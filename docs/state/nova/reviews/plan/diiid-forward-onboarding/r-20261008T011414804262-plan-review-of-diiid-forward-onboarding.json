@@ -63,9 +63,22 @@
       "finding": "single_goal-1",
       "reason": "both halves are assertions about one criterion's provenance and the node closes on one verdict, but the two measures are independent enough that a reviewer should read them separately; flagging so the author can split if desired rather than as a blocking defect.",
       "when": "2026-10-28T05:07:30.123699+00:00"
+    },
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "anchors_resolve-1",
+      "reason": "the file is a retired follow-on reference in a landed comment; \u00a711 and the live sections do not cite it, so no node acts on the dead pointer.",
+      "when": "2026-10-28T05:07:36.884232+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the file is a retired follow-on reference in a landed comment; \u00a711 and the live sections do not cite it, so no node acts on the dead pointer.",
+      "when": "2026-10-28T05:07:36.884232+00:00"
+    },
     "single_goal-1": {
       "action": "noted",
       "by": "plan-review-reflex",

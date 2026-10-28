@@ -26,6 +26,7 @@ __all__ = [
     "saddle_wedge_current_moments",
     "level_set_current_moment_tangent",
     "fixed_polygon_current_moment_tangent",
+    "moving_polygon_current_moment_tangent",
 ]
 
 
@@ -245,6 +246,56 @@ def fixed_polygon_current_moment_tangent(
         jnp.sum(weighted),
         jnp.sum(weighted * relative[:, 0]),
         jnp.sum(weighted * relative[:, 1]),
+    )
+
+
+def moving_polygon_current_moment_tangent(
+    vertices,
+    velocity,
+    vertex_count,
+    centre,
+    pitch,
+    normalized_coefficient,
+    profile,
+) -> ClippedCurrentMoments:
+    """Integrate the shape derivative on the booking's sampled ring edges.
+
+    Each edge's normal velocity is linear between its endpoint velocities.
+    The oriented boundary integral differentiates exactly the polygon the
+    booking uses, including its chord approximation of a conic segment.
+    """
+    slot = jnp.arange(vertices.shape[0])
+    following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
+    edge = vertices[following] - vertices
+    velocity_edge = velocity[following] - velocity
+    node = jnp.asarray(_UNIT_NODE, dtype=vertices.dtype)
+    weight = jnp.asarray(_UNIT_WEIGHT, dtype=vertices.dtype)
+    point = vertices[:, None] + node[None, :, None] * edge[:, None]
+    speed = velocity[:, None] + node[None, :, None] * velocity_edge[:, None]
+    cross = speed[..., 0] * edge[:, None, 1] - speed[..., 1] * edge[:, None, 0]
+    local = (point - centre) / pitch
+    radial, vertical = local[..., 0], local[..., 1]
+    basis = jnp.stack(
+        (
+            jnp.ones_like(radial),
+            radial,
+            vertical,
+            radial**2,
+            radial * vertical,
+            vertical**2,
+        ),
+        axis=-1,
+    )
+    flux = jnp.einsum("ijk,k->ij", basis, normalized_coefficient)
+    density = profile.current_density(point[..., 0], flux)
+    weighted = jnp.where(
+        slot[:, None] < vertex_count, weight[None] * cross * density, 0.0
+    )
+    relative = point - centre
+    return ClippedCurrentMoments(
+        jnp.sum(weighted),
+        jnp.sum(weighted * relative[..., 0]),
+        jnp.sum(weighted * relative[..., 1]),
     )
 
 

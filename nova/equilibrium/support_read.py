@@ -237,6 +237,187 @@ def bank_program(operands: SupportOperands, moments) -> jax.Array:
     return jnp.where(mask, jets, 0.0)
 
 
+class StepResidual(NamedTuple):
+    """Moment mismatch under one fixed connected-support decision."""
+
+    residual: tuple[jax.Array, jax.Array, jax.Array]
+    booked: current.Booking
+    reading: topology.TopologyRead
+    valid: jax.Array
+
+
+def _directional_field(operands: SupportOperands, direction):
+    """Apply only the bank's linear rows, without its exterior constant."""
+    stacked = jnp.stack(tuple(direction), axis=-1)
+    jets = jnp.einsum("ncmq,cm->nq", operands.rows, stacked)
+    return jets, fixed_points.field_from_jets(
+        jets, operands.sample_index, operands.mesh
+    )
+
+
+def step_residual(
+    operands,
+    base_moments,
+    moments,
+    support: SupportRead,
+    profile,
+    quadrature,
+) -> StepResidual:
+    """Book a state while preserving one read's ownership and clip set.
+
+    Continuous coefficients and stationary flux levels follow the bank. The
+    point coordinates stay fixed by the stationary-point envelope argument;
+    changes of ownership or clipped-cell set require a new support read.
+    """
+    direction = tuple(
+        value - base for value, base in zip(moments, base_moments, strict=True)
+    )
+    _, field = _directional_field(operands, direction)
+    reading = support.reading._replace(
+        field_coefficients=support.reading.field_coefficients
+        + field.sampled_coefficient(operands.geometry),
+        axis_flux=support.reading.axis_flux + field.value(support.reading.axis),
+        boundary_flux=support.reading.boundary_flux
+        + field.value(support.reading.boundary),
+    )
+    psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+    booked = current.book(psi, reading, operands.geometry, profile, quadrature)
+    valid = support.valid & booked.valid
+    residual = tuple(
+        jnp.where(valid, value - predicted, jnp.nan)
+        for value, predicted in zip(moments, booked[:3], strict=True)
+    )
+    return StepResidual(residual, booked, reading, valid)
+
+
+def step_jacobian_vector(
+    operands,
+    moments,
+    direction,
+    support: SupportRead,
+    profile,
+    density_gradient,
+    quadrature,
+    booked: current.Booking | None = None,
+):
+    """Apply the bank and the three closed-form booking tangent channels."""
+    psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+    if booked is None:
+        booked = current.book(
+            psi, support.reading, operands.geometry, profile, quadrature
+        )
+    jets, field = _directional_field(operands, direction)
+    tangent = current.book_tangent(
+        psi,
+        jets[operands.sample_index, 0],
+        support.reading,
+        field.sampled_coefficient(operands.geometry),
+        field.value(support.reading.axis),
+        field.value(support.reading.boundary),
+        operands.geometry,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+    )
+    return tuple(
+        value - change for value, change in zip(direction, tangent, strict=True)
+    )
+
+
+class NewtonStep(NamedTuple):
+    """One matrix-free Newton update and its linear-solve accuracy ledger."""
+
+    update: tuple[jax.Array, jax.Array, jax.Array]
+    condition_estimate: jax.Array
+    tolerance: jax.Array
+    linear_residual: jax.Array
+    converged: jax.Array
+
+
+def _krylov_condition_estimate(matvec, size: int, width: int = 8):
+    """Estimate conditioning from the singular values of an Arnoldi block."""
+    width = min(width, size)
+    seed = jnp.linspace(-1.0, 1.0, size)
+    seed = seed / jnp.linalg.norm(seed)
+    basis = jnp.zeros((width + 1, size), seed.dtype).at[0].set(seed)
+    hessenberg = jnp.zeros((width + 1, width), seed.dtype)
+
+    def advance(column, carried):
+        vectors, h = carried
+        candidate = matvec(vectors[column])
+
+        def orthogonalize(row, state):
+            remaining, matrix = state
+            coefficient = jnp.vdot(vectors[row], remaining)
+            remaining = remaining - coefficient * vectors[row]
+            return remaining, matrix.at[row, column].set(coefficient)
+
+        candidate, h = jax.lax.fori_loop(0, column + 1, orthogonalize, (candidate, h))
+        length = jnp.linalg.norm(candidate)
+        vectors = vectors.at[column + 1].set(
+            candidate / jnp.where(length > 0, length, 1.0)
+        )
+        return vectors, h.at[column + 1, column].set(length)
+
+    _, hessenberg = jax.lax.fori_loop(0, width, advance, (basis, hessenberg))
+    singular = jnp.linalg.svd(hessenberg[:width, :width], compute_uv=False)
+    largest = jnp.max(singular)
+    cutoff = 64.0 * jnp.finfo(singular.dtype).eps * largest
+    smallest = jnp.min(jnp.where(singular > cutoff, singular, jnp.inf))
+    return jnp.maximum(largest / smallest, 1.0)
+
+
+def newton_step(
+    operands,
+    moments,
+    support: SupportRead,
+    profile,
+    density_gradient,
+    quadrature,
+) -> NewtonStep:
+    """Solve the bank-backed linear system at one fixed support decision.
+
+    Arnoldi estimates the matrix condition from eight Krylov directions. Its
+    estimate sets GMRES's relative tolerance so their product is at most
+    ``1e-8``; the returned residual and convergence flag expose any miss.
+    """
+    residual = step_residual(operands, moments, moments, support, profile, quadrature)
+    sizes = tuple(value.size for value in moments)
+    boundaries = np.cumsum(sizes)[:-1]
+    right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
+
+    def matvec(vector):
+        direction = tuple(jnp.split(vector, boundaries))
+        applied = step_jacobian_vector(
+            operands,
+            moments,
+            direction,
+            support,
+            profile,
+            density_gradient,
+            quadrature,
+            residual.booked,
+        )
+        return jnp.concatenate(tuple(jnp.ravel(value) for value in applied))
+
+    estimate = _krylov_condition_estimate(matvec, right.size)
+    tolerance = 1e-8 / estimate
+    solution, info = jax.scipy.sparse.linalg.gmres(
+        matvec, right, tol=tolerance, atol=0.0, restart=20, maxiter=20
+    )
+    linear_residual = jnp.linalg.norm(matvec(solution) - right) / jnp.maximum(
+        jnp.linalg.norm(right), jnp.finfo(right.dtype).tiny
+    )
+    return NewtonStep(
+        tuple(jnp.split(solution, boundaries)),
+        estimate,
+        tolerance,
+        linear_residual,
+        (info == 0) & (linear_residual <= tolerance),
+    )
+
+
 def _bank_payload(operands: SupportOperands) -> bytes:
     """Serialize the bank's dense operands and their shape identity."""
     import io

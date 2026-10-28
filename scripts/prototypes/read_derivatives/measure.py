@@ -178,6 +178,7 @@ def main():
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cells", type=int, default=550)
     parser.add_argument("--step", type=float, default=1e-3)
+    parser.add_argument("--batch", type=int, default=64)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     revision = subprocess.check_output(
@@ -249,52 +250,92 @@ def main():
     value_operand = matrix[..., 0]
     index = jnp.asarray(sample_index)
 
+    from scripts.prototypes.read_route.jets import HermiteField
+
     def run_prepared(jets):
         return read_field(
-            __import__(
-                "scripts.prototypes.read_route.jets", fromlist=["HermiteField"]
-            ).HermiteField(jets, nodes, sample_index, geometry.centre, geometry.pitch),
+            HermiteField(jets, nodes, sample_index, geometry.centre, geometry.pitch),
             geometry,
             convention,
             policy,
             finite_curvature=True,
         )
 
-    def oracle_read(nodes, coupling, moments, exterior):
-        local = jax.vmap(jets_oracle, in_axes=(0, None))(nodes, coupling)
-        return run_prepared(exterior + jnp.einsum("ncmq,cm->nq", local, moments))
+    def oracle_batch(points, coupling):
+        return jax.vmap(jets_oracle, in_axes=(0, None))(points, coupling)
 
-    def fd_read(nodes, coupling, moments, exterior, step):
-        local = jax.vmap(jets_fd, in_axes=(0, None, None))(nodes, coupling, step)
-        return run_prepared(exterior + jnp.einsum("ncmq,cm->nq", local, moments))
+    def fd_batch(points, coupling, step):
+        return jax.vmap(jets_fd, in_axes=(0, None, None))(points, coupling, step)
 
-    def interp_read(value, moments, exterior, inverse, index, pitch):
-        flux = jnp.einsum("ncm,cm->n", value, moments)
-        return run_prepared(exterior + jets_interp(flux, inverse, index, pitch))
+    def interp_program(value, moments, inverse, index, pitch):
+        return jets_interp(
+            jnp.einsum("ncm,cm->n", value, moments), inverse, index, pitch
+        )
+
+    # The kernel derivative is evaluated over a node batch, as production builds
+    # its operand; one call over the whole mesh materialises the point jet for
+    # every node at once and exhausts device memory.
+    batch = min(args.batch, len(nodes))
+    point_batch = jnp.asarray(np.asarray(nodes)[:batch])
+    derivative_rows = []
+    programs = (
+        ("oracle", oracle_batch, (point_batch, coupling)),
+        ("fd", fd_batch, (point_batch, coupling, jnp.asarray(args.step))),
+        (
+            "interp",
+            interp_program,
+            (
+                value_operand,
+                jnp.stack(tuple(converged_moments), -1),
+                inverse,
+                index,
+                pitch,
+            ),
+        ),
+    )
+    executables = {}
+    for name, function, operands in programs:
+        row, executable = timed(function, operands, name)
+        row.update(batch=len(nodes) if name == "interp" else batch)
+        derivative_rows.append(row)
+        executables[name] = executable
+    read_row, read_executable = timed(run_prepared, (exterior,), "read")
+
+    def assemble(name, moments):
+        if name == "interp":
+            return exterior + executables[name](
+                value_operand, moments, inverse, index, pitch
+            )
+        matrix_rows = []
+        for first in range(0, len(nodes), batch):
+            points = jnp.asarray(np.asarray(nodes)[first : first + batch])
+            matrix_rows.append(executables[name](points, coupling))
+        local = jnp.concatenate(matrix_rows, axis=0)
+        return exterior + jnp.einsum("ncmq,cm->nq", local, moments)
 
     rows = []
-    for name, function, extra in (
-        ("oracle", oracle_read, ()),
-        ("fd", fd_read, (jnp.asarray(args.step),)),
-        ("interp", interp_read, (inverse, index, pitch)),
-    ):
+    for name in ("oracle", "fd", "interp"):
+        derivative = next(row for row in derivative_rows if row["program"] == name)
         for state_name, moments in (
             ("converged", converged_moments),
             ("trial", trial_moments),
         ):
-            operands = (
-                (nodes, coupling, jnp.stack(tuple(moments), -1), exterior) + extra
-                if name != "interp"
-                else (value_operand, jnp.stack(tuple(moments), -1), exterior) + extra
-            )
-            label = f"{name}:{state_name}"
-            row, executable = timed(function, operands, label)
-            result = jax.block_until_ready(executable(*operands))
+            stacked = jnp.stack(tuple(moments), -1)
+            jets = assemble(name, stacked)
+            result = jax.block_until_ready(read_executable(jets))
             x_points = np.asarray(result.x_points)[np.asarray(result.x_point_valid)]
-            row.update(
+            row = dict(
+                derivative,
+                program=name,
                 state=state_name,
+                read_cold_compile_seconds=read_row["cold_compile_seconds"],
+                read_warm_seconds=read_row["warm_seconds"],
+                read_hlo_instructions=read_row["hlo_instructions"],
                 valid=bool(result.valid),
                 qualified=bool(result.qualified),
+                read_derivative_warm_seconds=(
+                    read_row["warm_seconds"] + derivative["warm_seconds"]
+                ),
                 axis=np.asarray(result.axis).tolist(),
                 x_points=x_points.tolist(),
                 boundary_flux=float(result.boundary_flux),
@@ -302,33 +343,31 @@ def main():
             )
             rows.append(row)
 
-    best = {row["program"]: row for row in rows}
-    reference_axis = np.asarray(best["oracle:converged"]["axis"])
-    reference_flux = best["oracle:converged"]["boundary_flux"]
-    span = abs(reference_flux - best["oracle:converged"]["axis_flux"])
+    best = {(row["program"], row["state"]): row for row in rows}
+    origin = best[("oracle", "converged")]
+    reference_flux = origin["boundary_flux"]
+    span = abs(reference_flux - origin["axis_flux"])
     for row in rows:
-        errors = dict(
+        oracle_row = best[("oracle", row["state"])]
+        probe = np.asarray(row["x_points"])
+        reference_probe = np.asarray(oracle_row["x_points"])
+        row.update(
             axis_error_m=float(
-                np.linalg.norm(np.asarray(row["axis"]) - reference_axis)
+                np.linalg.norm(np.asarray(row["axis"]) - np.asarray(oracle_row["axis"]))
             ),
             boundary_flux_error_relative=(
                 None
                 if span == 0
-                else float(abs(row["boundary_flux"] - reference_flux) / span)
+                else float(
+                    abs(row["boundary_flux"] - oracle_row["boundary_flux"]) / span
+                )
+            ),
+            x_point_error_m=(
+                None
+                if len(probe) != 1 or len(reference_probe) != 1
+                else float(np.linalg.norm(probe[0] - reference_probe[0]))
             ),
         )
-        probe = np.asarray(row["x_points"])
-        errors["x_point_error_m"] = (
-            None
-            if len(probe) != 1
-            or len(np.asarray(best["oracle:converged"]["x_points"])) != 1
-            else float(
-                np.linalg.norm(
-                    probe[0] - np.asarray(best["oracle:converged"]["x_points"])[0]
-                )
-            )
-        )
-        row.update(errors)
         print("COMPARISON_ROW " + json.dumps(row), flush=True)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

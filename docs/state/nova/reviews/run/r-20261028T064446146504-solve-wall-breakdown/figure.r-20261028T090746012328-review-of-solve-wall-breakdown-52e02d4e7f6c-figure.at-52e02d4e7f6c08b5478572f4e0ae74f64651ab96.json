@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T09:18:35.590Z",
+  "dispatched_at": "2026-10-28T09:10:03Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "ff40f426e32",
+      "line": 78,
+      "severity": "non-blocking",
+      "summary": "The 1 ms target is a threshold, which the repository plotting rules draw as a 1.2 pt dotted neutral grey line and reserve red for marks that are past a limit. Here the threshold line and its label are red while the six dots, every one of which is past the target, are blue, so the red points a reader at the reference line rather than at the breaching data. The dotted style and the inline '1 ms target' label keep the threshold legible, so this does not impede reading and does not hold the node."
+    },
+    {
+      "file": "scripts/prototypes/solve_wall_breakdown/figure.py",
+      "id": "fc6aa52fa43",
+      "line": 76,
+      "severity": "non-blocking",
+      "summary": "The x axis is labelled 'wall per stage [ms]', but the grey dot is not a stage: it is the map's wall per slice at batch width 16, a different quantity placed on the same logarithmic axis. The dot's own y label and the caption both disambiguate it, so no distinction is lost to a reader who reads the row labels; the axis label alone would misdescribe that one mark."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 the blue #3b6ea5 dots, the near-black value labels and the red threshold label all clear the white ground comfortably, and the mid-grey #929292 batch dot still reads as data rather than fading out.",
+    "data_ink": "pass \u2014 six solid dots and six one-line value labels carry essentially all the ink; there is no gridline, fill, shading or legend box, and the axis rule and the dotted threshold are the only furniture.",
+    "decoration": "pass \u2014 white ground, the top and right spines are hidden, and there is no gradient or background wash; the only non-data mark is the dotted 1 ms threshold, which the caption names as the target.",
+    "label_collision": "pass \u2014 nothing is clipped or overlapping on the 1400 x 720 px render: content sits at least 16 px inside every edge (measured left 16, right 20, top 22, bottom 22), each value sits in clear space to the right of its dot, and the '1 ms target' label sits above the top dot, right of the threshold line, and clear of both.",
+    "legibility": "pass \u2014 six labelled dots, from the 735.7 ms Jacobian block dot on the right down to the 6.4 ms linear solve dot near the 1 ms line, read at a glance on the 1400 x 720 px render without zoom.",
+    "table_form": "pass \u2014 the figure's message is each stage's distance from a 1 ms target, a spatial comparison, not a table's content; the numbers also appear in the evidence prose but the figure does not re-depict the table as an image."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 six labelled dots from 735.7 ms down to 6.4 ms read at a glance on the 1400 x 720 px render without zoom.\nRUBRIC data_ink: pass \u2014 six solid dots plus six value labels carry the ink; no gridlines, fills, shading or legend box.\nRUBRIC decoration: pass \u2014 white ground, top and right spines hidden, no gradient or wash; the only non-data mark is the dotted 1 ms threshold the caption names.\nRUBRIC contrast: pass \u2014 blue dots, near-black value labels and the red threshold label all clear white; the grey batch dot still reads as data.\nRUBRIC table_form: pass \u2014 each stage's distance from a threshold is spatial, not a table's content, and the figure does not re-depict the evidence table as an image.\nRUBRIC label_collision: pass \u2014 nothing clipped or overlapping; content sits at least 16 px inside every edge, each value in clear space right of its dot, and the target label above the top dot and right of the threshold line.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:78 non-blocking: the 1 ms threshold is drawn red with a red label, where the plotting rules give thresholds a neutral grey dotted line and reserve red for marks past a limit; the dots, all past the target, are blue, so the encoding is inverted though still legible.\nFINDING scripts/prototypes/solve_wall_breakdown/figure.py:76 non-blocking: the x axis label 'wall per stage [ms]' also covers the grey dot, which is the map's per-slice wall at batch width 16 rather than a stage of one step; the row label and caption disambiguate it, the axis label alone does not.",
+  "review_run_id": "r-20261028T090746012328-review-of-solve-wall-breakdown-52e02d4e7f6c-figure",
+  "reviewed_base_sha": "f41ee6ee18f8ae4f3bf9e64ae7fbaeee186a5f2e",
+  "reviewed_head_sha": "52e02d4e7f6c08b5478572f4e0ae74f64651ab96",
+  "reviewed_run_id": "r-20261028T064446146504-solve-wall-breakdown",
+  "rubric": "figure",
+  "rubric_items": [
+    "legibility",
+    "data_ink",
+    "decoration",
+    "contrast",
+    "table_form",
+    "label_collision"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:19:15.436886+00:00",
+  "total": null
+}

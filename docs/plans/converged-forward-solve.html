@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="602">
+<meta name="plan-version" content="603">
 <meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
@@ -2134,7 +2134,10 @@ oracle _reference_moments already owns.</p></div>
     <div class="r-comment-body"><p>read-derivative-prototype — prototype measured three derivative paths through the production read at the 550-cell limited and diverted states on one H200; the stencil fit compiles in 0.258603-0.308345 s with 89 HLO instructions against the oracle's 89.596-91.809 s with 60529, central differencing is rejected at 179.162-184.486 s, and neither variant is recommended against the proposed 1 cm / 1e-3 budget.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261028T084347706394-review-of-read-derivative-prototype-265f8d2b00ca" data-who="reckon-build" data-when="2026-10-28T08:57:44.672Z">
-    <div class="r-comment-body"><p>read-derivative-prototype review at c4679e437..265f8d2b0 — the one blocking finding from the previous review is repaired and the repair is guarded by a checker arm that reddens on the reverted sentence; read at 265f8d2b00ca: scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 14, fit 18, reuse 19; one non-blocking finding (the new target guard skips any sentence whose direction word is a synonym, so &quot;within the 10 s target&quot; still prints CONSISTENT)</p></div>
+    <div class="r-comment-body"><p>read-derivative-prototype review at c4679e437..265f8d2b0 — the one blocking finding from the previous review is repaired and the repair is guarded by a checker arm that reddens on the reverted sentence; read at 265f8d2b00ca: scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 14, fit 18, reuse 19; one non-blocking finding (the new target guard skips any sentence whose direction word is a synonym, so "within the 10 s target" still prints CONSISTENT)</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261028T090746012328-review-of-solve-wall-breakdown-52e02d4e7f6c-figure" data-who="reckon-build" data-when="2026-10-28T09:18:35.590Z">
+    <div class="r-comment-body"><p>Reviewed the rendered step-stages figure at head 52e02d4e7f6c as a read-only figure review: all six rubric items pass, two non-blocking findings (red threshold colour; x-axis label also covering the grey batch point). No blocking findings, so the node does not hold on this review.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

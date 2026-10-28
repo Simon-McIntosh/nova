@@ -1,0 +1,131 @@
+<!-- fragment: prewarm-lane-programs -->
+<section id="prewarm-lane-programs">
+<h3>The pre-warm pin now compiles the lane's own target, and the guard counts entries a lookup can hit</h3>
+
+<p><strong>Three defects, and the base arm reproduces each of them.</strong>
+The guard reported <code>served_entries</code> as a recursive file count, so
+the XLA per-fusion autotune subtree beneath a served directory counted as
+cache: read at the revision measured here, the published pin's leaf holds
+<strong>18986 program-key entries and 50653 files</strong>, and the guard
+reported the second. The marker was printed from a pytest session hook with a
+bare <code>print</code>, so on a run whose last progress line was
+unterminated it landed at the tail of that line and a reader grepping for
+<code>^CACHE_GUARD_MARKER</code> found nothing on a run that passed. And the
+pre-warm compiled the certificate drivers, whose cache keys carry the jitted
+function's abstract shapes: the drivers and the lane target both log a row
+named <code>jit_solve</code>, yet the pin supplied none of the 1285 keys the
+lane requested, so a lane on a fresh directory compiled everything it needed.</p>
+
+<p><strong>The change.</strong> <code>program_key_entry_count</code> counts the
+top-level <code>&lt;program&gt;-&lt;key&gt;-cache</code> files a lookup can be
+served by, and <code>served_directory_state</code>,
+<code>verify_pinned_directory</code> and the pre-warm payload's own
+<code>PREWARM_SERVED_ENTRIES</code> all read that count; the payload no longer
+runs a bare <code>find | wc -l</code>. The marker is written with a leading
+newline so it begins a line whatever pytest has left unterminated. The
+pre-warm gains a row that runs <code>tests/test_equilibrium_forward_solve.py</code>,
+the lane's own target, in its own process like every other row.</p>
+
+<table>
+<caption>The gate, one process per arm, the new test file against the module
+each revision ships.</caption>
+<thead><tr><th scope="col">arm</th><th scope="col">tree</th><th scope="col">result</th><th scope="col">exit</th></tr></thead>
+<tbody>
+<tr><td>base <code>6ccf43de</code></td><td><code>git archive</code> of the base
+revision in the run's scratch tree</td>
+<td>4 failed — <code>test_program_key_entry_count_counts_only_executable_entries</code>,
+<code>test_program_key_entry_count_ignores_a_missing_directory</code>,
+<code>test_served_directory_reports_program_key_entries</code>,
+<code>test_marker_begins_a_line_after_unterminated_output</code></td><td>1</td></tr>
+<tr><td>head <code>1efb2faa</code></td><td>this worktree</td>
+<td>4 passed</td><td>0</td></tr>
+</tbody>
+</table>
+
+<p><strong>An anchored grep finds the marker on a passing run.</strong> The
+head gate is the passing run the guard is exercised on, and the test that
+proves the fix writes an unterminated progress line immediately before the
+receipt is emitted, then requires the marker to start a line of its own. At
+base that assertion fails and the marker-line list is empty; at head it is
+the single line</p>
+<pre>CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0</pre>
+
+<p><strong>The lane is warm against a fresh pin (H200 job 1299214, three
+sequential arms, one process each).</strong> The pre-warm row compiled
+<code>tests/test_equilibrium_forward_solve.py</code> into a fresh sibling root,
+<code>/work/…/jax-cache/nova-prewarm-lane-programs</code>, and published that
+root's own pin document (both arms exited 0; the row records 1637 misses and
+383.0 compile seconds, which is what filling that pin cost).
+<span id="prewarm-lane-programs-status-correction">That zero is the status of
+the arm's own invocation, which passed the test path to the row runner rather
+than pytest, so the target's three content failures never reached the exit
+code. The production path passes pytest and did exit nonzero for them; the
+repair below is what makes the row's status say what it means.</span>
+The lane run against that root
+with <code>NOVA_CACHE_MISS_BUDGET=0</code> reports
+<code>CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0</code>, and its
+receipt reads <strong>1710 hits, 0 misses, 0.0 compile seconds</strong> in
+570.72 s of wall clock — the done-when, measured on a directory holding only
+the new pin's keys.</p>
+
+<p><strong>The negative control fires.</strong> The same target run against a
+copy holding only the currently published pin's documented keys prints
+<code>CACHE_GUARD_MARKER=WALL-CLOCK-UNRELIABLE misses=1637 budget=0</code> and
+exits 1: the old pin's keys serve none of the lane's programs, which is the
+defect the new row removes. The copy is made by hardlink into the run's scratch
+tree rather than by pointing the lane at the live shared directory, because the
+live leaf now holds 18986 entries against the 3362 its document records — later
+lane runs wrote into it — and a polluted directory would have shown hits the
+pin never supplied.</p>
+
+<p><strong>Three cases fail in the warm arm and none of them is a cache
+miss.</strong> <code>test_the_accelerator_routes_agree_on_the_fixed_point</code>,
+<code>test_the_solve_is_differentiable_in_the_conductor_current</code> and
+<code>test_the_plasma_current_is_differentiable_in_the_conductor_current</code>
+fail in the 30-case file (3 failed, 27 passed) at a revision whose miss count
+is zero, so the compiles were all served from disk and the failures belong to
+the tests' own subject matter. They are reported as outside this node's write
+scope rather than triaged here.</p>
+
+<h3 id="prewarm-lane-programs-repair">Repair: one counter, and a pre-warm status that means its compiles</h3>
+
+<p><strong>The guard had grown a second counter.</strong> The capability belongs
+to <code>cache_reuse_summary.served_keys</code>, which read every name in a
+served directory: the <code>-atime</code> companion JAX writes beside each
+entry, the pin document and the autotune subtree all entered its key set, so
+it and the guard reported two different sizes for one directory under the same
+<code>served_entries</code> name. <code>served_keys</code> now reads the
+top-level <code>-cache</code> files alone and returns their keys, and
+<code>program_key_entry_count</code> is its length, so the summary and the
+guard cannot disagree. The check is
+<code>test_served_keys_and_the_guard_count_agree</code>, and it fails on a tree
+with only that hunk reverted (<code>negative-control-reverted-counter.log</code>,
+1 failed, exit 1).</p>
+
+<p><strong>The lane row made every pre-warm exit nonzero for test content.</strong>
+<code>prewarm_row.py</code> propagated pytest's status, and the lane target
+fails three cases at this revision for reasons unrelated to the cache. The row
+runner gains <code>--allow-pytest-failures</code>: a row whose compilations
+were all persisted reports success, the command's own status is still recorded
+in the receipt's <code>command_status</code>, and a miss written nowhere is
+never tolerated. The lane row opts in; the certificate rows keep the strict
+path. Driven end to end against a payload with one failing case: with the flag
+the runner exits 0 with <code>command_status 1</code> and <code>status 0</code>
+(<code>repair-prewarm-status-tolerate.log</code>), without it exits 1
+(<code>repair-prewarm-status-strict.log</code>), and
+<code>test_prewarm_row_does_not_gate_on_the_targets_own_failures</code> fails on
+a tree with only that hunk reverted
+(<code>negative-control-reverted-prewarm-status.log</code>, 1 failed,
+exit 1).</p>
+
+<p><strong>The gate over both repairs.</strong> <code>tests/test_cache_guard.py</code>
+is 7 passed at the repaired head and 7 failed against the base revision's
+modules, so every case — the two repairs included — fails without its fix.</p>
+
+<p><strong>What the coordinator still owns.</strong> The measured root covers
+the lane row alone, because the pre-warm's certificate rows were not re-run
+here; the script now carries the lane row beside them, so the next full
+pre-warm run produces the pin to switch to. The served-entry count the guard
+reports against the old pin leaf is 18986 where the previous recursive count
+read 50653, which is the size of the instrument error this fragment closes.</p>
+</section>

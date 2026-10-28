@@ -60,11 +60,22 @@ def lane_receipt(path):
     return receipt, rows, wall
 
 
-def served_keys(digest):
-    keys = set()
-    for name in os.listdir(digest):
-        keys.add(name[: -len(MARKER_SUFFIX)] if name.endswith(MARKER_SUFFIX) else name)
-    return keys
+def served_keys(directory):
+    """Return the program keys a served directory holds.
+
+    JAX writes one ``<program>-<key>-cache`` file per compiled program and a
+    ``-atime`` companion beside it, and a served directory also carries
+    receipts, the XLA per-fusion autotune subtree and plain directories. Only a
+    top-level file ending in ``-cache`` is an entry a lookup can be served by,
+    so the key set is read from those files alone; counting every name in the
+    directory reports companions and receipts as programs.
+    """
+    return {
+        name[: -len(MARKER_SUFFIX)]
+        for name in os.listdir(directory)
+        if name.endswith(MARKER_SUFFIX)
+        and os.path.isfile(os.path.join(directory, name))
+    }
 
 
 def short_name(program):

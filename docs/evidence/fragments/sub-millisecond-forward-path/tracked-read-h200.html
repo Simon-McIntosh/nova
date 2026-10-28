@@ -76,7 +76,8 @@
   diverted axis and 8.40e-4 m on the limited one with the boundary flux inside
   1.5e-5 and 8.3e-5 of the span, so the read reproduces the analytic state it is
   handed. The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over
-  the four states and reports <code>3 failed, 5 passed</code>: the limited trial
+  the four states, with the two cell-owner clauses, and reports
+  <code>3 failed, 8 passed</code>: the limited trial
   axis at 4.12e-3 m against 2.00e-3, the diverted trial X-point at 8.82e-4
   against 6.81e-4, and the diverted trial boundary flux at 2.21e-3 of the span
   against 1e-4. Both converged states pass every clause. Those are the recorded

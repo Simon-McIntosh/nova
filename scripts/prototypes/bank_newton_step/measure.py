@@ -68,6 +68,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--converge", action="store_true")
     parser.add_argument("--state-path", type=Path)
+    parser.add_argument("--initial-state", type=Path)
+    parser.add_argument("--max-iterations", type=int, default=12)
     parser.add_argument("--direction", choices=("ramp", "balanced"), default="ramp")
     args = parser.parse_args()
     revision = subprocess.check_output(
@@ -83,6 +85,9 @@ def main():
     )
     print("STAGE load", flush=True)
     operands, cache, roots, convention, policy, profile, quadrature, moments = machine()
+    if args.initial_state is not None:
+        with np.load(args.initial_state, allow_pickle=False) as previous:
+            moments = tuple(jnp.asarray(row) for row in previous["moments"])
     jax.block_until_ready(moments)
     emit("BANK", rows=list(operands.rows.shape), bucket=operands.bucket)
     seed = roots + 0.03 * jnp.median(operands.geometry.pitch)
@@ -203,7 +208,7 @@ def main():
     current_moments = moments
     current_support = support
     converged = False
-    for iteration in range(12):
+    for iteration in range(args.max_iterations):
         state = residual(operands, current_moments, current_moments, current_support)
         norm = float(jnp.max(jnp.abs(jnp.concatenate(state.residual))))
         emit("ITERATE", index=iteration, residual_sup=norm)
@@ -236,7 +241,33 @@ def main():
                 np.asarray(candidate_support.reading.membership > 0)
                 != np.asarray(current_support.reading.membership > 0)
             ).tolist()
+            former_cut = (np.asarray(current_support.reading.membership) > 0) & (
+                np.asarray(current_support.reading.membership) < 1
+            )
+            candidate_cut = (np.asarray(candidate_support.reading.membership) > 0) & (
+                np.asarray(candidate_support.reading.membership) < 1
+            )
+            clip_changed = np.flatnonzero(former_cut != candidate_cut).tolist()
+            owner_changed = np.flatnonzero(
+                np.any(
+                    np.asarray(candidate_support.reading.fragment_selected)
+                    != np.asarray(current_support.reading.fragment_selected),
+                    axis=-1,
+                )
+            ).tolist()
             if not bool(candidate_support.valid):
+                emit(
+                    "REJECT",
+                    index=iteration,
+                    scale=scale,
+                    reason="support",
+                    support_valid=False,
+                    reading_valid=bool(candidate_support.reading.valid),
+                    reading_qualified=bool(candidate_support.reading.qualified),
+                    changed_cells=changed,
+                    clip_changed=clip_changed,
+                    owner_changed=owner_changed,
+                )
                 last_rejected = (scale, candidate_support, changed, None)
                 continue
             candidate_residual = residual(
@@ -253,6 +284,19 @@ def main():
                     "ACCEPT", index=iteration, scale=scale, residual_sup=candidate_norm
                 )
                 break
+            emit(
+                "REJECT",
+                index=iteration,
+                scale=scale,
+                reason="residual",
+                residual_sup=candidate_norm,
+                support_valid=True,
+                reading_valid=bool(candidate_support.reading.valid),
+                reading_qualified=bool(candidate_support.reading.qualified),
+                changed_cells=changed,
+                clip_changed=clip_changed,
+                owner_changed=owner_changed,
+            )
             last_rejected = (scale, candidate_support, changed, candidate_norm)
         if not accepted:
             scale, rejected, changed, candidate_norm = last_rejected

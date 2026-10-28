@@ -13,7 +13,7 @@ serves any state of the same layout.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import NamedTuple
 
 import jax
@@ -377,15 +377,29 @@ def step_jacobian(
     operands, moments, support, profile, density_gradient, quadrature, booked=None
 ):
     """Compose the bank with closed-form cell-local booking sensitivities."""
-    if quadrature.target_current is not None:
-        raise ValueError("dense local booking needs unconstrained current")
     if booked is None:
         psi = nodal_jets(operands, moments)[operands.sample_index, 0]
         booked = current.book(
             psi, support.reading, operands.geometry, profile, quadrature
         )
+    if quadrature.target_current is None:
+        local_quadrature, local_booked = quadrature, booked
+    else:
+        local_quadrature = replace(quadrature, target_current=None)
+        local_booked = current.Booking(
+            *(jnp.zeros_like(value) for value in booked[:3]),
+            booked.raw_current,
+            jnp.ones_like(booked.normalization),
+            booked.valid,
+        )
     local = _local_booking_sensitivities(
-        operands, moments, support, profile, density_gradient, quadrature, booked
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        local_quadrature,
+        local_booked,
     )
     cells = moments[0].size
 
@@ -409,9 +423,15 @@ def step_jacobian(
 
     channels = jax.vmap(bank_channels)(jnp.arange(3 * cells))
     response = jnp.einsum("cok,ick->coi", local, channels)
-    return jnp.eye(3 * cells, dtype=response.dtype) - jnp.transpose(
-        response, (1, 0, 2)
-    ).reshape(3 * cells, 3 * cells)
+    response = jnp.transpose(response, (1, 0, 2)).reshape(3 * cells, 3 * cells)
+    if quadrature.target_current is not None:
+        current_tangent = jnp.sum(response[:cells], axis=0)
+        booked_vector = jnp.concatenate(booked[:3])
+        response = (
+            booked.normalization * response
+            - (booked_vector[:, None] / booked.raw_current) * current_tangent[None, :]
+        )
+    return jnp.eye(3 * cells, dtype=response.dtype) - response
 
 
 def _equilibrate(matrix, moments, booked):

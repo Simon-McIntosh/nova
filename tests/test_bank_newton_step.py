@@ -192,19 +192,24 @@ def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
             return self.jets[0, 0] * point[0]
 
     def book(psi, read, geometry, profile, quadrature):
-        del geometry, profile, quadrature
+        del geometry, profile
         value = (
             psi[0, 0]
             + 2.0 * read.field_coefficients[0, 0]
             + 3.0 * read.axis_flux
             + 4.0 * read.boundary_flux
         )
+        normalization = (
+            1.0
+            if quadrature is None or quadrature.target_current is None
+            else quadrature.target_current / value
+        )
         return current.Booking(
-            jnp.asarray([value]),
+            jnp.asarray([value * normalization]),
             jnp.zeros(1),
             jnp.zeros(1),
             value,
-            jnp.asarray(1.0),
+            jnp.asarray(normalization),
             jnp.asarray(True),
         )
 
@@ -221,15 +226,22 @@ def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
         quadrature,
         booked,
     ):
-        del psi, read, geometry, profile, density_gradient, quadrature, booked
+        del psi, read, geometry, profile, density_gradient
         value = (
             psi_tangent[0, 0]
             + 2.0 * field_tangent[0, 0]
             + 3.0 * axis_tangent
             + 4.0 * boundary_tangent
         )
+        correction = (
+            0.0
+            if quadrature is None or quadrature.target_current is None
+            else -value * booked.cell_current[0] / booked.raw_current
+        )
         return clip_quadrature.ClippedCurrentMoments(
-            jnp.asarray([value]), jnp.zeros(1), jnp.zeros(1)
+            jnp.asarray([booked.normalization * value + correction]),
+            jnp.zeros(1),
+            jnp.zeros(1),
         )
 
     monkeypatch.setattr(
@@ -267,6 +279,18 @@ def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
     )
     np.testing.assert_allclose(
         matrix @ jnp.concatenate(direction), jnp.concatenate(applied)
+    )
+    constrained = current.Quadrature(target_current=5.0)
+    nonzero = (jnp.ones(1), jnp.zeros(1), jnp.zeros(1))
+    constrained_jvp = support_read.step_jacobian_vector(
+        operands, nonzero, direction, support, None, None, constrained
+    )
+    constrained_matrix = support_read.step_jacobian(
+        operands, nonzero, support, None, None, constrained
+    )
+    np.testing.assert_allclose(
+        constrained_matrix @ jnp.concatenate(direction),
+        jnp.concatenate(constrained_jvp),
     )
 
 

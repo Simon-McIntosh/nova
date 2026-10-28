@@ -103,8 +103,11 @@ def analytic_boundary(case, references):
     values = np.asarray(
         jax.vmap(lambda point: analytic.evaluate(point).value)(jnp.asarray(wall))
     )
-    coarse = np.argmax(np.abs(values - axis_flux))
-    maximise = bool(values[coarse] > axis_flux)
+    # The outermost closed surface touches the wall at the wall's extremum
+    # nearest the axis flux on the outward side, not at the wall's global
+    # extremum: a limiter contour carries flux well beyond the plasma.
+    coarse = int(np.argmin(np.abs(values - axis_flux)))
+    maximise = bool(values[coarse] > values.mean())
     return _wall_extremum(analytic, wall, int(coarse), maximise)
 
 

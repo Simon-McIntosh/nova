@@ -1,0 +1,110 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T22:49:14.661Z",
+  "dispatched_at": "2026-10-28T22:39:03Z",
+  "evidence_inputs": {
+    "figure_defect": "In both attached panels only one contour family is rendered. The analytic (reference) family is drawn in #444444 at linewidth 2.6 and the read's in the feature blue at the same linewidth 2.6, drawn second, so a reference that agrees to about a pixel is swallowed by the line laid over it. This matches the raster: interior near-black ink is 92 px (diverted) and 9 px (limited) against 22,896 and 26,665 blue px.",
+    "level_set_mismatch": "tests/equilibrium/test_topology_read.py draws the reference at levels and the read at levels[1:] plus a synthetic boundary contour whenever the normal-form radius is positive, so the diverted panel compares nine analytic levels with eight shifted read levels.",
+    "method": "Judged from the two attached PNGs only (1400x900 each): visual read, full palette histogram, region-split ink counts (text margin x < 520 versus plot region x >= 520), four scanline run decompositions, two column decompositions, and character maps of both axis markers and the divertor null. No SVG was opened, rendered or searched, and no file in the repository or the run directory was modified.",
+    "redeems_or_contradicts": "The run's manifest and landing line record both panels as rendered, inspected and landed 'with both null sets and the wall' and 'on one shared level set'. The raster shows one contour family and one resolvable null marker per state, so the inspection claim is not supported by the artifact it names."
+  },
+  "figures": [
+    {
+      "attached": "image-0.png",
+      "path": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+      "rubric_verdicts": [
+        "RUBRIC legibility: fails - one contour family is visible where the caption and the in-figure label promise two; every interior crossing on four sampled scanlines and two sampled columns is the blue cell-field contour, and 92 near-black pixels sit inside the plot region against 22,896 blue, so the analytic flux cannot be seen at all.",
+        "RUBRIC data_ink: passes - the mark is line contours of one feature colour on a white field with no fills, gradients or decorative shading, and the contours carry the panel.",
+        "RUBRIC decoration: passes - no gradient, background fill or styled theme; the only non-data ink is the wall, the label block and a faint dotted circle, which is recorded as a finding rather than as decoration.",
+        "RUBRIC contrast: passes - text is #333333 (12.6:1 on white) and #666666 (5.7:1); the feature blue #3366CC reads 4.5:1, so all text clears its background.",
+        "RUBRIC table_form: passes - the panel is a spatial contour figure, not a depiction of tabular information; the single scalar annotation it carries is recorded as a caption finding, not as a table.",
+        "RUBRIC label_collision: passes for text - the four-line label block sits in clear space at the left, content spans x 85-936 and y 101-800 well inside the 1400x900 canvas, and no text is clipped or overlapping; the marker overlap at the axis and at the divertor null is recorded under legibility because it is data, not a label."
+      ],
+      "state": "diverted trial state"
+    },
+    {
+      "attached": "image-1.png",
+      "path": "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg",
+      "rubric_verdicts": [
+        "RUBRIC legibility: fails - as in the diverted panel, only the blue cell-field contours are visible; the dark analytic family appears on no sampled scanline or column through the interior (9 near-black px inside the plot region against 26,665 blue), so the comparison the caption describes cannot be read.",
+        "RUBRIC data_ink: passes - nested line contours on a white field with no fills or gradients; the data carry the panel.",
+        "RUBRIC decoration: passes - no gradient, background fill or styled theme anywhere in the panel.",
+        "RUBRIC contrast: passes - #333333 and #666666 text on white, and the #3366CC label line at 4.5:1; all text clears its background.",
+        "RUBRIC table_form: passes - a spatial contour figure with no tabular content.",
+        "RUBRIC label_collision: passes for text - a three-line label block in clear space, nothing clipped; the two null markers at the magnetic axis overlap each other and that is recorded under legibility."
+      ],
+      "state": "limited trial state"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+      "id": "f77ee643d50",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The analytic flux is invisible in the rendered panel, so the figure does not show what it claims. Its label block names 'analytic field / larger nulls' in near-black and 'cell field / read nulls' in blue, and the fragment's caption states that dark contours are the analytic flux and the feature colour the read's cell field on the same levels. Measured on the attached PNG, the plot region (x >= 520) holds 22,896 feature-blue pixels and 92 near-black ones, and four scanlines (rows 250, 405, 550, 700) and two columns (700, 745) each show one blue run per level and near-black ink only at the two outermost boundaries. A reader gets a single contour family plus the wall: the read cannot be compared against the analytic field, and the accuracy claim the panel exists to support is not visible in it."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg",
+      "id": "f54d815f2b3",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The same defect in the limited panel: 26,665 feature-blue pixels against 9 near-black ones inside the plot region, with no second contour family on any sampled scanline (rows 250, 405, 550, 700) or column (700, 745). The caption promises dark analytic contours on the same levels as the blue read contours and a reader sees only the blue. The run's own manifest records these panels as landed with 'both null sets and the wall' and 'shared levels'; the rendered artifact does not carry the analytic family at all, so that evidence line describes a figure the reader does not get."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+      "id": "f77ee643d50",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The two null sets are not distinguishable at the marks they are encoded on. The caption asks the reader to tell the analytic null from the read's by size ('larger nulls are analytic, smaller the read's'), and the painter draws the analytic marker at markersize 12 in #333333 and the read's at 8 in the feature blue. In the rendered panel the magnetic axis shows one filled blue triangle about 16 px tall with the dark outline surfacing only as a 1-2 px fringe at its apex and base, and the divertor null is a pile of marks inside a dotted circle occupying roughly 15 px. The two null positions are real and nearly coincide, which is the good result, but the figure gives the reader no way to read that from the picture: what looks like one marker is two."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg",
+      "id": "f54d815f2b3",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The same merge at the limited panel's magnetic axis: rows 446-462 show a filled blue triangle with the analytic marker's dark fringe visible only at its apex and base, a separation of 2-3 px at 1400 px width. The size coding the caption relies on cannot be resolved, so a reader comparing 'larger nulls are analytic, smaller the read's' sees a single null position and no evidence about whether the analytic and read axes agree within one pixel or within twenty."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_h200/figures.py",
+      "id": "f7b405d74bf",
+      "line": 83,
+      "severity": "non-blocking",
+      "summary": "The diverted panel does not draw the two fields on one shared level set, as its caption and this module's docstring claim. The renderer this call reaches selects the analytic levels as linspace(boundary_flux, axis_flux, 10)[:-1] - nine levels - and then draws the read's sampled field at levels[1:] plus a separate single-level boundary contour, so eight of the nine read contours sit at values the analytic contours do not carry. The defect is not visible today only because the analytic family is not visible at all; repairing the blocking finding without repairing this would leave two families drawn at mismatched values and invite the reader to read agreement off them."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+      "id": "f77ee643d50",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Composition wastes a third of the page and leaves the panel off-centre. Content spans x 85-936 of a 1400 px canvas and y 101-800 of 900, so 464 px at the right are blank while the drawing sits left of centre; the canvas is 1400x900 (1.56) rather than the repository's 14 x 7.2 in slide canvas. Nothing is unreadable, but both panels in the fragment spend a third of their width on white space a reader scrolls past."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+      "id": "f77ee643d50",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The diverted panel's one annotation is unexplained and its marking is nearly invisible. The label block carries 'normal-form radius 107.13 mm' with no statement of what radius is meant, and the dotted circle that presumably marks it at the divertor is drawn in about #d9d9d9, roughly 1.4:1 against white, so the mark a reader would use to place the number is fainter than the paper it sits on. The limited panel carries neither the number nor the circle, so a reader comparing the two panels cannot tell whether the quantity is absent in the limited state or was simply omitted there."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html",
+      "id": "fff4475e387",
+      "line": 132,
+      "severity": "non-blocking",
+      "summary": "The diverted panel's caption ('Diverted trial state, same vocabulary.') repeats the panel's own title and adds nothing state-specific: no residual, no null positions, nothing the picture does not already say once the vocabulary is known from the previous figure. The one quantity the panel carries - the 107.13 mm radius - is inside the image and not in the caption, and the reader is left to infer it."
+    }
+  ],
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261028T223723687367-review-of-tracked-read-h200-2e007b43dd2a-figure",
+  "reviewed_base_sha": "a1f6782c9c1bb1b6278418393961d76ffc7329ca",
+  "reviewed_head_sha": "2e007b43dd2a1127582a6bc21a235ad2c98c9c23",
+  "reviewed_run_id": "r-20261028T215104424875-tracked-read-h200",
+  "rubric": "figure",
+  "status": "parsed",
+  "summary": "Two strip PNGs were attached, and I read them: image-0.png is the diverted trial state (saddle null at the divertor, normal-form radius annotation) and image-1.png is the limited trial state (nested contours, no saddle). Both are judged from the rendered pixels only, by scanline and per-region palette measurement of the attached PNGs; no SVG was opened and nothing was edited. The panels read cleanly as single-family contour plots, and that is the defect: the caption and the in-figure label promise two contour families on one shared level set, and every interior crossing on every scanline and column I sampled carries only the feature-blue cell-field contour (23,879 blue px in the diverted panel and 27,648 in the limited one, against 92 and 9 near-black px inside the plot). Only two thin near-black curves survive anywhere, both at the panel's outer edge. The analytic field the figure exists to compare against is therefore invisible, and both null markers of each state sit within 2-3 px of each other and merge into a single mark, so the size-coded comparison the caption asks the reader to make cannot be made. Both blocking findings hold this node.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T22:49:53.812567+00:00",
+  "total": null
+}

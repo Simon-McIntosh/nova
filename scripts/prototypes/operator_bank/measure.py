@@ -255,7 +255,8 @@ def main():
         captured = np.asarray(operands.rows)
         constant = jnp.asarray(captured[:, 0, 0, 0])
         return jax.jit(
-            lambda moments: jnp.sum(constant) * 0.0 + jnp.sum(moments) * 0.0
+            lambda moments: jnp.sum(constant) * 0.0
+            + jnp.sum(jnp.stack(tuple(moments))) * 0.0
         )
 
     before = cache_entries(args.compile_cache)

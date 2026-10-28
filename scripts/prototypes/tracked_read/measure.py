@@ -234,7 +234,7 @@ def main():
     diverted = build_kind("diverted", cells, policy_radius)
     operands, digest = bank_for(diverted, args.store)
     cache = cache_for(operands)
-    moments = jnp.stack(tuple(diverted["states"]["converged"]), axis=-1)
+    moments = diverted["states"]["converged"]
     seeds = jnp.asarray(diverted["roots"])
     convention = diverted["convention"]
     policy = diverted["policy"]
@@ -363,11 +363,10 @@ def main():
             analytic_read = case["analytic_read"]
             span = abs(float(analytic_read.boundary_flux - analytic_read.axis_flux))
             for state_name, state_moments in case["states"].items():
-                stacked = jnp.stack(tuple(state_moments), axis=-1)
                 reading = support_read.read(
                     case_operands,
                     case_cache,
-                    stacked,
+                    state_moments,
                     case_seeds,
                     case_seeds,
                     case["convention"],

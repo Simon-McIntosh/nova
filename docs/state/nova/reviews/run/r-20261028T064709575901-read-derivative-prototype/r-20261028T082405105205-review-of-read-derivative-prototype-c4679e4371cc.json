@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-10-28T08:34:14.890Z",
   "dispatched_at": "2026-10-28T08:26:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-read-derivative-prototype-c4679e4371cc",
+      "recorded_at": "2026-10-28T08:41:47.310494+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "This sentence was added by 94b7a1380, the commit whose stated purpose was to quote the measured compile walls. It states the opposite of what its own figure shows: 11.798116 > 10. The contradiction is internal to the fragment, so a reader cannot resolve it from either paragraph, and the checker does not read prose compile claims.",

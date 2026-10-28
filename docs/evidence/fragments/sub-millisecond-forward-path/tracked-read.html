@@ -1,0 +1,53 @@
+<section id="tracked-read">
+  <h2>tracked-read — a read that tracks its stationary points</h2>
+  <p><code>support_read.read</code> now returns each tracked point's hex cell, the
+  limited/diverted ownership and a rebuild counter, and rebuilds the
+  connected-domain decision only when one of the first two changes. The two
+  whole-mesh costs §2 names are paid by a rebuild step alone: the own-node fit
+  over every node (<code>fixed_points.sampled_coefficient</code>, called from
+  <code>topology.read_at_stationary_points</code>) and the whole-mesh Bell
+  rebuild (<code>fixed_points.field_from_jets</code>). A steady-state step
+  reuses the previous <code>TopologyRead</code>.</p>
+
+  <p>The refinement itself is unchanged and already cell-local: the warm-started
+  stationary-point Newton in <code>fixed_points.solve</code> differentiates
+  <code>fixed_points._CachedField</code>, which contracts only the selected
+  triangle's rows and builds the Bell coefficients for that one triangle. That
+  is the cell-local fit §2 asks for, read from the coupling operand; no jets are
+  averaged across cells. The lead's reuse map names
+  <code>stencil_nulls._quadratic_fit_matrices</code> for this fit and the
+  implementation reuses the existing one instead — recorded under
+  <code>outside_scope</code> in the manifest for the coordinator to rule on.</p>
+
+  <h3 id="tracked-read-gate">The gate</h3>
+  <p><code>tests/test_tracked_read.py</code> (4 passed, 112.57 s at head):</p>
+  <ul>
+    <li id="tracked-read-gate-first">the first read rebuilds once and the steady
+    state rebuilds nothing, carrying the same cells and passing the validity
+    check;</li>
+    <li id="tracked-read-gate-stays">a field change that leaves the X-point in
+    its cell (a uniform linear term moving it ≲ 0.1 pitch) reports
+    <code>rebuilt=False</code> and leaves the rebuild counter unchanged;</li>
+    <li id="tracked-read-gate-leaves">a field change that moves the X-point out
+    of its cell (cell 15 → 23, both stationary points converged, read valid)
+    reports <code>rebuilt=True</code> and increments the counter by exactly
+    one;</li>
+    <li id="tracked-read-gate-accuracy">both stationary points land on the
+    analytic reference within the locked precision budget
+    (5e-4 of the minor radius).</li>
+  </ul>
+
+  <h3 id="tracked-read-negative-control">Negative control</h3>
+  <p>Averaging the cell-local fit across each cell's nodes in a scratch copy
+  puts the axis 0.3049 m from the analytic extremum against a 7.49e-4 m budget.
+  The accuracy test fails there (<code>EXIT=1</code>) and passes at head, so the
+  gate discriminates: it is the cell-local fit, not the averaging, that carries
+  the accuracy.</p>
+
+  <h3 id="tracked-read-open">Not measured here</h3>
+  <p>The warm-wall, kernel-launch and host–device copy measurement on an H200,
+  the rebuild-step wall, the four-certificate-state accuracy table against a
+  direct Newton solve on the analytic ψ, and the qualification-gate repair for
+  the limited trial state are outstanding. No figure is published for this node
+  pending those measurements.</p>
+</section>

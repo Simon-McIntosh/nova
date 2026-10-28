@@ -1,8 +1,11 @@
 """Plot milliseconds per Newton-step stage against the 1 ms target.
 
 Reads the job receipt, so the figure cannot drift from the measurement it
-states. The x axis is logarithmic because the stages span 1.6 ms to 168 ms,
-about two decades against a 1 ms target.
+states. The stages are drawn as dots with their values, not as bars: a bar's
+length is read as a magnitude, and across three decades a log bar overstates the
+small stages and clips the large one, while a dot carries no length to misread
+and the number is written beside it. The axis is logarithmic only so the stages
+spread apart; every value is labelled. The batch arm is not a stage of one step and sits below a gap, in grey.
 """
 
 import argparse
@@ -24,6 +27,9 @@ STAGES = (
     ("jacobian_block_ms", "Jacobian block"),
     ("linear_solve_ms", "linear solve"),
 )
+SUBJECT = "#3b6ea5"
+BATCH = "#929292"
+LIMIT = "#b03030"
 
 
 def main():
@@ -34,49 +40,61 @@ def main():
 
     receipt = json.loads(args.receipt.read_text())
     step = (receipt.get("steps") or {}).get("1", {})
-    rows = [(label, step[key]) for key, label in STAGES if key in step]
+    rows = [(label, step[key], SUBJECT) for key, label in STAGES if key in step]
     batch = (receipt.get("steps") or {}).get("16", {})
-    if "map_per_solve_ms" in batch:
-        rows.append(("map, width 16 per slice", batch["map_per_solve_ms"]))
+    separated = "map_per_solve_ms" in batch
+    if separated:
+        rows.append(("map at width 16, per slice", batch["map_per_solve_ms"], BATCH))
 
     plt.style.use(TARGET)
     figure, axes = plt.subplots(figsize=(35.56 * CM, 18.29 * CM))
-    values = np.array([value for _, value in rows])
-    positions = np.arange(len(rows))[::-1]
-    subject = ["#3b6ea5" if "width 16" not in label else "#929292" for label, _ in rows]
-    axes.barh(positions, values, height=0.55, color=subject, zorder=3)
-    axes.set_yticks(positions, [label for label, _ in rows])
-    axes.set_xscale("log")
-    axes.set_xlabel("wall per stage [ms]")
-    axes.axvline(1.0, color="#b03030", linewidth=1.2, linestyle=":", zorder=4)
-    axes.annotate(
-        "1 ms target",
-        xy=(1.0, positions.max() + 0.55),
-        xytext=(0, 0),
-        textcoords="offset points",
-        ha="center",
-        va="bottom",
-        color="#b03030",
-        fontsize=11,
-    )
-    for position, value in zip(positions, values):
+    positions = []
+    cursor = len(rows) - 1
+    for index in range(len(rows)):
+        if separated and index == len(rows) - 1:
+            cursor -= 0.9
+        positions.append(cursor)
+        cursor -= 1
+    values = np.array([value for _, value, _ in rows])
+
+    for position, (label, value, colour) in zip(positions, rows):
+        axes.plot([value], [position], marker="o", markersize=9, color=colour, zorder=3)
         axes.annotate(
             f"{value:.1f}",
             xy=(value, position),
-            xytext=(4, 0),
+            xytext=(12, 0),
             textcoords="offset points",
             va="center",
-            fontsize=11,
+            fontsize=14,
             color="#222222",
         )
-    axes.set_xlim(right=values.max() * 3)
+
+    axes.set_yticks(positions, [label for label, _, _ in rows])
+    axes.set_xscale("log")
+    axes.set_xlim(0.8, values.max() * 2.2)
+    axes.set_ylim(min(positions) - 0.8, max(positions) + 0.8)
+    axes.set_xlabel("wall per stage [ms]", fontsize=16)
+    axes.tick_params(labelsize=14)
+    axes.axvline(1.0, color=LIMIT, linewidth=1.2, linestyle=":", zorder=2)
+    axes.annotate(
+        "1 ms target",
+        xy=(1.0, max(positions) + 0.7),
+        xytext=(6, 0),
+        textcoords="offset points",
+        ha="left",
+        va="center",
+        color=LIMIT,
+        fontsize=14,
+    )
     axes.spines[["top", "right"]].set_visible(False)
     axes.grid(False)
     axes.set_title("")
     figure.tight_layout()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.output, format=args.output.suffix.lstrip("."))
-    print(f"WROTE {args.output} rows={[(label, round(value, 3)) for label, value in rows]}")
+    print(
+        f"WROTE {args.output} rows={[(label, round(value, 3)) for label, value, _ in rows]}"
+    )
 
 
 if __name__ == "__main__":

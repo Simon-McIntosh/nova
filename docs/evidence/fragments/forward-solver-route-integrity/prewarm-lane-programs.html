@@ -50,9 +50,41 @@ base that assertion fails and the marker-line list is empty; at head it is
 the single line</p>
 <pre>CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0</pre>
 
-<p><strong>The H200 arms.</strong> One allocation, three sequential arms, each
-in its own process: the lane target compiled into a fresh pin root, the same
-target run against that root with the miss budget at zero, and the same target
-run against a copy holding only the currently published pin's documented keys.
-The arm results are appended here once the allocation reports them.</p>
+<p><strong>The lane is warm against a fresh pin (H200 job 1299214, three
+sequential arms, one process each).</strong> The pre-warm row compiled
+<code>tests/test_equilibrium_forward_solve.py</code> into a fresh sibling root,
+<code>/work/…/jax-cache/nova-prewarm-lane-programs</code>, and published that
+root's own pin document (both arms exited 0; the row records 1637 misses and
+383.0 compile seconds, which is what filling that pin cost). The lane run against that root
+with <code>NOVA_CACHE_MISS_BUDGET=0</code> reports
+<code>CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0</code>, and its
+receipt reads <strong>1710 hits, 0 misses, 0.0 compile seconds</strong> in
+570.72 s of wall clock — the done-when, measured on a directory holding only
+the new pin's keys.</p>
+
+<p><strong>The negative control fires.</strong> The same target run against a
+copy holding only the currently published pin's documented keys prints
+<code>CACHE_GUARD_MARKER=WALL-CLOCK-UNRELIABLE misses=1637 budget=0</code> and
+exits 1: the old pin's keys serve none of the lane's programs, which is the
+defect the new row removes. The copy is made by hardlink into the run's scratch
+tree rather than by pointing the lane at the live shared directory, because the
+live leaf now holds 18986 entries against the 3362 its document records — later
+lane runs wrote into it — and a polluted directory would have shown hits the
+pin never supplied.</p>
+
+<p><strong>Three cases fail in the warm arm and none of them is a cache
+miss.</strong> <code>test_the_accelerator_routes_agree_on_the_fixed_point</code>,
+<code>test_the_solve_is_differentiable_in_the_conductor_current</code> and
+<code>test_the_plasma_current_is_differentiable_in_the_conductor_current</code>
+fail in the 30-case file (3 failed, 27 passed) at a revision whose miss count
+is zero, so the compiles were all served from disk and the failures belong to
+the tests' own subject matter. They are reported as outside this node's write
+scope rather than triaged here.</p>
+
+<p><strong>What the coordinator still owns.</strong> The measured root covers
+the lane row alone, because the pre-warm's certificate rows were not re-run
+here; the script now carries the lane row beside them, so the next full
+pre-warm run produces the pin to switch to. The served-entry count the guard
+reports against the old pin leaf is 18986 where the previous recursive count
+read 50653, which is the size of the instrument error this fragment closes.</p>
 </section>

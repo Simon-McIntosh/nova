@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run armed no suite: its manifest tests line reads none, and the manifest carries no baseline_suite or after_suite arm, so no gate-log pair exists from which to derive an added-failure delta and the count is zero by that absence rather than by a green pair. Its one guard, check_units.py, was run by hand and both runs are on disk (units.log: UNIT CHECK OK, 50 stated values; units-negative.log: the same check failing on a planted 0.7357 ms for 735.7 ms); this review re-ran that guard at HEAD (exit 0) and against the run directory's reverted-08b7d5906.html (exit 1, naming 21.7 s, 0.652 s and both containment sentences).",
+  "call_sites": [],
+  "completed_at": "2026-10-28T08:44:36.767Z",
+  "dispatched_at": "2026-10-28T08:31:07Z",
+  "findings": [
+    {
+      "detail": "The round's purpose was to correct the cold decomposition, and 08b7d5906 rewrote line 21 and line 33 while leaving line 9 untouched. The guard cannot catch it: fragment_seconds scans the whole file, so 29.0 s in the meta matches the 28.997 s XLA sum within the half-unit tolerance and the head run exits 0. This review re-analyzed nothing: it ran the guard's own command at HEAD and got exit 0, so the stale figure is green.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "d8d93aecf62",
+      "line": 9,
+      "severity": "blocking",
+      "summary": "The document's own plan-summary metadata still states that the cold compile of the three per-step programs is 29.0 s, the total the same round corrected to 34.9 s at line 21; 29.0 s is the XLA share, so the headline a plan index renders keeps the pre-correction decomposition."
+    },
+    {
+      "detail": "Reproduced: replacing 'of which 29.0 s is XLA compile, 4.0 s is tracing' with 'of which 3.983 s is XLA compile, 1.24 s is tracing' (a decomposition that now adds to 7.1 s, not 34.9 s) leaves the check at exit 0 with 'UNIT CHECK OK: 50 stated values agree with the receipt'. The guard is a presence check over the receipt's value set, not the sum check its docstring and the commit body claim.",
+      "file": "scripts/prototypes/solve_wall_breakdown/check_units.py",
+      "id": "95730469b14",
+      "line": 58,
+      "severity": "non-blocking",
+      "summary": "cold_seconds' docstring claims that the cold table's rows and the summary sentence must both come from it, so a decomposition that does not add up cannot be stated, but the seconds loop at check_units.py:189-194 membership-tests each stated value against a flat bag of per-stage values and sums, so a decomposition that assigns receipt numbers to the wrong stages passes."
+    },
+    {
+      "detail": "The disjointness conclusion is supported by the code the same sentence cites (map_moments calls kernel.read over its own roots, the step calls nova.equilibrium.topology.read), but the citation it gives is arithmetic that is definitional in the receipt, so it cannot show non-overlap. The unmeasured-step gap is the earlier review's, recorded for the warm arm; this round's sentence leans on it rather than introducing it.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "dc31ba5fe9c",
+      "line": 113,
+      "severity": "non-blocking",
+      "summary": "The sentence that the five stage walls sum to the step without overlap offers that sum as evidence of disjointness, but the receipt records no measured step wall: logs/h200h/stages.json step 1 holds the five stage rows and a residual size only, and 1,023.7 ms is their sum (units.log's derived 'step total' 1023.726)."
+    },
+    {
+      "detail": "The cold section at line 24 states both parts correctly (carrier 0.651 s, jet 0.181 s), so the summary quotes one component as the whole store cost. The earlier review recorded this figure as non-blocking and it was not among the two findings this round acted on, so it is re-stated here against the line this round edited.",
+      "file": "docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html",
+      "id": "44e635e1d9a",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "The operand store is said to have loaded in 0.18 s, which understates the receipt: logs/h200c/stages.json records operand_load_seconds 0.690 (carrier 0.651 plus jet matrix 0.181), and 0.18 s is the jet matrix alone; 08b7d5906 rewrote this sentence and carried the figure over."
+    },
+    {
+      "detail": "Neither units.log nor units-negative.log carries a revision header or a bare EXIT=<code> last line, so a reader cannot read the check's status without rerunning it and cannot tell which revision it ran at; the JSON blocks at the end of each log are the check's own echo, not a status line. The manifest's test_logs text does name the two reverted copies used as negative controls, which is what let this review verify the round by hand.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T064446146504-solve-wall-breakdown/manifest.md",
+      "id": "3b570a0444a",
+      "line": 14,
+      "severity": "non-blocking",
+      "summary": "tests states that the node changes no product code or tests, which is inaccurate for this round: b999d8534 adds 70 lines to scripts/prototypes/solve_wall_breakdown/check_units.py, and line 15's 'UNIT CHECK OK, 42 stated values' disagrees with units.log's own summary line, 'UNIT CHECK OK: 50 stated values agree with the receipt'."
+    },
+    {
+      "detail": "measure.py:125-128 is the one place that stamps trace_seconds, lower_seconds, xla_compile_seconds and first_execute_seconds into each program row; check_units.py:59 duplicates that tuple rather than importing it, and scripts/prototypes/compile_pass_profile/profile.py:85-102 is a second copy of the same capability. Adding a stage means editing three places, and missing this one leaves the guard green over an unchecked figure.",
+      "file": "scripts/prototypes/solve_wall_breakdown/check_units.py",
+      "id": "191fff49205",
+      "line": 59,
+      "severity": "non-blocking",
+      "summary": "cold_seconds re-lists the four cold stage keys that the receipt writer already owns at scripts/prototypes/solve_wall_breakdown/measure.py:125-128, so a stage added to the receipt must be added again here or the guard silently stops covering it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from e77d251057dafc1b8152b37777da300d94f6214f to 1d210c9e56b2dc027973e46289ff4e995154701a: three commits, two files, +77/-7 - b999d8534 adds fragment_seconds, cold_seconds and containment_claims and wires them into main(); 08b7d5906 rewrites the summary cold decomposition, the carrier load figure and the map/read bullet; 1d210c9e5 fixes the residual-share sentence's leftover containment wording.",
+    "done_when": "The three done-when clauses are unchanged by this round and stand as the earlier review scored them; what this round adds is the cold-decomposition assertion itself, and it reproduces: the guard exits 0 on the fragment at HEAD ('UNIT CHECK OK: 50 stated values agree with the receipt') and exits 1 on the run directory's reverted-08b7d5906.html, naming 21.7 s, 0.652 s and both containment sentences - so the class of defect this round repaired is now caught at value level, while the meta-headline and step-total gaps above sit outside it.",
+    "goal": "The node goal is a cold and warm stage split of a production forward solve on one H200; this round of three commits corrects the cold decomposition at docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21-33, where 34.9 s is 3.983 + 1.240 + 28.996 + 0.714 from logs/h200c/stages.json and 28.996/34.933 is the stated 83 %, and corrects the map/read relationship at :113 against map_moments calling read over its own roots (scripts/prototypes/fast_map_production/program.py:203) and nova.equilibrium.topology.read (nova/equilibrium/topology.py:3111) - but the same document's plan-summary at :9 still carries the old 29.0 s cold total.",
+    "manifest": "Read; status complete with checkpoint, artifacts and test_logs filled - but line 14 claims the node changes no tests while b999d8534 changes check_units.py, line 15's '42 stated values' contradicts units.log's 50, and neither unit log carries a revision header or a bare EXIT= line.",
+    "write_paths": "The reviewed node declares scripts/prototypes/solve_wall_breakdown, docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html and docs/figures/converged-forward-solve/solve-wall-breakdown; the round's diff is exactly the first two - docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html (-8/+7 across 08b7d5906 and 1d210c9e5) and scripts/prototypes/solve_wall_breakdown/check_units.py (+70 in b999d8534)."
+  },
+  "justifications": {
+    "durability": "The added guard fails on the reverted record (exit 1) and is green on HEAD (exit 0), but scripts/prototypes/solve_wall_breakdown/check_units.py:189-194 accepts a relabelled decomposition at exit 0, and the script is not pytest-collected and reads receipts outside the repository, so only a person runs it on a regression of the map_moments/topology.read distinction.",
+    "evidence": "Every corrected cold value reconciles with logs/h200c/stages.json (3.983, 1.240, 28.996, 0.714, carrier 0.651) and the shares recompute to 83/11/3.5/2 %, but docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21 keeps the 0.18 s store figure (receipt 0.690) and :113 rests on a step total the receipt never measures independently.",
+    "fit": "The additions follow the module's own idiom (argparse, a problems list, exit 1 with the offending values) and introduce no forbidden name, but scripts/prototypes/solve_wall_breakdown/check_units.py:55-58 documents a check stronger than the loop below it performs.",
+    "goal_fidelity": "The round does what it set out to do - docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21-33 now states the receipt's own cold total and shares, and :113 states the map/read relationship the code supports - but :9's plan-summary still headlines 29.0 s, so the document does not yet carry one consistent cold figure.",
+    "reuse": "fragment_seconds and containment_claims have no owner in the repository (a search over scripts/prototypes, tests and nova/ found no prose-versus-receipt checker), while scripts/prototypes/solve_wall_breakdown/check_units.py:59 re-implements the cold stage-key list owned by scripts/prototypes/solve_wall_breakdown/measure.py:125-128.",
+    "scope_discipline": "git diff --stat e77d251057dafc1b8152b37777da300d94f6214f..1d210c9e56b2dc027973e46289ff4e995154701a is two files and 77 insertions against the node's declared roots, with no file under nova/ touched and no deletion beyond the seven corrected prose lines."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a cold and warm stage split of a production forward solve on one H200; the round corrects the cold decomposition at docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21-33 to the receipt's 34.9 s, but :9's plan-summary still headlines the corrected-away 29.0 s.\nVERDICT done_when: the round's own measure reproduces - the named guard exits 0 on the fragment at HEAD and exits 1 on the run directory's reverted-08b7d5906.html, naming 21.7 s, 0.652 s and both containment sentences.\nVERDICT write_paths: the diff touches only docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html and scripts/prototypes/solve_wall_breakdown/check_units.py, both inside the node's declared write roots.\nVERDICT manifest: read; status complete, but line 14 says the node changes no tests while b999d8534 changes check_units.py, and line 15's 42 stated values contradicts units.log's 50.\nVERDICT diff: read commit by commit from e77d251057dafc1b8152b37777da300d94f6214f to 1d210c9e56b2dc027973e46289ff4e995154701a - three commits, two files, +77/-7.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:9 still states the 29.0 s cold total the round replaced at :21.\nSCORE evidence: 14\nJUSTIFICATION evidence: the corrected values reconcile with logs/h200c/stages.json, but docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:113 cites a step total the receipt computes as the five stage sum.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is two files, both inside the declared roots, and touches nothing under nova/.\nSCORE durability: 9\nJUSTIFICATION durability: scripts/prototypes/solve_wall_breakdown/check_units.py:189-194 passes a fragment whose stage values are relabelled, and nothing in tests/ imports the guard.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/solve_wall_breakdown/check_units.py:55-58 documents a sum check the loop below it does not perform.\nSCORE reuse: 10\nJUSTIFICATION reuse: scripts/prototypes/solve_wall_breakdown/check_units.py:59 re-lists the cold stage keys owned at scripts/prototypes/solve_wall_breakdown/measure.py:125-128.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:9 blocking: The document's own plan-summary metadata still states that the cold compile of the three per-step programs is 29.0 s, the total the same round corrected to 34.9 s at line 21; 29.0 s is the XLA share, so the headline a plan index renders keeps the pre-correction decomposition.\nFINDING scripts/prototypes/solve_wall_breakdown/check_units.py:58 non-blocking: cold_seconds' docstring claims that the cold table's rows and the summary sentence must both come from it, so a decomposition that does not add up cannot be stated, but the seconds loop at check_units.py:189-194 membership-tests each stated value against a flat bag of per-stage values and sums, so a decomposition that assigns receipt numbers to the wrong stages passes.\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:113 non-blocking: The sentence that the five stage walls sum to the step without overlap offers that sum as evidence of disjointness, but the receipt records no measured step wall: logs/h200h/stages.json step 1 holds the five stage rows and a residual size only, and 1,023.7 ms is their sum (units.log's derived 'step total' 1023.726).\nFINDING docs/evidence/fragments/converged-forward-solve/solve-wall-breakdown.html:21 non-blocking: The operand store is said to have loaded in 0.18 s, which understates the receipt: logs/h200c/stages.json records operand_load_seconds 0.690 (carrier 0.651 plus jet matrix 0.181), and 0.18 s is the jet matrix alone; 08b7d5906 rewrote this sentence and carried the figure over.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T064446146504-solve-wall-breakdown/manifest.md:14 non-blocking: tests states that the node changes no product code or tests, which is inaccurate for this round: b999d8534 adds 70 lines to scripts/prototypes/solve_wall_breakdown/check_units.py, and line 15's 'UNIT CHECK OK, 42 stated values' disagrees with units.log's own summary line, 'UNIT CHECK OK: 50 stated values agree with the receipt'.\nFINDING scripts/prototypes/solve_wall_breakdown/check_units.py:59 non-blocking: cold_seconds re-lists the four cold stage keys that the receipt writer already owns at scripts/prototypes/solve_wall_breakdown/measure.py:125-128, so a stage added to the receipt must be added again here or the guard silently stops covering it.",
+  "review_run_id": "r-20261028T082905577351-review-of-solve-wall-breakdown-1d210c9e56b2",
+  "reviewed_base_sha": "e77d251057dafc1b8152b37777da300d94f6214f",
+  "reviewed_head_sha": "1d210c9e56b2dc027973e46289ff4e995154701a",
+  "reviewed_run_id": "r-20261028T064446146504-solve-wall-breakdown",
+  "scores": {
+    "durability": 9,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:40:40Z",
+  "total": 85
+}

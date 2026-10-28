@@ -293,7 +293,7 @@ def main():
         (float(booked.raw_current) / len(reference)) * np.asarray((1.0, pitch, pitch))
     )
 
-    def equation(scaled, *carried):
+    def equation(scaled, carried):
         state = mapped(scaled.reshape(reference.shape) * scale, *carried)
         return (state.moment_residual / scale).reshape(-1)
 
@@ -381,7 +381,7 @@ def main():
     map_ms, map_p95 = wall(map_program, (reference, *operands), 50)
 
     flat = reference.reshape(-1)
-    residual = equation(flat, *operands)
+    residual = equation(flat, operands)
     tangent = operand_tangent(equation, flat)
     identity = jnp.eye(residual.size, dtype=residual.dtype)
     columns_image = operand_block(tangent, len(operands))

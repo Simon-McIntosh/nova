@@ -2021,6 +2021,11 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <p>The run's earlier failure, two compiled programs for two same-shape geometries, was traced to the geometry digest in the operator's pytree auxiliary data; the worker's layout identity excluded it. A process-global LRU cache of compiled programs was added along the way and is one reason the code does not merge.</p>
   </section>
 
+  <section id="prewarm-lane-programs">
+    <h2>§4 — the pre-warm compiles the lane&#x27;s own programs</h2>
+    <p>Landed 2026-10-28 (worker head <code>75922052f</code>, merged to main at <code>318a89b1c</code>). The pre-warm now compiles the lane target's own programs. The guard, the pre-warm payload and the summary count program-key entries through one owner, <code>scripts/h200_test_lane/cache_reuse_summary.py</code> <code>served_keys</code>. The guard's marker is line-anchored. A pre-warm exits on its compile outcome, not on unrelated test failures.</p><ul><li>A lane run against the fresh pin root <code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm-lane-programs</code> reports 1,710 hits, 0 misses and 0.0 compile seconds.</li><li>The old pin's documented keys force 1,637 misses.</li><li>The guard counts 18,986 program-key entries on the old pin leaf, where the previous recursive count read 50,653.</li><li>The focused gate passes 7 tests at head and fails 7 at base, and reverting the counter or the exit-status repair reddens one test each.</li></ul><p>Remaining:</p><ul><li>The lane still defaults to the old pin (<code>scripts/h200_test_lane/run.sh:19</code> <code>DEFAULT_PINNED_ROOT</code>). Switching the default is the pin republish of §5.</li><li>Review notes, all non-blocking: one test leaves <code>jax_compilation_cache_dir</code> pointing at a deleted tmp path; the exit-status wiring in <code>prewarm_row.main</code> has no test; <code>PROGRAM_KEY_SUFFIX</code> is unread; and the recorded H200 arm predates the counter repair.</li></ul>
+  </section>
+
 </main>
 </body>
 </html>

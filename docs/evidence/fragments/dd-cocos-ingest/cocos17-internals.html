@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dd-cocos-ingest">
+  <meta name="plan-title" content="nova's internal consumers run in COCOS 17 through the convention owner">
+  <meta name="plan-evidence-for" content="dd-cocos-ingest">
+  <meta name="plan-verifies" content="dd-cocos-ingest#s4">
+  <meta name="plan-recorded-at" content="2026-10-28">
+  <meta name="plan-verdict" content="complete">
+  <title>cocos17-internals | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1 id="cocos17-internals-title">nova's internal consumers run in COCOS 17 through the convention owner</h1>
+<p>Base <code>6ccf43de9</code>. This node walks the internal consumers the census migration list names, confirms each one either already reads its convention from an owner or is one call site that did not, and lands the one that did not beside a COCOS 17 contract for each consumer in its scope.</p>
+
+<h2 id="cocos17-internals-state">What the consumers already held</h2>
+<p>The store shares this node's scope and was measured rather than reworked. <code>SignalStore.cache_key</code> already names the stored fields' convention through <code>hash_attrs</code>, and <code>legacy_cache_key</code> is the identity-only key an older nova wrote under, so a group written before the convention entered the key is refused by <code>StaleConventionError</code>. <code>nova.equilibrium.inverse</code>'s boundary constraint already passes <code>psi_boundary</code> through unnegated, because the equilibrium reader applies the source sign once; <code>nova.imas.extrapolate</code>'s update and its masked flux display already take their sign from the convention.</p>
+
+<h2 id="cocos17-internals-contour">The one bare factor</h2>
+<p><code>nova/biot/contour.py</code> was the exception. <code>Surface.fit</code> divided the least-squares coefficients by a literal <code>-2 * np.pi</code>, and <code>ContourLoc.plot_fit</code> rebuilt the toroidal current density with the same literal, so the Grad–Shafranov factor existed in a second place beside its owner. The fit now divides by <code>nova.equilibrium.convention.TOTAL_FLUX_FACTOR</code> and the plot rebuilds through <code>toroidal_current_density</code>. Both are the owner's own algebra, and every fitted value is unchanged.</p>
+
+<h2 id="cocos17-internals-contracts">COCOS 17 contracts</h2>
+<p><code>tests/test_cocos17_internals.py</code> holds one test per consumer in scope. The contour fit recovers a known <code>(p', FF')</code> pair and rebuilds the current density it was fitted to through the owner; a second test moves the owner's published factor and requires the coefficients to move by the same factor, so the site is bound to the owner rather than to a re-statement. The store key equals <code>hash_attrs({uri, dd_version, cocos})</code>, two conventions of one source get different groups, and a pre-convention group raises <code>StaleConventionError</code> instead of being served. The inverse constraint hands on the reader's <code>psi_boundary</code> byte for byte, so a returned negation reddens it.</p>
+
+<h2 id="cocos17-internals-negative-control">Negative control</h2>
+<p>In a scratch copy of the tree, <code>SignalStore.cache_key</code> was returned to its pre-convention identity, the convention dropped from the key. The test file then reports <code>3 failed, 4 passed</code> and exits 1: the key-equality test, the second-convention-group test and the refusal test fail, and none of the four contour or inverse contracts does. The log is <code>negative-control.log</code> in this run's directory.</p>
+
+<h2 id="cocos17-internals-arms">Arms</h2>
+<p>The gate is every test file that imports <code>nova.biot.contour</code>, each in its own fresh process with its own basetemp, at the base revision and at the head. <code>baseline_suite</code> and <code>after_suite</code> in the manifest carry the revisions, commands, exit statuses and failure ids. The new test file has no base arm, because it did not exist at the base.</p>
+
+</main>
+</body>
+</html>

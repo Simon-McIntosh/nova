@@ -37,6 +37,7 @@ PATCH
   echo "# mutation: average the Bell fit across the triangle's nodes"
   echo "# command: python -m pytest -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py"
   cd "$D/tree"
+  set +e
   PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
     -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py \
     --basetemp="$D/bt-mutant"

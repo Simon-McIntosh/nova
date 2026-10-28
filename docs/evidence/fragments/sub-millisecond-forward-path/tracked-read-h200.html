@@ -20,9 +20,47 @@
   the read to that field is the solve's own error and the distance from that
   field to the analytic extremum is the derivative source's.</p>
   <table>
-    <tr><th>state</th><th>read − field [m]</th><th>field − analytic [m]</th>
-      <th>read − analytic [m]</th><th>axis budget [m]</th></tr>
+    <tr><th>state</th><th>axis [m]</th><th>X-point [m]</th>
+      <th>boundary flux / span</th><th>Newton iterations</th><th>budget</th></tr>
+    <tr><td>diverted, converged</td><td>3.88e-6</td><td>5.28e-6</td>
+      <td>1.49e-5</td><td>[2, 2]</td><td>6.81e-4 / 1e-4</td></tr>
+    <tr><td>diverted, trial</td><td>1.88e-4</td><td>8.82e-4</td>
+      <td>2.21e-3</td><td>[2, 2]</td><td>6.81e-4 / 1e-4</td></tr>
+    <tr><td>limited, converged</td><td>inside budget</td><td>—</td>
+      <td>inside budget</td><td>—</td><td>2.00e-3 / 1e-4</td></tr>
+    <tr><td>limited, trial</td><td>4.12e-3</td><td>—</td>
+      <td>inside budget</td><td>—</td><td>2.00e-3 / 1e-4</td></tr>
   </table>
+  <p>The shared store publishes the diverted certificate's bank only
+  (<code>receipt.json</code> reads <code>"kind": "diverted"</code>), so binding
+  the limited case to it fed that case another state's field and the read
+  reported invalid with a boundary-flux error of 259 in span units. A case the
+  store does not hold is built from its own rows; the numbers here are each
+  certificate measured on the field it books.</p>
+  <p>The stage is fixed by the iteration count. Both points terminate after two
+  Newton iterations with <code>status=0</code> on a position tolerance of
+  <code>1e-10</code> of the pitch, so the read's position is the stationary
+  point of its derivative source to far better than the budgets above; the
+  distance the table reports is that source's distance from the analytic flux,
+  not a solve that stopped short. Widening the iteration budget cannot move it,
+  and the seed cannot either — a converged Newton solve has forgotten its seed.
+  What carries these numbers is the column of booked moments at the trial
+  state, the sampled-field booking the fast route consumes, together with the
+  Bell interpolant that turns nodal jets into a field. Both are upstream of the
+  read.</p>
+  <p>At the converged state the same instrument lands at 3.88e-6 m on the axis
+  and 5.28e-6 m on the X-point with the boundary flux inside 1.5e-5 of the
+  span, so the read reproduces the analytic state it is handed. The trial state
+  is the one that misses, by 1.3 and 22 times the budgets, and no change inside
+  the read reaches it: the repair belongs to the trial booking.</p>
+  <p>The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over the
+  four states and reports <code>3 failed, 5 passed</code>: the limited trial
+  axis at 4.12e-3 m against 2.00e-3, the diverted trial X-point at 8.82e-4
+  against 6.81e-4, and the diverted trial boundary flux at 2.21e-3 of the span
+  against 1e-4. Both converged states pass every clause. That is the recorded
+  defect reproduced on the H200, and it is left failing rather than relaxed:
+  the budgets are the section's, and a test that stopped asserting them would
+  report a read that meets them.</p>
 
   <h3 id="tracked-read-h200-wall">The warm wall on the H200</h3>
   <p>One job on <code>98dci4-gpu-0003</code>, an <code>NVIDIA H200 NVL</code>,
@@ -44,13 +82,18 @@
   </table>
   <p>The steady read is 1.225 ms, six times the section's 0.2 ms bound. The
   launches table says where they go: the stationary solve is 55 launches and
-  0.634 ms, and the remaining 750 launches cost the other 0.591 ms. Those are
-  not the fit — a steady step pays no whole-mesh fit — but the whole-mesh
-  containment scan <code>topology._inside_cells</code> evaluated at each tracked
-  point, the Hessian eigenvalues that classify it, and the tracking predicate.
-  Even a perfect fusion of the remainder leaves the solve's own 0.634 ms, three
-  times the bound, so the bound is not reachable by fusing the read: the
-  warm-started solve has to get cheaper, which is §3's subject.</p>
+  0.634 ms, and the remaining 750 launches carry the other 0.591 ms, over
+  21,000 of the 24,178 HLO instructions. The remainder is not the fit — a
+  steady step pays no whole-mesh fit — and the stages it contains are read from
+  the code rather than timed separately: the whole-mesh containment scan
+  <code>topology._inside_cells</code> evaluated at each tracked point, which
+  tests every cell's edges for each point, the Hessian eigenvalues that classify
+  it, and the tracking predicate. Even a perfect fusion of all of it leaves the
+  solve's own 0.634 ms, more than three times the bound, so the bound is not
+  reachable by fusing the read: the warm-started solve has to get cheaper, and
+  that is §3's subject. The stage split is left as measured for the solve and
+  structural for the remainder, which is stated rather than presented as a
+  measurement it is not.</p>
   <p>The rebuild row is reported as measured but the instrument is suspect:
   35.65 ms against 1.649 ms reported for the same call on a P100 is twenty-two
   times slower on the faster device, where the steady row is only 1.25 times
@@ -63,14 +106,14 @@
   shared level set, with both null sets and the wall
   (<code>nova.media.poloidal</code> through the repository's read renderer).</p>
   <figure id="tracked-read-h200-figure-limited">
-    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/limited-trial-read.svg"
+    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg"
       alt="limited trial state: analytic and read flux contours with both null sets">
     <figcaption>Limited trial state. Dark contours are the analytic flux, the
     feature colour the read's cell field on the same levels; larger nulls are
     analytic, smaller the read's.</figcaption>
   </figure>
   <figure id="tracked-read-h200-figure-diverted">
-    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/diverted-trial-read.svg"
+    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg"
       alt="diverted trial state: analytic and read flux contours with both null sets">
     <figcaption>Diverted trial state, same vocabulary.</figcaption>
   </figure>

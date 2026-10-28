@@ -7,6 +7,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import time
 
 from nova.jax.config import configure_dtypes
 
@@ -209,17 +210,21 @@ def main():
         if norm <= 1e-10:
             converged = True
             break
+        started = time.perf_counter()
         update = solve_one(operands, current_moments, current_support)
         jax.block_until_ready(update)
+        wall_ms = 1e3 * (time.perf_counter() - started)
         emit(
             "LINEAR_SOLVE",
             index=iteration,
-            condition=float(update.condition_estimate),
-            tolerance=float(update.tolerance),
+            condition_before=float(update.condition_before),
+            condition_after=float(update.condition_after),
             residual=float(update.linear_residual),
             converged=bool(update.converged),
+            wall_ms=wall_ms,
         )
         accepted = False
+        last_rejected = None
         for half in range(10):
             scale = 2.0**-half
             candidate = tuple(
@@ -227,7 +232,12 @@ def main():
                 for value, delta in zip(current_moments, update.update, strict=True)
             )
             candidate_support = read_state(operands, cache, candidate)
+            changed = np.flatnonzero(
+                np.asarray(candidate_support.reading.membership > 0)
+                != np.asarray(current_support.reading.membership > 0)
+            ).tolist()
             if not bool(candidate_support.valid):
+                last_rejected = (scale, candidate_support, changed, None)
                 continue
             candidate_residual = residual(
                 operands, candidate, candidate, candidate_support
@@ -243,8 +253,19 @@ def main():
                     "ACCEPT", index=iteration, scale=scale, residual_sup=candidate_norm
                 )
                 break
+            last_rejected = (scale, candidate_support, changed, candidate_norm)
         if not accepted:
-            emit("NO_ADMISSIBLE_UPDATE", index=iteration)
+            scale, rejected, changed, candidate_norm = last_rejected
+            emit(
+                "NO_ADMISSIBLE_UPDATE",
+                index=iteration,
+                last_scale=scale,
+                candidate_residual=candidate_norm,
+                support_valid=bool(rejected.valid),
+                reading_valid=bool(rejected.reading.valid),
+                reading_qualified=bool(rejected.reading.qualified),
+                changed_cells=changed,
+            )
             break
     emit("CONVERGED", value=converged, steps=iteration, residual_sup=norm)
     if args.state_path is not None:

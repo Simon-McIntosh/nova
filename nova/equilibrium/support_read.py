@@ -326,13 +326,115 @@ def step_jacobian_vector(
 
 
 class NewtonStep(NamedTuple):
-    """One matrix-free Newton update and its linear-solve accuracy ledger."""
+    """One dense Newton update and its conditioning ledger."""
 
     update: tuple[jax.Array, jax.Array, jax.Array]
-    condition_estimate: jax.Array
-    tolerance: jax.Array
+    condition_before: jax.Array
+    condition_after: jax.Array
     linear_residual: jax.Array
     converged: jax.Array
+
+
+def _local_booking_sensitivities(
+    operands, moments, support, profile, density_gradient, quadrature, booked
+):
+    """Differentiate one booking against its local flux and level inputs."""
+    cells, samples = operands.sample_index.shape
+    psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+    channels = samples + 8
+    sample_basis = jnp.eye(samples, dtype=psi.dtype)
+    field_basis = jnp.eye(6, dtype=psi.dtype)
+
+    def evaluate(index):
+        psi_direction = jnp.broadcast_to(
+            sample_basis[jnp.minimum(index, samples - 1)] * (index < samples),
+            psi.shape,
+        )
+        field_index = jnp.clip(index - samples, 0, 5)
+        field_direction = jnp.broadcast_to(
+            field_basis[field_index] * ((index >= samples) & (index < samples + 6)),
+            (cells, 6),
+        )
+        tangent = current.book_tangent(
+            psi,
+            psi_direction,
+            support.reading,
+            field_direction,
+            (index == samples + 6).astype(psi.dtype),
+            (index == samples + 7).astype(psi.dtype),
+            operands.geometry,
+            profile,
+            density_gradient,
+            quadrature,
+            booked,
+        )
+        return jnp.stack(tuple(tangent), axis=-1)
+
+    return jnp.moveaxis(jax.lax.map(evaluate, jnp.arange(channels)), 0, -1)
+
+
+def step_jacobian(
+    operands, moments, support, profile, density_gradient, quadrature, booked=None
+):
+    """Compose the bank with closed-form cell-local booking sensitivities."""
+    if quadrature.target_current is not None:
+        raise ValueError("dense local booking needs unconstrained current")
+    if booked is None:
+        psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+        booked = current.book(
+            psi, support.reading, operands.geometry, profile, quadrature
+        )
+    local = _local_booking_sensitivities(
+        operands, moments, support, profile, density_gradient, quadrature, booked
+    )
+    cells = moments[0].size
+
+    def bank_channels(index):
+        direction = tuple(
+            jnp.where(
+                index // cells == block, jax.nn.one_hot(index % cells, cells), 0.0
+            )
+            for block in range(3)
+        )
+        jets, field = _directional_field(operands, direction)
+        return jnp.concatenate(
+            (
+                jets[operands.sample_index, 0],
+                field.sampled_coefficient(operands.geometry),
+                jnp.broadcast_to(field.value(support.reading.axis), (cells, 1)),
+                jnp.broadcast_to(field.value(support.reading.boundary), (cells, 1)),
+            ),
+            axis=-1,
+        )
+
+    channels = jax.vmap(bank_channels)(jnp.arange(3 * cells))
+    response = jnp.einsum("cok,ick->coi", local, channels)
+    return jnp.eye(3 * cells, dtype=response.dtype) - jnp.transpose(
+        response, (1, 0, 2)
+    ).reshape(3 * cells, 3 * cells)
+
+
+def _equilibrate(matrix, moments, booked):
+    """Scale moment blocks physically, then balance row and column norms."""
+    scales = jnp.stack(
+        tuple(
+            jnp.maximum(jnp.maximum(jnp.max(jnp.abs(a)), jnp.max(jnp.abs(b))), 1e-12)
+            for a, b in zip(moments, booked[:3], strict=True)
+        )
+    )
+    column = jnp.repeat(scales, moments[0].size)
+    row = column
+    balanced = matrix * column[None, :] / row[:, None]
+    for _ in range(3):
+        row_norm = jnp.sqrt(jnp.max(jnp.abs(balanced), axis=1))
+        row_norm = jnp.maximum(row_norm, 1e-12)
+        balanced = balanced / row_norm[:, None]
+        row = row * row_norm
+        column_norm = jnp.sqrt(jnp.max(jnp.abs(balanced), axis=0))
+        column_norm = jnp.maximum(column_norm, 1e-12)
+        balanced = balanced / column_norm[None, :]
+        column = column / column_norm
+    return balanced, row, column
 
 
 def _krylov_condition_estimate(matvec, size: int, width: int = 8):
@@ -431,38 +533,36 @@ def newton_step(
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
-    Arnoldi estimates the matrix condition from eight Krylov directions. Its
-    estimate sets GMRES's relative tolerance so their product is at most
-    ``1e-8``; the returned residual and convergence flag expose any miss.
+    Local analytic booking sensitivities compose with the bank into a dense
+    matrix. Physical moment scales and diagonal equilibration precede LU.
     """
     residual = step_residual(operands, moments, moments, support, profile, quadrature)
-    sizes = tuple(value.size for value in moments)
-    boundaries = np.cumsum(sizes)[:-1]
+    cells = moments[0].size
+    boundaries = (cells, 2 * cells)
     right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
+    matrix = step_jacobian(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        quadrature,
+        residual.booked,
+    )
+    balanced, row, column = _equilibrate(matrix, moments, residual.booked)
+    from jax.scipy import linalg
 
-    def matvec(vector):
-        direction = tuple(jnp.split(vector, boundaries))
-        applied = step_jacobian_vector(
-            operands,
-            moments,
-            direction,
-            support,
-            profile,
-            density_gradient,
-            quadrature,
-            residual.booked,
-        )
-        return jnp.concatenate(tuple(jnp.ravel(value) for value in applied))
-
-    estimate = _krylov_condition_estimate(matvec, right.size)
-    tolerance = 1e-8 / estimate
-    solution, linear_residual = _krylov_solve(matvec, right, tolerance)
+    factor = linalg.lu_factor(balanced)
+    solution = column * linalg.lu_solve(factor, right / row)
+    linear_residual = jnp.linalg.norm(matrix @ solution - right) / jnp.linalg.norm(
+        right
+    )
     return NewtonStep(
         tuple(jnp.split(solution, boundaries)),
-        estimate,
-        tolerance,
+        jnp.linalg.cond(matrix),
+        jnp.linalg.cond(balanced),
         linear_residual,
-        linear_residual <= tolerance,
+        linear_residual <= 1e-8,
     )
 
 

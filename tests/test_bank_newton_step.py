@@ -262,3 +262,18 @@ def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
     difference = (high.residual[0] - low.residual[0]) / (2 * step)
     np.testing.assert_allclose(applied[0], difference, rtol=1e-10)
     np.testing.assert_allclose(applied[0], -27.0, rtol=1e-10)
+    matrix = support_read.step_jacobian(
+        operands, moments, support, None, None, SimpleNamespace(target_current=None)
+    )
+    np.testing.assert_allclose(
+        matrix @ jnp.concatenate(direction), jnp.concatenate(applied)
+    )
+
+
+def test_diagonal_equilibration_reduces_scale_disparity():
+    matrix = jnp.asarray([[1e-6, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1e6]])
+    moments = (jnp.asarray([1.0]), jnp.asarray([1.0]), jnp.asarray([1.0]))
+    booked = (*moments,)
+    balanced, row, column = support_read._equilibrate(matrix, moments, booked)
+    np.testing.assert_allclose(balanced, matrix * column[None, :] / row[:, None])
+    assert float(jnp.linalg.cond(balanced)) < float(jnp.linalg.cond(matrix))

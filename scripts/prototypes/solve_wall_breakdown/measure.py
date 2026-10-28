@@ -75,6 +75,23 @@ class CompileCounter(logging.Handler):
             self.lines.append(message)
 
 
+def describe(argument):
+    """Return a JSON-safe shape and dtype record for one program argument."""
+    record = []
+
+    def leaf(value):
+        if hasattr(value, "shape"):
+            record.append(
+                {"shape": list(np.shape(value)), "dtype": str(np.asarray(value).dtype)}
+            )
+        else:
+            record.append({"type": type(value).__name__})
+        return value
+
+    jax.tree_util.tree_map(leaf, argument)
+    return record
+
+
 def cold_stages(name, function, arguments, revision):
     """Time trace, lowering, XLA compile, first execute and warm wall."""
     jax.clear_caches()
@@ -113,8 +130,7 @@ def cold_stages(name, function, arguments, revision):
         "compilation_lines": counter.lines,
         "executable_bytes": generated_bytes(compiled),
         "jaxpr_equations": len(traced.jaxpr.eqns),
-        "argument_shapes": [list(np.shape(a)) for a in arguments],
-        "dtypes": [str(np.asarray(a).dtype) for a in arguments],
+        "argument_leafs": [describe(a) for a in arguments],
     }
 
 
@@ -260,15 +276,21 @@ def main():
         results["operand_load_seconds"] = None
         results["operand_load_cache"] = {"absent": "certificate content store has no carrier at this revision"}
 
+    def persist():
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(results, indent=2, default=str) + "\n")
+
     results["programs"].append(
         cold_stages("topology_read", read_function, (field, geometry), revision)
     )
     results["programs"].append(
         cold_stages("booking", book_function, (samples, reading, geometry), revision)
     )
+    persist()
     results["programs"].append(
         cold_stages("map", mapped, (reference, *operands), revision)
     )
+    persist()
 
     map_program = jax.jit(mapped).lower(reference, *operands).compile()
     read_program = jax.jit(read_function).lower(field, geometry).compile()

@@ -62,6 +62,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--cold-receipt", type=Path)
+    parser.add_argument("--trace-receipt", type=Path)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
 
@@ -80,6 +81,18 @@ def main():
     derived = {}
     if all(f"cold:{name}" in cold for name in ("topology_read", "booking", "map")):
         derived["three programs only"] = sum(cold[f"cold:{name}"] for name in ("topology_read", "booking", "map"))
+    if args.trace_receipt:
+        traces = json.loads(args.trace_receipt.read_text())
+        for label, record in traces.items():
+            repetitions = 20.0
+            derived[f"{label} device"] = record["device_us_total"] / repetitions / 1000
+            derived[f"{label} memcpy"] = record["memcpy_us_total"] / repetitions / 1000
+            tree = sum(value for name, value in record["top_kernels"] if "build_contour_tree" in name)
+            derived[f"{label} tree"] = tree / repetitions / 1000
+            ranks = [value for name, value in record["top_kernels"] if "build_contour_tree" in name]
+            if ranks:
+                derived[f"{label} largest tree rank"] = max(ranks) / repetitions / 1000
+            derived[f"{label} launch issue"] = record["kernels"] / repetitions * 0.0015
     if "batch1:map_ms" in values and "batch1:topology_read_ms" in values:
         derived["map less read"] = values["batch1:map_ms"] - values["batch1:topology_read_ms"]
     if "batch1:jacobian_block_ms" in values:

@@ -1,0 +1,92 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T09:46:28.184Z",
+  "dispatched_at": "2026-10-28T09:38:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:106",
+      "id": "reasoning-1",
+      "reason": "a node that builds \u00a71\u2013\u00a74 without a named entry point lands an unreachable module or a second route the request seam refuses, which is the prototype outcome the plan exists to leave behind.",
+      "text": "the plan specifies a bank (\u00a71), a read (\u00a72) and a step (\u00a73) and then says only that \u00a74 \"assembles \u00a71 to \u00a73 into one solve\"; no module, function or route value is named, so nothing connects the new step to production. The seam exists and is closed: `SolveRoute = Literal[\"host\",\"host_krylov\",\"picard\",\"anderson\",\"newton_krylov\",\"reduced_newton\"]` in `nova/equilibrium/solve_request.py:31`, and `converged-forward-solve-design` says the `ForwardSolveRequest \u2192 ForwardProfile.solve \u2192 ForwardSolveReceipt` adapter \"cannot choose a second numerical route\". The cited prototype this plan continues from ended in `scripts/prototypes/read_derivatives/`, i.e. a path no caller reaches.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:72",
+      "id": "done_when-1",
+      "reason": "the compile budget is measured on the wrong side of \u00a72\u2192\u00a73, so a \u00a73 fusion that blows the 60 s bound passes both nodes' gates, which is exactly the failure the plan is written to prevent.",
+      "text": "\u00a71's third clause gates \"the step program's cold compile \u2026 at most 60 s, and its executable \u2026 under 50 MB\", but the step program is the artifact \u00a73 defines (\"the map, booking and solve are fused into a small fixed number of kernels per step\", :95), and \u00a73's own done-when (:96\u2013:101) carries no compile or executable-size clause. Either \u00a71 measures a stub, in which case the gate is meaningless, or it measures an artifact that does not exist yet. The 60 s / 50 MB bounds themselves resolve \u2014 they are `converged-forward-solve`'s joint acceptance as quoted in `sub-millisecond-forward-design`.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:39",
+      "id": "anchors_resolve-1",
+      "reason": "the launch counts are the plan's quantitative baseline for \"the cost is launches\", and \u00a73's \u2264100 launches per step is sized against them; a node inheriting 76,000 has a target set by an unsourced figure.",
+      "text": "the \u00a70 table's \"What sets it\" column asserts \"about 76,000 kernel launches per call\" for the map (:39) and \"about 61,000\" for the standalone read (:40), directly under a sentence saying both measurements are recorded on `solve-wall-breakdown` and `read-derivative-prototype`. Neither string appears anywhere in the docs corpus except this plan (grep for `76,000|61,000` over `docs/*.html` returns only `docs/plans/sub-millisecond-forward-path.html`), and the record's own counting unit is different and an order of magnitude smaller: jaxpr equations 7,728 for the map and 5,150 for the topology read (`solve-wall-breakdown`). The 60,529 near-miss in the corpus is an HLO instruction count for the *point-jet derivative program* (`kernel-compile-barrier/compile-pass-profile`), a different program.",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:88",
+      "id": "reasoning-2",
+      "reason": "the 0.7 ms \u00a74 budgets is 0.2 (read) + 0.5 (step), and if the read's non-derivative cost is ~140 ms then the read's done-when has no stated mechanism and \u00a74's 1 ms figure is short by two orders of magnitude.",
+      "text": "\u00a72's done-when (2) requires the warm read to cost \"at most 0.2 ms per call\", while the cited prototype measures the read that consumes the jets at \"141 to 144 ms per call over 1743 nodes and 550 cells\" and states it \"stays a floor above the sub-millisecond target independently of how the jets are built\" (`read-derivative-prototype`). \u00a72's mechanism list (:79\u2013:82) names the derivative source, the Newton refinement, and skipping the contour-tree rebuild \u2014 none of which is claimed to remove ~140 ms of a stage the prototype isolates from jet construction.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:87",
+      "id": "done_when-2",
+      "reason": "a worker failing this clause cannot tell a solver defect from a harness that never exercises the saddle branch, and would report either a false pass (no X-point, no error) or an unattributable failure.",
+      "text": "\u00a72's done-when (1) requires \"the axis and X-point are within the locked budget of the analytic oracle\", but the cited prototype reports that no error for the X-point can be measured at these states: \"No row admits an X-point, including every oracle row, so no X-point error is reported: at these states the saddle branch was not exercised by the read as this harness calls it\" (`read-derivative-prototype`). The clause is therefore armed on a quantity the cited instrument has never produced, including against the oracle.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:109",
+      "id": "done_when-3",
+      "reason": "without a control, \u00a74's verdict \u2014 the plan's headline claim \u2014 rests entirely on numbers a suite could produce on a route that does not do what the plan says.",
+      "text": "\u00a74 declares three done-when clauses and no negative control, so its gate cannot show any guard fires; the other three sections each name a mechanism-mutating control (:74, :91, :102) and \u00a74 has none. Clause (2) is further weakened by its own phrasing \"Any row that misses is named with its error\", which is a reporting requirement that holds whether or not the solve meets the budget.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:84",
+      "id": "wiring-1",
+      "reason": "three of the four sections' primary measure resolves through a value the plan does not yet hold, and nothing machine-readable stops them being dispatched before it is chosen.",
+      "text": "\u00a72 says \"The precision budget is the open decision `precision-budget` below\" and its done-when (1) (:87), \u00a73's done-when (1) (:98) and \u00a74's done-when (2) (:110) all measure \"within the locked precision budget\", but the decision at :116 carries `data-choice=\"\"`. The lock is required only by followup prose at :131 (\"Lock the `precision-budget` decision before \u00a72 and \u00a73 are dispatched\"), and `plan-section-depends-on` records only s2\u2192s1, s3\u2192s1, s4\u2192[s2,s3] \u2014 so a dispatcher reading the declared relationships can dispatch \u00a72 as soon as \u00a71 lands, with the budget still unlocked.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5336c3ba6a3d67d2f72675fb0990c8dd35c23804",
+  "plan_fingerprint": "c114215adcba5ea50c8996a015180e5b7626ce88f79aa0848ffab09436dd224c",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261028T093712662401-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "038e58ba41f623570ed0f06f83b9c1cdf4fe52a3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the three hrefs, the `precision-budget` decision, sections s0\u2013s4 and `plan-after` all resolve (extensionless plan hrefs are the SPA fetch form), but the two kernel-launch counts in \u00a70's table are attributed to no record that contains them.",
+    "done_when": "a finding \u2014 \u00a71's done-when (3) gates the *step program*'s cold compile and executable size, an artifact \u00a73 restructures and never re-measures; \u00a74 declares no negative control at all.",
+    "evidence_paths": "pass \u2014 no gate writes to a scratchpad or node-local path; the H200 lane's receipts land in the run's own log directory and the durable record is a `docs/evidence/fragments/sub-millisecond-forward-path/` fragment by house convention.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any symbol, filename or comment; the section ids and the decision key are plan structure, not code names.",
+    "reasoning": "a finding \u2014 the plan names no production caller or module path anywhere, so the mechanism it specifies has no stated route into the solve seam; and \u00a72's mechanism names no lever that removes the read's own measured 141\u2013144 ms.",
+    "single_goal": "pass \u2014 \u00a71 is the operator bank, \u00a72 the read, \u00a73 the Newton step and \u00a74 the assembled batched solve; the three-clause done-whens are clauses of one deliverable each.",
+    "wiring": "a finding \u2014 \u00a72, \u00a73 and \u00a74 all measure against \"the locked precision budget\" while the `precision-budget` decision carries `data-choice=\"\"`, and the lock precondition is stated only in followup `f-smfp-001`'s body, not in any machine-readable relationship."
+  },
+  "section_digests": {
+    "_document": "a93b0540e0139d473cea92f9f29672a3fcb22cd942f0d91b44c16933c057960b",
+    "s0": "b4978a7485b71e2bec92365e95214739f221a092a4c47ca1acececab75f84149",
+    "s1": "72f355bd876da071226b1e9c0951e99e4859f3fb8dbb5f2160e5ed3ace7c7ff5",
+    "s2": "f08bcdcfbf8064b2b371ecf68b9aa4ce18e68eba879d720b4d1546a2ee531352",
+    "s3": "cf697355560a762e148f0c01ed5f02a891cca11876ceb90463b8cc628df1d1d8",
+    "s4": "7c8dd979feeb0ac2ceeb1a22e7817cf02090d665bb0123bc71deb132ed386142"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T14:07:42.117837+00:00"
+}

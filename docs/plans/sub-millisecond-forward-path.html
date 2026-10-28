@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
@@ -83,10 +83,10 @@
       <li>It refines the magnetic axis and the admitted X-point by a few Newton iterations from the previous step's positions.</li>
       <li>It rebuilds the connected-domain decision only when a tracked point leaves its cell, or the limited/diverted ownership changes, and it reports that rebuild.</li>
     </ul>
-    <p>The present read's 107.8 ms is spent rebuilding the connected-domain decision and contour tree on every call, across 61,330 launches: the tree's loop body alone takes 18.4 ms of device time per call, and its fragment and fusion kernels take the rest. Moving the derivative source to a stencil fit does not remove that cost, as read-derivative-prototype found (141–144 ms per call). What removes it is tracking: in the steady state this read refines two points from the previous step's positions and rebuilds nothing. The 0.2 ms bound below holds only for that steady state. A rebuild step is measured separately and is not held to it. Accuracy is judged against the locked decision <code>precision-budget</code>.</p>
+    <p>The present read's 107.8 ms is spent rebuilding the connected-domain decision and contour tree on every call, across 61,330 launches: the tree's loop body alone takes 18.4 ms of device time per call, and its fragment and fusion kernels take the rest. Moving the derivative source to a stencil fit does not remove that cost, as read-derivative-prototype found (141–144 ms per call). What removes it is tracking: in the steady state this read refines two points from the previous step's positions and rebuilds nothing. It evaluates the stencil fit only in the few cells that hold the tracked axis and X-point, never over every node; the prototype's 0.4 ms is the fit over all 1,743 nodes, which only a rebuild step pays. The 0.2 ms bound below holds only for that steady state. A rebuild step is measured separately and is not held to it. Accuracy is judged against the locked decision <code>precision-budget</code>.</p>
     <p>Done when:</p>
     <ol>
-      <li>At the limited and diverted 550-cell trial and converged states, the magnetic axis is within 5e-4 of the minor radius of the analytic oracle's axis, and the boundary flux is within 1e-4 of the flux span. The X-point error is measured at every state where the oracle admits one. The diverted converged state must admit one: if the oracle harness admits no X-point there, the harness is repaired in this section before the clause is judged.</li>
+      <li>At the limited and diverted 550-cell trial and converged states, the magnetic axis is within 5e-4 of the minor radius of the analytic oracle's axis, and the boundary flux is within 1e-4 of the flux span. The X-point is judged against the saddle of the analytic flux itself, located by a direct Newton solve on the analytic ψ of the certificate state and independent of any read code, at the diverted trial and converged states. Neither the present read nor its harness is the reference, so no instrument the section changes can decide its own clause.</li>
       <li>The warm steady-state read, with no rebuild, costs at most 0.2 ms per call on an H200 at the 550-cell diverted state, with kernel launches per call counted and tabled. A rebuild step's wall is tabled beside it.</li>
       <li>A field change that moves the X-point out of its cell triggers the rebuild, which is reported. A field change that does not move it triggers no rebuild.</li>
     </ol>
@@ -109,10 +109,10 @@
     <p>Done when:</p>
     <ol>
       <li>Warm, the converged solve costs at most 1 ms per slice on one H200 at batch width 16 or more on the 550-cell diverted certificate. The batch-1 wall and the per-stage split are recorded beside it.</li>
-      <li>The fast route is selectable as a <code>SolveRoute</code> value through <code>ForwardSolveRequest</code>. Over the limited and diverted certificate rows at about 550, 2,000 and 5,000 cells, both the fast route and the present route converge to a residual of at most 1e-10, and every fast-route state is within the locked precision budget of the analytic oracle. The section fails if any row misses.</li>
+      <li>The fast route is selectable as a <code>SolveRoute</code> value through <code>ForwardSolveRequest</code>. Over the limited and diverted certificate rows at about 550, 2,000 and 5,000 cells, the fast route converges to a residual of at most 1e-10 and every fast-route state is within the locked precision budget of the analytic oracle. The present route is held to no regression rather than convergence: each of its rows ends with the same convergence status and terminal residual (within 1e-12 relative) as at the base revision, since several of those rows stall on the present route today (certificate-550-convergence, certificate-diverted-stall). The section fails if any fast-route row misses or any present-route row changes.</li>
       <li>The record tables nova's per-iteration wall beside imas-efit's flux-update and whole-iteration walls at the nearest grid sizes, with the source of each figure.</li>
     </ol>
-    <p>Negative control: perturb one bank operator by 1e-3 relative in a scratch copy, and the precision check in clause (2) fails on the fast route while the present route still passes.</p>
+    <p>Negative control: perturb one bank operator by 1e-3 relative in a scratch copy, and the precision check in clause (2) fails on the fast route while the present route's rows stay unchanged.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -132,7 +132,7 @@
       <button class="r-opt chosen" data-value="both-viable">both-viable</button>
       <button class="r-opt" data-value="fast-replaces">fast-replaces</button>
       </p>
-    <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-28. The fast route becomes a new &lt;code&gt;SolveRoute&lt;/code&gt; value selected through &lt;code&gt;ForwardSolveRequest&lt;/code&gt;. The present route stays selectable, tested and passing its certificate rows, and §4 requires both routes to pass the same rows.&lt;/p&gt;</p>
+    <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-28. The fast route becomes a new &lt;code&gt;SolveRoute&lt;/code&gt; value selected through &lt;code&gt;ForwardSolveRequest&lt;/code&gt;. The present route stays selectable and tested. §4 holds it to no regression on the certificate rows (same convergence status and terminal residual as at base), not to a convergence it does not reach today.&lt;/p&gt;</p>
     </div>
 </section>
 

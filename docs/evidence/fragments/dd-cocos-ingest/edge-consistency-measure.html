@@ -7,7 +7,7 @@
 
 <p id="edge-consistency-measure-summary">The measure of section 5 is <code>nova/imas/edge_consistency.py</code>, which reports three forms on one structured grid: the parity chain's own <code>RMS(j_phi_profile - j_phi_grid) / max|j_phi_grid|</code> over the whole scored slice, and two band forms inside <code>1 - EDGE_BAND_WIDTH &lt;= psi_norm &lt;= 1</code> &mdash; the absolute residual in A/m<sup>2</sup> and the residual relative to the local profile current. The band forms never borrow the slice-wide denominator. <code>nova/imas/mast_parity_chain.py</code> reads its grid current through that same owner operator, so the parity chain and this measure are one arithmetic. The edge threshold is <code>EDGE_BAND_RELATIVE_THRESHOLD = 1.0e-3</code>, fixed on the analytic state before any IDS row was read.</p>
 
-<h3 id="edge-consistency-measure-gate">The gate, run at this node's base</h3>
+<h3 id="edge-consistency-measure-gate-rerun">The gate, run at this node's base</h3>
 <p id="edge-consistency-measure-gate-result">One fresh process, <code>tests/test_edge_consistency.py</code>: <strong>8 passed</strong>, exit 0, 22.6 s. The four load-bearing tests are the ones section 5's done-when names:</p>
 <ul id="edge-consistency-measure-gate-tests">
 <li>the analytic <code>CerfonFreidbergSingleNull</code> state sits under the fixed threshold, its only error the stencil's own;</li>
@@ -29,7 +29,7 @@
 <p id="edge-consistency-measure-decision">The decision this node records: <strong>CORSICA 130506/6 is not confirmed as the section 6 reference and should not be chosen on this measure</strong>; between the two DINA pulses edge consistency does not discriminate, so no source is confirmed on it and the choice must rest on grounds this measure does not cover. The ranking is provisional in one specific sense only: it is measured through the current flux-function sense, and the leader&rsquo;s ruling to make the owner COCOS 17 is not landed at this base. When it lands, the table re-measures against the same fixed threshold and the DINA-versus-CORSICA gap above is the number to watch.</p>
 
 <h3 id="edge-consistency-measure-not-done">What this node did not do</h3>
-<p id="edge-consistency-measure-scope">The measure itself, its threshold and its IDS route were landed by the earlier node of this scope and are unchanged here: this node verifies them, re-reads one row, and settles the reference question the section&rsquo;s third done-when clause asks for. The parity chain&rsquo;s residual is not restructured; it already reads its grid current through the one owner operator.</p>
+<p id="edge-consistency-measure-scope-note">The measure itself, its threshold and its IDS route were landed by the earlier node of this scope and are unchanged here: this node verifies them, re-reads one row, and settles the reference question the section&rsquo;s third done-when clause asks for. The parity chain&rsquo;s residual is not restructured; it already reads its grid current through the one owner operator.</p>
 </main>
 </body>
 </html>

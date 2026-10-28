@@ -1,0 +1,111 @@
+<section id="tracked-read">
+  <h2>tracked-read — a read that tracks its stationary points</h2>
+  <p><code>support_read.read</code> now returns each tracked point's hex cell, the
+  limited/diverted ownership and a rebuild counter, and rebuilds the
+  connected-domain decision only when one of the first two changes. The two
+  whole-mesh costs §2 names are paid by a rebuild step alone: the own-node fit
+  over every node (<code>fixed_points.sampled_coefficient</code>, called from
+  <code>topology.read_at_stationary_points</code>) and the whole-mesh Bell
+  rebuild (<code>fixed_points.field_from_jets</code>). A steady-state step
+  reuses the previous <code>TopologyRead</code>.</p>
+
+  <p>The refinement itself is unchanged and already cell-local: the warm-started
+  stationary-point Newton in <code>fixed_points.solve</code> differentiates
+  <code>fixed_points._CachedField</code>, which contracts only the selected
+  triangle's rows and builds the Bell coefficients for that one triangle. That
+  is the cell-local fit §2 asks for, read from the coupling operand; no jets are
+  averaged across cells. The lead's reuse map names
+  <code>stencil_nulls._quadratic_fit_matrices</code> for this fit and the
+  implementation reuses the existing one instead — recorded under
+  <code>outside_scope</code> in the manifest for the coordinator to rule on.</p>
+
+  <h3 id="tracked-read-gate">The gate</h3>
+  <p><code>tests/test_tracked_read.py</code> (4 passed, 112.57 s at head):</p>
+  <ul>
+    <li id="tracked-read-gate-first">the first read rebuilds once and the steady
+    state rebuilds nothing, carrying the same cells and passing the validity
+    check;</li>
+    <li id="tracked-read-gate-stays">a field change that leaves the X-point in
+    its cell (a uniform linear term moving it ≲ 0.1 pitch) reports
+    <code>rebuilt=False</code> and leaves the rebuild counter unchanged;</li>
+    <li id="tracked-read-gate-leaves">a field change that moves the X-point out
+    of its cell (cell 15 → 23, both stationary points converged, read valid)
+    reports <code>rebuilt=True</code> and increments the counter by exactly
+    one;</li>
+    <li id="tracked-read-gate-accuracy">both stationary points land on the
+    analytic reference within the locked precision budget
+    (5e-4 of the minor radius).</li>
+  </ul>
+
+  <h3 id="tracked-read-negative-control">Negative control</h3>
+  <p>Averaging the cell-local fit across each cell's nodes in a scratch copy
+  puts the axis 0.3049 m from the analytic extremum against a 7.49e-4 m budget.
+  The accuracy test fails there (<code>EXIT=1</code>) and passes at head, so the
+  gate discriminates: it is the cell-local fit, not the averaging, that carries
+  the accuracy.</p>
+
+  <h3 id="tracked-read-stage">The read's warm wall, launches and copies</h3>
+  <p>One job at the 550-cell diverted state on a titan P100, the operator bank
+  built once and reloaded through the content store (1,741 nodes, 162.3 MB,
+  digest <code>sha256:2cd7f88e…</code>). Every row is the minimum of five warm
+  repeats of a compiled step, so no compile is inside the timed region:</p>
+  <table>
+    <tr><th>call</th><th>warm wall</th><th>kernel launches</th>
+      <th>HLO instructions</th><th>host–device copy bytes</th></tr>
+    <tr><td>steady (tracked, no rebuild)</td><td>1.531 ms</td><td>805</td>
+      <td>24,178</td><td>0, result device-resident</td></tr>
+    <tr><td>rebuild step</td><td>1.649 ms</td><td>805</td><td>24,025</td>
+      <td>0</td></tr>
+  </table>
+  <p>Two readings follow. The steady state reports <code>rebuilt=false</code>
+  and reuses the previous connected-domain decision, so the own-node fit and
+  the whole-mesh Bell rebuild are absent from it. What they cost when they do
+  run is the difference: 0.118 ms per rebuild, about seven per cent of the call.
+  The rest of the read is the warm-started stationary solve and the membership
+  work, which no tracking can remove. These are P100 numbers; the section's
+  0.2 ms bound is stated for an H200 and is not claimed here.</p>
+
+  <h3 id="tracked-read-accuracy">Accuracy at the four certificate states</h3>
+  <p>Each state's booked moments are applied to the bank, and the read's
+  stationary points and boundary flux are compared with a direct Newton solve
+  on the analytic ψ, which shares no code with any read. Budgets are those the
+  section locks: the axis and the X-point within <code>5e-4</code> of the minor
+  radius, the boundary flux within <code>1e-4</code> of the flux span.</p>
+  <table>
+    <tr><th>state</th><th>axis error [m]</th><th>X-point error [m]</th>
+      <th>boundary flux error</th><th>valid / qualified</th></tr>
+    <tr><td>limited, converged</td><td>5.10e-4 (budget 2.00e-3)</td><td>—</td>
+      <td>7.18e-5</td><td>true / true</td></tr>
+    <tr><td>limited, trial</td><td>2.22e-3 (budget 2.00e-3)</td><td>—</td>
+      <td>4.53e-5</td><td>true / true</td></tr>
+    <tr><td>diverted, converged</td><td>4.32e-6 (budget 6.81e-4)</td>
+      <td>5.53e-6</td><td>1.49e-5</td><td>true / true</td></tr>
+    <tr><td>diverted, trial</td><td>1.88e-4 (budget 6.81e-4)</td>
+      <td>9.17e-4</td><td>2.21e-3</td><td>true / true</td></tr>
+  </table>
+  <p>Two of the four states are inside every budget. The two trial states miss
+  one each: the limited trial axis by 11 per cent of its budget and the diverted
+  trial X-point and boundary flux by more. Both trial states book their moments
+  from a sampled-field read rather than the analytic one, so their errors carry
+  that booking's own flux error as well as the read's; separating the two needs
+  a trial booking that no read produces, which this node did not build. The
+  figures are therefore recorded as measured, not as a verdict on the read.</p>
+
+  <h3 id="tracked-read-gate-repair">The limited trial gate</h3>
+  <p>The section records that the present gate reports every read at the limited
+  trial state invalid. It does not reproduce here: at that state the read
+  returns <code>valid=true</code>, <code>qualified=true</code> and
+  <code>status=[0]</code>, and its axis lands 2.22e-3 m from the analytic
+  extremum. No gate refused, so nothing inside <code>support_read</code> was
+  changed; a repair would have been a change made against a premise this
+  measurement contradicts.</p>
+
+  <h3 id="tracked-read-open">Not measured here</h3>
+  <p>The base arm's warm wall. Its child process was refused the device with
+  <code>CUDA_ERROR_OUT_OF_MEMORY</code> while instantiating a command buffer, at
+  33 live graphs, because the parent process still held the GPU; the arm needs
+  its own job, or a child started with
+  <code>XLA_PYTHON_CLIENT_PREALLOCATE=false</code>. No H200 number exists: the
+  reservation held the node for seventeen minutes without admitting the first
+  submission. No figure is published for this node.</p>
+</section>

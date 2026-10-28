@@ -119,12 +119,51 @@ class SupportOperands:
         )
 
 
+class TrackingState(NamedTuple):
+    """The previous step's tracked cells, ownership and connected decision.
+
+    ``cells`` holds the hex cell of each tracked point, ``-1`` where the point
+    is not live. ``saddle_live`` records whether an admitted saddle gave the
+    state diverted ownership. ``reading`` is the connected-domain decision of
+    that step, reused as long as neither changes.
+    """
+
+    cells: jax.Array
+    saddle_live: jax.Array
+    reading: topology.TopologyRead
+    rebuilds: jax.Array
+    valid: jax.Array
+
+
 class SupportRead(NamedTuple):
-    """The read, its stationary points and one overall verdict."""
+    """The read, its stationary points and one overall verdict.
+
+    ``cells``, ``saddle_live`` and ``rebuilds`` carry the tracking state
+    forward; ``rebuilt`` says whether this call rebuilt the connected-domain
+    decision. ``jets`` is the contour-free derivative source the cell-local
+    fit was evaluated from, so a caller needs no second whole-mesh pass.
+    """
 
     stationary: fixed_points.FixedPointResult
     reading: topology.TopologyRead
     valid: jax.Array
+    cells: jax.Array
+    saddle_live: jax.Array
+    rebuilds: jax.Array
+    rebuilt: jax.Array
+
+
+def stationary_cells(operands: SupportOperands, position, live) -> jax.Array:
+    """Index the hex cell that holds each tracked point, ``-1`` when not live.
+
+    The cell is the one whose generator is nearest, which is the same
+    selection ``fixed_points._CachedField`` evaluates the cell-local Bell fit
+    in, so a reused decision and a rebuilt one agree on where the point sits.
+    """
+    distance = jnp.sum(
+        (operands.mesh.generators[None, :, :] - position[:, None, :]) ** 2, axis=-1
+    )
+    return jnp.where(live, jnp.argmin(distance, axis=-1), -1)
 
 
 def nodal_jets(operands: SupportOperands, moments) -> jax.Array:
@@ -145,6 +184,7 @@ def read(
     *,
     iterations: int = 12,
     jets=None,
+    tracking: TrackingState | None = None,
 ) -> SupportRead:
     """Solve the stationary points, then read membership at them.
 
@@ -152,6 +192,14 @@ def read(
     ``cache`` is the bounded row window kept by ``fixed_points.maintain_rows``.
     A row-window miss, a wrong root or an unconverged point makes the whole
     read invalid; the typed per-point status stays on ``stationary``.
+
+    The stationary points are refined by ``fixed_points.solve`` on the
+    cell-local Bell fit of whichever cells they occupy, warm-started from
+    ``previous``. The connected-domain decision is rebuilt only when a tracked
+    point changes cell or the limited/diverted ownership changes; otherwise the
+    previous decision is carried forward, so the own-node fit over every node
+    (``sampled_coefficient``) and the whole-mesh Bell rebuild
+    (``field_from_jets``) are paid by a rebuild step only.
     """
     pitch = jnp.median(operands.geometry.pitch)
     solved = fixed_points.solve(
@@ -163,13 +211,45 @@ def read(
         axis_sign,
         iterations=iterations,
     )
-    jets = nodal_jets(operands, moments) if jets is None else jets
-    field = fixed_points.field_from_jets(jets, operands.sample_index, operands.mesh)
-    reading = topology.read_at_stationary_points(
-        field, operands.geometry, convention, policy, solved
-    )
+    eigenvalues = jnp.linalg.eigvalsh(convention.sigma * solved.jet.hessian)
+    inside = jax.vmap(
+        lambda point: jnp.any(topology._inside_cells(operands.geometry, point))
+    )(solved.position)
+    live = solved.valid & inside
+    cells = stationary_cells(operands, solved.position, live)
+    saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
+    saddle_live = jnp.any(saddles)
+
+    def rebuild(_):
+        field_jets = nodal_jets(operands, moments) if jets is None else jets
+        field = fixed_points.field_from_jets(
+            field_jets, operands.sample_index, operands.mesh
+        )
+        return topology.read_at_stationary_points(
+            field, operands.geometry, convention, policy, solved
+        )
+
+    if tracking is None:
+        rebuilt = jnp.asarray(True)
+        reading = rebuild(None)
+        rebuilds = jnp.asarray(1, jnp.int32)
+    else:
+        rebuilt = (
+            jnp.any(cells != tracking.cells)
+            | (saddle_live != tracking.saddle_live)
+            | ~tracking.valid
+        )
+        reading = jax.lax.cond(
+            rebuilt,
+            rebuild,
+            lambda _: tracking.reading,
+            None,
+        )
+        rebuilds = tracking.rebuilds + rebuilt.astype(jnp.int32)
     valid = jnp.all(solved.valid) & reading.valid & reading.qualified
-    return SupportRead(solved, reading, valid)
+    return SupportRead(
+        solved, reading, valid, cells, saddle_live, rebuilds, rebuilt
+    )
 
 
 def book(operands, support: SupportRead, psi, profile, quadrature):
@@ -199,11 +279,14 @@ def read_and_book(
     *,
     psi=None,
     iterations: int = 12,
+    tracking: TrackingState | None = None,
 ):
     """One step: one contraction, one read, one booking.
 
     ``psi`` is the physical flux at ``geometry.sample_points``; when omitted it
-    is the flux the booked moments themselves generate at those points.
+    is the flux the booked moments themselves generate at those points. That
+    contraction is over every node, which booking needs, so it is not part of
+    what tracking saves; the read's own whole-mesh fit and Bell rebuild are.
     """
     jets = nodal_jets(operands, moments)
     if psi is None:
@@ -219,8 +302,20 @@ def read_and_book(
         axis_sign,
         iterations=iterations,
         jets=jets,
+        tracking=tracking,
     )
     return support, book(operands, support, psi, profile, quadrature)
+
+
+def tracking_of(support: SupportRead) -> TrackingState:
+    """Carry one step's tracked cells, ownership and decision to the next."""
+    return TrackingState(
+        support.cells,
+        support.saddle_live,
+        support.reading,
+        support.rebuilds,
+        support.valid,
+    )
 
 
 def bank_program(operands: SupportOperands, moments) -> jax.Array:

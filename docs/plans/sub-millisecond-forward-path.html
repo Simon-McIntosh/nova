@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
@@ -55,18 +55,19 @@
       <li>batched slices.</li>
     </ul>
     <p>The analytic kernels stay as the reference oracle that every section is judged against. <strong>Both paths stay viable</strong> (decision <code>both-routes-viable</code>). The fast path is added as a new <code>SolveRoute</code> value in <code>nova/equilibrium/solve_request.py</code>. It is reached through the existing <code>ForwardSolveRequest</code> → <code>ForwardProfile.solve</code> → <code>ForwardSolveReceipt</code> seam, which today cannot choose a second numerical route; §4 opens it to one. The present route stays selectable, tested, and passing its own certificate rows. Nothing in this plan removes it.</p>
+    <p><strong>The owners this plan extends.</strong> nova already has one deep module with the contract this plan wants, and it is not yet wired into the route measured above. <code>nova/equilibrium/support_read.py</code> does one read and one booking per step: <code>read</code> (:78) solves the axis and X-points warm-started in the bounded row window, <code>read_and_book</code> (:130) does the whole step's support work, and <code>SupportOperands</code> (:27, assembled by <code>from_rows</code> at :44 from <code>topology.BiotMomentCoupling</code> and an <code>ExteriorField</code>) holds the jet rows and the exterior. The row window is <code>fixed_points.RowCache</code>, maintained by <code>maintain_rows</code> (fixed_points.py:413), with the warm-started stationary-point Newton in <code>fixed_points.solve</code> (:646). The cell-local quadratic fit already exists as <code>stencil_nulls._quadratic_fit_matrices</code> (:412) and <code>_fit_selected_cells</code> (:378). The compile key is <code>forward._request_compilation_cache_key</code> (forward.py:2731), which feeds <code>_configure_solve_compilation_cache</code>. Each section below extends these owners. None introduces a second operand container, read, fit or cache.</p>
     <p><strong>Not in this plan.</strong> converged-forward-solve keeps the certificate route and the analytic map. This plan's work does not depend on that route's open repairs. The moment-field Hessian repair and kernel-compile-barrier §2 are paused, and they resume only if this plan needs them as the oracle.</p>
 
     <h2 id="s1">§1 — A per-machine operator bank at fixed shape, compiled once</h2>
     <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links=""></section>
-    <p>The bank holds every operator the step applies, precomputed from the analytic kernels once per machine and mesh and stored as dense device arrays:</p>
+    <p>The bank is <code>support_read.SupportOperands</code> extended, not a new container. It holds every operator the step applies, precomputed from the analytic kernels once per machine and mesh and stored as dense device arrays, with the row window kept by <code>fixed_points.RowCache</code>:</p>
     <ul>
       <li>coil and passive response to the grid;</li>
       <li>plasma-cell response to the grid;</li>
       <li>the boundary and wall operators;</li>
       <li>the cached coupling operand the read samples.</li>
     </ul>
-    <p>The mesh is padded to a small set of shape buckets, so a machine maps to one bucket and two geometries in one bucket share one program. The step program takes every operator as a traced argument and captures no constants, so a geometry change inside a bucket never recompiles. The bank is built through the existing content store. It adds no second store.</p>
+    <p>The mesh is padded to a small set of shape buckets, so a machine maps to one bucket and two geometries in one bucket share one program. The step program takes every operator as a traced argument and captures no constants, so a geometry change inside a bucket never recompiles. The bucket enters the existing compile key, <code>forward._request_compilation_cache_key</code>, rather than a second cache. The bank is built through the existing content store. It adds no second store.</p>
     <p>Done when:</p>
     <ol>
       <li>The bank for the diverted 550-cell certificate builds once, and loads in at most 1 s on an H200. Its operators reproduce the analytic map at the certificate's analytic state within 1e-10 relative.</li>
@@ -77,7 +78,7 @@
 
     <h2 id="s2">§2 — A read that tracks its stationary points, once per step</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s1"></section>
-    <p>The present step reads twice: once inside the map and once standalone. Each read rebuilds the contour tree. This read runs once per step:</p>
+    <p>The present step reads twice: once inside the map and once standalone. Each read rebuilds the contour tree. This section makes <code>support_read.read</code> the step's only read and makes it fast. It is wired into the fast route in place of both present reads, using <code>fixed_points.solve</code> for the warm-started stationary points and <code>stencil_nulls._quadratic_fit_matrices</code> for the cell-local fit:</p>
     <ul>
       <li>It takes nodal flux derivatives from a cell-local quadratic fit over each hex cell's stencil, read from the §1 coupling operand. Each cell evaluates only its own fit, so no jets are averaged across cells.</li>
       <li>It refines the magnetic axis and the admitted X-point by a few Newton iterations from the previous step's positions.</li>
@@ -94,7 +95,7 @@
 
     <h2 id="s3">§3 — A Newton step with no per-step autodiff</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s1"></section>
-    <p>The step forms its Jacobian from the §1 operators and closed-form booking derivatives. It does not trace a JVP per column, and it applies the Jacobian either as one dense block or matrix-free inside a Krylov solve, whichever the measurement favours. The map, booking and solve are fused into a small fixed number of kernels per step. The 735.7 ms Jacobian block and the 166.2 ms map are what this section removes.</p>
+    <p>The step is built around <code>support_read.read_and_book</code> and the §1 bank. It forms its Jacobian from the §1 operators and closed-form booking derivatives. It does not trace a JVP per column, and it applies the Jacobian either as one dense block or matrix-free inside a Krylov solve, whichever the measurement favours. The map, booking and solve are fused into a small fixed number of kernels per step. The 735.7 ms Jacobian block and the 166.2 ms map are what this section removes.</p>
     <p>Done when:</p>
     <ol>
       <li>On the diverted 550-cell certificate, the step converges to a solved-equation residual of at most 1e-10 in no more Newton steps than the present route takes from the same seed. Its converged state matches the present route's within the locked precision budget.</li>
@@ -105,7 +106,7 @@
 
     <h2 id="s4">§4 — A converged solve under 1 ms, batched, against the oracle</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s2,sub-millisecond-forward-path#s3"></section>
-    <p>This section assembles §1 to §3 into one solve. It is warm-started from the previous slice, steps until converged, and is batched over slices on one device. Its result is judged against the analytic oracle on the certificate rows.</p>
+    <p>This section assembles §1 to §3 into one solve. It is warm-started from the previous slice, steps until converged, and is batched over slices on one device. Its result is judged against the analytic oracle on the certificate rows. It enters through the existing route-dispatched seam (<code>forward.py</code>, the <code>_ACCELERATED</code> and <code>_REDUCED</code> route sets) as a seventh <code>SolveRoute</code> value. Nothing is retired by this plan, because decision <code>both-routes-viable</code> keeps the present route. The present route would be retired once the fast route passes every certificate row the present route passes and the lead decides it, which is outside this plan.</p>
     <p>Done when:</p>
     <ol>
       <li>Warm, the converged solve costs at most 1 ms per slice on one H200 at batch width 16 or more on the 550-cell diverted certificate. The batch-1 wall and the per-stage split are recorded beside it.</li>

@@ -40,7 +40,24 @@
   "plan_slug": "ensemble-forward-seam",
   "plan_version": 12,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-3",
+      "reason": "the batch genuinely needs a per-member refusal carrier that names the member identity, so wrapping the owner's typed errors is a reasonable extension.",
+      "when": "2026-10-28T05:06:34.177338+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-3": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the batch genuinely needs a per-member refusal carrier that names the member identity, so wrapping the owner's typed errors is a reasonable extension.",
+      "when": "2026-10-28T05:06:34.177338+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/ensemble-forward-seam/r-20261005T153133417186-plan-review-of-ensemble-forward-seam.json",
   "review_run_id": "r-20261005T153133417186-plan-review-of-ensemble-forward-seam",
   "reviewed_blob_sha": "52782816a8e285c77055e33dafb6f0909641d1f5",
   "rubric": "design",

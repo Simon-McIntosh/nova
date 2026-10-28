@@ -44,6 +44,58 @@ def fragment_values(text):
     )]
 
 
+def fragment_seconds(text):
+    """Return the numbers the fragment states in seconds, in order."""
+    return [(float(match.group(1).replace(",", "")), match.group(0)) for match in re.finditer(
+        r"(?<!m)\b([0-9][0-9,]*(?:\.[0-9]+)?)\s?s\b", text
+    )]
+
+
+def cold_seconds(receipt):
+    """Every second-valued stage the cold receipt records, and their sums.
+
+    The cold table's own rows and the summary sentence must both come from
+    these, so a decomposition that does not add up cannot be stated.
+    """
+    stages = ("trace_seconds", "lower_seconds", "xla_compile_seconds", "first_execute_seconds")
+    values = {}
+    for program in receipt.get("programs", []):
+        for stage in stages:
+            if stage in program:
+                values[f"{program['program']}.{stage}"] = float(program[stage])
+    for stage in stages:
+        rows = [value for name, value in values.items() if name.endswith("." + stage)]
+        if rows:
+            values[f"sum {stage}"] = sum(rows)
+    totals = [values[name] for name in values if name.startswith("sum ")]
+    if totals:
+        values["sum every stage"] = sum(totals)
+    for name in ("carrier_load_seconds", "operand_load_seconds"):
+        if name in receipt:
+            values[name] = float(receipt[name])
+    jets = receipt.get("jets") or {}
+    for name in ("load_seconds", "stored_build_seconds"):
+        if jets.get(name):
+            values[f"jets {name}"] = float(jets[name])
+    return values
+
+
+def containment_claims(text):
+    """Sentences asserting the map contains the read stage, which the code contradicts.
+
+    map_moments calls kernel.read over roots it solves itself, while the step's
+    read stage runs nova.equilibrium.topology.read; they are different programs
+    over different inputs, so the map's wall cannot contain the read's.
+    """
+    patterns = [
+        r"map contains this read",
+        r"carries the read inside it",
+        r"contains the read",
+        r"the read inside the map",
+    ]
+    return [pattern for pattern in patterns if re.search(pattern, text)]
+
+
 def precision_tolerance(raw):
     """Half a unit in the last place the fragment states.
 
@@ -130,6 +182,24 @@ def main():
         if name in matched or not name.startswith("batch1:") or name.endswith("_p95_ms"):
             continue
         problems.append((f"{name} = {expected:.1f} ms is stated nowhere", []))
+
+    seconds = {}
+    if args.cold_receipt:
+        seconds = cold_seconds(json.loads(args.cold_receipt.read_text()))
+    for value, raw in fragment_seconds(text):
+        tolerance = precision_tolerance(raw)
+        if any(abs(value - expected) <= tolerance for expected in seconds.values()):
+            continue
+        problems.append((raw, sorted(round(v, 3) for v in seconds.values())))
+
+    for pattern in containment_claims(text):
+        problems.append(
+            (
+                f"fragment asserts containment ({pattern}), contradicted by map_moments "
+                "calling kernel.read rather than the measured topology.read",
+                [],
+            )
+        )
 
     if problems:
         print("UNIT CHECK FAILED", file=sys.stderr)

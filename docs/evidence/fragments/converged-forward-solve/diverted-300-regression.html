@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="diverted-300-regression">
+<meta name="plan-title" content="The diverted 300-cell row does not converge, and never did on main"></meta>
+<meta name="plan-summary" content="The row reads 5.626976272072871e-15 in the banked part receipt because the certificate driver returns a persisted part without entering the solver; a fresh process at the revision said to converge and a fresh process at base declare the same 37174.65 A target current and give the same carrier"></meta>
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<title>The diverted 300-cell row does not converge, and never did on main</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="diverted-300-regression" id="diverted-300-regression">
+
+<h2 id="diverted-300-regression-result">There is no convergence regression to repair</h2>
+
+<p>The node was dispatched to find the change that stopped the diverted
+300-cell row converging, on the reading that the row reached
+<code>5.626976272072871e-15</code> in two trips at <code>e39ffd109</code> and
+<code>0.0749196925647991</code> in twelve trips at <code>d3dcd9ce3</code> and
+since. Measured in fresh processes, the row does not converge at either
+revision, and the two revisions build the same carrier. The converged reading
+is a banked part receipt written on 2026-09-19, which the certificate driver
+returns without entering the solver.</p>
+
+<h3 id="diverted-300-regression-receipt">The receipt the driver serves is September data</h3>
+
+<p><code>benchmarks/solovev_certificate.py</code> keeps one part receipt per
+<code>(case, requested_cells)</code> under
+<code>docs/figures/gs-absolute-accuracy/solovev/production-route-parts/</code>.
+<code>_measure</code> opens that file first and, when it carries
+<code>render_data</code>, calls <code>_render_persisted_row</code> — whose own
+docstring reads &ldquo;Rebuild one panel from its part receipt without entering
+the solver&rdquo; — then returns the persisted row. Every solver field in the
+answer, including <code>terminal_fixed_point_residual</code>,
+<code>converged</code>, <code>active_set_iterations</code> and
+<code>target_current_a</code>, therefore comes from the file rather than from
+the tree.</p>
+
+<p>That file was last written at <code>edb02142f</code> on 2026-09-19, under
+job <code>1268058</code> on <code>98dci4-gpu-0003</code>. It records
+<code>target_current_a</code> <code>61834.308668218204</code>, terminal residual
+<code>5.626976272072871e-15</code>, <code>converged</code> true,
+<code>residual_only_qualification</code> qualified — and overall
+<code>qualification</code> unqualified, on
+<code>topology_read_does_not_admit_required_stationary_points</code>, because
+its <code>exact_topology</code> reads class <code>limited</code> with
+<code>x_candidate_count</code> 0 on a diverted state.</p>
+
+<h3 id="diverted-300-regression-arms">Three arms, one carrier</h3>
+
+<p>Each arm ran in a fresh process from its own extracted tree, printing the
+module file it imported. The carrier probe builds the machine, the analytic
+fixture and the declared current and stops before the Newton loop, so it
+measures the inputs the solver would receive rather than a compile.</p>
+
+<table>
+<thead>
+<tr><th>Tree</th><th>Hex cells</th><th>Sample coordinates</th><th>Cells with a repeated vertex</th><th>Target current [A]</th><th>Current centroid [m]</th></tr>
+</thead>
+<tbody>
+<tr><td><code>e39ffd109</code></td><td>340</td><td>1075</td><td>0</td><td>37174.65342635735</td><td>(1.7129433406610075, 0.034376124089401355)</td></tr>
+<tr><td><code>3efe36b3a</code> (parent of <code>50837db4d</code>)</td><td>340</td><td>1075</td><td>0</td><td>37174.65342635682</td><td>(1.7129433406610106, 0.034376124089404485)</td></tr>
+<tr><td><code>6ccf43de9</code> (base)</td><td>340</td><td>1075</td><td>0</td><td>37174.65342635682</td><td>(1.7129433406610106, 0.034376124089404485)</td></tr>
+<tr><td>banked part receipt</td><td>340</td><td>1075</td><td>&mdash;</td><td>61834.308668218204</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+
+<p>The merge <code>50837db4d</code> carries no change to
+<code>nova/</code>, <code>tests/</code>, <code>benchmarks/</code> or
+<code>scripts/</code> against its first parent
+<code>3efe36b3a</code> (<code>git diff --stat 3efe36b3a 50837db4d</code> over
+those four subtrees is empty), so its tree is the parent's for every module
+this row imports; the arm is labelled with the parent it is identical to.</p>
+
+<p>The declared current agrees across all three trees to twelve significant
+figures, and differs from the banked receipt by 24659.65 A. A row whose declared
+current is 37174.65 A cannot produce a receipt stamped 61834.31 A, so the
+5.63e-15 residual was not measured on any of these three trees.</p>
+
+<h3 id="diverted-300-regression-guard">The guard, and it firing</h3>
+
+<p><code>tests/test_diverted_300_convergence.py</code> compares the current the
+builder declares against the current the banked receipt records, and fails when
+they disagree. At base it fails in 17 s:</p>
+
+<pre><code>E  AssertionError: the banked part receipt declares a target current computed
+   from another carrier: recorded 61834.308668218204 A against
+   37174.65342635682 A on this tree
+1 failed in 17.02s
+EXIT=1</code></pre>
+
+<p>A second test in the same file, <code>slow</code> marked, runs the row and
+asserts the terminal residual is inside the qualification bound. It was not run
+inside this node's window: the row needs a full XLA compile and a twelve-trip
+Newton solve, and the CPU allocation did not reach a terminal receipt before the
+node's time was spent.</p>
+
+<h3 id="diverted-300-regression-owner">Where the repair belongs</h3>
+
+<p>Whatever stops the row converging is not a regression introduced after
+<code>e39ffd109</code>: the carrier and the declared current are unchanged
+across the window. The reachable defect on this row is the receipt reuse above,
+whose owner is <code>benchmarks/solovev_certificate.py</code>. That file is
+outside this node's write paths, and the row's solver behaviour belongs to the
+cut-cell and topology read the tracked-read and moment-field-hessian nodes
+carry, so it is reported rather than edited.</p>
+
+<p>The residual plateau the reproduced rows do show is a frozen-partition
+Newton stopping with zero mask changes, which is a region decision, not a
+residual arithmetic. A fresh CPU row at <code>e0e4bca0</code> stops after one
+trip at <code>2.2640848763056183</code> with its only linear action refused as
+<code>nonfinite_linear_action</code>, and the fresh H200 row recorded in
+<code>certificate-300-trip-cap</code> reads
+<code>0.07489864728918744</code> after twelve trips. Both are unqualified at
+<code>1e-12</code>.</p>
+
+</article>
+</main>
+</body>
+</html>

@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T18:20:20.888Z",
+  "dispatched_at": "2026-10-28T18:12:57Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward.py",
+      "id": "f5a5a6796b1",
+      "line": 2766,
+      "severity": "blocking",
+      "text": "getattr(self.operator, \"support_bank_bucket\", None) reads an attribute that no code in the repository sets (git grep for support_bank_bucket over nova/, tests/ and scripts/ returns this line only), so the compile key always receives None and the shape bucket never distinguishes two programs. Section 1 requires the bucket to enter this existing key rather than a second cache, and docs/evidence/fragments/sub-millisecond-forward-path/operator-bank.html:21 states that it does. As landed the claim is untrue: when the bank is wired into a solve route, two meshes padding to different buckets would share one cache key and could reuse a program compiled for the other bucket's operand shapes.",
+      "title": "the bucket key component resolves to None for every request"
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f9e51e2348b",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "from pathlib import Path is imported and never referenced anywhere in the module; ruff reports F401 on this line, so the file does not pass the repository's own lint.",
+      "title": "unused import of pathlib.Path"
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "fb2eebe7180",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "BANK_MANIFEST_NAME = \"bank.json\" is defined and never used; write_bank publishes a payload named bank.npz with an inline json.dumps manifest, so the constant both misnames the artifact and is dead.",
+      "title": "BANK_MANIFEST_NAME names a file that is never written"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T144924463262-operator-bank/manifest.md",
+      "id": "f9092457fc5",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "The after_suite record sets completed: true, but slugs/suite-rerun-slurm.out and both arms' exit.txt show tests/test_forward_compile_identity.py killed at exit 137 by the step cgroup OOM in BOTH arms. That is the file most directly concerned with compile identity for this change, and it produced no result in either arm, so the flag overstates the evidence the arms carry.",
+      "title": "after_suite records completed true for an arm that lost one file"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T144924463262-operator-bank/manifest.md",
+      "id": "faf7079d274",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "rubric.suite reads \"missing - both suite arms were cut short at 32 of 69 files\", while the checkpoint at line 10 and both suite records state 69/69 files with ARM_STATUS base=0 head=0. The stale line leaves the suite dimension reading as unanswered when it was answered.",
+      "title": "rubric.suite line contradicts the checkpoint and the suite records"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 330abce22 to 32abc792a: 743 insertions over eight files, all inside scope; the source change is the SupportOperands bucket/padding fields and from_rows padding, bank_program, _bank_payload/_BankFile/write_bank/read_bank, and the one forward.py key element; the remaining commits add the H200 measurement script and launchers, the two test files and the evidence fragment.",
+    "done_when": "The done_when's three clauses are measured in logs/operator_bank_h200.log: build 94.5-96.1 s, content-store load 0.114 s (inside 1 s), worst relative reproduction 2.938768222931248e-13 (inside 1e-10), same-bucket new compilations 0 and different-bucket 1, and a MEMORY row with 110709898496 B headroom and batch-16 headroom 108113100032 B; source files are byte-identical between the measurement revision 06242922d and the head, so the gate measures the landed code.",
+    "goal": "The node's goal is a per-machine operator bank at fixed shape compiled once; support_read.py:45-60 extends SupportOperands with a static bucket and zero padding, :225 adds the traced bank_program, :269/:293 publish and reload it through nova/database/content_store, and forward.py:2766 adds the compile-key slot, but that slot is inert so the bucket never reaches the key the goal names.",
+    "manifest": "Read in full; it records status complete, ten commits, the H200 and negative-control logs, both suite arms and the headline metrics, but its tests line is a template carrying <arm tree>/<test file> placeholders, its after_suite sets completed true for an arm that lost one file to OOM, and its rubric.suite line still says the arms were cut short at 32 of 69 files.",
+    "write_paths": "All eight paths in the base..head diff lie inside the declared write paths: nova/equilibrium/support_read.py, nova/equilibrium/forward.py, tests/test_support_read.py, tests/test_operator_bank_compile.py, scripts/prototypes/operator_bank/{measure.py,run_h200.sh,run_suite_arms.sh} and docs/evidence/fragments/sub-millisecond-forward-path/operator-bank.html."
+  },
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a per-machine operator bank at fixed shape compiled once; nova/equilibrium/support_read.py:45 extends SupportOperands with a static bucket and zero padding and nova/equilibrium/forward.py:2766 adds the compile-key slot, but that slot reads an attribute nothing sets so the bucket never reaches the key.\nVERDICT done_when: the done_when's three clauses are measured in logs/operator_bank_h200.log (load 0.114 s, worst relative 2.938768222931248e-13, same-bucket compilations 0, different-bucket 1, batch-16 headroom 108113100032 B) and the source is byte-identical between the measurement revision 06242922d and the head.\nVERDICT write_paths: read the manifest's declared paths; every path in the base..head diff is inside them.\nVERDICT manifest: read; it records the H200 and negative-control logs and both suite arms, but its tests line is a placeholder template, its after_suite sets completed true for an arm that lost tests/test_forward_compile_identity.py to OOM in both arms, and its rubric.suite line contradicts its own checkpoint.\nVERDICT diff: read commit by commit from 330abce22 to 32abc792a; 743 insertions over eight files, all inside the declared scope, with the substantive change in nova/equilibrium/support_read.py and one key element in nova/equilibrium/forward.py.\nCALL_SITES: nova/equilibrium/forward.py:2644 ForwardProfile.solve (via _request_compilation_cache_key at :2766)\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:225 bank_program and :269 write_bank deliver the bank and its store round trip, but nova/equilibrium/forward.py:2766 keys on an attribute nothing sets so the plan's compile-key mechanism is absent.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/operator_bank_h200.log records every done-when figure and ends EXIT=0 at a revision whose source is identical to the head, though the compile-identity suite file was OOM-killed in both arms.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all eight changed paths sit inside the declared write paths and no SolveRoute wiring was added.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_operator_bank_compile.py:53 fails when a captured operator constant forces a recompile, proven by logs/negative_control.log ending EXIT=1, but nothing tests the nova/equilibrium/forward.py:2766 key element or consumes a padded bank through support_read.read.\nSCORE fit: 14\nJUSTIFICATION fit: the module keeps the surrounding dataclass and content-store idiom, but nova/equilibrium/support_read.py:18 leaves pathlib.Path unused (ruff F401) and :30 defines BANK_MANIFEST_NAME with nothing consuming it.\nSCORE reuse: 16\nJUSTIFICATION reuse: write_bank/read_bank extend nova/database/content_store.py:publish_files rather than forking a store, but they re-implement the operand publish/read capability already carried by scripts/prototypes/read_route/jets.py:publish_operand and :read_operand.\nFINDING nova/equilibrium/forward.py:2766 blocking: the bucket key component resolves to None for every request because nothing sets support_bank_bucket, so the shape bucket never enters the compile key as the plan and the landed evidence claim.\nFINDING nova/equilibrium/support_read.py:18 non-blocking: pathlib.Path is imported and never used, and ruff reports F401 on this line.\nFINDING nova/equilibrium/support_read.py:30 non-blocking: BANK_MANIFEST_NAME names bank.json but write_bank publishes bank.npz with an inline manifest, so the constant is dead and misnames the artifact.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T144924463262-operator-bank/manifest.md:22 non-blocking: after_suite records completed true although tests/test_forward_compile_identity.py was OOM-killed at exit 137 in both arms and produced no result.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T144924463262-operator-bank/manifest.md:31 non-blocking: rubric.suite says the arms were cut short at 32 of 69 files, contradicting the checkpoint's 69/69 and both suite records.\n",
+  "review_run_id": "r-20261028T181102994342-review-of-operator-bank-32abc792ad5e",
+  "reviewed_at": "2026-10-28",
+  "reviewed_base_sha": "330abce22572052e13649cd6351e8aad39bbf13b",
+  "reviewed_head_sha": "32abc792ad5e430d0ec83c8c18cce7b166db28c9",
+  "reviewed_run_id": "r-20261028T144924463262-operator-bank",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 14,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T18:20:58.737651+00:00",
+  "total": 94
+}

@@ -314,7 +314,10 @@ def main():
             if width < batch:
                 # the compiled executable is fixed at the block size
                 block = np.concatenate((block, np.repeat(block[-1:], batch - width, 0)))
-            rows = executables[name](jnp.asarray(block), coupling)
+            operands = (jnp.asarray(block), coupling)
+            if name == "fd":
+                operands = operands + (jnp.asarray(args.step),)
+            rows = executables[name](*operands)
             matrix_rows.append(rows[:width])
         local = jnp.concatenate(matrix_rows, axis=0)
         return exterior + jnp.einsum("ncmq,cm->nq", local, moments)

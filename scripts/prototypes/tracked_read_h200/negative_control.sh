@@ -11,7 +11,7 @@ REV=${1:?REV must name the revision to mutate}
 LOG=${2:?LOG must name the log to write}
 WT=$(cd "$(dirname "$0")/../../.." && pwd)
 export TMPDIR=${TMPDIR:-/tmp}
-export JAX_PLATFORMS=cpu
+export JAX_PLATFORMS=${JAX_PLATFORMS:-cpu}
 D=$(mktemp -d "$TMPDIR/nova-mutant-XXXX")
 trap 'rm -rf "$D"' EXIT
 mkdir -p "$D/tree"
@@ -35,10 +35,11 @@ PATCH
 {
   echo "# mutant tree $D/tree revision $(git -C "$WT" rev-parse "$REV")"
   echo "# mutation: average the Bell fit across the triangle's nodes"
-  echo "# command: $PY -m pytest -p no:cacheprovider -q -m slow tests/test_tracked_read_accuracy.py"
+  echo "# command: python -m pytest -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py"
   cd "$D/tree"
   PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
-    -p no:cacheprovider -q -m slow tests/test_tracked_read_accuracy.py
+    -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py \
+    --basetemp="$D/bt-mutant"
   echo "EXIT=$?"
 } > "$LOG" 2>&1
 tail -20 "$LOG"

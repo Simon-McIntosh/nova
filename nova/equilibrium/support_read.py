@@ -15,7 +15,6 @@ serves any state of the same layout.
 import json
 from dataclasses import dataclass, field
 from typing import NamedTuple
-from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -100,7 +99,9 @@ class SupportOperands:
                 bucket = shape_bucket(active)
             padded_rows = np.zeros((bucket, *rows.shape[1:]), dtype=rows.dtype)
             padded_rows[:active] = rows
-            padded_exterior = np.zeros((bucket, *exterior.shape[1:]), dtype=exterior.dtype)
+            padded_exterior = np.zeros(
+                (bucket, *exterior.shape[1:]), dtype=exterior.dtype
+            )
             padded_exterior[:active] = exterior
             padded_nodes = np.zeros((bucket, nodes.shape[-1]), dtype=nodes.dtype)
             padded_nodes[:active] = nodes
@@ -223,7 +224,7 @@ def read_and_book(
 
 
 def bank_program(operands: SupportOperands, moments) -> jax.Array:
-    """Apply the bank to booked moments: the minimal program the bank is measured through.
+    """Apply the bank to booked moments: the minimal program it is measured through.
 
     Every operand is a traced argument, so the program is reused for any state
     and any geometry of the operand's shape bucket; only ``bucket`` is static.

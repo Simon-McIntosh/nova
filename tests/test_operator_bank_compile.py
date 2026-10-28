@@ -10,6 +10,9 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium import support_read
+from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
+from tests.test_prescribed_current_solve import _profile
 
 assert jax.config.jax_enable_x64 is True
 
@@ -66,3 +69,39 @@ def test_the_padded_rows_do_not_change_the_active_result():
     bare = np.asarray(support_read.bank_program(plain, MOMENTS))
     assert np.array_equal(padded[:60], bare)
     assert np.all(padded[60:] == 0.0)
+
+
+def test_the_compile_key_carries_the_bank_bucket(monkeypatch):
+    """A bank's bucket selects its program inside the one compilation cache."""
+    monkeypatch.setattr(
+        ForwardFluxOperator,
+        "program_identity",
+        property(lambda _operator: "operator-bank-key-test"),
+    )
+    profile, _ordinary, _prescribed = _profile()
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="operator-bank-key-carrier",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(np.zeros(4)),
+        policy_overrides={"route": "picard", "newton_steps": 1, "relaxation": 1.0},
+    )
+    seed = np.zeros(4)
+
+    def key():
+        return profile._request_compilation_cache_key(request, seed)
+
+    unattached = key()
+    assert unattached[1] is None
+
+    profile.support_bank = _bank(60, 64, 1.0)
+    narrow = key()
+    assert narrow[1] == 64
+
+    profile.support_bank = _bank(60, 128, 1.0)
+    wide = key()
+    assert wide[1] == 128
+
+    profile.support_bank = _bank(60, 64, 2.0)
+    assert key() == narrow
+
+    assert len({unattached, narrow, wide}) == 3

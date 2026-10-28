@@ -195,9 +195,12 @@ def test_bank_pads_the_operators_to_its_bucket_and_keeps_the_machine_prefix(rout
 
 def test_bank_round_trips_through_the_content_store(tmp_path, route):
     *_, operands, cache, roots, pitch, step, reference, axis, _booked = route
-    rows = np.arange(np.prod(operands.rows.shape), dtype=float).reshape(
-        operands.rows.shape
-    ) / 7.0
+    rows = (
+        np.arange(np.prod(operands.rows.shape), dtype=float).reshape(
+            operands.rows.shape
+        )
+        / 7.0
+    )
     bank = support_read.SupportOperands.from_rows(
         operands.geometry,
         rows,

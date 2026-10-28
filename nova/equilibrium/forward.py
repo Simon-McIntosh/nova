@@ -94,7 +94,7 @@ from nova.equilibrium.solve_request import (
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
-from nova.equilibrium import fixed_point
+from nova.equilibrium import fixed_point, support_read
 from nova.equilibrium.connectivity_boundary import _points_inside_polygon
 from nova.equilibrium.conservation import (
     ConservationLedger,
@@ -553,6 +553,11 @@ class ForwardProfile:
     map, the ladder and the domain partition are already mesh-agnostic — so
     the mesh kind changes which stencil the receipts are formed on and
     nothing about the equilibrium that is found.
+
+    ``support_bank`` is the per-machine bank of plasma support operators the
+    route contracts, when one is attached. Its shape bucket pads every
+    operator operand to a fixed size, so the bucket is a static program
+    property and enters the compilation key; it never selects a second cache.
     """
 
     operator: ForwardFluxOperator
@@ -565,6 +570,10 @@ class ForwardProfile:
     )
     newton_steps: int = field(
         default_factory=lambda: declared_forward_solve_policy().newton_steps
+    )
+    support_bank: support_read.SupportOperands | None = field(
+        default=None,
+        repr=False,
     )
     _request_compilation_cache: set[tuple[object, ...]] = field(
         default_factory=set,
@@ -2760,10 +2769,10 @@ class ForwardProfile:
         )
         return (
             self.operator.program_identity,
-            # The operator bank's shape bucket fixes every operand shape, so two
+            # The support bank's shape bucket fixes every operand shape, so two
             # machines whose meshes pad to different buckets need different
             # programs; it enters this key rather than a second cache.
-            getattr(self.operator, "support_bank_bucket", None),
+            None if self.support_bank is None else self.support_bank.bucket,
             request.route,
             request.policy,
             request.clip_mode,

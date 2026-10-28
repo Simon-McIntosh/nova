@@ -48,6 +48,13 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-10-28T15:04:25.039739+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-10-28T15:04:36.061505+00:00"
     }
   ],
   "responses": {
@@ -56,6 +63,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-28T15:04:25.039739+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-28T15:04:36.061505+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261028T145146326508-plan-review-of-sub-millisecond-forward-path.json",

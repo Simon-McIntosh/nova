@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "computed as after_suite.failure_ids - baseline_suite.failure_ids from the reviewed run's own manifest.md arms: base 41 ids over 29 files (logs/suite-base.log, revision 6ccf43de9, FAILURE_COUNT=41, EXIT=1), head 13 ids over 29 files (logs/suite-head.log, revision b32caab47, FAILURE_COUNT=13, EXIT=1); 28 resolved, 0 added. Both arms ran to their summary lines and both logs carry a bare EXIT= last line.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-28T23:23:05.497Z",
+  "dispatched_at": "2026-10-28T23:17:10Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html",
+      "line": "215",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states the banked weak-rotation part \"matches none of the three facts this tree builds\", but the fragment's own refusal table in the same file records weak-rotation-reactor-static at 300 cells with banked and declared current both 16,314,773.311828 A, realised cells 342, and the reason \"carrier digest differs\" alone - so the declared current and the realised cell count match and only the carrier digest differs. The record overstates the mismatch the restamp is covering."
+    },
+    {
+      "file": "tests/test_certificate_gate_live.py",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: _restamped_part sources all three compared facts from certificate._certificate_case_setup, the same call _receipt_verdict reads (benchmarks/solovev_certificate.py:2253-2276), so the values the fixture writes and the values the driver compares move together: a regression that changes what the setup declares restamps the part to match and leaves the assertion at :297 green, and the fixture cannot detect a defect in the facts it copies."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html",
+      "line": "228",
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative control recorded for the restamp fails by pytest-timeout (150 s, logs/gate-live-negative-control.log, 1 failed in 173.40s, EXIT=1) rather than by the provenance assertion at tests/test_certificate_gate_live.py:297, so the record shows the test does not finish without the restamp, not that the assertion it exists for reddens; a regression that merely slows the solve is indistinguishable from the one this control is meant to demonstrate."
+    }
+  ],
+  "findings_blocking": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none - the delta adds a test helper and a documentation section only; no production module, and neither file is imported by runtime code.",
+    "diff": "read commit by commit: 7cf633d69 changes only tests/test_certificate_gate_live.py (27 insertions, 2 deletions - the _restamped_part helper and its call), and b32caab47 changes only the evidence fragment (27 insertions); nothing else in a995112c0..b32caab47.",
+    "done_when": "the declared done_when (prompt.txt:109-110) is \"Test files importing the changed modules show 0 added failures between base and head arms in one sirius job\"; both arms now reached their summary lines at 6ccf43de9 and b32caab47 (logs/suite-base.log FAILURE_COUNT=41, logs/suite-head.log FAILURE_COUNT=13), 0 added and 28 resolved.",
+    "goal": "the node goal (prompt.txt:38) is to find and repair the change that stopped the diverted 300-cell row converging; the delta reviewed here is the follow-up that clears the blocking finding the earlier review recorded, and tests/test_certificate_gate_live.py:292 now restamps the installed part so the driver serves it again.",
+    "manifest": "read; it records status complete, baseline_suite and after_suite as completed with revisions and log paths, a green live gate (logs/gate-live-fixed.log, 1 passed in 11.61s, EXIT=0) and a red negative control (logs/gate-live-negative-control.log, 1 failed, EXIT=1).",
+    "write_paths": "the delta touches exactly docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html (a declared write path) and tests/test_certificate_gate_live.py, which is not in the prompt.txt:83-89 fence list but is named by this round's review goal and recorded in manifest.md outside_scope as a supervisor grant."
+  },
+  "justifications": {
+    "durability": "tests/test_certificate_gate_live.py:297 reddens when the restamp is removed only by timing out, and _restamped_part at :43 copies its facts from the same _certificate_case_setup the driver compares against, so the fixture cannot redden on a regression in the values it supplies.",
+    "evidence": "logs/gate-logs/live gate: logs/gate-live-fixed.log records 1 passed in 11.61s EXIT=0 and logs/gate-live-negative-control.log records 1 failed EXIT=1 on a copy byte-identical to a995112c0's file, while the suite arms at logs/suite-base.log and logs/suite-head.log give 0 added failures.",
+    "fit": "tests/test_certificate_gate_live.py:43 follows the module's private-helper idiom and its docstrings, carries no plan label, run id or ticket reference, and the committed line at :292 sits inside the 88-column ruff limit.",
+    "goal_fidelity": "tests/test_certificate_gate_live.py:292 reinstalls the banked part restamped to the three facts the driver compares, which is exactly the regression the earlier review named at :271, and the row again carries figure.render_source \"persisted_part_receipt\" at :297.",
+    "reuse": "no helper that restamps a banked part exists in tests/, scripts/ or benchmarks/ (searched for \"restamp\" and for target_current_a/semantic_key assignments); tests/test_diverted_300_convergence.py:47's _receipt_for builds a minimal receipt with empty render_data and cannot supply the banked payload this gate renders.",
+    "scope_discipline": "git show --stat a995112c0..b32caab47 lists only tests/test_certificate_gate_live.py and docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html, and the fragment diff is +27 lines spliced into the existing document rather than a rewrite."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal (prompt.txt:38) is to find and repair the change that stopped the diverted 300-cell row converging; the delta reviewed here is the follow-up that clears the blocking finding the earlier review recorded, and tests/test_certificate_gate_live.py:292 now restamps the installed part so the driver serves it again.\nVERDICT done_when: the declared done_when (prompt.txt:109-110) is \"Test files importing the changed modules show 0 added failures between base and head arms in one sirius job\"; both arms now reached their summary lines at 6ccf43de9 and b32caab47 (logs/suite-base.log FAILURE_COUNT=41, logs/suite-head.log FAILURE_COUNT=13), 0 added and 28 resolved.\nVERDICT write_paths: the delta touches exactly docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html (a declared write path) and tests/test_certificate_gate_live.py, which is not in the prompt.txt:83-89 fence list but is named by this round's review goal and recorded in manifest.md outside_scope as a supervisor grant.\nVERDICT manifest: read; it records status complete, baseline_suite and after_suite as completed with revisions and log paths, a green live gate (logs/gate-live-fixed.log, 1 passed in 11.61s, EXIT=0) and a red negative control (logs/gate-live-negative-control.log, 1 failed in 173.40s, EXIT=1).\nVERDICT diff: read commit by commit: 7cf633d69 changes only tests/test_certificate_gate_live.py (27 insertions, 2 deletions - the _restamped_part helper and its call), and b32caab47 changes only the evidence fragment (27 insertions); nothing else in a995112c0..b32caab47.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/test_certificate_gate_live.py:292 reinstalls the banked part restamped to the three facts the driver compares, which is exactly the regression the earlier review named at :271, and the row again carries figure.render_source \"persisted_part_receipt\" at :297.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/gate-live-fixed.log records 1 passed in 11.61s EXIT=0 and logs/gate-live-negative-control.log records 1 failed EXIT=1 on a copy byte-identical to a995112c0's file, while logs/suite-base.log versus logs/suite-head.log give 0 added failures over 29 files each.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: git show --stat a995112c0..b32caab47 lists only tests/test_certificate_gate_live.py and docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html, and the fragment diff is +27 lines spliced into the existing document rather than a rewrite.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_certificate_gate_live.py:297 reddens when the restamp is removed only by timing out, and _restamped_part at :43 copies its facts from the same _certificate_case_setup the driver compares against, so the fixture cannot redden on a regression in the values it supplies.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_certificate_gate_live.py:43 follows the module's private-helper idiom and docstring style, carries no plan label, run id or ticket reference, and the committed line at :292 sits inside the 88-column limit.\nSCORE reuse: 17\nJUSTIFICATION reuse: no helper that restamps a banked part exists in tests/, scripts/ or benchmarks/ (searched for \"restamp\" and for target_current_a/semantic_key assignments), and tests/test_diverted_300_convergence.py:47's _receipt_for builds a minimal receipt with empty render_data that cannot supply the banked payload this gate renders.\nFINDING docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html:215 non-blocking: the fragment states the banked weak-rotation part \"matches none of the three facts this tree builds\", but the fragment's own refusal table records weak-rotation-reactor-static at 300 cells with banked and declared current both 16,314,773.311828 A and realised cells 342, and the audit's reason is \"carrier digest differs\" alone, so two of the three facts match.\nFINDING tests/test_certificate_gate_live.py:43 non-blocking: _restamped_part sources all three compared facts from certificate._certificate_case_setup, the same call _receipt_verdict reads (benchmarks/solovev_certificate.py:2253-2276), so a regression that changes what the setup declares restamps the part to match and leaves the assertion at :297 green.\nFINDING docs/evidence/fragments/converged-forward-solve/diverted-300-regression.html:228 non-blocking: the negative control fails by pytest-timeout (logs/gate-live-negative-control.log, 1 failed in 173.40s, EXIT=1) rather than at the provenance assertion tests/test_certificate_gate_live.py:297, so the record shows the test does not finish without the restamp, not that the assertion reddens.",
+  "review_run_id": "r-20261028T231517997217-review-of-diverted-300-regression-b32caab47893",
+  "reviewed_base_note": "the diff reviewed is a995112c07d81a749de4289c0635358f8fb6c721..b32caab47893d59440b34619b974c63e6e8f38d8, the commits this run gained since the review recorded at a995112c0; the earlier six commits (base 6ccf43de9) were reviewed in r-20261028T215753040008-review-of-diverted-300-regression-a995112c07d8.",
+  "reviewed_base_sha": "a995112c07d81a749de4289c0635358f8fb6c721",
+  "reviewed_head_sha": "b32caab47893d59440b34619b974c63e6e8f38d8",
+  "reviewed_run_id": "r-20261028T201253421766-diverted-300-regression",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T23:25:08.889775+00:00",
+  "total": 98
+}

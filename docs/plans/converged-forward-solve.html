@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="610">
-<meta name="plan-modified" content="2026-10-28">
+<meta name="plan-version" content="611">
+<meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
   <main class="plan-doc">
@@ -2159,6 +2159,9 @@ oracle _reference_moments already owns.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261028T215753040008-review-of-diverted-300-regression-a995112c07d8" data-who="reckon-build" data-when="2026-10-28T22:19:41.777Z">
     <div class="r-comment-body"><p>reviewed r-20261028T201253421766-diverted-300-regression at 6ccf43de9..a995112c0 — parsed review, scores goal_fidelity 14, evidence 9, scope_discipline 18, durability 13, fit 16, reuse 18 (total 88), added_failure_count 1 (tests/test_certificate_gate_live.py::test_rerendered_part_receipt_is_not_a_live_certificate_row), one blocking and five non-blocking findings</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261028T231517997217-review-of-diverted-300-regression-b32caab47893" data-who="reckon-build" data-when="2026-10-28T23:23:05.497Z">
+    <div class="r-comment-body"><p>diverted-300-regression gained two commits since its review at a995112c0 (7cf633d69 restamps the part tests/test_certificate_gate_live.py installs so the driver serves it again; b32caab47 records that in the evidence fragment); the delta scores goal_fidelity 17, evidence 17, scope_discipline 16, durability 13, fit 18, reuse 17, carries 0 added failures over both complete suite arms (base 41 ids at 6ccf43de9, head 13 at b32caab47, 28 resolved) and three non-blocking findings, so it is fit to land.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

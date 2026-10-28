@@ -1,0 +1,95 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/h200_test_lane/prewarm.sh:149",
+    "scripts/h200_test_lane/prewarm_row.py:71",
+    "scripts/h200_test_lane/cache_guard.py:351",
+    "scripts/h200_test_lane/cache_reuse_summary.py:100",
+    "scripts/h200_test_lane/run.sh:28"
+  ],
+  "completed_at": "2026-10-28T22:02:52.159Z",
+  "dispatched_at": "2026-10-28T21:55:33Z",
+  "findings": [
+    {
+      "file": "scripts/h200_test_lane/cache_guard.py",
+      "id": "f565fd02f44",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "PROGRAM_KEY_SUFFIX is defined and never read anywhere in the tree; the suffix that actually governs the count is cache_reuse_summary.py:16 MARKER_SUFFIX, which served_keys reads. The constant is a second definition of the one fact this node's repair set out to keep in one place, and it survives as documentation of a rule no code enforces."
+    },
+    {
+      "file": "scripts/h200_test_lane/prewarm_row.py",
+      "id": "f8f34ef3fbf",
+      "line": 63,
+      "severity": "non-blocking",
+      "text": "build_receipt writes both \"status\" and \"command_status\" from the same argument, so the row it returns carries the command's status under the field name that means the row's own status everywhere else (main overwrites it at :103). A caller that used build_receipt directly, or a reader of a receipt written before :103 runs, sees a status that is not the row's outcome."
+    },
+    {
+      "file": "scripts/h200_test_lane/prewarm_row.py",
+      "id": "fb8d5a40808",
+      "line": 121,
+      "severity": "non-blocking",
+      "text": "the repair's effect lives in main's wiring, which no test reaches: reverting :121 to 'return status', or deleting the record[\"status\"] = program_status(...) assignment at :103, restores the original defect and leaves all seven cases in tests/test_cache_guard.py green, because the tests call program_status directly. The end-to-end evidence exists only as logs (repair-prewarm-status-tolerate.log / -strict.log), so a later regression of the wiring is unguarded."
+    },
+    {
+      "file": "tests/test_cache_guard.py",
+      "id": "fc3d2d30ded",
+      "line": 57,
+      "severity": "non-blocking",
+      "text": "test_served_directory_reports_program_key_entries takes the monkeypatch fixture and never uses it, calling jax.config.update(\"jax_compilation_cache_dir\", ...) at :62 directly; the global then points at a tmp_path pytest deletes, so every later test in the same process that reads the guard's served directory (test_marker_begins_a_line_after_unterminated_output at :90 does, through emit_receipt) runs against a vanished directory and sees served_entries 0."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f4c5530454f",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "negative_control_log names arm-old-pin.log, whose three failing ids (test_the_accelerator_routes_agree_on_the_fixed_point and the two differentiability cases) are exactly the three the head arm arm-warm.log also fails, so this log shows no test the head does not fail. The two logs that do redden the new tests \u2014 negative-control-reverted-counter.log and negative-control-reverted-prewarm-status.log, each 1 failed with EXIT=1 \u2014 are listed only under test_logs, so the single field the admission check reads names the weaker control."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f4dfbfe85a5",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "the landing line reports '4 passed at head against 4 failed at base' while repair-head.log and repair-base.log carry 7 passed and 7 failed, and the H200 arm that carries the zero-compile measure (arm-warm.log:2 REVISION=1efb2faa3) predates 82a36d80f, so that log's served_entries field was written by the counter 82a36d80f supersedes; the hits/misses/compile-seconds figures the measure rests on are unaffected, but the recorded arm is not the reviewed code."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "five production sites read the changed code: prewarm.sh:149-150 (PREWARM_SERVED_ENTRIES through program_key_entry_count), prewarm_row.py:71 (build_receipt -> served_directory_state), cache_guard.py:351 (emit_receipt, the plugin run.sh:27 loads via PYTEST_ADDOPTS), cache_reuse_summary.py:100 (the CLI's served_keys), run.sh:28 (which imports cache_guard for pinned_cache_directory); no site outside scripts/h200_test_lane reaches them.",
+    "diff": "read 82a36d80f and 75922052f commit by commit, and the whole node as 6ccf43de..75922052f; 82a36d80f delegates program_key_entry_count to cache_reuse_summary.served_keys (cache_reuse_summary.py:63-77), adds prewarm_row.program_status and --allow-pytest-failures, and opts only the lane row in at prewarm.sh:133; 75922052f is the fragment alone.",
+    "done_when": "the gate asserts the measure: tests/test_cache_guard.py is 7 failed at base 6ccf43de (repair-base.log, EXIT=1) and 7 passed at 82a36d80f (repair-head.log, EXIT=0), and the H200 lane arm against the fresh pin records hits 1710, misses 0, compile_seconds 0.0 with marker wall-clock-reliable at arm-warm.log:23-24.",
+    "goal": "the goal is a pre-warm covering the lane's own target plus a guard that counts program-key entries with a line-anchored marker; prewarm.sh:133-138 adds the lane row and cache_guard.py:220-235 counts keyed entries, with the marker newline at cache_guard.py:363.",
+    "manifest": "read; it claims complete with the six declared paths, both suite arms as JSON, and the fresh pin root named; two fields are stale, the landing pass count (line 10) and the negative-control log it names (line 15).",
+    "write_paths": "every path in the diff \u2014 scripts/h200_test_lane/cache_guard.py, cache_reuse_summary.py, prewarm.sh, prewarm_row.py, tests/test_cache_guard.py and docs/evidence/fragments/forward-solver-route-integrity/prewarm-lane-programs.html \u2014 is inside the six paths this node was dispatched to cover."
+  },
+  "justifications": {
+    "durability": "tests/test_cache_guard.py:44-53 reddens if program_key_entry_count reverts to counting autotune files or -atime companions, :68-80 is the identity check that reddens on the counter's revert (proven at negative-control-reverted-counter.log, 1 failed), and :90-105 reddens if the leading newline is removed; but :121's wiring in prewarm_row.main is reached by no test.",
+    "evidence": "repair-base.log ends '7 failed in 7.97s' / EXIT=1 and repair-head.log '7 passed in 4.02s' / EXIT=0 for the same file, arm-warm.log:21-23 carries a run where the anchored grep finds 'CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0' at line start with a receipt reading hits 1710, misses 0, compile_seconds 0, and I re-measured the old pin leaf myself at 18986 -cache files against 50653 files, which matches the fragment's number.",
+    "fit": "cache_guard.py:220-235 and cache_reuse_summary.py:63-77 follow the modules' docstring-and-type-hint idiom and both survive ruff format --check clean, but cache_guard.py:78 leaves PROGRAM_KEY_SUFFIX as a dead restatement of cache_reuse_summary.py:16 MARKER_SUFFIX.",
+    "goal_fidelity": "prewarm.sh:133-138 supplies the lane's own target as a pre-warm row and cache_guard.py:220-235 counts only files a lookup can be served by, so a lane on a fresh pin finds its keys \u2014 measured as 0 misses and 0.0 compile seconds at arm-warm.log:23-24.",
+    "reuse": "program_key_entry_count at cache_guard.py:235 returns len(cache_reuse_summary.served_keys(path)) rather than enumerating keys itself, extending the owner the plan's owner note names, and program_status at prewarm_row.py:36 extends the existing row machinery; only the unused PROGRAM_KEY_SUFFIX at cache_guard.py:78 restates a constant the owner holds.",
+    "scope_discipline": "git diff --stat 6ccf43de 75922052f lists six files, all of them inside the dispatched paths, with no change to a driver, a test outside the file, or a plan."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a pre-warm pin that covers the lane's own target and a guard that counts program-key entries with a line-anchored marker; prewarm.sh:133-138 adds the lane row, cache_guard.py:220-235 counts keyed entries and cache_guard.py:363 anchors the marker.\nVERDICT done_when: the gate asserts the measure \u2014 tests/test_cache_guard.py is 7 failed at base 6ccf43de (repair-base.log, EXIT=1) against 7 passed at 82a36d80f (repair-head.log, EXIT=0), and the H200 lane arm at arm-warm.log:23-24 reads 'CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0' with a receipt of hits 1710, misses 0, compile_seconds 0 against the fresh pin.\nVERDICT write_paths: the six paths the node was dispatched to cover are exactly the six in git diff --stat 6ccf43de 75922052f, and nothing outside them is touched.\nVERDICT manifest: read; status complete, both suite arms recorded as JSON with commands, logs and failure ids, the fresh pin root named; the landing pass count at line 10 and the negative-control log at line 15 are stale against the logs they cite.\nVERDICT diff: read 82a36d80f and 75922052f commit by commit against the previously reviewed head 97aa8a2a7, and the whole node as 6ccf43de..75922052f; 82a36d80f answers both blocking findings of the earlier review by delegating program_key_entry_count to cache_reuse_summary.served_keys and by adding prewarm_row.program_status with --allow-pytest-failures opted in at prewarm.sh:133, and 75922052f is the fragment alone.\nCALL_SITES: scripts/h200_test_lane/prewarm.sh:149, scripts/h200_test_lane/prewarm_row.py:71, scripts/h200_test_lane/cache_guard.py:351, scripts/h200_test_lane/cache_reuse_summary.py:100, scripts/h200_test_lane/run.sh:28\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 17\nSCORE reuse: 19\nJUSTIFICATION goal_fidelity: prewarm.sh:133-138 supplies the lane's own target as a pre-warm row and cache_guard.py:220-235 counts only the top-level -cache files a lookup can be served by, which the warm arm at arm-warm.log:23-24 measures as 0 misses and 0.0 compile seconds against a fresh pin.\nJUSTIFICATION evidence: repair-base.log ends '7 failed' / EXIT=1 and repair-head.log '7 passed' / EXIT=0, arm-warm.log:23-24 carries the marker and a receipt of 1710 hits and 0 misses, and I re-measured the published pin leaf myself at 18986 -cache files against 50653 files, matching the fragment's number.\nJUSTIFICATION scope_discipline: git diff --stat 6ccf43de 75922052f lists exactly the six dispatched paths and nothing else.\nJUSTIFICATION durability: tests/test_cache_guard.py:44-53 and :68-80 redden on the counter's revert (negative-control-reverted-counter.log, 1 failed) and :90-105 reddens on the marker newline, but prewarm_row.py:121's return of record[\"status\"] is reached by no test, so reverting the wiring leaves all seven cases green.\nJUSTIFICATION fit: cache_guard.py:220-235 and cache_reuse_summary.py:63-77 match the modules' idiom and are ruff format and ruff check clean, but cache_guard.py:78 leaves PROGRAM_KEY_SUFFIX defined and never read.\nJUSTIFICATION reuse: cache_guard.py:235 returns len(cache_reuse_summary.served_keys(path)) instead of enumerating keys a second time, extending the owner the plan's owner note names, with only the dead PROGRAM_KEY_SUFFIX at cache_guard.py:78 restating a constant the owner holds.\nFINDING scripts/h200_test_lane/cache_guard.py:78 non-blocking: PROGRAM_KEY_SUFFIX is defined and never read, a second definition of the -cache suffix that cache_reuse_summary.py:16 MARKER_SUFFIX actually governs, so it documents a rule no code enforces.\nFINDING scripts/h200_test_lane/prewarm_row.py:63 non-blocking: build_receipt writes both \"status\" and \"command_status\" from the same argument, so the row it returns carries the command's status under the name that means the row's status everywhere else before main overwrites it at :103.\nFINDING scripts/h200_test_lane/prewarm_row.py:121 non-blocking: the repair's effect lives in main's wiring, which no test reaches \u2014 reverting :121 to 'return status' or dropping the assignment at :103 restores the original defect and leaves all seven cases green.\nFINDING tests/test_cache_guard.py:57 non-blocking: test_served_directory_reports_program_key_entries accepts monkeypatch and never uses it, calling jax.config.update at :62 directly, so the session's cache directory points at a deleted tmp_path for every later test in the process, including the marker case at :90.\nFINDING manifest.md:15 non-blocking: negative_control_log names arm-old-pin.log, whose three failing ids are the same three arm-warm.log fails, so it shows no test the head does not fail; the two revert controls that do redden the new tests are listed only under test_logs.\nFINDING manifest.md:10 non-blocking: the landing line reports 4 passed / 4 failed where the cited logs carry 7 and 7, and the H200 arm behind the zero-compile measure ran at 1efb2faa3, before 82a36d80f superseded the counter that log's served_entries came from.\n",
+  "review_run_id": "r-20261028T215338508215-review-of-prewarm-lane-programs-75922052f719",
+  "reviewed_base_sha": "97aa8a2a7ae02c175a254be1c7f2b03ed46577de",
+  "reviewed_commits": [
+    "82a36d80f7ea5aa6268a4abe9e5352133df9e15a",
+    "75922052f71925c1e79162a40ab40b974903123e"
+  ],
+  "reviewed_head_sha": "75922052f71925c1e79162a40ab40b974903123e",
+  "reviewed_run_id": "r-20261028T201244197134-prewarm-lane-programs",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T22:04:44.815863+00:00",
+  "total": 109
+}

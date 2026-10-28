@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="142">
+<meta name="plan-version" content="143">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
@@ -910,7 +910,10 @@
     <div class="r-comment-body"><p>Evaluate the payload prelude in the payload shell instead of `bash -c` so its exports reach pytest; the launcher test fails at base 9300a7714 (1 failed/8 passed) and passes at head b091aa8d8 (9 passed), and an H200 lane run now loads the guard (job 1280627, CACHE_GUARD_MARKER=wall-clock-reliable misses=13, budget=100000) while budget 0 against a served directory lacking the programs ends WALL-CLOCK-UNRELIABLE misses=13 with EXIT_STATUS=1 (job 1280632).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261028T211919003156-review-of-prewarm-lane-programs-97aa8a2a7ae0" data-who="reckon-build" data-when="2026-10-28T21:34:04.110Z">
-    <div class="r-comment-body"><p>review of prewarm-lane-programs at head 97aa8a2a7: total 84 of 120, two blocking findings — the guard adds a second program-key counter instead of extending cache_reuse_summary.served_keys as the plan&#x27;s owner note requires, and the new pre-warm row propagates pytest&#x27;s exit so every full pre-warm now exits nonzero on three lane tests that fail at this revision</p></div>
+    <div class="r-comment-body"><p>review of prewarm-lane-programs at head 97aa8a2a7: total 84 of 120, two blocking findings — the guard adds a second program-key counter instead of extending cache_reuse_summary.served_keys as the plan's owner note requires, and the new pre-warm row propagates pytest's exit so every full pre-warm now exits nonzero on three lane tests that fail at this revision</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261028T215338508215-review-of-prewarm-lane-programs-75922052f719" data-who="reckon-build" data-when="2026-10-28T22:02:52.159Z">
+    <div class="r-comment-body"><p>review of r-20261028T201244197134-prewarm-lane-programs over 97aa8a2a7..75922052f: 82a36d80f answers both blocking findings of the earlier review (the counter now delegates to cache_reuse_summary.served_keys and the lane row tolerates the target&#x27;s own content failures), scores goal_fidelity 19 evidence 18 scope_discipline 20 durability 16 fit 17 reuse 19, zero added failures, and six non-blocking findings (dead PROGRAM_KEY_SUFFIX, receipt status double-write, untested main wiring, a leaked jax config in one test, and two stale manifest fields)</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261019T083720812901-xla-autotune-cache-off" data-who="reckon-build" data-when="2026-10-19T12:58:09Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/forward-solver-route-integrity/xla-autotune-cache-off.html — configure_persistent_compilation_cache sets jax_persistent_cache_enable_xla_caches=none before hashing the runtime identity, tiledassembly compilation_cache applies the same setting, and the h200 lane prelude and pre-warm payload export it; 18 focused tests pass; deleting the config line fails the identity pin (EXIT=1); titan job 1290032 creates zero autotune files at the changed revision across both passes with 273 second-pass compile-cache hits and 0 misses, against 1408 autotune files with the key left at JAX's default</p></div>

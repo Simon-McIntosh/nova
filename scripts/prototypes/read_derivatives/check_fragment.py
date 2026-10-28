@@ -194,5 +194,43 @@ for pattern, expected in (
 if claims == 0:
     problems.append("no validity tally claim found in the fragment")
 
+# Target comparisons: a sentence that compares a wall against "the N s target"
+# must not place a number on the wrong side of it. The direction is the word
+# nearest the target phrase, and only numbers written with a seconds unit are
+# read, so a sentence may also quote counts and millisecond walls.
+DIRECTION = re.compile(
+    r"\b(under|below|above|over|exceeds?|exceeding)\b", re.IGNORECASE
+)
+TARGET = re.compile(r"the (\d+(?:\.\d+)?) s target")
+SECONDS = re.compile(r"(\d+(?:\.\d+)?) s\b")
+LOW = ("under", "below")
+compared = 0
+for sentence in re.split(r"(?<=[.!?])\s+", re.sub(r"<[^>]+>", " ", fragment)):
+    target = TARGET.search(sentence)
+    if target is None:
+        continue
+    directions = list(DIRECTION.findall(sentence))
+    if not directions:
+        continue
+    near = min(
+        DIRECTION.finditer(sentence),
+        key=lambda word: abs(word.start() - target.start()),
+    )
+    wanted_below = near.group(1).lower() in LOW
+    limit = float(target.group(1))
+    for wall in SECONDS.finditer(sentence):
+        # The target's own number is written with the same unit.
+        if wall.start() == target.start(1):
+            continue
+        value = float(wall.group(1))
+        compared += 1
+        if (value < limit) != wanted_below:
+            problems.append(
+                f"target: {value} s is described as "
+                f"{'under' if wanted_below else 'above'} the {target.group(1)} s target"
+            )
+if compared == 0:
+    problems.append("no wall was compared against a target")
+
 print("\n".join(problems) if problems else "CONSISTENT")
 sys.exit(1 if problems else 0)

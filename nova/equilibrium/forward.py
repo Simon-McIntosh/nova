@@ -2760,6 +2760,10 @@ class ForwardProfile:
         )
         return (
             self.operator.program_identity,
+            # The operator bank's shape bucket fixes every operand shape, so two
+            # machines whose meshes pad to different buckets need different
+            # programs; it enters this key rather than a second cache.
+            getattr(self.operator, "support_bank_bucket", None),
             request.route,
             request.policy,
             request.clip_mode,

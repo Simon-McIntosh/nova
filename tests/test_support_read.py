@@ -153,3 +153,63 @@ def test_a_row_miss_at_the_x_point_alone_does_not_read_as_limited(route):
     assert status[1] == fixed_points.FixedPointStatus.NEEDS_ROWS
     assert not bool(support.valid)
     assert not bool(booked.valid)
+
+
+def test_shape_bucket_rounds_a_machine_mesh_up_to_a_declared_bucket():
+    assert support_read.shape_bucket(1) == 64
+    assert support_read.shape_bucket(550) == 1024
+    assert support_read.shape_bucket(1024) == 1024
+    with pytest.raises(ValueError):
+        support_read.shape_bucket(0)
+
+
+def test_bank_pads_the_operators_to_its_bucket_and_keeps_the_machine_prefix(route):
+    *_, operands, cache, roots, pitch, step, reference, axis, _booked = route
+    rows = np.arange(np.prod(operands.rows.shape), dtype=float).reshape(
+        operands.rows.shape
+    )
+    exterior = np.arange(np.prod(operands.exterior.shape), dtype=float).reshape(
+        operands.exterior.shape
+    )
+    machine = support_read.SupportOperands.from_rows(
+        operands.geometry, rows, exterior, operands.nodes, operands.sample_index
+    )
+    bank = support_read.SupportOperands.from_rows(
+        operands.geometry,
+        rows,
+        exterior,
+        operands.nodes,
+        operands.sample_index,
+        bucket=len(operands.nodes),
+    )
+    active = len(operands.nodes)
+    assert bank.bucket == support_read.shape_bucket(active)
+    assert bank.rows.shape == (bank.bucket, *rows.shape[1:])
+    assert bank.exterior.shape == (bank.bucket, exterior.shape[1])
+    moments = (jnp.ones(rows.shape[1]),) * 3
+    plain = support_read.bank_program(machine, moments)
+    padded = support_read.bank_program(bank, moments)
+    assert np.array_equal(np.asarray(plain), np.asarray(padded)[:active])
+    assert np.all(np.asarray(padded)[active:] == 0.0)
+
+
+def test_bank_round_trips_through_the_content_store(tmp_path, route):
+    *_, operands, cache, roots, pitch, step, reference, axis, _booked = route
+    rows = np.arange(np.prod(operands.rows.shape), dtype=float).reshape(
+        operands.rows.shape
+    ) / 7.0
+    bank = support_read.SupportOperands.from_rows(
+        operands.geometry,
+        rows,
+        np.asarray(operands.exterior),
+        operands.nodes,
+        operands.sample_index,
+        bucket=len(operands.nodes),
+    )
+    digest = support_read.write_bank(bank, tmp_path)
+    assert digest == support_read.write_bank(bank, tmp_path)
+    loaded = support_read.read_bank(tmp_path, digest, operands.geometry, operands.mesh)
+    assert np.array_equal(np.asarray(loaded.rows), np.asarray(bank.rows))
+    assert np.array_equal(np.asarray(loaded.exterior), np.asarray(bank.exterior))
+    assert loaded.bucket == bank.bucket
+    assert int(loaded.active_nodes) == int(bank.active_nodes)

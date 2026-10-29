@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T17:49:09.039Z",
+  "dispatched_at": "2026-10-29T17:44:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:112",
+      "id": "reasoning-1",
+      "reason": "as written, \u00a74 sets a target its own upstream budgets allow for exactly one iteration; a dispatched worker would either discover the target unreachable mid-build or \"meet\" it by capping iterations at one, so \u00a74 must state the warm-start residual and iteration count (or hold the bound at N \u00d7 0.7 ms, or tighten \u00a72/\u00a73).",
+      "text": "\u00a74 clause (1) requires the *converged* solve to cost at most 1 ms per slice, but \u00a72 clause (2) bounds the per-step read at 0.2 ms per slice (`:91`) and \u00a73 clause (2) bounds the per-step wall excluding the read at 0.5 ms (`:102`), so one Newton step already costs 0.7 ms and a second costs 1.4 ms; the plan never states the warm-start fresh-read residual or the iteration count, and its own record `bank-newton-step.html:48` shows a two-step trajectory from 0.0996 to 8.38e-13, so the bound holds only if a per-slice warm start lands within one quadratic step (starting residual below about 1e-5), a premise nothing in the plan supplies",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:109",
+      "id": "reasoning-2",
+      "reason": "the batched caller exists and is reachable, so the mechanism runs and a worker reaches it with one grep; naming it would sharpen the brief but not redirect the node's work.",
+      "text": "\u00a74 says the section \"is batched over slices on one device\" and clause (1) measures at \"batch width 16 or more\", but the only entry point it names is the single-solve seam (`ForwardSolveRequest` \u2192 `ForwardProfile.solve` \u2192 `ForwardSolveReceipt`) as a seventh `SolveRoute` value, and `ForwardSolveRequest` (`solve_request.py:559-581`) carries no ensemble axis; the batched entry that does exist, `ForwardProfile.solve_batch` (`forward.py:3203`, mapped over a leading ensemble axis), is never named",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "bb2cf6a8065e27555f2fb5ab9990bc158a031a32",
+  "plan_fingerprint": "8b8cdc573c27b7992514e8c90d08ee0e1148efd2733192a7dbf2645633ad20dd",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 43,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T174328103353-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "9f5527c4e3a69cb952db6c708ee8acb31b8c1155",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `SolveRoute` resolves to a six-value `Literal` so \"seventh\" is right, `ForwardSolveRequest.route` exists at `solve_request.py:575`, both certificate rows resolve as fragments, and every decision key s4 cites is present in the Decisions block.",
+    "done_when": "pass \u2014 each of the three clauses is measurable against a named quantity (1 ms per slice, a fresh-read residual of 1e-10 plus the locked precision budget, a tabled comparison), and the section names a declared negative control that can fail on the fast-route precision check.",
+    "evidence_paths": "pass \u2014 s4's records follow the plan's established fragment convention (`docs/evidence/fragments/sub-millisecond-forward-path/`, as `operator-bank`, `tracked-read`, `tracked-read-h200` and `bank-newton-step` already do), which is durable and version-controlled, not a scratchpad.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any symbol or path s4 names; `certificate-550-convergence` and `certificate-diverted-stall` are evidence row names, not plan labels.",
+    "reasoning": "a finding \u2014 \u00a74's 1 ms converged-solve bound is not reachable from the sum of \u00a72's and \u00a73's per-step bounds unless the warm solve converges in one Newton iteration, and the plan states neither that premise nor the warm-start residual.",
+    "single_goal": "pass \u2014 s4 carries one deliverable, \"a converged solve under 1 ms, batched, against the oracle\"; clauses (1)-(3) are measures of that one deliverable, not separate goals.",
+    "wiring": "pass \u2014 s4's `data-links` (`\u2026/sub-millisecond-forward-path#s2,\u2026#s3`) and `plan-section-depends-on` agree, and both upstream nodes are the ones s4 actually consumes: \u00a72's open per-slice read bound and \u00a73's fresh-read convergence are exactly the deliverables clause (1) and clause (2) rest on."
+  },
+  "section_digests": {
+    "_document": "f1957b0c3356110790135de7d35cadbda5b934343d7f3fd139afa0b2bd6d6228",
+    "s0": "17c245a8c7e01a95e666e304f714c37c862790a4b3be58d4fec3faa18cef74f9",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "8d73e766df3661327f30b84aa59d1bedcd314ba636a40a2d481e639719747624"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:54:12.625908+00:00"
+}

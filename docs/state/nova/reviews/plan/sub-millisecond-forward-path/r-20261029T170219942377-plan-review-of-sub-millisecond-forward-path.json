@@ -49,6 +49,15 @@
       "finding": "reasoning-1",
       "reason": "5.85 and 664 are the absolute residual-difference norms (5.84576, 664.309) the bank-newton-converge audit tables at the same physical moment iterate; bank-newton-step tables the same gap in relative form (0.999 and 1.040). Both say the residuals differ by about their own size before linearisation, which is the decision's ground; the converge record lands with that node and the clause now cites its run",
       "when": "2026-10-29T17:15:40.124186+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "995522a1ec7fd352c77dab561a697c928c06a69b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-29T17:15:50.403148+00:00"
     }
   ],
   "responses": {
@@ -59,6 +68,14 @@
       "commit_basis": "edit",
       "reason": "",
       "when": "2026-10-29T17:15:27.912107+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "995522a1ec7fd352c77dab561a697c928c06a69b",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-10-29T17:15:50.403148+00:00"
     },
     "reasoning-1": {
       "action": "declined",

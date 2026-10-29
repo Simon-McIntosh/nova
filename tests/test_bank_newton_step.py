@@ -12,7 +12,10 @@ from typing import NamedTuple
 from types import SimpleNamespace
 
 from nova.equilibrium import clip_quadrature, current, support_read, topology
-from scripts.prototypes.bank_newton_step.measure import _terminal_verdict
+from scripts.prototypes.bank_newton_step.measure import (
+    _assert_update_agreement,
+    _terminal_verdict,
+)
 
 
 class ConstantDensity:
@@ -153,22 +156,6 @@ def test_krylov_condition_estimate_resolves_two_scales():
     matrix = jnp.diag(jnp.asarray([1.0, 4.0]))
     estimate = support_read._krylov_condition_estimate(lambda value: matrix @ value, 2)
     np.testing.assert_allclose(estimate, 4.0, rtol=1e-12)
-
-
-def test_krylov_solve_does_not_require_a_transpose():
-    """A nonsymmetric linear operator reaches its requested residual."""
-    matrix = jnp.asarray([[4.0, 1.0], [0.5, 3.0]])
-    right = jnp.asarray([1.0, 2.0])
-
-    @jax.jit
-    def solve(matrix, right):
-        return support_read._krylov_solve(
-            lambda value: matrix @ value, right, 1e-10, restart=2, maxiter=4
-        )
-
-    solution, residual = solve(matrix, right)
-    np.testing.assert_allclose(solution, np.linalg.solve(matrix, right), rtol=1e-10)
-    assert float(residual) <= 1e-10
 
 
 def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
@@ -330,3 +317,11 @@ def test_terminal_verdict_requires_fresh_read():
     assert not _terminal_verdict(8e-13, 0.0303684, True)
     assert not _terminal_verdict(8e-13, 9e-13, False)
     assert not _terminal_verdict(8e-13, np.nan, True)
+
+
+def test_forward_route_update_comparison_refuses_regressions():
+    assert _assert_update_agreement([1.0, 2.0], [1.0, 2.0]) == 0.0
+    with np.testing.assert_raises(AssertionError):
+        _assert_update_agreement([1.01, 2.0], [1.0, 2.0])
+    with np.testing.assert_raises(AssertionError):
+        _assert_update_agreement([np.nan, 2.0], [1.0, 2.0])

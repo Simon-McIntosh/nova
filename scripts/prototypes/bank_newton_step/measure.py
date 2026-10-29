@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
 import subprocess
 import time
+from types import SimpleNamespace
 
 from nova.jax.config import configure_dtypes
 
@@ -39,6 +41,144 @@ def _terminal_verdict(tracked_residual, fresh_residual, fresh_valid, tolerance=1
         and tracked_residual <= tolerance
         and fresh_residual <= tolerance
     )
+
+
+def _assert_update_agreement(bank, route, tolerance=1e-6):
+    """Reject a nonfinite or materially different forward-route direction."""
+    bank = np.asarray(bank)
+    route = np.asarray(route)
+    if not np.all(np.isfinite(bank)) or not np.all(np.isfinite(route)):
+        raise AssertionError("forward-route update is not finite")
+    scale = np.linalg.norm(route)
+    if not np.isfinite(scale) or scale <= 0:
+        raise AssertionError("forward-route update has no measurable scale")
+    relative = float(np.linalg.norm(bank - route) / scale)
+    if relative > tolerance:
+        raise AssertionError(
+            f"forward-route update difference {relative:.9g} > {tolerance:g}"
+        )
+    return relative
+
+
+def compare_route(
+    operands,
+    cache,
+    roots,
+    convention,
+    policy,
+    profile,
+    quadrature,
+    moments,
+    support,
+    analytic,
+):
+    """Factor the present moment map at the bank step's physical iterate."""
+    from scripts.prototypes.fast_map_production import program as present
+    from scripts.prototypes.lean_map.jets import JetMap
+    from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
+    from scripts.prototypes.lean_map.values import build_values
+
+    geometry = operands.geometry
+    state = jnp.stack(moments, axis=-1)
+    polygons = tuple(
+        np.asarray(geometry.vertices[index, :count])
+        for index, count in enumerate(np.asarray(geometry.vertex_count))
+    )
+    machine = SimpleNamespace(cell_polygons=polygons)
+    rule = triangle_rule(geometry)
+    fit, design = quadratic_fit(rule, geometry)
+    values, receipt = build_values(machine, rule, analytic, state, persist=False)
+    emit("ROUTE_VALUES", **receipt)
+    jets = JetMap(
+        operands.rows,
+        operands.exterior,
+        operands.nodes,
+        operands.sample_index,
+        operands.mesh,
+    )
+    axis_sign = float(jnp.sign(analytic.evaluate(roots[0]).hessian[0, 0]))
+    target_current = jnp.sum(moments[0])
+    route_quadrature = replace(quadrature, target_current=target_current)
+    bank = support_read.newton_step(
+        operands,
+        moments,
+        support,
+        profile,
+        lambda radius, flux: jnp.zeros_like(radius),
+        route_quadrature,
+    )
+    bank_update = jnp.stack(bank.update, axis=-1)
+
+    def route_residual(flat, carried):
+        values, jets, window, rule, fit, design, geometry = carried
+        mapped = present.map_moments(
+            flat.reshape(state.shape),
+            values,
+            jets,
+            window,
+            rule,
+            fit,
+            design,
+            geometry,
+            profile,
+            roots,
+            convention,
+            policy,
+            target_current,
+            axis_sign,
+        )
+        return mapped.moment_residual.reshape(-1)
+
+    carried = (values, jets, cache, rule, fit, design, geometry)
+    flat = state.reshape(-1)
+    route_state = present.map_moments(
+        state,
+        values,
+        jets,
+        cache,
+        rule,
+        fit,
+        design,
+        geometry,
+        profile,
+        roots,
+        convention,
+        policy,
+        target_current,
+        axis_sign,
+    )
+    from jax.scipy.linalg import lu_solve
+
+    factored = solve.factor(route_residual, flat, carried)
+    route_update = lu_solve(
+        (factored.lu, factored.pivots), -route_residual(flat, carried)
+    ).reshape(state.shape)
+    jax.block_until_ready((route_update, bank_update, route_state))
+    bank_residual = support_read.step_residual(
+        operands, moments, moments, support, profile, route_quadrature
+    )
+    residual_difference = float(
+        jnp.linalg.norm(
+            jnp.stack(bank_residual.residual, axis=-1) - route_state.moment_residual
+        )
+        / jnp.linalg.norm(route_state.moment_residual)
+    )
+    relative = float(
+        jnp.linalg.norm(bank_update - route_update) / jnp.linalg.norm(route_update)
+    )
+    emit(
+        "ROUTE_COMPARISON",
+        kind="present_moment_map",
+        relative_update=relative,
+        relative_residual=residual_difference,
+        route_valid=bool(route_state.booking_valid),
+        bank_valid=bool(bank_residual.valid),
+        reference_finite=bool(jnp.all(jnp.isfinite(route_update))),
+        bank_linear_residual=float(bank.linear_residual),
+    )
+    if not bool(route_state.booking_valid) or not bool(bank_residual.valid):
+        raise AssertionError("a same-iterate forward-route read is invalid")
+    _assert_update_agreement(bank_update, route_update)
 
 
 def machine(kind):
@@ -97,7 +237,17 @@ def machine(kind):
         operands.rows,
         operands.exterior,
     )
-    return operands, cache, roots, convention, policy, profile, quadrature, moments
+    return (
+        operands,
+        cache,
+        roots,
+        convention,
+        policy,
+        profile,
+        quadrature,
+        moments,
+        analytic,
+    )
 
 
 def main():
@@ -109,6 +259,7 @@ def main():
     parser.add_argument("--max-iterations", type=int, default=12)
     parser.add_argument("--max-halvings", type=int, default=10)
     parser.add_argument("--compare-dense-factor", action="store_true")
+    parser.add_argument("--compare-route", action="store_true")
     parser.add_argument("--tracked-line-search", action="store_true")
     parser.add_argument("--direction", choices=("ramp", "balanced"), default="ramp")
     args = parser.parse_args()
@@ -124,9 +275,17 @@ def main():
         "DEVICE", backend=jax.default_backend(), devices=[str(d) for d in jax.devices()]
     )
     print("STAGE load", flush=True)
-    operands, cache, roots, convention, policy, profile, quadrature, moments = machine(
-        args.kind
-    )
+    (
+        operands,
+        cache,
+        roots,
+        convention,
+        policy,
+        profile,
+        quadrature,
+        moments,
+        analytic,
+    ) = machine(args.kind)
     if args.initial_state is not None:
         with np.load(args.initial_state, allow_pickle=False) as previous:
             moments = tuple(jnp.asarray(row) for row in previous["moments"])
@@ -153,6 +312,20 @@ def main():
         ),
         normal=int(jnp.sum(support.reading.normal_form_cells)),
     )
+    if args.compare_route:
+        compare_route(
+            operands,
+            cache,
+            roots,
+            convention,
+            policy,
+            profile,
+            quadrature,
+            moments,
+            support,
+            analytic,
+        )
+        return
     if args.direction == "ramp":
         direction = tuple(jnp.linspace(0.1, 0.4, value.shape[0]) for value in moments)
     else:

@@ -38,6 +38,13 @@
     "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/baseline-suite/summary.log",
     "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/negative-control.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-newton-step-425d44581fee",
+      "recorded_at": "2026-10-29T07:48:03.335643+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html",

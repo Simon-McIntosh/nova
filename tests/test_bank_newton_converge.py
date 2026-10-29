@@ -10,9 +10,11 @@ from types import SimpleNamespace
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.equilibrium import current, support_read
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
+from scripts.prototypes.bank_newton_converge.fresh_solve import run as fresh_solve
 
 
 def test_dense_columns_and_random_vector_match_directional_tangent(monkeypatch):
@@ -143,3 +145,16 @@ def test_dense_columns_and_random_vector_match_directional_tangent(monkeypatch):
         np.testing.assert_allclose(matrix[:, column], matvec(basis), rtol=1e-12)
     random = jnp.asarray(np.random.default_rng(7102).normal(size=6))
     np.testing.assert_allclose(matrix @ random, matvec(random), rtol=1e-12)
+
+
+@pytest.mark.slow
+def test_fresh_read_solve_converges_against_analytic_oracle(tmp_path):
+    """A shared omission in dense and vector tangents must fail the solve."""
+    state_path = tmp_path / "state.npz"
+    fresh_solve(state_path, max_steps=12)
+    with np.load(state_path) as state:
+        assert bool(state["converged"])
+        assert float(state["residual_sup"]) <= 1e-10
+        assert float(state["axis_ratio"]) <= 5e-4
+        assert float(state["saddle_ratio"]) <= 5e-4
+        assert float(state["boundary_ratio"]) <= 1e-4

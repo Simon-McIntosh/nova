@@ -32,6 +32,15 @@
       "finding": "anchors_resolve-1",
       "reason": "the record lands with node tracked-read-h200, now in re-review (r-20261029T075544267875); its fragment reaches main at that landing, before any node is dispatched against this paragraph",
       "when": "2026-10-29T08:01:09.440126+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "39655d36c51f083b78c64aae6e81e4a5b8fb04e3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-29T08:01:18.723562+00:00"
     }
   ],
   "responses": {
@@ -40,6 +49,14 @@
       "by": "",
       "reason": "the record lands with node tracked-read-h200, now in re-review (r-20261029T075544267875); its fragment reaches main at that landing, before any node is dispatched against this paragraph",
       "when": "2026-10-29T08:01:09.440126+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "39655d36c51f083b78c64aae6e81e4a5b8fb04e3",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-10-29T08:01:18.723562+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261029T074355421239-plan-review-of-sub-millisecond-forward-path.json",

@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite. The count and list are the neutral values the record shape requires, not a measurement.",
+  "attachment_map": {
+    "image-0.png (1399x720 RGB, attached to this review run)": "docs/figures/sub-millisecond-forward-path-newton/bank-newton-step-stalled.svg"
+  },
+  "attachment_note": "The attached raster was opened with Read and judged directly as an image; no SVG was opened, read, rendered or searched, and no image other than the named PNG was inspected. Provenance is by construction: the reviewed head 425d44581fee adds exactly docs/figures/sub-millisecond-forward-path-newton/bank-newton-step-stalled.svg and a 19-line edit to docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html, the fragment's only figure is that path, and the run manifest records the preview PNG /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/bank-newton-step-stalled-preview-final.png. The 1399x720 raster matches the 14inx7.2in canvas at 100 dpi that the renderer declares. The reviewed base c8e424a789 is confirmed an ancestor of the reviewed head (git merge-base --is-ancestor, exit 0).",
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T06:48:01Z",
+  "figure_checks": {
+    "clipping": "No ink touches the canvas edge: the leftmost and rightmost data pixels are near x 500 and x 900 of 1399, and the topmost and bottommost near y 85 and y 690 of 720.",
+    "legend_geometry": "The whole legend (both swatches and both labels) occupies x 465-930, y 24-43. Labels are 'stalled bank state' and 'analytic oracle', separated by a clear gap, with no overlap and no clipping.",
+    "levels": "Eight contour levels are drawn twice from one shared array. Their numeric values are printed only to the renderer's stdout (the run's stalled-panel log), not to the figure, its legend, or the caption, so a reader of the evidence page cannot attach a flux value to any contour.",
+    "null_markers": "At the axis (blue extent x 719-730, y 360-371; grey extent x 715-734, y 356-375) the larger grey oracle triangle surrounds the blue solved triangle and reads as a dark rim rather than as a separately visible second marker. At the saddle (blue extent about x 641-669, y 629-669 including the converging contours; grey extent x 641-661, y 629-650) the grey and blue crosses coincide into one dark, blocky mark with only short grey arms showing at the tips.",
+    "render_provenance": "image-0.png was opened with Read at its native 1399x720 and inspected directly; colour and geometry were then measured on that same PNG only (Pillow, no new image written). A colour census gives 976,729 white pixels, 15,566 blue (#3366cc) pixels, 1,208 black pixels (legend text and vessel outline), and grey pixels at #555555 and its antialiased neighbours. No SVG was opened or rendered anywhere in this review."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path-newton/bank-newton-step-stalled.svg",
+      "rubric": {
+        "contrast": "All text is near-black on white, far above 4.5:1. The blue #3366cc data stroke measures about 5.4:1 against white and the grey #555555 dashed stroke about 7.4:1, so neither series is lost to low contrast at the delivered 1399x720 size.",
+        "data_ink": "Only data ink is present. Eight contour levels are drawn twice (solid blue solved, dashed grey analytic), one black vessel outline, two null marks per series and two legend swatches. No grid, no shading, no background fill, no annotation box and no decorative band.",
+        "decoration": "Axes are off: no spines, ticks, tick labels or gridlines. The legend is frameless and unboxed, and the background is plain white. Nothing on the canvas is stylisation, and the absence of a title keeps identity in the file name and the caption.",
+        "label_collision": "The legend text spans x 465-930 on a 1399 px canvas and y 24-43 on a 720 px canvas, so nothing is clipped at any edge and the legend clears the data (whose topmost ink begins near y 85). No label overlaps another label or a contour. The one overlap on the canvas is between the two null-marker sets themselves, which is recorded as finding 2 rather than as a label collision.",
+        "legibility": "Most of the canvas is empty. A single D-shaped poloidal cross-section is centred in the middle third, drawn as nested closed contours in solid blue (#3366cc) over an almost coincident set of dashed grey (#555555) contours. A thin black vessel outline encloses them. One dark triangle sits at the magnetic axis and one cross sits at the lower X-point. A two-entry frameless legend sits above the panel: a blue line with a triangle marker labelled 'stalled bank state' and a grey dashed line with a triangle marker labelled 'analytic oracle'. The two series read apart where the fields differ, most plainly along the top-right and upper-left of the outer contours, and the residual agreement of the interior contours is legible as a blue line with grey dashes showing through its flanks. What cannot be read from the figure is the meaning of the marks: the four null marks are two shapes in two colours with nothing on the canvas or in the caption that says triangle means axis and cross means saddle, and the caption's 'Blue markers identify the bank axis and admitted saddle' names colour only. Two further legibility observations are recorded as findings 3 and 4: the contour levels are not stated anywhere a reader can see them, and the cross-section is drawn at about a quarter of the available canvas width.",
+        "table_form": "The figure depicts poloidal flux contours, a vessel boundary and stationary-point positions. That is a spatial relationship the page's two residual tables do not carry; no part of the image is an image of tabular information."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_newton_step/render.py",
+      "id": "f98d0aa93b6",
+      "line": 120,
+      "severity": "non-blocking",
+      "summary": "The null-marker vocabulary is not decodable from the figure. The legend gives both series a triangle marker, but the plotted stationary points use two shapes: a solid triangle at the magnetic axis and a cross at the admitted saddle. A reader sees a cross at the bottom of the panel with no key, and the caption names the marker colours only ('Blue markers identify the bank axis and admitted saddle, with larger grey oracle markers behind them'), never that a triangle is an axis and a cross is a saddle. The reader can tell which series a mark belongs to but not what kind of stationary point it marks. Non-blocking: the null positions are still visible and the caption's residual carries the convergence claim."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_step/render.py",
+      "id": "fdc49054d91",
+      "line": 99,
+      "severity": "non-blocking",
+      "summary": "At the delivered resolution the two null-marker sets merge into single composite marks, so the offset between the solved and analytic null positions cannot be seen. At the axis the larger grey oracle triangle encloses the blue solved triangle and reads as a dark rim on it (grey extent 715-734 x 356-375 against blue 719-730 x 360-371). At the lower X-point the grey oracle cross and the blue solved cross coincide into one dark blocky mark with only short grey arms at the tips, set among the converging contours. The caption's 'larger grey oracle markers behind them' describes the drawing scheme, but a reader cannot resolve two markers from the render. Non-blocking: the marks remain identifiable by colour, and the null agreement is a detail this evidence page does not certify numerically."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_step/render.py",
+      "id": "f9f75485d1c",
+      "line": 59,
+      "severity": "non-blocking",
+      "summary": "The contour levels are never stated to the reader. Eight levels are computed from a shared array and drawn twice, but their numeric values are emitted only on the renderer's stdout; neither the legend, the axis (which is switched off), nor the caption gives a flux value for any line. A reader of the evidence page therefore sees a shape comparison but cannot say what flux any contour represents, and cannot relate the panel to the residual or to either table above it. Non-blocking: the figure's stated purpose is the comparison between two states, which survives without the level values."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_step/render.py",
+      "id": "f7b5eafe878",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The cross-section is drawn small within a wide canvas: the plotted flux occupies roughly x 500-900 of the 1399 px width, about 28 percent of it, with the remaining two thirds of the figure empty on both sides. The empty margin is not decoration, it is the consequence of an equal-aspect poloidal panel on the mandated 14x7.2 inch slide canvas, but at the delivered size the contour spacing is drawn at a quarter of the width the figure actually has, which is why the near-coincident blue and grey lines need looking at rather than reading at a glance. Non-blocking: every contour is still resolvable."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is not a restatement of a title. The figure carries no title, and the caption states the encoding (solid blue solved, dashed grey oracle, black vessel), the shared physical level count, the meaning of the marker colours, the terminal residual 1.0349e-2 with converged=false, and the caveat that close contour overlap does not imply convergence. It is accurate about what is drawn. Its marker sentence explains colour but not shape, which is finding 1.",
+    "finding_materiality": "Four non-blocking findings and no blocking finding. No label is clipped or overlapping, no text is unreadable, and no data are withheld: both series and both null-marker colours appear on the canvas. The null marks are identifiable by colour, if not by shape, and the caption supplies the residual numerically.",
+    "rendered_artifact": "The single attached figure was opened and inspected as an image at its native 1399x720. No SVG, and no image other than the named PNG, was opened, read, rendered or searched.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261029T064557146508-review-of-bank-newton-step-425d44581fee-figure",
+  "reviewed_base_sha": "c8e424a78957b379be997296e09e374ee6ba6a10",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path-newton/bank-newton-step-stalled.svg"
+  ],
+  "reviewed_head_sha": "425d44581fee3c17f335358fed320009e7f845e8",
+  "reviewed_run_id": "r-20261028T210713789452-bank-newton-step",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: readable at a glance; the solid blue solved contours and the dashed grey analytic contours separate wherever the two fields differ, and both frameless legend labels read about 14 px high on the 1399 px render, but the four null marks are a triangle and a cross with no key in the figure or caption, recorded as finding 1",
+    "RUBRIC data_ink: pass; the canvas carries only eight contour levels drawn twice, the vessel outline, four null marks and two legend swatches",
+    "RUBRIC decoration: pass; white background, axes off, no grid, no spine or frame and a frameless legend are all absent of styling",
+    "RUBRIC contrast: pass; legend text is near-black on white, the blue contour stroke is about 5.4:1 and the grey dashed stroke about 7.4:1 against the background",
+    "RUBRIC table_form: pass; poloidal flux contours and stationary-point positions are a spatial relationship, not tabular information",
+    "RUBRIC label_collision: pass; the legend text occupies x 465-930 of 1399 and y 24-43, well inside the canvas and clear of the data, and no text sits over a contour; the only overlap is the null-marker composite recorded as finding 2"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T06:56:09.532546+00:00",
+  "total": null
+}

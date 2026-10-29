@@ -1,0 +1,95 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "42: x64 guard fails when the configured dtype flag is false.",
+    "43,68,86: analytic constants fail when the corresponding boundary or interior moment is wrong.",
+    "44,69,111,147,275: finite differences fail when the moving-boundary or JVP derivative disagrees with an independently recomputed perturbed geometry or residual.",
+    "45,87,88: zero-moment checks fail when a symmetric fixture acquires an unintended moment.",
+    "154: known diagonal spectrum fails if the condition estimator returns a value other than four.",
+    "169: NumPy solve fails if Krylov returns the wrong solution; 170 alone can follow its supplied tolerance and is flagged.",
+    "276: fixed -27 oracle fails when the mock JVP loses a flux or level channel; the recorded booking-drop mutation demonstrates this.",
+    "280-282: dense matrix action fails if it differs from the separately assembled mock JVP; 291-294 similarly checks constrained-current coupling but shares the mock tangent and lacks a finite-difference oracle.",
+    "302: returned balance factors must reconstruct the returned balanced matrix; 303 independently requires a smaller condition number for the given diagonal case."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T06:56:01Z",
+  "dispatched_at": "2026-10-29T06:45:43Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/after-suite-dense/summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/baseline-suite/summary.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/negative-control.log"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html",
+      "id": "f1733bd5315",
+      "line": 39,
+      "severity": "blocking",
+      "text": "The diverted solve stalls at 0.01034894 versus 1e-10, warm wall is 342 ms versus 0.5 ms, and the converged-state, launch-count, cold-compile, and executable-size gates remain unmet."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_step/measure.py",
+      "id": "f5a9ca88446",
+      "line": 198,
+      "severity": "blocking",
+      "text": "The gate invokes only the bank step, so it never compares its update from the same iterate with the present route at the two required valid 550-cell states."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f447202d6e9",
+      "line": 297,
+      "severity": "blocking",
+      "text": "No added assertion invokes newton_step or fails when its dense update, residual, or equilibration regresses; component checks do not protect the delivered step."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f5c8132d983",
+      "line": 493,
+      "severity": "non-blocking",
+      "text": "_krylov_solve duplicates the GMRES capability in nova/equilibrium/fixed_point.py:2227; exempted because the delivered dense path never calls this helper."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "fc72bed89e3",
+      "line": 170,
+      "severity": "non-blocking",
+      "text": "The asserted residual is the same solver-returned quantity checked against the tolerance passed at line 165, so a solver returning that tolerance would keep this assertion green; exempted because the independent NumPy solution comparison at line 169 protects this case's update."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all 13 commit subjects and per-commit path changes from c8e424a78957b379be997296e09e374ee6ba6a10 to 425d44581fee3c17f335358fed320009e7f845e8; nova/equilibrium/support_read.py:238-586 contains the analytic dense step and tests/test_bank_newton_step.py:22-303 contains its added assertions.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html \u00a73 requires same-iterate route agreement, 1e-10 residual, 0.5 ms warm wall, compile and kernel limits, and trial plus converged JVP; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:20-39 records only a passing balanced trial JVP and a stalled 342 ms step.",
+    "goal": "docs/plans/sub-millisecond-forward-path.html \u00a73 asks for a bank-backed fast Newton update; nova/equilibrium/support_read.py:546 adds one, but docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:39 records unmet convergence and speed.",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/manifest.md records 13 commits, base and head suite receipts with zero failures, the negative-control log, and the unsatisfied solve and speed gates.",
+    "write_paths": "the source manifest's orientation_write_paths in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/manifest.md includes all 12 paths in the base-to-head diff."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_step.py:275-276 has an independent finite-difference and constant oracle and the booking-drop mutation fails, but the file has no assertion on newton_step at nova/equilibrium/support_read.py:546.",
+    "evidence": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:20-39 records a passing balanced trial JVP and failed nonlinear gate, but the required present-route update, converged JVP, launch count, and cold compile are absent.",
+    "fit": "nova/equilibrium/support_read.py:238-586 extends the existing support-read owner beside read_and_book and adds no forbidden source name.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:546 implements a dense step, while docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:31-39 records a 0.01034894 stall and 342 ms warm wall.",
+    "reuse": "nova/equilibrium/support_read.py:493 duplicates the GMRES and Arnoldi solve capability already owned by nova/equilibrium/fixed_point.py:2099-2457; the addition neither extends nor wraps that owner.",
+    "scope_discipline": "the base-to-head diff's 12 paths are all declared in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/sub-millisecond-forward-path.html \u00a73 asks for a bank-backed fast Newton update; nova/equilibrium/support_read.py:546 adds one, but docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:39 records unmet convergence and speed.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html \u00a73 requires same-iterate route agreement, 1e-10 residual, 0.5 ms warm wall, compile and kernel limits, and trial plus converged JVP; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:20-39 records only a passing balanced trial JVP and a stalled 342 ms step.\nVERDICT write_paths: the source manifest's orientation_write_paths in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/manifest.md includes all 12 paths in the base-to-head diff.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/manifest.md records 13 commits, base and head suite receipts with zero failures, the negative-control log, and the unsatisfied solve and speed gates.\nVERDICT diff: read all 13 commit subjects and per-commit path changes from c8e424a78957b379be997296e09e374ee6ba6a10 to 425d44581fee3c17f335358fed320009e7f845e8; nova/equilibrium/support_read.py:238-586 contains the analytic dense step and tests/test_bank_newton_step.py:22-303 contains its added assertions.\nCALL_SITES: none\nSCORE goal_fidelity: 5\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:546 implements a dense step, while docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:31-39 records a 0.01034894 stall and 342 ms warm wall.\nSCORE evidence: 7\nJUSTIFICATION evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:20-39 records a passing balanced trial JVP and failed nonlinear gate, but the required present-route update, converged JVP, launch count, and cold compile are absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the base-to-head diff's 12 paths are all declared in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/manifest.md:3.\nSCORE durability: 10\nJUSTIFICATION durability: tests/test_bank_newton_step.py:275-276 has an independent finite-difference and constant oracle and the booking-drop mutation fails, but the file has no assertion on newton_step at nova/equilibrium/support_read.py:546.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/support_read.py:238-586 extends the existing support-read owner beside read_and_book and adds no forbidden source name.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/support_read.py:493 duplicates the GMRES and Arnoldi solve capability already owned by nova/equilibrium/fixed_point.py:2099-2457; the addition neither extends nor wraps that owner.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:39 blocking: The diverted solve stalls at 0.01034894 versus 1e-10, warm wall is 342 ms versus 0.5 ms, and the converged-state, launch-count, cold-compile, and executable-size gates remain unmet.\nFINDING scripts/prototypes/bank_newton_step/measure.py:198 blocking: The gate invokes only the bank step, so it never compares its update from the same iterate with the present route at the two required valid 550-cell states.\nFINDING tests/test_bank_newton_step.py:297 blocking: No added assertion invokes newton_step or fails when its dense update, residual, or equilibration regresses; component checks do not protect the delivered step.\nFINDING nova/equilibrium/support_read.py:493 non-blocking: _krylov_solve duplicates the GMRES capability in nova/equilibrium/fixed_point.py:2227; exempted because the delivered dense path never calls this helper.\nFINDING tests/test_bank_newton_step.py:170 non-blocking: The asserted residual is the same solver-returned quantity checked against the tolerance passed at line 165, so a solver returning that tolerance would keep this assertion green; exempted because the independent NumPy solution comparison at line 169 protects this case's update.",
+  "review_run_id": "r-20261029T064352171540-review-of-bank-newton-step-425d44581fee",
+  "reviewed_base_sha": "c8e424a78957b379be997296e09e374ee6ba6a10",
+  "reviewed_head_sha": "425d44581fee3c17f335358fed320009e7f845e8",
+  "reviewed_run_id": "r-20261028T210713789452-bank-newton-step",
+  "scores": {
+    "durability": 10,
+    "evidence": 7,
+    "fit": 17,
+    "goal_fidelity": 5,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T07:05:52.258225+00:00",
+  "total": 64
+}

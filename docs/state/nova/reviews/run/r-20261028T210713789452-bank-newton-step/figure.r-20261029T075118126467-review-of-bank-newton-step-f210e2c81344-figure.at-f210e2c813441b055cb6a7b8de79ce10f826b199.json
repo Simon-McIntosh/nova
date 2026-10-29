@@ -6,7 +6,7 @@
     "image-0.png (1399x720, attached to this review run)": "docs/figures/sub-millisecond-forward-path-newton/bank-newton-step-stalled.svg"
   },
   "attachment_note": "The attached raster /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T075118126467-review-of-bank-newton-step-f210e2c81344-figure/image-0.png was opened with Read at native 1399x720 and judged directly as an image. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that named PNG was opened or inspected; region crops were written to the run's scratch directory under /tmp and re-opened there, and they are magnifications of the same PNG rather than new renders. Provenance is by construction: the reviewed head's fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html carries exactly one figure, whose img src is that path, and the 1399x720 size matches the 14x7.2 in canvas at 100 dpi that scripts/prototypes/bank_newton_step/render.py declares. The reviewed base c8e424a789 is confirmed an ancestor of the reviewed head (git merge-base --is-ancestor, exit 0; 22 commits between them). The figure blob and the renderer blob are byte-identical at this head and at the earlier reviewed head 425d44581fee (b856e66e8149 for the figure, 63a7c03c26e8 for render.py), and the caption line is unchanged, so the artwork judged here is the same artwork the earlier figure review judged.",
-  "completed_at": "",
+  "completed_at": "2026-10-29T08:01:31.435Z",
   "dispatched_at": "2026-10-29T07:53:02Z",
   "figure_checks": {
     "clipping": "No ink touches a canvas edge: the full ink bounding box is x 465-930 of 1399 and y 24-689 of 720, so every mark sits well inside the frame.",
@@ -92,6 +92,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-29T08:01:36.977394+00:00",
+  "timestamp": "2026-10-29T08:03:57.194695+00:00",
   "total": null
 }

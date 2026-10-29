@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-newton-converge-landing">Bank Newton convergence audit</h1>
-<p id="bank-newton-converge-summary">The bank's own equation is the selected target. Its baseline frozen-read step stalls, but the repaired saddle geometry Jacobian and dense assembly now converge the diverted 550-cell seed with a fresh read at every step: five accepted steps reach a residual of 1.53e-11. The axis and boundary flux meet the analytic-oracle precision budget. The warm step remains 370 ms, above the section's 0.5 ms performance bound, and launch count is unmeasured. Production-route parity was dropped because the routes discretise differently.</p>
+<p id="bank-newton-converge-summary">The bank's own equation is the selected target. Its baseline frozen-read step stalls, but the repaired saddle geometry Jacobian and dense assembly now converge the diverted 550-cell seed with a fresh read at every step: three accepted steps reach a residual of 1.00e-11. The axis, diverted X-point and boundary flux meet the analytic-oracle precision budget. The warm step remains 366 ms, above the section's 0.5 ms performance bound, and launch count is unmeasured. Production-route parity was dropped because the routes discretise differently.</p>
 
 <section id="bank-newton-converge-parity">
 <h2>Same-iterate systems</h2>
@@ -55,11 +55,11 @@
 </tbody></table>
 <p>The first outer probe double-applied a displacement in its own tracking helper; its red log is retained separately and excluded from the method result. The corrected plain and damped runs both ended nonzero. The node's two-failure stop rule now applies to this repair path.</p>
 <table id="bank-newton-converge-cost"><thead><tr><th>Measure</th><th>Result</th><th>Gate</th></tr></thead><tbody>
-<tr><td>Median warm bank step, excluding read</td><td>370.02 ms over four warm repaired steps</td><td>0.5 ms</td></tr>
+<tr><td>Median warm bank step, excluding read</td><td>366.42 ms over two warm repaired steps in the repeat</td><td>0.5 ms</td></tr>
 <tr><td>Kernel launches per step</td><td>not measured</td><td>at most 100</td></tr>
 <tr><td>Converged contour panel against oracle</td><td>rendered and visually reviewed below</td><td>required for landing</td></tr>
 </tbody></table>
-<p id="bank-newton-converge-blocker">The solved-equation and oracle gates now pass. The remaining section work is the 0.5 ms warm-step bound, a launch count and executable cost measurements; the measured 370.02 ms warm median does not meet the bound.</p>
+<p id="bank-newton-converge-blocker">The solved-equation and oracle gates now pass. The dense geometry response still invokes JAX directional differentiation for each selected input channel. That violates the section's no-per-step-autodiff design and the measured 366.42 ms warm median does not meet 0.5 ms. Removing these calls requires explicit derivatives through the piecewise Bell Hessian, saddle normal form, cubic edge intersections and moving rings, followed by a new performance measurement; this repair round does not claim that design is complete.</p>
 </section>
 
 <section id="bank-newton-converge-geometry">
@@ -85,13 +85,12 @@
 <h2>Fresh-read convergence and analytic oracle</h2>
 <table id="bank-newton-converge-steps"><thead><tr><th>Accepted step</th><th>Step length</th><th>Tracked residual</th><th>Fresh residual</th></tr></thead><tbody>
 <tr><td>Seed</td><td>—</td><td>—</td><td>0.0996264499</td></tr>
-<tr><td>1</td><td>1</td><td>0.0382396267</td><td>0.000328407148</td></tr>
-<tr><td>2</td><td>1</td><td>0.000252674594</td><td>1.64420005e-7</td></tr>
-<tr><td>3</td><td>0.5</td><td>1.10501503e-7</td><td>8.22100157e-8</td></tr>
-<tr><td>4</td><td>0.25</td><td>1.02762524e-7</td><td>6.16575108e-8</td></tr>
-<tr><td>5</td><td>1</td><td>1.64420007e-7</td><td>1.53193014e-11</td></tr>
+<tr><td>1</td><td>1</td><td>0.0382396266</td><td>0.000328407160</td></tr>
+<tr><td>2</td><td>1</td><td>0.000252892996</td><td>1.64420063e-7</td></tr>
+<tr><td>3</td><td>1</td><td>2.17163489e-7</td><td>1.00328634e-11</td></tr>
 </tbody></table>
-<p>Every fresh read was valid. The terminal fresh residual is below 1e-10. The axis is 7.6931 µm from the analytic oracle, or 1.0477e-5 of the 0.73427 m minor radius against a 5e-4 bound. The boundary flux differs by 9.2937e-7 Wb, or 2.5906e-5 of the 0.0358743 Wb oracle span against a 1e-4 bound.</p>
-<figure id="bank-newton-converge-panel"><img src="/nova/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg" alt="Converged bank and analytic poloidal flux line contours inside the wall, with both axis and saddle sets marked"><figcaption>Diverted 550-cell fresh-read solution after five accepted Newton steps: fresh residual 1.53e-11, converged true. Bank flux is solid blue; the analytic oracle is dashed grey on the same ψ levels, −0.060194, −0.045963, −0.031731, −0.017500, −0.003269, 0.010962 and 0.025193 Wb. The black outline is the wall. The bank axis is a filled blue triangle and its admitted saddle a filled blue cross; the analytic axis is an outlined grey triangle and its saddle an outlined grey diamond. The wider outlines keep nearly coincident null sets separately legible.</figcaption></figure>
+<p>Every fresh read was valid. The terminal fresh residual is below 1e-10. The axis is 7.6931 µm from the analytic oracle, or 1.0477e-5 of the 0.73427 m minor radius against a 5e-4 bound. The diverted saddle is 6.7955 µm from the analytic X-point, or 9.2548e-6 of that radius against the same bound. The boundary flux differs by 9.2937e-7 Wb, or 2.5906e-5 of the 0.0358743 Wb oracle span against a 1e-4 bound.</p>
+<figure id="bank-newton-converge-panel"><img src="/nova/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg" alt="Converged bank and analytic poloidal flux line contours inside the wall, with both axis and saddle sets marked"><figcaption>Diverted 550-cell fresh-read solution after three accepted Newton steps: fresh residual 1.00e-11, converged true. Bank flux is solid blue; the analytic oracle is dashed grey on the same ψ levels, −0.060194, −0.045963, −0.031731, −0.017500, −0.003269, 0.010962 and 0.025193 Wb. The black outline is the wall. The bank axis is a filled blue triangle and its admitted saddle a filled blue cross; the analytic axis is an outlined grey triangle and its saddle an outlined grey diamond. The wider outlines keep nearly coincident null sets separately legible.</figcaption></figure>
+<p id="bank-newton-converge-review">The fresh-read directional gate now requires a relative error at most 1e-6 at both the diverted trial and truly converged states. Best central-difference errors are 1.03e-7 and 5.98e-7 respectively; the frozen tangent differs by about 0.803 at both. The independent solve test passes on titan. A scratch mutation that removes the geometry tangent from both dense and vector paths leaves the matrix self-consistency test green but makes the fresh-read solve test fail, proving the latter guards the missing response. The analytic X-point check is also asserted in the solve and recorded above.</p>
 </section>
 </main></body></html>

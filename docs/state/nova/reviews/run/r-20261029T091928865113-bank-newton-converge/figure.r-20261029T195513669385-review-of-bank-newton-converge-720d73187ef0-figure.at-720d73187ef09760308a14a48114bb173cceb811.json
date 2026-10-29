@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T19:56:15Z",
+  "figures": [
+    {
+      "caption": "Diverted 550-cell fresh-read solution after three accepted Newton steps: fresh residual 1.00e-11, converged true. Bank flux is solid blue; the analytic oracle is dashed grey on the same \u03c8 levels, \u22120.060194, \u22120.045963, \u22120.031731, \u22120.017500, \u22120.003269, 0.010962 and 0.025193 Wb. The black outline is the wall. The bank axis is a filled blue triangle and its admitted saddle a filled blue cross; the analytic axis is an outlined grey triangle and its saddle an outlined grey diamond. The wider outlines keep nearly coincident null sets separately legible.",
+      "path": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T195513669385-review-of-bank-newton-converge-720d73187ef0-figure/image-0.png",
+      "rubric": {
+        "contrast": "pass: the legend text renders at pure black (0,0,0) on pure white, the only text in the figure. The oracle grey #676767 measures 5.65:1 and the bank blue #3366CC 5.37:1 against white, both above the 4.5:1 a 14 pt label needs, and the two series are separated by colour and by dash, so neither depends on lightness alone.",
+        "data_ink": "pass: the picture is two contour families, one wall outline and four null marks, with no gridline, tick, tick label, spine, title or annotation. A colour inventory of the panel body returns exactly three opaque inks - the oracle/wall grey (103,103,103) at 4788 px, the bank blue (51,102,204) at 2209 px and black (0,0,0) at 408 px - plus blue-white anti-aliasing tints that are line edges (203,241,242-family) rather than a fill: the largest tint holds only 467 px of the 188370 px body.",
+        "decoration": "pass: no gradient, background fill, band, shadow or themed styling anywhere in the render; the poloidal axes are off, so no furniture competes with the contours.",
+        "label_collision": "pass: the only text is the seven-entry figure legend, whose ink spans x 309-1087 and y 27-76 of the 1399x720 canvas - well inside every edge, with nothing clipped. The legend fills two row bands, y 27-52 and y 61-76, and no glyph in one band touches the other; columns are separated by at least 39 px of white (row 1 ends at x 466, the next swatch starts at x 505). No text sits over the data, which begins at row 138.",
+        "legibility": "pass at the delivered 1399x720 render: the seven shared \u03c8 levels read as one nested family of closed contours inside the wall and the two series are separable along their whole length; both null pairs are identifiable - an ASCII classification of the rendered pixels at the axis (x 704-744, y 372-404) shows a grey (103,103,103) outline enclosing a filled blue (51,102,204) triangle, and at the saddle (x 638-678, y 622-652) a grey diamond outline enclosing a filled blue cross, so both sets are visible at the same pixel position 7.7 \u03bcm apart. Two costs are recorded as non-blocking findings rather than folded into this verdict: the solid blue stroke is chopped into short beads by the overlying dashes, and the panel occupies a quarter of its canvas.",
+        "table_form": "pass: this is a spatial object - two flux fields and their stationary points against a wall - where position carries the meaning, and no part of it is a list of numbers a table would serve better; the seven \u03c8 levels the caption lists stay in the caption."
+      },
+      "script": "scripts/prototypes/bank_newton_converge/render_panel.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_newton_converge/render_panel.py",
+      "id": "fda9dec34a5",
+      "line": 107,
+      "severity": "non-blocking",
+      "summary": "The analytic oracle is drawn after the bank field (the reference call carries zorder=4 against the solved call's zorder=3) and only 0.4 pt narrower, so the reference sits on top of the subject and, wherever the two fields coincide - which is most of the panel, since agreement is the record's point - the grey dashes chop the solid blue into short beads. Measured on the render: the blue ink forms 821 connected components, 815 of them under 60 px, and the largest blue object in the panel body is 67 px (x 759-787, y 519-542); the blue only runs continuously where the two series diverge, along the outer right. The legend keys the bank flux as a solid swatch and the caption says 'Bank flux is solid blue', which is not the stroke a reader meets along most of the contour. Both series stay visible and their agreement is legible - hence not blocking - but the overlap region reads as one two-colour beaded curve rather than as a solved field measured against a reference, and the repository's layering rule puts the series the figure is about on the top layer."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_converge/render_panel.py",
+      "id": "fb2430e6953",
+      "line": 85,
+      "severity": "non-blocking",
+      "summary": "The canvas is the 14x7.2 in slide default while the plasma is tall and narrow and the axes are set to equal aspect, so the drawn panel occupies only x 529-874 of the 1399 px width - 345 px, 24.7 per cent - with about 525 px of blank white on each side and only y 138-684 carrying data. Served in the reckon column at roughly 900 px, the panel scales to about 222 px wide, at which the two null sets the caption spends a sentence distinguishing (a 7 pt blue triangle inside a 14 pt grey outline; a filled blue cross inside a grey diamond) fall to a few pixels each and the beading of the blue contour becomes hard to read as beading. The figure reads correctly at its intrinsic size, so this does not block; sizing the canvas to the content would let the panel use the page."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_converge/render_panel.py",
+      "id": "f6268d72e46",
+      "line": 196,
+      "severity": "non-blocking",
+      "summary": "The figure legend asks for four columns for seven entries, and a matplotlib figure legend fills column-major, so the delivered layout is row 1 = bank flux | wall | oracle axis | oracle saddle (ink at x 309, 505, 702, 911) and row 2 = oracle flux | bank axis | bank saddle (x 311, 519, 705), leaving the fourth column empty on the second row. The two entries a reader most needs to hold apart, bank axis and oracle axis, therefore land three positions apart in different rows and different columns, and the ragged last column draws the eye to an isolated entry. Ordering the handles so each bank mark sits beside its oracle counterpart, or choosing a column count that divides seven, would make the legend read as pairs while keeping the single figure-level legend the style requires. No entry collides or is clipped, so this does not block."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T195513669385-review-of-bank-newton-converge-720d73187ef0-figure",
+  "reviewed_base_sha": "b97064dab62d265248b69294573af8ce05f01780",
+  "reviewed_head_sha": "720d73187ef09760308a14a48114bb173cceb811",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T20:03:57.079888+00:00",
+  "total": null
+}

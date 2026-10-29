@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "fresh_gate.py:81 fails when either state read is invalid; :98 fails if either perturbed read is invalid; :123 fails when every tested central-difference length exceeds 1e-6 in the trial or converged state. Removing the geometry response produces a roughly 0.803 frozen-relative discrepancy in repair-gate-final.log:5-11.",
+    "fresh_solve.py:238 fails when the admitted saddle lies more than 5e-4 minor radii from the fixture's analytic X-point; this is independent of support_read but the fixture provides a prescribed point, not the plan's direct Newton solve.",
+    "tests/test_bank_newton_converge.py:154-160 fails if fresh_solve raises or its saved convergence, residual, axis, saddle or flux ratios miss their fixed limits; repair-negative.log:159-160 shows the solve test red after both dense and vector geometry responses are removed while the matrix test stays green.",
+    "tests/test_bank_newton_converge.py:156-160 reads the same state artifact that fresh_solve writes; the thresholds are fixed independent constants, but the oracle ratios and reference choice are supplied wholly by the code under test.",
+    "negative_review.sh:40-43 fails if the parent directional gate omits either state or exceeds 1e-6; repair-direction-negative.log:26 shows missing state, while repair-oracle-negative.log has no terminal test result and cannot evidence its separate oracle parent replay.",
+    "No added assertion literally compares a code result with the identical value passed into that call; the oracle test's two sides can nevertheless move together through topology.read."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T20:04:25Z",
+  "dispatched_at": "2026-10-29T19:55:05Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/repair-suite-titan.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/matrix-head-absolute.log",
+    "directional_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/repair-gate-final.log",
+    "fresh_solve": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/repair-solve.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/repair-negative.log"
+  },
+  "findings": [
+    {
+      "file": "tests/test_bank_newton_converge.py",
+      "id": "f629dfac993",
+      "line": 151,
+      "severity": "blocking",
+      "text": "The new test claims accuracy against an analytic oracle but calls fresh_solve.run, whose axis and boundary-flux references come from topology.read at fresh_solve.py:195; a shared read error can move both sides together, and the plan requires an independent direct Newton reference for the analytic flux."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "This revision-specific prototype control is already executed and does not affect the product path.",
+      "file": "scripts/prototypes/bank_newton_converge/negative_geometry.sh",
+      "id": "f5aa83239f2",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "The scratch-copy, mutation and pytest harness duplicates negative_gate.sh rather than adding a selectable mutation to its existing runner; two nearly identical control scripts now need parallel maintenance."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production route calls the prototype fresh_gate or fresh_solve at 720d73187ef0; git grep for newton_step found only prototype and test callers.",
+    "diff": "Read the eight commits from 0618efbd8462 through 720d73187ef0 and their nine-file delta; fresh_gate.py:79-123 adds a two-state directional limit, fresh_solve.py:205-239 adds saddle distance, and tests/test_bank_newton_converge.py:150-160 adds a solve test.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html:100-104 requires independent analytic-state accuracy, two-state 1e-6 Jacobian agreement and a 0.5 ms step; repair-gate-final.log:4-12 meets the directional limit, but fresh_solve.py:195 uses topology.read for axis and flux and repair-solve.log:19 misses the wall limit.",
+    "goal": "The source brief asks for a fresh-read converged bank step; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-converge.html:14 and repair-solve.log:19 record a three-step 1.00e-11 solve while the 366.42 ms step remains above the plan bound.",
+    "manifest": "The source manifest.md records the eight repair commits, complete baseline_suite and after_suite arms, zero failure ids, repair-solve.log, repair-gate-final.log and the unresolved performance and launch-count gaps.",
+    "write_paths": "The source manifest.md orientation_write_paths include the evidence fragment, figure directory, prototype directory and test file; git diff --name-status bddf5ae85a04..720d73187ef0 lists nine paths, all inside those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_converge.py:154-160 fails when the scratch geometry mutation makes the solve diverge, as repair-negative.log:159-160 shows, but its saved oracle ratios are computed inside the called prototype.",
+    "evidence": "repair-gate-final.log:4-12 and repair-solve.log:18-21 carry passing numerical receipts, but fresh_solve.py:195 obtains the axis and flux reference from topology.read rather than a direct Newton solve of analytic flux.",
+    "fit": "fresh_gate.py:79-123 follows the existing prototype's read and tangent idiom and introduces no forbidden name; the source fragment at bank-newton-converge.html:66 honestly retains the design and timing gap.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-converge.html:14 records converged fresh reads and the X-point result, while :66 states the unchanged autodiff and 366.42 ms wall gap.",
+    "reuse": "negative_geometry.sh:5-33 repeats the scratch-copy, source-mutation and pytest-run harness already owned by scripts/prototypes/bank_newton_converge/negative_gate.sh:5-29 instead of extending it.",
+    "scope_discipline": "The nine paths in git diff bddf5ae85a04..720d73187ef0 fall under the source manifest.md orientation_write_paths, including tests/test_bank_newton_converge.py and the two new negative-control scripts."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for a fresh-read converged bank step; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-converge.html:14 and repair-solve.log:19 record a three-step 1.00e-11 solve while the 366.42 ms step remains above the plan bound.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html:100-104 requires independent analytic-state accuracy, two-state 1e-6 Jacobian agreement and a 0.5 ms step; repair-gate-final.log:4-12 meets the directional limit, but fresh_solve.py:195 uses topology.read for axis and flux and repair-solve.log:19 misses the wall limit.\nVERDICT write_paths: The source manifest.md orientation_write_paths include the evidence fragment, figure directory, prototype directory and test file; git diff --name-status bddf5ae85a04..720d73187ef0 lists nine paths, all inside those grants.\nVERDICT manifest: The source manifest.md records the eight repair commits, complete baseline_suite and after_suite arms, zero failure ids, repair-solve.log, repair-gate-final.log and the unresolved performance and launch-count gaps.\nVERDICT diff: Read the eight commits from 0618efbd8462 through 720d73187ef0 and their nine-file delta; fresh_gate.py:79-123 adds a two-state directional limit, fresh_solve.py:205-239 adds saddle distance, and tests/test_bank_newton_converge.py:150-160 adds a solve test.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-converge.html:14 records converged fresh reads and the X-point result, while :66 states the unchanged autodiff and 366.42 ms wall gap.\nSCORE evidence: 12\nJUSTIFICATION evidence: repair-gate-final.log:4-12 and repair-solve.log:18-21 carry passing numerical receipts, but fresh_solve.py:195 obtains the axis and flux reference from topology.read rather than a direct Newton solve of analytic flux.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The nine paths in git diff bddf5ae85a04..720d73187ef0 fall under the source manifest.md orientation_write_paths, including tests/test_bank_newton_converge.py and the two new negative-control scripts.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_bank_newton_converge.py:154-160 fails when the scratch geometry mutation makes the solve diverge, as repair-negative.log:159-160 shows, but its saved oracle ratios are computed inside the called prototype.\nSCORE fit: 16\nJUSTIFICATION fit: fresh_gate.py:79-123 follows the existing prototype's read and tangent idiom and introduces no forbidden name; the source fragment at bank-newton-converge.html:66 honestly retains the design and timing gap.\nSCORE reuse: 5\nJUSTIFICATION reuse: negative_geometry.sh:5-33 repeats the scratch-copy, source-mutation and pytest-run harness already owned by scripts/prototypes/bank_newton_converge/negative_gate.sh:5-29 instead of extending it.\nFINDING tests/test_bank_newton_converge.py:151 blocking: The new test claims accuracy against an analytic oracle but calls fresh_solve.run, whose axis and boundary-flux references come from topology.read at fresh_solve.py:195; a shared read error can move both sides together, and the plan requires an independent direct Newton reference for the analytic flux.\nFINDING scripts/prototypes/bank_newton_converge/negative_geometry.sh:5 non-blocking: The scratch-copy, mutation and pytest harness duplicates negative_gate.sh rather than adding a selectable mutation to its existing runner; two nearly identical control scripts now need parallel maintenance.",
+  "review_run_id": "r-20261029T195407180570-review-of-bank-newton-converge-720d73187ef0",
+  "reviewed_base_sha": "bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2",
+  "reviewed_head_sha": "720d73187ef09760308a14a48114bb173cceb811",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T20:05:47.300884+00:00",
+  "total": 82
+}

@@ -80,21 +80,22 @@
   64.34, 64.45 and 64.66 ms and the two never separate, so the conditional
   moves nothing at either batch.</p>
 
-  <p>The full series at 64 cells is 44.8, 64.5, 74.9 and 99.3 ms per call at
-  one, four, sixteen and sixty-four slices, which is 44.8, 16.1, 4.7 and
-  1.55 ms per slice. The wall is therefore a fixed cost of about 44 ms per
-  call that the batch never sheds, plus a marginal 0.5 ms per slice that the
-  unbatched read already pays at 1.38 ms. Batching this read shares arithmetic
-  but cannot share that fixed cost, which is where the bound is lost, and it
-  is the fixed cost that the profiler would have to name. Passing
-  <code>rebuild=False</code> therefore cannot fix it: the batched read pays
-  more than a full rebuild while doing no rebuild, and the mechanism is
-  inside the solve rather than the carried decision. The column counts are
-  HLO op classes read from the lowered module — <code>while</code> loops rise
-  from 81 to 118 under <code>vmap</code> — and are not kernel launches; this
-  node carries no profiler (no <code>nsys</code>, no <code>ncu</code>, no
-  <code>tensorflow</code> for the xplane format), so a launch count remains to
-  be taken elsewhere.</p>
+  <p>The attribution is made on the series measured at the diverted 550-cell
+  state, which is the state the bound is stated at. Its per-call walls are
+  54.61, 80.95, 150.06 and 372.25 ms at one, four, sixteen and sixty-four
+  slices, so the increment from one to sixty-four slices is 317.64 ms over 63
+  slices: 5.04 ms of arithmetic per slice. The remaining 54.61 − 5.04 = 49.57
+  ms is a cost the call pays once whatever the batch holds, which spreads to
+  0.77 ms per slice at sixty-four and would still be 3.10 ms at sixteen. So
+  the 5.82 ms per slice at sixty-four slices is 5.04 ms of arithmetic plus the
+  fixed share, and no further batching closes it: the marginal 5.04 ms is
+  twenty-five times the 0.2 ms bound on its own. The 64-cell run above is a
+  controlled experiment that names the rebuild conditional as innocent, not
+  the place the attribution is made. Passing <code>rebuild=False</code>
+  therefore cannot fix it: at 550 cells the batched read pays more than a full
+  rebuild while doing no rebuild. The column counts are HLO op lines read from
+  the lowered module — <code>while</code> loops rise from 81 to 118 under
+  <code>vmap</code> — and are not kernel launches.</p>
 
   <p>Every column's instrument: the per-call and per-slice walls are
   <code>perf_counter</code> around a call closed by

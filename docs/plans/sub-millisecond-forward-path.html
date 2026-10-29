@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
@@ -190,6 +190,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261028T215104424875-tracked-read-h200" data-who="reckon-build" data-when="2026-10-29T08:31:12Z">
     <div class="r-comment-body"><p>§2 follow-on: fixed_points.nearest_cell now owns the one cell-selection rule (support_read.stationary_cells deleted) with tests/test_tracked_read.py passing 4 of 4 at base and at head; at the 550-cell diverted state on an H200 the steady tracked read is 1.225 ms over 805 launches with zero host-device copies, of which the stationary solve is 0.634-0.817 ms in 55 launches, so the 0.2 ms bound is not reachable by fusing the read alone and the residual belongs to the warm-started solve; the trial-state accuracy miss is attributed to the booked moments and the Bell interpolant, the gate reproduces it at 3 failed of 8 and the declared mutation fails 6 of 8 including both converged cases the head passes.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261029T101333107298-review-of-tracked-read-batch-6d2652aa00cd" data-who="reckon-build" data-when="2026-10-29T10:23:19.957Z">
+    <div class="r-comment-body"><p>reviewed r-20261029T090616166280-tracked-read-batch from 273ce05691c5dd25721267b1f26b60ad89081351 to 6d2652aa00cdd34ab589bbf5d9b04a60504228d4; six dimensions scored 14/12/18/11/18/19 (total 92) with six findings, one blocking: the rewritten boundary oracle in tests/test_tracked_read_accuracy.py has been executed at neither revision.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

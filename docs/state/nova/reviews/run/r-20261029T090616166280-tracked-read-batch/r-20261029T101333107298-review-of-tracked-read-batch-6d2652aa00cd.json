@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-29T10:23:19.957Z",
+  "dispatched_at": "2026-10-29T10:15:10Z",
+  "findings": [
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "f57473a38f1",
+      "line": 29,
+      "severity": "blocking",
+      "text": "the boundary oracle was rewritten to call reference.py and has been executed at neither revision (logs/accuracy_arm.log is EXIT=137, killed before collection), while the rewrite replaces the old coarse argmin(abs(psi - axis_flux)) plus ternary refinement, which could minimise, with an unconditional global wall maximum via polarity=1 and a different wall source (case[\"geometry\"].wall_points instead of _analytic_inputs), so the BOUNDARY_BUDGET assertion now measures a rule that no run has shown it still passes."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "id": "f304c4af280",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "the one-slice call is called launch-bound on the strength of \"807 launches in 54.6 ms is 68 us per launch\", but 68 us per launch is an order above launch latency and the same page gives the same launch count at 1.27 ms for the unbatched read, so the regime at batch 1 is unsupported by the fragment's own data; the done_when asks for exactly this per-batch classification."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/measure.py",
+      "id": "fb8488e984f",
+      "line": 53,
+      "severity": "non-blocking",
+      "text": "launches_per_call is a count of HLO text lines containing fusion(/custom-call(/call(, not measured kernel launches, and the fragment's \"launches\" column is read as a runtime count without stating the instrument."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "ff268ee15d6",
+      "line": 232,
+      "severity": "non-blocking",
+      "text": "the rebuild=False branch is exercised only by the prototype measure, so the one production change in this diff carries no test that fails if the branch is removed or inverted, and its contract (a caller that knows no lane rebuilds) is unchecked."
+    },
+    {
+      "file": "tests/test_tracked_read_batch.py",
+      "id": "fd7b9cf159b",
+      "line": 44,
+      "severity": "non-blocking",
+      "text": "the batch test asserts only that one compiled program is reused and never that the batched reading equals the single read, so a vmap that silently changes the reading passes; the owner of this pattern, tests/test_forward_census.py:296, asserts the parity as well."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/manifest.md",
+      "id": "f27cfe7af66",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "baseline_suite and after_suite both name logs/negative_control_gpu.log and both name revision 6029edb6b, so the added-failure derivation reads identical text and reports 0 added failures and neither arm is separately addressable, and the recorded arm revision is not the reviewed head 6d2652aa0."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to batch the tracked read over slices and measure the per-slice wall at batch 1/4/16/64 with launches and copy bytes; scripts/prototypes/tracked_read_batch/measure.py measures all four rows at the diverted 550-cell state and docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html tables them, but the brief's item (2) stage attribution and the cut of the largest arithmetic stage were not performed and nova/equilibrium/fixed_points.py, a declared write path, is untouched.\nVERDICT done_when: the done_when is the 0.2 ms per-slice bound over 16 or more slices; the landed record states the bound is unmet at every batch size (9.38 ms per slice at 16, 5.82 ms at 64) and the gate measures exactly that bound against the same numbers, so the measure is asserted rather than assumed.\nVERDICT write_paths: read the manifest's declared paths; the diff touches tests/test_tracked_read_accuracy.py, tests/test_tracked_read_batch.py, scripts/prototypes/tracked_read_batch/*, the evidence fragment and the figure, all inside the grants, plus nova/equilibrium/support_read.py which the brief explicitly authorised with a scope_note the manifest carries.\nVERDICT manifest: read; it records status complete, six commits, the per-slice numbers, gate_head.log 4 passed EXIT=0, the H200 measure job 1299957 EXIT=0, and discloses under outside_scope that the accuracy test could not execute (EXIT=137).\nVERDICT diff: read commit by commit against 273ce05691c5; the batch measurement and prototype check are new files, the accuracy test loses its own wall-extremum search, and support_read.read gains one additive keyword with the default unchanged.\nCALL_SITES: nova/equilibrium/forward.py imports nova.equilibrium.support_read but calls no read; the only callers of support_read.read at 6d2652aa0 are scripts/prototypes (bank_newton_step/measure.py:139, solve_options/*, support/read_route_rows.py) and tests (tests/test_support_read.py:51, tests/test_tracked_read_accuracy.py:113), so the additive keyword reaches no production runtime path.\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: the per-slice table at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:20 answers item (1) but the brief's conditional item (2) cut is absent and nova/equilibrium/fixed_points.py carries no change.\nSCORE evidence: 12\nJUSTIFICATION evidence: logs/h200b_1299957.log:6-9 records the four rows with EXIT=0 and I re-ran scripts/prototypes/tracked_read_batch/check_table.py against batch_rows.json and got keys=4 named=4 rows=4 stated=4 EXIT=0, but docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:39 labels the one-slice call launch-bound on 68 us per launch while the same page measures the same 805 launches at 1.27 ms.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path in git diff 273ce05691c5..6d2652aa0 is inside a declared grant, and the one exception, nova/equilibrium/support_read.py, is briefed and covered by the manifest's scope_note.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_tracked_read_batch.py:63 reddens on a per-call rebuild, which the mutant arm in logs/negative_control_gpu.log proves, but nova/equilibrium/support_read.py:232's rebuild=False branch is taken only by measure.py while every test calls batch_program with the default None, so deleting the branch reddens nothing.\nSCORE fit: 18\nJUSTIFICATION fit: the module, names and figure follow the surrounding idiom, including the established _cache_size probe that tests/test_forward_census.py:319 already uses and the nova.media.ink figure style, and no name carries a plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/prototypes/tracked_read_batch/reference.py:44 calls nova.geometry.select.host_wall_flux rather than forking a wall search, and check_table.py delegates to scripts/prototypes/carrier_identity_receipt/check_receipt_table.py, which I executed.\nFINDING tests/test_tracked_read_accuracy.py:29 blocking: the boundary oracle was rewritten to call reference.py and has been executed at neither revision (logs/accuracy_arm.log is EXIT=137, killed before collection), while the rewrite replaces the old coarse argmin(abs(psi - axis_flux)) plus ternary refinement, which could minimise, with an unconditional global wall maximum via polarity=1 and a different wall source (case[\"geometry\"].wall_points instead of _analytic_inputs), so the BOUNDARY_BUDGET assertion now measures a rule that no run has shown it still passes.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:39 non-blocking: the one-slice call is called launch-bound on the strength of \"807 launches in 54.6 ms is 68 us per launch\", but 68 us per launch is an order above launch latency and the same page gives the same launch count at 1.27 ms for the unbatched read, so the regime at batch 1 is unsupported by the fragment's own data; the done_when asks for exactly this per-batch classification.\nFINDING scripts/prototypes/tracked_read_batch/measure.py:53 non-blocking: launches_per_call is a count of HLO text lines containing fusion(/custom-call(/call(, not measured kernel launches, and the fragment's \"launches\" column is read as a runtime count without stating the instrument.\nFINDING nova/equilibrium/support_read.py:232 non-blocking: the rebuild=False branch is exercised only by the prototype measure, so the one production change in this diff carries no test that fails if the branch is removed or inverted, and its contract (a caller that knows no lane rebuilds) is unchecked.\nFINDING tests/test_tracked_read_batch.py:44 non-blocking: the batch test asserts only that one compiled program is reused and never that the batched reading equals the single read, so a vmap that silently changes the reading passes; the owner of this pattern, tests/test_forward_census.py:296, asserts the parity as well.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/manifest.md:15 non-blocking: baseline_suite and after_suite both name logs/negative_control_gpu.log and both name revision 6029edb6b, so the added-failure derivation reads identical text and reports 0 added failures and neither arm is separately addressable, and the recorded arm revision is not the reviewed head 6d2652aa0.\n",
+  "review_run_id": "r-20261029T101333107298-review-of-tracked-read-batch-6d2652aa00cd",
+  "reviewed_base_sha": "273ce05691c5dd25721267b1f26b60ad89081351",
+  "reviewed_head_sha": "6d2652aa00cdd34ab589bbf5d9b04a60504228d4",
+  "reviewed_run_id": "r-20261029T090616166280-tracked-read-batch",
+  "scores": {
+    "durability": 11,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T16:41:13.032638+00:00",
+  "total": 92
+}

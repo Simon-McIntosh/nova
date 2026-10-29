@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T10:17:48Z",
+  "figures": [
+    {
+      "caption": "Per-slice wall of the tracked read at the diverted 550-cell state on one H200, against the number of slices in the batch. The dotted line is the 0.2 ms bound; the series is the minimum of 20 steady-state calls at each batch size.",
+      "path": "docs/figures/sub-millisecond-forward-path/tracked-read-batch/per-slice-wall.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T101528758414-review-of-tracked-read-batch-6d2652aa00cd-figure/image-0.png",
+      "rubric": {
+        "contrast": "defect: the bound's grey text and dotted line are #929292 on white, a contrast ratio of about 3.1:1, below the 4.5:1 that 14 pt text needs; the one numeric label for the figure's central threshold is the faintest mark on the page",
+        "data_ink": "pass: one blue 3 pt series with markers carries the picture, its end value is directly labelled, and the only ruled element is the bound line itself",
+        "decoration": "pass: no gridlines, no background fill, no gradient and no shading; the top and right spines are absent and only the two scaled axes are drawn",
+        "label_collision": "pass: the direct label '9.379 ms at 16' clears both the line and its marker at batch 16, the bottom-left bound label clears the '1' tick label and the y-axis, and no text is clipped at any edge, with the x-axis label and the y-axis label complete",
+        "legibility": "defect: the four measured per-slice walls (54.6, 20.2, 9.38 and 5.82 ms at batches 1, 4, 16 and 64) read at a glance, but the 0.2 ms bound the figure and its caption turn on cannot be located: on a 0 to about 65 ms linear axis the dotted reference line falls inside the x-axis stroke, so a reader sees a second line hugging the baseline rather than a threshold 29x below the last point",
+        "table_form": "pass: four ordered batch sizes plotted as a falling trend, which is a relationship and not a table image; the same four rows are carried as a table above the figure in the fragment"
+      },
+      "script": "scripts/prototypes/tracked_read_batch/render.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/tracked_read_batch/render.py",
+      "id": "fabf8c1431e",
+      "line": 64,
+      "severity": "non-blocking",
+      "summary": "The 0.2 ms bound is drawn at y=0.2 on an axis whose top is max(per_slice)*1.2, about 65 ms, so the dotted reference line at line 51 renders inside the x-axis stroke and is indistinguishable from zero. The figure exists to show that no batch size reaches the bound, and the gap it is about - a factor of 29 at 64 slices, 47 at 16 - is the one quantity the picture cannot show; the caption's 'The dotted line is the 0.2 ms bound' points a reader at a line that looks like the axis itself. A log y-scale, or a stated break, would let the bound and the data share one panel; reported, not edited, under this review's read-only fence."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/render.py",
+      "id": "f47ac93c802",
+      "line": 56,
+      "severity": "non-blocking",
+      "summary": "The bound label is drawn in GREY (#929292) at 14 pt on white, a contrast ratio of about 3.1:1 against the 4.5:1 that text at that size needs to pass AA. Against the blue series and the dark tick labels the grey recedes as intended for a reference mark, but it is applied to text, and that text is the only place the reader is given the bound's value; the dotted line beside it inherits the same weakness."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T101528758414-review-of-tracked-read-batch-6d2652aa00cd-figure",
+  "reviewed_base_sha": "273ce05691c5dd25721267b1f26b60ad89081351",
+  "reviewed_head_sha": "6d2652aa00cdd34ab589bbf5d9b04a60504228d4",
+  "reviewed_run_id": "r-20261029T090616166280-tracked-read-batch",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T10:22:56.499976+00:00",
+  "total": null
+}

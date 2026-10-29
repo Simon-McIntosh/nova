@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_bank_newton_converge.py::test_small_dense_matrix_matches_full_fresh_residual"
+  ],
+  "assertion_audit": [
+    "tests/test_bank_newton_converge.py:199-201 fail for invalid setup or absent normal-form cells; these are positive controls for the synthetic fixture.",
+    "tests/test_bank_newton_converge.py:220-223 fail for invalid fresh perturbations or a zero observed derivative; line 227 fails when the dense column differs from central differences of a new read, and its recorded focused arms are red or timed out.",
+    "tests/test_bank_newton_converge.py:228 fails if the fresh and frozen columns coincide, but it alone does not establish agreement with the independent residual.",
+    "tests/test_bank_newton_converge.py:247-249 fail if oracle errors for the fixture's exact roots exceed 1e-10; line 250 moves with the supplied seeds and remains true if the helper simply returns them, so it does not guard direct Newton solving.",
+    "tests/test_bank_newton_converge.py:258-260 fail if an intentionally displaced read is reported as accurate, exercising the three error ratios independently of the test's exact read.",
+    "tests/test_bank_newton_converge.py:269-273 fail if the fresh solve marks itself unconverged, its measured residual exceeds 1e-10, or its saved axis, saddle or boundary ratios exceed their limits; the current-head test body has no completed passing gate.",
+    "scripts/prototypes/bank_newton_converge/fresh_gate.py:135 fails if either trial or converged directional discrepancy stays above 1e-6 over its independent fresh-read difference steps; repair-gate-final.log records 1.03e-7 and 5.98e-7."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T21:13:55Z",
+  "dispatched_at": "2026-10-29T21:04:11Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/small-fresh-gate-repeat.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/matrix-head-absolute.log",
+    "directional_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/repair-gate-final.log",
+    "earlier_focused_failure": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/small-fresh-gate.log",
+    "figure_preview": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/direct-oracle-panel-repeat-preview.png",
+    "four_test_pass": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/direct-oracle-gate-repeat.log",
+    "fresh_solve": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/repair-solve.log",
+    "geometry_negative": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/direct-geometry-negative.log",
+    "oracle_negative": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/direct-oracle-negative.log"
+  },
+  "findings": [
+    {
+      "file": "tests/test_bank_newton_converge.py",
+      "id": "f69de4c0e76",
+      "line": 227,
+      "severity": "blocking",
+      "text": "The current-head dense-column gate has no completed passing run: the earlier focused arm measured 3.45e-6 above the 1e-6 limit and the expanded arm timed out before its assertion, so the required full fresh-residual Jacobian agreement is unverified."
+    },
+    {
+      "file": "tests/test_bank_newton_converge.py",
+      "id": "f675767b06d",
+      "line": 250,
+      "severity": "blocking",
+      "text": "Returned analytic roots are compared with the exact fixture seeds supplied to analytic_oracle at line 246; replacing Newton with a function that echoes those seeds leaves this assertion green, while the parent-source negative control fails on ImportError before it exercises oracle behavior."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all nineteen commits from bddf5ae to f410e42 and their twelve changed paths; fresh_solve.py:32-55 adds an analytic-root wrapper, tests/test_bank_newton_converge.py:150-273 adds three tests, and the figure and fragment show the new comparison.",
+    "done_when": "Docs/plans/sub-millisecond-forward-path.html:101-105 requires a complete 1e-6 fresh-residual Jacobian check; tests/test_bank_newton_converge.py:227 adds it but small-fresh-gate-repeat.log ends in a 300 s timeout, with no passing current-head receipt.",
+    "goal": "The source brief and docs/plans/sub-millisecond-forward-path.html:96-105 require a fresh-read bank Newton solve and analytic oracle; fresh_solve.py:225-248 adds the direct reference while the recorded 366.42 ms step still misses the 0.5 ms bound.",
+    "manifest": "The source manifest.md records eleven commits after its own base, a passing four-test suite at 78f6b35, a complete baseline_suite with zero failures, and an after_suite with one failure at 7484ae5; it explicitly reports the current-head dense-column gate unverified.",
+    "write_paths": "The source manifest.md grants the bank prototype directory, its test, evidence fragment, and figure directory; git diff bddf5ae..f410e42 lists twelve files, all inside those paths."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_converge.py:250 compares returned roots to the same fixture seeds passed at line 246, so replacing direct Newton with a seed echo leaves the assertion green, while the independent column gate at line 227 has no passing current-head receipt.",
+    "evidence": "tests/test_bank_newton_converge.py:227 has a 1e-6 fresh-column assertion, yet small-fresh-gate.log reports 3.45e-6 and small-fresh-gate-repeat.log reports a timeout; repair-solve.log independently records the 1.003e-11 fresh residual.",
+    "fit": "scripts/prototypes/bank_newton_converge/fresh_solve.py:34-35 reuses the existing newton_reference helper and render_panel.py:98 uses the established contour drawer; the new test at line 213 exceeds its configured 300 s bound.",
+    "goal_fidelity": "scripts/prototypes/bank_newton_converge/fresh_solve.py:225-248 checks fresh convergence against analytic roots, but docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-converge.html:57-62 records a 366.42 ms warm step and no launch count.",
+    "reuse": "A capability search found direct analytic Newton in scripts/prototypes/tracked_read/measure.py:65 and contour drawing in nova/media/poloidal.py; fresh_solve.py:34-35 and render_panel.py:98 invoke those owners rather than duplicate them.",
+    "scope_discipline": "git diff bddf5ae..f410e42 changes only the twelve paths under the source manifest.md orientation_write_paths, including scripts/prototypes/bank_newton_converge and tests/test_bank_newton_converge.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief and docs/plans/sub-millisecond-forward-path.html:96-105 require a fresh-read bank Newton solve and analytic oracle; fresh_solve.py:225-248 adds the direct reference while the recorded 366.42 ms step still misses the 0.5 ms bound.\nVERDICT done_when: Docs/plans/sub-millisecond-forward-path.html:101-105 requires a complete 1e-6 fresh-residual Jacobian check; tests/test_bank_newton_converge.py:227 adds it but small-fresh-gate-repeat.log ends in a 300 s timeout, with no passing current-head receipt.\nVERDICT write_paths: The source manifest.md grants the bank prototype directory, its test, evidence fragment, and figure directory; git diff bddf5ae..f410e42 lists twelve files, all inside those paths.\nVERDICT manifest: The source manifest.md records eleven commits after its own base, a passing four-test suite at 78f6b35, a complete baseline_suite with zero failures, and an after_suite with one failure at 7484ae5; it explicitly reports the current-head dense-column gate unverified.\nVERDICT diff: Read all nineteen commits from bddf5ae to f410e42 and their twelve changed paths; fresh_solve.py:32-55 adds an analytic-root wrapper, tests/test_bank_newton_converge.py:150-273 adds three tests, and the figure and fragment show the new comparison.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_newton_converge/fresh_solve.py:225-248 checks fresh convergence against analytic roots, but docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-converge.html:57-62 records a 366.42 ms warm step and no launch count.\nSCORE evidence: 11\nJUSTIFICATION evidence: tests/test_bank_newton_converge.py:227 has a 1e-6 fresh-column assertion, yet small-fresh-gate.log reports 3.45e-6 and small-fresh-gate-repeat.log reports a timeout; repair-solve.log independently records the 1.003e-11 fresh residual.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff bddf5ae..f410e42 changes only the twelve paths under the source manifest.md orientation_write_paths, including scripts/prototypes/bank_newton_converge and tests/test_bank_newton_converge.py.\nSCORE durability: 8\nJUSTIFICATION durability: tests/test_bank_newton_converge.py:250 compares returned roots to the same fixture seeds passed at line 246, so replacing direct Newton with a seed echo leaves the assertion green, while the independent column gate at line 227 has no passing current-head receipt.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/bank_newton_converge/fresh_solve.py:34-35 reuses the existing newton_reference helper and render_panel.py:98 uses the established contour drawer; the new test at line 213 exceeds its configured 300 s bound.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search found direct analytic Newton in scripts/prototypes/tracked_read/measure.py:65 and contour drawing in nova/media/poloidal.py; fresh_solve.py:34-35 and render_panel.py:98 invoke those owners rather than duplicate them.\nFINDING tests/test_bank_newton_converge.py:227 blocking: The current-head dense-column gate has no completed passing run: the earlier focused arm measured 3.45e-6 above the 1e-6 limit and the expanded arm timed out before its assertion, so the required full fresh-residual Jacobian agreement is unverified.\nFINDING tests/test_bank_newton_converge.py:250 blocking: Returned analytic roots are compared with the exact fixture seeds supplied to analytic_oracle at line 246; replacing Newton with a function that echoes those seeds leaves this assertion green, while the parent-source negative control fails on ImportError before it exercises oracle behavior.",
+  "review_run_id": "r-20261029T210314818817-review-of-bank-newton-converge-f410e42bc154",
+  "reviewed_base_sha": "bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2",
+  "reviewed_head_sha": "f410e42bc1541fe67539cf2cb5cd5c58893842b5",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "scores": {
+    "durability": 8,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 12,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T21:17:42.690941+00:00",
+  "total": 86
+}

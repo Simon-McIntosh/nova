@@ -62,6 +62,38 @@
   batch that reports one. That change does not move the batch-1 and batch-4
   numbers, which is what says the cost is not the rebuild branch.</p>
 
+  <h3 id="tracked-read-batch-oracle">The boundary oracle is executed, and it measures the rule it replaced</h3>
+  <p>The accuracy test's boundary reference was moved onto the shared wall
+  selection without ever being executed: its CPU arm was killed before
+  collection and no device arm had been run. Running it showed why. The
+  certificate's 550-cell bank is compiled inside the module fixture and takes
+  longer than the suite's 300 s per-test bound, so every clause that asks for
+  the fixture was reported as a timeout rather than a result at either
+  revision. The module now carries its own bound, and with it the limited
+  certificate passes: 6 passed at exit 0, covering the cell selection, the
+  shared-cell clause, both stationary points and both boundary clauses.</p>
+
+  <p>The rewrite was also checked against the rule it replaced rather than
+  argued to be equivalent. On the limited certificate at 550 cells both rules
+  return the same boundary point and the same flux, 2.23e-14, and the
+  difference between them is exactly zero, so the read's boundary flux scores
+  identically against either: 8.2e-5 against the 1e-4 budget at the converged
+  state and 3.9e-5 at the trial. The two walls are the same object, the case's
+  carried wall polygon and the fixture's wall agreeing element for element over
+  121 vertices, so the change of wall source moves nothing. The rules coincide
+  for a reason that can be stated: the historical rule minimises the distance
+  from the axis flux over the wall vertices, and on a wall whose analytic flux
+  lies wholly below the axis flux that vertex is the wall's maximum.</p>
+
+  <p>A clause now pins that property on the case's own wall rather than on the
+  reference: the reference flux must be at least the largest analytic flux
+  found on the wall polygon, and must not sit near its minimum, so a selection
+  that minimised or that read another wall fails here rather than quietly
+  changing what the boundary budget measures. Reverting the repair leaves the
+  clause absent and the boundary comparison unrunnable under the suite bound,
+  which is the state measured at the reviewed revision: 1 passed, 10 errors,
+  exit 1.</p>
+
   <h3 id="tracked-read-batch-reuse">The wall selection and the table check have one owner</h3>
   <p>The accuracy test's boundary reference carried its own wall-extremum
   search, a ternary refinement over the wall polygon, and imported the wall

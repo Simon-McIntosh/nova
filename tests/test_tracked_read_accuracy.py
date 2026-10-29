@@ -33,6 +33,12 @@ from scripts.prototypes.tracked_read_batch.reference import psi as analytic_psi
 
 assert jax.config.jax_enable_x64 is True
 
+# The certificate's 550-cell bank is compiled inside the module fixture, which
+# costs several minutes on the device and is charged to the first test that
+# asks for it. The suite-wide 300 s bound is shorter than that compile, so it
+# would report a timeout rather than a result.
+pytestmark = pytest.mark.timeout(1800)
+
 CELLS = 550
 POLICY_RADIUS = 0.054806712567833996
 AXIS_BUDGET = 5e-4
@@ -68,6 +74,25 @@ def _record(record):
         return
     with Path(path).open("a") as handle:
         handle.write(json.dumps(record) + "\n")
+
+
+def _wall_flux_range(case, per_segment=64):
+    """The analytic flux range over the wall polygon the case carries.
+
+    The wall is sampled along every segment, so the range is a property of the
+    geometry the read is built on rather than of the reference being checked.
+    """
+    wall = np.asarray(case["geometry"].wall_points, dtype=float).reshape(-1, 2)
+    start = wall
+    end = np.roll(wall, -1, axis=0)
+    fraction = np.linspace(0.0, 1.0, per_segment, endpoint=False)[None, :, None]
+    sample = (start[:, None, :] + fraction * (end - start)[:, None, :]).reshape(-1, 2)
+    values = np.asarray(
+        jax.vmap(lambda point: case["analytic"].evaluate(point).value)(
+            jnp.asarray(sample)
+        )
+    )
+    return float(values.max()), float(values.min())
 
 
 def field_reference(operands, moments, seed, iterations=60):
@@ -108,6 +133,7 @@ def measured(request):
     boundary_point, boundary_flux_reference = analytic_boundary(case, references)
     axis_flux = analytic_psi(case["analytic"], references[0])
     span = abs(boundary_flux_reference - axis_flux)
+    wall_flux_max, wall_flux_min = _wall_flux_range(case)
 
     def run(moments):
         reading = support_read.read(
@@ -169,6 +195,8 @@ def measured(request):
         axis_flux=axis_flux,
         span=span,
         minor_radius=minor_radius,
+        wall_flux_max=wall_flux_max,
+        wall_flux_min=wall_flux_min,
     )
     print("BOUNDARY_REFERENCE", json.dumps(boundary_record), flush=True)
     _record(boundary_record)
@@ -180,6 +208,9 @@ def measured(request):
         minor_radius=minor_radius,
         span=span,
         states=states,
+        boundary_flux_reference=boundary_flux_reference,
+        wall_flux_max=wall_flux_max,
+        wall_flux_min=wall_flux_min,
     )
 
 
@@ -227,6 +258,31 @@ def test_stationary_points_against_the_analytic_newton(measured, state):
             np.linalg.norm(row["position"][1] - measured["references"][1])
         )
         assert saddle_error <= budget, (measured["kind"], state, saddle_error, budget)
+
+
+@pytest.mark.slow
+def test_the_boundary_reference_is_the_wall_flux_extremum(measured):
+    """The limited reference must sit at the wall's largest analytic flux.
+
+    A rule that minimised the wall flux instead, or read a different wall,
+    would land outside this window, and the boundary comparison it feeds would
+    then be measuring an instrument rather than the read.
+    """
+    if len(measured["references"]) > 1:
+        # A diverted boundary is the certificate's saddle, not a wall point.
+        return
+    budget = BOUNDARY_BUDGET * measured["span"]
+    flux = measured["boundary_flux_reference"]
+    maximum = measured["wall_flux_max"]
+    minimum = measured["wall_flux_min"]
+    assert maximum - minimum > 0.0, (measured["kind"], maximum, minimum)
+    assert flux >= maximum - budget, (measured["kind"], flux, maximum, budget)
+    assert flux - minimum > 0.5 * (maximum - minimum), (
+        measured["kind"],
+        flux,
+        minimum,
+        maximum,
+    )
 
 
 @pytest.mark.slow

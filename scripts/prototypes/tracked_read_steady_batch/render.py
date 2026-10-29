@@ -64,8 +64,10 @@ def main():
             zorder=4 if tone is None else 3,
         )
 
+    # The bound is the figure's reference and must stay legible under the
+    # bound-meeting arm, which sits below it: a 2 pt dash in the neutral.
     axis.axhline(
-        BOUND_MS, color=style.flux_color, linewidth=1.2, linestyle=":", zorder=2
+        BOUND_MS, color=NEUTRAL, linewidth=2.0, linestyle=(0, (6, 3)), zorder=2
     )
     axis.set_xscale("log", base=2)
     axis.set_yscale("log")
@@ -74,8 +76,8 @@ def main():
     axis.set_xlim(sizes[0] / 1.4, sizes[-1] * 1.6)
     axis.text(
         sizes[0] / 1.25,
-        BOUND_MS * 1.12,
-        f"{BOUND_MS} ms bound",
+        BOUND_MS * 1.14,
+        f"{BOUND_MS} ms per slice — the bound",
         color=NEUTRAL,
         fontsize=14,
         va="bottom",

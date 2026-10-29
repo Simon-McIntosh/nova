@@ -195,12 +195,15 @@ def run(state_path, max_steps):
     reference = jax.jit(topology.read)(analytic, operands.geometry, convention, policy)
     from tests.equilibrium import test_topology_read as fixture
 
-    _, _, wall, _, _ = fixture._analytic_inputs("diverted")
+    _, _, wall, _, analytic_saddle = fixture._analytic_inputs("diverted")
     radius = 0.5 * (
         float(jnp.max(jnp.asarray(wall)[:, 0]))
         - float(jnp.min(jnp.asarray(wall)[:, 0]))
     )
     axis_error = float(jnp.linalg.norm(support.reading.axis - reference.axis))
+    saddle_error = float(
+        jnp.linalg.norm(support.reading.boundary - jnp.asarray(analytic_saddle))
+    )
     span = float(jnp.abs(reference.boundary_flux - reference.axis_flux))
     boundary_error = float(
         jnp.abs(support.reading.boundary_flux - reference.boundary_flux)
@@ -210,6 +213,8 @@ def run(state_path, max_steps):
         axis_error=axis_error,
         minor_radius=radius,
         axis_ratio=axis_error / radius,
+        saddle_error=saddle_error,
+        saddle_ratio=saddle_error / radius,
         boundary_flux_error=boundary_error,
         flux_span=span,
         boundary_ratio=boundary_error / span,
@@ -230,9 +235,11 @@ def run(state_path, max_steps):
         converged=np.asarray(converged),
         residual_sup=np.asarray(terminal),
         axis_ratio=np.asarray(axis_error / radius),
+        saddle_ratio=np.asarray(saddle_error / radius),
         boundary_ratio=np.asarray(boundary_error / span),
     )
     assert axis_error / radius <= 5e-4
+    assert saddle_error / radius <= 5e-4
     assert boundary_error / span <= 1e-4
 
 

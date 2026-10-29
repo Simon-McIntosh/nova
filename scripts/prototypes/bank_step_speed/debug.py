@@ -12,6 +12,7 @@ from pathlib import Path
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 import nova
 from nova.equilibrium import current, fixed_points, support_read, topology
@@ -225,6 +226,17 @@ def main():
             reference_norm=float(jnp.linalg.norm(pair[0])),
             actual_norm=float(jnp.linalg.norm(pair[1])),
         )
+    old_velocity, new_velocity = (np.asarray(value) for value in pairs[9])
+    largest = np.unravel_index(
+        np.argmax(np.abs(new_velocity - old_velocity)), old_velocity.shape
+    )
+    emit(
+        "RING_MAX",
+        index=largest,
+        reference=float(old_velocity[largest]),
+        actual=float(new_velocity[largest]),
+        ring_count=int(np.asarray(ring_count)[largest[0]]),
+    )
     emit(
         "CELL", index=int(cell), active=int(active), rings=int(jnp.sum(ring_count > 0))
     )

@@ -19,6 +19,8 @@ import nova
 from nova.equilibrium import support_read
 from scripts.prototypes.bank_newton_step.measure import machine
 
+MEASURED_STAGES = []
+
 
 def emit(kind, **data):
     print(kind, json.dumps(data, sort_keys=True, default=float), flush=True)
@@ -35,6 +37,7 @@ def measure(name, function, *args):
         jax.block_until_ready(result)
         walls.append(1e3 * (perf_counter() - started))
     emit("STAGE", name=name, walls_ms=walls, median_ms=sorted(walls)[1])
+    MEASURED_STAGES.append((name, compiled, args))
     return result
 
 
@@ -153,12 +156,12 @@ def main():
         )
     )
     measure("whole_step", whole, bank, moments, support)
-    jax.block_until_ready(whole(bank, moments, support))
     trace = Path(os.environ["BANK_STEP_TRACE_DIR"])
     jax.profiler.start_trace(str(trace), create_perfetto_link=False)
-    for _ in range(2):
-        result = whole(bank, moments, support)
-        jax.block_until_ready(result)
+    for name, compiled, args in MEASURED_STAGES:
+        with jax.profiler.TraceAnnotation(f"stage:{name}"):
+            result = compiled(*args)
+            jax.block_until_ready(result)
     jax.profiler.stop_trace()
     emit("TRACE", path=str(trace))
 

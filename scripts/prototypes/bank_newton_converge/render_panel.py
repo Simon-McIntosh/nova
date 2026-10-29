@@ -23,6 +23,7 @@ from nova.media.poloidal import (  # noqa: E402
     draw_scattered_contours,
     draw_wall,
 )
+from scripts.prototypes.tracked_read.measure import newton_reference  # noqa: E402
 
 
 def draw_outline(axes, point, marker, size, color, zorder):
@@ -74,7 +75,17 @@ def render(state_path, output_path, preview_path):
     wall = data["wall"]
     analytic = data["analytic_flux"]
     solved = data["solved_flux"]
-    oracle_roots = data["analytic_roots"]
+    from tests.equilibrium import test_topology_read as fixture
+
+    _, analytic_field, _, axis_seed, saddle_seed = fixture._analytic_inputs(
+        "diverted"
+    )
+    oracle_roots = np.stack(
+        (
+            newton_reference(analytic_field, axis_seed)[0],
+            newton_reference(analytic_field, saddle_seed)[0],
+        )
+    )
     solved_roots = data["solved_roots"]
     span = float(np.ptp(analytic))
     levels = np.linspace(

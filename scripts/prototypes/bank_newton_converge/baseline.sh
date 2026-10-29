@@ -7,7 +7,9 @@ export JAX_PLATFORMS=cuda
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 LOG=${1:?log path required}
 STATE=${2:-}
-args=(--converge --tracked-line-search)
+SEARCH=${3:-tracked}
+args=(--converge)
+if [[ $SEARCH == tracked ]]; then args+=(--tracked-line-search); fi
 if [[ -n $STATE ]]; then args+=(--state-path "$STATE"); fi
 {
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$ROOT" "$PY -m scripts.prototypes.bank_newton_step.measure ${args[*]}"

@@ -173,6 +173,27 @@ def main():
         _, velocity = jax.jvp(
             rings_fn, (*form_inputs, intervals), (*form_changes, interval_rate)
         )
+        _, ray_rate, _, _, _ = support_read._ray_intersection_rate(
+            vertices, count, form, algebraic_rate
+        )
+
+        def roots_fn(position, direction, curvature, cubic):
+            changed = form._replace(
+                position=position, direction=direction, curvature=curvature, cubic=cubic
+            )
+            slot = jnp.arange(vertices.shape[0])
+            following = jnp.where(slot + 1 < count, slot + 1, 0)
+            edges = vertices[following] - vertices
+            relative = vertices - changed.position
+            cross = topology._cross_plane
+            return topology._cubic_parameters(
+                cross(changed.cubic[:, None], edges[None]),
+                cross(changed.curvature[:, None], edges[None]),
+                cross(changed.direction[:, None], edges[None]),
+                -cross(relative[None], edges[None]),
+            )
+
+        _, reference_root_rate = jax.jvp(roots_fn, form_inputs, form_changes)
         new_velocity = support_read._normal_ring_velocity(
             vertices,
             count,
@@ -194,6 +215,7 @@ def main():
             (form_rate.direction, algebraic_rate[1]),
             (form_rate.curvature, algebraic_rate[2]),
             (form_rate.cubic, algebraic_rate[3]),
+            (reference_root_rate, ray_rate),
             (velocity, new_velocity),
             (jnp.concatenate(tuple(old)), jnp.concatenate(tuple(new))),
             cell,
@@ -213,6 +235,7 @@ def main():
             "direction_rate",
             "curvature_rate",
             "cubic_rate",
+            "root_rate",
             "ring_velocity",
             "booking_rate",
         ),
@@ -226,7 +249,7 @@ def main():
             reference_norm=float(jnp.linalg.norm(pair[0])),
             actual_norm=float(jnp.linalg.norm(pair[1])),
         )
-    old_velocity, new_velocity = (np.asarray(value) for value in pairs[9])
+    old_velocity, new_velocity = (np.asarray(value) for value in pairs[10])
     largest = np.unravel_index(
         np.argmax(np.abs(new_velocity - old_velocity)), old_velocity.shape
     )

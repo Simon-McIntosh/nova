@@ -28,8 +28,17 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import fixed_points, support_read
+from scripts.prototypes.tracked_read_batch import reference
+from scripts.prototypes.tracked_read_batch.reference import analytic_boundary
+from scripts.prototypes.tracked_read_batch.reference import psi as analytic_psi
 
 assert jax.config.jax_enable_x64 is True
+
+# The certificate's 550-cell bank is compiled inside the module fixture, which
+# costs several minutes on the device and is charged to the first test that
+# asks for it. The suite-wide 300 s bound is shorter than that compile, so it
+# would report a timeout rather than a result.
+pytestmark = pytest.mark.timeout(1800)
 
 CELLS = 550
 POLICY_RADIUS = 0.054806712567833996
@@ -52,67 +61,6 @@ def _built(kind):
     return case, operands, cache_for(operands)
 
 
-def _psi(analytic, point):
-    return float(np.asarray(analytic.evaluate(jnp.asarray(point)).value))
-
-
-def _wall_extremum(analytic, wall, index, maximise, refinements=120):
-    """Refine a coarse wall vertex onto the psi extremum along its segments."""
-    count = len(wall)
-    best = (float("inf"), None) if not maximise else (float("-inf"), None)
-    for step in (-1, 1):
-        start = wall[index]
-        end = wall[(index + step) % count]
-        low, high = 0.0, 1.0
-        for _ in range(refinements):
-            first = low + (high - low) / 3.0
-            second = high - (high - low) / 3.0
-            left = _psi(analytic, start + first * (end - start))
-            right = _psi(analytic, start + second * (end - start))
-            if (left < right) == maximise:
-                low = first
-            else:
-                high = second
-        fraction = 0.5 * (low + high)
-        point = start + fraction * (end - start)
-        value = _psi(analytic, point)
-        better = value > best[0] if maximise else value < best[0]
-        if best[1] is None or better:
-            best = (value, point)
-    return best[1], best[0]
-
-
-def analytic_boundary(case, references):
-    """The boundary point and its flux, from the analytic field alone.
-
-    A diverted state's boundary is the saddle of a direct Newton solve on the
-    analytic flux. A limited state's is the wall point where the flux is
-    extremal away from the axis: the wall polygon is swept for the coarse
-    extremum farthest from the axis flux and refined by a ternary search on the
-    analytic flux along the two segments meeting that vertex. Neither route
-    consults a read.
-    """
-    analytic = case["analytic"]
-    if len(references) > 1:
-        return references[1], _psi(analytic, references[1])
-    from tests.equilibrium.test_topology_read import _analytic_inputs
-
-    wall = _analytic_inputs(case["kind"])[2]
-    wall = np.asarray(getattr(wall, "coordinate", wall), dtype=float)
-    if wall.ndim == 1:
-        wall = wall.reshape(-1, 2)
-    axis_flux = _psi(analytic, references[0])
-    values = np.asarray(
-        jax.vmap(lambda point: analytic.evaluate(point).value)(jnp.asarray(wall))
-    )
-    # The outermost closed surface touches the wall at the wall's extremum
-    # nearest the axis flux on the outward side, not at the wall's global
-    # extremum: a limiter contour carries flux well beyond the plasma.
-    coarse = int(np.argmin(np.abs(values - axis_flux)))
-    maximise = bool(values[coarse] > values.mean())
-    return _wall_extremum(analytic, wall, int(coarse), maximise)
-
-
 def _record(record):
     """Append one measurement record to the artifact named by the environment.
 
@@ -127,6 +75,21 @@ def _record(record):
         return
     with Path(path).open("a") as handle:
         handle.write(json.dumps(record) + "\n")
+
+
+def _wall_flux_range(case, per_segment=64):
+    """The analytic flux range over the wall polygon the case carries.
+
+    The wall is sampled along every segment, so the range is a property of the
+    geometry the read is built on rather than of the reference being checked.
+    """
+    wall = np.asarray(case["geometry"].wall_points, dtype=float).reshape(-1, 2)
+    start = wall
+    end = np.roll(wall, -1, axis=0)
+    fraction = np.linspace(0.0, 1.0, per_segment, endpoint=False)[None, :, None]
+    sample = (start[:, None, :] + fraction * (end - start)[:, None, :]).reshape(-1, 2)
+    values = reference.wall_flux(case["analytic"], sample)
+    return float(values.max()), float(values.min())
 
 
 def field_reference(operands, moments, seed, iterations=60):
@@ -165,8 +128,9 @@ def measured(request):
         )
     )
     boundary_point, boundary_flux_reference = analytic_boundary(case, references)
-    axis_flux = _psi(case["analytic"], references[0])
+    axis_flux = analytic_psi(case["analytic"], references[0])
     span = abs(boundary_flux_reference - axis_flux)
+    wall_flux_max, wall_flux_min = _wall_flux_range(case)
 
     def run(moments):
         reading = support_read.read(
@@ -228,6 +192,8 @@ def measured(request):
         axis_flux=axis_flux,
         span=span,
         minor_radius=minor_radius,
+        wall_flux_max=wall_flux_max,
+        wall_flux_min=wall_flux_min,
     )
     print("BOUNDARY_REFERENCE", json.dumps(boundary_record), flush=True)
     _record(boundary_record)
@@ -239,6 +205,9 @@ def measured(request):
         minor_radius=minor_radius,
         span=span,
         states=states,
+        boundary_flux_reference=boundary_flux_reference,
+        wall_flux_max=wall_flux_max,
+        wall_flux_min=wall_flux_min,
     )
 
 
@@ -286,6 +255,31 @@ def test_stationary_points_against_the_analytic_newton(measured, state):
             np.linalg.norm(row["position"][1] - measured["references"][1])
         )
         assert saddle_error <= budget, (measured["kind"], state, saddle_error, budget)
+
+
+@pytest.mark.slow
+def test_the_boundary_reference_is_the_wall_flux_extremum(measured):
+    """The limited reference must sit at the wall's largest analytic flux.
+
+    A rule that minimised the wall flux instead, or read a different wall,
+    would land outside this window, and the boundary comparison it feeds would
+    then be measuring an instrument rather than the read.
+    """
+    if len(measured["references"]) > 1:
+        # A diverted boundary is the certificate's saddle, not a wall point.
+        return
+    budget = BOUNDARY_BUDGET * measured["span"]
+    flux = measured["boundary_flux_reference"]
+    maximum = measured["wall_flux_max"]
+    minimum = measured["wall_flux_min"]
+    assert maximum - minimum > 0.0, (measured["kind"], maximum, minimum)
+    assert flux >= maximum - budget, (measured["kind"], flux, maximum, budget)
+    assert flux - minimum > 0.5 * (maximum - minimum), (
+        measured["kind"],
+        flux,
+        minimum,
+        maximum,
+    )
 
 
 @pytest.mark.slow

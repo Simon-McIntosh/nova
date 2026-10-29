@@ -1,0 +1,209 @@
+<section id="tracked-read-batch">
+  <h2>tracked-read-batch — the read batched over slices, and what the batch pays</h2>
+
+  <p>The tracked read is repeated over a stacked bank through
+  <code>jax.vmap</code>, so one launched program reads a batch of slices and
+  the per-slice bound of decision <code>read-bound-per-slice</code> can be
+  charged once per batch rather than once per call. The bank's operands and the
+  row window are shared by every lane; the booked moments, the seeds, the warm
+  starts and the tracking state carry one entry per slice. Every call is timed
+  in the steady state, with no slice changing cell and no slice changing
+  ownership, so no lane rebuilds the connected decision. The table below states N = 4 batch sizes.</p>
+
+  <table>
+    <caption>Per-slice wall of the tracked read at the diverted 550-cell state on one H200, N = 4 batch sizes</caption>
+    <tr><th>batch</th><th>slices</th><th>wall per call [ms]</th><th>wall per slice [ms]</th><th>launches per call</th><th>launches per slice</th><th>copy bytes</th></tr>
+    <tr><td><code>single</code></td><td>1</td><td>54.61</td><td>54.61</td><td>807</td><td>807.0</td><td>0</td></tr>
+    <tr><td><code>four</code></td><td>4</td><td>80.95</td><td>20.24</td><td>807</td><td>201.8</td><td>0</td></tr>
+    <tr><td><code>sixteen</code></td><td>16</td><td>150.06</td><td>9.38</td><td>807</td><td>50.4</td><td>0</td></tr>
+    <tr><td><code>sixtyfour</code></td><td>64</td><td>372.25</td><td>5.82</td><td>807</td><td>12.6</td><td>0</td></tr>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/sub-millisecond-forward-path/tracked-read-batch/per-slice-wall.svg" alt="Per-slice wall of the tracked read against the number of slices in the batch, falling from 54.6 ms at one slice to 5.8 ms at sixty-four, every point far above the 0.2 ms bound.">
+    <figcaption>Per-slice wall of the tracked read at the diverted 550-cell state on one H200, against the number of slices in the batch. The dotted line is the 0.2 ms bound; the series is the minimum of 20 steady-state calls at each batch size.</figcaption>
+  </figure>
+
+  <h3 id="tracked-read-batch-bound">The bound is not met, and the batch does not carry it</h3>
+  <p>Sixteen slices read at 9.38 ms per slice and sixty-four at 5.82 ms, so the
+  bound of 0.2 ms per slice, which needs a factor of 47 at sixteen slices, is
+  not met by batching this read. The per-call wall is not what batching was
+  expected to buy, either: it rises with the batch, from 54.6 ms at one slice
+  to 372.3 ms at sixty-four, so the batch pays 5.0 ms of arithmetic for each
+  slice added past the first instead of sharing one slice's work across the
+  lanes. The launch count is the same 807 in every case, so the batch removes
+  no launches at all: <code>vmap</code> maps the read over the slice axis and
+  the compiled program issues the vmap's launches unchanged per call.</p>
+
+  <p>The two regimes separate by what each slice pays. At one slice the call is
+  launch-bound: 807 launches in 54.6 ms is 68 µs per launch, and a second slice
+  costs only 5 ms of arithmetic against that 54.6 ms of fixed cost. By sixteen
+  slices the fixed share has amortised to 3.4 ms per slice and arithmetic is
+  5.9 ms per slice; by sixty-four the fixed share is 0.85 ms and arithmetic
+  5.0 ms, so the batch is arithmetic-bound and the per-slice wall is falling
+  only as the fixed cost spreads. The arithmetic floor this path shows is
+  therefore about 5 ms per slice, twenty-five times the bound, and no batch
+  size closes it.</p>
+
+  <p>The floor is a property of this path rather than of the read. The same
+  read traced once, with the tracking state passed as a single value, was
+  measured at 1.27 ms per call over 805 launches at this state. The vmapped
+  program carries 24,781 HLO instructions at one slice against a per-call wall
+  of 54.6 ms, so the batched path pays about 43 times the single call's wall
+  for the same launch count, and the number this record can defend is that the
+  read costs 1.27 ms per call at one slice and that batching it through
+  <code>vmap</code> does not bring it near 0.2 ms.</p>
+
+  <p>Nothing in <code>support_read.read</code> was changed to make the batched
+  number smaller. The one change it carries is the carried-decision path: under
+  <code>vmap</code> the rebuild conditional becomes a select evaluated in every
+  lane, so a caller whose batch holds no rebuild passes
+  <code>rebuild=False</code> and reads the rebuilt flag back to re-read any
+  batch that reports one. That change does not move the batch-1 and batch-4
+  numbers, which is what says the cost is not the rebuild branch.</p>
+
+  <h3 id="tracked-read-batch-executed">The accuracy arm executed, and the batch's cost is not the rebuild branch</h3>
+  <p>The accuracy arm now runs to completion on one H200: 11 passed, 2 failed
+  (job 1300836, exit 1). Both failures are the diverted trial state — the
+  saddle 9.1e-4 m against a 6.8e-4 m budget, and the boundary 2.2e-3 against
+  1e-4 — and neither is the wall oracle: a diverted boundary is the
+  certificate's saddle in both revisions of the reference, so the rewrite does
+  not touch that path. The limited states pass at both revisions' rule, and
+  the two rules return the same point and flux there. The diverted trial
+  booking is a separate defect and is recorded as open.</p>
+
+  <p>The batched read's per-call wall is not the rebuild conditional. At the
+  64-cell certificate the same read costs 1.38 ms carried and 35.37 ms when it
+  rebuilds every call; through <code>vmap</code> it costs 44.76 ms at one
+  slice with the conditional removed entirely and 44.17 ms with the
+  conditional present, a difference of 1.3 %. At four slices the three read
+  64.34, 64.45 and 64.66 ms and the two never separate, so the conditional
+  moves nothing at either batch.</p>
+
+  <p>The attribution is made on the series measured at the diverted 550-cell
+  state, which is the state the bound is stated at. Its per-call walls are
+  54.61, 80.95, 150.06 and 372.25 ms at one, four, sixteen and sixty-four
+  slices, so the increment from one to sixty-four slices is 317.64 ms over 63
+  slices: 5.04 ms of arithmetic per slice. The remaining 54.61 − 5.04 = 49.57
+  ms is a cost the call pays once whatever the batch holds, which spreads to
+  0.77 ms per slice at sixty-four and would still be 3.10 ms at sixteen. So
+  the 5.82 ms per slice at sixty-four slices is 5.04 ms of arithmetic plus the
+  fixed share, and no further batching closes it: the marginal 5.04 ms is
+  twenty-five times the 0.2 ms bound on its own. The 64-cell run above is a
+  controlled experiment that names the rebuild conditional as innocent, not
+  the place the attribution is made. Passing <code>rebuild=False</code>
+  therefore cannot fix it: at 550 cells the batched read pays more than a full
+  rebuild while doing no rebuild. The column counts are HLO op lines read from
+  the lowered module — <code>while</code> loops rise from 81 to 118 under
+  <code>vmap</code> — and are not kernel launches.</p>
+
+  <p>The launch count and the device time come from the profiler, not from
+  HLO text. Each program is traced with <code>jax.profiler.trace</code> and
+  the xplane is read back with <code>jax.profiler.ProfileData</code>, which
+  yields one event per kernel carrying its name and its device duration; the
+  lines of a trace are kept apart, because a Python frame on a host track is
+  not a kernel and the device track is named for its CUDA stream
+  (<code>Stream #14(MemcpyH2D,Compute,MemcpyD2D)</code>). At the diverted
+  550-cell state, over the twelve largest kernels, the unbatched read as a
+  caller gets it without tracking — the rebuilding path — issues 21,359
+  kernel events per call and 36.83 ms of device time; the same state read
+  with its tracking carried issues 165 events per call and 0.27 ms. The
+  batched read at four slices is back in the thousands, 82.07 ms of device
+  time per call over the same twelve kernels, 20.5 ms per slice. So the
+  batched path does not simply add a launch or two to the carried read: even
+  with <code>rebuild=False</code> it does whole-mesh work on the device,
+  matching the rebuilding read rather than the 0.27 ms carried one, which is
+  the per-call cost the paragraph above measures from the wall series. The
+  1.2 ms carried read and the 54.6 ms batched read are both at this state, so
+  the gap between them is what batching costs here, not a comparison across
+  states. Its device time does not grow in proportion to the batch either:
+  four slices cost 82.07 ms where one costs the 54.6 ms wall, so most of what
+  the batched path pays is per call. The one-slice trace captured no device
+  events at all, so its figure is the wall and not a traced number.</p>
+
+  <p>Every column's instrument: the per-call and per-slice walls are
+  <code>perf_counter</code> around a call closed by
+  <code>block_until_ready</code>, minimum of the repeats; the copy bytes are a
+  property of the timed region rather than a measurement, since every result
+  leaf is asserted to be a device array and nothing converts to host between
+  the timestamps; the op-class columns are counted from the lowered HLO text.</p>
+
+  <p>A clause now reads the batch against the single read slice by slice: each
+  lane's stationary position, status, boundary flux and cell must equal what
+  the same state returns read once, and it passes on one H200 (job 1300839).</p>
+
+  <h3 id="tracked-read-batch-oracle">The boundary oracle is executed, and it measures the rule it replaced</h3>
+  <p>The accuracy test's boundary reference was moved onto the shared wall
+  selection without ever being executed: its CPU arm was killed before
+  collection and no device arm had been run. Running it showed why. The
+  certificate's 550-cell bank is compiled inside the module fixture and takes
+  longer than the suite's 300 s per-test bound, so every clause that asks for
+  the fixture was reported as a timeout rather than a result at either
+  revision. The module now carries its own bound, and with it the limited
+  certificate passes: 6 passed at exit 0, covering the cell selection, the
+  shared-cell clause, both stationary points and both boundary clauses.</p>
+
+  <p>The rewrite was also checked against the rule it replaced rather than
+  argued to be equivalent. On the limited certificate at 550 cells both rules
+  return the same boundary point and the same flux, 2.23e-14, and the
+  difference between them is exactly zero, so the read's boundary flux scores
+  identically against either: 8.2e-5 against the 1e-4 budget at the converged
+  state and 3.9e-5 at the trial. The two walls are the same object, the case's
+  carried wall polygon and the fixture's wall agreeing element for element over
+  121 vertices, so the change of wall source moves nothing. The rules coincide
+  for a reason that can be stated: the historical rule minimises the distance
+  from the axis flux over the wall vertices, and on a wall whose analytic flux
+  lies wholly below the axis flux that vertex is the wall's maximum.</p>
+
+  <p>A clause now pins that property on the case's own wall rather than on the
+  reference: the reference flux must be at least the largest analytic flux
+  found on the wall polygon, and must not sit near its minimum, so a selection
+  that minimised or that read another wall fails here rather than quietly
+  changing what the boundary budget measures. Reverting the repair leaves the
+  clause absent and the boundary comparison unrunnable under the suite bound,
+  which is the state measured at the reviewed revision: 1 passed, 10 errors,
+  exit 1.</p>
+
+  <p>The control that a minimising selection fails here was first recorded
+  against a mutation that never ran. The arm put an overlay copy of the
+  reference ahead of the worktree on <code>PYTHONPATH</code> and then invoked
+  pytest from the worktree, whose <code>scripts/__init__.py</code> makes
+  <code>scripts</code> a regular package: the tree that owns
+  <code>__init__.py</code> first on <code>sys.path</code> owns every submodule
+  beneath it, and pytest's default prepend import mode had already put the
+  worktree's entry first. The arm therefore reported the unmutated test
+  passing — 3 passed, exit 0 — and verified nothing.</p>
+
+  <p>Run with the two trees separated, the mutant is refused, and each arm now
+  proves which module it read. No overlay is involved: each arm gets its own
+  copy of the committed tree from <code>git archive HEAD</code>, the mutant
+  copy has the wall selection's polarity changed to −1 in place, and each arm
+  runs with its own copy as both the working directory and
+  <code>PYTHONPATH</code>, so the entry pytest prepends and the tree that owns
+  <code>scripts/__init__.py</code> are the same one. A plugin loaded through
+  <code>PYTEST_PLUGINS</code> prints the resolved <code>reference</code>
+  module and exits nonzero when it is not that arm's copy. The head arm
+  served its own <code>head/scripts</code> copy and reported 6 passed, exit 0.
+  The mutant arm served its <code>mutant/scripts</code> copy and failed the
+  three clauses that decide the rule: the extremum clause at a flux of −9.68
+  against a wall maximum of 2.2e-14 with a 5.96e-3 budget, and the boundary
+  budget at 0.162 against 1e-4 at both the converged and the trial state,
+  exit 1 (job 1300932). A selection that minimises therefore fails here,
+  measured rather than asserted, and the arm names the module it imported so
+  an unmutated run cannot be read as a result.</p>
+
+  <h3 id="tracked-read-batch-reuse">The wall selection and the table check have one owner</h3>
+  <p>The accuracy test's boundary reference carried its own wall-extremum
+  search, a ternary refinement over the wall polygon, and imported the wall
+  geometry from a test module. The reference now lives outside the tests, in
+  <code>scripts/prototypes/tracked_read_batch/reference.py</code>, and takes its
+  extremum from <code>nova.geometry.select.host_wall_flux</code>, the selection
+  the limiter route already uses: the wall polygon's analytic flux is handed
+  over with the polarity that selects its maximum, and the returned point is
+  read back. The wall geometry is taken from the geometry the case already
+  carries, so neither the tests nor the prototype import a test module. The
+  fragment's table is checked against its record by
+  <code>scripts/prototypes/tracked_read_batch/check_table.py</code>, which calls
+  the shared <code>carrier_identity_receipt.check_receipt_table</code> rather
+  than carrying a second copy of that check.</p>
+</section>

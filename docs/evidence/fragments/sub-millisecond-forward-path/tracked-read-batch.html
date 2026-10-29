@@ -62,6 +62,41 @@
   batch that reports one. That change does not move the batch-1 and batch-4
   numbers, which is what says the cost is not the rebuild branch.</p>
 
+  <h3 id="tracked-read-batch-executed">The accuracy arm executed, and the batch's cost is not the rebuild branch</h3>
+  <p>The accuracy arm now runs to completion on one H200: 11 passed, 2 failed
+  (job 1300836, exit 1). Both failures are the diverted trial state — the
+  saddle 9.1e-4 m against a 6.8e-4 m budget, and the boundary 2.2e-3 against
+  1e-4 — and neither is the wall oracle: a diverted boundary is the
+  certificate's saddle in both revisions of the reference, so the rewrite does
+  not touch that path. The limited states pass at both revisions' rule, and
+  the two rules return the same point and flux there. The diverted trial
+  booking is a separate defect and is recorded as open.</p>
+
+  <p>The batched read's per-call wall is not the rebuild conditional. At the
+  64-cell certificate the same read costs 1.38 ms carried and 35.37 ms when it
+  rebuilds every call; through <code>vmap</code> it costs 44.76 ms at one
+  slice with the conditional removed entirely and 44.17 ms with the
+  conditional present, a difference of 1.3 %. Passing
+  <code>rebuild=False</code> therefore cannot fix it: the batched read pays
+  more than a full rebuild while doing no rebuild, and the mechanism is
+  inside the solve rather than the carried decision. The column counts are
+  HLO op classes read from the lowered module — <code>while</code> loops rise
+  from 81 to 118 under <code>vmap</code> — and are not kernel launches; this
+  node carries no profiler (no <code>nsys</code>, no <code>ncu</code>, no
+  <code>tensorflow</code> for the xplane format), so a launch count remains to
+  be taken elsewhere.</p>
+
+  <p>Every column's instrument: the per-call and per-slice walls are
+  <code>perf_counter</code> around a call closed by
+  <code>block_until_ready</code>, minimum of the repeats; the copy bytes are a
+  property of the timed region rather than a measurement, since every result
+  leaf is asserted to be a device array and nothing converts to host between
+  the timestamps; the op-class columns are counted from the lowered HLO text.</p>
+
+  <p>A clause now reads the batch against the single read slice by slice: each
+  lane's stationary position, status, boundary flux and cell must equal what
+  the same state returns read once, and it passes on one H200 (job 1300839).</p>
+
   <h3 id="tracked-read-batch-oracle">The boundary oracle is executed, and it measures the rule it replaced</h3>
   <p>The accuracy test's boundary reference was moved onto the shared wall
   selection without ever being executed: its CPU arm was killed before

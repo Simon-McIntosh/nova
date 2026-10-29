@@ -16,6 +16,7 @@ configure_dtypes()
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 import pytest
 
 from nova.equilibrium import support_read
@@ -23,6 +24,10 @@ from scripts.prototypes.tracked_read.measure import build_kind, cache_for
 from scripts.prototypes.tracked_read_batch.measure import batch_program, tiled
 
 CELLS = 64
+# Building the certificate's bank and compiling the batch costs minutes on the
+# device, which the suite-wide 300 s bound reports as a timeout rather than a
+# result.
+pytestmark = pytest.mark.timeout(1800)
 POLICY_RADIUS = 0.054806712567833996
 COUNT = 2
 
@@ -38,6 +43,51 @@ def _built():
         bucket=len(case["nodes"]),
     )
     return case, operands, cache_for(operands)
+
+
+@pytest.mark.slow
+def test_a_batch_read_equals_the_single_read_slice_by_slice():
+    """Every lane of the batch must return what one unbatched read returns.
+
+    The batch shares one compiled program across its lanes, so a lane that
+    picked up another lane's cells, seeds or decision would agree with the
+    batch and disagree with the read it is standing in for. Each lane is
+    therefore compared against the same state read once.
+    """
+    case, operands, cache = _built()
+    convention, policy = case["convention"], case["policy"]
+    seeds = jnp.asarray(case["roots"])
+    moments = case["states"]["converged"]
+
+    single = support_read.read(
+        operands, cache, moments, seeds, seeds, convention, policy
+    )
+    stacked = tuple(tiled(moment, COUNT) for moment in moments)
+    program = batch_program(operands, cache, convention, policy)
+    batch = program(stacked, tiled(seeds, COUNT), tiled(seeds, COUNT), None)
+    jax.block_until_ready(batch)
+
+    position = np.asarray(single.stationary.position)
+    for lane in range(COUNT):
+        np.testing.assert_allclose(
+            np.asarray(batch.stationary.position)[lane],
+            position,
+            rtol=0.0,
+            atol=1e-12,
+        )
+        np.testing.assert_array_equal(
+            np.asarray(batch.stationary.status)[lane],
+            np.asarray(single.stationary.status),
+        )
+        np.testing.assert_allclose(
+            float(batch.reading.boundary_flux[lane]),
+            float(single.reading.boundary_flux),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+        np.testing.assert_array_equal(
+            np.asarray(batch.cells)[lane], np.asarray(single.cells)
+        )
 
 
 @pytest.mark.slow

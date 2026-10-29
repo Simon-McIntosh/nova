@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
@@ -98,7 +98,7 @@
     <p>The step is built around <code>support_read.read_and_book</code> and the §1 bank. It forms its Jacobian from the §1 operators and closed-form booking derivatives. It does not trace a JVP per column, and it applies the Jacobian either as one dense block or matrix-free inside a Krylov solve, whichever the measurement favours. A relative linear residual bounds the update's relative error only by the matrix's condition number times that residual. A Krylov solve therefore sets its tolerance from an estimated condition number of the Newton matrix, so that their product is at most 1e-8, and the record tables the estimate. A dense solve has no such tolerance. The map, booking and solve are fused into a small fixed number of kernels per step. The 735.7 ms Jacobian block and the 166.2 ms map are what this section removes.</p>
     <p>Done when:</p>
     <ol>
-      <li>One fast step's update agrees with the present route's Newton update from the same iterate within 1e-6 relative, so both solve the same linear system. This is checked at the 550-cell states where read-derivative-prototype records the present read as valid: the limited converged state and the diverted trial state. At the limited trial state the present read is invalid and yields no finite update, so it is not a reference there. That comparison needs no converged present-route state. From the diverted 550-cell certificate seed, the fast step reaches a solved-equation residual of at most 1e-10. Its converged state is within the locked precision budget of the analytic oracle. The present route's step count and terminal residual from that seed are tabled beside it, whether or not the present route converges there.</li>
+      <li>The fast route solves its own discretised equation (decision <code>fast-route-equation</code>), so its step is not compared with the present route's update: the two routes reconstruct flux and book current differently, and their residuals differ before any linearisation (bank-newton-converge). The step's Jacobian agrees with central differences of the full fresh-read residual. From the diverted 550-cell certificate seed, the fast step reaches a solved-equation residual of at most 1e-10. Its converged state is within the locked precision budget of the analytic oracle. The present route's step count and terminal residual from that seed are tabled beside it, whether or not the present route converges there.</li>
       <li>The warm per-step wall, excluding the read, is at most 0.5 ms on an H200, with kernel launches per step counted and at most 100. The step program's cold compile, in a fresh process with the cache disabled, is at most 60 s, and its executable is under 50 MB.</li>
       <li>The step's Jacobian-vector product agrees with central differences of the step residual within 1e-6 relative, at a trial state and at the converged state.</li>
     </ol>
@@ -143,6 +143,16 @@
       <button class="r-opt" data-value="per-call">per-call</button>
       </p>
     <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-29. §4&#x27;s 1 ms target is per slice at batch 16 or more, so the read is held to 0.2 ms per slice batched over 16 or more slices, with the batch-1 wall tabled beside it.&lt;/p&gt;</p>
+    </div>
+<div class="r-dec" data-key="fast-route-equation" data-choice="own-equation-vs-oracle" data-by="lead" data-when="2026-10-29T16:47:32+00:00" data-sections="s3,s4">
+    <p class="r-dec-q">Which equation is the fast route held to?</p>
+    <p class="r-dec-ctx">&lt;p&gt;The bank step and the present route discretise differently before linearisation. The bank reconstructs flux from nodal jets and books through &lt;code&gt;current.book&lt;/code&gt;. The production map fits Gaussian-point values and books interior triangles, Bell polygons and saddle sectors. At the same state their residuals differ by 5.85 (diverted trial) and 664 (limited), so 1e-6 same-iterate update parity is unreachable unless one route copies the other&#x27;s discretisation.&lt;/p&gt;</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="own-equation-vs-oracle">own-equation-vs-oracle</button>
+      <button class="r-opt" data-value="reproduce-present-map">reproduce-present-map</button>
+      <button class="r-opt" data-value="converged-state-parity">converged-state-parity</button>
+      </p>
+    <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-29. The fast route converges its own equation and is judged against the analytic oracle under the locked precision budget, as §4 already requires. Same-iterate parity with the present route is dropped; both routes stay viable and are compared only at the converged state, each against the oracle.&lt;/p&gt;</p>
     </div>
 </section>
 

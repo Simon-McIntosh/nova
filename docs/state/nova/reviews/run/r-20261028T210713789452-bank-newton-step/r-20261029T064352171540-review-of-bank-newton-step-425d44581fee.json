@@ -16,6 +16,11 @@
   "call_sites": [],
   "completed_at": "2026-10-29T06:56:01Z",
   "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "bank-newton-step",
+      "recorded_at": "2026-10-29T07:19:41.504498+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "bank-newton-step",

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-modified" content="2026-10-30">
 </head>
 <body>
@@ -229,7 +229,10 @@
     <div class="r-comment-body"><p>tracked-read-batch — the read batched over 1/4/16/64 slices on one H200 measures 54.61/20.24/9.38/5.82 ms per slice at the diverted 550-cell state with zero copy bytes and the same 807 HLO op lines per call, so the 0.2 ms per-slice bound is not met at any batch size; the batch pays a fixed cost of about 44 ms per call that the unbatched read does not pay and a marginal 0.5 ms per slice, so the rebuild conditional was measured present and absent and falsified as the cause, and the accuracy arm finally executed at 550 cells and found two open failures at the diverted trial state.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261029T225150769350-review-of-tracked-read-steady-batch-24f9a404b0e5" data-who="reckon-build" data-when="2026-10-29T23:03:31.286Z">
-    <div class="r-comment-body"><p>review of tracked-read-steady-batch at 24f9a404b: parsed, 96/120 across six dimensions; read_batch threads per-lane tracking and takes one batch-uniform lax.cond as the brief requires, but the evidence record&#x27;s stated cause is refuted by its own vmap-carried control, the plan&#x27;s kernel-launch and copy-byte clause is unmeasured, and the 0.2 ms bound is missed at sixteen slices; five non-blocking findings recorded.</p></div>
+    <div class="r-comment-body"><p>review of tracked-read-steady-batch at 24f9a404b: parsed, 96/120 across six dimensions; read_batch threads per-lane tracking and takes one batch-uniform lax.cond as the brief requires, but the evidence record's stated cause is refuted by its own vmap-carried control, the plan's kernel-launch and copy-byte clause is unmeasured, and the 0.2 ms bound is missed at sixteen slices; five non-blocking findings recorded.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261029T225403582119-review-of-tracked-read-steady-batch-24f9a404b0e5-figure" data-who="reckon-build" data-when="2026-10-29T23:03:36.045Z">
+    <div class="r-comment-body"><p>none; read-only figure review, no plan edit and no repository file touched</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

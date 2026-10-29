@@ -6,7 +6,7 @@
     "image-0.png (1400x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/tracked-read-steady-batch/per-slice-wall.svg"
   },
   "attachment_note": "One attachment, opened with Read and judged directly as an image at its native 1400x720, plus upscaled crops of the marker region, the right-hand end of the dashed arms, the bound annotation and the legend. Identity was established by content, not assumed: the render carries exactly the three legend entries, the labelled 0.2 ms bound and the four x values the reviewed run's fragment describes, and the values read off the log axes (about 2.07, 0.64, 0.23 and 0.13 ms for the solid blue arm; about 54 down to 5.8 ms for the two dashed arms) match the walls the run recorded for this figure (2.068 / 0.635 / 0.230 / 0.133 ms) and the alt text's 'between 5.8 and 54 milliseconds'. No SVG was opened, rendered or read, per the brief; every measurement below is taken from the attached PNG's pixels.",
-  "completed_at": "",
+  "completed_at": "2026-10-29T23:03:36.045Z",
   "dispatched_at": "2026-10-29T22:56:02Z",
   "figure_checks": {
     "bound_geometry": "The bound and the tick grid are internally consistent: the log axis places decades about 220 px apart (10^-1 at y=650, 10^0 at y=430, 10^1 at y=215), and 0.2 ms falls at y=584 against the drawn dash at y=587 \u2014 a 3 px agreement, so the labelled bound is drawn where the axis scale puts it. The blue series crosses it between the sixteen-slice and sixty-four-slice markers, matching the caption and the run's own statement that the sixteen-slice wall misses the bound by about 15 percent.",
@@ -69,6 +69,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-29T23:03:38.560382+00:00",
+  "timestamp": "2026-10-29T23:11:01.382678+00:00",
   "total": null
 }

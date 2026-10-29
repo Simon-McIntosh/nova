@@ -674,15 +674,15 @@ def _normal_ring_velocity(
         vertices, count, form, rates
     )
     chosen = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
-    candidate = fraction[chosen].reshape(2, -1)
-    candidate_rate = fraction_rate[chosen].reshape(2, -1)
-    candidate_hit = hit[chosen].reshape(2, -1)
-    gap = jnp.abs(intervals[:2, ..., None] - candidate[:, None, None, None, :])
+    candidate = fraction[chosen]
+    candidate_rate = fraction_rate[chosen]
+    candidate_hit = hit[chosen]
+    gap = jnp.abs(intervals[:2, ..., None] - candidate[:, :, None, None, :])
     nearest = jnp.argmin(
-        jnp.where(candidate_hit[:, None, None, None, :], gap, jnp.inf), axis=-1
+        jnp.where(candidate_hit[:, :, None, None, :], gap, jnp.inf), axis=-1
     )
     interval_rate = jnp.take_along_axis(
-        jnp.broadcast_to(candidate_rate[:, None, None, None, :], gap.shape),
+        jnp.broadcast_to(candidate_rate[:, :, None, None, :], gap.shape),
         nearest[..., None],
         axis=-1,
     )[..., 0]

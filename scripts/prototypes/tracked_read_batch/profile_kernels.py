@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -41,22 +42,35 @@ def xplane_of(directory):
     return found[-1] if found else None
 
 
+DEVICE = re.compile(r"device|gpu", re.IGNORECASE)
+
+
 def kernels(directory):
-    """Kernel events of one trace, as (name, count, total_ns) rows."""
+    """Kernel events of one trace, and the per-line totals they came from.
+
+    A trace holds host tracks as well as the device one, so the events are
+    kept per line: a Python frame's duration on a host line is not a kernel,
+    and counting both together reports a launch count that no device issued.
+    """
     path = xplane_of(directory)
     if path is None:
-        return None, []
+        return None, [], []
     data = jax.profiler.ProfileData.from_file(str(path))
+    lines = []
     totals = defaultdict(lambda: [0, 0])
     for plane in data.planes:
         for line in plane.lines:
+            count = sum(1 for event in line.events if event.duration_ns)
+            lines.append((line.name, count))
+            if not DEVICE.search(line.name):
+                continue
             for event in line.events:
                 if not event.duration_ns:
                     continue
                 entry = totals[event.name]
                 entry[0] += 1
                 entry[1] += event.duration_ns
-    return path, sorted(totals.items(), key=lambda item: -item[1][1])
+    return path, sorted(totals.items(), key=lambda item: -item[1][1]), lines
 
 
 def trace(program, arguments, repeats):
@@ -64,7 +78,8 @@ def trace(program, arguments, repeats):
     with jax.profiler.trace(directory, create_perfetto_link=False):
         for _ in range(repeats):
             jax.block_until_ready(program(*arguments))
-    path, rows = kernels(directory)
+    path, rows, lines = kernels(directory)
+    emit("TRACE_LINES", path=str(path), lines=lines)
     shutil.rmtree(directory, ignore_errors=True)
     return path, rows
 

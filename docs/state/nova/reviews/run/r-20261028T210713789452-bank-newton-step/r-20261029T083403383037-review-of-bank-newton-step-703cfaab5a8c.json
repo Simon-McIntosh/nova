@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_newton_step.py:323 fails if identical fixed arrays do not return zero; by itself it does not protect compare_route wiring.",
+    "tests/test_bank_newton_step.py:324-325 fail if the helper accepts a fixed direction shifted by 0.01; removing its threshold made this check fail in repair-round-guard_mutated-control.log.",
+    "tests/test_bank_newton_step.py:326-327 fail if the helper accepts a nonfinite bank direction.",
+    "No added assertion compares its output against the same supplied value to claim route parity; the missing assertion is an integration test that reaches independently computed bank and present-route updates."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T08:41:45Z",
+  "dispatched_at": "2026-10-29T08:35:07Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-round-final-suite/summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/baseline-suite/summary.log",
+    "guard_mutation": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-round-guard_mutated-control.log",
+    "reversion_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-round-reverted-control.log",
+    "route_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-route-comparison-block.log"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html",
+      "id": "f963fcce898",
+      "line": 55,
+      "severity": "blocking",
+      "text": "The diverted and limited same-iterate updates differ by 1.002510 and 0.871164 relative, so both fail the required 1e-6 route parity gate and the step cannot land as satisfying the section."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f8ba1d5ae9f",
+      "line": 322,
+      "severity": "blocking",
+      "text": "The added test calls only _assert_update_agreement on fixed arrays; removing compare_route from measure.py main or passing bank_update as both arguments leaves this test green while the actual route comparison no longer protects parity."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found; scripts/prototypes/bank_newton_step/measure.py:106 and :419 are prototype callers",
+    "diff": "read commits 3a8e2cbdec4c05edb51358e491b293e52ec5acb9, 42ef3f3c3080568f7afee584af85808f1c15757b and 703cfaab5a8ccacea8b25caef7e2aab42357b459 individually; they remove unused Krylov code, add the route comparison and helper test, carry Jacobian operands, and table its failed H200 result.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html:99-105 requires 1e-6 update parity, 1e-10 convergence and 0.5 ms warm wall; repair-route-comparison-block.log records a red parity gate and the fragment:58 keeps the other measures open.",
+    "goal": "docs/plans/sub-millisecond-forward-path.html:96-105 requires a bank Newton update matching the present route; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-56 reports both comparisons failing.",
+    "manifest": "the reviewed run manifest records three repair commits, a zero-failure completed head suite at 42ef3f3c3080568f7afee584af85808f1c15757b, and the still-red route parity gate.",
+    "write_paths": "the reviewed run manifest declares all four changed paths, and git diff f210e2c813441b055cb6a7b8de79ce10f826b199..703cfaab5a8ccacea8b25caef7e2aab42357b459 changes only those paths."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_step.py:322-327 tests the numeric refusal helper but never calls compare_route at scripts/prototypes/bank_newton_step/measure.py:63 or its main dispatch at line 321.",
+    "evidence": "scripts/prototypes/bank_newton_step/measure.py:185-187 asserts valid reads and update agreement, and repair-route-comparison-block.log records both valid H200 states failing with EXIT=1.",
+    "fit": "scripts/prototypes/bank_newton_step/measure.py:76-80 uses the existing moment-map and operand-tangent helpers, and the added names describe capability without plan labels.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-58 records relative update errors 1.002510 and 0.871164 against the 1e-6 goal, while convergence and speed remain open.",
+    "reuse": "scripts/prototypes/bank_newton_step/measure.py:154-159 extends the existing operand_tangent and operand_block owner in scripts/prototypes/fast_map_production/solver.py:76-97; the capability search found no separate route-parity comparator.",
+    "scope_discipline": "the four files in git diff f210e2c813441b055cb6a7b8de79ce10f826b199..703cfaab5a8ccacea8b25caef7e2aab42357b459 are within the reviewed manifest orientation_write_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/sub-millisecond-forward-path.html:96-105 requires a bank Newton update matching the present route; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-56 reports both comparisons failing.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html:99-105 requires 1e-6 update parity, 1e-10 convergence and 0.5 ms warm wall; repair-route-comparison-block.log records a red parity gate and the fragment:58 keeps the other measures open.\nVERDICT write_paths: the reviewed run manifest declares all four changed paths, and git diff f210e2c813441b055cb6a7b8de79ce10f826b199..703cfaab5a8ccacea8b25caef7e2aab42357b459 changes only those paths.\nVERDICT manifest: the reviewed run manifest records three repair commits, a zero-failure completed head suite at 42ef3f3c3080568f7afee584af85808f1c15757b, and the still-red route parity gate.\nVERDICT diff: read commits 3a8e2cbdec4c05edb51358e491b293e52ec5acb9, 42ef3f3c3080568f7afee584af85808f1c15757b and 703cfaab5a8ccacea8b25caef7e2aab42357b459 individually; they remove unused Krylov code, add the route comparison and helper test, carry Jacobian operands, and table its failed H200 result.\nCALL_SITES: none\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-58 records relative update errors 1.002510 and 0.871164 against the 1e-6 goal, while convergence and speed remain open.\nSCORE evidence: 17\nJUSTIFICATION evidence: scripts/prototypes/bank_newton_step/measure.py:185-187 asserts valid reads and update agreement, and repair-route-comparison-block.log records both valid H200 states failing with EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the four files in git diff f210e2c813441b055cb6a7b8de79ce10f826b199..703cfaab5a8ccacea8b25caef7e2aab42357b459 are within the reviewed manifest orientation_write_paths.\nSCORE durability: 9\nJUSTIFICATION durability: tests/test_bank_newton_step.py:322-327 tests the numeric refusal helper but never calls compare_route at scripts/prototypes/bank_newton_step/measure.py:63 or its main dispatch at line 321.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_newton_step/measure.py:76-80 uses the existing moment-map and operand-tangent helpers, and the added names describe capability without plan labels.\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/prototypes/bank_newton_step/measure.py:154-159 extends the existing operand_tangent and operand_block owner in scripts/prototypes/fast_map_production/solver.py:76-97; the capability search found no separate route-parity comparator.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55 blocking: The diverted and limited same-iterate updates differ by 1.002510 and 0.871164 relative, so both fail the required 1e-6 route parity gate and the step cannot land as satisfying the section.\nFINDING tests/test_bank_newton_step.py:322 blocking: The added test calls only _assert_update_agreement on fixed arrays; removing compare_route from measure.py main or passing bank_update as both arguments leaves this test green while the actual route comparison no longer protects parity.",
+  "review_run_id": "r-20261029T083403383037-review-of-bank-newton-step-703cfaab5a8c",
+  "reviewed_base_sha": "f210e2c813441b055cb6a7b8de79ce10f826b199",
+  "reviewed_head_sha": "703cfaab5a8ccacea8b25caef7e2aab42357b459",
+  "reviewed_run_id": "r-20261028T210713789452-bank-newton-step",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 7,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:46:00.215115+00:00",
+  "total": 90
+}

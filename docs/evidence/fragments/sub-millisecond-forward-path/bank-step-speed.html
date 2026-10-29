@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step speed | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-speed-landing">Bank step speed</h1>
+<p id="bank-step-speed-summary">The published diverted 550-cell bank reproduced the warm-step defect at 368.64 ms on the H200. The booking tangent alone takes 120.47 ms; the full Jacobian takes 143.03 ms. Exact condition diagnostics account for much of the 213 ms between the separately timed residual, Jacobian, equilibration, LU and the whole step. A fast option now omits those diagnostics without changing the linear update in the small-matrix control. The algebraic geometry derivative is still under numerical review, so no speed or convergence claim is made for that path.</p>
+<figure id="bank-step-speed-stage-wall"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-speed/stage-wall.svg" alt="Warm H200 wall times for each isolated bank step stage and the whole step on a logarithmic millisecond scale"><figcaption>Baseline warm H200 stage measurements on the published diverted bank. Each bar is a separately compiled and synchronised stage; nested bars are not additive. Green identifies the whole step. The dotted line is the 0.5 ms target. The read is shown for context and is excluded from the step target. The SVG was rendered to PNG and visually checked.</figcaption></figure>
+<table id="bank-step-speed-baseline"><thead><tr><th>Baseline stage</th><th>Warm wall [ms]</th><th>Device time</th><th>Launches</th></tr></thead><tbody>
+<tr><td>Read, outside step</td><td>35.87</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Flux and booking residual</td><td>5.08</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Local booking tangent</td><td>120.47</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Geometry tangent, one direction</td><td>2.18</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Full Jacobian</td><td>143.03</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Equilibration</td><td>0.78</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>LU factor</td><td>5.73</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>LU solve</td><td>1.00</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Whole step</td><td>368.64</td><td>unresolved</td><td>unresolved</td></tr>
+</tbody></table>
+<p id="bank-step-speed-trace">The first profiler trace reached its 5,000,000-event cap while recording Python compilation activity and contained zero GPU events; it cannot establish device time or launch count. The isolated stage times are synchronised host walls. The subsequent profiler script warms compiled stages before tracing and awaits a new H200 run.</p>
+<p id="bank-step-speed-geometry">The first closed-form geometry comparison failed against the retained directional reference at the diverted trial state: relative response error 2788.81, with the tested reference norm nonzero. A per-edge interval assignment bug was repaired. The remaining arc-velocity discrepancy is being separated into normal-form and cubic-root rates before the focused test is repeated. The prior converged result at 1.00e-11 fresh residual and its oracle ratios remain baseline evidence, not an outcome of the new derivative.</p>
+</main></body></html>

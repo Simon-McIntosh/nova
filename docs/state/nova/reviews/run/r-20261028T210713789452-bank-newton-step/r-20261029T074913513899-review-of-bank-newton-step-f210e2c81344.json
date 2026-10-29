@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_newton_step.py:322 fails if the step update differs from NumPy's independently solved three-block linear system; the sign-reversal mutation makes it fail.",
+    "tests/test_bank_newton_step.py:323 fails if the returned linear residual reaches 1e-12; it is an independent fixed threshold but uses the step's reported residual.",
+    "tests/test_bank_newton_step.py:324 fails if equilibration does not lower condition number; both operands are returned by the step, so it does not establish an externally measured condition number.",
+    "tests/test_bank_newton_step.py:325 fails if the step reports non-convergence on this known accurate linear solve; it follows the same returned residual as line 323.",
+    "tests/test_bank_newton_step.py:329 fails if a small fresh and tracked residual with valid read is rejected.",
+    "tests/test_bank_newton_step.py:330-332 fail if an oversized fresh residual, invalid read, or nonfinite fresh residual is accepted; the H200 receipt also observes an oversized fresh residual at the call site.",
+    "No new assertion compares the result to an expected value that was itself supplied to the code under test; the NumPy solve at line 321 uses the fixture values but computes an independent answer."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T07:58:35Z",
+  "dispatched_at": "2026-10-29T07:51:08Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-final-suite/summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/baseline-suite/summary.log",
+    "guard_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-guarded-tracked-solve.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/reversion-controls-final/mutated-dense-update.log"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html",
+      "id": "f563304686c",
+      "line": 48,
+      "severity": "blocking",
+      "text": "A fresh read returns residual 0.0303684 after the tracked solve reaches 8.53e-13; the 1e-10 convergence, 0.5 ms wall, converged JVP, launch-count and cold-compile gates remain unmet."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_step/measure.py",
+      "id": "f363bf33267",
+      "line": 250,
+      "severity": "blocking",
+      "text": "The added factor reference differentiates the bank step residual itself and never reaches the production forward route, so it cannot establish the required same-iterate route-update agreement."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_step/measure.py",
+      "id": "facbf283339",
+      "line": 294,
+      "severity": "blocking",
+      "text": "The relative factor difference and reference-finite flag are only emitted; no threshold or finite assertion fails the measurement when the comparison regresses."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The H200 factor receipts and step sign-mutation supply the relevant current evidence.",
+      "file": "scripts/prototypes/bank_newton_step/reversion_control.py",
+      "id": "fa8960a630f",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "The parent-source probe uses the historical --compare-present flag while the delivered measurement uses --compare-dense-factor, so that probe does not exercise the final comparison flag."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found; scripts/prototypes/bank_newton_step/measure.py:240 is a prototype caller",
+    "diff": "read nine commits from 425d44581fee3c17f335358fed320009e7f845e8 to f210e2c813441b055cb6a7b8de79ce10f826b199; their four net paths add a step test, factor and fresh-read probes, reversion controls and a revised evidence fragment.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html:99-105 requires production-route parity, 1e-10 convergence, 0.5 ms wall and two JVP states; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:43-49 records a same-bank factor control and the unmet gates.",
+    "goal": "docs/plans/sub-millisecond-forward-path.html:96-105 requires a fast bank Newton step; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:48-49 records a fresh-read refusal and open timing gates.",
+    "manifest": "the source manifest records the repair commits, zero-failure base and head suite receipts, a sign-mutation control and the unresolved fresh-read and production-route gates.",
+    "write_paths": "the source manifest's orientation_write_paths include all four net paths changed from 425d44581fee3c17f335358fed320009e7f845e8 to f210e2c813441b055cb6a7b8de79ce10f826b199."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_step.py:307-332 adds independent NumPy-update and fixed-input terminal checks, and reversion-controls-final/mutated-dense-update.log records their failure under a sign reversal.",
+    "evidence": "scripts/prototypes/bank_newton_step/measure.py:250-264 compares against solve.factor on the bank residual, while the H200 guard receipt records CONVERGED=false after a fresh read.",
+    "fit": "scripts/prototypes/bank_newton_step/measure.py:33-41 keeps the fresh-read rule beside the prototype's measurement and scripts/prototypes/bank_newton_step/reversion_control.py:1-160 follows its script idiom without forbidden source names.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:48-49 records fresh residual 0.0303684 and 342 ms warm wall against the required 1e-10 and 0.5 ms.",
+    "reuse": "scripts/prototypes/bank_newton_step/measure.py:261 calls the existing nova/equilibrium/solve.py:68 factor owner; the capability search found no existing fresh-read terminal predicate or reversion-control owner.",
+    "scope_discipline": "the four net diff paths are all within the source manifest's orientation_write_paths, including tests/test_bank_newton_step.py and scripts/prototypes/bank_newton_step/reversion_control.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/sub-millisecond-forward-path.html:96-105 requires a fast bank Newton step; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:48-49 records a fresh-read refusal and open timing gates.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html:99-105 requires production-route parity, 1e-10 convergence, 0.5 ms wall and two JVP states; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:43-49 records a same-bank factor control and the unmet gates.\nVERDICT write_paths: the source manifest's orientation_write_paths include all four net paths changed from 425d44581fee3c17f335358fed320009e7f845e8 to f210e2c813441b055cb6a7b8de79ce10f826b199.\nVERDICT manifest: the source manifest records the repair commits, zero-failure base and head suite receipts, a sign-mutation control and the unresolved fresh-read and production-route gates.\nVERDICT diff: read nine commits from 425d44581fee3c17f335358fed320009e7f845e8 to f210e2c813441b055cb6a7b8de79ce10f826b199; their four net paths add a step test, factor and fresh-read probes, reversion controls and a revised evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:48-49 records fresh residual 0.0303684 and 342 ms warm wall against the required 1e-10 and 0.5 ms.\nSCORE evidence: 9\nJUSTIFICATION evidence: scripts/prototypes/bank_newton_step/measure.py:250-264 compares against solve.factor on the bank residual, while the H200 guard receipt records CONVERGED=false after a fresh read.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the four net diff paths are all within the source manifest's orientation_write_paths, including tests/test_bank_newton_step.py and scripts/prototypes/bank_newton_step/reversion_control.py.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_bank_newton_step.py:307-332 adds independent NumPy-update and fixed-input terminal checks, and reversion-controls-final/mutated-dense-update.log records their failure under a sign reversal.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_newton_step/measure.py:33-41 keeps the fresh-read rule beside the prototype's measurement and scripts/prototypes/bank_newton_step/reversion_control.py:1-160 follows its script idiom without forbidden source names.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/prototypes/bank_newton_step/measure.py:261 calls the existing nova/equilibrium/solve.py:68 factor owner; the capability search found no existing fresh-read terminal predicate or reversion-control owner.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:48 blocking: A fresh read returns residual 0.0303684 after the tracked solve reaches 8.53e-13; the 1e-10 convergence, 0.5 ms wall, converged JVP, launch-count and cold-compile gates remain unmet.\nFINDING scripts/prototypes/bank_newton_step/measure.py:250 blocking: The added factor reference differentiates the bank step residual itself and never reaches the production forward route, so it cannot establish the required same-iterate route-update agreement.\nFINDING scripts/prototypes/bank_newton_step/measure.py:294 blocking: The relative factor difference and reference-finite flag are only emitted; no threshold or finite assertion fails the measurement when the comparison regresses.\nFINDING scripts/prototypes/bank_newton_step/reversion_control.py:29 non-blocking: The parent-source probe uses the historical --compare-present flag while the delivered measurement uses --compare-dense-factor, so that probe does not exercise the final comparison flag; exempted because the H200 factor receipts and step sign-mutation supply the relevant current evidence.",
+  "review_run_id": "r-20261029T074913513899-review-of-bank-newton-step-f210e2c81344",
+  "reviewed_base_sha": "425d44581fee3c17f335358fed320009e7f845e8",
+  "reviewed_head_sha": "f210e2c813441b055cb6a7b8de79ce10f826b199",
+  "reviewed_run_id": "r-20261028T210713789452-bank-newton-step",
+  "scores": {
+    "durability": 16,
+    "evidence": 9,
+    "fit": 18,
+    "goal_fidelity": 6,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:02:33.635975+00:00",
+  "total": 89
+}

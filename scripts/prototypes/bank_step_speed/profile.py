@@ -152,10 +152,19 @@ def main():
     )
     whole = jax.jit(
         lambda b, m, s: support_read.newton_step(
-            b, m, s, profile, gradient, quadrature, fresh_geometry=True
+            b,
+            m,
+            s,
+            profile,
+            gradient,
+            quadrature,
+            fresh_geometry=True,
+            condition_diagnostics=False,
         )
     )
-    measure("whole_step", whole, bank, moments, support)
+    step = measure("whole_step", whole, bank, moments, support)
+    assert bool(jnp.isnan(step.condition_before) & jnp.isnan(step.condition_after))
+    emit("WHOLE_STEP", exact_condition_diagnostics=False)
     trace = Path(os.environ["BANK_STEP_TRACE_DIR"])
     jax.profiler.start_trace(str(trace), create_perfetto_link=False)
     for name, compiled, args in MEASURED_STAGES:

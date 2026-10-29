@@ -33,7 +33,28 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 19,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3b0cd9de983afa704d50c643731ee798546f01a4",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "reason": "",
+      "when": "2026-10-29T06:52:22.670143+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3b0cd9de983afa704d50c643731ee798546f01a4",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-10-29T06:52:22.670143+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261029T063751166538-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261029T063751166538-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "179439d88f6c7a06113afcca5242c8ad73ae8582",
   "rubric": "content",

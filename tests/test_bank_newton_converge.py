@@ -12,9 +12,8 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium import current, support_read, topology
+from nova.equilibrium import current, fixed_points, support_read, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
-from scripts.prototypes.bank_newton_converge.fresh_solve import analytic_oracle
 from scripts.prototypes.bank_newton_converge.fresh_solve import run as fresh_solve
 
 
@@ -148,8 +147,88 @@ def test_dense_columns_and_random_vector_match_directional_tangent(monkeypatch):
     np.testing.assert_allclose(matrix @ random, matvec(random), rtol=1e-12)
 
 
+@pytest.mark.slow
+def test_small_dense_matrix_matches_full_fresh_residual():
+    from nova.equilibrium.solve_request import TopologyPolicy
+    from tests.test_support_read import UnitDensity, _case
+
+    baseline, _, roots, pitch, _, _, _ = _case("diverted")
+    cells = len(baseline.geometry.centre)
+    nodes = np.asarray(baseline.nodes)
+    saddle = np.asarray(roots[1])
+    radial = nodes[:, 0] - saddle[0]
+    vertical = nodes[:, 1] - saddle[1]
+    rows = np.zeros_like(np.asarray(baseline.rows))
+    rows[:, 0, 0] = np.stack(
+        (radial * vertical, vertical, radial, np.zeros_like(radial),
+         np.ones_like(radial), np.zeros_like(radial)),
+        axis=-1,
+    )
+    operands = support_read.SupportOperands.from_rows(
+        baseline.geometry,
+        rows,
+        np.asarray(baseline.exterior),
+        nodes,
+        np.asarray(baseline.sample_index),
+    )
+    cache = fixed_points.RowCache(
+        operands.mesh,
+        operands.nodes,
+        jnp.arange(len(nodes)),
+        operands.rows,
+        operands.exterior,
+    )
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    quadrature = current.Quadrature(sigma=convention.sigma, segments=64)
+    moments = tuple(jnp.zeros(cells) for _ in range(3))
+    seeds = roots + 0.03 * pitch
+    profile = UnitDensity()
+
+    def full_residual(state):
+        support = support_read.read(
+            operands, cache, state, seeds, roots, convention, policy
+        )
+        result = support_read.step_residual(
+            operands, state, state, support, profile, quadrature
+        )
+        return jnp.concatenate(result.residual), support, result.valid
+
+    _, support, valid = full_residual(moments)
+    assert bool(valid)
+    assert bool(jnp.any(support.reading.normal_form_cells))
+    gradient = lambda radius, flux: jnp.zeros_like(radius)
+    matrix = support_read.step_jacobian(
+        operands, moments, support, profile, gradient, quadrature,
+        fresh_geometry=True,
+    )
+    frozen = support_read.step_jacobian(
+        operands, moments, support, profile, gradient, quadrature,
+    )
+    column = np.asarray(matrix[:, 0])
+    old_column = np.asarray(frozen[:, 0])
+    errors = []
+    for length in (1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8):
+        positive = list(moments)
+        negative = list(moments)
+        positive[0] = positive[0].at[0].set(length)
+        negative[0] = negative[0].at[0].set(-length)
+        high, _, high_valid = full_residual(tuple(positive))
+        low, _, low_valid = full_residual(tuple(negative))
+        assert bool(high_valid) and bool(low_valid)
+        observed = np.asarray((high - low) / (2 * length))
+        scale = np.linalg.norm(observed)
+        assert scale > 0
+        errors.append((float(np.linalg.norm(column - observed) / scale), length))
+    error, length = min(errors)
+    print(f"FRESH_COLUMN relative={error:.9g} length={length:.9g}")
+    assert error <= 1e-6
+    assert np.linalg.norm(column - old_column) / np.linalg.norm(column) > 1e-6
+
+
 def test_analytic_oracle_uses_direct_newton_without_read(monkeypatch):
     from tests.equilibrium import test_topology_read as fixture
+    from scripts.prototypes.bank_newton_converge.fresh_solve import analytic_oracle
 
     _, analytic, wall, axis, saddle = fixture._analytic_inputs("diverted")
 

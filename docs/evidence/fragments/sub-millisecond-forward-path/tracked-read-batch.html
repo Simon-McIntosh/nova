@@ -1,0 +1,79 @@
+<section id="tracked-read-batch">
+  <h2>tracked-read-batch — the read batched over slices, and what the batch pays</h2>
+
+  <p>The tracked read is repeated over a stacked bank through
+  <code>jax.vmap</code>, so one launched program reads a batch of slices and
+  the per-slice bound of decision <code>read-bound-per-slice</code> can be
+  charged once per batch rather than once per call. The bank's operands and the
+  row window are shared by every lane; the booked moments, the seeds, the warm
+  starts and the tracking state carry one entry per slice. Every call is timed
+  in the steady state, with no slice changing cell and no slice changing
+  ownership, so no lane rebuilds the connected decision. The table below states N = 4 batch sizes.</p>
+
+  <table>
+    <caption>Per-slice wall of the tracked read at the diverted 550-cell state on one H200, N = 4 batch sizes</caption>
+    <tr><th>batch</th><th>slices</th><th>wall per call [ms]</th><th>wall per slice [ms]</th><th>launches per call</th><th>launches per slice</th><th>copy bytes</th></tr>
+    <tr><td><code>single</code></td><td>1</td><td>54.61</td><td>54.61</td><td>807</td><td>807.0</td><td>0</td></tr>
+    <tr><td><code>four</code></td><td>4</td><td>80.95</td><td>20.24</td><td>807</td><td>201.8</td><td>0</td></tr>
+    <tr><td><code>sixteen</code></td><td>16</td><td>150.06</td><td>9.38</td><td>807</td><td>50.4</td><td>0</td></tr>
+    <tr><td><code>sixtyfour</code></td><td>64</td><td>372.25</td><td>5.82</td><td>807</td><td>12.6</td><td>0</td></tr>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/sub-millisecond-forward-path/tracked-read-batch/per-slice-wall.svg" alt="Per-slice wall of the tracked read against the number of slices in the batch, falling from 54.6 ms at one slice to 5.8 ms at sixty-four, every point far above the 0.2 ms bound.">
+    <figcaption>Per-slice wall of the tracked read at the diverted 550-cell state on one H200, against the number of slices in the batch. The dotted line is the 0.2 ms bound; the series is the minimum of 20 steady-state calls at each batch size.</figcaption>
+  </figure>
+
+  <h3 id="tracked-read-batch-bound">The bound is not met, and the batch does not carry it</h3>
+  <p>Sixteen slices read at 9.38 ms per slice and sixty-four at 5.82 ms, so the
+  bound of 0.2 ms per slice, which needs a factor of 47 at sixteen slices, is
+  not met by batching this read. The per-call wall is not what batching was
+  expected to buy, either: it rises with the batch, from 54.6 ms at one slice
+  to 372.3 ms at sixty-four, so the batch pays 5.0 ms of arithmetic for each
+  slice added past the first instead of sharing one slice's work across the
+  lanes. The launch count is the same 807 in every case, so the batch removes
+  no launches at all: <code>vmap</code> maps the read over the slice axis and
+  the compiled program issues the vmap's launches unchanged per call.</p>
+
+  <p>The two regimes separate by what each slice pays. At one slice the call is
+  launch-bound: 807 launches in 54.6 ms is 68 µs per launch, and a second slice
+  costs only 5 ms of arithmetic against that 54.6 ms of fixed cost. By sixteen
+  slices the fixed share has amortised to 3.4 ms per slice and arithmetic is
+  5.9 ms per slice; by sixty-four the fixed share is 0.85 ms and arithmetic
+  5.0 ms, so the batch is arithmetic-bound and the per-slice wall is falling
+  only as the fixed cost spreads. The arithmetic floor this path shows is
+  therefore about 5 ms per slice, twenty-five times the bound, and no batch
+  size closes it.</p>
+
+  <p>The floor is a property of this path rather than of the read. The same
+  read traced once, with the tracking state passed as a single value, was
+  measured at 1.27 ms per call over 805 launches at this state. The vmapped
+  program carries 24,781 HLO instructions at one slice against a per-call wall
+  of 54.6 ms, so the batched path pays about 43 times the single call's wall
+  for the same launch count, and the number this record can defend is that the
+  read costs 1.27 ms per call at one slice and that batching it through
+  <code>vmap</code> does not bring it near 0.2 ms.</p>
+
+  <p>Nothing in <code>support_read.read</code> was changed to make the batched
+  number smaller. The one change it carries is the carried-decision path: under
+  <code>vmap</code> the rebuild conditional becomes a select evaluated in every
+  lane, so a caller whose batch holds no rebuild passes
+  <code>rebuild=False</code> and reads the rebuilt flag back to re-read any
+  batch that reports one. That change does not move the batch-1 and batch-4
+  numbers, which is what says the cost is not the rebuild branch.</p>
+
+  <h3 id="tracked-read-batch-reuse">The wall selection and the table check have one owner</h3>
+  <p>The accuracy test's boundary reference carried its own wall-extremum
+  search, a ternary refinement over the wall polygon, and imported the wall
+  geometry from a test module. The reference now lives outside the tests, in
+  <code>scripts/prototypes/tracked_read_batch/reference.py</code>, and takes its
+  extremum from <code>nova.geometry.select.host_wall_flux</code>, the selection
+  the limiter route already uses: the wall polygon's analytic flux is handed
+  over with the polarity that selects its maximum, and the returned point is
+  read back. The wall geometry is taken from the geometry the case already
+  carries, so neither the tests nor the prototype import a test module. The
+  fragment's table is checked against its record by
+  <code>scripts/prototypes/tracked_read_batch/check_table.py</code>, which calls
+  the shared <code>carrier_identity_receipt.check_receipt_table</code> rather
+  than carrying a second copy of that check.</p>
+</section>

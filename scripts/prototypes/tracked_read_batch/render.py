@@ -42,7 +42,7 @@ def main():
     axis.plot(
         sizes,
         per_slice,
-        color=style.sol_color,
+        color=style.flux_color,
         linewidth=3.0,
         marker="o",
         markersize=7,
@@ -70,7 +70,7 @@ def main():
         (sizes[index], per_slice[index]),
         textcoords="offset points",
         xytext=(12, 10),
-        color=style.sol_color,
+        color=style.flux_color,
         fontsize=14,
     )
     fig.tight_layout()

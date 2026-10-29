@@ -12,6 +12,7 @@ from typing import NamedTuple
 from types import SimpleNamespace
 
 from nova.equilibrium import clip_quadrature, current, support_read, topology
+from scripts.prototypes.bank_newton_step.measure import _terminal_verdict
 
 
 class ConstantDensity:
@@ -322,3 +323,10 @@ def test_dense_newton_step_solves_scaled_residual(monkeypatch):
     assert float(step.linear_residual) < 1e-12
     assert float(step.condition_after) < float(step.condition_before)
     assert bool(step.converged)
+
+
+def test_terminal_verdict_requires_fresh_read():
+    assert _terminal_verdict(8e-13, 9e-13, True)
+    assert not _terminal_verdict(8e-13, 0.0303684, True)
+    assert not _terminal_verdict(8e-13, 9e-13, False)
+    assert not _terminal_verdict(8e-13, np.nan, True)

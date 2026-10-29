@@ -30,6 +30,17 @@ def emit(name, **values):
     print(name + " " + json.dumps(values, sort_keys=True, default=float), flush=True)
 
 
+def _terminal_verdict(tracked_residual, fresh_residual, fresh_valid, tolerance=1e-10):
+    """Require the refreshed read to certify a tracked Newton solution."""
+    return bool(
+        fresh_valid
+        and np.isfinite(tracked_residual)
+        and np.isfinite(fresh_residual)
+        and tracked_residual <= tolerance
+        and fresh_residual <= tolerance
+    )
+
+
 def machine(kind):
     import tests.equilibrium.test_topology_read as fixture
     from benchmarks import solovev_certificate as certificate
@@ -400,10 +411,12 @@ def main():
     fresh_support = read_state(operands, cache, current_moments)
     fresh_state = residual(operands, current_moments, current_moments, fresh_support)
     fresh_norm = float(jnp.max(jnp.abs(jnp.concatenate(fresh_state.residual))))
-    converged = np.isfinite(norm) and norm <= 1e-10
+    tracked_converged = np.isfinite(norm) and norm <= 1e-10
+    converged = _terminal_verdict(norm, fresh_norm, bool(fresh_support.valid))
     emit(
         "CONVERGED",
         value=converged,
+        tracked_converged=tracked_converged,
         steps=iteration,
         residual_sup=norm,
         fresh_residual_sup=fresh_norm,

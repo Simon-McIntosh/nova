@@ -3,7 +3,7 @@ set -u
 export TMPDIR=/tmp
 ROOT=$(git rev-parse --show-toplevel)
 export PYTHONPATH=$ROOT
-export JAX_PLATFORMS=cpu
+export JAX_PLATFORMS=cuda
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 LOG=${1:?log path required}
 BASE=$(mktemp -d "$TMPDIR/bank-matrix-test-XXXXXX")

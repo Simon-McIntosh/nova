@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The steady-batch gate: one fresh pytest process, its own basetemp, no timeout wrapper.
 set -euo pipefail
-W=$(git -C "$(dirname "$0")/../../.." rev-parse --show-toplevel)
+W=${NOVA_TREE:?set NOVA_TREE to the tree under test}
 L=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T210641793337-tracked-read-steady-batch/logs
 mkdir -p "$L"
 export TMPDIR=/tmp

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One H200, one bank: the batched steady read's wall, decision flags and kernels.
 set -euo pipefail
-W=$(git -C "$(dirname "$0")/../../.." rev-parse --show-toplevel)
+W=${NOVA_TREE:?set NOVA_TREE to the tree under test}
 L=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T210641793337-tracked-read-steady-batch/logs
 mkdir -p "$L"
 export TMPDIR=/tmp

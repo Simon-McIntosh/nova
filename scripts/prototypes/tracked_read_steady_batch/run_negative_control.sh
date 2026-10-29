@@ -2,7 +2,7 @@
 # The declared mutation: drop the tracking state from the batched call in a
 # scratch copy, so every lane rebuilds and the steady clause must refuse it.
 set -euo pipefail
-W=$(git -C "$(dirname "$0")/../../.." rev-parse --show-toplevel)
+W=${NOVA_TREE:?set NOVA_TREE to the tree under test}
 L=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T210641793337-tracked-read-steady-batch/logs
 mkdir -p "$L"
 export TMPDIR=/tmp

@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-10-29T08:07:50.683Z",
   "dispatched_at": "2026-10-29T07:59:09Z",
   "evidence_inputs": {
     "caption_finding_repaired": "The non-blocking finding that the diverted caption only repeated the panel title ('Diverted trial state, same vocabulary.') is repaired: the caption at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html now states that the axes agree to 0.19 mm inside the 6.81e-4 m budget while the X-point pair is 0.88 mm apart against the same budget, and the limited caption states its 4.12 mm axis error against the 2.00e-3 m budget. Neither caption repeats its figure's title alone.",
@@ -68,6 +68,6 @@
   "status": "parsed",
   "summary": "I opened both attached PNGs and judged the pictures only: image-0.png is the diverted trial state (saddle null at the divertor, 'normal-form radius 107.13 mm' annotation, two magnified windows titled 'axis magnified, 0.19 mm apart' and 'X-point magnified, 0.88 mm apart') and image-1.png is the limited trial state (nested contours, no saddle, one window titled 'axis magnified, 4.12 mm apart'). The repair at 15f6cfddfd works: both contour families are now visible in both panels. On rows 350, 450 and 550 through the main panels every dark analytic crossing is accompanied by the dashed blue read contour within +-5 px over +-7 rows (0-2 unpaired of 22-29 crossings per row, the misses at the outermost level), and the whole-panel ink balance is 11,939 near-black against 11,117 feature-blue pixels in the diverted panel and 14,510 against 9,026 in the limited one, against 92 near-black in the same region before the repair. The null pairs, which previously merged into one mark, are separable in the windows: the large dark marker and the small feature-coloured one are about a marker-width apart and read as two. Six rubric items are reported per figure. No blocking defect survives. Two non-blocking findings are recorded: one solid blue curve (the boundary-level contour) contradicts the in-figure legend's 'cell field / dashed', and the two magnification windows carry full four-spine boxes that the repository's despine rule excludes. Nothing was edited, created, moved or redrawn; no SVG was opened and no image other than the two named PNGs was read.",
   "times_source": "run-record",
-  "timestamp": "2026-10-29T08:07:54.402354+00:00",
+  "timestamp": "2026-10-29T08:15:05.680413+00:00",
   "total": null
 }

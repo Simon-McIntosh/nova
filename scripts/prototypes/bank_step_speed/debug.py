@@ -21,8 +21,8 @@ from scripts.prototypes.bank_step_speed.reference import (
 )
 
 
-def emit(name, **values):
-    print(name, json.dumps(values, sort_keys=True, default=float), flush=True)
+def emit(kind, **values):
+    print(kind, json.dumps(values, sort_keys=True, default=float), flush=True)
 
 
 def difference(actual, reference):

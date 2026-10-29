@@ -42,6 +42,13 @@
       "finding": "anchors_resolve-1",
       "reason": "",
       "when": "2026-10-29T17:15:27.912107+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "5.85 and 664 are the absolute residual-difference norms (5.84576, 664.309) the bank-newton-converge audit tables at the same physical moment iterate; bank-newton-step tables the same gap in relative form (0.999 and 1.040). Both say the residuals differ by about their own size before linearisation, which is the decision's ground; the converge record lands with that node and the clause now cites its run",
+      "when": "2026-10-29T17:15:40.124186+00:00"
     }
   ],
   "responses": {
@@ -52,6 +59,12 @@
       "commit_basis": "edit",
       "reason": "",
       "when": "2026-10-29T17:15:27.912107+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "5.85 and 664 are the absolute residual-difference norms (5.84576, 664.309) the bank-newton-converge audit tables at the same physical moment iterate; bank-newton-step tables the same gap in relative form (0.999 and 1.040). Both say the residuals differ by about their own size before linearisation, which is the decision's ground; the converge record lands with that node and the clause now cites its run",
+      "when": "2026-10-29T17:15:40.124186+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261029T170219942377-plan-review-of-sub-millisecond-forward-path.json",

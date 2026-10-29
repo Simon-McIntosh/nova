@@ -42,9 +42,26 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-29T06:52:22.670143+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3b0cd9de983afa704d50c643731ee798546f01a4",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-10-29T06:52:42.927106+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3b0cd9de983afa704d50c643731ee798546f01a4",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-10-29T06:52:42.927106+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

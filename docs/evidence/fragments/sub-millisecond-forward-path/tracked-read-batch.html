@@ -76,9 +76,17 @@
   64-cell certificate the same read costs 1.38 ms carried and 35.37 ms when it
   rebuilds every call; through <code>vmap</code> it costs 44.76 ms at one
   slice with the conditional removed entirely and 44.17 ms with the
-  conditional present, a difference of 1.3 %. At four slices the same three
-  variants read 64.34, 64.45 and 66.66 ms, so the conditional moves nothing;
-  the batch's cost tracks the batch axis alone. Passing
+  conditional present, a difference of 1.3 %. At four slices the three read
+  64.34, 64.45 and 64.66 ms and the two never separate, so the conditional
+  moves nothing at either batch.</p>
+
+  <p>The full series at 64 cells is 44.8, 64.5, 74.9 and 99.3 ms per call at
+  one, four, sixteen and sixty-four slices, which is 44.8, 16.1, 4.7 and
+  1.55 ms per slice. The wall is therefore a fixed cost of about 44 ms per
+  call that the batch never sheds, plus a marginal 0.5 ms per slice that the
+  unbatched read already pays at 1.38 ms. Batching this read shares arithmetic
+  but cannot share that fixed cost, which is where the bound is lost, and it
+  is the fixed cost that the profiler would have to name. Passing
   <code>rebuild=False</code> therefore cannot fix it: the batched read pays
   more than a full rebuild while doing no rebuild, and the mechanism is
   inside the solve rather than the carried decision. The column counts are

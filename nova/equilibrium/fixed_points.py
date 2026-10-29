@@ -145,7 +145,7 @@ class BellField:
         return jnp.dot(self.coefficients[cell, triangle], basis)
 
     def value(self, point):
-        cell = jnp.argmin(jnp.sum((self.mesh.generators - point) ** 2, axis=-1))
+        cell = nearest_cell(self.mesh, point)
         return self.cell_value(cell, point)
 
     def cell_value(self, cell, point):
@@ -262,6 +262,19 @@ def _source_jets(point, coupling):
     return jnp.einsum("cbq,cbm->cmq", coefficients, transform)
 
 
+def nearest_cell(mesh: BellMesh, position) -> jax.Array:
+    """Index the hex cell whose generator is nearest each position.
+
+    Vectorised over any leading position dimensions: a point of shape (2,)
+    returns one index, a batch of shape (points, 2) returns ``points`` indices.
+    This is the single cell-selection rule the mesh has: the cell-local Bell fit
+    evaluates in it and a tracked point is recorded in it, so a reused decision
+    and a rebuilt one agree on which cell a point occupies.
+    """
+    distance = jnp.sum((mesh.generators - position[..., None, :]) ** 2, axis=-1)
+    return jnp.argmin(distance, axis=-1)
+
+
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
 class _CachedField:
@@ -278,7 +291,7 @@ class _CachedField:
     exterior: jax.Array
 
     def _location(self, point):
-        cell = jnp.argmin(jnp.sum((self.mesh.generators - point) ** 2, axis=-1))
+        cell = nearest_cell(self.mesh, point)
         local = (point - self.mesh.origins[cell]) / self.mesh.scales[cell, :, None]
         bary = jnp.einsum("tij,tj->ti", self.mesh.inverse_edges[cell], local)
         bary = jnp.concatenate((bary, 1 - jnp.sum(bary, axis=-1, keepdims=True)), -1)

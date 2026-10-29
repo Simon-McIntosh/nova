@@ -1,0 +1,195 @@
+<section id="tracked-read-h200">
+  <h2>tracked-read-h200 — one cell rule, the H200 wall and the trial-state error</h2>
+
+  <h3 id="tracked-read-h200-reuse">The cell selection has one owner</h3>
+  <p><code>support_read.stationary_cells</code> re-implemented the nearest-generator
+  cell selection that <code>fixed_points._CachedField._location</code> already
+  owned, so the cell a tracked read recorded and the cell the cell-local Bell fit
+  evaluated in were two rules that could drift apart. The rule now lives once, in
+  <code>fixed_points.nearest_cell</code>, vectorised over any leading position
+  dimensions: a single point returns one index and a batch of <code>points</code>
+  positions returns <code>points</code> indices. <code>_location</code>,
+  <code>BellField.value</code> and the tracked read all call it, and
+  <code>stationary_cells</code> is deleted. <code>tests/test_tracked_read.py</code>
+  passes 4 of 4 over the change.</p>
+  <p>Two clauses keep it one owner. The first refuses a second nearest-generator
+  rule: <code>support_read</code> must carry no <code>stationary_cells</code>,
+  and both <code>support_read.read</code> and
+  <code>fixed_points._CachedField._location</code> must reach the shared rule.
+  The second is behavioural, because a source check cannot see two correct
+  implementations that disagree at a boundary: it takes the two generators
+  nearest each other in the mesh, puts a point exactly between them - on the
+  surface where two cell choices are equidistant - and requires the read's cell
+  and the field's cell to be the same index. Two owners drift at exactly the
+  points this one is chosen from.</p>
+
+  <h3 id="tracked-read-h200-stage">Which stage carries the trial-state error</h3>
+  <p>Every reference is a direct solve on the analytic flux of the certificate
+  state, and none of them passes through the read it judges. The axis and the
+  diverted boundary are Newton solves on the analytic flux seeded from the
+  certificate; the limited boundary is the wall point where that flux is
+  extremal on the plasma side, found by sweeping the wall polygon and refining
+  the segment with a ternary search; the flux span is the difference of those
+  two analytic values. An earlier version of this row compared the read against
+  <code>topology.read</code> on the analytic field, which is the same read, so
+  the reference decided its own clause; that is what the numbers below replace.</p>
+  <p>Each state is measured twice: on the moments it books (the trial state books
+  the sampled field, the converged state books the analytic one), and on the
+  analytic field substituted for those moments. A third column is the distance
+  from the read's own derivative source - the cell-local Bell interpolant of the
+  booked nodal jets, solved directly - to the analytic extremum, which is the
+  interpolant's own share.</p>
+  <table>
+    <tr><th>state</th><th>axis [m]</th><th>X-point [m]</th>
+      <th>boundary flux / span</th><th>axis, analytic field substituted [m]</th>
+      <th>interpolant's own distance [m]</th><th>budget</th></tr>
+    <tr><td>diverted, converged</td><td>3.88e-6</td><td>5.28e-6</td>
+      <td>1.49e-5</td><td>3.88e-6</td><td>3.88e-6</td>
+      <td>6.81e-4 m / 1e-4</td></tr>
+    <tr><td>diverted, trial</td><td>1.88e-4</td><td>8.82e-4</td>
+      <td>2.21e-3</td><td>3.88e-6</td><td>1.88e-4</td>
+      <td>6.81e-4 m / 1e-4</td></tr>
+    <tr><td>limited, converged</td><td>8.40e-4</td><td>—</td>
+      <td>8.24e-5</td><td>8.40e-4</td><td>8.40e-4</td>
+      <td>2.00e-3 m / 1e-4</td></tr>
+    <tr><td>limited, trial</td><td>4.12e-3</td><td>—</td>
+      <td>3.33e-5</td><td>8.40e-4</td><td>4.12e-3</td>
+      <td>2.00e-3 m / 1e-4</td></tr>
+  </table>
+  <p>The booked field carries the miss, and the substitution shows it. Hand the
+  read the analytic field's moments and both trial states land inside every
+  axis budget: the diverted X-point at 3.88e-6 m against 6.81e-4 and the limited
+  axis at 8.40e-4 m against 2.00e-3. Hand it the trial booking and the diverted
+  X-point goes to 8.82e-4 m and the limited axis to 4.12e-3 m. The interpolant
+  is not the carrier on the diverted state - solved directly on the analytic
+  moments it sits 3.88e-6 m from the analytic axis - while on the limited state
+  it is already at 8.40e-4 m, inside the 2.00e-3 budget but the larger of the
+  two shares. What moves either state out of budget is the column of booked
+  moments, which is the booking's error, upstream of the read.</p>
+  <p>The solve is not the carrier either, and the iteration count settles that:
+  every point terminates with <code>status=0</code> on a position tolerance of
+  <code>1e-10</code> of the pitch, so where the solve stops is a stationary
+  point of the field it is handed, not a Newton that ran out. Widening the
+  iteration budget cannot move these numbers, and a converged Newton solve has
+  forgotten its seed.</p>
+  <p>At the converged state the same instrument lands at 3.88e-6 m on the
+  diverted axis and 8.40e-4 m on the limited one with the boundary flux inside
+  1.5e-5 and 8.3e-5 of the span, so the read reproduces the analytic state it is
+  handed.</p>
+  <p>Every row of the table is a record. The gate writes each state's row to
+  the file named by <code>NOVA_ACCURACY_ROWS</code>, which the job sets,
+  truncates and names in its log header, so a state that passes is recorded as
+  well as one that fails: pytest prints a fixture's output only inside the
+  captured-output section of a failing test, so a row that lived nowhere else
+  was absent from every run in which its state passed, and a table cell could
+  be quoted with no run behind it. <code>attribution_check.py</code> reads the
+  cells out of this table and the rows out of the named logs and reports every
+  cell found or missing, so such a cell fails a check instead of passing
+  review. Against <code>logs/accuracy_rows_ea870badc.jsonl</code> all eighteen
+  numeric cells of the table are found; against the logs of the run before that
+  recording existed, all ten diverted cells are missing and it exits nonzero.</p>
+  <p>The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over
+  the four states, with the two cell-owner clauses, and at revision
+  <code>ea870badc</code> reports
+  <code>3 failed, 8 passed in 432.50s</code>: the limited trial
+  axis at 4.12e-3 m against 2.00e-3, the diverted trial X-point at 8.82e-4
+  against 6.81e-4, and the diverted trial boundary flux at 2.21e-3 of the span
+  against 1e-4. Both converged states pass every clause. Those are the recorded
+  defect reproduced against a reference the read does not decide, and they are
+  left failing rather than relaxed: the budgets are the section's, and a test
+  that stopped asserting them would report a read that meets them. Those three
+  clauses are carried to the next node: the repair is the booking's, which is
+  upstream of the read, and they stay failing here rather than being marked
+  expected-failure.</p>
+  <p>The gate is controlled. The declared mutation averages the Bell fit across
+  the three nodes of the triangle a point occupies instead of contracting each
+  node's own jets, applied to an exported copy of this revision and run on the
+  same device: it reports <code>6 failed, 2 passed</code> in 419 s, and the ids
+  it adds to the three above are both converged cases, which the head passes. A
+  mutation that no clause catches would leave this gate's failures
+  indistinguishable from a gate that is simply too strict.</p>
+  <p>The shared store publishes the diverted certificate's bank only
+  (<code>receipt.json</code> reads <code>"kind": "diverted"</code>), so binding
+  the limited case to it fed that case another state's field and the read
+  reported invalid with a boundary-flux error of 259 in span units. A case the
+  store does not hold is built from its own rows; the numbers here are each
+  certificate measured on the field it books.</p>
+
+  <h3 id="tracked-read-h200-wall">The warm wall on the H200</h3>
+  <p>One job on <code>98dci4-gpu-0003</code>, an <code>NVIDIA H200 NVL</code>,
+  at the 550-cell diverted state. The bank is loaded through
+  <code>support_read.read_bank</code> from
+  <code>/work/projects/imas_gpu/sophelio/nova-assembled-step-bank</code>
+  (digest <code>sha256:6ebe02e0…</code>, 1,741 nodes, 162.2 MB), so nothing is
+  re-derived from source jets. Every row is the minimum of five warm repeats of
+  one compiled step:</p>
+  <table>
+    <tr><th>call</th><th>warm wall</th><th>kernel launches</th>
+      <th>HLO instructions</th><th>host–device copy bytes</th></tr>
+    <tr><td>steady (tracked, no rebuild)</td><td>1.225 ms</td><td>805</td>
+      <td>24,178</td><td>0, result device-resident</td></tr>
+    <tr><td>stationary solve alone</td><td>0.634 ms</td><td>55</td>
+      <td>3,249</td><td>0</td></tr>
+    <tr><td>rebuild step</td><td>35.65 ms</td><td>805</td><td>24,025</td>
+      <td>0</td></tr>
+  </table>
+  <p>Two further jobs on the same device repeated the table at the head: the
+  steady read came back at 1.237 ms and 1.268 ms with 805 launches, so the
+  steady figure is stable to about 2 %, while the solve-alone row moved between
+  0.594 ms and 0.817 ms across the three runs. The bound is missed by every
+  reading and the conclusion below does not turn on which; the spread is stated
+  so the solve figure is not read as tighter than it is.</p>
+  <p>The steady read is 1.225-1.268 ms across three head revisions, six times the section's 0.2 ms bound. The
+  launches table says where they go: the stationary solve is 55 launches and
+  0.634 ms, and the remaining 750 launches carry the other 0.591 ms, over
+  21,000 of the 24,178 HLO instructions. The remainder is not the fit — a
+  steady step pays no whole-mesh fit — and the stages it contains are read from
+  the code rather than timed separately: the whole-mesh containment scan
+  <code>topology._inside_cells</code> evaluated at each tracked point, which
+  tests every cell's edges for each point, the Hessian eigenvalues that classify
+  it, and the tracking predicate. Even a perfect fusion of all of it leaves the
+  solve's own 0.634 ms, more than three times the bound, so the bound is not
+  reachable by fusing the read: the warm-started solve has to get cheaper, and
+  that is §3's subject. The stage split is left as measured for the solve and
+  structural for the remainder, which is stated rather than presented as a
+  measurement it is not.</p>
+  <p>The rebuild row is reported as measured but the instrument is suspect:
+  35.65 ms against 1.649 ms reported for the same call on a P100 is twenty-two
+  times slower on the faster device, where the steady row is only 1.25 times
+  faster. A number that moves the wrong way by an order of magnitude is a claim
+  about the instrument before it is a claim about the code, so this row is not
+  used to price a rebuild step.</p>
+
+  <h3 id="tracked-read-h200-figures">The two trial states</h3>
+  <p>Each panel draws the analytic flux and the read's own cell field on one
+  shared level set, with both null sets and the wall
+  (<code>nova.media.poloidal</code> through the repository's read renderer).
+  The analytic family is drawn solid and dark beneath, the cell family dashed in
+  the feature colour above it, on the same level values, so a level a family
+  misses is a real miss rather than a shifted comparison. Over a whole poloidal
+  cross-section a state's two null sets sit a fraction of a millimetre apart -
+  two or three pixels - and merge into one mark, so each pair is repeated in a
+  window beside the plasma, magnified to three times the separation and titled
+  with that separation. In the windows the field's null is the large dark
+  marker and the read's the small feature-coloured one, told apart by style and
+  by size rather than by position. The dotted circle marks the normal-form
+  radius quoted on the diverted panel, the radius over which its saddle form is
+  carried.</p>
+  <figure id="tracked-read-h200-figure-limited">
+    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg"
+      alt="limited trial state: analytic and read flux contours with both null sets">
+    <figcaption>Limited trial state. Solid dark contours are the analytic flux,
+    dashed feature-coloured contours the read's cell field on the same levels;
+    in the window the large dark marker is the analytic null and the small
+    feature-coloured one the read's, 4.12 mm apart - the error the accuracy
+    table records for this state's axis against a 2.00e-3 m budget.</figcaption>
+  </figure>
+  <figure id="tracked-read-h200-figure-diverted">
+    <img src="/nova/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg"
+      alt="diverted trial state: analytic and read flux contours with both null sets">
+    <figcaption>Diverted trial state, same vocabulary. The two windows carry the
+    state's two null pairs: the axes agree to 0.19 mm, well inside the
+    6.81e-4 m budget, while the X-point pair is 0.88 mm apart against that same
+    budget - the miss the accuracy table records for this state.</figcaption>
+  </figure>
+</section>

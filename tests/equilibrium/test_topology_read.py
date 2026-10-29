@@ -723,63 +723,89 @@ def _render_read_panel(
 
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
-    radial = np.linspace(wall[:, 0].min(), wall[:, 0].max(), 180)
-    vertical = np.linspace(wall[:, 1].min(), wall[:, 1].max(), 220)
-    rr, zz = np.meshgrid(radial, vertical)
-    locations = np.column_stack((rr.ravel(), zz.ravel()))
     polygons = [
         Polygon(np.asarray(poly)[: int(count)])
         for poly, count in zip(geometry.vertices, geometry.vertex_count, strict=True)
     ]
-    matches = STRtree(polygons).query(points(locations), predicate="within")
-    sampled = np.full(len(locations), np.nan)
-    index, cell = matches
-    local = (locations[index] - np.asarray(geometry.centre)[cell]) / np.asarray(
-        geometry.pitch
-    )[cell, None]
-    x, y = local.T
-    basis = np.column_stack((np.ones_like(x), x, y, x * x, x * y, y * y))
-    sampled[index] = np.sum(basis * np.asarray(result.field_coefficients)[cell], axis=1)
-    reference = np.asarray(jax.vmap(field.value)(jnp.asarray(locations))).reshape(
-        rr.shape
-    )
+    tree = STRtree(polygons)
+
+    def sample(locations):
+        """The cell field and the analytic field on one set of points."""
+        matches = tree.query(points(locations), predicate="within")
+        index, cell = matches
+        sampled = np.full(len(locations), np.nan)
+        local = (locations[index] - np.asarray(geometry.centre)[cell]) / np.asarray(
+            geometry.pitch
+        )[cell, None]
+        x, y = local.T
+        basis = np.column_stack((np.ones_like(x), x, y, x * x, x * y, y * y))
+        sampled[index] = np.sum(
+            basis * np.asarray(result.field_coefficients)[cell], axis=1
+        )
+        values = np.asarray(jax.vmap(field.value)(jnp.asarray(locations)))
+        return sampled, values, index, cell
+
+    radial = np.linspace(wall[:, 0].min(), wall[:, 0].max(), 180)
+    vertical = np.linspace(wall[:, 1].min(), wall[:, 1].max(), 220)
+    rr, zz = np.meshgrid(radial, vertical)
+    locations = np.column_stack((rr.ravel(), zz.ravel()))
+    sampled, analytic_values, index, cell = sample(locations)
+    reference = analytic_values.reshape(rr.shape)
     levels = np.linspace(float(result.boundary_flux), float(result.axis_flux), 10)[:-1]
     figure, axes = plt.subplots(figsize=(14, 9), dpi=100)
     poloidal_axes(axes)
+    analytic_color = "#1a1a1a"
+    read_color = DEFAULT_INK.flux_color
     reference_style = replace(
         DEFAULT_INK,
-        axis_color="#333333",
-        xpoint_color="#333333",
-        axis_markersize=12,
-        xpoint_markersize=13,
+        axis_color=analytic_color,
+        xpoint_color=analytic_color,
+        axis_markersize=20,
+        xpoint_markersize=24,
+        xpoint_markeredgewidth=2.4,
     )
     read_style = replace(
         DEFAULT_INK,
-        axis_color=DEFAULT_INK.flux_color,
-        xpoint_color=DEFAULT_INK.flux_color,
-        axis_markersize=8,
-        xpoint_markersize=9,
+        axis_color=read_color,
+        xpoint_color=read_color,
+        axis_markersize=9,
+        xpoint_markersize=10,
     )
-    poloidal.draw_flux_contours(
+
+    def contours(
+        target, local_radial, local_vertical, local_reference, local_cell, levels
+    ):
+        """The analytic family solid and beneath, the cell family dashed above."""
+        poloidal.draw_flux_contours(
+            target,
+            local_radial,
+            local_vertical,
+            local_reference,
+            levels,
+            wall=(wall,),
+            color=analytic_color,
+            linewidth=3.2,
+        )
+        poloidal.draw_flux_contours(
+            target,
+            local_radial,
+            local_vertical,
+            local_cell,
+            levels,
+            wall=(wall,),
+            color=read_color,
+            linewidth=1.6,
+            linestyle=(0, (5, 3)),
+        )
+
+    physical_radius = float(result.normal_form_radius)
+    contours(
         axes,
         radial,
         vertical,
         reference,
-        levels,
-        wall=(wall,),
-        color="#444444",
-        linewidth=2.6,
-    )
-    physical_radius = float(result.normal_form_radius)
-    poloidal.draw_flux_contours(
-        axes,
-        radial,
-        vertical,
         sampled.reshape(rr.shape),
         levels[1:] if physical_radius > 0 else levels,
-        wall=(wall,),
-        color=DEFAULT_INK.flux_color,
-        linewidth=2.6,
     )
     if physical_radius > 0:
         from matplotlib.patches import Circle
@@ -854,10 +880,80 @@ def _render_read_panel(
         style=read_style,
         contain=(wall,),
     )
+    read_x = np.asarray(result.x_points)[np.asarray(result.x_point_valid)]
+    pairs = [
+        (np.asarray(axis, dtype=float), np.asarray(result.axis, dtype=float), True)
+    ]
+    if saddle is not None and len(read_x):
+        pairs.append(
+            (np.asarray(saddle, dtype=float), np.asarray(read_x[0], dtype=float), False)
+        )
+    # The two null sets sit a few tenths of a millimetre apart, so the whole
+    # panel cannot show them as two marks. Each pair gets a magnified window
+    # in the clear margin beside the plasma: the window is a small multiple of
+    # the separation, which puts the marks a marker-width apart rather than
+    # on top of each other regardless of how small the separation is.
+    figure.canvas.draw()
+    placed = axes.get_position()
+    inches = figure.get_size_inches()
+    left = min(max(placed.x1 + 0.02, 0.66), 0.72)
+    size_inches = 2.7
+    width = size_inches / inches[0]
+    height = size_inches / inches[1]
+    tops = (0.60, 0.60 - height - 0.10)
+    for (reference_point, read_point, is_axis), top in zip(pairs, tops):
+        separation = float(np.linalg.norm(read_point - reference_point))
+        window = max(3.0 * separation, 5e-4)
+        target = figure.add_axes([left, top, width, height])
+        target.set_facecolor("white")
+        local_radial = np.linspace(
+            reference_point[0] - window, reference_point[0] + window, 90
+        )
+        local_vertical = np.linspace(
+            reference_point[1] - window, reference_point[1] + window, 90
+        )
+        lrr, lzz = np.meshgrid(local_radial, local_vertical)
+        lloc = np.column_stack((lrr.ravel(), lzz.ravel()))
+        lsampled, lanalytic, _, _ = sample(lloc)
+        contours(
+            target,
+            local_radial,
+            local_vertical,
+            lanalytic.reshape(lrr.shape),
+            lsampled.reshape(lrr.shape),
+            levels,
+        )
+        if is_axis:
+            poloidal.draw_nulls(target, reference_point, None, style=reference_style)
+            poloidal.draw_nulls(target, read_point, None, style=read_style)
+        else:
+            poloidal.draw_nulls(
+                target, None, reference_point[None], style=reference_style
+            )
+            poloidal.draw_nulls(target, None, read_point[None], style=read_style)
+        target.set_xlim(reference_point[0] - window, reference_point[0] + window)
+        target.set_ylim(reference_point[1] - window, reference_point[1] + window)
+        target.set_aspect("equal")
+        target.set_xticks([])
+        target.set_yticks([])
+        target.tick_params(length=0)
+        for spine in target.spines.values():
+            spine.set_color("#888888")
+            spine.set_linewidth(1.2)
+        figure.text(
+            left,
+            top + height + 0.012,
+            ("axis" if is_axis else "X-point")
+            + f" magnified, {separation * 1e3:.2f} mm apart",
+            transform=figure.transFigure,
+            fontsize=14,
+            color="#555555",
+            va="bottom",
+        )
     figure.text(
         0.06,
         0.89,
-        "analytic field /\nlarger nulls",
+        "analytic field /\nsolid, larger nulls",
         transform=figure.transFigure,
         color="#333333",
         fontsize=20,
@@ -866,7 +962,7 @@ def _render_read_panel(
     figure.text(
         0.06,
         0.81,
-        "cell field /\nread nulls",
+        "cell field /\ndashed, small nulls",
         transform=figure.transFigure,
         color=DEFAULT_INK.flux_color,
         fontsize=20,
@@ -887,12 +983,9 @@ def _render_read_panel(
             color="#555555",
             arrowprops={"arrowstyle": "-", "color": "#555555"},
         )
-    for extension in ("png", "svg"):
-        figure.savefig(
-            directory / f"{kind}-poloidal{suffix}.{extension}",
-            dpi=100,
-            facecolor="white",
-        )
+    figure.savefig(
+        directory / f"{kind}-poloidal{suffix}.svg", dpi=100, facecolor="white"
+    )
     plt.close(figure)
 
 

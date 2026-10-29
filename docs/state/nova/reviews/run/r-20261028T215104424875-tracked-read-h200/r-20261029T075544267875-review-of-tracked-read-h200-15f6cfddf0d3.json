@@ -8,6 +8,13 @@
   "added_failures_note": "The pre-existing suite arm carries no added failure: tests/test_tracked_read.py passed 4 of 4 at base a1f6782 (logs/gate_tracked_read_base.log, EXIT=0) and 4 of 4 at head 0adcf5d6c (logs/gate_tracked_read_head.log, EXIT=0), and this window changes no nova/ source. The three ids above are the accuracy file's trial clauses, already red at the previous review head 2e007b43 and still red at 15f6cfdd (logs/accuracy_gate_head.log, head 8fae4af5d, '3 failed, 8 passed', EXIT=1); the reviewed manifest declares them deliberately under outside_scope as the reproduced trial-booking defect, and the delta adds none beyond them.",
   "call_sites": [],
   "completed_at": "2026-10-29T08:07:59.077Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "tracked-read-h200",
+      "recorded_at": "2026-10-29T08:17:55.267096+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T07:57:36Z",
   "findings": [
     {

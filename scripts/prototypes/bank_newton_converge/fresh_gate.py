@@ -11,6 +11,7 @@ import subprocess
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 import nova
 from nova.equilibrium import support_read
@@ -53,6 +54,21 @@ def run():
             axis=-1,
         )
 
+    @jax.jit
+    def frozen(bank, state, direction, support):
+        return jnp.stack(
+            support_read.step_jacobian_vector(
+                bank,
+                state,
+                direction,
+                support,
+                profile,
+                lambda radius, flux: jnp.zeros_like(radius),
+                quadrature,
+            ),
+            axis=-1,
+        )
+
     base, valid, support = fresh(operands, cache, moments)
     assert bool(valid)
     index = jnp.arange(moments[0].size)
@@ -60,13 +76,15 @@ def run():
     shape = 0.4 * (shape - jnp.mean(shape)) / jnp.max(jnp.abs(shape))
     direction = (shape, 0.5 * jnp.roll(shape, 17), -0.2 * jnp.roll(shape, 31))
     predicted = tangent(operands, moments, direction, support)
-    jax.block_until_ready(predicted)
+    frozen_prediction = frozen(operands, moments, direction, support)
+    jax.block_until_ready((predicted, frozen_prediction))
     emit(
         "BASE",
         residual_norm=float(jnp.linalg.norm(base)),
         tangent_norm=float(jnp.linalg.norm(predicted)),
         valid=bool(valid),
     )
+    best = float("inf")
     for length in (1e-5, 1e-6, 1e-7):
         plus = tuple(a + length * d for a, d in zip(moments, direction, strict=True))
         minus = tuple(a - length * d for a, d in zip(moments, direction, strict=True))
@@ -76,16 +94,27 @@ def run():
         relative = float(
             jnp.linalg.norm(predicted - difference) / jnp.linalg.norm(difference)
         )
+        old_relative = float(
+            jnp.linalg.norm(frozen_prediction - difference)
+            / jnp.linalg.norm(difference)
+        )
+        per_cell = np.asarray(jnp.linalg.norm(predicted - difference, axis=-1))
+        worst = np.argsort(per_cell)[-8:][::-1]
         emit(
             "FRESH_JVP",
             length=length,
             relative=relative,
+            frozen_relative=old_relative,
             high_valid=bool(high_valid),
             low_valid=bool(low_valid),
             observed_norm=float(jnp.linalg.norm(difference)),
+            worst_cells=worst.tolist(),
+            worst_errors=per_cell[worst].tolist(),
+            worst_normal=np.asarray(support.reading.normal_form_cells)[worst].tolist(),
         )
-        if length == 1e-5 and relative > 1e-3:
-            raise AssertionError(f"fresh-read tangent differs by {relative}")
+        best = min(best, relative)
+    if best > 1e-3:
+        raise AssertionError(f"fresh-read tangent differs by {best}")
 
 
 if __name__ == "__main__":

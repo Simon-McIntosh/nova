@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T07:53:25.547Z",
+  "dispatched_at": "2026-10-29T07:46:07Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:81",
+      "id": "anchors_resolve-1",
+      "reason": "a locked lead decision now rests on a record whose href 404s, so the author must either land the declared fragment or repoint the citation at the run record under `docs/state/nova/runs/`, and until then the section's done-when asks a node to table its stage walls against a reference nobody can open.",
+      "text": "the paragraph now cites \"(record tracked-read-h200 \u2026)\" for the decision's premise, but `docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html` is absent from the main checkout's tree (HEAD c67c50548 lists only `operator-bank.html` and `tracked-read.html`), and the blob exists only in commit 15f6cfddf, which `git merge-base --is-ancestor 15f6cfddf HEAD` reports is not an ancestor of HEAD; the run r-20261028T215104424875-tracked-read-h200 declares that path as an artifact it delivered, so the record was written and never landed, and the earlier anchors_resolve finding about these four numbers is answered with a pointer a reader cannot open",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:81",
+      "id": "reasoning-1",
+      "reason": "this sentence is the author's answer to whether the 0.2 ms per-slice bound is reachable, and it fixes the factor a node is told its solve arithmetic must achieve; correcting it either changes the target (six-fold to three- to four-fold) or replaces it with the missing measurement that decides whether the requirement exists at all.",
+      "text": "the new sentence \"The warm solve's own arithmetic still has to fall about sixfold under either bound\" does not follow from the numbers the same sentence cites: a warm stationary-point solve of 0.63\u20130.82 ms held to a 0.2 ms per-slice bound is a three- to four-fold fall (0.634/0.2 = 3.2, 0.817/0.2 = 4.1), while six-fold is 1.225/0.2, the whole-call ratio; and the sentence's own amortization claim contradicts it, because if batching 16 slices shares the launches across slices then the per-slice cost falls toward the solve's arithmetic and no six-fold arithmetic reduction is owed, whereas if the solve is arithmetic-bound rather than launch-bound then batching does not share its cost and the required fall is three- to four-fold, not six \u2014 the section cannot hold both, and which regime the 55 launches sit in is exactly what the previous review found unstated",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "39655d36c51f083b78c64aae6e81e4a5b8fb04e3",
+  "plan_fingerprint": "7811f5760dc70b6f7b6b352a078b7bcba26dc150394c5c10e96b8f026695c7b6",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 24,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T074355421239-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "07d6509bcb092d23a15b73374c6e07f6387b0423",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the changed s2 paragraph's only record pointer, `/nova/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200`, names a fragment that does not exist on the served tree, while every other href in the plan resolves.",
+    "done_when": "pass \u2014 s2's three clauses are measurable (5e-4 minor radius, 1e-4 flux span, 0.2 ms per slice, zero copy bytes), each names its state and batch width, clause 3 states both the trigger and the no-trigger direction, clause 1 forbids the instrument deciding its own clause, and the declared negative control (averaging the fit across cells must exceed the axis budget) is a mutation that fails the clause rather than one that holds either way.",
+    "evidence_paths": "pass \u2014 s2's record and gate tables are assigned to the project's durable evidence tree (`docs/evidence/fragments/sub-millisecond-forward-path/`), not a scratchpad or node-local temporary directory, and the H200 walls it quotes are reproducible from the run record under `docs/state/nova/`.",
+    "naming": "pass \u2014 the changed s2 text names mechanisms (`support_read.read`, `read_at_stationary_points`, `_quadratic_fit_matrices`, `sampled_coefficient`, `field_from_jets`, `tracking`), a decision key and a commit sha, and carries no plan label, stage name, ticket number, version tag or changelog prose into a symbol.",
+    "reasoning": "a finding \u2014 the sentence s2 added to answer the reachability question states a reduction factor its own cited measurements do not give, and its two halves cannot both hold.",
+    "single_goal": "pass \u2014 s2 lands one deliverable, the tracked read wired into the fast route and made fast; the accuracy-gate repair is a precondition of clause 1's judgment on that same read, not an independent goal.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s2\u2192s1, s3\u2192s1 and s4\u2192s2,s3, matching each section's `data-links`; the `read-bound-per-slice` decision carries `data-sections=\"s2\"` and therefore attaches to the unit that is held to its bound."
+  },
+  "section_digests": {
+    "_document": "2b1879db2641ceb2c56376c39f9fd6970d63d88d1cd28db92e3c1ece6233e2fb",
+    "s0": "17c245a8c7e01a95e666e304f714c37c862790a4b3be58d4fec3faa18cef74f9",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "2726c12647565898704ab4b6d05cff9bac5b62757b9a9293fd7f0bc6abd78768",
+    "s3": "a0b9c6a24e4849c4ff248270b6269c9b3fd32faa707cdf5731a3d6ed625ccc44",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:00:14.165335+00:00"
+}

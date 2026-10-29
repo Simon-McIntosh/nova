@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite; the count and the id list are the neutral values the record shape requires, not a measurement.",
+  "attachment_map": {
+    "image-0.png (1400x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/tracked-read-steady-batch/per-slice-wall.svg"
+  },
+  "attachment_note": "One attachment, opened with Read and judged directly as an image at its native 1400x720, plus upscaled crops of the marker region, the right-hand end of the dashed arms, the bound annotation and the legend. Identity was established by content, not assumed: the render carries exactly the three legend entries, the labelled 0.2 ms bound and the four x values the reviewed run's fragment describes, and the values read off the log axes (about 2.07, 0.64, 0.23 and 0.13 ms for the solid blue arm; about 54 down to 5.8 ms for the two dashed arms) match the walls the run recorded for this figure (2.068 / 0.635 / 0.230 / 0.133 ms) and the alt text's 'between 5.8 and 54 milliseconds'. No SVG was opened, rendered or read, per the brief; every measurement below is taken from the attached PNG's pixels.",
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T22:56:02Z",
+  "figure_checks": {
+    "bound_geometry": "The bound and the tick grid are internally consistent: the log axis places decades about 220 px apart (10^-1 at y=650, 10^0 at y=430, 10^1 at y=215), and 0.2 ms falls at y=584 against the drawn dash at y=587 \u2014 a 3 px agreement, so the labelled bound is drawn where the axis scale puts it. The blue series crosses it between the sixteen-slice and sixty-four-slice markers, matching the caption and the run's own statement that the sixteen-slice wall misses the bound by about 15 percent.",
+    "clipping": "Non-white pixels in the outer 1 px, 2 px and 3 px frames of the attached render: 0, 0 and 0.",
+    "coincidence_of_the_dashed_arms": "The two dashed arms are drawn coincident. In upscaled crops of every marker the light grey square sits behind the near-black triangle with only its corners showing, and a column scan of the plot area finds grey series pixels only where antialiasing escapes the near-black dash (for example three grey rows at x=900 against the near-black dash at the same x). The caption states that the two vmap arms 'coincide because removing the conditional from a mapped read changes the wall by well under a percent', so the overlap is real data rather than a plotting fault; a reader is told why, which is why finding 1 is recorded as non-blocking.",
+    "render_provenance": "The attached image-0.png was read with Read and inspected directly, and all crops and counts below come from that file. It is 1400x720 RGBA. Its content matches the reviewed run's figure: three legend entries, the labelled 0.2 ms bound, four x values, and per-slice values that agree with the walls the run recorded. No SVG was read, `git show`n or rendered, as the brief requires; no claim below depends on SVG markup."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/tracked-read-steady-batch/per-slice-wall.svg",
+      "rubric": {
+        "contrast": "pass. All text is pure black on white except the bound annotation, which renders at #6b6b6b \u2014 a contrast ratio of about 5.2:1 against white, above the 4.5:1 threshold for body text. The bound dashes are the same #6b6b6b, and the blue series is #3366cc (about 5.0:1 against white), so neither the data nor the reference line is lost to low contrast.",
+        "data_ink": "pass. The canvas holds two data curves (the third is coincident), twelve markers, one bound line, one worded annotation, six tick values, two axis labels and a frameless three-row legend. No grid, no fill, no shading and no third ink.",
+        "decoration": "pass. Ground is pure white; no gradient, band or background fill anywhere. Spines are drawn only on the left and bottom: the darkest horizontal run above the axis row carries at most 42 dark pixels across the full width and no column carries more than 11, so there is no top or right spine. The legend is frameless with no box.",
+        "label_collision": "pass. The outer 1, 2 and 3 pixel frames of the 1400x720 render contain 0 non-white pixels, so nothing is clipped by the canvas; the rightmost ink is legend text ending 14 px from the edge. Text artists do not overlap each other or the data: the bound annotation stands about 17 px above the bound line in empty space at the lower left, the legend occupies the top right where no series runs (the highest data ink at those x values is about y=216, while the legend ends by y=120), and the four marker rows '1', '4', '16', '64' sit clear in the bottom margin.",
+        "legibility": "pass, with the defect recorded as finding 1. At 1400x720 the comparison reads at a glance: a solid blue series with round markers falls from about 2.07 ms per slice at one slice to about 0.13 ms at sixty-four, crossing the dashed 0.2 ms bound annotated in words ('0.2 ms per slice \u2014 the bound') somewhere between sixteen and sixty-four; two near-parallel dashed arms sit an order of magnitude above, from about 54 ms to about 5.8 ms. Axis labels are 'wall per slice [ms]' and 'slices per batch', tick values are 10^-1, 10^0, 10^1 on y and 1, 4, 16, 64 on x, and the units sit in the label with values between 0.1 and 1000 ms, so no prefix rescaling is needed. Every text artist measures pure black at roughly 17-20 px, comfortably above the page's body text. The one readability gap is that the legend lists three arms while the plot shows two curves: 'vmap of the read's conditional' (light grey square, pale dash) is drawn directly beneath 'vmap carried, no branch' (near-black triangle, black dash) and its only visible trace is a faint grey square edge peeking behind each of the four triangles.",
+        "table_form": "pass. The twelve walls could be tabulated and the fragment does tabulate them, but the figure's subject is the log-log trend and the fact that the shipped arm crosses the 0.2 ms bound between sixteen and sixty-four slices. That crossing is a plotted relationship no table carries, and the figure is the right form for it."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "attached image-0.png, upscaled crops of the four marker positions and a column scan of the plot area; caption at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html:31",
+      "file": "docs/figures/sub-millisecond-forward-path/tracked-read-steady-batch/per-slice-wall.svg",
+      "id": "f8a05b29e64",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Two of the three legend entries name arms the plot does not let the reader tell apart. 'vmap of the read's conditional' (pale grey square and dash) is drawn directly beneath 'vmap carried, no branch' (near-black triangle, black dash) at the same coordinates, so the figure shows two curves where the legend lists three: a reader glancing at the plot sees a legend they cannot reconcile with the picture, and cannot check the caption's 'under a percent' agreement from the image. Measured on the attached render: in upscaled crops of all four marker positions the grey square is covered by the near-black triangle with only its corners visible, and a column scan finds grey series pixels only as antialiasing escapes around the near-black dash. The caption explains the coincidence, and the arms are genuinely equal, so no differing datum is hidden and the figure's headline \u2014 the solid blue arm crossing the bound \u2014 reads cleanly; that is why this does not hold the node. The pale #bfbfbf face of the grey legend swatch compounds the effect, since it is about 1.8:1 against white and easy to miss beside the two dark entries."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption does not restate a title: the figure carries no title, so identity lives in the file name and the caption. The caption names the state and machine ('the diverted 550-cell state on one H200'), identifies the series ('the solid series is the shipped read_batch; the two dashed arms are the previous record's'), explains the coincidence, and states the sampling ('minimum of 20 calls per point'). It is accurate about the drawing it describes.",
+    "finding_materiality": "One non-blocking finding, no blocking finding. No label is clipped (0 non-white pixels in the outer 3 px frame), no label overlaps another label or the data, no text is unreadable, and the figure's own datum \u2014 the blue arm's cross of the 0.2 ms bound \u2014 is fully visible.",
+    "rendered_artifact": "The single attached PNG was opened and inspected at native size and in upscaled crops of the markers, the bound annotation, the right-hand end of the dashed arms and the legend.",
+    "scope": "Read-only. No figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and this run's manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "Identity and provenance come from the attachment's own content agreeing with the reviewed run's recorded walls, its caption and its alt text; the reviewed base f4d29a09 is the parent of the run's first commit and was confirmed an ancestor of the reviewed head 24f9a404b.",
+    "legibility": "Read from the attached PNG and from upscaled crops of that same PNG; the overlap claim is measured in pixels on the attachment rather than judged by eye alone.",
+    "scope_discipline": "The brief's read-only rule was kept: no SVG was opened, read, rendered or `git show`n, and every finding is anchored to the figure's repository path or to the run's caption."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261029T225403582119-review-of-tracked-read-steady-batch-24f9a404b0e5-figure",
+  "reviewed_base_sha": "f4d29a0952f7ca4430b4430769a6f5a80f793a9e",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/tracked-read-steady-batch/per-slice-wall.svg"
+  ],
+  "reviewed_head_sha": "24f9a404b0e54700507e6243e5a873b3fc21785b",
+  "reviewed_run_id": "r-20261029T210641793337-tracked-read-steady-batch",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass, with one encoding defect recorded as finding 1 (two of the three legend entries name arms drawn on top of one another, so the plot shows two lines where the legend lists three).",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T23:03:38.560382+00:00",
+  "total": null
+}

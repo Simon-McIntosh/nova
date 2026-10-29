@@ -1,0 +1,108 @@
+{
+  "added_failure_basis": "the reviewed run recorded baseline_suite: null and after_suite: null in its delivered manifest, so there is no paired arm to difference; the one recorded gate is logs/gate.log, whose summary line reads '2 passed in 548.22s' with a bare EXIT=0, and it runs at the head revision 1c2fdc380, so the head arm records zero failures and no baseline arm exists to add any to.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T23:03:31.286Z",
+  "dispatched_at": "2026-10-29T22:53:16Z",
+  "emitted_lines": [
+    "VERDICT goal: the node goal is a batched steady read that carries one tracking state per lane and takes one rebuild decision for the batch; nova/equilibrium/support_read.py:323 read_batch does that, vmapping the per-lane stencil and taking one jax.lax.cond on jnp.any(flags) at :392.",
+    "VERDICT done_when: the bound is 0.2 ms per slice at batch 16 or more with the batch-1 wall beside it; logs/measure.log:5-16 records 2.068 / 0.635 / 0.230 / 0.133 ms per slice at 1/4/16/64, so the gate measures the stated quantity and reports the bound met at 64 and missed by 15 percent at 16.",
+    "VERDICT write_paths: read the source manifest's declared paths; every diff path is inside them or is nova/equilibrium/support_read.py, the brief-authorised shared file whose scope_note is present.",
+    "VERDICT manifest: read; status complete, gate 2 passed EXIT=0 at 1c2fdc380 in logs/gate.log, mutation 1 failed 1 passed EXIT=1 in logs/negative-control.log, measurement EXIT=0 at 21be2e9ad with the four walls.",
+    "VERDICT diff: read all eleven commits against f4d29a09; one code commit adds stationary_stencil, rebuild_needed, _verdict and read_batch, the rest are tests, prototypes and evidence, and the evidence commits change no code so the walls come from the shipped revision.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 15",
+    "JUSTIFICATION goal_fidelity: support_read.py:323 read_batch threads moments, seeds, previous and tracking per lane and takes one branch at :392 as the brief requires, but the brief's item (1) is answered only in part: the cause it states is refuted by the arms' own control in tracked-read-steady-batch.html:48-55.",
+    "SCORE evidence: 13",
+    "JUSTIFICATION evidence: logs/measure.log:5-16 records per-slice walls at all four batch sizes at the shipped code revision, but the plan's done-when also names kernel launches and copy bytes and tracked-read-steady-batch.html:74 reports neither.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: every path in git diff --stat f4d29a09..24f9a404b lies inside the manifest's declared write paths or is support_read.py, the brief-named shared file recorded in scope_note.",
+    "SCORE durability: 14",
+    "JUSTIFICATION durability: tests/test_tracked_read_steady_batch.py:118-140 compares each lane against an independent single-lane read and refuses any per-lane rebuild, and logs/negative-control.log reddens that clause, but no assertion reddens if read_batch regresses to vmap(read).",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: support_read.py:162-230 follows the module's NamedTuple-and-docstring idiom and introduces no plan, ticket or version label, and the figure renderer obeys the repository's data-ink style.",
+    "SCORE reuse: 16",
+    "JUSTIFICATION reuse: read_batch extends support_read's own read, but support_read.py:312 _rebuilt_reading is a verbatim copy of the rebuild closure still left in read at :279-287.",
+    "FINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html:48 non-blocking: the stated cause of the vmapped read's 54 ms is refuted by the record's own control, since the vmap-carried arm with no conditional costs 54.65 ms against 54.36 ms with it and 2.07 ms for read_batch, so the placement of the decision cannot be the cost and the cause remains unidentified.",
+    "FINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html:74 non-blocking: the plan's done-when requires kernel launches and host-device copy bytes and the record tables neither, reporting the profiler's zero device events as an instrument fault with the 54 ms arm as positive control.",
+    "FINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html:57 non-blocking: the 0.2 ms bound is missed at sixteen slices at 0.230 ms, so the section's done-when is unclosed, and the remainder is attributed by a two-parameter fit of the four points rather than by stage, with the rebuild-branch wall also absent.",
+    "FINDING nova/equilibrium/support_read.py:312 non-blocking: _rebuilt_reading duplicates the rebuild closure left in read at :279-287, so the two whole-mesh rebuild paths can drift.",
+    "FINDING nova/equilibrium/support_read.py:392 non-blocking: the mixed-state measurement arm reports rebuild_fraction 0.0 at every batch size, so logs/measure.log never exercises the batch-uniform reload branch and no rebuild-step wall is measured."
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html",
+      "id": "cause-attribution-contradicts-control",
+      "line": 48,
+      "severity": "non-blocking",
+      "summary": "The stated cause of the vmapped read's 54 ms is refuted by the record's own control: the paragraph at :48-55 says placing the decision inside the mapped function is what the batch paid for, yet the vmap-carried arm, which has no conditional inside or outside the map, costs 54.65 ms at one slice against 54.36 ms with the conditional and 2.07 ms for read_batch on the same state and device, so removing the conditional changes nothing and the placement of the decision cannot be the cost. What the control actually shows is that jax.vmap over read is slow for a reason the node did not identify (the nested vmap in stationary_stencil's _inside_cells pass, or the traced control flow in fixed_points.solve, are the candidates), and the brief's item (1) asked for the cause to be confirmed. The walls, the per-lane flags and the delivered read_batch are unaffected, so this does not hold the node; the explanatory paragraph should state that the cause is narrowed to vmapping read itself and remains unidentified, and the identification belongs in a followup, because \u00a73 and \u00a74 will batch this route and will otherwise carry a wrong explanation forward."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html",
+      "id": "kernel-and-copy-bytes-missing",
+      "line": 74,
+      "severity": "non-blocking",
+      "summary": "The plan's done-when for this section requires the record to table kernel launches and host-device copy bytes per call, and the record tables neither: the profiler returned zero device events and the record reports that as an instrument fault with the 54 ms arm as its positive control, which is the right way to report a failed instrument but still leaves the done-when clause unmeasured. Copy bytes are asserted zero by construction rather than measured. The per-slice wall carries the bound, so this does not hold the node; the profiler fault should be recorded as a followup so \u00a72's done-when is visibly still short of one clause rather than silently narrowed."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-steady-batch.html",
+      "id": "bound-missed-at-sixteen",
+      "line": 57,
+      "severity": "non-blocking",
+      "summary": "The section's bound is at most 0.2 ms per slice batched over sixteen or more slices; at sixteen the measured wall is 0.230 ms, a 15 percent miss, and only sixty-four slices meet it, so \u00a72's done-when is not satisfied as written. The brief anticipated a miss and required the remainder to be attributed by stage, and the record instead decomposes the four points arithmetically into a 2.14 ms per-call share and a 0.0998 ms per-slice floor, which is an attribution by regression and not by stage; the 0.73 ms by which the batch's per-call cost exceeds the single read's is named but not resolved. This does not hold the node because the brief admits the miss and the number is reported honestly, but \u00a72's done-when is unclosed and the stage attribution it asked for is missing."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "rebuilt-reading-duplicates-rebuild-closure",
+      "line": 312,
+      "severity": "non-blocking",
+      "summary": "_rebuilt_reading at :312-321 is a verbatim copy of the rebuild closure left in read at :279-287, so the two whole-mesh rebuild paths can drift and a change to field_from_jets' call signature must be made twice; read should call the new helper instead of keeping its own copy. Nothing is wrong at runtime today and the gate exercises both paths, so this does not hold the node."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "mixed-arm-never-rebuilds",
+      "line": 392,
+      "severity": "non-blocking",
+      "summary": "The measurement's mixed-state arm reports rebuild_fraction 0.0 at every batch size because the certificate's converged and trial states resolve the same cells, so logs/measure.log never exercises the reload branch of the lax.cond at :392; the only evidence that the batch-uniform rebuild branch works is the gate's forced stale-cell test. The record says this explicitly, so it is not a hidden gap, but a measured rebuild-branch wall is still absent even though the plan asks for one ('a rebuild step's wall')."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all eleven commits against f4d29a09: one code commit refactoring read and adding stationary_stencil, rebuild_needed, _verdict and read_batch (support_read.py +186/-25), five test and prototype commits, and five evidence and figure commits whose code is identical to the measured revision 21be2e9ad apart from docs, so the walls are from the shipped code.",
+    "done_when": "the done_when is the 0.2 ms per-slice bound at batch 16 or more with the batch-1 wall tabled; logs/measure.log:5-16 records 2.068 / 0.635 / 0.230 / 0.133 ms per slice at 1/4/16/64, so the gate measures the quantity the bound states, and it reports the bound met at 64 and missed by 15 percent at 16.",
+    "goal": "the node goal is a batched steady read that carries one tracking state per lane and takes one rebuild decision for the batch; nova/equilibrium/support_read.py:323 read_batch does exactly that, vmap over the per-lane stencil and one jax.lax.cond on jnp.any(flags) at :392.",
+    "manifest": "read; it reports status complete, the gate at 1c2fdc380 as 2 passed EXIT=0 in logs/gate.log, the declared mutation at logs/negative-control.log as 1 failed 1 passed EXIT=1, and the measurement at 21be2e9ad as EXIT=0 with the per-slice walls above.",
+    "write_paths": "read the source manifest's orientation_write_paths; every path in the diff is inside them except nova/equilibrium/support_read.py, which the brief explicitly authorised as a shared file with a scope_note, and the scope_note is present in the manifest."
+  },
+  "justifications": {
+    "durability": "tests/test_tracked_read_steady_batch.py:118-140 compares each lane against an independent single-lane read and refuses any per-lane rebuild, and the declared mutation at logs/negative-control.log reddens that clause, but no assertion fails if read_batch regresses to vmap(read), which is the performance defect the node exists to remove.",
+    "evidence": "logs/measure.log:5-16 records per-slice walls at all four batch sizes at the shipped code revision, but the plan's done-when also names kernel launches and host-device copy bytes, and tracked-read-steady-batch.html:74 reports neither, so the recorded measure is narrower than the done-when states.",
+    "fit": "support_read.py:162-230 follows the module's NamedTuple-and-docstring idiom and introduces no plan, ticket or version label, and the figure renderer obeys the repository's data-ink style with despined axes and a labelled bound dash.",
+    "goal_fidelity": "support_read.py:323 read_batch threads moments, seeds, previous and tracking per lane and takes one branch at :392 as the brief requires, but the brief's item (1) is answered only in part: the cause it states, that placing the decision inside the mapped function is what the batch paid for, is refuted by the arms' own control in tracked-read-steady-batch.html:48-55.",
+    "reuse": "read_batch extends support_read's own read rather than forking another module's capability, but support_read.py:312 _rebuilt_reading is a verbatim copy of the rebuild closure still left in read at :279-287, so the new helper duplicates rather than replaces the existing one.",
+    "scope_discipline": "every path in git diff --stat f4d29a09..24f9a404b lies inside the manifest's declared write paths or is support_read.py, which the brief names as an authorised shared-file edit recorded in scope_note."
+  },
+  "node": "review-of-tracked-read-steady-batch-24f9a404b0e5",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a batched steady read carrying one tracking state per lane and taking one rebuild decision for the batch; support_read.py:323 read_batch does that, vmapping the per-lane stencil and taking one jax.lax.cond on jnp.any(flags) at :392.\nVERDICT done_when: the bound is 0.2 ms per slice at batch 16 or more with the batch-1 wall beside it; logs/measure.log records 2.068 / 0.635 / 0.230 / 0.133 ms per slice at 1/4/16/64, so the gate measures the stated quantity and reports the bound met at 64 and missed by 15 percent at 16.\nVERDICT write_paths: read the source manifest's declared paths; every diff path is inside them or is support_read.py, the brief-authorised shared file whose scope_note is present.\nVERDICT manifest: read; status complete, gate 2 passed EXIT=0 at 1c2fdc380, mutation 1 failed 1 passed EXIT=1, measurement EXIT=0 at 21be2e9ad with the four walls.\nVERDICT diff: read all eleven commits against f4d29a09; one code commit adds stationary_stencil, rebuild_needed, _verdict and read_batch, the rest are tests, prototypes and evidence, and the evidence commits change no code so the walls come from the shipped revision.",
+  "review_run_id": "r-20261029T225150769350-review-of-tracked-read-steady-batch-24f9a404b0e5",
+  "review_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-tracked-read-steady-batch-24f9a404b0e5",
+  "reviewed_base_sha": "f4d29a0952f7ca4430b4430769a6f5a80f793a9e",
+  "reviewed_head_sha": "24f9a404b0e54700507e6243e5a873b3fc21785b",
+  "reviewed_run_id": "r-20261029T210641793337-tracked-read-steady-batch",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/tracked-read-steady-batch",
+  "rubric": "node",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-30T00:10:00+00:00",
+  "total": 96
+}

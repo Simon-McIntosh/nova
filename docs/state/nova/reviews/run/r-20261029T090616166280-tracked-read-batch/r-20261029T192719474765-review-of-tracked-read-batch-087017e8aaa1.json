@@ -10,6 +10,13 @@
     }
   },
   "dispatched_at": "2026-10-29T19:36:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "tracked-read-steady-batch",
+      "recorded_at": "2026-10-29T20:42:45.428916+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",

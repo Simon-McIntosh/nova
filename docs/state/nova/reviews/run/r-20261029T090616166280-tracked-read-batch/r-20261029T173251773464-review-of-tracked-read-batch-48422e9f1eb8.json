@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T17:34:45Z",
+  "findings": [
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "fc612caa63c",
+      "line": 264,
+      "severity": "blocking",
+      "text": "the only negative control recorded for the new wall-extremum clause applied no mutation: repair/run_mutant.sh exports PYTHONPATH=repair/overlay:$WT but invokes pytest with cwd at the worktree, and scripts/ is a regular package (scripts/__init__.py), so the scripts package __path__ is frozen to the worktree entry that the cwd-first sys.path entry puts ahead of PYTHONPATH; logs/negative_oracle.log's own third line names the unmutated worktree reference.py and the arm reports 3 passed, 10 deselected, EXIT=0 for the polarity=-1 (wall-minimum) mutant. Replaying importlib find_spec from that cwd with the same PYTHONPATH resolves scripts.prototypes.tracked_read_batch.reference to the worktree file, not the overlay. The clause's refusal was therefore never shown, and the fragment's claim that a selection that minimised fails here rests on a run that verified nothing."
+    },
+    {
+      "file": "tests/test_tracked_read_batch.py",
+      "id": "f9340c6451b",
+      "line": 65,
+      "severity": "non-blocking",
+      "text": "the parity clause tiles one state across every lane (moments = case[\"states\"][\"converged\"] then tiled(moment, COUNT)), so all lanes are identical and a vmap that mixed a lane's cells, seeds or decision would still return matching output for every lane; the docstring at :52 claims exactly the cross-lane detection the identical lanes cannot provide."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "id": "f6fdec9374b",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "the batch-1 regime is called launch-bound on 807 launches in 54.6 ms (68 us per launch), and the table header at :15 still reads launches per call, while the paragraph this change adds at :93-95 states that those column counts are HLO op classes and are not kernel launches; the done_when asks for the launch-bound or arithmetic-bound classification at each batch size, so the classification now rests on a count the same page disclaims."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "id": "f318fde7ce6",
+      "line": 88,
+      "severity": "non-blocking",
+      "text": "the new paragraph concludes that the fixed cost is where the bound is lost, but its series is measured at 64 cells while the record's table and the paragraph at :42-47 are at the diverted 550-cell state, where the page's own decomposition puts 5.0 ms per slice of arithmetic against a 0.85 ms fixed share; at the state the bound is stated for, arithmetic dominates and the attribution is the reverse of the one given."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/diagnose.py",
+      "id": "ffc6826fc7d",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "emit is a verbatim copy of scripts/prototypes/tracked_read_batch/measure.py:42-44 in the same package, and op_classes at :40 re-lowers and re-counts the HLO text that measure.py:46 lowered_counts already owns rather than extending it, so the launches mislabel lowered_counts produces at measure.py:53 survives beside a corrected copy."
+    },
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "ff2dae58779",
+      "line": 90,
+      "severity": "non-blocking",
+      "text": "_wall_flux_range repeats the wall analytic-flux vmap that scripts/prototypes/tracked_read_batch/reference.py:39-43 already owns, rather than sharing it from the reference module it is checking."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal, read from the plan's section 2 done-when at docs/plans/sub-millisecond-forward-path.html:91 and the brief, is the 0.2 ms per-slice bound over 16 or more slices at the diverted 550-cell state with the batch-1 wall beside it; the five commits reviewed (6029edb6b, 60c790316, 98cd451ff, 6e64714d9, 48422e9f1) do not attempt the brief's conditional item (2) stage attribution or cut, so the node still reports the bound unmet without decomposing the remainder by stage.\nVERDICT done_when: the done_when's bound is asserted against measured numbers - docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:20 tables 54.61/20.24/9.38/5.82 ms per slice at 1/4/16/64 slices and states the bound is not met - but the clause that asks for kernel launches is met only by a retraction at :93-95 (the 807 are HLO op classes, not launches) and the stage table the done_when asks for is absent.\nVERDICT write_paths: the source manifest declares nova/equilibrium/fixed_points.py, tests/test_tracked_read_accuracy.py, tests/test_tracked_read_batch.py, scripts/prototypes/tracked_read_batch, the evidence fragment and the figure directories; git diff 6d2652aa0..48422e9f1 touches only the two test files, scripts/prototypes/tracked_read_batch/diagnose.py and the evidence fragment, all inside those grants.\nVERDICT manifest: read; it records status complete, ten commits, the 550-cell table with job 1299957, the accuracy arm at 11 passed 2 failed (job 1300836), the equality clause at 1 passed (job 1300839), and discloses the diverted trial state under outside_scope; its baseline_suite (6d2652aa0, 10 failure ids) and after_suite (60c790316, 2 failure ids) now name different revisions and different logs, so the added-failure derivation is readable.\nVERDICT diff: read commit by commit against 6d2652aa0; the change adds a module-level 1800 s timeout and a new wall-extremum clause with its _wall_flux_range helper to tests/test_tracked_read_accuracy.py, a batch-versus-single parity clause to tests/test_tracked_read_batch.py, a new scripts/prototypes/tracked_read_batch/diagnose.py, and 77 added lines to the evidence fragment; no production module is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:83-95 adds a cost decomposition of the batched read but neither the brief's item (2) stage attribution nor any cut of the largest arithmetic stage appears, and nova/equilibrium/fixed_points.py still carries no change in git diff 6d2652aa0..48422e9f1.\nSCORE evidence: 12\nJUSTIFICATION evidence: every new number reconciles with its log (diagnose.py's rows match logs/diagnose.log job 1300857 EXIT=0 and the accuracy arm matches logs/accuracy_full.log 2 failed 11 passed), but the launch clause is answered by a retraction rather than a measurement and logs/negative_oracle.log records EXIT=0 for the mutant that was meant to make the new clause refuse.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 6d2652aa0..48422e9f1 is inside the source manifest's declared grants and the increment adds no production code, no plan label and no run id in any name or comment.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_tracked_read_batch.py:67-88 compares every lane against the single read so a divergent batched read reddens it, but :65 tiles one state across all lanes so lane mixing is invisible, and tests/test_tracked_read_accuracy.py:279's refusal was never demonstrated because its mutant run resolved the unmutated module.\nSCORE fit: 17\nJUSTIFICATION fit: the new prototype follows the surrounding header, emit-token and configure_dtypes idiom of scripts/prototypes/tracked_read_batch/measure.py:1-43 and the clause follows the file's parametrised slow-test style, with two blemishes - diagnose.py ends without a trailing newline and the fragment's 64-cell series quotes two different variants at :84.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/tracked_read_batch/diagnose.py:36 duplicates measure.py:42-44 verbatim and :40 forks measure.py:46's lowered_counts without extending it, and tests/test_tracked_read_accuracy.py:90 repeats the wall-flux vmap owned by scripts/prototypes/tracked_read_batch/reference.py:39-43; the reference itself still calls nova.geometry.select.host_wall_flux, which is preserved.\nFINDING tests/test_tracked_read_accuracy.py:264 blocking: the only negative control recorded for the new wall-extremum clause applied no mutation - repair/run_mutant.sh sets PYTHONPATH=repair/overlay:$WT but runs pytest with cwd at the worktree, and scripts/ is a regular package so scripts.__path__ is frozen to the cwd-first worktree entry, which is why logs/negative_oracle.log's own third line names the unmutated worktree reference.py and the polarity=-1 arm reports 3 passed, 10 deselected, EXIT=0.\nFINDING tests/test_tracked_read_batch.py:65 non-blocking: the parity clause tiles one state across every lane, so all lanes are identical and a vmap mixing lanes' cells, seeds or decisions would still agree with the single read, which is the detection its docstring at :52 claims.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:39 non-blocking: the batch-1 regime is called launch-bound on 807 launches while the paragraph added at :93-95 says those counts are not kernel launches, so the per-batch regime classification the done_when asks for rests on a disclaimed count.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:88 non-blocking: the fixed-cost attribution is measured at 64 cells but stated as where the bound is lost, while the record's 550-cell table and :42-47 put arithmetic at 5.0 ms per slice against a 0.85 ms fixed share there.\nFINDING scripts/prototypes/tracked_read_batch/diagnose.py:36 non-blocking: emit duplicates measure.py:42-44 verbatim and op_classes at :40 forks measure.py:46 lowered_counts instead of extending it, leaving measure.py's launches label uncorrected beside a corrected copy.\nFINDING tests/test_tracked_read_accuracy.py:90 non-blocking: _wall_flux_range repeats the wall analytic-flux vmap already owned by scripts/prototypes/tracked_read_batch/reference.py:39-43 rather than sharing it.\n",
+  "review_run_id": "r-20261029T173251773464-review-of-tracked-read-batch-48422e9f1eb8",
+  "reviewed_base_sha": "6d2652aa00cdd34ab589bbf5d9b04a60504228d4",
+  "reviewed_head_sha": "48422e9f1eb80a45fcb5a521d4cc10057baa1593",
+  "reviewed_run_id": "r-20261029T090616166280-tracked-read-batch",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:46:01.531515+00:00",
+  "total": 78
+}

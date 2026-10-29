@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="blocked">
+<title>Bank-backed Newton step | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-newton-step-landing">Bank-backed Newton step</h1>
+<p id="bank-newton-step-summary">The bank and closed-form booking tangent now assemble a dense Newton matrix from local flux, field-coefficient and stationary-level sensitivities. Diagonal row and column equilibration precede LU; no booking call or traced JVP is made per unknown. The diverted 550-cell trial JVP passes the relative check, and equilibration reduces the full matrix condition number by about ten orders of magnitude. The nonlinear solve still stalls at residual 1.03e-2, so the converged-state and oracle clauses remain open.</p>
+<section id="bank-newton-step-jacobian">
+<h2>Jacobian check on the diverted bank</h2>
+<p>The published 550-cell bank was loaded, not rebuilt. The trial read was valid and qualified, with 233 cut cells and 8 normal-form cells. The finite difference held the read's ownership, clipped-cell set and qualification fixed while its continuous coefficients and stationary flux levels moved. Along the balanced direction, both sides of every tabled difference remained valid. The largest tested displacement was 1e-5, so the observed admissibility margin along this direction is at least 1e-5; its exact branch boundary was not measured. The earlier 1e-3 Newton-direction shift crossed the qualification gate, which remains owned by the tracked read.</p>
+<table id="bank-newton-step-jacobian-table"><thead><tr><th>State</th><th>Difference step</th><th>Observed admissibility margin</th><th>Relative JVP error</th></tr></thead><tbody>
+<tr><td>Diverted trial, balanced direction</td><td>1e-8</td><td>at least 1e-5 along this direction</td><td>6.52e-8</td></tr>
+<tr><td>Diverted trial, balanced direction, dense run</td><td>1e-7</td><td>at least 1e-5 along this direction</td><td>9.04e-7</td></tr>
+<tr><td>Diverted trial, ramp direction</td><td>1e-7</td><td>at least 1e-5 along this direction</td><td>1.50e-6; misses the bound</td></tr>
+<tr><td>Stalled iterate, ramp direction</td><td>1e-7</td><td>at least 1e-5 along this direction</td><td>1.55e-6; misses the bound</td></tr>
+<tr><td>Converged state</td><td>not available</td><td>not available</td><td>not measured</td></tr>
+</tbody></table>
+<p>The first boundary calculation used the smooth conic and plateaued at 1.74e-4 relative against the booking's sampled polygon. Differentiating the polygon's implicit conic vertices and integrating their normal velocity on its own edges removed that fixed discrepancy. The dense block also carries prescribed-total-current normalization as a rank-one correction, tested against the analytic JVP. A scratch mutation that drops the booking derivative makes <code>test_bank_jvp_composes_flux_and_level_derivatives</code> fail with <code>EXIT=1</code>. The suggested moving-clip-only mutation remains unrun. The base and dense-head regression arms both completed with zero failing tests.</p>
+</section>
+<section id="bank-newton-step-solve">
+<h2>Dense solve and nonlinear stall</h2>
+<p>The full Newton matrix's condition number at the seed was 8.81e13 before scaling and 9.01e3 after scaling. This full-spectrum measurement is more severe than the prior eight-direction Arnoldi estimate of 5.16e9. Dense LU returned relative linear residuals between 1.05e-15 and 3.71e-15. The first compiled step took 10,605 ms and the next two warm steps took 342.0 and 342.1 ms on the H200, above the 0.5 ms goal; no kernel-launch count or cache-disabled cold compile was measured.</p>
+<table id="bank-newton-step-solve-table"><thead><tr><th>Newton step</th><th>Residual before</th><th>Accepted length</th><th>Residual after</th><th>Condition before scaling</th><th>Condition after scaling</th></tr></thead><tbody>
+<tr><td>0</td><td>9.9626e-2</td><td>1</td><td>3.0380e-2</td><td>8.8061e13</td><td>9.0117e3</td></tr>
+<tr><td>1</td><td>3.0380e-2</td><td>1/4</td><td>1.0349e-2</td><td>8.8086e13</td><td>9.0124e3</td></tr>
+<tr><td>2</td><td>1.0349e-2</td><td>none</td><td>1.0349e-2</td><td>8.8084e13</td><td>9.0119e3</td></tr>
+</tbody></table>
+<p>At the last iterate, <code>support.valid</code>, <code>reading.valid</code> and <code>reading.qualified</code> were all true. Every tested length from 1 through 1/512 kept those flags true, but raised the residual; even 1/512 gave 1.0484e-2. No cell left the admitted membership set, clipped-cell set or fragment ownership at any of those lengths. The refusal is therefore a residual increase under the refreshed read, rather than a qualification boundary at these tested lengths. The separate fixed-support JVP check does not establish the derivative of that refreshed read.</p>
+<figure id="bank-newton-step-stalled-panel"><img src="/nova/figures/sub-millisecond-forward-path-newton/bank-newton-step-stalled.svg" alt="Shared-level line contours of the stalled 550-cell bank flux and analytic diverted oracle inside the vessel, with both axis and X-point marker sets"><figcaption>The stalled, unconverged bank iterate (solid blue) and analytic oracle (dashed grey) share eight physical flux levels; the vessel is black. Blue markers identify the bank axis and admitted saddle, with larger grey oracle markers behind them. The plotted state has solved-equation residual 1.0349e-2 and <code>converged=false</code>. The close contour overlap does not imply the nonlinear equation converged.</figcaption></figure>
+<p id="bank-newton-step-missing">No converged-state contour panel can be made from this stalled iterate. The converged-state JVP, terminal 1e-10 residual, 0.5 ms warm step, kernel count and cold-compile size gates remain unmet.</p>
+</section>
+<section id="bank-newton-step-repair">
+<h2>Same-iterate factor control and refreshed-read check</h2>
+<p>Before this repair, the test file contained no call to <code>newton_step</code>, and the measurement gate called only that bank step. The added step-level test now checks a known three-block LU update, a small linear residual, improved conditioning and the convergence flag. The measurement also runs <code>nova.equilibrium.solve.factor</code> on the exact same fixed-support residual and iterate as the bank step. This is an independent dense autodiff factor control, <em>not</em> the production forward route's update, whose state and residual have not been aligned with the bank step. The two valid 550-cell control states give:</p>
+<table id="bank-newton-step-factor-table"><thead><tr><th>State</th><th>Read valid / qualified</th><th>Relative bank versus dense-factor update</th><th>Balanced JVP check</th></tr></thead><tbody>
+<tr><td>Diverted trial</td><td>yes / yes</td><td>2.32e-14</td><td>9.04e-7 at h=1e-7</td></tr>
+<tr><td>Limited converged oracle state</td><td>yes / yes</td><td>1.25e-13</td><td>2.66e-9 at h=1e-8</td></tr>
+</tbody></table>
+<p>The limited bank was built once on the H200 in 101.1 s; the published diverted bank was read without rebuilding. A twenty-length line-search probe at the diverted stall separated the two residual definitions. At length 1/2 the fixed-support residual fell to 0.00517447 while the fresh-read residual rose to 0.04488417. At length 1/524288 the fixed-support residual was 0.010348920, below the starting 0.010348940, while the fresh-read residual was 0.010349072, above it. Every read remained valid and qualified; no membership, clip or ownership set changed. Carrying the analytic continuous reading for two full Newton steps reduced the tracked residual from 0.09962645 through 1.129e-5 to 8.38e-13, but a fresh read of that same terminal state returned 0.0303684. At the committed head, a repeated H200 run recorded tracked residual 8.53e-13 and fresh residual 0.0303684, with <code>tracked_converged=true</code> and <code>CONVERGED value=false</code>. The terminal guard thus fired on the measured counterexample; its unit check also has a positive control. A scratch sign reversal of the dense update failed <code>test_dense_newton_step_solves_scaled_residual</code> with <code>EXIT=1</code>.</p>
+<p>The discrepancy is in how a refreshed read changes continuous coefficients or flux levels while the support set stays fixed. The tracked-read implementation landed after this worktree's base and was not merged here. Its continuous update and rebuild contract must be reconciled with this step before a fresh-read 1e-10 result or a converged-state panel can be claimed. The 342 ms warm wall and unmeasured launch, cold-compile and executable-size gates also remain open.</p>
+</section>
+</main></body></html>

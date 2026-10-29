@@ -2199,6 +2199,71 @@ def _positive_vertical_intervals(vertices, count, coefficient, x):
     return bottom, top, present
 
 
+def quadratic_slice_break_tangent(vertices, count, coefficient, tangent):
+    """Differentiate the fixed-order conic slice events by implicit roots.
+
+    Event identity and ordering stay fixed within a tracked read. A conic/edge
+    crossing moves along its edge; a vertical tangency moves as a root of the
+    conic discriminant. Vertex events have zero velocity.
+    """
+    width = vertices.shape[0]
+    slot = jnp.arange(width)
+    following = jnp.where(slot + 1 < count, slot + 1, 0)
+    end = vertices[following]
+    edge = end - vertices
+    live = slot < count
+    first = _quadratic_value(coefficient, vertices)
+    last = _quadratic_value(coefficient, end)
+    middle = _quadratic_value(coefficient, 0.5 * (vertices + end))
+    edge_quadratic = 2.0 * (first + last - 2.0 * middle)
+    edge_linear = last - first - edge_quadratic
+    roots = _quadratic_parameters(edge_quadratic, edge_linear, first)
+    valid = live[:, None] & (roots > 0.0) & (roots < 1.0)
+    safe_roots = jnp.where(valid, roots, 0.0)
+    crossing = vertices[:, None, :] + safe_roots[..., None] * edge[:, None, :]
+    tangent_value = _quadratic_value(tangent, crossing)
+    slope = 2.0 * edge_quadratic[:, None] * safe_roots + edge_linear[:, None]
+    crossing_speed = -tangent_value / jnp.where(slope != 0, slope, 1.0)
+    crossing_x = crossing[..., 0]
+    crossing_x_speed = edge[:, 0, None] * crossing_speed
+
+    a, b, c, d, e, f = coefficient
+    da, db, dc, dd, de, df = tangent
+    disc_a = e * e - 4 * f * d
+    disc_b = 2 * c * e - 4 * f * b
+    disc_c = c * c - 4 * f * a
+    ddisc_a = 2 * e * de - 4 * (df * d + f * dd)
+    ddisc_b = 2 * (dc * e + c * de) - 4 * (df * b + f * db)
+    ddisc_c = 2 * c * dc - 4 * (df * a + f * da)
+    tangent_x = _quadratic_parameters(disc_a, disc_b, disc_c)
+    tangent_slope = 2 * disc_a * tangent_x + disc_b
+    tangent_speed = -(
+        ddisc_a * tangent_x**2 + ddisc_b * tangent_x + ddisc_c
+    ) / jnp.where(tangent_slope != 0, tangent_slope, 1.0)
+    lower_x = jnp.min(jnp.where(live, vertices[:, 0], jnp.inf))
+    upper_x = jnp.max(jnp.where(live, vertices[:, 0], -jnp.inf))
+    interior = (tangent_x > lower_x) & (tangent_x < upper_x)
+    events = jnp.concatenate(
+        (
+            jnp.where(live, vertices[:, 0], upper_x),
+            jnp.where(valid, crossing_x, upper_x).reshape(-1),
+            jnp.clip(tangent_x, lower_x, upper_x),
+        )
+    )
+    speeds = jnp.concatenate(
+        (
+            jnp.zeros(width, vertices.dtype),
+            jnp.where(valid, crossing_x_speed, 0.0).reshape(-1),
+            jnp.where(interior, tangent_speed, 0.0),
+        )
+    )
+    order = jnp.argsort(events)
+    events, speeds = events[order], speeds[order]
+    unique = jnp.concatenate((jnp.ones(1, bool), events[1:] > events[:-1]))
+    indices = jnp.nonzero(unique, size=events.size, fill_value=events.size - 1)[0]
+    return events[indices], speeds[indices]
+
+
 def quadratic_cell_fragments(vertices, vertex_count, coefficient, capacity=2):
     """Decompose a quadratic superlevel set by exact algebraic slice events.
 

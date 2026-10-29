@@ -13,7 +13,7 @@ serves any state of the same layout.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import NamedTuple
 
 import jax
@@ -330,6 +330,355 @@ def bank_program(operands: SupportOperands, moments) -> jax.Array:
     )
     mask = (jnp.arange(jets.shape[0]) < active)[:, None]
     return jnp.where(mask, jets, 0.0)
+
+
+class StepResidual(NamedTuple):
+    """Moment mismatch under one fixed connected-support decision."""
+
+    residual: tuple[jax.Array, jax.Array, jax.Array]
+    booked: current.Booking
+    reading: topology.TopologyRead
+    valid: jax.Array
+
+
+def _directional_field(operands: SupportOperands, direction):
+    """Apply only the bank's linear rows, without its exterior constant."""
+    stacked = jnp.stack(tuple(direction), axis=-1)
+    jets = jnp.einsum("ncmq,cm->nq", operands.rows, stacked)
+    return jets, fixed_points.field_from_jets(
+        jets, operands.sample_index, operands.mesh
+    )
+
+
+def step_residual(
+    operands,
+    base_moments,
+    moments,
+    support: SupportRead,
+    profile,
+    quadrature,
+) -> StepResidual:
+    """Book a state while preserving one read's ownership and clip set.
+
+    Continuous coefficients and stationary flux levels follow the bank. The
+    point coordinates stay fixed by the stationary-point envelope argument;
+    changes of ownership or clipped-cell set require a new support read.
+    """
+    direction = tuple(
+        value - base for value, base in zip(moments, base_moments, strict=True)
+    )
+    _, field = _directional_field(operands, direction)
+    reading = support.reading._replace(
+        field_coefficients=support.reading.field_coefficients
+        + field.sampled_coefficient(operands.geometry),
+        axis_flux=support.reading.axis_flux + field.value(support.reading.axis),
+        boundary_flux=support.reading.boundary_flux
+        + field.value(support.reading.boundary),
+    )
+    psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+    booked = current.book(psi, reading, operands.geometry, profile, quadrature)
+    valid = support.valid & booked.valid
+    residual = tuple(
+        jnp.where(valid, value - predicted, jnp.nan)
+        for value, predicted in zip(moments, booked[:3], strict=True)
+    )
+    return StepResidual(residual, booked, reading, valid)
+
+
+def step_jacobian_vector(
+    operands,
+    moments,
+    direction,
+    support: SupportRead,
+    profile,
+    density_gradient,
+    quadrature,
+    booked: current.Booking | None = None,
+):
+    """Apply the bank and the three closed-form booking tangent channels."""
+    psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+    if booked is None:
+        booked = current.book(
+            psi, support.reading, operands.geometry, profile, quadrature
+        )
+    jets, field = _directional_field(operands, direction)
+    tangent = current.book_tangent(
+        psi,
+        jets[operands.sample_index, 0],
+        support.reading,
+        field.sampled_coefficient(operands.geometry),
+        field.value(support.reading.axis),
+        field.value(support.reading.boundary),
+        operands.geometry,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+    )
+    return tuple(
+        value - change for value, change in zip(direction, tangent, strict=True)
+    )
+
+
+class NewtonStep(NamedTuple):
+    """One dense Newton update and its conditioning ledger."""
+
+    update: tuple[jax.Array, jax.Array, jax.Array]
+    condition_before: jax.Array
+    condition_after: jax.Array
+    linear_residual: jax.Array
+    converged: jax.Array
+
+
+def _local_booking_sensitivities(
+    operands, moments, support, profile, density_gradient, quadrature, booked
+):
+    """Differentiate one booking against its local flux and level inputs."""
+    cells, samples = operands.sample_index.shape
+    psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+    channels = samples + 8
+    sample_basis = jnp.eye(samples, dtype=psi.dtype)
+    field_basis = jnp.eye(6, dtype=psi.dtype)
+
+    def evaluate(index):
+        psi_direction = jnp.broadcast_to(
+            sample_basis[jnp.minimum(index, samples - 1)] * (index < samples),
+            psi.shape,
+        )
+        field_index = jnp.clip(index - samples, 0, 5)
+        field_direction = jnp.broadcast_to(
+            field_basis[field_index] * ((index >= samples) & (index < samples + 6)),
+            (cells, 6),
+        )
+        tangent = current.book_tangent(
+            psi,
+            psi_direction,
+            support.reading,
+            field_direction,
+            (index == samples + 6).astype(psi.dtype),
+            (index == samples + 7).astype(psi.dtype),
+            operands.geometry,
+            profile,
+            density_gradient,
+            quadrature,
+            booked,
+        )
+        return jnp.stack(tuple(tangent), axis=-1)
+
+    return jnp.moveaxis(jax.lax.map(evaluate, jnp.arange(channels)), 0, -1)
+
+
+def step_jacobian(
+    operands, moments, support, profile, density_gradient, quadrature, booked=None
+):
+    """Compose the bank with closed-form cell-local booking sensitivities."""
+    if booked is None:
+        psi = nodal_jets(operands, moments)[operands.sample_index, 0]
+        booked = current.book(
+            psi, support.reading, operands.geometry, profile, quadrature
+        )
+    if quadrature.target_current is None:
+        local_quadrature, local_booked = quadrature, booked
+    else:
+        local_quadrature = replace(quadrature, target_current=None)
+        local_booked = current.Booking(
+            *(jnp.zeros_like(value) for value in booked[:3]),
+            booked.raw_current,
+            jnp.ones_like(booked.normalization),
+            booked.valid,
+        )
+    local = _local_booking_sensitivities(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        local_quadrature,
+        local_booked,
+    )
+    cells = moments[0].size
+
+    def bank_channels(index):
+        direction = tuple(
+            jnp.where(
+                index // cells == block, jax.nn.one_hot(index % cells, cells), 0.0
+            )
+            for block in range(3)
+        )
+        jets, field = _directional_field(operands, direction)
+        return jnp.concatenate(
+            (
+                jets[operands.sample_index, 0],
+                field.sampled_coefficient(operands.geometry),
+                jnp.broadcast_to(field.value(support.reading.axis), (cells, 1)),
+                jnp.broadcast_to(field.value(support.reading.boundary), (cells, 1)),
+            ),
+            axis=-1,
+        )
+
+    channels = jax.vmap(bank_channels)(jnp.arange(3 * cells))
+    response = jnp.einsum("cok,ick->coi", local, channels)
+    response = jnp.transpose(response, (1, 0, 2)).reshape(3 * cells, 3 * cells)
+    if quadrature.target_current is not None:
+        current_tangent = jnp.sum(response[:cells], axis=0)
+        booked_vector = jnp.concatenate(booked[:3])
+        response = (
+            booked.normalization * response
+            - (booked_vector[:, None] / booked.raw_current) * current_tangent[None, :]
+        )
+    return jnp.eye(3 * cells, dtype=response.dtype) - response
+
+
+def _equilibrate(matrix, moments, booked):
+    """Scale moment blocks physically, then balance row and column norms."""
+    scales = jnp.stack(
+        tuple(
+            jnp.maximum(jnp.maximum(jnp.max(jnp.abs(a)), jnp.max(jnp.abs(b))), 1e-12)
+            for a, b in zip(moments, booked[:3], strict=True)
+        )
+    )
+    column = jnp.repeat(scales, moments[0].size)
+    row = column
+    balanced = matrix * column[None, :] / row[:, None]
+    for _ in range(3):
+        row_norm = jnp.sqrt(jnp.max(jnp.abs(balanced), axis=1))
+        row_norm = jnp.maximum(row_norm, 1e-12)
+        balanced = balanced / row_norm[:, None]
+        row = row * row_norm
+        column_norm = jnp.sqrt(jnp.max(jnp.abs(balanced), axis=0))
+        column_norm = jnp.maximum(column_norm, 1e-12)
+        balanced = balanced / column_norm[None, :]
+        column = column / column_norm
+    return balanced, row, column
+
+
+def _krylov_condition_estimate(matvec, size: int, width: int = 8):
+    """Estimate conditioning from the singular values of an Arnoldi block."""
+    width = min(width, size)
+    seed = jnp.linspace(-1.0, 1.0, size)
+    seed = seed / jnp.linalg.norm(seed)
+    basis = jnp.zeros((width + 1, size), seed.dtype).at[0].set(seed)
+    hessenberg = jnp.zeros((width + 1, width), seed.dtype)
+
+    def advance(column, carried):
+        vectors, h = carried
+        candidate = matvec(vectors[column])
+
+        def orthogonalize(row, state):
+            remaining, matrix = state
+            coefficient = jnp.vdot(vectors[row], remaining)
+            remaining = remaining - coefficient * vectors[row]
+            return remaining, matrix.at[row, column].set(coefficient)
+
+        candidate, h = jax.lax.fori_loop(0, column + 1, orthogonalize, (candidate, h))
+        length = jnp.linalg.norm(candidate)
+        vectors = vectors.at[column + 1].set(
+            candidate / jnp.where(length > 0, length, 1.0)
+        )
+        return vectors, h.at[column + 1, column].set(length)
+
+    _, hessenberg = jax.lax.fori_loop(0, width, advance, (basis, hessenberg))
+    singular = jnp.linalg.svd(hessenberg[:width, :width], compute_uv=False)
+    largest = jnp.max(singular)
+    cutoff = 64.0 * jnp.finfo(singular.dtype).eps * largest
+    smallest = jnp.min(jnp.where(singular > cutoff, singular, jnp.inf))
+    return jnp.maximum(largest / smallest, 1.0)
+
+
+def _krylov_solve(matvec, right, tolerance, restart: int = 20, maxiter: int = 20):
+    """Solve a linear operator without tracing a transpose of its program."""
+    width = min(restart, right.size)
+    basis_dtype = right.dtype
+    right_norm = jnp.linalg.norm(right)
+    threshold = tolerance * right_norm
+
+    def one_restart(state):
+        solution, iteration, _ = state
+        residual = right - matvec(solution)
+        length = jnp.linalg.norm(residual)
+        basis = (
+            jnp.zeros((width + 1, right.size), basis_dtype)
+            .at[0]
+            .set(residual / jnp.where(length > 0, length, 1.0))
+        )
+        hessenberg = jnp.zeros((width + 1, width), basis_dtype)
+
+        def advance(column, carried):
+            vectors, h = carried
+            candidate = matvec(vectors[column])
+
+            def orthogonalize(row, value):
+                remaining, matrix = value
+                coefficient = jnp.vdot(vectors[row], remaining)
+                remaining = remaining - coefficient * vectors[row]
+                return remaining, matrix.at[row, column].set(coefficient)
+
+            candidate, h = jax.lax.fori_loop(
+                0, column + 1, orthogonalize, (candidate, h)
+            )
+            norm = jnp.linalg.norm(candidate)
+            vectors = vectors.at[column + 1].set(
+                candidate / jnp.where(norm > 0, norm, 1.0)
+            )
+            return vectors, h.at[column + 1, column].set(norm)
+
+        basis, hessenberg = jax.lax.fori_loop(0, width, advance, (basis, hessenberg))
+        target = jnp.zeros(width + 1, basis_dtype).at[0].set(length)
+        coefficients = jnp.linalg.pinv(hessenberg, rtol=1e-12) @ target
+        solution = solution + basis[:width].T @ coefficients
+        error = jnp.linalg.norm(right - matvec(solution))
+        return solution, iteration + 1, error
+
+    def continue_solve(state):
+        _, iteration, error = state
+        return (iteration < maxiter) & (error > threshold)
+
+    initial = (jnp.zeros_like(right), jnp.asarray(0), right_norm)
+    solution, _, error = jax.lax.while_loop(continue_solve, one_restart, initial)
+    return solution, error / jnp.maximum(right_norm, jnp.finfo(right.dtype).tiny)
+
+
+def newton_step(
+    operands,
+    moments,
+    support: SupportRead,
+    profile,
+    density_gradient,
+    quadrature,
+) -> NewtonStep:
+    """Solve the bank-backed linear system at one fixed support decision.
+
+    Local analytic booking sensitivities compose with the bank into a dense
+    matrix. Physical moment scales and diagonal equilibration precede LU.
+    """
+    residual = step_residual(operands, moments, moments, support, profile, quadrature)
+    cells = moments[0].size
+    boundaries = (cells, 2 * cells)
+    right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
+    matrix = step_jacobian(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        quadrature,
+        residual.booked,
+    )
+    balanced, row, column = _equilibrate(matrix, moments, residual.booked)
+    from jax.scipy import linalg
+
+    factor = linalg.lu_factor(balanced)
+    solution = column * linalg.lu_solve(factor, right / row)
+    linear_residual = jnp.linalg.norm(matrix @ solution - right) / jnp.linalg.norm(
+        right
+    )
+    return NewtonStep(
+        tuple(jnp.split(solution, boundaries)),
+        jnp.linalg.cond(matrix),
+        jnp.linalg.cond(balanced),
+        linear_residual,
+        linear_residual <= 1e-8,
+    )
 
 
 def _bank_payload(operands: SupportOperands) -> bytes:

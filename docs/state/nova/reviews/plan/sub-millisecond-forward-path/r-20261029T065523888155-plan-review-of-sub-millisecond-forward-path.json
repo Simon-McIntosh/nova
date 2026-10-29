@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T07:04:49.027Z",
+  "dispatched_at": "2026-10-29T06:56:41Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:140",
+      "id": "reasoning-1",
+      "reason": "\u00a72's node is held to 0.2 ms per slice on a rationale that does not establish the bound is reachable, so either the decision needs the cross-slice amortization argument stated (and measured) or the s2 bound needs to be recorded as a budget allocation that may return to the lead, and as written the section will spend its budget chasing a target the plan's own evidence does not distinguish from the one it rejected.",
+      "text": "the decision `read-bound-per-slice` argues from \"the tracked read is 1.225 ms per call over 805 launches, and the warm stationary-point solve alone is 0.63\u20130.82 ms in 55 launches, so launch fusion cannot bring a single call to 0.2 ms\", but s2 (:81, in this same change set) still states that `support_read.read`'s \"cost has never been measured\", so the plan asserts both that the read's cost is 1.225 ms and that it is unknown; and the stated ground does not separate the two options it puts to the lead, because the chosen option (0.2 ms per slice at batch 16) needs the same ~6x reduction as the rejected one (0.2 ms per call) unless the 55 solve launches fuse across slices \u2014 which is exactly the launch fusion the rationale says will not rescue a single call. At 1.225 ms per call, sixteen unbatched calls cost 19.6 ms, i.e. 1.225 ms per slice, six times the bound being set.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:140",
+      "id": "anchors_resolve-1",
+      "reason": "the decision's choice stands or falls on the argument in the finding above; a missing pointer costs a reader one search but does not itself redirect a node.",
+      "text": "the decision's four measurements (1.225 ms per call, 805 launches, 0.63\u20130.82 ms, 55 launches) appear nowhere in the plan's own text or in any cited evidence fragment; the only corroboration anywhere is the s2 review comment at :174, which records the 1.225 ms wall as taken \"at the base revision\" of r-20261028T215104424875-tracked-read-h200 without stating whether that read was steady-state or rebuilding, so a reader cannot check the premise of a locked decision.",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:58",
+      "id": "anchors_resolve-2",
+      "reason": "every one of these anchors also names its symbol, so a node resolves them by name; the defect costs a reader a wrong jump, not a wrong mechanism.",
+      "text": "the support-owner paragraph's line references no longer resolve to the symbols they name: `support_read.read (:78)` is at :175, `read_and_book (:130)` at :268, `SupportOperands (:27)` at :44, `from_rows` (:44) at :71, and `forward._request_compilation_cache_key (forward.py:2731)` is at :2740; the drift is the tracking work at 72717729a, which added the `TrackingState` class above them.",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "4d9e19065b17762f443282e097c678940aa7258b",
+  "plan_fingerprint": "5609b7f7b05f41e2d66ae9979645283e9fd5e7795b65f68c11d13db6afedc80d",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 21,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T065523888155-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "507e009f91529c02ea5e70271a3e904fb149de85",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "two findings \u2014 the support-owner line references in `_document` no longer point at the named symbols, and the new decision's measurements carry no pointer to a record a reader can open.",
+    "done_when": "pass \u2014 s2's three clauses are each measurable (5e-4 minor-radius axis, 1e-4 flux span, 0.2 ms per slice at batch \u226516, rebuild/no-rebuild discrimination) and the section names a negative control that can fail (averaging the fit across cells drives the axis error over budget); the feasibility of clause (2)'s bound is carried under `reasoning` below, not as a missing control.",
+    "evidence_paths": "pass \u2014 the section writes its record to the plan's evidence fragments (`docs/evidence/fragments/...`), names no scratchpad or node-local temporary path, and requires the base/head stage walls and the rebuild wall to sit in that record.",
+    "naming": "pass \u2014 the decision keys (`read-bound-per-slice`, `per-slice-batch-16`) are plan vocabulary that reaches no source symbol, and the commit sha cited in s2 is provenance for present behaviour, not a plan label.",
+    "reasoning": "a finding \u2014 the new decision's premise is quoted as an unmeasured quantity in the same section, and its stated ground does not distinguish the option it chose from the one it rejected.",
+    "single_goal": "pass \u2014 s2 has one deliverable, the tracked read wired into the fast route and made fast; all three clauses measure that read.",
+    "wiring": "pass \u2014 the declared depends-on edges (s2\u2190s1, s3\u2190s1, s4\u2190s2+s3) all resolve to sections that exist, and the new `read-bound-per-slice` decision carries `data-sections=\"s2\"`, which is the section it governs."
+  },
+  "section_digests": {
+    "_document": "2b1879db2641ceb2c56376c39f9fd6970d63d88d1cd28db92e3c1ece6233e2fb",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "e09a4352a99b89606e091ee58f29e8f7fc527592c8e230dc4fe82c1190e15237",
+    "s3": "a0b9c6a24e4849c4ff248270b6269c9b3fd32faa707cdf5731a3d6ed625ccc44",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T07:23:02.269091+00:00"
+}

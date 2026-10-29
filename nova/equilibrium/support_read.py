@@ -159,6 +159,82 @@ def nodal_jets(operands: SupportOperands, moments) -> jax.Array:
     return operands.exterior + jnp.einsum("ncmq,cm->nq", operands.rows, stacked)
 
 
+class Stencil(NamedTuple):
+    """The stationary points of one state, before any connected decision.
+
+    This is the part of a read that cannot be shared between lanes: it refines
+    the state's own stationary points and resolves the cell each occupies.
+    Everything after it is the connected-domain decision, which a caller in the
+    steady state carries from the previous step's :class:`TrackingState`.
+    """
+
+    solved: fixed_points.FixedPointResult
+    cells: jax.Array
+    saddle_live: jax.Array
+
+
+def stationary_stencil(
+    operands: SupportOperands,
+    cache: fixed_points.RowCache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    axis_sign=-1.0,
+    *,
+    iterations: int = 12,
+) -> Stencil:
+    """Solve the stationary points and resolve their tracked cells."""
+    pitch = jnp.median(operands.geometry.pitch)
+    solved = fixed_points.solve(
+        cache,
+        jnp.stack(tuple(moments), axis=-1),
+        seeds,
+        previous,
+        pitch,
+        axis_sign,
+        iterations=iterations,
+    )
+    eigenvalues = jnp.linalg.eigvalsh(convention.sigma * solved.jet.hessian)
+    inside = jax.vmap(
+        lambda point: jnp.any(topology._inside_cells(operands.geometry, point))
+    )(solved.position)
+    live = solved.valid & inside
+    cells = jnp.where(
+        live, fixed_points.nearest_cell(operands.mesh, solved.position), -1
+    )
+    saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
+    return Stencil(solved, cells, jnp.any(saddles))
+
+
+def rebuild_needed(stencil: Stencil, tracking: TrackingState) -> jax.Array:
+    """Whether a stencil's cells or ownership differ from the tracked ones."""
+    return (
+        jnp.any(stencil.cells != tracking.cells)
+        | (stencil.saddle_live != tracking.saddle_live)
+        | ~tracking.valid
+    )
+
+
+def _verdict(
+    stencil: Stencil,
+    reading,
+    rebuilt: jax.Array,
+    rebuilds: jax.Array,
+) -> SupportRead:
+    """One lane's read result from its stencil and the decision it carries."""
+    valid = jnp.all(stencil.solved.valid) & reading.valid & reading.qualified
+    return SupportRead(
+        stencil.solved,
+        reading,
+        valid,
+        stencil.cells,
+        stencil.saddle_live,
+        rebuilds,
+        rebuilt,
+    )
+
+
 def read(
     operands: SupportOperands,
     cache: fixed_points.RowCache,
@@ -189,26 +265,16 @@ def read(
     (``sampled_coefficient``) and the whole-mesh Bell rebuild
     (``field_from_jets``) are paid by a rebuild step only.
     """
-    pitch = jnp.median(operands.geometry.pitch)
-    solved = fixed_points.solve(
+    stencil = stationary_stencil(
+        operands,
         cache,
-        jnp.stack(tuple(moments), axis=-1),
+        moments,
         seeds,
         previous,
-        pitch,
+        convention,
         axis_sign,
         iterations=iterations,
     )
-    eigenvalues = jnp.linalg.eigvalsh(convention.sigma * solved.jet.hessian)
-    inside = jax.vmap(
-        lambda point: jnp.any(topology._inside_cells(operands.geometry, point))
-    )(solved.position)
-    live = solved.valid & inside
-    cells = jnp.where(
-        live, fixed_points.nearest_cell(operands.mesh, solved.position), -1
-    )
-    saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
-    saddle_live = jnp.any(saddles)
 
     def rebuild(_):
         field_jets = nodal_jets(operands, moments) if jets is None else jets
@@ -216,7 +282,7 @@ def read(
             field_jets, operands.sample_index, operands.mesh
         )
         return topology.read_at_stationary_points(
-            field, operands.geometry, convention, policy, solved
+            field, operands.geometry, convention, policy, stencil.solved
         )
 
     if tracking is None:
@@ -224,18 +290,13 @@ def read(
         reading = rebuild(None)
         rebuilds = jnp.asarray(1, jnp.int32)
     else:
-        rebuilt = (
-            jnp.any(cells != tracking.cells)
-            | (saddle_live != tracking.saddle_live)
-            | ~tracking.valid
-        )
+        rebuilt = rebuild_needed(stencil, tracking)
         if rebuild is False:
             # A caller that knows no slice of its batch can rebuild takes the
             # carried decision directly. Under ``vmap`` the conditional below
             # becomes a select and evaluates the whole-mesh rebuild for every
-            # lane whether or not any lane needs it, which is the cost this
-            # branch exists to avoid; the caller reads ``rebuilt`` back and
-            # re-reads any batch that reports one.
+            # lane whether or not a lane needs it; :func:`read_batch` avoids
+            # that by taking one branch for the whole batch.
             reading = tracking.reading
         else:
             reading = jax.lax.cond(
@@ -245,8 +306,107 @@ def read(
                 None,
             )
         rebuilds = tracking.rebuilds + rebuilt.astype(jnp.int32)
-    valid = jnp.all(solved.valid) & reading.valid & reading.qualified
-    return SupportRead(solved, reading, valid, cells, saddle_live, rebuilds, rebuilt)
+    return _verdict(stencil, reading, rebuilt, rebuilds)
+
+
+def _rebuilt_reading(operands, stencil, moments, convention, policy, jets):
+    """The connected-domain decision of one stencil, fitted over the whole mesh."""
+    field_jets = nodal_jets(operands, moments) if jets is None else jets
+    field = fixed_points.field_from_jets(
+        field_jets, operands.sample_index, operands.mesh
+    )
+    return topology.read_at_stationary_points(
+        field, operands.geometry, convention, policy, stencil.solved
+    )
+
+
+def read_batch(
+    operands: SupportOperands,
+    cache: fixed_points.RowCache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    policy,
+    axis_sign=-1.0,
+    *,
+    iterations: int = 12,
+    jets=None,
+    tracking: TrackingState | None = None,
+) -> SupportRead:
+    """One read over a batch of slices, taking one decision branch for all.
+
+    ``moments``, ``seeds``, ``previous``, ``jets`` and ``tracking`` carry one
+    entry per slice on their leading axis; the operands and the row window are
+    shared by every lane. The per-lane rebuild decision is formed from the
+    batched stencils, and a single ``lax.cond`` on whether *any* lane needs a
+    rebuild chooses between the carried decision and the whole batch's reload.
+    A steady batch therefore executes the carry branch alone, where a ``vmap``
+    of :func:`read`'s own conditional compiles to a select that evaluates the
+    whole-mesh rebuild in every lane.
+
+    ``rebuilt`` and the ``rebuilds`` counter are batch-uniform: when one lane
+    needs the decision rebuilt the batch rebuilds all of them, so every lane
+    reports the rebuild it took part in.
+    """
+    stack = jax.vmap(
+        lambda state, seed, warm: stationary_stencil(
+            operands,
+            cache,
+            state,
+            seed,
+            warm,
+            convention,
+            axis_sign,
+            iterations=iterations,
+        )
+    )(moments, seeds, previous)
+
+    def whole_mesh():
+        if jets is None:
+            return jax.vmap(
+                lambda stencil, state: _rebuilt_reading(
+                    operands, stencil, state, convention, policy, None
+                )
+            )(stack, moments)
+        return jax.vmap(
+            lambda stencil, state, jet: _rebuilt_reading(
+                operands, stencil, state, convention, policy, jet
+            )
+        )(stack, moments, jets)
+
+    lanes = jnp.shape(stack.cells)[:1]
+    if tracking is None:
+        return jax.vmap(
+            lambda stencil, reading: _verdict(
+                stencil,
+                reading,
+                jnp.ones(lanes, dtype=bool),
+                jnp.ones(lanes, dtype=jnp.int32),
+            )
+        )(stack, whole_mesh())
+
+    flags = jax.vmap(rebuild_needed)(stack, tracking)
+
+    def verdict(stencil, reading, tracked, flag):
+        return _verdict(
+            stencil,
+            reading,
+            flag,
+            jnp.where(flag, tracked.rebuilds + 1, tracked.rebuilds),
+        )
+
+    def carry(_):
+        return jax.vmap(verdict)(stack, tracking.reading, tracking, flags)
+
+    def rebuild(_):
+        # The branch is taken once for the batch, so every lane reports the
+        # rebuild it took part in and its counter moves with the others.
+        return jax.vmap(verdict)(
+            stack, whole_mesh(), tracking, jnp.ones_like(flags)
+        )
+
+    return jax.lax.cond(jnp.any(flags), rebuild, carry, None)
 
 
 def book(operands, support: SupportRead, psi, profile, quadrature):

@@ -1,0 +1,102 @@
+<section id="tracked-read-steady-batch">
+  <h2>tracked-read-steady-batch — the batch carries the steady branch, and what it costs per slice</h2>
+
+  <p>The batched read was measured at 54.61 ms per slice at one slice and 5.82 ms
+  at sixty-four, against 1.27 ms for the same read called once with its tracking
+  carried, and the previous record left the cause open between the batch axis and
+  the rebuild conditional. The tracking state does reach the batch, and no lane
+  asks for a rebuild: the per-lane decision reads false for every lane at every
+  batch size. What the batch paid was not the branch it took but where the
+  decision was made. A <code>jax.vmap</code> of <code>support_read.read</code>
+  carries the read's <code>lax.cond</code> inside the mapped function, and the
+  cost barely moves when the conditional is removed altogether: the arm with the
+  decision carried and no branch at all costs 54.65 ms at one slice against
+  54.36 ms with the conditional present. <code>support_read.read_batch</code>
+  forms the per-lane decision from batched stationary stencils and takes
+  <em>one</em> <code>lax.cond</code> on whether any lane needs a rebuild, outside
+  the map. On the same state, device and flags that costs 2.07 ms at one slice
+  and 0.133 ms per slice at sixty-four.</p>
+
+  <table>
+    <caption>Per-slice wall of the batched steady read at the diverted 550-cell state on one H200, 20 repeats, minimum of the per-call walls; the two vmap arms re-measure the previous record's baseline on the same state and device; all arms are re-measured at the shipped revision</caption>
+    <tr><th>slices</th><th>one branch for the batch [ms]</th><th>per call [ms]</th><th>vmap of the read's conditional [ms]</th><th>vmap carried, no branch [ms]</th></tr>
+    <tr><td><code>1</code></td><td>2.068</td><td>2.068</td><td>54.362</td><td>54.650</td></tr>
+    <tr><td><code>4</code></td><td>0.635</td><td>2.539</td><td>20.294</td><td>20.316</td></tr>
+    <tr><td><code>16</code></td><td>0.230</td><td>3.683</td><td>9.405</td><td>9.453</td></tr>
+    <tr><td><code>64</code></td><td>0.133</td><td>8.528</td><td>5.811</td><td>5.817</td></tr>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/sub-millisecond-forward-path/tracked-read-steady-batch/per-slice-wall.svg" alt="Per-slice wall of three batching arms against slices per batch on a log axis: one branch for the batch falls from 2.07 to 0.13 milliseconds and crosses the 0.2 millisecond bound between sixteen and sixty-four slices, while both vmap arms stay between 5.8 and 54 milliseconds.">
+    <figcaption>Per-slice wall of the batched steady read at the diverted 550-cell state on one H200, against the dashed 0.2 ms bound, which the batch crosses between sixteen and sixty-four slices. The solid series is the shipped <code>read_batch</code>; the two dashed arms are the previous record's, and they coincide because removing the conditional from a mapped read changes the wall by well under a percent. All three arms are re-measured here at the shipped revision; minimum of 20 calls per point.</figcaption>
+  </figure>
+
+  <h3 id="tracked-read-steady-batch-cause">The batch held the tracking state, and did not rebuild</h3>
+
+  <p>The cause is settled at the state the bound is stated at rather than
+  inferred from a wall. Every arm is handed the same stacked tracking state, one
+  entry per lane, and the per-lane decision
+  (<code>support_read.rebuild_needed</code> over the batched stencils) is printed
+  for each batch size: at one, four, sixteen and sixty-four slices every lane
+  reads false, so the tracking state does reach the batch and the batch's own
+  decision agrees with it. A batch whose lanes hold the converged and the trial
+  state of this certificate also reads false in every lane and takes no rebuild,
+  because at this geometry the two states resolve the same cells. The printed
+  flag is therefore a real decision and not a constant: the gate drives a lane
+  whose cell is stale and requires the batch to take the reload branch.</p>
+
+  <p>What separated the arms was not which branch ran. With the decision carried
+  and no branch in the program at all, the vmapped read still costs 54.65 ms at
+  one slice, 0.5 % more than the arm that keeps the conditional. Placing the
+  decision inside the mapped function is what the batch paid for, and taking it
+  once outside the map is what removes it: the same flags, the same state, the
+  same device, 54.65 ms against 2.07 ms.</p>
+
+  <h3 id="tracked-read-steady-batch-measure">The bound is met at sixty-four slices and missed by 15 % at sixteen</h3>
+
+  <p>Sixteen slices read at 0.230 ms per slice, against the 0.2 ms bound; sixty-four
+  read at 0.133 ms and meet it. The per-slice wall is a fixed per-call cost plus a
+  marginal per-slice cost, and the four points give both: the marginal from four
+  to sixty-four slices is (8.528 − 2.539) / 60 = 0.0998 ms per slice, and the fixed
+  share is 2.539 − 4 × 0.0998 = 2.14 ms per call. At sixteen slices that fixed
+  share is 2.14 / 16 = 0.134 ms per slice against 0.0998 ms of arithmetic, so the
+  miss at sixteen is the per-call cost and not the work per lane. At sixty-four
+  the fixed share falls to 0.033 ms and the same arithmetic gives 0.133 ms.
+  Batching beyond sixty-four therefore approaches the 0.0998 ms arithmetic floor,
+  which is two times the bound and the part no batch size removes.</p>
+
+  <p>The batched program's own floor is visible at one slice: 2.068 ms against
+  1.333 ms for the same state read once with its tracking carried, 0.73 ms of
+  per-call cost that the single read does not pay, which the one <code>lax.cond</code>
+  and the batch's extra dispatch are what is left of once the stationary stencil
+  is counted.</p>
+
+  <p>Kernel launches and device time are not reported, and the zero is the
+  instrument's rather than the path's. Each program was traced with
+  <code>jax.profiler.trace</code> and the xplane read back with
+  <code>jax.profiler.ProfileData</code>, and every arm at one slice — including
+  the arm that takes 54 ms and therefore issues thousands of kernels — reported
+  zero device events, which is the positive control for the instrument and the
+  same failure the previous record saw at one slice. The wall series is what the
+  attribution above is made from. Copy bytes are zero by construction: the timed
+  region returns device arrays and nothing converts to host between its
+  timestamps.</p>
+
+  <h3 id="tracked-read-steady-batch-gate">The gate</h3>
+
+  <p><code>tests/test_tracked_read_steady_batch.py</code> reads a batch of two
+  distinct states, one per lane, through <code>read_batch</code> and compares each
+  lane's stationary position, status, cells, boundary flux and verdict against
+  the same state read once. It then carries the batch's tracking state and
+  requires that no lane reports a rebuild and that the rebuild counter does not
+  move, which is the clause a batch that lost the tracking state fails. A second
+  clause gives one lane a stale cell and requires the batch to take the reload
+  branch for all lanes and still match each state's single read, because the
+  branch is taken once for the whole batch.</p>
+
+  <p>The declared mutation drops the tracking state from the batched call in a
+  scratch copy of the test, so every lane rebuilds; the steady clause refuses it.
+  At the shipped revision both tests pass in 548 s and the mutant fails in 545 s
+  on the steady clause alone (<code>test_batched_steady_read_equals_the_single_read_lane_by_lane</code>),
+  which the head passes, so the clause is what separates the two arms.</p>
+</section>

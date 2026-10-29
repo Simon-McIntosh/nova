@@ -424,336 +424,6 @@ def step_jacobian_vector(
     )
 
 
-def _bell_hessian_rate(field, direction_field, point, point_rate):
-    """Evaluate a Bell Hessian and its rate from quintic coefficients."""
-    mesh = field.mesh
-    cell = fixed_points.nearest_cell(mesh, point)
-    local = (point - mesh.origins[cell]) / mesh.scales[cell, :, None]
-    bary = jnp.einsum("tij,tj->ti", mesh.inverse_edges[cell], local)
-    bary = jnp.concatenate((bary, 1 - jnp.sum(bary, axis=-1, keepdims=True)), axis=-1)
-    triangle = jnp.argmax(jnp.min(bary, axis=-1))
-    coordinate = local[triangle]
-    scale = mesh.scales[cell, triangle]
-    powers = jnp.asarray(fixed_points.POWERS)
-    x, y = coordinate
-
-    def derivative(dx, dy):
-        ax, ay = powers[:, 0], powers[:, 1]
-        factor = jnp.ones_like(x) * jnp.ones_like(ax, dtype=x.dtype)
-        for offset in range(dx):
-            factor = factor * (ax - offset)
-        for offset in range(dy):
-            factor = factor * (ay - offset)
-        basis = jnp.where(
-            (ax >= dx) & (ay >= dy),
-            factor
-            * x ** jnp.maximum(ax - dx, 0)
-            * y ** jnp.maximum(ay - dy, 0)
-            / scale ** (dx + dy),
-            0.0,
-        )
-        return (
-            jnp.dot(field.coefficients[cell, triangle], basis),
-            jnp.dot(direction_field.coefficients[cell, triangle], basis),
-        )
-
-    values = [derivative(*orders) for orders in ((2, 0), (1, 1), (0, 2))]
-    third = [derivative(*orders)[0] for orders in ((3, 0), (2, 1), (1, 2), (0, 3))]
-    hxx, hxy, hyy = (item[0] for item in values)
-    rxx, rxy, ryy = (item[1] for item in values)
-    vx, vy = point_rate
-    rate = jnp.asarray(
-        (
-            (rxx + third[0] * vx + third[1] * vy, rxy + third[1] * vx + third[2] * vy),
-            (rxy + third[1] * vx + third[2] * vy, ryy + third[2] * vx + third[3] * vy),
-        )
-    )
-    return jnp.asarray(((hxx, hxy), (hxy, hyy))), rate
-
-
-def _curvature_rate(field, direction_field, point, point_rate, pitch):
-    """Differentiate the fixed nine-point curvature stencil algebraically."""
-    step = 0.01 * pitch
-    offsets = jnp.asarray(
-        (
-            (0.0, 0.0),
-            (1.0, 0.0),
-            (-1.0, 0.0),
-            (0.0, 1.0),
-            (0.0, -1.0),
-            (1.0, 1.0),
-            (1.0, -1.0),
-            (-1.0, 1.0),
-            (-1.0, -1.0),
-        )
-    )
-    hessian, rates = jax.vmap(
-        lambda offset: _bell_hessian_rate(
-            field, direction_field, point + step * offset, point_rate
-        )
-    )(offsets)
-
-    def build(values):
-        third = jnp.stack(
-            (
-                (values[1] - values[2]) / (2 * step),
-                (values[3] - values[4]) / (2 * step),
-            ),
-            axis=-1,
-        )
-        mixed = (values[5] - values[6] - values[7] + values[8]) / (4 * step**2)
-        fourth = jnp.stack(
-            (
-                jnp.stack(
-                    ((values[1] - 2 * values[0] + values[2]) / step**2, mixed), axis=-1
-                ),
-                jnp.stack(
-                    (mixed, (values[3] - 2 * values[0] + values[4]) / step**2), axis=-1
-                ),
-            ),
-            axis=-1,
-        )
-        from itertools import permutations
-
-        third = sum(jnp.transpose(third, order) for order in permutations(range(3))) / 6
-        fourth = (
-            sum(jnp.transpose(fourth, order) for order in permutations(range(4))) / 24
-        )
-        return third, fourth
-
-    return hessian[0], rates[0], *build(hessian), *build(rates)
-
-
-def _normal_form_rate(
-    form, hessian, hessian_rate, third, third_rate, fourth, fourth_rate, point_rate
-):
-    """Differentiate null directions, curvature and cubic correction."""
-    direction = form.direction
-    perpendicular = jnp.stack((-direction[:, 1], direction[:, 0]), axis=-1)
-    normal = direction @ hessian
-    direction_rate = (
-        -jnp.einsum("ai,ij,aj->a", direction, hessian_rate, direction)
-        / (2 * jnp.einsum("ai,ai->a", perpendicular, normal))
-    )[:, None] * perpendicular
-    normal_rate = direction_rate @ hessian + direction @ hessian_rate
-    square = jnp.sum(normal * normal, axis=-1)
-    square_rate = 2 * jnp.sum(normal * normal_rate, axis=-1)
-    cubic_value = jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, direction)
-    cubic_rate = jnp.einsum(
-        "ijk,ai,aj,ak->a", third_rate, direction, direction, direction
-    ) + 3 * jnp.einsum("ijk,ai,aj,ak->a", third, direction_rate, direction, direction)
-    curvature = form.curvature
-    curvature_rate = (
-        -cubic_rate[:, None] * normal / (6 * square[:, None])
-        - cubic_value[:, None] * normal_rate / (6 * square[:, None])
-        + cubic_value[:, None]
-        * normal
-        * square_rate[:, None]
-        / (6 * square[:, None] ** 2)
-    )
-    remainder_rate = (
-        jnp.einsum("ai,ij,aj->a", curvature_rate, hessian, curvature)
-        + 0.5 * jnp.einsum("ai,ij,aj->a", curvature, hessian_rate, curvature)
-        + 0.5
-        * jnp.einsum("ijk,ai,aj,ak->a", third_rate, direction, direction, curvature)
-        + jnp.einsum("ijk,ai,aj,ak->a", third, direction_rate, direction, curvature)
-        + 0.5
-        * jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, curvature_rate)
-        + jnp.einsum(
-            "ijkl,ai,aj,ak,al->a",
-            fourth_rate,
-            direction,
-            direction,
-            direction,
-            direction,
-        )
-        / 24
-        + jnp.einsum(
-            "ijkl,ai,aj,ak,al->a",
-            fourth,
-            direction_rate,
-            direction,
-            direction,
-            direction,
-        )
-        / 6
-    )
-    remainder = (
-        0.5 * jnp.einsum("ai,ij,aj->a", curvature, hessian, curvature)
-        + 0.5 * jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, curvature)
-        + jnp.einsum(
-            "ijkl,ai,aj,ak,al->a", fourth, direction, direction, direction, direction
-        )
-        / 24
-    )
-    correction_rate = (
-        -remainder_rate[:, None] * normal / square[:, None]
-        - remainder[:, None] * normal_rate / square[:, None]
-        + remainder[:, None] * normal * square_rate[:, None] / square[:, None] ** 2
-    )
-    return point_rate, direction_rate, curvature_rate, correction_rate
-
-
-def _ray_intersection_rate(vertices, count, form, rates):
-    """Implicitly differentiate cubic-ray intersections with fixed cell edges."""
-    position_rate, direction_rate, curvature_rate, cubic_rate = rates
-    width = vertices.shape[0]
-    slot = jnp.arange(width)
-    following = jnp.where(slot + 1 < count, slot + 1, 0)
-    edges = vertices[following] - vertices
-    relative = vertices - form.position
-    cross = topology._cross_plane
-    coefficients = (
-        cross(form.cubic[:, None], edges[None]),
-        cross(form.curvature[:, None], edges[None]),
-        cross(form.direction[:, None], edges[None]),
-        -cross(relative[None], edges[None]),
-    )
-    changes = (
-        cross(cubic_rate[:, None], edges[None]),
-        cross(curvature_rate[:, None], edges[None]),
-        cross(direction_rate[:, None], edges[None]),
-        cross(position_rate, edges)[None] + jnp.zeros_like(coefficients[0]),
-    )
-    roots = topology._cubic_parameters(*coefficients)
-    safe = jnp.where(jnp.isfinite(roots), roots, 0.0)
-    a, b, c, _ = coefficients
-    da, db, dc, dd = changes
-    numerator = (
-        da[..., None] * safe**3
-        + db[..., None] * safe**2
-        + dc[..., None] * safe
-        + dd[..., None]
-    )
-    denominator = 3 * a[..., None] * safe**2 + 2 * b[..., None] * safe + c[..., None]
-    root_rate = jnp.where(
-        jnp.isfinite(roots) & (jnp.abs(denominator) > 1e-20),
-        -numerator / jnp.where(jnp.abs(denominator) > 1e-20, denominator, 1.0),
-        0.0,
-    )
-    point = (
-        safe[..., None] * form.direction[:, None, None]
-        + safe[..., None] ** 2 * form.curvature[:, None, None]
-        + safe[..., None] ** 3 * form.cubic[:, None, None]
-    )
-    point_rate = (
-        position_rate
-        + safe[..., None] * direction_rate[:, None, None]
-        + safe[..., None] ** 2 * curvature_rate[:, None, None]
-        + safe[..., None] ** 3 * cubic_rate[:, None, None]
-        + root_rate[..., None]
-        * (
-            form.direction[:, None, None]
-            + 2 * safe[..., None] * form.curvature[:, None, None]
-            + 3 * safe[..., None] ** 2 * form.cubic[:, None, None]
-        )
-    )
-    square = jnp.sum(edges * edges, axis=-1)
-    fraction = (
-        jnp.sum((point - relative[None, :, None]) * edges[None, :, None], axis=-1)
-        / square[None, :, None]
-    )
-    fraction_rate = (
-        jnp.sum(point_rate * edges[None, :, None], axis=-1) / square[None, :, None]
-    )
-    hit = (
-        (slot < count)[None, :, None]
-        & jnp.isfinite(roots)
-        & (roots >= -1e-12)
-        & (fraction >= -1e-12)
-        & (fraction <= 1 + 1e-12)
-    )
-    return roots, root_rate, fraction, fraction_rate, hit
-
-
-def _normal_ring_velocity(
-    vertices, count, centre, form, selected, intervals, segments, rates, ring_count
-):
-    """Carry straight-edge endpoints and cubic-ray samples analytically."""
-    roots, root_rate, fraction, fraction_rate, hit = _ray_intersection_rate(
-        vertices, count, form, rates
-    )
-    chosen = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
-    candidate = fraction[chosen]
-    candidate_rate = fraction_rate[chosen]
-    candidate_hit = hit[chosen]
-    gap = jnp.abs(intervals[:2, ..., None] - candidate[:, :, None, None, :])
-    nearest = jnp.argmin(
-        jnp.where(candidate_hit[:, :, None, None, :], gap, jnp.inf), axis=-1
-    )
-    interval_rate = jnp.take_along_axis(
-        jnp.broadcast_to(candidate_rate[:, :, None, None, :], gap.shape),
-        nearest[..., None],
-        axis=-1,
-    )[..., 0]
-    interval_rate = jnp.where(
-        (intervals[:2] > 0) & (intervals[:2] < 1), interval_rate, 0.0
-    )
-    slot = jnp.arange(vertices.shape[0])
-    following = jnp.where(slot + 1 < count, slot + 1, 0)
-    edges = vertices[following] - vertices
-    first = interval_rate[..., 0, None] * edges[None, :, None, :]
-    last = interval_rate[..., 1, None] * edges[None, :, None, :]
-    straight = jnp.stack((jnp.zeros_like(first), first, last), axis=-2).reshape(
-        -1, 3, 2
-    )
-    straight = jnp.pad(straight, ((0, 0), (0, segments - 1), (0, 0)))
-
-    relative = vertices - form.position
-    radii = jnp.linalg.norm(relative, axis=-1)
-    farthest = jnp.argmax(radii)
-    bound = 2 * radii[farthest]
-    bound_rate = -2 * jnp.dot(relative[farthest], rates[0]) / radii[farthest]
-    candidates = jnp.where(hit, roots, jnp.inf).reshape(4, -1)
-    order = jnp.argsort(jnp.clip(candidates, 0, bound), axis=-1)
-    sorted_root = jnp.take_along_axis(jnp.clip(candidates, 0, bound), order, axis=-1)
-    candidate_rate = jnp.where(hit, root_rate, 0.0).reshape(4, -1)
-    clipped_rate = jnp.where(
-        candidates >= bound,
-        bound_rate,
-        jnp.where(candidates <= 0, 0.0, candidate_rate),
-    )
-    sorted_rate = jnp.take_along_axis(clipped_rate, order, axis=-1)
-    parameters = jnp.concatenate(
-        (jnp.zeros((4, 1)), sorted_root, jnp.full((4, 1), bound)), axis=-1
-    )
-    parameter_rate = jnp.pad(sorted_rate, ((0, 0), (1, 1)))
-    linear = jnp.linspace(0.0, 1.0, segments + 1)
-    t = (
-        parameters[:, :-1, None]
-        + (parameters[:, 1:, None] - parameters[:, :-1, None]) * linear
-    )
-    t_rate = (
-        parameter_rate[:, :-1, None]
-        + (parameter_rate[:, 1:, None] - parameter_rate[:, :-1, None]) * linear
-    )
-    position_rate, direction_rate, curvature_rate, cubic_rate = rates
-    arc_rate = (
-        position_rate
-        + t[..., None] * direction_rate[:, None, None]
-        + t[..., None] ** 2 * curvature_rate[:, None, None]
-        + t[..., None] ** 3 * cubic_rate[:, None, None]
-        + t_rate[..., None]
-        * (
-            form.direction[:, None, None]
-            + 2 * t[..., None] * form.curvature[:, None, None]
-            + 3 * t[..., None] ** 2 * form.cubic[:, None, None]
-        )
-    )
-    sector_live = jnp.zeros(4, dtype=bool).at[chosen].set(selected[:2])
-    sign = sector_live.astype(vertices.dtype) - jnp.roll(sector_live, 1).astype(
-        vertices.dtype
-    )
-    arc_rate = jnp.where(
-        (sign < 0)[:, None, None, None], arc_rate[:, :, ::-1], arc_rate
-    )
-    arcs = jnp.concatenate(
-        (jnp.zeros_like(arc_rate[:, :, :1]), arc_rate), axis=2
-    ).reshape(-1, segments + 2, 2)
-    velocity = jnp.concatenate((straight, arcs))
-    return jnp.where((ring_count > 0)[:, None, None], velocity, 0.0)
-
-
 def _normal_geometry_booking_tangent(
     operands, moments, jet_tangent, support, profile, quadrature, booked
 ):
@@ -791,25 +461,43 @@ def _normal_geometry_booking_tangent(
             jet.hessian, direction_field.evaluate(point).gradient
         )
 
-        hessian, hessian_tangent, third, fourth, third_tangent, fourth_tangent = (
-            _curvature_rate(field, direction_field, point, point_tangent, pitch)
+        def varied_field(amount):
+            return replace(
+                field,
+                coefficients=field.coefficients + amount * direction_field.coefficients,
+                jets=field.jets + amount * direction_field.jets,
+            )
+
+        def form_inputs(amount, position):
+            varied = varied_field(amount)
+            derivatives = topology._curvature_derivatives(varied, position, pitch)
+            return varied.evaluate(position).hessian, *derivatives
+
+        (hessian, third, fourth), (hessian_tangent, third_tangent, fourth_tangent) = (
+            jax.jvp(
+                form_inputs,
+                (jnp.zeros((), point.dtype), point),
+                (jnp.ones((), point.dtype), point_tangent),
+            )
         )
         sigma = quadrature.sigma
         form = reading.saddle_form
-        form_tangent = _normal_form_rate(
-            form,
-            sigma * hessian,
-            sigma * hessian_tangent,
-            sigma * third,
-            sigma * third_tangent,
-            sigma * fourth,
-            sigma * fourth_tangent,
-            point_tangent,
+        _, form_tangent = jax.jvp(
+            lambda position, h, d3, d4: topology.saddle_normal_form(
+                position,
+                sigma * h,
+                sigma * d3,
+                topology.TopologyPolicy().hessian_tolerance,
+                sigma * d4,
+            ),
+            (point, hessian, third, fourth),
+            (point_tangent, hessian_tangent, third_tangent, fourth_tangent),
         )
         psi = total_jets[operands.sample_index, 0]
         coefficients = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi)
         span = reading.boundary_flux - reading.axis_flux
         normalized = coefficients.at[:, 0].add(-reading.axis_flux) / span
+        chosen = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
         indices = jnp.nonzero(active, size=cells, fill_value=0)[0]
         count = jnp.sum(active, dtype=jnp.int32)
 
@@ -821,6 +509,50 @@ def _normal_geometry_booking_tangent(
             intervals = reading.edge_interval[cell]
             selected = reading.fragment_selected[cell]
 
+            def edges(position, direction, curvature, cubic):
+                changed = form._replace(
+                    position=position,
+                    direction=direction,
+                    curvature=curvature,
+                    cubic=cubic,
+                )
+                return topology._normal_form_cell_fragments(
+                    vertices,
+                    vertex_count,
+                    changed,
+                    topology.TopologyPolicy().edge_tolerance,
+                ).edge_interval[chosen]
+
+            inputs = (form.position, form.direction, form.curvature, form.cubic)
+            changes = (
+                form_tangent.position,
+                form_tangent.direction,
+                form_tangent.curvature,
+                form_tangent.cubic,
+            )
+            _, interval_tangent = jax.jvp(edges, inputs, changes)
+            interval_tangent = jnp.pad(
+                interval_tangent,
+                ((0, intervals.shape[0] - 2), (0, 0), (0, 0), (0, 0)),
+            )
+
+            def rings(position, direction, curvature, cubic, interval):
+                changed = form._replace(
+                    position=position,
+                    direction=direction,
+                    curvature=curvature,
+                    cubic=cubic,
+                )
+                return current._normal_rings(
+                    vertices,
+                    vertex_count,
+                    centre,
+                    changed,
+                    selected,
+                    interval,
+                    quadrature.segments,
+                )[0]
+
             rings_now, ring_count = current._normal_rings(
                 vertices,
                 vertex_count,
@@ -830,16 +562,10 @@ def _normal_geometry_booking_tangent(
                 intervals,
                 quadrature.segments,
             )
-            velocity = _normal_ring_velocity(
-                vertices,
-                vertex_count,
-                centre,
-                form,
-                selected,
-                intervals,
-                quadrature.segments,
-                form_tangent,
-                ring_count,
+            _, velocity = jax.jvp(
+                rings,
+                (*inputs, intervals),
+                (*changes, interval_tangent),
             )
 
             def moving(ring, speed, number):

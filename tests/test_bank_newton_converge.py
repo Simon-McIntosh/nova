@@ -158,12 +158,16 @@ def test_small_dense_matrix_matches_full_fresh_residual():
     saddle = np.asarray(roots[1])
     radial = nodes[:, 0] - saddle[0]
     vertical = nodes[:, 1] - saddle[1]
-    rows = np.zeros(
-        (len(nodes), cells, 3, 6), dtype=np.asarray(baseline.rows).dtype
-    )
+    rows = np.zeros((len(nodes), cells, 3, 6), dtype=np.asarray(baseline.rows).dtype)
     rows[:, 0, 0] = np.stack(
-        (radial * vertical, vertical, radial, np.zeros_like(radial),
-         np.ones_like(radial), np.zeros_like(radial)),
+        (
+            radial * vertical,
+            vertical,
+            radial,
+            np.zeros_like(radial),
+            np.ones_like(radial),
+            np.zeros_like(radial),
+        ),
         axis=-1,
     )
     operands = support_read.SupportOperands.from_rows(
@@ -199,13 +203,26 @@ def test_small_dense_matrix_matches_full_fresh_residual():
     _, support, valid = full_residual(moments)
     assert bool(valid)
     assert bool(jnp.any(support.reading.normal_form_cells))
-    gradient = lambda radius, flux: jnp.zeros_like(radius)
+
+    def gradient(radius, flux):
+        return jnp.zeros_like(radius)
+
     matrix = support_read.step_jacobian(
-        operands, moments, support, profile, gradient, quadrature,
+        operands,
+        moments,
+        support,
+        profile,
+        gradient,
+        quadrature,
         fresh_geometry=True,
     )
     frozen = support_read.step_jacobian(
-        operands, moments, support, profile, gradient, quadrature,
+        operands,
+        moments,
+        support,
+        profile,
+        gradient,
+        quadrature,
     )
     column = np.asarray(matrix[:, 0])
     old_column = np.asarray(frozen[:, 0])
@@ -242,12 +259,14 @@ def test_analytic_oracle_uses_direct_newton_without_read(monkeypatch):
     exact = SimpleNamespace(
         axis=jnp.asarray(axis), boundary=jnp.asarray(saddle), boundary_flux=flux
     )
-    seeds = jnp.asarray([axis, saddle])
+    roots_expected = jnp.asarray([axis, saddle])
+    seeds = roots_expected + jnp.asarray([[0.012, -0.008], [-0.011, 0.009]])
     measured, roots = analytic_oracle(analytic, seeds, exact, wall)
     assert measured["axis_ratio"] < 1e-10
     assert measured["saddle_ratio"] < 1e-10
     assert measured["boundary_ratio"] < 1e-10
-    np.testing.assert_allclose(roots, seeds, atol=1e-10)
+    np.testing.assert_allclose(roots, roots_expected, atol=1e-10)
+    assert np.min(np.linalg.norm(np.asarray(roots - seeds), axis=1)) > 1e-3
 
     displaced = SimpleNamespace(
         axis=exact.axis + jnp.asarray([1e-3, 0.0]),

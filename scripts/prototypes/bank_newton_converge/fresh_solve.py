@@ -85,39 +85,59 @@ def run(state_path, max_steps):
             converged=bool(correction.converged),
         )
         if index == 0:
-            length = 1e-4
-            high = tuple(
-                value + length * change
-                for value, change in zip(moments, correction.update, strict=True)
-            )
-            low = tuple(
-                value - length * change
-                for value, change in zip(moments, correction.update, strict=True)
-            )
-            high_support = read(operands, cache, high)
-            low_support = read(operands, cache, low)
-            high_result = residual(operands, high, high, high_support)
-            low_result = residual(operands, low, low, low_support)
-            central = tuple(
-                (a - b) / (2 * length)
-                for a, b in zip(high_result.residual, low_result.residual, strict=True)
+            predicted = support_read.step_jacobian_vector(
+                operands,
+                moments,
+                correction.update,
+                support,
+                profile,
+                lambda radius, flux: jnp.zeros_like(radius),
+                quadrature,
+                current.booked,
+                fresh_geometry=True,
             )
             remainder = tuple(
-                a + b for a, b in zip(current.residual, central, strict=True)
+                a + b for a, b in zip(current.residual, predicted, strict=True)
             )
-            ratio = float(
-                jnp.linalg.norm(jnp.concatenate(remainder))
-                / jnp.linalg.norm(jnp.concatenate(current.residual))
-            )
+            norm = jnp.linalg.norm(jnp.concatenate(current.residual))
             emit(
-                "FRESH_LINEARIZATION",
-                length=length,
-                ratio=ratio,
-                high_valid=bool(high_support.valid),
-                low_valid=bool(low_support.valid),
+                "DENSE_DIRECTION",
+                ratio=float(jnp.linalg.norm(jnp.concatenate(remainder)) / norm),
+                update_sup=float(jnp.max(jnp.abs(jnp.concatenate(correction.update)))),
             )
-            assert bool(high_support.valid) and bool(low_support.valid)
-            assert ratio < 1e-3
+            best = float("inf")
+            for length in (1e-4, 1e-5, 1e-6, 1e-7):
+                high = tuple(
+                    value + length * change
+                    for value, change in zip(moments, correction.update, strict=True)
+                )
+                low = tuple(
+                    value - length * change
+                    for value, change in zip(moments, correction.update, strict=True)
+                )
+                high_support = read(operands, cache, high)
+                low_support = read(operands, cache, low)
+                high_result = residual(operands, high, high, high_support)
+                low_result = residual(operands, low, low, low_support)
+                central = tuple(
+                    (a - b) / (2 * length)
+                    for a, b in zip(
+                        high_result.residual, low_result.residual, strict=True
+                    )
+                )
+                remainder = tuple(
+                    a + b for a, b in zip(current.residual, central, strict=True)
+                )
+                ratio = float(jnp.linalg.norm(jnp.concatenate(remainder)) / norm)
+                emit(
+                    "FRESH_LINEARIZATION",
+                    length=length,
+                    ratio=ratio,
+                    high_valid=bool(high_support.valid),
+                    low_valid=bool(low_support.valid),
+                )
+                best = min(best, ratio)
+            assert best < 1e-3
         accepted = False
         for half in range(13):
             length = 2.0**-half

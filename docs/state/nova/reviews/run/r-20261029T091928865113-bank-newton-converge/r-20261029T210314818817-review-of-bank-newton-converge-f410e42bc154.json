@@ -34,6 +34,13 @@
     "geometry_negative": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/direct-geometry-negative.log",
     "oracle_negative": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/direct-oracle-negative.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-newton-converge-f410e42bc154",
+      "recorded_at": "2026-10-29T22:08:44.574614+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_bank_newton_converge.py",

@@ -139,6 +139,31 @@
   which is the state measured at the reviewed revision: 1 passed, 10 errors,
   exit 1.</p>
 
+  <p>The control that a minimising selection fails here was first recorded
+  against a mutation that never ran. The arm put an overlay copy of the
+  reference ahead of the worktree on <code>PYTHONPATH</code> and then invoked
+  pytest from the worktree, whose <code>scripts/__init__.py</code> makes
+  <code>scripts</code> a regular package: the tree that owns
+  <code>__init__.py</code> first on <code>sys.path</code> owns every submodule
+  beneath it, and pytest's default prepend import mode had already put the
+  worktree's entry first. The arm therefore reported the unmutated test
+  passing — 3 passed, exit 0 — and verified nothing.</p>
+
+  <p>Run with the two trees separated, the mutant is refused, and each arm now
+  proves which module it read. Both arms run from a scratch directory with
+  <code>--import-mode=importlib</code>, which leaves <code>sys.path</code>
+  alone, and each arm loads a plugin that prints the resolved
+  <code>reference</code> module and exits nonzero when it is not the tree that
+  arm was configured for. The head arm served the worktree's file and reported
+  6 passed, exit 0. The mutant arm served the overlay's file, whose selection
+  asks for the wall minimum, and failed the three clauses that decide the
+  rule: the extremum clause at a flux of −9.68 against a wall maximum of
+  2.2e-14 with a 5.96e-3 budget, and the boundary budget at 0.162 against
+  1e-4 at both the converged and the trial state, exit 1 (job 1300871). A
+  selection that minimises therefore fails here, measured rather than
+  asserted, and the arm names the module it imported so an unmutated run
+  cannot be read as a result.</p>
+
   <h3 id="tracked-read-batch-reuse">The wall selection and the table check have one owner</h3>
   <p>The accuracy test's boundary reference carried its own wall-extremum
   search, a ternary refinement over the wall polygon, and imported the wall

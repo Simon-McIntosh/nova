@@ -717,22 +717,51 @@ def step_jacobian(
             jnp.stack(tuple(moments), axis=-1),
             operands.exterior,
         )
-        _, _, nodes = cached._location(point)
+        pitch = jnp.median(operands.geometry.pitch)
+        offsets = jnp.asarray(
+            (
+                (0.0, 0.0),
+                (1.0, 0.0),
+                (-1.0, 0.0),
+                (0.0, 1.0),
+                (0.0, -1.0),
+                (1.0, 1.0),
+                (1.0, -1.0),
+                (-1.0, 1.0),
+                (-1.0, -1.0),
+            )
+        )
+        stencil = jax.vmap(lambda p: cached._location(p)[2])(
+            point + 0.01 * pitch * offsets
+        ).reshape(-1)
+        slot = jnp.arange(stencil.size)
+        duplicate = (stencil[:, None] == stencil[None, :]) & (
+            slot[:, None] > slot[None, :]
+        )
+        first = ~jnp.any(duplicate, axis=1)
+        count = jnp.sum(first, dtype=jnp.int32)
+        nodes = stencil[jnp.nonzero(first, size=stencil.size, fill_value=0)[0]]
         jet_rows = operands.rows[nodes]
-        channels = jnp.transpose(jet_rows, (0, 3, 1, 2)).reshape(18, 3 * cells)
+        channels = jnp.transpose(jet_rows, (0, 3, 1, 2)).reshape(-1, 3 * cells)
 
-        def local_channel(index):
+        def local_channel(index, carried):
             direction = (
                 jnp.zeros_like(operands.exterior)
                 .at[nodes[index // 6], index % 6]
                 .set(1.0)
             )
-            return _normal_geometry_booking_tangent(
+            response = _normal_geometry_booking_tangent(
                 operands, moments, direction, support, profile, quadrature, booked
             )
+            return carried.at[index].set(jnp.stack(tuple(response), axis=-1))
 
-        local = jax.lax.map(local_channel, jnp.arange(18))
-        response = jnp.einsum("kco,ki->coi", jnp.stack(tuple(local), axis=-1), channels)
+        local = jax.lax.fori_loop(
+            0,
+            6 * count,
+            local_channel,
+            jnp.zeros((6 * stencil.size, cells, 3), dtype=matrix.dtype),
+        )
+        response = jnp.einsum("kco,ki->coi", local, channels)
         response = jnp.transpose(response, (1, 0, 2)).reshape(3 * cells, 3 * cells)
         matrix = matrix - response
     return matrix

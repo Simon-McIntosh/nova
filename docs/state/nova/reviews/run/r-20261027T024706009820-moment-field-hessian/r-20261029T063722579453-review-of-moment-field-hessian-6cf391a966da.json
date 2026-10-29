@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-10-29T06:51:03Z",
   "dispatched_at": "2026-10-29T06:40:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-moment-field-hessian-6cf391a966da",
+      "recorded_at": "2026-10-29T07:24:10.306840+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/biot/polygonanalytic.py",

@@ -83,7 +83,10 @@
   against 1e-4. Both converged states pass every clause. Those are the recorded
   defect reproduced against a reference the read does not decide, and they are
   left failing rather than relaxed: the budgets are the section's, and a test
-  that stopped asserting them would report a read that meets them.</p>
+  that stopped asserting them would report a read that meets them. Those three
+  clauses are carried to the next node: the repair is the booking's, which is
+  upstream of the read, and they stay failing here rather than being marked
+  expected-failure.</p>
   <p>The gate is controlled. The declared mutation averages the Bell fit across
   the three nodes of the triangle a point occupies instead of contracting each
   node's own jets, applied to an exported copy of this revision and run on the
@@ -146,17 +149,33 @@
   <h3 id="tracked-read-h200-figures">The two trial states</h3>
   <p>Each panel draws the analytic flux and the read's own cell field on one
   shared level set, with both null sets and the wall
-  (<code>nova.media.poloidal</code> through the repository's read renderer).</p>
+  (<code>nova.media.poloidal</code> through the repository's read renderer).
+  The analytic family is drawn solid and dark beneath, the cell family dashed in
+  the feature colour above it, on the same level values, so a level a family
+  misses is a real miss rather than a shifted comparison. Over a whole poloidal
+  cross-section a state's two null sets sit a fraction of a millimetre apart -
+  two or three pixels - and merge into one mark, so each pair is repeated in a
+  window beside the plasma, magnified to three times the separation and titled
+  with that separation. In the windows the field's null is the large dark
+  marker and the read's the small feature-coloured one, told apart by style and
+  by size rather than by position. The dotted circle marks the normal-form
+  radius quoted on the diverted panel, the radius over which its saddle form is
+  carried.</p>
   <figure id="tracked-read-h200-figure-limited">
     <img src="/nova/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg"
       alt="limited trial state: analytic and read flux contours with both null sets">
-    <figcaption>Limited trial state. Dark contours are the analytic flux, the
-    feature colour the read's cell field on the same levels; larger nulls are
-    analytic, smaller the read's.</figcaption>
+    <figcaption>Limited trial state. Solid dark contours are the analytic flux,
+    dashed feature-coloured contours the read's cell field on the same levels;
+    in the window the large dark marker is the analytic null and the small
+    feature-coloured one the read's, 4.12 mm apart - the error the accuracy
+    table records for this state's axis against a 2.00e-3 m budget.</figcaption>
   </figure>
   <figure id="tracked-read-h200-figure-diverted">
     <img src="/nova/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg"
       alt="diverted trial state: analytic and read flux contours with both null sets">
-    <figcaption>Diverted trial state, same vocabulary.</figcaption>
+    <figcaption>Diverted trial state, same vocabulary. The two windows carry the
+    state's two null pairs: the axes agree to 0.19 mm, well inside the
+    6.81e-4 m budget, while the X-point pair is 0.88 mm apart against that same
+    budget - the miss the accuracy table records for this state.</figcaption>
   </figure>
 </section>

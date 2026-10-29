@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-29T20:52:59.706Z",
+  "dispatched_at": "2026-10-29T20:44:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "id": "f6c011f37bd",
+      "line": 107,
+      "severity": "non-blocking",
+      "text": "the paragraph attributes 21,359 kernel events per call and 36.83 ms of device time (and at :111 82.07 ms with 20.5 ms per slice, and at :110 165 events and 0.27 ms) to 'the twelve largest kernels', but those are the STEADY line's ALL-kernel sums (rebuilding_events 64077/3 = 21,359, rebuilding_ns 36.83 ms, carried 495/3 = 165 events and 0.27 ms, batch4 82.07 ms in logs/profile_kernels.log), whereas the twelve printed SINGLE_KERNEL / CARRIED_KERNEL / BATCH_KERNEL rows sum to 18,516 events and 31.3 ms, 58 events and 0.1 ms, and 19,587 events and 44.0 ms, so a reader summing the tabulated twelve rows gets different numbers than the sentence states."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh",
+      "id": "f522ce12adf",
+      "line": 77,
+      "severity": "non-blocking",
+      "text": "the new '# command:' line emits SELECT unquoted, so the line it labels as the invocation a reader could re-run is not re-runnable: bash parses 'SELECT=limited and boundary or limited and read <script>' as running the command 'and' (measured: 'bash: line 1: and: command not found', EXIT=127). The progress the commit claims is real for WT/LOG but SELECT needs quoting (the '# exec:' line at :78 does carry it quoted)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/manifest.md",
+      "id": "f879174fa8a",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "test_logs and artifacts omit logs/negative_oracle2.log, the only control run at the reviewed head bc50440cb (revision header on its line 1, EXIT=1 at line 55: head 6 passed exit 0, mutant 3 failed exit 1), which is the run that exercises the changed run_boundary_mutant.sh header and default SELECT; the manifest's negative_control_log still names negative_oracle.log from an earlier revision, and the manifest (mtime 21:09) predates negative_oracle2.log (21:28), so the head's control is unrecorded for promotion's receipt."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal (plan section s2, decision read-bound-per-slice) is the 0.2 ms per-slice bound at 16+ slices on an H200 at the diverted 550-cell state with the batch-1 wall beside it and a stage attribution; the four gained commits 087017e8a..bc50440cb correct the profiler attribution paragraph (048ec37c7), trace the carried read beside the rebuilding one (9e362216f at scripts/prototypes/tracked_read_batch/profile_kernels.py), and make the mutant arm record a re-runnable command header (e6e3087ca, bc50440cb), answering the prior review's blocking finding without changing the unmet 0.2 ms verdict.\nVERDICT done_when: the done_when's launch-and-device clause is asserted from jax.profiler.trace rather than HLO text; the landed paragraph's figures reconcile with logs/profile_kernels.log (STEADY: rebuilding 21,359 events/call and 36.83 ms, carried 165 events/call and 0.27 ms, batch4 82.07 ms) and the batch-1 trace failure (kernels=0 after the XSpace 2GB limit) is stated, so the numbers are recorded rather than claimed.\nVERDICT write_paths: the source manifest grants scripts/prototypes/tracked_read_batch, tests/ and the fragment; the four commits touch only docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html, scripts/prototypes/tracked_read_batch/profile_kernels.py and scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh, all inside those grants and inside the three paths the review goal names.\nVERDICT manifest: read; status complete, baseline_suite 6d2652aa0 (10 error ids) and after_suite 60c790316 (2 failure ids) both readable, negative_control_log negative_oracle.log, and test_logs listing six logs; it does not record logs/negative_oracle2.log, the only control trace at the reviewed head, so its evidence section lags the commits it describes.\nVERDICT diff: read commit by commit against 087017e8a; 048ec37c7 rewrites the cross-state sentence (grep 'comparison across states' returns 0 at head and 1 at 048ec37c7^), 9e362216f adds a carried-read arm to profile_kernels.py via support_read.tracking_of and emits a STEADY summary, e6e3087ca renames the shell default SELECT, and bc50440cb moves the description above the recorded command line.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:104-121 now states the 1.2 ms carried read and the 54.6 ms batched read are both at the diverted 550-cell state and attributes the gap to batching, resolving the prior blocking finding, while the 0.2 ms bound stays honestly reported unmet.\nSCORE evidence: 15\nJUSTIFICATION evidence: the paragraph's figures reconcile with logs/profile_kernels.log STEADY row (21,359 events/call, 36.83 ms, 0.27 ms, 82.07 ms), but the 'twelve largest kernels' qualifier at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:107 contradicts the log's own top-twelve sums (18,516 events / 31.3 ms) and the head's control log logs/negative_oracle2.log is not recorded in the manifest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 087017e8a..bc50440cb touches only the three files the review goal names, each inside the source manifest's scripts/prototypes/tracked_read_batch, tests/ and fragment grants, with no production module and no plan label, run id or ticket reference in any comment.\nSCORE durability: 12\nJUSTIFICATION durability: the four commits add no test assertion (scripts/prototypes/tracked_read_batch/profile_kernels.py adds only emit arms and run_boundary_mutant.sh edits a log header), so the corrected fragment sentence is guarded only by the manifest's grep note at manifest.md:45 and the carried-arm reading by no test at all, though the pre-existing parity and boundary-oracle tests still refuse under the mutant at logs/negative_oracle2.log.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/tracked_read_batch/profile_kernels.py:132-167 follows the existing configure_dtypes-before-jax and emit-token idiom, and the comments explain the mechanism ('the carried read, which is the one the 1.2 ms wall belongs to') with no forbidden naming, though run_boundary_mutant.sh:77's unquoted SELECT is a craft blemish.\nSCORE reuse: 14\nJUSTIFICATION reuse: the increment's carried arm imports support_read.tracking_of and measure.batched/tiled rather than re-implementing them and adds no new def or class, so it forks nothing, though the pre-existing emit copy at scripts/prototypes/tracked_read_batch/profile_kernels.py:36 that the prior review named still stands in this file.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:107 non-blocking: the paragraph attributes 21,359 kernel events per call and 36.83 ms (and at :111 82.07 ms with 20.5 ms/slice, and at :110 165 events and 0.27 ms) to 'the twelve largest kernels', but those are the STEADY line's all-kernel sums while the twelve printed SINGLE_KERNEL/CARRIED_KERNEL/BATCH_KERNEL rows sum to 18,516 events and 31.3 ms, 58 events and 0.1 ms, and 19,587 events and 44.0 ms, so the label does not match the quantity and a reader summing the tabulated twelve gets different numbers.\nFINDING scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh:77 non-blocking: the new '# command:' line emits SELECT unquoted, so the line labelled as the invocation a reader could re-run is not re-runnable -- 'bash: line 1: and: command not found' (EXIT=127) -- where the '# exec:' line at :78 already carries SELECT quoted.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/manifest.md:28 non-blocking: test_logs and artifacts omit logs/negative_oracle2.log, the only control run at reviewed head bc50440cb that exercises the changed run_boundary_mutant.sh, because the manifest was written before that run.\n",
+  "review_run_id": "r-20261029T204257491482-review-of-tracked-read-batch-bc50440cb613",
+  "reviewed_base_sha": "087017e8aaa1805e57916542c54a028beeeac9ff",
+  "reviewed_head_sha": "bc50440cb6135565cce93a9516bd34b909108dbc",
+  "reviewed_run_id": "r-20261029T090616166280-tracked-read-batch",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T20:55:52.778189+00:00",
+  "total": 95
+}

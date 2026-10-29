@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="614">
+<meta name="plan-version" content="615">
 <meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
@@ -2171,6 +2171,9 @@ oracle _reference_moments already owns.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261029T064111989340-review-of-moment-field-hessian-6cf391a966da-figure" data-who="reckon-build" data-when="2026-10-29T06:50:16.382Z">
     <div class="r-comment-body"><p>read-only review, no code changed; figure review for r-20261027T024706009820-moment-field-hessian stores a parsed figure rubric record (6/6 items) anchored to base f1e09f09 and head 6cf391a966, with 2 non-blocking findings and 0 blocking</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T024706009820-moment-field-hessian" data-who="reckon-build" data-when="2026-10-29T07:23:12Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/moment-field-hessian.html#moment-field-hessian-landing — blocked: closed-form H200 compile ratio 1.3580844 (127.891468/94.170484 s) exceeds 1.10, point-jet expression bound adds a visible failure at 31595/22000 and exact-corner Hessian fails (8/9); archived-base primal bytes pass 9/9 with scratch mutation refusal; both axes miss original 1e-6 m direct limit (1.049720e-6 and 1.652340e-6 m) but meet later 2e-6 m restatement, with 6.026463e-7 m mutual difference and 0 m cold Bell floor. Do not promote this source candidate.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

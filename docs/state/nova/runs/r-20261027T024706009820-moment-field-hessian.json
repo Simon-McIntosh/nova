@@ -1,0 +1,3177 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 8,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "f1e09f09d02a077025f618549fc38b82f1ab9574",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/brief.txt",
+    "sha256": "ad8ea141bef247e3a605692f33e7c98f501e4fb6eaae3a423c8b47f384baf1b6"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 144492672,
+      "cached_input_tokens_cumulative": 144492672,
+      "input_tokens": 146233078,
+      "input_tokens_cumulative": 146233078,
+      "output_tokens": 309487,
+      "output_tokens_cumulative": 309487,
+      "reasoning_output_tokens": 130403,
+      "reasoning_output_tokens_cumulative": 130403
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 639,
+    "files": 8,
+    "removed": 20
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "tangent",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "__init__",
+        "path": "nova/biot/polygonanalytic.py"
+      },
+      "window_line": 3711
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 77,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/analyse.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_schema_payload",
+        "path": "tests/imas/test_diiid_dataset_recheck.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_mast_frame_exposes_exact_shared_helper_surface",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/moment_hessian/certificate_row.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "measure_direct",
+        "path": "scripts/prototypes/moment_hessian/trial_direct.py"
+      },
+      "window_line": 105
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "measure",
+        "path": "scripts/prototypes/moment_hessian/trial_probe.py"
+      },
+      "window_line": 59
+    }
+  ],
+  "commit_list_shortfall": {
+    "declared": 36,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261027T024706009820-moment-field-hessian' has a passing gate presenting 8 commit(s) of the 36 its manifest declares; missing: 04ce60c4cde9ac5003d59624b1b2068412bebf19, 06117e2c00dfdd9b83c7cac657f3db2509fd8c23, 0694e3fb4a85619e63fad10c531be3052bbdb1a8, 1280fd507c31a5e92e4e06b90aa8cb5301458a44, 14b6cb85699d3c2f7513e16fa6190b6c988e6eaf, 3edd40cda9e3b46bc8b6196ee556287a00beb8f3, 4094196bac46751c13843ed4b6f51f2bc5966bda, 432242abb38ba89c2dbc408d435a404f68e0064d, 49004249986b9a79ce8bfc5d3150de8e033869f2, 4ffa376f28e2a6c644a671532ff9231e20f71c66, 508245ef4e7d6167974b9b46b63947f27d852223, 5987f6b4ad8a6f771d8cfdab64f317d3d3385ec9, 5b839a789111fc4c79632ca770e3315bca47e5d4, 64eeadb011b664ef6c16cd9a13ae1014bc066736, 704e3cc18db1157cdd4a81036984a0226995e7c2, 8f0d53f37aed8df7ab4c3004e341ecf2a371c0d8, a45df408300afb066f422d2d64776c0b74b6dd26, a7e9a9a507882badf1b05b709d8e155a281326d9, ab6c5503d0194784b019ff5f45f50d01fefd3b66, be9716f98b936140252cc0c81e0676e3a15e66bc, cd14841821f09fecfe2280eb0e1a8367748d65d8, d365dfca90db13c41da39b1ec3d9fe85a57e7dfe, d51b9f7a58d82a16cf339502cf13cbc8e72e25f8, d66304d8017a1ea3ab7cebe9a4cb4cd648b07175, e0357e614418d603a9334c094388eea4b7fb4125, ee666bd837e2cb8e934f6d45307b537dd6af14ff, fc4804071f660e2867e29f325f7328d0348f36e3, fff2e866c05dbcfa23e20f13580562faf56c6aa9. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "04ce60c4cde9ac5003d59624b1b2068412bebf19",
+      "06117e2c00dfdd9b83c7cac657f3db2509fd8c23",
+      "0694e3fb4a85619e63fad10c531be3052bbdb1a8",
+      "1280fd507c31a5e92e4e06b90aa8cb5301458a44",
+      "14b6cb85699d3c2f7513e16fa6190b6c988e6eaf",
+      "3edd40cda9e3b46bc8b6196ee556287a00beb8f3",
+      "4094196bac46751c13843ed4b6f51f2bc5966bda",
+      "432242abb38ba89c2dbc408d435a404f68e0064d",
+      "49004249986b9a79ce8bfc5d3150de8e033869f2",
+      "4ffa376f28e2a6c644a671532ff9231e20f71c66",
+      "508245ef4e7d6167974b9b46b63947f27d852223",
+      "5987f6b4ad8a6f771d8cfdab64f317d3d3385ec9",
+      "5b839a789111fc4c79632ca770e3315bca47e5d4",
+      "64eeadb011b664ef6c16cd9a13ae1014bc066736",
+      "704e3cc18db1157cdd4a81036984a0226995e7c2",
+      "8f0d53f37aed8df7ab4c3004e341ecf2a371c0d8",
+      "a45df408300afb066f422d2d64776c0b74b6dd26",
+      "a7e9a9a507882badf1b05b709d8e155a281326d9",
+      "ab6c5503d0194784b019ff5f45f50d01fefd3b66",
+      "be9716f98b936140252cc0c81e0676e3a15e66bc",
+      "cd14841821f09fecfe2280eb0e1a8367748d65d8",
+      "d365dfca90db13c41da39b1ec3d9fe85a57e7dfe",
+      "d51b9f7a58d82a16cf339502cf13cbc8e72e25f8",
+      "d66304d8017a1ea3ab7cebe9a4cb4cd648b07175",
+      "e0357e614418d603a9334c094388eea4b7fb4125",
+      "ee666bd837e2cb8e934f6d45307b537dd6af14ff",
+      "fc4804071f660e2867e29f325f7328d0348f36e3",
+      "fff2e866c05dbcfa23e20f13580562faf56c6aa9"
+    ],
+    "presented": 8
+  },
+  "commit_resolution": null,
+  "commits": [
+    "0c892343a74137d63ad417e20a7c1355000ee1ff",
+    "5e796489d06194fb7a8b6cc58709b8521b787586",
+    "db3661b1cb8179ff4f201f33bc983187bc25f37a",
+    "cd6f8624a3aa227111f0cf6a8fe8e02a61b2d0b3",
+    "50e0af6f2db336f3def18f7ebe4ceb270147c9db",
+    "c26b9cd37d9d9decaa759d9534c6cd234fdd1f88",
+    "1a38987925083a12fc9b7a4cd92508eae516f34d",
+    "6cf391a966da53cb58a46c71796db4cdda272bcf"
+  ],
+  "completed_at": "2026-10-29T07:23:12Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-27T02:56:48Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_moment_field_hessian.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/head-hessian.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-27T03:49:11.733459+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-27T02:49:10Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-11-02T20:41:14Z",
+    "seconds_until_reset": 582723,
+    "state": "quiet",
+    "utilisation_pct": 20.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-27T02:49:10Z",
+    "read_at": "2026-10-27T02:49:11Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 20.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-29T07:23:12Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-29T07:23:12Z",
+        "resets_at": 1793774241,
+        "used_percent": 2.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md",
+  "member": "disposable-r-20261027T024706009820-moment-field-hessian",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_moment_field_hessian.py::test_named_source_cell_hessians[integration-212]",
+      "tests/test_moment_field_hessian.py::test_named_source_cell_hessians[integration-234]"
+    ],
+    "baseline_failure_ids": [
+      "tests/biot/test_edge_term_tangents.py::test_near_edge_tangent_meets_reference",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[channel_split]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[flux_and_moment_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[flux_line_moments]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_and_moment_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_line_moments]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[second_residual]",
+      "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[flux_and_moment_terms]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_compiles_within_three_primals[finite_part]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[graded_residual]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[regularised]",
+      "tests/biot/test_vertex_term_tangents.py::test_near_corner_radial_tangent_meets_reference",
+      "tests/biot/test_vertex_term_tangents.py::test_near_corner_reference_is_the_exact_integral",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[against_first_arsinh]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[arsinh_terms]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[flux_moment_residuals]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[horizontal_flux_line_moments]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[vertex]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[against_first_arsinh]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[arsinh_terms]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[flux_moment_residuals]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[horizontal_flux_line_moments]",
+      "tests/test_biotpolygonmoments.py::test_flux_moment_expansion_point_translation_identity",
+      "tests/test_biottiledbackend.py::test_cancellation_limited_section_matches_the_extended_precision_value",
+      "tests/test_biottiledbackend.py::test_the_traced_closed_form_matches_numpy_and_independent_quadrature",
+      "tests/test_equilibrium_forward_reference.py::test_couplings_and_current_vectors_share_geometric_expansion_centres",
+      "tests/test_equilibrium_forward_reference.py::test_every_conductor_the_entry_declares_is_placed",
+      "tests/test_equilibrium_forward_reference.py::test_hex_operator_carries_the_authored_cell_geometry",
+      "tests/test_equilibrium_forward_reference.py::test_no_current_appears_outside_the_declared_support",
+      "tests/test_equilibrium_forward_reference.py::test_the_conservation_receipt_qualifies_the_equilibrium",
+      "tests/test_equilibrium_forward_reference.py::test_the_differenced_field_agrees_with_the_analytic_cell_field",
+      "tests/test_equilibrium_forward_reference.py::test_the_free_boundary_map_does_not_contract_at_the_equilibrium",
+      "tests/test_equilibrium_forward_reference.py::test_the_observation_operator_matches_an_independent_quadrature",
+      "tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+      "tests/test_equilibrium_forward_reference.py::test_the_passive_structure_cannot_carry_the_reproduction_gap",
+      "tests/test_equilibrium_forward_reference.py::test_the_plasma_mesh_is_hexagonal_and_wall_trimmed",
+      "tests/test_equilibrium_forward_reference.py::test_the_published_equilibrium_is_the_scored_post_map_state",
+      "tests/test_equilibrium_forward_reference.py::test_the_published_solve_runs_on_the_production_mesh",
+      "tests/test_equilibrium_forward_reference.py::test_the_receipt_is_read_where_the_source_is_declared",
+      "tests/test_equilibrium_forward_reference.py::test_the_receipt_layer_reads_the_solve_without_changing_it",
+      "tests/test_equilibrium_forward_reference.py::test_the_receipt_records_an_absolute_static_unrotated_source",
+      "tests/test_equilibrium_forward_reference.py::test_the_relaxed_route_walks_down_the_vertical_instability",
+      "tests/test_equilibrium_forward_reference.py::test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget",
+      "tests/test_equilibrium_forward_reference.py::test_the_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_axis_matches_the_stored_axis",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_boundary_matches_the_stored_boundary",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_flux_map_matches_the_stored_map",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_plasma_current_matches_the_stored_current",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_shape_moments_match_the_stored_flux_map",
+      "tests/test_equilibrium_forward_reference.py::test_the_stabilisation_pair_carries_the_turns_the_entry_declares"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_moment_field_hessian.py::test_named_source_cell_hessians[integration-212]",
+      "tests/test_moment_field_hessian.py::test_named_source_cell_hessians[integration-234]"
+    ],
+    "declaration": "revert only the repaired term in a scratch copy; the Hessian test fails again at the two named source-cell/target pairs",
+    "head_failure_ids": [
+      "tests/biot/test_edge_term_tangents.py::test_near_edge_tangent_meets_reference",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[flux_and_moment_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[flux_line_moments]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_and_moment_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_line_moments]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[second_residual]",
+      "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[flux_and_moment_terms]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_compiles_within_three_primals[finite_part]",
+      "tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[graded_residual]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[regularised]",
+      "tests/biot/test_vertex_term_tangents.py::test_near_corner_radial_tangent_meets_reference",
+      "tests/biot/test_vertex_term_tangents.py::test_near_corner_reference_is_the_exact_integral",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[against_first_arsinh]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[arsinh_terms]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[flux_moment_residuals]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[horizontal_flux_line_moments]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_compiles_within_three_primals[vertex]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[against_first_arsinh]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[arsinh_terms]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[flux_moment_residuals]",
+      "tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp[horizontal_flux_line_moments]",
+      "tests/test_biotpolygonmoments.py::test_flux_moment_expansion_point_translation_identity",
+      "tests/test_biottiledbackend.py::test_cancellation_limited_section_matches_the_extended_precision_value",
+      "tests/test_biottiledbackend.py::test_the_traced_closed_form_matches_numpy_and_independent_quadrature",
+      "tests/test_equilibrium_forward_reference.py::test_couplings_and_current_vectors_share_geometric_expansion_centres",
+      "tests/test_equilibrium_forward_reference.py::test_every_conductor_the_entry_declares_is_placed",
+      "tests/test_equilibrium_forward_reference.py::test_hex_operator_carries_the_authored_cell_geometry",
+      "tests/test_equilibrium_forward_reference.py::test_no_current_appears_outside_the_declared_support",
+      "tests/test_equilibrium_forward_reference.py::test_the_conservation_receipt_qualifies_the_equilibrium",
+      "tests/test_equilibrium_forward_reference.py::test_the_differenced_field_agrees_with_the_analytic_cell_field",
+      "tests/test_equilibrium_forward_reference.py::test_the_free_boundary_map_does_not_contract_at_the_equilibrium",
+      "tests/test_equilibrium_forward_reference.py::test_the_observation_operator_matches_an_independent_quadrature",
+      "tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent",
+      "tests/test_equilibrium_forward_reference.py::test_the_passive_structure_cannot_carry_the_reproduction_gap",
+      "tests/test_equilibrium_forward_reference.py::test_the_plasma_mesh_is_hexagonal_and_wall_trimmed",
+      "tests/test_equilibrium_forward_reference.py::test_the_published_equilibrium_is_the_scored_post_map_state",
+      "tests/test_equilibrium_forward_reference.py::test_the_published_solve_runs_on_the_production_mesh",
+      "tests/test_equilibrium_forward_reference.py::test_the_receipt_is_read_where_the_source_is_declared",
+      "tests/test_equilibrium_forward_reference.py::test_the_receipt_layer_reads_the_solve_without_changing_it",
+      "tests/test_equilibrium_forward_reference.py::test_the_receipt_records_an_absolute_static_unrotated_source",
+      "tests/test_equilibrium_forward_reference.py::test_the_relaxed_route_walks_down_the_vertical_instability",
+      "tests/test_equilibrium_forward_reference.py::test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget",
+      "tests/test_equilibrium_forward_reference.py::test_the_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_axis_matches_the_stored_axis",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_boundary_matches_the_stored_boundary",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_flux_map_matches_the_stored_map",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_plasma_current_matches_the_stored_current",
+      "tests/test_equilibrium_forward_reference.py::test_the_solved_shape_moments_match_the_stored_flux_map",
+      "tests/test_equilibrium_forward_reference.py::test_the_stabilisation_pair_carries_the_turns_the_entry_declares"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/negative-control.log",
+    "test_paths": [
+      "tests/test_moment_field_hessian.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "moment-field-hessian",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct27/moment-field-hessian.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/brief.txt",
+    "brief_sha256": "ad8ea141bef247e3a605692f33e7c98f501e4fb6eaae3a423c8b47f384baf1b6",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 407,
+          "cached_input_tokens": 224866,
+          "input_tokens": 225275,
+          "output_tokens": 28,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 225303,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Tests in tests/biot, tests/test_moment_field_hessian.py and every importer of a changed module pass with no added failure, both suite arms as one sirius job",
+    "estimated_hours": null,
+    "goal": "Repair the second derivative of the analytic polygon moment field so nodal Hessians match finite differences near horizontal source edges",
+    "id": "moment-field-hessian",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-27T02:49:10Z",
+      "read_at": "2026-10-27T02:49:11Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 20.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md",
+    "negative_control": "revert only the repaired term in a scratch copy; the Hessian test fails again at the two named source-cell/target pairs",
+    "plan": "converged-forward-solve",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/polygonanalytic.py",
+      "scripts/prototypes/read_route/jets.py",
+      "tests/test_moment_field_hessian.py",
+      "scripts/prototypes/moment_hessian",
+      "docs/evidence/fragments/converged-forward-solve/moment-field-hessian.html",
+      "docs/figures/converged-forward-solve/moment-field-hessian"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.03693364218915344,
+      "elapsed_hours": 6.204851887777778,
+      "group": "codex-sub",
+      "limited_by": null,
+      "observed_at": "2026-10-27T02:53:31+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 3.69% elapsed is below the 5% floor",
+      "remaining_budget": 0.8,
+      "remaining_windows": null,
+      "resets_at": "2026-11-02T20:41:14Z",
+      "state": "observed",
+      "utilisation": 0.2,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.10400000000000002,
+      "decided_by": "window",
+      "margin": 0.6335000000000001,
+      "name": "moment-field-hessian",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.2
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.466796,
+        "observed_at": "2026-10-27T02:53:31+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-02T20:41:14Z",
+        "state": "observed",
+        "utilisation": 0.2,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "moment-field-hessian",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-27T02:53:31.466796+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead 2026-10-26: use codex lane for long running jobs; H200 550 solve plus two suite arms",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.459,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 15667.385,
+      "context-estimate": 758.519,
+      "records": 95226.112,
+      "verdict-inputs": 403.321
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6cf391a966da53cb58a46c71796db4cdda272bcf",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f1e09f09d02a077025f618549fc38b82f1ab9574",
+    "reviewed_head_sha": "6cf391a966da53cb58a46c71796db4cdda272bcf",
+    "scores": {
+      "durability": 12,
+      "evidence": 13,
+      "fit": 17,
+      "goal_fidelity": 11,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261027T024706009820-moment-field-hessian",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a17b4e-c4b3-77a3-b4d5-5561461f0f69",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 9,
+  "throughput": {
+    "cumulative_cached_input_tokens": 144492672,
+    "cumulative_input_tokens": 146233078,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 439890,
+    "generation_seconds": 185532.257,
+    "machine_seconds": 2936.591,
+    "tokens_per_second": 2.37
+  },
+  "time_budget": "60m",
+  "tool_steps": 336.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 188784,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 8,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-29T07:23:14Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-29T06:52:31Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 50671027,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/codex-home/cache"
+      },
+      {
+        "bytes": 28835209,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261027T024706009820-moment-field-hessian",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2948,
+    "worker_pid": 566023
+  },
+  "worker_seconds": 188468,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

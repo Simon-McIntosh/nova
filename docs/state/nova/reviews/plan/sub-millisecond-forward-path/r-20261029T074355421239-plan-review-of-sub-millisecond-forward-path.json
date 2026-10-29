@@ -25,7 +25,24 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 24,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the record lands with node tracked-read-h200, now in re-review (r-20261029T075544267875); its fragment reaches main at that landing, before any node is dispatched against this paragraph",
+      "when": "2026-10-29T08:01:09.440126+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the record lands with node tracked-read-h200, now in re-review (r-20261029T075544267875); its fragment reaches main at that landing, before any node is dispatched against this paragraph",
+      "when": "2026-10-29T08:01:09.440126+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261029T074355421239-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261029T074355421239-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "07d6509bcb092d23a15b73374c6e07f6387b0423",
   "rubric": "content",

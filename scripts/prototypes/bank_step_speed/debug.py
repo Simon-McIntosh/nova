@@ -194,6 +194,35 @@ def main():
             )
 
         _, reference_root_rate = jax.jvp(roots_fn, form_inputs, form_changes)
+        root_values = roots_fn(*form_inputs)
+        _, _, _, _, hits = support_read._ray_intersection_rate(
+            vertices, count, form, form_changes
+        )
+
+        def sorted_parameters(position, roots):
+            bound = 2 * jnp.max(jnp.linalg.norm(vertices - position, axis=-1))
+            return jnp.sort(
+                jnp.clip(jnp.where(hits, roots, jnp.inf).reshape(4, -1), 0, bound),
+                axis=-1,
+            )
+
+        _, reference_sorted_rate = jax.jvp(
+            sorted_parameters,
+            (form.position, root_values),
+            (form_rate.position, reference_root_rate),
+        )
+        bound = 2 * jnp.max(jnp.linalg.norm(vertices - form.position, axis=-1))
+        candidates = jnp.where(hits, root_values, jnp.inf).reshape(4, -1)
+        order = jnp.argsort(jnp.clip(candidates, 0, bound), axis=-1)
+        sorted_value = jnp.take_along_axis(
+            jnp.clip(candidates, 0, bound), order, axis=-1
+        )
+        algebraic_sorted_rate = jnp.take_along_axis(
+            jnp.where(hits, ray_rate, 0.0).reshape(4, -1), order, axis=-1
+        )
+        algebraic_sorted_rate = jnp.where(
+            sorted_value < bound, algebraic_sorted_rate, 0.0
+        )
         new_velocity = support_read._normal_ring_velocity(
             vertices,
             count,
@@ -216,6 +245,7 @@ def main():
             (form_rate.curvature, algebraic_rate[2]),
             (form_rate.cubic, algebraic_rate[3]),
             (reference_root_rate, ray_rate),
+            (reference_sorted_rate, algebraic_sorted_rate),
             (velocity, new_velocity),
             (jnp.concatenate(tuple(old)), jnp.concatenate(tuple(new))),
             cell,
@@ -236,6 +266,7 @@ def main():
             "curvature_rate",
             "cubic_rate",
             "root_rate",
+            "sorted_root_rate",
             "ring_velocity",
             "booking_rate",
         ),
@@ -249,7 +280,7 @@ def main():
             reference_norm=float(jnp.linalg.norm(pair[0])),
             actual_norm=float(jnp.linalg.norm(pair[1])),
         )
-    old_velocity, new_velocity = (np.asarray(value) for value in pairs[10])
+    old_velocity, new_velocity = (np.asarray(value) for value in pairs[11])
     largest = np.unravel_index(
         np.argmax(np.abs(new_velocity - old_velocity)), old_velocity.shape
     )

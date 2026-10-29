@@ -28,6 +28,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import fixed_points, support_read
+from scripts.prototypes.tracked_read_batch import reference
 from scripts.prototypes.tracked_read_batch.reference import analytic_boundary
 from scripts.prototypes.tracked_read_batch.reference import psi as analytic_psi
 
@@ -87,11 +88,7 @@ def _wall_flux_range(case, per_segment=64):
     end = np.roll(wall, -1, axis=0)
     fraction = np.linspace(0.0, 1.0, per_segment, endpoint=False)[None, :, None]
     sample = (start[:, None, :] + fraction * (end - start)[:, None, :]).reshape(-1, 2)
-    values = np.asarray(
-        jax.vmap(lambda point: case["analytic"].evaluate(point).value)(
-            jnp.asarray(sample)
-        )
-    )
+    values = reference.wall_flux(case["analytic"], sample)
     return float(values.max()), float(values.min())
 
 

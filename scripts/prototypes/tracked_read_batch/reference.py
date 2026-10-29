@@ -23,6 +23,14 @@ def psi(analytic, point):
     return float(np.asarray(analytic.evaluate(jnp.asarray(point)).value))
 
 
+def wall_flux(analytic, wall):
+    """The analytic flux at every wall vertex, in the wall's own order."""
+    wall = np.asarray(wall, dtype=float).reshape(-1, 2)
+    return np.asarray(
+        jax.vmap(lambda point: analytic.evaluate(point).value)(jnp.asarray(wall))
+    )
+
+
 def analytic_boundary(case, references):
     """The boundary point and its flux, from the analytic field alone.
 
@@ -37,9 +45,7 @@ def analytic_boundary(case, references):
         return references[1], psi(analytic, references[1])
 
     wall = np.asarray(case["geometry"].wall_points, dtype=float).reshape(-1, 2)
-    values = np.asarray(
-        jax.vmap(lambda point: analytic.evaluate(point).value)(jnp.asarray(wall))
-    )
+    values = wall_flux(analytic, wall)
     x_coordinate, z_coordinate, flux, _ = select.host_wall_flux(
         wall[:, 0], wall[:, 1], values, 1
     )

@@ -28,7 +28,11 @@ import jax.numpy as jnp
 
 from nova.equilibrium import support_read
 from scripts.prototypes.tracked_read.measure import build_kind, cache_for
-from scripts.prototypes.tracked_read_batch.measure import batched, tiled
+from scripts.prototypes.tracked_read_batch.measure import (
+    batched,
+    lowered_counts,
+    tiled,
+)
 
 assert jax.config.jax_enable_x64 is True
 
@@ -38,15 +42,8 @@ def emit(token, **row):
 
 
 def op_classes(program, arguments):
-    """HLO op classes of the lowered module, counted from its text."""
-    lines = program.lower(*arguments).as_text(dialect="hlo").splitlines()
-    return dict(
-        hlo_lines=len(lines),
-        fusion=sum(1 for line in lines if "fusion(" in line),
-        custom_call=sum(1 for line in lines if "custom-call(" in line),
-        while_loop=sum(1 for line in lines if line.strip().startswith("while")),
-        conditional=sum(1 for line in lines if line.strip().startswith("conditional")),
-    )
+    """Op classes of the lowered module, counted by the shared reader."""
+    return lowered_counts(program.lower(*arguments))
 
 
 def wall(program, arguments, repeats):
@@ -80,11 +77,15 @@ def main(argv):
     convention, policy = case["convention"], case["policy"]
     moments = case["states"]["converged"]
     roots = jnp.asarray(case["roots"])
-    emit("DEVICE", backend=jax.default_backend(), devices=[str(d) for d in jax.devices()])
+    emit(
+        "DEVICE", backend=jax.default_backend(), devices=[str(d) for d in jax.devices()]
+    )
 
     # The unbatched read, both ways: rebuilding the decision every call, and
     # carrying it with the conditional still in the program.
-    single = support_read.read(operands, cache, moments, roots, roots, convention, policy)
+    single = support_read.read(
+        operands, cache, moments, roots, roots, convention, policy
+    )
     jax.block_until_ready(single)
     program = jax.jit(
         lambda m: support_read.read(
@@ -92,16 +93,36 @@ def main(argv):
         )
     )
     low, high = wall(program, (moments,), args.repeats)
-    emit("SINGLE", variant="rebuild_every_call", per_call_ms=low, mean_ms=high, **op_classes(program, (moments,)))
+    emit(
+        "SINGLE",
+        variant="rebuild_every_call",
+        per_call_ms=low,
+        mean_ms=high,
+        **op_classes(program, (moments,)),
+    )
 
     track = support_read.tracking_of(single)
     carried = jax.jit(
         lambda m, t: support_read.read(
-            operands, cache, m, roots, roots, convention, policy, tracking=t, rebuild=False
+            operands,
+            cache,
+            m,
+            roots,
+            roots,
+            convention,
+            policy,
+            tracking=t,
+            rebuild=False,
         )
     )
     low, high = wall(carried, (moments, track), args.repeats)
-    emit("SINGLE", variant="carried", per_call_ms=low, mean_ms=high, **op_classes(carried, (moments, track)))
+    emit(
+        "SINGLE",
+        variant="carried",
+        per_call_ms=low,
+        mean_ms=high,
+        **op_classes(carried, (moments, track)),
+    )
 
     # The batched read: the same state stacked over the slice axis.
     for count in (1, 4, 16, 64):

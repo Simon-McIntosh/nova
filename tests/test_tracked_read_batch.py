@@ -57,36 +57,41 @@ def test_a_batch_read_equals_the_single_read_slice_by_slice():
     case, operands, cache = _built()
     convention, policy = case["convention"], case["policy"]
     seeds = jnp.asarray(case["roots"])
-    moments = case["states"]["converged"]
 
-    single = support_read.read(
-        operands, cache, moments, seeds, seeds, convention, policy
+    # Distinct states, one per lane: a batch that shared one lane's reading
+    # across the axis would agree with itself and disagree with the read each
+    # lane is standing in for, which one tiled state cannot show.
+    lanes = [case["states"]["converged"], case["states"]["trial"]]
+    assert len(lanes) == COUNT
+    stacked = tuple(
+        jnp.stack([lane[leaf] for lane in lanes]) for leaf in range(len(lanes[0]))
     )
-    stacked = tuple(tiled(moment, COUNT) for moment in moments)
     program = batch_program(operands, cache, convention, policy)
     batch = program(stacked, tiled(seeds, COUNT), tiled(seeds, COUNT), None)
     jax.block_until_ready(batch)
 
-    position = np.asarray(single.stationary.position)
-    for lane in range(COUNT):
+    for index, moments in enumerate(lanes):
+        single = support_read.read(
+            operands, cache, moments, seeds, seeds, convention, policy
+        )
         np.testing.assert_allclose(
-            np.asarray(batch.stationary.position)[lane],
-            position,
+            np.asarray(batch.stationary.position)[index],
+            np.asarray(single.stationary.position),
             rtol=0.0,
             atol=1e-12,
         )
         np.testing.assert_array_equal(
-            np.asarray(batch.stationary.status)[lane],
+            np.asarray(batch.stationary.status)[index],
             np.asarray(single.stationary.status),
         )
         np.testing.assert_allclose(
-            float(batch.reading.boundary_flux[lane]),
+            float(batch.reading.boundary_flux[index]),
             float(single.reading.boundary_flux),
             rtol=1e-12,
             atol=1e-12,
         )
         np.testing.assert_array_equal(
-            np.asarray(batch.cells)[lane], np.asarray(single.cells)
+            np.asarray(batch.cells)[index], np.asarray(single.cells)
         )
 
 

@@ -44,15 +44,27 @@ def emit(token, **row):
 
 
 def lowered_counts(program):
-    """Fusion and command lines of a compiled program, and its instruction count."""
-    text = program.as_text(dialect="hlo")
-    lines = text.splitlines()
-    launches = sum(
-        1
-        for line in lines
-        if "fusion(" in line or "custom-call(" in line or "call(" in line
-    )
-    return launches, sum(1 for line in lines if " = " in line)
+    """Op classes counted from a compiled program's HLO text.
+
+    These are text lines, not kernel launches: one fusion may issue several
+    kernels and one kernel may serve several lines. Anything that needs a
+    launch count needs a profiler, which is why the key names say op lines.
+    """
+    lines = program.as_text(dialect="hlo").splitlines()
+    return {
+        "op_lines": sum(
+            1
+            for line in lines
+            if "fusion(" in line or "custom-call(" in line or "call(" in line
+        ),
+        "hlo_instructions": sum(1 for line in lines if " = " in line),
+        "fusion": sum(1 for line in lines if "fusion(" in line),
+        "custom_call": sum(1 for line in lines if "custom-call(" in line),
+        "while_loop": sum(1 for line in lines if line.strip().startswith("while")),
+        "conditional": sum(
+            1 for line in lines if line.strip().startswith("conditional")
+        ),
+    }
 
 
 def batch_program(operands, cache, convention, policy, rebuild=None):
@@ -122,17 +134,15 @@ def measure(case, operands, cache, count, repeats):
 
     leaves = jax.tree_util.tree_leaves(result)
     on_device = all(isinstance(leaf, jax.Array) for leaf in leaves)
-    launches, instructions = lowered_counts(
-        program.lower(stacked, seeds, seeds, tracking)
-    )
+    counts = lowered_counts(program.lower(stacked, seeds, seeds, tracking))
     wall = min(walls)
     return {
         "batch": count,
         "per_call_ms": wall * 1e3,
         "per_slice_ms": wall * 1e3 / count,
-        "launches_per_call": launches,
-        "launches_per_slice": launches / count,
-        "hlo_instructions": instructions,
+        "op_lines_per_call": counts["op_lines"],
+        "op_lines_per_slice": counts["op_lines"] / count,
+        "hlo_instructions": counts["hlo_instructions"],
         "copy_bytes": 0,
         "result_on_device": bool(on_device),
         "rebuilt": False,

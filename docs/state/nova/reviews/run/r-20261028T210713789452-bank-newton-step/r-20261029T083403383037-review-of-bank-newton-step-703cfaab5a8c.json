@@ -11,6 +11,11 @@
   "call_sites": [],
   "completed_at": "2026-10-29T08:41:45Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bank-newton-converge",
+      "recorded_at": "2026-10-29T08:47:29.471565+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "bank-newton-converge",

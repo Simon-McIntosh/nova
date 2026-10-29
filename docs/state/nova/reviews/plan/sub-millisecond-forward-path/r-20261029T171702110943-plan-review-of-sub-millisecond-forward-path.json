@@ -33,7 +33,24 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 42,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "\u00a73 consumes the read's correctness, which landed with tracked-read (72717729a) and tracked-read-h200 (merge 8b6628142): the validity gate repair, the saddle branch and both converged-state accuracy rows. \u00a72's open clause is the batched per-slice wall, which \u00a73 does not consume, so a wait on s2 would hold \u00a73 on a deliverable it does not use",
+      "when": "2026-10-29T17:30:12.386578+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a73 consumes the read's correctness, which landed with tracked-read (72717729a) and tracked-read-h200 (merge 8b6628142): the validity gate repair, the saddle branch and both converged-state accuracy rows. \u00a72's open clause is the batched per-slice wall, which \u00a73 does not consume, so a wait on s2 would hold \u00a73 on a deliverable it does not use",
+      "when": "2026-10-29T17:30:12.386578+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261029T171702110943-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261029T171702110943-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "47cb5aca3b73d19d7fb9c60735d3b91f23aaa40a",
   "rubric": "content",

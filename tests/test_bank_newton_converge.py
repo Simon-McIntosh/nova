@@ -148,6 +148,7 @@ def test_dense_columns_and_random_vector_match_directional_tangent(monkeypatch):
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(900)
 def test_small_dense_matrix_matches_full_fresh_residual():
     from nova.equilibrium.solve_request import TopologyPolicy
     from tests.test_support_read import UnitDensity, _case
@@ -227,7 +228,7 @@ def test_small_dense_matrix_matches_full_fresh_residual():
     column = np.asarray(matrix[:, 0])
     old_column = np.asarray(frozen[:, 0])
     errors = []
-    for length in (3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7):
+    for length in (3e-4, 1e-4, 3e-5, 1e-5):
         positive = list(moments)
         negative = list(moments)
         positive[0] = positive[0].at[0].set(length)
@@ -238,7 +239,9 @@ def test_small_dense_matrix_matches_full_fresh_residual():
         observed = np.asarray((high - low) / (2 * length))
         scale = np.linalg.norm(observed)
         assert scale > 0
-        errors.append((float(np.linalg.norm(column - observed) / scale), length))
+        relative = float(np.linalg.norm(column - observed) / scale)
+        print(f"FRESH_COLUMN_STEP relative={relative:.9g} length={length:.9g}")
+        errors.append((relative, length))
     error, length = min(errors)
     print(f"FRESH_COLUMN relative={error:.9g} length={length:.9g}")
     assert error <= 1e-6

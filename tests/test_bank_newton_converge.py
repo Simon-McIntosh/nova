@@ -210,7 +210,7 @@ def test_small_dense_matrix_matches_full_fresh_residual():
     column = np.asarray(matrix[:, 0])
     old_column = np.asarray(frozen[:, 0])
     errors = []
-    for length in (1e-5, 3e-6, 1e-6, 3e-7, 1e-7, 3e-8):
+    for length in (3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6, 3e-7, 1e-7):
         positive = list(moments)
         negative = list(moments)
         positive[0] = positive[0].at[0].set(length)

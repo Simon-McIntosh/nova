@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Zero additions across both arms of both gates in this window. Pre-existing suite arm: logs/gate_tracked_read_base.log (revision a1f6782, baseline arm) reports '4 passed in 115.12s' EXIT=0 and logs/gate_tracked_read_head.log (revision 0adcf5d6c, after arm) reports '4 passed in 121.12s' EXIT=0. Accuracy arm, the one that exercises the changed test file: logs/accuracy_gate_15f6cfddf.log (base 15f6cfddf) and logs/accuracy_gate_ea870badc.log (after ea870badc) each report '3 failed, 8 passed' EXIT=1 with the identical ids test_stationary_points_against_the_analytic_newton[limited-trial], test_stationary_points_against_the_analytic_newton[diverted-trial] and test_boundary_flux_against_the_analytic_read[diverted-trial], so the delta adds none. The source manifest carries no baseline_suite/after_suite keys; both arms were derived from its test_logs entries, which are the same logs.",
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T08:38:20Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/tracked_read_h200/attribution_check.py",
+      "id": "f1bd1129306",
+      "line": 58,
+      "severity": "non-blocking",
+      "text": "the loop iterates whatever table_rows yields and returns 0 when it yields nothing, so a table whose rows are reformatted (the regex at :32 requires a literal `<tr><td>` with no whitespace between the tags) makes the integrity check a vacuous pass rather than a failure, because the check never asserts it examined a nonzero number of cells."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_h200/attribution_check.py",
+      "id": "fa92c8b2837",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "RELATIVE_TOLERANCE = 0.02 accepts a 2% disagreement between a quoted cell and its recorded value, about four times the band implied by the table's three-significant-figure quotes, so a cell that moved by up to 2% is still reported found while the table no longer states what the run produced."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_h200/attribution_check.py",
+      "id": "f9a66c839aa",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the script duplicates the fragment-table reconciliation mechanism owned by scripts/prototypes/carrier_identity_receipt/check_receipt_table.py:27 (same `<table>`..`</table>` extraction, same main(argv)->int exit-code contract) rather than extending it, and the repository's idiom for a reconciliation check that actually runs is the pytest form at tests/test_outboard_census_receipt_consistency.py:90 - a standalone script fires only when a reader runs it by hand."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200/manifest.md",
+      "id": "f4817034bbd",
+      "line": 14,
+      "severity": "non-blocking",
+      "text": "test_logs names gate_tracked_read_head.log and accuracy_gate_head.log but not logs/accuracy_gate_ea870badc.log, the four-state arm at the reviewed head's behavioural commit that produced both the rows file and the '3 failed, 8 passed' figure the fragment quotes, so the log needed to reconcile this delta is reachable only through artifacts."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "ea870badc adds the _record helper (tests/test_tracked_read_accuracy.py:116) and points NOVA_ACCURACY_ROWS at a truncated file (run_reference_gate.sh:37); 51564f4f4 adds attribution_check.py:1-85 and rewrites the fragment's provenance paragraph (:76-94); 3e7bc6c08 moves the rows echo below the command line (run_reference_gate.sh:35) so the command stays in the header window.",
+    "done_when": "logs/accuracy_gate_ea870badc.log records the four-state gate at ea870badc as \"3 failed, 8 passed in 432.50s\" EXIT=1 with the three declared trial ids, which is the measure; manifest.md:13, however, names tests/test_tracked_read.py as the gate, and that file does not import or exercise tests/test_tracked_read_accuracy.py, so the recorded gate line does not reach this delta.",
+    "goal": "the node goal is the sub-millisecond-forward-path \u00a72 follow-on (one cell rule, trial-state accuracy, the 0.2 ms H200 bound); this delta is the provenance repair the figure review demanded, and attribution_check.py re-run at 3e7bc6c08 reports 18 of 18 table cells found (exit 0) and 10 diverted cells missing (exit 1) against the pre-recording logs, so the previously claimed cells are now recorded ones.",
+    "manifest": "read; status complete, commits end at 3e7bc6c08, the acted line pins fadf13f8204 to 51564f4f4, every log names its device and revision and ends in a bare EXIT marker; the gap is that test_logs:14 omits logs/accuracy_gate_ea870badc.log and the record carries no baseline_suite/after_suite keys at all.",
+    "write_paths": "the declared paths cover scripts/prototypes/tracked_read_h200, tests/test_tracked_read_accuracy.py, docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html and the figure directories; git diff --name-only 15f6cfddf..3e7bc6c08 names exactly those four files and nothing else, so the diff is wholly inside scope."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the sub-millisecond-forward-path \u00a72 follow-on; this delta answers the blocking finding that two diverted trial cells had no run behind them, and scripts/prototypes/tracked_read_h200/attribution_check.py:54 now checks that claim: re-run at 3e7bc6c08 it reports all 18 table cells found and exits 0 against logs/accuracy_rows_ea870badc.jsonl, and 10 diverted cells missing and exits 1 against the pre-recording logs.\nVERDICT done_when: the measurable clause is the four-state accuracy gate; logs/accuracy_gate_ea870badc.log at the revised head's behavioural commit carries the device and revision in the traceback header window, records \"3 failed, 8 passed in 432.50s\" and ends EXIT=1 with the three declared trial ids, but manifest.md:13 names tests/test_tracked_read.py, which does not reach the file this delta changes.\nVERDICT write_paths: the source manifest declares scripts/prototypes/tracked_read_h200, tests/test_tracked_read_accuracy.py, docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html and the two figure directories; git diff --name-only 15f6cfddf..3e7bc6c08 names four files and every one of them is inside that set.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200/manifest.md; status is complete, commits end at 3e7bc6c08, the acted line answers fadf13f8204, but test_logs:14 omits logs/accuracy_gate_ea870badc.log and the file carries no baseline_suite or after_suite keys, so I derived both arms from test_logs instead.\nVERDICT diff: read all three gained commits against 15f6cfddf; ea870badc adds _record at tests/test_tracked_read_accuracy.py:116 and sets NOVA_ACCURACY_ROWS at scripts/prototypes/tracked_read_h200/run_reference_gate.sh:37, 51564f4f4 rewrites the fragment's provenance paragraph at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:76-94 and adds attribution_check.py:1-85, and 3e7bc6c08 moves one header echo line at run_reference_gate.sh:35.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: attribution_check.py:54 turns the previously claimed diverted cells into a checked claim, and at 3e7bc6c08 it reports 18 found / exit 0 on logs/accuracy_rows_ea870badc.jsonl and 10 missing / exit 1 on the pre-recording logs, which I reproduced.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/accuracy_gate_ea870badc.log carries its revision, device and command in the header and \"3 failed, 8 passed in 432.50s\" / EXIT=1 at its tail, and its rows file backs all 18 numeric cells of the table at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:44-64.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only 15f6cfddf..3e7bc6c08 names exactly four files, each inside the declared write paths, and no nova/ source and no figure changed.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_tracked_read_accuracy.py:116 _record is the mechanism the whole delta rests on, and nothing in tests/ or the suites invokes attribution_check.py, so removing it would leave the accuracy file reporting \"3 failed, 8 passed\" unchanged and the loss visible only to a hand-run script.\nSCORE fit: 16\nJUSTIFICATION fit: attribution_check.py:1-85 follows the prototype idiom and ruff reports no findings on it, and its names carry no plan, sprint or ticket label, though it omits the `from __future__ import annotations` and typed main that scripts/prototypes/carrier_identity_receipt/check_receipt_table.py:11-20 carries.\nSCORE reuse: 5\nJUSTIFICATION reuse: attribution_check.py:35 re-implements without extending the fragment-table-versus-record reconciliation that scripts/prototypes/carrier_identity_receipt/check_receipt_table.py:27 already owns, with the same `<table>`..`</table>` extraction and the same main(argv)->int exit-code contract.\nFINDING scripts/prototypes/tracked_read_h200/attribution_check.py:58 non-blocking: the loop iterates whatever table_rows yields and returns 0 when it yields nothing, so a table whose rows are reformatted - the regex at :32 requires a literal `<tr><td>` with no whitespace between the two tags - makes the integrity check a vacuous pass rather than a failure, because the check never asserts it examined a nonzero number of cells.\nFINDING scripts/prototypes/tracked_read_h200/attribution_check.py:26 non-blocking: RELATIVE_TOLERANCE = 0.02 accepts a 2% disagreement between a quoted cell and its recorded value, about four times the band implied by the table's three-significant-figure quotes, so a cell that moved by up to 2% is still reported found while the table no longer states what the run produced.\nFINDING scripts/prototypes/tracked_read_h200/attribution_check.py:1 non-blocking: the script duplicates the fragment-table reconciliation mechanism owned by scripts/prototypes/carrier_identity_receipt/check_receipt_table.py:27 (same table extraction, same exit-code contract) rather than extending it, and the repository's idiom for a reconciliation check that actually runs is the pytest form at tests/test_outboard_census_receipt_*:1 - a standalone script fires only when a reader runs it by hand.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215104424875-tracked-read-h200/manifest.md:14 non-blocking: test_logs names gate_tracked_read_head.log and accuracy_gate_head.log but not logs/accuracy_gate_ea870badc.log, the four-state arm at the reviewed head's behavioural commit that produced both the rows file and the \"3 failed, 8 passed\" figure the fragment quotes, so the log needed to reconcile this delta is reachable only through artifacts.\n",
+  "review_run_id": "r-20261029T083655576666-review-of-tracked-read-h200-3e7bc6c0816b",
+  "reviewed_base_sha": "15f6cfddf0d399ba9d8f28ec3e2a733a057b4a35",
+  "reviewed_head_sha": "3e7bc6c0816bb8d9280852d33b56db6d022fce45",
+  "reviewed_run_id": "r-20261028T215104424875-tracked-read-h200",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:50:00.144431+00:00",
+  "total": 85
+}

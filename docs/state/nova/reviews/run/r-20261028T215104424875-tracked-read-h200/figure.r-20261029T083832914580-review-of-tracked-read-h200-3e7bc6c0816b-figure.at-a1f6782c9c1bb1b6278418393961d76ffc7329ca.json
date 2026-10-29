@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; no added failures are measured.",
+  "attachment_map": {
+    "image-0.png (1400x900, attached to this review run)": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+    "image-1.png (1400x900, attached to this review run)": "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg"
+  },
+  "attachment_note": "Both attached PNGs were opened with Read at native 1400x900 and judged directly as images. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than the two named PNGs was opened; crops written to the run's /tmp scratch directory are magnifications of those same PNGs, not new renders. Mapping by content: image-0 carries an X-point magnified window, which only the diverted state has (its analytic saddle is the only non-None saddle in the renderer), so it is the diverted trial panel; image-1 carries an axis-only window, the limited trial panel. Provenance: the reviewed head's fragment docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:178-194 binds each img src to one of the two SVG paths; the figure blobs and the renderer (blob at scripts/prototypes/tracked_read_h200/figures.py calling _render_read_panel in tests/equilibrium/test_topology_read.py) are unchanged between 15f6cfddf and this head (git diff empty), so this is the same artwork the figure review at 15f6cfddf judged, re-rendered at 14x9 in at 100 dpi.",
+  "completed_at": "2026-10-29T08:48:44.886Z",
+  "dispatched_at": "2026-10-29T08:39:47Z",
+  "figure_verdicts": {
+    "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg": {
+      "contrast": "pass; legend #333333, window titles #555555 and cell field #3366cc all clear on white.",
+      "data_ink": "pass; the contour lines carry the visual weight, the analytic family ~20165 near-black px and the cell family ~19452 blue px on the canvas, with no fill, gradient or colour map.",
+      "decoration": "the two magnified windows retain a full four-spine grey box (renderer line 940 recolours the spines but never despines them), decoration the repository's data-ink rule removes; recorded as finding 1.",
+      "label_collision": "pass; no label is clipped or overlapping \u2014 content sits at x[85,1294] y[59,800] inside the 1400x900 canvas, the window titles clear of the boxes, and the two null pairs each other in their magnified windows (0.19 mm and 0.88 mm apart render as clearly separate marks).",
+      "legibility": "pass; both contour families read at a glance \u2014 the solid dark analytic contours beneath and the dashed blue cell field above, with the magnetic-axis triangle, the X-point cross, the vessel wall and both magnified windows all distinguishable.",
+      "table_form": "pass; a spatial poloidal flux field is rightly a contour panel, not a table."
+    },
+    "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg": {
+      "contrast": "pass; legend #333333, window title #555555 and cell field #3366cc all clear on white.",
+      "data_ink": "pass; the contour lines carry the visual weight, analytic family ~24548 near-black px against ~17476 blue px, no fill, gradient or colour map.",
+      "decoration": "the single magnified window retains a full four-spine grey box (renderer line 940), the same decoration as the diverted panel; recorded as finding 1.",
+      "label_collision": "pass; no label clipped or overlapping \u2014 content sits at x[85,1231] y[59,800] inside the 1400x900 canvas, and the axis window shows two clearly separated triangles 4.12 mm apart.",
+      "legibility": "pass; both contour families, the magnetic-axis triangle, the vessel wall and the single magnified window read at a glance.",
+      "table_form": "pass; a spatial poloidal flux field is rightly a contour panel, not a table."
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "id": "fdad16b18b2",
+      "line": 940,
+      "severity": "non-blocking",
+      "summary": "Both magnified null windows keep a full four-spine grey frame: lines 940-942 only recolour each spine (#888888, lw 1.2) and never remove the top and right spines, so each window reads as a boxed sub-plot where the repository's data-ink rule despines every axis. Visible on both the diverted panel (two windows) and the limited panel (one window). Non-blocking: the frames are thin and do not obscure the marks; the axes and ticks are already off."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "id": "fa898527c9f",
+      "line": 824,
+      "severity": "non-blocking",
+      "summary": "The normal-form boundary contour is drawn solid in the cell-field feature colour (levels[:1], DEFAULT_INK.flux_color, linewidth 2.6) while the legend reads 'cell field / dashed', so a prominent solid blue line is not covered by the legend vocabulary and a reader can take it for an unlabelled third series. Visible on the diverted panel where the boundary contour is drawn. Non-blocking: the caption names the solid analytic versus dashed cell-field vocabulary and the mark remains identifiable by colour."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": [
+      "pass; legend #333333, window titles #555555 and cell field #3366cc all clear on white.",
+      "pass; legend #333333, window title #555555 and cell field #3366cc all clear on white."
+    ],
+    "data_ink": [
+      "pass; the contour lines carry the visual weight, the analytic family ~20165 near-black px and the cell family ~19452 blue px on the canvas, with no fill, gradient or colour map.",
+      "pass; the contour lines carry the visual weight, analytic family ~24548 near-black px against ~17476 blue px, no fill, gradient or colour map."
+    ],
+    "decoration": [
+      "the two magnified windows retain a full four-spine grey box (renderer line 940 recolours the spines but never despines them), decoration the repository's data-ink rule removes; recorded as finding 1.",
+      "the single magnified window retains a full four-spine grey box (renderer line 940), the same decoration as the diverted panel; recorded as finding 1."
+    ],
+    "label_collision": [
+      "pass; no label is clipped or overlapping \u2014 content sits at x[85,1294] y[59,800] inside the 1400x900 canvas, the window titles clear of the boxes, and the two null pairs each other in their magnified windows (0.19 mm and 0.88 mm apart render as clearly separate marks).",
+      "pass; no label clipped or overlapping \u2014 content sits at x[85,1231] y[59,800] inside the 1400x900 canvas, and the axis window shows two clearly separated triangles 4.12 mm apart."
+    ],
+    "legibility": [
+      "pass; both contour families read at a glance \u2014 the solid dark analytic contours beneath and the dashed blue cell field above, with the magnetic-axis triangle, the X-point cross, the vessel wall and both magnified windows all distinguishable.",
+      "pass; both contour families, the magnetic-axis triangle, the vessel wall and the single magnified window read at a glance."
+    ],
+    "table_form": [
+      "pass; a spatial poloidal flux field is rightly a contour panel, not a table.",
+      "pass; a spatial poloidal flux field is rightly a contour panel, not a table."
+    ]
+  },
+  "project": "nova",
+  "review_run_id": "r-20261029T083832914580-review-of-tracked-read-h200-3e7bc6c0816b-figure",
+  "reviewed_base_sha": "a1f6782c9c1bb1b6278418393961d76ffc7329ca",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+    "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg"
+  ],
+  "reviewed_head_sha": "a1f6782c9c1bb1b6278418393961d76ffc7329ca",
+  "reviewed_run_id": "r-20261028T215104424875-tracked-read-h200",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC[diverted] docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg legibility: pass; both contour families read at a glance \u2014 the solid dark analytic contours beneath and the dashed blue cell field above, with the magnetic-axis triangle, the X-point cross, the vessel wall and both magnified windows all distinguishable.",
+    "RUBRIC[limited] docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg legibility: pass; both contour families, the magnetic-axis triangle, the vessel wall and the single magnified window read at a glance."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:51:33.986280+00:00",
+  "total": null
+}

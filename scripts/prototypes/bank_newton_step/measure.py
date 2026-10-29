@@ -74,6 +74,10 @@ def compare_route(
 ):
     """Factor the present moment map at the bank step's physical iterate."""
     from scripts.prototypes.fast_map_production import program as present
+    from scripts.prototypes.fast_map_production.solver import (
+        operand_block,
+        operand_tangent,
+    )
     from scripts.prototypes.lean_map.jets import JetMap
     from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
     from scripts.prototypes.lean_map.values import build_values
@@ -147,12 +151,14 @@ def compare_route(
         target_current,
         axis_sign,
     )
-    from jax.scipy.linalg import lu_solve
-
-    factored = solve.factor(route_residual, flat, carried)
-    route_update = lu_solve(
-        (factored.lu, factored.pivots), -route_residual(flat, carried)
-    ).reshape(state.shape)
+    tangent = operand_tangent(route_residual, flat)
+    columns = jax.jit(operand_block(tangent, len(carried)))(
+        jnp.eye(flat.size, dtype=flat.dtype), *carried
+    )
+    route_residual_value = route_residual(flat, carried)
+    route_update = jnp.linalg.solve(columns.T, -route_residual_value).reshape(
+        state.shape
+    )
     jax.block_until_ready((route_update, bank_update, route_state))
     bank_residual = support_read.step_residual(
         operands, moments, moments, support, profile, route_quadrature

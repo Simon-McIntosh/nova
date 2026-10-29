@@ -33,6 +33,10 @@ def stages(path):
     return values
 
 
+def readable(value):
+    return f"{value:.2f}" if value < 10 else f"{value:.0f}"
+
+
 def main(baseline, after, svg, png):
     plt.style.use("data-ink")
     before = stages(baseline)
@@ -41,15 +45,45 @@ def main(baseline, after, svg, png):
     y = np.arange(len(names))
     fig, ax = plt.subplots(figsize=(14, 7.2))
     if current:
-        ax.barh(y - 0.19, [before[name] for name in names], 0.34,
-                color="#929292", label="baseline")
-        ax.barh(y + 0.19, [current[name] for name in names], 0.34,
-                color="#2e8b57", label="current")
-        ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.12),
-                  ncol=2)
+        ax.barh(
+            y - 0.19,
+            [before[name] for name in names],
+            0.34,
+            color="#929292",
+            label="baseline",
+        )
+        ax.barh(
+            y + 0.19,
+            [current[name] for name in names],
+            0.34,
+            color="#2e8b57",
+            label="current",
+        )
+        ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.12), ncol=2)
+        for index, name in enumerate(names):
+            for offset, value, color in (
+                (-0.19, before[name], "#666666"),
+                (0.19, current[name], "#2e8b57"),
+            ):
+                ax.text(
+                    value * 1.08,
+                    index + offset,
+                    readable(value),
+                    va="center",
+                    color=color,
+                )
     else:
-        ax.barh(y, [before[name] for name in names], 0.54,
-                color="#929292", label="baseline")
+        colors = ["#2e8b57" if name == "whole_step" else "#929292" for name in names]
+        ax.barh(y, [before[name] for name in names], 0.54, color=colors)
+        for index, name in enumerate(names):
+            value = before[name]
+            ax.text(
+                value * 1.08,
+                index,
+                readable(value),
+                va="center",
+                color="#2e8b57" if name == "whole_step" else "#666666",
+            )
     ax.axvline(0.5, color="#777777", linestyle=":", linewidth=1.2)
     ax.set_xscale("log")
     ax.set_xlim(0.2, 1000)

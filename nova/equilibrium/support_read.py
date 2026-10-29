@@ -1109,6 +1109,7 @@ def newton_step(
     quadrature,
     *,
     fresh_geometry: bool = False,
+    condition_diagnostics: bool = True,
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
@@ -1137,10 +1138,16 @@ def newton_step(
     linear_residual = jnp.linalg.norm(matrix @ solution - right) / jnp.linalg.norm(
         right
     )
+    if condition_diagnostics:
+        condition_before = jnp.linalg.cond(matrix)
+        condition_after = jnp.linalg.cond(balanced)
+    else:
+        condition_before = jnp.asarray(jnp.nan, dtype=matrix.dtype)
+        condition_after = condition_before
     return NewtonStep(
         tuple(jnp.split(solution, boundaries)),
-        jnp.linalg.cond(matrix),
-        jnp.linalg.cond(balanced),
+        condition_before,
+        condition_after,
         linear_residual,
         linear_residual <= 1e-8,
     )

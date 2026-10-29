@@ -97,7 +97,8 @@ def main():
     parser.add_argument("--initial-state", type=Path)
     parser.add_argument("--max-iterations", type=int, default=12)
     parser.add_argument("--max-halvings", type=int, default=10)
-    parser.add_argument("--compare-present", action="store_true")
+    parser.add_argument("--compare-dense-factor", action="store_true")
+    parser.add_argument("--tracked-line-search", action="store_true")
     parser.add_argument("--direction", choices=("ramp", "balanced"), default="ramp")
     args = parser.parse_args()
     revision = subprocess.check_output(
@@ -235,20 +236,20 @@ def main():
         )
 
     @jax.jit
-    def present_update(operands, moments, support):
+    def dense_factor_update(operands, moments, support):
         cells = moments[0].size
         flat = jnp.concatenate(moments)
 
-        def present_residual(state, bank):
+        def factor_residual(state, bank):
             parts = tuple(jnp.split(state, (cells, 2 * cells)))
             result = support_read.step_residual(
                 bank, moments, parts, support, profile, quadrature
             )
             return jnp.concatenate(result.residual)
 
-        factored = solve.factor(present_residual, flat, operands)
+        factored = solve.factor(factor_residual, flat, operands)
         return jax.scipy.linalg.lu_solve(
-            (factored.lu, factored.pivots), -present_residual(flat, operands)
+            (factored.lu, factored.pivots), -factor_residual(flat, operands)
         )
 
     print("STAGE solve", flush=True)
@@ -275,15 +276,15 @@ def main():
             converged=bool(update.converged),
             wall_ms=wall_ms,
         )
-        if args.compare_present:
-            reference = present_update(operands, current_moments, current_support)
+        if args.compare_dense_factor:
+            reference = dense_factor_update(operands, current_moments, current_support)
             jax.block_until_ready(reference)
             bank_update = jnp.concatenate(update.update)
             relative = jnp.linalg.norm(bank_update - reference) / jnp.linalg.norm(
                 reference
             )
             emit(
-                "PRESENT_ROUTE",
+                "DENSE_FACTOR_REFERENCE",
                 index=iteration,
                 relative_update=float(relative),
                 reference_finite=bool(jnp.all(jnp.isfinite(reference))),
@@ -345,12 +346,24 @@ def main():
             candidate_norm = float(
                 jnp.max(jnp.abs(jnp.concatenate(candidate_residual.residual)))
             )
+            fresh_norm = candidate_norm
+            same_support = not (changed or clip_changed or owner_changed)
+            if args.tracked_line_search and same_support:
+                candidate_norm = fixed_norm
+                candidate_support = candidate_support._replace(
+                    reading=fixed_candidate.reading
+                )
             if np.isfinite(candidate_norm) and candidate_norm < norm:
                 current_moments = candidate
                 current_support = candidate_support
                 accepted = True
                 emit(
-                    "ACCEPT", index=iteration, scale=scale, residual_sup=candidate_norm
+                    "ACCEPT",
+                    index=iteration,
+                    scale=scale,
+                    residual_sup=candidate_norm,
+                    fresh_residual_sup=fresh_norm,
+                    rebuilt=not same_support,
                 )
                 break
             emit(
@@ -366,6 +379,7 @@ def main():
                 clip_changed=clip_changed,
                 owner_changed=owner_changed,
                 fixed_support_residual=fixed_norm,
+                fresh_residual=fresh_norm,
             )
             last_rejected = (scale, candidate_support, changed, candidate_norm)
         if not accepted:
@@ -381,7 +395,20 @@ def main():
                 changed_cells=changed,
             )
             break
-    emit("CONVERGED", value=converged, steps=iteration, residual_sup=norm)
+    final_state = residual(operands, current_moments, current_moments, current_support)
+    norm = float(jnp.max(jnp.abs(jnp.concatenate(final_state.residual))))
+    fresh_support = read_state(operands, cache, current_moments)
+    fresh_state = residual(operands, current_moments, current_moments, fresh_support)
+    fresh_norm = float(jnp.max(jnp.abs(jnp.concatenate(fresh_state.residual))))
+    converged = np.isfinite(norm) and norm <= 1e-10
+    emit(
+        "CONVERGED",
+        value=converged,
+        steps=iteration,
+        residual_sup=norm,
+        fresh_residual_sup=fresh_norm,
+        fresh_valid=bool(fresh_support.valid),
+    )
     if args.state_path is not None:
         np.savez_compressed(
             args.state_path,

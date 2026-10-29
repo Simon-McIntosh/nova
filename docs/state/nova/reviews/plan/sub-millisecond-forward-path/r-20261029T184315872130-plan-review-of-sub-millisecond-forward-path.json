@@ -41,14 +41,25 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-29T18:54:45.961339+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9084be9336ae1a11bb05efe399296e9c823d6ccf",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "reason": "",
+      "when": "2026-10-29T18:54:55.955895+00:00"
     }
   ],
   "responses": {
     "evidence_paths-1": {
-      "action": "noted",
-      "by": "plan-review-reflex",
-      "reason": "a node can derive both walls from imas-efit and the clause already requires the source to be stated, so the gap costs a lookup rather than a wrong path.",
-      "when": "2026-10-29T18:54:19.404792+00:00"
+      "action": "acted",
+      "by": "",
+      "commit": "9084be9336ae1a11bb05efe399296e9c823d6ccf",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-10-29T18:54:55.955895+00:00"
     },
     "reasoning-1": {
       "action": "acted",

@@ -103,7 +103,7 @@ def render(state_path, output_path, preview_path):
         levels,
         wall,
         color=neutral,
-        linewidth=3.6,
+        linewidth=4.5,
         zorder=3,
     )
     reference.set_linestyle("dashed")
@@ -182,7 +182,7 @@ def render(state_path, output_path, preview_path):
             lw=DEFAULT_INK.wall_linewidth,
             label="wall",
         ),
-        Line2D([], [], color=neutral, lw=3.6, ls="--", label="oracle flux"),
+        Line2D([], [], color=neutral, lw=4.5, ls="--", label="oracle flux"),
         Line2D(
             [],
             [],

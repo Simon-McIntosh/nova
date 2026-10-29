@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="blocked">
+<title>Bank Newton convergence audit | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-newton-converge-landing">Bank Newton convergence audit</h1>
+<p id="bank-newton-converge-summary">The unchanged bank step still solves a frozen-read equation and stalls under a fresh read. The bank and the prototype production moment map differ before linearization, and neither measured update is a Newton direction for the bank's full fresh-read residual. No converged state or production-parity test is claimed.</p>
+
+<section id="bank-newton-converge-parity">
+<h2>Same-iterate systems</h2>
+<p>The published diverted 550-cell bank was read from <code>/work/projects/imas_gpu/sophelio/nova-assembled-step-bank</code>. The limited bank was built on the H200. At each physical moment iterate the diagnostic applied the same prescribed total-current normalization to both maps. The first disagreement is in the reconstructed flux field: the bank contracts nodal jet rows and the production map fits its separate Gaussian-point values. The axis and boundary levels agree at the sampled states, but the cell coefficients do not. The production read then selects one different cell at the diverted trial state. The two booking implementations also differ: <code>current.book</code> integrates its clipped support, while the production map combines interior triangles, Bell polygons and saddle sectors with path weights. Consequently a factorization of the bank residual cannot establish production-route parity.</p>
+<table id="bank-newton-converge-route-table"><thead><tr><th>550-cell state</th><th>Maximum coefficient gap</th><th>Maximum membership gap; selected-cell changes</th><th>Bank residual norm</th><th>Production residual norm</th><th>Residual difference norm</th><th>Relative update difference</th></tr></thead><tbody>
+<tr><td>Diverted trial</td><td>9.709e-6</td><td>0.03480; one</td><td>0.12460</td><td>5.85063</td><td>5.84576</td><td>1.002510</td></tr>
+<tr><td>Limited analytic state</td><td>0.088812</td><td>0.14045; zero</td><td>118.952</td><td>638.659</td><td>664.309</td><td>0.871164 from the landed same-iterate comparison</td></tr>
+</tbody></table>
+<p>The bank and production root positions and boundary levels agree to displayed precision in both rows. The diverted row's residual and update values are independently reproduced by the fresh-read direction probe; the limited update value is carried from the landed bank-step record. The coefficient gap precedes the topology and booking gap, so changing only the bank LU factor cannot make these systems identical.</p>
+<table id="bank-newton-converge-blocks"><thead><tr><th>Term</th><th>Bank step</th><th>Production moment map</th><th>Observed consequence</th></tr></thead><tbody>
+<tr><td>Flux</td><td>Bank nodal value and jet contraction</td><td>Gaussian-point value operator and window rows</td><td>Cell coefficient gap is the first measured difference.</td></tr>
+<tr><td>Booking</td><td>Closed-form tangent of <code>current.book</code> on fixed support</td><td>Differentiated interior, Bell and saddle bookings</td><td>Residual vectors differ before factorization.</td></tr>
+<tr><td>Level and normal geometry</td><td>Updates axis and boundary scalar flux; retains the read's saddle form and edge intervals</td><td>Recomputes its read inside the moment map</td><td>Those retained fields account for the 0.0303684 fresh-read gap below.</td></tr>
+<tr><td>Normalization</td><td>Rank-one correction for prescribed current in this comparison</td><td>Prescribed current divided by its own raw booking total</td><td>The correction cannot reconcile different raw bookings.</td></tr>
+</tbody></table>
+<p>Central differences of the <em>full bank residual</em> called <code>support_read.read</code> afresh at each perturbed state. Both sides remained valid at displacement fractions 1e-5 and 1e-6. The diagnostic checked <code>‖R + JΔ‖/‖R‖</code>: the bank's frozen Jacobian gave 2.58e-9 for its own update, a positive control, but a fresh-read central difference gave 1.63 at 1e-5 and 1.76 at 1e-6. The production update gave 2338.53 at both fractions. Thus both updates miss the full fresh-read linearization; the production update is also for a different residual. The 1e-6 update-parity gate remains failed.</p>
+</section>
+
+<section id="bank-newton-converge-read">
+<h2>Tracked versus fresh read</h2>
+<table id="bank-newton-converge-replay"><thead><tr><th>Search from diverted seed</th><th>Accepted steps</th><th>Tracked residual</th><th>Fresh residual</th><th>Outcome</th></tr></thead><tbody>
+<tr><td>Unchanged tracked search</td><td>two full</td><td>8.53e-13</td><td>0.0303684</td><td>fresh terminal guard refuses convergence</td></tr>
+<tr><td>Unchanged fresh line search</td><td>full, quarter</td><td>0.01034894</td><td>0.01034894</td><td>no decreasing step at the next iterate</td></tr>
+</tbody></table>
+<p>At the tracked terminal the fresh stationary axis moves 10.04 µm and the boundary point 8.35 µm. The axis and boundary flux levels shift only −1.17e-11 and 9.37e-12. No ownership, clipped-cell or selected-cell set changes; the coefficient supremum gap is 4.64e-16, while the continuous membership supremum gap is 3.54e-4. The worst booked current changes by 0.0303684, at cell 184. A replayed state differed from the saved state by at most 1.99e-12, giving a 1.64e-7 tracked residual in the substitution probe; this small replay error is separate from the measured fresh gap.</p>
+<table id="bank-newton-converge-substitution"><thead><tr><th>Fresh field substituted into tracked read</th><th>Residual supremum</th></tr></thead><tbody>
+<tr><td>Saddle normal form only</td><td>0.0159123</td></tr>
+<tr><td>Edge intervals only</td><td>0.0144561</td></tr>
+<tr><td>Both</td><td>0.0303684</td></tr>
+</tbody></table>
+<p>The normal form and edge intervals, rather than a support-set change or a scalar boundary-level shift, carry the fresh-read stall. The existing closed-form Jacobian has no derivatives for either field.</p>
+</section>
+
+<section id="bank-newton-converge-outer">
+<h2>Refresh attempt and remaining gate</h2>
+<table id="bank-newton-converge-outer-table"><thead><tr><th>Outer method</th><th>Outer iterations</th><th>Best or terminal fresh residual</th><th>Result</th></tr></thead><tbody>
+<tr><td>Full tracked solve, refresh without damping</td><td>24</td><td>77.6569 terminal, from 0.0996264</td><td>diverged</td></tr>
+<tr><td>Full tracked solve, fresh-residual line search</td><td>three</td><td>0.0103516 best</td><td>none of twelve further lengths decreased the residual</td></tr>
+</tbody></table>
+<p>The first outer probe double-applied a displacement in its own tracking helper; its red log is retained separately and excluded from the method result. The corrected plain and damped runs both ended nonzero. The node's two-failure stop rule now applies to this repair path.</p>
+<table id="bank-newton-converge-cost"><thead><tr><th>Measure</th><th>Result</th><th>Gate</th></tr></thead><tbody>
+<tr><td>Median warm bank step, excluding read</td><td>335.63 ms in the damped outer probe</td><td>0.5 ms</td></tr>
+<tr><td>Kernel launches per step</td><td>not measured</td><td>at most 100</td></tr>
+<tr><td>Converged contour panel against oracle</td><td>no converged state exists</td><td>required for landing</td></tr>
+</tbody></table>
+<p id="bank-newton-converge-blocker">The remaining repair needs a decision on the canonical moment equation and access to the production map's flux and booking implementation, which is outside this node's write scope. The bank's own full equation also needs the missing normal-form and edge-interval derivatives or a separately justified globalization method. No product source, test or read implementation was changed in this node. The converged-state contour figure, oracle comparison, launch count and production-parity assertion remain open.</p>
+</section>
+</main></body></html>

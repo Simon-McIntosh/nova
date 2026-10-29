@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T17:09:09.112Z",
+  "dispatched_at": "2026-10-29T17:03:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:101",
+      "id": "anchors_resolve-1",
+      "reason": "a node dispatched against \u00a73 follows this pointer to corroborate that the fast route may be judged against the oracle rather than the present route, and finds nothing, so the decision's sole in-plan justification is a dead reference.",
+      "text": "the rewritten clause (1) attributes the routes' pre-linearisation residual difference to \"(bank-newton-converge)\", but no such fragment or anchor exists: `docs/evidence/fragments/sub-millisecond-forward-path/` holds only `bank-newton-step.html`, `operator-bank.html`, `tracked-read-h200.html` and `tracked-read.html`, and `bank-newton-step.html`'s ids are `bank-newton-step-summary`, `-route-table`, `-parity-status` and nine similar, with no `bank-newton-converge` among them; the string occurs exactly once in the whole plan, in this clause",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:149",
+      "id": "reasoning-1",
+      "reason": "the decision rests on these two numbers as its quantitative premise, so a reader or a node checking the decision against its evidence sees a mismatch it cannot reconcile, and either the numbers are wrong or they belong to an uncited measurement that the plan must name before the decision can be defended.",
+      "text": "the `fast-route-equation` decision argues that same-iterate parity is unreachable because \"at the same state their residuals differ by 5.85 (diverted trial) and 664 (limited)\", but the cited evidence records different numbers and different states: `docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:54-57` tables relative residual differences of 0.999168 (diverted trial) and 1.040259 (limited converged oracle state), with relative update differences 1.002510 and 0.871164, and no measurement anywhere in `docs/state/nova` or `docs/evidence` records 5.85 or 664 as a residual figure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:101",
+      "id": "done_when-1",
+      "reason": "read as the fixed-support residual the clause is already satisfied by the 8.38e-13 the fragment reports, so the node can pass \u00a73 without the route actually converging under a refreshed read, which is exactly the state the fragment marks \"interim component only\".",
+      "text": "clause (1) requires the fast step to \"reach a solved-equation residual of at most 1e-10\" without saying which residual that is, and the evidence the clause leans on separates two definitions by thirteen orders of magnitude at the same head: `bank-newton-step.html:48` records a tracked residual of 8.53e-13 beside a fresh-read residual of 0.0303684 (`tracked_converged=true`, `CONVERGED value=false`), and `:37-39` record the stall at a fresh residual of 1.03e-2",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "995522a1ec7fd352c77dab561a697c928c06a69b",
+  "plan_fingerprint": "ca633af79e87c69557e4543e5d240ea7bd2181a757b8719c3ce273f5e8d1cde8",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 41,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T170219942377-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "0937756e3f404023e1ba344670e7b5f457668a4f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 s3 clause (1) cites `(bank-newton-converge)`, and no fragment or anchor by that name exists in the tree.",
+    "done_when": "a finding \u2014 s3 clause (1) requires \"a solved-equation residual of at most 1e-10\" without naming which of the two residual definitions the cited evidence distinguishes, and the one measured bank step reaches 8.38e-13 on one of them while the other returns 0.0303684.",
+    "evidence_paths": "pass \u2014 s3 adds no gate log or scratch path; its only new pointer is a fragment citation, which is scored under `anchors_resolve`.",
+    "naming": "pass \u2014 the new decision key `fast-route-equation` and the clause wording describe the mechanism; no plan label, stage name, version tag or ticket number reaches a symbol, and no changelog prose was added.",
+    "reasoning": "a finding \u2014 the `fast-route-equation` decision's premise quotes residual differences of 5.85 and 664, values that appear in no recorded measurement, where the evidence it relies on records 0.999168 and 1.040259.",
+    "single_goal": "pass \u2014 s3 still carries one deliverable (a Newton step with no per-step autodiff); clauses (1)\u2013(3) are three measures of that one step, not three products.",
+    "wiring": "pass \u2014 s3 declares `data-links=\"sub-millisecond-forward-path#s1\"`, the new `fast-route-equation` decision carries `data-sections=\"s3,s4\"`, and the \u00a74 clause the decision appeals to (clause 2, oracle precision budget) already exists, so no declared relationship points at nothing."
+  },
+  "section_digests": {
+    "_document": "f1957b0c3356110790135de7d35cadbda5b934343d7f3fd139afa0b2bd6d6228",
+    "s0": "17c245a8c7e01a95e666e304f714c37c862790a4b3be58d4fec3faa18cef74f9",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "92b66a6482394cf8ecbd759a9542eff53b76e0e0ad40f92f99038b8609ab9510",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:14:30.903875+00:00"
+}

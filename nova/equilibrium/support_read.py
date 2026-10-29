@@ -742,7 +742,7 @@ def step_jacobian(
         count = jnp.sum(first, dtype=jnp.int32)
         nodes = stencil[jnp.nonzero(first, size=stencil.size, fill_value=0)[0]]
         jet_rows = operands.rows[nodes]
-        channels = jnp.transpose(jet_rows, (0, 3, 1, 2)).reshape(-1, 3 * cells)
+        channels = jnp.transpose(jet_rows, (0, 3, 2, 1)).reshape(-1, 3 * cells)
 
         def local_channel(index, carried):
             direction = (

@@ -25,7 +25,24 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 49,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "evidence_paths-1",
+      "reason": "a node can derive both walls from imas-efit and the clause already requires the source to be stated, so the gap costs a lookup rather than a wrong path.",
+      "when": "2026-10-29T18:54:19.404792+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "a node can derive both walls from imas-efit and the clause already requires the source to be stated, so the gap costs a lookup rather than a wrong path.",
+      "when": "2026-10-29T18:54:19.404792+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261029T184315872130-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261029T184315872130-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "021b9036cfea978e157bebbcc5aca665a49b8ad7",
   "rubric": "content",

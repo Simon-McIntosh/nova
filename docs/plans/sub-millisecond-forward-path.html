@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
@@ -98,7 +98,7 @@
     <p>The step is built around <code>support_read.read_and_book</code> and the §1 bank. It forms its Jacobian from the §1 operators and closed-form booking derivatives. It does not trace a JVP per column, and it applies the Jacobian either as one dense block or matrix-free inside a Krylov solve, whichever the measurement favours. A relative linear residual bounds the update's relative error only by the matrix's condition number times that residual. A Krylov solve therefore sets its tolerance from an estimated condition number of the Newton matrix, so that their product is at most 1e-8, and the record tables the estimate. A dense solve has no such tolerance. The map, booking and solve are fused into a small fixed number of kernels per step. The 735.7 ms Jacobian block and the 166.2 ms map are what this section removes.</p>
     <p>Done when:</p>
     <ol>
-      <li>The fast route solves its own discretised equation (decision <code>fast-route-equation</code>), so its step is not compared with the present route's update: the two routes reconstruct flux and book current differently, and their residuals differ before any linearisation (bank-newton-converge). The step's Jacobian agrees with central differences of the full fresh-read residual. From the diverted 550-cell certificate seed, the fast step reaches a solved-equation residual of at most 1e-10. Its converged state is within the locked precision budget of the analytic oracle. The present route's step count and terminal residual from that seed are tabled beside it, whether or not the present route converges there.</li>
+      <li>The fast route solves its own discretised equation (decision <code>fast-route-equation</code>), so its step is not compared with the present route's update: the two routes reconstruct flux and book current differently, and their residuals differ before any linearisation (measured by run r-20261029T091928865113-bank-newton-converge; relative form in <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-step">bank-newton-step</a>). The step's Jacobian agrees with central differences of the full fresh-read residual: the residual evaluated after <code>support_read.read</code> is called afresh at the perturbed state, not with the previous read retained. From the diverted 550-cell certificate seed, the fast step reaches a fresh-read solved-equation residual of at most 1e-10. A residual with the read retained across the step (the tracked residual) does not count. Its converged state is within the locked precision budget of the analytic oracle. The present route's step count and terminal residual from that seed are tabled beside it, whether or not the present route converges there.</li>
       <li>The warm per-step wall, excluding the read, is at most 0.5 ms on an H200, with kernel launches per step counted and at most 100. The step program's cold compile, in a fresh process with the cache disabled, is at most 60 s, and its executable is under 50 MB.</li>
       <li>The step's Jacobian-vector product agrees with central differences of the step residual within 1e-6 relative, at a trial state and at the converged state.</li>
     </ol>

@@ -5,8 +5,9 @@ ROOT=$(git rev-parse --show-toplevel)
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 LOG=${1:?log path required}
 BASE=$(mktemp -d "$TMPDIR/bank-matrix-negative-XXXXXX")
+RUNNER='import inspect, nova, nova.equilibrium.support_read as m, pytest, sys; print("NOVA="+nova.__file__+" MODULE="+m.__file__, flush=True); assert "point + 0.0 * pitch * offsets" in inspect.getsource(m.step_jacobian); raise SystemExit(pytest.main(sys.argv[1:]))'
 {
-  printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$BASE" "$PY -m pytest -p no:cacheprovider $ROOT/tests/test_bank_newton_converge.py --basetemp=$BASE/pytest -vv"
+  printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$BASE" "$PY -c '$RUNNER' -p no:cacheprovider $ROOT/tests/test_bank_newton_converge.py --basetemp=$BASE/pytest -vv"
   cp -a "$ROOT/nova" "$BASE/nova"
   "$PY" - "$BASE/nova/equilibrium/support_read.py" <<'PY'
 from pathlib import Path
@@ -24,8 +25,7 @@ PY
   export JAX_PLATFORMS=cpu
   export PYTHONDONTWRITEBYTECODE=1
   cd "$BASE" || exit 2
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
-  "$PY" -m pytest -p no:cacheprovider "$ROOT/tests/test_bank_newton_converge.py" --basetemp="$BASE/pytest" -vv
+  "$PY" -c "$RUNNER" -p no:cacheprovider "$ROOT/tests/test_bank_newton_converge.py" --basetemp="$BASE/pytest" -vv
   code=$?
   cd "$ROOT" || exit 2
   rm -rv "$BASE"

@@ -699,14 +699,21 @@ def _normal_ring_velocity(
     )
     straight = jnp.pad(straight, ((0, 0), (0, segments - 1), (0, 0)))
 
-    bound = 2 * jnp.max(jnp.linalg.norm(vertices - form.position, axis=-1))
+    relative = vertices - form.position
+    radii = jnp.linalg.norm(relative, axis=-1)
+    farthest = jnp.argmax(radii)
+    bound = 2 * radii[farthest]
+    bound_rate = -2 * jnp.dot(relative[farthest], rates[0]) / radii[farthest]
     candidates = jnp.where(hit, roots, jnp.inf).reshape(4, -1)
     order = jnp.argsort(jnp.clip(candidates, 0, bound), axis=-1)
     sorted_root = jnp.take_along_axis(jnp.clip(candidates, 0, bound), order, axis=-1)
-    sorted_rate = jnp.take_along_axis(
-        jnp.where(hit, root_rate, 0.0).reshape(4, -1), order, axis=-1
+    candidate_rate = jnp.where(hit, root_rate, 0.0).reshape(4, -1)
+    clipped_rate = jnp.where(
+        candidates >= bound,
+        bound_rate,
+        jnp.where(candidates <= 0, 0.0, candidate_rate),
     )
-    sorted_rate = jnp.where(sorted_root < bound, sorted_rate, 0.0)
+    sorted_rate = jnp.take_along_axis(clipped_rate, order, axis=-1)
     parameters = jnp.concatenate(
         (jnp.zeros((4, 1)), sorted_root, jnp.full((4, 1), bound)), axis=-1
     )

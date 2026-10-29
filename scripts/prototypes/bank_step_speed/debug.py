@@ -211,18 +211,22 @@ def main():
             (form.position, root_values),
             (form_rate.position, reference_root_rate),
         )
-        bound = 2 * jnp.max(jnp.linalg.norm(vertices - form.position, axis=-1))
+        relative = vertices - form.position
+        radii = jnp.linalg.norm(relative, axis=-1)
+        farthest = jnp.argmax(radii)
+        bound = 2 * radii[farthest]
+        bound_rate = (
+            -2 * jnp.dot(relative[farthest], form_rate.position) / radii[farthest]
+        )
         candidates = jnp.where(hits, root_values, jnp.inf).reshape(4, -1)
         order = jnp.argsort(jnp.clip(candidates, 0, bound), axis=-1)
-        sorted_value = jnp.take_along_axis(
-            jnp.clip(candidates, 0, bound), order, axis=-1
+        candidate_rate = jnp.where(hits, ray_rate, 0.0).reshape(4, -1)
+        clipped_rate = jnp.where(
+            candidates >= bound,
+            bound_rate,
+            jnp.where(candidates <= 0, 0.0, candidate_rate),
         )
-        algebraic_sorted_rate = jnp.take_along_axis(
-            jnp.where(hits, ray_rate, 0.0).reshape(4, -1), order, axis=-1
-        )
-        algebraic_sorted_rate = jnp.where(
-            sorted_value < bound, algebraic_sorted_rate, 0.0
-        )
+        algebraic_sorted_rate = jnp.take_along_axis(clipped_rate, order, axis=-1)
         new_velocity = support_read._normal_ring_velocity(
             vertices,
             count,

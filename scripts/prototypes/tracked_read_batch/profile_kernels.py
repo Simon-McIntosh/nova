@@ -42,7 +42,10 @@ def xplane_of(directory):
     return found[-1] if found else None
 
 
-DEVICE = re.compile(r"device|gpu", re.IGNORECASE)
+# The device track is named for the CUDA stream that carries it, e.g.
+# "Stream #14(MemcpyH2D,Compute,MemcpyD2D)"; host tracks are named
+# "Host Threads/<pid>" and "python".
+DEVICE = re.compile(r"stream|device|gpu", re.IGNORECASE)
 
 
 def kernels(directory):

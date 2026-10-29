@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T19:53:57Z",
+  "figures": [
+    {
+      "caption": "Per-slice wall of the tracked read at the diverted 550-cell state on one H200, against the number of slices in the batch. The dotted line is the 0.2 ms bound; the series is the minimum of 20 steady-state calls at each batch size.",
+      "path": "docs/figures/sub-millisecond-forward-path/tracked-read-batch/per-slice-wall.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T195247895200-review-of-tracked-read-batch-087017e8aaa1-figure/image-0.png",
+      "rubric": {
+        "contrast": "defect: the bound's text and dotted line are grey #929292 on white, a measured pixel value of (146,146,146) giving a contrast ratio of about 3.1:1, below the 4.5:1 that 14 pt text needs to pass AA. The annotation naming the figure's central threshold is the faintest text on the page, while the blue series and the dark tick labels sit well above the requirement",
+        "data_ink": "pass: one blue 3 pt series with circular markers is the only plotted data and carries the picture; its batch-16 value is directly labelled in the series colour; the sole ruled element is the bound line the caption names",
+        "decoration": "pass: measured pixel scan finds only the left spine at column 66 and the bottom spine at row 656, with no top spine, no right spine, no gridlines, no background fill, no gradient and no shading",
+        "label_collision": "pass: measured bounding boxes show the direct label at batch 16 sitting clear above and right of its marker, the grey bound label occupying columns 66 to 240 and rows 636 to 651 so it clears the y-axis tick labels and stops five rows above the axis, and no non-white pixel within 12 px of the top or right canvas edge and none left of column 60; both axis labels are complete and unclipped",
+        "legibility": "defect: the four measured walls read at a glance (about 54.6 ms at one slice falling to about 5.8 ms at sixty-four), but the 0.2 ms bound the panel and its caption turn on cannot be located. On a linear y-axis running 0 to about 65.5 ms the bound renders as a three-pixel band centred on row 654 against a black x-axis spine on row 656 of a 720 px canvas, so it reads as a second faint baseline rather than a threshold roughly 29x below the lowest point. The reader is told the bound's value by the corner label and the caption and by the table above the figure, so the measurement is not lost, but the visual comparison the panel exists to make is not available",
+        "table_form": "pass: four ordered batch sizes plotted as a falling relationship between an input and a measured cost, which is what a plot is for; the same four rows are carried as a real table immediately above the figure in the fragment, so the plot adds the shape of the fall rather than re-presenting a lookup"
+      },
+      "script": "scripts/prototypes/tracked_read_batch/render.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/tracked_read_batch/render.py",
+      "id": "f8d48ecbe4c",
+      "line": 51,
+      "severity": "non-blocking",
+      "summary": "The 0.2 ms bound is drawn by axhline at y=0.2 on an axis whose top is max(per_slice)*1.2 (line 64), about 65.5 ms, so the dotted reference line renders at row 654 against the black x-axis spine at row 656 of the 720 px canvas, two rows of antialiasing apart, and is visually indistinguishable from the axis. The figure exists to show that no batch size reaches the bound, and the gap it is about - a factor near 29 at 64 slices and 47 at 16 - is the one quantity the panel cannot show, while the caption's 'The dotted line is the 0.2 ms bound' points a reader at a line that looks like the axis. A log y-scale, a broken axis, or a separate zoom strip would let the bound and the data share the panel. Recorded, not edited, under this review's read-only fence; the measured values themselves remain legible in the label, the caption and the table above the figure, so this does not stop a reader reading the figure."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/render.py",
+      "id": "f47ac93c802",
+      "line": 56,
+      "severity": "non-blocking",
+      "summary": "The bound's label and its dotted line are drawn in GREY (#929292) at 14 pt on white, a measured contrast ratio of about 3.1:1 against the 4.5:1 that text at that size needs to pass AA. Grey is the right register for a reference mark, but here it is applied to the only text that states the bound's value, so the figure's central reference is the faintest mark on the page; the dotted line at line 51 inherits the same weakness and compounds the finding above."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/render.py",
+      "id": "fb14ed464d7",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The x-axis is set to log base 2 with tick labels at 1, 4, 16 and 64, so the four points are spaced equidistantly although the batch multiplies fourfold between each. The axis label reads only 'slices per batch' and gives no indication that the scale is logarithmic, so a reader can misread the equal horizontal steps as equal increments and overestimate how quickly the wall stops improving. Writing the axis as logarithmic, or annotating the fourfold steps, removes the misread; the falling direction and the plotted points stay readable, so this does not block."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T195247895200-review-of-tracked-read-batch-087017e8aaa1-figure",
+  "reviewed_base_sha": "273ce05691c5dd25721267b1f26b60ad89081351",
+  "reviewed_head_sha": "087017e8aaa1805e57916542c54a028beeeac9ff",
+  "reviewed_run_id": "r-20261029T090616166280-tracked-read-batch",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T19:59:28.756811+00:00",
+  "total": null
+}

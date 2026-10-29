@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-29T19:55:48.883Z",
+  "dispatched_at": "2026-10-29T19:36:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "id": "f232f73052f",
+      "line": 111,
+      "severity": "blocking",
+      "text": "the sentence states that the 54.6 ms against 1.27 ms contrast is a comparison across states, but both figures are at the diverted 550-cell state (the plan records 1.225 ms steady at that state) and the profiler arms compared were the unbatched rebuilding read (profile_kernels.py:117, no tracking so support_read.read takes the rebuild path) at 31.82 ms and the carried batched read at 31.61 ms, so the 1.27 ms carried unbatched read was never traced by this instrument; the paragraph also contradicts the one immediately above it, which attributes 49.57 ms of the same 54.61 ms to a per-call fixed cost at the same state."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "id": "f0fe5623551",
+      "line": 117,
+      "severity": "non-blocking",
+      "text": "the claim that the kernel count does not rise with the batch is read off a decrease (19,989 to 19,587) that is the signature of a top-12-by-time sum whose membership changed, and the log's own ADDED_KERNEL rows record 18 kernels scaling per slice (input_reduce_fusion_3 363 to 4,719 events), so the 1,473 difference is a delta between two differently-composed truncated sums rather than a launch count the batched path adds."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_batch/profile_kernels.py",
+      "id": "ffec09153c3",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "emit is a verbatim third copy of measure.py:42 and is imported nowhere, so the helper now has three definitions in one package and the file that owns it gains no caller."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/profile_kernels.log",
+      "id": "f9740ff0904",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "the batch-1 loop_gather_fusion row is truncated by an interleaved TRACE_LINES write, so the log cannot be parsed as one JSON object per event line and the batch-1 figures the fragment quotes are recoverable only by subtracting the batch-4 sum from the combined total."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal, read from plan section 2 (docs/plans/sub-millisecond-forward-path.html, decision read-bound-per-slice) and the brief, is the 0.2 ms per-slice bound over 16 or more slices at the diverted 550-cell state with the batch-1 wall beside it, plus a stage attribution and a cut of the largest arithmetic stage; the eight commits 48422e9f1..087017e8a answer the two clauses the prior review left open - a profiler-backed launch count (profile_kernels.py) and a 550-cell attribution - while the cut of item (2) still does not appear.\nVERDICT done_when: the done_when's per-slice table and its launch clause are asserted against measurements - scripts/prototypes/tracked_read_batch/profile_kernels.py reads launch events and device time from jax.profiler.trace and the run is recorded at logs/profile_kernels.log EXIT=0 - and the bound is reported unmet at 9.38 and 5.82 ms per slice, but the arithmetic stage is attributed and never cut.\nVERDICT write_paths: the eight files in git diff 48422e9f1..087017e8a (the evidence fragment, diagnose.py, measure.py, profile_kernels.py, reference.py, run_boundary_mutant.sh, and the two test files) are all inside the source manifest's declared grants for scripts/prototypes/tracked_read_batch, tests/ and the fragment; no production module is touched.\nVERDICT manifest: read; it records status complete, the profiler gate at job 1300949 EXIT=0, the parity gate at 114c5c4eb EXIT=0, the negative control at job 1300932 with head 6 passed exit 0 and mutant 3 failed exit 1, and baseline_suite (6d2652aa0, 10 error ids) and after_suite (60c790316, 2 failure ids) both readable.\nVERDICT diff: read commit by commit against 48422e9f1; the eight commits add scripts/prototypes/tracked_read_batch/profile_kernels.py, rewrite run_boundary_mutant.sh to run two git-archive arms each proven by a PYTEST_PLUGINS module-identity probe, give each lane its own state in the parity clause, route diagnose.py's op counting through measure.py's lowered_counts, add reference.wall_flux as the single owner of the wall analytic flux, and add two paragraphs to the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:96-120 now makes the attribution at the 550-cell state and names a profiler for the launch clause the prior review found answered only by retraction, but no cut of the arithmetic stage appears in git diff 48422e9f1..087017e8a.\nSCORE evidence: 12\nJUSTIFICATION evidence: the profiler figures reconcile with logs/profile_kernels.log (18,516 / 31.82 ms unbatched, 19,989 / 31.61 ms at one slice, 19,587 / 43.83 ms at four, all reproduced from the log's own rows), and the negative control at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:162-190 genuinely refuses with each arm serving its own module, but :111 draws an attribution its own log does not support and :117 is contradicted by that log's ADDED_KERNEL rows.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 48422e9f1..087017e8a is inside the source manifest's declared grants, the increment adds no production code, and no plan label, run id or ticket reference appears in any name or comment.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_tracked_read_batch.py:60-96 now compares each of two distinct states against its own single read so a lane-mixing vmap reddens it, and tests/test_tracked_read_accuracy.py:276's extremum clause is shown to fail on the mutated selection at logs/negative_oracle.log, but the parity clause has no recorded negative control and no full-suite arm exists at the reviewed head.\nSCORE fit: 16\nJUSTIFICATION fit: the new scripts/prototypes/tracked_read_batch/profile_kernels.py follows the surrounding configure_dtypes-before-jax, emit-token idiom of scripts/prototypes/tracked_read_batch/measure.py:1-44 and carries no forbidden name, with the duplication at :36 the one blemish.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/tracked_read_batch/profile_kernels.py:36 re-implements scripts/prototypes/tracked_read_batch/measure.py:42's emit verbatim without importing it, and scripts/prototypes/tracked_read_batch/diagnose.py:40 keeps the copy the prior review named, so an added definition duplicates a capability the package already owns; the wall_flux and lowered_counts consolidations at reference.py:26 and measure.py:46 are genuine consolidations.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:111 blocking: the sentence states that the 54.6 ms against 1.27 ms contrast is a comparison across states, but both figures are at the diverted 550-cell state (the plan records 1.225 ms steady at that state) and the profiler arms compared were the unbatched rebuilding read (scripts/prototypes/tracked_read_batch/profile_kernels.py:117, no tracking so support_read.read takes the rebuild path) at 31.82 ms and the carried batched read at 31.61 ms, so the 1.27 ms carried unbatched read was never traced by this instrument; the paragraph also contradicts the one immediately above it, which attributes 49.57 ms of the same 54.61 ms to a per-call fixed cost at the same state.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html:117 non-blocking: the claim that the kernel count does not rise with the batch is read off a decrease (19,989 to 19,587) that is the signature of a top-12-by-time sum whose membership changed, and logs/profile_kernels.log's own ADDED_KERNEL rows record 18 kernels scaling per slice (input_reduce_fusion_3 363 to 4,719 events), so the 1,473 difference is a delta between two differently-composed truncated sums rather than a launch count the batched path adds.\nFINDING scripts/prototypes/tracked_read_batch/profile_kernels.py:36 non-blocking: emit is a verbatim third copy of scripts/prototypes/tracked_read_batch/measure.py:42 and is imported nowhere, so the helper now has three definitions in one package and the one file that owns it gains no caller.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/profile_kernels.log:34 non-blocking: the batch-1 loop_gather_fusion row is truncated by an interleaved TRACE_LINES write, so the log cannot be parsed as one JSON object per event line and the batch-1 figures the fragment quotes are recoverable only by subtracting the batch-4 sum from the combined total; the instrument writes each arm's trace summary while the previous arm's stdout is still flushing.\n",
+  "review_run_id": "r-20261029T192719474765-review-of-tracked-read-batch-087017e8aaa1",
+  "reviewed_base_sha": "48422e9f1eb80a45fcb5a521d4cc10057baa1593",
+  "reviewed_head_sha": "087017e8aaa1805e57916542c54a028beeeac9ff",
+  "reviewed_run_id": "r-20261029T090616166280-tracked-read-batch",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T19:59:27.168277+00:00",
+  "total": 84
+}

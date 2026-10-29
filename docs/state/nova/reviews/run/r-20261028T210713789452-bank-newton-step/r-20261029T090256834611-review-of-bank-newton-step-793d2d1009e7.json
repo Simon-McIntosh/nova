@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_newton_step.py:399-414 raises only when compare_route computes a distinct present-map update and the 1e-6 assertion rejects it; passing bank_update as both comparator arguments removes the raise, confirmed by repair-behavior-reversion-same_direction-new.log (EXIT=1).",
+    "tests/test_bank_newton_step.py:413 requires the emitted relative_update to exceed 0.1; it fails if the comparator emits no ROUTE_COMPARISON row or a near-zero ratio, but the fixture supplies expected_route so this line alone does not prove physical route parity.",
+    "tests/test_bank_newton_step.py:467-468 expects the sentinel exception from compare_route; bypassing --compare-route dispatch removes it, confirmed by repair-behavior-reversion-skip_dispatch-new.log (EXIT=1).",
+    "No added assertion compares its result against the same update value passed in; the test injects a separate present-map residual and checks that the path rejects disagreement."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T09:11:04Z",
+  "dispatched_at": "2026-10-29T09:04:03Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-behavior-final-suite/summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/baseline-suite/summary.log",
+    "dispatch_mutation": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-behavior-reversion-skip_dispatch-new.log",
+    "route_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-route-comparison-block.log",
+    "same_direction_mutation": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-behavior-reversion-same_direction-new.log"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html",
+      "id": "fa16eab74df",
+      "line": 55,
+      "severity": "blocking",
+      "text": "The diverted and limited same-iterate updates still differ by 1.002510 and 0.871164 relative; the 1e-6 plan gate remains failed, so this interim component cannot land as a completed Newton-step section."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site found at the reviewed revision; nova/equilibrium/support_read.py:493 defines newton_step but only scripts/prototypes/bank_newton_step/measure.py:106,419 and tests call it.",
+    "diff": "read the sole new commit 793d2d1009e78b452f392ff626383bb4c9de46fc against parent 703cfaab5a8ccacea8b25caef7e2aab42357b459; it adds two behavioral tests and an explicit interim status to the evidence fragment.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html:99-105 requires 1e-6 update parity, 1e-10 convergence and 0.5 ms warm wall; repair-route-comparison-block.log records both parity states failing and the fragment:58-59 leaves the other gates open.",
+    "goal": "docs/plans/sub-millisecond-forward-path.html:96-105 requires a bank Newton step matching the present route; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-58 now labels its still-failing route comparison as interim.",
+    "manifest": "the source manifest records the 793d2d1009e78b452f392ff626383bb4c9de46fc head, zero-failure completed head suite, two red mutation controls, and unresolved route parity.",
+    "write_paths": "the source manifest declares both changed paths; git show 793d2d1009e78b452f392ff626383bb4c9de46fc changes only its evidence fragment and tests/test_bank_newton_step.py."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_step.py:399-414 fails when a present-map update is replaced by the bank update, and :467-468 fails when --compare-route bypasses compare_route, as the red mutation receipts confirm.",
+    "evidence": "repair-behavior-final-suite/summary.log records zero failures at 793d2d1009e78b452f392ff626383bb4c9de46fc, and the two repair-behavior-reversion-*-new.log receipts each name a failing test with EXIT=1.",
+    "fit": "tests/test_bank_newton_step.py:334-468 uses pytest monkeypatch and explicit failure expectations consistent with the file's existing assertion style, and its new names describe behavior.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-58 truthfully marks the component interim, while relative route-update errors 1.002510 and 0.871164 still miss 1e-6.",
+    "reuse": "tests/test_bank_newton_step.py:334-468 adds tests for the existing measure.compare_route and main owners; a capability search found only tests/measure_exact_section_routes.py:405's distinct snapshot comparator, so no mechanism was forked.",
+    "scope_discipline": "git show 793d2d1009e78b452f392ff626383bb4c9de46fc changes only tests/test_bank_newton_step.py and docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html, both declared by the source manifest."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/sub-millisecond-forward-path.html:96-105 requires a bank Newton step matching the present route; docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-58 now labels its still-failing route comparison as interim.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html:99-105 requires 1e-6 update parity, 1e-10 convergence and 0.5 ms warm wall; repair-route-comparison-block.log records both parity states failing and the fragment:58-59 leaves the other gates open.\nVERDICT write_paths: the source manifest declares both changed paths; git show 793d2d1009e78b452f392ff626383bb4c9de46fc changes only its evidence fragment and tests/test_bank_newton_step.py.\nVERDICT manifest: the source manifest records the 793d2d1009e78b452f392ff626383bb4c9de46fc head, zero-failure completed head suite, two red mutation controls, and unresolved route parity.\nVERDICT diff: read the sole new commit 793d2d1009e78b452f392ff626383bb4c9de46fc against parent 703cfaab5a8ccacea8b25caef7e2aab42357b459; it adds two behavioral tests and an explicit interim status to the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55-58 truthfully marks the component interim, while relative route-update errors 1.002510 and 0.871164 still miss 1e-6.\nSCORE evidence: 18\nJUSTIFICATION evidence: repair-behavior-final-suite/summary.log records zero failures at 793d2d1009e78b452f392ff626383bb4c9de46fc, and the two repair-behavior-reversion-*-new.log receipts each name a failing test with EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show 793d2d1009e78b452f392ff626383bb4c9de46fc changes only tests/test_bank_newton_step.py and docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html, both declared by the source manifest.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_bank_newton_step.py:399-414 fails when a present-map update is replaced by the bank update, and :467-468 fails when --compare-route bypasses compare_route, as the red mutation receipts confirm.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_bank_newton_step.py:334-468 uses pytest monkeypatch and explicit failure expectations consistent with the file's existing assertion style, and its new names describe behavior.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/test_bank_newton_step.py:334-468 adds tests for the existing measure.compare_route and main owners; a capability search found only tests/measure_exact_section_routes.py:405's distinct snapshot comparator, so no mechanism was forked.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html:55 blocking: The diverted and limited same-iterate updates still differ by 1.002510 and 0.871164 relative; the 1e-6 plan gate remains failed, so this interim component cannot land as a completed Newton-step section.",
+  "review_run_id": "r-20261029T090256834611-review-of-bank-newton-step-793d2d1009e7",
+  "reviewed_base_sha": "703cfaab5a8ccacea8b25caef7e2aab42357b459",
+  "reviewed_head_sha": "793d2d1009e78b452f392ff626383bb4c9de46fc",
+  "reviewed_run_id": "r-20261028T210713789452-bank-newton-step",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 8,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T09:14:30.900423+00:00",
+  "total": 102
+}

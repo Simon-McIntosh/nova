@@ -17,6 +17,8 @@ STORE=${STORE:-/work/projects/imas_gpu/sophelio/nova-assembled-step-bank}
 DIGEST=${DIGEST:-}
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda
+ROWS=${ROWS_LOG:-$RUN/logs/accuracy_rows.jsonl}
+: > "$ROWS"
 D=$(mktemp -d /tmp/tracked-gate-XXXX)
 trap 'rm -rf "$D"' EXIT
 mkdir -p "$D/tree"
@@ -29,10 +31,12 @@ echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"
   echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"
   echo "# module $(cd "$D/tree" && PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova.equilibrium.support_read as m; print(m.__file__)')"
   echo "# cwd $D/tree"
+  echo "# rows $ROWS"
   echo "# command: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py"
   cd "$D/tree" || exit 1
   set +e
-  PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
+  NOVA_ACCURACY_ROWS="$ROWS" \
+    PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
     -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py \
     --basetemp="$D/bt-head"
   echo "EXIT=$?"

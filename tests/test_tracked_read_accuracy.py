@@ -19,6 +19,8 @@ configure_dtypes()
 
 import inspect
 import json
+import os
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -111,6 +113,22 @@ def analytic_boundary(case, references):
     return _wall_extremum(analytic, wall, int(coarse), maximise)
 
 
+def _record(record):
+    """Append one measurement record to the artifact named by the environment.
+
+    A fixture's stdout reaches a log only inside a captured-output section,
+    which pytest prints for a failing test, so a row for a state that passes is
+    absent from the log of that run. A named path carries every row whatever
+    the test outcomes are, which is what lets a quoted number be traced to the
+    run that produced it.
+    """
+    path = os.environ.get("NOVA_ACCURACY_ROWS")
+    if not path:
+        return
+    with Path(path).open("a") as handle:
+        handle.write(json.dumps(record) + "\n")
+
+
 def field_reference(operands, moments, seed, iterations=60):
     """Newton on the read's own derivative source, from a stated seed."""
     field = fixed_points._CachedField(
@@ -180,52 +198,39 @@ def measured(request):
     for name, row in states.items():
         row["boundary_reference"] = boundary_flux_reference
         source = field_reference(operands, case["states"][name], case["roots"][0])
-        print(
-            "ACCURACY_ROW",
-            json.dumps(
-                dict(
-                    kind=kind,
-                    state=name,
-                    axis_error_m=float(
-                        np.linalg.norm(row["position"][0] - references[0])
-                    ),
-                    saddle_error_m=(
-                        float(np.linalg.norm(row["position"][1] - references[1]))
-                        if len(references) > 1
-                        else None
-                    ),
-                    axis_budget_m=budget,
-                    boundary_error=abs(row["boundary_flux"] - boundary_flux_reference)
-                    / span,
-                    analytic_field_axis_error_m=float(
-                        np.linalg.norm(substituted["position"][0] - references[0])
-                    ),
-                    analytic_field_boundary_error=abs(
-                        substituted["boundary_flux"] - boundary_flux_reference
-                    )
-                    / span,
-                    interpolant_axis_error_m=float(
-                        np.linalg.norm(source - references[0])
-                    ),
-                    iterations=row["status"],
-                )
+        record = dict(
+            kind=kind,
+            state=name,
+            axis_error_m=float(np.linalg.norm(row["position"][0] - references[0])),
+            saddle_error_m=(
+                float(np.linalg.norm(row["position"][1] - references[1]))
+                if len(references) > 1
+                else None
             ),
-            flush=True,
-        )
-    print(
-        "BOUNDARY_REFERENCE",
-        json.dumps(
-            dict(
-                kind=kind,
-                point=np.asarray(boundary_point).tolist(),
-                flux=boundary_flux_reference,
-                axis_flux=axis_flux,
-                span=span,
-                minor_radius=minor_radius,
+            axis_budget_m=budget,
+            boundary_error=abs(row["boundary_flux"] - boundary_flux_reference) / span,
+            analytic_field_axis_error_m=float(
+                np.linalg.norm(substituted["position"][0] - references[0])
+            ),
+            analytic_field_boundary_error=abs(
+                substituted["boundary_flux"] - boundary_flux_reference
             )
-        ),
-        flush=True,
+            / span,
+            interpolant_axis_error_m=float(np.linalg.norm(source - references[0])),
+            iterations=row["status"],
+        )
+        print("ACCURACY_ROW", json.dumps(record), flush=True)
+        _record(record)
+    boundary_record = dict(
+        kind=kind,
+        point=np.asarray(boundary_point).tolist(),
+        flux=boundary_flux_reference,
+        axis_flux=axis_flux,
+        span=span,
+        minor_radius=minor_radius,
     )
+    print("BOUNDARY_REFERENCE", json.dumps(boundary_record), flush=True)
+    _record(boundary_record)
     return dict(
         kind=kind,
         mesh=operands.mesh,

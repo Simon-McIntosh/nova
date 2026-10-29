@@ -20,6 +20,13 @@
     }
   },
   "dispatched_at": "2026-10-28T22:37:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "tracked-read-h200",
+      "recorded_at": "2026-10-29T07:53:36.912497+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_tracked_read_accuracy.py",

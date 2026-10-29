@@ -90,6 +90,7 @@ def test_dense_columns_and_random_vector_match_directional_tangent(monkeypatch):
     operands = SimpleNamespace(
         rows=rows,
         exterior=jnp.zeros((4, 6)),
+        nodes=jnp.zeros((4, 2)),
         sample_index=jnp.asarray([[0], [1]]),
         geometry=SimpleNamespace(pitch=jnp.ones(2)),
         mesh=object(),

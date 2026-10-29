@@ -76,7 +76,9 @@
   64-cell certificate the same read costs 1.38 ms carried and 35.37 ms when it
   rebuilds every call; through <code>vmap</code> it costs 44.76 ms at one
   slice with the conditional removed entirely and 44.17 ms with the
-  conditional present, a difference of 1.3 %. Passing
+  conditional present, a difference of 1.3 %. At four slices the same three
+  variants read 64.34, 64.45 and 66.66 ms, so the conditional moves nothing;
+  the batch's cost tracks the batch axis alone. Passing
   <code>rebuild=False</code> therefore cannot fix it: the batched read pays
   more than a full rebuild while doing no rebuild, and the mechanism is
   inside the solve rather than the carried decision. The column counts are

@@ -22,7 +22,7 @@ from nova.equilibrium import support_read
 from scripts.prototypes.tracked_read.measure import build_kind, cache_for
 from scripts.prototypes.tracked_read_batch.measure import batch_program, tiled
 
-CELLS = 128
+CELLS = 64
 POLICY_RADIUS = 0.054806712567833996
 COUNT = 2
 

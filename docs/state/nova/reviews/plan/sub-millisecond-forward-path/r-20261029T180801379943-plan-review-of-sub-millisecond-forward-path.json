@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T18:13:26.270Z",
+  "dispatched_at": "2026-10-29T18:08:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:109",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on this clause has to invent the slice sequence and its seed producer, and either solves the slices sequentially (which is not the batched entry the section claims) or warms each from a seed no section defines, so the measured per-slice wall would not be the one clause (1) describes.",
+      "text": "the section now says it is \"warm-started from the previous slice \u2026 through the existing ensemble entry ForwardProfile.solve_batch, which maps over a leading slice axis\", but `solve_batch` is `jax.vmap` over caller-supplied independent seeds (forward.py:3244-3252, and `tests/test_equilibrium_forward_solve.py:819-822`, where the seeds are built up front as a stack of three perturbations): it cannot take slice i's seed from slice i\u22121's *converged* result, because every seed must exist before the single vmap call is made, so a pass of 16 neighbour-warm-started slices is circular and no caller that produces those seeds is named anywhere in the plan",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:109",
+      "id": "reasoning-2",
+      "reason": "without saying whether rebuild slices are excluded from the 1 ms or amortised across the batch, the section's target rests on a precondition its own dependency declines to bound, so the node cannot know whether a passing batch is a passing batch.",
+      "text": "the sentence \"One read and one step cost at most 0.7 ms per slice under the \u00a72 and \u00a73 bounds\" buys the 0.3 ms of slack from \u00a72's 0.2 ms bound, but \u00a72 states that bound \"holds only for that steady state\" with no rebuild and that \"A rebuild step is measured separately and is not held to it\" (:87), and s4's done-when carries no such exclusion \u2014 a slice whose tracked axis or X-point enters a new cell pays the whole-mesh rebuild, which is on its face a large multiple of 1 ms, and is exactly what \u00a72's own clause (3) is built to trigger",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:112",
+      "id": "done_when-1",
+      "reason": "the residual read is 0.2 ms against 0.3 ms of stated slack, so two nodes measuring the same solve can land on opposite sides of the only quantitative target this plan exists to meet.",
+      "text": "clause (1) does not define what the 1 ms measures, and the two readings differ by a whole read: the section's 0.7 ms per slice counts one read plus one step, but a slice that terminates on a *fresh-read* residual (\u00a73 clause (1); s4 clause (2)) pays a seed read and a post-step residual read, i.e. 0.9 ms at one step, so the same implementation passes or fails clause (1) depending on a convention the plan never states",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a0fa3b6839384bd633850dd311fc9d418f59b569",
+  "plan_fingerprint": "fd53351f1b7a5f2d9aa50c6d68511555c9c2b5d77e6378451a5cbad2b2d0ba35",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 46,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T180801379943-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "32d13a3da670f8d9c8e160619e96e8d6e2b1a4f4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `ForwardProfile.solve_batch` resolves at `nova/equilibrium/forward.py:3203`, `_ACCELERATED` at `:196`, `_REDUCED` at `:200`, `SolveRoute` at `nova/equilibrium/solve_request.py:31`, the count \"seventh\" is right (six values today), and `bank-newton-step`, `certificate-550-convergence` and `certificate-diverted-stall` all resolve as fragments.",
+    "done_when": "a finding \u2014 clause (1) is measurable but its accounting boundary is undefined: it does not say whether the read that evaluates the termination residual is inside the 1 ms, and the section's own arithmetic counts only one read per slice.",
+    "evidence_paths": "pass \u2014 s4 cites the durable fragments under `docs/evidence/fragments/sub-millisecond-forward-path/` and the run record `r-20261029T091928865113-bank-newton-converge`; no scratchpad or node-local path appears in the changed unit.",
+    "naming": "pass \u2014 the changed lines introduce no plan label, stage name, ticket number or changelog prose; \"warm-start fresh-read residual\" and \"steps per slice\" name the measured quantities.",
+    "reasoning": "a finding \u2014 the mechanism the section newly names to deliver the batched warm-started solve does not deliver it, and the 0.7 ms accounting that sets the 1 ms margin inherits a precondition \u00a72 states and \u00a74 does not.",
+    "single_goal": "pass \u2014 s4's three clauses answer one verdict (assembled fast solve meets 1 ms and the oracle, present route unchanged), clause (3) being the comparison evidence for that same verdict.",
+    "wiring": "pass \u2014 s4 declares `depends-on` s2 and s3, the two units it assembles, and decision `fast-route-equation` carries `data-sections=\"s3,s4\"` while `both-routes-viable` carries `s4`; no missing or misdirected edge in the changed unit."
+  },
+  "section_digests": {
+    "_document": "f1957b0c3356110790135de7d35cadbda5b934343d7f3fd139afa0b2bd6d6228",
+    "s0": "17c245a8c7e01a95e666e304f714c37c862790a4b3be58d4fec3faa18cef74f9",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "58ed8027839c96eb489e59ffb9738e5a5494541d7cd78465517d45c898bfa9cb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T18:15:29.860278+00:00"
+}

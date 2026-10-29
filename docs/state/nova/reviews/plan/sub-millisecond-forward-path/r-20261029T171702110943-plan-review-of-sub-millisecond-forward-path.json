@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T17:23:56.378Z",
+  "dispatched_at": "2026-10-29T17:17:47Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:97",
+      "id": "wiring-1",
+      "reason": "the cited run reproduces exactly this stall (\"the read derivatives and fresh-residual convergence remain to be measured\"), so a node built on s1 alone would land the same failure and the dependency would have to be added anyway.",
+      "text": "s3 declares `depends-on` s1 only, but its changed clause (:101) judges the fast step against a fresh `support_read.read` residual, and \u00a72 is the section that repairs the read's validity gate and its stationary-point derivatives (`s2` clause 1; \u00a72's bullets own the cell-local fit and its Newton refinement) \u2014 so s3 is dispatched without the upstream whose deliverable its measure rests on",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:101",
+      "id": "reasoning-1",
+      "reason": "the plan asserts a target eight orders of magnitude below its own cited measurement without naming the mechanism that closes it, so the \u00a73 node would be dispatched against a measure no described step can satisfy.",
+      "text": "clause (1) now requires a fresh-read solved-equation residual of at most 1e-10 from the diverted 550-cell seed, but the section's mechanism names only the Jacobian's construction (\"formed from the \u00a71 operators and closed-form booking derivatives\") and says nothing about how the residual evaluation itself is driven down; the cited run's own damped outer refresh walks 0.0996 \u2192 0.0304 \u2192 0.0104 over three iterations and ends `converged: false`, while its fresh-vs-frozen JVP mismatch is 80 % at the read the step would retain and 3 % at h=1e-5 falling as h\u00b2, which locates the gap in the read's tangent rather than in the booking derivative",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:113",
+      "id": "reasoning-2",
+      "reason": "without carrying the fresh-read qualifier into \u00a74, the gate that decides the plan is satisfiable by a residual definition the plan now rejects by name.",
+      "text": "\u00a74 clause (2) requires the fast route to \"converge to a residual of at most 1e-10\" with no qualifier, but s3's change makes the fresh-read residual the only one that counts and rules the tracked residual out; the same run measures the tracked residual at 8.526512829121202e-13 at the converged state against a fresh residual of 0.0304, so the plan's final gate can pass on precisely the quantity s3 forbids",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "29bb05fabcb63b32f3289a64a3e38d53afa8af13",
+  "plan_fingerprint": "e286c7f918d072b9f582e579f5003b95b7cea02d6ab4959dc261455e5191cb43",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 42,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T171702110943-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "47cb5aca3b73d19d7fb9c60735d3b91f23aaa40a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the run id resolves to an existing run directory whose manifest lands `bank-newton-converge.html` and whose `directional.log`/`fresh-gate-scan.log` carry the measurement the clause leans on; the inline href `/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-step` resolves as `bank-newton-step.html`, which at :55\u2013:56 carries the relative residual forms (0.999168, 1.040259) the clause cites. The earlier `reasoning-1` on the decision's 5.85/664 figures is not re-raised: the clause no longer cites those.",
+    "done_when": "pass \u2014 the three clauses are measurable on named states and quantities; the section declares one mutation control (\"drop the booking-derivative term\") that falsifies the Jacobian checks, and the residual and wall measures demonstrably fail on the current machinery (the cited run's `outer-damped.log` ends `fresh residual 0.010351600868418132 exceeds 1e-10`).",
+    "evidence_paths": "pass \u2014 the cited evidence is the run's on-disk logs under `~/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/` and a committed fragment under `docs/evidence/fragments/sub-millisecond-forward-path/`, both durable and openable.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags enter a symbol or comment through this change.",
+    "reasoning": "a finding \u2014 with the fresh-read residual as the only counted measure, the section's stated mechanism (Jacobian from \u00a71 operators plus closed-form booking derivatives) does not address the residual map's own derivative error, which is what the cited run isolates as the gap between 0.0104 and 1e-10; and \u00a74's own gate still measures the unqualified residual, so the plan's final measure does not inherit the distinction this change introduces.",
+    "single_goal": "pass \u2014 one deliverable, a per-step Newton step with no traced JVP.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` declares s3 as depending on s1 only (:24, s3's `data-links` likewise), yet the changed clause (:101) makes the section's measure rest on the accuracy of the fresh read, which \u00a72 owns and which the cited run records as unsettled."
+  },
+  "section_digests": {
+    "_document": "f1957b0c3356110790135de7d35cadbda5b934343d7f3fd139afa0b2bd6d6228",
+    "s0": "17c245a8c7e01a95e666e304f714c37c862790a4b3be58d4fec3faa18cef74f9",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "ae9a0a7c8b1ebcb84d5385d3c1402c12ecb952351e23a968e28fdc282808407f",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:28:55.766857+00:00"
+}

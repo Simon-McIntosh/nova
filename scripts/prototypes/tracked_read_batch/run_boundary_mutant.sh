@@ -29,6 +29,8 @@ WT=${WT:?WT must name the worktree whose scripts tree is the head arm}
 LOG=${LOG:-/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/negative_oracle.log}
 PY=${PY:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
 SELECT=${SELECT:-"limited and (boundary or read)"}
+ARMS=${ARMS:-both}
+STATUS=1
 export TMPDIR=/tmp
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
@@ -64,23 +66,30 @@ PROBE
 
 {
   echo "# revision $(git -C "$WT" rev-parse HEAD) tree $(git -C "$WT" rev-parse HEAD^{tree})"
-  echo "# command: run_boundary_mutant.sh with -k \"$SELECT\"; script served from $(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+  echo "# command: $WT/scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh with ARMS=$ARMS SELECT=$SELECT"
+  echo "# exec: $PY -m pytest -p no:cacheprovider --import-mode=importlib $WT/tests/test_tracked_read_accuracy.py -k \"$SELECT\" -q"
   echo "# nova file $($PY -c 'import nova; print(nova.__file__)')"
   echo "# mutant: the overlay copy of scripts/prototypes/tracked_read_batch/reference.py, wall selection polarity -1"
   grep -n 'values, 1$\|values, -1$' "$S/scripts/prototypes/tracked_read_batch/reference.py"
 
-  echo "# ---- arm head: the worktree's scripts tree"
-  ARM_NAME=head ARM_WANT="$WT/scripts" PYTEST_PLUGINS=armprobe PYTHONPATH="$D:$WT" \
-    "$PY" -m pytest -p no:cacheprovider --import-mode=importlib \
-    "$WT/tests/test_tracked_read_accuracy.py" -k "$SELECT" \
-    --basetemp="$D/bt_head" -q
-  echo "HEAD_EXIT=$?"
+  if [ "$ARMS" = both ] || [ "$ARMS" = head ]; then
+    echo "# ---- arm head: the worktree's scripts tree"
+    ARM_NAME=head ARM_WANT="$WT/scripts" PYTEST_PLUGINS=armprobe PYTHONPATH="$D:$WT" \
+      "$PY" -m pytest -p no:cacheprovider --import-mode=importlib \
+      "$WT/tests/test_tracked_read_accuracy.py" -k "$SELECT" \
+      --basetemp="$D/bt_head" -q
+    echo "HEAD_EXIT=$?"
+  fi
 
   echo "# ---- arm mutant: the same tests against the wall-minimum reference"
   ARM_NAME=mutant ARM_WANT="$S/scripts" PYTEST_PLUGINS=armprobe PYTHONPATH="$D:$S:$WT" \
     "$PY" -m pytest -p no:cacheprovider --import-mode=importlib \
     "$WT/tests/test_tracked_read_accuracy.py" -k "$SELECT" \
     --basetemp="$D/bt_mutant" -q
-  echo "MUTANT_EXIT=$?"
+  STATUS=$?
+  echo "MUTANT_EXIT=$STATUS"
+  # The job's own status is the mutant arm's: a control that is meant to be
+  # refused is only a result when it is nonzero.
+  echo "EXIT=$STATUS"
 } > "$LOG" 2>&1
 tail -20 "$LOG"

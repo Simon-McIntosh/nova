@@ -30,6 +30,13 @@
     "reversion_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-round-reverted-control.log",
     "route_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-route-comparison-block.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-newton-step-703cfaab5a8c",
+      "recorded_at": "2026-10-29T08:59:00.609830+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-newton-step.html",

@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T18:48:24.256Z",
+  "dispatched_at": "2026-10-29T18:44:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:109",
+      "id": "reasoning-1",
+      "reason": "the condition that decides whether the 1 ms target is reachable is wrong; a node reading a first failed measurement against \"one step on average\" diagnoses the wrong statistic, and the record's mean-steps column cannot carry the verdict the clause assigns it, so the clause must state the maximum steps per slice (or a per-lane masking design) as the governing bound.",
+      "text": "the section routes the batch through `ForwardProfile.solve_batch`, which is `jax.vmap` over `_solve_accelerated` (`forward.py:3245-3252`), and the accelerated ladder's iteration is a `jax.lax.while_loop` whose predicate is the per-lane `continue_newton` carrying `active` (`fixed_point.py:3857-3860`); under `vmap` JAX batches that predicate by taking its disjunction across lanes and masks the finished lanes' carries, so the loop runs for the slowest slice's step count and every lane pays those iterations. A batch in which one stream warms in two steps therefore costs 2 x 0.9 ms per slice, so the stated condition (\"one step on average\") is satisfied while the target is missed, and the same sentence's own arithmetic (0.5 ms step + 0.2 ms seed read + 0.2 ms terminal check = 0.9 ms) leaves only 0.1 ms of slack for it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/sub-millisecond-forward-path.html:114",
+      "id": "evidence_paths-1",
+      "reason": "a node can derive both walls from imas-efit and the clause already requires the source to be stated, so the gap costs a lookup rather than a wrong path.",
+      "text": "clause (3) requires the record to table imas-efit's flux-update and whole-iteration walls \"with the source of each figure\", but the plan's only imas-efit figures are the flux-update walls at :49, attributed to \"derived figures, 2026-10-28\" with no record or path, and no whole-iteration figure appears anywhere in the plan",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "9084be9336ae1a11bb05efe399296e9c823d6ccf",
+  "plan_fingerprint": "ea7191e03142363a9a63b0bf30d6056e1780140f2c74f4672364197516d05b3a",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 49,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T184315872130-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "021b9036cfea978e157bebbcc5aca665a49b8ad7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the file and symbol anchors resolve as the changed unit writes them: `SolveRoute` holds six values (`nova/equilibrium/solve_request.py:31-38`), so \"seventh\" is correct, `_ACCELERATED` and `_REDUCED` exist (`forward.py:196`), `ForwardProfile.solve_batch` exists at `forward.py:3203`, and the extensionless fragment links resolve as `<path>.html`.",
+    "done_when": "pass \u2014 clause (1) defines the wall it measures (mean per slice, seed to accepted converged state, every read and rebuild counted) and the section declares a negative control that perturbs a bank operator so the clause (2) precision check must fail while the present route is unchanged.",
+    "evidence_paths": "pass \u2014 the section names no scratch path; its record is the plan's own evidence surface and the fragments it cites the tracked-read and bank-newton records land in `docs/evidence/fragments/sub-millisecond-forward-path/`, which exists.",
+    "naming": "pass \u2014 the changed unit introduces no plan label, stage name, ticket number or changelog prose; the new route is described by what it does and the record fields are mechanism names.",
+    "reasoning": "a finding \u2014 the section states the 1 ms target \"holds only if a warm-started slice converges in one step on average\", but the batched entry it relies on maps a solve whose convergence loop is vmapped, so a batch costs the maximum steps over its lanes and the mean is not the governing statistic.",
+    "single_goal": "pass \u2014 s4 has one deliverable, a converged batched fast-route solve under 1 ms judged against the oracle.",
+    "wiring": "pass \u2014 s4 declares `depends-on` s2 and s3, both of which exist and carry the read and step bounds \u00a74 sums; no relationship points at a missing or wrong node."
+  },
+  "section_digests": {
+    "_document": "f1957b0c3356110790135de7d35cadbda5b934343d7f3fd139afa0b2bd6d6228",
+    "s0": "17c245a8c7e01a95e666e304f714c37c862790a4b3be58d4fec3faa18cef74f9",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "700737e9a449ea15073936a208c92f119945762b7367943085ac458c6cb9d793"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T18:53:50.670385+00:00"
+}

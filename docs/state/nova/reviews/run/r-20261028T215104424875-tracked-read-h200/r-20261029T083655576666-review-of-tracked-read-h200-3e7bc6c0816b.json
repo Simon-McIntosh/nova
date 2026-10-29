@@ -3,7 +3,7 @@
   "added_failure_ids": [],
   "added_failures_note": "Zero additions across both arms of both gates in this window. Pre-existing suite arm: logs/gate_tracked_read_base.log (revision a1f6782, baseline arm) reports '4 passed in 115.12s' EXIT=0 and logs/gate_tracked_read_head.log (revision 0adcf5d6c, after arm) reports '4 passed in 121.12s' EXIT=0. Accuracy arm, the one that exercises the changed test file: logs/accuracy_gate_15f6cfddf.log (base 15f6cfddf) and logs/accuracy_gate_ea870badc.log (after ea870badc) each report '3 failed, 8 passed' EXIT=1 with the identical ids test_stationary_points_against_the_analytic_newton[limited-trial], test_stationary_points_against_the_analytic_newton[diverted-trial] and test_boundary_flux_against_the_analytic_read[diverted-trial], so the delta adds none. The source manifest carries no baseline_suite/after_suite keys; both arms were derived from its test_logs entries, which are the same logs.",
   "call_sites": [],
-  "completed_at": "",
+  "completed_at": "2026-10-29T08:49:56.578Z",
   "dispatched_at": "2026-10-29T08:38:20Z",
   "findings": [
     {
@@ -58,6 +58,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-29T08:50:00.144431+00:00",
+  "timestamp": "2026-10-29T08:56:31.489826+00:00",
   "total": 85
 }

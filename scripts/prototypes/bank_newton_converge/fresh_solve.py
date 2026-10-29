@@ -214,6 +214,24 @@ def run(state_path, max_steps):
         flux_span=span,
         boundary_ratio=boundary_error / span,
     )
+    active = int(operands.active_nodes)
+    nodes = operands.nodes[:active]
+    np.savez_compressed(
+        state_path,
+        moments=np.stack(tuple(np.asarray(value) for value in moments)),
+        coordinates=np.asarray(nodes),
+        solved_flux=np.asarray(support_read.nodal_jets(operands, moments)[:active, 0]),
+        analytic_flux=np.asarray(jax.vmap(analytic.value)(nodes)),
+        wall=np.asarray(wall),
+        solved_roots=np.asarray(
+            jnp.stack((support.reading.axis, support.reading.boundary))
+        ),
+        analytic_roots=np.asarray(jnp.stack((reference.axis, reference.boundary))),
+        converged=np.asarray(converged),
+        residual_sup=np.asarray(terminal),
+        axis_ratio=np.asarray(axis_error / radius),
+        boundary_ratio=np.asarray(boundary_error / span),
+    )
     assert axis_error / radius <= 5e-4
     assert boundary_error / span <= 1e-4
 

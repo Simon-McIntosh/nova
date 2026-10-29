@@ -71,8 +71,10 @@ def main():
         support,
     )
     booked = residual.booked
+
     def gradient(radius, flux):
         return jnp.zeros_like(radius)
+
     tangent = measure(
         "local_booking_tangent",
         lambda b, m, s, p: support_read._local_booking_sensitivities(
@@ -145,23 +147,17 @@ def main():
             jnp.linalg.norm(matrix @ solution - right) / jnp.linalg.norm(right)
         ),
     )
-    measure(
-        "whole_step",
+    whole = jax.jit(
         lambda b, m, s: support_read.newton_step(
             b, m, s, profile, gradient, quadrature, fresh_geometry=True
-        ),
-        bank,
-        moments,
-        support,
+        )
     )
+    measure("whole_step", whole, bank, moments, support)
+    jax.block_until_ready(whole(bank, moments, support))
     trace = Path(os.environ["BANK_STEP_TRACE_DIR"])
     jax.profiler.start_trace(str(trace), create_perfetto_link=False)
     for _ in range(2):
-        result = jax.jit(
-            lambda b, m, s: support_read.newton_step(
-                b, m, s, profile, gradient, quadrature, fresh_geometry=True
-            )
-        )(bank, moments, support)
+        result = whole(bank, moments, support)
         jax.block_until_ready(result)
     jax.profiler.stop_trace()
     emit("TRACE", path=str(trace))

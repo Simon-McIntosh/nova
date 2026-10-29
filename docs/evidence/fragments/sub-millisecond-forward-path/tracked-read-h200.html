@@ -75,9 +75,23 @@
   <p>At the converged state the same instrument lands at 3.88e-6 m on the
   diverted axis and 8.40e-4 m on the limited one with the boundary flux inside
   1.5e-5 and 8.3e-5 of the span, so the read reproduces the analytic state it is
-  handed. The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over
-  the four states, with the two cell-owner clauses, and reports
-  <code>3 failed, 8 passed</code>: the limited trial
+  handed.</p>
+  <p>Every row of the table is a record. The gate writes each state's row to
+  the file named by <code>NOVA_ACCURACY_ROWS</code>, which the job sets,
+  truncates and names in its log header, so a state that passes is recorded as
+  well as one that fails: pytest prints a fixture's output only inside the
+  captured-output section of a failing test, so a row that lived nowhere else
+  was absent from every run in which its state passed, and a table cell could
+  be quoted with no run behind it. <code>attribution_check.py</code> reads the
+  cells out of this table and the rows out of the named logs and reports every
+  cell found or missing, so such a cell fails a check instead of passing
+  review. Against <code>logs/accuracy_rows_ea870badc.jsonl</code> all eighteen
+  numeric cells of the table are found; against the logs of the run before that
+  recording existed, all ten diverted cells are missing and it exits nonzero.</p>
+  <p>The gate runs as <code>tests/test_tracked_read_accuracy.py</code> over
+  the four states, with the two cell-owner clauses, and at revision
+  <code>ea870badc</code> reports
+  <code>3 failed, 8 passed in 432.50s</code>: the limited trial
   axis at 4.12e-3 m against 2.00e-3, the diverted trial X-point at 8.82e-4
   against 6.81e-4, and the diverted trial boundary flux at 2.21e-3 of the span
   against 1e-4. Both converged states pass every clause. Those are the recorded

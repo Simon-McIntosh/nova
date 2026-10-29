@@ -40,10 +40,14 @@ def recorded(log_paths):
     rows = {}
     for path in log_paths:
         for line in Path(path).read_text().splitlines():
-            if "ACCURACY_ROW" not in line:
+            if "ACCURACY_ROW" in line:
+                row = json.loads(line.split("ACCURACY_ROW", 1)[1])
+            elif line.startswith("{"):
+                row = json.loads(line)
+            else:
                 continue
-            row = json.loads(line.split("ACCURACY_ROW", 1)[1])
-            rows[(row["kind"], row["state"])] = row
+            if "kind" in row and "state" in row:
+                rows[(row["kind"], row["state"])] = row
     return rows
 
 

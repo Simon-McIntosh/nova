@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-29T06:45:23.984Z",
+  "dispatched_at": "2026-10-29T06:38:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:83",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on \u00a72 would be sent to build a cell-selection facility that already exists at HEAD, and would report it \"implemented\" without the section gaining what it actually lacks.",
+      "text": "the bullet added by this change says \"Today support_read.read pays two whole-mesh costs on every call, and this section makes both cell-selective\", but these two behaviours are already landed: `nova/equilibrium/support_read.py:232-248` rebuilds the own-node fit and the whole-mesh Bell rebuild only under `jax.lax.cond(rebuilt, ...)`, `read_and_book` (:268, :296-297) threads `tracking` into `read`, and `tracking_of` (:319) carries the state, all introduced by commit 72717729a, which the section's own landing comment at :161-163 records (\"rebuilds the connected-domain decision only when one changes, so the own-node fit over every node and the whole-mesh Bell rebuild are paid by a rebuild step only\"). The change therefore describes as outstanding the one part of the section that is done, while the part that is actually outstanding (wiring the read into the fast route and measuring it) is written as a preamble",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:81",
+      "id": "anchors_resolve-1",
+      "reason": "the claim that matters, that no production route calls the read, is correct, and the omission does not change what a node does, only how complete the caller census reads.",
+      "text": "the changed parenthetical says support_read.read is called by \"only tests/test_support_read.py\", but tests/test_tracked_read.py exercises support_read.read directly at lines 99, 118 and 160 (through `tracking=support_read.tracking_of(first)`), and that file is the gate the section's rebuild clause (3) is judged by",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:91",
+      "id": "anchors_resolve-2",
+      "reason": "\u00a74's clause (1) states the same per-slice-at-batch-16 figure in the plan's own text, so the bound is supported without the missing record; recording the decision would tidy the trail but change no node's work.",
+      "text": "the new done-when cites \"(lead decision 2026-10-29: the bound follows \u00a74, whose 1 ms target is per slice at batch 16 or more)\", but the Decisions section records only precision-budget and both-routes-viable, both dated 2026-10-28, so a reader cannot resolve the decision the clause rests its changed figure on",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "3b0cd9de983afa704d50c643731ee798546f01a4",
+  "plan_fingerprint": "856a12749fa55c6312260e202b176e970ab6e9ad6e64502c94592e741e7df5e3",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 19,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261029T063751166538-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "179439d88f6c7a06113afcca5242c8ad73ae8582",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the intro's new parenthetical names tests/test_support_read.py as the only caller of support_read.read, and the new done-when cites a \"lead decision 2026-10-29\" that the plan's Decisions section does not carry; every file anchor (fixed_points.sampled_coefficient, fixed_points.field_from_jets, topology.read_at_stationary_points, stencil_nulls._quadratic_fit_matrices) resolves at HEAD.",
+    "done_when": "pass \u2014 each of \u00a72's three clauses is measurable (5e-4 of the minor radius, 1e-4 of the flux span, 0.2 ms per slice at batch 16 with the batch-1 wall tabled, a reported rebuild), and the section declares a negative control (averaging the fit across cells must push the axis error past the budget) that can fail.",
+    "evidence_paths": "pass \u2014 the evidence \u00a72 cites is committed under docs/evidence/fragments/converged-forward-solve/ (solve-wall-breakdown.html, read-derivative-prototype.html), not a scratch path, and the section asks for its own record on the same durable surface.",
+    "naming": "pass \u2014 the new \u00a72 text introduces no plan labels, stage names, ticket numbers or version tags, and no changelog prose.",
+    "reasoning": "a finding \u2014 the new bullet states the cell-selective fit as work this section will do, but it is already in the tree at HEAD, so the section's described mechanism and the work a node would be sent to do no longer agree; the root cause (\u00a72 attributes the present read's 107.8 ms to topology.read, split 18.4 + 17.9 + 39.6 + 29.4 ms by the cited trace) and the mechanism-to-done-when chain otherwise hold.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, a tracked read wired in place of both present reads; the gate repair inside support_read is part of that same deliverable rather than a second one.",
+    "wiring": "pass \u2014 \u00a72 declares depends-on sub-millisecond-forward-path#s1, s1 exists and its bank holds the cached coupling operand \u00a72 says it reads from, and the section sits upstream of \u00a74 which declares both \u00a72 and \u00a73."
+  },
+  "section_digests": {
+    "_document": "6463ca0c5cddeb270554e523f56f43bc296e279984295861655ec23c245eeae7",
+    "s0": "2aeef3dc567f2412561cbf7802dd51784609c34077acd0066ebff3932abd34ac",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "8088205e407a172fd2ccd6aea316c92064b44bad28017aafc051a084ccae1f79",
+    "s3": "a0b9c6a24e4849c4ff248270b6269c9b3fd32faa707cdf5731a3d6ed625ccc44",
+    "s4": "c65f25ea989a99e6f330defe1f8ebc57de5dccaa51b9e793958120cd0dc31e7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T06:51:01.952643+00:00"
+}

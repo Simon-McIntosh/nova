@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
@@ -106,10 +106,10 @@
 
     <h2 id="s4">§4 — A converged solve under 1 ms, batched, against the oracle</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-attempts="0" data-status="implementable" data-links="sub-millisecond-forward-path#s2,sub-millisecond-forward-path#s3"></section>
-    <p>This section assembles §1 to §3 into one solve. It is warm-started from the previous slice, steps until converged, and is batched over slices on one device. Its result is judged against the analytic oracle on the certificate rows. It enters through the existing route-dispatched seam (<code>forward.py</code>, the <code>_ACCELERATED</code> and <code>_REDUCED</code> route sets) as a seventh <code>SolveRoute</code> value. Nothing is retired by this plan, because decision <code>both-routes-viable</code> keeps the present route. The present route would be retired once the fast route passes every certificate row the present route passes and the lead decides it, which is outside this plan.</p>
+    <p>This section assembles §1 to §3 into one solve. It is warm-started from the previous slice, steps until converged, and is batched over slices on one device through the existing ensemble entry <code>ForwardProfile.solve_batch</code>, which maps over a leading slice axis; the single-solve seam below selects the route. One read and one step cost at most 0.7 ms per slice under the §2 and §3 bounds, so the 1 ms target holds only if a warm-started slice converges in one fresh-read step on average. The record therefore tables the warm-start fresh-read residual and the steps per slice, and a slice needing more steps is a measured shortfall, not a passing row. Its result is judged against the analytic oracle on the certificate rows. It enters through the existing route-dispatched seam (<code>forward.py</code>, the <code>_ACCELERATED</code> and <code>_REDUCED</code> route sets) as a seventh <code>SolveRoute</code> value. Nothing is retired by this plan, because decision <code>both-routes-viable</code> keeps the present route. The present route would be retired once the fast route passes every certificate row the present route passes and the lead decides it, which is outside this plan.</p>
     <p>Done when:</p>
     <ol>
-      <li>Warm, the converged solve costs at most 1 ms per slice on one H200 at batch width 16 or more on the 550-cell diverted certificate. The batch-1 wall and the per-stage split are recorded beside it.</li>
+      <li>Warm, the converged solve costs at most 1 ms per slice on one H200 at batch width 16 or more on the 550-cell diverted certificate, warm-started from the neighbouring slice. The batch-1 wall, the per-stage split, the warm-start fresh-read residual and the mean and maximum Newton steps per slice are recorded beside it.</li>
       <li>The fast route is selectable as a <code>SolveRoute</code> value through <code>ForwardSolveRequest</code>. Over the limited and diverted certificate rows at about 550, 2,000 and 5,000 cells, the fast route converges to a fresh-read residual of at most 1e-10 (the tracked residual does not count, as in §3) and every fast-route state is within the locked precision budget of the analytic oracle. The present route is held to no regression rather than convergence: each of its rows ends with the same convergence status and terminal residual (within 1e-12 relative) as at the base revision, since several of those rows stall on the present route today (certificate-550-convergence, certificate-diverted-stall). The section fails if any fast-route row misses or any present-route row changes.</li>
       <li>The record tables nova's per-iteration wall beside imas-efit's flux-update and whole-iteration walls at the nearest grid sizes, with the source of each figure.</li>
     </ol>

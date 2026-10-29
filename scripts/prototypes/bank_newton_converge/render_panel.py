@@ -143,7 +143,13 @@ def render(state_path, output_path, preview_path):
     handles = [
         Line2D([], [], color=feature, lw=3, label="bank flux"),
         Line2D([], [], color=neutral, lw=2.6, ls="--", label="oracle flux"),
-        Line2D([], [], color=neutral, lw=2.4, label="wall"),
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.wall_color,
+            lw=DEFAULT_INK.wall_linewidth,
+            label="wall",
+        ),
         Line2D(
             [],
             [],

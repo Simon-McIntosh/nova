@@ -301,3 +301,24 @@ def test_diagonal_equilibration_reduces_scale_disparity():
     balanced, row, column = support_read._equilibrate(matrix, moments, booked)
     np.testing.assert_allclose(balanced, matrix * column[None, :] / row[:, None])
     assert float(jnp.linalg.cond(balanced)) < float(jnp.linalg.cond(matrix))
+
+
+def test_dense_newton_step_solves_scaled_residual(monkeypatch):
+    """The delivered step applies the scaled LU update to all moment blocks."""
+    matrix = jnp.asarray([[1e-6, 2e-7, 0.0], [0.0, 1.0, 0.2], [0.0, 0.0, 1e6]])
+    moments = tuple(jnp.asarray([1.0]) for _ in range(3))
+    residual = tuple(jnp.asarray([value]) for value in (1e-6, 1.0, 1e6))
+    booked = current.Booking(*moments, jnp.asarray(1.0), jnp.asarray(1.0), True)
+    monkeypatch.setattr(
+        support_read,
+        "step_residual",
+        lambda *args: support_read.StepResidual(residual, booked, None, True),
+    )
+    monkeypatch.setattr(support_read, "step_jacobian", lambda *args: matrix)
+    step = support_read.newton_step(None, moments, None, None, None, None)
+    actual = jnp.concatenate(step.update)
+    expected = np.linalg.solve(np.asarray(matrix), -np.asarray([1e-6, 1.0, 1e6]))
+    np.testing.assert_allclose(actual, expected, rtol=1e-10, atol=1e-10)
+    assert float(step.linear_residual) < 1e-12
+    assert float(step.condition_after) < float(step.condition_before)
+    assert bool(step.converged)

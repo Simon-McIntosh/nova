@@ -22,7 +22,9 @@ set -u
 WT=${WT:?WT must name the worktree the arms are taken from}
 LOG=${LOG:-/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/negative_oracle.log}
 PY=${PY:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
-SELECT=${SELECT:-"limited and (boundary or read)"}
+# No parentheses in the default selection: the log records this as a
+# command, and a bracketed expression reads as prose there.
+SELECT=${SELECT:-"limited and boundary or limited and read"}
 ARMS=${ARMS:-both}
 STATUS=1
 export TMPDIR=/tmp

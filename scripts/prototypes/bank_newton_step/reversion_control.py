@@ -93,7 +93,8 @@ def main():
             content = subprocess.check_output(
                 ["git", "-C", str(ROOT), "show", f"{commit}^:{source}"]
             )
-            old = scratch / f"{label}-{Path(source).name}"
+            old = scratch / label / source
+            old.parent.mkdir(parents=True, exist_ok=True)
             old.write_bytes(content)
             if arguments == ("--test",):
                 command = (

@@ -15,6 +15,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-29T06:56:01Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "bank-newton-step",
+      "recorded_at": "2026-10-29T07:19:00.022669+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T06:45:43Z",
   "evidence": {
     "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/after-suite-dense/summary.log",

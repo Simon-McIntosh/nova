@@ -104,17 +104,22 @@
   lines of a trace are kept apart, because a Python frame on a host track is
   not a kernel and the device track is named for its CUDA stream
   (<code>Stream #14(MemcpyH2D,Compute,MemcpyD2D)</code>). At the diverted
-  550-cell state, over the twelve largest kernels, the unbatched read issues
-  18,516 kernel events per call and the batched read at one slice 19,989;
-  their device time is the same to within two thirds of a percent, 31.82 ms
-  and 31.61 ms per call. So the two are doing the same work on the device,
-  and the 54.6 ms against 1.27 ms contrast is a comparison across states
-  rather than a cost the batch adds. At four slices the same kernels cost
-  43.83 ms per call, an increment of 4.07 ms per slice, which is the
-  arithmetic per slice the wall series gives. What the batched path adds is
-  the launches: about nineteen thousand kernel events per call at this state,
-  and 1,473 more at one slice than the unbatched read — per call, since the
-  count does not rise with the batch (19,587 at four slices).</p>
+  550-cell state, over the twelve largest kernels, the unbatched read as a
+  caller gets it without tracking — the rebuilding path — issues 21,359
+  kernel events per call and 36.83 ms of device time; the same state read
+  with its tracking carried issues 165 events per call and 0.27 ms. The
+  batched read at four slices is back in the thousands, 82.07 ms of device
+  time per call over the same twelve kernels, 20.5 ms per slice. So the
+  batched path does not simply add a launch or two to the carried read: even
+  with <code>rebuild=False</code> it does whole-mesh work on the device,
+  matching the rebuilding read rather than the 0.27 ms carried one, which is
+  the per-call cost the paragraph above measures from the wall series. The
+  1.2 ms carried read and the 54.6 ms batched read are both at this state, so
+  the gap between them is what batching costs here, not a comparison across
+  states. Its device time does not grow in proportion to the batch either:
+  four slices cost 82.07 ms where one costs the 54.6 ms wall, so most of what
+  the batched path pays is per call. The one-slice trace captured no device
+  events at all, so its figure is the wall and not a traced number.</p>
 
   <p>Every column's instrument: the per-call and per-slice walls are
   <code>perf_counter</code> around a call closed by

@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T18:17:56Z",
+  "figures": [
+    {
+      "caption": "Diverted 550-cell fresh-read solution after five accepted Newton steps: fresh residual 1.53e-11, converged true. Bank flux is solid blue; the analytic oracle is dashed grey on the same \u03c8 levels, \u22120.060194, \u22120.045963, \u22120.031731, \u22120.017500, \u22120.003269, 0.010962 and 0.025193 Wb. The black outline is the wall. The bank axis is a filled blue triangle and its admitted saddle a filled blue cross; the analytic axis is an outlined grey triangle and its saddle an outlined grey diamond. The wider outlines keep nearly coincident null sets separately legible.",
+      "path": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181602165031-review-of-bank-newton-converge-bddf5ae85a04-figure/image-0.png",
+      "rubric": {
+        "contrast": "pass: the oracle grey #676767 measures 5.66:1 and the bank blue #3366CC 5.35:1 against white, both above the 4.5:1 a 14 pt label needs, and the legend text and wall outline are black; the two series are separated by colour and by dash, so neither depends on lightness alone",
+        "data_ink": "pass: the picture is made of two contour sets, one wall outline and four null marks; there is no gridline, tick, tick label, spine, axis title or annotation, and every mark drawn is data the caption names",
+        "decoration": "pass: no gradient, background fill, band, shadow or themed styling; the axes are off, so the reader's eye is on the contours rather than on furniture",
+        "label_collision": "pass: the only text is the seven-entry figure legend, whose ink spans x 309-1087 and y 27-85 of the 1399x720 canvas, well inside every edge; no glyph touches another entry, and no text sits over the contours, which begin at row 138",
+        "legibility": "pass at the delivered 1399x720 canvas: the seven shared contour levels read as a single nested family, bank and oracle resolvable apart along their whole length, and both null pairs identifiable - measured at the axis position, the outline grey (103,103,103) and the filled blue (51,102,204) are both present in a 32 px window, and the same holds at the saddle; the panel's small share of the canvas is recorded as a non-blocking finding",
+        "table_form": "pass: this is a spatial object - two flux fields and their stationary points inside a wall - where position carries the meaning; no part of it is a list of numbers that a table would serve better, and the levels the caption lists stay in the caption"
+      },
+      "script": "scripts/prototypes/bank_newton_converge/render_panel.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_newton_converge/render_panel.py",
+      "id": "fda9dec34a5",
+      "line": 107,
+      "severity": "non-blocking",
+      "summary": "The analytic oracle is drawn after the bank field (reference call at zorder=4 against the solved call's zorder=3), so the reference sits on top of the subject. Where the two fields nearly coincide - which is most of the panel, since the record's point is that they agree - the dashed grey runs over the solid blue and the bank curve is read through the gaps between dashes, with only the 3.0 pt line's slight extra width showing at its edges. The repository's layering rule puts the series the figure is about on the top layer and the reference beneath it, so the reader sees the solved contour's own path uninterrupted. Both series remain readable, which is why this does not block, but the overlap region reads as one grey-dashed curve with a blue fringe rather than as a solved field measured against a reference."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_converge/render_panel.py",
+      "id": "fb2430e6953",
+      "line": 85,
+      "severity": "non-blocking",
+      "summary": "The canvas is the 14x7.2 in slide default while the plasma is tall and narrow and the axis is set to equal aspect, so the drawn panel occupies only x 529-874 of a 1399 px width - 24.7 per cent - measured as the ink bounding box below the legend, leaving roughly 525 px of empty white on each side and only y 138-684 carrying data. Served in the reckon column at about 900 px, the panel scales to about 222 px, at which the two null sets that the caption takes a sentence to distinguish (a 7 pt blue triangle inside a 14 pt grey outline, a filled blue cross inside a grey diamond) fall to a few pixels each. The figure reads correctly at its intrinsic size; at the width a reader actually meets it, the comparison the record rests on needs close looking. Sizing the canvas to the content - a taller canvas, or a narrower figure width - would let the panel use the page."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_converge/render_panel.py",
+      "id": "f6268d72e46",
+      "line": 196,
+      "severity": "non-blocking",
+      "summary": "The figure legend asks for four columns for seven entries, and a figure-level legend fills column-major, so the delivered layout is bank flux / oracle flux, wall / bank axis, oracle axis / bank saddle, then oracle saddle alone on a fourth column with nothing beneath it. The two entries a reader most needs to hold apart - bank axis and oracle axis - land in different columns and different rows, three positions apart, and the ragged fourth column draws the eye to an isolated entry. Ordering the handles so each bank mark sits beside its oracle counterpart, or using a row count that divides the seven, would make the legend read as pairs while keeping the single figure-level legend the style requires. No entry collides or is clipped, so this does not block."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T181602165031-review-of-bank-newton-converge-bddf5ae85a04-figure",
+  "reviewed_base_sha": "b97064dab62d265248b69294573af8ce05f01780",
+  "reviewed_head_sha": "bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T18:22:53.448580+00:00",
+  "total": null
+}

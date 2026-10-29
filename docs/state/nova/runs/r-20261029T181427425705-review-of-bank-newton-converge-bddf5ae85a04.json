@@ -1,0 +1,528 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "f1f0c218d92821b81b1fb0216851ec81656cf3bd",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/brief.md",
+    "sha256": "360716296e5cc3770c64531ab17edf20c56a3143239b0df6516ff9470dc3a11f"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4248576,
+      "cached_input_tokens_cumulative": 4248576,
+      "input_tokens": 4372866,
+      "input_tokens_cumulative": 4372866,
+      "output_tokens": 15393,
+      "output_tokens_cumulative": 15393,
+      "reasoning_output_tokens": 6113,
+      "reasoning_output_tokens_cumulative": 6113
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-29T18:23:49Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-29T18:15:31Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 0.23582624970755675,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-04T06:37:21Z, which is after this node's 3600s horizon ending 2026-10-29T19:14:31.984244+00:00",
+    "horizon_ends_at": "2026-10-29T19:14:31.984244+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-29T18:14:30Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-04T06:37:21Z",
+    "resets_at": "2026-11-04T06:37:21Z",
+    "seconds_until_reset": 476570,
+    "state": "quiet",
+    "utilisation_pct": 5.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-29T18:14:30Z",
+    "read_at": "2026-10-29T18:14:31Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 5.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-29T18:23:49Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-10-29T18:23:49Z",
+        "resets_at": 1793774241,
+        "used_percent": 5.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/manifest.md",
+  "member": "disposable-r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run; it writes no code",
+  "node": "review-of-bank-newton-converge-bddf5ae85a04",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/brief.md",
+    "brief_sha256": "360716296e5cc3770c64531ab17edf20c56a3143239b0df6516ff9470dc3a11f",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261029T091928865113-bank-newton-converge stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261029T091928865113-bank-newton-converge, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261029T091928865113-bank-newton-converge",
+    "id": "review-of-bank-newton-converge-bddf5ae85a04",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-29T18:14:30Z",
+      "read_at": "2026-10-29T18:14:31Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 5.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/manifest.md",
+    "negative_control": "",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/review-records/r-20261029T091928865113-bank-newton-converge.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/review-records/r-20261029T091928865113-bank-newton-converge.at-bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 0.23576427624436844,
+      "derived": 0.23328385825082673,
+      "drain_hours": 168.0,
+      "effective_limit": 0.23328385825082673,
+      "elapsed_fraction": 0.21207623477347884,
+      "elapsed_hours": 35.628807441944446,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-02T20:41:14+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1793218757-827e5e",
+        "pace_multiple": null,
+        "remaining_seconds": 354369.293209,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-10-29T18:15:04+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.95,
+      "remaining_windows": null,
+      "resets_at": "2026-11-04T06:37:21Z",
+      "state": "observed",
+      "utilisation": 0.05,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.007250000000000001,
+      "decided_by": "window",
+      "margin": 0.61775,
+      "name": "review-of-bank-newton-converge-bddf5ae85a04",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.05
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.706791,
+        "observed_at": "2026-10-29T18:15:04+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-04T06:37:21Z",
+        "state": "observed",
+        "utilisation": 0.05,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1793218757-827e5e",
+    "member": "codex",
+    "node": "review-of-bank-newton-converge-bddf5ae85a04",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-29T18:15:04.706791+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:jev",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5012.799,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 604.116,
+      "context-estimate": 31.384,
+      "records": 789.138,
+      "verdict-inputs": 127.339
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f1f0c218d92821b81b1fb0216851ec81656cf3bd",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04",
+    "reviewed_base_sha": "b97064dab62d265248b69294573af8ce05f01780",
+    "reviewed_head_sha": "bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2",
+    "scores": {
+      "durability": 9,
+      "evidence": 10,
+      "fit": 9,
+      "goal_fidelity": 9,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 75
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a188e0-519f-73f0-8272-f5e3c7e82f00",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4248576,
+    "cumulative_input_tokens": 8621442,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 21506
+  },
+  "time_budget": "60m",
+  "tool_steps": 68.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: the fence gate cannot be evaluated at this certificate's trial state as the check is written. A dedicated H200 run reports support.valid; reading.valid and reading.qualified all false with 0 of 550 booked cells valid at a shift of one thousandth of the direction; against all satisfied at the unperturbed state; so the residual; the central difference and the Jacobian-vector product are NaN together; and agreement on NaN is not agreement. The next node should either pin the qualification alongside the point for the duration of a difference; or take the check at a state whose margin keeps a one-thousandth shift admissible; and report the margin used.",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2468,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-28T21:03:47Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-28T20:23:09Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261028T161422378426-assembled-step",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 20475,
+          "worker_pid": 2565694
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the fence gate cannot be evaluated at this certificate's trial state as the check is written. A dedicated H200 run reports support.valid; reading.valid and reading.qualified all false with 0 of 550 booked cells valid at a shift of one thousandth of the direction; against all satisfied at the unperturbed state; so the residual; the central difference and the Jacobian-vector product are NaN together; and agreement on NaN is not agreement. The next node should either pin the qualification alongside the point for the duration of a difference; or take the check at a state whose margin keeps a one-thousandth shift admissible; and report the margin used.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-28T21:03:47Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 76251,
+        "log_fresh": false,
+        "manifest_commits": [
+          "938887d2b af70b3ddc 5cfb26103 51c29308c dccf7a75c a601124c7 7771d1c81 bb0b4b922 cfcfb3b0f 07cf81f30 ba308ca6a"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "15001c3ea952bd4b8f4c03d601c065bea00caaf67de9d4b1e707de334e4be13e",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T161422378426-assembled-step/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "flash",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T161422378426-assembled-step/manifest.md; resolve the blocker before resuming the run",
+        "node": "assembled-step",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261028T161422378426-assembled-step",
+        "session": "s21-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261028T161422378426-assembled-step",
+          "session_id": "e3af7a40-a09f-41de-a290-67fc3700dc4d",
+          "source": "pointer"
+        },
+        "stored_phase": "complete",
+        "terminal_age_seconds": 76319,
+        "terminal_at": "2026-10-28T21:02:36Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/assembled-step"
+      }
+    ]
+  },
+  "wall_seconds": 498,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-29T18:23:53Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-29T18:15:51Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 51612665,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/codex-home/cache"
+      },
+      {
+        "bytes": 28835209,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 185,
+    "worker_pid": 847334
+  },
+  "worker_seconds": 498,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

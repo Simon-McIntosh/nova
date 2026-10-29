@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_newton_converge.py:143 fails if the dense matrix omits an adjacent Bell node or misorders a column while step_jacobian_vector retains it, as both the pre-repair and mutated-stencil logs show; deleting the shared geometry term from both sides does not fail it.",
+    "tests/test_bank_newton_converge.py:145 fails if the dense matrix differs from step_jacobian_vector on the seeded random vector; the same shared-term omission leaves it green.",
+    "scripts/prototypes/bank_newton_converge/fresh_gate.py:116 fails only if the best fresh-read directional discrepancy exceeds 1e-3, so an error between 1e-6 and 1e-3 passes.",
+    "scripts/prototypes/bank_newton_converge/fresh_solve.py:140 fails if its best step-direction central difference exceeds 1e-3; :192 fails if a fresh read is invalid or the terminal residual exceeds 1e-10; :235-236 fail for excess axis or boundary-flux error but cannot fail for an inaccurate X-point.",
+    "No added assertion is a literal comparison of a function result to the identical value passed to that function; the matrix test instead shares the geometry mechanism between its two sides."
+  ],
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:408",
+    "nova/equilibrium/support_read.py:845"
+  ],
+  "completed_at": "2026-10-29T18:23:49Z",
+  "dispatched_at": "2026-10-29T18:15:31Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/matrix-head-absolute.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/matrix-base.log",
+    "directional_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/fresh-gate-scan.log",
+    "figure_preview": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04/review-figure.png",
+    "fresh_solve": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/fresh-converged.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/matrix-negative-import.log"
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "fc8909818b4",
+      "line": 758,
+      "severity": "blocking",
+      "text": "Dense assembly calls the geometry tangent for every selected input channel, and that tangent runs jax.jvp at lines 467, 475, 523 and 555; this violates the no-per-step-autodiff clause and the recorded 370.02 ms warm step misses the 0.5 ms bound."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_converge/fresh_gate.py",
+      "id": "ffed862be6a",
+      "line": 116,
+      "severity": "blocking",
+      "text": "The only fresh-read directional gate accepts error below 1e-3, although the plan requires 1e-6 at trial and converged states; the recorded best trial error is 2.44e-6 and no converged-state check is present."
+    },
+    {
+      "file": "scripts/prototypes/bank_newton_converge/fresh_solve.py",
+      "id": "f1c68180870",
+      "line": 203,
+      "severity": "blocking",
+      "text": "The oracle check computes and asserts axis and boundary-flux errors but never measures or asserts the diverted X-point error required by the locked precision budget, so a displaced saddle could pass."
+    },
+    {
+      "file": "tests/test_bank_newton_converge.py",
+      "id": "f005694cf6e",
+      "line": 143,
+      "severity": "blocking",
+      "text": "The matrix-to-matvec assertion uses the same geometry tangent on both sides; removing that tangent from both functions leaves this test green, so the declared booking-derivative negative control and fresh-read convergence are not durably guarded."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/support_read.py:408 invokes the added geometry tangent and :845 invokes the changed dense Jacobian; git grep at the reviewed head found no production route caller of newton_step.",
+    "diff": "Read all 28 commit subjects and per-commit path stats from b97064dab62d265248b69294573af8ce05f01780 to bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2, then inspected the cumulative support_read.py, test, solve, gate and evidence changes; the dense stencil repair and its test are present.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html:101-105 requires 1e-6 trial and converged Jacobian agreement, a 0.5 ms warm step, at most 100 launches, and compile bounds; fresh_gate.py:116 permits 1e-3, fresh-converged.log measures 370.02 ms, and launches and compile sizes are absent.",
+    "goal": "docs/plans/sub-millisecond-forward-path.html:96-105 asks for a fast fresh-read Newton step; nova/equilibrium/support_read.py:417-579 adds moving saddle geometry and the source fresh-converged.log reaches 1.53e-11, while its 370.02 ms step misses 0.5 ms.",
+    "manifest": "The source manifest.md records all 28 commits, complete baseline_suite and after_suite, the 1.53e-11 fresh residual, 370.02 ms wall, and unmeasured launches; its after_suite log ends EXIT=0.",
+    "write_paths": "The source manifest.md orientation_write_paths names support_read.py, tests/test_bank_newton_converge.py, scripts/prototypes/bank_newton_converge, the evidence fragment, and figure directories; git diff --name-only b97064d..bddf5ae lists only paths inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_converge.py:143-145 fails on the recorded central-stencil mutation, but both expected and actual sides share the geometry tangent and no committed test guards fresh-read convergence or the 1e-6 Jacobian criterion.",
+    "evidence": "fresh-converged.log records five accepted steps and oracle axis and flux ratios, while fresh_gate.py:116 accepts 1e-3 and fresh_solve.py:203-236 never checks the X-point budget.",
+    "fit": "nova/equilibrium/support_read.py:467-555 uses JAX JVP inside the geometry tangent and :758 repeats it per dense column, contrary to the plan's no-per-step-autodiff mechanism and consistent with the measured 370.02 ms.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:417-579 enables fresh geometry and fresh-converged.log records 1.53e-11, but support_read.py:758 still traces geometry JVPs per column and the warm step is 370.02 ms.",
+    "reuse": "A capability search found existing normal-form, edge-fragment and moving-polygon owners in nova/equilibrium/topology.py:1635,1907,3102 and nova/equilibrium/current.py:171,495; support_read.py:463-562 calls those owners rather than copying them.",
+    "scope_discipline": "The 24 paths in git diff --name-only b97064d..bddf5ae are all under the source manifest.md orientation_write_paths, including nova/equilibrium/support_read.py and its test."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/sub-millisecond-forward-path.html:96-105 asks for a fast fresh-read Newton step; nova/equilibrium/support_read.py:417-579 adds moving saddle geometry and the source fresh-converged.log reaches 1.53e-11, while its 370.02 ms step misses 0.5 ms.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html:101-105 requires 1e-6 trial and converged Jacobian agreement, a 0.5 ms warm step, at most 100 launches, and compile bounds; fresh_gate.py:116 permits 1e-3, fresh-converged.log measures 370.02 ms, and launches and compile sizes are absent.\nVERDICT write_paths: The source manifest.md orientation_write_paths names support_read.py, tests/test_bank_newton_converge.py, scripts/prototypes/bank_newton_converge, the evidence fragment, and figure directories; git diff --name-only b97064d..bddf5ae lists only paths inside them.\nVERDICT manifest: The source manifest.md records all 28 commits, complete baseline_suite and after_suite, the 1.53e-11 fresh residual, 370.02 ms wall, and unmeasured launches; its after_suite log ends EXIT=0.\nVERDICT diff: Read all 28 commit subjects and per-commit path stats from b97064dab62d265248b69294573af8ce05f01780 to bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2, then inspected the cumulative support_read.py, test, solve, gate and evidence changes; the dense stencil repair and its test are present.\nCALL_SITES: nova/equilibrium/support_read.py:408, nova/equilibrium/support_read.py:845\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:417-579 enables fresh geometry and fresh-converged.log records 1.53e-11, but support_read.py:758 still traces geometry JVPs per column and the warm step is 370.02 ms.\nSCORE evidence: 10\nJUSTIFICATION evidence: fresh-converged.log records five accepted steps and oracle axis and flux ratios, while fresh_gate.py:116 accepts 1e-3 and fresh_solve.py:203-236 never checks the X-point budget.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 24 paths in git diff --name-only b97064d..bddf5ae are all under the source manifest.md orientation_write_paths, including nova/equilibrium/support_read.py and its test.\nSCORE durability: 9\nJUSTIFICATION durability: tests/test_bank_newton_converge.py:143-145 fails on the recorded central-stencil mutation, but both expected and actual sides share the geometry tangent and no committed test guards fresh-read convergence or the 1e-6 Jacobian criterion.\nSCORE fit: 9\nJUSTIFICATION fit: nova/equilibrium/support_read.py:467-555 uses JAX JVP inside the geometry tangent and :758 repeats it per dense column, contrary to the plan's no-per-step-autodiff mechanism and consistent with the measured 370.02 ms.\nSCORE reuse: 18\nJUSTIFICATION reuse: A capability search found existing normal-form, edge-fragment and moving-polygon owners in nova/equilibrium/topology.py:1635,1907,3102 and nova/equilibrium/current.py:171,495; support_read.py:463-562 calls those owners rather than copying them.\nFINDING nova/equilibrium/support_read.py:758 blocking: Dense assembly calls the geometry tangent for every selected input channel, and that tangent runs jax.jvp at lines 467, 475, 523 and 555; this violates the no-per-step-autodiff clause and the recorded 370.02 ms warm step misses the 0.5 ms bound.\nFINDING scripts/prototypes/bank_newton_converge/fresh_gate.py:116 blocking: The only fresh-read directional gate accepts error below 1e-3, although the plan requires 1e-6 at trial and converged states; the recorded best trial error is 2.44e-6 and no converged-state check is present.\nFINDING scripts/prototypes/bank_newton_converge/fresh_solve.py:203 blocking: The oracle check computes and asserts axis and boundary-flux errors but never measures or asserts the diverted X-point error required by the locked precision budget, so a displaced saddle could pass.\nFINDING tests/test_bank_newton_converge.py:143 blocking: The matrix-to-matvec assertion uses the same geometry tangent on both sides; removing that tangent from both functions leaves this test green, so the declared booking-derivative negative control and fresh-read convergence are not durably guarded.",
+  "review_run_id": "r-20261029T181427425705-review-of-bank-newton-converge-bddf5ae85a04",
+  "reviewed_base_sha": "b97064dab62d265248b69294573af8ce05f01780",
+  "reviewed_head_sha": "bddf5ae85a04397cb29fa01d17bf1c163c6cfbe2",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "scores": {
+    "durability": 9,
+    "evidence": 10,
+    "fit": 9,
+    "goal_fidelity": 9,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T18:25:49.661739+00:00",
+  "total": 75
+}

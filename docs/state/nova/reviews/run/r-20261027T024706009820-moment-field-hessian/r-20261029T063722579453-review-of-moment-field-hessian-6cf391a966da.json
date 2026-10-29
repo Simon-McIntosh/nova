@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound"
+  ],
+  "added_failures_note": "Derived by set difference from the reviewed manifest's completed baseline_suite (f1e09f09d, 56 IDs) and after_suite (0c892343a, 56 IDs). The suite-files/concurrent-1296538/comparison.json positive control lists 55 shared IDs, one base-only ID, and this one head-only ID. The final product module is unchanged after ee666bd83.",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2418",
+    "nova/equilibrium/fixed_points.py:210",
+    "nova/biot/tiledassembly.py:851"
+  ],
+  "completed_at": "2026-10-29T06:51:03Z",
+  "dispatched_at": "2026-10-29T06:40:35Z",
+  "findings": [
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "2906",
+      "severity": "blocking",
+      "text": "the new custom JVP expands the point jet to 55,504 equations versus the 22,000 bound and raises uncached H200 compile wall from 94.576 to 305.636 s (3.23 times); the two-arm suite records test_point_jet_expression_bound as one added failure, violating the source done_when's no-added-failure clause."
+    },
+    {
+      "file": "tests/test_moment_field_hessian.py",
+      "line": "123",
+      "severity": "blocking",
+      "text": "the byte-identity assertion compares the wrapper with _packed_analytic_moments_primal in the same head, so changing the shared primal expression moves both sides together and leaves the test green instead of proving byte identity to the base revision."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/moment-field-hessian.html",
+      "line": "24",
+      "severity": "blocking",
+      "text": "the fragment accepts 1.049720e-6 and 1.652340e-6 m direct-axis errors by invoking a 2e-6 m restatement without amending the source briefs 1e-6 m done_when; the source brief's done_when requires each carrier within 1e-6 m, so neither measured carrier satisfies the stated gate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified 3 production call sites at the reviewed revision.",
+    "diff": "Commit-by-commit read of f1e09f09d..6cf391a96 shows ee666bd83 changing only nova/biot/polygonanalytic.py, 14b6cb856 adding tests/test_moment_field_hessian.py, and the remaining 24 commits adding measurement scripts, the evidence fragment and the rendered SVG within scope; the numeric correction adds a custom JVP at polygonanalytic.py:2865-2977.",
+    "done_when": "The brief's three clauses require nine Hessian cases, two carrier axes within 1e-6 m of the direct axis, a cold limited 550 solve, and no added importer failure; head-hessian.log reports 9 passed, cold-solve.log reaches 7.892009486298989e-15, the trial logs show 1.049720e-6 and 1.652340e-6 m direct-axis errors, and the complete suite comparison records one added failure.",
+    "goal": "The source brief at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/brief.txt seeks a near-corner analytic moment Hessian repair; nova/biot/polygonanalytic.py:2893-2934 supplies a stable field height tangent, and tests/test_moment_field_hessian.py:119 verifies its numerical Hessian, but the trial and no-added-failure clauses are not met.",
+    "manifest": "The source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md is complete and names 26 commits, the Hessian/negative/cold-solve/profile logs, and complete baseline_suite and after_suite receipts with 56 failure IDs each and one head-only ID.",
+    "write_paths": "The source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md declares polygonanalytic.py, the Hessian test, moment_hessian scripts, one evidence fragment and one figure directory; git diff --name-only f1e09f09d..6cf391a96 lists 20 files, all within these paths."
+  },
+  "justifications": {
+    "durability": "tests/test_moment_field_hessian.py:119 reddens when the repaired tangent is reverted, as negative-control.log records, but the primal byte check at :123-124 compares two head paths that share the same underlying expression and would survive a common primal regression.",
+    "evidence": "head-hessian.log:5 and negative-control.log show a passing nine-case head and two failing reverted cases, while suite-files/concurrent-1296538/comparison.json records one added failure and point-jet-profile/head/attribution.json records a 305.636 s compile against 94.576 s at base.",
+    "fit": "nova/biot/polygonanalytic.py:2865-2977 extends the existing packed-moment entry point with mechanism-named helpers and no forbidden identifiers, though its extra JVP evaluations substantially increase compile cost.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:2923-2932 corrects the affected Hessian, but the brief's direct-axis limit is exceeded in split-trial.log:14-16 and integration-trial.log:15-16.",
+    "reuse": "A capability search found the existing packed_analytic_moments owner and edge tangent helpers in nova/biot/polygonanalytic.py:2643 and :3313; the addition at :2937 extends that owner rather than forking a second packed-moment API.",
+    "scope_discipline": "git diff --name-only f1e09f09d..6cf391a96 contains only the 20 paths permitted by the source manifest's orientation_write_paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md:3."
+  },
+  "node": "review-of-moment-field-hessian-6cf391a966da",
+  "node:reviewed": "moment-field-hessian",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/brief.txt seeks a near-corner analytic moment Hessian repair; nova/biot/polygonanalytic.py:2893-2934 supplies a stable field height tangent, and tests/test_moment_field_hessian.py:119 verifies its numerical Hessian, but the trial and no-added-failure clauses are not met.\nVERDICT done_when: The brief's three clauses require nine Hessian cases, two carrier axes within 1e-6 m of the direct axis, a cold limited 550 solve, and no added importer failure; head-hessian.log reports 9 passed, cold-solve.log reaches 7.892009486298989e-15, the trial logs show 1.049720e-6 and 1.652340e-6 m direct-axis errors, and the complete suite comparison records one added failure.\nVERDICT write_paths: The source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md declares polygonanalytic.py, the Hessian test, moment_hessian scripts, one evidence fragment and one figure directory; git diff --name-only f1e09f09d..6cf391a96 lists 20 files, all within these paths.\nVERDICT manifest: The source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md is complete and names 26 commits, the Hessian/negative/cold-solve/profile logs, and complete baseline_suite and after_suite receipts with 56 failure IDs each and one head-only ID.\nVERDICT diff: Commit-by-commit read of f1e09f09d..6cf391a96 shows ee666bd83 changing only nova/biot/polygonanalytic.py, 14b6cb856 adding tests/test_moment_field_hessian.py, and the remaining 24 commits adding measurement scripts, the evidence fragment and the rendered SVG within scope; the numeric correction adds a custom JVP at polygonanalytic.py:2865-2977.\nCALL_SITES: nova/equilibrium/topology.py:2418, nova/equilibrium/fixed_points.py:210, nova/biot/tiledassembly.py:851\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:2923-2932 corrects the affected Hessian, but the brief's direct-axis limit is exceeded in split-trial.log:14-16 and integration-trial.log:15-16.\nSCORE evidence: 13\nJUSTIFICATION evidence: head-hessian.log:5 and negative-control.log show a passing nine-case head and two failing reverted cases, while suite-files/concurrent-1296538/comparison.json records one added failure and point-jet-profile/head/attribution.json records a 305.636 s compile against 94.576 s at base.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only f1e09f09d..6cf391a96 contains only the 20 paths permitted by the source manifest's orientation_write_paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T024706009820-moment-field-hessian/manifest.md:3.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_moment_field_hessian.py:119 reddens when the repaired tangent is reverted, as negative-control.log records, but the primal byte check at :123-124 compares two head paths that share the same underlying expression and would survive a common primal regression.\nSCORE fit: 17\nJUSTIFICATION fit: nova/biot/polygonanalytic.py:2865-2977 extends the existing packed-moment entry point with mechanism-named helpers and no forbidden identifiers, though its extra JVP evaluations substantially increase compile cost.\nSCORE reuse: 20\nJUSTIFICATION reuse: A capability search found the existing packed_analytic_moments owner and edge tangent helpers in nova/biot/polygonanalytic.py:2643 and :3313; the addition at :2937 extends that owner rather than forking a second packed-moment API.\nFINDING nova/biot/polygonanalytic.py:2906 blocking: the new custom JVP expands the point jet to 55,504 equations versus the 22,000 bound and raises uncached H200 compile wall from 94.576 to 305.636 s (3.23 times); the two-arm suite records test_point_jet_expression_bound as one added failure, violating the source done_when's no-added-failure clause.\nFINDING tests/test_moment_field_hessian.py:123 blocking: the byte-identity assertion compares the wrapper with _packed_analytic_moments_primal in the same head, so changing the shared primal expression moves both sides together and leaves the test green instead of proving byte identity to the base revision.\nFINDING docs/evidence/fragments/converged-forward-solve/moment-field-hessian.html:24 blocking: the fragment accepts 1.049720e-6 and 1.652340e-6 m direct-axis errors by invoking a 2e-6 m restatement without amending the source briefs 1e-6 m done_when; the source brief's done_when requires each carrier within 1e-6 m, so neither measured carrier satisfies the stated gate.",
+  "review_run_id": "r-20261029T063722579453-review-of-moment-field-hessian-6cf391a966da",
+  "reviewed_base_sha": "f1e09f09d02a077025f618549fc38b82f1ab9574",
+  "reviewed_head_sha": "6cf391a966da53cb58a46c71796db4cdda272bcf",
+  "reviewed_run_id": "r-20261027T024706009820-moment-field-hessian",
+  "scores": {
+    "durability": 12,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 11,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T06:46:56.996Z",
+  "total": 93
+}

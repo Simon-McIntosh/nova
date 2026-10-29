@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T06:43:34Z",
+  "figures": [
+    {
+      "drawing_script": "scripts/prototypes/moment_hessian/render_panel.py",
+      "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T064111989340-review-of-moment-field-hessian-6cf391a966da-figure/image-0.png",
+      "repository_path": "docs/figures/converged-forward-solve/moment-field-hessian/limited-cold-solve.svg",
+      "verdicts": {
+        "contrast": "pass - black legend text and markers on white; blue contours and grey dashes both clear the white background",
+        "data_ink": "pass - contours and wall carry the visual weight; the wide left and right margins are the equal-aspect consequence of a tall narrow plasma cross-section, not unused decoration",
+        "decoration": "pass - no gridlines, no background fill and no gradient; the axis furniture is off, leaving only the data",
+        "label_collision": "pass - legend entries are separated and no text or marker is clipped or overlaps other text; the two axis markers coincide, but that is data agreement rather than a text collision",
+        "legibility": "pass - the nested flux contours, the black first-wall curve and the four-entry legend are all readable at a glance; the blue solid solved traces and grey dashed analytic traces are distinguishable where they nearly coincide",
+        "table_form": "pass - a spatial R-Z flux map, not information that is naturally a table"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted: the caption in docs/evidence/fragments/converged-forward-solve/moment-field-hessian.html states that the black curve is the wall, so the mark is identified in the evidence record even though it is not in the legend",
+      "file": "scripts/prototypes/moment_hessian/render_panel.py",
+      "id": "f73e31bc037",
+      "line": 103,
+      "severity": "non-blocking",
+      "summary": "The black first-wall curve is drawn (line 72) but the figure-level legend lists only the two flux traces and the two axis markers; the wall is named only in the caption, so a reader viewing the panel alone cannot identify the outermost black curve."
+    },
+    {
+      "disposition": "exempted: the two axes genuinely coincide, which is the agreement this panel exists to show, and the grey rim of the analytic marker remains visible over the blue fill",
+      "file": "scripts/prototypes/moment_hessian/render_panel.py",
+      "id": "f6e6b7b2734",
+      "line": 78,
+      "severity": "non-blocking",
+      "summary": "The analytic-axis marker (grey outlined triangle, markersize 12) and the solved-axis marker (blue filled triangle, markersize 7) sit at the same point, so in the rendered panel they read as one blue triangle with a thin grey rim rather than the two distinct styles the legend promises."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T064111989340-review-of-moment-field-hessian-6cf391a966da-figure",
+  "reviewed_base_sha": "f1e09f09d02a077025f618549fc38b82f1ab9574",
+  "reviewed_head_sha": "6cf391a966da53cb58a46c71796db4cdda272bcf",
+  "reviewed_run_id": "r-20261027T024706009820-moment-field-hessian",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T06:50:22.359608+00:00",
+  "total": null
+}

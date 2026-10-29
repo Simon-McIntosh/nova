@@ -10,6 +10,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-29T08:41:45Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "bank-newton-converge",
+      "recorded_at": "2026-10-29T08:47:22.070055+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T08:35:07Z",
   "evidence": {
     "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T210713789452-bank-newton-step/repair-round-final-suite/summary.log",

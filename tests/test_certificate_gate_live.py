@@ -40,6 +40,24 @@ def _revision() -> str:
     ).strip()
 
 
+def _restamped_part(source: Path, clip_mode: str | None) -> dict:
+    """Return the banked part as this tree would have written it.
+
+    The three facts the driver compares are replaced with the ones this tree
+    builds, so the part is servable and the test can measure what a rendered
+    row is worth rather than whether it is refused.
+    """
+
+    part = json.loads(source.read_text(encoding="utf-8"))
+    setup = certificate._certificate_case_setup(CASE, REQUESTED_CELLS, clip_mode, {})
+    part.setdefault("solver", {})["target_current_a"] = float(setup["target_current"])
+    part.setdefault("cache", {})["semantic_key"] = setup["machine"].cache[
+        "semantic_key"
+    ]
+    part["realised_cells"] = int(len(setup["machine"].node))
+    return part
+
+
 def _relative_error(mapped: np.ndarray, reference: np.ndarray) -> dict[str, float]:
     error = np.asarray(mapped, dtype=np.float64) - reference
     return {
@@ -247,7 +265,14 @@ def test_live_certificate_route_requires_map_convergence_and_position(
 def test_rerendered_part_receipt_is_not_a_live_certificate_row(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """A stored part can be rendered but cannot satisfy fresh-run provenance."""
+    """A stored part can be rendered but cannot satisfy fresh-run provenance.
+
+    The part installed here is the banked one restamped to the carrier and the
+    current this tree builds, because the driver serves a part only where it can
+    reproduce both. A part that does not match is refused and solved instead, so
+    restamping is what keeps this test measuring provenance rather than the
+    refusal.
+    """
 
     source = certificate._part_path(CASE, REQUESTED_CELLS)
     if not source.exists():
@@ -264,7 +289,7 @@ def test_rerendered_part_receipt_is_not_a_live_certificate_row(
     part_root = tmp_path / "parts"
     part_root.mkdir()
     target = part_root / source.name
-    target.write_bytes(source.read_bytes())
+    target.write_text(json.dumps(_restamped_part(source, "exact")), encoding="utf-8")
     monkeypatch.setattr(certificate, "ROOT", tmp_path)
     monkeypatch.setattr(certificate, "PART_ROOT", part_root)
     monkeypatch.setattr(certificate, "FIGURE_ROOT", figure_root)

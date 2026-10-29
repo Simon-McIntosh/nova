@@ -2223,35 +2223,73 @@ def _certificate_solve_request(
     )
 
 
-def _measure(
-    case_name: str, requested_cells: int, *, clip_mode: str | None = None
-) -> dict[str, Any]:
-    part = _part_path(case_name, requested_cells)
-    if part.exists():
-        persisted = json.loads(part.read_text(encoding="utf-8"))
-        if "render_data" in persisted:
-            print(
-                f"SOLOVEV_RENDER_PERSISTED case={case_name} "
-                f"requested_cells={requested_cells}",
-                flush=True,
-            )
-            _apply_joint_qualification(persisted)
-            row = _render_persisted_row(persisted)
-            _validate_row(row)
-            _write_json(part, row)
-            return row
+def _read_persisted_part(path: Path) -> dict[str, Any] | None:
+    """Return a banked part receipt that carries figure data, or ``None``."""
 
-    row_started = perf_counter()
-    configure_dtypes()
-    compilation_cache = configure_persistent_compilation_cache(
-        default_persistent_compilation_cache_root()
-    )
-    print(
-        f"SOLOVEV_COMPILATION_CACHE directory={compilation_cache.directory} "
-        f"version={compilation_cache.version_key}",
-        flush=True,
-    )
-    stage_timings: dict[str, float] = {}
+    if not path.exists():
+        return None
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    return persisted if "render_data" in persisted else None
+
+
+def _receipt_verdict(
+    persisted: dict[str, Any], setup: dict[str, Any]
+) -> dict[str, Any]:
+    """Decide whether a banked receipt describes the carrier built here.
+
+    The receipt is the only claim about a solve the render path has, so it is
+    accepted only where the tree can reproduce the two quantities the solve
+    was handed: the carrier it was built on and the current it was declared
+    against. A receipt from another carrier answers a different row, and
+    returning it would report a residual no run of this tree produced.
+    """
+
+    reasons: list[str] = []
+    recorded_target = (persisted.get("solver") or {}).get("target_current_a")
+    declared_target = setup["target_current"]
+    if recorded_target is None:
+        reasons.append("receipt_records_no_target_current")
+    elif not np.isclose(
+        float(recorded_target), float(declared_target), rtol=1.0e-12, atol=0.0
+    ):
+        reasons.append(
+            f"target_current recorded {float(recorded_target)!r} "
+            f"declared {float(declared_target)!r}"
+        )
+
+    recorded_key = (persisted.get("cache") or {}).get("semantic_key")
+    declared_key = (setup["machine"].cache or {}).get("semantic_key")
+    if recorded_key is None or declared_key is None:
+        reasons.append("carrier_semantic_key_missing")
+    elif recorded_key != declared_key:
+        reasons.append(f"carrier_semantic_key {recorded_key} declared {declared_key}")
+
+    recorded_cells = persisted.get("realised_cells")
+    declared_cells = int(len(setup["machine"].node))
+    if recorded_cells != declared_cells:
+        reasons.append(
+            f"realised_cells recorded {recorded_cells} declared {declared_cells}"
+        )
+
+    return {
+        "accepted": not reasons,
+        "reason": "; ".join(reasons) if reasons else "carrier_and_current_match",
+    }
+
+
+def _certificate_case_setup(
+    case_name: str,
+    requested_cells: int,
+    clip_mode: str | None,
+    stage_timings: dict[str, float],
+) -> dict[str, Any]:
+    """Build the machine, the analytic fixture and the declared current.
+
+    This is the state a solve is handed before the seed is chosen, and it is
+    also the state a banked receipt is checked against, so both paths build it
+    once and read the same numbers.
+    """
+
     with _timed_stage(
         "case_and_machine",
         stage_timings,
@@ -2302,19 +2340,102 @@ def _measure(
             operator,
             exact_physical,
         )
-        seed, requested_class, seed_receipt = _production_seed(
-            profile,
-            case_name,
-            target_current,
-            current_centroid,
-            current_receipt,
+
+    return {
+        "carrier_case": carrier_case,
+        "source_case": source_case,
+        "exact": exact,
+        "machine": machine,
+        "coordinates": coordinates,
+        "oracle_state": oracle_state,
+        "fixture_cache": fixture_cache,
+        "operator": operator,
+        "mesh": mesh,
+        "profile": profile,
+        "target_current": target_current,
+        "current_centroid": current_centroid,
+        "current_receipt": current_receipt,
+    }
+
+
+def _measure(
+    case_name: str, requested_cells: int, *, clip_mode: str | None = None
+) -> dict[str, Any]:
+    part = _part_path(case_name, requested_cells)
+
+    row_started = perf_counter()
+    configure_dtypes()
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    print(
+        f"SOLOVEV_COMPILATION_CACHE directory={compilation_cache.directory} "
+        f"version={compilation_cache.version_key}",
+        flush=True,
+    )
+    stage_timings: dict[str, float] = {}
+    setup = _certificate_case_setup(
+        case_name, requested_cells, clip_mode, stage_timings
+    )
+
+    persisted = _read_persisted_part(part)
+    if persisted is not None:
+        verdict = _receipt_verdict(persisted, setup)
+        if verdict["accepted"]:
+            print(
+                f"SOLOVEV_RECEIPT_RENDERED case={case_name} "
+                f"requested_cells={requested_cells} "
+                f"target_current_a={setup['target_current']!r} "
+                f"basis={verdict['reason']}",
+                flush=True,
+            )
+            _apply_joint_qualification(persisted)
+            row = _render_persisted_row(persisted)
+            row["receipt"] = {
+                "served_from": "persisted_part",
+                "status": "rendered",
+                "basis": verdict["reason"],
+                "solver_entered": False,
+            }
+            row["solver"]["solve_status"] = "rendered_from_receipt"
+            _validate_row(row)
+            _write_json(part, row)
+            return row
+        print(
+            f"SOLOVEV_RECEIPT_REFUSED case={case_name} "
+            f"requested_cells={requested_cells} reason={verdict['reason']}",
+            flush=True,
         )
-        seed_moments = operator.cell_current_moments(seed)
+
+    with _timed_stage(
+        "seed",
+        stage_timings,
+        case_name=case_name,
+        requested_cells=requested_cells,
+    ):
+        seed, requested_class, seed_receipt = _production_seed(
+            setup["profile"],
+            case_name,
+            setup["target_current"],
+            setup["current_centroid"],
+            setup["current_receipt"],
+        )
+        seed_moments = setup["operator"].cell_current_moments(seed)
         seed_amplitude = float(
-            operator.current_normalisation_amplitude(
-                target_current, jnp.sum(seed_moments.cell_current)
+            setup["operator"].current_normalisation_amplitude(
+                setup["target_current"], jnp.sum(seed_moments.cell_current)
             )
         )
+
+    profile = setup["profile"]
+    target_current = setup["target_current"]
+    machine = setup["machine"]
+    coordinates = setup["coordinates"]
+    oracle_state = setup["oracle_state"]
+    exact = setup["exact"]
+    fixture_cache = setup["fixture_cache"]
+    mesh = setup["mesh"]
+    operator = setup["operator"]
 
     with _timed_stage(
         "production_solve",

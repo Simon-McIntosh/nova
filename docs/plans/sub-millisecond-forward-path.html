@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
@@ -224,6 +224,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261029T204420630714-review-of-tracked-read-batch-bc50440cb613-figure" data-who="reckon-build" data-when="2026-10-29T20:51:52.119Z">
     <div class="r-comment-body"><p>figure review of per-slice-wall at head bc50440cb: 6 of 6 rubric items answered, 3 non-blocking findings (invisible 0.2 ms bound merged into the x-axis spine, grey bound label at 3.11:1, unlabelled log2 x-axis), no blocking defect, status parsed</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261029T090616166280-tracked-read-batch" data-who="reckon-build" data-when="2026-10-29T20:12:07Z">
+    <div class="r-comment-body"><p>tracked-read-batch — the read batched over 1/4/16/64 slices on one H200 measures 54.61/20.24/9.38/5.82 ms per slice at the diverted 550-cell state with zero copy bytes and the same 807 HLO op lines per call, so the 0.2 ms per-slice bound is not met at any batch size; the batch pays a fixed cost of about 44 ms per call that the unbatched read does not pay and a marginal 0.5 ms per slice, so the rebuild conditional was measured present and absent and falsified as the cause, and the accuracy arm finally executed at 550 cells and found two open failures at the diverted trial state.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

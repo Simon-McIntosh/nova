@@ -1,0 +1,680 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "273ce05691c5dd25721267b1f26b60ad89081351",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/brief.txt",
+    "sha256": "9fafe94195d4bdeee9b432e09eb0f2db9b2ff45b730b286b2d37b79ee27de8df"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4505778,
+      "input_tokens_cumulative": 4505778,
+      "output_tokens": 12081,
+      "output_tokens_cumulative": 12081,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2182,
+    "files": 15,
+    "removed": 71
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 265,
+        "name": "read_and_book",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 266
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_built",
+        "path": "tests/test_tracked_read_accuracy.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "main",
+        "path": "scripts/prototypes/tracked_read_batch/diagnose.py"
+      },
+      "window_line": 68
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "_built",
+        "path": "tests/test_tracked_read_batch.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "main",
+        "path": "scripts/prototypes/tracked_read_batch/diagnose.py"
+      },
+      "window_line": 68
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "one",
+        "path": "scripts/prototypes/tracked_read_batch/measure.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_built",
+        "path": "tests/test_tracked_read_accuracy.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "main",
+        "path": "scripts/prototypes/tracked_read_batch/profile_kernels.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "_built",
+        "path": "tests/test_tracked_read_batch.py"
+      },
+      "run_function": {
+        "line": 90,
+        "name": "main",
+        "path": "scripts/prototypes/tracked_read_batch/profile_kernels.py"
+      },
+      "window_line": 99
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "_built",
+        "path": "tests/test_tracked_read_batch.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "_built",
+        "path": "tests/test_tracked_read_accuracy.py"
+      },
+      "window_line": 53
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_built",
+        "path": "tests/test_tracked_read_accuracy.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "_built",
+        "path": "tests/test_tracked_read_batch.py"
+      },
+      "window_line": 37
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "70cccaa1c7e13e583f22b6696a11a653bc8f8b06",
+    "f467161bf38571394089aa30017de040463603bd",
+    "a87248dd3f1110310ec522d7109b52da9139af7d",
+    "8ff3421a1cd8241102f231c5e9d21829e7f808ac",
+    "6029edb6b328c670846704841a41a17499c41fe7",
+    "6d2652aa00cdd34ab589bbf5d9b04a60504228d4",
+    "60c79031612a5644ad17937905ef0e0bf9888468",
+    "98cd451ff1ec0cea07d992ecb3fd8e03d69ddd96",
+    "6e64714d9ea2dc3481e34e37819a79823dd1bfcd",
+    "48422e9f1eb80a45fcb5a521d4cc10057baa1593",
+    "4a8a26b29dac687371d006a47dece5dc83d8e985",
+    "8b0799c12f72cce0040983cd5308a1d9cc6d9ba0",
+    "d0c5ffdc7997524fcff5c8f9e6ce130a13d81041",
+    "114c5c4ebbcad729c71623777c45803b32312939",
+    "358acdc74f257ebad7f235dbd838ef71bfbde972",
+    "0782903aefe4d23f31f2fb0dc979d9c97d5b9208",
+    "bd851eed6f7cdee7507991539c04fab366cb5ec9",
+    "087017e8aaa1805e57916542c54a028beeeac9ff",
+    "9e362216ff656c252826982a84baffb67ef96f3d",
+    "048ec37c7b741d57eb7d2ad770d88429ad2cdf0c",
+    "e6e3087ca2017eeca67788561097c299f8f92bd8",
+    "bc50440cb6135565cce93a9516bd34b909108dbc"
+  ],
+  "completed_at": "2026-10-29T20:12:07Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-29T09:07:49Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read_batch.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/parity.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-29T10:06:23.617303+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-29T09:06:23Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 11,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 9,
+    "mean_context": 146667,
+    "observed_at": "2026-10-29T09:06:18Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 11,
+      "aggregate_tokens_per_second": 240.621,
+      "detail": "",
+      "mean_tokens_per_second": 70.771,
+      "observed_at": "2026-10-29T09:06:18Z",
+      "runs": 3.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-29T20:12:07Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/manifest.md",
+  "member": "disposable-r-20261029T090616166280-tracked-read-batch",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_tracked_read_accuracy.py::test_boundary_flux_against_the_analytic_read[limited-converged]",
+      "tests/test_tracked_read_accuracy.py::test_boundary_flux_against_the_analytic_read[limited-trial]",
+      "tests/test_tracked_read_accuracy.py::test_the_boundary_reference_is_the_wall_flux_extremum[limited]"
+    ],
+    "baseline_failure_ids": [
+      "test_boundary_flux_against_the_analytic_read[diverted-converged]",
+      "test_boundary_flux_against_the_analytic_read[diverted-trial]",
+      "test_boundary_flux_against_the_analytic_read[limited-converged]",
+      "test_boundary_flux_against_the_analytic_read[limited-trial]",
+      "test_stationary_points_against_the_analytic_newton[diverted-converged]",
+      "test_stationary_points_against_the_analytic_newton[diverted-trial]",
+      "test_stationary_points_against_the_analytic_newton[limited-converged]",
+      "test_stationary_points_against_the_analytic_newton[limited-trial]",
+      "test_the_read_and_the_field_choose_the_same_cell[diverted]",
+      "test_the_read_and_the_field_choose_the_same_cell[limited]"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_tracked_read_accuracy.py::test_boundary_flux_against_the_analytic_read[limited-converged]",
+      "tests/test_tracked_read_accuracy.py::test_boundary_flux_against_the_analytic_read[limited-trial]",
+      "tests/test_tracked_read_accuracy.py::test_the_boundary_reference_is_the_wall_flux_extremum[limited]"
+    ],
+    "declaration": "run the batched read with the bank captured as a closure constant in a scratch copy; a second batch recompiles",
+    "head_failure_ids": [
+      "test_boundary_flux_against_the_analytic_read[diverted-trial]",
+      "test_stationary_points_against_the_analytic_newton[diverted-trial]"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/negative_oracle.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/logs/negative_oracle.log",
+    "test_paths": [
+      "tests/test_tracked_read_accuracy.py",
+      "tests/test_tracked_read_batch.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "tracked-read-batch",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/oct29/tracked-read-batch.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/brief.txt",
+    "brief_sha256": "9fafe94195d4bdeee9b432e09eb0f2db9b2ff45b730b286b2d37b79ee27de8df",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2224,
+          "cached_input_tokens": 622398,
+          "input_tokens": 624624,
+          "output_tokens": 196,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 624820,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "tests/test_tracked_read_accuracy.py uses geometry.select.host_wall_flux and imports nothing a prototype also imports from tests, with tests/test_tracked_read.py passing 4 of 4",
+    "estimated_hours": null,
+    "goal": "Measure and bring the tracked read to 0.2 ms per slice at batch 16 on the H200",
+    "id": "tracked-read-batch",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-29T09:06:23Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 11,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 9,
+      "mean_context": 146667,
+      "observed_at": "2026-10-29T09:06:18Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 11,
+        "aggregate_tokens_per_second": 240.621,
+        "detail": "",
+        "mean_tokens_per_second": 70.771,
+        "observed_at": "2026-10-29T09:06:18Z",
+        "runs": 3.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T090616166280-tracked-read-batch/manifest.md",
+    "negative_control": "run the batched read with the bank captured as a closure constant in a scratch copy; a second batch recompiles",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/fixed_points.py",
+      "tests/test_tracked_read_accuracy.py",
+      "tests/test_tracked_read_batch.py",
+      "scripts/prototypes/tracked_read_batch",
+      "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html",
+      "docs/figures/sub-millisecond-forward-path-read-batch",
+      "docs/figures/sub-millisecond-forward-path/tracked-read-batch",
+      "nova/equilibrium/support_read.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1383294.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "tracked-read-batch",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-29T09:07:31.611144+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "edits a file claimed by the codex step node under the 2026-10-24 ruling; the codex write fence would refuse an ungranted path",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.532,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "bc50440cb6135565cce93a9516bd34b909108dbc",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "087017e8aaa1805e57916542c54a028beeeac9ff",
+    "reviewed_head_sha": "bc50440cb6135565cce93a9516bd34b909108dbc",
+    "scores": {
+      "durability": 12,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 17,
+      "reuse": 14,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261029T090616166280-tracked-read-batch",
+  "scope_acceptances": [
+    {
+      "path": "nova/equilibrium/support_read.py",
+      "reason": "edited beside the step nodes under the lead's 2026-10-24 ruling; merged cleanly",
+      "stopped_peer_claims": [
+        {
+          "claim": "nova/equilibrium/support_read.py",
+          "run_id": "r-20261029T091928865113-bank-newton-converge"
+        }
+      ]
+    }
+  ],
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "549614e6-64d1-4db3-a03a-0758aeebc2cc",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 56916831,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 823.834,
+    "generated_tokens": 244704,
+    "generation_seconds": 203.017,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.5,
+    "machine_seconds": 620.817,
+    "peak_input_tokens": 196720,
+    "tokens_per_second": 1205.34,
+    "wall_tokens_per_second": 297.03
+  },
+  "time_budget": "60m",
+  "tool_steps": 146.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: the fence gate cannot be evaluated at this certificate's trial state as the check is written. A dedicated H200 run reports support.valid; reading.valid and reading.qualified all false with 0 of 550 booked cells valid at a shift of one thousandth of the direction; against all satisfied at the unperturbed state; so the residual; the central difference and the Jacobian-vector product are NaN together; and agreement on NaN is not agreement. The next node should either pin the qualification alongside the point for the duration of a difference; or take the check at a state whose margin keeps a one-thousandth shift admissible; and report the margin used.",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2468,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-10-28T21:03:47Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-28T20:23:09Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261028T161422378426-assembled-step",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 20475,
+          "worker_pid": 2565694
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the fence gate cannot be evaluated at this certificate's trial state as the check is written. A dedicated H200 run reports support.valid; reading.valid and reading.qualified all false with 0 of 550 booked cells valid at a shift of one thousandth of the direction; against all satisfied at the unperturbed state; so the residual; the central difference and the Jacobian-vector product are NaN together; and agreement on NaN is not agreement. The next node should either pin the qualification alongside the point for the duration of a difference; or take the check at a state whose margin keeps a one-thousandth shift admissible; and report the margin used.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-28T21:03:47Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 43366,
+        "log_fresh": false,
+        "manifest_commits": [
+          "938887d2b af70b3ddc 5cfb26103 51c29308c dccf7a75c a601124c7 7771d1c81 bb0b4b922 cfcfb3b0f 07cf81f30 ba308ca6a"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "15001c3ea952bd4b8f4c03d601c065bea00caaf67de9d4b1e707de334e4be13e",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T161422378426-assembled-step/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "flash",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T161422378426-assembled-step/manifest.md; resolve the blocker before resuming the run",
+        "node": "assembled-step",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261028T161422378426-assembled-step",
+        "session": "s21-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261028T161422378426-assembled-step",
+          "session_id": "e3af7a40-a09f-41de-a290-67fc3700dc4d",
+          "source": "pointer"
+        },
+        "stored_phase": "complete",
+        "terminal_age_seconds": 43434,
+        "terminal_at": "2026-10-28T21:02:36Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/assembled-step"
+      }
+    ]
+  },
+  "wall_seconds": 39858,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [
+      1214489,
+      1214490,
+      1214491,
+      1272216,
+      1300348,
+      1214586,
+      1214596,
+      1214585,
+      1214597
+    ],
+    "exit_code": null,
+    "exited_at": "2026-10-29T20:14:37Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-29T19:58:16Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261029T090616166280-tracked-read-batch",
+    "signal": 15,
+    "signal_name": "SIGTERM",
+    "stream_records_seen": 37129,
+    "worker_pid": 1214489
+  },
+  "worker_seconds": 14204,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

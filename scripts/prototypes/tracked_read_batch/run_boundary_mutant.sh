@@ -72,7 +72,9 @@ arm() {
 
 {
   echo "# revision $(git -C "$WT" rev-parse HEAD) tree $(git -C "$WT" rev-parse HEAD^{tree})"
-  echo "# command: $WT/scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh ARMS=$ARMS SELECT=$SELECT (each arm from its own git archive copy, that copy as cwd and PYTHONPATH)"
+  # The description belongs above the command, not trailing it, so the line a
+  # reader could re-run carries only the invocation.
+  echo "# command: WT=$WT LOG=$LOG ARMS=$ARMS SELECT=$SELECT $WT/scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh"
   echo "# exec: cd <copy> && $PY -m pytest -p no:cacheprovider <copy>/tests/test_tracked_read_accuracy.py -k \"$SELECT\" -q"
   echo "# nova file $($PY -c 'import nova; print(nova.__file__)')"
   echo "# mutant copy: $(grep -n 'values, 1$\|values, -1$' "$D/mutant/scripts/prototypes/tracked_read_batch/reference.py")"

@@ -158,7 +158,9 @@ def test_small_dense_matrix_matches_full_fresh_residual():
     saddle = np.asarray(roots[1])
     radial = nodes[:, 0] - saddle[0]
     vertical = nodes[:, 1] - saddle[1]
-    rows = np.zeros_like(np.asarray(baseline.rows))
+    rows = np.zeros(
+        (len(nodes), cells, 3, 6), dtype=np.asarray(baseline.rows).dtype
+    )
     rows[:, 0, 0] = np.stack(
         (radial * vertical, vertical, radial, np.zeros_like(radial),
          np.ones_like(radial), np.zeros_like(radial)),

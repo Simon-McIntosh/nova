@@ -104,7 +104,7 @@ def render(state_path, output_path, preview_path):
         wall,
         color=neutral,
         linewidth=2.6,
-        zorder=2,
+        zorder=4,
     )
     reference.set_linestyle("dashed")
     draw_wall(axes, wall[:, 0], wall[:, 1])

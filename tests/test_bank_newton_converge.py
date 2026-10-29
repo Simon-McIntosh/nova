@@ -12,8 +12,9 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium import current, support_read
+from nova.equilibrium import current, support_read, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
+from scripts.prototypes.bank_newton_converge.fresh_solve import analytic_oracle
 from scripts.prototypes.bank_newton_converge.fresh_solve import run as fresh_solve
 
 
@@ -145,6 +146,37 @@ def test_dense_columns_and_random_vector_match_directional_tangent(monkeypatch):
         np.testing.assert_allclose(matrix[:, column], matvec(basis), rtol=1e-12)
     random = jnp.asarray(np.random.default_rng(7102).normal(size=6))
     np.testing.assert_allclose(matrix @ random, matvec(random), rtol=1e-12)
+
+
+def test_analytic_oracle_uses_direct_newton_without_read(monkeypatch):
+    from tests.equilibrium import test_topology_read as fixture
+
+    _, analytic, wall, axis, saddle = fixture._analytic_inputs("diverted")
+
+    def reject_read(*args, **kwargs):
+        raise AssertionError("an oracle must not call the topology read")
+
+    monkeypatch.setattr(topology, "read", reject_read)
+    flux = analytic.evaluate(jnp.asarray(saddle)).value
+    exact = SimpleNamespace(
+        axis=jnp.asarray(axis), boundary=jnp.asarray(saddle), boundary_flux=flux
+    )
+    seeds = jnp.asarray([axis, saddle])
+    measured, roots = analytic_oracle(analytic, seeds, exact, wall)
+    assert measured["axis_ratio"] < 1e-10
+    assert measured["saddle_ratio"] < 1e-10
+    assert measured["boundary_ratio"] < 1e-10
+    np.testing.assert_allclose(roots, seeds, atol=1e-10)
+
+    displaced = SimpleNamespace(
+        axis=exact.axis + jnp.asarray([1e-3, 0.0]),
+        boundary=exact.boundary + jnp.asarray([1e-3, 0.0]),
+        boundary_flux=flux + 1e-3,
+    )
+    measured, _ = analytic_oracle(analytic, seeds, displaced, wall)
+    assert measured["axis_ratio"] > 5e-4
+    assert measured["saddle_ratio"] > 5e-4
+    assert measured["boundary_ratio"] > 1e-4
 
 
 @pytest.mark.slow

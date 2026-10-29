@@ -16,8 +16,9 @@ import jax.numpy as jnp
 import numpy as np
 
 import nova
-from nova.equilibrium import support_read, topology
+from nova.equilibrium import support_read
 from scripts.prototypes.bank_newton_step.measure import machine
+from scripts.prototypes.tracked_read.measure import newton_reference
 
 
 def emit(name, **values):
@@ -26,6 +27,32 @@ def emit(name, **values):
 
 def magnitude(result):
     return float(jnp.max(jnp.abs(jnp.concatenate(result.residual))))
+
+
+def analytic_oracle(analytic, seeds, reading, wall):
+    """Measure a read against stationary points found on analytic flux alone."""
+    axis, axis_flux = newton_reference(analytic, seeds[0])
+    saddle, boundary_flux = newton_reference(analytic, seeds[1])
+    for point in (axis, saddle):
+        gradient = np.asarray(analytic.evaluate(jnp.asarray(point)).gradient)
+        assert np.linalg.norm(gradient) < 1e-10
+    wall = np.asarray(wall)
+    radius = 0.5 * float(np.ptp(wall[:, 0]))
+    span = abs(boundary_flux - axis_flux)
+    assert radius > 0 and span > 0
+    axis_error = float(np.linalg.norm(np.asarray(reading.axis) - axis))
+    saddle_error = float(np.linalg.norm(np.asarray(reading.boundary) - saddle))
+    boundary_error = abs(float(reading.boundary_flux) - boundary_flux)
+    return {
+        "axis_error": axis_error,
+        "minor_radius": radius,
+        "axis_ratio": axis_error / radius,
+        "saddle_error": saddle_error,
+        "saddle_ratio": saddle_error / radius,
+        "boundary_flux_error": boundary_error,
+        "flux_span": span,
+        "boundary_ratio": boundary_error / span,
+    }, np.stack((axis, saddle))
 
 
 def run(state_path, max_steps):
@@ -192,33 +219,11 @@ def run(state_path, max_steps):
     if not converged:
         raise AssertionError(f"fresh residual {terminal} exceeds 1e-10")
 
-    reference = jax.jit(topology.read)(analytic, operands.geometry, convention, policy)
     from tests.equilibrium import test_topology_read as fixture
 
-    _, _, wall, _, analytic_saddle = fixture._analytic_inputs("diverted")
-    radius = 0.5 * (
-        float(jnp.max(jnp.asarray(wall)[:, 0]))
-        - float(jnp.min(jnp.asarray(wall)[:, 0]))
-    )
-    axis_error = float(jnp.linalg.norm(support.reading.axis - reference.axis))
-    saddle_error = float(
-        jnp.linalg.norm(support.reading.boundary - jnp.asarray(analytic_saddle))
-    )
-    span = float(jnp.abs(reference.boundary_flux - reference.axis_flux))
-    boundary_error = float(
-        jnp.abs(support.reading.boundary_flux - reference.boundary_flux)
-    )
-    emit(
-        "ORACLE",
-        axis_error=axis_error,
-        minor_radius=radius,
-        axis_ratio=axis_error / radius,
-        saddle_error=saddle_error,
-        saddle_ratio=saddle_error / radius,
-        boundary_flux_error=boundary_error,
-        flux_span=span,
-        boundary_ratio=boundary_error / span,
-    )
+    _, _, wall, _, _ = fixture._analytic_inputs("diverted")
+    oracle, analytic_roots = analytic_oracle(analytic, roots, support.reading, wall)
+    emit("ORACLE", **oracle)
     active = int(operands.active_nodes)
     nodes = operands.nodes[:active]
     np.savez_compressed(
@@ -231,16 +236,16 @@ def run(state_path, max_steps):
         solved_roots=np.asarray(
             jnp.stack((support.reading.axis, support.reading.boundary))
         ),
-        analytic_roots=np.asarray(jnp.stack((reference.axis, reference.boundary))),
+        analytic_roots=analytic_roots,
         converged=np.asarray(converged),
         residual_sup=np.asarray(terminal),
-        axis_ratio=np.asarray(axis_error / radius),
-        saddle_ratio=np.asarray(saddle_error / radius),
-        boundary_ratio=np.asarray(boundary_error / span),
+        axis_ratio=np.asarray(oracle["axis_ratio"]),
+        saddle_ratio=np.asarray(oracle["saddle_ratio"]),
+        boundary_ratio=np.asarray(oracle["boundary_ratio"]),
     )
-    assert axis_error / radius <= 5e-4
-    assert saddle_error / radius <= 5e-4
-    assert boundary_error / span <= 1e-4
+    assert oracle["axis_ratio"] <= 5e-4
+    assert oracle["saddle_ratio"] <= 5e-4
+    assert oracle["boundary_ratio"] <= 1e-4
 
 
 if __name__ == "__main__":

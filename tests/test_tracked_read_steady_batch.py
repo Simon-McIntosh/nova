@@ -57,24 +57,20 @@ def _stack(lanes):
 def _batch(operands, cache, case, moments, seeds, tracking):
     """One compiled program per shape, as the route calls the batched read."""
     convention, policy = case["convention"], case["policy"]
+    count = jnp.shape(moments[0])[0]
+    lanes = jnp.broadcast_to(seeds, (count, *jnp.shape(seeds)))
     return jax.jit(
         lambda state, track: support_read.read_batch(
             operands,
             cache,
             state,
-            seeds,
-            seeds,
+            lanes,
+            lanes,
             convention,
             policy,
             tracking=track,
         )
     )(moments, tracking)
-
-
-def _tiled_tracking(tracking, count):
-    return jax.tree_util.tree_map(
-        lambda leaf: jnp.broadcast_to(leaf, (count, *jnp.shape(leaf))), tracking
-    )
 
 
 @pytest.mark.slow

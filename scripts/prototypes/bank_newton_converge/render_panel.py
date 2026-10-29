@@ -1,5 +1,10 @@
 """Draw a converged bank flux field against its analytic oracle."""
 
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
 import argparse
 from pathlib import Path
 import re

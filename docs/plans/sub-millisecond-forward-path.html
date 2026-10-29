@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
-<meta name="plan-modified" content="2026-10-28">
+<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-10-29">
 </head>
 <body>
   <main class="plan-doc">
@@ -88,7 +88,7 @@
     <p>Done when:</p>
     <ol>
       <li>At the limited and diverted 550-cell trial and converged states, the magnetic axis is within 5e-4 of the minor radius of the extremum of the analytic flux, and the boundary flux is within 1e-4 of the flux span. The X-point is judged against the saddle of the analytic flux at the diverted trial and converged states. Both references are located by a direct Newton solve on the analytic ψ of the certificate state, independent of any read code. This holds at all four states, including the two where the oracle's own axis reference is refused (the limited trial and the diverted converged state, per read-derivative-prototype). Neither the present read nor its harness is the reference, so no instrument the section changes can decide its own clause. Only a read that reports itself valid and qualified meets the clause (the <code>valid</code> flag <code>support_read.read</code> returns). The present gate reports every read at the limited trial state invalid, even though the analytic ψ has a contained extremum there. The section repairs that gate inside <code>support_read</code> and records why it refused.</li>
-      <li>The warm steady-state read, with no rebuild, costs at most 0.2 ms per call on an H200 at the 550-cell diverted state. The read returns its result on the device, and the record tables kernel launches and host–device copy bytes per call, with the copy bytes zero. The record also tables <code>support_read.read</code>'s warm wall by stage at the base and at the head, and a rebuild step's wall.</li>
+      <li>The warm steady-state read, with no rebuild, costs at most 0.2 ms per slice on an H200 at the 550-cell diverted state, batched over 16 or more slices, with the batch-1 wall tabled beside it (lead decision 2026-10-29: the bound follows §4, whose 1 ms target is per slice at batch 16 or more). The read returns its result on the device, and the record tables kernel launches and host–device copy bytes per call, with the copy bytes zero. The record also tables <code>support_read.read</code>'s warm wall by stage at the base and at the head, and a rebuild step's wall.</li>
       <li>A field change that moves the X-point out of its cell triggers the rebuild, which is reported. A field change that does not move it triggers no rebuild.</li>
     </ol>
     <p>Negative control: average the fit across cells, as the prototype did, and the axis error exceeds the budget.</p>
@@ -165,7 +165,7 @@
     <div class="r-comment-body"><p>review of r-20261028T215104424875-tracked-read-h200 at 2e007b43dd2a (base a1f6782c9c1b): the cell-selection reuse landed as one owner and the node's named gate is green, but that gate passes 4 of 4 at base and at head so it cannot distinguish the change, the accuracy clause is committed red at 3 of 8 and its boundary reference is the present read rather than the analytic Newton, and the 1.225 ms H200 wall was measured at the base revision; seven non-blocking findings, no blocker.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261028T223723687367-review-of-tracked-read-h200-2e007b43dd2a-figure" data-who="reckon-build" data-when="2026-10-28T22:49:14.661Z">
-    <div class="r-comment-body"><p>The figure review of r-20261028T215104424875-tracked-read-h200 at head 2e007b43 is stored as a parsed read-only rubric record at both declared paths (12 verdicts, 6 items per panel, 8 findings: 4 blocking, 4 non-blocking); the blocking pair is that neither rendered panel shows the analytic contour family the caption and the run&#x27;s own landing claim (92 and 9 near-black px inside the plot region against 22,896 and 26,665 blue) and that the two null markers of each state sit 2-3 px apart and merge into one mark, so the field comparison and the size-coded null comparison the panels exist to show cannot be read.</p></div>
+    <div class="r-comment-body"><p>The figure review of r-20261028T215104424875-tracked-read-h200 at head 2e007b43 is stored as a parsed read-only rubric record at both declared paths (12 verdicts, 6 items per panel, 8 findings: 4 blocking, 4 non-blocking); the blocking pair is that neither rendered panel shows the analytic contour family the caption and the run's own landing claim (92 and 9 near-black px inside the plot region against 22,896 and 26,665 blue) and that the two null markers of each state sit 2-3 px apart and merge into one mark, so the field comparison and the size-coded null comparison the panels exist to show cannot be read.</p></div>
 </div>
 </section>
 </main>

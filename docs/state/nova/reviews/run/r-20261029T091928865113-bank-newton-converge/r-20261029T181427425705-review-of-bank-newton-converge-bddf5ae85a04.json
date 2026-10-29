@@ -23,6 +23,13 @@
     "fresh_solve": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/fresh-converged.log",
     "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/matrix-negative-import.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-speed",
+      "recorded_at": "2026-10-29T18:29:11.621764+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/support_read.py",

@@ -842,15 +842,19 @@ def newton_step(
     quadrature,
     *,
     fresh_geometry: bool = False,
-    condition_diagnostics: bool = True,
+    condition_diagnostics: bool | None = None,
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
     Local analytic booking sensitivities compose with the bank into a dense
     matrix. Physical moment scales and diagonal equilibration precede LU.
+    Exact condition estimates are automatic only for a single-cell diagnostic
+    system; larger systems omit the two dense SVDs unless requested.
     """
     residual = step_residual(operands, moments, moments, support, profile, quadrature)
     cells = moments[0].size
+    if condition_diagnostics is None:
+        condition_diagnostics = cells == 1
     boundaries = (cells, 2 * cells)
     right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
     matrix = step_jacobian(

@@ -95,6 +95,12 @@
 <tr><td>Diverted trial</td><td>2e-8</td><td>1.03e-7</td><td>at most 1e-6</td></tr>
 <tr><td>Diverted converged</td><td>5e-8</td><td>5.98e-7</td><td>at most 1e-6</td></tr>
 </tbody></table>
-<p id="bank-newton-converge-review">The step sweep above uses fresh reads on both sides, and the frozen tangent differs by about 0.803 at both states. A four-test H200 suite passed at the earlier small-case test revision, including a dense-column comparison against central differences of the complete freshly read residual. A focused repeat of that column check found 3.45e-6 at a 1e-5 difference step; an expanded step sweep then hit the test's 300 s limit before selecting a step. Its 1e-6 assertion is therefore unverified at the current head. A scratch mutation removing geometry response from both dense and vector paths leaves their mutual-consistency test green but fails that independent column check at 0.046 relative. An additional test disables <code>topology.read</code>, verifies that direct analytic Newton references still work, and rejects displaced axis, saddle and boundary levels. Reverting the direct-oracle source makes that test fail.</p>
+<table id="bank-newton-converge-column-sweep"><thead><tr><th>Difference step</th><th>Full fresh-residual column error</th></tr></thead><tbody>
+<tr><td>3e-4</td><td>1.1753e-4</td></tr>
+<tr><td>1e-4</td><td>1.3056e-5</td></tr>
+<tr><td>3e-5</td><td>1.1750e-6</td></tr>
+<tr><td>1e-5</td><td>2.6385e-7</td></tr>
+</tbody></table>
+<p id="bank-newton-converge-review">The trial and converged directional sweep above uses fresh reads on both sides, and the frozen tangent differs by about 0.803 at both states. The small dense-column test now perturbs saddle position and curvature together and compares the matrix against central differences of the complete fresh-read residual. Its focused H200 run completed in 237.51 s and selected 1e-5 at 2.64e-7 relative, below 1e-6. The earlier curvature-only fixture had a 3.32e-6 floor and is superseded by this measured saddle-motion case. An earlier scratch mutation removing geometry response from both dense and vector paths left their mutual-consistency test green but failed the independent column check at 0.046 relative. The oracle test begins from perturbed seeds and requires Newton to reach the known stationary points without calling <code>topology.read</code>. A seed-echo mutation fails inside the analytic stationary-point check, while the head test passes.</p>
 </section>
 </main></body></html>

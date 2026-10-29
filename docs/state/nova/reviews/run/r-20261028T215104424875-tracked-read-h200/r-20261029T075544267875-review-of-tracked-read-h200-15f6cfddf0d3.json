@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 3,
+  "added_failure_ids": [
+    "tests/test_tracked_read_accuracy.py::test_stationary_points_against_the_analytic_newton[limited-trial]",
+    "tests/test_tracked_read_accuracy.py::test_stationary_points_against_the_analytic_newton[diverted-trial]",
+    "tests/test_tracked_read_accuracy.py::test_boundary_flux_against_the_analytic_read[diverted-trial]"
+  ],
+  "added_failures_note": "The pre-existing suite arm carries no added failure: tests/test_tracked_read.py passed 4 of 4 at base a1f6782 (logs/gate_tracked_read_base.log, EXIT=0) and 4 of 4 at head 0adcf5d6c (logs/gate_tracked_read_head.log, EXIT=0), and this window changes no nova/ source. The three ids above are the accuracy file's trial clauses, already red at the previous review head 2e007b43 and still red at 15f6cfdd (logs/accuracy_gate_head.log, head 8fae4af5d, '3 failed, 8 passed', EXIT=1); the reviewed manifest declares them deliberately under outside_scope as the reproduced trial-booking defect, and the delta adds none beyond them.",
+  "call_sites": [],
+  "completed_at": "2026-10-29T08:07:59.077Z",
+  "dispatched_at": "2026-10-29T07:57:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html",
+      "id": "fadf13f8204",
+      "line": 49,
+      "severity": "blocking",
+      "text": "the diverted trial row reports \"axis, analytic field substituted\" 3.88e-6 m and \"interpolant's own distance\" 1.88e-4 m, and the prose at line 59 rests the whole stage attribution on them, but no recorded run produced those two cells: the only log carrying analytic_field_axis_error_m is logs/accuracy_gate_limited.log, which ran with -k limited, and a grep of every log and of logs/tracked_read_h200_rows.json finds no diverted row of that shape, so the diverted half of the section's accuracy attribution is claimed rather than recorded."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html",
+      "id": "f81f68cdacf",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "the fragment says the behavioural clause \"requires the read's cell and the field's cell to be the same index\", but tests/test_tracked_read_accuracy.py:249 never calls support_read.read, so the sentence describes a guard the run does not have."
+    },
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "f28e11f009f",
+      "line": 267,
+      "severity": "non-blocking",
+      "text": "both sides of the assertion derive from one owner - located calls field._location, which calls nearest_cell - so it holds whatever nearest_cell returns and stays green if the read stops using the owner, which is the regression its name claims to catch."
+    },
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "fd9b87723eb",
+      "line": 89,
+      "severity": "non-blocking",
+      "text": "the docstring says the wall polygon is swept for the coarse extremum \"farthest from the axis flux\" while line 109 takes argmin(|values - axis_flux|), the nearest; the code is right only while every wall flux lies below the axis flux, and the description hides that fragility from the next reader."
+    },
+    {
+      "file": "tests/test_tracked_read_accuracy.py",
+      "id": "f084398e5f4",
+      "line": 57,
+      "severity": "non-blocking",
+      "text": "_wall_extremum and analytic_boundary duplicate wall-flux extremum selection owned by nova/geometry/select.py:165 host_wall_flux, which is independent of the read and could be called here rather than re-implemented."
+    },
+    {
+      "file": "scripts/prototypes/tracked_read_h200/measure.py",
+      "id": "f4573f1c9f6",
+      "line": 292,
+      "severity": "non-blocking",
+      "text": "a prototype measurement script imports _psi and analytic_boundary from tests.test_tracked_read_accuracy, which itself imports tests.equilibrium.test_topology_read._analytic_inputs, inverting the layering so the reference cannot be run outside a pytest-equipped tree."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read per change from 2e007b43 to 15f6cfdd; seven changes over eleven files, no nova/ source changed, the accuracy reference moved onto the analytic flux, and both panels redrawn with a magnified window per null pair.",
+    "done_when": "the done_when is stationary_cells removed in favour of fixed_points._CachedField._location with tests/test_tracked_read.py passing 4 of 4; logs/gate_tracked_read_head.log records \"4 passed ... EXIT=0\" at 0adcf5d6c against a base arm of the same at a1f6782, and tests/test_tracked_read_accuracy.py:241 now asserts the absence of stationary_cells.",
+    "goal": "the goal is to bring the tracked read to its accuracy and H200 bounds through the fixed_points cell owner; the delta since 2e007b43 re-points the accuracy reference at the analytic flux so no read decides its own clause (tests/test_tracked_read_accuracy.py:83) and repairs both panels, but both bounds are still missed and the diverted half of the attribution has no receipt.",
+    "manifest": "read; it gives the gate command literally, names the logs, every log carries a device and revision header and a bare EXIT= line, and the three red trial ids are declared under outside_scope rather than relaxed.",
+    "write_paths": "every path in the delta lies inside the declared write paths except tests/equilibrium/test_topology_read.py, which is outside the node's FENCE-SCOPE list and was authorised line by line (\"... _render_read_panel if you reuse it\") in resume-2-advice.txt."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to bring the tracked read to its accuracy and H200 bounds through the fixed_points cell owner; the delta since 2e007b43 re-points the accuracy reference at the analytic flux so no read decides its own clause (tests/test_tracked_read_accuracy.py:83) and repairs both panels, but both bounds are still missed and the diverted half of the attribution has no receipt.\nVERDICT done_when: the done_when is stationary_cells removed in favour of fixed_points._CachedField._location with tests/test_tracked_read.py passing 4 of 4; logs/gate_tracked_read_head.log records \"4 passed ... EXIT=0\" at 0adcf5d6c against a base arm of the same at a1f6782, and tests/test_tracked_read_accuracy.py:241 now asserts the absence of stationary_cells.\nVERDICT write_paths: every path in the delta lies inside the declared write paths except tests/equilibrium/test_topology_read.py, which is outside the node's FENCE-SCOPE list and was authorised line by line (\"... _render_read_panel if you reuse it\") in resume-2-advice.txt.\nVERDICT manifest: read; it gives the gate command literally, names the logs, every log carries a device and revision header and a bare EXIT= line, and the three red trial ids are declared under outside_scope rather than relaxed.\nVERDICT diff: read per change from 2e007b43 to 15f6cfdd; seven changes over eleven files, no nova/ source changed, the accuracy reference moved onto the analytic flux, and both panels redrawn with a magnified window per null pair.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: tests/test_tracked_read_accuracy.py:83 makes analytic_boundary the only reference, fixing the defect that the read decided its own clause, while the 0.2 ms bound in docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html remains missed at 1.225-1.268 ms.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/accuracy_gate_head.log records \"3 failed, 8 passed ... EXIT=1\" against the analytic Newton, but the diverted rows of the diverted trial table line at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:49 appear in no log.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every changed path is inside the declared set except tests/equilibrium/test_topology_read.py:723, which the coordinator authorised in resume-2-advice.txt and which changes no test logic.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_tracked_read_accuracy.py:241 reddens if stationary_cells returns or read stops calling nearest_cell, but the behavioural clause at line 267 compares two calls into the same owner and never exercises the read.\nSCORE fit: 14\nJUSTIFICATION fit: the added names carry no plan or ticket labels, but scripts/prototypes/tracked_read_h200/measure.py:292 imports its reference out of a test module, so the prototype cannot run without pytest on the path.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/test_tracked_read_accuracy.py:83 re-implements wall-flux extremum selection that nova/geometry/select.py:165 already owns through host_wall_flux (called from nova/biot/limiter.py:53) instead of extending it.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:49 blocking: the diverted trial row reports \"axis, analytic field substituted\" 3.88e-6 m and \"interpolant's own distance\" 1.88e-4 m, and the prose at line 59 rests the whole stage attribution on them, but no recorded run produced those two cells: the only log carrying analytic_field_axis_error_m is logs/accuracy_gate_limited.log, which ran with -k limited, and a grep of every log and of logs/tracked_read_h200_rows.json finds no diverted row of that shape, so the diverted half of the section's accuracy attribution is claimed rather than recorded.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html:22 non-blocking: the fragment says the behavioural clause \"requires the read's cell and the field's cell to be the same index\", but tests/test_tracked_read_accuracy.py:249 never calls support_read.read, so the sentence describes a guard the run does not have.\nFINDING tests/test_tracked_read_accuracy.py:267 non-blocking: both sides of the assertion derive from one owner - located calls field._location, which calls nearest_cell - so it holds whatever nearest_cell returns and stays green if the read stops using the owner, which is the regression its name claims to catch.\nFINDING tests/test_tracked_read_accuracy.py:89 non-blocking: the docstring says the wall polygon is swept for the coarse extremum \"farthest from the axis flux\" while line 109 takes argmin(|values - axis_flux|), the nearest; the code is right only while every wall flux lies below the axis flux, and the description hides that fragility from the next reader.\nFINDING tests/test_tracked_read_accuracy.py:57 non-blocking: _wall_extremum and analytic_boundary duplicate wall-flux extremum selection owned by nova/geometry/select.py:165 host_wall_flux, which is independent of the read and could be called here rather than re-implemented.\nFINDING scripts/prototypes/tracked_read_h200/measure.py:292 non-blocking: a prototype measurement script imports _psi and analytic_boundary from tests.test_tracked_read_accuracy, which itself imports tests.equilibrium.test_topology_read._analytic_inputs, inverting the layering so the reference cannot be run outside a pytest-equipped tree.",
+  "review_run_id": "r-20261029T075544267875-review-of-tracked-read-h200-15f6cfddf0d3",
+  "reviewed_base_sha": "2e007b43dd2a1127582a6bc21a235ad2c98c9c23",
+  "reviewed_head_sha": "15f6cfddf0d399ba9d8f28ec3e2a733a057b4a35",
+  "reviewed_run_id": "r-20261028T215104424875-tracked-read-h200",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 14,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:12:34.281726+00:00",
+  "total": 75
+}

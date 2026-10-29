@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T07:59:09Z",
+  "evidence_inputs": {
+    "caption_finding_repaired": "The non-blocking finding that the diverted caption only repeated the panel title ('Diverted trial state, same vocabulary.') is repaired: the caption at docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-h200.html now states that the axes agree to 0.19 mm inside the 6.81e-4 m budget while the X-point pair is 0.88 mm apart against the same budget, and the limited caption states its 4.12 mm axis error against the 2.00e-3 m budget. Neither caption repeats its figure's title alone.",
+    "dotted_circle_contrast_repaired": "The earlier finding that the normal-form-radius circle was drawn at about 1.48:1 against white is repaired: it is now #666666 at 5.74:1, and it is explained in the fragment prose as the radius over which the saddle form is carried.",
+    "method": "Judged from the two attached PNGs only (1400x900 RGB). Method: apart from the visual read, palette histograms and per-family run counting of the two named PNGs, plus a banded check that counts dark analytic crossings on sampled rows and tests for a blue companion within +-5 px over a +-7 row band (the +-7 rows cover a dash period, so a dash gap does not read as a missing level). No SVG was opened, rendered or read; the drawing script was consulted only for the line each finding is anchored to and never for a verdict.",
+    "null_separation_resolved": "The second blocking defect at 2e007b43dd2 was that each state's two null sets merged into one mark so the size coding could not be read. The magnified windows resolve it: in image-0 the axis pair is separated by about 22 px vertically and the X-point pair by about 32 px, with the analytic marker about twice the size of the read's and in a different colour and style; image-1 shows the limited axis pair at a comparable separation. Both window titles state the separation in millimetres (0.19, 0.88, 4.12), so the reader gets the number as well as the picture.",
+    "repair_verified": "The blocking defect recorded at head 2e007b43dd2 (analytic flux invisible: 92 near-black pixels inside the plot region against 22,896 feature-blue) is repaired at head 15f6cfddfd. Measured on the attached PNGs at the same plot region, the diverted panel now carries 11,939 near-black and 11,117 feature-blue pixels and the limited panel 14,510 and 9,026, and both families cross every sampled scanline and column of the interior (6 rows x 3 columns sampled, blue runs 4-14 per scanline against 6-32 dark runs).",
+    "shared_level_defect_repaired": "The earlier non-blocking finding that the two families were drawn on mismatched level sets is repaired: the renderer passes one level array to both draw_flux_contours calls, and the diverted state's shift to levels[1:] is applied to both families together, so a level a family misses is a real miss rather than a shifted comparison."
+  },
+  "figures": [
+    {
+      "attached": "image-0.png",
+      "path": "docs/figures/sub-millisecond-forward-path-read-h200/diverted-trial-poloidal-read.svg",
+      "rubric_verdicts": [
+        "RUBRIC legibility: passes - both contour families are visible at a glance. The dark analytic family is drawn heavy and solid, the feature-blue read family dashed over it, and on rows 350, 450 and 550 across the panel, 0, 0 and 2 of 22-23 dark crossings respectively lack a blue companion within +-5 px over +-7 rows, so essentially every level carries both families; the two null pairs, which could not be told apart in the previous rendering, are separated in the magnified windows as a large dark marker and a small blue one.",
+        "RUBRIC data_ink: passes - the panel is line contours on white (11,939 near-black and 11,117 feature-blue pixels against 1,188,195 white) with the wall in a thin single line and no fills, gradients, shading or decorative bands anywhere.",
+        "RUBRIC decoration: passes - no gradient, background fill or styled theme competes with the data; the only non-data ink is the wall, the two-line legend block, the two window titles and the inset boxes, and the inset boxes are recorded as a separate non-blocking finding rather than as decoration here.",
+        "RUBRIC contrast: passes - the legend is #333333 (12.6:1 on white) and the feature-blue line against white 5.37:1, the radius annotation and the window titles #666666 and #555555 at 5.74:1 and 7.4:1, so every text element clears 4.5:1 against its white background.",
+        "RUBRIC table_form: passes - this is a spatial contour panel in which position and topology are the information, not a rendering of rows and columns; the single scalar it carries (the normal-form radius) is a geometric quantity that belongs on the geometry.",
+        "RUBRIC label_collision: passes - all content sits inside the canvas (content bounding box x 85-1294 of 1400, y 59-800 of 900), so no text is clipped, and the legend block, the two window titles and the two inset boxes occupy separate clear regions with no label overlapping another label or the contours."
+      ],
+      "state": "diverted trial state"
+    },
+    {
+      "attached": "image-1.png",
+      "path": "docs/figures/sub-millisecond-forward-path-read-h200/limited-trial-poloidal-read.svg",
+      "rubric_verdicts": [
+        "RUBRIC legibility: passes - both families are present and distinguishable: solid heavy near-black analytic contours with the dashed feature-blue read contours over them, and on rows 350, 450 and 550, 2, 0 and 2 of 28-29 dark crossings respectively lack a blue companion within +-5 px over +-7 rows. The axis pair is separated in the window titled 'axis magnified, 4.12 mm apart' as a large dark triangle above a small blue one.",
+        "RUBRIC data_ink: passes - nested line contours on white (14,510 near-black and 9,026 feature-blue pixels against 1,190,427 white) with the wall as one thin line; no fills or shading.",
+        "RUBRIC decoration: passes - no gradient, background fill or styled theme; the only non-data ink is the wall, the three-line legend block, the window title and the inset box, and the inset box is recorded as a separate non-blocking finding.",
+        "RUBRIC contrast: passes - #333333 legend text at 12.6:1, the feature-blue legend line at 5.37:1 and the #555555 window title at 7.4:1, all on white.",
+        "RUBRIC table_form: passes - a spatial contour panel; it depicts no tabular information and carries no scalar annotations.",
+        "RUBRIC label_collision: passes - content bounding box x 85-1231 of 1400 and y 59-800 of 900, so nothing is clipped, and the legend block, the window title and the inset box do not overlap one another or the data."
+      ],
+      "state": "limited trial state"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "folded: the figure follow-on in the plan section that owns these panels; the curve should either be dashed to match the legend or named on the panel and in the caption as the read's boundary level",
+      "file": "tests/equilibrium/test_topology_read.py",
+      "id": "faa8c6975f0",
+      "line": 816,
+      "severity": "non-blocking",
+      "summary": "The diverted panel draws one blue curve solid where the in-figure legend says the cell family is dashed, so a reader who looks for a solid blue line has no explanation for it. The boundary-level contour of the read's field is drawn in the feature colour at 2.6 pt with the default solid style (the draw_flux_contours call at this line passes no linestyle), and it is plainly visible in the rendered panel: scanning rows 120-760 the outermost blue feature is present on 641 of 700 rows with a single jump above 6 px between consecutive rows, which is a continuous curve, against 104 such jumps in the limited panel where only the dashed family is drawn. The legend block reads 'cell field / dashed, small nulls' and neither caption mentions a solid cell contour, so the one solid blue line in the figure is unexplained ink that a reader can mistake for the analytic family drawn in the wrong colour."
+    },
+    {
+      "disposition": "exempted: the boxes delimit the magnified windows, cost a reader nothing, and removing them would need a redraw of a figure that otherwise reads correctly; recorded so the next figure in this family does not repeat the frame",
+      "file": "tests/equilibrium/test_topology_read.py",
+      "id": "fdad16b18b2",
+      "line": 940,
+      "severity": "non-blocking",
+      "summary": "The two magnification windows carry complete four-sided boxes in #888888, which the repository's plotting rules exclude: every axis is despined and a 2D poloidal panel is drawn with its axis off, because a frame is furniture that adds no information. The frames are clearly visible in both attached panels as grey rectangles around each zoom. They do not distract from the data and they usefully delimit the magnified region, which is why this does not block, but they are the one piece of styled furniture on an otherwise axis-free figure and a redraw would remove them."
+    }
+  ],
+  "project": "nova",
+  "read_only": true,
+  "response": null,
+  "review_run_id": "r-20261029T075744577039-review-of-tracked-read-h200-15f6cfddf0d3-figure",
+  "reviewed_base_sha": "a1f6782c9c1bb1b6278418393961d76ffc7329ca",
+  "reviewed_head_sha": "15f6cfddf0d399ba9d8f28ec3e2a733a057b4a35",
+  "reviewed_run_id": "r-20261028T215104424875-tracked-read-h200",
+  "rubric": "figure",
+  "status": "parsed",
+  "summary": "I opened both attached PNGs and judged the pictures only: image-0.png is the diverted trial state (saddle null at the divertor, 'normal-form radius 107.13 mm' annotation, two magnified windows titled 'axis magnified, 0.19 mm apart' and 'X-point magnified, 0.88 mm apart') and image-1.png is the limited trial state (nested contours, no saddle, one window titled 'axis magnified, 4.12 mm apart'). The repair at 15f6cfddfd works: both contour families are now visible in both panels. On rows 350, 450 and 550 through the main panels every dark analytic crossing is accompanied by the dashed blue read contour within +-5 px over +-7 rows (0-2 unpaired of 22-29 crossings per row, the misses at the outermost level), and the whole-panel ink balance is 11,939 near-black against 11,117 feature-blue pixels in the diverted panel and 14,510 against 9,026 in the limited one, against 92 near-black in the same region before the repair. The null pairs, which previously merged into one mark, are separable in the windows: the large dark marker and the small feature-coloured one are about a marker-width apart and read as two. Six rubric items are reported per figure. No blocking defect survives. Two non-blocking findings are recorded: one solid blue curve (the boundary-level contour) contradicts the in-figure legend's 'cell field / dashed', and the two magnification windows carry full four-spine boxes that the repository's despine rule excludes. Nothing was edited, created, moved or redrawn; no SVG was opened and no image other than the two named PNGs was read.",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:07:54.402354+00:00",
+  "total": null
+}

@@ -31,8 +31,8 @@ echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"
   echo "# revision $(git -C "$WT" rev-parse HEAD) tree $D/tree"
   echo "# module $(cd "$D/tree" && PYTHONPATH="$D/tree" /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova.equilibrium.support_read as m; print(m.__file__)')"
   echo "# cwd $D/tree"
-  echo "# rows $ROWS"
   echo "# command: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -m slow ${SELECT:-} tests/test_tracked_read_accuracy.py"
+  echo "# rows $ROWS"
   cd "$D/tree" || exit 1
   set +e
   NOVA_ACCURACY_ROWS="$ROWS" \

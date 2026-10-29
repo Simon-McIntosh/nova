@@ -55,17 +55,20 @@ def _stack(lanes):
 
 
 def _batch(operands, cache, case, moments, seeds, tracking):
+    """One compiled program per shape, as the route calls the batched read."""
     convention, policy = case["convention"], case["policy"]
-    return support_read.read_batch(
-        operands,
-        cache,
-        moments,
-        seeds,
-        seeds,
-        convention,
-        policy,
-        tracking=tracking,
-    )
+    return jax.jit(
+        lambda state, track: support_read.read_batch(
+            operands,
+            cache,
+            state,
+            seeds,
+            seeds,
+            convention,
+            policy,
+            tracking=track,
+        )
+    )(moments, tracking)
 
 
 def _tiled_tracking(tracking, count):
@@ -160,11 +163,13 @@ def test_a_batch_with_one_rebuilding_lane_rebuilds_and_still_matches(built):
     stale = tracking._replace(
         cells=tracking.cells.at[1].set(jnp.full_like(tracking.cells[1], -1))
     )
-    stencil = jax.vmap(
-        lambda state, seed: support_read.stationary_stencil(
-            operands, cache, state, seed, seed, convention
-        )
-    )(tuple(stacked for stacked in _stack(lanes)), jnp.stack([seeds, seeds]))
+    stencil = jax.jit(
+        lambda state: jax.vmap(
+            lambda lane: support_read.stationary_stencil(
+                operands, cache, lane, seeds, seeds, convention
+            )
+        )(state)
+    )(_stack(lanes))
     per_lane = jax.vmap(support_read.rebuild_needed)(stencil, stale)
     jax.block_until_ready(per_lane)
     assert bool(jnp.any(per_lane)), (

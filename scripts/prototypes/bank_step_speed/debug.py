@@ -174,7 +174,7 @@ def main():
             rings_fn, (*form_inputs, intervals), (*form_changes, interval_rate)
         )
         _, ray_rate, _, _, _ = support_read._ray_intersection_rate(
-            vertices, count, form, algebraic_rate
+            vertices, count, form, form_changes
         )
 
         def roots_fn(position, direction, curvature, cubic):
@@ -202,7 +202,7 @@ def main():
             selected,
             intervals,
             quadrature.segments,
-            algebraic_rate,
+            form_changes,
             ring_count,
         )
         return (

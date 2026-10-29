@@ -18,7 +18,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.database import content_store
-from nova.equilibrium import current, fixed_points, support_read, topology
+from nova.equilibrium import current, fixed_points, solve, support_read, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 
 
@@ -70,6 +70,8 @@ def main():
     parser.add_argument("--state-path", type=Path)
     parser.add_argument("--initial-state", type=Path)
     parser.add_argument("--max-iterations", type=int, default=12)
+    parser.add_argument("--max-halvings", type=int, default=10)
+    parser.add_argument("--compare-present", action="store_true")
     parser.add_argument("--direction", choices=("ramp", "balanced"), default="ramp")
     args = parser.parse_args()
     revision = subprocess.check_output(
@@ -204,6 +206,23 @@ def main():
             quadrature,
         )
 
+    @jax.jit
+    def present_update(operands, moments, support):
+        cells = moments[0].size
+        flat = jnp.concatenate(moments)
+
+        def present_residual(state, bank):
+            parts = tuple(jnp.split(state, (cells, 2 * cells)))
+            result = support_read.step_residual(
+                bank, moments, parts, support, profile, quadrature
+            )
+            return jnp.concatenate(result.residual)
+
+        factored = solve.factor(present_residual, flat, operands)
+        return jax.scipy.linalg.lu_solve(
+            (factored.lu, factored.pivots), -present_residual(flat, operands)
+        )
+
     print("STAGE solve", flush=True)
     current_moments = moments
     current_support = support
@@ -228,13 +247,34 @@ def main():
             converged=bool(update.converged),
             wall_ms=wall_ms,
         )
+        if args.compare_present:
+            reference = present_update(operands, current_moments, current_support)
+            jax.block_until_ready(reference)
+            bank_update = jnp.concatenate(update.update)
+            relative = jnp.linalg.norm(bank_update - reference) / jnp.linalg.norm(
+                reference
+            )
+            emit(
+                "PRESENT_ROUTE",
+                index=iteration,
+                relative_update=float(relative),
+                reference_finite=bool(jnp.all(jnp.isfinite(reference))),
+                bank_update_norm=float(jnp.linalg.norm(bank_update)),
+                reference_update_norm=float(jnp.linalg.norm(reference)),
+            )
         accepted = False
         last_rejected = None
-        for half in range(10):
+        for half in range(args.max_halvings):
             scale = 2.0**-half
             candidate = tuple(
                 value + scale * delta
                 for value, delta in zip(current_moments, update.update, strict=True)
+            )
+            fixed_candidate = residual(
+                operands, current_moments, candidate, current_support
+            )
+            fixed_norm = float(
+                jnp.max(jnp.abs(jnp.concatenate(fixed_candidate.residual)))
             )
             candidate_support = read_state(operands, cache, candidate)
             changed = np.flatnonzero(
@@ -267,6 +307,7 @@ def main():
                     changed_cells=changed,
                     clip_changed=clip_changed,
                     owner_changed=owner_changed,
+                    fixed_support_residual=fixed_norm,
                 )
                 last_rejected = (scale, candidate_support, changed, None)
                 continue
@@ -296,6 +337,7 @@ def main():
                 changed_cells=changed,
                 clip_changed=clip_changed,
                 owner_changed=owner_changed,
+                fixed_support_residual=fixed_norm,
             )
             last_rejected = (scale, candidate_support, changed, candidate_norm)
         if not accepted:

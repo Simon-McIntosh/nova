@@ -112,18 +112,52 @@ def main(argv):
         "DEVICE", backend=jax.default_backend(), cells=args.cells, repeats=args.repeats
     )
 
+    # Both unbatched arms: the rebuilding read, which is what a caller that
+    # passes no tracking gets, and the carried read, which is the one the
+    # 1.2 ms wall belongs to. Tracing only the first would compare the batch
+    # against a read nobody runs in the steady state.
     single = jax.jit(
         lambda m: support_read.read(
             operands, cache, m, roots, roots, convention, policy
         )
     )
-    jax.block_until_ready(single(moments))
+    opening = single(moments)
+    jax.block_until_ready(opening)
     path, rows = trace(single, (moments,), args.repeats)
     single_rows = dict(rows)
     emit("TRACE", arm="single", path=str(path), kernels=len(rows), repeats=args.repeats)
     for name, (count, total) in rows[: args.top]:
         emit(
             "SINGLE_KERNEL",
+            name=name,
+            count=count,
+            total_ns=total,
+            per_call_ns=total / args.repeats,
+        )
+
+    track = support_read.tracking_of(opening)
+    carried = jax.jit(
+        lambda m, t: support_read.read(
+            operands,
+            cache,
+            m,
+            roots,
+            roots,
+            convention,
+            policy,
+            tracking=t,
+            rebuild=False,
+        )
+    )
+    jax.block_until_ready(carried(moments, track))
+    path, rows = trace(carried, (moments, track), args.repeats)
+    carried_rows = dict(rows)
+    emit(
+        "TRACE", arm="carried", path=str(path), kernels=len(rows), repeats=args.repeats
+    )
+    for name, (count, total) in rows[: args.top]:
+        emit(
+            "CARRIED_KERNEL",
             name=name,
             count=count,
             total_ns=total,
@@ -162,7 +196,16 @@ def main(argv):
             )
 
     one, four = arms[1], arms[4]
-    for name in sorted(set(one) - set(single_rows)):
+    emit(
+        "STEADY",
+        carried_events=sum(value[0] for value in carried_rows.values()),
+        carried_ns=sum(value[1] for value in carried_rows.values()) / args.repeats,
+        rebuilding_events=sum(value[0] for value in single_rows.values()),
+        rebuilding_ns=sum(value[1] for value in single_rows.values()) / args.repeats,
+        batch1_ns=sum(value[1] for value in one.values()) / args.repeats,
+        batch4_ns=sum(value[1] for value in four.values()) / args.repeats,
+    )
+    for name in sorted(set(one) - set(carried_rows)):
         events_one = one[name][0]
         events_four = four.get(name, (0, 0))[0]
         emit(

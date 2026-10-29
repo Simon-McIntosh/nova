@@ -112,7 +112,7 @@ def test_batched_steady_read_equals_the_single_read_lane_by_lane(built):
             seeds,
             convention,
             policy,
-            tracking=tracking[index],
+            tracking=jax.tree_util.tree_map(lambda leaf: leaf[index], tracking),
         )
         np.testing.assert_allclose(
             np.asarray(steady.stationary.position)[index],

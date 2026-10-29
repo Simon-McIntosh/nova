@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T22:14:50Z",
+  "figures": [
+    {
+      "caption": "Diverted 550-cell fresh-read solution after three accepted Newton steps: fresh residual 1.00e-11, converged true. Bank flux is solid blue above the dashed grey analytic oracle on the same psi levels, -0.060194, -0.045963, -0.031731, -0.017500, -0.003269, 0.010962 and 0.025193 Wb. The black outline is the wall, which bounds the cropped canvas. The bank axis is a filled blue triangle and its admitted saddle a filled blue cross; the direct analytic Newton references are an outlined grey triangle and diamond. The wider outlines keep nearly coincident null sets separately legible.",
+      "path": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T221237618525-review-of-bank-newton-converge-8ec96bf6ddeb-figure/image-0.png",
+      "rubric": {
+        "contrast": "pass: the only text is the two-column figure legend in black on white. The bank blue #3366CC is about 5.4:1 and the oracle grey #676767 about 5.7:1 against white, and the two series are separated by dash pattern as well as by hue, so neither depends on lightness alone.",
+        "data_ink": "pass with the caveat in finding 1: the canvas holds two contour families, one wall outline and four null marks, and nothing else. The one place the ink budget is misallocated is weight rather than quantity - the analytic reference is drawn heavier than the solved field it is set against.",
+        "decoration": "pass: no gradient, no background fill, no shading, no grid, no spines, no title and no annotation inside the panel; the poloidal axes are off and the white field carries no non-data ink.",
+        "label_collision": "pass: the legend is the only text, sits wholly inside the top band of the canvas in two clean columns with a gap between them, and no row touches another. Nothing is clipped at any canvas edge and no text falls over a contour, the wall or a null mark; the only marks that overlap are the null pairs, which overlap by design so that nearly coincident points stay distinguishable.",
+        "legibility": "pass at the delivered render (attached image-0.png, 1400x2039 native): the seven shared psi levels read as one nested family of contours inside the closed black wall, the centre pair of null marks resolves as a blue filled triangle inside a grey outlined triangle, and the bottom pair as a blue filled cross inside a grey outlined diamond, so the nearly coincident references stay separable. Readability costs that remain are recorded as the non-blocking findings below (the reference stroke outweighs the subject, and no contour carries its level), not folded into this verdict.",
+        "table_form": "pass: the content is spatial - two poloidal flux fields, their stationary points and a first-wall boundary - where relative position is the information. The seven psi levels stay in the caption as text, which is where they belong."
+      },
+      "script": "scripts/prototypes/bank_newton_converge/render_panel.py"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted: the figure is judged read-only here and the defect costs readability, not comprehension; it is carried for the next figure edit rather than holding this record.",
+      "file": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "id": "faff9b25c71",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Stroke weight is inverted against the subject: the analytic oracle is drawn beneath the bank field at 4.5 pt dashed grey while the solved field is drawn over it at 3.0 pt solid blue (scripts/prototypes/bank_newton_converge/render_panel.py lines 106 and 118). Because the two fields agree over most of the panel - which is exactly what the record exists to show - the heavier reference protrudes as a grey fringe along both sides of every blue contour, so the panel reads as dashed grey rails threading through the measured result rather than as one blue subject on a subordinate reference. The legend compounds this: 'oracle flux' is keyed as a full-weight 4.5 pt dash, a mark the reader never meets plainly on the panel. The nested structure and the agreement remain legible, so this does not block; drawing the reference at or below the subject's weight, and letting the dash pattern rather than a wider stroke separate the two, would restore the intended hierarchy."
+    },
+    {
+      "disposition": "exempted: read-only review; recorded for the next figure edit, not acted on here.",
+      "file": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "id": "faff9b25c71",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Where the two fields diverge slightly, the grey dash ends break the visual continuity of the blue stroke, so the outer contour family along the lower right and the long lower-left tail reads as a chain of short broken segments rather than as continuous levels, and several outer contours terminate abruptly with a squared open end in mid-panel. A reader cannot tell from the picture whether a level is closed and interrupted by the reference stroke or genuinely open. The nested topology the caption claims is still visible, so this does not block; separating the two series by offsetting or by thinning the reference, instead of stacking a heavy dash beneath a thinner solid stroke, would let each contour be followed as one curve."
+    },
+    {
+      "disposition": "exempted: read-only review; carried for the next figure edit.",
+      "file": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "id": "faff9b25c71",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "No contour on the panel is identified by level. The seven shared psi values are listed only in the caption, and because every tick, axis label and direct label is off, a reader cannot tell which curve is -0.060194 Wb and which is 0.025193 Wb without counting inward from the axis, nor verify from the picture that both fields sit on the same levels beyond the coincidence of the strokes. The coincidence is in fact visible, so this does not block; one label per contour, or a stated level ordering in the caption, would make the shared-level claim checkable from the figure alone."
+    },
+    {
+      "disposition": "exempted: read-only review; layout improvement only.",
+      "file": "docs/figures/sub-millisecond-forward-path-converge/bank-newton-converged.svg",
+      "id": "faff9b25c71",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The canvas is portrait (7.2 x 10.5 in, 1400 x 2039 px) with the legend pinned in the top fifth and the equal-aspect panel centred, leaving a blank band of roughly a fifth of the width each side and a wide empty strip between the legend and the wall. At the column width a reckon page renders, the two nearly coincident null pairs the caption spends a sentence distinguishing fall to a few pixels of marker difference. The panel reads correctly at its intrinsic size, so this does not block; cropping the horizontal margins to the wall would give the panel more of the page and enlarge the null marks that carry the caption's point."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T221237618525-review-of-bank-newton-converge-8ec96bf6ddeb-figure",
+  "reviewed_base_sha": "f410e42bc1541fe67539cf2cb5cd5c58893842b5",
+  "reviewed_head_sha": "8ec96bf6ddeb1f34493840c017f51af5656b1a8e",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T22:20:12.622156+00:00",
+  "total": null
+}

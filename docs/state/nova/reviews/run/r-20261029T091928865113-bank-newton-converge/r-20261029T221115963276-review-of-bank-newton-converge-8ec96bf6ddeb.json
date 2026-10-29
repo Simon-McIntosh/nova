@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_newton_converge.py:205-206 fail when the base read is invalid or has no normal-form cells; these conditions establish that the synthetic fixture reaches the geometry branch.",
+    "tests/test_bank_newton_converge.py:238 and :241 fail when a perturbed fresh read is invalid or its observed column has zero magnitude; the finite-difference instrument demonstrably sees the nonzero column reported in column-motion.log.",
+    "tests/test_bank_newton_converge.py:247 compares the assembled column against a separately evaluated full fresh-read residual and fails when geometry response is removed, as geometry-current-negative.log shows at 0.135.",
+    "tests/test_bank_newton_converge.py:248 fails if the fresh and frozen columns collapse together; it is a branch-exercise check and alone does not prove fresh-read accuracy.",
+    "tests/test_bank_newton_converge.py:268-270 fail if the oracle ratios exceed 1e-10, while :271 compares returned roots with independently supplied fixture roots and :272 fails a seed echo because the fixture seeds are displaced.",
+    "tests/test_bank_newton_converge.py:280-282 fail if an intentionally displaced read is accepted as accurate, giving the ratio checks a negative case.",
+    "tests/test_bank_newton_converge.py:291-295 fail if the fresh solve does not converge to 1e-10 or misses the analytic axis, saddle, or boundary budgets."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-29T22:18:29Z",
+  "dispatched_at": "2026-10-29T22:12:23Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/head-suite-current.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/baseline-complete.log",
+    "fresh_column": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/column-motion.log",
+    "geometry_negative": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/geometry-current-negative.log",
+    "oracle_negative": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/oracle-seed-echo-negative.log",
+    "oracle_positive": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T091928865113-bank-newton-converge/oracle-current.log"
+  },
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The separate focused oracle receipt is useful for this bounded review and the duplicate wrapper does not affect tested behavior.",
+      "file": "scripts/prototypes/bank_newton_converge/oracle_gate.sh",
+      "id": "fe8865c120c",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "The new focused oracle runner duplicates the setup, log header, pytest launch, and cleanup in small_gate.sh rather than extending that focused-gate owner; disposition: exempted because the separate oracle receipt is useful for this bounded review and the duplication does not affect the tested behavior."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read eight commits from f410e42 to 8ec96bf6, which change only the evidence fragment, three prototype scripts, and tests/test_bank_newton_converge.py; no production source changed.",
+    "done_when": "Docs/plans/sub-millisecond-forward-path.html:101-105 requires a 1e-6 fresh-residual Jacobian check and oracle accuracy; tests/test_bank_newton_converge.py:247 and :268-272 assert these, and column-motion.log plus oracle-current.log record passing runs.",
+    "goal": "The source brief and docs/plans/sub-millisecond-forward-path.html:96-105 require a fresh-read Newton step and analytic oracle; tests/test_bank_newton_converge.py:231-272 now verifies the column and displaced-seed oracle, while the previously deferred timing remains outside this delta.",
+    "manifest": "The source manifest.md reports both complete suite arms at four passes and zero failures, cites their logs, and records the seed-echo and geometry-removal negative controls.",
+    "write_paths": "The source manifest.md grants the evidence fragment, bank prototype directory, and bank test; git diff f410e42..8ec96bf6 names exactly five files, all within those paths."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_converge.py:247 fails when geometry response is removed (0.135 relative), and :268-272 fails a seed-echo oracle; both refusals have readable negative-control logs.",
+    "evidence": "column-motion.log records 2.63849682e-7 with EXIT=0, oracle-seed-echo-negative.log fails at fresh_solve.py:40 with EXIT=1, and both suite logs report four passes.",
+    "fit": "tests/test_bank_newton_converge.py:151 bounds the slow check at 900 s, and the added identifiers at :265-272 describe fixture roots and displaced seeds without plan labels.",
+    "goal_fidelity": "tests/test_bank_newton_converge.py:247 and :268-272 turn the earlier unverified column and seed-echo defects into behavioral checks for the fresh-read solve.",
+    "reuse": "scripts/prototypes/bank_newton_converge/oracle_gate.sh:4-15 repeats the focused pytest wrapper already owned by scripts/prototypes/bank_newton_converge/small_gate.sh:4-15 instead of parameterizing that owner.",
+    "scope_discipline": "The five paths in git diff f410e42..8ec96bf6 fit the source manifest.md orientation_write_paths, with no change to nova production modules."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief and docs/plans/sub-millisecond-forward-path.html:96-105 require a fresh-read Newton step and analytic oracle; tests/test_bank_newton_converge.py:231-272 now verifies the column and displaced-seed oracle, while the previously deferred timing remains outside this delta.\nVERDICT done_when: Docs/plans/sub-millisecond-forward-path.html:101-105 requires a 1e-6 fresh-residual Jacobian check and oracle accuracy; tests/test_bank_newton_converge.py:247 and :268-272 assert these, and column-motion.log plus oracle-current.log record passing runs.\nVERDICT write_paths: The source manifest.md grants the evidence fragment, bank prototype directory, and bank test; git diff f410e42..8ec96bf6 names exactly five files, all within those paths.\nVERDICT manifest: The source manifest.md reports both complete suite arms at four passes and zero failures, cites their logs, and records the seed-echo and geometry-removal negative controls.\nVERDICT diff: Read eight commits from f410e42 to 8ec96bf6, which change only the evidence fragment, three prototype scripts, and tests/test_bank_newton_converge.py; no production source changed.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/test_bank_newton_converge.py:247 and :268-272 turn the earlier unverified column and seed-echo defects into behavioral checks for the fresh-read solve.\nSCORE evidence: 17\nJUSTIFICATION evidence: column-motion.log records 2.63849682e-7 with EXIT=0, oracle-seed-echo-negative.log fails at fresh_solve.py:40 with EXIT=1, and both suite logs report four passes.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five paths in git diff f410e42..8ec96bf6 fit the source manifest.md orientation_write_paths, with no change to nova production modules.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_bank_newton_converge.py:247 fails when geometry response is removed (0.135 relative), and :268-272 fails a seed-echo oracle; both refusals have readable negative-control logs.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_bank_newton_converge.py:151 bounds the slow check at 900 s, and the added identifiers at :265-272 describe fixture roots and displaced seeds without plan labels.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/bank_newton_converge/oracle_gate.sh:4-15 repeats the focused pytest wrapper already owned by scripts/prototypes/bank_newton_converge/small_gate.sh:4-15 instead of parameterizing that owner.\nFINDING scripts/prototypes/bank_newton_converge/oracle_gate.sh:8 non-blocking: The new focused oracle runner duplicates the setup, log header, pytest launch, and cleanup in small_gate.sh rather than extending that focused-gate owner; disposition: exempted because the separate oracle receipt is useful for this bounded review and the duplication does not affect the tested behavior.",
+  "review_run_id": "r-20261029T221115963276-review-of-bank-newton-converge-8ec96bf6ddeb",
+  "reviewed_base_sha": "f410e42bc1541fe67539cf2cb5cd5c58893842b5",
+  "reviewed_head_sha": "8ec96bf6ddeb1f34493840c017f51af5656b1a8e",
+  "reviewed_run_id": "r-20261029T091928865113-bank-newton-converge",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T22:22:19.016289+00:00",
+  "total": 94
+}

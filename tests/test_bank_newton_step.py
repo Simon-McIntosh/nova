@@ -8,10 +8,13 @@ configure_dtypes()
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
+import sys
 from typing import NamedTuple
 from types import SimpleNamespace
 
 from nova.equilibrium import clip_quadrature, current, support_read, topology
+from scripts.prototypes.bank_newton_step import measure
 from scripts.prototypes.bank_newton_step.measure import (
     _assert_update_agreement,
     _terminal_verdict,
@@ -325,3 +328,141 @@ def test_forward_route_update_comparison_refuses_regressions():
         _assert_update_agreement([1.01, 2.0], [1.0, 2.0])
     with np.testing.assert_raises(AssertionError):
         _assert_update_agreement([np.nan, 2.0], [1.0, 2.0])
+
+
+def test_route_comparison_uses_production_update(monkeypatch):
+    """A distinct route residual must reach the final update assertion."""
+    from scripts.prototypes.fast_map_production import program, solver
+    from scripts.prototypes.lean_map import jets, quadrature, values
+
+    geometry = SimpleNamespace(
+        vertices=jnp.asarray([[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]]),
+        vertex_count=jnp.asarray([3]),
+    )
+    operands = SimpleNamespace(
+        geometry=geometry,
+        rows=jnp.zeros(1),
+        exterior=jnp.zeros(1),
+        nodes=jnp.zeros(1),
+        sample_index=jnp.zeros(1),
+        mesh=jnp.zeros(1),
+    )
+    moments = tuple(jnp.zeros(1) for _ in range(3))
+    expected_route = jnp.asarray([[2.0, 3.0, 4.0]])
+    observed = {}
+
+    monkeypatch.setattr(
+        measure,
+        "jax",
+        SimpleNamespace(
+            jit=lambda function: function, block_until_ready=lambda _: None
+        ),
+    )
+    monkeypatch.setattr(
+        measure, "emit", lambda name, **row: observed.update({name: row})
+    )
+    monkeypatch.setattr(quadrature, "triangle_rule", lambda _: jnp.zeros(1))
+    monkeypatch.setattr(
+        quadrature, "quadratic_fit", lambda *_: (jnp.zeros(1), jnp.zeros(1))
+    )
+    monkeypatch.setattr(
+        values, "build_values", lambda *_args, **_kwargs: (jnp.zeros(1), {})
+    )
+    monkeypatch.setattr(jets, "JetMap", lambda *_: jnp.zeros(1))
+    monkeypatch.setattr(
+        program,
+        "map_moments",
+        lambda state, *_args: SimpleNamespace(
+            moment_residual=state - expected_route, booking_valid=jnp.asarray(True)
+        ),
+    )
+    monkeypatch.setattr(
+        solver, "operand_block", lambda *_: lambda directions, *args: directions
+    )
+    monkeypatch.setattr(
+        support_read,
+        "newton_step",
+        lambda *_: SimpleNamespace(
+            update=tuple(jnp.asarray([value]) for value in (1.0, 2.0, 3.0)),
+            linear_residual=jnp.asarray(0.0),
+        ),
+    )
+    monkeypatch.setattr(
+        support_read,
+        "step_residual",
+        lambda *_: SimpleNamespace(
+            residual=tuple(jnp.asarray([value]) for value in (1.0, 2.0, 3.0)),
+            valid=jnp.asarray(True),
+        ),
+    )
+    analytic = SimpleNamespace(evaluate=lambda _: SimpleNamespace(hessian=jnp.eye(2)))
+    with pytest.raises(AssertionError, match="forward-route update difference"):
+        measure.compare_route(
+            operands,
+            jnp.zeros(1),
+            jnp.zeros((1, 2)),
+            None,
+            None,
+            None,
+            current.Quadrature(),
+            moments,
+            None,
+            analytic,
+        )
+    assert observed["ROUTE_COMPARISON"]["relative_update"] > 0.1
+
+
+def test_route_comparison_cli_reaches_comparator(monkeypatch):
+    """The comparison option must dispatch before the tangent-only path."""
+
+    class ReachedComparison(Exception):
+        pass
+
+    geometry = SimpleNamespace(pitch=jnp.ones(1))
+    operands = SimpleNamespace(geometry=geometry, rows=jnp.zeros((1, 1)), bucket=1)
+    moments = tuple(jnp.zeros(1) for _ in range(3))
+    reading = SimpleNamespace(
+        valid=jnp.asarray(True),
+        qualified=jnp.asarray(True),
+        membership=jnp.ones(1),
+        normal_form_cells=jnp.zeros(1, dtype=bool),
+    )
+    support = SimpleNamespace(valid=jnp.asarray(True), reading=reading)
+    monkeypatch.setattr(sys, "argv", [measure.__file__, "--compare-route"])
+    monkeypatch.setattr(
+        measure.subprocess, "check_output", lambda *_args, **_kwargs: "test-revision"
+    )
+    monkeypatch.setattr(
+        measure,
+        "jax",
+        SimpleNamespace(
+            jit=lambda function: function,
+            block_until_ready=lambda _: None,
+            default_backend=lambda: "cpu",
+            devices=lambda: [],
+        ),
+    )
+    monkeypatch.setattr(measure, "emit", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        measure,
+        "machine",
+        lambda kind: (
+            operands,
+            None,
+            jnp.zeros((1, 2)),
+            None,
+            None,
+            None,
+            None,
+            moments,
+            None,
+        ),
+    )
+    monkeypatch.setattr(support_read, "read", lambda *_: support)
+
+    def reached(*_args):
+        raise ReachedComparison
+
+    monkeypatch.setattr(measure, "compare_route", reached)
+    with pytest.raises(ReachedComparison):
+        measure.main()

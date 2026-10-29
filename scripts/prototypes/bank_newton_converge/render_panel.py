@@ -82,8 +82,20 @@ def render(state_path, output_path, preview_path):
     )
     feature = DEFAULT_INK.flux_color
     neutral = "#676767"
-    figure, axes = plt.subplots(figsize=(14, 7.2), dpi=100)
+    figure, axes = plt.subplots(figsize=(7.2, 10.5), dpi=100)
     poloidal_axes(axes)
+    reference = draw_scattered_contours(
+        axes,
+        coordinates[:, 0],
+        coordinates[:, 1],
+        analytic,
+        levels,
+        wall,
+        color=neutral,
+        linewidth=3.6,
+        zorder=3,
+    )
+    reference.set_linestyle("dashed")
     draw_scattered_contours(
         axes,
         coordinates[:, 0],
@@ -93,20 +105,8 @@ def render(state_path, output_path, preview_path):
         wall,
         color=feature,
         linewidth=3.0,
-        zorder=3,
-    )
-    reference = draw_scattered_contours(
-        axes,
-        coordinates[:, 0],
-        coordinates[:, 1],
-        analytic,
-        levels,
-        wall,
-        color=neutral,
-        linewidth=2.6,
         zorder=4,
     )
-    reference.set_linestyle("dashed")
     draw_wall(axes, wall[:, 0], wall[:, 1])
     oracle_style = DEFAULT_INK.variant(
         axis_color=neutral,
@@ -140,16 +140,12 @@ def render(state_path, output_path, preview_path):
         contain=wall,
     )
     axes.set_aspect("equal")
+    lower, upper = np.min(wall, axis=0), np.max(wall, axis=0)
+    margin = 0.04 * (upper - lower)
+    axes.set_xlim(lower[0] - margin[0], upper[0] + margin[0])
+    axes.set_ylim(lower[1] - margin[1], upper[1] + margin[1])
     handles = [
         Line2D([], [], color=feature, lw=3, label="bank flux"),
-        Line2D([], [], color=neutral, lw=2.6, ls="--", label="oracle flux"),
-        Line2D(
-            [],
-            [],
-            color=DEFAULT_INK.wall_color,
-            lw=DEFAULT_INK.wall_linewidth,
-            label="wall",
-        ),
         Line2D(
             [],
             [],
@@ -162,21 +158,29 @@ def render(state_path, output_path, preview_path):
         Line2D(
             [],
             [],
+            color=feature,
+            marker="X",
+            markersize=8,
+            linestyle="none",
+            label="bank saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.wall_color,
+            lw=DEFAULT_INK.wall_linewidth,
+            label="wall",
+        ),
+        Line2D([], [], color=neutral, lw=3.6, ls="--", label="oracle flux"),
+        Line2D(
+            [],
+            [],
             color=neutral,
             marker="^",
             markersize=12,
             markerfacecolor="white",
             linestyle="none",
             label="oracle axis",
-        ),
-        Line2D(
-            [],
-            [],
-            color=feature,
-            marker="X",
-            markersize=8,
-            linestyle="none",
-            label="bank saddle",
         ),
         Line2D(
             [],
@@ -193,11 +197,11 @@ def render(state_path, output_path, preview_path):
         handles=handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.98),
-        ncol=4,
+        ncol=2,
         frameon=False,
         fontsize=14,
     )
-    figure.subplots_adjust(left=0.03, right=0.97, top=0.83, bottom=0.03)
+    figure.subplots_adjust(left=0.03, right=0.97, top=0.79, bottom=0.03)
     check_text(figure)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(preview_path, format="png", dpi=200)
@@ -206,7 +210,7 @@ def render(state_path, output_path, preview_path):
     image = output_path.read_text()
     image, count = re.subn(
         r'width="[^"]+" height="[^"]+" viewBox=',
-        'width="31.1cm" height="16cm" viewBox=',
+        'width="16cm" height="23.3cm" viewBox=',
         image,
         count=1,
     )

@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-29T10:23:19.957Z",
   "dispatched_at": "2026-10-29T10:15:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-tracked-read-batch-6d2652aa00cd",
+      "recorded_at": "2026-10-29T17:31:20.074448+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_tracked_read_accuracy.py",

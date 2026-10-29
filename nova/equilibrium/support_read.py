@@ -172,6 +172,7 @@ def read(
     iterations: int = 12,
     jets=None,
     tracking: TrackingState | None = None,
+    rebuild: bool | None = None,
 ) -> SupportRead:
     """Solve the stationary points, then read membership at them.
 
@@ -228,17 +229,24 @@ def read(
             | (saddle_live != tracking.saddle_live)
             | ~tracking.valid
         )
-        reading = jax.lax.cond(
-            rebuilt,
-            rebuild,
-            lambda _: tracking.reading,
-            None,
-        )
+        if rebuild is False:
+            # A caller that knows no slice of its batch can rebuild takes the
+            # carried decision directly. Under ``vmap`` the conditional below
+            # becomes a select and evaluates the whole-mesh rebuild for every
+            # lane whether or not any lane needs it, which is the cost this
+            # branch exists to avoid; the caller reads ``rebuilt`` back and
+            # re-reads any batch that reports one.
+            reading = tracking.reading
+        else:
+            reading = jax.lax.cond(
+                rebuilt,
+                rebuild,
+                lambda _: tracking.reading,
+                None,
+            )
         rebuilds = tracking.rebuilds + rebuilt.astype(jnp.int32)
     valid = jnp.all(solved.valid) & reading.valid & reading.qualified
-    return SupportRead(
-        solved, reading, valid, cells, saddle_live, rebuilds, rebuilt
-    )
+    return SupportRead(solved, reading, valid, cells, saddle_live, rebuilds, rebuilt)
 
 
 def book(operands, support: SupportRead, psi, profile, quadrature):

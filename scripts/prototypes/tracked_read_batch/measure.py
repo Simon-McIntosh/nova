@@ -55,11 +55,24 @@ def lowered_counts(program):
     return launches, sum(1 for line in lines if " = " in line)
 
 
-def batched(operands, cache, convention, policy):
+def batch_program(operands, cache, convention, policy, rebuild=None):
+    """One compiled program that serves every state of the batch's shape.
+
+    The bank enters as a traced operand and never as a constant folded into the
+    program, so a second batch of another state reuses this executable. A read
+    whose bank is captured in a closure instead has to build a new program per
+    state, which is what the batch test refuses.
+    """
+    return jax.jit(batched(operands, cache, convention, policy, rebuild))
+
+
+def batched(operands, cache, convention, policy, rebuild=None):
     """Vmap one tracked read over a stacked bank
 
     The operands and the row window are shared by every lane; the moments, the
     seeds, the warm starts and the tracking state carry one entry per slice.
+    ``rebuild=False`` takes the carried decision without the conditional, which
+    under ``vmap`` would evaluate the whole-mesh rebuild in every lane.
     """
 
     def one(moments, seeds, previous, track):
@@ -72,6 +85,7 @@ def batched(operands, cache, convention, policy):
             convention,
             policy,
             tracking=track,
+            rebuild=rebuild,
         )
 
     return jax.vmap(one)
@@ -87,9 +101,10 @@ def measure(case, operands, cache, count, repeats):
     stacked = tuple(tiled(moment, count) for moment in moments)
     seeds = tiled(jnp.asarray(case["roots"]), count)
     convention, policy = case["convention"], case["policy"]
-    program = jax.jit(batched(operands, cache, convention, policy))
+    program = batch_program(operands, cache, convention, policy, rebuild=False)
+    opening = jax.jit(batched(operands, cache, convention, policy))
 
-    first = program(stacked, seeds, seeds, None)
+    first = opening(stacked, seeds, seeds, None)
     tracking = jax.vmap(support_read.tracking_of)(first)
     jax.block_until_ready(tracking)
 

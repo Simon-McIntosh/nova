@@ -20,7 +20,7 @@ import pytest
 
 from nova.equilibrium import support_read
 from scripts.prototypes.tracked_read.measure import build_kind, cache_for
-from scripts.prototypes.tracked_read_batch.measure import batched, tiled
+from scripts.prototypes.tracked_read_batch.measure import batch_program, tiled
 
 CELLS = 128
 POLICY_RADIUS = 0.054806712567833996
@@ -48,7 +48,10 @@ def test_one_program_serves_a_second_batch_of_another_state():
     converged = tuple(tiled(moment, COUNT) for moment in case["states"]["converged"])
     trial = tuple(tiled(moment, COUNT) for moment in case["states"]["trial"])
 
-    program = jax.jit(batched(operands, cache, convention, policy))
+    program = batch_program(operands, cache, convention, policy)
+    assert hasattr(program, "_cache_size"), (
+        "the batch must hand back one compiled program, not a per-call rebuild"
+    )
     first = program(converged, seeds, seeds, None)
     tracking = jax.vmap(support_read.tracking_of)(first)
     settled = program(converged, seeds, seeds, tracking)

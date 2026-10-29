@@ -97,6 +97,25 @@
   the lowered module — <code>while</code> loops rise from 81 to 118 under
   <code>vmap</code> — and are not kernel launches.</p>
 
+  <p>The launch count and the device time come from the profiler, not from
+  HLO text. Each program is traced with <code>jax.profiler.trace</code> and
+  the xplane is read back with <code>jax.profiler.ProfileData</code>, which
+  yields one event per kernel carrying its name and its device duration; the
+  lines of a trace are kept apart, because a Python frame on a host track is
+  not a kernel and the device track is named for its CUDA stream
+  (<code>Stream #14(MemcpyH2D,Compute,MemcpyD2D)</code>). At the diverted
+  550-cell state, over the twelve largest kernels, the unbatched read issues
+  18,516 kernel events per call and the batched read at one slice 19,989;
+  their device time is the same to within two thirds of a percent, 31.82 ms
+  and 31.61 ms per call. So the two are doing the same work on the device,
+  and the 54.6 ms against 1.27 ms contrast is a comparison across states
+  rather than a cost the batch adds. At four slices the same kernels cost
+  43.83 ms per call, an increment of 4.07 ms per slice, which is the
+  arithmetic per slice the wall series gives. What the batched path adds is
+  the launches: about nineteen thousand kernel events per call at this state,
+  and 1,473 more at one slice than the unbatched read — per call, since the
+  count does not rise with the batch (19,587 at four slices).</p>
+
   <p>Every column's instrument: the per-call and per-slice walls are
   <code>perf_counter</code> around a call closed by
   <code>block_until_ready</code>, minimum of the repeats; the copy bytes are a

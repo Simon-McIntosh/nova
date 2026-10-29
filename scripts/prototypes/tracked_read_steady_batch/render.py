@@ -63,16 +63,6 @@ def main():
             label=label,
             zorder=4 if tone is None else 3,
         )
-        index = ORDER.index("sixteen")
-        axis.annotate(
-            label,
-            (sizes[index], values[index]),
-            textcoords="offset points",
-            xytext=(0, -16 if tone != "grey" else 10),
-            ha="center",
-            color=color,
-            fontsize=14,
-        )
 
     axis.axhline(
         BOUND_MS, color=style.flux_color, linewidth=1.2, linestyle=":", zorder=2
@@ -83,12 +73,12 @@ def main():
     axis.set_xticklabels([LABEL[key] for key in ORDER])
     axis.set_xlim(sizes[0] / 1.4, sizes[-1] * 1.6)
     axis.text(
-        sizes[-1] * 1.05,
-        BOUND_MS,
+        sizes[0] / 1.25,
+        BOUND_MS * 1.12,
         f"{BOUND_MS} ms bound",
         color=NEUTRAL,
         fontsize=14,
-        va="center",
+        va="bottom",
         ha="left",
         zorder=5,
     )

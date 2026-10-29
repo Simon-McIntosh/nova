@@ -30,36 +30,61 @@ def emit(name, **values):
     print(name + " " + json.dumps(values, sort_keys=True, default=float), flush=True)
 
 
-def machine():
+def machine(kind):
     import tests.equilibrium.test_topology_read as fixture
     from benchmarks import solovev_certificate as certificate
     from scripts.analytic_oracle_fixtures.measure import analytic_profile
 
-    receipt = json.loads((STORE / "receipt.json").read_text())
-    digest = receipt["digest"]
-    oracle, analytic, wall, axis, saddle = fixture._analytic_inputs("diverted")
+    oracle, analytic, wall, axis, saddle = fixture._analytic_inputs(kind)
     geometry = fixture._realised_hex_geometry(wall, 550)
-    object_root = content_store.verified_object_root(STORE, create=False)
-    destination = content_store.verified_destination(
-        object_root, content_store.digest_hex(digest)
-    )
-    with np.load(destination / "bank.npz", allow_pickle=False) as archive:
-        nodes = archive["nodes"]
-        sample_index = archive["sample_index"]
-    mesh = fixed_points.build_mesh(nodes, sample_index, geometry)
-    operands = support_read.read_bank(STORE, digest, geometry, mesh)
+    if kind == "diverted":
+        receipt = json.loads((STORE / "receipt.json").read_text())
+        digest = receipt["digest"]
+        object_root = content_store.verified_object_root(STORE, create=False)
+        destination = content_store.verified_destination(
+            object_root, content_store.digest_hex(digest)
+        )
+        with np.load(destination / "bank.npz", allow_pickle=False) as archive:
+            nodes = archive["nodes"]
+            sample_index = archive["sample_index"]
+        mesh = fixed_points.build_mesh(nodes, sample_index, geometry)
+        operands = support_read.read_bank(STORE, digest, geometry, mesh)
+    else:
+        if jax.default_backend() != "gpu":
+            raise RuntimeError("analytic operator construction needs a GPU")
+        from scripts.prototypes.read_route.jets import build_jet_matrix
+
+        reference = fixture._kernel_backed_field(kind, oracle, analytic, geometry)
+        matrix, exterior, nodes, sample_index, seconds = build_jet_matrix(
+            reference.coupling, geometry, analytic, reference.moments, persist=False
+        )
+        emit("BANK_BUILD", kind=kind, seconds=seconds, nodes=len(nodes))
+        operands = support_read.SupportOperands.from_rows(
+            geometry, matrix, exterior, nodes, sample_index, bucket=len(nodes)
+        )
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
-    policy = TopologyPolicy(normal_form_radius=0.054806712567833996)
-    _, source, _ = certificate._case("diverted-single-null", clip_mode="exact")
+    policy = (
+        TopologyPolicy(normal_form_radius=0.054806712567833996)
+        if kind == "diverted"
+        else TopologyPolicy()
+    )
+    case = (
+        "diverted-single-null" if kind == "diverted" else "weak-rotation-reactor-static"
+    )
+    _, source, _ = certificate._case(case, clip_mode="exact")
     profile = analytic_profile(source)
     quadrature = current.Quadrature(sigma=convention.sigma, segments=64)
-    roots = jnp.asarray([axis, saddle])
+    roots = jnp.asarray([axis] if saddle is None else [axis, saddle])
     psi = jax.vmap(jax.vmap(analytic.value))(geometry.sample_points)
     analytic_read = jax.jit(topology.read)(analytic, geometry, convention, policy)
     booked = current.book(psi, analytic_read, geometry, profile, quadrature)
     moments = booked[:3]
     cache = fixed_points.RowCache(
-        mesh, operands.nodes, jnp.arange(len(nodes)), operands.rows, operands.exterior
+        operands.mesh,
+        operands.nodes,
+        jnp.arange(len(operands.nodes)),
+        operands.rows,
+        operands.exterior,
     )
     return operands, cache, roots, convention, policy, profile, quadrature, moments
 
@@ -67,6 +92,7 @@ def machine():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--converge", action="store_true")
+    parser.add_argument("--kind", choices=("diverted", "limited"), default="diverted")
     parser.add_argument("--state-path", type=Path)
     parser.add_argument("--initial-state", type=Path)
     parser.add_argument("--max-iterations", type=int, default=12)
@@ -86,7 +112,9 @@ def main():
         "DEVICE", backend=jax.default_backend(), devices=[str(d) for d in jax.devices()]
     )
     print("STAGE load", flush=True)
-    operands, cache, roots, convention, policy, profile, quadrature, moments = machine()
+    operands, cache, roots, convention, policy, profile, quadrature, moments = machine(
+        args.kind
+    )
     if args.initial_state is not None:
         with np.load(args.initial_state, allow_pickle=False) as previous:
             moments = tuple(jnp.asarray(row) for row in previous["moments"])

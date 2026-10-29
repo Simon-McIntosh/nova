@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-newton-converge-landing">Bank Newton convergence audit</h1>
-<p id="bank-newton-converge-summary">The unchanged bank step still solves a frozen-read equation and stalls under a fresh read. The bank and the prototype production moment map differ before linearization, and neither measured update is a Newton direction for the bank's full fresh-read residual. No converged state or production-parity test is claimed.</p>
+<p id="bank-newton-converge-summary">The bank's own equation is the selected target. Its baseline step solves a frozen read and stalls under a fresh read. An added saddle-form and edge-interval tangent agrees with small-step central differences, but the dense Newton matrix does not compose to that tangent at the diverted seed. The fresh solve, oracle comparison and converged contour remain open. Production-route parity is no longer a gate because the routes discretise differently.</p>
 
 <section id="bank-newton-converge-parity">
 <h2>Same-iterate systems</h2>
@@ -29,7 +29,7 @@
 <tr><td>Level and normal geometry</td><td>Updates axis and boundary scalar flux; retains the read's saddle form and edge intervals</td><td>Recomputes its read inside the moment map</td><td>Those retained fields account for the 0.0303684 fresh-read gap below.</td></tr>
 <tr><td>Normalization</td><td>Rank-one correction for prescribed current in this comparison</td><td>Prescribed current divided by its own raw booking total</td><td>The correction cannot reconcile different raw bookings.</td></tr>
 </tbody></table>
-<p>Central differences of the <em>full bank residual</em> called <code>support_read.read</code> afresh at each perturbed state. Both sides remained valid at displacement fractions 1e-5 and 1e-6. The diagnostic checked <code>‖R + JΔ‖/‖R‖</code>: the bank's frozen Jacobian gave 2.58e-9 for its own update, a positive control, but a fresh-read central difference gave 1.63 at 1e-5 and 1.76 at 1e-6. The production update gave 2338.53 at both fractions. Thus both updates miss the full fresh-read linearization; the production update is also for a different residual. The 1e-6 update-parity gate remains failed.</p>
+<p>Central differences of the <em>full bank residual</em> called <code>support_read.read</code> afresh at each perturbed state. Both sides remained valid at displacement fractions 1e-5 and 1e-6. The baseline diagnostic checked <code>‖R + JΔ‖/‖R‖</code>: the frozen Jacobian gave 2.58e-9 for its own update, a positive control, but a fresh-read central difference gave 1.63 at 1e-5 and 1.76 at 1e-6. The production update gave 2338.53 at both fractions. The updates miss the bank's full fresh-read linearization, and the production update solves a different residual. Production-route parity was subsequently dropped.</p>
 </section>
 
 <section id="bank-newton-converge-read">
@@ -44,7 +44,7 @@
 <tr><td>Edge intervals only</td><td>0.0144561</td></tr>
 <tr><td>Both</td><td>0.0303684</td></tr>
 </tbody></table>
-<p>The normal form and edge intervals, rather than a support-set change or a scalar boundary-level shift, carry the fresh-read stall. The existing closed-form Jacobian has no derivatives for either field.</p>
+<p>The normal form and edge intervals carry the baseline fresh-read stall. The baseline closed-form Jacobian had no derivatives for either field.</p>
 </section>
 
 <section id="bank-newton-converge-outer">
@@ -59,6 +59,18 @@
 <tr><td>Kernel launches per step</td><td>not measured</td><td>at most 100</td></tr>
 <tr><td>Converged contour panel against oracle</td><td>no converged state exists</td><td>required for landing</td></tr>
 </tbody></table>
-<p id="bank-newton-converge-blocker">The remaining repair needs a decision on the canonical moment equation and access to the production map's flux and booking implementation, which is outside this node's write scope. The bank's own full equation also needs the missing normal-form and edge-interval derivatives or a separately justified globalization method. No product source, test or read implementation was changed in this node. The converged-state contour figure, oracle comparison, launch count and production-parity assertion remain open.</p>
+<p id="bank-newton-converge-blocker">The lead selected the bank's own equation. The new geometry tangent is in <code>support_read.py</code>, but its dense matrix composition still yields an update that is not a Newton direction for the refreshed residual. The next repair is to compare the dense matrix's product with <code>step_jacobian_vector</code> for that update and correct the composition. The fresh residual gate, oracle comparison and converged contour remain open.</p>
+</section>
+
+<section id="bank-newton-converge-geometry">
+<h2>Fresh geometry tangent and dense update</h2>
+<p>The bank now differentiates the admitted saddle's stationary location, Hessian, third and fourth derivatives, cubic normal form, and selected edge intervals. Moving-polygon moments carry these ring velocities into the booking tangent. At the diverted 550-cell seed, a central difference of the full fresh-read residual saw a relative tangent gap of 0.0300271 at fraction 1e-5, 0.000239573 at 1e-6 and 2.44017e-6 at 1e-7. The original frozen tangent stayed near 0.80. This shrinking error supports the added directional derivative.</p>
+<table id="bank-newton-converge-dense-table"><thead><tr><th>Fraction of dense Newton update</th><th>‖R + central difference‖ / ‖R‖</th><th>Fresh reads valid</th></tr></thead><tbody>
+<tr><td>1e-4</td><td>5.51195</td><td>both</td></tr>
+<tr><td>1e-5</td><td>5.51194</td><td>both</td></tr>
+<tr><td>1e-6</td><td>5.55141</td><td>both</td></tr>
+<tr><td>1e-7</td><td>8.59823</td><td>both</td></tr>
+</tbody></table>
+<p>The dense LU system reports a 1.08e-14 internal linear residual, but applying the separately composed directional tangent to its update gives <code>‖R + JΔ‖/‖R‖ = 5.51195</code>. The update supremum is 0.17508. This is a matrix-composition discrepancy, present before nonlinear step acceptance. Two fresh-solve attempts stopped at this check; no per-step convergence or oracle claim is made.</p>
 </section>
 </main></body></html>

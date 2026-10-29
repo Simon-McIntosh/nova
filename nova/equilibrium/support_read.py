@@ -388,25 +388,23 @@ def read_batch(
 
     flags = jax.vmap(rebuild_needed)(stack, tracking)
 
-    def verdict(stencil, reading, tracked):
+    def verdict(stencil, reading, tracked, flag):
         return _verdict(
             stencil,
             reading,
-            flags,
-            jnp.where(flags, tracked.rebuilds + 1, tracked.rebuilds),
+            flag,
+            jnp.where(flag, tracked.rebuilds + 1, tracked.rebuilds),
         )
 
     def carry(_):
-        return jax.vmap(
-            lambda stencil, tracked: verdict(stencil, tracked.reading, tracked)
-        )(stack, tracking)
+        return jax.vmap(verdict)(stack, tracking.reading, tracking, flags)
 
     def rebuild(_):
-        return jax.vmap(
-            lambda stencil_dummy, reading, tracked: verdict(
-                stencil_dummy, reading, tracked
-            )
-        )(stack, whole_mesh(), tracking)
+        # The branch is taken once for the batch, so every lane reports the
+        # rebuild it took part in and its counter moves with the others.
+        return jax.vmap(verdict)(
+            stack, whole_mesh(), tracking, jnp.ones_like(flags)
+        )
 
     return jax.lax.cond(jnp.any(flags), rebuild, carry, None)
 

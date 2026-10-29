@@ -15,6 +15,11 @@
   ],
   "completed_at": "2026-10-29T18:23:49Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bank-newton-converge",
+      "recorded_at": "2026-10-29T18:29:26.169144+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "bank-newton-converge",

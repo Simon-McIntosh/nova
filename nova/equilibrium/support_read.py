@@ -391,8 +391,10 @@ def step_jacobian_vector(
     density_gradient,
     quadrature,
     booked: current.Booking | None = None,
+    *,
+    fresh_geometry: bool = False,
 ):
-    """Apply the bank and the three closed-form booking tangent channels."""
+    """Apply the bank, booking tangent and optional moving saddle geometry."""
     psi = nodal_jets(operands, moments)[operands.sample_index, 0]
     if booked is None:
         booked = current.book(
@@ -412,9 +414,193 @@ def step_jacobian_vector(
         quadrature,
         booked,
     )
+    if fresh_geometry:
+        geometry_tangent = _normal_geometry_booking_tangent(
+            operands, moments, jets, support, profile, quadrature, booked
+        )
+        tangent = jax.tree.map(lambda a, b: a + b, tangent, geometry_tangent)
     return tuple(
         value - change for value, change in zip(direction, tangent, strict=True)
     )
+
+
+def _normal_geometry_booking_tangent(
+    operands, moments, jet_tangent, support, profile, quadrature, booked
+):
+    """Move admitted saddle rays and their edge intervals with the Bell field.
+
+    The only differentiated inputs are the jets at the saddle's Bell triangle.
+    Its stationary position follows the implicit Hessian equation. The small
+    normal-form and edge-intersection expressions then supply ring velocities;
+    moving-polygon moments integrate those velocities on the selected rings.
+    """
+    geometry = operands.geometry
+    reading = support.reading
+    cells = len(geometry.centre)
+    zero = current.ClippedCurrentMoments(
+        *(jnp.zeros(cells, dtype=jet_tangent.dtype) for _ in range(3))
+    )
+    active = (
+        (reading.membership > 0)
+        & (reading.membership < 1 - 1e-14)
+        & reading.normal_form_cells
+    )
+
+    def evaluate(_):
+        total_jets = nodal_jets(operands, moments)
+        field = fixed_points.field_from_jets(
+            total_jets, operands.sample_index, operands.mesh
+        )
+        direction_field = fixed_points.field_from_jets(
+            jet_tangent, operands.sample_index, operands.mesh
+        )
+        point = reading.saddle_form.position
+        pitch = jnp.median(geometry.pitch)
+        jet = field.evaluate(point)
+        point_tangent = -jnp.linalg.solve(
+            jet.hessian, direction_field.evaluate(point).gradient
+        )
+
+        def varied_field(amount):
+            return replace(
+                field,
+                coefficients=field.coefficients + amount * direction_field.coefficients,
+                jets=field.jets + amount * direction_field.jets,
+            )
+
+        def form_inputs(amount, position):
+            varied = varied_field(amount)
+            derivatives = topology._curvature_derivatives(varied, position, pitch)
+            return varied.evaluate(position).hessian, *derivatives
+
+        (hessian, third, fourth), (hessian_tangent, third_tangent, fourth_tangent) = (
+            jax.jvp(
+                form_inputs,
+                (jnp.zeros((), point.dtype), point),
+                (jnp.ones((), point.dtype), point_tangent),
+            )
+        )
+        sigma = quadrature.sigma
+        form = reading.saddle_form
+        _, form_tangent = jax.jvp(
+            lambda position, h, d3, d4: topology.saddle_normal_form(
+                position,
+                sigma * h,
+                sigma * d3,
+                topology.TopologyPolicy().hessian_tolerance,
+                sigma * d4,
+            ),
+            (point, hessian, third, fourth),
+            (point_tangent, hessian_tangent, third_tangent, fourth_tangent),
+        )
+        psi = total_jets[operands.sample_index, 0]
+        coefficients = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi)
+        span = reading.boundary_flux - reading.axis_flux
+        normalized = coefficients.at[:, 0].add(-reading.axis_flux) / span
+        chosen = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
+        indices = jnp.nonzero(active, size=cells, fill_value=0)[0]
+        count = jnp.sum(active, dtype=jnp.int32)
+
+        def add(index, carried):
+            cell = indices[index]
+            vertices = geometry.vertices[cell]
+            vertex_count = geometry.vertex_count[cell]
+            centre = geometry.centre[cell]
+            intervals = reading.edge_interval[cell]
+            selected = reading.fragment_selected[cell]
+
+            def edges(position, direction, curvature, cubic):
+                changed = form._replace(
+                    position=position,
+                    direction=direction,
+                    curvature=curvature,
+                    cubic=cubic,
+                )
+                return topology._normal_form_cell_fragments(
+                    vertices,
+                    vertex_count,
+                    changed,
+                    topology.TopologyPolicy().edge_tolerance,
+                ).edge_interval[chosen]
+
+            inputs = (form.position, form.direction, form.curvature, form.cubic)
+            changes = (
+                form_tangent.position,
+                form_tangent.direction,
+                form_tangent.curvature,
+                form_tangent.cubic,
+            )
+            _, interval_tangent = jax.jvp(edges, inputs, changes)
+            interval_tangent = jnp.pad(
+                interval_tangent,
+                ((0, intervals.shape[0] - 2), (0, 0), (0, 0), (0, 0)),
+            )
+
+            def rings(position, direction, curvature, cubic, interval):
+                changed = form._replace(
+                    position=position,
+                    direction=direction,
+                    curvature=curvature,
+                    cubic=cubic,
+                )
+                return current._normal_rings(
+                    vertices,
+                    vertex_count,
+                    centre,
+                    changed,
+                    selected,
+                    interval,
+                    quadrature.segments,
+                )[0]
+
+            rings_now, ring_count = current._normal_rings(
+                vertices,
+                vertex_count,
+                centre,
+                form,
+                selected,
+                intervals,
+                quadrature.segments,
+            )
+            _, velocity = jax.jvp(
+                rings,
+                (*inputs, intervals),
+                (*changes, interval_tangent),
+            )
+
+            def moving(ring, speed, number):
+                return current.moving_polygon_current_moment_tangent(
+                    ring,
+                    speed,
+                    number,
+                    centre,
+                    geometry.pitch[cell],
+                    normalized[cell],
+                    profile,
+                )
+
+            moved = jax.vmap(moving)(rings_now, velocity, ring_count)
+            return jax.tree.map(
+                lambda prior, change: prior.at[cell].add(jnp.sum(change)),
+                carried,
+                moved,
+            )
+
+        raw = jax.lax.fori_loop(0, count, add, zero)
+        total = jnp.sum(raw.cell_current)
+        return current.ClippedCurrentMoments(
+            *(
+                booked.normalization * change
+                - (
+                    0.0
+                    if quadrature.target_current is None
+                    else value * total / booked.raw_current
+                )
+                for change, value in zip(raw, booked[:3], strict=True)
+            )
+        )
+
+    return jax.lax.cond(jnp.any(active), evaluate, lambda _: zero, None)
 
 
 class NewtonStep(NamedTuple):
@@ -466,7 +652,15 @@ def _local_booking_sensitivities(
 
 
 def step_jacobian(
-    operands, moments, support, profile, density_gradient, quadrature, booked=None
+    operands,
+    moments,
+    support,
+    profile,
+    density_gradient,
+    quadrature,
+    booked=None,
+    *,
+    fresh_geometry: bool = False,
 ):
     """Compose the bank with closed-form cell-local booking sensitivities."""
     if booked is None:
@@ -523,7 +717,64 @@ def step_jacobian(
             booked.normalization * response
             - (booked_vector[:, None] / booked.raw_current) * current_tangent[None, :]
         )
-    return jnp.eye(3 * cells, dtype=response.dtype) - response
+    matrix = jnp.eye(3 * cells, dtype=response.dtype) - response
+    if fresh_geometry:
+        point = support.reading.saddle_form.position
+        cached = fixed_points._CachedField(
+            operands.mesh,
+            jnp.arange(len(operands.nodes)),
+            operands.rows,
+            jnp.stack(tuple(moments), axis=-1),
+            operands.exterior,
+        )
+        pitch = jnp.median(operands.geometry.pitch)
+        offsets = jnp.asarray(
+            (
+                (0.0, 0.0),
+                (1.0, 0.0),
+                (-1.0, 0.0),
+                (0.0, 1.0),
+                (0.0, -1.0),
+                (1.0, 1.0),
+                (1.0, -1.0),
+                (-1.0, 1.0),
+                (-1.0, -1.0),
+            )
+        )
+        stencil = jax.vmap(lambda p: cached._location(p)[2])(
+            point + 0.01 * pitch * offsets
+        ).reshape(-1)
+        slot = jnp.arange(stencil.size)
+        duplicate = (stencil[:, None] == stencil[None, :]) & (
+            slot[:, None] > slot[None, :]
+        )
+        first = ~jnp.any(duplicate, axis=1)
+        count = jnp.sum(first, dtype=jnp.int32)
+        nodes = stencil[jnp.nonzero(first, size=stencil.size, fill_value=0)[0]]
+        jet_rows = operands.rows[nodes]
+        channels = jnp.transpose(jet_rows, (0, 3, 2, 1)).reshape(-1, 3 * cells)
+
+        def local_channel(index, carried):
+            direction = (
+                jnp.zeros_like(operands.exterior)
+                .at[nodes[index // 6], index % 6]
+                .set(1.0)
+            )
+            response = _normal_geometry_booking_tangent(
+                operands, moments, direction, support, profile, quadrature, booked
+            )
+            return carried.at[index].set(jnp.stack(tuple(response), axis=-1))
+
+        local = jax.lax.fori_loop(
+            0,
+            6 * count,
+            local_channel,
+            jnp.zeros((6 * stencil.size, cells, 3), dtype=matrix.dtype),
+        )
+        response = jnp.einsum("kco,ki->coi", local, channels)
+        response = jnp.transpose(response, (1, 0, 2)).reshape(3 * cells, 3 * cells)
+        matrix = matrix - response
+    return matrix
 
 
 def _equilibrate(matrix, moments, booked):
@@ -589,6 +840,8 @@ def newton_step(
     profile,
     density_gradient,
     quadrature,
+    *,
+    fresh_geometry: bool = False,
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
@@ -607,6 +860,7 @@ def newton_step(
         density_gradient,
         quadrature,
         residual.booked,
+        fresh_geometry=fresh_geometry,
     )
     balanced, row, column = _equilibrate(matrix, moments, residual.booked)
     from jax.scipy import linalg

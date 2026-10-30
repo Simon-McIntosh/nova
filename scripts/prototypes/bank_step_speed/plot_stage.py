@@ -37,7 +37,7 @@ def readable(value):
     return f"{value:.2f}" if value < 10 else f"{value:.0f}"
 
 
-def main(baseline, after, svg, png):
+def main(baseline, after, svg, png, before_label, after_label):
     plt.style.use("data-ink")
     before = stages(baseline)
     current = stages(after) if after else None
@@ -50,14 +50,14 @@ def main(baseline, after, svg, png):
             [before[name] for name in names],
             0.34,
             color="#929292",
-            label="baseline",
+            label=before_label,
         )
         ax.barh(
             y + 0.19,
             [current[name] for name in names],
             0.34,
             color="#2e8b57",
-            label="current",
+            label=after_label,
         )
         ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.12), ncol=2)
         for index, name in enumerate(names):
@@ -86,7 +86,10 @@ def main(baseline, after, svg, png):
             )
     ax.axvline(0.5, color="#777777", linestyle=":", linewidth=1.2)
     ax.set_xscale("log")
-    ax.set_xlim(0.2, 1000)
+    maximum = max(before.values())
+    if current:
+        maximum = max(maximum, *current.values())
+    ax.set_xlim(0.2, max(1000, maximum * 1.6))
     ax.set_yticks(y, [LABELS[name] for name in names])
     ax.invert_yaxis()
     ax.set_xlabel("warm wall [ms]")
@@ -101,13 +104,23 @@ def main(baseline, after, svg, png):
     root.getroot().set("width", "31.1cm")
     root.getroot().set("height", "16cm")
     root.write(svg, encoding="unicode", xml_declaration=True)
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("baseline", type=Path)
     parser.add_argument("--after", type=Path)
+    parser.add_argument("--before-label", default="baseline")
+    parser.add_argument("--after-label", default="current")
     parser.add_argument("--svg", type=Path, required=True)
     parser.add_argument("--png", type=Path, required=True)
     args = parser.parse_args()
-    main(args.baseline, args.after, args.svg, args.png)
+    main(
+        args.baseline,
+        args.after,
+        args.svg,
+        args.png,
+        args.before_label,
+        args.after_label,
+    )

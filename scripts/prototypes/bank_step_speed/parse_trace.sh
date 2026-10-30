@@ -1,6 +1,6 @@
 #!/bin/bash
 set -u
-export TMPDIR=/tmp
+export TMPDIR=/tmp JAX_PLATFORMS=cpu
 ROOT=$(git rev-parse --show-toplevel)
 export PYTHONPATH="$ROOT"
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python

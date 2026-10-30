@@ -46,4 +46,4 @@ assert source.count(needle) == 1
 path.write_text(source.replace(needle, "    else:\n        jnp.linalg.cond(matrix)\n        jnp.linalg.cond(balanced)\n        condition_before = jnp.asarray(jnp.nan, dtype=matrix.dtype)"))
 PY
 run_case discard test_condition_diagnostics_do_not_change_update \
-  8527472787f303c46adba086c6c2bdcb73727d4f
+  "$(git -C "$ROOT" rev-parse HEAD)+discarded-estimates"

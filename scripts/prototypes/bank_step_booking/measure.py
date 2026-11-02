@@ -113,7 +113,13 @@ def run(arm, trace, max_steps):
             linear_residual=float(correction.linear_residual),
         )
         if trace is not None and index == 1:
-            jax.profiler.start_trace(str(trace), create_perfetto_link=False)
+            options = jax.profiler.ProfileOptions()
+            options.enable_hlo_proto = False
+            options.host_tracer_level = 0
+            options.python_tracer_level = 0
+            jax.profiler.start_trace(
+                str(trace), create_perfetto_link=False, profiler_options=options
+            )
             with jax.profiler.TraceAnnotation("stage:whole_step"):
                 if use_cache:
                     traced = carried_step(moments, support, factor, jnp.asarray(ratio))

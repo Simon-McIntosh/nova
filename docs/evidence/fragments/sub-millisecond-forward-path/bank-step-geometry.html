@@ -13,13 +13,13 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-step-geometry-landing">Closed bank step geometry</h1>
-<p id="bank-step-geometry-summary">The bank step now differentiates the Bell field, saddle normal form, sorted cubic edge cuts and moving polygon rings explicitly. The per-step geometry path contains no <code>jax.jvp</code> call. On titan P100, the complete diverted 550-cell bank agrees with the retained directional tangent in all 1,650 moment channels at both the trial and converged states. The fresh-read solve reaches 9.806e-11 residual in eight accepted steps, with axis, saddle and boundary errors inside the analytic-oracle budgets. This is the geometry-correctness landing; the H200 step-wall and launch gates remain to be measured when that device admits jobs.</p>
+<p id="bank-step-geometry-summary">The bank step now differentiates the Bell field, saddle normal form, sorted cubic edge cuts and moving polygon rings explicitly. The per-step geometry path contains no <code>jax.jvp</code> call. On titan P100, the complete diverted 550-cell bank agrees with the retained directional tangent in all 1,650 moment channels at both the trial and converged states. The fresh-read solve reaches 4.266e-11 residual in six accepted steps, with axis, saddle and boundary errors inside the analytic-oracle budgets. This is the geometry-correctness landing; the H200 step-wall and launch gates remain to be measured when that device admits jobs.</p>
 
 <section id="bank-step-geometry-parity">
 <h2>Per-channel tangent parity</h2>
 <table id="bank-step-geometry-parity-table"><thead><tr><th>Diverted 550-cell state</th><th>Channels checked</th><th>Worst relative gap</th><th>Worst moment and cell</th><th>Limit</th></tr></thead><tbody>
-<tr><td>Trial</td><td>1,650</td><td>1.351374878e-11</td><td>moment 2, cell 277; channel 1377</td><td>1e-10</td></tr>
-<tr><td>Converged</td><td>1,650</td><td>5.996607522e-11</td><td>moment 1, cell 182; channel 732</td><td>1e-10</td></tr>
+<tr><td>Trial</td><td>1,650</td><td>1.351209540e-11</td><td>moment 2, cell 277; channel 1377</td><td>1e-10</td></tr>
+<tr><td>Converged</td><td>1,650</td><td>5.996458982e-11</td><td>moment 1, cell 182; channel 732</td><td>1e-10</td></tr>
 </tbody></table>
 <p>The retained <code>jax.jvp</code> reference lives in the parity harness, outside the step path. A source inspection test refuses a reintroduced geometry JVP. The earlier closed-form attempt misidentified coincident ray-root fractions and gave a straight-ring velocity near 1.29e8 against 34.97. Its later candidate reduced the trial booking gap to 7.77e-5, still above the required limit. The new cut rate stays attached to its root through sorting and clipping. In the present diagnostic, trial channel 7 first exposed a 6.97e-7 relative third-derivative gap: the bank Bell field needs exact polynomial derivatives, while the attempted formula used a finite-difference stencil for a different field type. After the correction, the third derivative differs by 5.28e-17 relative, and the formerly worst affected cell 184 ring velocity differs by 1.31e-12 relative. The diagnostic names that ring as index 319, vertex 1, coordinate 1; before the correction the worst ring there was index 143, vertex 2, coordinate 1.</p>
 <p>The mutation control perturbs one active ring velocity by 1e-3 in a scratch copy. The scratch module path was printed, and the one-channel booking parity test failed with <code>EXIT=1</code>; the same test passed at the committed head. This demonstrates that the check observes a moving ring rather than merely accepting a compiled step.</p>
@@ -28,13 +28,13 @@
 <section id="bank-step-geometry-solve">
 <h2>Fresh solve and analytic oracle</h2>
 <table id="bank-step-geometry-solve-table"><thead><tr><th>Measure on titan P100</th><th>Result</th><th>Budget</th></tr></thead><tbody>
-<tr><td>Fresh-read terminal residual</td><td>9.806139339e-11 after eight accepted steps</td><td>at most 1e-10</td></tr>
-<tr><td>Axis error / minor radius</td><td>1.047726938e-5</td><td>at most 5e-4</td></tr>
-<tr><td>Saddle error / minor radius</td><td>9.254857028e-6</td><td>at most 5e-4</td></tr>
-<tr><td>Boundary flux error / flux span</td><td>2.590625876e-5</td><td>at most 1e-4</td></tr>
-<tr><td>Warm step median, excluding read</td><td>1,480.28 ms on P100</td><td>tabled, not gated for this node</td></tr>
+<tr><td>Fresh-read terminal residual</td><td>4.266098586e-11 after six accepted steps</td><td>at most 1e-10</td></tr>
+<tr><td>Axis error / minor radius</td><td>1.047723761e-5</td><td>at most 5e-4</td></tr>
+<tr><td>Saddle error / minor radius</td><td>9.254826391e-6</td><td>at most 5e-4</td></tr>
+<tr><td>Boundary flux error / flux span</td><td>2.590619149e-5</td><td>at most 1e-4</td></tr>
+<tr><td>Warm step median, excluding read</td><td>1,483.21 ms on P100</td><td>tabled, not gated for this node</td></tr>
 </tbody></table>
-<p>The first dense solve and independently composed directional tangent agreed to 2.51e-14 relative. A temporary P100 allocation warning caused rematerialization; the job continued to a terminal <code>EXIT=0</code> receipt. The H200 was closed to new jobs, so this P100 wall is not used as a claim about the H200 0.5 ms or 100-launch section targets.</p>
+<p>The first dense solve and independently composed directional tangent agreed to 4.36e-14 relative. A temporary P100 allocation warning caused rematerialization; the job continued to a terminal <code>EXIT=0</code> receipt. The H200 was closed to new jobs, so this P100 wall is not used as a claim about the H200 0.5 ms or 100-launch section targets.</p>
 </section>
 </main></body>
 </html>

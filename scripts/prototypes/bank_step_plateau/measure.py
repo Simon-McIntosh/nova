@@ -280,9 +280,56 @@ def correct_flux(path, raw, output):
     emit("SUMMARY", rows=len(rows), output=str(output))
 
 
+def refine(path, output):
+    _, _, read, _, held, matrix, _, _ = setup()
+    trajectory = np.load(path)
+    rows = []
+    for index in (3, 4):
+        state = jnp.asarray(trajectory["states"][index])
+        direction = jnp.asarray(trajectory["directions"][index])
+        support = read(state)
+        action = matrix(state, support, True) @ direction
+        for relative_size in np.geomspace(1e-4, 1e-7, 25):
+            scale = float(relative_size * norm(state) / norm(direction))
+            plus = state + scale * direction
+            minus = state - scale * direction
+            high_support = read(plus)
+            low_support = read(minus)
+            high = held(plus, plus, high_support)
+            low = held(minus, minus, low_support)
+            difference = (high - low) / (2 * scale)
+            selection = np.asarray(support.reading.fragment_selected)
+            selected_plus = np.asarray(high_support.reading.fragment_selected)
+            selected_minus = np.asarray(low_support.reading.fragment_selected)
+            row = {
+                "iterate": index,
+                "h_over_x": float(relative_size),
+                "full": error(action, difference),
+                "selection_changes_plus": int(
+                    np.count_nonzero(selection != selected_plus)
+                ),
+                "selection_changes_minus": int(
+                    np.count_nonzero(selection != selected_minus)
+                ),
+                "plus_valid": bool(high_support.valid),
+                "minus_valid": bool(low_support.valid),
+            }
+            rows.append(row)
+            emit("REFINE", **row)
+    output.write_text(json.dumps(rows, indent=2) + "\n")
+    emit(
+        "SUMMARY",
+        output=str(output),
+        rows=len(rows),
+        best={
+            str(i): min(r["full"] for r in rows if r["iterate"] == i) for i in (3, 4)
+        },
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("record", "compare", "flux"))
+    parser.add_argument("mode", choices=("record", "compare", "flux", "refine"))
     parser.add_argument("--trajectory", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--raw", type=Path)
@@ -308,7 +355,11 @@ if __name__ == "__main__":
         if args.output is None:
             parser.error("compare requires --output")
         compare(args.trajectory, args.output, args.mutation)
-    else:
+    elif args.mode == "flux":
         if args.output is None or args.raw is None:
             parser.error("flux requires --raw and --output")
         correct_flux(args.trajectory, args.raw, args.output)
+    else:
+        if args.output is None:
+            parser.error("refine requires --output")
+        refine(args.trajectory, args.output)

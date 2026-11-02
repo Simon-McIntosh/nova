@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T20:24:32.937Z",
+  "dispatched_at": "2026-11-02T20:17:10Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:171",
+      "id": "reasoning-1",
+      "reason": "a node following the receipt literally re-runs with the default grid and silently replaces the 65\u00d765 full-axis state, and its committed contours, with a 33\u00d733 one.",
+      "text": "\u00a76 says each state \"is therefore re-solved with the producer's own command, `benchmarks/mast_centroid_solve_panels.py run` then `panels`, on the lane its receipt names\", but `docs/figures/mast-centroid-capability/*/centroid-solve.json` records only `runtime` (partition, device_kind, host) and never the invocation; `--grid-points` is what makes `full-axis-lane/panel-fields.npz` 65\u00d765 while `cpu-lane` and `titan-lane` are 33\u00d733, and `full-axis-lane/centroid-solve.json` records `partition: titan`, `device_kind: Tesla P100-PCIE-16GB` \u2014 the same values the titan-lane receipt holds, so \"the lane its receipt names\" does not distinguish it, and \u00a76 (unlike the amended \u00a77) gives neither a recovery path nor a stop clause for an invocation it cannot identify",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-1",
+      "reason": "the clause as written is unsatisfiable for one of the four panels, so a node will either drop that panel from the test and ship it unmeasured, or invent a render setting the plan never fixes.",
+      "text": "\u00a76 done-when (1) requires the test to redraw \"each of the four panels from the conductor currents and cell moments stored in its `panel-fields.npz` alone\", but there are three such files (`cpu-lane`, `full-axis-lane`, `titan-lane`) for four panels: the cpu lane's `vacuum-and-plasma-panels-fine` is a second view of the same state (`docs/evidence/fragments/separatrix-spline-extraction/centroid-state-guard.html` calls it \"the fine CPU view\"), and `tests/test_mast_centroid_panel_states.py` renders through `panel_renderer.panels(state_path, figure_path, receipt_path, hex_cells=200)` \u2014 the distinguishing render argument lives in the call, not in the npz",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:175",
+      "id": "anchors_resolve-1",
+      "reason": "two of the five figures send the node to a receipt that is not there, and the plan's own instruction is to stop on a figure whose producer it cannot identify, so a false pointer turns an identifiable figure into a stopped node.",
+      "text": "\u00a77 says the node finds each figure's producer \"from the figure's landing commit (`git log` on the figure) and from the latency receipt beside it\" and that \"The `converged-vs-nonconverged.json` receipts record no lane, device or command\", but `docs/figures/forward-solve-api/coil-edit-nonconvergence/` holds no latency receipt at all (its JSON files are `coil-edit-nonconvergence.json`, `branch-terms.json`, `converged-vs-nonconverged.json`), and no file named `converged-vs-nonconverged.json` exists beside `docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png` (its receipt is `titan-coil-edit-nonconvergence.json`) or beside either `cpu-compile-abort/coil-edit-regeneration-row` figure (theirs is `coil-edit-nonconvergence.json`)",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:175",
+      "id": "reasoning-2",
+      "reason": "a node that re-measures and finds the pins unchanged loses nothing, and the clause only bites if a pin does move, which is the case it already tells the node to explain.",
+      "text": "\u00a77 asserts \"Re-solving changes those states, so the pins are re-measured and each changed pin states its cause\", but `PERSISTED_STATE_TERMS` (`tests/test_flux_surface_connectivity.py:833`) pins `closed_segment_count` and `open_branch_count` computed from `psi_%d`, the lattice raster field, and \u00a75 makes the lattice spline the solve's authority, so the change this plan introduces (storing currents and moments beside psi) does not alter the pinned field",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "2b384a68a6a021658c8ba4e0ca47863237f3a55b",
+  "plan_fingerprint": "4460af6dbe804e18ab956ad369f6164e68b3c859deaaff709b36d1239bdebe04",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 158,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T201624424860-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "aa6991f070d792dd6a269080dd9f8299130e6c30",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a77 tells the node to recover each figure's invocation \"from the latency receipt beside it\", and there is no latency receipt beside `docs/figures/forward-solve-api/coil-edit-nonconvergence/`; its sentence about \"the `converged-vs-nonconverged.json` receipts\" also names a file that exists for only three of the five figures.",
+    "done_when": "a finding \u2014 \u00a76 done-when (1) requires a redraw of four panels from \"its panel-fields.npz alone\", but only three such files exist and the cpu `-fine` panel is a second render of the same state that differs by render settings the npz does not carry.",
+    "evidence_paths": "pass \u2014 both units write into committed figure directories (`docs/figures/mast-centroid-capability/`, `docs/figures/forward-solve-api/`, `docs/figures/single-grid-solver-cutover/`, `docs/figures/cpu-compile-abort/`), not a scratchpad.",
+    "naming": "pass \u2014 no plan labels, stage names or tracker ids reach these units, and the symbols they cite (`PANEL_STATE_KEYS`, `PERSISTED_STATE_TERMS`, `panels`, `_render_panel`) are named by what they do.",
+    "reasoning": "a finding \u2014 \u00a76 re-solves \"on the lane its receipt names\" with \"the producer's own command\", but the centroid receipts record runtime only; the lane that makes the full-axis figure 65\u00d765 is a `--grid-points` argument the receipt does not carry, and the receipt for that figure names partition `titan` with a P100, exactly what the titan lane records.",
+    "single_goal": "pass \u2014 \u00a76 has one deliverable (four redrawn centroid panels) and \u00a77 one (five redrawn coil-edit panels); each closes on one verdict.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares `s6:[separatrix-spline-extraction#s5]` and `s7:[separatrix-spline-extraction#s5]`, and both units consume the \u00a75 builder, so the declared edges are the ones the work needs."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "d88676ac8b8aee3bcfcecef711a99248af725fa16ea291116c1582b970d1b6a5",
+    "s7": "80f21d47c2235dfb01ccaa94dc48ed0e1665f503ea6384821a8fd0c315d2c5a7",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:29:57.976795+00:00"
+}

@@ -89,6 +89,28 @@ def chunked(function, count, chunk=8):
     return run
 
 
+def chunked_lanes(function, count, chunk=8):
+    """Chunk a three-argument program whose arguments share a leading axis."""
+
+    def run(state, hold, seeds):
+        parts = []
+        for start in range(0, count, chunk):
+            width = min(chunk, count - start)
+            window = jax.lax.slice_in_dim
+            parts.append(
+                function(
+                    jax.tree_util.tree_map(
+                        lambda value: window(value, start, start + width), state
+                    ),
+                    window(hold, start, start + width),
+                    window(seeds, start, start + width),
+                )
+            )
+        return jax.tree_util.tree_map(lambda *pieces: jnp.concatenate(pieces), *parts)
+
+    return run
+
+
 def chunked_args(function, count, chunk=8):
     """The same chunking for a program that already takes a batched leading axis."""
 
@@ -483,13 +505,13 @@ def run_trace_arm(run_dir):
             )
         )
 
-        def one_step(state, hold):
+        def one_step(state, hold, seeds):
             return support_read.step_batch(
                 bank,
                 cache,
                 state,
-                lane_seeds,
-                lane_seeds,
+                seeds,
+                seeds,
                 convention,
                 policy,
                 profile,
@@ -499,7 +521,7 @@ def run_trace_arm(run_dir):
                 converged=hold,
             )
 
-        step_program = jax.jit(chunked_args(one_step, count))
+        step_program = jax.jit(chunked_lanes(one_step, count))
         hold = np.zeros(count, dtype=bool)
         index = 0
         while index < steps:
@@ -513,7 +535,7 @@ def run_trace_arm(run_dir):
             hold = hold | (np.asarray(sizes) <= 1e-10)
             if hold.all():
                 break
-            correction = step_program(stacked, jnp.asarray(hold))
+            correction = step_program(stacked, jnp.asarray(hold), lane_seeds)
             jax.block_until_ready(correction.step.update)
             stacked = tuple(
                 value + change

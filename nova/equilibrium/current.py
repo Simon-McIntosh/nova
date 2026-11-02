@@ -775,8 +775,31 @@ def book_tangent_channels(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jnp.where(full[:, None, None], whole, 0.0)
-    cuts = jax.vmap(cut_cell)(jnp.arange(cells))
-    cuts = jnp.where(cut[:, None, None], cuts, 0.0)
+    batch_width = min(64, cells)
+    cut_count = jnp.sum(cut, dtype=jnp.int32)
+    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
+    cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
+
+    def add_batch(carried, batch):
+        start = batch * batch_width
+        indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
+        active = start + jnp.arange(batch_width) < cut_count
+
+        def integrate(values):
+            response = jax.vmap(cut_cell)(indices)
+            return values.at[indices].add(
+                jnp.where(active[:, None, None], response, 0.0)
+            )
+
+        return jax.lax.cond(
+            start < cut_count, integrate, lambda value: value, carried
+        ), None
+
+    cuts, _ = jax.lax.scan(
+        add_batch,
+        jnp.zeros_like(whole),
+        jnp.arange(len(cut_index) // batch_width),
+    )
     raw = whole + cuts
     total_rate = jnp.sum(raw[:, :, 0], axis=0)
     scale_rate = (

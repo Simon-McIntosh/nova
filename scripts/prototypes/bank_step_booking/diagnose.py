@@ -65,6 +65,63 @@ def main():
     print("SELECTED", np.asarray(selected).astype(int).tolist())
     print("SIGNED_DIRECTION", np.asarray(signed_direction[channel, cell]).tolist())
 
+    sample_basis = jnp.eye(samples, dtype=psi.dtype)
+    psi_direction = jnp.broadcast_to(
+        sample_basis[jnp.minimum(indices, samples - 1), None]
+        * (indices < samples)[:, None, None],
+        (samples + 8, cells, samples),
+    )
+    axis_direction = (indices == samples + 6).astype(psi.dtype)
+
+    def density_gradient(radius, flux):
+        return jnp.ones_like(radius)
+
+    serial_all = jax.jit(
+        lambda: jax.vmap(
+            lambda index: current.book_tangent(
+                psi,
+                psi_direction[index],
+                reading,
+                field_direction[index],
+                axis_direction[index],
+                boundary_direction[index],
+                geometry,
+                UnitDensity(),
+                density_gradient,
+                quadrature,
+                booked,
+            )
+        )(indices)
+    )()
+    vector_all = jax.jit(
+        lambda: current.book_tangent_channels(
+            psi,
+            psi_direction,
+            reading,
+            field_direction,
+            axis_direction,
+            boundary_direction,
+            geometry,
+            UnitDensity(),
+            density_gradient,
+            quadrature,
+            booked,
+            jnp.concatenate(
+                (jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))
+            ),
+        )
+    )()
+    print(
+        "FULL_RESPONSE serial vector",
+        float(serial_all.vertical_moment[channel, cell]),
+        float(vector_all[cell, 2, channel]),
+        "normalization",
+        float(booked.normalization),
+    )
+    cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
+    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
+    print("CUT_INDICES", np.asarray(cut_index[: int(jnp.sum(cut))]).tolist())
+
     if bool(reading.normal_form_cells[cell]):
         rings, counts = current._normal_rings(
             vertices,
@@ -97,6 +154,54 @@ def main():
     rings, counts, valid = current._conic_rings(
         vertices, count, centre, width, signed[cell], selected, quadrature.segments
     )
+
+    def cell_moving(index):
+        ring, numbers, _ = current._conic_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            geometry.pitch[index],
+            signed[index],
+            reading.fragment_selected[index],
+            quadrature.segments,
+        )
+        velocity = current._conic_ring_tangents(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            geometry.pitch[index],
+            signed[index],
+            signed_direction[channel, index],
+            reading.fragment_selected[index],
+            quadrature.segments,
+        )
+        response = jax.vmap(
+            lambda one_ring, speed, number: moving_polygon_current_moment_tangent(
+                one_ring,
+                speed,
+                number,
+                geometry.centre[index],
+                geometry.pitch[index],
+                jnp.zeros(6),
+                UnitDensity(),
+            )
+        )(ring, velocity, numbers)
+        return response.vertical_moment
+
+    serial_cell = jax.jit(cell_moving)(cell)
+    cut_batch = cut_index[:8]
+    vector_cells = jax.jit(jax.vmap(cell_moving))(cut_batch)
+    batch_slot = int(jnp.argmax(cut_batch == cell))
+    print(
+        "CELL_BATCH_MOVING serial vector",
+        float(jnp.sum(serial_cell)),
+        float(jnp.sum(vector_cells[batch_slot])),
+    )
+    for ring_index, pair in enumerate(
+        zip(np.asarray(serial_cell), np.asarray(vector_cells[batch_slot]))
+    ):
+        if any(abs(v) > 1e-13 for v in pair):
+            print("CELL_BATCH_FRAGMENT", ring_index, pair)
 
     def terms(direction):
         velocity = current._conic_ring_tangents(

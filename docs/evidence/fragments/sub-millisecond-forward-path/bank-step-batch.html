@@ -95,7 +95,7 @@
   Newton iteration.</p>
 
   <table id="bank-step-batch-single-step-table">
-    <caption>Largest fresh-read residual after each Newton iteration, unbatched solve against a batch of one lane, same state and same device. The unbatched solve passes 1e-10 at iteration 3; so does the one-lane batch, from a different value at iteration 2.</caption>
+    <caption>Largest fresh-read residual after each Newton iteration, unbatched solve against a batch of one lane, same state and same device, both started from the moments perturbed by 2e-5. The unbatched solve passes 1e-10 at iteration 3; so does the one-lane batch, from a different value at iteration 2.</caption>
     <tr><th>iteration</th><th>unbatched</th><th>batch, one lane</th></tr>
     <tr><td>0</td><td>1.1196e-1</td><td>1.1196e-1</td></tr>
     <tr><td>1</td><td>3.7229e-4</td><td>3.7229e-4</td></tr>
@@ -111,7 +111,10 @@
   two agree to eleven digits at iterations 0 and 1 and differ at iteration 2,
   1.6e-9 against 1.64e-7, so <strong>the first divergence between the batched
   path and the unbatched one is iteration 2</strong>, and it is a
-  one-iteration detour rather than a stall.</p>
+  one-iteration detour rather than a stall. How many iterations the plateau
+  costs depends on where the iterate enters it: started from the exact
+  certificate moments the same unbatched solve alternates for six iterations
+  before it converges, which is the table in the next section.</p>
 
 <h3 id="bank-step-batch-multi-lane">The two-cycle is the operator's, not the batch's</h3>
 

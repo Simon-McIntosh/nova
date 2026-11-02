@@ -19,29 +19,45 @@ STAGES = (
 )
 
 
-def main(baseline: Path, after: Path, svg: Path):
+def main(baseline: Path, checkpoint: Path, after: Path, svg: Path):
     plt.style.use("data-ink")
     plt.rcParams["svg.fonttype"] = "none"
     before = {item["name"]: item["median_ms"] for item in records(baseline, "STAGE ")}
+    intermediate = {
+        item["name"]: item["median_ms"] for item in records(checkpoint, "STAGE ")
+    }
     current = {item["name"]: item["median_ms"] for item in records(after, "STAGE ")}
     y = np.arange(len(STAGES))
     fig, ax = plt.subplots(figsize=(14, 7.2))
-    for offset, values, color, label in (
-        (-0.15, before, "#929292", "base"),
-        (0.15, current, "#2e8b57", "vectorized geometry"),
+    for offset, values, color, label, marker, style in (
+        (-0.22, before, "#929292", "base", "o", "-"),
+        (0.0, intermediate, "#3478b5", "geometry batch", "s", "--"),
+        (0.22, current, "#2e8b57", "booking batch", "D", "-"),
     ):
         for index, (name, _) in enumerate(STAGES):
             value = values[name]
-            ax.plot([0, value], [index + offset] * 2, color=color, linewidth=2.6)
-            ax.scatter([value], [index + offset], s=65, color=color, zorder=3)
-        ax.plot([], [], color=color, linewidth=3, label=label)
+            ax.plot(
+                [0, value],
+                [index + offset] * 2,
+                color=color,
+                linewidth=2.6,
+                linestyle=style,
+            )
+            ax.scatter(
+                [value], [index + offset], s=65, color=color, marker=marker, zorder=3
+            )
+        ax.plot([], [], color=color, linewidth=3, linestyle=style, label=label)
     ax.set_yticks(y, [label for _, label in STAGES])
     ax.invert_yaxis()
-    ax.set_xlim(0, max(before["whole_step"], current["whole_step"]) * 1.08)
+    ax.set_xlim(
+        0,
+        max(before["whole_step"], intermediate["whole_step"], current["whole_step"])
+        * 1.08,
+    )
     ax.set_xlabel("titan P100 warm wall [ms]")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.08), ncol=2)
+    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.08), ncol=3)
     fig.subplots_adjust(left=0.30, right=0.97, top=0.86, bottom=0.14)
     check_text(fig)
     svg.parent.mkdir(parents=True, exist_ok=True)
@@ -60,7 +76,8 @@ def main(baseline: Path, after: Path, svg: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("baseline", type=Path)
+    parser.add_argument("checkpoint", type=Path)
     parser.add_argument("after", type=Path)
     parser.add_argument("--svg", type=Path, required=True)
     args = parser.parse_args()
-    main(args.baseline, args.after, args.svg)
+    main(args.baseline, args.checkpoint, args.after, args.svg)

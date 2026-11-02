@@ -53,6 +53,16 @@ def main(path):
     print("POSITIVE_CONTROL", "gpu_events", len(gpu), "stage_ms", stage["dur"] / 1000)
     for name, (count, duration) in sorted(groups.items(), key=lambda item: -item[1][1]):
         print("KERNEL_FAMILY", name, "count", count, "device_ms", round(duration, 6))
+    for event in sorted(gpu, key=lambda item: -item["dur"])[:8]:
+        print(
+            "KERNEL_TOP",
+            "duration_ms",
+            round(event["dur"] / 1000, 6),
+            "name",
+            event["name"],
+            "long_name",
+            event.get("args", {}).get("long_name", ""),
+        )
 
 
 if __name__ == "__main__":

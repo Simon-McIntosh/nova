@@ -187,9 +187,9 @@ def compare(path, output, mutation):
         full_action = fresh_matrix @ direction
         held_action = held_matrix @ direction
         geometry_action = full_action - held_action
-        flux_action = support_read.nodal_jets(bank, parts(direction))[
-            bank.sample_index, 0
-        ]
+        flux_action = jnp.einsum(
+            "ncmq,cm->nq", bank.rows, jnp.stack(parts(direction), axis=-1)
+        )[bank.sample_index, 0]
         base, valid = fresh(state)
         emit(
             "BASE",
@@ -244,11 +244,46 @@ def compare(path, output, mutation):
     )
 
 
+def correct_flux(path, raw, output):
+    bank, _, _, _, _, _, _, flux = setup()
+    trajectory = np.load(path)
+    rows = json.loads(raw.read_text())
+
+    @jax.jit
+    def action(direction):
+        jets = jnp.einsum(
+            "ncmq,cm->nq", bank.rows, jnp.stack(parts(direction), axis=-1)
+        )
+        return jets[bank.sample_index, 0]
+
+    for row in rows:
+        index = row["iterate"]
+        state = jnp.asarray(trajectory["states"][index])
+        direction = jnp.asarray(trajectory["directions"][index])
+        scale = row["h"]
+        difference = (
+            flux(state + scale * direction) - flux(state - scale * direction)
+        ) / (2 * scale)
+        predicted = action(direction)
+        row["flux"] = error(predicted, difference)
+        row["flux_abs"] = norm(predicted - difference)
+        emit(
+            "FLUX",
+            iterate=index,
+            h_over_x=row["h_over_x"],
+            relative_error=row["flux"],
+            absolute_error=row["flux_abs"],
+        )
+    output.write_text(json.dumps(rows, indent=2) + "\n")
+    emit("SUMMARY", rows=len(rows), output=str(output))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("record", "compare"))
+    parser.add_argument("mode", choices=("record", "compare", "flux"))
     parser.add_argument("--trajectory", type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--raw", type=Path)
     parser.add_argument("--mutation", action="store_true")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
@@ -267,7 +302,11 @@ if __name__ == "__main__":
     assert jax.config.jax_enable_x64
     if args.mode == "record":
         record(args.trajectory)
-    else:
+    elif args.mode == "compare":
         if args.output is None:
             parser.error("compare requires --output")
         compare(args.trajectory, args.output, args.mutation)
+    else:
+        if args.output is None or args.raw is None:
+            parser.error("flux requires --raw and --output")
+        correct_flux(args.trajectory, args.raw, args.output)

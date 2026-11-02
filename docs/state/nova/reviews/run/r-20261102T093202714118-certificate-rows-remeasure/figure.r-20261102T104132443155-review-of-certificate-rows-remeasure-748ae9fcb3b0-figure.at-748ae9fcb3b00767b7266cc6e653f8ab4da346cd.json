@@ -8,7 +8,7 @@
     "image-2.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
   },
   "attachment_mapping_basis": "Each attachment was identified from what it draws, not from file order. image-0 carries an admitted X-point near the bottom of the vessel and a solved axis displaced above the analytic one, which is the diverted single-null row (solved (1.8001608410035406, 0.35890956521291556) m above analytic (1.7878074752250435, 0.046513016111756206) m). image-1 carries two separated axis triangles with the blue solved one outboard of the grey reference by about 18 px, which is the limited row (solved x 6.4806569817254855 against analytic 6.199014565254948). image-2 carries a single axis position with the two contour families drawn on top of one another, which is the converged private moment solve the caption calls 'indistinguishable at this level array'.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T10:52:18.840Z",
   "dispatched_at": "2026-11-02T10:44:05Z",
   "figure_checks": {
     "clipping": "Zero ink pixels in the outer 4 px frame of every attachment (measured on all three). No text leaves the canvas, consistent with the renderer's own check at render_panel.py:140-160.",
@@ -125,6 +125,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T10:52:21.408648+00:00",
+  "timestamp": "2026-11-02T10:56:54.467660+00:00",
   "total": null
 }

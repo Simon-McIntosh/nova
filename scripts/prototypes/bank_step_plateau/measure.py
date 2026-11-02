@@ -8,7 +8,6 @@ configure_dtypes()
 import argparse
 import json
 import subprocess
-from dataclasses import replace
 from functools import partial
 from pathlib import Path
 
@@ -46,7 +45,6 @@ def setup():
         "diverted"
     )
     seed = roots + 0.03 * jnp.median(bank.geometry.pitch)
-    quadrature = replace(quadrature, target_current=jnp.sum(moments[0]))
 
     @jax.jit
     def read(state):
@@ -112,9 +110,11 @@ def record(path):
     states = []
     directions = []
     accepted = []
+    residual_history = []
     for index in range(30):
         before, valid = fresh(state)
         magnitude = float(jnp.max(jnp.abs(before)))
+        residual_history.append(magnitude)
         emit("ITERATE", index=index, residual=magnitude, valid=bool(valid))
         if magnitude <= 1e-10 and bool(valid):
             break
@@ -159,6 +159,10 @@ def record(path):
         residual=terminal_residual,
         valid=bool(valid),
         trajectory=str(path),
+    )
+    assert len(accepted) >= 8, "the reported multi-step solve was not reproduced"
+    assert any(1.63e-7 <= value <= 1.66e-7 for value in residual_history), (
+        "the reported fresh-read plateau was not reproduced"
     )
     assert bool(valid) and terminal_residual <= 1e-10
 

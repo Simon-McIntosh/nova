@@ -23,6 +23,13 @@
   },
   "dispatched_at": "2026-11-02T13:00:51Z",
   "evidence": "The reviewed run's manifest.md records baseline_suite: null and after_suite: null: it is a measurement node with no pytest arms, so added_failure_count is 0 and added_failure_ids is empty by the absence of those arms rather than by a measured dedupe.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-certificate-rows-remeasure-8f5ee89e3ebe",
+      "recorded_at": "2026-11-02T13:23:00.893177+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/certificate_rows_remeasure/row.py",

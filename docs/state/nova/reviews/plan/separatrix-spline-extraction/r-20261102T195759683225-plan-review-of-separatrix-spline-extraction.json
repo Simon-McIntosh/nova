@@ -58,6 +58,15 @@
       "finding": "anchors_resolve-1",
       "reason": "",
       "when": "2026-11-02T20:12:25.457767+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2b384a68a6a021658c8ba4e0ca47863237f3a55b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-11-02T20:12:37.337425+00:00"
     }
   ],
   "responses": {
@@ -68,6 +77,14 @@
       "commit_basis": "edit",
       "reason": "",
       "when": "2026-11-02T20:12:25.457767+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2b384a68a6a021658c8ba4e0ca47863237f3a55b",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-02T20:12:37.337425+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/separatrix-spline-extraction/r-20261102T195759683225-plan-review-of-separatrix-spline-extraction.json",

@@ -16,6 +16,13 @@
     "nova/equilibrium/support_read.py:1322"
   ],
   "completed_at": "2026-11-02T14:12:20Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-step-launch-fusion",
+      "recorded_at": "2026-11-02T14:24:16.126447+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T14:01:03Z",
   "evidence": {
     "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/suite-four-test_bank_step_booking.log",

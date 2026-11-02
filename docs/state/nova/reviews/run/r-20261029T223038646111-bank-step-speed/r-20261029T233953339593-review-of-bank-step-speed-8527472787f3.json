@@ -17,6 +17,11 @@
   ],
   "completed_at": "2026-10-29T23:46:58Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bank-step-booking",
+      "recorded_at": "2026-11-02T07:54:59.117505+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "bank-step-booking",

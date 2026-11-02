@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T20:53:02.798Z",
+  "dispatched_at": "2026-11-02T20:44:38Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-1",
+      "reason": "the done-when must name the shot's conductor geometry and the recorded response carrier as test inputs, or the node cannot satisfy the clause it is measured against.",
+      "text": "\u00a76 done-when (1) says the test redraws the panels \"from the conductor currents and cell moments stored in the three `panel-fields.npz` files alone\", but the \u00a75 builder it names needs two further inputs that no npz carries: the conductor geometry, read from the shot store (`benchmarks/mast_centroid_solve_panels.py:162` `_coil_outlines` opens `SHOT_STORE/<shot>.zarr`, and the npz keeps only 938 four-corner outlines with no per-circuit section mapping), and the conductor source columns the lattice is evaluated from, a 1126\u00d7101 response carrier at a GPFS path recorded only in `evidence_inputs.response_carrier` in `docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json`. Clause (2) writes currents and moments into the npz but neither geometry nor carrier, so \"alone\" stays unachievable and a node implementing it literally must stop or silently widen its inputs",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:171",
+      "id": "anchors_resolve-1",
+      "reason": "the node can draw both densities regardless and the measure already requires them; only the word \"recorded\" is unsupported.",
+      "text": "\u00a76 says \"The cpu lane's state is drawn twice, at its two recorded mesh densities\", but the cpu-lane receipts record one density: `cpu-lane/centroid-solve.json` names only `vacuum-and-plasma-panels-fine.png` and its `drawn_plasma_mesh` records `requested_cells` 12000 and 12353 delivered, `cpu-lane/coil-edit-latency.json` records none, and no receipt accompanies the plain `vacuum-and-plasma-panels.png`, so the second density survives only as the script default `DEFAULT_HEX_CELLS` rather than a recorded field",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "788c2636111009da44cc1e1cd0a78d6c1c74a750",
+  "plan_fingerprint": "d9360e8d5e78734a0e0b3e955857dae44603e1bde54d46a793095b7f01e416c9",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 162,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T204340109628-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "4956f3ce2e5d81aa60f3d0157c21dbac23dc3556",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the claim that the cpu state is drawn \"at its two recorded mesh densities\" resolves to one recorded density; every other cited path, subcommand and commit resolves.",
+    "done_when": "a finding \u2014 \u00a76 done-when (1) requires a redraw \"from the conductor currents and cell moments stored in the three `panel-fields.npz` files alone\", but that input set does not carry the conductor geometry or the response carrier the \u00a75 builder needs.",
+    "evidence_paths": "pass \u2014 figures and receipts land under `docs/figures/mast-centroid-capability/` in the repository, and the response carrier \u00a75 uses resolves on GPFS at the path its own receipt records.",
+    "naming": "pass \u2014 \u00a76 names no plan label, stage name or ticket number in a symbol, path or comment.",
+    "reasoning": "pass \u2014 the stated cause (thin contours are the 33\u00d733 and 65\u00d765 lattice raster, confirmed in each committed `panel-fields.npz`) matches the cited evidence, the \u00a75 builder can produce the map the done-when measures, and the caller is named: `benchmarks/mast_centroid_solve_panels.py` `run` then `panels`, both existing subcommands (`main`, benchmarks/mast_centroid_solve_panels.py:1477).",
+    "single_goal": "pass \u2014 \u00a76 has one deliverable, the four centroid panels drawn from the \u00a75 map, with the producer and test changes serving that one measure.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares `s6` on `separatrix-spline-extraction#s5`, which is the builder \u00a76 draws through, and no other relationship \u00a76 relies on is missing."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "93f4de175cbc96d9a1f90c78206222da1adb502c78eb470f8e14ace5db6690b4",
+    "s7": "9ddcc4be93a921b78a5112d7c3e86c585b544accf7e06869b5b37c6c329d3878",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:57:34.549188+00:00"
+}

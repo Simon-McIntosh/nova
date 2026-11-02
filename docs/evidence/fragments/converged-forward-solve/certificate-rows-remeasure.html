@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="certificate-rows-remeasure">
+<meta name="plan-title" content="Certificate rows re-measured on the repaired route">
+<meta name="plan-summary" content="Three certificate rows measured in fresh processes on main after the moment-field Hessian repair and the stale-receipt refusal: the diverted -300 row stops at 0.3009 in three trips, the limited -500 row at 0.0402 in six, and the private 550-cell moment solve converges to 4.72e-15 in three corrections.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-recorded-at" content="2026-11-02">
+<meta name="plan-verdict" content="partial">
+<title>Certificate rows re-measured on the repaired route | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="certificate-rows-remeasure-landing">Certificate rows re-measured on the repaired route</h1>
+
+<p id="certificate-rows-remeasure-summary">All three rows were measured on base <code>67ad6e9c3</code>, each in its own fresh process with a private part and figure root, so no banked part receipt could be served: every row reports <code>receipt_status=solved</code> and no rendered-receipt marker, and each log names the tree, the revision and the module it imported. The diverted single-null row at requested cells −300 (340 realised cells) stops at <strong>0.3008686803164573</strong> after three production trips, unqualified, against the 0.0749196925647991 over twelve trips recorded before the Hessian repair. The limited row at requested cells −500 (553 realised cells) stops at <strong>0.0401684059566752</strong> after six trips, unqualified, against the 0.0012464509730622084 the driver previously served from a stored row. The private 550-cell moment solve still converges, to <strong>4.716708794545881e−15</strong> after three corrections, against 7.892009486298989e−15 on the Hessian head.</p>
+
+<section id="certificate-rows-remeasure-table"><h2>The three rows</h2>
+<table>
+<thead><tr><th>Row</th><th>Realised cells</th><th>Terminal residual</th><th>Converged</th><th>Qualification</th><th>Trips</th><th>Device</th><th>Solve wall [s]</th><th>Receipt</th></tr></thead>
+<tbody>
+<tr><td>diverted single-null, requested −300</td><td>340</td><td>0.3008686803164573</td><td>false</td><td>unqualified</td><td>3</td><td>cpu (JAX cpu), titan 98dci4-gpu-0002</td><td>610.6</td><td>fresh solve</td></tr>
+<tr><td>limited, requested −500</td><td>553</td><td>0.0401684059566752</td><td>false</td><td>unqualified</td><td>6</td><td>cpu (JAX cpu), titan 98dci4-gpu-0002</td><td>3451.1</td><td>fresh solve</td></tr>
+<tr><td>private 550-cell moment solve</td><td>553</td><td>4.716708794545881e−15</td><td>true</td><td>converged</td><td>3 corrections</td><td>cuda, Tesla P100-PCIE-16GB on titan 98dci4-gpu-0002</td><td>450.0 step wall</td><td>fresh solve</td></tr>
+</tbody>
+</table>
+<p id="certificate-rows-remeasure-qualification">The two certificate rows share the termination <code>active_set_settled</code> and the reason <code>fixed_point_residual_outside_qualification_bound</code>; neither is converged against the 1e−12 bound. Both readings are lower-bounded by a solve that stopped accepting Newton steps rather than by a residual that grew, which is the same stall shape the 553-cell carrier showed before the root tangent was repaired.</p>
+</section>
+
+<section id="certificate-rows-remeasure-diverted"><h2>Diverted single-null at requested cells −300</h2>
+<p id="certificate-rows-remeasure-diverted-row">Terminal residual 0.3008686803164573, three trips, <code>converged=false</code>, unqualified. The solved axis is (1.8001608410035406, 0.35890956521291556) m against the analytic axis at (1.7878074752250435, 0.046513016111756206) m, and the solved contours are displaced upward and outboard across the whole plasma, so the displacement is a property of the terminal state rather than of one panel feature.</p>
+<p><img src="/nova/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg" alt="Solved and analytic flux contours for the diverted single-null row at requested cells minus 300, with both null sets and the wall"></p>
+</section>
+
+<section id="certificate-rows-remeasure-limited"><h2>Limited at requested cells −500</h2>
+<p id="certificate-rows-remeasure-limited-row">Terminal residual 0.0401684059566752 over six trips, <code>converged=false</code>, unqualified, on 553 realised cells. The solved axis is (6.480656976907307, 0.0017757500935194276) m against the analytic axis at (6.19901456525495, −1.92345179566829e−17) m. The solved axis stands 0.28 m outboard of the reference and 1.8 mm above it, and the solved contours follow the reference shape with that displacement carried across the whole stack: the map is close and the terminal state has not converged.</p>
+<p><img src="/nova/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg" alt="Solved and analytic flux contours for the limited row at requested cells minus 500, with both null sets and the wall"></p>
+</section>
+
+<section id="certificate-rows-remeasure-private"><h2>Private 550-cell moment solve</h2>
+<p id="certificate-rows-remeasure-private-row">The moment route converges on the carrier built for this tree: centre residual 0.01738494446496178, then 1.1021919656046158e−05, then 3.4581490786155827e−12, then 4.716708794545881e−15 at the third correction, <code>converged=true</code>. Its solved axis is (6.199969513585479, 3.4079249244763792e−09) m against the reference (6.2, 0), a 3.0e−05 m radial offset. The solved and reference contours are indistinguishable at this level array. The carrier was absent from the private store at this revision (<code>FileNotFoundError: certified carrier is absent</code>, the first GPU arm's refusal) and was built in the private store by this job before the solve.</p>
+<p><img src="/nova/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg" alt="Solved and analytic flux contours for the private 550-cell moment solve, with both null sets and the wall"></p>
+</section>
+
+<section id="certificate-rows-remeasure-conditions"><h2>Run conditions</h2>
+<p id="certificate-rows-remeasure-conditions-lanes">The H200 node carried <code>REBOOT_REQUESTED</code>, so all three rows ran in one labelled titan job (<code>--partition=titan --gres=gpu:1</code>, job 1302899, node 98dci4-gpu-0002, Tesla P100-PCIE-16GB): the two certificate rows on the CPU platform and the private moment solve on the card. Nothing ran on the login node. The two certificate rows ran at revision <code>e1ffd3a69</code> and the private step at <code>224880f50</code>, which adds only a figure to the tree, so the three rows measure the same code. Every process was launched with <code>TMPDIR=/tmp</code> exported in the submit environment and again in the payload, called <code>nova.jax.config.configure_dtypes()</code> before building any array, printed <code>nova.__file__</code>, the imported module and the resolved working directory, and ended its log with a bare <code>EXIT=</code> line.</p>
+<p id="certificate-rows-remeasure-conditions-receipts">The driver's stale-part refusal is what makes these readings measurements rather than served receipts: the earlier readings of 0.0749 and 1.2465e−3 came from part receipts the driver now refuses on a declared-current, carrier-digest or realised-cell mismatch. No part existed in any private root when these rows started, so each one entered the solver, and the recorded wall is the solve's own. The receipt column above is the driver's own marker rather than an assumption: each certificate row was refused unless its part carried <code>figure.render_source = fresh_production_solve</code> and no banked receipt block, and both rows report exactly that.</p>
+<p id="certificate-rows-remeasure-conditions-figures">The two certificate panels are drawn by the certificate driver's own <code>_plot</code>, reusing the committed painter rather than a second composition; the private row's panel is the route renderer's. <code>_plot</code> places two labels without measuring them: a long subtitle centred on the narrow flux axis, which ran off the left canvas edge, and a level readout at the bottom-left of every error axis, which lay across the wall and the contours. The panel writer therefore re-places both before saving — the subtitle is wrapped onto two lines and the level arrays move out of the axes into a caption band beneath the panels, prefixed with the quantity each belongs to — and then measures every text artist, refusing to write the panel if any leaves the canvas, overlaps another label, or sits inside an axis. Both delivered certificate panels pass that check, and the same check applied to the driver's unaltered composition reports the clipped subtitle and the three level readouts over the data.</p>
+</section>
+
+</main></body></html>

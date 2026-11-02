@@ -32,6 +32,13 @@
     "refinement": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/refine.log",
     "suite_comparison_note": "The source manifest has empty baseline_suite and after_suite fields and records no suite gate logs. Zero is the count of observed added suite failure IDs; no paired suite comparison is available."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-step-plateau-a8ef0ceef7ce",
+      "recorded_at": "2026-11-02T18:26:01.342005+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_step_plateau/measure.py",

@@ -1,0 +1,127 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires and not a measurement; no base/head gate pair was read and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720, RGBA, the attachment named by this review node)": "docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg"
+  },
+  "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png (1399x720, RGBA, 64848 bytes). No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that one PNG was opened; the pixel measurements below were taken from that same PNG. The reviewed run's manifest names its committed figure as docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg drawn by scripts/prototypes/bank_step_plateau/plot.py at the reviewed head, and the attachment is structurally consistent with that script: four log-y panels in a 2x2 grid, x axis 'accepted iterate' labelled 0-9 on the bottom row, one frameless two-entry legend above the panels, head blue #2865b2 and base grey #929292. The reviewed base 8b9b8321d is not this review worktree's HEAD, so base and head are both named explicitly rather than taken from this checkout. Only one attachment was offered for this head.",
+  "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-plateau.html names the device and trajectory ('Titan P100, one diverted 550-cell trajectory'), states that head and base are evaluated at the same states and directions, names the displayed displacement (1e-5 times the norm of each state), decodes both marker styles, states that their overlap is the result, and points at the tabled six-spacing ladder. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T19:12:05Z",
+  "figure_checks": {
+    "caption_independence": "The caption names the device (Titan P100), the trajectory, that base is evaluated at the head's states and directions, the shown displacement (1e-5 of the state norm), what each marker style means, that the overlap is the result, and that the full six-spacing ladder is tabled below. It is not a restatement of the title or the axis labels, and it is consistent with the render: the arms do overlap at every iterate, and only the 1e-5 spacing is drawn.",
+    "rendered_artifact": "Only image-0.png was opened, at its native 1399x720 resolution, and every pixel count, ink bounding box, spine position and curve extent above was measured from that same PNG. No SVG text, dimension or glyph coordinate was read, so every verdict is about the picture a reader sees.",
+    "scope": "Read-only. No figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and this node's manifest.",
+    "unchanged_since_previous_review": "The reviewed run's figure and its drawing script are unchanged between the previous figure review head ae7be5c86 and this head 10358fc31 apart from the drawing script's local text check being replaced by its booking owner's check_text; the rendered picture is the same figure, and this record's verdicts are made independently from the attachment rather than carried over.",
+    "values_from_the_render": "Read from the picture only: bank flux sits between 1e-11 and 1e-10 with a small hump near iterate 1; geometry dips to about 6e-8 at iterate 4; booking is flat near 1e-5 from iterate 2 to 7 with low points at 0, 1, 8 and 9; full error is near 1e-5 over most iterates with a dip to about 1e-7 at iterate 4. No table value was used to decide a verdict."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg",
+      "render_check": {
+        "base_grey_px": 9750,
+        "canvas": "1399x720 RGBA",
+        "coincident_marker_probe": "In the booking plateau band (render rows 140-160, columns 990-1260) 3784 pixels are pure white and 53 of them sit directly beside a grey #929292 edge pixel, the white interiors of the base squares; the head marker is not visible at those iterates.",
+        "curve_extent_by_panel": {
+          "booking": {
+            "blue_rows": [
+              148,
+              292
+            ],
+            "fraction_of_panel_height": 0.68
+          },
+          "flux": {
+            "blue_rows": [
+              498,
+              541
+            ],
+            "fraction_of_panel_height": 0.2
+          },
+          "full": {
+            "blue_rows": [
+              184,
+              278
+            ],
+            "fraction_of_panel_height": 0.44
+          },
+          "geometry": {
+            "blue_rows": [
+              460,
+              569
+            ],
+            "fraction_of_panel_height": 0.51
+          }
+        },
+        "head_blue_px": 6957,
+        "ink_bbox_rows_cols": [
+          3,
+          685,
+          137,
+          1372
+        ],
+        "outer_4px_frame_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 40
+        },
+        "panel_geometry": "Bottom spines at render rows 342 and 625-626; left spines at columns 223-224 and 795-796; each panel's plot area is about 213 rows tall."
+      },
+      "rubric": {
+        "contrast": "pass. Near-black text on white; head blue #2865b2 at about 5.8:1 on white and base grey #929292 at about 3.1:1, with a marker-shape difference between the arms in addition to hue.",
+        "data_ink": "pass. 6957 head-blue px and 9750 base-grey px carry the content; there is no fill, gradient, band or decorative styling inside any axes, and the white area between panels is the 2x2 grid's spacing.",
+        "decoration": "pass. No gridlines, no top or right spine, no background fill, no shadow, no panel frame.",
+        "label_collision": "pass. Zero ink in the left, right and bottom 4-px frames and only the legend glyph tops in the top frame at rows 3-7, so nothing is clipped; no label sits over the data and the legend is outside the axes. The top margin is three rows, the tightest in the layout.",
+        "legibility": "pass. Each panel names its quantity on the y axis, the shared x axis is labelled once, and both arms are traceable across all ten iterates. The head arm is a solid blue line with filled circles and the base arm an open grey square; the legend above the panels is unframed and names both. Reductions: at every iterate the head marker is painted out by the base marker, so the marker the legend promises for head is absent from the panels (finding 1); and the flux panel uses only about a fifth of its height for the variation it reports (finding 2).",
+        "table_form": "pass. A per-iterate error trend for four blocks and two arms is what a log plot shows better than a table; the exact numbers are tabled in the evidence fragment."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "plot.py draws head at zorder 3 with markersize 5 and then, for base, an extra scatter at s=45 with zorder 4, which paints over the head line and marker. Measured on image-0.png in the booking panel's plateau band (render rows 140-160, columns 990-1260): 3784 pure-white pixels, 53 of them directly beside a grey edge pixel, i.e. the base squares' white interiors sit on top of the head trace.",
+      "file": "scripts/prototypes/bank_step_plateau/plot.py",
+      "id": "fe2c34036b4",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The base series is redrawn as a large white-faced square in a separate scatter above the head line, so wherever the two arms coincide the head marker and the head line beneath it are painted out and the reader sees a white-centred grey square with the blue line interrupted at its edge. The head arm is the one the figure reports on, and it is the one that disappears exactly where the arms agree, which is the figure's headline. It stays non-blocking because the blue line enters and leaves each square at the same height, so the head level at every occluded iterate remains readable, and the interruption itself shows where base sits on head; the caption also states that the overlap is the result. A reader who had not read the caption could, however, mistake the broken blue line for missing head data at those iterates, and no filled blue circle appears anywhere in the four panels."
+    },
+    {
+      "evidence": "plot.py computes lower and upper as floored and ceiled decades of the plotted values and then calls set_ylim(10**(lower-0.3), 10**(upper+0.3)), a fixed 1.6-decade window whenever the data occupy one decade or less. Measured on image-0.png over plot areas about 213 rows tall: blue curve rows 184-278 in 'full' (94 rows, 0.44 of the panel), 148-292 in 'booking' (144 rows, 0.68), 460-569 in 'geometry' (109 rows, 0.51) and 498-541 in 'flux' (43 rows, 0.20).",
+      "file": "scripts/prototypes/bank_step_plateau/plot.py",
+      "id": "f91a7c68ca0",
+      "line": 67,
+      "severity": "non-blocking",
+      "summary": "Every panel gets the same axis construction: snap the limits to whole decades of the data and then pad by 0.3 decades on each side. The pad is fixed, so a panel whose data span less than a decade is zoomed out far more than one whose data span several. The flux panel spans about 0.3 decades and so uses about 20 percent of its height for its variation, against 44 to 68 percent in the full, booking and geometry panels, which makes the flux error read as flatter and steadier than the other blocks at a glance. It stays non-blocking because the decade labels are present and legible, so a reader who reads the axis is not misled by the compression."
+    }
+  ],
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with crew check --review --record before the manifest is closed.",
+    "evidence": "Provenance is the attachment this node was given (image-0.png, 1399x720), matched in structure to the figure the reviewed run's manifest names. Clipping, frame ink, series-colour counts, panel geometry, per-panel curve extent and the marker-occlusion probe are all pixel measurements on that same PNG.",
+    "legibility": "Read from the rendered image at native resolution: every axis label, tick label and legend entry is legible and both arms are followable across all ten iterates; the costs are the occluded head marker (finding 1) and the compressed flux panel (finding 2).",
+    "scope_discipline": "This review is read-only; both findings are reported in this record and no source, figure, caption or script was changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T190955849148-review-of-bank-step-plateau-10358fc31ffa-figure",
+  "reviewed_base_sha": "8b9b8321d1bd77ef67613df12374055678d58529",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg"
+  ],
+  "reviewed_head_sha": "10358fc31ffaecec70615a783718ec5541ce510f",
+  "reviewed_run_id": "r-20261102T170048604704-bank-step-plateau",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Four log-y panels in a 2x2 grid, one per residual block, each naming its quantity on the y axis ('full relative error', 'booking relative error', 'geometry relative error', 'flux relative error'), a shared x axis 'accepted iterate' labelled 0-9 on the bottom row, and one unframed two-entry legend above the panels. Every axis label, tick label and legend entry is legible at native resolution and both arms are followable across all ten iterates. Two reading costs are recorded as non-blocking findings: in one panel (booking) the arms differ by far less than a pixel at this log scale and the reader sees one trace, and in every panel the head marker is painted out under the base marker (finding 1).",
+    "RUBRIC data_ink: pass. Two line-and-marker series per panel and nothing else inside the axes apart from the log ticks that make the values readable. Measured on the render with a tight colour tolerance: 6957 px of head blue #2865b2 and 9750 px of base grey #929292 across the whole canvas, with no shaded region, band, area fill or gradient inside any axes.",
+    "RUBRIC decoration: pass. Top and right spines are absent on every panel (only the bottom spines at render rows 342 and 625-626 and the left spines at columns 223-224 and 795-796 are drawn), no gridline is drawn, and there is no background fill, panel frame or drop shadow. The y tick ladder is thinned to at most about five labelled decades per panel.",
+    "RUBRIC contrast: pass. All axis, tick and legend text is near-black on white. Head blue #2865b2 is about 5.8:1 on white; base grey #929292 is about 3.1:1, at the 3:1 graphics floor, and the arms are separated by marker shape (white-faced square against a line) in addition to hue.",
+    "RUBRIC table_form: pass. Ten accepted iterates against four error blocks with two arms overlaid is a trend comparison, which a line plot shows and a table does not; the exact six-spacing ladder is tabled in the evidence fragment, so the image carries only the shape the table cannot give at a glance.",
+    "RUBRIC label_collision: pass. No text is clipped and no label overlaps another label or the data. The render's ink bounding box is rows 3-685 and columns 137-1372; the outer 4-px frames carry zero non-white pixels on the left, right and bottom and 40 on the top, all of them the tops of the legend glyphs at rows 3-7. The legend clears the canvas top edge by three rows: not clipped, but it is the tightest margin in the layout, and the drawing script's own refusal check (plot.py check_text) is what keeps it from crossing."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T19:21:10.707921+00:00",
+  "total": null
+}

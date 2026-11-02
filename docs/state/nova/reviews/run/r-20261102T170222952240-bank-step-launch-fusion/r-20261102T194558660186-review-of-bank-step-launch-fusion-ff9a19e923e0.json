@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_step_launch_fusion.py:21-24 fails if current's scalar alias ceases to be the clip_quadrature owner; that identity alone does not guard against restoring the duplicate body.",
+    "tests/test_bank_step_launch_fusion.py:25-28 fails if current's batched alias ceases to be the clip_quadrature owner; it is independent of the values passed to book_tangent_channels.",
+    "tests/test_bank_step_launch_fusion.py:40-59 fails if book_tangent_channels bypasses the patched imported batched routine; restoring the former inline body does bypass it, as duplicate-red-guard-sirius.log:39 shows.",
+    "tests/test_bank_step_launch_fusion.py:61-64 fails if support_read stops calling the shared routine or restores its local quadrature constants.",
+    "tests/test_bank_step_launch_fusion.py:65-68 fails if current.book_tangent_channels loses the shared call or restores its local quadrature constants; none of these assertions compares output to the supplied input."
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1096",
+    "scripts/prototypes/bank_step_launch_fusion/h200_compare.sh:51",
+    "scripts/prototypes/bank_step_launch_fusion/h200_compare.sh:82",
+    "scripts/prototypes/bank_step_launch_fusion/plot.py:133"
+  ],
+  "completed_at": "2026-11-02T19:56:26Z",
+  "dispatched_at": "2026-11-02T19:47:50Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/guard-suite-head-summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/guard-suite-base-summary.log",
+    "figure_render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/stage-wall-h200-clean.png",
+    "guard_head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/duplicate-head-guard-sirius.log",
+    "guard_old": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/duplicate-old-guard-sirius.log",
+    "guard_red": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/duplicate-red-guard-sirius.log",
+    "h200_base": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/base-h200.log",
+    "h200_head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/head-h200.log"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html",
+      "id": "fd98bbc9397",
+      "line": 16,
+      "severity": "blocking",
+      "text": "The measured H200 step is 43.11 ms with 2,804 launches, so it still exceeds the live section's 0.5 ms and 100-launch limits and cannot satisfy the latency goal."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all ten commits from 242c6809 to ff9a19e9: they add the same-allocation H200 harness, correct trace isolation, extend the stage figure and evidence, and add a behavioral shared-integral guard in tests/test_bank_step_launch_fusion.py:18-68.",
+    "done_when": "docs/plans/sub-millisecond-forward-path.html:101-104 requires at most 0.5 ms and 100 launches on H200; base-h200.log:17,29 and head-h200.log:17,29 record 73.11/43.11 ms and 15,310/2,804 launches, so the latency gate fails.",
+    "goal": "brief.txt:1-8 requires shared boundary integration, profiling and fusion; the new H200 evidence at docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html:16 shows a faster step and the live section bound remains unmet.",
+    "manifest": "The source manifest.md records ff9a19e9, the red restored-body control, H200 profile and solve receipts, and completed baseline_suite/after_suite arms with zero failures.",
+    "write_paths": "manifest.md:3 grants the evidence fragment, figure directory, prototype directory and test; git diff 242c6809..ff9a19e9 changes seven paths, all within those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_launch_fusion.py:40-59 patches the shared routine to raise, so restoring the removed body bypasses it and fails as duplicate-red-guard-sirius.log:39 confirms; lines 65-68 also reject the restored quadrature constants.",
+    "evidence": "base-h200.log:1-29 and head-h200.log:1-29 carry source identities, positive GPU events, stage medians and launches; guard-suite-base-summary.log and guard-suite-head-summary.log complete at zero failures, and duplicate-red-guard-sirius.log:39 refuses the restored body.",
+    "fit": "scripts/prototypes/bank_step_launch_fusion/plot.py:7,21 reuses the existing bank_step_booking plotting helpers, and tests/test_bank_step_launch_fusion.py:18 follows the nearby JAX fixture idiom with no forbidden source name added.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html:16 records a 41% H200 wall reduction but explicitly reports 43.11 ms and 2,804 launches against the unmet 0.5 ms and 100-launch bounds.",
+    "reuse": "scripts/prototypes/bank_step_launch_fusion/plot.py:10 imports the existing records and text checker from bank_step_booking/plot.py; h200_compare.sh:51 invokes the existing measure.sh runner, and guard_arms.sh:26 specializes the existing negative_control.sh scratch-mutation pattern for a distinct body-restoration control.",
+    "scope_discipline": "The seven paths in git diff 242c6809..ff9a19e9 are inside source manifest.md:3 and address measurement, the figure, the behavioral guard and their evidence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt:1-8 requires shared boundary integration, profiling and fusion; the new H200 evidence at docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html:16 shows a faster step and the live section bound remains unmet.\nVERDICT done_when: docs/plans/sub-millisecond-forward-path.html:101-104 requires at most 0.5 ms and 100 launches on H200; base-h200.log:17,29 and head-h200.log:17,29 record 73.11/43.11 ms and 15,310/2,804 launches, so the latency gate fails.\nVERDICT write_paths: manifest.md:3 grants the evidence fragment, figure directory, prototype directory and test; git diff 242c6809..ff9a19e9 changes seven paths, all within those grants.\nVERDICT manifest: The source manifest.md records ff9a19e9, the red restored-body control, H200 profile and solve receipts, and completed baseline_suite/after_suite arms with zero failures.\nVERDICT diff: Read all ten commits from 242c6809 to ff9a19e9: they add the same-allocation H200 harness, correct trace isolation, extend the stage figure and evidence, and add a behavioral shared-integral guard in tests/test_bank_step_launch_fusion.py:18-68.\nCALL_SITES: nova/equilibrium/support_read.py:1096, scripts/prototypes/bank_step_launch_fusion/h200_compare.sh:51, scripts/prototypes/bank_step_launch_fusion/h200_compare.sh:82, scripts/prototypes/bank_step_launch_fusion/plot.py:133\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html:16 records a 41% H200 wall reduction but explicitly reports 43.11 ms and 2,804 launches against the unmet 0.5 ms and 100-launch bounds.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-h200.log:1-29 and head-h200.log:1-29 carry source identities, positive GPU events, stage medians and launches; guard-suite-base-summary.log and guard-suite-head-summary.log complete at zero failures, and duplicate-red-guard-sirius.log:39 refuses the restored body.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The seven paths in git diff 242c6809..ff9a19e9 are inside source manifest.md:3 and address measurement, the figure, the behavioral guard and their evidence.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_bank_step_launch_fusion.py:40-59 patches the shared routine to raise, so restoring the removed body bypasses it and fails as duplicate-red-guard-sirius.log:39 confirms; lines 65-68 also reject the restored quadrature constants.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_step_launch_fusion/plot.py:7,21 reuses the existing bank_step_booking plotting helpers, and tests/test_bank_step_launch_fusion.py:18 follows the nearby JAX fixture idiom with no forbidden source name added.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/bank_step_launch_fusion/plot.py:10 imports the existing records and text checker from bank_step_booking/plot.py; h200_compare.sh:51 invokes the existing measure.sh runner, and guard_arms.sh:26 specializes the existing negative_control.sh scratch-mutation pattern for a distinct body-restoration control.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html:16 blocking: The measured H200 step is 43.11 ms with 2,804 launches, so it still exceeds the live section's 0.5 ms and 100-launch limits and cannot satisfy the latency goal.",
+  "review_run_id": "r-20261102T194558660186-review-of-bank-step-launch-fusion-ff9a19e923e0",
+  "reviewed_base_sha": "242c6809e51d6596418796451e08f867ad6ccda3",
+  "reviewed_head_sha": "ff9a19e923e02ad0cae235681d9384505dacebf9",
+  "reviewed_run_id": "r-20261102T170222952240-bank-step-launch-fusion",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 11,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:02:39.975642+00:00",
+  "total": 104
+}

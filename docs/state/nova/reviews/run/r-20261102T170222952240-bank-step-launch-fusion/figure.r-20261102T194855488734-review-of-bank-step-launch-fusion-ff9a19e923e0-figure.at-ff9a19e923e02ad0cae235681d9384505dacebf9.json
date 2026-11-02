@@ -1,0 +1,121 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires and not a measurement; no base/head gate pair was read and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720, RGBA, the only attachment named by this review node)": "docs/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg"
+  },
+  "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png, measured at 1399x720 RGBA. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that one PNG was opened; every pixel measurement below was taken from that same PNG. The reviewed run's diff 242c6809..ff9a19e9 changes exactly one rendered figure, docs/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg, drawn by scripts/prototypes/bank_step_launch_fusion/plot.py at the reviewed head; the attachment is structurally that script's output (two panels titled 'titan P100 warm wall [ms]' and 'H200 warm wall [ms]', five stage rows sharing one y axis, grey circle / blue square / green diamond series, one frameless three-entry legend above). Only one attachment was offered. The reviewed base 242c6809 and head ff9a19e9 are both named explicitly because this review worktree's HEAD is 5dd2eab7.",
+  "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html names both devices and their separate labelled linear millisecond axes, decodes all three series ('Grey is base, blue is the P100 geometry checkpoint, and green is the booking batch'), states that marks are medians of three synchronized warm calls, warns that the full-Jacobian and whole-step rows include preceding work and are not additive, and states that the read is outside the step and omitted. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T19:51:35Z",
+  "figure_checks": {
+    "caption_independence": "The evidence caption names the devices, the axis units, the three series, the acquisition ('medians of three synchronized warm calls'), the non-additivity of two rows and the omission of the read. It is not a restatement of the title or axis labels.",
+    "rendered_artifact": "Only image-0.png was opened, at its native 1399x720 resolution, and every pixel count, ink bounding box, spine position, row band and mark extent above was measured from that same PNG. No SVG text element, dimension or glyph coordinate was read, so every verdict is about the picture a reader sees.",
+    "scope": "Read-only. No figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and this node's manifest.",
+    "values_from_the_render": "The mark extents quoted above are pixel positions mapped through each panel's own tick spacing (about 81.75 px per 200 ms on P100, about 101.4 px per 20 ms on H200); they agree with the plotted data and no table value was used to decide a verdict."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg",
+      "render_check": {
+        "blue_absent_from_h200_probe": "No pixel matching geometry blue #3478b5 within tolerance 18 exists in the right panel (columns 919-1395) in any of the five row bands.",
+        "canvas": "1399x720 RGBA",
+        "ink_bbox_rows_cols": [
+          37,
+          676,
+          177,
+          1358
+        ],
+        "outer_4px_frame_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0
+        },
+        "panel_geometry": "Left spines at columns 391 and 918; shared bottom spine at row 618; five y rows at render rows 160, 263, 366, 470 and 573 (about 103 px apart).",
+        "row_extent_ms_from_the_render": {
+          "LU factor": {
+            "H200": "cols 919-955, about 0.2 to 7 ms",
+            "P100": "cols 392-403, about 2.5 to 29 ms"
+          },
+          "booking tangent": {
+            "H200": "base about 41, booking about 29",
+            "P100": "base about 245, geometry about 245, booking about 597"
+          },
+          "fresh whole step": {
+            "H200": "base about 74, booking about 45",
+            "P100": "base about 646, geometry about 619, booking about 971"
+          },
+          "full jacobian": {
+            "H200": "base about 64, booking about 34",
+            "P100": "base about 318, geometry about 289, booking about 641"
+          },
+          "residual and booking": {
+            "H200": "base about 6.3, booking about 6.7",
+            "P100": "base up to about 335, geometry about 335, booking about 340"
+          }
+        },
+        "series_colour_px": {
+          "base_grey_929292": 6101,
+          "booking_green_2e8b57": 5733,
+          "geometry_blue_3478b5": 1979
+        }
+      },
+      "rubric": {
+        "contrast": "pass. Near-black text on white; blue about 4.7:1, green about 4.2:1 and grey about 3.1:1 on white, above the 3:1 graphics floor, with marker shape and dash pattern as second cues.",
+        "data_ink": "pass. Line-and-marker series only; measured 6101 grey, 1979 blue and 5733 green pixels, with no fill or gradient inside either plot area.",
+        "decoration": "pass. No gridlines, no top or right spines, no background fill, no shadow, no styled theme.",
+        "label_collision": "pass. Ink bounding box rows 37-676, columns 177-1358; zero ink in the outer 4-pixel frame; no label over data; no mark at a plot edge.",
+        "legibility": "pass. Device-titled linear panels, five named stage rows shared across the two panels, and readable tick, axis and legend text at native resolution. Cost: the LU factor row is compressed to 11 px on P100 and 36 px on H200 (finding 1).",
+        "table_form": "pass. Grouped bars compare stage, device and configuration at a glance; exact values are tabled in the evidence fragment."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "plot.py:51 sets set_xlim(0, upper*1.08) from the panel maximum. Measured on image-0.png: the LU factor row's coloured marks span columns 392-403 in the left panel and 919-955 in the right panel, while the blue series in the whole-step row reaches column 788 and the grey in the right panel column 1295.",
+      "file": "scripts/prototypes/bank_step_launch_fusion/plot.py",
+      "id": "f9b56abcf83",
+      "line": 51,
+      "severity": "non-blocking",
+      "summary": "Both panels size their linear axis to the largest stage, so the LU factor row is squeezed against the origin: on P100 its marks occupy about 11 px of a roughly 440 px plot width (columns 392-403, about 2.5 percent) and on H200 about 36 px (columns 919-955, about 8 percent), against a whole step of about 971 ms and 74 ms. The row is visible, so a reader does see that LU factor is very small, but its values (about 10-25 ms on P100, about 2-7 ms on H200) cannot be read off the figure and the three P100 series cannot be told apart there. It stays non-blocking because the brief asks for a linear axis, the intended fact (the row is near-zero) remains visible, and the exact numbers are tabled in the evidence fragment beside the figure."
+    },
+    {
+      "evidence": "plot.py:94 draws one fig.legend with three entries for both panels, while draw_device is called for the H200 panel with only two series. Measured on image-0.png: zero pixels matching #3478b5 within tolerance 18 in columns 919-1395 across all five row bands.",
+      "file": "scripts/prototypes/bank_step_launch_fusion/plot.py",
+      "id": "f69abe95f55",
+      "line": 94,
+      "severity": "non-blocking",
+      "summary": "A single figure-level legend carries three entries (base, geometry batch, booking batch), but the H200 panel plots only base and booking batch; no geometry-blue pixel is present anywhere in the right panel. A reader scanning the H200 panel may briefly look for a blue trace the data do not contain. It stays non-blocking because nothing is hidden or mislabelled, the caption states that blue is the P100 geometry checkpoint, and the P100-only nature of that series is a true property of the measurement."
+    }
+  ],
+  "justifications": {
+    "durability": "The record is written at both declared paths and each is checked with crew check --review --record before the manifest is closed.",
+    "evidence": "All claims are pixel measurements on the single attached PNG: ink bounding box, zero-ink outer frame, per-series colour counts, spine positions and per-row mark extents. No SVG was consulted, so the clipped/hidden-label failure the rule guards against cannot have been reported from generated markup.",
+    "legibility": "Read at native resolution: every label is legible and the two panels share row labels so the right panel is followable; the only reading cost is the compressed LU factor row (finding 1).",
+    "scope_discipline": "This review is read-only; both findings are reported in this record and no source, figure, caption or script was changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T194855488734-review-of-bank-step-launch-fusion-ff9a19e923e0-figure",
+  "reviewed_base_sha": "242c6809e51d6596418796451e08f867ad6ccda3",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg"
+  ],
+  "reviewed_head_sha": "ff9a19e923e02ad0cae235681d9384505dacebf9",
+  "reviewed_run_id": "r-20261102T170222952240-bank-step-launch-fusion",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Two side-by-side linear panels, each titled with its device and unit ('titan P100 warm wall [ms]', 'H200 warm wall [ms]'); the left panel names all five stage rows and the right panel shares that y axis so the rows align horizontally. Every axis label, tick label and legend entry reads at native 1399x720 without magnification. One reading cost is recorded as non-blocking finding 1: the LU factor row occupies only about 11 px of the P100 panel (columns 392-403) and about 36 px of the H200 panel (columns 919-955), so the marks in that row are visible but their values cannot be read off the picture.",
+    "RUBRIC data_ink: pass. The content is five horizontal line-and-marker series on two axes and nothing else inside them. Measured on the render with a tight colour tolerance: 6101 px of base grey #929292, 1979 px of geometry blue #3478b5 and 5733 px of booking green #2e8b57; there is no shaded band, area fill, gradient or decorative mark inside either plot area.",
+    "RUBRIC decoration: pass. No gridlines are drawn; the top and right spines are absent, and only the two left spines at columns 391 and 918 and the shared bottom spine at row 618 are drawn; there is no background fill, panel frame, shadow or styled theme. The only furniture outside the plot areas is the legend and the axis text, both required to read the figure.",
+    "RUBRIC contrast: pass. All axis, tick and legend text is near-black on white. Of the marks, blue #3478b5 is about 4.7:1 on white, green #2e8b57 about 4.2:1 and grey #929292 about 3.1:1, all at or above the 3:1 graphics floor; series are additionally separated by marker shape (circle, square, diamond) and by the blue line's dash pattern, so colour alone does not carry the distinction.",
+    "RUBRIC table_form: pass. This is a grouped bar comparison of stage wall against device and configuration, which is what a bar chart shows better than a table; the exact per-stage numbers live in the evidence fragment's tables, so the image carries the at-a-glance comparison rather than tabulated data.",
+    "RUBRIC label_collision: pass. Nothing is clipped and no label overlaps another label or the data. The render's ink bounding box is rows 37-676 and columns 177-1358, and the outer 4-pixel frame carries zero non-white pixels on all four sides. No coloured mark reaches a plot edge: the furthest P100 mark ends at column 788 of a plot area ending near column 831, and the furthest H200 mark at column 1295 of a plot area ending near column 1356. The legend sits above both plot areas (their tops begin about row 104) and clears the canvas top edge."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:01:35.388396+00:00",
+  "total": null
+}

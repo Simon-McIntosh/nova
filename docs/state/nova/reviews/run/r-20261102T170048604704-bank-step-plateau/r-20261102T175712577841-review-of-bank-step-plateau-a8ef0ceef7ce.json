@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "measure.py:351 fails if x64 configuration is disabled before the measurement.",
+    "measure.py:163 fails if the replay no longer takes at least eight accepted steps; :164-166 fails if no iterate enters the recorded residual range, although a single visit would still pass without a multi-step plateau; :167 fails if the final read is invalid or the residual exceeds 1e-10.",
+    "measure.py:239 purports to fail when the booking-column mutation is absent, but the unmutated 7.180208e-6 already exceeds its 1e-6 threshold, so reverting the mutation does not redden it.",
+    "report.py:28-36 fail when paired ladders are incomplete or contain invalid reads; :44 fails if neither refined plateau iterate has a sub-1e-6 spacing; :78-80 fail if base/head full errors diverge by at least 1e-7, booking exceeds 1e-6, or full error falls below 1e-4 at the selected row.",
+    "No added assertion compares a result with the same input passed to the code under test; the failing independence is the mutation threshold, which accepts the unmutated result."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-02T18:04:58Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bank-step-plateau",
+      "recorded_at": "2026-11-02T18:07:35.508036+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-step-plateau",
+      "recorded_at": "2026-11-02T18:07:38.633173+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-02T17:58:21Z",
+  "evidence": {
+    "base_difference": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/base-difference.log",
+    "head_difference": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/head-difference.log",
+    "head_trajectory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/head-trajectory.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/negative-control.log",
+    "refinement": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/refine.log",
+    "suite_comparison_note": "The source manifest has empty baseline_suite and after_suite fields and records no suite gate logs. Zero is the count of observed added suite failure IDs; no paired suite comparison is available."
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_plateau/measure.py",
+      "id": "f780b370f30",
+      "line": 239,
+      "severity": "blocking",
+      "text": "The mutation guard only requires booking error above 1e-6, while the unmutated head-checked.json row at iterate 2 and h/|x|=1e-5 is already 7.180208e-6; removing the 1e-3 Jacobian perturbation leaves this assertion green, so the declared negative control does not prove the measure detects the regression."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The duplicate is confined to this run-specific figure script and its current rendered artifact is legible; consolidation can wait for a shared figure-save owner.",
+      "file": "scripts/prototypes/bank_step_plateau/plot.py",
+      "id": "f81bb9b7ed4",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "check_text duplicates the text bounds and overlap capability in scripts/prototypes/bank_step_booking/plot.py:30-48 instead of using its owner."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all twelve commits from 8b9b8321 to a8ef0ce; they add measurement, plotting and reporting helpers plus one SVG and one evidence fragment, with no product source edits.",
+    "done_when": "brief.txt:2-8 requires every iterate, three residual blocks, a base replay and a P100 figure; head-trajectory.log, paired 60-row difference logs, refine.log and bank-step-plateau.html:16-30 record those measures, but the mutation check in measure.py:239 does not refuse the unmutated value.",
+    "goal": "brief.txt:1-8 asks for a ten-step P100 plateau replay and same-state base/head directional ladders; measure.py:108-234 and bank-step-plateau.html:15-20 deliver both, with the causal conclusion bounded as an inference.",
+    "manifest": "source manifest.md:5-29 reports complete, lists twelve commits and six EXIT=0 measurement logs, and leaves baseline_suite and after_suite empty.",
+    "write_paths": "manifest.md:3 grants the bank_step_plateau prototype, evidence fragment and figure directory; the eight paths in the 8b9b8321..a8ef0ce diff all lie inside those grants."
+  },
+  "justifications": {
+    "durability": "measure.py:163-167 would fail a missing ten-step plateau or terminal residual above 1e-10 and report.py:28-44 would fail missing or invalid ladder rows, but measure.py:239 stays true when its claimed booking mutation is removed.",
+    "evidence": "head-trajectory.log ends with ten steps and 7.969536297e-11, paired difference logs each complete 60 rows, and refine.log completes 50 rows, but source manifest.md:21-22 records no completed suite arms and measure.py:239 is an ineffective mutation gate.",
+    "fit": "measure.py:4-6 configures JAX precision before array creation, and plot.py:38-114 follows the local data-ink SVG convention without adding forbidden source names.",
+    "goal_fidelity": "measure.py:114-167 records accepted states and directions, while bank-step-plateau.html:16-26 reports paired errors and the refined plateau window without claiming an identified clipping operation.",
+    "reuse": "A capability search found the same text clipping and overlap checker already owned by scripts/prototypes/bank_step_booking/plot.py:30-48; plot.py:15-35 duplicates it rather than extending that owner.",
+    "scope_discipline": "All eight paths in git diff 8b9b8321..a8ef0ce are contained by source manifest.md:3, and the diff touches no nova/equilibrium product module."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt:1-8 asks for a ten-step P100 plateau replay and same-state base/head directional ladders; measure.py:108-234 and bank-step-plateau.html:15-20 deliver both, with the causal conclusion bounded as an inference.\nVERDICT done_when: brief.txt:2-8 requires every iterate, three residual blocks, a base replay and a P100 figure; head-trajectory.log, paired 60-row difference logs, refine.log and bank-step-plateau.html:16-30 record those measures, but the mutation check in measure.py:239 does not refuse the unmutated value.\nVERDICT write_paths: manifest.md:3 grants the bank_step_plateau prototype, evidence fragment and figure directory; the eight paths in the 8b9b8321..a8ef0ce diff all lie inside those grants.\nVERDICT manifest: source manifest.md:5-29 reports complete, lists twelve commits and six EXIT=0 measurement logs, and leaves baseline_suite and after_suite empty.\nVERDICT diff: read all twelve commits from 8b9b8321 to a8ef0ce; they add measurement, plotting and reporting helpers plus one SVG and one evidence fragment, with no product source edits.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: measure.py:114-167 records accepted states and directions, while bank-step-plateau.html:16-26 reports paired errors and the refined plateau window without claiming an identified clipping operation.\nSCORE evidence: 14\nJUSTIFICATION evidence: head-trajectory.log ends with ten steps and 7.969536297e-11, paired difference logs each complete 60 rows, and refine.log completes 50 rows, but source manifest.md:21-22 records no completed suite arms and measure.py:239 is an ineffective mutation gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All eight paths in git diff 8b9b8321..a8ef0ce are contained by source manifest.md:3, and the diff touches no nova/equilibrium product module.\nSCORE durability: 6\nJUSTIFICATION durability: measure.py:163-167 would fail a missing ten-step plateau or terminal residual above 1e-10 and report.py:28-44 would fail missing or invalid ladder rows, but measure.py:239 stays true when its claimed booking mutation is removed.\nSCORE fit: 18\nJUSTIFICATION fit: measure.py:4-6 configures JAX precision before array creation, and plot.py:38-114 follows the local data-ink SVG convention without adding forbidden source names.\nSCORE reuse: 5\nJUSTIFICATION reuse: A capability search found the same text clipping and overlap checker already owned by scripts/prototypes/bank_step_booking/plot.py:30-48; plot.py:15-35 duplicates it rather than extending that owner.\nFINDING scripts/prototypes/bank_step_plateau/measure.py:239 blocking: The mutation guard only requires booking error above 1e-6, while the unmutated head-checked.json row at iterate 2 and h/|x|=1e-5 is already 7.180208e-6; removing the 1e-3 Jacobian perturbation leaves this assertion green, so the declared negative control does not prove the measure detects the regression.\nFINDING scripts/prototypes/bank_step_plateau/plot.py:15 non-blocking: check_text duplicates the text bounds and overlap capability in scripts/prototypes/bank_step_booking/plot.py:30-48 instead of using its owner.; disposition: exempted because The duplicate is confined to this run-specific figure script and its current rendered artifact is legible; consolidation can wait for a shared figure-save owner.",
+  "review_run_id": "r-20261102T175712577841-review-of-bank-step-plateau-a8ef0ceef7ce",
+  "reviewed_base_sha": "8b9b8321d1bd77ef67613df12374055678d58529",
+  "reviewed_head_sha": "a8ef0ceef7ceb873f3887ab1feb4cbb21c838437",
+  "reviewed_run_id": "r-20261102T170048604704-bank-step-plateau",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T18:07:15.126221+00:00",
+  "total": 81
+}

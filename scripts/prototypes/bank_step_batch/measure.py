@@ -497,7 +497,7 @@ def run_converge_arm(run_dir):
             **oracle,
         }
         journal(run_dir / "converge.jsonl", record)
-        emit("LANE", **record)
+        emit("LANE", **{key: value for key, value in record.items() if key != "kind"})
     emit(
         "CONVERGE",
         lanes=count,

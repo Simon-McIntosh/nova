@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "check_plot.py:16 fails when the SVG text reader cannot find the known baseline label; legend-reverted.log demonstrates that the reader finds it in the reversed artifact.",
+    "check_plot.py:17 fails when plot.py returns to the stale shared-boundary label; legend-reverted.log records that specific failure.",
+    "check_plot.py:18 fails if the stale label remains alongside the corrected one.",
+    "run_plot_check.sh:48-52 fails if reversing the answering commit passes the check or exits with a status other than one; the observed log shows the desired assertion failure, though any unrelated exit one would also satisfy this wrapper.",
+    "No added assertion compares a result with the same variable passed to the code under test; the independent literals still do not assert association between text and stroke color."
+  ],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/bank_step_booking/plot.py:95",
+    "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking.html:17"
+  ],
+  "completed_at": "2026-11-02T15:03:15Z",
+  "dispatched_at": "2026-11-02T14:56:34Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/suite-four-test_bank_step_booking.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/suite-base-test_bank_step_speed.log",
+    "convergence_receipts": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/convergence-record-checked.log",
+    "legend_head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/legend-head.log",
+    "legend_reverted": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/legend-reverted.log"
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T15:13:29.357450+00:00"
+    }
+  },
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The committed SVG and inspected PNG pair the current labels correctly, and the recorded reversal proves the original stale-label regression fails.",
+      "file": "scripts/prototypes/bank_step_booking/check_plot.py",
+      "id": "f846cc4a33a",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "Label membership alone cannot detect the two legend labels swapped between grey and green strokes, so a future color-to-name regression could pass."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read each of the five commits from dc981e7fd7d0 to 420d0abb7b57; they add the SVG label check, correct and publish the green legend, add its reversal gate, and document eight solve receipts.",
+    "done_when": "The source brief.txt requires a measured stage figure and fresh residual within 1e-10; bank-step-booking.html:16-52 reports the P100 stage and solve receipts, while legend-head.log and convergence-record-checked.log record the new checks.",
+    "goal": "The source brief.txt asks for titan booking speed evidence, a correctly labelled linear stage figure and solve accounting; plot.py:61 repairs the prior label and bank-step-booking.html:52-70 adds revision-bound step history.",
+    "manifest": "The source manifest.md reports complete, lists all five later commits, and names legend-head.log EXIT=0, legend-reverted.log EXIT=1, convergence-record-checked.log EXIT=0, and completed baseline and after suite logs.",
+    "write_paths": "The source manifest.md:3 grants the booking prototype, evidence fragment and figure directory; all five paths changed from dc981e7fd7d0 to 420d0abb7b57 fall within them."
+  },
+  "justifications": {
+    "durability": "check_plot.py:16-18 uses literal labels and the reverted plot.py:61 fails at :17, but the assertions do not bind either text to its colored legend stroke.",
+    "evidence": "legend-reverted.log shows known baseline text, the stale label and EXIT=1; convergence-record-checked.log reports eight receipt rows and EXIT=0, although the history compares different devices and revisions as bank-step-booking.html:67 discloses.",
+    "fit": "plot.py:53 preserves SVG text with the repository's Matplotlib idiom and stage-wall.svg:306-312 retains legible text without introducing a forbidden source name.",
+    "goal_fidelity": "plot.py:61 and stage-wall.svg:312 name the measured green configuration, and bank-step-booking.html:52-70 explains accepted steps without claiming an unmeasured Jacobian cause.",
+    "reuse": "A capability search in scripts/prototypes and nova/scripts found SVG size rewriting in bank_step_speed/plot_stage.py:103-107 but no existing rendered-legend semantic checker; check_plot.py:8-18 supplies that distinct check.",
+    "scope_discipline": "The five paths in the dc981e7fd7d0..420d0abb7b57 diff all fit source manifest.md:3 and contain only figure, gate and explanation repairs."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt asks for titan booking speed evidence, a correctly labelled linear stage figure and solve accounting; plot.py:61 repairs the prior label and bank-step-booking.html:52-70 adds revision-bound step history.\nVERDICT done_when: The source brief.txt requires a measured stage figure and fresh residual within 1e-10; bank-step-booking.html:16-52 reports the P100 stage and solve receipts, while legend-head.log and convergence-record-checked.log record the new checks.\nVERDICT write_paths: The source manifest.md:3 grants the booking prototype, evidence fragment and figure directory; all five paths changed from dc981e7fd7d0 to 420d0abb7b57 fall within them.\nVERDICT manifest: The source manifest.md reports complete, lists all five later commits, and names legend-head.log EXIT=0, legend-reverted.log EXIT=1, convergence-record-checked.log EXIT=0, and completed baseline and after suite logs.\nVERDICT diff: Read each of the five commits from dc981e7fd7d0 to 420d0abb7b57; they add the SVG label check, correct and publish the green legend, add its reversal gate, and document eight solve receipts.\nCALL_SITES: scripts/prototypes/bank_step_booking/plot.py:95, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking.html:17\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: plot.py:61 and stage-wall.svg:312 name the measured green configuration, and bank-step-booking.html:52-70 explains accepted steps without claiming an unmeasured Jacobian cause.\nSCORE evidence: 17\nJUSTIFICATION evidence: legend-reverted.log shows known baseline text, the stale label and EXIT=1; convergence-record-checked.log reports eight receipt rows and EXIT=0, although the history compares different devices and revisions as bank-step-booking.html:67 discloses.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five paths in the dc981e7fd7d0..420d0abb7b57 diff all fit source manifest.md:3 and contain only figure, gate and explanation repairs.\nSCORE durability: 17\nJUSTIFICATION durability: check_plot.py:16-18 uses literal labels and the reverted plot.py:61 fails at :17, but the assertions do not bind either text to its colored legend stroke.\nSCORE fit: 18\nJUSTIFICATION fit: plot.py:53 preserves SVG text with the repository's Matplotlib idiom and stage-wall.svg:306-312 retains legible text without introducing a forbidden source name.\nSCORE reuse: 20\nJUSTIFICATION reuse: A capability search in scripts/prototypes and nova/scripts found SVG size rewriting in bank_step_speed/plot_stage.py:103-107 but no existing rendered-legend semantic checker; check_plot.py:8-18 supplies that distinct check.\nFINDING scripts/prototypes/bank_step_booking/check_plot.py:17 non-blocking: Label membership alone cannot detect the two legend labels swapped between grey and green strokes, so a future color-to-name regression could pass; disposition: exempted for this repair because stage-wall.svg:306-312 and the inspected PNG pair the current labels correctly, and legend-reverted.log proves the original stale-label regression fails.",
+  "review_run_id": "r-20261102T145509992267-review-of-bank-step-booking-420d0abb7b57",
+  "reviewed_base_sha": "dc981e7fd7d0c6e1a8adf7cfafecfff485498f5c",
+  "reviewed_head_sha": "420d0abb7b57eaf7f577a78da92b94c0bb59574e",
+  "reviewed_run_id": "r-20261102T105133506522-bank-step-booking",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T15:03:18.098952+00:00",
+  "total": 110
+}

@@ -476,6 +476,37 @@ def main():
         float(serial_all.vertical_moment[channel, cell]),
     )
 
+    def no_fixed(index):
+        field = jnp.broadcast_to(
+            jax.nn.one_hot(jnp.clip(index - samples, 0, 5), 6)
+            * ((index >= samples) & (index < samples + 6)),
+            (cells, 6),
+        )
+        return current.book_tangent(
+            psi,
+            jnp.zeros_like(psi),
+            reading,
+            field,
+            jnp.zeros((), psi.dtype),
+            (index == samples + 7).astype(psi.dtype),
+            geometry,
+            UnitDensity(),
+            lambda radius, flux: jnp.zeros_like(radius),
+            quadrature,
+            booked,
+        ).vertical_moment
+
+    isolated = jax.jit(jax.vmap(no_fixed))(indices)
+    scalar = jax.jit(serial_reference)(jnp.asarray(channel)).vertical_moment
+    print(
+        "SERIAL_NO_FIXED",
+        float(isolated[channel, cell]),
+        "SERIAL_SCALAR",
+        float(scalar[cell]),
+        "SERIAL_ALL",
+        float(serial_all.vertical_moment[channel, cell]),
+    )
+
     def terms(direction):
         velocity = current._conic_ring_tangents(
             vertices,

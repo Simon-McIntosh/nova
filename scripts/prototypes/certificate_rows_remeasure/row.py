@@ -31,9 +31,10 @@ LOGICAL = {
 
 def _roots(topology):
     axis = np.asarray(topology["axis_rz_m"], dtype=float).reshape(1, 2)
-    points = np.asarray(topology["x_point_rz_m"], dtype=float)
-    points = points.reshape(-1, 2) if points.size else np.empty((0, 2))
-    return np.vstack((axis, points)).tolist()
+    x_points = topology["x_point_rz_m"]
+    if x_points is None or len(x_points) == 0:
+        return axis.tolist()
+    return np.vstack((axis, np.asarray(x_points, dtype=float).reshape(-1, 2))).tolist()
 
 
 def main():

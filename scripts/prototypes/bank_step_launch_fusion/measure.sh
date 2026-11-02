@@ -6,7 +6,8 @@ RUN_DIR=${1:?run directory required}
 TAG=${2:?measurement tag required}
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp PYTHONPATH="$ROOT"
-export BANK_STEP_TRACE_DIR="$RUN_DIR/$TAG-trace"
+export BANK_STEP_TRACE_DIR
+BANK_STEP_TRACE_DIR=$(mktemp -d "$RUN_DIR/$TAG-trace-XXXXXX") || exit 2
 
 printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git rev-parse HEAD)" "$ROOT" "$PWD" \
   "$PY -m scripts.prototypes.bank_step_speed.profile"

@@ -84,9 +84,7 @@ def chunked(function, count, chunk=8):
                 (stacked, support, booked),
             )
             parts.append(inner(*window))
-        return jax.tree_util.tree_map(
-            lambda *pieces: jnp.concatenate(pieces), *parts
-        )
+        return jax.tree_util.tree_map(lambda *pieces: jnp.concatenate(pieces), *parts)
 
     return run
 
@@ -105,9 +103,7 @@ def chunked_args(function, count, chunk=8):
             parts.append(
                 function(window, jax.lax.slice_in_dim(second, start, start + width))
             )
-        return jax.tree_util.tree_map(
-            lambda *pieces: jnp.concatenate(pieces), *parts
-        )
+        return jax.tree_util.tree_map(lambda *pieces: jnp.concatenate(pieces), *parts)
 
     return run
 
@@ -207,9 +203,11 @@ def run_stage_arm(run_dir):
         support = jax.jit(read_program)(stacked, seeds)
         booked = jax.jit(
             lambda state, lane_support: jax.vmap(
-                lambda one, one_support: support_read.step_residual(
-                    bank, one, one, one_support, profile, quadrature
-                ).booked
+                lambda one, one_support: (
+                    support_read.step_residual(
+                        bank, one, one, one_support, profile, quadrature
+                    ).booked
+                )
             )(state, lane_support)
         )(stacked, support)
         jax.block_until_ready(support.reading.boundary_flux)
@@ -258,6 +256,11 @@ def run_stage_arm(run_dir):
         jax.block_until_ready(row)
 
         for name, function in (("read", read_program), ("whole_step", step_program)):
+            if count == 64 and name == "whole_step":
+                # The 64-slice whole step ends the process with a segmentation
+                # fault inside the profiler trace, after the stage rows land.
+                emit("SKIPPED", slices=count, name=name, reason="segfault-in-trace")
+                continue
             compiled = jax.jit(chunked_args(function, count))
             wall, walls = timed(compiled, (stacked, seeds))
             trace_dir = run_dir / f"trace-s{count}-{name}"
@@ -276,6 +279,81 @@ def run_stage_arm(run_dir):
                 walls_ms=walls,
                 memory=memory_mb(),
             )
+
+
+def publish_case():
+    """Build the certificate case with the shared operand cache published."""
+    from scripts.prototypes.bank_step_batch.fixture import build_case
+
+    case = build_case("diverted", 64)
+    emit(
+        "PUBLISH",
+        nodes=len(case["nodes"]),
+        matrix_bytes=int(case["matrix"].nbytes),
+    )
+
+
+def _kernel_totals(trace_dir):
+    import gzip
+
+    totals = {}
+    for path in Path(trace_dir).rglob("*.trace.json.gz"):
+        with gzip.open(path, "rt") as stream:
+            try:
+                document = json.load(stream)
+            except json.JSONDecodeError:
+                continue
+        for event in document.get("traceEvents", ()):
+            if event.get("ph") != "X" or "dur" not in event:
+                continue
+            category = str(event.get("cat", ""))
+            name = str(event.get("name", ""))
+            if category.lower() != "kernel" and "kernel" not in name.lower():
+                continue
+            entry = totals.setdefault(name, [0.0, 0])
+            entry[0] += float(event["dur"])
+            entry[1] += 1
+    ranked = sorted(totals.items(), key=lambda item: item[1][0], reverse=True)
+    return [
+        {"name": name, "ms": total / 1e3, "calls": calls}
+        for name, (total, calls) in ranked[:5]
+    ]
+
+
+def run_kernel_arm(run_dir):
+    """Profile the booking tangent with and without the batch's vmap."""
+    bank, cache, roots, convention, policy, profile, quadrature, moments, _analytic = (
+        machine("diverted")
+    )
+    stages = stage_programs(bank, profile, quadrature)
+    for count in (1, 4):
+        stacked = lanes_of(moments, count)
+        seeds = seeds_for(roots, count)
+        support = jax.jit(
+            lambda state, lane_seeds: support_read.read_batch(
+                bank, cache, state, lane_seeds, lane_seeds, convention, policy
+            )
+        )(stacked, seeds)
+        booked = jax.jit(
+            lambda state, lane_support: jax.vmap(
+                lambda one, one_support: (
+                    support_read.step_residual(
+                        bank, one, one, one_support, profile, quadrature
+                    ).booked
+                )
+            )(state, lane_support)
+        )(stacked, support)
+        compiled = jax.jit(chunked(stages["local_booking_tangent"], count))
+        args = (stacked, support, booked)
+        compiled(*args)
+        jax.block_until_ready(compiled(*args))
+        trace_dir = run_dir / f"trace-tangent-{count}"
+        trace_dir.mkdir(parents=True, exist_ok=True)
+        jax.profiler.start_trace(str(trace_dir), create_perfetto_link=False)
+        compiled(*args)
+        jax.block_until_ready(compiled(*args))
+        jax.profiler.stop_trace()
+        emit("KERNELS", slices=count, top=_kernel_totals(trace_dir))
 
 
 def run_converge_arm(run_dir):
@@ -350,7 +428,8 @@ def run_converge_arm(run_dir):
         jax.block_until_ready(correction.step.update)
         iteration_walls.append(1e3 * (perf_counter() - started))
         state = tuple(
-            value + change for value, change in zip(state, correction.step.update, strict=True)
+            value + change
+            for value, change in zip(state, correction.step.update, strict=True)
         )
 
     final_support = read(state)
@@ -358,7 +437,9 @@ def run_converge_arm(run_dir):
     finals = jnp.max(jnp.abs(jnp.concatenate(final.residual, axis=1)), axis=1)
     jax.block_until_ready(finals)
     for lane in range(count):
-        reading = jax.tree_util.tree_map(lambda value: value[lane], final_support.reading)
+        reading = jax.tree_util.tree_map(
+            lambda value: value[lane], final_support.reading
+        )
         oracle, _roots = analytic_oracle(analytic, np.asarray(seeds), reading, wall)
         record = {
             "kind": "LANE",
@@ -376,14 +457,20 @@ def run_converge_arm(run_dir):
         max_steps=max(per_lane_steps),
         mean_steps=float(np.mean(per_lane_steps)),
         iteration_ms=iteration_walls,
-        per_slice_ms=float(np.mean(iteration_walls)) / count if iteration_walls else None,
+        per_slice_ms=float(np.mean(iteration_walls)) / count
+        if iteration_walls
+        else None,
         max_fresh_residual=float(jnp.max(finals)),
     )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--arm", choices=("stage", "converge", "both"), default="both")
+    parser.add_argument(
+        "--arm",
+        choices=("stage", "converge", "kernel", "publish", "both"),
+        default="both",
+    )
     parser.add_argument("--run-dir", type=Path, required=True)
     arguments = parser.parse_args()
     arguments.run_dir.mkdir(parents=True, exist_ok=True)
@@ -405,6 +492,10 @@ def main():
         run_stage_arm(arguments.run_dir)
     if arguments.arm in ("converge", "both"):
         run_converge_arm(arguments.run_dir)
+    if arguments.arm in ("kernel", "both"):
+        run_kernel_arm(arguments.run_dir)
+    if arguments.arm == "publish":
+        publish_case()
 
 
 if __name__ == "__main__":

@@ -53,7 +53,9 @@ def transplant(root: Path, scratch: Path):
     target = scratch / "nova" / "equilibrium" / "support_read.py"
     text = target.read_text()
     if BATCHED not in text:
-        raise SystemExit("the batch-uniform read call was not found in the scratch copy")
+        raise SystemExit(
+            "the batch-uniform read call was not found in the scratch copy"
+        )
     target.unlink()
     target.write_text(text.replace(BATCHED, MUTANT))
 
@@ -73,7 +75,6 @@ def main():
 
     environment = dict(os.environ)
     environment["PYTHONPATH"] = f"{scratch}:{arguments.root}"
-    environment["JAX_PLATFORMS"] = "cpu"
     print(f"SCRATCH={scratch}", flush=True)
     check = subprocess.run(
         [

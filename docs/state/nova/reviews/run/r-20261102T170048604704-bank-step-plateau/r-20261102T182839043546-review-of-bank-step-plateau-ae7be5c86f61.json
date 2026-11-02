@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "check_mutation.py:38-41 fails if either source mutation site is absent or duplicated, so the test cannot silently skip suppressing it.",
+    "check_mutation.py:62-68 fails if the suppressed child succeeds or fails for a reason other than the named booking guard; reverting the new guard makes the child succeed, as control-reverted.log records.",
+    "measure.py:244-252 fails if either measured error is nonfinite or the perturbed booking error does not exceed both 1e-6 and ten times the paired unperturbed control; deleting the matrix perturbations makes the two errors equal and triggers the refusal.",
+    "run_control_check.sh:37-39 intends to fail if the pre-repair arm refuses the suppression, but at the final head its HEAD^ input is the repaired commit, so it fails even when the guard is correct.",
+    "No added comparison passes the same variable to both sides; the paired control_action is computed from the unmutated held matrix while the compared booking action uses the perturbed matrix."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-02T18:35:31Z",
+  "dispatched_at": "2026-11-02T18:29:40Z",
+  "evidence": {
+    "perturbed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/review-records/../control-perturbed.log",
+    "reverted": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/review-records/../control-reverted.log",
+    "suite_comparison_note": "baseline_suite and after_suite are empty in the reviewed manifest; zero is the count of observed added failure IDs, not evidence of a paired suite pass.",
+    "suppressed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/review-records/../control-suppressed.log"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_plateau/run_control_check.sh",
+      "id": "feecd3e10b7",
+      "line": 8,
+      "severity": "blocking",
+      "text": "At reviewed head ae7be5c8, HEAD^ resolves to fixed commit 29f13d88, so the bundled reversion arm checks the repaired guard and line 37 reports failure instead of reproducing the pre-repair guard; resolve the pre-repair revision from the guard-changing commit or pass it explicitly."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read d9088cd9, 29f13d88 and ae7be5c8 commit by commit; they add a suppression checker, paired booking control and matching fragment text, plus a launcher whose HEAD^ assumption expires after the final docs commit.",
+    "done_when": "brief.txt:2-8 requires a same-state derivative ladder and discriminating control; control-perturbed.log records a 109.5215 ratio and control-suppressed.log records the named refusal, but run_control_check.sh:8 misselects the pre-repair arm at the reviewed head.",
+    "goal": "brief.txt:1-8 requests a P100 plateau attribution; measure.py:185-257 repairs the booking-block negative control for that attribution without changing the product solver.",
+    "manifest": "source manifest.md:5-29 names all three added commits and the control logs, with baseline_suite and after_suite empty, so no paired suite comparison is available.",
+    "write_paths": "source manifest.md:3 grants the bank_step_plateau prototype and evidence fragment; git diff a8ef0ce..ae7be5c changes exactly five paths within those grants."
+  },
+  "justifications": {
+    "durability": "check_mutation.py:38-68 makes source suppression fail unless the named guard refuses it, but run_control_check.sh:8 prevents its bundled red arm from reproducing at the final head.",
+    "evidence": "control-perturbed.log records 7.863869862e-4 versus 7.180208028e-6, control-suppressed.log records the exact refusal, and control-reverted.log records the old guard accepting suppression; source manifest.md has no complete suite arms.",
+    "fit": "check_mutation.py:42-68 follows the local scratch-control idiom, while run_control_check.sh:8 relies on a commit's immediate parent remaining the pre-repair revision.",
+    "goal_fidelity": "scripts/prototypes/bank_step_plateau/measure.py:242-257 now rejects an unperturbed booking error instead of treating it as a detected matrix mutation.",
+    "reuse": "A capability search found scripts/prototypes/bank_step_booking/negative_control.py:11-101 as a scratch mutation of product performance, but no owner for suppressing a measurement-script mutation and checking its named refusal; check_mutation.py:32-68 serves that separate control.",
+    "scope_discipline": "The five paths in a8ef0ce..ae7be5c are all inside the source manifest.md:3 grants and no nova/equilibrium product source changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt:1-8 requests a P100 plateau attribution; measure.py:185-257 repairs the booking-block negative control for that attribution without changing the product solver.\nVERDICT done_when: brief.txt:2-8 requires a same-state derivative ladder and discriminating control; control-perturbed.log records a 109.5215 ratio and control-suppressed.log records the named refusal, but run_control_check.sh:8 misselects the pre-repair arm at the reviewed head.\nVERDICT write_paths: source manifest.md:3 grants the bank_step_plateau prototype and evidence fragment; git diff a8ef0ce..ae7be5c changes exactly five paths within those grants.\nVERDICT manifest: source manifest.md:5-29 names all three added commits and the control logs, with baseline_suite and after_suite empty, so no paired suite comparison is available.\nVERDICT diff: read d9088cd9, 29f13d88 and ae7be5c8 commit by commit; they add a suppression checker, paired booking control and matching fragment text, plus a launcher whose HEAD^ assumption expires after the final docs commit.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_step_plateau/measure.py:242-257 now rejects an unperturbed booking error instead of treating it as a detected matrix mutation.\nSCORE evidence: 17\nJUSTIFICATION evidence: control-perturbed.log records 7.863869862e-4 versus 7.180208028e-6, control-suppressed.log records the exact refusal, and control-reverted.log records the old guard accepting suppression; source manifest.md has no complete suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the five paths in a8ef0ce..ae7be5c are all inside the source manifest.md:3 grants and no nova/equilibrium product source changed.\nSCORE durability: 15\nJUSTIFICATION durability: check_mutation.py:38-68 makes source suppression fail unless the named guard refuses it, but run_control_check.sh:8 prevents its bundled red arm from reproducing at the final head.\nSCORE fit: 16\nJUSTIFICATION fit: check_mutation.py:42-68 follows the local scratch-control idiom, while run_control_check.sh:8 relies on a commit's immediate parent remaining the pre-repair revision.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search found scripts/prototypes/bank_step_booking/negative_control.py:11-101 as a scratch mutation of product performance, but no owner for suppressing a measurement-script mutation and checking its named refusal; check_mutation.py:32-68 serves that separate control.\nFINDING scripts/prototypes/bank_step_plateau/run_control_check.sh:8 blocking: at reviewed head ae7be5c8, HEAD^ resolves to fixed commit 29f13d88, so the bundled reversion arm checks the repaired guard and line 37 reports failure instead of reproducing the pre-repair guard; resolve the pre-repair revision from the guard-changing commit or pass it explicitly.",
+  "review_run_id": "r-20261102T182839043546-review-of-bank-step-plateau-ae7be5c86f61",
+  "reviewed_base_sha": "a8ef0ceef7ceb873f3887ab1feb4cbb21c838437",
+  "reviewed_head_sha": "ae7be5c86f61717ed29e44a9970ec90f8d893be1",
+  "reviewed_run_id": "r-20261102T170048604704-bank-step-plateau",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T18:39:33.467202+00:00",
+  "total": 106
+}

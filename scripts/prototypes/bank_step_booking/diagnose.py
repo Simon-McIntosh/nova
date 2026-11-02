@@ -401,6 +401,81 @@ def main():
             )
             break
 
+    padded = jnp.pad(cut_index, (0, (-cells) % 32))
+    first_batch = padded[:32]
+    active = jnp.arange(32) < jnp.sum(cut)
+
+    def conditional_channel(index):
+        field = jax.nn.one_hot(jnp.clip(index - samples, 0, 5), 6)
+        field *= (index >= samples) & (index < samples + 6)
+        direction = quadrature.sigma * field
+        direction = direction.at[0].add(
+            -quadrature.sigma * (index == samples + 7).astype(psi.dtype)
+        )
+
+        def one_cell(cell_index):
+            def conic(_):
+                ring, numbers, valid = current._conic_rings(
+                    geometry.vertices[cell_index],
+                    geometry.vertex_count[cell_index],
+                    geometry.centre[cell_index],
+                    geometry.pitch[cell_index],
+                    signed[cell_index],
+                    reading.fragment_selected[cell_index],
+                    quadrature.segments,
+                )
+                velocity = current._conic_ring_tangents(
+                    geometry.vertices[cell_index],
+                    geometry.vertex_count[cell_index],
+                    geometry.centre[cell_index],
+                    geometry.pitch[cell_index],
+                    signed[cell_index],
+                    direction,
+                    reading.fragment_selected[cell_index],
+                    quadrature.segments,
+                )
+                response = jax.vmap(
+                    lambda one_ring, speed, number: (
+                        moving_polygon_current_moment_tangent(
+                            one_ring,
+                            speed,
+                            number,
+                            geometry.centre[cell_index],
+                            geometry.pitch[cell_index],
+                            jnp.zeros(6),
+                            UnitDensity(),
+                        )
+                    )
+                )(ring, velocity, numbers)
+                return jnp.where(valid, jnp.sum(response.vertical_moment), jnp.nan)
+
+            return jax.lax.cond(
+                reading.normal_form_cells[cell_index],
+                lambda _: jnp.zeros((), psi.dtype),
+                conic,
+                None,
+            )
+
+        values = jax.vmap(one_cell)(first_batch)
+        scattered = (
+            jnp.zeros((cells,), psi.dtype)
+            .at[first_batch]
+            .add(jnp.where(active, values, 0.0))
+        )
+        return values, scattered
+
+    conditional_values, conditional_scatter = jax.jit(jax.vmap(conditional_channel))(
+        indices
+    )
+    print(
+        "CONDITIONAL_VALUE",
+        float(conditional_values[channel, serial_slot]),
+        "SCATTERED_VALUE",
+        float(conditional_scatter[channel, cell]),
+        "REFERENCE_VALUE",
+        float(serial_all.vertical_moment[channel, cell]),
+    )
+
     def terms(direction):
         velocity = current._conic_ring_tangents(
             vertices,

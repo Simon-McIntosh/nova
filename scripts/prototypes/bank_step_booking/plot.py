@@ -58,7 +58,7 @@ def main(baseline, after, svg, png):
     fig, ax = plt.subplots(figsize=(14, 7.2))
     for offset, values, color, label in (
         (-0.15, before, "#929292", "batched baseline"),
-        (0.15, current, "#2e8b57", "shared boundary"),
+        (0.15, current, "#2e8b57", "density basis, four cut lanes"),
     ):
         for index, (name, _) in enumerate(STAGES):
             value = values[name]

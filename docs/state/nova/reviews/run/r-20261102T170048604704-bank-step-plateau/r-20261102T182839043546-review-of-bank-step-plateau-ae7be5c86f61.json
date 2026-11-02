@@ -18,6 +18,13 @@
     "suite_comparison_note": "baseline_suite and after_suite are empty in the reviewed manifest; zero is the count of observed added failure IDs, not evidence of a paired suite pass.",
     "suppressed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/review-records/../control-suppressed.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-step-plateau-ae7be5c86f61",
+      "recorded_at": "2026-11-02T19:05:34.779687+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_step_plateau/run_control_check.sh",

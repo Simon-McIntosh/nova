@@ -15,12 +15,11 @@ import jax.numpy as jnp
 from nova.equilibrium import topology
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
-    _UNIT_NODE,
-    _UNIT_WEIGHT,
     _quadrature_from_arrays,
     clipped_support_current_moments,
     fixed_polygon_current_moment_tangent,
     moving_polygon_current_moment_tangent,
+    moving_polygon_current_moment_tangents,
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 
@@ -48,6 +47,7 @@ class Quadrature:
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
+    cut_batch_width: int = dataclass_field(default=64, metadata={"static": True})
 
 
 class Booking(NamedTuple):
@@ -738,57 +738,17 @@ def book_tangent_channels(
                     inward_endpoints=True,
                 )
             )(signed_rate[boundary_channels, index])
-            slot = jnp.arange(rings.shape[1])
-            following = jnp.where(slot[None] + 1 < counts[:, None], slot + 1, 0)
-            next_ring = jnp.take_along_axis(
-                rings, jnp.broadcast_to(following[..., None], rings.shape), axis=1
-            )
-            edge = next_ring - rings
-            node = jnp.asarray(_UNIT_NODE, dtype=psi.dtype)
-            weight = jnp.asarray(_UNIT_WEIGHT, dtype=psi.dtype)
-            point = rings[:, :, None] + node[None, None, :, None] * edge[:, :, None]
-            local = (point - centre) / geometry.pitch[index]
-            radial, vertical = local[..., 0], local[..., 1]
-            basis = jnp.stack(
-                (
-                    jnp.ones_like(radial),
-                    radial,
-                    vertical,
-                    radial**2,
-                    radial * vertical,
-                    vertical**2,
-                ),
-                axis=-1,
-            )
-            flux = jnp.einsum("rvqk,k->rvq", basis, normalized[index])
-            density = profile.current_density(point[..., 0], flux)
-            next_velocity = jnp.take_along_axis(
+            moved = moving_polygon_current_moment_tangents(
+                rings,
                 velocity,
-                jnp.broadcast_to(following[None, :, :, None], velocity.shape),
-                axis=2,
+                counts,
+                centre,
+                geometry.pitch[index],
+                normalized[index],
+                profile,
             )
-            speed = (
-                velocity[:, :, :, None]
-                + node[None, None, None, :, None]
-                * (next_velocity - velocity)[:, :, :, None]
-            )
-            cross = (
-                speed[..., 0] * edge[None, :, :, None, 1]
-                - speed[..., 1] * edge[None, :, :, None, 0]
-            )
-            weighted = jnp.where(
-                slot[None, :, None] < counts[:, None, None],
-                weight[None, None] * density * cross,
-                0.0,
-            )
-            relative = point - centre
             moving = jnp.stack(
-                (
-                    jnp.sum(weighted, axis=(1, 2, 3)),
-                    jnp.sum(weighted * relative[None, ..., 0], axis=(1, 2, 3)),
-                    jnp.sum(weighted * relative[None, ..., 1], axis=(1, 2, 3)),
-                ),
-                axis=-1,
+                tuple(jnp.sum(value, axis=1) for value in moved), axis=-1
             )
 
             moving = (
@@ -816,23 +776,32 @@ def book_tangent_channels(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jnp.where(full[:, None, None], whole, 0.0)
-    batch_width = min(4, cells)
+    if quadrature.cut_batch_width < 1:
+        raise ValueError("cut batch width must be positive")
+    batch_width = min(quadrature.cut_batch_width, cells)
     cut_count = jnp.sum(cut, dtype=jnp.int32)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
 
-    def add_batch(batch, carried):
+    def add_batch(carried, batch):
         start = batch * batch_width
         indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
         active = start + jnp.arange(batch_width) < cut_count
-        response = jax.vmap(cut_cell)(indices)
-        return carried.at[indices].add(jnp.where(active[:, None, None], response, 0.0))
 
-    cuts = jax.lax.fori_loop(
-        0,
-        (cut_count + batch_width - 1) // batch_width,
+        def integrate(values):
+            response = jax.vmap(cut_cell)(indices)
+            return values.at[indices].add(
+                jnp.where(active[:, None, None], response, 0.0)
+            )
+
+        return jax.lax.cond(
+            start < cut_count, integrate, lambda value: value, carried
+        ), None
+
+    cuts, _ = jax.lax.scan(
         add_batch,
         jnp.zeros_like(whole),
+        jnp.arange(len(cut_index) // batch_width),
     )
     raw = whole + cuts
     total_rate = jnp.sum(raw[:, :, 0], axis=0)

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step launch reduction | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-launch-fusion-landing">Bank Newton step launch reduction</h1>
+<p id="bank-step-launch-fusion-summary">The deciding same-allocation H200 comparison gives a warm 550-cell Newton step of 73.11 ms and 15,310 launches at the archived base, versus 43.11 ms and 2,804 launches after geometry and booking batching: 41% less wall and 82% fewer launches. On titan P100 the same source change reduces launches from 14,427 to 3,029 but increases warm wall from 635.24 to 957.50 ms. The device-specific reversal supports retaining the batched booking path for H200. The H200 section bound of 0.5 ms and 100 launches is still unmet; this is a measured partial result.</p>
+<figure id="bank-step-launch-fusion-stage-figure"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg" alt="Separate linear P100 and H200 warm stage axes comparing the base and booking batch"><figcaption>Titan P100 at left and H200 at right, each on its own labelled linear millisecond axis. Grey is base, blue is the P100 geometry checkpoint, and green is the booking batch. Marks are medians of three synchronized warm calls. The full Jacobian and whole-step rows include preceding work and are not additive. Read is outside the step and omitted from the figure. The SVG passed the text check, was rendered to PNG, and was visually inspected.</figcaption></figure>
+<section id="bank-step-launch-fusion-stage-profile"><h2>Warm stage measurements by device</h2>
+<p>Every stage-table cell is wall time in milliseconds followed by kernel launches. The H200 base and batch arms ran sequentially in one reserved one-card job with the same warmed stage profiler; each arm persisted its own receipt before the next began. The P100 geometry checkpoint records the intermediate source. A profile was warmed before tracing, and each stage was synchronized before the next.</p>
+<table id="bank-step-launch-fusion-stage-table"><thead><tr><th>Stage</th><th>P100 base<br>ms / launches</th><th>P100 geometry<br>ms / launches</th><th>P100 batch<br>ms / launches</th><th>H200 base<br>ms / launches</th><th>H200 batch<br>ms / launches</th></tr></thead><tbody>
+<tr><td>Read outside step</td><td>1,651.61 / 20,379</td><td>1,654.66 / 20,379</td><td>1,652.94 / 20,379</td><td>35.73 / 20,143</td><td>35.69 / 20,143</td></tr>
+<tr><td>Residual and booking</td><td>323.28 / 1,503</td><td>323.63 / 1,503</td><td>323.24 / 1,503</td><td>5.24 / 1,366</td><td>5.22 / 1,366</td></tr>
+<tr><td>Local booking tangent</td><td>231.16 / 5,736</td><td>231.53 / 5,736</td><td>580.29 / 602</td><td>40.18 / 6,570</td><td>27.87 / 518</td></tr>
+<tr><td>One moving geometry direction</td><td>3.14 / 249</td><td>3.05 / 249</td><td>3.15 / 249</td><td>1.64 / 239</td><td>1.74 / 239</td></tr>
+<tr><td>Jacobian without moving geometry</td><td>262.51 / 5,753</td><td>263.02 / 5,753</td><td>611.32 / 619</td><td>43.17 / 6,589</td><td>30.39 / 537</td></tr>
+<tr><td>Full Jacobian</td><td>305.08 / 10,341</td><td>275.98 / 6,075</td><td>624.41 / 941</td><td>62.55 / 10,997</td><td>32.65 / 850</td></tr>
+<tr><td>Equilibration</td><td>1.14 / 20</td><td>1.19 / 20</td><td>1.19 / 20</td><td>0.66 / 20</td><td>0.88 / 20</td></tr>
+<tr><td>LU factor</td><td>10.38 / 118</td><td>10.39 / 118</td><td>10.36 / 118</td><td>5.77 / 117</td><td>5.86 / 117</td></tr>
+<tr><td>LU solve</td><td>1.21 / 8</td><td>1.26 / 8</td><td>1.20 / 8</td><td>0.89 / 8</td><td>1.02 / 8</td></tr>
+<tr><td>Fresh whole step</td><td>635.24 / 14,427</td><td>607.25 / 9,701</td><td>957.50 / 3,029</td><td>73.11 / 15,310</td><td>43.11 / 2,804</td></tr>
+</tbody></table>
+<p>Device time, summed over the GPU events in each warm annotation, is tabled separately because it is not the synchronized wall median. Device-event coverage was positive in every row; the H200 trace names the H200 GPU node, and unique trace directories prevent a P100 file from being selected for an H200 arm.</p>
+<table id="bank-step-launch-fusion-device-table"><thead><tr><th>Stage</th><th>P100 base device [ms]</th><th>P100 geometry device [ms]</th><th>P100 batch device [ms]</th><th>H200 base device [ms]</th><th>H200 batch device [ms]</th></tr></thead><tbody>
+<tr><td>Read outside step</td><td>1,720.36</td><td>1,723.61</td><td>1,712.86</td><td>40.69</td><td>43.58</td></tr>
+<tr><td>Residual and booking</td><td>332.40</td><td>332.62</td><td>330.79</td><td>3.45</td><td>3.47</td></tr>
+<tr><td>Local booking tangent</td><td>233.76</td><td>234.12</td><td>592.06</td><td>38.32</td><td>26.73</td></tr>
+<tr><td>One moving geometry direction</td><td>2.61</td><td>2.64</td><td>2.61</td><td>0.85</td><td>0.85</td></tr>
+<tr><td>Jacobian without moving geometry</td><td>263.61</td><td>264.03</td><td>622.76</td><td>41.23</td><td>29.43</td></tr>
+<tr><td>Full Jacobian</td><td>304.79</td><td>276.82</td><td>635.82</td><td>55.35</td><td>31.57</td></tr>
+<tr><td>Equilibration</td><td>0.96</td><td>0.96</td><td>0.96</td><td>0.23</td><td>0.23</td></tr>
+<tr><td>LU factor</td><td>10.19</td><td>10.19</td><td>10.17</td><td>4.85</td><td>4.85</td></tr>
+<tr><td>LU solve</td><td>1.06</td><td>1.07</td><td>1.06</td><td>0.45</td><td>0.44</td></tr>
+<tr><td>Fresh whole step</td><td>647.35</td><td>620.22</td><td>977.50</td><td>64.25</td><td>40.30</td></tr>
+</tbody></table>
+<p>The P100 local booking tangent rose from 231.16 to 580.29 ms while falling from 5,736 to 602 launches. On H200 it fell from 40.18 to 27.87 ms and from 6,570 to 518 launches. The H200 full Jacobian fell from 62.55 to 32.65 ms; its whole step fell from 73.11 to 43.11 ms. The H200 improvement means the conditional arithmetic-cut path was not invoked. The remaining H200 booking tangent is the largest independently timed step stage, and the 0.5 ms target remains far away.</p>
+<p>The H200 latency clause remains open. With the measured algorithm, the LU factor alone takes 5.86 ms and 117 launches, already above the whole-step limits of 0.5 ms and 100 launches. Residual and booking take 5.22 ms and 1,366 launches; the local tangent takes 27.87 ms and 518 launches. These stage measurements show that another cut-cell batch-width adjustment cannot close the gap. Meeting both limits requires replacing the dense-factor route and the residual, booking, and tangent kernel schedule, followed by a fresh convergence and oracle check.</p>
+<p><code>book_tangent_channels</code> compacts cut-cell indices on device and integrates the 99 live cut cells in fixed 64-cell batches in one static device scan. The whole Newton step is one JIT call that contains booking, geometry tangent, Jacobian assembly, equilibration, and LU without a host materialization inside it; that compiled program still emits thousands of kernels. Read precedes the step, and the outer solver synchronizes afterward to assess the fresh residual and line-search acceptance. The all-cell batch attempted a 63.88 GiB allocation on the 16 GiB P100; the bounded batch avoids it. On P100, widths 4, 8, 16, 32, and 64 show a wall-versus-launch tradeoff, with the retained width 64 giving the lowest measured launches.</p>
+</section>
+<section id="bank-step-launch-fusion-convergence"><h2>Fresh-read convergence and oracle</h2>
+<table id="bank-step-launch-fusion-convergence-table"><thead><tr><th>Device</th><th>Source and harness</th><th>Steps</th><th>Fresh residual</th><th>Axis ratio</th><th>Saddle ratio</th><th>Boundary ratio</th></tr></thead><tbody>
+<tr><td>P100</td><td>Archived base, separate entry</td><td>10</td><td>7.970e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>P100</td><td>Source-identical measurement entry</td><td>5</td><td>2.417e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>P100</td><td>Geometry checkpoint</td><td>5</td><td>2.417e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>P100</td><td>Booking batch</td><td>5</td><td>4.160e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>H200</td><td>Base, profile then solve</td><td>3</td><td>2.117e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>H200</td><td>Booking batch, profile then solve</td><td>3</td><td>2.353e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>H200</td><td>Base, direct run one</td><td>4</td><td>7.958e-12</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>H200</td><td>Base, direct run two</td><td>7</td><td>4.903e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+<tr><td>H200</td><td>Base, archived entry</td><td>7</td><td>2.349e-11</td><td>1.048e-05</td><td>9.255e-06</td><td>2.591e-05</td></tr>
+</tbody></table>
+<p>Every row reached a fresh-read residual at most 1e-10; axis, saddle, and boundary ratio limits are respectively 5e-4, 5e-4, and 1e-4. The P100 archived-base run took ten steps while a source-identical measurement-only revision took five, so a source change cannot explain that difference. The H200 archived base took three steps after profiling, four and seven in two direct processes with the same harness in one allocation, and seven through the archived entry point. The direct and archived entry points call the same <code>run(&quot;fresh&quot;, None, 30)</code>; the latter adds a header. A separate completed H200 head run took six steps while the clean same-allocation head took three. No tested harness setting uniquely moves the count: it varies even between identical direct calls. The receipts therefore do not isolate a cause for the P100 10-versus-5 observation, and no source change is credited for it.</p>
+<p>On sirius CPU, all six <code>book()</code> field digests match the archived base byte-for-byte. The focused suite completed in fresh processes per file: base 23 passed and two skipped, head 26 passed and two skipped. The original duplicate-body report in <code>support_read.py</code> did not reproduce: it already reached <code>clip_quadrature.py</code> through an imported name. The final <code>support_read.py</code> calls the shared batched entry directly, and the duplicate boundary integration body in <code>current.py</code> was removed. An analytic multi-channel boundary-moment test covers the shared rule. A scratch host materialization before dense assembly fails the traced-step test with <code>ConcretizationTypeError</code>; the head test passes.</p>
+<p>The original shared-integral guard still passed when the previous boundary body was restored inside <code>current.book_tangent_channels</code>. The guard now traces that function on the diverted fixture with the imported batched integral patched to raise. Restoring the body bypasses the patch and fails <code>test_geometry_tangent_uses_shared_boundary_integral</code> with “DID NOT RAISE RuntimeError” (<code>EXIT=1</code>); the head reaches the patch and passes (<code>EXIT=0</code>). Both arms assert the imported <code>current.__file__</code> inside the pytest process, so the red result is from the scratch mutation. Source inspection also checks that neither boundary integration constant remains in <code>current.book_tangent_channels</code>.</p>
+<p>The first H200 parser selected an older P100 trace from a reused directory; its apparent 9,701-launch line was rejected after the GPU-node check found the H200 trace separately. The parser was repaired to use a unique directory per arm. The final same-allocation receipts use their own H200 traces and report 15,310 and 2,804 whole-step launches. Earlier interrupted and corrected receipts remain in the run directory for audit.</p>
+<p>Receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion</code>: <code>h200-clean-aggregate.log</code>, <code>base-h200.log</code>, <code>head-h200.log</code>, <code>base-own-one-h200.log</code>, <code>base-own-two-h200.log</code>, <code>base-archived-h200.log</code>, <code>baseline-p100.log</code>, <code>head-p100.log</code>, <code>fused-final-p100.log</code>, <code>base-solve-p100-retry.log</code>, <code>fused-final-digest-sirius.log</code>, <code>final-suite-base-summary.log</code>, <code>final-suite-head-summary.log</code>, <code>fused-final-negative-control.log</code>, <code>duplicate-old-guard-sirius.log</code>, <code>duplicate-red-guard-sirius.log</code>, <code>duplicate-head-guard-sirius.log</code>, and the inspected <code>stage-wall-h200-clean.png</code>.</p>
+</section>
+</main></body>
+</html>

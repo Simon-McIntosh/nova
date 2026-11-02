@@ -1,0 +1,88 @@
+<section id="bank-step-batch-landing">
+  <h2>bank-step-batch — batching the warm step shares launches, and the arithmetic does not fall with it</h2>
+
+  <p>The warm bank Newton step was run over independent slices in one compiled
+  program at the diverted 550-cell certificate state on one H200. The batched
+  program is <code>support_read.step_batch</code>: it reads the batch through
+  <code>read_batch</code>, which forms one rebuild decision for the whole batch
+  outside the map, and applies the step as a <code>vmap</code> over the lanes.
+  Each lane is a distinct state, a small multiple away from the converged
+  moments, so a batch that broadcast one lane across the axis would not
+  reproduce the single-lane result.</p>
+
+  <table id="bank-step-batch-stage-table">
+    <caption>Per-slice warm wall in milliseconds at the diverted 550-cell state on one H200, minimum of five calls per point. Lanes are stepped in chunks of eight, so a chunk shares its launches and a 64-slice batch pays eight chunks. The 64-slice whole-step row is absent: the job that measured it ended with a segmentation fault after the stage rows were written.</caption>
+    <tr><th>stage</th><th>1 slice</th><th>4 slices</th><th>16 slices</th><th>64 slices</th></tr>
+    <tr><td>read (batched)</td><td>53.81</td><td>20.38</td><td>12.87</td><td>—</td></tr>
+    <tr><td>residual and booking</td><td>4.85</td><td>1.55</td><td>0.99</td><td>1.02</td></tr>
+    <tr><td>booking tangent</td><td>121.24</td><td>109.65</td><td>109.05</td><td>108.97</td></tr>
+    <tr><td>geometry tangent</td><td>1.13</td><td>0.40</td><td>0.22</td><td>0.20</td></tr>
+    <tr><td>assembly</td><td>125.32</td><td>109.65</td><td>110.66</td><td>110.55</td></tr>
+    <tr><td>equilibration</td><td>0.44</td><td>0.45</td><td>0.26</td><td>0.20</td></tr>
+    <tr><td>LU factor</td><td>5.65</td><td>5.18</td><td>6.40</td><td>1.81</td></tr>
+    <tr><td>whole step (read and step)</td><td>189.77</td><td>141.28</td><td>130.89</td><td>—</td></tr>
+  </table>
+
+  <figure id="bank-step-batch-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg" alt="Per-slice wall against slices per batch on a log axis: the whole step falls from 190 to 131 milliseconds per slice between one and sixteen slices, while the booking tangent and assembly stay near 109 milliseconds per slice at every batch size.">
+    <figcaption>Per-slice wall against slices per batch at the diverted 550-cell state on one H200, log axes, minimum of five calls per point. The whole step and the read fall with batch size because they share per-call launches; the booking tangent and assembly do not, because their cost is per-lane work. The whole-step series ends at sixteen slices, where the measurement job ended with a segmentation fault.</figcaption>
+  </figure>
+
+  <h3 id="bank-step-batch-marginal">The booking tangent and the assembly it feeds are the marginal per-slice cost</h3>
+
+  <p>Fit the whole-step per-slice wall as a fixed per-call cost plus a marginal
+  per-slice cost. Between four and sixteen slices the total wall goes from
+  565.11 ms to 2,094.18 ms, so the marginal is
+  (2094.18 − 565.11) / 12 = 127.42 ms per slice, and the fixed share at sixteen
+  slices is 130.89 − 127.42 = 3.47 ms per call. The one-to-four pair gives
+  125.11 ms marginal and 64.66 ms fixed, which is the same marginal within the
+  noise of a shared card and a larger fixed share where the launch cost is
+  divided by fewer lanes.</p>
+
+  <p>That marginal is not the read: the batched read falls from 53.81 to
+  12.87 ms per slice and its own marginal between four and sixteen slices is
+  3.75 ms per lane. It is the booking tangent and the assembly stage that calls
+  it, each sitting at 109 to 111 ms per slice at four, sixteen and sixty-four
+  slices — flat, which is what a per-lane arithmetic cost looks like once the
+  launches are shared. <strong>The booking tangent is the stage to cut next</strong>,
+  and the assembly stage inherits it: at sixty-four slices it is 108.97 ms of
+  the step's per-slice arithmetic, an order of magnitude above every other
+  stage in the table.</p>
+
+  <p>Chunking bounds the peak memory and is what the batch paid for it. The
+  sixteen-lane tangent tried to allocate 118.95 GiB in one vmap, so the arms
+  step the lanes eight at a time; peak device use at sixteen slices was
+  66.99 GB of a 112.59 GB limit. The chunked 64-slice points therefore pay
+  eight per-chunk launch costs, and an unchunked program would lower them.</p>
+
+  <h3 id="bank-step-batch-gate">The gate, and what it did not establish</h3>
+
+  <p><code>tests/test_bank_step_batch.py</code> compares each lane of a batched
+  step against the same state stepped alone to a relative 1e-12, and a second
+  clause gives one lane a stale tracked cell and requires the batch to rebuild
+  every lane and report the rebuild on every lane. On one H200 the branch clause
+  passed and the equality clause failed with a maximum relative difference of
+  1.09e-6 (30 of 64 radial entries; first mismatch −0.2807694960 against
+  −0.2807694588). The two arms differ in no input: the batch reads each lane
+  with the same seeds and the same policy as the single read. A batched dense
+  solve and a batched tangent are therefore not bit-identical to their
+  single-lane forms on the device, and this node does not establish the 1e-12
+  clause the section asks for.</p>
+
+  <p>The CPU arm, where the clause was to be measured, did not run. At 64 cells
+  the certificate fixture's jet build was killed for exceeding the allocation at
+  64 GB and again at 256 GB on <code>sirius</code>, after 4 and 12 minutes. It
+  is the fixture build, not the step, that does not fit: the same build takes
+  333 s and 223 nodes on one H200. The convergence arm is also absent: it was
+  scheduled after the stage arm in the same process, and the segmentation fault
+  at the 64-slice wall ended the job before it ran.</p>
+
+  <p>Receipts are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:
+  <code>h200b/h200-both.log</code>, <code>h200b/stage.jsonl</code>,
+  <code>gate-gpu.log</code>, <code>gate-cpu-16.log</code>,
+  <code>gate-head.log</code>, and the inspected <code>per-slice-wall.png</code>.
+  Three earlier submissions failed on harness defects (a stage-arity error, the
+  118.95 GiB tangent vmap, and a double <code>vmap</code> in the chunker); their
+  logs are kept in <code>h200/</code> for audit.</p>
+</section>

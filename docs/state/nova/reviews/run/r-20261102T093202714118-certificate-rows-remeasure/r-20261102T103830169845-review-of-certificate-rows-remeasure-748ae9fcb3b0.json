@@ -12,6 +12,11 @@
   "call_sites": [],
   "completed_at": "2026-11-02T10:50:13.310Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "certificate-rows-remeasure",
+      "recorded_at": "2026-11-02T10:59:48.021912+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "certificate-rows-remeasure",

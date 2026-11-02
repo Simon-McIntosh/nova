@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T20:04:54.486Z",
+  "dispatched_at": "2026-11-02T19:59:53Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:170",
+      "id": "done_when-1",
+      "reason": "as written the clause is satisfied by the existing test unchanged, so a node can add the keys and prove nothing about them, which is the one thing this section exists to establish.",
+      "text": "\u00a76 done-when (2) says the stored conductor currents and cell moments let \"that test redraw the panels from them without a solve\", but `tests/test_mast_centroid_panel_states.py::test_committed_panel_state_renders` redraws through `panel_renderer.panels(state_path, \u2026)`, which draws contours from the stored `solved_psi`, so the redraw passes identically whether or not the currents were added",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:170",
+      "id": "done_when-2",
+      "reason": "without a control that the painter actually receives the fine map (a perturbed-current arm as in \u00a75(3), or an assertion that the drawn contour set differs from the lattice raster), the section's central claim rests on an assertion that cannot fail.",
+      "text": "\u00a76 done-when (1) compares the receipt's recorded shape and spacing to \"those the \u00a75 builder returned\", but both sides of that comparison come from the same builder call, so a node that records the builder's 10 mm map into the receipt while the painter still receives the 33\u00d733 lattice passes; the only guard is the prose \"taken from those calls\", and \u00a76 declares no negative control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:170",
+      "id": "done_when-3",
+      "reason": "the re-solve rewrites the receipts, so a non-converged re-solve would pass every stated clause while the prose rule silently goes unenforced; a one-clause assertion on the receipt field makes the stop condition a gate.",
+      "text": "\u00a76 asserts \"A re-solved cold frame that does not converge stops the node, and is reported rather than drawn\" and that \"every receipt records `cold_solve.converged` true\", but none of the three done-when clauses measures `cold_solve.converged` on the re-solved receipt; the clauses cover shape and spacing (1), the npz contents (2) and the saddle offset (3)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:174",
+      "id": "done_when-4",
+      "reason": "a node following the clause literally writes no spacing, leaving the test with nothing to compare and forcing the worker to invent a field the plan did not specify.",
+      "text": "\u00a77 done-when (1) requires each receipt to record \"the shape of the array handed to the contour painter and to the branch assembly\" while the same sentence's render test asserts \"the recorded shape and spacing equal those the \u00a75 builder returned\", so the test reads a spacing the receipt was never told to record",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:174",
+      "id": "anchors_resolve-1",
+      "reason": "two of the five figures have no lane to run on and none of the five has a named producer command, so the node must guess both or stop, which is exactly the failure the earlier finding about the missing `panel-states.npz` set out to remove.",
+      "text": "\u00a77 says every figure is \"re-solved with the producer command that wrote it, on the lane its receipt names\", but `docs/figures/mast-centroid-capability/converged-vs-nonconverged.json` and `docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.json` record only caption, converged, figure, figure_vector, level_band, levels, non_converged, receipt and reference fields \u2014 no lane, no device, no command \u2014 while the coil-edit receipts (`titan-coil-edit-nonconvergence.json`) record `case`, `edits`, `source_revision`, `summary` and likewise no command",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6fc856a8208c4c0a3f57efc607fd9b8998192e8f",
+  "plan_fingerprint": "8f1dce5539c30160a3689f8b58c30d742687ed6ad176d0d7d6489cfa0056ade8",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 155,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T195759683225-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "38e2cab47c1d46d71c0b85d2c14ef75dcc0222b6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a77 tells each figure to re-solve \"on the lane its receipt names\", but the two `converged-vs-nonconverged.json` receipts carry no lane or device field and no producer command.",
+    "done_when": "a finding \u2014 \u00a76's clause (2) claims the redraw proves the stored currents are used, but the renderer it names draws from `solved_psi`, so the clause holds however the code behaves; \u00a76 also declares no negative control, unlike \u00a75(3).",
+    "evidence_paths": "pass \u2014 receipts and state files stay under `docs/figures/\u2026` (measured 56\u2013840 KB, well under the git ceiling), and \u00a76/\u00a77 add no scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a76 and \u00a77 add no new symbols; the symbols they cite (`_render_panel`, `PERSISTED_STATE_TERMS`, `PANEL_STATE_KEYS`, `cold_solve.converged`) exist with those names and carry no plan labels.",
+    "reasoning": "pass \u2014 the root cause \u00a76 now states matches the committed artefacts (cpu and titan `panel-fields.npz` hold 33\u00d733 `radius`/`height`, full-axis holds 65\u00d765), and \u00a75's builder does produce the map \u00a76/\u00a77 draw from; the mechanism defect I would raise is the one below, filed under done_when because it is the measure that fails, not the mechanism.",
+    "single_goal": "pass \u2014 \u00a76 is \"four centroid panel figures on the fine map\" and \u00a77 is \"five coil-edit panel figures on the fine map\"; \u00a77's pin re-measurement is a consequence of its own re-solve, not a second deliverable.",
+    "wiring": "pass \u2014 \u00a76 and \u00a77 each declare `depends-on: separatrix-spline-extraction#s5`, which is the builder both consume, and neither needs a relationship that is missing from `plan-section-depends-on`."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "9302f557ae34ca398a0ee33c6a42c947b1b6a7df4e9c35bc5cdddd70cb498fd4",
+    "s7": "24d5cd7a3d637205f8057b5566926a56cfd744360290f22c90bd671c0382e257",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:11:35.912517+00:00"
+}

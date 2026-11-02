@@ -76,23 +76,32 @@ def main():
     def density_gradient(radius, flux):
         return jnp.ones_like(radius)
 
-    serial_all = jax.jit(
-        lambda: jax.vmap(
-            lambda index: current.book_tangent(
-                psi,
-                psi_direction[index],
-                reading,
-                field_direction[index],
-                axis_direction[index],
-                boundary_direction[index],
-                geometry,
-                UnitDensity(),
-                density_gradient,
-                quadrature,
-                booked,
-            )
-        )(indices)
-    )()
+    def serial_reference(index):
+        sample = jnp.broadcast_to(
+            jax.nn.one_hot(jnp.minimum(index, samples - 1), samples)
+            * (index < samples),
+            psi.shape,
+        )
+        field = jnp.broadcast_to(
+            jax.nn.one_hot(jnp.clip(index - samples, 0, 5), 6)
+            * ((index >= samples) & (index < samples + 6)),
+            (cells, 6),
+        )
+        return current.book_tangent(
+            psi,
+            sample,
+            reading,
+            field,
+            (index == samples + 6).astype(psi.dtype),
+            (index == samples + 7).astype(psi.dtype),
+            geometry,
+            UnitDensity(),
+            density_gradient,
+            quadrature,
+            booked,
+        )
+
+    serial_all = jax.jit(jax.vmap(serial_reference))(indices)
     vector_all = jax.jit(
         lambda: current.book_tangent_channels(
             psi,
@@ -134,6 +143,21 @@ def main():
         float(support_vector[cell, 2, channel]),
         "DIRECT_DIFFERENCE",
         float(jnp.max(jnp.abs(support_vector - vector_all))),
+    )
+    serial_stack = jnp.stack(tuple(serial_all), axis=-1)
+    expected = np.moveaxis(np.asarray(serial_stack), 0, -1)
+    observed = np.asarray(support_vector)
+    discrepancy = np.abs(expected - observed)
+    worst = np.unravel_index(np.argmax(discrepancy), discrepancy.shape)
+    print(
+        "GLOBAL_WORST",
+        worst,
+        "serial",
+        expected[worst],
+        "vector",
+        observed[worst],
+        "relative",
+        np.linalg.norm(expected - observed) / max(np.linalg.norm(expected), 1.0),
     )
     cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]

@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T20:37:26.732Z",
+  "dispatched_at": "2026-11-02T20:32:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-1",
+      "reason": "the node needs a stated decision (extend `panel-fields.npz`/the producer payload with the conductor currents and cell moments, or read them from a named separate artefact) before it can write a test that reads them.",
+      "text": "done-when (1) has the test redraw the four panels \"from the conductor currents and cell moments stored in the three `panel-fields.npz` files alone\" and its negative control perturb \"one stored conductor current by 1 %\", but none of the three committed npz files holds a conductor current (keys are \u03c8, cell geometry, nulls, branches, wall), the `run` producer's payload at `benchmarks/mast_centroid_solve_panels.py:556-581` writes no currents either, and the same section states the files \"does not keep the currents\"; the clause as written cannot be satisfied, so a node either stalls on it or silently widens the artefact schema on its own authority",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "18bbfd5d311482330535b593774be5cbbcd282c4",
+  "plan_fingerprint": "52903e64aba78d3de48ec3b8fd2ed4bc7640a9ea54f2b3dff5e789134928b313",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 161,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T203126394161-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "2645ca80d372d7b059248ae99d10f85b775c53d4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every file, symbol, flag and figure s6 names resolves in the tree (see the check list above), and the landing commit that carries the second cpu density does exist.",
+    "done_when": "a finding \u2014 done-when (1) requires the test to redraw from \"the conductor currents and cell moments stored in the three `panel-fields.npz` files alone\", but the npz files (and the `run` producer that rewrites them, `benchmarks/mast_centroid_solve_panels.py:556-581`) store no conductor currents, and s6 itself says they \"does not keep the currents\".",
+    "evidence_paths": "pass \u2014 re-solved receipts and figures land beside the existing ones under `docs/figures/mast-centroid-capability/<lane>/`, which are committed durable paths; done-when (3)'s PNG inspection is recorded in the node's gate log.",
+    "naming": "pass \u2014 s6 introduces no symbols; no plan, stage or ticket label reaches code or comments, and the section names mechanisms rather than tracker entries.",
+    "reasoning": "a finding \u2014 the stated root cause (contours are a linear interpolation of the 33\u00d733 / 65\u00d765 lattice values) is supported by the npz shapes and the \u00a75 argument, and the re-solve mechanism does reach a production caller (`measure` under the `run` subcommand), but the mechanism as specified cannot produce done-when (1)'s measure: the producer's stored state is exactly what lacks the currents the test is told to read.",
+    "single_goal": "pass \u2014 s6 carries one deliverable: redraw the four MAST centroid panels from the fine map on the identified lanes.",
+    "wiring": "pass \u2014 `s6` declares `depends-on: separatrix-spline-extraction#s5` at plan line 31, matching the \u00a75 builder every clause in s6 relies on; the `data-links` attribute is empty on every section, so it carries no wiring signal either way."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "41d92e39de6ef29d5970af17ae7fb569eb297914ecbcda163099342cf9c0212f",
+    "s7": "9ddcc4be93a921b78a5112d7c3e86c585b544accf7e06869b5b37c6c329d3878",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:40:57.708473+00:00"
+}

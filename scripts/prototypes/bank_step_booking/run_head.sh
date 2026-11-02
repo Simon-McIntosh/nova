@@ -2,6 +2,7 @@
 set -u
 
 RUN_DIR=${1:?run directory required}
+TAG=${2:-final}
 ROOT=$(git rev-parse --show-toplevel)
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp PYTHONPATH="$ROOT" JAX_PLATFORMS=cpu
@@ -9,7 +10,7 @@ SCRATCH=$(mktemp -d "$TMPDIR/bank-booking-head-XXXXXX") || exit 2
 trap '"$PY" -c '\''import shutil, sys; print("removing", sys.argv[1]); shutil.rmtree(sys.argv[1])'\'' "$SCRATCH"' EXIT
 
 for file in test_bank_step_speed.py test_bank_step_booking.py; do
-  log="$RUN_DIR/suite-final-${file%.py}.log"
+  log="$RUN_DIR/suite-$TAG-${file%.py}.log"
   target="$ROOT/tests/$file"
   basetemp="$SCRATCH/${file%.py}"
   (

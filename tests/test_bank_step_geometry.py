@@ -24,6 +24,7 @@ def test_step_geometry_has_no_directional_autodiff():
         "class NewtonStep(", 1
     )[0]
     assert "jax.jvp(" not in geometry
+    assert ".evaluate(" not in geometry
 
 
 def test_normal_form_rate_matches_directional_reference():

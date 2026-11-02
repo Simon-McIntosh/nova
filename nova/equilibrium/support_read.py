@@ -624,6 +624,7 @@ def _tensor_orders(rank):
 
 
 _HESSIAN_ORDERS = _tensor_orders(2)
+_GRADIENT_ORDERS = _tensor_orders(1)
 _THIRD_ORDERS = _tensor_orders(3)
 _FOURTH_ORDERS = _tensor_orders(4)
 _FIFTH_ORDERS = _tensor_orders(5)
@@ -946,9 +947,9 @@ def _normal_geometry_booking_tangent(
         )
         point = reading.saddle_form.position
         pitch = jnp.median(geometry.pitch)
-        jet = field.evaluate(point)
         point_tangent = -jnp.linalg.solve(
-            jet.hessian, direction_field.evaluate(point).gradient
+            _bell_derivatives(field, point, _HESSIAN_ORDERS).reshape(2, 2),
+            _bell_derivatives(direction_field, point, _GRADIENT_ORDERS),
         )
 
         hessian, hessian_tangent, third, third_tangent, fourth, fourth_tangent = (

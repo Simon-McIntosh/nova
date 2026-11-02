@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="165">
+<meta name="plan-version" content="166">
 <meta name="plan-modified" content="2026-11-02">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -657,7 +657,10 @@
     <div class="r-comment-body"><p>The saddle cell is repaired in <code>391458c7a</code>. Segment nodes now follow their endpoints, and an edge carrying two crossings ranks them along the edge. Each arm reaches the X-point along its Hessian asymptote. The arms now sit within 0.06–0.17 mm of the spline level set, against 0.9–8.4 mm before, and the lobe no longer overshoots the saddle. The MAST centroid panels were redrawn in <code>b34e2a4da</code>. <a href="/nova/evidence/archive/separatrix-spline-extraction-landed.html#s3-saddle-cell-repair">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261102T201335731265-fine-flux-display-map" data-who="reckon-build" data-when="2026-11-02T20:45:53.346Z">
-    <div class="r-comment-body"><p>This node adds `nova/equilibrium/display_flux.py`, which evaluates a state&#x27;s flux on a fine display grid from the conductor and plasma-cell current coupling the producer supplies as callables over target points, reporting the map&#x27;s own polished saddle (3.45 mm from the lattice-spline saddle on the manufactured case), the largest node mismatch to the state (0.0 Wb), and the reproduction of `raster_image` at the lattice nodes (0.0 relative, gate 1e-10); the MAST X-point figure was not produced inside the node budget.</p></div>
+    <div class="r-comment-body"><p>This node adds `nova/equilibrium/display_flux.py`, which evaluates a state's flux on a fine display grid from the conductor and plasma-cell current coupling the producer supplies as callables over target points, reporting the map's own polished saddle (3.45 mm from the lattice-spline saddle on the manufactured case), the largest node mismatch to the state (0.0 Wb), and the reproduction of `raster_image` at the lattice nodes (0.0 relative, gate 1e-10); the MAST X-point figure was not produced inside the node budget.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261102T204702569394-review-of-fine-flux-display-map-737b08bb09ed" data-who="reckon-build" data-when="2026-11-02T20:59:34.021Z">
+    <div class="r-comment-body"><p>Review of fine-flux-display-map at 0e755a34..737b08bb: 18/15/19/11/13/5 across goal_fidelity, evidence, scope_discipline, durability, fit, reuse; the builder, its three-test gate and the negative control are sound, but the display path forks the moment contraction that `FluxTarget.internal` owns, the fixture zeroes the radial and vertical moment columns so those terms are unguarded, and the fragment quotes a negative-control error (2.41e-4) its own log does not record (5.45e-4). No blocking findings.</p></div>
 </div>
 </section>
 </main>

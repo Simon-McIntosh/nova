@@ -1,0 +1,119 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_display_flux.py:174 fails if the coupling's contraction of the uniform moment column or the conductor external term departs from operator.raster_image; logs/negative_control.log:16-18 shows it red on a one-percent conductor edit, so it is a real guard for those two terms.",
+    "tests/test_display_flux.py:175 fails if the map's node values differ from the manufactured state, which is itself raster_image(moments); it shares the state with the code under test but not the evaluation path, so it is not circular.",
+    "tests/test_display_flux.py:190-195 fails if the spacing, saddle or finiteness contract regresses.",
+    "tests/test_display_flux.py:207 fails if the spacing floor stops being enforced at display_flux.py:186-189.",
+    "no committed assertion exercises the radial or vertical moment columns (tests/test_display_flux.py:152), so that half of the product is durable only by reading."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-02T20:59:34.021Z",
+  "dispatched_at": "2026-11-02T20:48:41Z",
+  "evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201335731265-fine-flux-display-map/logs/gate.log",
+    "metrics": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201335731265-fine-flux-display-map/logs/metrics.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201335731265-fine-flux-display-map/logs/negative_control.log"
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T21:08:24.181982+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T21:08:24.259074+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T21:08:27.389885+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T21:08:30.409139+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T21:08:30.952996+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "fa342959a2e",
+      "line": 94,
+      "severity": "non-blocking",
+      "text": "_moment_flux writes out the plasma_target @ uniform + plasma_target_r @ radial + plasma_target_z @ vertical product that nova/biot/target.py:576 FluxTarget.internal already owns, and DisplayCoupling replaces the FluxTarget the plan named as the product to build, so the display path and the operator path can diverge; a per-chunk FluxTarget would extend the owner instead of forking it."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "f40ef6de71b",
+      "line": 152,
+      "severity": "non-blocking",
+      "text": "the _moments fixture zeroes both moment columns, so the radial and vertical terms contracted at display_flux.py:99-101 contribute nothing and a regression that dropped or swapped those columns would leave reproduction_relative_error at 0.0 with all three tests green."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-map.html",
+      "id": "f51896bd8c5",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "the fragment and manifest.md:15 quote a negative-control relative error of 2.41e-4, but the log they cite, logs/negative_control.log:16-18, records 5.45e-4, so the recorded measure does not reconcile with its own log."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-map.html",
+      "id": "f2160556bc7",
+      "line": 38,
+      "severity": "non-blocking",
+      "text": "the brief required the fragment to carry the MAST CPU centroid X-point figure and none was drawn; the fragment states this plainly and the panel sections own the prescribing producer, but the requested evidence is absent."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "f48d69934ec",
+      "line": 32,
+      "severity": "non-blocking",
+      "text": "the DEFAULT_SPACING docstring says \"the plan fixes\", a plan reference in source that the repository naming rules ban; the same appears at tests/test_display_flux.py:179 and :202, and tests/test_display_flux.py:30 refers to \"the node\"."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits against 0e755a34c: 10af1d363 adds display_flux.py with 275 lines and its three tests, 737b08bb0 adds the 47-line evidence fragment, and no producer or painter was touched.",
+    "done_when": "prompt.txt:131-135 restates the plan section 5 gate at docs/plans/separatrix-spline-extraction.html:167; logs/gate.log:1,7,9 records revision 737b08bb with 3 passed and EXIT=0, tests/test_display_flux.py:174 asserts the 1e-10 reproduction, and logs/negative_control.log:16-18 shows that test red at 5.45e-4 under a one-percent conductor edit.",
+    "goal": "prompt.txt:38 asks for a display flux map evaluated on a 10 mm grid as the Green product of a state's conductor currents and plasma cell moments; nova/equilibrium/display_flux.py:169 build_display_flux_map returns that, contracting the caller's DisplayCoupling blocks at display_flux.py:94 against the state's moments and reporting the map's own polished saddle, its millimetre offset and the node mismatch.",
+    "manifest": "manifest.md:1-27 records status complete, the two commits, the 3-test gate at 79.5 s with EXIT=0, the 3.45 mm saddle offset and the negative control, and states plainly that the MAST figure was not produced.",
+    "write_paths": "prompt.txt:101-106 grants five paths; git diff 0e755a34..737b08bb touches display_flux.py, tests/test_display_flux.py and the evidence fragment, three of the five, and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_display_flux.py:152 sets the radial and vertical moments to zeros, so the radial and vertical terms contracted at display_flux.py:99-101 are exercised by no committed assertion.",
+    "evidence": "logs/negative_control.log:16-18 is red at 0.000545 against the 1e-10 gate, but the evidence fragment and manifest quote 0.000241 for that same control, and the brief's MAST figure was not produced.",
+    "fit": "the frozen dataclasses and numpy/JAX split at nova/equilibrium/display_flux.py:35-66 match the surrounding equilibrium modules, but display_flux.py:32 and tests/test_display_flux.py:179,202 carry plan references the repository naming rules forbid in source.",
+    "goal_fidelity": "nova/equilibrium/display_flux.py:169 delivers the 10 mm Green-product map the goal names, with the spacing floor enforced at display_flux.py:186-189.",
+    "reuse": "nova/equilibrium/display_flux.py:94-101 re-implements the moment contraction that nova/biot/target.py:576 FluxTarget.internal already owns, and does not extend that owner.",
+    "scope_discipline": "the three changed paths in git diff 0e755a34..737b08bb are all inside the write_paths granted at prompt.txt:101-106, and no producer, painter or plan file was modified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 asks for a display flux map evaluated on a 10 mm grid as the Green product of a state's conductor currents and plasma cell moments; nova/equilibrium/display_flux.py:169 build_display_flux_map returns exactly that, contracting the caller's DisplayCoupling blocks (display_flux.py:94 _moment_flux) against the state's moments and reporting the map's own polished saddle, its millimetre offset and the node mismatch.\nVERDICT done_when: prompt.txt:131-135 restates plan section 5's gate (docs/plans/separatrix-spline-extraction.html:167); logs/gate.log:1,7,9 records revision 737b08bb, \"3 passed\", EXIT=0; tests/test_display_flux.py:174 asserts the 1e-10 reproduction; and logs/negative_control.log:1,16-18 shows that test red at 5.45e-4 under a one-percent conductor edit, so all three done-when clauses are measured rather than claimed.\nVERDICT write_paths: prompt.txt:101-106 grants five paths; git diff 0e755a34..737b08bb touches nova/equilibrium/display_flux.py, tests/test_display_flux.py and the evidence fragment, three of the five, and nothing outside them.\nVERDICT manifest: manifest.md:1-27 records status complete, the two commits, the 3-test gate at 79.5 s with EXIT=0, the 3.45 mm saddle offset and the negative control; it also states plainly that the MAST figure was not produced.\nVERDICT diff: read both commits against 0e755a34c: 10af1d363 adds display_flux.py (275 lines) and its three tests, 737b08bb0 adds the 47-line evidence fragment, and no producer or painter was touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/display_flux.py:169 delivers the 10 mm Green-product map the goal names, with the spacing floor enforced at display_flux.py:186-189.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/negative_control.log:16-18 is red at 5.45e-4 while docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-map.html:36 and manifest.md:15 quote 2.41e-4, and the brief's MAST figure is absent (fine-flux-display-map.html:38-44).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the three changed paths in git diff 0e755a34..737b08bb are all inside the write_paths granted at prompt.txt:101-106, and no producer, painter or plan file was modified.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_display_flux.py:152 sets the radial and vertical moments to zeros, so the radial and vertical terms contracted at display_flux.py:99-101 are exercised by no committed assertion.\nSCORE fit: 13\nJUSTIFICATION fit: the frozen dataclasses and the numpy/JAX split at nova/equilibrium/display_flux.py:35-66 match the surrounding equilibrium modules, but display_flux.py:32 and tests/test_display_flux.py:179,202 carry plan references the repository naming rules forbid in source.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/display_flux.py:94-101 re-implements the moment contraction that nova/biot/target.py:576 FluxTarget.internal already owns, and does not extend that owner.\nFINDING nova/equilibrium/display_flux.py:94 non-blocking: _moment_flux writes out the plasma_target @ uniform + plasma_target_r @ radial + plasma_target_z @ vertical product that nova/biot/target.py:576 FluxTarget.internal already owns, and DisplayCoupling replaces the FluxTarget the plan named as the product to build, so the display path and the operator path can diverge; a per-chunk FluxTarget would extend the owner instead of forking it.\nFINDING tests/test_display_flux.py:152 non-blocking: the _moments fixture zeroes both moment columns, so the radial and vertical terms contracted at display_flux.py:99-101 contribute nothing and a regression that dropped or swapped those columns would leave reproduction_relative_error at 0.0 with all three tests green.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-map.html:36 non-blocking: the fragment and manifest.md:15 quote a negative-control relative error of 2.41e-4, but the log they cite, logs/negative_control.log:16-18, records 5.45e-4, so the recorded measure does not reconcile with its own log.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-map.html:38 non-blocking: the brief required the fragment to carry the MAST CPU centroid X-point figure and none was drawn; the fragment states this plainly and the panel sections own the prescribing producer, but the requested evidence is absent.\nFINDING nova/equilibrium/display_flux.py:32 non-blocking: the DEFAULT_SPACING docstring says \"the plan fixes\", a plan reference in source that the repository naming rules ban; the same appears at tests/test_display_flux.py:179 and :202, and tests/test_display_flux.py:30 refers to \"the node\".",
+  "review_run_id": "r-20261102T204702569394-review-of-fine-flux-display-map-737b08bb09ed",
+  "reviewed_base_sha": "0e755a34ccc24980ac8d21031109505ced553ec7",
+  "reviewed_head_sha": "737b08bb09ed10e62ea4867a59bd630aa32e6f7b",
+  "reviewed_run_id": "r-20261102T201335731265-fine-flux-display-map",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 13,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T20:59:36.692818+00:00",
+  "total": 81
+}

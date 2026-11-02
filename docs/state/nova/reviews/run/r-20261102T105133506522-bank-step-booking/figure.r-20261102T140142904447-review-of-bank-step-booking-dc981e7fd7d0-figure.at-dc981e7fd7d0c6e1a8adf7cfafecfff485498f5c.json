@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "caption_review": "The caption does not merely repeat the figure title: it names the device and case (titan P100, 550-cell diverted bank), binds each colour to a series, states that the read is outside the Newton step, warns that the Jacobian and whole-step rows are not additive, gives the warm-call count behind each median, and records that the render was checked. Its only defect is the green-series name mismatch recorded as the first finding.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T14:18:03.070Z",
   "dispatched_at": "2026-11-02T14:09:01Z",
   "figures": [
     {
@@ -67,6 +67,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T14:18:06.944049+00:00",
+  "timestamp": "2026-11-02T14:25:41.734249+00:00",
   "total": null
 }

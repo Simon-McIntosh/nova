@@ -16,6 +16,13 @@
     "scripts/prototypes/bank_newton_step/measure.py:419"
   ],
   "completed_at": "2026-10-29T23:46:58Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "bank-step-booking",
+      "recorded_at": "2026-11-02T07:54:17.566198+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T23:40:48Z",
   "evidence": {
     "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/unit-final.log",

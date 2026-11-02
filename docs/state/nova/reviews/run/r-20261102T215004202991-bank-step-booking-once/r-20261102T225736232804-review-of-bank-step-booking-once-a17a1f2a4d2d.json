@@ -4,6 +4,11 @@
   "call_sites": [],
   "completed_at": "2026-11-02T23:17:46.189Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bank-step-booking-once",
+      "recorded_at": "2026-11-02T23:44:21.529560+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "bank-step-booking-once",

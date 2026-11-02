@@ -9,6 +9,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from types import SimpleNamespace
 
 from nova.equilibrium import current, support_read
 
@@ -71,3 +72,43 @@ def test_reuse_requires_observed_contraction(linear_step):
         support_read.newton_step(
             None, moments, None, None, None, None, factor_cache=first.factor
         )
+
+
+def test_booking_block_is_assembled_from_one_batched_sensitivity_call(monkeypatch):
+    moments = tuple(jnp.asarray([1.0]) for _ in range(3))
+    booked = current.Booking(*moments, jnp.asarray(1.0), jnp.asarray(1.0), True)
+    operands = SimpleNamespace(sample_index=jnp.asarray([[0]]), geometry=object())
+    support = SimpleNamespace(reading=SimpleNamespace(axis=0.0, boundary=0.0))
+    calls = []
+
+    def local(*args):
+        calls.append(1)
+        return jnp.asarray([[[2.0] + [0.0] * 8, [0.0] * 9, [0.0] * 9]])
+
+    class DirectionalField:
+        def sampled_coefficient(self, geometry):
+            return jnp.zeros((1, 6))
+
+        def value(self, point):
+            return jnp.asarray(0.0)
+
+    def directional(operands, direction):
+        return jnp.stack(direction, axis=-1), DirectionalField()
+
+    monkeypatch.setattr(support_read, "_local_booking_sensitivities", local)
+    monkeypatch.setattr(support_read, "_directional_field", directional)
+    assembled = jax.jit(
+        lambda: support_read.step_jacobian(
+            operands,
+            moments,
+            support,
+            None,
+            None,
+            current.Quadrature(),
+            booked,
+        )
+    )
+    matrix = assembled()
+    matrix.block_until_ready()
+    assert calls == [1]
+    np.testing.assert_allclose(matrix, jnp.diag(jnp.asarray([-1.0, 1.0, 1.0])))

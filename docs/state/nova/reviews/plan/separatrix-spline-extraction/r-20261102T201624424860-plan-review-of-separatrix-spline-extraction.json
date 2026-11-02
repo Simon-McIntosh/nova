@@ -59,9 +59,26 @@
       "finding": "done_when-1",
       "reason": "",
       "when": "2026-11-02T20:30:50.967675+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "18bbfd5d311482330535b593774be5cbbcd282c4",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "reason": "",
+      "when": "2026-11-02T20:31:02.879013+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "18bbfd5d311482330535b593774be5cbbcd282c4",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-02T20:31:02.879013+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

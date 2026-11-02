@@ -37,7 +37,7 @@ profile_arm() {
     cd "$tree" || exit 2
     export PYTHONPATH="$tree" BANK_STEP_TRACE_DIR="$trace_dir"
     printf '# revision: %s tree: %s cwd: %s command: %s -m scripts.prototypes.bank_step_speed.profile\n' \
-      "$(git -C "$SOURCE" rev-parse "$BASE")" "$tree" "$PWD" "$PY"
+      "$(git -C "$tree" rev-parse HEAD 2>/dev/null || echo unknown)" "$tree" "$PWD" "$PY"
     "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("nova.__file__:", nova.__file__); print("module.__file__:", m.__file__)'
     "$PY" -m scripts.prototypes.bank_step_speed.profile
     first=$?
@@ -61,7 +61,7 @@ solve_arm() {
     cd "$tree" || exit 2
     export PYTHONPATH="$tree"
     printf '# revision: %s tree: %s cwd: %s command: %s -m scripts.prototypes.bank_step_booking.measure --arm fresh\n' \
-      "$(git -C "$SOURCE" rev-parse HEAD)" "$tree" "$PWD" "$PY"
+      "$(git -C "$tree" rev-parse HEAD)" "$tree" "$PWD" "$PY"
     "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("nova.__file__:", nova.__file__); print("module.__file__:", m.__file__)'
     "$PY" -m scripts.prototypes.bank_step_booking.measure --arm fresh
     printf 'EXIT=%s\n' "$?"

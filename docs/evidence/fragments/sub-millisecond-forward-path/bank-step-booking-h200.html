@@ -44,7 +44,7 @@
 <section id="bank-step-booking-h200-tables"><h2>Booking tangent before and after, both devices</h2>
 <table id="bank-step-booking-h200-wall-table"><thead><tr><th>Source</th><th>H200 wall [ms]</th><th>H200 launches</th><th>H200 device [ms]</th><th>P100 wall [ms]</th><th>P100 launches</th><th>P100 device [ms]</th></tr></thead><tbody>
 <tr><td>Base</td><td>27.85</td><td>518</td><td>26.72</td><td>580.32</td><td>602</td><td>591.97</td></tr>
-<tr><td>Shared kernel only</td><td>40.76</td><td>520</td><td>39.51</td><td>592.86</td><td>602</td><td></td></tr>
+<tr><td>Shared kernel only</td><td>40.76</td><td>520</td><td>39.51</td><td>592.86</td><td>608</td><td>606.14</td></tr>
 <tr><td>Shared kernel and cut buckets</td><td>31.87</td><td>589</td><td>31.18</td><td>508.26</td><td>655</td><td>520.80</td></tr>
 </tbody></table>
 <table id="bank-step-booking-h200-step-table"><thead><tr><th>Whole Newton step</th><th>H200 wall [ms]</th></tr></thead><tbody>
@@ -52,6 +52,7 @@
 <tr><td>Shared kernel and cut buckets</td><td>55.93</td></tr>
 </tbody></table>
 <p>The whole step follows the tangent: the base source measures 42.95 ms warm on the reserve card, matching the 43.11 ms the fused-step record reports, and the arithmetic change raised it to 55.93 ms.</p>
+<p>Every wall in this table and in the figure is read from the stage line the profile program printed in that arm's log, so the figure is regenerated from the measurements rather than transcribed. Each arm's log opens with the revision it ran at; the head arms of the two earliest runs carried the base revision on that line, and each of those logs now states its own revision immediately below it. The shared-kernel form needs six more launches on the P100 than the base does (608 against 602), which is the whole of its launch cost there.</p>
 </section>
 <section id="bank-step-booking-h200-correctness"><h2>Correctness of the attempted change</h2>
 <p>The changed formulation was run through the fresh-read solve on the reserve card. It converged in eight refactorized steps to a fresh residual of 2.99e-11, and its oracle ratios are axis 1.048e-5 against 5e-4, saddle 9.25e-6 against 5e-4 and boundary flux 2.59e-5 against 1e-4. So the replacement is numerically correct and the rejection is purely about wall time. The station's own focused booking suite passes on CPU against the changed source, three tests in 51.87 s.</p>

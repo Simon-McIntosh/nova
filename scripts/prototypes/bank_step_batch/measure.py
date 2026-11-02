@@ -303,12 +303,20 @@ def _kernel_totals(trace_dir):
                 document = json.load(stream)
             except json.JSONDecodeError:
                 continue
-        for event in document.get("traceEvents", ()):
+        events = document.get("traceEvents", ())
+        device = {
+            event.get("pid")
+            for event in events
+            if event.get("name") == "process_name"
+            and "/device:GPU" in str(event.get("args", {}).get("name", ""))
+        }
+        for event in events:
             if event.get("ph") != "X" or "dur" not in event:
                 continue
-            category = str(event.get("cat", ""))
+            if event.get("pid") not in device:
+                continue
             name = str(event.get("name", ""))
-            if category.lower() != "kernel" and "kernel" not in name.lower():
+            if name.startswith(("cuGraphLaunch", "command_buffer", "memcpy")):
                 continue
             entry = totals.setdefault(name, [0.0, 0])
             entry[0] += float(event["dur"])
@@ -318,6 +326,41 @@ def _kernel_totals(trace_dir):
         {"name": name, "ms": total / 1e3, "calls": calls}
         for name, (total, calls) in ranked[:5]
     ]
+
+
+def run_plain_kernel_arm(run_dir):
+    """Trace the booking tangent at one lane with no batch map at all."""
+    bank, cache, roots, convention, policy, profile, quadrature, moments, _analytic = (
+        machine("diverted")
+    )
+    stages = stage_programs(bank, profile, quadrature)
+    seeds = seeds_for(roots, 1)
+    stacked = lanes_of(moments, 1)
+    support = jax.jit(
+        lambda state, lane_seeds: support_read.read_batch(
+            bank, cache, state, lane_seeds, lane_seeds, convention, policy
+        )
+    )(stacked, seeds)
+    one = tuple(value[0] for value in stacked)
+    one_support = jax.tree_util.tree_map(lambda value: value[0], support)
+    booked = jax.jit(
+        lambda state, lane_support: (
+            support_read.step_residual(
+                bank, state, state, lane_support, profile, quadrature
+            ).booked
+        )
+    )(one, one_support)
+    compiled = jax.jit(stages["local_booking_tangent"])
+    args = (one, one_support, booked)
+    compiled(*args)
+    jax.block_until_ready(compiled(*args))
+    trace_dir = run_dir / "trace-tangent-plain"
+    trace_dir.mkdir(parents=True, exist_ok=True)
+    jax.profiler.start_trace(str(trace_dir), create_perfetto_link=False)
+    compiled(*args)
+    jax.block_until_ready(compiled(*args))
+    jax.profiler.stop_trace()
+    emit("KERNELS", slices=1, batch=False, top=_kernel_totals(trace_dir))
 
 
 def run_kernel_arm(run_dir):
@@ -472,7 +515,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--arm",
-        choices=("stage", "converge", "kernel", "publish", "both"),
+        choices=("stage", "converge", "kernel", "plain", "publish", "both"),
         default="both",
     )
     parser.add_argument("--run-dir", type=Path, required=True)
@@ -498,6 +541,8 @@ def main():
         run_converge_arm(arguments.run_dir)
     if arguments.arm in ("kernel", "both"):
         run_kernel_arm(arguments.run_dir)
+    if arguments.arm == "plain":
+        run_plain_kernel_arm(arguments.run_dir)
     if arguments.arm == "publish":
         publish_case()
 

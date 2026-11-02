@@ -33,7 +33,7 @@ run_profile() {
   (
     cd "$tree" || exit 2
     export PYTHONPATH="$tree"
-    "$SOURCE/scripts/prototypes/bank_step_launch_fusion/measure.sh" "$RUN_DIR" "$tag"
+    bash "$SOURCE/scripts/prototypes/bank_step_launch_fusion/measure.sh" "$RUN_DIR" "$tag"
   ) > "$log" 2>&1
   code=$?
   printf 'ARM=%s EXIT=%s LOG=%s\n' "$tag" "$code" "$log"

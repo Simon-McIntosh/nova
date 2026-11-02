@@ -399,6 +399,110 @@ def run_kernel_arm(run_dir):
         emit("KERNELS", slices=count, top=_kernel_totals(trace_dir))
 
 
+def run_trace_arm(run_dir):
+    """Residual per Newton step: unbatched, then the same state batched."""
+    bank, cache, roots, convention, policy, profile, quadrature, moments, _analytic = (
+        machine("diverted")
+    )
+    seeds = roots + 0.03 * jnp.median(bank.geometry.pitch)
+    base = tuple(value * (1.0 + 2e-5) for value in moments)
+    steps = 30
+
+    def unbatched(state):
+        support = support_read.read(
+            bank, cache, state, seeds, seeds, convention, policy
+        )
+        return support_read.newton_step(
+            bank,
+            state,
+            support,
+            profile,
+            gradient,
+            quadrature,
+            fresh_geometry=True,
+            condition_diagnostics=False,
+        ), support
+
+    def residual_of(state, support):
+        residual = support_read.step_residual(
+            bank, state, state, support, profile, quadrature
+        )
+        return float(jnp.max(jnp.abs(jnp.concatenate(residual.residual))))
+
+    def batched(state, lane_seeds):
+        return support_read.step_batch(
+            bank,
+            cache,
+            state,
+            lane_seeds,
+            lane_seeds,
+            convention,
+            policy,
+            profile,
+            gradient,
+            quadrature,
+            fresh_geometry=True,
+        )
+
+    unbatched = jax.jit(unbatched)
+    state = base
+    for index in range(steps):
+        step, support = unbatched(state)
+        jax.block_until_ready(step.update)
+        size = residual_of(state, support)
+        emit("TRACE_SINGLE", index=index, residual=size)
+        state = tuple(
+            value + change for value, change in zip(state, step.update, strict=True)
+        )
+        if size <= 1e-10:
+            break
+
+    exact = support_read.newton_step(
+        bank,
+        state,
+        support_read.read(bank, cache, state, seeds, seeds, convention, policy),
+        profile,
+        gradient,
+        quadrature,
+        fresh_geometry=True,
+        condition_diagnostics=True,
+    )
+    emit(
+        "CONDITION",
+        cells=int(state[0].size),
+        before=float(exact.condition_before),
+        after=float(exact.condition_after),
+    )
+
+    for count in (1, 4):
+        stacked = tuple(
+            jnp.stack([value * (1.0 + 2e-5 * (lane + 1)) for lane in range(count)])
+            for value in moments
+        )
+        lane_seeds = seeds_for(roots, count)
+        step_program = jax.jit(chunked_args(batched, count))
+        for index in range(steps):
+            correction = step_program(stacked, lane_seeds)
+            jax.block_until_ready(correction.step.update)
+            support = jax.jit(
+                lambda state, lane_seeds: support_read.read_batch(
+                    bank, cache, state, lane_seeds, lane_seeds, convention, policy
+                )
+            )(stacked, lane_seeds)
+            sizes = []
+            for lane in range(count):
+                one = jax.tree_util.tree_map(lambda v: v[lane], stacked)
+                one_support = jax.tree_util.tree_map(lambda v: v[lane], support)
+                sizes.append(residual_of(one, one_support))
+            emit("TRACE_BATCH", slices=count, index=index, residual=sizes)
+            stacked = tuple(
+                value + change
+                for value, change in zip(stacked, correction.step.update, strict=True)
+            )
+            if max(sizes) <= 1e-10:
+                break
+
+
 def run_converge_arm(run_dir):
     import tests.equilibrium.test_topology_read as fixture
     from scripts.prototypes.bank_newton_converge.fresh_solve import analytic_oracle
@@ -515,7 +619,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--arm",
-        choices=("stage", "converge", "kernel", "plain", "publish", "both"),
+        choices=("stage", "converge", "kernel", "plain", "trace", "publish", "both"),
         default="both",
     )
     parser.add_argument("--run-dir", type=Path, required=True)
@@ -541,6 +645,8 @@ def main():
         run_converge_arm(arguments.run_dir)
     if arguments.arm in ("kernel", "both"):
         run_kernel_arm(arguments.run_dir)
+    if arguments.arm == "trace":
+        run_trace_arm(arguments.run_dir)
     if arguments.arm == "plain":
         run_plain_kernel_arm(arguments.run_dir)
     if arguments.arm == "publish":

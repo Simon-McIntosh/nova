@@ -7,11 +7,30 @@ configure_dtypes()
 
 import jax
 import jax.numpy as jnp
+import hashlib
 import numpy as np
 import pytest
 from types import SimpleNamespace
 
 from nova.equilibrium import current, support_read
+
+
+def test_book_primal_keeps_exact_diverted_moments():
+    from tests.test_support_read import _case
+
+    operands, cache, roots, pitch, step, _, _ = _case("diverted")
+    _, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    expected = (
+        "73db87c3ed35d06111216d2e94f40e707a3358056e16898da445945b3bc358a5",
+        "a50bd0ec4f6c3fa86f4590d4bf4286c349fb181721887be99a9ffa9cafe81d4b",
+        "648a03e71877e7279744d1fa475f9cc9580798e070343ce51fb3ef5531d048d6",
+        "340bc5ca6f9b6666779b145b364f5d372e04400736edc43da3d8d4c7dd3d9621",
+        "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
+        "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
+    )
+    for name, digest in zip(booked._fields, expected, strict=True):
+        actual = hashlib.sha256(np.asarray(getattr(booked, name)).tobytes()).hexdigest()
+        assert actual == digest, name
 
 
 @pytest.fixture

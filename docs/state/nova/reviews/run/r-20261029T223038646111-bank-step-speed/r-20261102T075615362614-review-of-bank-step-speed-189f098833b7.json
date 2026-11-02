@@ -1,0 +1,100 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_step_speed.py:37 fails if skipping diagnostics changes the update relative to the explicit exact branch; both calls share the solver, so this tests branch parity rather than absolute correctness.",
+    "tests/test_bank_step_speed.py:38 fails if the fast result reports a finite condition_before, but compute-then-discard would pass this marker alone; the refusal at :29-32 catches that mutation.",
+    "tests/test_bank_step_speed.py:39 fails if equilibration does not lower the explicitly computed condition number for the synthetic matrix.",
+    "tests/test_bank_step_speed.py:59-60 fails if the default multicell result reports finite condition fields; the refusal at :54-57 fails if the estimates execute even when their results are discarded.",
+    "tests/test_bank_step_speed.py:61-63 fails if the update differs from the independently calculated diagonal-system solution.",
+    "scripts/prototypes/bank_step_speed/profile.py:166 fails if the chosen fast profile returns finite condition fields; tests/test_bank_step_speed.py:29-32 is the stronger execution guard.",
+    "scripts/prototypes/bank_step_speed/parse_trace.py:35 fails on missing GPU kernel events or stage annotations; parse-titan-committed.log positively observes 98,018 kernel events and ten annotations.",
+    "scripts/prototypes/bank_step_speed/negative_repair.sh:45 fails if its expected mutation insertion point is absent; negative-discard.log shows the mutated test failed in cond."
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/bank_step_speed/profile.py:154",
+    "scripts/prototypes/bank_newton_converge/fresh_solve.py:84",
+    "scripts/prototypes/bank_newton_converge/outer.py:52",
+    "scripts/prototypes/bank_newton_converge/fresh_diff.py:38",
+    "scripts/prototypes/bank_newton_step/measure.py:106",
+    "scripts/prototypes/bank_newton_step/measure.py:419"
+  ],
+  "completed_at": "2026-11-02T08:10:00Z",
+  "dispatched_at": "2026-11-02T07:58:11Z",
+  "evidence": {
+    "after_revision": "3560265f576a51ffa8fe4966b25d96db3cacc7b4",
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/suite-head.log",
+    "baseline_revision": "8527472787f303c46adba086c6c2bdcb73727d4f",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/suite-base.log",
+    "negative_default": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/negative-default.log",
+    "negative_discard": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/negative-discard.log",
+    "note": "After-suite revision predates later trace and documentation commits; no product or test source changed after that suite arm.",
+    "trace": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/parse-titan-committed.log"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html",
+      "id": "fb4032e98b0",
+      "line": 16,
+      "severity": "blocking",
+      "text": "The repaired current-head fast path has no H200 wall, device-time or launch receipt after the reserved job stayed pending, so the plan's 0.5 ms and 100-launch gates cannot be certified from P100 measurements."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html",
+      "id": "fa760194df1",
+      "line": 16,
+      "severity": "blocking",
+      "text": "The attempted closed-form geometry derivative was rolled back after a 2788.81 relative directional mismatch, leaving the required geometry tangent replacement undelivered."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html",
+      "id": "ff9230403e9",
+      "line": 44,
+      "severity": "blocking",
+      "text": "The retained local booking tangent takes 5290.81 ms and 92% of the P100 whole-step wall, and this revision makes no cut to that largest stage; the source goal's remaining-stage reduction is outstanding."
+    },
+    {
+      "disposition": "folded",
+      "disposition_node": "bank-step-speed-followup",
+      "file": "scripts/prototypes/bank_step_speed/parse_trace.py",
+      "id": "fb8be2921e5",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "The modified parser repeats GPU-event counting owned by scripts/prototypes/sub_millisecond/parse_launch_trace.py:10-48 rather than extending it; fold consolidation into bank-step-speed-followup."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all nine commits from 852747278 to 189f098 and their eleven-path diff; support_read.py:845-857 changes the multicell default, tests/test_bank_step_speed.py:29-62 adds refusal checks, and the remaining changes add profiling, trace receipts, figure and evidence.",
+    "done_when": "The source prompt.txt:118-119 requires wall and launches after each change, fresh residual at most 1e-10 and oracle ratios within budget, with 0.5 ms reached or the remaining stage and lever named; bank-step-speed.html:39-44 supplies a P100 fallback, a passing residual and the booking lever, but no after-change H200 receipt.",
+    "goal": "The source prompt.txt:38 asks to bring the converged bank step from 366 ms toward 0.5 ms on H200; support_read.py:856-857 removes default condition estimates, while bank-step-speed.html:16 records no current-head H200 timing and a rolled-back geometry derivative.",
+    "manifest": "The source manifest.md records nine repair commits beyond 852747278, a complete baseline_suite with one pass and after_suite with two passes, two red mutation logs, and an explicit unresolved current-head H200 gate.",
+    "write_paths": "The source manifest.md:3 grants support_read.py, test_bank_step_speed.py, bank_step_speed scripts, the evidence fragment and figure directories; git diff 852747278..189f098 lists eleven final paths, all within those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_speed.py:57-62 fails when the multicell default calls cond or gives a wrong diagonal update, and :32-39 fails on a compute-then-discard fast branch as negative-discard.log demonstrates.",
+    "evidence": "suite-base.log and suite-head.log complete with zero failures and negative-default.log and negative-discard.log each end EXIT=1; bank-step-speed.html:16 supplies no current-head H200 wall or launches after the change.",
+    "fit": "support_read.py:845-857 keeps the existing optional diagnostic idiom and the changed test and script names describe behavior without plan-labelled identifiers.",
+    "goal_fidelity": "support_read.py:856-857 advances the H200 speed goal by skipping condition estimates, but bank-step-speed.html:16,44 lacks a current-head H200 measurement and leaves the geometry and booking-stage work outstanding.",
+    "reuse": "scripts/prototypes/bank_step_speed/parse_trace.py:18-45 still implements GPU-event counting independently of scripts/prototypes/sub_millisecond/parse_launch_trace.py:10-48, and the added parse_trace.sh:17-22 wraps that duplicate.",
+    "scope_discipline": "The eleven paths in git diff 852747278..189f098 stay inside the grants in the source manifest.md:3, and bank-step-speed.html:16 accurately labels the fallback hardware."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt.txt:38 asks to bring the converged bank step from 366 ms toward 0.5 ms on H200; support_read.py:856-857 removes default condition estimates, while bank-step-speed.html:16 records no current-head H200 timing and a rolled-back geometry derivative.\nVERDICT done_when: The source prompt.txt:118-119 requires wall and launches after each change, fresh residual at most 1e-10 and oracle ratios within budget, with 0.5 ms reached or the remaining stage and lever named; bank-step-speed.html:39-44 supplies a P100 fallback, a passing residual and the booking lever, but no after-change H200 receipt.\nVERDICT write_paths: The source manifest.md:3 grants support_read.py, test_bank_step_speed.py, bank_step_speed scripts, the evidence fragment and figure directories; git diff 852747278..189f098 lists eleven final paths, all within those grants.\nVERDICT manifest: The source manifest.md records nine repair commits beyond 852747278, a complete baseline_suite with one pass and after_suite with two passes, two red mutation logs, and an explicit unresolved current-head H200 gate.\nVERDICT diff: Read all nine commits from 852747278 to 189f098 and their eleven-path diff; support_read.py:845-857 changes the multicell default, tests/test_bank_step_speed.py:29-62 adds refusal checks, and the remaining changes add profiling, trace receipts, figure and evidence.\nCALL_SITES: scripts/prototypes/bank_step_speed/profile.py:154, scripts/prototypes/bank_newton_converge/fresh_solve.py:84, scripts/prototypes/bank_newton_converge/outer.py:52, scripts/prototypes/bank_newton_converge/fresh_diff.py:38, scripts/prototypes/bank_newton_step/measure.py:106, scripts/prototypes/bank_newton_step/measure.py:419\nSCORE goal_fidelity: 5\nJUSTIFICATION goal_fidelity: support_read.py:856-857 advances the H200 speed goal by skipping condition estimates, but bank-step-speed.html:16,44 lacks a current-head H200 measurement and leaves the geometry and booking-stage work outstanding.\nSCORE evidence: 10\nJUSTIFICATION evidence: suite-base.log and suite-head.log complete with zero failures and negative-default.log and negative-discard.log each end EXIT=1; bank-step-speed.html:16 supplies no current-head H200 wall or launches after the change.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eleven paths in git diff 852747278..189f098 stay inside the grants in the source manifest.md:3, and bank-step-speed.html:16 accurately labels the fallback hardware.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_bank_step_speed.py:57-62 fails when the multicell default calls cond or gives a wrong diagonal update, and :32-39 fails on a compute-then-discard fast branch as negative-discard.log demonstrates.\nSCORE fit: 18\nJUSTIFICATION fit: support_read.py:845-857 keeps the existing optional diagnostic idiom and the changed test and script names describe behavior without plan-labelled identifiers.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_step_speed/parse_trace.py:18-45 still implements GPU-event counting independently of scripts/prototypes/sub_millisecond/parse_launch_trace.py:10-48, and the added parse_trace.sh:17-22 wraps that duplicate.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html:16 blocking: The repaired current-head fast path has no H200 wall, device-time or launch receipt after the reserved job stayed pending, so the plan's 0.5 ms and 100-launch gates cannot be certified from P100 measurements.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html:16 blocking: The attempted closed-form geometry derivative was rolled back after a 2788.81 relative directional mismatch, leaving the required geometry tangent replacement undelivered.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html:44 blocking: The retained local booking tangent takes 5290.81 ms and 92% of the P100 whole-step wall, and this revision makes no cut to that largest stage; the source goal's remaining-stage reduction is outstanding.\nFINDING scripts/prototypes/bank_step_speed/parse_trace.py:22 non-blocking: The modified parser repeats GPU-event counting owned by scripts/prototypes/sub_millisecond/parse_launch_trace.py:10-48 rather than extending it; fold consolidation into bank-step-speed-followup.",
+  "review_run_id": "r-20261102T075615362614-review-of-bank-step-speed-189f098833b7",
+  "reviewed_base_sha": "8527472787f303c46adba086c6c2bdcb73727d4f",
+  "reviewed_head_sha": "189f098833b773d8425f513f6e0d6466a5434235",
+  "reviewed_run_id": "r-20261029T223038646111-bank-step-speed",
+  "scores": {
+    "durability": 18,
+    "evidence": 10,
+    "fit": 18,
+    "goal_fidelity": 5,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T08:18:01.785339+00:00",
+  "total": 76
+}

@@ -233,13 +233,22 @@
   and the one- and four-slice reads reproduce at 53.80 and 20.32 ms. The
   timing headline stands unchanged.</p>
 
-  <p>The negative control was re-run against the repaired code in the same job:
-  its mutation arm launched after the gate and its verdict was still pending
-  when this record was written. Its log is <code>waverun/regate.log</code>
-  (job 1303787), which carries the gate result and the mutation phase in one
-  stream; a completed mutation appends its <code>NEG_EXIT</code> line to that
-  file. The sixteen-lane per-lane trace (job 1303790) was still queued at the
-  deadline, so the per-lane table this delivery carries is the four-lane one.</p>
+  <p>The negative control was re-run against the repaired code in the same job.
+  Its mutation moves the batch-uniform read decision inside the <code>vmap</code>,
+  and the mutated batch takes the convergence clause red:
+  <code>NEG_EXIT=1</code>, with lane 0's radial flux disagreeing with that
+  lane's own solve in 75 of 550 cells at a maximum relative difference of
+  5.2e-8 and an absolute one of 2.0e-8 — four orders above the 1e-12 floor the
+  comparison now carries, so the tolerance change does not weaken the control.
+  The batch still converged under the mutation (1.97e-11 and 4.53e-11 in 13
+  steps), which is the point: the mutation is caught by the flux, not by
+  failure to converge. Its log is <code>waverun/regate.log</code> (job 1303787),
+  which carries the gate result and the mutation arm in one stream.</p>
+
+  <p>The sixteen-lane per-lane trace (job 1303790) was queued at the deadline
+  and began running minutes later; the per-lane table this delivery carries is
+  the four-lane one, and the sixteen-lane exit line is
+  <code>waverun/trace.log</code>.</p>
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:

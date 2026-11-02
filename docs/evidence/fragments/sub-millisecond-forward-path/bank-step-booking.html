@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step booking and factor reuse | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-booking-landing">Bank step booking and factor reuse</h1>
+<p id="bank-step-booking-summary">The existing bank Jacobian already forms its booking block from one batched 15-channel sensitivity call inside one compiled program; a new assembly test pins that call and a scratch serial-loop mutation makes it fail. This node adds a carried balanced LU factor, reused while the observed fresh-residual contraction ratio is at most 0.5. On titan P100, a reused warm step falls from about 1,476 to 323 ms with launches falling from 8,381 to 1,816. Two complete carried-factor solves took 10 and 13 steps, so total step wall ranged from 9,037 to 14,573 ms against 11,832 ms for the first fresh-factor solve. All terminal states meet the 1e-10 fresh-read residual and analytic-oracle budgets. The local booking tangent itself remains 1,077 ms on P100; this is a measured partial result, not a claim that the H200 step target is met.</p>
+<figure id="bank-step-booking-stage-wall"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-booking/stage-wall.svg" alt="Linear titan P100 warm wall by bank-step stage, with the carried-factor step highlighted"><figcaption>Titan P100, diverted 550-cell bank. Grey marks are independently timed warm stages; the green mark is the median of four steps that reused a factor. The Jacobian contains the local booking tangent, and the whole step contains the residual, Jacobian, balancing, factor and solve, so rows are not additive. The read is outside the step target. The SVG was rendered to PNG, checked mechanically for label collisions and clipping, and visually inspected.</figcaption></figure>
+<section id="bank-step-booking-profile"><h2>Warm stage trace on titan P100</h2>
+<table id="bank-step-booking-profile-table"><thead><tr><th>Stage</th><th>Warm wall [ms]</th><th>Device duration [ms]</th><th>Kernel launches</th></tr></thead><tbody>
+<tr><td>Read, outside step</td><td>1,660.14</td><td>1,720.51</td><td>20,379</td></tr>
+<tr><td>Residual and booking</td><td>324.94</td><td>332.41</td><td>1,503</td></tr>
+<tr><td>Local booking tangent</td><td>1,076.97</td><td>1,095.56</td><td>1,082</td></tr>
+<tr><td>Full Jacobian, with geometry</td><td>1,152.30</td><td>1,169.34</td><td>5,718</td></tr>
+<tr><td>LU factor</td><td>10.44</td><td>10.18</td><td>118</td></tr>
+<tr><td>Fresh whole step</td><td>1,486.11</td><td>1,510.70</td><td>8,381</td></tr>
+<tr><td>Carried-factor whole step</td><td>323.43</td><td>332.22</td><td>1,816</td></tr>
+</tbody></table>
+<p>The profiler was warmed before tracing. The base trace contains 42,129 GPU events and 38,558 kernels across ten stage annotations, so the parser demonstrably saw device activity. A first carried-factor trace exceeded the profiler's 2 GB protobuf limit and produced zero GPU events; that trace is invalid as an absence claim. The narrowed trace contains 1,882 GPU events and 1,816 kernels from its single reused-step call. Stage walls are medians of three synchronised calls for the base and four actual reused Newton steps for the carried-factor row; device duration and launches come from one traced call.</p>
+</section>
+<section id="bank-step-booking-convergence"><h2>Fresh-read solves and oracle</h2>
+<table id="bank-step-booking-convergence-table"><thead><tr><th>Titan P100 arm</th><th>Accepted steps to 1e-10</th><th>Terminal fresh residual</th><th>Total step wall [ms]</th><th>Refactors / reused steps</th></tr></thead><tbody>
+<tr><td>Fresh factor each step, first run</td><td>8</td><td>3.439e-12</td><td>11,831.53</td><td>8 / 0</td></tr>
+<tr><td>Fresh factor each step, repeat</td><td>8</td><td>3.439e-12</td><td>11,807.77</td><td>8 / 0</td></tr>
+<tr><td>Carry factor while contraction ≤ 0.5, first run</td><td>13</td><td>2.235e-11</td><td>14,572.67</td><td>9 / 4</td></tr>
+<tr><td>Carry factor while contraction ≤ 0.5, repeat</td><td>10</td><td>7.753e-11</td><td>9,036.58</td><td>5 / 5</td></tr>
+</tbody></table>
+<p>These totals sum measured Newton-step calls, excluding topology reads and line-search work. The carried-factor warm step is 4.56× faster in isolation. The two carried-factor solves bracket both fresh-factor results: one spends 1.232× the first fresh-factor step wall and the other 0.764×. The fresh-factor repeat preserves eight steps and the same terminal residual. The carried arm changes its accepted step count and line-search path between runs, so one total-wall claim would be misleading. The final analytic-oracle ratios for the carried arm are axis 1.048e-5 against 5e-4, saddle 9.255e-6 against 5e-4, and boundary flux 2.591e-5 against 1e-4. The fresh-factor arm also passes these budgets.</p>
+</section>
+<section id="bank-step-booking-gates"><h2>Guards and limits</h2>
+<p>The base speed file passes three tests; at the head the speed file passes three and the booking file passes three, each file in a fresh pytest process. The scratch mutation replaces the single sensitivity call in Jacobian assembly with 15 host calls. The assembly test fails on that mutant (15 calls versus one, EXIT=1) and passes at the head. A first P100 carried solve stopped at its 12-step measurement limit with residual 1.525e-10; extending only that bound reached 2.235e-11 at step 13. The H200 request stayed pending from 11:55:48 to 12:06:38 Europe/Paris (10 min 50 s) and was cancelled by job ID, as recorded by <code>h200-admission.log</code>. Thus neither the H200 0.5 ms nor 100-launch target is judged here. Reducing the first-step booking tangent further points at the conic-ring and tangent internals in <code>nova/equilibrium/current.py</code>, outside this node's write grant.</p>
+<p>Durable logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking</code>: <code>titan-baseline.out</code> and <code>titan-baseline-device.log</code> hold the stage profile, <code>titan-fresh-solve.log</code>, <code>titan-fresh-repeat.log</code>, <code>titan-reuse-extended.log</code> and <code>titan-reuse-trace-fixed.log</code> hold the complete solve arms, <code>titan-reuse-device.log</code> holds the positive device trace, <code>suite-*.log</code> hold the tests, <code>negative-control.log</code> holds the red mutation, and <code>plot-retry.log</code> holds the SVG render receipt.</p>
+</section>
+</main></body>
+</html>

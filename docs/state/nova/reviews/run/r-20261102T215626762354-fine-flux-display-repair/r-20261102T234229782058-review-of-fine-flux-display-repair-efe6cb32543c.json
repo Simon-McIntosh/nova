@@ -11,6 +11,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-02T23:53:33.903Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "fine-flux-display-repair",
+      "recorded_at": "2026-11-02T23:58:25.521201+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T23:43:46Z",
   "evidence": {
     "added_failure_source": "The reviewed manifest records no baseline_suite or after_suite block; added_failure_count derives from logs/gate-final.log (5 passed, EXIT=0), the only post-change arm on record, which carries no failures.",

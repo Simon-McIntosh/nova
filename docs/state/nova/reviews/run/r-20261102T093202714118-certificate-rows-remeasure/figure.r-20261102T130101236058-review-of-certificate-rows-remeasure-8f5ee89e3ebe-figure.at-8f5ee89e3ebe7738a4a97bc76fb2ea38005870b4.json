@@ -48,6 +48,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-certificate-rows-remeasure-8f5ee89e3ebe",
+      "recorded_at": "2026-11-02T13:23:06.209381+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",

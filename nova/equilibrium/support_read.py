@@ -1366,6 +1366,73 @@ def newton_step(
     )
 
 
+class BatchStep(NamedTuple):
+    """A batched warm step and the one read decision the whole batch took."""
+
+    step: NewtonStep
+    support: SupportRead
+
+
+def step_batch(
+    operands,
+    cache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    policy,
+    profile,
+    density_gradient,
+    quadrature,
+    axis_sign=-1.0,
+    *,
+    iterations: int = 12,
+    tracking: TrackingState | None = None,
+    fresh_geometry: bool = False,
+    condition_diagnostics: bool = False,
+) -> BatchStep:
+    """One warm Newton step over independent slices in one compiled program.
+
+    ``moments``, ``seeds`` and ``previous`` carry one entry per slice on their
+    leading axis, exactly as in :func:`read_batch`, and the operands and row
+    window are shared by every lane. The read is :func:`read_batch`, so the
+    batch takes one ``lax.cond`` on whether any lane needs a rebuild, outside
+    the map; the step that consumes that read is a ``vmap`` over the lanes.
+    A steady batch therefore shares the read's and the step's launches across
+    the slices instead of charging each of them the whole per-call cost.
+
+    This is the minimal-factor route: every lane assembles and factors its own
+    matrix. A carried :class:`NewtonFactor` cannot be shared here, because the
+    lanes hold different states and each factor belongs to one lane.
+    """
+    support = read_batch(
+        operands,
+        cache,
+        moments,
+        seeds,
+        previous,
+        convention,
+        policy,
+        axis_sign,
+        iterations=iterations,
+        tracking=tracking,
+    )
+
+    def one(state, lane_support):
+        return newton_step(
+            operands,
+            state,
+            lane_support,
+            profile,
+            density_gradient,
+            quadrature,
+            fresh_geometry=fresh_geometry,
+            condition_diagnostics=condition_diagnostics,
+        )
+
+    return BatchStep(jax.vmap(one)(moments, support), support)
+
+
 def _bank_payload(operands: SupportOperands) -> bytes:
     """Serialize the bank's dense operands and their shape identity."""
     import io

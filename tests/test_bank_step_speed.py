@@ -6,9 +6,10 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import jax.numpy as jnp
+import jax
 import numpy as np
 
-from nova.equilibrium import current, support_read
+from nova.equilibrium import current, support_read, topology
 
 
 def test_condition_diagnostics_do_not_change_update(monkeypatch):
@@ -61,3 +62,32 @@ def test_multicell_step_omits_condition_estimates_by_default(monkeypatch):
     np.testing.assert_allclose(
         jnp.concatenate(step.update), -1.0 / jnp.diag(matrix), rtol=1e-12
     )
+
+
+def test_local_booking_sensitivities_batch_channels(monkeypatch):
+    from tests.test_support_read import UnitDensity, _case
+
+    operands, cache, roots, pitch, step, _, _ = _case("diverted")
+    support, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    moments = tuple(jnp.zeros(operands.sample_index.shape[0]) for _ in range(3))
+    sigma = topology.TopologyConvention.from_cocos(17, 1.0).sigma
+
+    def refuse_serial_map(*args, **kwargs):
+        raise AssertionError("booking sensitivities mapped channels serially")
+
+    monkeypatch.setattr(jax.lax, "map", refuse_serial_map)
+    sensitivities = support_read._local_booking_sensitivities(
+        operands,
+        moments,
+        support,
+        UnitDensity(),
+        lambda radius, flux: jnp.zeros_like(radius),
+        current.Quadrature(sigma=sigma, segments=64),
+        booked,
+    )
+    assert sensitivities.shape == (
+        operands.sample_index.shape[0],
+        3,
+        operands.sample_index.shape[1] + 8,
+    )
+    assert np.all(np.isfinite(np.asarray(sensitivities)))

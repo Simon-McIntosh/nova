@@ -808,7 +808,7 @@ def _local_booking_sensitivities(
         )
         return jnp.stack(tuple(tangent), axis=-1)
 
-    return jnp.moveaxis(jax.lax.map(evaluate, jnp.arange(channels)), 0, -1)
+    return jnp.moveaxis(jax.vmap(evaluate)(jnp.arange(channels)), 0, -1)
 
 
 def step_jacobian(

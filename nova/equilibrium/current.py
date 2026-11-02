@@ -15,6 +15,8 @@ import jax.numpy as jnp
 from nova.equilibrium import topology
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
+    _UNIT_NODE,
+    _UNIT_WEIGHT,
     _quadrature_from_arrays,
     clipped_support_current_moments,
     fixed_polygon_current_moment_tangent,
@@ -720,8 +722,8 @@ def book_tangent_channels(
             )
             fixed = interior(index, rings, counts)
 
-            def boundary_response(direction):
-                velocity = _conic_ring_tangents(
+            velocity = jax.vmap(
+                lambda direction: _conic_ring_tangents(
                     vertices,
                     count,
                     centre,
@@ -732,23 +734,64 @@ def book_tangent_channels(
                     quadrature.segments,
                     inward_endpoints=True,
                 )
-                response = jax.vmap(
-                    lambda ring, speed, number: moving_polygon_current_moment_tangent(
-                        ring,
-                        speed,
-                        number,
-                        centre,
-                        geometry.pitch[index],
-                        normalized[index],
-                        profile,
-                    )
-                )(rings, velocity, counts)
-                return jnp.sum(jnp.stack(tuple(response), axis=-1), axis=0)
+            )(signed_rate[boundary_channels, index])
+            slot = jnp.arange(rings.shape[1])
+            following = jnp.where(slot[None] + 1 < counts[:, None], slot + 1, 0)
+            next_ring = jnp.take_along_axis(
+                rings, jnp.broadcast_to(following[..., None], rings.shape), axis=1
+            )
+            edge = next_ring - rings
+            node = jnp.asarray(_UNIT_NODE, dtype=psi.dtype)
+            weight = jnp.asarray(_UNIT_WEIGHT, dtype=psi.dtype)
+            point = rings[:, :, None] + node[None, None, :, None] * edge[:, :, None]
+            local = (point - centre) / geometry.pitch[index]
+            radial, vertical = local[..., 0], local[..., 1]
+            basis = jnp.stack(
+                (
+                    jnp.ones_like(radial),
+                    radial,
+                    vertical,
+                    radial**2,
+                    radial * vertical,
+                    vertical**2,
+                ),
+                axis=-1,
+            )
+            flux = jnp.einsum("rvqk,k->rvq", basis, normalized[index])
+            density = profile.current_density(point[..., 0], flux)
+            next_velocity = jnp.take_along_axis(
+                velocity,
+                jnp.broadcast_to(following[None, :, :, None], velocity.shape),
+                axis=2,
+            )
+            speed = (
+                velocity[:, :, :, None]
+                + node[None, None, None, :, None]
+                * (next_velocity - velocity)[:, :, :, None]
+            )
+            cross = (
+                speed[..., 0] * edge[None, :, :, None, 1]
+                - speed[..., 1] * edge[None, :, :, None, 0]
+            )
+            weighted = jnp.where(
+                slot[None, :, None] < counts[:, None, None],
+                weight[None, None] * density * cross,
+                0.0,
+            )
+            relative = point - centre
+            moving = jnp.stack(
+                (
+                    jnp.sum(weighted, axis=(1, 2, 3)),
+                    jnp.sum(weighted * relative[None, ..., 0], axis=(1, 2, 3)),
+                    jnp.sum(weighted * relative[None, ..., 1], axis=(1, 2, 3)),
+                ),
+                axis=-1,
+            )
 
             moving = (
                 jnp.zeros((channels, 3), dtype=psi.dtype)
                 .at[boundary_channels]
-                .set(jax.vmap(boundary_response)(signed_rate[boundary_channels, index]))
+                .set(moving)
             )
             return jnp.where(valid, fixed + moving, jnp.nan)
 

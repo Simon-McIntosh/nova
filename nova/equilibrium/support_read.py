@@ -1080,35 +1080,33 @@ def _local_booking_sensitivities(
     cells, samples = operands.sample_index.shape
     psi = nodal_jets(operands, moments)[operands.sample_index, 0]
     channels = samples + 8
+    indices = jnp.arange(channels)
     sample_basis = jnp.eye(samples, dtype=psi.dtype)
+    psi_direction = jnp.broadcast_to(
+        sample_basis[jnp.minimum(indices, samples - 1), None]
+        * (indices < samples)[:, None, None],
+        (channels, cells, samples),
+    )
     field_basis = jnp.eye(6, dtype=psi.dtype)
-
-    def evaluate(index):
-        psi_direction = jnp.broadcast_to(
-            sample_basis[jnp.minimum(index, samples - 1)] * (index < samples),
-            psi.shape,
-        )
-        field_index = jnp.clip(index - samples, 0, 5)
-        field_direction = jnp.broadcast_to(
-            field_basis[field_index] * ((index >= samples) & (index < samples + 6)),
-            (cells, 6),
-        )
-        tangent = current.book_tangent(
-            psi,
-            psi_direction,
-            support.reading,
-            field_direction,
-            (index == samples + 6).astype(psi.dtype),
-            (index == samples + 7).astype(psi.dtype),
-            operands.geometry,
-            profile,
-            density_gradient,
-            quadrature,
-            booked,
-        )
-        return jnp.stack(tuple(tangent), axis=-1)
-
-    return jnp.moveaxis(jax.vmap(evaluate)(jnp.arange(channels)), 0, -1)
+    field_direction = jnp.broadcast_to(
+        field_basis[jnp.clip(indices - samples, 0, 5), None]
+        * ((indices >= samples) & (indices < samples + 6))[:, None, None],
+        (channels, cells, 6),
+    )
+    return current.book_tangent_channels(
+        psi,
+        psi_direction,
+        support.reading,
+        field_direction,
+        (indices == samples + 6).astype(psi.dtype),
+        (indices == samples + 7).astype(psi.dtype),
+        operands.geometry,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+        jnp.concatenate((jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))),
+    )
 
 
 def step_jacobian(

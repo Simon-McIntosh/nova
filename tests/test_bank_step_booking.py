@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 from types import SimpleNamespace
 
-from nova.equilibrium import current, support_read
+from nova.equilibrium import current, support_read, topology
 
 
 def test_book_primal_keeps_exact_diverted_moments():
@@ -31,6 +31,66 @@ def test_book_primal_keeps_exact_diverted_moments():
     for name, digest in zip(booked._fields, expected, strict=True):
         actual = hashlib.sha256(np.asarray(getattr(booked, name)).tobytes()).hexdigest()
         assert actual == digest, name
+
+
+def test_batched_booking_tangent_matches_single_channel_reference():
+    from tests.test_support_read import UnitDensity, _case
+
+    operands, cache, roots, pitch, step, _, _ = _case("diverted")
+    support, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    cells, samples = operands.sample_index.shape
+    moments = tuple(jnp.zeros(cells) for _ in range(3))
+    psi = support_read.nodal_jets(operands, moments)[operands.sample_index, 0]
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    quadrature = current.Quadrature(sigma=convention.sigma, segments=8)
+
+    def gradient(radius, flux):
+        return jnp.ones_like(radius)
+
+    def reference(index):
+        psi_direction = jnp.broadcast_to(
+            jax.nn.one_hot(jnp.minimum(index, samples - 1), samples)
+            * (index < samples),
+            psi.shape,
+        )
+        field_direction = jnp.broadcast_to(
+            jax.nn.one_hot(jnp.clip(index - samples, 0, 5), 6)
+            * ((index >= samples) & (index < samples + 6)),
+            (cells, 6),
+        )
+        result = current.book_tangent(
+            psi,
+            psi_direction,
+            support.reading,
+            field_direction,
+            (index == samples + 6).astype(psi.dtype),
+            (index == samples + 7).astype(psi.dtype),
+            operands.geometry,
+            UnitDensity(),
+            gradient,
+            quadrature,
+            booked,
+        )
+        return jnp.stack(tuple(result), axis=-1)
+
+    serial = jax.jit(jax.vmap(reference))(jnp.arange(samples + 8))
+    batched = jax.jit(
+        lambda: support_read._local_booking_sensitivities(
+            operands,
+            moments,
+            support,
+            UnitDensity(),
+            gradient,
+            quadrature,
+            booked,
+        )
+    )()
+    expected = np.moveaxis(np.asarray(serial), 0, -1)
+    observed = np.asarray(batched)
+    assert np.all(np.isfinite(observed))
+    relative = np.linalg.norm(observed - expected) / max(np.linalg.norm(expected), 1.0)
+    worst = np.unravel_index(np.argmax(np.abs(observed - expected)), observed.shape)
+    assert relative < 1e-10, (relative, worst, observed[worst], expected[worst])
 
 
 @pytest.fixture

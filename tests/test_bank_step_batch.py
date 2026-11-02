@@ -40,6 +40,10 @@ LANES = 2
 MAX_STEPS = 60
 RESIDUAL = 1e-10
 EQUALITY = 1e-10
+# Some cells of the vertical flux are zero to round-off (1e-26 and below), where
+# a relative tolerance compares nothing. The two solves also disagree by the
+# reference's own residual alternation, which moves the flux by 1.7e-13.
+FLOOR = 1e-12
 LANE_PERTURBATION = (2e-5, 6e-5)
 pytestmark = pytest.mark.timeout(1800)
 
@@ -186,7 +190,7 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
                 np.asarray(value),
                 np.asarray(reference),
                 rtol=EQUALITY,
-                atol=0.0,
+                atol=FLOOR,
                 err_msg=f"lane {lane} {name} converged flux",
             )
 

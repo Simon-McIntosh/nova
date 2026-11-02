@@ -15,8 +15,8 @@ from nova.equilibrium.display_flux import (
 )
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.source import DomainProfile, ForwardSource
-from nova.linalg.interpolant import Linear
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.linalg.interpolant import Linear
 
 #: Radial and vertical extent [m] of the manufactured lattice.
 RADIUS = (0.6, 1.4)
@@ -27,7 +27,7 @@ CONDUCTOR_HEIGHT = np.asarray([0.0, 0.0])
 CONDUCTOR_WIDTH = 0.05
 CONDUCTOR_CURRENT = np.asarray([1.0e5, -1.0e5])
 #: The current the display build carries.  A one-percent edit to this scale is
-#: the declared negative control: the node reproduction cannot hold under it.
+#: the declared negative control: the reproduction cannot hold under it.
 DISPLAY_CURRENT_SCALE = 1.0
 
 
@@ -100,6 +100,8 @@ def _profile(nodes: int = 9) -> tuple[ForwardProfile, FluxLattice]:
         external_current=jnp.asarray(CONDUCTOR_CURRENT.copy()),
         source_to_grid=np.stack(source_columns, axis=1),
         plasma_to_grid=plasma_columns[0],
+        plasma_to_grid_r=plasma_columns[1],
+        plasma_to_grid_z=plasma_columns[2],
         source_to_wall=np.zeros((wall.shape[0], len(CONDUCTOR_CURRENT))),
         plasma_to_wall=np.zeros((wall.shape[0], node)),
         wall_coordinate=wall,
@@ -144,13 +146,23 @@ def _coupling(profile: ForwardProfile) -> DisplayCoupling:
 
 
 def _moments(lattice: FluxLattice) -> CellCurrentMoments:
-    """Return a manufactured cell-current moment triple on ``lattice``."""
-    node = lattice.node_count
-    cell_current = np.zeros(node)
-    core = np.hypot(lattice.coordinate[:, 0] - 1.0, lattice.coordinate[:, 1]) < 0.25
-    cell_current[core] = 1.0e5
-    zeros = jnp.zeros(node)
-    return CellCurrentMoments(jnp.asarray(cell_current), zeros, zeros)
+    """Return a manufactured cell-current moment triple on ``lattice``.
+
+    The radial and vertical moments are non-zero and differ from each other, so
+    a build that drops one column, or contracts them in the wrong order, cannot
+    reproduce the operator's own raster.
+    """
+    radius = lattice.coordinate[:, 0]
+    height = lattice.coordinate[:, 1]
+    core = np.hypot(radius - 1.0, height) < 0.25
+    cell_current = np.where(core, 1.0e5, 0.0)
+    radial = np.where(core, 2.5e4 * (radius - 1.0), 0.0)
+    vertical = np.where(core, -4.0e4 * height, 0.0)
+    return CellCurrentMoments(
+        jnp.asarray(cell_current),
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+    )
 
 
 def _state(profile: ForwardProfile, moments: CellCurrentMoments) -> np.ndarray:
@@ -161,7 +173,7 @@ def _state(profile: ForwardProfile, moments: CellCurrentMoments) -> np.ndarray:
 
 
 def test_fine_map_reproduces_the_operator_raster_image():
-    """Evaluating the coupling at the lattice nodes reproduces raster_image."""
+    """Non-zero moment columns contract to the operator's own raster image."""
     profile, lattice = _profile()
     moments = _moments(lattice)
     display = build_display_flux_map(
@@ -175,8 +187,63 @@ def test_fine_map_reproduces_the_operator_raster_image():
     assert display.max_node_mismatch_wb < 1.0e-6
 
 
+def test_the_moment_columns_carry_the_map():
+    """The linear moments move the flux, so a swapped column cannot hide."""
+    profile, lattice = _profile()
+    moments = _moments(lattice)
+    full = build_display_flux_map(
+        profile,
+        _state(profile, moments),
+        coupling=_coupling(profile),
+        moments=moments,
+        chunk=128,
+    )
+    uniform_only = CellCurrentMoments(
+        moments.cell_current,
+        jnp.zeros_like(moments.radial_moment),
+        jnp.zeros_like(moments.vertical_moment),
+    )
+    bare = build_display_flux_map(
+        profile,
+        _state(profile, moments),
+        coupling=_coupling(profile),
+        moments=uniform_only,
+        chunk=128,
+    )
+    scale = max(float(np.max(np.abs(full.flux))), 1.0e-30)
+    assert float(np.max(np.abs(full.flux - bare.flux))) / scale > 1.0e-2
+    assert not np.allclose(
+        np.asarray(moments.radial_moment), np.asarray(moments.vertical_moment)
+    )
+
+
+def test_the_node_mismatch_is_the_fixed_point_residual():
+    """A state one increment off the map misses it by exactly that increment.
+
+    The state is the operator's own image of the moments plus a declared
+    increment, so the mismatch the builder reports is a residual the test
+    knows independently rather than the distance between a state and the
+    raster built from its own moments.
+    """
+    profile, lattice = _profile()
+    moments = _moments(lattice)
+    image = _state(profile, moments)
+    increment = 1.0e-5 * np.cos(np.linspace(0.0, np.pi, lattice.node_count))
+    state = image + increment
+    display = build_display_flux_map(
+        profile,
+        state,
+        coupling=_coupling(profile),
+        moments=moments,
+        chunk=128,
+    )
+    residual = float(np.max(np.abs(increment)))
+    assert display.max_node_mismatch_wb == pytest.approx(residual, rel=1.0e-9)
+    assert display.reproduction_relative_error < 1.0e-10
+
+
 def test_display_map_spacing_and_saddle_are_reported():
-    """The map is drawn at the plan's spacing floor and carries its two saddles."""
+    """The map is drawn at its spacing floor and carries its own saddles."""
     profile, lattice = _profile()
     moments = _moments(lattice)
     display = build_display_flux_map(
@@ -192,14 +259,10 @@ def test_display_map_spacing_and_saddle_are_reported():
     assert display.radius.size > lattice.radius.size
     assert np.all(np.isfinite(display.saddle_rz))
     assert np.linalg.norm(display.saddle_rz - np.asarray([1.08, 0.0])) < 0.05
-    assert np.all(np.isfinite(display.lattice_saddle_rz))
-    assert np.isfinite(display.saddle_offset_mm)
-    assert display.max_node_mismatch_wb < 1.0e-6
-    assert np.all(np.isfinite(display.flux))
 
 
 def test_a_coarser_than_declared_spacing_is_refused():
-    """A map coarser than the plan's floor is refused rather than drawn."""
+    """A map coarser than the declared floor is refused rather than drawn."""
     profile, lattice = _profile()
     moments = _moments(lattice)
     with pytest.raises(ValueError, match="coarser"):

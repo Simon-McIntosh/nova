@@ -1,0 +1,58 @@
+<section data-reckon="evidence" id="fine-flux-display-repair">
+<h2>Fine-grid display flux map — repair</h2>
+
+<p id="fine-flux-display-repair-summary">The display flux map now reads its
+saddles and its separatrix off its own field with the same machinery the solve
+uses, and evaluates its plasma coupling through the operator's own
+<code>FluxTarget</code>. The finite-difference saddle search is gone: both the
+fine map's saddle and the lattice spline's saddle are polished with
+<code>polish_stationary_points</code> on a tensor spline fit of the field, and
+the map's separatrix branches are assembled with
+<code>assemble_separatrix_branches</code> at the level
+<code>boundary_flux_at_admitted_saddle</code> reads from the map's own saddle
+cell, so a panel draws the separatrix and the contours from one field.</p>
+
+<h3>Measure</h3>
+
+<table id="fine-flux-display-repair-measure">
+<caption>Manufactured forward operator, 9 by 9 lattice (100 mm cells), display
+map at the 10 mm floor, 81 by 91 points. Five tests, one command.</caption>
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>map at the lattice nodes against <code>raster_image</code>, relative
+(with non-zero radial and vertical moment columns)</td><td>&lt; 1e-10 (gate)</td></tr>
+<tr><td>node mismatch on a state one declared increment off the operator's
+image</td><td>equal to that increment to 1e-9 relative</td></tr>
+<tr><td>separatrix branches assembled on the map</td><td>returned; the map
+exposes <code>branches</code> and <code>well_formed</code></td></tr>
+<tr><td>gate wall</td><td>230 s, 5 passed, host CPU</td></tr>
+</table>
+
+<h3>Negative control</h3>
+
+<p id="fine-flux-display-repair-control">Swapping the radial and vertical moment
+columns in the display build's <code>FluxTarget</code> makes the reproduction
+test fail: the map then misses <code>raster_image</code> by a relative
+2.53e-2 against a 1e-10 gate. The log is
+<code>negative-control.log</code> in the run directory; its last line is
+<code>EXIT=1</code>.</p>
+
+<h3>The moment columns are exercised</h3>
+
+<p id="fine-flux-display-repair-moments">The fixture carries non-zero radial and
+vertical moment columns that differ from each other, and a test asserts that
+zeroing them moves the flux by more than 1e-2 relative, so a dropped or swapped
+column cannot pass unnoticed.</p>
+
+<h3>What was not produced</h3>
+
+<p id="fine-flux-display-repair-remaining">The convergence arm is not met as
+stated. Solving the manufactured operator to convergence needs a free-boundary
+fixed-point solve, and the manufactured machine's iteration leaves its axis
+unqualified: <code>profile.solve</code> raises
+<code>NoQualifiedAxisError</code> on the first iterate after the seed, for both
+the <code>picard</code> and <code>anderson</code> routes. The delivered test
+measures the same reporting contract without a solve, by declaring the
+increment that separates the state from the operator's image and asserting the
+reported mismatch equals it. A solved-state version belongs on a real machine,
+which is the panel sections' producer path.</p>
+</section>

@@ -49,6 +49,13 @@
     "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/negative-booking-revert.log",
     "profile_note": "profile-booking.log declares 189f0988 while the batching source first appears in b8d10f3; converge-booking.log at b8d10f3 independently records a 1490.56 ms warm step."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-booking",
+      "recorded_at": "2026-11-02T09:20:12.328637+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html",

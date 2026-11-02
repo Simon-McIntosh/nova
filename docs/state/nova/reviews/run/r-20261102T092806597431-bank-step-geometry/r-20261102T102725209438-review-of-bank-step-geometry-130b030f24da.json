@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_step_geometry.py:26-27 fail if jax.jvp or field.evaluate re-enters the inspected geometry block, guarding the no-per-step-autodiff requirement by source inspection.",
+    "tests/test_bank_step_geometry.py:50 fails if the closed-form normal-form rate diverges from topology.saddle_normal_form's independent directional derivative.",
+    "tests/test_bank_step_geometry.py:70 fails if no diverted normal-form cell is exercised; :91-93 fail if a sorted edge-cut rate diverges from the topology JVP.",
+    "tests/test_bank_step_geometry.py:120-122 fail if ring propagation diverges from current._normal_rings' JVP for the supplied interval rate, but both paths receive the actual interval rate from :88-90, so this assertion alone survives a regression in that rate.",
+    "tests/test_bank_step_geometry.py:149-150 fail if a changed booked moment from the closed-form tangent differs from the retained JVP implementation for the selected jet; final-negative.log shows a 1e-3 ring-rate mutation turns this test red.",
+    "tests/test_bank_step_geometry.py:192 fails if exact Bell curvature rates diverge from an independently varied field and JVP."
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:577 step_jacobian_vector",
+    "nova/equilibrium/support_read.py:1211 step_jacobian",
+    "nova/equilibrium/support_read.py:1308 newton_step"
+  ],
+  "completed_at": "2026-11-02T10:41:42Z",
+  "dispatched_at": "2026-11-02T10:28:43Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/final-head-test_bank_newton_step.py.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/final-base-test_bank_newton_step.py.log",
+    "focused_test": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/final-head-test_bank_step_geometry.py.log",
+    "fresh_solve": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/committed-solve-titan.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/final-negative.log",
+    "parity": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/committed-parity-titan.log"
+  },
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "Lines 87-93 independently check the interval rate, while line 120 checks propagation of a supplied interval rate.",
+      "file": "tests/test_bank_step_geometry.py",
+      "id": "f1abab8ff55",
+      "line": 120,
+      "severity": "non-blocking",
+      "text": "The ring-velocity assertion feeds actual_interval from _edge_interval_rate into both the reference JVP and the closed-form ring calculation, so this line alone stays green if that interval rate regresses; disposition: exempted because lines 87-93 independently compare the interval rate with the topology JVP."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The duplicate is confined to this prototype gate and has no production call site.",
+      "file": "scripts/prototypes/bank_step_geometry/run_test.sh",
+      "id": "f8dd35b9ef7",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "This focused pytest receipt runner duplicates the setup, module import, log header, pytest invocation and cleanup already provided by scripts/prototypes/bank_newton_converge/small_gate.sh rather than extending that owner; disposition: exempted because the duplicate is confined to this prototype gate and does not alter production behavior."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the six commits ec739c1b, e285207a, ab56cbae, 14fdb74c, 4574efd8 and 130b030f against base 67ad6e9c; they add closed-form geometry, its reference and gate scripts, five tests and an evidence fragment, without an out-of-scope path.",
+    "done_when": "The source brief.txt:8-11 requires 1e-10 relative parity per channel and a fresh-read residual at most 1e-10 with oracle budgets; committed-parity-titan.log:24,46 records 1,650 channels per state below 1e-10 and committed-solve-titan.log:33-35 records 4.2661e-11 plus oracle ratios.",
+    "goal": "The source brief.txt:1-11 asks for closed-form sorted-cut and ring geometry with all-channel parity and a fresh-read solve; nova/equilibrium/support_read.py:918-1017 replaces the retained geometry JVP and the committed receipts meet the stated correctness limits.",
+    "manifest": "The source manifest.md is complete, names six commits, the parity, solve, suite and negative-control logs, and records the base and head suite arms with the same single pre-existing failure.",
+    "write_paths": "The source manifest.md orientation_write_paths grants support_read.py, the geometry test and prototype directory, and the evidence fragment; git diff 67ad6e9c..130b030f changes ten paths wholly inside that grant."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_geometry.py:26,50,92,121,150,192 refuse a restored JVP or mismatched closed-form derivatives, and final-negative.log:1-4,82-83 demonstrates the one-channel parity refusal after a ring-velocity perturbation, though the ring assertion shares the computed interval input.",
+    "evidence": "committed-parity-titan.log:24,46 gives worst relative gaps 1.3512e-11 and 5.9965e-11 across 1,650 channels per state, committed-solve-titan.log:33-35 gives a 4.2661e-11 fresh residual, and final-base/head-test_bank_newton_step.py.log record the same one failure.",
+    "fit": "nova/equilibrium/support_read.py:577 and :1211 attach the new rates to the existing Jacobian paths, and the added source and test names describe geometry mechanisms without forbidden stage identifiers.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:938-1017 uses closed-form Bell, normal-form, edge and ring rates in the bank step, while committed-parity-titan.log:24,46 and committed-solve-titan.log:33-35 meet the geometry correctness limits.",
+    "reuse": "scripts/prototypes/bank_step_geometry/run_test.sh:10-20 duplicates the focused pytest receipt and cleanup capability already owned by scripts/prototypes/bank_newton_converge/small_gate.sh:4-17 instead of extending that runner.",
+    "scope_discipline": "The ten changed paths in git diff 67ad6e9c..130b030f are all under the source manifest.md orientation_write_paths and implement or measure the geometry replacement."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt:1-11 asks for closed-form sorted-cut and ring geometry with all-channel parity and a fresh-read solve; nova/equilibrium/support_read.py:918-1017 replaces the retained geometry JVP and the committed receipts meet the stated correctness limits.\nVERDICT done_when: The source brief.txt:8-11 requires 1e-10 relative parity per channel and a fresh-read residual at most 1e-10 with oracle budgets; committed-parity-titan.log:24,46 records 1,650 channels per state below 1e-10 and committed-solve-titan.log:33-35 records 4.2661e-11 plus oracle ratios.\nVERDICT write_paths: The source manifest.md orientation_write_paths grants support_read.py, the geometry test and prototype directory, and the evidence fragment; git diff 67ad6e9c..130b030f changes ten paths wholly inside that grant.\nVERDICT manifest: The source manifest.md is complete, names six commits, the parity, solve, suite and negative-control logs, and records the base and head suite arms with the same single pre-existing failure.\nVERDICT diff: Read the six commits ec739c1b, e285207a, ab56cbae, 14fdb74c, 4574efd8 and 130b030f against base 67ad6e9c; they add closed-form geometry, its reference and gate scripts, five tests and an evidence fragment, without an out-of-scope path.\nCALL_SITES: nova/equilibrium/support_read.py:577 step_jacobian_vector, nova/equilibrium/support_read.py:1211 step_jacobian, nova/equilibrium/support_read.py:1308 newton_step\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:938-1017 uses closed-form Bell, normal-form, edge and ring rates in the bank step, while committed-parity-titan.log:24,46 and committed-solve-titan.log:33-35 meet the geometry correctness limits.\nSCORE evidence: 18\nJUSTIFICATION evidence: committed-parity-titan.log:24,46 gives worst relative gaps 1.3512e-11 and 5.9965e-11 across 1,650 channels per state, committed-solve-titan.log:33-35 gives a 4.2661e-11 fresh residual, and final-base/head-test_bank_newton_step.py.log record the same one failure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The ten changed paths in git diff 67ad6e9c..130b030f are all under the source manifest.md orientation_write_paths and implement or measure the geometry replacement.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_bank_step_geometry.py:26,50,92,121,150,192 refuse a restored JVP or mismatched closed-form derivatives, and final-negative.log:1-4,82-83 demonstrates the one-channel parity refusal after a ring-velocity perturbation, though the ring assertion shares the computed interval input.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/support_read.py:577 and :1211 attach the new rates to the existing Jacobian paths, and the added source and test names describe geometry mechanisms without forbidden stage identifiers.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_step_geometry/run_test.sh:10-20 duplicates the focused pytest receipt and cleanup capability already owned by scripts/prototypes/bank_newton_converge/small_gate.sh:4-17 instead of extending that runner.\nFINDING tests/test_bank_step_geometry.py:120 non-blocking: The ring-velocity assertion feeds actual_interval from _edge_interval_rate into both the reference JVP and the closed-form ring calculation, so this line alone stays green if that interval rate regresses; disposition: exempted because lines 87-93 independently compare the interval rate with the topology JVP.\nFINDING scripts/prototypes/bank_step_geometry/run_test.sh:10 non-blocking: This focused pytest receipt runner duplicates the setup, module import, log header, pytest invocation and cleanup already provided by scripts/prototypes/bank_newton_converge/small_gate.sh rather than extending that owner; disposition: exempted because the duplicate is confined to this prototype gate and does not alter production behavior.",
+  "review_run_id": "r-20261102T102725209438-review-of-bank-step-geometry-130b030f24da",
+  "reviewed_base_sha": "67ad6e9c33b3441fa5725784e3b3f3312f04c39f",
+  "reviewed_head_sha": "130b030f24daa672ab0cf690fff840085602f623",
+  "reviewed_run_id": "r-20261102T092806597431-bank-step-geometry",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T10:44:40.931333+00:00",
+  "total": 96
+}

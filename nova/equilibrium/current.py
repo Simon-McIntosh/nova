@@ -689,13 +689,16 @@ def book_tangent_channels(
             axis=-1,
         )
         flux = jnp.einsum("rpk,k->rp", basis, normalized[index])
-        rate = jnp.einsum("rpk,ck->crp", basis, normalized_rate[:, index])
         weight = weights * density_gradient(points[..., 0], flux)
         relative = points - centre
         moment_basis = jnp.stack(
             (jnp.ones_like(weight), relative[..., 0], relative[..., 1]), axis=-1
         )
-        return jnp.einsum("rp,crp,rpo->co", weight, rate, moment_basis)
+        integral_basis = jnp.sum(
+            weight[..., None, None] * basis[..., :, None] * moment_basis[..., None, :],
+            axis=(0, 1),
+        )
+        return normalized_rate[:, index] @ integral_basis
 
     def whole_cell(index):
         return interior(

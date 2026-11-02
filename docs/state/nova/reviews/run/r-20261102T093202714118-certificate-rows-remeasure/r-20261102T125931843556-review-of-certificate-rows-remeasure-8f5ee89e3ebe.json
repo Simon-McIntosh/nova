@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "scripts/prototypes/certificate_rows_remeasure/row.py:69-71 fails when a part's figure.render_source is anything but fresh_production_solve; it is falsifiable by a part carrying a served marker, but no test exercises it, so only a run reddens.",
+    "scripts/prototypes/certificate_rows_remeasure/row.py:72-74 fails when the part carries a receipt block; falsifiable, untested.",
+    "No assertion was added by this delta in any test file; the delta's guard is the two RuntimeError refusals above."
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/certificate_rows_remeasure/run_rows.sh:34",
+    "scripts/prototypes/certificate_rows_remeasure/run_rows.sh:41",
+    "benchmarks/solovev_certificate.py:2172",
+    "benchmarks/solovev_certificate.py:2584"
+  ],
+  "completed_at": "2026-11-02T13:10:24.332Z",
+  "dispatched_at": "2026-11-02T13:00:51Z",
+  "evidence": "The reviewed run's manifest.md records baseline_suite: null and after_suite: null: it is a measurement node with no pytest arms, so added_failure_count is 0 and added_failure_ids is empty by the absence of those arms rather than by a measured dedupe.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/row.py",
+      "id": "fe98a65f7cd",
+      "line": 78,
+      "severity": "blocking",
+      "text": "The delta switches the certificate panels to certificate._plot, and the delivered figures carry clipped and overlapping labels: rendering docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg and diverted-300.svg at head shows the flux panel's title cut off at the left canvas edge (limited renders it as 'c blue contours and nulls ...') and the 'levels:' readout drawn across the wall and the contours in the error panels; _plot sets that title at benchmarks/solovev_certificate.py:2083 without measuring it against the canvas, and the composition it replaces (scripts/prototypes/certificate_rows_remeasure/render_panel.py) had a clip and overlap check that this path drops. A figure whose labels are clipped or sit on the data is not a delivered figure under the repository plotting rules, and the record itself concedes the clipping at docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:54."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html",
+      "id": "fd23cbc01b6",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "The landing summary still states that every row reports receipt_status=solved, but this delta removed that field from the row receipts: scripts/prototypes/certificate_rows_remeasure/row.py:117 emits render_source instead, and rows2/diverted-300/row.json and rows2/limited-550/row.json carry no receipt_status key, so the summary asserts a marker no receipt carries while the table above it at :28-30 correctly reads 'fresh solve'."
+    },
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/render_panel.py",
+      "id": "fac7d17afd7",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The composition this file duplicates is now unused: git grep at 8f5ee89e3 finds no reference to certificate_rows_remeasure.render_panel anywhere in the tree, so the second solved-versus-analytic panel composition stays behind after the switch to certificate._plot and can drift from the owner it was flagged against; it belongs deleted rather than orphaned."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/manifest.md",
+      "id": "f6a556790ca",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "The tests line is a prose description of job 1302899 ('srun-batch titan job ... running, in order, ...') rather than the literal command a shell was handed, so the gate receipt cannot be filled by re-running it; the same absence is what the previous review recorded against the earlier failed-arm line."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the three commits against the base: e1ffd3a69 rewrites row.py and run_rows.sh to one job with a fresh-solve refusal and driver-drawn panels, 224880f50 replaces the diverted SVG, and 8f5ee89e3 re-measures all three rows and updates the record.",
+    "done_when": "The per-row measure is recorded in the run's own logs, which name the revision the tree holds, the node, partition, JAX platform and devices and end EXIT=0, and row.py:69-74 refuses to emit unless the part reports render_source=fresh_production_solve with no banked receipt, so the solver-entered clause is read rather than assumed.",
+    "goal": "The brief's goal is three certificate rows re-measured on the repaired route with a panel each; the delta delivers it through scripts/prototypes/certificate_rows_remeasure/run_rows.sh:31-52 and the table at docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:28-30.",
+    "manifest": "The source manifest.md:5 reads status complete, :12 test_logs names three logs that exist and end EXIT=0, and retry_failures and outside_scope are recorded, but :11 states the gate as prose rather than a literal command so it cannot be re-run from the record.",
+    "write_paths": "The source manifest.md:3 grants scripts/prototypes/certificate_rows_remeasure, the evidence fragment and both figure directories; git diff 748ae9fcb..8f5ee89e3 lists six paths and every one is inside those grants."
+  },
+  "justifications": {
+    "durability": "The delta adds no test and row.py:70-74 has no automated exercise, so deleting the fresh-solve refusal reddens nothing; the nearest assertion, tests/test_certificate_gate_live.py:222, supplies the render_source value it asserts and predates this delta.",
+    "evidence": "The values at docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:28-30 reconcile with rows2/diverted-300/row.json (0.3008686803164573, 3 trips) and rows2/limited-550/row.json (0.0401684059566752, 6 trips), and each row.log names revision, tree, backend, devices and ends EXIT=0; the summary at :22 still claims receipt_status=solved, which scripts/prototypes/certificate_rows_remeasure/row.py:117 no longer emits.",
+    "fit": "row.py and run_rows.sh follow the surrounding prototype idiom (module-level configure_dtypes, PYTHONPATH to the shared interpreter, tagged stdout lines) and carry no plan or stage labels.",
+    "goal_fidelity": "The brief asks for three rows re-measured fresh with residual, converged, qualification, trips, device and wall plus a poloidal panel each; docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:28-30 tables all three from one titan job and each section embeds its panel, though the two certificate panels arrive with clipped captions (scripts/prototypes/certificate_rows_remeasure/row.py:78).",
+    "reuse": "The change replaces its own composition with the certificate owner's benchmarks/solovev_certificate.py:2021 _plot and the route renderer, but leaves scripts/prototypes/certificate_rows_remeasure/render_panel.py orphaned beside it with no reference at head.",
+    "scope_discipline": "git diff 748ae9fcb..8f5ee89e3 touches only the six granted paths: row.py, run_rows.sh, the evidence fragment and the three figures."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The brief asks for three certificate rows re-measured fresh with residual, converged, qualification, trips, device and wall plus a panel each; docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:28-30 tables all three from one titan job and each section embeds its panel.\nVERDICT done_when: The per-row measure is recorded in the run's own logs (rows2/diverted-300/row.log, rows2/limited-550/row.log, rows2/private-550/row.log), each naming revision, node, backend and devices and ending EXIT=0, and scripts/prototypes/certificate_rows_remeasure/row.py:69-74 refuses to emit unless the part reports render_source=fresh_production_solve with no banked receipt.\nVERDICT write_paths: The source manifest.md:3 grants scripts/prototypes/certificate_rows_remeasure, the evidence fragment and both figure directories; git diff 748ae9fcb..8f5ee89e3 lists six paths, all inside those grants.\nVERDICT manifest: The source manifest.md:5 reads status complete, :12 test_logs names three logs that exist and end EXIT=0, and retry_failures and outside_scope are recorded, but :11 states the gate as prose rather than a literal command.\nVERDICT diff: Read e1ffd3a69, 224880f50 and 8f5ee89e3 against 748ae9fcb; the first rewrites row.py and run_rows.sh to one job with a fresh-solve refusal, the second replaces the diverted SVG, the third re-measures all three rows and updates the record.\nCALL_SITES: scripts/prototypes/certificate_rows_remeasure/run_rows.sh:34, scripts/prototypes/certificate_rows_remeasure/run_rows.sh:41, benchmarks/solovev_certificate.py:2172, benchmarks/solovev_certificate.py:2584\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:28-30 carries all three rows from one titan job, but the certificate panels arrive with clipped captions (scripts/prototypes/certificate_rows_remeasure/row.py:78).\nSCORE evidence: 14\nJUSTIFICATION evidence: rows2/limited-550/row.json records 0.0401684059566752 in six trips matching html:29, but the summary at html:22 still claims receipt_status=solved, a key scripts/prototypes/certificate_rows_remeasure/row.py:117 no longer emits.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 748ae9fcb..8f5ee89e3 touches only the six granted paths.\nSCORE durability: 6\nJUSTIFICATION durability: The delta adds no test and row.py:70-74 is unexercised, so removing the fresh-solve refusal reddens nothing.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/certificate_rows_remeasure/run_rows.sh:31-52 follows the surrounding prototype idiom with no plan or stage labels.\nSCORE reuse: 15\nJUSTIFICATION reuse: The change calls benchmarks/solovev_certificate.py:2021 _plot instead of composing its own panel, but leaves scripts/prototypes/certificate_rows_remeasure/render_panel.py orphaned with no reference at head.\nFINDING scripts/prototypes/certificate_rows_remeasure/row.py:78 blocking: The panels drawn by certificate._plot clip their left caption at the canvas edge and draw the levels readout across the wall and contours (limited-550.svg renders the title as 'c blue contours and nulls ...'), and this path drops the clip and overlap check the replaced composition had.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:22 non-blocking: The summary still claims every row reports receipt_status=solved, but row.py:117 emits render_source and neither row.json carries a receipt_status key.\nFINDING scripts/prototypes/certificate_rows_remeasure/render_panel.py:1 non-blocking: The duplicate panel composition is unreferenced at head and should be deleted now that certificate._plot draws the panels.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/manifest.md:11 non-blocking: The tests line is a prose description of the job rather than a literal command, so the gate cannot be re-run from the record.",
+  "review_run_id": "r-20261102T125931843556-review-of-certificate-rows-remeasure-8f5ee89e3ebe",
+  "reviewed_base_sha": "748ae9fcb3b00767b7266cc6e653f8ab4da346cd",
+  "reviewed_head_sha": "8f5ee89e3ebe7738a4a97bc76fb2ea38005870b4",
+  "reviewed_run_id": "r-20261102T093202714118-certificate-rows-remeasure",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T13:11:41.501975+00:00",
+  "total": 88
+}

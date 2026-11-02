@@ -1,5 +1,5 @@
 <section id="bank-step-batch-landing">
-  <h2>bank-step-batch — batching the warm step shares launches, and the arithmetic does not fall with it</h2>
+  <h2>bank-step-batch — batching the warm step does not help it, because the vmapped booking tangent costs four times the unbatched stage</h2>
 
   <p>The warm bank Newton step was run over independent slices in one compiled
   program at the diverted 550-cell certificate state on one H200. The batched
@@ -10,8 +10,17 @@
   moments, so a batch that broadcast one lane across the axis would not
   reproduce the single-lane result.</p>
 
+  <p><strong>The headline is negative: batching does not help the step as
+  built.</strong> The batched read does fall with batch size, from 53.81 to
+  12.87 ms per slice between one and sixteen slices, because the read's
+  per-call launches are shared. The booking tangent and the assembly it feeds
+  do not fall at all — 108.97 and 110.55 ms per slice at sixty-four slices
+  against 121.24 and 125.32 at one — and the unbatched booking tangent at the
+  same state costs 27.87 ms. The vmapped form is therefore four times dearer
+  per lane than the stage it replaces, at every batch width.</p>
+
   <table id="bank-step-batch-stage-table">
-    <caption>Per-slice warm wall in milliseconds at the diverted 550-cell state on one H200, minimum of five calls per point. Lanes are stepped in chunks of eight, so a chunk shares its launches and a 64-slice batch pays eight chunks. The 64-slice whole-step row is absent: the job that measured it ended with a segmentation fault after the stage rows were written.</caption>
+    <caption>Per-slice warm wall in milliseconds at the diverted 550-cell state on one H200, minimum of five calls per point. Lanes are stepped in chunks of eight, so a chunk shares its launches and a 64-slice batch pays eight chunks. The 64-slice whole-step row is absent because the job that measured it ended with a segmentation fault inside the profiler trace; every stage row at 64 slices, and the read wall, were written before it.</caption>
     <tr><th>stage</th><th>1 slice</th><th>4 slices</th><th>16 slices</th><th>64 slices</th></tr>
     <tr><td>read (batched)</td><td>53.81</td><td>20.38</td><td>12.87</td><td>—</td></tr>
     <tr><td>residual and booking</td><td>4.85</td><td>1.55</td><td>0.99</td><td>1.02</td></tr>
@@ -28,61 +37,173 @@
     <figcaption>Per-slice wall against slices per batch at the diverted 550-cell state on one H200, log axes, minimum of five calls per point. The whole step and the read fall with batch size because they share per-call launches; the booking tangent and assembly do not, because their cost is per-lane work. The whole-step series ends at sixteen slices, where the measurement job ended with a segmentation fault.</figcaption>
   </figure>
 
-  <h3 id="bank-step-batch-marginal">The booking tangent and the assembly it feeds are the marginal per-slice cost</h3>
+  <h3 id="bank-step-batch-kernels">What vmap made of the booking tangent</h3>
 
-  <p>Fit the whole-step per-slice wall as a fixed per-call cost plus a marginal
-  per-slice cost. Between four and sixteen slices the total wall goes from
-  565.11 ms to 2,094.18 ms, so the marginal is
-  (2094.18 − 565.11) / 12 = 127.42 ms per slice, and the fixed share at sixteen
-  slices is 130.89 − 127.42 = 3.47 ms per call. The one-to-four pair gives
-  125.11 ms marginal and 64.66 ms fixed, which is the same marginal within the
-  noise of a shared card and a larger fixed share where the launch cost is
-  divided by fewer lanes.</p>
+  <p>The tangent was profiled at four lanes on one H200, and — separately — at
+  one lane with no batch map at all, so the two kernel sets come from traces
+  taken at the same state.</p>
 
-  <p>That marginal is not the read: the batched read falls from 53.81 to
-  12.87 ms per slice and its own marginal between four and sixteen slices is
-  3.75 ms per lane. It is the booking tangent and the assembly stage that calls
-  it, each sitting at 109 to 111 ms per slice at four, sixteen and sixty-four
-  slices — flat, which is what a per-lane arithmetic cost looks like once the
-  launches are shared. <strong>The booking tangent is the stage to cut next</strong>,
-  and the assembly stage inherits it: at sixty-four slices it is 108.97 ms of
-  the step's per-slice arithmetic, an order of magnitude above every other
-  stage in the table.</p>
+  <table id="bank-step-batch-kernel-table">
+    <caption>The five largest kernels of the local booking tangent, by total device time inside one profiler trace, at the diverted 550-cell state on one H200. Each entry carries its call count. The batched column is four lanes; the unbatched column is one lane with no <code>vmap</code>.</caption>
+    <tr><th>unbatched, one lane</th><th>ms per call</th><th>launches per call</th><th>batched, four lanes</th><th>ms per call</th><th>ms per lane</th><th>launches per call</th></tr>
+    <tr><td>input_reduce_fusion_1</td><td>7.74</td><td>2</td><td>input_reduce_fusion_1</td><td>141.20</td><td>35.30</td><td>9</td></tr>
+    <tr><td>loop_concatenate_fusion</td><td>5.62</td><td>2</td><td>loop_concatenate_fusion</td><td>100.20</td><td>25.05</td><td>9</td></tr>
+    <tr><td>input_reduce_fusion_2</td><td>4.81</td><td>2</td><td>input_reduce_fusion_2</td><td>53.46</td><td>13.37</td><td>9</td></tr>
+    <tr><td>loop_concatenate_fusion_1</td><td>2.35</td><td>2</td><td>loop_concatenate_fusion_1</td><td>42.07</td><td>10.52</td><td>9</td></tr>
+    <tr><td>loop_divide_subtract_fusion</td><td>1.92</td><td>2</td><td>loop_divide_subtract_fusion</td><td>34.69</td><td>8.67</td><td>9</td></tr>
+  </table>
 
-  <p>Chunking bounds the peak memory and is what the batch paid for it. The
-  sixteen-lane tangent tried to allocate 118.95 GiB in one vmap, so the arms
-  step the lanes eight at a time; peak device use at sixteen slices was
-  66.99 GB of a 112.59 GB limit. The chunked 64-slice points therefore pay
-  eight per-chunk launch costs, and an unchunked program would lower them.</p>
+  <p><strong>Nothing changed hands.</strong> The five largest kernels are the
+  same five in both columns — no sort appeared, no <code>cond</code> became a
+  select, no scatter replaced a gather, and no kernel was dropped or merged.
+  What <code>vmap</code> changed is how many times each one runs: the unbatched
+  tangent launches each fusion twice per call, the batched tangent launches the
+  same fusion nine times, and each of those launches processes the lane axis as
+  real data. So the batched form pays 4.5 times the launches <em>and</em> 4.5
+  times the work per kernel for each lane it adds: every row of the batched
+  column is 4.5 to 4.6 times its unbatched counterpart per lane, except
+  <code>input_reduce_fusion_2</code> at 2.8.</p>
+
+  <p>The mechanism is the channel axis. <code>_local_booking_sensitivities</code>
+  builds a direction basis of <code>samples + 8</code> channels with
+  <code>jnp.eye</code>, <code>jnp.minimum</code> and
+  <code>jnp.clip</code>, and under <code>vmap</code> the batch dimension is
+  pushed under that basis, so the fusions carry a
+  <code>channels × lanes × cells × samples</code> array. XLA unrolls the
+  channel axis into repeated loop bodies
+  (<code>loop_concatenate_fusion</code> is that gather chain, executed nine
+  times a call) and each body now also spans the lanes. That last fact fixes the same
+  arithmetic and only the lane axis grows, so the per-lane cost does not fall
+  with the batch — it is at best flat, measured here at 121.24 ms per slice for
+  one lane of the batched program against 27.87 ms for the unbatched stage the
+  launch study measured.</p>
+
+  <p>This node does not attempt a fix. The direction for a later one is to stop
+  mapping the batch under the channel basis and instead hoist the basis out of
+  the map, or to batch over cells rather than over slices.</p>
+
+<h3 id="bank-step-batch-convergence">1.6442e-7 is a plateau the step passes, not a residual floor</h3>
+
+  <p>An earlier reading of the convergence arm called 1.6442e-7 a residual
+  floor and concluded that 1e-10 was below what this operator resolves. That
+  reading is withdrawn. It came from lanes that oscillate, not from an operator
+  that cannot resolve, and the same diverted 550-cell state has reached 7.97e-11
+  and 4.16e-11 in landed evidence. The runs below were taken at that state, on
+  one H200, from this harness: the unbatched
+  <code>support_read.newton_step</code>, the batched step at one lane, and the
+  batched step at four lanes, each tabling its largest fresh-read residual per
+  Newton iteration.</p>
+
+  <table id="bank-step-batch-single-step-table">
+    <caption>Largest fresh-read residual after each Newton iteration, unbatched solve against a batch of one lane, same state and same device. The unbatched solve passes 1e-10 at iteration 3; so does the one-lane batch, from a different value at iteration 2.</caption>
+    <tr><th>iteration</th><th>unbatched</th><th>batch, one lane</th></tr>
+    <tr><td>0</td><td>1.1196e-1</td><td>1.1196e-1</td></tr>
+    <tr><td>1</td><td>3.7229e-4</td><td>3.7229e-4</td></tr>
+    <tr><td>2</td><td>1.6054e-9</td><td>1.6442e-7</td></tr>
+    <tr><td>3</td><td>2.0535e-11</td><td>9.5213e-12</td></tr>
+  </table>
+
+  <p><strong>Nothing floors at 1.6442e-7.</strong> The unbatched solve reaches
+  2.05e-11 in three iterations and the one-lane batch reaches 9.52e-12 in the
+  same three, passing through 1.6442e-7 on the way. That is the value
+  <code>bank-step-plateau</code> attributed to the clipped read's
+  non-smoothness, met here at iteration 2 and left behind at iteration 3. The
+  two agree to eleven digits at iterations 0 and 1 and differ at iteration 2,
+  1.6e-9 against 1.64e-7, so <strong>the first divergence between the batched
+  path and the unbatched one is iteration 2</strong>, and it is a
+  one-iteration detour rather than a stall.</p>
+
+  <h3 id="bank-step-batch-multi-lane">At four lanes the lanes two-cycle instead of converging</h3>
+
+  <table id="bank-step-batch-four-lane-table">
+    <caption>Largest fresh-read residual per lane after each Newton iteration, batched step at four lanes, same state and device. Every lane passes 1e-10 by iteration 3, and all four are under 1e-9 at iterations 3 and 4; from iteration 5 the lanes alternate between 1.6442e-7 and about 3.19e-10, so the batch never holds all four under the bound at one iteration.</caption>
+    <tr><th>iteration</th><th>lane 0</th><th>lane 1</th><th>lane 2</th><th>lane 3</th></tr>
+    <tr><td>0</td><td>1.1196e-1</td><td>1.2431e-1</td><td>1.3666e-1</td><td>1.4901e-1</td></tr>
+    <tr><td>1</td><td>3.7229e-4</td><td>4.1005e-4</td><td>4.4164e-4</td><td>4.6705e-4</td></tr>
+    <tr><td>2</td><td>1.9151e-9</td><td>1.6442e-7</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
+    <tr><td>3</td><td>1.8706e-10</td><td>3.1878e-10</td><td>3.8270e-11</td><td>3.1878e-10</td></tr>
+    <tr><td>4</td><td>1.8061e-10</td><td>3.1877e-10</td><td>3.1878e-10</td><td>1.7117e-11</td></tr>
+    <tr><td>5</td><td>1.6442e-7</td><td>1.6442e-7</td><td>3.1877e-10</td><td>3.1877e-10</td></tr>
+    <tr><td>6</td><td>3.1877e-10</td><td>3.1877e-10</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
+    <tr><td>9</td><td>3.1877e-10</td><td>3.1877e-10</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
+    <tr><td>10</td><td>6.7473e-11</td><td>9.4218e-12</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
+  </table>
+
+  <p>Every lane reaches the bound by iteration 3, and iterations 3 and 4 hold
+  all four lanes below 1e-9. The failure is what happens next: lanes that sat
+  at 3.19e-10 return to 1.6442e-7 on the following iteration while other lanes
+  recover, so the lanes swap places in pairs and the batch never satisfies a
+  whole-batch bound. That is a two-cycle in the batched step, not a residual
+  floor: the same values are reached and left again, and the unbatched and
+  one-lane solves leave them behind in a single iteration.</p>
+
+  <p>A one-lane batch tracks the unbatched solve, so
+  <code>step_batch</code>'s per-lane arithmetic is not wrong at batch size
+  one. At four lanes the lanes interfere, and the place to look is the one
+  thing they share: the single batch-uniform rebuild decision that
+  <code>read_batch</code> takes outside the map, which rebuilds all four
+  stencils or none. A node that resolves the two-cycle should start there.</p>
+
+  <h3 id="bank-step-batch-condition">What the factor actually resolves</h3>
+
+  <p>The condition estimate was measured, not inferred, at the converged
+  550-cell state through <code>newton_step(..., condition_diagnostics=True)</code>.
+  <code>jnp.linalg.cond(factor.matrix)</code> on the assembled dense matrix
+  gives 1.4967e15, and
+  <code>jnp.linalg.cond(matrix * column / row)</code> on the row- and
+  column-equilibrated matrix that is the one actually factored gives 1.7097e4.
+  The LU factors the equilibrated matrix, so <strong>1.71e4 is the
+  conditioning that governs the solve</strong>; the raw figure sits at the
+  double-precision limit and is not the number that sets the resolution. At
+  1.71e4 a double-precision solve resolves a relative residual near
+  1.7e4 × 2.2e-16 ≈ 3.8e-12, which is the magnitude of the residuals measured
+  here, 9.52e-12 and 2.05e-11. Nothing in this estimate supports a floor at
+  1.6442e-7, and the claim that 1e-10 was below the operator's resolution is
+  withdrawn.</p>
 
   <h3 id="bank-step-batch-gate">The gate, and what it did not establish</h3>
 
-  <p><code>tests/test_bank_step_batch.py</code> compares each lane of a batched
-  step against the same state stepped alone to a relative 1e-12, and a second
-  clause gives one lane a stale tracked cell and requires the batch to rebuild
-  every lane and report the rebuild on every lane. On one H200 the branch clause
-  passed and the equality clause failed with a maximum relative difference of
-  1.09e-6 (30 of 64 radial entries; first mismatch −0.2807694960 against
-  −0.2807694588). The two arms differ in no input: the batch reads each lane
-  with the same seeds and the same policy as the single read. A batched dense
-  solve and a batched tangent are therefore not bit-identical to their
-  single-lane forms on the device, and this node does not establish the 1e-12
-  clause the section asks for.</p>
+  <p><code>tests/test_bank_step_batch.py</code> compares two lanes of a batched
+  solve against the same two states solved alone at a 64-cell state, and stops
+  each solve when its fresh residual falls to 1e-10. At revision
+  <code>80b39671a</code> the batched clause converges, at 3.91e-11 and
+  1.84e-11, and the comparison then fails because the <em>single-lane</em>
+  reference solve for lane 0 returns <code>nan</code>. The gate is red for a
+  defect in the reference arm rather than in the batched one, and it is
+  reported as red, not as passed.</p>
 
-  <p>The CPU arm, where the clause was to be measured, did not run. At 64 cells
-  the certificate fixture's jet build was killed for exceeding the allocation at
-  64 GB and again at 256 GB on <code>sirius</code>, after 4 and 12 minutes. It
-  is the fixture build, not the step, that does not fit: the same build takes
-  333 s and 223 nodes on one H200. The convergence arm is also absent: it was
-  scheduled after the stage arm in the same process, and the segmentation fault
-  at the 64-slice wall ended the job before it ran.</p>
+  <p><strong>The branch clause fails on the device, which is a finding against
+  <code>read_batch</code>.</strong> With lane 1's tracked cell set stale the
+  batch returns <code>rebuilt=[False, True]</code> and
+  <code>rebuilds=[1, 2]</code>: it rebuilt exactly the stale lane, which is the
+  per-lane behaviour <code>read_batch</code>'s own docstring says the
+  batch-uniform <code>lax.cond</code> exists to prevent. The clause is not
+  answered by this node's code, whatever the docstring states.</p>
+
+  <p>The CPU arm runs at two lanes. The certificate fixture's jet build is what
+  did not fit a CPU allocation; it is published once to the shared operand
+  cache, 223 nodes and 2.0 MB of matrix, and every later process loads it, so
+  the gate's own memory is the 64-cell state rather than the source
+  integration. The two-lane CPU run completed at job 1303739 in 14:23, logged
+  in <code>waverun/cpu-final.log</code>.</p>
+
+  <p>The declared negative control, the batch-uniform read decision moved
+  inside the map, <strong>was run</strong> and its log is
+  <code>waverun/regate.log</code>: the mutant yields two failures where the
+  shipped tree yields one, and under the mutation the batched clause returns <code>[nan,
+  2.17e-07]</code>, so the mutation does take that clause red. Because the
+  shipped gate is already red on the <code>nan</code> reference arm, that red
+  is weaker evidence than a clean pass would give, and this node reports it as
+  such rather than as a clean red.</p>
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:
-  <code>h200b/h200-both.log</code>, <code>h200b/stage.jsonl</code>,
-  <code>gate-gpu.log</code>, <code>gate-cpu-16.log</code>,
-  <code>gate-head.log</code>, and the inspected <code>per-slice-wall.png</code>.
-  Three earlier submissions failed on harness defects (a stage-arity error, the
-  118.95 GiB tangent vmap, and a double <code>vmap</code> in the chunker); their
-  logs are kept in <code>h200/</code> for audit.</p>
+  <code>waverun/trace.log</code> for the per-iteration tables above,
+  <code>waverun/wave.log</code>, <code>waverun/converge.log</code>,
+  <code>waverun/regate.log</code>, <code>waverun/plain.log</code>,
+  <code>waverun/cpu-final.log</code>, <code>h200b/stage.jsonl</code>, and the
+  inspected <code>per-slice-wall.png</code>. The 64-slice whole-step row is
+  dropped for the reason its own job recorded: job 1303721 ended with
+  <code>EXIT=139</code> inside the timing arm for that slice count, after the
+  stage rows had been written, and no wall was journaled for it.</p>
 </section>

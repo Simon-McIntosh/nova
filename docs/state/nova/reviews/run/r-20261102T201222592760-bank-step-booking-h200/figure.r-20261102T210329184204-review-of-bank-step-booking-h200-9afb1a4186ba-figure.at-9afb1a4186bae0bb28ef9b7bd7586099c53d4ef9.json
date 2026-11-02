@@ -1,0 +1,115 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires rather than a measurement; no base/head gate pair was read and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1400x720, RGBA, the only attachment named by this review node)": "docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg"
+  },
+  "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png, measured at its native 1400x720 RGBA. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that one PNG was opened; every pixel measurement below was taken from that same PNG. The reviewed run's diff 0e755a34..9afb1a418 adds exactly one rendered figure, docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg, drawn by scripts/prototypes/bank_step_booking_h200/plot.py at the reviewed head; the attachment is structurally that script's output (two panels titled 'H200, reserved card' and 'P100 on titan', three labelled rows on both, grey/orange/green bars with the printed values 27.85/40.76/31.87 and 580.32/592.86/508.26). Only one attachment was offered. The reviewed head's own subject is the removal of the committed PNG twin of that SVG, so the delivered repository artifact is the SVG and the attachment is the render of it. The reviewed base 0e755a34 and head 9afb1a418 are both named explicitly because this review worktree's HEAD is e1f7a560b, which is not an ancestor of the reviewed head (merge base 0e755a34).",
+  "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html names both devices and their hosts, decodes the three arms and their colours ('the base source (grey), the shared-kernel factoring alone (orange) and the shared kernel with separate cut-cell buckets (green)'), states the acquisition ('medians of three synchronized calls'), warns that each panel has its own linear millisecond axis and that the two are not on a shared scale, and states that the arms ran as separate scheduler jobs with the profiler warmed before tracing. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
+  "completed_at": "2026-11-02T21:21:46.670Z",
+  "dispatched_at": "2026-11-02T21:04:41Z",
+  "figure_checks": {
+    "caption_independence": "The caption names the devices, the hosts, the axis units, the three arms and their colours, the acquisition ('medians of three synchronized calls') and the separate per-panel scales. It is not a restatement of the title or the axis labels.",
+    "rendered_artifact": "Only image-0.png was opened, at its native 1400x720 RGBA, and every pixel count, ink bounding box, spine position and bar extent above was measured from that same PNG. No SVG text element, dimension or glyph coordinate was read, so each verdict is about the picture a reader sees.",
+    "scope": "Read-only. No figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and this node's manifest.",
+    "values_from_the_render": "Each bar's end column was mapped back through that panel's own tick spacing (11.15 px/ms on the left panel, 0.77 px/ms on the right) and agrees with the value printed beside it to within 2 ms in all six cases, so the bars encode the stated data honestly rather than being drawn to a different scale."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg",
+      "render_check": {
+        "bar_extents_and_ms_from_the_render": {
+          "base": {
+            "left_panel": "cols 156-465, about 27.7 ms against the printed 27.85",
+            "right_panel": "cols 849-1292, about 577.9 ms against the printed 580.32"
+          },
+          "left_panel_scale": "11.15 px per ms (x ticks 0/10/20/30/40 at columns 155/267/378/490/601)",
+          "right_panel_scale": "0.77 px per ms (x ticks 0/100/200/300/400/500/600 at columns 847-1308)",
+          "shared_kernel_and_cut_buckets": {
+            "left_panel": "cols 156-510, about 31.7 ms against the printed 31.87",
+            "right_panel": "cols 849-1237, about 506.5 ms against the printed 508.26"
+          },
+          "shared_kernel_only": {
+            "left_panel": "cols 156-609, about 40.5 ms against the printed 40.76",
+            "right_panel": "cols 849-1302, about 590.9 ms against the printed 592.86"
+          }
+        },
+        "canvas": "1400x720 RGBA",
+        "ink_bbox_rows_cols": [
+          16,
+          704,
+          18,
+          1384
+        ],
+        "outer_edge_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0
+        },
+        "panel_geometry": "Left spines at columns 155 and 848; shared bottom spine at row 661; three bar bands at rows 65-186, 288-409 and 511-632, centres at rows 125, 348 and 571 (about 223 px apart).",
+        "series_colour_px_in_plot_areas": {
+          "base_grey_929292": 92045,
+          "both_green_2e8b57": 90768,
+          "kernel_orange_b06a2c": 110776
+        },
+        "two_line_label_gap": "ink rows 559-569 and 576-586, so 6 px clear between the lines, columns roughly 40-145 left of the row-3 tick"
+      },
+      "rubric": {
+        "contrast": "pass. Near-black text on white with every value label in white space; fills at 3.11:1 (grey), 4.25:1 (orange) and 4.25:1 (green) on white, above the 3:1 graphics floor.",
+        "data_ink": "pass. Three solid bars and six value labels per panel and nothing else; measured 92045 grey, 110776 orange and 90768 green pixels inside the plot areas, remainder being text, spine and bar-edge antialiasing.",
+        "decoration": "pass. No gridlines, no top or right spines, no background fill, no shadow, no styled theme.",
+        "label_collision": "pass. Ink bounding box rows 16-704, columns 18-1384; zero ink on all four canvas edges; 6 px gap between the two lines of the only multi-line label; no value label over its bar.",
+        "legibility": "pass. Device-titled linear panels, three named and labelled rows on both, every value printed at its bar end, all text readable at the delivered 1400x720. Cost recorded as non-blocking finding 2: type below the declared sizes, about 6-7 px at the reckon column width.",
+        "table_form": "pass. Paired bars carry the device comparison and the sign reversal; the exact values are also tabled in the same evidence fragment."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "plot.py:18-20 define the three hex values and plot.py:35 passes them as barh colours. Measured on image-0.png the fills render at exactly (146,146,146), (176,106,44) and (46,139,87), carrying 92045, 110776 and 90768 pixels in the two plot areas, while each bar's identity is given by the y tick label set at plot.py:39.",
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f00bbac7bba",
+      "line": 19,
+      "severity": "non-blocking",
+      "summary": "The three bars are coloured grey, orange and green, but every bar is already named by its own y-axis label on both panels, so the hue carries no information a reader can use: redrawing all three in one neutral, or in lightness steps of one hue, would lose nothing. The middle hue, #b06a2c, renders as a muted orange-brown (OKLCH L 0.77, C 0.09, H 73 degrees) at the dull end of the warm-brown family the plotting style retires, so beside the clean green it reads as dirt rather than as a component. It stays non-blocking: the rows are labelled, nothing is hidden, and the figure is fully readable."
+    },
+    {
+      "evidence": "The tick digit '0' of the x tick '10' occupies rows 672-681 (10 px) and '100' occupies rows 672-681 (10 px); the axis label 'warm booking tangent [ms]' occupies rows 691-703 (13 px) and the 12 pt value label '508.26' rows 564-576 (13 px). The same PNG resampled to 900 px wide puts the tick digits at about 6 px.",
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f0bb9393b8d",
+      "line": 29,
+      "severity": "non-blocking",
+      "summary": "The script never applies the repository's data-ink style (the sibling prototype calls plt.style.use('data-ink') in its own main), so every label is drawn at matplotlib's defaults rather than the declared sizes. Tick digits carry 10 px of ink where the style's 14 pt would carry about 14 px, the axis label carries about 13 px where 16 pt is prescribed, and the value labels are set to 12 pt at plot.py:48, also below the 14 pt direct-label size. At the ~900 px reckon column that presents the page, the same tick digits fall to about 6 px, below body text -- exactly the reading cost the style's stated sizes exist to prevent. It stays non-blocking because at the delivered 1400x720 the text reads without magnification and no label is clipped or lost."
+    }
+  ],
+  "justifications": {
+    "durability": "The record is written at both declared paths and each is checked with crew check --review --record before the manifest is closed.",
+    "evidence": "All claims are pixel measurements on the single attached PNG: ink bounding box, zero-ink canvas edge, per-colour pixel counts inside the plot areas, spine positions, bar end columns mapped back to milliseconds through each panel's own tick spacing, and measured glyph heights.",
+    "legibility": "Read at native resolution: both panels are titled by device, all three rows are named and every value is printed at its bar end, so no reading depends on judging a bar length by eye. The only cost is the below-style type size (finding 2).",
+    "scope_discipline": "This review is read-only; both findings are reported in this record and no source, figure, caption or script was changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T210329184204-review-of-bank-step-booking-h200-9afb1a4186ba-figure",
+  "reviewed_base_sha": "0e755a34ccc24980ac8d21031109505ced553ec7",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg"
+  ],
+  "reviewed_head_sha": "9afb1a4186bae0bb28ef9b7bd7586099c53d4ef9",
+  "reviewed_run_id": "r-20261102T201222592760-bank-step-booking-h200",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Two side-by-side linear panels titled with their device ('H200, reserved card', 'P100 on titan'); the same three ledgers on both, named 'base', 'shared kernel only' and 'shared kernel / + cut buckets'; every value printed at its bar end so no value has to be read off an axis. All text is legible at the delivered 1400x720 without magnification. One reading cost is recorded as non-blocking finding 2: the type renders below the repository's declared sizes, so at the ~900 px reckon column the text shrinks to about 6-7 px.",
+    "RUBRIC data_ink: pass. Each plot area holds three solid bars and the six value labels, and nothing else. Measured over rows 40-655 inside the two plot areas: 92045 px of grey #929292, 110776 px of orange #b06a2c and 90768 px of green #2e8b57. The only remaining non-white pixels are near-black text and spine, plus the pale antialiasing fringe of the bar edges (3676 px of light tints such as (236,219,203) and (203,226,213)); the bars carry all the visual weight.",
+    "RUBRIC decoration: pass. No gridlines (plot.py:53 calls axis.grid(False)); the top and right spines are hidden at plot.py:51-52, so the only spines drawn are the two left spines at columns 155 and 848 and the bottom spine at row 661; no background fill, panel frame, shadow or styled theme. The only furniture is the required axis text and the panel titles.",
+    "RUBRIC contrast: pass. All text is near-black on white, far above the 4.5:1 text floor, and every value label sits in white space beside its bar end rather than on the fill. The fills are graphic marks, not text: grey #929292 is 3.11:1 on white, the prescribed 'reads as data and still recedes' grey, and orange #b06a2c and green #2e8b57 are 4.25:1 each, above the 3:1 graphics floor.",
+    "RUBRIC table_form: pass. The image carries six scalars, but its job is the at-a-glance comparison a table does not give: a 20-fold device gap (27.85 against 580.32 ms on the same arm) and one arm reversing direction between devices (the shared kernel alone is 46 percent worse on the H200 and 2.1 percent worse on the P100, while the two together are 14.4 percent worse on the H200 and 12.4 percent better on the P100). The exact numbers are additionally tabulated in the same evidence fragment, so the figure is not the only form the data take.",
+    "RUBRIC label_collision: pass. Nothing is clipped and no label overlaps another label or the data. The render's ink bounding box is rows 16-704, columns 18-1384, and all four canvas edge rows and columns carry zero non-white pixels. The only two-line label ('shared kernel' / '+ cut buckets') has a clear 6 px gap between its lines (ink rows 559-569 and 576-586). Every value label sits in white space to the right of its bar; the rightmost ('592.86') ends near column 1360 of the 1400 px canvas."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T21:24:53.196261+00:00",
+  "total": null
+}

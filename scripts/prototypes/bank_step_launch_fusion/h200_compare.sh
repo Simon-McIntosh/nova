@@ -18,7 +18,8 @@ trap finish EXIT
 
 mkdir -p "$SCRATCH/base"
 git archive "$BASE" nova tests scripts benchmarks pyproject.toml | tar -xf - -C "$SCRATCH/base" || exit 2
-mkdir -p "$SCRATCH/base/.git/objects/info" "$SCRATCH/base/scripts/prototypes/bank_step_launch_fusion"
+mkdir -p "$SCRATCH/base/.git/objects/info" "$SCRATCH/base/.git/refs/heads" \
+  "$SCRATCH/base/scripts/prototypes/bank_step_launch_fusion"
 printf '%s\n' "$BASE" > "$SCRATCH/base/.git/HEAD"
 printf '[core]\n\trepositoryformatversion = 0\n\tbare = false\n' > "$SCRATCH/base/.git/config"
 printf '%s\n' "$OBJECTS" > "$SCRATCH/base/.git/objects/info/alternates"

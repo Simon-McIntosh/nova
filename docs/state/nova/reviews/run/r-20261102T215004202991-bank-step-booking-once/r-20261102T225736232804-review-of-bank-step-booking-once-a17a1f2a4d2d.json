@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-02T23:17:46.189Z",
+  "dispatched_at": "2026-11-02T22:59:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html",
+      "id": "0a362f4f265",
+      "line": 18,
+      "severity": "blocking",
+      "text": "The caption states both arms came from one allocation at revision 6a404a566, but h200-prefix.log names revision 7b2a7898 and slurm job 1303768 while h200-base2.log is job 1303773, and the other base-labelled arm h200-base.log reports 38.18 ms tangent against base2's 27.83 ms without reconciliation, so the headline cost rests on an unreconciled, cross-allocation pair."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html",
+      "id": "f5f180edcc6",
+      "line": 35,
+      "severity": "non-blocking",
+      "text": "The receipts paragraph cites compare.log for the byte-identical CPU tangent, but no compare.log exists in the run directory, so the numerical-identity claim has no readable receipt."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html",
+      "id": "377ec4649fb",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "The census paragraph asserts three interior copies and the table repeats 3 against 2, but h200-prefix.log prints two tagged interior sites (interior:whole, interior:cut) and both base-labelled arm logs print no TAG-TAGGED lines, so the base arm's three-copy census is asserted rather than receipted."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/plot_stage_compare.py",
+      "id": "a0cca30fad5",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "read() matches STAGE_DEVICE name={name} but is called with name 'base' and 'head' at lines 26-27, which no stage row carries, so both dicts are empty and the script raises KeyError at line 32 instead of regenerating the committed figure."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/negative_control.sh",
+      "id": "3c50f44d860",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "The committed script runs tests/test_bank_step_booking_once.py, which is absent from the landed tree, so the landed negative control cannot be re-run by a later reader."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/hlo_census.py",
+      "id": "58becbcc2bf",
+      "line": 52,
+      "severity": "non-blocking",
+      "text": "The loop over re.findall results ends immediately in pass so it computes nothing, and the surrounding lower/count logic duplicates hlo_tags.py in the same directory."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215004202991-bank-step-booking-once/manifest.md",
+      "id": "821625d197b",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "outside_scope records that no fresh-read residual and no oracle ratio were measured, so the first half of the done_when's measure was not produced; the recorded gate tests/test_bank_step_booking.py asserts none of those quantities."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "CALL_SITES: none.",
+    "diff": "Nine files added (one evidence fragment, one SVG, seven prototype scripts) with no product source and no test.",
+    "done_when": "The walls are tabled in the evidence fragment but the fresh-read residual and oracle ratios were never measured and the recorded gate asserts none of them.",
+    "goal": "The diagnosis landed but no duplicate was removed; nova/equilibrium/current.py is unchanged at a17a1f2a4.",
+    "manifest": "Read; status complete, four commits, 5 passed in focused-suite.log, and outside_scope conceding the unmeasured residual and oracle ratios.",
+    "write_paths": "Every changed path in git diff 7b2a7898..a17a1f2a4 lies inside the declared write paths."
+  },
+  "justifications": {
+    "durability": "no test is landed and tests/test_bank_step_booking_once.py, which the negative control exercised, is absent from the tree, so nothing in the delivered change fails if a measurement or script regresses.",
+    "evidence": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:18 claims one allocation at revision 6a404a566, but the collapsed arm is h200-prefix.log at revision 7b2a7898 (job 1303768) and the base arm h200-base2.log is job 1303773, and the other base-labelled run h200-base.log reports 38.18 ms against 27.83 ms.",
+    "fit": "scripts/prototypes/bank_step_booking_once follows the layout of scripts/prototypes/bank_step_speed, but plot_stage_compare.py:26 looks up stage names 'base'/'head' that no log row carries, so the script raises KeyError rather than drawing the figure.",
+    "goal_fidelity": "nova/equilibrium/current.py and nova/equilibrium/clip_quadrature.py are byte-identical to the base at a17a1f2a4, so the duplicate the goal names is still computed.",
+    "reuse": "scripts/prototypes/bank_step_booking_once/hlo_census.py:44-61 re-implements the lower-and-count capability of hlo_tags.py:34-60 in the same directory instead of extending it.",
+    "scope_discipline": "every path in git diff 7b2a7898..a17a1f2a4 lies inside the declared write paths and the product files are net-identical to the base."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to find why the booking tangent's compiled programs are emitted twice, remove the duplicate, and table the before/after walls; the diagnosis landed but nova/equilibrium/current.py is unchanged at a17a1f2a4, so no duplicate was removed and only a measured negative result landed.\nVERDICT done_when: The done_when asks for a fresh-read residual at most 1e-10 with oracle ratios within 5e-4/5e-4/1e-4 and the whole-step wall and launches tabled before and after; the table exists in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:18, but the manifest's outside_scope records that no fresh-read residual or oracle ratio was measured and the recorded gate tests/test_bank_step_booking.py asserts none of those numbers.\nVERDICT write_paths: Declared paths are nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py, tests/test_bank_step_booking_once.py, scripts/prototypes/bank_step_booking_once, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html and docs/figures/sub-millisecond-forward-path/bank-step-booking-once; every path in git diff 7b2a7898..a17a1f2a4 is inside them.\nVERDICT manifest: Read; it records status complete, four commits, the before/after walls, 5 passed in focused-suite.log, and an outside_scope entry conceding the fresh-read residual and oracle ratios were never measured.\nVERDICT diff: Read commit by commit against 7b2a7898; nine files added (one evidence fragment, one SVG, seven prototype scripts), no deletions, no product source, no test file.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py and nova/equilibrium/clip_quadrature.py are byte-identical to the base at a17a1f2a4, so the duplicate the goal names is still computed.\nSCORE evidence: 9\nJUSTIFICATION evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:18 claims both arms came from one allocation at revision 6a404a566, but the collapsed arm is h200-prefix.log at revision 7b2a7898 (job 1303768) and the base arm is h200-base2.log (job 1303773), and h200-base.log reports 38.18 ms for a base-labelled arm against base2's 27.83 ms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 7b2a7898..a17a1f2a4 lies inside the declared write paths and the product files are net-identical to the base.\nSCORE durability: 3\nJUSTIFICATION durability: no test is landed and tests/test_bank_step_booking_once.py, which the negative control exercised, is absent from the tree, so nothing in the delivered change fails if a measurement or script regresses.\nSCORE fit: 10\nJUSTIFICATION fit: scripts/prototypes/bank_step_booking_once follows the layout of scripts/prototypes/bank_step_speed, but plot_stage_compare.py:26 looks up stage names \"base\"/\"head\" that no log row carries, so the script raises KeyError rather than drawing the figure.\nSCORE reuse: 12\nJUSTIFICATION reuse: scripts/prototypes/bank_step_booking_once/hlo_census.py:44-61 re-implements the lower-and-count capability of hlo_tags.py:34-60 in the same directory instead of extending it, and lands a no-op loop at line 52.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:18 blocking: the caption states both arms came from one allocation at revision 6a404a566, but h200-prefix.log names revision 7b2a7898 and slurm job 1303768 while h200-base2.log is job 1303773, and the other base-labelled arm h200-base.log reports a 38.18 ms tangent against base2's 27.83 ms without reconciliation, so the headline cost rests on an unreconciled, cross-allocation pair.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:35 non-blocking: the receipts paragraph cites compare.log for the byte-identical CPU tangent, but no compare.log exists in the run directory, so the numerical-identity claim has no readable receipt.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:9 non-blocking: the census paragraph asserts three interior copies and the table repeats 3 against 2, but h200-prefix.log prints two tagged interior sites and both base-labelled arm logs print no TAG-TAGGED lines, so the base side of the 3-to-2 claim is asserted rather than receipted.\nFINDING scripts/prototypes/bank_step_booking_once/plot_stage_compare.py:19 non-blocking: read() matches STAGE_DEVICE name={name} but is called with name \"base\" and \"head\" at lines 26-27, which no stage row carries, so both dicts are empty and the script raises KeyError at line 32 instead of regenerating the committed figure.\nFINDING scripts/prototypes/bank_step_booking_once/negative_control.sh:29 non-blocking: the committed script runs tests/test_bank_step_booking_once.py, which is absent from the landed tree, so the landed negative control cannot be re-run by a later reader.\nFINDING scripts/prototypes/bank_step_booking_once/hlo_census.py:52 non-blocking: the loop over re.findall results ends immediately in pass so it computes nothing, and the surrounding lower/count logic duplicates hlo_tags.py in the same directory.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215004202991-bank-step-booking-once/manifest.md:24 non-blocking: outside_scope records that no fresh-read residual and no oracle ratio were measured, so the first half of the done_when's measure was not produced.\n",
+  "review_run_id": "r-20261102T225736232804-review-of-bank-step-booking-once-a17a1f2a4d2d",
+  "reviewed_base_sha": "7b2a7898126c14e955b42de709c9b66a112bf00c",
+  "reviewed_head_sha": "a17a1f2a4d2db21ef87b5b693038d4cf1181723f",
+  "reviewed_run_id": "r-20261102T215004202991-bank-step-booking-once",
+  "scores": {
+    "durability": 3,
+    "evidence": 9,
+    "fit": 10,
+    "goal_fidelity": 10,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T23:52:00.000000+00:00",
+  "total": 64
+}

@@ -1051,6 +1051,16 @@ def _normal_geometry_booking_tangent(
     return jax.lax.cond(jnp.any(active), evaluate, lambda _: zero, None)
 
 
+class NewtonFactor(NamedTuple):
+    """Balanced matrix and factor carried between contracting Newton steps."""
+
+    matrix: jax.Array
+    row: jax.Array
+    column: jax.Array
+    lu: jax.Array
+    pivots: jax.Array
+
+
 class NewtonStep(NamedTuple):
     """One dense Newton update and its conditioning ledger."""
 
@@ -1059,6 +1069,8 @@ class NewtonStep(NamedTuple):
     condition_after: jax.Array
     linear_residual: jax.Array
     converged: jax.Array
+    factor: NewtonFactor
+    refactored: jax.Array
 
 
 def _local_booking_sensitivities(
@@ -1291,6 +1303,8 @@ def newton_step(
     *,
     fresh_geometry: bool = False,
     condition_diagnostics: bool | None = None,
+    factor_cache: NewtonFactor | None = None,
+    contraction_ratio: jax.Array | float | None = None,
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
@@ -1305,29 +1319,46 @@ def newton_step(
         condition_diagnostics = cells == 1
     boundaries = (cells, 2 * cells)
     right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
-    matrix = step_jacobian(
-        operands,
-        moments,
-        support,
-        profile,
-        density_gradient,
-        quadrature,
-        residual.booked,
-        fresh_geometry=fresh_geometry,
-    )
-    balanced, row, column = _equilibrate(matrix, moments, residual.booked)
     from jax.scipy import linalg
 
-    factor = linalg.lu_factor(balanced)
-    solution = column * linalg.lu_solve(factor, right / row)
-    linear_residual = jnp.linalg.norm(matrix @ solution - right) / jnp.linalg.norm(
-        right
+    def rebuild(_):
+        matrix = step_jacobian(
+            operands,
+            moments,
+            support,
+            profile,
+            density_gradient,
+            quadrature,
+            residual.booked,
+            fresh_geometry=fresh_geometry,
+        )
+        balanced, row, column = _equilibrate(matrix, moments, residual.booked)
+        lu, pivots = linalg.lu_factor(balanced)
+        return NewtonFactor(matrix, row, column, lu, pivots)
+
+    if factor_cache is None:
+        factor = rebuild(None)
+        refactored = jnp.asarray(True)
+    else:
+        if contraction_ratio is None:
+            raise ValueError(
+                "factor reuse requires a measured residual contraction ratio"
+            )
+        reuse = jnp.isfinite(contraction_ratio) & (contraction_ratio <= 0.5)
+        factor = jax.lax.cond(reuse, lambda _: factor_cache, rebuild, None)
+        refactored = ~reuse
+    solution = factor.column * linalg.lu_solve(
+        (factor.lu, factor.pivots), right / factor.row
     )
+    linear_residual = jnp.linalg.norm(
+        factor.matrix @ solution - right
+    ) / jnp.linalg.norm(right)
     if condition_diagnostics:
-        condition_before = jnp.linalg.cond(matrix)
+        condition_before = jnp.linalg.cond(factor.matrix)
+        balanced = factor.matrix * factor.column[None, :] / factor.row[:, None]
         condition_after = jnp.linalg.cond(balanced)
     else:
-        condition_before = jnp.asarray(jnp.nan, dtype=matrix.dtype)
+        condition_before = jnp.asarray(jnp.nan, dtype=factor.matrix.dtype)
         condition_after = condition_before
     return NewtonStep(
         tuple(jnp.split(solution, boundaries)),
@@ -1335,6 +1366,8 @@ def newton_step(
         condition_after,
         linear_residual,
         linear_residual <= 1e-8,
+        factor,
+        refactored,
     )
 
 

@@ -27,6 +27,7 @@ __all__ = [
     "level_set_current_moment_tangent",
     "fixed_polygon_current_moment_tangent",
     "moving_polygon_current_moment_tangent",
+    "moving_polygon_current_moment_tangents",
 ]
 
 
@@ -297,6 +298,16 @@ def moving_polygon_current_moment_tangent(
         jnp.sum(weighted * relative[..., 0]),
         jnp.sum(weighted * relative[..., 1]),
     )
+
+
+def moving_polygon_current_moment_tangents(
+    vertices, velocity, vertex_count, centre, pitch, normalized_coefficient, profile
+) -> ClippedCurrentMoments:
+    """Integrate a bank of moving rings through the shared boundary rule."""
+    return jax.vmap(
+        moving_polygon_current_moment_tangent,
+        in_axes=(0, 0, 0, None, None, None, None),
+    )(vertices, velocity, vertex_count, centre, pitch, normalized_coefficient, profile)
 
 
 def cut_capacity_edge_bound() -> int:

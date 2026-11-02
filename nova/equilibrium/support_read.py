@@ -22,7 +22,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.database import content_store
-from nova.equilibrium import current, fixed_points, topology
+from nova.equilibrium import clip_quadrature, current, fixed_points, topology
 
 # Node and cell counts a machine's mesh is padded up to, so two geometries of
 # one bucket share one compiled program and the bank program is shape-static.
@@ -1016,18 +1016,15 @@ def _normal_geometry_booking_tangent(
                 quadrature.segments,
             )
 
-            def moving(ring, speed, number):
-                return current.moving_polygon_current_moment_tangent(
-                    ring,
-                    speed,
-                    number,
-                    centre,
-                    geometry.pitch[cell],
-                    normalized[cell],
-                    profile,
-                )
-
-            moved = jax.vmap(moving)(rings_now, velocity, ring_count)
+            moved = clip_quadrature.moving_polygon_current_moment_tangents(
+                rings_now,
+                velocity,
+                ring_count,
+                centre,
+                geometry.pitch[cell],
+                normalized[cell],
+                profile,
+            )
             return jax.tree.map(
                 lambda prior, change: prior.at[cell].add(jnp.sum(change)),
                 carried,
@@ -1212,7 +1209,7 @@ def step_jacobian(
         jet_rows = operands.rows[nodes]
         channels = jnp.transpose(jet_rows, (0, 3, 2, 1)).reshape(-1, 3 * cells)
 
-        def local_channel(index, carried):
+        def local_channel(index):
             direction = (
                 jnp.zeros_like(operands.exterior)
                 .at[nodes[index // 6], index % 6]
@@ -1221,14 +1218,11 @@ def step_jacobian(
             response = _normal_geometry_booking_tangent(
                 operands, moments, direction, support, profile, quadrature, booked
             )
-            return carried.at[index].set(jnp.stack(tuple(response), axis=-1))
+            return jnp.stack(tuple(response), axis=-1)
 
-        local = jax.lax.fori_loop(
-            0,
-            6 * count,
-            local_channel,
-            jnp.zeros((6 * stencil.size, cells, 3), dtype=matrix.dtype),
-        )
+        channel_index = jnp.arange(6 * stencil.size)
+        local = jax.vmap(local_channel)(channel_index)
+        local = jnp.where((channel_index < 6 * count)[:, None, None], local, 0.0)
         response = jnp.einsum("kco,ki->coi", local, channels)
         response = jnp.transpose(response, (1, 0, 2)).reshape(3 * cells, 3 * cells)
         matrix = matrix - response

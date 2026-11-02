@@ -78,21 +78,57 @@ def boundary_flux_at_admitted_saddle(
     return jnp.where(jnp.isfinite(distance[nearest]), saddle_value[nearest], locator)
 
 
-def _split_cubic_at_saddle(controls, saddle):
-    """Split a cubic near its midpoint and move the shared point to a saddle."""
-    first = 0.5 * (controls[..., 0, :] + controls[..., 1, :])
-    middle = 0.5 * (controls[..., 1, :] + controls[..., 2, :])
-    last = 0.5 * (controls[..., 2, :] + controls[..., 3, :])
-    left_inner = 0.5 * (first + middle)
-    right_inner = 0.5 * (middle + last)
-    midpoint = 0.5 * (left_inner + right_inner)
-    correction = saddle - midpoint
-    left = jnp.stack(
-        (controls[..., 0, :], first, left_inner + correction, saddle), axis=-2
+def _unit(vector):
+    length = jnp.linalg.norm(vector, axis=-1, keepdims=True)
+    return vector / jnp.where(length > 0.0, length, 1.0)
+
+
+def _arm_to_saddle(crossing, crossing_tangent, saddle, asymptotes):
+    """Return the cubic from an edge crossing to the saddle along its arm.
+
+    The crossing keeps the spline tangent the cell's cubic already carries
+    there, and the saddle end takes the asymptote ray that faces the crossing:
+    the separatrix arm meets the X-point along a null line of the Hessian, not
+    along the vertex tangent of the cubic that bows past it.  Both handles use
+    the same chord-projected length as every other cell's cubic.
+    """
+    chord = saddle - crossing
+    chord_length = jnp.linalg.norm(chord, axis=-1)
+    tangent = _unit(crossing_tangent)
+    tangent = jnp.where(
+        (jnp.sum(tangent * chord, axis=-1) < 0.0)[..., None], -tangent, tangent
     )
-    right = jnp.stack(
-        (saddle, right_inner + correction, last, controls[..., 3, :]), axis=-2
+    rays = jnp.concatenate((asymptotes, -asymptotes), axis=-2)
+    facing = jnp.argmax(jnp.sum(rays * -chord[..., None, :], axis=-1), axis=-1)
+    ray = jnp.take_along_axis(rays, facing[..., None, None], axis=-2)[..., 0, :]
+    minimum_scale = 0.25 * chord_length
+    start_scale = jnp.maximum(jnp.sum(chord * tangent, axis=-1), minimum_scale)
+    end_scale = jnp.maximum(jnp.sum(-chord * ray, axis=-1), minimum_scale)
+    return jnp.stack(
+        (
+            crossing,
+            crossing + start_scale[..., None] * tangent / 3.0,
+            saddle + end_scale[..., None] * ray / 3.0,
+            saddle,
+        ),
+        axis=-2,
     )
+
+
+def _split_cubic_at_saddle(controls, saddle, asymptotes):
+    """Replace a saddle cell's cubic by its two arms meeting at the saddle."""
+    left = _arm_to_saddle(
+        controls[..., 0, :],
+        controls[..., 1, :] - controls[..., 0, :],
+        saddle,
+        asymptotes,
+    )
+    right = _arm_to_saddle(
+        controls[..., 3, :],
+        controls[..., 2, :] - controls[..., 3, :],
+        saddle,
+        asymptotes,
+    )[..., ::-1, :]
     return left, right
 
 
@@ -102,6 +138,7 @@ def _expanded_graph(contour):
     valid = contour["segment_valid"].reshape(-1)
     at_saddle = contour["segment_at_saddle"].reshape(-1) & valid
     saddle = contour["segment_saddle_rz"].reshape(-1, 2)
+    asymptotes = contour["segment_saddle_asymptotes_rz"].reshape(-1, 2, 2)
     segment_count = controls.shape[0]
     edge_node_capacity = contour["edge_node_capacity"]
     cell_count = segment_count // 2
@@ -112,7 +149,7 @@ def _expanded_graph(contour):
         edge_node_capacity + jnp.arange(segment_count, dtype=jnp.int32) // 2
     )
 
-    left, right = _split_cubic_at_saddle(controls, saddle)
+    left, right = _split_cubic_at_saddle(controls, saddle, asymptotes)
     first_controls = jnp.where(at_saddle[:, None, None], left, controls)
     second_controls = right
     first_nodes = jnp.stack(

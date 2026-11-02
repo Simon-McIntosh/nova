@@ -816,10 +816,11 @@ PANEL_STATES = (
 # one closed candidate, well formed, whose segment count is pinned below.  The
 # closing states span 71 to 77 closed segments and all but one carry two open
 # branches, so a change to the tracker or to the saddle bracket moves one of
-# these counts.  State 19 is the exception on both counts: its lobe meets no
-# open branch at all, and its candidate survives a 1e-3 Wb displacement of the
-# level, so its own control displacement is 2e-3 Wb.  That is a statement about
-# how sharply its level is pinned, not a weaker assertion.
+# these counts.  State 19 is the exception on both counts: its stored X-point
+# is not a stationary point of its own field, whose saddle sits about 60 mm
+# higher, so the level read there is a core surface about 2.7 mWb inside the
+# separatrix.  Its lobe therefore meets no open branch, and it stays closed
+# until the displacement crosses that saddle, so its control is 3e-3 Wb.
 #
 # The other nine states are pinned by what they do produce instead.  The
 # contour traces a cycle that encloses the axis but admits no closed candidate
@@ -844,7 +845,7 @@ PERSISTED_STATE_TERMS = {
         "closes": True,
         "closed_segment_count": 72,
         "open_branch_count": 0,
-        "control_displacement": 2.0e-3,
+        "control_displacement": 3.0e-3,
     },
     0: {"closes": False, "cycle_component_count": 1},
     1: {"closes": False, "cycle_component_count": 1},
@@ -881,8 +882,8 @@ def test_persisted_state_closes_the_axis_enclosing_lobe(index):
     result: the displaced-level control below assembles no cycle on every
     closing state, while the saddle level gives exactly one axis-enclosing
     cycle.  State 19 carries its own wider control displacement, because its
-    candidate survives the 1e-3 Wb default and the control has to move the
-    level further before it stops validating.
+    level is a core surface inside the separatrix and the control has to move
+    it past the field's saddle before the lobe opens.
 
     The open states are pinned by the mechanism that leaves them open instead.
     Each draws no closed candidate, and what tells them apart is whether the

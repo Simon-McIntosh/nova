@@ -9,8 +9,12 @@ import numpy as np
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
     polish_stationary_points,
+    traced_spline_contour,
 )
-from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.separatrix_branches import (
+    assemble_separatrix_branches,
+    boundary_flux_at_admitted_saddle,
+)
 
 
 jax.config.update("jax_enable_x64", True)
@@ -219,3 +223,60 @@ def test_closed_branch_geometry_is_invariant_to_open_leg_domain_extension():
     assert int(long["open_segment_count"][0]) > int(short["open_segment_count"][0])
     assert int(long["open_segment_count"][1]) > int(short["open_segment_count"][1])
     np.testing.assert_array_equal(long_closed, short_closed)
+
+
+def _saddle_below_row_field(radial, vertical, saddle_rz):
+    """Return a lobe hanging below a saddle that sits just under a lattice row.
+
+    Both upper arms of the separatrix leave the saddle's cell through its top
+    edge, so that edge carries two crossings and the cell above shares them.
+    """
+    grid_radial, grid_vertical = jnp.meshgrid(radial, vertical)
+    across = grid_radial - saddle_rz[0]
+    along = grid_vertical - saddle_rz[1]
+    return across**2 - along**2 - along**3
+
+
+def test_saddle_cell_with_two_crossings_on_one_edge_keeps_the_lobe_below():
+    radial = jnp.linspace(-1.6, 1.6, 33, dtype=jnp.float64)
+    vertical = jnp.linspace(-2.0, 1.0, 25, dtype=jnp.float64)
+    saddle = jnp.asarray((0.05, 0.105))
+    axis = saddle - jnp.asarray((0.0, 0.5))
+    values = _saddle_below_row_field(radial, vertical, saddle)
+    level = boundary_flux_at_admitted_saddle(values, radial, vertical, axis, saddle)
+
+    contour = traced_spline_contour(values, radial, vertical, level, axis_rz=axis)
+    valid = np.asarray(contour["segment_valid"]).reshape(-1)
+    nodes = np.asarray(contour["segment_node_indices"]).reshape(-1, 2)[valid]
+    controls = np.asarray(contour["segment_controls_rz"]).reshape(-1, 4, 2)[valid]
+    saddle_cell = np.asarray(contour["saddle_stationary"])
+    assert int(np.sum(saddle_cell)) == 1
+    crossing_height = np.asarray(contour["edge_crossing_rz"])[saddle_cell][0, :, 1]
+    assert int(np.sum(np.isclose(crossing_height, float(vertical[17])))) == 2
+    # A node id names one crossing in every cell that shares it, and a
+    # segment's first control point is the crossing its first node names.
+    position = {}
+    for node_pair, segment in zip(nodes, controls):
+        for node, point in ((node_pair[0], segment[0]), (node_pair[1], segment[-1])):
+            np.testing.assert_allclose(position.setdefault(node, point), point)
+
+    result = assemble_separatrix_branches(values, radial, vertical, level, axis)
+    assert bool(result["well_formed"])
+    assert int(result["open_branch_count"]) == 2
+    closed = _active_controls(result, "closed_controls_rz", "closed_valid")
+    polished = closed[0, 0]
+    np.testing.assert_allclose(polished, np.asarray(saddle), atol=1e-9)
+    np.testing.assert_allclose(closed[1:, 0], closed[:-1, -1], rtol=0.0, atol=1e-12)
+    np.testing.assert_array_equal(closed[-1, -1], polished)
+    # The lobe meets the saddle and turns; no part of it climbs past it.
+    assert np.max(closed[..., 1]) <= polished[1] + 1e-12
+    # Both lobe arms leave the X-point down the Hessian's null lines, which
+    # for this field are the diagonals |dr| = |dz|.
+    for handle in (closed[0, 1] - closed[0, 0], closed[-1, 2] - closed[-1, 3]):
+        assert handle[1] < 0.0
+        np.testing.assert_allclose(abs(handle[0]), abs(handle[1]), rtol=1e-6)
+    for branch in range(2):
+        leg = _active_controls(result, "open_controls_rz", "open_valid", branch=branch)
+        np.testing.assert_allclose(leg[1:, 0], leg[:-1, -1], rtol=0.0, atol=1e-12)
+        np.testing.assert_array_equal(leg[-1, -1], polished)
+        assert np.min(leg[..., 1]) >= polished[1] - 1e-12

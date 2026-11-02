@@ -1677,11 +1677,14 @@ def traced_spline_contour(
     # An edge can carry two crossings, and they are distinct points that must
     # stay distinct nodes.  Each slot therefore numbers itself among the
     # crossings of its own edge in a direction-independent order -- ascending
-    # vertical for a radial edge, ascending radius for a vertical one -- so the
-    # two cells sharing the edge agree on the number and a crossing keeps one
-    # node identity across the cells it separates.
+    # radius along a bottom or top edge, ascending height along a side edge --
+    # so the two cells sharing the edge, which traverse it in opposite
+    # directions, agree on the number and a crossing keeps one node identity
+    # across the cells it separates.  The key is the coordinate that varies
+    # along the edge; the fixed one ties every pair and leaves the rank to the
+    # traversal order.
     edge_spans_radius = (slot_edge % 2) == 0
-    crossing_key = jnp.where(edge_spans_radius, edge_point[..., 1], edge_point[..., 0])
+    crossing_key = jnp.where(edge_spans_radius, edge_point[..., 0], edge_point[..., 1])
     slot_ordinal = jnp.arange(4, dtype=jnp.int32)
     same_edge = slot_edge[..., :, None] == slot_edge[..., None, :]
     lower_key = crossing_key[..., :, None] < crossing_key[..., None, :]
@@ -1812,6 +1815,12 @@ def traced_spline_contour(
     segment_tangent = jnp.take_along_axis(
         segment_tangent, endpoint_order[..., None], axis=-2
     )
+    # The node and edge of each end follow its point, so a segment's first
+    # control is the crossing its first node names.  Splitting a segment at a
+    # saddle attaches each half to the node at its outer end; an unreordered
+    # node hands that half to the opposite crossing.
+    segment_node = jnp.take_along_axis(segment_node, endpoint_order, axis=-1)
+    segment_source = jnp.take_along_axis(segment_source, endpoint_order, axis=-1)
     chord = segment_point[..., 1, :] - segment_point[..., 0, :]
     chord_length = jnp.linalg.norm(chord, axis=-1)
     minimum_scale = 0.25 * chord_length
@@ -1852,6 +1861,42 @@ def traced_spline_contour(
     )
     canonical_controls = jnp.where(segment_valid[..., None, None], controls, 0.0)
     canonical_saddle_point = jnp.where(ambiguous[..., None], saddle_point, 0.0)
+    # The level set through a saddle leaves it along the two null lines of the
+    # Hessian's quadratic form, so these are the tangents a separatrix arm
+    # takes at the X-point.  In the principal frame the form is
+    # major * p**2 + minor * q**2 with major > 0 > minor, nulled on
+    # q / p = +/- sqrt(major / -minor).
+    hessian_mean = 0.5 * (
+        saddle_evaluation.radial_second_derivative
+        + saddle_evaluation.vertical_second_derivative
+    )
+    hessian_radius = jnp.hypot(
+        0.5
+        * (
+            saddle_evaluation.radial_second_derivative
+            - saddle_evaluation.vertical_second_derivative
+        ),
+        saddle_evaluation.mixed_derivative,
+    )
+    principal_angle = 0.5 * jnp.arctan2(
+        2.0 * saddle_evaluation.mixed_derivative,
+        saddle_evaluation.radial_second_derivative
+        - saddle_evaluation.vertical_second_derivative,
+    )
+    major = jnp.sqrt(jnp.maximum(hessian_mean + hessian_radius, 0.0))
+    minor = jnp.sqrt(jnp.maximum(hessian_radius - hessian_mean, 0.0))
+    principal = jnp.stack((jnp.cos(principal_angle), jnp.sin(principal_angle)), -1)
+    transverse = jnp.stack((-principal[..., 1], principal[..., 0]), axis=-1)
+    asymptotes = jnp.stack(
+        (
+            minor[..., None] * principal + major[..., None] * transverse,
+            minor[..., None] * principal - major[..., None] * transverse,
+        ),
+        axis=-2,
+    )
+    asymptote_length = jnp.linalg.norm(asymptotes, axis=-1, keepdims=True)
+    asymptotes = asymptotes / jnp.where(asymptote_length > 0.0, asymptote_length, 1.0)
+    at_saddle = ambiguous & decision_tie & saddle_stationary
     canonical_saddle_value = jnp.where(ambiguous, saddle_evaluation.value, 0.0)
 
     return {
@@ -1874,14 +1919,16 @@ def traced_spline_contour(
         "saddle_rz": canonical_saddle_point,
         "saddle_value": canonical_saddle_value,
         "segment_saddle_rz": jnp.where(
-            (segment_valid & (ambiguous & decision_tie & saddle_stationary)[..., None])[
-                ..., None
-            ],
+            (segment_valid & at_saddle[..., None])[..., None],
             saddle_point[..., None, :],
             0.0,
         ),
-        "segment_at_saddle": segment_valid
-        & (ambiguous & decision_tie & saddle_stationary)[..., None],
+        "segment_saddle_asymptotes_rz": jnp.where(
+            (segment_valid & at_saddle[..., None])[..., None, None],
+            asymptotes[..., None, :, :],
+            0.0,
+        ),
+        "segment_at_saddle": segment_valid & at_saddle[..., None],
         "edge_node_capacity": jnp.asarray(
             EDGE_CROSSING_CAPACITY
             * (vertical.size * (radial.size - 1) + (vertical.size - 1) * radial.size),

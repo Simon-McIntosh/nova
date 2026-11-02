@@ -41,6 +41,7 @@ MAX_STEPS = 60
 RESIDUAL = 1e-10
 EQUALITY = 1e-10
 LANE_PERTURBATION = (2e-5, 6e-5)
+pytestmark = pytest.mark.timeout(1800)
 
 
 def _gradient(radius, flux):

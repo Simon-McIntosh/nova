@@ -113,36 +113,59 @@
   path and the unbatched one is iteration 2</strong>, and it is a
   one-iteration detour rather than a stall.</p>
 
-  <h3 id="bank-step-batch-multi-lane">At four lanes the lanes two-cycle instead of converging</h3>
+<h3 id="bank-step-batch-multi-lane">The two-cycle is the operator's, not the batch's</h3>
 
-  <table id="bank-step-batch-four-lane-table">
-    <caption>Largest fresh-read residual per lane after each Newton iteration, batched step at four lanes, same state and device. Every lane passes 1e-10 by iteration 3, and all four are under 1e-9 at iterations 3 and 4; from iteration 5 the lanes alternate between 1.6442e-7 and about 3.19e-10, so the batch never holds all four under the bound at one iteration.</caption>
-    <tr><th>iteration</th><th>lane 0</th><th>lane 1</th><th>lane 2</th><th>lane 3</th></tr>
-    <tr><td>0</td><td>1.1196e-1</td><td>1.2431e-1</td><td>1.3666e-1</td><td>1.4901e-1</td></tr>
-    <tr><td>1</td><td>3.7229e-4</td><td>4.1005e-4</td><td>4.4164e-4</td><td>4.6705e-4</td></tr>
-    <tr><td>2</td><td>1.9151e-9</td><td>1.6442e-7</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
-    <tr><td>3</td><td>1.8706e-10</td><td>3.1878e-10</td><td>3.8270e-11</td><td>3.1878e-10</td></tr>
-    <tr><td>4</td><td>1.8061e-10</td><td>3.1877e-10</td><td>3.1878e-10</td><td>1.7117e-11</td></tr>
-    <tr><td>5</td><td>1.6442e-7</td><td>1.6442e-7</td><td>3.1877e-10</td><td>3.1877e-10</td></tr>
-    <tr><td>6</td><td>3.1877e-10</td><td>3.1877e-10</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
-    <tr><td>9</td><td>3.1877e-10</td><td>3.1877e-10</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
-    <tr><td>10</td><td>6.7473e-11</td><td>9.4218e-12</td><td>1.6442e-7</td><td>1.6442e-7</td></tr>
+  <p>An earlier reading of this node called the alternation between 3.19e-10 and
+  1.6442e-7 a defect of the batched step and pointed at
+  <code>read_batch</code>'s single decision. That attribution is withdrawn. The
+  same solve, unbatched, with no <code>vmap</code> and one state, does it
+  identically at the same 550-cell state:</p>
+
+  <table id="bank-step-batch-single-cycle-table">
+    <caption>Largest fresh-read residual after each Newton iteration, unbatched solve at the diverted 550-cell state on one H200. The iteration alternates between 3.19e-10 and 1.6442e-7 for six iterations before dropping below 1e-10 at iteration 10, with no batch involved.</caption>
+    <tr><th>iteration</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr>
+    <tr><td>residual</td><td>1.12e-1</td><td>3.72e-4</td><td>1.58e-9</td><td>3.19e-10</td><td>1.64e-7</td><td>3.19e-10</td><td>1.64e-7</td><td>3.19e-10</td><td>1.64e-7</td><td>3.19e-10</td><td>2.74e-11</td></tr>
   </table>
 
-  <p>Every lane reaches the bound by iteration 3, and iterations 3 and 4 hold
-  all four lanes below 1e-9. The failure is what happens next: lanes that sat
-  at 3.19e-10 return to 1.6442e-7 on the following iteration while other lanes
-  recover, so the lanes swap places in pairs and the batch never satisfies a
-  whole-batch bound. That is a two-cycle in the batched step, not a residual
-  floor: the same values are reached and left again, and the unbatched and
-  one-lane solves leave them behind in a single iteration.</p>
+  <p>The plateau reported by <code>bank-step-plateau</code> is what the iteration
+  steps onto between 3.19e-10 and 1.64e-7: the clipped read is not smooth
+  across a stencil change, so a full Newton step from a state whose residual is
+  3.19e-10 lands where the fresh read reports 1.6442e-7. The cycle belongs to
+  the <em>operator</em>'s iteration, and batching neither causes nor cures it. A batched lane reproduces the unbatched
+  trajectory, which is what the one-lane table shows: it passes the plateau and
+  reaches 2.01e-11 in six iterations.</p>
 
-  <p>A one-lane batch tracks the unbatched solve, so
-  <code>step_batch</code>'s per-lane arithmetic is not wrong at batch size
-  one. At four lanes the lanes interfere, and the place to look is the one
-  thing they share: the single batch-uniform rebuild decision that
-  <code>read_batch</code> takes outside the map, which rebuilds all four
-  stencils or none. A node that resolves the two-cycle should start there.</p>
+  <h3 id="bank-step-batch-freeze">Freezing a converged lane</h3>
+
+  <p><code>step_batch</code> now takes an optional per-lane <code>converged</code>
+  flag and zeroes a flagged lane's update, so a lane that has met the residual
+  bound holds the state that satisfied it while the other lanes continue. The
+  driver's loop also tests the bound <em>before</em> stepping rather than after:
+  the earlier arm read the bound from the pre-step state and then took one more
+  step off it, which is why a lane that had reached 9.5e-12 was reported at
+  1.64e-7 at exit.</p>
+
+  <table id="bank-step-batch-freeze-table">
+    <caption>Largest fresh-read residual per lane, batched step at four lanes with the freeze, diverted 550-cell state, one H200. Lanes 1 and 2 reach the bound at iteration 4 and hold exactly those values through iteration 8; lane 0 reaches 8.78e-11 at iteration 7 and holds it; lane 3 cycles through 1.42e-10 before reaching 5.24e-11, and the batch exits converged after 16 iterations with every lane at or below 1e-10.</caption>
+    <tr><th>iteration</th><th>lane 0</th><th>lane 1</th><th>lane 2</th><th>lane 3</th></tr>
+    <tr><td>0</td><td>8.11e-2</td><td>9.35e-2</td><td>1.06e-1</td><td>1.18e-1</td></tr>
+    <tr><td>1</td><td>2.51e-4</td><td>3.04e-4</td><td>3.51e-4</td><td>3.92e-4</td></tr>
+    <tr><td>2</td><td>1.64e-7</td><td>1.04e-9</td><td>1.33e-9</td><td>1.77e-9</td></tr>
+    <tr><td>3</td><td>3.19e-10</td><td>3.19e-10</td><td>3.19e-10</td><td>3.19e-10</td></tr>
+    <tr><td>4</td><td>1.64e-7</td><td>4.49e-11 (hold)</td><td>6.69e-12 (hold)</td><td>1.64e-7</td></tr>
+    <tr><td>6</td><td>3.19e-10</td><td>4.49e-11</td><td>6.69e-12</td><td>1.64e-7</td></tr>
+    <tr><td>7</td><td>8.78e-11 (hold)</td><td>4.49e-11</td><td>6.69e-12</td><td>1.42e-10</td></tr>
+    <tr><td>8</td><td>8.78e-11</td><td>4.49e-11</td><td>6.69e-12</td><td>1.64e-7</td></tr>
+  </table>
+
+  <p>The held values are the measurement that the freeze works: a lane that has
+  met the bound reports the same residual at every later iteration, where before
+  it moved. The batch exits <code>converged: true</code> after 16 iterations
+  with residuals <code>[8.7795e-11, 4.4864e-11, 6.6933e-12, 5.2410e-11]</code>,
+  every lane at or below the 1e-10 bound. Composed with the unbatched table
+  above, that is the whole claim: the alternation is the operator's, and the
+  freeze lets a batch satisfy a whole-batch bound that a naive loop never
+  reaches because it keeps stepping lanes that have already arrived.</p>
 
   <h3 id="bank-step-batch-condition">What the factor actually resolves</h3>
 
@@ -154,56 +177,64 @@
   column-equilibrated matrix that is the one actually factored gives 1.7097e4.
   The LU factors the equilibrated matrix, so <strong>1.71e4 is the
   conditioning that governs the solve</strong>; the raw figure sits at the
-  double-precision limit and is not the number that sets the resolution. At
-  1.71e4 a double-precision solve resolves a relative residual near
-  1.7e4 × 2.2e-16 ≈ 3.8e-12, which is the magnitude of the residuals measured
-  here, 9.52e-12 and 2.05e-11. Nothing in this estimate supports a floor at
-  1.6442e-7, and the claim that 1e-10 was below the operator's resolution is
-  withdrawn.</p>
+  conditioning limit and is not the number that sets the resolution. At 1.71e4
+  a double-precision solve resolves a relative residual near
+  1.7e4 × 2.2e-16 ≈ 3.8e-12, the magnitude actually reached (2.01e-11,
+  2.74e-11, 9.52e-12). No floor at 1.6442e-7 is supported.</p>
 
-  <h3 id="bank-step-batch-gate">The gate, and what it did not establish</h3>
+  <h3 id="bank-step-batch-rebuild">The rebuild decision, and what it was doing</h3>
 
-  <p><code>tests/test_bank_step_batch.py</code> compares two lanes of a batched
-  solve against the same two states solved alone at a 64-cell state, and stops
-  each solve when its fresh residual falls to 1e-10. At revision
-  <code>80b39671a</code> the batched clause converges, at 3.91e-11 and
-  1.84e-11, and the comparison then fails because the <em>single-lane</em>
-  reference solve for lane 0 returns <code>nan</code>. The gate is red for a
-  defect in the reference arm rather than in the batched one, and it is
-  reported as red, not as passed.</p>
+  <p><code>read_batch</code> took its branch on one batch-uniform flag but
+  <em>reported</em> a per-lane verdict: a batch with one stale lane returned
+  <code>rebuilt=[False, True]</code> and <code>rebuilds=[1, 2]</code>, the exact
+  per-lane behaviour its docstring says the batch-uniform
+  <code>lax.cond</code> exists to prevent. The decision is now computed once as
+  a scalar that the branch, the reported flag and the counter all read, so no
+  lane can carry a verdict of its own. The clause in
+  <code>tests/test_bank_step_batch.py</code> requires a batch with one stale
+  lane to report the rebuild on every lane and to advance every counter by
+  exactly one.</p>
+  <h3 id="bank-step-batch-gate">The gate</h3>
 
-  <p><strong>The branch clause fails on the device, which is a finding against
-  <code>read_batch</code>.</strong> With lane 1's tracked cell set stale the
-  batch returns <code>rebuilt=[False, True]</code> and
-  <code>rebuilds=[1, 2]</code>: it rebuilt exactly the stale lane, which is the
-  per-lane behaviour <code>read_batch</code>'s own docstring says the
-  batch-uniform <code>lax.cond</code> exists to prevent. The clause is not
-  answered by this node's code, whatever the docstring states.</p>
+  <p>The gate now runs at the diverted 550-cell certificate state, not at 64
+  cells. At 64 cells the fixture's converged moments are not a fixed point of
+  that mesh's operator: the diagnostic arm measured a joint residual of 13.4 at
+  iteration 0 there, with every stage finite — the read's stationary positions,
+  the booking, the residual and the update all finite — and the iteration then
+  walked away from the state rather than toward it, which is what ended in the
+  NaN the record previously reported. That is a fixture defect, reported as
+  such; the solver was never returning a non-finite value from a finite reading.</p>
 
-  <p>The CPU arm runs at two lanes. The certificate fixture's jet build is what
-  did not fit a CPU allocation; it is published once to the shared operand
-  cache, 223 nodes and 2.0 MB of matrix, and every later process loads it, so
-  the gate's own memory is the 64-cell state rather than the source
-  integration. The two-lane CPU run completed at job 1303739 in 14:23, logged
-  in <code>waverun/cpu-final.log</code>.</p>
+  <p>With the freeze in place the batched clause converges at 550 cells:
+  <code>batched residuals: [9.4829e-11, 2.3292e-11] after 10 steps</code>, both
+  lanes at or below the 1e-10 bound. The branch clause exercises one stale
+  tracked cell and requires every lane to report the rebuild and advance its
+  counter by exactly one.</p>
 
-  <p>The declared negative control, the batch-uniform read decision moved
-  inside the map, <strong>was run</strong> and its log is
-  <code>waverun/regate.log</code>: the mutant yields two failures where the
-  shipped tree yields one, and under the mutation the batched clause returns <code>[nan,
-  2.17e-07]</code>, so the mutation does take that clause red. Because the
-  shipped gate is already red on the <code>nan</code> reference arm, that red
-  is weaker evidence than a clean pass would give, and this node reports it as
-  such rather than as a clean red.</p>
+  <p><strong>As delivered the gate is red, on a timeout and not on a
+  number.</strong> The first re-run ended <code>1 failed, 1 passed</code>: the
+  branch clause passed and the convergence clause exceeded the suite's 300 s
+  per-test bound while solving the two reference lanes, after its batched
+  residual had already been printed at 9.48e-11. The test file now declares
+  <code>pytest.mark.timeout(1800)</code>, and the re-run under that bound is
+  job 1303787, which was still queued when this record was written.</p>
+
+  <p>The declared negative control was not re-run against the repaired code:
+  job 1303783 reached the gate's red and was stopped before its mutation arm,
+  so the mutation log for this revision does not exist. The previous
+  revision's mutation run is still on disk at
+  <code>waverun/regate.log</code> from this node's earlier delivery; it says
+  nothing about the repaired <code>read_batch</code> and must not be read as
+  covering it.</p>
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:
-  <code>waverun/trace.log</code> for the per-iteration tables above,
-  <code>waverun/wave.log</code>, <code>waverun/converge.log</code>,
-  <code>waverun/regate.log</code>, <code>waverun/plain.log</code>,
-  <code>waverun/cpu-final.log</code>, <code>h200b/stage.jsonl</code>, and the
-  inspected <code>per-slice-wall.png</code>. The 64-slice whole-step row is
-  dropped for the reason its own job recorded: job 1303721 ended with
-  <code>EXIT=139</code> inside the timing arm for that slice count, after the
-  stage rows had been written, and no wall was journaled for it.</p>
+  <code>waverun/trace.log</code> for the per-iteration tables above (job
+  1303782), <code>waverun/regate.log</code> for the gate and the negative
+  control (job 1303783), <code>waverun/diagnose.log</code> for the 64-cell
+  non-finite diagnosis (job 1303781), and <code>waverun/h200-stage.log</code>
+  for the stage wall re-measured at the repaired revision (job 1303785). Jobs
+  1303782 and 1303783 were launched from the repaired working tree before it was
+  committed, so their <code>REVISION</code> line reads 98b6bb91d while the code
+  they ran is c3124432d; job 1303785 records c3124432d directly.</p>
 </section>

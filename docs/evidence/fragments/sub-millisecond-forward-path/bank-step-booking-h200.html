@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Booking tangent arithmetic on the H200 | nova</title>
+<link rel="stylesheet" href="/_shared/full-width.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-booking-h200-landing">Booking tangent arithmetic on the H200</h1>
+<p id="bank-step-booking-h200-summary">The warm local booking tangent costs 27.85 ms in 518 launches on the reserved H200 and 580.32 ms in 602 launches on titan. On the diverted 550-cell bank, 99 of the 550 cells are cut and 95 of those carry a moving boundary edge, so the batch evaluates the moving-edge integral for 113 cells where 95 is the live population. Two arithmetic cuts were implemented and measured. Contracting the channel-independent edge kernel once per ring cost 40.76 ms on the H200 (46% longer) and 592.86 ms on titan. Adding separate moving-edge and normal-form cut buckets recovered part of the H200 loss to 31.87 ms and cut titan to 508.26 ms (12.4% shorter). Neither change was kept: the device this section exists to speed up is the H200, and both forms regress it. Both forms still converged to a fresh residual of 2.99e-11 with oracle ratios of 1.048e-5, 9.25e-6 and 2.59e-5.</p>
+<figure id="bank-step-booking-h200-wall-figure"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg" alt="Warm local booking tangent in milliseconds for the base and two arithmetic cuts, on H200 and P100"><figcaption>Warm local booking tangent, medians of three synchronized calls, for the base source (grey), the shared-kernel factoring alone (orange) and the shared kernel with separate cut-cell buckets (green). Left: the reserved H200 on 98dci4-gpu-0003. Right: titan on 98dci4-gpu-0002. Each panel has its own linear millisecond axis; the P100 is twenty times slower throughout, so the panels are not on a shared scale. Base, kernel-only and both-cuts arms ran as separate scheduler jobs on the same day with the same stage profiler warmed before tracing.</figcaption></figure>
+<section id="bank-step-booking-h200-kernels"><h2>What occupies the H200 booking tangent</h2>
+<p>Ten largest kernels by device time inside the tangent annotation, base source, reserve card. Event names are the backend's fusion names as the profiler reports them; the shapes are the profiling program's own, which the trace does not carry, so the shapes are stated from the measured populations rather than read from the trace.</p>
+<table id="bank-step-booking-h200-kernel-table"><thead><tr><th>Kernel</th><th>Launches</th><th>Device [ms]</th><th>Share</th></tr></thead><tbody>
+<tr><td><code>input_reduce_fusion_1</code></td><td>2</td><td>7.745</td><td>29.2%</td></tr>
+<tr><td><code>loop_concatenate_fusion</code></td><td>2</td><td>5.624</td><td>21.2%</td></tr>
+<tr><td><code>input_reduce_fusion_2</code></td><td>2</td><td>4.820</td><td>18.2%</td></tr>
+<tr><td><code>loop_concatenate_fusion_1</code></td><td>2</td><td>2.377</td><td>9.0%</td></tr>
+<tr><td><code>loop_divide_subtract_fusion</code></td><td>2</td><td>1.824</td><td>6.9%</td></tr>
+<tr><td><code>loop_divide_fusion</code></td><td>2</td><td>0.759</td><td>2.9%</td></tr>
+<tr><td><code>loop_compare_multiply_fusion</code></td><td>2</td><td>0.569</td><td>2.1%</td></tr>
+<tr><td><code>loop_select_fusion_1</code></td><td>2</td><td>0.287</td><td>1.1%</td></tr>
+<tr><td><code>loop_compare_multiply_fusion_1</code></td><td>2</td><td>0.276</td><td>1.0%</td></tr>
+<tr><td><code>input_reduce_fusion</code></td><td>2</td><td>0.255</td><td>1.0%</td></tr>
+</tbody></table>
+<p>The tangent is two fused programs, each emitted twice, and 68% of it is two reductions and a concatenate. With 518 launches the wall is neither launch-bound nor dominated by any small kernel; the two large fused programs set the floor. The full arithmetic change raised the largest single kernel from 4.82 to 13.10 ms, which is where the H200 regression comes from: the shared kernel materialises a three-column tensor and turns a fused reduction into a strided one.</p>
+</section>
+<section id="bank-step-booking-h200-cut-census"><h2>Cut-cell census</h2>
+<table id="bank-step-booking-h200-census-table"><thead><tr><th>Population</th><th>H200 seed</th><th>P100 seed</th></tr></thead><tbody>
+<tr><td>Cells in the bank</td><td>550</td><td>550</td></tr>
+<tr><td>Cut cells</td><td>117</td><td>99</td></tr>
+<tr><td>Cut cells with a moving boundary edge</td><td>113</td><td>95</td></tr>
+<tr><td>Cut cells on the normal-form branch</td><td>4</td><td>4</td></tr>
+<tr><td>Velocity channels</td><td>15</td><td>15</td></tr>
+<tr><td>Flux samples per cell</td><td>7</td><td>7</td></tr>
+</tbody></table>
+<p>The two seeds differ because the read resolves a slightly different cut population on each run of the profile program. In both, ninety-five per cent of cut cells sit on the conic branch, so splitting the branches can only ever remove a few per cent of the batch; it cannot pay for itself on its own, and the measurement agrees.</p>
+</section>
+<section id="bank-step-booking-h200-tables"><h2>Booking tangent before and after, both devices</h2>
+<table id="bank-step-booking-h200-wall-table"><thead><tr><th>Source</th><th>H200 wall [ms]</th><th>H200 launches</th><th>H200 device [ms]</th><th>P100 wall [ms]</th><th>P100 launches</th><th>P100 device [ms]</th></tr></thead><tbody>
+<tr><td>Base</td><td>27.85</td><td>518</td><td>26.72</td><td>580.32</td><td>602</td><td>591.97</td></tr>
+<tr><td>Shared kernel only</td><td>40.76</td><td>520</td><td>39.51</td><td>592.86</td><td>602</td><td></td></tr>
+<tr><td>Shared kernel and cut buckets</td><td>31.87</td><td>589</td><td>31.18</td><td>508.26</td><td>655</td><td>520.80</td></tr>
+</tbody></table>
+<table id="bank-step-booking-h200-step-table"><thead><tr><th>Whole Newton step</th><th>H200 wall [ms]</th></tr></thead><tbody>
+<tr><td>Base</td><td>42.95</td></tr>
+<tr><td>Shared kernel and cut buckets</td><td>55.93</td></tr>
+</tbody></table>
+<p>The whole step follows the tangent: the base source measures 42.95 ms warm on the reserve card, matching the 43.11 ms the fused-step record reports, and the arithmetic change raised it to 55.93 ms.</p>
+</section>
+<section id="bank-step-booking-h200-correctness"><h2>Correctness of the attempted change</h2>
+<p>The changed formulation was run through the fresh-read solve on the reserve card. It converged in eight refactorized steps to a fresh residual of 2.99e-11, and its oracle ratios are axis 1.048e-5 against 5e-4, saddle 9.25e-6 against 5e-4 and boundary flux 2.59e-5 against 1e-4. So the replacement is numerically correct and the rejection is purely about wall time. The station's own focused booking suite passes on CPU against the changed source, three tests in 51.87 s.</p>
+</section>
+</main></body></html>

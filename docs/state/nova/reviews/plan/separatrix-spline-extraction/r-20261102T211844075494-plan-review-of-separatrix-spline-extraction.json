@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "redundant, not load-bearing: the same clause's negative control (a 1 percent perturbation of one stored conductor current must change the drawn contour paths) fails on any panel still drawn from the stored lattice psi, so the gate can fail on an unfixed figure without the between-rows sub-clause",
       "when": "2026-11-02T22:12:12.612142+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "--hex-cells sets the drawn plasma hex mesh in panels(), not the solve; both cpu panels draw the same solved state, so one stored set of conductor currents and cell moments per panel-fields.npz serves both densities",
+      "when": "2026-11-02T22:12:24.379047+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "redundant, not load-bearing: the same clause's negative control (a 1 percent perturbation of one stored conductor current must change the drawn contour paths) fails on any panel still drawn from the stored lattice psi, so the gate can fail on an unfixed figure without the between-rows sub-clause",
       "when": "2026-11-02T22:12:12.612142+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "--hex-cells sets the drawn plasma hex mesh in panels(), not the solve; both cpu panels draw the same solved state, so one stored set of conductor currents and cell moments per panel-fields.npz serves both densities",
+      "when": "2026-11-02T22:12:24.379047+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/separatrix-spline-extraction/r-20261102T211844075494-plan-review-of-separatrix-spline-extraction.json",

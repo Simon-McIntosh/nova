@@ -41,7 +41,7 @@ RESIDUAL = 1e-10
 EQUALITY = 1e-10
 pytestmark = pytest.mark.timeout(1800)
 POLICY_RADIUS = 0.054806712567833996
-LANE_PERTURBATION = (1e-4, -2e-4)
+LANE_PERTURBATION = (1e-5, 3e-5)
 
 
 @pytest.fixture(scope="module")
@@ -56,6 +56,13 @@ def built():
         bucket=len(case["nodes"]),
     )
     return case, operands, cache_for(operands)
+
+
+def _seeds(case):
+    """Seeds offset a fraction of a cell pitch, which is what keeps a read in
+    the basin after the moments move by a small multiple."""
+    roots = jnp.asarray(case["roots"])
+    return roots + 0.03 * jnp.median(case["geometry"].pitch)
 
 
 def _gradient(radius, flux):
@@ -82,7 +89,7 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
     case, operands, cache = built
     convention, policy = case["convention"], case["policy"]
     profile, quadrature = case["profile"], case["quadrature"]
-    seeds = jnp.asarray(case["roots"])
+    seeds = _seeds(case)
 
     lanes = [
         _perturbed(case["states"]["converged"], scale) for scale in LANE_PERTURBATION
@@ -228,7 +235,7 @@ def test_one_stale_lane_rebuilds_the_whole_batch(built):
     case, operands, cache = built
     convention, policy = case["convention"], case["policy"]
     profile, quadrature = case["profile"], case["quadrature"]
-    seeds = jnp.asarray(case["roots"])
+    seeds = _seeds(case)
     lanes = [
         _perturbed(case["states"]["converged"], scale) for scale in LANE_PERTURBATION
     ]

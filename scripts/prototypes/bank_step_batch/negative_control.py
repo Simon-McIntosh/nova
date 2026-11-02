@@ -43,6 +43,16 @@ MUTANT = """    support = jax.vmap(
     )(moments, seeds, previous, tracking)"""
 
 
+SHADOW = """import sys
+
+sys.meta_path[:] = [
+    finder
+    for finder in sys.meta_path
+    if "editable" not in type(finder).__name__.lower()
+]
+"""
+
+
 def transplant(root: Path, scratch: Path):
     for name in ("nova", "tests", "scripts", "benchmarks"):
         source = root / name
@@ -50,6 +60,10 @@ def transplant(root: Path, scratch: Path):
             shutil.copytree(
                 source, scratch / name, copy_function=os.link, symlinks=True
             )
+    # The shared environment installs nova through an editable meta-path
+    # finder, which is consulted before sys.path and would serve the shipped
+    # module ahead of the scratch copy.
+    (scratch / "sitecustomize.py").write_text(SHADOW)
     target = scratch / "nova" / "equilibrium" / "support_read.py"
     text = target.read_text()
     if BATCHED not in text:

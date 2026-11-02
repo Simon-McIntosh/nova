@@ -6,6 +6,13 @@
   ],
   "completed_at": "2026-11-02T22:32:03.398Z",
   "dispatched_at": "2026-11-02T22:15:57Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the coordinator restated the equality clause after the 1e-12 bitwise wording proved over-strict: batched and single LU take different device paths, so equality is judged at the converged flux within 1e-10 relative with both residuals at most 1e-10",
+      "recorded_at": "2026-11-02T22:41:45.965531+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_bank_step_batch.py",

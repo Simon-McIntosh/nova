@@ -42,9 +42,43 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-11-02T19:23:48.155857+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "51e2b18063df5a084f8653ac6bbf98d96332e164",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-11-02T19:24:20.711071+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "51e2b18063df5a084f8653ac6bbf98d96332e164",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "reason": "",
+      "when": "2026-11-02T19:24:37.739054+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "51e2b18063df5a084f8653ac6bbf98d96332e164",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-02T19:24:20.711071+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "51e2b18063df5a084f8653ac6bbf98d96332e164",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-02T19:24:37.739054+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

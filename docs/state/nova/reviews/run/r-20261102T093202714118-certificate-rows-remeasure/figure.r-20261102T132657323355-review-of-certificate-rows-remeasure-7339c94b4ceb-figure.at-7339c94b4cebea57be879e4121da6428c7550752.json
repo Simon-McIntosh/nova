@@ -7,7 +7,7 @@
     "image-2.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
   },
   "attachment_mapping_basis": "Read from what each attachment draws, not from file order. image-0 is the four-panel composition whose suptitle reads 'diverted-single-null - cells-300 - unqualified', the diverted single-null row. image-1 carries 'weak-rotation-reactor-static - cells-500 - unqualified', the limited row at requested cells -500 (553 realised cells) that the evidence page reports. image-2 is a single 1400x800 poloidal panel with two top-left series labels, the private 550-cell moment solve.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T13:37:33.816Z",
   "dispatched_at": "2026-11-02T13:29:19Z",
   "findings": [
     {
@@ -76,6 +76,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T13:37:36.235763+00:00",
+  "timestamp": "2026-11-02T13:40:32.218152+00:00",
   "total": null
 }

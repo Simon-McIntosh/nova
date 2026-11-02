@@ -13,6 +13,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import jax
+import numpy as np
 import nova
 from nova.biot import polygonanalytic
 
@@ -29,8 +30,10 @@ LOGICAL = {
 
 
 def _roots(topology):
-    axis = topology["axis_rz_m"]
-    return [axis, *topology["x_point_rz_m"]]
+    axis = np.asarray(topology["axis_rz_m"], dtype=float).reshape(1, 2)
+    points = np.asarray(topology["x_point_rz_m"], dtype=float)
+    points = points.reshape(-1, 2) if points.size else np.empty((0, 2))
+    return np.vstack((axis, points)).tolist()
 
 
 def main():

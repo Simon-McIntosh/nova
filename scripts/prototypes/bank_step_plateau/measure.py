@@ -175,6 +175,8 @@ def compare(path, output, mutation):
     for index, (x, d) in enumerate(
         zip(trajectory["states"], trajectory["directions"], strict=True)
     ):
+        if mutation and index != 2:
+            continue
         state = jnp.asarray(x)
         direction = jnp.asarray(d)
         support = read(state)
@@ -198,7 +200,7 @@ def compare(path, output, mutation):
             valid=bool(valid),
             direction_norm=norm(direction),
         )
-        for relative_size in ladder:
+        for relative_size in (1e-5,) if mutation else ladder:
             scale = relative_size * norm(state) / norm(direction)
             plus = state + scale * direction
             minus = state - scale * direction

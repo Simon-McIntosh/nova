@@ -49,11 +49,11 @@ def main(baseline: Path, checkpoint: Path, after: Path, svg: Path):
         ax.plot([], [], color=color, linewidth=3, linestyle=style, label=label)
     ax.set_yticks(y, [label for _, label in STAGES])
     ax.invert_yaxis()
-    ax.set_xlim(
-        0,
-        max(before["whole_step"], intermediate["whole_step"], current["whole_step"])
-        * 1.08,
+    maximum = max(
+        before["whole_step"], intermediate["whole_step"], current["whole_step"]
     )
+    ax.set_xlim(0, maximum * 1.08)
+    ax.set_xticks(np.arange(0, np.ceil(maximum / 200) * 200 + 1, 200))
     ax.set_xlabel("titan P100 warm wall [ms]")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)

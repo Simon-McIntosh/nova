@@ -118,6 +118,23 @@ def main():
         "normalization",
         float(booked.normalization),
     )
+    support_vector = jax.jit(
+        lambda: support_read._local_booking_sensitivities(
+            operands,
+            moments,
+            support,
+            UnitDensity(),
+            density_gradient,
+            quadrature,
+            booked,
+        )
+    )()
+    print(
+        "SUPPORT_RESPONSE",
+        float(support_vector[cell, 2, channel]),
+        "DIRECT_DIFFERENCE",
+        float(jnp.max(jnp.abs(support_vector - vector_all))),
+    )
     cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     print("CUT_INDICES", np.asarray(cut_index[: int(jnp.sum(cut))]).tolist())

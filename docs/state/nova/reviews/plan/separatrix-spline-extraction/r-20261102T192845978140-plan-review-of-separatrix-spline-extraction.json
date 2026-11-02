@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T19:38:21.505Z",
+  "dispatched_at": "2026-11-02T19:30:31Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-1",
+      "reason": "the assertion has to be per figure and against the builder's returned shape and spacing, or one of the four figures is signed off as regenerated without having been drawn from a \u00a75 map.",
+      "text": "\u00a76 done-when (1) discriminates with \"asserts that shape is the \u00a75 map's and not 33\u00d733\", but the full-axis lane's committed artefact is already 65\u00d765 (`docs/figures/mast-centroid-capability/full-axis-lane/panel-fields.npz`, `shape [65 65]`) with its contours still a lattice raster, so the clause passes on the unfixed figure and cannot show that figure was redrawn; \u00a76's own premise, \"their thin contours are still the 33\u00d733 lattice raster\", is likewise false for that lane",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-2",
+      "reason": "\u00a76 can close with non-converged panels whose captions still present the stopped iterate as the solved field, which is the exact misreading \u00a75 was revised to prevent.",
+      "text": "\u00a75 requires that \"a panel of a non-converged state says in its caption that it draws the field of the terminal currents, and gives that mismatch\", and \u00a77 done-when (1) carries that clause, but \u00a76's done-when has none, while its cpu lane's receipt records `warm_converged_count = 2` (`docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json`), so the fleet it redraws includes non-converged states",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:175",
+      "id": "anchors_resolve-1",
+      "reason": "the node needs the plan to say that figure is re-solved from its producer without a stored state and that done-when (2) creates the npz, otherwise the fifth figure either cannot be closed on the stated measure or closes vacuously.",
+      "text": "\u00a77 states \"Their `panel-states.npz` files keep \u03c8 only, so each is re-solved with the producer command that wrote it\", but `docs/figures/single-grid-solver-cutover/` contains `titan-converged-vs-nonconverged.png` and `.svg` and no `panel-states.npz` at all, so for that figure there is no stored state to re-solve from and no file for done-when (2) to carry currents into",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "51e2b18063df5a084f8653ac6bbf98d96332e164",
+  "plan_fingerprint": "1fdd26a99b03fab835ba03235a95dda6570ddd2e615b21d9453df2ed4f777cbd",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 150,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T192845978140-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "7e0ec5cb5fb8a5ce64ea4324f929a02cf44ae142",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a77 asserts a `panel-states.npz` behind each of its five figures, and `docs/figures/single-grid-solver-cutover/` holds none.",
+    "done_when": "two findings \u2014 \u00a76 done-when (1)'s \"not 33\u00d733\" discriminator already holds on the unfixed full-axis artefact, and \u00a76 carries no caption clause for the non-converged panels \u00a75 requires captioned.",
+    "evidence_paths": "pass \u2014 receipts and the npz states land under `docs/figures/...` in git, alongside the figures they describe, not in a scratchpad or a node-local path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach a symbol the units create; \"\u00a75 map\" appears only in plan prose, not in a name the work would carry.",
+    "reasoning": "pass \u2014 the 2026-11-02 saddle-cell observation supports the interpolation root cause, the fine-map mechanism is capable of each done-when, and the caller is named at both consumers (`benchmarks/mast_centroid_solve_panels.py`, `benchmarks/coil_edit_latency.py:_render_panel`).",
+    "single_goal": "pass \u2014 each unit carries one deliverable: s5 a map builder, s6 four centroid panels, s7 five coil-edit panels.",
+    "wiring": "pass \u2014 s6, s7 and s8 each declare `separatrix-spline-extraction#s5` in `plan-section-depends-on`, every named producer, test and figure path resolves, and no unit depends on a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "b93bd56edd6223ab192c1f3f9ebe3945830d8a755956ae9ab106d8e7d30e400d",
+    "s7": "2239b1976ef1144fa14c2f4a76d97fb4b9d606b5bd2ebde5faa902dbab4e40f2",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T19:46:59.336751+00:00"
+}

@@ -14,7 +14,6 @@ serves any state of the same layout.
 
 import json
 from dataclasses import dataclass, field, replace
-from itertools import permutations
 from math import factorial
 from typing import NamedTuple
 
@@ -617,61 +616,37 @@ def _bell_derivatives(field, point, orders):
     )
 
 
-_HESSIAN_ORDERS = ((2, 0), (1, 1), (1, 1), (0, 2))
-_THIRD_ORDERS = tuple(
-    (sum(index == 0 for index in axes), sum(index == 1 for index in axes))
-    for axes in np.ndindex((2, 2, 2))
-)
+def _tensor_orders(rank):
+    return tuple(
+        (sum(index == 0 for index in axes), sum(index == 1 for index in axes))
+        for axes in np.ndindex((2,) * rank)
+    )
 
 
-def _bell_hessian_rate(field, direction_field, point, point_rate):
-    hessian = _bell_derivatives(field, point, _HESSIAN_ORDERS).reshape(2, 2)
-    third = _bell_derivatives(field, point, _THIRD_ORDERS).reshape(2, 2, 2)
-    rate = _bell_derivatives(direction_field, point, _HESSIAN_ORDERS).reshape(2, 2)
-    return hessian, rate + jnp.einsum("ijk,k->ij", third, point_rate)
+_HESSIAN_ORDERS = _tensor_orders(2)
+_THIRD_ORDERS = _tensor_orders(3)
+_FOURTH_ORDERS = _tensor_orders(4)
+_FIFTH_ORDERS = _tensor_orders(5)
 
 
 def _curvature_rates(field, direction_field, point, point_rate, pitch):
-    step = 0.01 * pitch
-    offsets = jnp.asarray(
-        ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
+    """Use exact Bell derivatives, including the moving fourth-order term."""
+    del pitch
+    orders = _HESSIAN_ORDERS + _THIRD_ORDERS + _FOURTH_ORDERS + _FIFTH_ORDERS
+    primal = _bell_derivatives(field, point, orders)
+    varied = _bell_derivatives(direction_field, point, orders)
+    hessian = primal[:4].reshape(2, 2)
+    third = primal[4:12].reshape(2, 2, 2)
+    fourth = primal[12:28].reshape(2, 2, 2, 2)
+    fifth = primal[28:].reshape(2, 2, 2, 2, 2)
+    hessian_rate = varied[:4].reshape(2, 2) + jnp.einsum("ijk,k->ij", third, point_rate)
+    third_rate = varied[4:12].reshape(2, 2, 2) + jnp.einsum(
+        "ijkl,l->ijk", fourth, point_rate
     )
-    pairs = jax.lax.map(
-        lambda offset: _bell_hessian_rate(
-            field, direction_field, point + step * offset, point_rate
-        ),
-        offsets,
+    fourth_rate = varied[12:28].reshape(2, 2, 2, 2) + jnp.einsum(
+        "ijklm,m->ijkl", fifth, point_rate
     )
-
-    def assemble(values):
-        third = jnp.stack(
-            (
-                (values[1] - values[2]) / (2 * step),
-                (values[3] - values[4]) / (2 * step),
-            ),
-            axis=-1,
-        )
-        mixed = (values[5] - values[6] - values[7] + values[8]) / (4 * step**2)
-        fourth = jnp.stack(
-            (
-                jnp.stack(
-                    ((values[1] - 2 * values[0] + values[2]) / step**2, mixed), axis=-1
-                ),
-                jnp.stack(
-                    (mixed, (values[3] - 2 * values[0] + values[4]) / step**2), axis=-1
-                ),
-            ),
-            axis=-1,
-        )
-        third = sum(jnp.transpose(third, order) for order in permutations(range(3))) / 6
-        fourth = (
-            sum(jnp.transpose(fourth, order) for order in permutations(range(4))) / 24
-        )
-        return third, fourth
-
-    third, fourth = assemble(pairs[0])
-    third_rate, fourth_rate = assemble(pairs[1])
-    return pairs[0][0], pairs[1][0], third, third_rate, fourth, fourth_rate
+    return hessian, hessian_rate, third, third_rate, fourth, fourth_rate
 
 
 def _normal_form_rate(

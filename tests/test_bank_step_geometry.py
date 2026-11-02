@@ -7,12 +7,14 @@ configure_dtypes()
 
 import inspect
 from itertools import permutations
+from dataclasses import replace
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import current, support_read, topology
+from nova.equilibrium import current, fixed_points, support_read, topology
+from scripts.prototypes.bank_step_geometry import reference
 from tests.test_support_read import _case
 
 
@@ -43,8 +45,8 @@ def test_normal_form_rate_matches_directional_reference():
     actual = support_read._normal_form_rate(
         form, hessian, hessian_rate, third, third_rate, fourth, fourth_rate
     )
-    for observed, reference in zip(actual, expected[1:4], strict=True):
-        np.testing.assert_allclose(observed, reference, rtol=1e-10, atol=1e-10)
+    for observed, expected_rate in zip(actual, expected[1:4], strict=True):
+        np.testing.assert_allclose(observed, expected_rate, rtol=1e-10, atol=1e-10)
 
 
 def test_sorted_cuts_and_ring_velocities_match_directional_reference():
@@ -117,3 +119,73 @@ def test_sorted_cuts_and_ring_velocities_match_directional_reference():
         np.testing.assert_allclose(
             actual_velocity, expected_velocity, rtol=1e-10, atol=1e-10
         )
+
+
+def test_one_jet_channel_matches_retained_booking_geometry():
+    from tests.test_support_read import UnitDensity
+
+    operands, cache, roots, pitch, step, _, _ = _case("diverted")
+    support, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    moments = tuple(jnp.zeros(len(operands.geometry.centre)) for _ in range(3))
+    jets = jnp.zeros_like(support_read.nodal_jets(operands, moments))
+    node = jnp.argmin(
+        jnp.linalg.norm(operands.nodes - support.reading.saddle_form.position, axis=1)
+    )
+    jets = jets.at[node, 0].set(1.0)
+    quadrature = current.Quadrature(
+        sigma=topology.TopologyConvention.from_cocos(17, 1.0).sigma, segments=64
+    )
+    closed = jax.jit(
+        lambda direction: support_read._normal_geometry_booking_tangent(
+            operands, moments, direction, support, UnitDensity(), quadrature, booked
+        )
+    )(jets)
+    retained = jax.jit(
+        lambda direction: reference._normal_geometry_booking_tangent(
+            operands, moments, direction, support, UnitDensity(), quadrature, booked
+        )
+    )(jets)
+    for actual, expected in zip(closed, retained, strict=True):
+        np.testing.assert_allclose(actual, expected, rtol=1e-10, atol=1e-10)
+
+
+def test_bell_curvature_rates_match_directional_reference():
+    operands, cache, roots, pitch, step, _, _ = _case("diverted")
+    support, _ = step(operands, cache, roots + 0.03 * pitch, roots)
+    moments = tuple(jnp.zeros(len(operands.geometry.centre)) for _ in range(3))
+    jets = support_read.nodal_jets(operands, moments)
+    field = fixed_points.field_from_jets(jets, operands.sample_index, operands.mesh)
+    node = jnp.argmin(
+        jnp.linalg.norm(operands.nodes - support.reading.saddle_form.position, axis=1)
+    )
+    jet_rate = jnp.zeros_like(jets).at[node, 0].set(1.0)
+    direction_field = fixed_points.field_from_jets(
+        jet_rate, operands.sample_index, operands.mesh
+    )
+    point = support.reading.saddle_form.position
+    point_rate = -jnp.linalg.solve(
+        field.evaluate(point).hessian, direction_field.evaluate(point).gradient
+    )
+
+    def varying(amount, position):
+        moved = replace(
+            field,
+            coefficients=field.coefficients + amount * direction_field.coefficients,
+            jets=field.jets + amount * direction_field.jets,
+        )
+        return moved.evaluate(position).hessian, *topology._curvature_derivatives(
+            moved, position, pitch
+        )
+
+    primal, tangent = jax.jvp(
+        varying, (jnp.zeros(()), point), (jnp.ones(()), point_rate)
+    )
+    actual = support_read._curvature_rates(
+        field, direction_field, point, point_rate, pitch
+    )
+    for observed, expected in zip(
+        actual,
+        (primal[0], tangent[0], primal[1], tangent[1], primal[2], tangent[2]),
+        strict=True,
+    ):
+        np.testing.assert_allclose(observed, expected, rtol=1e-10, atol=1e-10)

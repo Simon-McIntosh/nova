@@ -53,9 +53,11 @@ def main():
         )
         assert bool(support.valid)
         psi = support_read.nodal_jets(bank, moments)[bank.sample_index, 0]
-        booked = jax.jit(current.book)(
-            psi, support.reading, bank.geometry, profile, quadrature
-        )
+        booked = jax.jit(
+            lambda values, reading, geometry: current.book(
+                values, reading, geometry, profile, quadrature
+            )
+        )(psi, support.reading, bank.geometry)
         assert bool(booked.valid)
 
         def channel(index):

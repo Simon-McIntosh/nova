@@ -163,6 +163,23 @@ def main():
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     print("CUT_INDICES", np.asarray(cut_index[: int(jnp.sum(cut))]).tolist())
 
+    cell = int(worst[0])
+    centre = geometry.centre[cell]
+    vertices = geometry.vertices[cell]
+    count = geometry.vertex_count[cell]
+    width = geometry.pitch[cell]
+    selected = reading.fragment_selected[cell]
+    print(
+        "DETAIL_TARGET",
+        cell,
+        "membership",
+        float(reading.membership[cell]),
+        "normal",
+        bool(reading.normal_form_cells[cell]),
+        "direction",
+        np.asarray(signed_direction[channel, cell]).tolist(),
+    )
+
     if bool(reading.normal_form_cells[cell]):
         rings, counts = current._normal_rings(
             vertices,
@@ -230,7 +247,8 @@ def main():
         return response.vertical_moment
 
     serial_cell = jax.jit(cell_moving)(cell)
-    cut_batch = cut_index[:8]
+    position = int(np.nonzero(np.asarray(cut_index) == cell)[0][0])
+    cut_batch = cut_index[(position // 8) * 8 : (position // 8 + 1) * 8]
     vector_cells = jax.jit(jax.vmap(cell_moving))(cut_batch)
     batch_slot = int(jnp.argmax(cut_batch == cell))
     print(
@@ -243,6 +261,59 @@ def main():
     ):
         if any(abs(v) > 1e-13 for v in pair):
             print("CELL_BATCH_FRAGMENT", ring_index, pair)
+
+    boundary_channels = jnp.concatenate(
+        (jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))
+    )
+
+    def cell_all_moving(index):
+        ring, numbers, _ = current._conic_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            geometry.pitch[index],
+            signed[index],
+            reading.fragment_selected[index],
+            quadrature.segments,
+        )
+
+        def channel_terms(direction):
+            velocity = current._conic_ring_tangents(
+                geometry.vertices[index],
+                geometry.vertex_count[index],
+                geometry.centre[index],
+                geometry.pitch[index],
+                signed[index],
+                direction,
+                reading.fragment_selected[index],
+                quadrature.segments,
+            )
+            terms = jax.vmap(
+                lambda one_ring, speed, number: moving_polygon_current_moment_tangent(
+                    one_ring,
+                    speed,
+                    number,
+                    geometry.centre[index],
+                    geometry.pitch[index],
+                    jnp.zeros(6),
+                    UnitDensity(),
+                )
+            )(ring, velocity, numbers)
+            return terms.vertical_moment
+
+        return jax.vmap(channel_terms)(signed_direction[boundary_channels, index])
+
+    nested = jax.jit(jax.vmap(cell_all_moving))(cut_batch)[batch_slot, 2]
+    print(
+        "NESTED_MOVING",
+        float(jnp.sum(nested)),
+        "SINGLE_MOVING",
+        float(jnp.sum(serial_cell)),
+    )
+    for ring_index, pair in enumerate(zip(np.asarray(serial_cell), np.asarray(nested))):
+        if abs(pair[0] - pair[1]) > 1e-12:
+            print("FIRST_DIFFERING_FRAGMENT", ring_index, pair)
+            break
 
     def terms(direction):
         velocity = current._conic_ring_tangents(

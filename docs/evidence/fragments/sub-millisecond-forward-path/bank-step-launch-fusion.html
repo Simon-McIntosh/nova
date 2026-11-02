@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step launch reduction | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-launch-fusion-landing">Bank step launch reduction</h1>
+<p id="bank-step-launch-fusion-summary">On titan P100, vectorizing the moving geometry channels reduced the warm 550-cell bank Newton step from 14,427 to 9,701 kernel launches and from 635.24 to 607.25 ms wall. The full Jacobian fell from 10,341 to 6,075 launches and from 305.08 to 275.98 ms. The booking tangent still takes 5,736 launches and about 231.5 ms. The head reached a fresh-read residual of 2.417e-11 in five Newton steps against ten at the archived base, with all three analytic-oracle ratios within their locked budgets. These are P100 results; no H200 timing or 100-launch verdict is claimed.</p>
+<figure id="bank-step-launch-fusion-stage-figure"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg" alt="Linear P100 warm wall times for bank Newton stages before and after vectorizing geometry channels"><figcaption>Titan P100, 550-cell diverted bank. Each mark is the median of three synchronized warm calls. The full Jacobian and whole-step rows include preceding work, so rows are not additive. The read, at about 1,653 ms outside the step, is omitted from this axis. The SVG passed mechanical text checks, was rendered to PNG and was inspected at the page width.</figcaption></figure>
+<section id="bank-step-launch-fusion-profile"><h2>Warm P100 stage trace</h2>
+<table id="bank-step-launch-fusion-stage-table"><thead><tr><th>Stage</th><th>Base wall [ms]</th><th>Head wall [ms]</th><th>Base device [ms]</th><th>Head device [ms]</th><th>Base launches</th><th>Head launches</th></tr></thead><tbody>
+<tr><td>Read, outside step</td><td>1,651.61</td><td>1,654.66</td><td>1,720.36</td><td>1,723.61</td><td>20,379</td><td>20,379</td></tr>
+<tr><td>Residual and booking</td><td>323.28</td><td>323.63</td><td>332.40</td><td>332.62</td><td>1,503</td><td>1,503</td></tr>
+<tr><td>Local booking tangent</td><td>231.16</td><td>231.53</td><td>233.76</td><td>234.12</td><td>5,736</td><td>5,736</td></tr>
+<tr><td>One moving geometry direction</td><td>3.14</td><td>3.05</td><td>2.61</td><td>2.64</td><td>249</td><td>249</td></tr>
+<tr><td>Jacobian without moving geometry</td><td>262.51</td><td>263.02</td><td>263.61</td><td>264.03</td><td>5,753</td><td>5,753</td></tr>
+<tr><td>Full Jacobian</td><td>305.08</td><td>275.98</td><td>304.79</td><td>276.82</td><td>10,341</td><td>6,075</td></tr>
+<tr><td>Equilibration</td><td>1.14</td><td>1.19</td><td>0.96</td><td>0.96</td><td>20</td><td>20</td></tr>
+<tr><td>LU factor</td><td>10.38</td><td>10.39</td><td>10.19</td><td>10.19</td><td>118</td><td>118</td></tr>
+<tr><td>LU solve</td><td>1.21</td><td>1.26</td><td>1.06</td><td>1.07</td><td>8</td><td>8</td></tr>
+<tr><td>Fresh whole step</td><td>635.24</td><td>607.25</td><td>647.35</td><td>620.22</td><td>14,427</td><td>9,701</td></tr>
+</tbody></table>
+<p>The profiler was warmed before tracing and saw GPU events in every row. Device time sums GPU events inside each annotation; wall is a separate median, so overlapping device activity can make device time larger than wall. The stage profiler deliberately calls <code>block_until_ready</code> between independently timed stages. The production <code>newton_step</code> wraps booking, Jacobian, equilibration and LU in one JIT call with no host materialization inside it. A fresh <code>read</code> precedes that call, and the outer driver synchronizes to evaluate fresh residuals and line-search acceptance afterward. Dynamic cut-cell and geometry loops inside JIT still generate many GPU launches.</p>
+</section>
+<section id="bank-step-launch-fusion-convergence"><h2>Fresh-read convergence and oracle</h2>
+<table id="bank-step-launch-fusion-convergence-table"><thead><tr><th>P100 source</th><th>Newton steps</th><th>Fresh residual</th><th>Axis ratio</th><th>Saddle ratio</th><th>Boundary ratio</th></tr></thead><tbody>
+<tr><td>Archived base</td><td>10</td><td>7.970e-11</td><td>1.048e-5</td><td>9.255e-6</td><td>2.591e-5</td></tr>
+<tr><td>Head</td><td>5</td><td>2.417e-11</td><td>1.048e-5</td><td>9.255e-6</td><td>2.591e-5</td></tr>
+</tbody></table>
+<p>The ratio limits are 5e-4, 5e-4 and 1e-4. The base ran from a git archive with its own source on <code>PYTHONPATH</code>; its receipt printed the archive module path and revision. The head solve printed its worktree module path. Both used fresh factors. The two different step counts reflect different numerical trajectories; the receipts do not isolate their cause.</p>
+<p>On sirius CPU, all six <code>book()</code> field digests are identical between base and head. The focused baseline suite has 23 passes and two skips; the head has 26 passes and two skips, each file in a fresh process. A scratch host materialization of booked current before dense assembly makes <code>test_newton_step_traces_booking_through_assembly</code> fail with a tracer concretization error; the head test passes. The control refuses the round trip during JIT tracing, so it has no comparable P100 launch or wall result.</p>
+<p>Receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion</code>: <code>baseline-p100.log</code>, <code>head-p100.log</code>, <code>base-solve-p100-retry.log</code>, <code>digest-sirius.log</code>, <code>suite-aggregate.log</code>, <code>negative-control.log</code> and the rendered <code>stage-wall.png</code>. The original duplicate-integral report did not reproduce in <code>support_read</code>: it already called a function imported from <code>clip_quadrature</code> through <code>current</code>. The head now calls the shared batched entry directly, with an analytic boundary-moment test.</p>
+</section>
+</main></body>
+</html>

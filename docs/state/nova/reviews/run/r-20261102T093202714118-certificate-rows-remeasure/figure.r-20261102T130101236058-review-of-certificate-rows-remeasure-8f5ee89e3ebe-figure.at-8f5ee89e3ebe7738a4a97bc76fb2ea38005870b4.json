@@ -1,0 +1,161 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This figure review ran no suite, so the count is the neutral value the record shape requires and not a measurement.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+    "image-1.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+    "image-2.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
+  },
+  "attachment_mapping_basis": "Identified from what each attachment draws, not from file order. image-0 is a four-panel figure whose suptitle reads 'diverted-single-null - cells-300 - unqualified', which is the diverted single-null row. image-1 is the same four-panel composition under the suptitle 'weak-rotation-reactor-static - cells-500 - unqualified', which is the limited row at requested cells -500 that the evidence page reports at 553 realised cells. image-2 is a single poloidal panel at 1400x800 with two top-left series labels, which matches the private 550-cell moment solve. The evidence fragment cites diverted-300.svg, limited-550.svg and private-550.svg in that order.",
+  "completed_at": "2026-11-02T13:13:15.466Z",
+  "dispatched_at": "2026-11-02T13:02:19Z",
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "rubric": {
+        "contrast": "pass for text. Panel titles, the level annotations and the suptitle are near-black on white. The cyan boundary stroke (#35b9c8) is a data mark rather than text and measures 2.4:1 against white, below the repository's 3:1 floor; that is recorded as finding 5.",
+        "data_ink": "pass. Line contours only: blue analytic and ochre solved flux at the top left, purple error contours in the other three, one black vessel outline and one cyan boundary per panel. No fill, no gradient, no gridline, no frame.",
+        "decoration": "pass. Everything drawn is data, a panel title, the level annotation or the suptitle.",
+        "label_collision": "FAIL. Measured on the 1400x1200 attachment, the caption line occupies rows 39-51 and its ink reaches column 0, so its leading characters are off-canvas. Separately, each error panel's level annotation is drawn inside the axes at the panel foot, immediately against the vessel wall, with no clearance.",
+        "legibility": "FAIL. Each of the four quadrants reads cleanly on its own -- the flux comparison, then the psi, gradient and hessian error fields -- but the one line that explains the colour coding is drawn across the top of the first quadrant and is cut off by the left canvas edge, so the reader is left with two contour families and no key. The null marks (an ochre triangle above a blue triangle near the centre, an ochre cross lower down) are likewise unkeyed once the caption is unreadable.",
+        "table_form": "pass. Four poloidal field panels; the row's terminal residual, trips and device are in the evidence page's table, not depicted here."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+      "rubric": {
+        "contrast": "pass for text; the cyan boundary at 2.4:1 against white is recorded as finding 5.",
+        "data_ink": "pass. Two contour families, one vessel outline, one boundary per panel, unfilled throughout; the data carry the weight.",
+        "decoration": "pass. No gradient, background fill or decorative styling.",
+        "label_collision": "FAIL. Measured on the 1400x1200 attachment, the caption occupies rows 39-51 with ink in column 0, and the visible text begins mid-word at 'ic blue contours'; the level annotations at the foot of the three error panels also sit inside the plotted area against the wall.",
+        "legibility": "FAIL. The caption is truncated: the rendered line reads 'ic blue contours and nulls / solved ochre contours and nulls; shared Wb levels', so the word naming the analytic family is gone. The panels themselves are legible -- the solved blue contours follow the analytic shape with a constant displacement across the stack, and the two axis triangles are separated on the midplane -- but the figure's only key to their colours and line weights cannot be read.",
+        "table_form": "pass. A spatial flux comparison."
+      }
+    },
+    {
+      "attachment": "image-2.png",
+      "figure": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg",
+      "rubric": {
+        "contrast": "pass. Blue #3366cc reads at about 5.4:1 and the grey #444444 label and contours at about 9:1, both on white.",
+        "data_ink": "pass, with the note recorded as finding 7. Nine contour strokes and one axis mark; no fill, no grid, axes off. The panel spans x 566..868 of a 1400 px canvas, so the data occupy about 22 % of the width.",
+        "decoration": "pass. None.",
+        "label_collision": "pass. Ink bounds x 43..868, y 19..690 on a 1400x800 canvas; nothing is clipped and the two labels are on separate rows.",
+        "legibility": "pass, with the defect recorded as finding 6. The blue contour stack fills the vessel and a single axis mark sits at its centre, which is a converged state read at a glance. What does not read at a glance is the pairing of the two label lines with the two drawn families: the grey analytic strokes sit within a few pixels of the blue solved strokes throughout the stack (sampled at y=300, 400 and 500, grey (68,68,68) and blue (51,102,204) runs alternate within about 15 px), and the labels carry no solid/dashed swatch to separate them.",
+        "table_form": "pass. A converged flux state read against its reference is a spatial relationship."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "id": "f07896ba919",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The flux panel's caption 'analytic blue contours and nulls / solved ochre contours and nulls; shared Wb levels' is clipped by the left canvas edge. On the 1400x1200 attachment the line occupies rows 39-51 and its ink reaches column 0, so its leading characters are cut off. That caption is the figure's only explanation of the colour coding and of the fact that both maps are contoured on one shared level array, so a reader cannot tell which family is analytic and which is solved, and cannot tell that the comparison is level-matched. Nothing else in the figure keys the colours."
+    },
+    {
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+      "id": "fd1fb8fe671",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The same caption is clipped further on this figure: the rendered line begins mid-word as 'ic blue contours and nulls / solved ochre contours and nulls; shared Wb levels', so the word that names the analytic family is gone from the picture. Measured on the 1400x1200 attachment, ink reaches column 0 in rows 39-51. A reader is left with two contour families, four panels and no readable key, which is the defect the evidence page itself notes as a pre-existing clipping of the painter; it is nonetheless present in the delivered artifact."
+    },
+    {
+      "disposition": "folded: a follow-up plan section on converged-forward-solve adding a mark key to the certificate panel for the axis and the admitted X-point",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "id": "f07896ba919",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The four-panel figures have no legend, so the null marks are identified only by shape. On image-0 an ochre filled triangle sits above a blue filled triangle near the centre and an ochre cross sits lower down; a reader can see them but is given no statement of which is the magnetic axis and which is the admitted X-point, and the diverted cross is the mark that makes the row a diverted single-null case rather than a limited one. Once finding 1 is fixed the colour half of the key returns with the caption, so only the shape vocabulary is missing."
+    },
+    {
+      "disposition": "folded: a follow-up plan section on converged-forward-solve moving the level annotation outside the plotted field or into the panel title",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "id": "f07896ba919",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Each error panel's level annotation is drawn inside the axes at the panel foot, sitting immediately against the vessel wall with no clearance, so it reads as part of the drawing rather than as a note about the levels, and its white box sits over the outermost part of the plotted field. The values are legible at the delivered size. The same placement appears on limited-550.svg."
+    },
+    {
+      "disposition": "folded: a follow-up plan section on converged-forward-solve darkening the boundary stroke to clear the 3:1 floor",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "id": "f07896ba919",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The cyan boundary stroke (#35b9c8) measures about 2.4:1 against white, below the 3:1 floor the repository's colour rule asks of a data mark, and it is the palest mark in the figure. It is legible but thin against the white field at the delivered size. The same stroke is used in every panel of limited-550.svg."
+    },
+    {
+      "disposition": "folded: a follow-up plan section on converged-forward-solve giving the private panel's labels line swatches that distinguish solid from dashed",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg",
+      "id": "ff79e584ab9",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two series labels at the top left are plain coloured text -- 'solved flux and nulls' in blue and 'analytic flux and nulls' in grey -- with no line or marker swatch, so they key a colour but not a line style. In the panel the analytic grey strokes and the solved blue strokes run within about 15 px of each other throughout the stack (grey (68,68,68) and blue (51,102,204) runs alternate along scanlines y=300, 400 and 500), so at the delivered size the two families read as one and a reader cannot tell from the figure whether the reference was drawn, omitted, or covered. The caption states the coincidence in words, which is why this does not hide the data; a solid/dashed swatch beside each label would make the pairing visible."
+    },
+    {
+      "disposition": "folded: the same follow-up plan section, which may size the panel to its content or inset it in a narrower canvas",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg",
+      "id": "ff79e584ab9",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The panel occupies 302 px of the 1400 px canvas width, about 22 %, leaving the rest of the 14x8 frame blank. The field itself is fully readable, so this is a statement about how little of the delivered canvas carries data rather than a loss of information."
+    },
+    {
+      "disposition": "folded: the same follow-up plan section, which should state on the certificate panel whether the cell count is requested or realised",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "id": "f07896ba919",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The suptitle names the requested cell count -- 'cells-300' here and 'cells-500' on limited-550.svg -- while the evidence table reports the realised counts of 340 and 553. A reader moving between the figure and the table finds two different numbers for the same row with nothing on the figure saying which is which. Naming the requested count explicitly, or using the realised one, would remove the ambiguity."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "None of the three captions only repeats its figure's title. The evidence page gives each figure its row identity, the terminal residual, the converged flag, the axis coordinates and the direction of the discrepancy, and it states in words that the private row's two contour families are indistinguishable at this level array. The figures carry no caption of their own in the rendered attachment.",
+    "finding_materiality": "Eight findings. Two are blocking, both the same defect on the two certificate panels: the caption that is the figure's only colour key is clipped by the left canvas edge, and on image-1 the truncation is visible mid-word. Six are non-blocking: the null marks have no shape key, the level annotations crowd the wall, the cyan boundary stroke falls below the 3:1 floor, the private panel's labels carry no line swatch, the private panel is small in a wide canvas, and the suptitles name the requested cell count while the evidence table reports the realised one.",
+    "rendered_artifact": "All three attachments were opened and inspected as rendered images at their delivered size: image-0.png and image-1.png at 1400x1200 and image-2.png at 1400x800. No SVG was opened, listed, searched, rendered or shown. The attachment map was formed from what each figure draws."
+  },
+  "justifications": {
+    "anchoring": "No finding is anchored to a drawing script, because the scripts that draw the attached figures (benchmarks/solovev_certificate.py and scripts/prototypes/fast_read/render_contours.py) are not part of this run's diff (67ad6e9c..8f5ee89e changes only the evidence fragment, three SVGs and scripts/prototypes/certificate_rows_remeasure/). Every finding therefore anchors to the figure's repository path with a null line.",
+    "evidence": "Every measurement quoted here was taken on the named attachments: canvas sizes, the per-row ink extents that show the caption reaching column 0 (rows 39-51 on both certificate attachments), the 1400x800 ink bounds of the private panel (x 43..868, y 19..690, with the field at x 566..868), and the scanline samples at y=300, 400 and 500 of image-2 that show grey (68,68,68) and blue (51,102,204) stroke runs alternating within about 15 px.",
+    "legibility": "Read from the rendered PNGs alone. The two certificate figures fail because the only explanation of their colours is clipped; the private figure passes because its field and its axis read without the labels, with the label defect carried as a finding.",
+    "scope_discipline": "This review is read-only. No repository file, figure, caption or plan was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T130101236058-review-of-certificate-rows-remeasure-8f5ee89e3ebe-figure",
+  "reviewed_base_sha": "67ad6e9c33b3441fa5725784e3b3f3312f04c39f",
+  "reviewed_figures": [
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
+  ],
+  "reviewed_head_sha": "8f5ee89e3ebe7738a4a97bc76fb2ea38005870b4",
+  "reviewed_run_id": "r-20261102T093202714118-certificate-rows-remeasure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC image-0.png legibility: FAIL -- the flux panel's caption, which is the figure's only colour key, is cut off at the left canvas edge, so a reader cannot reliably tell the blue contour family from the ochre one.",
+    "RUBRIC image-0.png data_ink: pass -- four unfilled line-contour panels, no fill, no gradient, no gridlines or frame; the data carry the weight.",
+    "RUBRIC image-0.png decoration: pass -- nothing is drawn that is not data, a level annotation or a title.",
+    "RUBRIC image-0.png contrast: pass -- all text is near-black on white; the cyan boundary stroke is not text and measures 2.4:1 against white, recorded as finding 5.",
+    "RUBRIC image-0.png table_form: pass -- four poloidal flux and error fields are spatial relationships; the row's scalars stay in the evidence page's table.",
+    "RUBRIC image-0.png label_collision: FAIL -- the caption is clipped at the left edge (ink in column 0 across its rows), and the level annotations at the foot of the three error panels sit inside the plotted area with no clearance from the vessel wall.",
+    "RUBRIC image-1.png legibility: FAIL -- the same caption is truncated visibly to 'ic blue contours and nulls', losing the words that name the analytic family, so the colour key cannot be read at all.",
+    "RUBRIC image-1.png data_ink: pass -- as image-0; contours carry the visual weight.",
+    "RUBRIC image-1.png decoration: pass -- no gradient, fill or decorative styling.",
+    "RUBRIC image-1.png contrast: pass -- near-black text on white; the cyan boundary stroke is not text and measures 2.4:1 against white, recorded as finding 5.",
+    "RUBRIC image-1.png table_form: pass -- spatial field comparison, not a table.",
+    "RUBRIC image-1.png label_collision: FAIL -- the caption is clipped at the left canvas edge and the level annotations are drawn against the vessel wall at the foot of each error panel.",
+    "RUBRIC image-2.png legibility: pass, with the defect recorded as finding 6 -- the contour field and the single axis mark read at a glance, but the two top-left labels carry no line swatch and the two contour families sit within a few pixels of one another, so the pairing is hard to apply.",
+    "RUBRIC image-2.png data_ink: pass, with the note recorded as finding 7 -- nine contour strokes and one axis mark, but they occupy 302 of the 1400 px canvas width.",
+    "RUBRIC image-2.png decoration: pass -- no gradient, fill or decorative styling.",
+    "RUBRIC image-2.png contrast: pass -- blue #3366cc at about 5.4:1 and grey #444444 at about 9:1 on white, both above the 3:1 floor.",
+    "RUBRIC image-2.png table_form: pass -- a converged flux state drawn against its reference is a spatial relationship.",
+    "RUBRIC image-2.png label_collision: pass -- ink bounds are x 43..868, y 19..690 on a 1400x800 canvas, so no text is clipped and the two labels are separated vertically."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T13:14:49.474475+00:00",
+  "total": null
+}

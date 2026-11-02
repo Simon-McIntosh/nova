@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-02T23:17:46.189Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "bank-step-booking-once",
+      "recorded_at": "2026-11-02T23:44:11.079165+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T22:59:17Z",
   "finding_dispositions": {
     "0": {

@@ -6,7 +6,12 @@ BASE=${1:?base revision required}
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp JAX_PLATFORMS=cpu
 SCRATCH=$(mktemp -d "$TMPDIR/bank-booking-digest-XXXXXX") || exit 2
-trap '"$PY" -c '\''import shutil, sys; print("removing", sys.argv[1]); shutil.rmtree(sys.argv[1])'\'' "$SCRATCH"' EXIT
+finish() {
+  code=$?
+  "$PY" -c 'import shutil, sys; print("removing", sys.argv[1]); shutil.rmtree(sys.argv[1])' "$SCRATCH"
+  printf 'EXIT=%s\n' "$code"
+}
+trap finish EXIT
 mkdir -p "$SCRATCH/base"
 git archive "$BASE" nova tests scripts benchmarks pyproject.toml | tar -xf - -C "$SCRATCH/base"
 
@@ -39,4 +44,3 @@ for name in booked._fields:
 PY
   ) || exit $?
 done
-printf 'EXIT=0\n'

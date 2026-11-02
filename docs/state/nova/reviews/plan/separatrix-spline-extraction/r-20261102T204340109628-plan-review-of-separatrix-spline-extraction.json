@@ -25,7 +25,28 @@
   "plan_slug": "separatrix-spline-extraction",
   "plan_version": 162,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "788c2636111009da44cc1e1cd0a78d6c1c74a750",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-11-02T20:59:01.080249+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "788c2636111009da44cc1e1cd0a78d6c1c74a750",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-02T20:59:01.080249+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/separatrix-spline-extraction/r-20261102T204340109628-plan-review-of-separatrix-spline-extraction.json",
   "review_run_id": "r-20261102T204340109628-plan-review-of-separatrix-spline-extraction",
   "reviewed_blob_sha": "4956f3ce2e5d81aa60f3d0157c21dbac23dc3556",
   "rubric": "content",

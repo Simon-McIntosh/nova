@@ -1062,7 +1062,7 @@ class NewtonFactor(NamedTuple):
 
 
 class NewtonStep(NamedTuple):
-    """One dense Newton update and its conditioning ledger."""
+    """One Newton update; the linear residual belongs to the factor's matrix."""
 
     update: tuple[jax.Array, jax.Array, jax.Array]
     condition_before: jax.Array
@@ -1310,6 +1310,9 @@ def newton_step(
 
     Local analytic booking sensitivities compose with the bank into a dense
     matrix. Physical moment scales and diagonal equilibration precede LU.
+    A carried factor skips assembly while the fresh residual contracts by at
+    least half. Its linear residual certifies the carried matrix solve; the
+    caller must check convergence against a fresh read of the new state.
     Exact condition estimates are automatic only for a single-cell diagnostic
     system; larger systems omit the two dense SVDs unless requested.
     """

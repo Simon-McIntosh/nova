@@ -6,7 +6,7 @@ RUN_DIR=${1:?run directory required}
 BASE=${2:?base revision required}
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp JAX_PLATFORMS=cpu
-SCRATCH=$(mktemp -d "$TMPDIR/bank-booking-suite-XXXXXX")
+SCRATCH=$(mktemp -d "$TMPDIR/bank-booking-suite-XXXXXX") || exit 2
 trap '"$PY" -c '\''import shutil, sys; print("removing", sys.argv[1]); shutil.rmtree(sys.argv[1])'\'' "$SCRATCH"' EXIT
 mkdir -p "$SCRATCH/base"
 git archive "$BASE" nova tests scripts benchmarks pyproject.toml | tar -xf - -C "$SCRATCH/base"

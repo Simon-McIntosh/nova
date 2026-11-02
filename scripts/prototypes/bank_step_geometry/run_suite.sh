@@ -22,6 +22,7 @@ for arm in base head; do
         revision=$(git -C "$root" rev-parse HEAD)
     fi
     export PYTHONPATH="$tree"
+    cd "$tree" || exit 2
     for file in test_support_read.py test_bank_newton_step.py test_bank_newton_converge.py test_bank_step_speed.py test_bank_step_geometry.py; do
         target="$tree/tests/$file"
         if [ ! -f "$target" ]; then

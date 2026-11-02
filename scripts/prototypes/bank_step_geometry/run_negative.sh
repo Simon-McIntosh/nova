@@ -29,6 +29,7 @@ source = source.replace(
 path.write_text(source)
 PY
 target="$scratch/tree/tests/test_bank_step_geometry.py::test_one_jet_channel_matches_retained_booking_geometry"
+cd "$scratch/tree" || exit 2
 command="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider $target --basetemp=$scratch/pytest -vv"
 {
     printf 'revision=%s tree=%s command=%s\n' "$(git -C "$root" rev-parse HEAD)" "$scratch/tree" "$command"

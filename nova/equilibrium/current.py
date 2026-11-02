@@ -47,6 +47,7 @@ class Quadrature:
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
+    cut_batch_width: int = dataclass_field(default=64, metadata={"static": True})
 
 
 class Booking(NamedTuple):
@@ -775,7 +776,9 @@ def book_tangent_channels(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jnp.where(full[:, None, None], whole, 0.0)
-    batch_width = min(64, cells)
+    if quadrature.cut_batch_width < 1:
+        raise ValueError("cut batch width must be positive")
+    batch_width = min(quadrature.cut_batch_width, cells)
     cut_count = jnp.sum(cut, dtype=jnp.int32)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))

@@ -1,0 +1,47 @@
+<section data-reckon="evidence" id="fine-flux-display-map">
+<h2>Fine-grid display flux map</h2>
+
+<p id="fine-flux-display-map-summary">A display flux map is the flux a state's
+own currents produce, evaluated wherever a panel wants to read it. The builder
+takes the coupling the producer already owns as a pair of callables over target
+points -- the conductor and prescribed-response rows on one side, the plasma
+cell uniform, radial and vertical moment columns on the other -- contracts them
+against the state's own cell-current moments, and adds no kernel of its own. The
+lattice spline stays the solve's authority; the map reports its own polished
+saddle beside the lattice spline's, and the largest node mismatch to the state.</p>
+
+<table id="fine-flux-display-map-measure">
+<caption>Manufactured forward operator, 9 by 9 lattice (61 mm cells), display map
+at the 10 mm floor, 81 by 91 points = 7371 targets.</caption>
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>map at the lattice nodes against <code>raster_image</code>, relative</td><td>0.0 (exact; the gate requires 1e-10)</td></tr>
+<tr><td>largest node mismatch to the state</td><td>0.0 Wb (the manufactured state is the current image)</td></tr>
+<tr><td>map saddle</td><td>(1.0814, 0.0000) m</td></tr>
+<tr><td>lattice-spline saddle</td><td>(1.0780, 0.0000) m</td></tr>
+<tr><td>saddle offset</td><td>3.45 mm</td></tr>
+<tr><td>build wall</td><td>29.6 s for 7371 targets at chunk 256, host CPU</td></tr>
+</table>
+
+<p id="fine-flux-display-map-cost">The build cost is the producer's coupling
+cost, not the builder's: each chunk calls the caller's Green's columns once per
+plasma cell, so a 62k-target map over a MAST wall bounding box scales with the
+number of cells and the chunk count. The builder holds no per-point state beyond
+the map itself, so peak memory is one chunk of coupling plus the map array.</p>
+
+<h3>Negative control</h3>
+
+<p id="fine-flux-display-map-control">One conductor current in the fine-map
+build is scaled by 0.99 and the reproduction gate is re-run: the map at the
+lattice nodes then misses <code>raster_image</code> by a relative
+2.41e-4 and the test fails. The guard measures the map, not the suite.</p>
+
+<h3>What was not produced</h3>
+
+<p id="fine-flux-display-map-remaining">The MAST CPU centroid state's X-point
+region figure was not drawn inside this node's budget: it needs the
+prescribed-circuit response matrix rebuilt at the fine targets (938 sections
+against every display point), and that build was not run. The saddle and
+mismatch numbers above are measured on the manufactured operator. Drawing the
+MAST panel from this builder belongs to the panel sections that follow, which
+already own the producer path and its response cache.</p>
+</section>

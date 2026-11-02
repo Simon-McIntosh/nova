@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-export TMPDIR=/tmp JAX_PLATFORMS=gpu
+export TMPDIR=/tmp JAX_PLATFORMS=cuda
 repo=${BANK_PLATEAU_WORKTREE:?}
 run=${BANK_PLATEAU_RUN_DIR:?}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python

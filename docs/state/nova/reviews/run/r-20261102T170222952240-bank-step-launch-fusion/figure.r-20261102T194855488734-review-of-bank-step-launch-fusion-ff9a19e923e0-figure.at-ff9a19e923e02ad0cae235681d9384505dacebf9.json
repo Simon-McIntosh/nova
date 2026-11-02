@@ -7,7 +7,7 @@
   },
   "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png, measured at 1399x720 RGBA. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that one PNG was opened; every pixel measurement below was taken from that same PNG. The reviewed run's diff 242c6809..ff9a19e9 changes exactly one rendered figure, docs/figures/sub-millisecond-forward-path/bank-step-launch-fusion/stage-wall.svg, drawn by scripts/prototypes/bank_step_launch_fusion/plot.py at the reviewed head; the attachment is structurally that script's output (two panels titled 'titan P100 warm wall [ms]' and 'H200 warm wall [ms]', five stage rows sharing one y axis, grey circle / blue square / green diamond series, one frameless three-entry legend above). Only one attachment was offered. The reviewed base 242c6809 and head ff9a19e9 are both named explicitly because this review worktree's HEAD is 5dd2eab7.",
   "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion.html names both devices and their separate labelled linear millisecond axes, decodes all three series ('Grey is base, blue is the P100 geometry checkpoint, and green is the booking batch'), states that marks are medians of three synchronized warm calls, warns that the full-Jacobian and whole-step rows include preceding work and are not additive, and states that the read is outside the step and omitted. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T20:01:32.203Z",
   "dispatched_at": "2026-11-02T19:51:35Z",
   "figure_checks": {
     "caption_independence": "The evidence caption names the devices, the axis units, the three series, the acquisition ('medians of three synchronized warm calls'), the non-additivity of two rows and the omission of the read. It is not a restatement of the title or axis labels.",
@@ -116,6 +116,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T20:01:35.388396+00:00",
+  "timestamp": "2026-11-02T20:04:11.069129+00:00",
   "total": null
 }

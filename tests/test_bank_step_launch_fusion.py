@@ -7,6 +7,7 @@ configure_dtypes()
 
 import inspect
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -42,3 +43,26 @@ def test_batched_boundary_integral_matches_single_ring_rule():
     np.testing.assert_allclose(actual.cell_current, (0.4, 0.4), atol=1e-13)
     np.testing.assert_allclose(actual.radial_moment, (0.3, 0.6), atol=1e-13)
     np.testing.assert_allclose(actual.vertical_moment, (0.0, 0.0), atol=1e-13)
+
+
+def test_newton_step_traces_booking_through_assembly(monkeypatch):
+    def residual(_operands, values, *_args):
+        booked = current.Booking(
+            *values, jnp.sum(values[0]), jnp.asarray(1.0), jnp.asarray(True)
+        )
+        return support_read.StepResidual(values, booked, None, True)
+
+    monkeypatch.setattr(support_read, "step_residual", residual)
+    monkeypatch.setattr(
+        support_read, "step_jacobian", lambda *_args, **_kwargs: jnp.eye(3)
+    )
+    values = tuple(jnp.asarray([1.0]) for _ in range(3))
+    compiled = jax.jit(
+        lambda state: (
+            support_read.newton_step(
+                None, state, None, None, None, None, condition_diagnostics=False
+            ).update
+        )
+    )
+    update = compiled(values)
+    np.testing.assert_allclose(jnp.concatenate(update), (-1.0, -1.0, -1.0))

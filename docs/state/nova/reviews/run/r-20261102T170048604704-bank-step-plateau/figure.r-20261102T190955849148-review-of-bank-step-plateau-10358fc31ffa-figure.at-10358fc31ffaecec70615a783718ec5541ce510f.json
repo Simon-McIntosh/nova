@@ -7,7 +7,7 @@
   },
   "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png (1399x720, RGBA, 64848 bytes). No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that one PNG was opened; the pixel measurements below were taken from that same PNG. The reviewed run's manifest names its committed figure as docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg drawn by scripts/prototypes/bank_step_plateau/plot.py at the reviewed head, and the attachment is structurally consistent with that script: four log-y panels in a 2x2 grid, x axis 'accepted iterate' labelled 0-9 on the bottom row, one frameless two-entry legend above the panels, head blue #2865b2 and base grey #929292. The reviewed base 8b9b8321d is not this review worktree's HEAD, so base and head are both named explicitly rather than taken from this checkout. Only one attachment was offered for this head.",
   "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-plateau.html names the device and trajectory ('Titan P100, one diverted 550-cell trajectory'), states that head and base are evaluated at the same states and directions, names the displayed displacement (1e-5 times the norm of each state), decodes both marker styles, states that their overlap is the result, and points at the tabled six-spacing ladder. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T19:21:03.907Z",
   "dispatched_at": "2026-11-02T19:12:05Z",
   "figure_checks": {
     "caption_independence": "The caption names the device (Titan P100), the trajectory, that base is evaluated at the head's states and directions, the shown displacement (1e-5 of the state norm), what each marker style means, that the overlap is the result, and that the full six-spacing ladder is tabled below. It is not a restatement of the title or the axis labels, and it is consistent with the render: the arms do overlap at every iterate, and only the 1e-5 spacing is drawn.",
@@ -122,6 +122,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T19:21:10.707921+00:00",
+  "timestamp": "2026-11-02T19:25:47.297627+00:00",
   "total": null
 }

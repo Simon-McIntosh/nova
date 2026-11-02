@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_map": {
+    "image-0.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+    "image-1.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+    "image-2.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
+  },
+  "attachment_mapping_basis": "Read from what each attachment draws, not from file order. image-0 is the four-panel composition whose suptitle reads 'diverted-single-null - cells-300 - unqualified', the diverted single-null row. image-1 carries 'weak-rotation-reactor-static - cells-500 - unqualified', the limited row at requested cells -500 (553 realised cells) that the evidence page reports. image-2 is a single 1400x800 poloidal panel with two top-left series labels, the private 550-cell moment solve.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T13:29:19Z",
+  "findings": [
+    {
+      "disposition": "folded: a follow-up section on converged-forward-solve raising the caption-band type in certificate_panel.py to the repository's 14 pt direct-label size, letting the reserved band grow to fit.",
+      "file": "scripts/prototypes/certificate_rows_remeasure/certificate_panel.py",
+      "id": "fed6b3f2308",
+      "line": 70,
+      "severity": "non-blocking",
+      "summary": "The three contour-level readouts are placed at fontsize 6, against a repository rule that sets tick labels, legends and direct labels at 14 pt. On the 1400x1200 attachments they render about 8 px tall, and at the roughly 900 px width the reckon column serves they fall to about 5 px, so the numbers stating the shared level arrays are readable only at full zoom. The placement repair itself works: the band sits clear of every panel and of the canvas edge. The defect is the type size the repair chose to fit the band, not the band."
+    },
+    {
+      "disposition": "folded: a follow-up section on converged-forward-solve adding a boundary entry to the certificate panel's key so the cyan stroke is named, and using one hue for the reference boundary across all four panels.",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "id": "f07896ba919",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The reference boundary is drawn cyan in the three error panels on image-0 and image-1 and is named in no legend, while the same curve is drawn blue in the flux panel where blue already means 'analytic'. A reader meeting the cyan stroke in the error panels has nothing in the figure that says what it is, and the one hue that is keyed (blue) is keyed to a different series in that panel."
+    },
+    {
+      "disposition": "exempted: the canvas comes from the shared route renderer rather than from this measurement node, and re-cropping a single panel is a presentation change outside the node's write scope; the contours remain legible as delivered.",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg",
+      "id": "ff79e584ab9",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The single poloidal panel occupies a 302x561 px box on a 1400x800 canvas, about 15% of its area, leaving roughly 530 px of empty white to either side. The contours remain legible, but the pair of nearly coincident solved and reference contours, which is the whole content of the figure, is drawn at a fifth of the width the canvas gives it and loses the detail the comparison could have shown."
+    },
+    {
+      "disposition": "folded: a follow-up section on converged-forward-solve replacing the ochre solved-flux hue in the certificate driver's painter with a clean hue that passes the repository's colour-blind separation check against the blue analytic family.",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+      "id": "fd1fb8fe671",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The solved flux family is drawn in ochre on both certificate panels, and the subtitle names it as such. The repository's plotting rules prohibit the muddy brown and ochre family for a data series, and require a clean, saturated-but-calm hue instead. Against the clean blue of the analytic family the ochre line reads as the duller of the two rather than as the series the row is reporting."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261102T132657323355-review-of-certificate-rows-remeasure-7339c94b4ceb-figure",
+  "reviewed_base_sha": "67ad6e9c33b3441fa5725784e3b3f3312f04c39f",
+  "reviewed_figures": [
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
+  ],
+  "reviewed_head_sha": "7339c94b4cebea57be879e4121da6428c7550752",
+  "reviewed_run_id": "r-20261102T093202714118-certificate-rows-remeasure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC image-0.png legibility: pass -- four panels read at a glance; the flux panel is titled 'analytic blue, solved ochre contours and nulls / shared Wb levels' and the three error fields are each titled; the contour-level readouts at the foot are small at served size (finding 1).",
+    "RUBRIC image-0.png data_ink: pass -- unfilled line contours throughout; no fill, gradient, gridline or frame; the contours carry the weight.",
+    "RUBRIC image-0.png decoration: pass -- nothing is drawn beyond the contours, the vessel, the null marks, the titles and the level band.",
+    "RUBRIC image-0.png contrast: pass -- every text artist is near-black on white and clears its background; the cyan boundary stroke is not text and is unlabelled (finding 2).",
+    "RUBRIC image-0.png table_form: pass -- four spatial fields; the row's scalars stay in the evidence page's table.",
+    "RUBRIC image-0.png label_collision: pass -- the repair holds: the subtitle is wrapped onto two lines wholly inside the canvas and the three level arrays sit in a band beneath the panels. Measured on the 1400x1200 attachment, ink spans x 28-1201 and y 5-1184 and touches no canvas edge.",
+    "RUBRIC image-1.png legibility: pass -- same composition under 'weak-rotation-reactor-static - cells-500 - unqualified'; the subtitle is complete and legible, and both axis marks are visible at the centre (finding 1 on the foot band).",
+    "RUBRIC image-1.png data_ink: pass -- as image-0; unfilled contours carry the visual weight.",
+    "RUBRIC image-1.png decoration: pass -- no gradient, fill or decorative styling.",
+    "RUBRIC image-1.png contrast: pass -- near-black text on white; the cyan boundary stroke is not text and is unlabelled (finding 2).",
+    "RUBRIC image-1.png table_form: pass -- spatial field comparison, not a table.",
+    "RUBRIC image-1.png label_collision: pass -- no clipped or overlapping label; measured ink spans x 28-1178 and y 5-1184 and touches no canvas edge.",
+    "RUBRIC image-2.png legibility: pass -- the poloidal panel and its two series labels read at a glance; the panel occupies 302x561 of a 1400x800 canvas, 15% of its area (finding 3).",
+    "RUBRIC image-2.png data_ink: pass -- unfilled line contours, no fill or gradient.",
+    "RUBRIC image-2.png decoration: pass -- nothing beyond the contours, the wall, one axis mark and the two labels.",
+    "RUBRIC image-2.png contrast: pass -- blue and grey label text on white, both clear of the background.",
+    "RUBRIC image-2.png table_form: pass -- a spatial flux comparison, not a table.",
+    "RUBRIC image-2.png label_collision: pass -- the two labels stack at the top-left without overlapping each other or the panel; measured ink spans x 43-868, y 19-684, touching no canvas edge."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T13:37:36.235763+00:00",
+  "total": null
+}

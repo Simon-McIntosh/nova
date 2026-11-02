@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "No assertion was added in any test file by this delta; there is no test file in the diff.",
+    "certificate_panel.py:76-111 (check_labels) raises on a label leaving the canvas, on two labels overlapping, or on a label overlapping the axes box of the panel it belongs to; it is falsifiable and falsified \u2014 panels_check/panel_labels.log:3 records it firing on the driver's own composition, which fails it on the subtitle and the three level readouts.",
+    "certificate_panel.py:52-75 (relayout_labels) has no assertion of its own; the only statement that it works is that check_labels then passes on the delivered panels, which I re-ran.",
+    "No assertion in the delta compares a value against the same variable the test passed in; there is no test."
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/certificate_rows_remeasure/row.py:73",
+    "scripts/prototypes/certificate_rows_remeasure/repanel.py:33",
+    "scripts/prototypes/certificate_rows_remeasure/repanel.py:47"
+  ],
+  "completed_at": "2026-11-02T13:34:32.384Z",
+  "dispatched_at": "2026-11-02T13:26:37Z",
+  "evidence": "The reviewed manifest.md carries no baseline_suite or after_suite block at all (grep finds neither key), so added_failure_count is 0 and added_failure_ids is empty by the absence of those arms rather than by a measured dedupe; the same absence was recorded by the review at 8f5ee89e3. What this delta does carry is a negative control: panels_check/panel_labels.log:3 shows repanel.py --raw refusing the driver's unaltered composition with 'label leaves the canvas' and three 'label sits on the panel data' problems (RAW_EXIT=1), and :5 shows the repaired path passing with labels_checked=8 (REPAIRED_EXIT=0). I reproduced the repaired path myself at 7339c94b4 on the diverted part receipt and got EXIT=0 with labels_checked=8, and the committed diverted-300.svg differs from my regenerated copy only in matplotlib clip-path ids.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/certificate_panel.py",
+      "id": "f97f9716cde",
+      "line": 140,
+      "severity": "non-blocking",
+      "text": "draw writes the unguarded PNG and SVG from _plot before checking and cleans them up only on the success path, so a refused panel leaves *-unguarded.png and *-unguarded.svg beside it in the served figures directory and an unclosed figure; the sibling raw path at repanel.py:46-55 wraps the same sequence in try/finally, which shows the omission is local to the delivered path."
+    },
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/certificate_panel.py",
+      "id": "f328786c6a2",
+      "line": 70,
+      "severity": "non-blocking",
+      "text": "the level readouts are drawn at 6 pt (and the flux subtitle at 9 pt, :52) while the repository's figure rules set an 11 pt floor for a multi-panel figure, so in a reckon column of roughly 900 px the caption band that carries the level arrays renders at about 4-6 pt."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/manifest.md",
+      "id": "f083449c276",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "the negative_control key is written twice, and the copy a reader meets first still reads 'none: a measurement that changes no code', which this delta falsifies by adding a code module whose refusal is the node's negative control; the real control sits under the duplicate key at :30 rather than in the field the record contract names."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the single commit 8f5ee89e3..7339c94b4: certificate_panel.py and repanel.py added, render_panel.py deleted, row.py:73 rewired, both certificate SVGs regenerated, evidence page updated.",
+    "done_when": "The source done_when is the per-row measure in rows2/*/row.log, landed at 8f5ee89e3; this delta's claim that both delivered panels pass the label check is recorded at panels_check/panel_labels.log:5 (labels_checked=8) and I reproduced it on the diverted part at 7339c94b4 (EXIT=0).",
+    "goal": "The source brief.txt:1-12 asks for three certificate rows re-measured with a poloidal panel each; the delta repairs the panel composition, and both delivered certificate panels now draw a two-line subtitle and a caption band clear of the canvas and the data.",
+    "manifest": "Read; status complete, and it records the negative control (RAW_EXIT=1 on the driver's composition, REPAIRED_EXIT=0), but the negative_control key appears twice with one stale copy.",
+    "write_paths": "The source manifest.md:3 grants scripts/prototypes/certificate_rows_remeasure, the evidence fragment and both figure directories; all seven paths in git diff 8f5ee89e3..7339c94b4 fall inside them."
+  },
+  "justifications": {
+    "durability": "no test exercises certificate_panel.py:76-111; check_labels fires only when repanel.py or row.py is invoked by hand, so deleting the refusal reddens nothing in the suite.",
+    "evidence": "panels_check/panel_labels.log:3 records the refusal on the driver's composition naming the clipped subtitle and the three level readouts, and :5 records the repaired pass with 8 labels measured, which I reproduced on the diverted part at 7339c94b4.",
+    "fit": "certificate_panel.py follows the prototype idiom of its siblings, but sets the flux subtitle at 9 pt (:52) and the caption band at 6 pt (:70), below the 11 pt floor the repository's figure rules set for a multi-panel figure.",
+    "goal_fidelity": "scripts/prototypes/certificate_rows_remeasure/certificate_panel.py:45-75 relayouts the two labels the finding named, and both figures under docs/figures/converged-forward-solve/certificate-rows-remeasure/ now render them inside the canvas and clear of the data.",
+    "reuse": "the delta deletes its own duplicate composer and calls the owner benchmarks/solovev_certificate.py:2021 _plot; a search over nova/media, nova/graphics and benchmarks found no owner of a label-collision check, so check_labels is the first, though it hardcodes at :20 a subtitle string the driver also owns at benchmarks/solovev_certificate.py:2084.",
+    "scope_discipline": "every path in git diff 8f5ee89e3..7339c94b4 lies inside the four grants listed at the source manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks for three certificate rows re-measured with a poloidal panel each (brief.txt:1-12); the delta is the repair of the panel composition, and both delivered certificate panels now draw a two-line subtitle and a caption band clear of the canvas and the data.\nVERDICT done_when: The source done_when is the per-row measure recorded in rows2/*/row.log, already landed at 8f5ee89e3; this delta's own claim, that both delivered panels pass the label check, is recorded in panels_check/panel_labels.log:5 (labels_checked=8) and I reproduced it at 7339c94b4 on the diverted part (rows2/diverted-300 part receipt, repanel.py --part, labels_checked=8, EXIT=0).\nVERDICT write_paths: The source manifest.md:3 grants scripts/prototypes/certificate_rows_remeasure; the four declared grants cover every one of the seven paths in git diff 8f5ee89e3..7339c94b4, including the deleted render_panel.py and both regenerated SVGs.\nVERDICT manifest: Read; status is complete and it records the negative-control result (RAW_EXIT=1 on the driver's composition, REPAIRED_EXIT=0), but the negative_control key appears twice and the shadowed copy still claims the run changes no code.\nVERDICT diff: Read the single commit 8f5ee89e3..7339c94b4: it adds certificate_panel.py (158 lines) and repanel.py (60), deletes render_panel.py (184), rewires row.py:73 to the new writer, and regenerates diverted-300.svg and limited-550.svg plus one paragraph of the evidence page, all inside the declared scope.\nCALL_SITES: scripts/prototypes/certificate_rows_remeasure/row.py:73, scripts/prototypes/certificate_rows_remeasure/repanel.py:33, scripts/prototypes/certificate_rows_remeasure/repanel.py:47\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/certificate_rows_remeasure/certificate_panel.py:45-75 relayouts the two labels the finding named and both figures at docs/figures/converged-forward-solve/certificate-rows-remeasure/ now render them inside the canvas and off the data.\nSCORE evidence: 16\nJUSTIFICATION evidence: panels_check/panel_labels.log:3 records the refusal on the driver's own composition naming the clipped subtitle and the three level readouts, and :5 records the repaired pass with 8 labels measured, which I reproduced on the diverted part at 7339c94b4.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 8f5ee89e3..7339c94b4 lies inside the four grants listed at the source manifest.md:3.\nSCORE durability: 6\nJUSTIFICATION durability: no test exercises certificate_panel.py:76-111; check_labels fires only when repanel.py or row.py is invoked by hand, so deleting the refusal reddens nothing in the suite.\nSCORE fit: 15\nJUSTIFICATION fit: certificate_panel.py follows the prototype idiom of its siblings, but it sets the flux subtitle at 9 pt (:52) and the caption band at 6 pt (:70), below the 11 pt floor the repository's figure rules set for a multi-panel figure.\nSCORE reuse: 17\nJUSTIFICATION reuse: the delta deletes its own duplicate composer and now calls the owner benchmarks/solovev_certificate.py:2021 _plot; a search over nova/media, nova/graphics and benchmarks found no owner of a label-collision check, so check_labels is the first, though it hardcodes at certificate_panel.py:20 a subtitle string the driver also owns at benchmarks/solovev_certificate.py:2084.\nFINDING scripts/prototypes/certificate_rows_remeasure/certificate_panel.py:140 non-blocking: draw writes the unguarded PNG and SVG from _plot before checking and cleans them up only on the success path, so a refused panel leaves *-unguarded.png and *-unguarded.svg beside it in the served figures directory and an unclosed figure; the sibling raw path at repanel.py:46-55 wraps the same sequence in try/finally, which shows the omission is local to the delivered path.\nFINDING scripts/prototypes/certificate_rows_remeasure/certificate_panel.py:70 non-blocking: the level readouts are drawn at 6 pt (and the flux subtitle at 9 pt, :52) while the repository's figure rules set an 11 pt floor for a multi-panel figure, so in a reckon column of roughly 900 px the caption band that carries the level arrays renders at about 4-6 pt.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/manifest.md:11 non-blocking: the negative_control key is written twice, and the copy a reader meets first still reads \"none: a measurement that changes no code\", which this delta falsifies by adding a code module whose refusal is the node's negative control; the real control sits under the duplicate key at :30 rather than in the field the record contract names.\n",
+  "review_run_id": "r-20261102T132516981035-review-of-certificate-rows-remeasure-7339c94b4ceb",
+  "reviewed_base_sha": "8f5ee89e3ebe7738a4a97bc76fb2ea38005870b4",
+  "reviewed_head_sha": "7339c94b4cebea57be879e4121da6428c7550752",
+  "reviewed_run_id": "r-20261102T093202714118-certificate-rows-remeasure",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T13:36:33.363078+00:00",
+  "total": 92
+}

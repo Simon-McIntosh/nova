@@ -1,0 +1,130 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires rather than a measurement; no base/head gate pair was read and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1400x720 RGBA, the only attachment named by this review node)": "docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg"
+  },
+  "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that PNG was opened; every pixel figure below was measured on that same PNG. The reviewed range 9afb1a418..388f7afe changes exactly one figure, docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg, drawn by scripts/prototypes/bank_step_booking_h200/plot.py at the reviewed head. Control that the attachment is the reviewed head's render and not a stale one: the head changes ROWS to the single-line labels 'shared kernel only' and 'shared kernel + cut buckets' (dropping the '\\n' the base carried) and changes COLOUR_KERNEL from #b06a2c to #b06a2a; the attached PNG shows both row labels on one line each and fills the middle bars at exactly RGB (176,106,42) = #b06a2a, so it can only be the head's output.",
+  "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html names both devices and their hosts, decodes the three arms and their colours ('the base source (grey), the shared-kernel factoring alone (orange) and the shared kernel with separate cut-cell buckets (green)'), states the acquisition ('medians of three synchronized calls'), warns that each panel has its own linear millisecond axis and that the two are not on a shared scale, and states that the arms ran as separate scheduler jobs with the profiler warmed before tracing. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T21:28:11Z",
+  "figure_checks": {
+    "caption_independence": "The caption names the devices, the hosts, the axis units, the three arms and their colours, the acquisition and the separate per-panel scales. It is not a restatement of the title or the axis labels.",
+    "head_identity_control": "The attachment is provable as the reviewed head's render rather than a stale image: the head's single-line row labels are present on both panels and the middle bars fill at exactly #b06a2a, both of which the base revision did not produce.",
+    "rendered_artifact": "Only image-0.png was opened, at its native 1400x720, and every pixel count, ink bounding box, spine position, bar extent and glyph height above was measured on that same PNG. No SVG text element, dimension or glyph coordinate was read, so each verdict is about the picture a reader sees.",
+    "scope": "Read-only. No figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and this node's manifest.",
+    "values_from_the_render": "Each bar's end column was mapped back through that panel's own tick spacing (9.8 px/ms left, 0.67 px/ms right) and agrees with the value printed beside it within about 1 ms in all six cases, so the bars encode the stated data honestly rather than being drawn to a different scale."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg",
+      "render_check": {
+        "bar_extents_and_ms_from_the_render": {
+          "base": {
+            "left_panel": "cols 223-493, about 27.7 ms against the printed 27.85",
+            "right_panel": "cols 915-1303, about 580.6 ms against the printed 580.32"
+          },
+          "left_panel_scale": "9.8 px per ms (x ticks 0/20/30/40 at columns 222/417/515/613)",
+          "right_panel_scale": "0.67 px per ms (x ticks 0/100/200/300/400/500 at columns 914/981/1049/1116/1183/1250)",
+          "shared_kernel_and_cut_buckets": {
+            "left_panel": "cols 223-532, about 31.6 ms against the printed 31.87",
+            "right_panel": "cols 915-1255, about 508.9 ms against the printed 508.26"
+          },
+          "shared_kernel_only": {
+            "left_panel": "cols 223-619, about 40.5 ms against the printed 40.76",
+            "right_panel": "cols 915-1312, about 594.0 ms against the printed 592.86"
+          }
+        },
+        "canvas": "1400x720 RGBA",
+        "ink_bbox_rows_cols": [
+          15,
+          704,
+          18,
+          1385
+        ],
+        "outer_edge_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0
+        },
+        "panel_geometry": "Left spine at column 222, right-panel spine at column 914, shared bottom spine at row 661; three bar bands at rows 65-186, 288-409 and 511-632 on both panels.",
+        "series_colour_px": {
+          "base_grey_929292": 80520,
+          "both_green_2e8b57": 79422,
+          "kernel_orange_b06a2a": 96990
+        },
+        "spine_occlusion": "The left panel's spine column 222 carries 260 dark pixels against 632 on the right panel's column 914; the 372-pixel difference is exactly the three 122-px bar bands, so the left spine is painted out wherever a bar touches it (finding 3).",
+        "text_heights_px": {
+          "row_label": 10,
+          "value_label": 12,
+          "x_axis_label": 13,
+          "x_tick_digits": 10
+        }
+      },
+      "rubric": {
+        "contrast": "pass. Near-black text on white with every value label in white space; fills about 3.1:1 (grey) and 4.3:1 (orange, green) against white, above the 3:1 graphics floor.",
+        "data_ink": "pass. Three solid bars and three value labels per panel and nothing else; measured 80520 grey, 96990 orange and 79422 green pixels, the remainder being text raster and bar-edge antialiasing.",
+        "decoration": "pass. No gridlines, no top or right spines, no background fill, no shadow, no styled theme.",
+        "label_collision": "pass. Ink bounding box rows 15-704, columns 18-1385; zero ink on all four canvas edges; 18 px clear between the longest row label and the left edge; no value label over its bar and no label near another.",
+        "legibility": "pass. Device-titled linear panels, three single-line named rows on both, every value printed at its bar end, all text readable at the delivered 1400x720. Cost recorded as non-blocking finding 1: type below the declared sizes.",
+        "table_form": "pass. The paired bars carry the device comparison and the sign reversal between devices; the exact values are also tabled in the same evidence fragment."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "plot.py:64 passes fontsize=12 to the value-label text call; the module imports pyplot at line 14 and never calls plt.style.use('data-ink') or rcParams anywhere. Glyph heights measured on image-0.png: tick band rows 672-681, axis-label band rows 691-703, value label '508.26' rows 564-575.",
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f304c68e045",
+      "line": 64,
+      "severity": "non-blocking",
+      "summary": "The script never applies the repository's data-ink style sheet, so every label is drawn at matplotlib's defaults rather than the declared sizes, and the value labels are additionally pinned to 12 pt. Measured on the render, the x tick digits occupy 10 px of height (declared 14 pt), the axis label 'warm booking tangent [ms]' 13 px including its descenders (declared 16 pt) and the value labels 12 px (declared 14 pt). At the ~900 px reckon column that presents the page the same tick digits fall to roughly 6 px, below body text, which is the reading cost the declared sizes exist to prevent. It stays non-blocking because at the delivered 1400x720 every glyph reads without magnification and no label is clipped or lost."
+    },
+    {
+      "evidence": "plot.py:17-19 define the three hex values and plot.py:51 passes them as the barh colours. Measured on image-0.png the fills render at exactly (146,146,146), (176,106,42) and (46,139,87), carrying 80520, 96990 and 79422 pixels, while each bar's identity is given by its y tick label set at plot.py:55.",
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f504687c79f",
+      "line": 18,
+      "severity": "non-blocking",
+      "summary": "The three bars are coloured grey, orange and green, but every bar is already named by its own row label on both panels, so the hue carries no information a reader can use; three configurations of one measurement would read better as lightness steps of a single hue, or all in one neutral. The middle hue #b06a2a renders as a muted orange-brown (RGB 176,106,42) at the dull end of the warm-brown family the plotting style retires, so beside the clean green it reads as dirt rather than as a component. It stays non-blocking: the rows are labelled, nothing is hidden and the figure is fully readable."
+    },
+    {
+      "evidence": "plot.py:52 sets zorder=3 on the barh call. Measured on image-0.png, the left spine column 222 holds 260 dark pixels against 632 in the right panel's column 914; the 372-pixel difference equals the three 122-px bar bands (rows 65-186, 288-409, 511-632).",
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f3a7efda64e",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The bars are drawn at zorder 3, above matplotlib's default spine zorder of 2.5, so on the left panel the bars paint out their own segment of the y-axis spine and the axis line reads as three disconnected segments; the right panel's spine is continuous because its bars happen to begin one pixel to the right. The two panels therefore present the same axis two different ways in one figure. It stays non-blocking: the tick marks and labels remain, so the axis is still readable, and no data is obscured."
+    }
+  ],
+  "justifications": {
+    "durability": "The record is written at both declared paths and each is checked with crew check --review --record before the manifest is closed.",
+    "evidence": "All claims are pixel measurements on the single attached PNG: ink bounding box, zero-ink canvas edges, per-colour pixel counts, spine positions and their occlusion, bar end columns mapped back to milliseconds through each panel's own tick spacing, and measured glyph heights.",
+    "legibility": "Read at native resolution: both panels are titled by device, all three rows are named, and every value is printed at its bar end, so no reading depends on judging a bar length by eye. The only cost is the below-style type size (finding 1).",
+    "scope_discipline": "This review is read-only; all three findings are reported in this record and no source, figure, caption or script was changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T212651747494-review-of-bank-step-booking-h200-388f7afe4565-figure",
+  "reviewed_base_sha": "9afb1a4186bae0bb28ef9b7bd7586099c53d4ef9",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg"
+  ],
+  "reviewed_head_sha": "388f7afe456570a6e6b3e8dcf43d11991af0554b",
+  "reviewed_run_id": "r-20261102T201222592760-bank-step-booking-h200",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Two side-by-side linear panels titled by device ('H200, reserved card', 'P100 on titan'); the same three rows on both, named 'base', 'shared kernel only' and 'shared kernel + cut buckets' on one line each; every value printed at its bar end so no value has to be measured off an axis. Every glyph is legible at the delivered 1400x720 without magnification. The reading cost recorded as non-blocking finding 1 is that the type renders below the repository's declared sizes, so at the ~900 px reckon column the tick digits fall to roughly 6 px.",
+    "RUBRIC data_ink: pass. Each plot area holds three solid bars and three value labels and nothing else. Measured on image-0.png: 80520 px of grey #929292, 96990 px of orange #b06a2a and 79422 px of green #2e8b57; the largest remaining non-white colours are the raster of black text and bar-edge antialiasing. The bars carry all the visual weight.",
+    "RUBRIC decoration: pass. No gridlines (plot.py:69 sets axis.grid(False)), no background fill, no panel frame, no shadow and no styled theme; top and right spines are hidden at plot.py:67-68, so each panel draws only a left and a bottom spine. One layering default is recorded as non-blocking finding 3: the bars sit above the spine and paint out its segment.",
+    "RUBRIC contrast: pass. All text is near-black on white, far above the 4.5:1 floor, and every value label sits in white space beside its bar end rather than on a fill. The fills are graphic marks, not text: the grey reads at about 3.1:1 on white (the prescribed 'reads as data and still recedes' grey) and the orange and green at about 4.3:1, all above the 3:1 graphics floor.",
+    "RUBRIC table_form: pass. The image carries six scalars plus two device identities, but its job is the comparison a table does not give at a glance: a twenty-fold device gap on the same arm (27.85 against 580.32 ms) and one arm reversing direction between the devices (the shared kernel alone is 46 percent longer on the H200 and 2.1 percent longer on the P100, while the two cuts together are 14.4 percent longer on the H200 and 12.4 percent shorter on the P100). The exact numbers are also tabulated in the same evidence fragment, so the figure is not the only form the data take.",
+    "RUBRIC label_collision: pass. No label is clipped and none overlaps another label or the data. The render's ink bounding box is rows 15-704 and columns 18-1385 of the 1400x720 canvas, and all four canvas edge rows and columns carry zero non-white pixels. The longest row label, 'shared kernel + cut buckets', occupies columns 18-221 and so clears the left edge by 18 px; the left panel's rightmost value label and the right panel's row labels are separated by white space."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T21:37:51.465323+00:00",
+  "total": null
+}

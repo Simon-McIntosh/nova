@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/bank_step_booking_h200/run_device.sh:profile_arm",
+    "scripts/prototypes/bank_step_booking_h200/run_device.sh:count_arm",
+    "scripts/prototypes/bank_step_speed/profile.py",
+    "scripts/prototypes/bank_step_speed/parse_trace.py"
+  ],
+  "completed_at": "2026-11-02T21:40:15.772Z",
+  "dispatched_at": "2026-11-02T21:26:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html",
+      "id": "f778c5f2592",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "The summary mixes the two seeds: it takes 99 cut and 95 moving-edge from the P100 seed and then says the batch evaluates the moving-edge integral for 113 cells, which is the H200 seed's moving-edge count, so the sentence contradicts itself and the census table below it. It predates this delta but sits in the file the delta edits and reads as the headline claim."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html",
+      "id": "fb86caa2602",
+      "line": 46,
+      "severity": "non-blocking",
+      "text": "The wall table is still transcribed by hand; only the repaired row was checked and nothing reconciles the table against the logs or against the SVG that is now derived, so the defect this commit fixed (the P100 kernel row carrying the base arm's launch count) can recur silently."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_h200/kernel_table.py",
+      "id": "fd189d24802",
+      "line": 32,
+      "severity": "non-blocking",
+      "text": "The added assertion compares this module's own stage-window walk against parse_trace's walk of the same trace; both apply the identical window and Memcpy/Memset filter, so it cannot fail for any data and only fires if the two copies are edited apart, and nothing invokes kernel_table.py in run_device.sh so it never runs automatically."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f1fb3100b56",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "The palette and canvas are hand-rolled and saved through a bare fig.savefig(path) at line 71 rather than nova.media's ink style and its mechanical label check, and #b06a2a is the brown-orange family the plot-style rule discourages; the figure is also not regenerable from any checked-in command, since nothing in run_device.sh invokes plot.py with its new required --run-dir."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/bank_step_booking_h200/run_device.sh:profile_arm invokes scripts/prototypes/bank_step_speed/profile.py and parse_trace; count_arm invokes count_cut.py. kernel_table.py and plot.py have no caller in the repository.",
+    "diff": "Read commit by commit against 9afb1a418: one commit, 388f7afe4, changing the evidence fragment, the SVG, count_cut.py (trailing newline only), kernel_table.py, plot.py and run_device.sh, all inside the declared scope.",
+    "done_when": "The done_when is a fresh-read residual at most 1e-10, oracle ratios within 5e-4/5e-4/1e-4 and a tabled P100 wall; head-h200-solve.log records FINAL fresh_residual 2.9857e-11 and ORACLE ratios 1.0477e-5/9.2549e-6/2.5906e-5 and the P100 column now reconciles with its logs, but the recorded gate command tests/test_bank_step_launch_fusion.py asserts none of those numbers.",
+    "goal": "The node goal is to cut the arithmetic of the fused booking tangent on the H200; nova/equilibrium/current.py and nova/equilibrium/clip_quadrature.py are byte-identical to the base at 388f7afe4, so nothing was cut and this delta is corrective evidence for the measured negative result.",
+    "manifest": "Read; it records status complete, seven commits, the residual and oracle ratios, both suite arms green at failure_count 0 pointing at the same gate-final.log, and a negative_control_note conceding its log is a timing arm rather than a failing test.",
+    "write_paths": "Declared paths are nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py, tests/test_bank_step_booking_h200.py, scripts/prototypes/bank_step_booking_h200, the evidence fragment and the figures directory; all six paths changed by 388f7afe4 are inside them."
+  },
+  "justifications": {
+    "durability": "No test was added; the one new assertion at scripts/prototypes/bank_step_booking_h200/kernel_table.py:32 compares this module's own stage walk against parse_trace's walk of the same trace and no script invokes kernel_table.py, so nothing reddens automatically if these numbers regress.",
+    "evidence": "The P100 row now reconciles with head-p100k-profile.log's STAGE_DEVICE launches=608 device_ms=606.139134, the four head logs carry a correction line naming the revision each actually ran, and the SVG labels read 27.85/40.76/31.87 and 580.32/592.86/508.26 from the six logs' STAGE medians, but the recorded gate command tests/test_bank_step_launch_fusion.py asserts none of the done_when's numbers and both suite arms cite the same gate-final.log at bc5eab299.",
+    "fit": "scripts/prototypes/bank_step_booking_h200 keeps the surrounding prototype idiom, but plot.py:18 keeps a hand-rolled palette including a brown-orange #b06a2a and plot.py:71 saves with a bare fig.savefig rather than the repository's nova.media ink style and its label check.",
+    "goal_fidelity": "The goal is to cut the fused booking tangent's arithmetic on the H200, and git diff 0e755a34..388f7afe4 over nova/ is empty, so the 27.85 ms tangent is unchanged and this delta corrects evidence only.",
+    "reuse": "kernel_table.py:21-24 now calls scripts/prototypes/bank_step_speed/parse_trace.py, extending the owner of the trace walk, but kernel_table.py:48-71 still re-implements that walk's device-pid selection and stage-window filter to recover the events parse_trace does not return.",
+    "scope_discipline": "All six paths in git diff 9afb1a418..388f7afe4 sit inside the run's declared write paths, and no product, test or plan file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to cut the fused booking tangent's arithmetic on the H200; git diff 0e755a34..388f7afe4 over nova/ is empty.\nVERDICT done_when: head-h200-solve.log records fresh_residual 2.9857e-11 and ORACLE ratios 1.0477e-5/9.2549e-6/2.5906e-5 and the P100 wall column now reconciles with head-p100k-profile.log, but tests/test_bank_step_launch_fusion.py asserts none of those numbers.\nVERDICT write_paths: all six paths in git diff 9afb1a418..388f7afe4 are inside the declared scripts, evidence-fragment and figure paths.\nVERDICT manifest: read; it reports status complete, seven commits, both suite arms green at failure_count 0 from the same gate-final.log, and a negative_control_note conceding its log is a timing arm.\nVERDICT diff: one commit, 388f7afe4, read against 9afb1a418: the fragment's P100 row and a new derivation paragraph, the SVG regenerated from the logs, and the three prototype scripts corrected.\nCALL_SITES: scripts/prototypes/bank_step_booking_h200/run_device.sh:profile_arm, scripts/prototypes/bank_step_booking_h200/run_device.sh:count_arm, scripts/prototypes/bank_step_speed/profile.py, scripts/prototypes/bank_step_speed/parse_trace.py\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: git diff 0e755a34..388f7afe4 -- nova/ is empty, so nova/equilibrium/current.py still carries the 27.85 ms tangent uncut and only corrective evidence landed.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html:47 now states 608 launches and 606.14 ms against head-p100k-profile.log:28, and the SVG labels match the six logs' STAGE medians.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 9afb1a418..388f7afe4 lies inside the declared write paths and no product, test or plan file is touched.\nSCORE durability: 7\nJUSTIFICATION durability: scripts/prototypes/bank_step_booking_h200/kernel_table.py:32 is the only new assertion, it is never invoked by a checked-in command, and no test asserts any wall or table value.\nSCORE fit: 13\nJUSTIFICATION fit: scripts/prototypes/bank_step_booking_h200/plot.py:18 keeps a hand-rolled brown-orange palette and plot.py:71 saves without the repository's ink style or its label check.\nSCORE reuse: 11\nJUSTIFICATION reuse: scripts/prototypes/bank_step_booking_h200/kernel_table.py:21-24 now calls scripts/prototypes/bank_step_speed/parse_trace.py, but lines 48-71 still duplicate its stage resolution to recover the events.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html:15 non-blocking: the summary pairs the P100 seed's 99/95 with the H200 seed's 113, contradicting its own census table.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html:46 non-blocking: the wall table is still transcribed by hand and nothing reconciles it with the logs or the derived figure, so the repaired mismatch can recur silently.\nFINDING scripts/prototypes/bank_step_booking_h200/kernel_table.py:32 non-blocking: the assertion compares two identical walks of the same trace and is never invoked by an automated path, so it cannot fail for any data.\nFINDING scripts/prototypes/bank_step_booking_h200/plot.py:18 non-blocking: the hand-rolled palette and bare savefig bypass nova.media's ink style and label check, and no checked-in command invokes plot.py with its required --run-dir.",
+  "review_run_id": "r-20261102T212434791779-review-of-bank-step-booking-h200-388f7afe4565",
+  "reviewed_base_sha": "9afb1a4186bae0bb28ef9b7bd7586099c53d4ef9",
+  "reviewed_head_sha": "388f7afe456570a6e6b3e8dcf43d11991af0554b",
+  "reviewed_run_id": "r-20261102T201222592760-bank-step-booking-h200",
+  "scores": {
+    "durability": 7,
+    "evidence": 15,
+    "fit": 13,
+    "goal_fidelity": 10,
+    "reuse": 11,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T21:40:41.418984+00:00",
+  "total": 76
+}

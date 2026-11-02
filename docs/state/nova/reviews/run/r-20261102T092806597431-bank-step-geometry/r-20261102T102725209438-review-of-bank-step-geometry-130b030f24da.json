@@ -32,6 +32,13 @@
     "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/final-negative.log",
     "parity": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/committed-parity-titan.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-02T10:53:35.718570+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "exempted",

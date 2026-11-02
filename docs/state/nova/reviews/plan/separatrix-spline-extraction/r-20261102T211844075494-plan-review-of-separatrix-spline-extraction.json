@@ -25,7 +25,24 @@
   "plan_slug": "separatrix-spline-extraction",
   "plan_version": 165,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "redundant, not load-bearing: the same clause's negative control (a 1 percent perturbation of one stored conductor current must change the drawn contour paths) fails on any panel still drawn from the stored lattice psi, so the gate can fail on an unfixed figure without the between-rows sub-clause",
+      "when": "2026-11-02T22:12:12.612142+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "redundant, not load-bearing: the same clause's negative control (a 1 percent perturbation of one stored conductor current must change the drawn contour paths) fails on any panel still drawn from the stored lattice psi, so the gate can fail on an unfixed figure without the between-rows sub-clause",
+      "when": "2026-11-02T22:12:12.612142+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/separatrix-spline-extraction/r-20261102T211844075494-plan-review-of-separatrix-spline-extraction.json",
   "review_run_id": "r-20261102T211844075494-plan-review-of-separatrix-spline-extraction",
   "reviewed_blob_sha": "622846b8305bf686a0236f3b37131aed7c35187a",
   "rubric": "content",

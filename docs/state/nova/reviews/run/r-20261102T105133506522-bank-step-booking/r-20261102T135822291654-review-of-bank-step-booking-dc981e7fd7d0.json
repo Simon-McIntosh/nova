@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_step_booking.py:38-50 fail if any of the six booked primal byte digests leaves both independently pinned CPU variants.",
+    "tests/test_bank_step_booking.py:103 fails if the batched tangent contains a nonfinite value; :104-106 fail if it differs by at least 1e-10 relative from the serial channel implementation, although the two paths share changed conic endpoint helpers.",
+    "tests/test_bank_step_booking.py:128-132 fail if ratio 0.5 rebuilds, reports refactoring, or changes the cached update; :144-149 fail if ratio 0.5001 reuses the factor.",
+    "tests/test_bank_step_booking.py:155-160 fail if a supplied cache is accepted without an observed contraction ratio.",
+    "tests/test_bank_step_booking.py:201-203 fail if Jacobian assembly invokes the local sensitivity callback more than once or assembles a matrix other than the fixed diagonal; negative-control.log shows the 15-call mutation fails :201.",
+    "No added assertion compares an output only with the same variable supplied as its input; the serial parity check has a shared endpoint helper and cannot independently validate that helper."
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1096",
+    "nova/equilibrium/support_read.py:1129",
+    "nova/equilibrium/support_read.py:1322"
+  ],
+  "completed_at": "2026-11-02T14:12:20Z",
+  "dispatched_at": "2026-11-02T14:01:03Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/suite-four-test_bank_step_booking.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/suite-base-test_bank_step_speed.log",
+    "matching_speed_head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/suite-four-test_bank_step_speed.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/negative-control.log",
+    "titan_final": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/titan-four.log"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "f49ae28cff6",
+      "line": 60,
+      "severity": "blocking",
+      "text": "The rendered final green series is labelled 'shared boundary', although the final 231.24 ms value follows density-basis contraction and four-lane sizing; the legend misattributes the measured speedup and must be corrected in the SVG before landing."
+    },
+    {
+      "disposition": "folded",
+      "disposition_reason": "The proposed bank-step-launch-fusion node should reduce launches while retaining the measured tangent and fresh-residual gains.",
+      "file": "nova/equilibrium/current.py",
+      "id": "fa5baf3fb62",
+      "line": 819,
+      "node": "bank-step-launch-fusion",
+      "severity": "non-blocking",
+      "text": "The four-lane cut batch reduces wall but raises tangent launches from 1,082 to 5,736 and whole-step launches from 8,381 to 14,427, leaving the brief's launch-reduction work open; disposition: folded into proposed bank-step-launch-fusion node."
+    },
+    {
+      "disposition": "folded",
+      "disposition_reason": "The proposed bank-step-launch-fusion node should move the vectorized boundary integral into the quadrature owner while preserving the performance receipt.",
+      "file": "nova/equilibrium/current.py",
+      "id": "fe7ce93c1cd",
+      "line": 747,
+      "node": "bank-step-launch-fusion",
+      "severity": "non-blocking",
+      "text": "The new boundary integral duplicates the capability in clip_quadrature.py:252-296 instead of extending that owner; both copies can diverge on quadrature or edge rules; disposition: folded into proposed bank-step-launch-fusion node."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the 46 commits from 731c57ca to dc981e7f by per-commit path and subject plus the cumulative source, test, script, evidence, and figure diffs; the final plot legend misidentifies the green series.",
+    "done_when": "The source prompt.txt:116-117 requires LU reuse steps, whole-step wall, and oracle ratios; bank-step-booking.html:43-52 tables fresh and carried arms with a 1e-10 fresh-residual gate and bounded oracle ratios.",
+    "goal": "The source prompt.txt:38 asks for a faster booking tangent and factor reuse; current.py:635 and support_read.py:1294 implement them, and the stage receipt records a 4.66x tangent speedup but a launch increase.",
+    "manifest": "The source manifest.md records status complete, 46 commits, baseline and after suite receipts, titan measurements, negative-control.log, and the H200 admission limit; both recorded suite logs end EXIT=0.",
+    "write_paths": "The source manifest.md:3 grants current.py, support_read.py, the booking test, booking prototype scripts, evidence fragment, and figure directory; all 17 paths in the 46-commit diff fit those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_booking.py:116-149 rejects reuse across a contraction ratio above 0.5, and :169-203 rejects a serial assembly mutant as negative-control.log confirms.",
+    "evidence": "bank-step-booking.html:39-52 tables factor-arm steps and wall, titan-four.log records a 7.970e-11 fresh residual and oracle ratios, and both suite receipts report EXIT=0.",
+    "fit": "support_read.py:1062-1111 extends the existing bank step and the added identifiers are mechanism names, although plot.py:60 mislabels the final series.",
+    "goal_fidelity": "current.py:635 and support_read.py:1340 deliver a batched tangent and optional factor reuse, but bank-step-booking.html:22-27 records 5,736 tangent launches against 1,082 at base.",
+    "reuse": "current.py:741-790 reproduces the moving polygon boundary integral owned by clip_quadrature.py:252-296, while solve.py:39-85 is a distinct autodiff-based factor mechanism unsuitable for this analytic bank step.",
+    "scope_discipline": "The 17 changed paths in the per-commit diff remain inside the source manifest.md:3 grants, including the booking prototype directory and figure directory."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt.txt:38 asks for a faster booking tangent and factor reuse; current.py:635 and support_read.py:1294 implement them, and the stage receipt records a 4.66x tangent speedup but a launch increase.\nVERDICT done_when: The source prompt.txt:116-117 requires LU reuse steps, whole-step wall, and oracle ratios; bank-step-booking.html:43-52 tables fresh and carried arms with a 1e-10 fresh-residual gate and bounded oracle ratios.\nVERDICT write_paths: The source manifest.md:3 grants current.py, support_read.py, the booking test, booking prototype scripts, evidence fragment, and figure directory; all 17 paths in the 46-commit diff fit those grants.\nVERDICT manifest: The source manifest.md records status complete, 46 commits, baseline and after suite receipts, titan measurements, negative-control.log, and the H200 admission limit; both recorded suite logs end EXIT=0.\nVERDICT diff: Read the 46 commits from 731c57ca to dc981e7f by per-commit path and subject plus the cumulative source, test, script, evidence, and figure diffs; the final plot legend misidentifies the green series.\nCALL_SITES: nova/equilibrium/support_read.py:1096, nova/equilibrium/support_read.py:1129, nova/equilibrium/support_read.py:1322\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: current.py:635 and support_read.py:1340 deliver a batched tangent and optional factor reuse, but bank-step-booking.html:22-27 records 5,736 tangent launches against 1,082 at base.\nSCORE evidence: 17\nJUSTIFICATION evidence: bank-step-booking.html:39-52 tables factor-arm steps and wall, titan-four.log records a 7.970e-11 fresh residual and oracle ratios, and both suite receipts report EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 17 changed paths in the per-commit diff remain inside the source manifest.md:3 grants, including the booking prototype directory and figure directory.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_bank_step_booking.py:116-149 rejects reuse across a contraction ratio above 0.5, and :169-203 rejects a serial assembly mutant as negative-control.log confirms.\nSCORE fit: 16\nJUSTIFICATION fit: support_read.py:1062-1111 extends the existing bank step and the added identifiers are mechanism names, although plot.py:60 mislabels the final series.\nSCORE reuse: 4\nJUSTIFICATION reuse: current.py:741-790 reproduces the moving polygon boundary integral owned by clip_quadrature.py:252-296, while solve.py:39-85 is a distinct autodiff-based factor mechanism unsuitable for this analytic bank step.\nFINDING scripts/prototypes/bank_step_booking/plot.py:60 blocking: The rendered final green series is labelled 'shared boundary', although the final 231.24 ms value follows density-basis contraction and four-lane sizing; the legend misattributes the measured speedup and must be corrected in the SVG before landing.\nFINDING nova/equilibrium/current.py:819 non-blocking: The four-lane cut batch reduces wall but raises tangent launches from 1,082 to 5,736 and whole-step launches from 8,381 to 14,427, leaving the brief's launch-reduction work open; disposition: folded into proposed bank-step-launch-fusion node.\nFINDING nova/equilibrium/current.py:747 non-blocking: The new boundary integral duplicates the capability in clip_quadrature.py:252-296 instead of extending that owner; both copies can diverge on quadrature or edge rules; disposition: folded into proposed bank-step-launch-fusion node.",
+  "review_run_id": "r-20261102T135822291654-review-of-bank-step-booking-dc981e7fd7d0",
+  "reviewed_base_sha": "731c57cae56fd34c025c798fdfa909cb234e740d",
+  "reviewed_head_sha": "dc981e7fd7d0c6e1a8adf7cfafecfff485498f5c",
+  "reviewed_run_id": "r-20261102T105133506522-bank-step-booking",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T14:16:39.028135+00:00",
+  "total": 90
+}

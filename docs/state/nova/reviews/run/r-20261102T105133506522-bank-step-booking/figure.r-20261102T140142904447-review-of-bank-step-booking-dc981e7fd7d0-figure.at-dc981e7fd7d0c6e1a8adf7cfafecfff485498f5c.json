@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_review": "The caption does not merely repeat the figure title: it names the device and case (titan P100, 550-cell diverted bank), binds each colour to a series, states that the read is outside the Newton step, warns that the Jacobian and whole-step rows are not additive, gives the warm-call count behind each median, and records that the render was checked. Its only defect is the green-series name mismatch recorded as the first finding.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T14:09:01Z",
+  "figures": [
+    {
+      "grapher": "scripts/prototypes/bank_step_booking/plot.py",
+      "path": "docs/figures/sub-millisecond-forward-path/bank-step-booking/stage-wall.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T140142904447-review-of-bank-step-booking-dc981e7fd7d0-figure/image-0.png",
+      "rendered_size": "1399x720"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The parsed independent review of this same run at this head already raises this exact line as a blocking finding, so the correction is owed there; repeating it here adds no work the node does not already hold.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "f2ccea7c85a",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The legend names the green series 'shared boundary', while the figure's caption calls the same green series 'the final vectorized tangent'. A reader of the rendered figure alone cannot tell whether 'shared boundary' is the final configuration or one intermediate change, and the name does not match what the caption says the colour means."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The two series are separated in every row by vertical offset as well as hue, and the caption binds each colour to its series, so the missing marker keys do not change what a reader can recover.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "fc022af5141",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "The legend keys are plain line segments, while every plotted series is drawn as a line with a filled circular endpoint marker; a reader matching legend to data gets no marker cue, and the two series are distinguished in the legend only by hue."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The brief requires a linear axis so the stages share one comparable scale, and the reuse result is tabled exactly in the evidence fragment beside the figure.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "f82f4f0609f",
+      "line": 69,
+      "severity": "non-blocking",
+      "summary": "The x limit is set from the largest value, about 1,790 ms, so the LU factor pair (about 20 ms against about 10 ms) spans roughly one per cent of the axis: both markers sit effectively on the y-axis and neither bar length can be read, so the factor-reuse reduction the run measures is not visible in the figure at this scale."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The repository's data-ink rules discourage redundant value labels, and the exact per-stage values are in the table directly below the figure.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "fadaa63f64f",
+      "line": 64,
+      "severity": "non-blocking",
+      "summary": "No bar carries its value and the figure draws no gridlines, so every number must be interpolated against 200 ms ticks; the booking-tangent reduction the figure exists to show (about 1,077 ms to about 231 ms) cannot be read to better than a few tens of milliseconds from the picture."
+    }
+  ],
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261102T140142904447-review-of-bank-step-booking-dc981e7fd7d0-figure",
+  "reviewed_base_sha": "731c57cae56fd34c025c798fdfa909cb234e740d",
+  "reviewed_head_sha": "dc981e7fd7d0c6e1a8adf7cfafecfff485498f5c",
+  "reviewed_run_id": "r-20261102T105133506522-bank-step-booking",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass: labels and tick values render in dark grey on white; the green #2e8b57 marks measure 4.25:1 and the grey #929292 3.11:1 against white, both above the 3:1 floor for graphical marks, and no text is drawn in either hue.",
+    "data_ink": "pass: the marks are the data, one line and one filled endpoint marker per series per row, with no fills, bands or shading competing with them.",
+    "decoration": "pass: no gridlines, no gradient, no background fill; the top and right spines are absent and only the left spine and the bottom axis carry a scale.",
+    "label_collision": "pass: no text is clipped at any canvas edge and no two labels overlap; the endpoint markers stay distinct even where the two values nearly coincide (read 1,660.14 vs 1,652.00 ms; residual and booking 324.94 vs 323.33 ms), because the series are drawn at separate vertical offsets.",
+    "legibility": "pass: all six stage labels, the legend and the axis label read at a glance on the 1399x720 render; the LU factor pair sits almost on the y-axis and is compressed by the linear scale, recorded as a non-blocking finding below.",
+    "table_form": "pass: six stages compared against two configurations is a magnitude comparison, not information that is naturally a table; the exact values remain in the evidence table beside the figure."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T14:18:06.944049+00:00",
+  "total": null
+}

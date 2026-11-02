@@ -816,7 +816,7 @@ def book_tangent_channels(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jnp.where(full[:, None, None], whole, 0.0)
-    batch_width = min(8, cells)
+    batch_width = min(4, cells)
     cut_count = jnp.sum(cut, dtype=jnp.int32)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))

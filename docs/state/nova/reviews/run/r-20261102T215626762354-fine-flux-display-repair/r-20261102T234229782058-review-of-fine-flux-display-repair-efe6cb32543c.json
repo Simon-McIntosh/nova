@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_display_flux.py:186 compares display.reproduction_relative_error against operator.raster_image, which the operator computes independently of the display path; dropping the radial or vertical moment column, or a wrong contraction, reddens it, and logs/negative-control.log shows it red at 2.53e-2 under a swapped column.",
+    "tests/test_display_flux.py:214 compares full.flux against bare.flux, two builds of the same code under test that differ only by a moment triple the test supplied; it holds whatever the contraction does with the columns' order, so a swap survives it and only :186 catches one.",
+    "tests/test_display_flux.py:241 asserts the reported mismatch equals max|increment|, an increment the test declares and the builder never sees; reinstating a mismatch computed against the wrong operand reddens it.",
+    "tests/test_display_flux.py:261 asserts the polished saddle lies within 50 mm of (1.08, 0.0); it does not compare against a polished reference, so it would also hold if _stationary_saddle returned the seed unchanged whenever that seed lies within 50 mm of (1.08, 0.0), which an X-point seed does -- the assertion does not by itself show the polish ran.",
+    "tests/test_display_flux.py:213-218 asserts the fixture's radial and vertical moments differ, a property of the fixture rather than of the code under test; it cannot fail against the landed code."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-02T23:53:33.903Z",
+  "dispatched_at": "2026-11-02T23:43:46Z",
+  "evidence": {
+    "added_failure_source": "The reviewed manifest records no baseline_suite or after_suite block; added_failure_count derives from logs/gate-final.log (5 passed, EXIT=0), the only post-change arm on record, which carries no failures.",
+    "after_suite": null,
+    "baseline_suite": null,
+    "gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/logs/gate-final.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/logs/negative-control.log"
+  },
+  "findings": [
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "cad0b80dc21",
+      "line": 220,
+      "severity": "blocking",
+      "text": "The brief's correction 4 and section 5 done-when clause 1 ask for a test that solves the manufactured operator to convergence and checks the node mismatch against that solve's terminal residual; test_the_node_mismatch_is_the_fixed_point_residual substitutes a declared increment (an operator image plus a cos ramp) for a solved state, so no assertion in the landed file touches a converged fixed point. The manifest and the evidence fragment disclose the gap, but the delivered gate does not measure the arm the done-when names."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "61815cb764b",
+      "line": 175,
+      "severity": "non-blocking",
+      "text": "A test_a_converged_state_mismatches_within_ten_terminal_residuals existed and failed with NoQualifiedAxisError (logs/gate-3.log, logs/gate-4.log: test_a_converged_state_mismatches_within_ten_terminal_residuals, profile.solve -> require_qualified_axis); it was deleted from the delivered file rather than left red or marked as expected-failure, so the failing signal the brief asked for is no longer visible in the suite. Folded with the blocking finding above."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "29412a2f37e",
+      "line": 299,
+      "severity": "blocking",
+      "text": "branches = _branches(values, radius, height, saddle_flux, axis_rz) is the node's headline repair -- the separatrix assembled on the fine map at the map's own saddle level -- and no committed assertion reads display.branches or display.well_formed; tests/test_display_flux.py:245-262 never mentions them. Deleting the call (leaving branches = {}) leaves all five tests green, so a regression of the one-field separatrix is invisible to the gate."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "48556df4e04",
+      "line": 165,
+      "severity": "non-blocking",
+      "text": "When polish_stationary_points does not converge, _stationary_saddle returns the caller's seed and its spline value, so saddle_rz becomes the lattice read and saddle_offset_mm silently becomes ~0; the converged flag is checked but the hessian_type is not, so a polish that lands on an extremum is accepted as the saddle. Neither fallback is asserted by any test."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "b1a548bc2e6",
+      "line": 191,
+      "severity": "non-blocking",
+      "text": "test_the_moment_columns_carry_the_map's docstring claims a swapped column cannot hide, but its assertion at :214 compares two builds of the same code under test that differ only by an argument the test supplied, so a swap of the radial and vertical columns is invisible to it; only the raster_image comparison at :186 catches a swap, which the manifest's 2.53e-2 negative control confirms."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-repair.html",
+      "id": "9fe73aa4787",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "The fragment states the branch level is the one boundary_flux_at_admitted_saddle reads from the map's own saddle cell; the code never calls that function, passing instead the value polish_stationary_points returns at the polished saddle (display_flux.py:298). The two quantities agree by construction, but the fragment names a function the landed change does not use."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-map.html",
+      "id": "48d7476fe34",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "The brief's housekeeping correction asked for the negative-control number to be reconciled (the fragment says 2.41e-4, its log says 5.45e-4); that fragment is unchanged at the head and still quotes 2.41e-4, so the recorded measure still does not reconcile with the log it cites. The path was inside the node's declared write paths."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit efe6cb325 against 0ae530af: display_flux.py reworks the evaluation and saddle path (282 lines changed), test_display_flux.py adds two tests and drops four finiteness assertions, and the repair fragment is new at 58 lines; nothing outside the fence is touched.",
+    "done_when": "The done-when is the brief's correction list rather than a single command; the gate logs/gate-final.log:1-6 records revision 0ae530af, the command on manifest.md:10, 5 passed, and EXIT=0 in 237.03 s, and the negative control logs/negative-control.log shows EXIT=1 with test_fine_map_reproduces_the_operator_raster_image red at 2.53e-2 against the 1e-10 gate, but no arm measures a converged state's mismatch against a solve's terminal residual.",
+    "goal": "The node's goal (brief.md:5-11, plan docs/plans/separatrix-spline-extraction.html section 5) is to correct display_flux.py before sections 6-8 consume it; the diff delivers four of the five corrections -- the finite-difference saddle search is deleted and both saddles polished through polish_stationary_points (display_flux.py:142-168), the moment product now goes through FluxTarget (display_flux.py:117-140), and the moment columns are exercised with a swap control -- while the solved-state test and the earlier fragment's number reconciliation are not delivered.",
+    "manifest": "Read; it records status complete, one commit efe6cb325, the gate command and log, a negative-control log with EXIT=1, and three self-attributed scaffolding retries, and it states plainly under evidence_inputs that profile.solve raises NoQualifiedAxisError so the convergence arm is unmet -- but it carries no baseline_suite or after_suite block, so no base arm is on record.",
+    "write_paths": "The node was fenced to nova/equilibrium/display_flux.py, tests/test_display_flux.py, docs/evidence/fragments/separatrix-spline-extraction/{fine-flux-display-map,fine-flux-display-repair}.html and docs/figures/separatrix-spline-extraction/fine-flux-display-repair; git diff 0ae530af..efe6cb325 touches display_flux.py, test_display_flux.py and fine-flux-display-repair.html, all inside the fence."
+  },
+  "justifications": {
+    "durability": "No assertion in tests/test_display_flux.py:175-270 reads display.branches or display.well_formed, so the separatrix assembly at nova/equilibrium/display_flux.py:299 can be deleted with all five tests green, and the four finiteness assertions that did cover lattice_saddle_rz and saddle_offset_mm were removed at :245-262.",
+    "evidence": "logs/gate-final.log:1-6 records 5 passed and EXIT=0 at 0ae530af and logs/negative-control.log ends EXIT=1, but no baseline arm was recorded and docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-repair.html:12 attributes the branch level to a function the code does not call.",
+    "fit": "The module keeps the surrounding numpy/JAX split and frozen dataclass idiom of nova/equilibrium/display_flux.py:70-90, and the plan references the earlier review flagged at :32 and tests/test_display_flux.py:179,202 are gone at the head.",
+    "goal_fidelity": "Four of the brief's five corrections land (nova/equilibrium/display_flux.py:142 deletes the finite-difference search, :117 replaces _moment_flux with a per-chunk FluxTarget), but tests/test_display_flux.py:220 substitutes a declared increment for the required solved state.",
+    "reuse": "display_flux.py:117 now builds a FluxTarget per chunk rather than restating the product at nova/biot/target.py:576, and the finite-difference Hessian is replaced by polish_stationary_points; _stationary_saddle at :142 still recomposes the fit-then-polish opening that nova/equilibrium/separatrix_branches.py:58 boundary_flux_at_admitted_saddle already owns.",
+    "scope_discipline": "Every path in git diff 0ae530af..efe6cb325 (nova/equilibrium/display_flux.py, tests/test_display_flux.py, docs/evidence/fragments/separatrix-spline-extraction/fine-flux-display-repair.html) is inside the declared write paths, and no plan, painter or producer was modified."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T234229782058-review-of-fine-flux-display-repair-efe6cb32543c",
+  "reviewed_base_sha": "0ae530af6b610d656c441871ac12354b6db092d3",
+  "reviewed_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/brief.md",
+  "reviewed_head_sha": "efe6cb32543c5b02e144711fc3d8a93fa85c0110",
+  "reviewed_run_id": "r-20261102T215626762354-fine-flux-display-repair",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T00:20:00.000000+00:00",
+  "total": 87
+}

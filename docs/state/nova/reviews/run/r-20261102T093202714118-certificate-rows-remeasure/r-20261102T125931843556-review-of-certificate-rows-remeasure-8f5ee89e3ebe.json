@@ -14,6 +14,13 @@
     "benchmarks/solovev_certificate.py:2584"
   ],
   "completed_at": "2026-11-02T13:10:24.332Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "certificate-rows-remeasure",
+      "recorded_at": "2026-11-02T13:14:03.375159+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T13:00:51Z",
   "evidence": "The reviewed run's manifest.md records baseline_suite: null and after_suite: null: it is a measurement node with no pytest arms, so added_failure_count is 0 and added_failure_ids is empty by the absence of those arms rather than by a measured dedupe.",
   "findings": [

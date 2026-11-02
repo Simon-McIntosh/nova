@@ -510,7 +510,17 @@ def main():
     target_centre = np.asarray(centre)
     original_tangents = current._conic_ring_tangents
 
-    def report_velocity(one_centre, one_direction, ring_seven, ring_ten):
+    def report_velocity(
+        one_centre,
+        one_direction,
+        ring_seven,
+        ring_ten,
+        x_end,
+        bottom_end,
+        top_end,
+        polygon_lower,
+        polygon_upper,
+    ):
         if (
             np.max(np.abs(one_centre - target_centre)) < 1e-12
             and abs(one_direction[2] - 1.0) < 1e-12
@@ -521,6 +531,23 @@ def main():
                 ring_seven.tolist(),
                 "ring10",
                 ring_ten.tolist(),
+            )
+            print(
+                "ACTUAL_SERIAL_INTERVAL",
+                "x",
+                float(x_end),
+                "bottom",
+                float(bottom_end),
+                "top",
+                float(top_end),
+                "polygon_lower",
+                float(polygon_lower),
+                "polygon_upper",
+                float(polygon_upper),
+                "bottom_minus_lower",
+                float(bottom_end - polygon_lower),
+                "top_minus_upper",
+                float(top_end - polygon_upper),
             )
 
     def traced_tangents(
@@ -536,8 +563,31 @@ def main():
             selection,
             segments,
         )
+        one_local = (vertices - one_centre) / pitch
+        one_fragments = topology.quadratic_cell_fragments(
+            one_local, count, coefficient, selection.shape[0]
+        )
+        left = one_fragments.slice_breaks[:-1]
+        right = one_fragments.slice_breaks[1:]
+        parameter = 0.5 * (1.0 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
+        x = left[:, None] + (right - left)[:, None] * parameter
+        bottom, top, _ = topology._positive_vertical_intervals(
+            one_local, count, coefficient, x
+        )
+        polygon_lower, polygon_upper = topology._vertical_polygon_interval(
+            one_local, count, x
+        )
         jax.debug.callback(
-            report_velocity, one_centre, direction, velocity[7], velocity[10]
+            report_velocity,
+            one_centre,
+            direction,
+            velocity[7],
+            velocity[10],
+            x[3, 8],
+            bottom[3, 8, 0],
+            top[3, 8, 0],
+            polygon_lower[3, 8],
+            polygon_upper[3, 8],
         )
         return velocity
 

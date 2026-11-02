@@ -23,7 +23,10 @@ def check_text(fig):
     ]
     for item, box in boxes:
         if not canvas.contains(box.x0, box.y0) or not canvas.contains(box.x1, box.y1):
-            raise ValueError(f"clipped figure text: {item.get_text()}")
+            raise ValueError(
+                f"clipped figure text: {item.get_text()} "
+                f"box={box.bounds} canvas={canvas.bounds}"
+            )
     for index, (first, a) in enumerate(boxes):
         for second, b in boxes[index + 1 :]:
             if a.overlaps(b):
@@ -41,6 +44,7 @@ def main(head, base, svg, png):
     }
     fig, axes = plt.subplots(2, 2, figsize=(14, 7.2), sharex=True)
     for axis, block in zip(axes.flat, BLOCKS, strict=True):
+        values = []
         for name, color, linestyle in (
             ("base", "#929292", "--"),
             ("head", "#2865b2", "-"),
@@ -52,17 +56,36 @@ def main(head, base, svg, png):
             ]
             x = np.asarray([row["iterate"] for row in selected])
             y = np.asarray([max(row[block], 1e-16) for row in selected])
+            values.extend(y)
             axis.plot(
                 x,
                 y,
                 color=color,
                 linestyle=linestyle,
                 linewidth=3 if name == "head" else 2.6,
-                marker="o",
+                marker="o" if name == "head" else "s",
+                markerfacecolor=color if name == "head" else "white",
+                markeredgecolor=color,
                 markersize=5,
                 zorder=3 if name == "head" else 2,
             )
+            if name == "base":
+                axis.scatter(
+                    x,
+                    y,
+                    marker="s",
+                    facecolors="white",
+                    edgecolors=color,
+                    s=45,
+                    linewidths=1.4,
+                    zorder=4,
+                )
         axis.set_yscale("log")
+        lower = int(np.floor(np.log10(min(values))))
+        upper = int(np.ceil(np.log10(max(values))))
+        stride = max(1, int(np.ceil((upper - lower) / 4)))
+        axis.set_yticks([10.0**power for power in range(lower, upper + 1, stride)])
+        axis.set_ylim(10.0 ** (lower - 0.3), 10.0 ** (upper + 0.3))
         axis.set_ylabel(f"{block} relative error")
         axis.set_xticks(np.arange(len({row["iterate"] for row in rows["head"]})))
         axis.spines[["top", "right"]].set_visible(False)
@@ -78,7 +101,7 @@ def main(head, base, svg, png):
         ncol=2,
     )
     fig.subplots_adjust(
-        left=0.10, right=0.98, top=0.89, bottom=0.13, hspace=0.33, wspace=0.27
+        left=0.16, right=0.98, top=0.82, bottom=0.13, hspace=0.33, wspace=0.32
     )
     check_text(fig)
     svg.parent.mkdir(parents=True, exist_ok=True)

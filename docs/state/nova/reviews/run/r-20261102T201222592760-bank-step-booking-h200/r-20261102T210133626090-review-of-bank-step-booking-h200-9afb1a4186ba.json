@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/bank_step_booking_h200/run_device.sh:profile_arm",
+    "scripts/prototypes/bank_step_booking_h200/run_device.sh:solve_arm",
+    "scripts/prototypes/bank_step_booking_h200/run_device.sh:count_arm",
+    "scripts/prototypes/bank_step_speed/profile.py"
+  ],
+  "completed_at": "2026-11-02T21:14:24.327Z",
+  "dispatched_at": "2026-11-02T21:03:18Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_booking_h200/run_device.sh",
+      "id": "fee59e321e8",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "profile_arm prints the header line's revision from $(git -C \"$SOURCE\" rev-parse \"$BASE\") for both arms, so the head profile logs' first line names the base revision: head-h200-profile.log:1 reads 0e755a34 while its HEADER JSON on line 2 reads 0cc85eade. The contract is that a log's first line names the revision it ran at, and a reader who trusts it concludes the head arm ran at base."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html",
+      "id": "f9dd653f660",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "The 'Shared kernel only' P100 row records 602 launches, but head-p100k-profile.log's STAGE_DEVICE line gives launches=608 (602 is the base arm's count), and its device column is blank where the log gives device_ms=606.139134. A wall table that cannot be reconciled with its own log weakens the very before/after comparison the node exists to produce."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_h200/kernel_table.py",
+      "id": "fa100181d54",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "The trace walk, GPU-pid selection and stage-window kernel filter duplicate scripts/prototypes/bank_step_speed/parse_trace.py:12-29, which already owns that capability and is invoked from the same run_device.sh arm, so the two must now be kept in step by hand; the only genuinely new part is the per-family ranking."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_h200/plot.py",
+      "id": "f10ba84a895",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "DATA hardcodes the six wall values rather than reading the profile logs, so the figure is a manual transcription that cannot detect a drifted or re-measured log; three of the six values were verified against their logs and two (the P100 kernel-only row) are already wrong elsewhere in the fragment."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201222592760-bank-step-booking-h200/manifest.md",
+      "id": "f143c2e2bb5",
+      "line": 153,
+      "severity": "non-blocking",
+      "text": "negative_control_log names negative-control.log, which carries EXIT=1 with no failing test id and whose header states its arm is 'base current.py with only the clip_quadrature kernel change' rather than the declared mutation 'restore evaluation over every cut cell'; the declared prediction (wall returns to 27.87 ms) is not what the log shows (40.76 ms), so the negative control does not demonstrate a check firing."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The only production readers of the landed scripts are the profile arm in scripts/prototypes/bank_step_booking_h200/run_device.sh, which invokes scripts/prototypes/bank_step_speed/profile.py, scripts/prototypes/bank_step_booking/measure.py and scripts/prototypes/bank_step_booking_h200/count_cut.py.",
+    "diff": "Read commit by commit against 0e755a34; six commits, two of which edit the product files and are undone by 14d6ae43f, leaving four scripts, one evidence fragment and one figure.",
+    "done_when": "The done_when is a fresh-read residual at most 1e-10 with oracle ratios within 5e-4/5e-4/1e-4 and a tabled P100 wall; head-h200-solve.log records FINAL fresh_residual 2.9857e-11 and ORACLE ratios 1.0477e-5/9.2549e-6/2.5906e-5, and the wall table carries the P100 column, but the gate command the manifest records (tests/test_bank_step_launch_fusion.py) asserts none of those numbers.",
+    "goal": "The node goal is to cut the arithmetic of the fused booking tangent on the H200; nothing was cut, and the product files at 9afb1a418 are identical to base 0e755a34.",
+    "manifest": "Read; it records status complete, six commits, the residual and oracle ratios, both suites green with failure_count 0, and a negative_control_log whose note concedes it is a timing arm rather than a failing test.",
+    "write_paths": "Declared paths are nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py, tests/test_bank_step_booking_h200.py, scripts/prototypes/bank_step_booking_h200, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html and docs/figures/sub-millisecond-forward-path/bank-step-booking-h200; every path in the diff is inside them and no test file was created."
+  },
+  "justifications": {
+    "durability": "No test was added and no product change landed, so nothing can regress; plot.py:22 hardcodes its three series so the figure cannot fail if a measurement drifts, and the negative control records EXIT=1 with no failing test id and an arm that differs from the declared mutation.",
+    "evidence": "The done_when's numbers are all reproducible from the recorded logs (head-h200-solve.log FINAL fresh_residual 2.9857e-11 and ORACLE ratios 1.0477e-5 / 9.2549e-6 / 2.5906e-5; base-p100-profile.log local_booking_tangent 580.32 ms), but baseline_suite and after_suite both cite the same gate-final.log at the same revision bc5eab299, so no independent base arm ran, and the fragment's P100 kernel-only arm misreports the log.",
+    "fit": "scripts/prototypes/bank_step_booking_h200 follows the existing scripts/prototypes/bank_step_speed layout and argparse idiom, but plot.py:18-20 and plot.py:29 hand-roll colours and the canvas instead of the repository's nova.media ink style.",
+    "goal_fidelity": "The goal is to cut the fused booking tangent's arithmetic, and nova/equilibrium/current.py and clip_quadrature.py are byte-identical to 0e755a34 at the head, so the tangent is unchanged at 27.85 ms; what landed is the profiling and the measured negative result the brief's items (1) and (3) also asked for.",
+    "reuse": "kernel_table.py:11-31 re-implements the trace loading, GPU-pid selection and stage-window kernel filter that scripts/prototypes/bank_step_speed/parse_trace.py already owns, extending it only by the per-family ranking.",
+    "scope_discipline": "Every path in git diff 0e755a34..9afb1a418 lies inside the declared write paths, no plan or sprint file is touched, and the two product files are net-identical to the base."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is 'cut the arithmetic of the fused booking tangent on the H200'; no arithmetic was cut and nova/equilibrium/current.py and nova/equilibrium/clip_quadrature.py are identical to base 0e755a34 at head 9afb1a418, so the tangent remains 27.85 ms.\nVERDICT done_when: The done_when is a fresh-read residual at most 1e-10, oracle ratios within 5e-4/5e-4/1e-4 and a tabled P100 wall; head-h200-solve.log records FINAL fresh_residual 2.9857e-11 and ORACLE ratios 1.0477e-5/9.2549e-6/2.5906e-5 and base-p100-profile.log gives 580.32 ms, but the recorded gate command tests/test_bank_step_launch_fusion.py asserts none of those numbers.\nVERDICT write_paths: Declared paths are current.py, clip_quadrature.py, tests/test_bank_step_booking_h200.py, scripts/prototypes/bank_step_booking_h200, the evidence fragment and the figures directory; every changed path in git diff 0e755a34..9afb1a418 sits inside them.\nVERDICT manifest: Read; it records six commits, the residual 2.9857e-11 and three oracle ratios, both suites green with failure_count 0, and a negative_control_note conceding its log is a timing arm rather than a failing test.\nVERDICT diff: Read commit by commit; commits c8021db1c and 5884db9c2 edit the two product files and 14d6ae43f restores them to base, leaving four prototype scripts, one evidence fragment and one SVG.\nCALL_SITES: scripts/prototypes/bank_step_booking_h200/run_device.sh:profile_arm, scripts/prototypes/bank_step_booking_h200/run_device.sh:solve_arm, scripts/prototypes/bank_step_booking_h200/run_device.sh:count_arm, scripts/prototypes/bank_step_speed/profile.py\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py at 9afb1a418 carries no change against 0e755a34, so the 27.85 ms booking tangent the goal names is uncut and only the profiling and negative result landed.\nSCORE evidence: 13\nJUSTIFICATION evidence: head-h200-solve.log FINAL and ORACLE lines reproduce the done_when, but baseline_suite and after_suite both cite the single gate-final.log at revision bc5eab299 so no independent base arm exists, and docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html:47 misreports the P100 kernel-only launches as 602 against the log's 608.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 0e755a34..9afb1a418 lies inside the declared write paths and the two product files are net-identical to the base.\nSCORE durability: 5\nJUSTIFICATION durability: no test was added and scripts/prototypes/bank_step_booking_h200/plot.py:22 hardcodes its series, so no assertion in the landed change fails if these measurements or numbers regress.\nSCORE fit: 13\nJUSTIFICATION fit: scripts/prototypes/bank_step_booking_h200 follows the layout of scripts/prototypes/bank_step_speed and its argparse idiom, but plot.py:18-20 hand-rolls colours and the canvas rather than the repository's nova.media ink style.\nSCORE reuse: 8\nJUSTIFICATION reuse: scripts/prototypes/bank_step_booking_h200/kernel_table.py:11-31 re-implements the trace loading, GPU-pid selection and stage-window kernel filter owned by scripts/prototypes/bank_step_speed/parse_trace.py:12-29, extending that owner only with the per-family ranking.\nFINDING scripts/prototypes/bank_step_booking_h200/run_device.sh:39 non-blocking: profile_arm prints the base revision in the header line for both arms, so head-h200-profile.log:1 names 0e755a34 while its own HEADER JSON names 0cc85eade.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html:47 non-blocking: the P100 'shared kernel only' row states 602 launches where head-p100k-profile.log gives 608 and leaves the device column blank where the log gives 606.139134.\nFINDING scripts/prototypes/bank_step_booking_h200/kernel_table.py:11 non-blocking: the trace walk and stage window duplicate scripts/prototypes/bank_step_speed/parse_trace.py:12-29, which the same run_device.sh arm already invokes.\nFINDING scripts/prototypes/bank_step_booking_h200/plot.py:22 non-blocking: the figure's six values are hardcoded rather than read from the profile logs, so it cannot detect a drifted measurement and one of them is already transcribed inconsistently in the fragment.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201222592760-bank-step-booking-h200/manifest.md:153 non-blocking: negative-control.log records EXIT=1 with no failing test id and its arm is the kernel-only change rather than the declared mutation, so it does not show a check firing.\n",
+  "review_run_id": "r-20261102T210133626090-review-of-bank-step-booking-h200-9afb1a4186ba",
+  "reviewed_base_sha": "0e755a34ccc24980ac8d21031109505ced553ec7",
+  "reviewed_head_sha": "9afb1a4186bae0bb28ef9b7bd7586099c53d4ef9",
+  "reviewed_run_id": "r-20261102T201222592760-bank-step-booking-h200",
+  "scores": {
+    "durability": 5,
+    "evidence": 13,
+    "fit": 13,
+    "goal_fidelity": 10,
+    "reuse": 8,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T21:17:13.341479+00:00",
+  "total": 69
+}

@@ -21,6 +21,13 @@
     "scripts/prototypes/bank_newton_step/measure.py:419"
   ],
   "completed_at": "2026-11-02T08:10:00Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "bank-step-booking",
+      "recorded_at": "2026-11-02T08:22:09.870505+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T07:58:11Z",
   "evidence": {
     "after_revision": "3560265f576a51ffa8fe4966b25d96db3cacc7b4",

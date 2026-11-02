@@ -14,6 +14,13 @@
     "scripts/prototypes/certificate_rows_remeasure/repanel.py:47"
   ],
   "completed_at": "2026-11-02T13:34:32.384Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "certificate-rows-remeasure",
+      "recorded_at": "2026-11-02T13:39:05.781457+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T13:26:37Z",
   "evidence": "The reviewed manifest.md carries no baseline_suite or after_suite block at all (grep finds neither key), so added_failure_count is 0 and added_failure_ids is empty by the absence of those arms rather than by a measured dedupe; the same absence was recorded by the review at 8f5ee89e3. What this delta does carry is a negative control: panels_check/panel_labels.log:3 shows repanel.py --raw refusing the driver's unaltered composition with 'label leaves the canvas' and three 'label sits on the panel data' problems (RAW_EXIT=1), and :5 shows the repaired path passing with labels_checked=8 (REPAIRED_EXIT=0). I reproduced the repaired path myself at 7339c94b4 on the diverted part receipt and got EXIT=0 with labels_checked=8, and the committed diverted-300.svg differs from my regenerated copy only in matplotlib clip-path ids.",
   "findings": [

@@ -8,31 +8,10 @@ import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scripts.prototypes.bank_step_booking.plot import check_text
+
 
 BLOCKS = ("full", "booking", "geometry", "flux")
-
-
-def check_text(fig):
-    fig.canvas.draw()
-    renderer = fig.canvas.get_renderer()
-    canvas = fig.bbox
-    boxes = [
-        (item, item.get_window_extent(renderer))
-        for item in fig.findobj(match=plt.Text)
-        if item.get_visible() and item.get_text()
-    ]
-    for item, box in boxes:
-        if not canvas.contains(box.x0, box.y0) or not canvas.contains(box.x1, box.y1):
-            raise ValueError(
-                f"clipped figure text: {item.get_text()} "
-                f"box={box.bounds} canvas={canvas.bounds}"
-            )
-    for index, (first, a) in enumerate(boxes):
-        for second, b in boxes[index + 1 :]:
-            if a.overlaps(b):
-                raise ValueError(
-                    f"overlapping figure text: {first.get_text()} / {second.get_text()}"
-                )
 
 
 def main(head, base, svg, png):

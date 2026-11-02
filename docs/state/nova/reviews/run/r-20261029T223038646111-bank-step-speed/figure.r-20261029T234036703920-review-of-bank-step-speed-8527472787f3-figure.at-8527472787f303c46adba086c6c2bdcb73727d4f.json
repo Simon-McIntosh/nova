@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T23:41:52Z",
+  "figures": [
+    {
+      "caption": "The caption explains the measurement method, identifies the green whole-step bar, names the dotted line as the 0.5 ms target, and states that the read is outside the step target and that nested bars are not additive. It does not merely repeat the figure title.",
+      "path": "docs/figures/sub-millisecond-forward-path/bank-step-speed/stage-wall.svg",
+      "rubric": {
+        "contrast": "passes: dark grey value labels (#666666) and mid-grey bars (#929292) both clear white",
+        "data_ink": "passes: solid bars and printed values, no gradients, no fill bands or background shading",
+        "decoration": "passes: no gridlines, top and right spines removed, no decorative styling between the reader and the bars",
+        "label_collision": "passes: no tick label, value label or axis label is clipped or overlaps another label or a bar",
+        "legibility": "passes: ten horizontal bars, values printed at each bar end, readable at a glance in one pass",
+        "table_form": "passes: the figure carries a magnitude ranking of ten stages, which the reader compares down the column; a table of the same numbers is printed beneath it"
+      },
+      "source_script": "scripts/prototypes/bank_step_speed/plot_stage.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f76ad1d7d85",
+      "line": 88,
+      "severity": "non-blocking",
+      "summary": "The bars are drawn on a log x-axis, so bar length is not proportional to value and a reader who compares lengths reads a wrong ratio: the booking-tangent bar (120 ms) is about 2.4 times the equilibration bar (0.78 ms) on the page while the printed values differ by 150 times. The data remain readable because every value is printed at its bar end, so this is a distortion of the visual encoding rather than hidden data. A dot or lollipop mark on the log axis, or a linear axis, would encode magnitude honestly."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "feb1bcf243f",
+      "line": 18,
+      "severity": "non-blocking",
+      "summary": "The figure draws a 'Jacobian, frozen geometry' bar (124 ms) for which the evidence fragment's baseline table has no row; the table lists only a full Jacobian at 143.03 ms. A reader matching the figure against its table finds one bar they cannot look up. Recording the frozen-geometry stage in the table, or dropping it from the figure, would let the two reconcile."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261029T234036703920-review-of-bank-step-speed-8527472787f3-figure",
+  "reviewed_base_sha": "86681056f1ddf90e11f0cffcf5f9259d2b9117ef",
+  "reviewed_head_sha": "8527472787f303c46adba086c6c2bdcb73727d4f",
+  "reviewed_run_id": "r-20261029T223038646111-bank-step-speed",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T23:45:24.174273+00:00",
+  "total": null
+}

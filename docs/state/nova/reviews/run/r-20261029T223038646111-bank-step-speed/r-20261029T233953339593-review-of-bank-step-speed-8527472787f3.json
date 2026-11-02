@@ -1,0 +1,109 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_step_speed.py:30 fails when toggling condition_diagnostics changes the computed update relative to the default branch; a common solver error can move both sides together, so this is a branch-parity check only.",
+    "tests/test_bank_step_speed.py:31 fails when the false branch returns a finite condition_before, but remains true if the two condition calculations execute and their values are discarded.",
+    "tests/test_bank_step_speed.py:32 fails when balancing does not reduce the synthetic matrix condition number; it measures the default branch and cannot establish the fast branch's cost."
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/bank_step_speed/profile.py:154",
+    "scripts/prototypes/bank_newton_converge/fresh_solve.py:84",
+    "scripts/prototypes/bank_newton_converge/outer.py:52",
+    "scripts/prototypes/bank_newton_converge/fresh_diff.py:38",
+    "scripts/prototypes/bank_newton_step/measure.py:106",
+    "scripts/prototypes/bank_newton_step/measure.py:419"
+  ],
+  "completed_at": "2026-10-29T23:46:58Z",
+  "dispatched_at": "2026-10-29T23:40:48Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/unit-final.log",
+    "baseline_profile": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/profile.log",
+    "baseline_suite": null,
+    "baseline_suite_note": "No baseline_suite object or baseline gate log was recorded by the reviewed run; the complete current-head after arm has zero failures, so added failures within its one-test scope are zero, but a paired baseline comparison is unavailable.",
+    "failed_geometry": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/geometry-test.log"
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-step-speed-8527472787f3",
+      "recorded_at": "2026-11-02T07:46:12.898182+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-bank-step-speed-8527472787f3",
+      "recorded_at": "2026-11-02T07:46:12.917772+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "repair-of-bank-step-speed-8527472787f3",
+      "recorded_at": "2026-11-02T07:46:13.210007+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f53a13ff6a0",
+      "line": 845,
+      "severity": "blocking",
+      "text": "The speed switch defaults to true and every checked runtime caller omits condition_diagnostics=False, so the shipped warm Newton path still computes both expensive condition estimates and no production path reaches the intended shortcut."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/profile.py",
+      "id": "f3dc1bc2b83",
+      "line": 154,
+      "severity": "blocking",
+      "text": "The only H200 whole-step profile times the default diagnostics path before the final change; no current-head H200 wall, device-time or launch receipt demonstrates the 0.5 ms and 100-launch limits."
+    },
+    {
+      "file": "tests/test_bank_step_speed.py",
+      "id": "fe7d49e6a3e",
+      "line": 31,
+      "severity": "blocking",
+      "text": "The NaN output assertion remains green if the false branch computes both condition numbers and discards them, so it cannot fail on the performance regression the new switch claims to prevent."
+    },
+    {
+      "disposition": "folded",
+      "disposition_node": "bank-step-speed-followup",
+      "file": "scripts/prototypes/bank_step_speed/parse_trace.py",
+      "id": "f724e73fd76",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "The new trace parser duplicates GPU-event counting already owned by scripts/prototypes/sub_millisecond/parse_launch_trace.py:9-48 and counts every GPU X event rather than identifying kernel and host graph launches; disposition: folded into the next bank-step-speed repair node."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the sixteen commits from 595ab5da to 852747278 and their final nine-path diff; support_read.py:845-879 retains the prior geometry path and adds only the condition-diagnostics switch, with a profiler, parser, chart, evidence fragment and one test.",
+    "done_when": "The live plan section s3 requires at most 0.5 ms and 100 launches on H200 plus geometry agreement; profile.log records only the 368.64 ms baseline, geometry-test.log fails at 2788.81 relative, and manifest.md:20 supplies no paired baseline suite.",
+    "goal": "The source brief.txt asks for a fast 550-cell H200 Newton step; support_read.py:845 adds only an opt-in diagnostic switch, while bank-step-speed.html:15-16 records 368.64 ms and the rollback of the proposed geometry derivative.",
+    "manifest": "The source manifest.md:5-22 lists sixteen commits and a single current-head one-test pass, says the geometry derivative was rolled back, and explicitly leaves post-change H200 wall, launches and suite arms unmeasured.",
+    "write_paths": "The source manifest.md:3 grants support_read.py, the bank-step prototype directory, test_bank_step_speed.py, the evidence fragment and figure directory; git diff 595ab5da..852747278 lists nine final paths inside those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_speed.py:30 catches a flag-dependent update change, but :31 only observes a NaN marker and stays green if the expensive condition calculations run then their values are discarded.",
+    "evidence": "profile.log reports a synchronized 368.64 ms whole step at be90b88, but bank-step-speed.html:17-28 leaves device times and launch counts unresolved and the source manifest.md:20 has no baseline_suite.",
+    "fit": "support_read.py:845-879 preserves the existing NewtonStep fields and JAX style, and the final source additions use descriptive names without forbidden numbered plan labels.",
+    "goal_fidelity": "support_read.py:845 leaves diagnostics enabled by default, and bank-step-speed.html:15-16 reports a 368.64 ms baseline with no retained geometry speedup.",
+    "reuse": "scripts/prototypes/bank_step_speed/parse_trace.py:9-39 independently parses GPU trace events already handled by scripts/prototypes/sub_millisecond/parse_launch_trace.py:9-48 instead of extending that owner.",
+    "scope_discipline": "The nine final paths in git diff 595ab5da..852747278 all fall under the source manifest.md:3 grants, and the intermediate geometry files were removed in the final commit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt asks for a fast 550-cell H200 Newton step; support_read.py:845 adds only an opt-in diagnostic switch, while bank-step-speed.html:15-16 records 368.64 ms and the rollback of the proposed geometry derivative.\nVERDICT done_when: The live plan section s3 requires at most 0.5 ms and 100 launches on H200 plus geometry agreement; profile.log records only the 368.64 ms baseline, geometry-test.log fails at 2788.81 relative, and manifest.md:20 supplies no paired baseline suite.\nVERDICT write_paths: The source manifest.md:3 grants support_read.py, the bank-step prototype directory, test_bank_step_speed.py, the evidence fragment and figure directory; git diff 595ab5da..852747278 lists nine final paths inside those grants.\nVERDICT manifest: The source manifest.md:5-22 lists sixteen commits and a single current-head one-test pass, says the geometry derivative was rolled back, and explicitly leaves post-change H200 wall, launches and suite arms unmeasured.\nVERDICT diff: Read the sixteen commits from 595ab5da to 852747278 and their final nine-path diff; support_read.py:845-879 retains the prior geometry path and adds only the condition-diagnostics switch, with a profiler, parser, chart, evidence fragment and one test.\nCALL_SITES: scripts/prototypes/bank_step_speed/profile.py:154, scripts/prototypes/bank_newton_converge/fresh_solve.py:84, scripts/prototypes/bank_newton_converge/outer.py:52, scripts/prototypes/bank_newton_converge/fresh_diff.py:38, scripts/prototypes/bank_newton_step/measure.py:106, scripts/prototypes/bank_newton_step/measure.py:419\nSCORE goal_fidelity: 5\nJUSTIFICATION goal_fidelity: support_read.py:845 leaves diagnostics enabled by default, and bank-step-speed.html:15-16 reports a 368.64 ms baseline with no retained geometry speedup.\nSCORE evidence: 6\nJUSTIFICATION evidence: profile.log reports a synchronized 368.64 ms whole step at be90b88, but bank-step-speed.html:17-28 leaves device times and launch counts unresolved and the source manifest.md:20 has no baseline_suite.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The nine final paths in git diff 595ab5da..852747278 all fall under the source manifest.md:3 grants, and the intermediate geometry files were removed in the final commit.\nSCORE durability: 8\nJUSTIFICATION durability: tests/test_bank_step_speed.py:30 catches a flag-dependent update change, but :31 only observes a NaN marker and stays green if the expensive condition calculations run then their values are discarded.\nSCORE fit: 18\nJUSTIFICATION fit: support_read.py:845-879 preserves the existing NewtonStep fields and JAX style, and the final source additions use descriptive names without forbidden numbered plan labels.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/bank_step_speed/parse_trace.py:9-39 independently parses GPU trace events already handled by scripts/prototypes/sub_millisecond/parse_launch_trace.py:9-48 instead of extending that owner.\nFINDING nova/equilibrium/support_read.py:845 blocking: The speed switch defaults to true and every checked runtime caller omits condition_diagnostics=False, so the shipped warm Newton path still computes both expensive condition estimates and no production path reaches the intended shortcut.\nFINDING scripts/prototypes/bank_step_speed/profile.py:154 blocking: The only H200 whole-step profile times the default diagnostics path before the final change; no current-head H200 wall, device-time or launch receipt demonstrates the 0.5 ms and 100-launch limits.\nFINDING tests/test_bank_step_speed.py:31 blocking: The NaN output assertion remains green if the false branch computes both condition numbers and discards them, so it cannot fail on the performance regression the new switch claims to prevent.\nFINDING scripts/prototypes/bank_step_speed/parse_trace.py:9 non-blocking: The new trace parser duplicates GPU-event counting already owned by scripts/prototypes/sub_millisecond/parse_launch_trace.py:9-48 and counts every GPU X event rather than identifying kernel and host graph launches; disposition: folded into the next bank-step-speed repair node.",
+  "review_run_id": "r-20261029T233953339593-review-of-bank-step-speed-8527472787f3",
+  "reviewed_base_sha": "595ab5da151b81ce9364ce36b9550e2dd247b283",
+  "reviewed_head_sha": "8527472787f303c46adba086c6c2bdcb73727d4f",
+  "reviewed_run_id": "r-20261029T223038646111-bank-step-speed",
+  "scores": {
+    "durability": 8,
+    "evidence": 6,
+    "fit": 18,
+    "goal_fidelity": 5,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T07:45:55.197597+00:00",
+  "total": 61
+}

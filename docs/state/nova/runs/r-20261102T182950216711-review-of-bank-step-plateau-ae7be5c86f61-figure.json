@@ -1,0 +1,380 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "619efd23115d53a5cd3673f48176b1fc99298c44",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure/brief.md",
+    "sha256": "0b896f64a43924fdc9cccc400d61bf344f9df2a196bfe358160374162821fe11"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2307564,
+      "input_tokens_cumulative": 2307564,
+      "output_tokens": 23904,
+      "output_tokens_cumulative": 23904,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-02T18:37:26.385Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-02T18:31:16Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-02T19:29:53.592323+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-02T18:29:53Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 29,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": 120000,
+    "observed_at": "2026-11-02T18:29:24Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 29,
+      "aggregate_tokens_per_second": 178.461,
+      "detail": "",
+      "mean_tokens_per_second": 148.717,
+      "observed_at": "2026-11-02T18:29:24Z",
+      "runs": 1.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-02T18:37:26.385Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure/manifest.md",
+  "member": "disposable-r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run; it writes no code",
+  "node": "review-of-bank-step-plateau-ae7be5c86f61-figure",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/figure-review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure/brief.md",
+    "brief_sha256": "0b896f64a43924fdc9cccc400d61bf344f9df2a196bfe358160374162821fe11",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 366,
+          "cached_input_tokens": 248252,
+          "input_tokens": 248622,
+          "output_tokens": 96,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 248718,
+          "uncached_input_tokens": 4
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the figure review for r-20261102T170048604704-bank-step-plateau stores a parsed read-only rubric record with all 6 rubric items at a declared write path, anchored to the reviewed base and head",
+    "estimated_hours": null,
+    "goal": "attach an independent figure review to run r-20261102T170048604704-bank-step-plateau",
+    "id": "review-of-bank-step-plateau-ae7be5c86f61-figure",
+    "images": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure/image-0.png"
+    ],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-02T18:29:53Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 29,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": 120000,
+      "observed_at": "2026-11-02T18:29:24Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 29,
+        "aggregate_tokens_per_second": 178.461,
+        "detail": "",
+        "mean_tokens_per_second": 148.717,
+        "observed_at": "2026-11-02T18:29:24Z",
+        "runs": 1.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure/manifest.md",
+    "negative_control": "",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/review-records/r-20261102T170048604704-bank-step-plateau.figure.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170048604704-bank-step-plateau/review-records/r-20261102T170048604704-bank-step-plateau.figure.at-ae7be5c86f61717ed29e44a9970ec90f8d893be1.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1194487.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-bank-step-plateau-ae7be5c86f61-figure",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-02T18:30:53.703328+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.501,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "619efd23115d53a5cd3673f48176b1fc99298c44",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure",
+    "reviewed_base_sha": "8b9b8321d1bd77ef67613df12374055678d58529",
+    "reviewed_head_sha": "ae7be5c86f61717ed29e44a9970ec90f8d893be1",
+    "scores": {},
+    "status": "parsed",
+    "total": null
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "abbb9755-ab28-4870-bebb-e3810b221d8a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 2307564,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 347.603,
+    "generated_tokens": 23904,
+    "generation_seconds": 291.126,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 45.3,
+    "machine_seconds": 56.477,
+    "peak_input_tokens": 104349,
+    "tokens_per_second": 82.11,
+    "wall_tokens_per_second": 68.77
+  },
+  "time_budget": "60m",
+  "tool_steps": 32.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 370,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-02T18:37:28Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-02T18:31:25Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261102T182950216711-review-of-bank-step-plateau-ae7be5c86f61-figure",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4249,
+    "worker_pid": 2798762
+  },
+  "worker_seconds": 310,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -32,6 +32,13 @@
     "note": "After-suite revision predates later trace and documentation commits; no product or test source changed after that suite arm.",
     "trace": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed/parse-titan-committed.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-booking",
+      "recorded_at": "2026-11-02T08:21:32.475635+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html",

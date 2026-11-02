@@ -474,33 +474,67 @@ def run_trace_arm(run_dir):
         after=float(exact.condition_after),
     )
 
-    for count in (1, 4):
-        stacked = tuple(
-            jnp.stack([value * (1.0 + 2e-5 * (lane + 1)) for lane in range(count)])
-            for value in moments
-        )
+    for count in (1, 4, 16):
+        stacked = lanes_of(moments, count)
         lane_seeds = seeds_for(roots, count)
-        step_program = jax.jit(chunked_args(batched, count))
-        for index in range(steps):
-            correction = step_program(stacked, lane_seeds)
-            jax.block_until_ready(correction.step.update)
-            support = jax.jit(
-                lambda state, lane_seeds: support_read.read_batch(
-                    bank, cache, state, lane_seeds, lane_seeds, convention, policy
-                )
-            )(stacked, lane_seeds)
+        read = jax.jit(
+            lambda state: support_read.read_batch(
+                bank, cache, state, lane_seeds, lane_seeds, convention, policy
+            )
+        )
+
+        def one_step(state, hold):
+            return support_read.step_batch(
+                bank,
+                cache,
+                state,
+                lane_seeds,
+                lane_seeds,
+                convention,
+                policy,
+                profile,
+                gradient,
+                quadrature,
+                fresh_geometry=True,
+                converged=hold,
+            )
+
+        step_program = jax.jit(chunked_args(one_step, count))
+        hold = np.zeros(count, dtype=bool)
+        index = 0
+        while index < steps:
+            support = read(stacked)
             sizes = []
             for lane in range(count):
                 one = jax.tree_util.tree_map(lambda v: v[lane], stacked)
                 one_support = jax.tree_util.tree_map(lambda v: v[lane], support)
                 sizes.append(residual_of(one, one_support))
             emit("TRACE_BATCH", slices=count, index=index, residual=sizes)
+            hold = hold | (np.asarray(sizes) <= 1e-10)
+            if hold.all():
+                break
+            correction = step_program(stacked, jnp.asarray(hold))
+            jax.block_until_ready(correction.step.update)
             stacked = tuple(
                 value + change
                 for value, change in zip(stacked, correction.step.update, strict=True)
             )
-            if max(sizes) <= 1e-10:
-                break
+            index += 1
+        support = read(stacked)
+        final = [
+            residual_of(
+                jax.tree_util.tree_map(lambda v: v[lane], stacked),
+                jax.tree_util.tree_map(lambda v: v[lane], support),
+            )
+            for lane in range(count)
+        ]
+        emit(
+            "TRACE_BATCH_EXIT",
+            slices=count,
+            steps=index,
+            residual=final,
+            converged=bool(hold.all()),
+        )
 
 
 def run_converge_arm(run_dir):
@@ -615,11 +649,145 @@ def run_converge_arm(run_dir):
     )
 
 
+def run_diagnose_arm(run_dir):
+    """Locate the first non-finite value in a single-lane solve, and audit the
+    batch-uniform rebuild decision against a batch with one stale lane."""
+    from scripts.prototypes.bank_step_batch.fixture import build_case
+    from scripts.prototypes.tracked_read.measure import cache_for
+
+    radius = 0.054806712567833996
+    for cells in (64,):
+        case = build_case("diverted", cells, radius)
+        operands = support_read.SupportOperands.from_rows(
+            case["geometry"],
+            case["matrix"],
+            case["exterior"],
+            case["nodes"],
+            case["sample_index"],
+            bucket=len(case["nodes"]),
+        )
+        cache = cache_for(operands)
+        convention, policy = case["convention"], case["policy"]
+        profile, quadrature = case["profile"], case["quadrature"]
+        seeds = jnp.asarray(case["roots"]) + 0.03 * jnp.median(case["geometry"].pitch)
+        lane = tuple(value * (1.0 + 1e-5) for value in case["states"]["converged"])
+
+        def stage(state):
+            support = support_read.read(
+                operands, cache, state, seeds, seeds, convention, policy
+            )
+            residual = support_read.step_residual(
+                operands, state, state, support, profile, quadrature
+            )
+            step = support_read.newton_step(
+                operands,
+                state,
+                support,
+                profile,
+                gradient,
+                quadrature,
+                fresh_geometry=True,
+            )
+            return support, residual, step
+
+        compiled = jax.jit(stage)
+        state = lane
+        for index in range(6):
+            support, residual, step = compiled(state)
+            jax.block_until_ready(step.update)
+            report = {
+                "cells": cells,
+                "index": index,
+                "position_finite": bool(
+                    np.isfinite(np.asarray(support.stationary.position)).all()
+                ),
+                "valid": bool(np.asarray(support.valid)),
+                "residual_finite": bool(
+                    np.isfinite(np.asarray(residual.residual[0])).all()
+                ),
+                "residual": float(jnp.max(jnp.abs(jnp.concatenate(residual.residual)))),
+                "booked_finite": bool(
+                    np.isfinite(np.asarray(residual.booked.cell_current)).all()
+                ),
+                "update_finite": bool(np.isfinite(np.asarray(step.update[0])).all()),
+                "linear_residual": float(step.linear_residual),
+            }
+            emit("DIAGNOSE", **report)
+            state = tuple(
+                value + change for value, change in zip(state, step.update, strict=True)
+            )
+            if report["residual"] <= 1e-10 or not report["update_finite"]:
+                break
+
+    # The rebuild decision: one stale lane in a batch of two.
+    case = build_case("diverted", 64, radius)
+    operands = support_read.SupportOperands.from_rows(
+        case["geometry"],
+        case["matrix"],
+        case["exterior"],
+        case["nodes"],
+        case["sample_index"],
+        bucket=len(case["nodes"]),
+    )
+    cache = cache_for(operands)
+    convention, policy = case["convention"], case["policy"]
+    seeds = jnp.asarray(case["roots"]) + 0.03 * jnp.median(case["geometry"].pitch)
+    lane_seeds = jnp.broadcast_to(seeds, (2, *jnp.shape(seeds)))
+    stacked = tuple(
+        jnp.stack([value * (1.0 + scale) for scale in (1e-5, 3e-5)])
+        for value in case["states"]["converged"]
+    )
+
+    def batch(state, tracking):
+        return support_read.read_batch(
+            operands,
+            cache,
+            state,
+            lane_seeds,
+            lane_seeds,
+            convention,
+            policy,
+            tracking=tracking,
+        )
+
+    compiled = jax.jit(batch)
+    opened = compiled(stacked, None)
+    jax.block_until_ready(opened.valid)
+    tracking = jax.vmap(support_read.tracking_of)(opened)
+    steady = compiled(stacked, tracking)
+    jax.block_until_ready(steady.valid)
+    stale = tracking._replace(
+        cells=tracking.cells.at[1].set(jnp.full_like(tracking.cells[1], -1))
+    )
+    rebuilt = compiled(stacked, stale)
+    jax.block_until_ready(rebuilt.valid)
+    emit(
+        "REBUILD_DECISION",
+        cells=64,
+        tracked=[int(v) for v in np.asarray(tracking.rebuilds)],
+        stale=[int(v) for v in np.asarray(stale.rebuilds)],
+        steady_rebuilt=[bool(v) for v in np.asarray(steady.rebuilt)],
+        steady_rebuilds=[int(v) for v in np.asarray(steady.rebuilds)],
+        rebuilt=[bool(v) for v in np.asarray(rebuilt.rebuilt)],
+        rebuilds=[int(v) for v in np.asarray(rebuilt.rebuilds)],
+        stale_cells=[int(v) for v in np.asarray(stale.cells).ravel()[:4]],
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--arm",
-        choices=("stage", "converge", "kernel", "plain", "trace", "publish", "both"),
+        choices=(
+            "stage",
+            "converge",
+            "kernel",
+            "plain",
+            "trace",
+            "diagnose",
+            "publish",
+            "both",
+        ),
         default="both",
     )
     parser.add_argument("--run-dir", type=Path, required=True)
@@ -647,6 +815,8 @@ def main():
         run_kernel_arm(arguments.run_dir)
     if arguments.arm == "trace":
         run_trace_arm(arguments.run_dir)
+    if arguments.arm == "diagnose":
+        run_diagnose_arm(arguments.run_dir)
     if arguments.arm == "plain":
         run_plain_kernel_arm(arguments.run_dir)
     if arguments.arm == "publish":

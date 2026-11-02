@@ -388,24 +388,25 @@ def read_batch(
         )(stack, whole_mesh())
 
     flags = jax.vmap(rebuild_needed)(stack, tracking)
+    # The decision is one scalar for the batch: the branch, the reported flag
+    # and the counter all read it, so no lane can carry a per-lane verdict.
+    needed = jnp.any(flags)
 
-    def verdict(stencil, reading, tracked, flag):
+    def verdict(stencil, reading, tracked):
         return _verdict(
             stencil,
             reading,
-            flag,
-            jnp.where(flag, tracked.rebuilds + 1, tracked.rebuilds),
+            needed,
+            tracked.rebuilds + needed.astype(tracked.rebuilds.dtype),
         )
 
     def carry(_):
-        return jax.vmap(verdict)(stack, tracking.reading, tracking, flags)
+        return jax.vmap(verdict)(stack, tracking.reading, tracking)
 
     def rebuild(_):
-        # The branch is taken once for the batch, so every lane reports the
-        # rebuild it took part in and its counter moves with the others.
-        return jax.vmap(verdict)(stack, whole_mesh(), tracking, jnp.ones_like(flags))
+        return jax.vmap(verdict)(stack, whole_mesh(), tracking)
 
-    return jax.lax.cond(jnp.any(flags), rebuild, carry, None)
+    return jax.lax.cond(needed, rebuild, carry, None)
 
 
 def book(operands, support: SupportRead, psi, profile, quadrature):
@@ -1390,6 +1391,7 @@ def step_batch(
     tracking: TrackingState | None = None,
     fresh_geometry: bool = False,
     condition_diagnostics: bool = False,
+    converged: jax.Array | None = None,
 ) -> BatchStep:
     """One warm Newton step over independent slices in one compiled program.
 
@@ -1404,6 +1406,13 @@ def step_batch(
     This is the minimal-factor route: every lane assembles and factors its own
     matrix. A carried :class:`NewtonFactor` cannot be shared here, because the
     lanes hold different states and each factor belongs to one lane.
+
+    ``converged`` is an optional per-lane flag: a lane flagged converged has
+    its update zeroed, so its state is carried unchanged while the remaining
+    lanes iterate. A lane that has met a residual bound would otherwise keep
+    moving under a full Newton step and step back off the solution, which is
+    what makes a whole-batch bound unreachable even where every lane passes it
+    at some iteration.
     """
     support = read_batch(
         operands,
@@ -1430,7 +1439,20 @@ def step_batch(
             condition_diagnostics=condition_diagnostics,
         )
 
-    return BatchStep(jax.vmap(one)(moments, support), support)
+    stepped = jax.vmap(one)(moments, support)
+    if converged is None:
+        return BatchStep(stepped, support)
+
+    hold = jnp.asarray(converged, dtype=bool)
+    update = tuple(
+        jnp.where(
+            hold.reshape(hold.shape + (1,) * (change.ndim - 1)),
+            jnp.zeros_like(change),
+            change,
+        )
+        for change in stepped.update
+    )
+    return BatchStep(stepped._replace(update=update), support)
 
 
 def _bank_payload(operands: SupportOperands) -> bytes:

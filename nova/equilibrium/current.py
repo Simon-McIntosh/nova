@@ -793,7 +793,7 @@ def book_tangent_channels(
 
         total, _ = jax.lax.scan(
             add_batch,
-            jnp.zeros((channels, cells, 3), dtype=psi.dtype),
+            jnp.zeros((cells, channels, 3), dtype=psi.dtype),
             jnp.arange(len(index) // batch_width),
         )
         return total

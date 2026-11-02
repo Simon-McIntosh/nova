@@ -22,6 +22,10 @@ trap finish EXIT
 mkdir -p "$SCRATCH/base"
 git -C "$SOURCE" archive "$BASE" nova tests scripts benchmarks pyproject.toml \
   | tar -xf - -C "$SCRATCH/base" || exit 2
+mkdir -p "$SCRATCH/base/.git/refs/heads" "$SCRATCH/base/.git/objects/info"
+printf '%s\n' "$BASE" > "$SCRATCH/base/.git/HEAD"
+printf '[core]\n\trepositoryformatversion = 0\n\tbare = false\n' \
+  > "$SCRATCH/base/.git/config"
 
 profile_arm() {
   tree=$1

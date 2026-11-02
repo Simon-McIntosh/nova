@@ -183,6 +183,7 @@ def compare(path, output, mutation):
         fresh_matrix = matrix(state, support, True)
         held_matrix = matrix(state, support, False)
         if mutation and index == 2:
+            control_action = held_matrix @ direction
             column = int(jnp.argmax(jnp.abs(direction)))
             fresh_matrix = fresh_matrix.at[0, column].add(1e-3)
             held_matrix = held_matrix.at[0, column].add(1e-3)
@@ -229,6 +230,8 @@ def compare(path, output, mutation):
                 "flux_abs": norm(flux_action - flux_difference),
                 "geometry_reference_norm": norm(geometry_difference),
             }
+            if mutation:
+                row["booking_control"] = error(control_action, held_difference)
             rows.append(row)
             emit("DIFFERENCE", **row)
     output.write_text(json.dumps(rows, indent=2) + "\n")
@@ -236,8 +239,24 @@ def compare(path, output, mutation):
         target = next(
             row for row in rows if row["iterate"] == 2 and row["h_over_x"] == 1e-5
         )
-        assert target["booking"] > 1e-6, target
-        emit("NEGATIVE_CONTROL", booking_error=target["booking"], flagged=True)
+        control = target["booking_control"]
+        perturbed = target["booking"]
+        if (
+            not np.isfinite(control)
+            or not np.isfinite(perturbed)
+            or perturbed <= max(1e-6, 10 * control)
+        ):
+            raise AssertionError(
+                "booking perturbation did not exceed its control: "
+                f"control={control:.9g}, perturbed={perturbed:.9g}"
+            )
+        emit(
+            "NEGATIVE_CONTROL",
+            booking_error=perturbed,
+            control_error=control,
+            ratio=perturbed / control,
+            flagged=True,
+        )
     emit(
         "SUMMARY",
         rows=len(rows),

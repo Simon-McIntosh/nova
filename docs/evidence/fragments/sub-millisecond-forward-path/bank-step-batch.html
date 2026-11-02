@@ -208,36 +208,48 @@
   NaN the record previously reported. That is a fixture defect, reported as
   such; the solver was never returning a non-finite value from a finite reading.</p>
 
-  <p>With the freeze in place the batched clause converges at 550 cells:
-  <code>batched residuals: [9.4829e-11, 2.3292e-11] after 10 steps</code>, both
-  lanes at or below the 1e-10 bound. The branch clause exercises one stale
-  tracked cell and requires every lane to report the rebuild and advance its
-  counter by exactly one.</p>
+  <p>With the freeze in place the batched clause converges at 550 cells. The
+  re-run under the restored bound (job 1303787) printed
+  <code>batched residuals: [1.3358e-11, 1.8943e-11] after 25 steps</code>, both
+  lanes at or below the 1e-10 bound, and the branch clause passed. The batch is
+  not faster to converge than the single solve — the operator alternation of
+  the section above is what sets the step count — but it now stops moving on a
+  lane that has met the bound, which is the property the clause asserts.</p>
 
-  <p><strong>As delivered the gate is red, on a timeout and not on a
-  number.</strong> The first re-run ended <code>1 failed, 1 passed</code>: the
-  branch clause passed and the convergence clause exceeded the suite's 300 s
-  per-test bound while solving the two reference lanes, after its batched
-  residual had already been printed at 9.48e-11. The test file now declares
-  <code>pytest.mark.timeout(1800)</code>, and the re-run under that bound is
-  job 1303787, which was still queued when this record was written.</p>
+  <p><strong>The gate is red at delivery, and on the comparison rather than on
+  a residual.</strong> The convergence clause failed its confluent-flux check
+  at <code>rtol=1e-10, atol=0</code>: lane 0's vertical flux disagreed in 7 of
+  550 cells, and every one of those cells is zero to round-off — the two solves
+  returned 1e-30 and 1e-26 where a relative tolerance divides by nothing. The
+  largest absolute disagreement was 1.7e-13, which is the scale on which the
+  unbatched reference's own residual alternation moves the flux. The comparison
+  now carries <code>atol=1e-12</code> with the relative tolerance unchanged
+  (commit 6a3d7084a), and the re-run is job 1303793, queued at the deadline;
+  its result is not in this delivery.</p>
 
-  <p>The declared negative control was not re-run against the repaired code:
-  job 1303783 reached the gate's red and was stopped before its mutation arm,
-  so the mutation log for this revision does not exist. The previous
-  revision's mutation run is still on disk at
-  <code>waverun/regate.log</code> from this node's earlier delivery; it says
-  nothing about the repaired <code>read_batch</code> and must not be read as
-  covering it.</p>
+  <p>The uniform rebuild decision costs nothing measurable at the read. The
+  sixteen-slice read re-measured at the repaired revision is 12.90 ms per slice
+  against 12.87 ms before it (job 1303785, <code>waverun/h200-stage.log</code>),
+  and the one- and four-slice reads reproduce at 53.80 and 20.32 ms. The
+  timing headline stands unchanged.</p>
+
+  <p>The negative control was re-run against the repaired code in the same job:
+  its mutation arm launched after the gate and its verdict was still pending
+  when this record was written. Its log is <code>waverun/regate.log</code>
+  (job 1303787), which carries the gate result and the mutation phase in one
+  stream; a completed mutation appends its <code>NEG_EXIT</code> line to that
+  file. The sixteen-lane per-lane trace (job 1303790) was still queued at the
+  deadline, so the per-lane table this delivery carries is the four-lane one.</p>
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:
-  <code>waverun/trace.log</code> for the per-iteration tables above (job
-  1303782), <code>waverun/regate.log</code> for the gate and the negative
-  control (job 1303783), <code>waverun/diagnose.log</code> for the 64-cell
-  non-finite diagnosis (job 1303781), and <code>waverun/h200-stage.log</code>
-  for the stage wall re-measured at the repaired revision (job 1303785). Jobs
-  1303782 and 1303783 were launched from the repaired working tree before it was
-  committed, so their <code>REVISION</code> line reads 98b6bb91d while the code
-  they ran is c3124432d; job 1303785 records c3124432d directly.</p>
+  <code>waverun/trace.log</code> for the per-iteration tables (job 1303782),
+  <code>waverun/regate.log</code> for the gate and the negative control (job
+  1303787), <code>waverun/regate2/regate.log</code> for the tolerance re-run
+  (job 1303793), <code>waverun/diagnose.log</code> for the 64-cell non-finite
+  diagnosis (job 1303781), and <code>waverun/h200-stage.log</code> for the stage
+  wall at the repaired revision (job 1303785). Job 1303782 was launched from the
+  repaired working tree before it was committed, so its <code>REVISION</code>
+  line reads 98b6bb91d while the code it ran is c3124432d; jobs 1303785 and
+  1303787 record the commit they ran.</p>
 </section>

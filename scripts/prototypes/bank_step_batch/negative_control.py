@@ -97,7 +97,7 @@ def main():
             "import nova, nova.equilibrium.support_read as m;"
             "print('NOVA='+nova.__file__+' MODULE='+m.__file__)",
         ],
-        cwd=arguments.root,
+        cwd=str(scratch),
         env=environment,
         text=True,
         capture_output=True,
@@ -123,7 +123,7 @@ def main():
             str(scratch / "tests" / "test_bank_step_batch.py"),
             f"--basetemp={arguments.basetemp}",
         ],
-        cwd=arguments.root,
+        cwd=str(scratch),
         env=environment,
     )
     print(f"EXIT={result.returncode}", flush=True)

@@ -16,6 +16,13 @@
     "nova/equilibrium/support_read.py:1308 newton_step"
   ],
   "completed_at": "2026-11-02T10:41:42Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-step-booking",
+      "recorded_at": "2026-11-02T10:46:51.248449+00:00"
+    }
+  },
   "dispatched_at": "2026-11-02T10:28:43Z",
   "evidence": {
     "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T092806597431-bank-step-geometry/final-head-test_bank_newton_step.py.log",

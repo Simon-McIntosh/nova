@@ -383,22 +383,26 @@ def run_converge_arm(run_dir):
 
     read = jax.jit(read_program)
     residual = jax.jit(residual_program)
+    # The sixteen-lane tangent asks for 119 GiB in one map, so the step runs
+    # eight lanes at a time, as the stage arm does.
     step = jax.jit(
-        lambda state: support_read.step_batch(
-            bank,
-            cache,
-            state,
-            lane_seeds,
-            lane_seeds,
-            convention,
-            policy,
-            profile,
-            gradient,
-            quadrature,
-            fresh_geometry=True,
+        chunked_args(
+            lambda state, lanes: support_read.step_batch(
+                bank,
+                cache,
+                state,
+                lanes,
+                lanes,
+                convention,
+                policy,
+                profile,
+                gradient,
+                quadrature,
+                fresh_geometry=True,
+            ),
+            count,
         )
     )
-
     state = stacked
     per_lane_steps = [None] * count
     iteration_walls = []
@@ -424,7 +428,7 @@ def run_converge_arm(run_dir):
         if all(value is not None for value in per_lane_steps):
             break
         started = perf_counter()
-        correction = step(state)
+        correction = step(state, lane_seeds)
         jax.block_until_ready(correction.step.update)
         iteration_walls.append(1e3 * (perf_counter() - started))
         state = tuple(

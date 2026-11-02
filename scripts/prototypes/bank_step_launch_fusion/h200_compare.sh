@@ -3,6 +3,11 @@ set -uo pipefail
 
 RUN_DIR=${1:?run directory required}
 BASE=${2:?base revision required}
+MODE=${3:-all}
+if [ "$MODE" != all ] && [ "$MODE" != resume ]; then
+  printf 'unknown comparison mode: %s\n' "$MODE" >&2
+  exit 2
+fi
 SOURCE=$(git rev-parse --show-toplevel)
 OBJECTS=$(readlink -f "$(git rev-parse --git-common-dir)/objects")
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
@@ -66,10 +71,13 @@ run_solve() {
 }
 
 printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git rev-parse HEAD)" "$SOURCE" "$PWD" \
-  "$SOURCE/scripts/prototypes/bank_step_launch_fusion/h200_compare.sh $RUN_DIR $BASE"
+  "$SOURCE/scripts/prototypes/bank_step_launch_fusion/h200_compare.sh $RUN_DIR $BASE $MODE"
 "$PY" -c 'import nova; print("NOVA="+nova.__file__)'
 git -C "$SCRATCH/base" rev-parse HEAD || exit 2
-run_profile "$SCRATCH/base" base || exit $?
+if [ "$MODE" = all ]; then
+  run_profile "$SCRATCH/base" base || exit $?
+fi
 run_profile "$SOURCE" head || exit $?
-run_solve "$SCRATCH/base" base-repeat scripts.prototypes.bank_step_booking.measure || exit $?
+run_solve "$SCRATCH/base" base-own-one scripts.prototypes.bank_step_booking.measure || exit $?
+run_solve "$SCRATCH/base" base-own-two scripts.prototypes.bank_step_booking.measure || exit $?
 run_solve "$SCRATCH/base" base-archived scripts.prototypes.bank_step_launch_fusion.base_solve || exit $?

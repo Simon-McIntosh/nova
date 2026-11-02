@@ -511,49 +511,83 @@ def main():
     original_tangents = current._conic_ring_tangents
 
     def report_velocity(
+        label,
         one_centre,
         one_direction,
-        ring_seven,
-        ring_ten,
+        lower_velocity,
+        upper_velocity,
         x_end,
+        x_speed,
         bottom_end,
         top_end,
         polygon_lower,
         polygon_upper,
+        lower_edge,
+        upper_edge,
+        lower_edge_speed,
+        upper_edge_speed,
+        root_lower,
+        root_upper,
     ):
         if (
             np.max(np.abs(one_centre - target_centre)) < 1e-12
             and abs(one_direction[2] - 1.0) < 1e-12
         ):
+
+            def source(y):
+                if abs(y - polygon_lower) < 1e-8:
+                    return "lower edge"
+                if abs(y - polygon_upper) < 1e-8:
+                    return "upper edge"
+                return "root"
+
             print(
-                "ACTUAL_SERIAL_VELOCITY",
-                "ring7",
-                ring_seven.tolist(),
-                "ring10",
-                ring_ten.tolist(),
-            )
-            print(
-                "ACTUAL_SERIAL_INTERVAL",
+                "CLASSIFICATION",
+                label,
+                "ring",
+                10,
+                "slot",
+                1,
                 "x",
                 float(x_end),
-                "bottom",
-                float(bottom_end),
-                "top",
-                float(top_end),
-                "polygon_lower",
-                float(polygon_lower),
-                "polygon_upper",
-                float(polygon_upper),
-                "bottom_minus_lower",
-                float(bottom_end - polygon_lower),
-                "top_minus_upper",
-                float(top_end - polygon_upper),
+                "x_rate",
+                float(x_speed),
+                "polygon",
+                (float(polygon_lower), float(polygon_upper)),
+                "interval",
+                (float(bottom_end), float(top_end)),
+            )
+            print(
+                "CLASSIFICATION_ENDPOINT",
+                label,
+                "lower",
+                source(bottom_end),
+                "velocity",
+                lower_velocity.tolist(),
+                "edge",
+                int(lower_edge),
+                "edge_rate",
+                float(lower_edge_speed),
+                "root_rate",
+                float(root_lower),
+            )
+            print(
+                "CLASSIFICATION_ENDPOINT",
+                label,
+                "upper",
+                source(top_end),
+                "velocity",
+                upper_velocity.tolist(),
+                "edge",
+                int(upper_edge),
+                "edge_rate",
+                float(upper_edge_speed),
+                "root_rate",
+                float(root_upper),
             )
 
-    def traced_tangents(
-        vertices, count, one_centre, pitch, coefficient, direction, selection, segments
-    ):
-        velocity = original_tangents(
+    def traced_tangents(label):
+        def trace(
             vertices,
             count,
             one_centre,
@@ -562,36 +596,109 @@ def main():
             direction,
             selection,
             segments,
-        )
-        one_local = (vertices - one_centre) / pitch
-        one_fragments = topology.quadratic_cell_fragments(
-            one_local, count, coefficient, selection.shape[0]
-        )
-        left = one_fragments.slice_breaks[:-1]
-        right = one_fragments.slice_breaks[1:]
-        parameter = 0.5 * (1.0 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
-        x = left[:, None] + (right - left)[:, None] * parameter
-        bottom, top, _ = topology._positive_vertical_intervals(
-            one_local, count, coefficient, x
-        )
-        polygon_lower, polygon_upper = topology._vertical_polygon_interval(
-            one_local, count, x
-        )
-        jax.debug.callback(
-            report_velocity,
-            one_centre,
-            direction,
-            velocity[7],
-            velocity[10],
-            x[3, 8],
-            bottom[3, 8, 0],
-            top[3, 8, 0],
-            polygon_lower[3, 8],
-            polygon_upper[3, 8],
-        )
-        return velocity
+        ):
+            velocity = original_tangents(
+                vertices,
+                count,
+                one_centre,
+                pitch,
+                coefficient,
+                direction,
+                selection,
+                segments,
+            )
+            one_local = (vertices - one_centre) / pitch
+            one_fragments = topology.quadratic_cell_fragments(
+                one_local, count, coefficient, selection.shape[0]
+            )
+            left = one_fragments.slice_breaks[:-1]
+            right = one_fragments.slice_breaks[1:]
+            parameter = 0.5 * (1.0 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
+            x = left[:, None] + (right - left)[:, None] * parameter
+            _, break_rate = topology.quadratic_slice_break_tangent(
+                one_local, count, coefficient, direction
+            )
+            x_rate = (
+                break_rate[:-1, None]
+                + (break_rate[1:, None] - break_rate[:-1, None]) * parameter
+            )
+            bottom, top, _ = topology._positive_vertical_intervals(
+                one_local, count, coefficient, x
+            )
+            polygon_lower, polygon_upper = topology._vertical_polygon_interval(
+                one_local, count, x
+            )
+            point_x = x[3, 8]
+            point_rate = x_rate[3, 8]
+            slot = jnp.arange(one_local.shape[0])
+            following = jnp.where(slot + 1 < count, slot + 1, 0)
+            edge = one_local[following] - one_local
+            safe_dx = jnp.where(edge[:, 0] != 0, edge[:, 0], 1.0)
+            fraction = (point_x - one_local[:, 0]) / safe_dx
+            live = (
+                (slot < count)
+                & (edge[:, 0] != 0)
+                & (fraction >= -1e-12)
+                & (fraction <= 1 + 1e-12)
+            )
+            edge_y = one_local[:, 1] + fraction * edge[:, 1]
+            slope = edge[:, 1] / safe_dx
+            probe_fraction = (
+                point_x + 1e-9 * jnp.sign(point_rate) - one_local[:, 0]
+            ) / safe_dx
+            entered = (
+                (slot < count)
+                & (edge[:, 0] != 0)
+                & (probe_fraction >= -1e-12)
+                & (probe_fraction <= 1 + 1e-12)
+            )
 
-    current._conic_ring_tangents = traced_tangents
+            def owner(bound):
+                near = live & (jnp.abs(edge_y - bound) < 1e-8)
+                moving = near & entered
+                candidates = jnp.where(jnp.any(moving), moving, near)
+                return jnp.argmin(jnp.where(candidates, jnp.abs(slope), jnp.inf))
+
+            low_edge = owner(jnp.min(jnp.where(live, edge_y, jnp.inf)))
+            high_edge = owner(jnp.max(jnp.where(live, edge_y, -jnp.inf)))
+
+            def root_rate(y):
+                field = (
+                    direction[0]
+                    + direction[1] * point_x
+                    + direction[2] * y
+                    + direction[3] * point_x**2
+                    + direction[4] * point_x * y
+                    + direction[5] * y**2
+                )
+                gx = coefficient[1] + 2 * coefficient[3] * point_x + coefficient[4] * y
+                gy = coefficient[2] + coefficient[4] * point_x + 2 * coefficient[5] * y
+                return -(field + gx * point_rate) / jnp.where(gy != 0, gy, 1)
+
+            jax.debug.callback(
+                lambda *args: report_velocity(label, *args),
+                one_centre,
+                direction,
+                velocity[10, 8],
+                velocity[10, 9],
+                point_x,
+                point_rate,
+                bottom[3, 8, 1],
+                top[3, 8, 1],
+                polygon_lower[3, 8],
+                polygon_upper[3, 8],
+                low_edge,
+                high_edge,
+                slope[low_edge] * point_rate,
+                slope[high_edge] * point_rate,
+                root_rate(bottom[3, 8, 1]),
+                root_rate(top[3, 8, 1]),
+            )
+            return velocity
+
+        return trace
+
+    current._conic_ring_tangents = traced_tangents("serial")
     try:
 
         def debug_reference(index):
@@ -599,6 +706,30 @@ def main():
 
         debug_result = jax.jit(jax.vmap(debug_reference))(indices)
         print("DEBUG_SERIAL_VALUE", float(debug_result.vertical_moment[channel, cell]))
+    finally:
+        current._conic_ring_tangents = original_tangents
+
+    current._conic_ring_tangents = traced_tangents("vector")
+    try:
+        debug_vector = jax.jit(
+            lambda: current.book_tangent_channels(
+                psi,
+                psi_direction,
+                reading,
+                field_direction,
+                axis_direction,
+                boundary_direction,
+                geometry,
+                UnitDensity(),
+                density_gradient,
+                quadrature,
+                booked,
+                jnp.concatenate(
+                    (jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))
+                ),
+            )
+        )()
+        print("DEBUG_VECTOR_VALUE", float(debug_vector[cell, 2, channel]))
     finally:
         current._conic_ring_tangents = original_tangents
 

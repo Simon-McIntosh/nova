@@ -26,6 +26,13 @@
     "p100_base": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/baseline-p100.log",
     "p100_final": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/fused-final-p100.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-launch-fusion",
+      "recorded_at": "2026-11-02T19:12:42.611750+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/current.py",

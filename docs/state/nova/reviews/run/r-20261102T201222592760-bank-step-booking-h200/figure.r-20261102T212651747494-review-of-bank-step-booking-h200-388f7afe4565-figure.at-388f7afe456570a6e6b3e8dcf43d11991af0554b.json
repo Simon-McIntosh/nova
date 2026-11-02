@@ -7,7 +7,7 @@
   },
   "attachment_note": "The verdict is read only from the rendered PNG this node attached, image-0.png. No SVG was opened, read, listed, searched, rendered or git-shown, and no image other than that PNG was opened; every pixel figure below was measured on that same PNG. The reviewed range 9afb1a418..388f7afe changes exactly one figure, docs/figures/sub-millisecond-forward-path/bank-step-booking-h200/booking-tangent-wall.svg, drawn by scripts/prototypes/bank_step_booking_h200/plot.py at the reviewed head. Control that the attachment is the reviewed head's render and not a stale one: the head changes ROWS to the single-line labels 'shared kernel only' and 'shared kernel + cut buckets' (dropping the '\\n' the base carried) and changes COLOUR_KERNEL from #b06a2c to #b06a2a; the attached PNG shows both row labels on one line each and fills the middle bars at exactly RGB (176,106,42) = #b06a2a, so it can only be the head's output.",
   "caption_check": "pass. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-h200.html names both devices and their hosts, decodes the three arms and their colours ('the base source (grey), the shared-kernel factoring alone (orange) and the shared kernel with separate cut-cell buckets (green)'), states the acquisition ('medians of three synchronized calls'), warns that each panel has its own linear millisecond axis and that the two are not on a shared scale, and states that the arms ran as separate scheduler jobs with the profiler warmed before tracing. It does not merely repeat the figure's title or axis labels, so no caption finding is raised.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T21:37:48.879Z",
   "dispatched_at": "2026-11-02T21:28:11Z",
   "figure_checks": {
     "caption_independence": "The caption names the devices, the hosts, the axis units, the three arms and their colours, the acquisition and the separate per-panel scales. It is not a restatement of the title or the axis labels.",
@@ -125,6 +125,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T21:37:51.465323+00:00",
+  "timestamp": "2026-11-02T21:43:44.193322+00:00",
   "total": null
 }

@@ -6,7 +6,7 @@
     "image-0.png (1399x720, the attachment named by this review node)": "docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg"
   },
   "attachment_note": "The verdict is read only from the rendered PNG named by this review node, image-0.png (1399x720, RGBA). No SVG and no other image was opened, read or rendered. The run's own manifest names the committed figure as docs/figures/sub-millisecond-forward-path/bank-step-plateau/directional-error.svg and the drawing script as scripts/prototypes/bank_step_plateau/plot.py at the reviewed head a8ef0ceef7ce, which plots the h/|x| = 1e-5 row of each measured ladder; the attachment shows four 2x2 log panels with the x axis 'accepted iterate' labelled 0-9, so it is that figure. The reviewed base 8b9b8321d is an ancestor of the reviewed head a8ef0ceef7ce (git merge-base --is-ancestor exit 0), twelve commits apart.",
-  "completed_at": "",
+  "completed_at": "2026-11-02T18:07:15.123Z",
   "dispatched_at": "2026-11-02T17:59:33Z",
   "figure_checks": {
     "caption_independence": "The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-plateau.html names the device (titan P100), the trajectory and that base is evaluated at the head's states, the shown displacement (1e-5 of the state norm), what the two marker styles mean, that their overlap is the result, and that the full six-spacing ladder is tabled below. It does not merely repeat the title or the axis labels, and it is accurate against the render: the arms do overlap, and the shown spacing does match the 1e-5 points the script selects.",
@@ -81,6 +81,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-02T18:07:21.737705+00:00",
+  "timestamp": "2026-11-02T18:09:48.869866+00:00",
   "total": null
 }

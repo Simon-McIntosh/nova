@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-02T09:15:51.041Z",
+  "dispatched_at": "2026-11-02T09:09:35Z",
+  "figures": [
+    {
+      "caption": "The caption behind the figure explains the measurement (warm isolated stages on the published diverted bank, both on titan P100), warns that the full Jacobian contains the booking tangent so their bars are not additive, identifies the dotted line as the H200 0.5 ms target shown for context only, and notes the read is outside the step. It does not merely repeat the figure's title.",
+      "judged_image": "image-0.png (1399x720 rendered PNG attached to this review)",
+      "path": "docs/figures/sub-millisecond-forward-path/bank-step-speed/stage-wall.svg",
+      "rubric": {
+        "contrast": "defect: the green P100-batched value labels and bars are #2e8b57 on white, which measures about 4.25:1 and falls just under the 4.5:1 threshold for 14 pt text; the grey serial value labels (#666666, about 5.7:1), the legend text and the black category labels clear it",
+        "data_ink": "passes: two solid bar series and their printed values on white carry all the ink; no fill bands, no gradient and no third encoding competes with the magnitudes",
+        "decoration": "passes: no gridlines, no background fill and no frame beyond the left and bottom spines; the single dotted vertical rule at 0.5 ms is the step target the caption names, which is data rather than decoration",
+        "label_collision": "passes: no category label, tick label, axis label or value label is clipped at the canvas edge or overlaps another label or a bar; the longest category name ('geometry tangent, one direction') fits inside the 0.33 left margin, the pair of labels on each row is vertically separated, and the largest value label (5741) sits well inside the right limit",
+        "legibility": "passes: ten stage rows on the y-axis, each carrying a grey 'P100-serial' bar and a green 'P100-batched' bar with the millisecond value printed at the bar end, a logarithmic x-axis labelled 'warm wall [ms]' and a frameless two-entry legend; the stage ranking (booking tangent, then the implicit Jacobian rows and the whole step dominate) is read in one pass",
+        "table_form": "passes: the figure answers which stage carries the wall, a magnitude comparison that bars set out faster than a table; the evidence fragment prints the same numbers in two tables beneath it, so the figure is not standing in for tabular data"
+      },
+      "source_script": "scripts/prototypes/bank_step_speed/plot_stage.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f7680ca2908",
+      "line": 17,
+      "severity": "non-blocking",
+      "summary": "The figure draws a 'Jacobian, frozen geometry' row (5347 ms serial, 1112 ms batched) that neither table in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html has a line for: both stage tables list only 'Full Jacobian' (5,381.76 ms and 1,159.96 ms). A reader checking a bar against the tables finds one row they cannot look up, so the figure and its evidence disagree on how many stages were measured."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f76ad1d7d85",
+      "line": 88,
+      "severity": "non-blocking",
+      "summary": "The bars are drawn on a logarithmic x-axis starting at 0.2, so bar length is not proportional to value: the 'flux and booking' bar (323 ms) is about three quarters the length of the 'whole step' bar (5741 ms), and the LU rows (about 1.2 ms) render as slivers a few pixels wide. Every value is printed at its bar end so no number is hidden, but a reader who compares lengths rather than reading the labels reads a wrong ratio; a dot or lollipop mark would encode magnitude honestly on the log axis."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "febc818d4f8",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "The green P100-batched value labels are drawn in #2e8b57 on white, about 4.25:1 contrast, just below the 4.5:1 threshold that applies to 14 pt text. They remain legible and are duplicated by the bar ends, so no reader is stopped; a darker green for the printed numbers would clear the threshold without changing the series hue."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f74b495cab9",
+      "line": 59,
+      "severity": "non-blocking",
+      "summary": "The two series are told apart by hue alone: grey #929292 and green #2e8b57 differ by little in relative luminance, so a deuteranope reads both as mid greys. The consistent vertical order (serial above, batched below), the legend wording and the printed values keep the figure usable, but a second cue such as a hatch on one series would make the mapping unambiguous for colour-blind readers."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f198aa5f0c0",
+      "line": 37,
+      "severity": "non-blocking",
+      "summary": "The value formatter rounds anything at or above 10 ms to an integer, so the LU factor pair (10.36 ms serial, 10.38 ms batched) both print '10' and the batched series reads as unchanged where it is in fact very slightly slower. The difference is far below the resolution the figure needs, but a reader comparing that row is given two identical labels for two different measurements."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "faed04d5689",
+      "line": 55,
+      "severity": "non-blocking",
+      "summary": "Where the two series measure the same wall the green bar is drawn over the grey one, so three rows ('read (outside step)' 1652/1652, 'flux and booking' 323/323, 'LU factor' 10/10) show a single visible bar despite the legend promising two series. The equal values are printed above and below, so nothing is hidden numerically, but the picture does not show that both devices were measured on those rows."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-step-speed/stage-wall.svg",
+      "id": "f358744341c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption identifies the colours as 'grey is the serial booking tangent, green the batched tangent', but grey and green encode every stage of the serial and batched runs, not the booking tangent alone. A reader who takes the caption literally expects the colour distinction to apply only to the booking-tangent row and may not carry it to the other nine."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261102T090810697014-review-of-bank-step-speed-1dd9553ce333-figure",
+  "reviewed_base_sha": "86681056f1ddf90e11f0cffcf5f9259d2b9117ef",
+  "reviewed_head_sha": "1dd9553ce333345a1cb96f7c5c84b6585baa4ae0",
+  "reviewed_run_id": "r-20261029T223038646111-bank-step-speed",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T09:17:05.974853+00:00",
+  "total": null
+}

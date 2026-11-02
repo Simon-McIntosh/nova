@@ -364,6 +364,18 @@ def main():
     outer_velocity, outer_moving = jax.jit(jax.vmap(channel_outer))(indices)
     outer_velocity = np.asarray(outer_velocity[channel, serial_slot])
     outer_moving = np.asarray(outer_moving[channel, serial_slot])
+    local_velocity = np.asarray(
+        current._conic_ring_tangents(
+            vertices,
+            count,
+            centre,
+            width,
+            signed[cell],
+            signed_direction[channel, cell],
+            selected,
+            quadrature.segments,
+        )
+    )
     print(
         "CHANNEL_OUTER_MOVING",
         float(np.sum(outer_moving)),
@@ -374,9 +386,7 @@ def main():
         if abs(old - new) > 1e-12:
             print("CHANNEL_OUTER_FIRST_FRAGMENT", ring_index, old, new)
             vertex_difference = np.max(
-                np.abs(
-                    outer_velocity[ring_index] - np.asarray(serial_velocity[ring_index])
-                ),
+                np.abs(outer_velocity[ring_index] - local_velocity[ring_index]),
                 axis=1,
             )
             vertex = int(np.argmax(vertex_difference))
@@ -387,7 +397,7 @@ def main():
                 "serial",
                 outer_velocity[ring_index, vertex].tolist(),
                 "vector",
-                np.asarray(serial_velocity[ring_index, vertex]).tolist(),
+                local_velocity[ring_index, vertex].tolist(),
             )
             break
 

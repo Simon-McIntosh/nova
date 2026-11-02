@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T22:08:05.111Z",
+  "dispatched_at": "2026-11-02T22:02:04Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-1",
+      "reason": "a node can keep the lattice raster, pass the stated discriminator, and close with the defect intact; the clause must assert that no drawn vertex lies on a lattice line in both coordinates, or compare the drawn contour's geometry against the map the \u00a75 builder returns.",
+      "text": "\u00a76 done-when (1) uses \"the drawn contour vertices must include points between lattice rows\" as the clause that discriminates the \u00a75 fine map from the lattice raster, but contourpy's marching squares on the committed 33\u00d733/65\u00d765 rasters already emits vertices between lattice rows: a crossing on a vertical lattice edge has y interpolated between two rows (x on a column line) and a crossing on a horizontal edge has x interpolated between two columns, so the old raster satisfies the clause and the check cannot fail on the unfixed behaviour",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-2",
+      "reason": "the gate asserts reproduction of four panels from three files, so the node either fails its own gate or papering it over needs a second moment set the plan never asks for; the section must say whether the npz stores both densities or the test rebuilds the 4000-cell mesh.",
+      "text": "\u00a76 now states the cpu state is drawn twice, the `-fine` view at 12000 cells (the density `cpu-lane/centroid-solve.json` records as `requested_cells` 12000) and the plain panel at the `DEFAULT_HEX_CELLS` 4000 the producer defaults to, yet done-when (1) redraws the four panels from \"the conductor currents and cell moments stored in the three `panel-fields.npz` files\" and done-when (2) writes one set of cell moments per file, so the plain cpu panel's 4000-cell moments are stored nowhere and the clause is unsatisfiable as written unless the test is allowed to rebuild that mesh and its moments from the geometry",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4760355412c6a6332dd4623d4871cb74a7d40f1c",
+  "plan_fingerprint": "18886ba6005e0e68b5ebee9a7ba96077875abdabc2709051be521d90419949a6",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 165,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T211844075494-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "622846b8305bf686a0236f3b37131aed7c35187a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `DEFAULT_HEX_CELLS = 4000` (`benchmarks/mast_centroid_solve_panels.py:88`), the `run`/`panels` subcommands (`:1480`, `:697`), `tests/test_mast_centroid_panel_states.py`, `FluxTarget` (`nova/biot/target.py:544`), `raster_image` (`nova/equilibrium/forward_operator.py:2938`), `hex_mesh` (`nova/media/sources/plasma_mesh.py:29`) and `boundary_flux_at_admitted_saddle` (`nova/equilibrium/separatrix_branches.py:31`) all resolve; the three npz files exist with `shape` 33\u00d733, 65\u00d765 and 33\u00d733 exactly as \u00a76 states, and their key sets confirm the section's claim that they keep \u03c8 on the lattice and no conductor currents.",
+    "done_when": "two findings \u2014 the \"points between lattice rows\" clause cannot fail on the lattice raster it exists to exclude, and one stored moment set per file cannot redraw the cpu lane's two densities that the same done-when names.",
+    "evidence_paths": "pass \u2014 the figures, the three `panel-fields.npz` files and the `centroid-solve.json` receipts all sit under the committed `docs/figures/mast-centroid-capability/` tree, never a scratch or node-local path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or changelog prose reach the section's paths, symbols or prose.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited code and evidence (`panels()` contours `vacuum_psi`/`solved_psi` on the lattice at `benchmarks/mast_centroid_solve_panels.py:730-732`), the \u00a75 mechanism of evaluating a `FluxTarget` from conductor and cell-moment columns produces the asserted 10 mm map, and the caller is named, the producer's `panels()` reached through the `panels` subcommand; every receipt records `cold_solve.converged` true on all three lanes.",
+    "single_goal": "pass \u2014 \u00a76 names one deliverable, the four MAST centroid panels redrawn on the \u00a75 map, with the re-solve and the npz extension as the means to it.",
+    "wiring": "pass \u2014 \u00a76 declares no `depends-on`, `informs` and `gates` and neither does any other authored section of the plan (`data-links=\"\"` is the only relationship attribute present), so no declared relationship points at the wrong node, and the \u00a75 builder it needs is named in the section's own text."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "d71e8b500bdc0cfd69c5d0503f55d882093c5461130524b9a10a13b1815aa997",
+    "s7": "9ddcc4be93a921b78a5112d7c3e86c585b544accf7e06869b5b37c6c329d3878",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T22:11:17.563290+00:00"
+}

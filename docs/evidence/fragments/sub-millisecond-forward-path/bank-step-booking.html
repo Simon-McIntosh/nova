@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step booking and factor reuse | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-booking-landing">Bank step booking and factor reuse</h1>
+<p id="bank-step-booking-summary">On titan P100, the 550-cell diverted bank's warm local booking tangent fell from 1,076.97 to 231.24 ms (4.66×) after replacing repeated channel work with a vectorized cell and channel contraction. The warm whole step fell from 1,486.11 to 634.30 ms (2.34×). Kernel launches rose from 1,082 to 5,736 for the tangent and from 8,381 to 14,427 for the step, so launch reduction remains open. Fresh balanced LU factorization stays the default: carrying a factor reduced an isolated step but its two full solves needed 10 and 13 steps against eight with fresh factors. The H200 request remained pending for 10 min 50 s and was cancelled by id; no H200 latency or launch target is claimed.</p>
+<figure id="bank-step-booking-stage-wall"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-booking/stage-wall.svg" alt="Linear titan P100 warm wall for baseline and vectorized booking stages"><figcaption>Titan P100, 550-cell diverted bank. Grey is the batched baseline; green is the density-basis contraction with four cut lanes, the configuration named in the corrected legend. The read is outside the Newton step. Jacobian and whole-step rows include preceding work and are not additive. Three synchronized warm calls determine each wall median. The SVG was rendered to PNG, mechanically checked for text clipping and collision, and visually inspected.</figcaption></figure>
+<section id="bank-step-booking-profile"><h2>Titan P100 warm stages</h2>
+<table id="bank-step-booking-profile-table"><thead><tr><th>Stage</th><th>Baseline wall [ms]</th><th>Final wall [ms]</th><th>Baseline device [ms]</th><th>Final device [ms]</th><th>Baseline launches</th><th>Final launches</th></tr></thead><tbody>
+<tr><td>Read, outside step</td><td>1,660.14</td><td>1,652.00</td><td>1,720.51</td><td>1,720.49</td><td>20,379</td><td>20,379</td></tr>
+<tr><td>Residual and booking</td><td>324.94</td><td>323.33</td><td>332.41</td><td>332.41</td><td>1,503</td><td>1,503</td></tr>
+<tr><td>Local booking tangent</td><td>1,076.97</td><td>231.24</td><td>1,095.56</td><td>233.79</td><td>1,082</td><td>5,736</td></tr>
+<tr><td>Full Jacobian, with geometry</td><td>1,152.34</td><td>305.12</td><td>1,169.34</td><td>304.92</td><td>5,718</td><td>10,341</td></tr>
+<tr><td>LU factor</td><td>10.44</td><td>10.36</td><td>10.18</td><td>10.20</td><td>118</td><td>118</td></tr>
+<tr><td>Fresh whole step</td><td>1,486.11</td><td>634.30</td><td>1,510.70</td><td>647.14</td><td>8,381</td><td>14,427</td></tr>
+</tbody></table>
+<p>The profiler was warmed before tracing. The final trace saw GPU activity in every stage, including 5,736 booking kernels and 14,427 whole-step kernels. Device duration is the sum of GPU events inside one stage annotation; wall is the median of three warm synchronized calls, so they need not coincide. The 0.5 ms and 100-launch H200 targets remain unjudged.</p>
+<table id="bank-step-booking-iteration-table"><thead><tr><th>Titan P100 implementation</th><th>Booking tangent wall [ms]</th><th>Booking launches</th><th>Whole step wall [ms]</th><th>Whole step launches</th></tr></thead><tbody>
+<tr><td>Batched baseline</td><td>1,076.97</td><td>1,082</td><td>1,486.11</td><td>8,381</td></tr>
+<tr><td>Vectorized channels before basis contraction</td><td>3,753.51</td><td>3,143</td><td>4,157.93</td><td>11,032</td></tr>
+<tr><td>Shared boundary samples</td><td>3,752.57</td><td>3,169</td><td>4,157.93</td><td>11,058</td></tr>
+<tr><td>Density basis before channels, eight cut lanes</td><td>401.89</td><td>3,195</td><td>806.15</td><td>11,082</td></tr>
+<tr><td>Density basis before channels, four cut lanes</td><td>231.24</td><td>5,736</td><td>634.30</td><td>14,427</td></tr>
+</tbody></table>
+</section>
+<section id="bank-step-booking-kernels"><h2>What occupied the tangent</h2>
+<table id="bank-step-booking-kernel-table"><thead><tr><th>Baseline titan P100 kernel family</th><th>Events</th><th>Device duration [ms]</th></tr></thead><tbody>
+<tr><td>Reductions</td><td>211</td><td>469.36</td></tr><tr><td>Segmented radix sort</td><td>88</td><td>322.56</td></tr><tr><td>Matrix multiply</td><td>10</td><td>212.25</td></tr><tr><td>Other kernels</td><td>773</td><td>90.83</td></tr><tr><td>Copies and sets</td><td>268</td><td>0.56</td></tr>
+</tbody></table>
+<p>The positive baseline trace contains 1,350 GPU events in the tangent annotation. Clipped polygon moment reductions, geometry sorts and matrix multiplies dominate; the host fragment loop is not the main wall. A first vectorized form increased the cost: 55 double-precision matrix multiplies consumed 3,448.15 of its 3,760.51 device ms. Those multiplied the cell density derivative at every quadrature point by every channel. Integrating the six local flux basis functions against each moment once per cell, then multiplying by 15 channel coefficients, removed that repeated contraction. A four-lane cut batch further reduced wall, at the cost of more launches.</p>
+</section>
+<section id="bank-step-booking-convergence"><h2>Fresh-read solves and oracle</h2>
+<table id="bank-step-booking-convergence-table"><thead><tr><th>Titan P100 arm</th><th>Steps to 1e-10</th><th>Terminal fresh residual</th><th>Total Newton wall [ms]</th><th>Refactors / reused steps</th></tr></thead><tbody>
+<tr><td>Batched baseline, fresh factor</td><td>8</td><td>3.439e-12</td><td>11,831.53</td><td>8 / 0</td></tr>
+<tr><td>Batched baseline, fresh repeat</td><td>8</td><td>3.439e-12</td><td>11,807.77</td><td>8 / 0</td></tr>
+<tr><td>Batched baseline, carry factor, first</td><td>13</td><td>2.235e-11</td><td>14,572.67</td><td>9 / 4</td></tr>
+<tr><td>Batched baseline, carry factor, repeat</td><td>10</td><td>7.753e-11</td><td>9,036.58</td><td>5 / 5</td></tr>
+<tr><td>Vectorized channels, fresh factor</td><td>10</td><td>7.970e-11</td><td>6,251.21</td><td>10 / 0</td></tr>
+</tbody></table>
+<p>The factor is reused only while the observed fresh-residual contraction ratio is at most 0.5; fresh factorization is the default. These totals sum synchronized Newton calls, excluding reads and line search. The carried-factor step itself was about 323 ms and 1,816 launches, but its full-solve step count varied. The final arm reduces total Newton wall by 1.89× against the first fresh-factor baseline despite taking two more steps. Its oracle ratios are axis 1.048e-5 against 5e-4, saddle 9.255e-6 against 5e-4, and boundary flux 2.591e-5 against 1e-4; all pass.</p>
+</section>
+<section id="bank-step-booking-step-history"><h2>Why the accepted step count changed</h2>
+<p>Factor reuse does not explain the three-, six-, eight- and ten-step fresh-factor results. The final receipt records ten refactorizations for ten steps, and the eight-step baseline records eight. Before the option existed, the measured source unconditionally factored the Jacobian on each call. The separate carried-factor arms in the preceding table are the only reuse experiments.</p>
+<table id="bank-step-booking-step-history-table"><thead><tr><th>Receipt revision</th><th>Configuration and device</th><th>Accepted / damped steps</th><th>Accepted lengths, in order</th><th>Terminal fresh residual</th><th>Receipt</th></tr></thead><tbody>
+<tr><td><code title="3e5478be6d7fecd2689aa6eb451b55b1d847e8bc">3e5478be6</code></td><td>geometry JVP; H200</td><td>3 / 0</td><td>1, 1, 1</td><td>1.003e-11</td><td><code>repair-solve.log</code></td></tr>
+<tr><td><code title="a0fd4cb9591bfa8f90524be222d2254e487eebb1">a0fd4cb95</code></td><td>serial local channels, geometry JVP; P100</td><td>8 / 4</td><td>1, 1, ½, ½, 1, ¼, ½, 1</td><td>8.612e-12</td><td><code>converge-titan.log</code></td></tr>
+<tr><td><code title="b8d10f3b6e4076744e9e6d737b7df57602055e4b">b8d10f3b6</code></td><td>batched local channels, geometry JVP; P100</td><td>6 / 2</td><td>1, 1, 1, ¼, ½, 1</td><td>2.252e-11</td><td><code>converge-booking.log</code></td></tr>
+<tr><td><code title="4574efd88c63e0a43c438f1c34654d1954508678">4574efd88</code></td><td>closed geometry; P100</td><td>6 / 3</td><td>1, 1, ½, ¼, ½, 1</td><td>4.266e-11</td><td><code>committed-solve-titan.log</code></td></tr>
+<tr><td><code title="c015f38c5cb8718ded9c701df767c84b2b357544">c015f38c5</code></td><td>booking baseline, fresh factor; P100</td><td>8 / 5</td><td>1, 1, ¼, ½, ¼, ½, 1/16, 1</td><td>3.439e-12</td><td><code>titan-fresh-solve.log</code></td></tr>
+<tr><td><code title="5eb6930437c29819c730e42ffa7f1d12397b3ee8">5eb693043</code></td><td>booking baseline repeat, fresh factor; P100</td><td>8 / 5</td><td>1, 1, ¼, ½, ¼, ½, 1/16, 1</td><td>3.439e-12</td><td><code>titan-fresh-repeat.log</code></td></tr>
+<tr><td><code title="993886374b34c138d86e68ac18d23016390e9ac7">993886374</code></td><td>density basis, eight cut lanes; P100</td><td>10 / 4</td><td>1, 1, 1, 1, 1, ½, ½, 1, ½, ½</td><td>7.970e-11</td><td><code>titan-integral.log</code></td></tr>
+<tr><td><code title="d519d48f16203d322041a6c913a6e8dd6de305c2">d519d48f1</code></td><td>density basis, four cut lanes; P100</td><td>10 / 4</td><td>1, 1, 1, 1, 1, ½, ½, 1, ½, ½</td><td>7.970e-11</td><td><code>titan-four.log</code></td></tr>
+</tbody></table>
+<p>These are the exact revisions printed by successful solve receipts, spanning the landed implementations and this node's final implementation. Each receipt ends <code>EXIT=0</code>, and its <code>FINAL.steps</code> equals the number of <code>ACCEPT</code> rows. Later documentation-only landing revisions have no separate solve measurement. The three-step run used the reserved H200 lane (submission receipt for job 1300942); the remaining rows used titan P100. The sequence is therefore neither a controlled same-device comparison nor a monotonic increase: the P100 path still using the geometry JVP took eight steps with serial local channels and six after batching.</p>
+<p>The line-search policy did not change: both drivers try lengths 1, ½, …, 1/4096 and accept the first valid fresh read with a finite residual strictly below the preceding residual. The eight-step baseline accepted five damped steps; the final ten-step run accepted four. More damping alone therefore does not explain the final increase. After two full steps, the final residual was 1.644203872e-7; the next three full steps only lowered it to 1.644200690e-7. The eight- and four-cut-lane receipts have identical accepted lengths and terminal residuals, so four-lane sizing did not add iterations.</p>
+<p>The supported diagnosis is a changed numerical Newton direction and fresh-read trajectory, followed by different line-search decisions, with reuse ruled out. The existing logs do not isolate a specific Jacobian defect: they do not retain old and new Jacobians at identical intermediate states on one GPU, or the fresh residual of every rejected trial. Changed derivative arithmetic, floating-point ordering and sensitivity of the clipped read cannot be separated from these receipts. A small linear-solve residual certifies the solve of the assembled matrix, not that matrix's derivative of the refreshed residual at the 1.6442e-7 plateau. The retained tangent checks at trial and converged states do not cover that intermediate state. A paired Jacobian-versus-fresh-residual directional check there is the next measurement needed to resolve the cause; it is not claimed by these logs.</p>
+<p>The history was read from <code>repair-solve.log</code> under <code>r-20261029T091928865113-bank-newton-converge</code>; <code>converge-titan.log</code> and <code>converge-booking.log</code> under <code>r-20261029T223038646111-bank-step-speed</code>; <code>committed-solve-titan.log</code> under <code>r-20261102T092806597431-bank-step-geometry</code>; and this run's named receipts. All directories are under <code>/home/ITER/mcintos/.config/reckon/crew/runs</code>. The extracted rows and source paths are preserved in this run's <code>convergence-history.json</code>.</p>
+</section>
+<section id="bank-step-booking-gates"><h2>Parity and limits</h2>
+<p>The all-cell, all-channel tangent parity test passes, as do the focused CPU speed and booking suites (three and five tests in separate fresh pytest processes). No JVP is traced through <code>current.book</code>. The <code>book()</code> primal keeps exactly the six field byte sequences observed at the same CPU base and head; the pinned test accepts the two measured CPU lowering variants. The scratch negative control replaces one assembled sensitivity call with 15 host calls and fails the assembly test (15 versus one), while the head passes it.</p>
+<p>At cell 42, ring 10, interval slot 1, the serial path classified a narrow root interval around vertical coordinate −0.3240259 with endpoint velocity about 21.198375; the vectorized path classified a duplicated upper-edge endpoint at 0.5420916 with zero velocity. Derivative-only sampling just inside the strip makes both paths choose the same interval. The <code>book()</code> primal path does not use that inward sample. The H200 job stayed pending 10 min 50 s while its node was reboot requested, then was cancelled by id. All timings above are titan P100 values.</p>
+<p>Durable receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking</code>: <code>titan-baseline.out</code>, <code>titan-four.log</code>, <code>titan-fresh-solve.log</code>, <code>titan-reuse-extended.log</code>, <code>titan-reuse-trace-fixed.log</code>, <code>suite-four-*.log</code>, <code>digest-compare.log</code>, <code>classification-slot.log</code>, <code>negative-control.log</code>, <code>legend-head.log</code> and <code>legend-reverted.log</code>. The corrected figure check passes; reversing the label correction in a scratch archive restores “shared boundary” and fails that same check after it reads the known baseline label.</p>
+</section>
+</main></body>
+</html>

@@ -1051,14 +1051,26 @@ def _normal_geometry_booking_tangent(
     return jax.lax.cond(jnp.any(active), evaluate, lambda _: zero, None)
 
 
+class NewtonFactor(NamedTuple):
+    """Balanced matrix and factor carried between contracting Newton steps."""
+
+    matrix: jax.Array
+    row: jax.Array
+    column: jax.Array
+    lu: jax.Array
+    pivots: jax.Array
+
+
 class NewtonStep(NamedTuple):
-    """One dense Newton update and its conditioning ledger."""
+    """One Newton update; the linear residual belongs to the factor's matrix."""
 
     update: tuple[jax.Array, jax.Array, jax.Array]
     condition_before: jax.Array
     condition_after: jax.Array
     linear_residual: jax.Array
     converged: jax.Array
+    factor: NewtonFactor
+    refactored: jax.Array
 
 
 def _local_booking_sensitivities(
@@ -1068,35 +1080,33 @@ def _local_booking_sensitivities(
     cells, samples = operands.sample_index.shape
     psi = nodal_jets(operands, moments)[operands.sample_index, 0]
     channels = samples + 8
+    indices = jnp.arange(channels)
     sample_basis = jnp.eye(samples, dtype=psi.dtype)
+    psi_direction = jnp.broadcast_to(
+        sample_basis[jnp.minimum(indices, samples - 1), None]
+        * (indices < samples)[:, None, None],
+        (channels, cells, samples),
+    )
     field_basis = jnp.eye(6, dtype=psi.dtype)
-
-    def evaluate(index):
-        psi_direction = jnp.broadcast_to(
-            sample_basis[jnp.minimum(index, samples - 1)] * (index < samples),
-            psi.shape,
-        )
-        field_index = jnp.clip(index - samples, 0, 5)
-        field_direction = jnp.broadcast_to(
-            field_basis[field_index] * ((index >= samples) & (index < samples + 6)),
-            (cells, 6),
-        )
-        tangent = current.book_tangent(
-            psi,
-            psi_direction,
-            support.reading,
-            field_direction,
-            (index == samples + 6).astype(psi.dtype),
-            (index == samples + 7).astype(psi.dtype),
-            operands.geometry,
-            profile,
-            density_gradient,
-            quadrature,
-            booked,
-        )
-        return jnp.stack(tuple(tangent), axis=-1)
-
-    return jnp.moveaxis(jax.vmap(evaluate)(jnp.arange(channels)), 0, -1)
+    field_direction = jnp.broadcast_to(
+        field_basis[jnp.clip(indices - samples, 0, 5), None]
+        * ((indices >= samples) & (indices < samples + 6))[:, None, None],
+        (channels, cells, 6),
+    )
+    return current.book_tangent_channels(
+        psi,
+        psi_direction,
+        support.reading,
+        field_direction,
+        (indices == samples + 6).astype(psi.dtype),
+        (indices == samples + 7).astype(psi.dtype),
+        operands.geometry,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+        jnp.concatenate((jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))),
+    )
 
 
 def step_jacobian(
@@ -1291,11 +1301,16 @@ def newton_step(
     *,
     fresh_geometry: bool = False,
     condition_diagnostics: bool | None = None,
+    factor_cache: NewtonFactor | None = None,
+    contraction_ratio: jax.Array | float | None = None,
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
     Local analytic booking sensitivities compose with the bank into a dense
     matrix. Physical moment scales and diagonal equilibration precede LU.
+    A carried factor skips assembly while the fresh residual contracts by at
+    least half. Its linear residual certifies the carried matrix solve; the
+    caller must check convergence against a fresh read of the new state.
     Exact condition estimates are automatic only for a single-cell diagnostic
     system; larger systems omit the two dense SVDs unless requested.
     """
@@ -1305,29 +1320,46 @@ def newton_step(
         condition_diagnostics = cells == 1
     boundaries = (cells, 2 * cells)
     right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
-    matrix = step_jacobian(
-        operands,
-        moments,
-        support,
-        profile,
-        density_gradient,
-        quadrature,
-        residual.booked,
-        fresh_geometry=fresh_geometry,
-    )
-    balanced, row, column = _equilibrate(matrix, moments, residual.booked)
     from jax.scipy import linalg
 
-    factor = linalg.lu_factor(balanced)
-    solution = column * linalg.lu_solve(factor, right / row)
-    linear_residual = jnp.linalg.norm(matrix @ solution - right) / jnp.linalg.norm(
-        right
+    def rebuild(_):
+        matrix = step_jacobian(
+            operands,
+            moments,
+            support,
+            profile,
+            density_gradient,
+            quadrature,
+            residual.booked,
+            fresh_geometry=fresh_geometry,
+        )
+        balanced, row, column = _equilibrate(matrix, moments, residual.booked)
+        lu, pivots = linalg.lu_factor(balanced)
+        return NewtonFactor(matrix, row, column, lu, pivots)
+
+    if factor_cache is None:
+        factor = rebuild(None)
+        refactored = jnp.asarray(True)
+    else:
+        if contraction_ratio is None:
+            raise ValueError(
+                "factor reuse requires a measured residual contraction ratio"
+            )
+        reuse = jnp.isfinite(contraction_ratio) & (contraction_ratio <= 0.5)
+        factor = jax.lax.cond(reuse, lambda _: factor_cache, rebuild, None)
+        refactored = ~reuse
+    solution = factor.column * linalg.lu_solve(
+        (factor.lu, factor.pivots), right / factor.row
     )
+    linear_residual = jnp.linalg.norm(
+        factor.matrix @ solution - right
+    ) / jnp.linalg.norm(right)
     if condition_diagnostics:
-        condition_before = jnp.linalg.cond(matrix)
+        condition_before = jnp.linalg.cond(factor.matrix)
+        balanced = factor.matrix * factor.column[None, :] / factor.row[:, None]
         condition_after = jnp.linalg.cond(balanced)
     else:
-        condition_before = jnp.asarray(jnp.nan, dtype=matrix.dtype)
+        condition_before = jnp.asarray(jnp.nan, dtype=factor.matrix.dtype)
         condition_after = condition_before
     return NewtonStep(
         tuple(jnp.split(solution, boundaries)),
@@ -1335,6 +1367,8 @@ def newton_step(
         condition_after,
         linear_residual,
         linear_residual <= 1e-8,
+        factor,
+        refactored,
     )
 
 

@@ -15,6 +15,9 @@ import jax.numpy as jnp
 from nova.equilibrium import topology
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
+    _UNIT_NODE,
+    _UNIT_WEIGHT,
+    _quadrature_from_arrays,
     clipped_support_current_moments,
     fixed_polygon_current_moment_tangent,
     moving_polygon_current_moment_tangent,
@@ -58,7 +61,26 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
-def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments):
+def _inward_interval_points(x, left, right):
+    """Sample a cut interval from its strip interior at an event endpoint."""
+    distance = jnp.minimum(1e-12, 0.25 * (right - left))[:, None]
+    slot = jnp.arange(x.shape[1])[None]
+    return jnp.where(
+        slot == 0, x + distance, jnp.where(slot == x.shape[1] - 1, x - distance, x)
+    )
+
+
+def _conic_rings(
+    vertices,
+    count,
+    centre,
+    pitch,
+    coefficient,
+    selected,
+    segments,
+    *,
+    inward_endpoints=False,
+):
     """Trace the same cosine-spaced strips as support.geometry.read_polygons."""
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
@@ -67,7 +89,10 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
     left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
-    bottom, top, _ = topology._positive_vertical_intervals(local, count, coefficient, x)
+    interval_x = _inward_interval_points(x, left, right) if inward_endpoints else x
+    bottom, top, _ = topology._positive_vertical_intervals(
+        local, count, coefficient, interval_x
+    )
     x = jnp.broadcast_to(x[..., None], bottom.shape)
     lower = jnp.stack((x, bottom), axis=-1)
     upper = jnp.stack((x[:, ::-1], top[:, ::-1]), axis=-1)
@@ -82,7 +107,16 @@ def _conic_rings(vertices, count, centre, pitch, coefficient, selected, segments
 
 
 def _conic_ring_tangents(
-    vertices, count, centre, pitch, coefficient, tangent, selected, segments
+    vertices,
+    count,
+    centre,
+    pitch,
+    coefficient,
+    tangent,
+    selected,
+    segments,
+    *,
+    inward_endpoints=False,
 ):
     """Move each sampled conic ring vertex by the implicit root rule."""
     local = (vertices - centre) / pitch
@@ -96,13 +130,20 @@ def _conic_ring_tangents(
     left_speed, right_speed = break_speed[:-1], break_speed[1:]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
+    interval_x = _inward_interval_points(x, left, right) if inward_endpoints else x
     x_speed = left_speed[:, None] + (right_speed - left_speed)[:, None] * parameter
-    bottom, top, _ = topology._positive_vertical_intervals(local, count, coefficient, x)
-    polygon_lower, polygon_upper = topology._vertical_polygon_interval(local, count, x)
+    bottom, top, _ = topology._positive_vertical_intervals(
+        local, count, coefficient, interval_x
+    )
+    polygon_lower, polygon_upper = topology._vertical_polygon_interval(
+        local, count, interval_x
+    )
     slot = jnp.arange(local.shape[0])
     following = jnp.where(slot + 1 < count, slot + 1, 0)
     edge = local[following] - local
-    fraction = (x[..., None] - local[:, 0]) / jnp.where(edge[:, 0] != 0, edge[:, 0], 1)
+    fraction = (interval_x[..., None] - local[:, 0]) / jnp.where(
+        edge[:, 0] != 0, edge[:, 0], 1
+    )
     live_edge = (
         (slot < count)
         & (edge[:, 0] != 0)
@@ -110,14 +151,35 @@ def _conic_ring_tangents(
         & (fraction <= 1 + 1e-12)
     )
     edge_y = local[:, 1] + fraction * edge[:, 1]
-    lower_edge = jnp.argmin(jnp.where(live_edge, edge_y, jnp.inf), axis=-1)
-    upper_edge = jnp.argmax(jnp.where(live_edge, edge_y, -jnp.inf), axis=-1)
     edge_slope = edge[:, 1] / jnp.where(edge[:, 0] != 0, edge[:, 0], 1)
+    lower_y = jnp.min(jnp.where(live_edge, edge_y, jnp.inf), axis=-1)
+    upper_y = jnp.max(jnp.where(live_edge, edge_y, -jnp.inf), axis=-1)
+    probe = interval_x + 1e-9 * jnp.sign(x_speed)
+    probe_fraction = (probe[..., None] - local[:, 0]) / jnp.where(
+        edge[:, 0] != 0, edge[:, 0], 1
+    )
+    forward_edge = (
+        (slot < count)
+        & (edge[:, 0] != 0)
+        & (probe_fraction >= -1e-12)
+        & (probe_fraction <= 1 + 1e-12)
+    )
+
+    def owning_edge(bound):
+        near = live_edge & (jnp.abs(edge_y - bound[..., None]) < 1e-8)
+        moving = near & forward_edge
+        candidates = jnp.where(jnp.any(moving, axis=-1, keepdims=True), moving, near)
+        return jnp.argmin(jnp.where(candidates, jnp.abs(edge_slope), jnp.inf), axis=-1)
+
+    # At a polygon vertex, use the edge entered as the slice moves. Two edges
+    # share the same height there, so a raw argmin/argmax can flip on roundoff.
+    lower_edge = owning_edge(lower_y)
+    upper_edge = owning_edge(upper_y)
     lower_speed = edge_slope[lower_edge] * x_speed
     upper_speed = edge_slope[upper_edge] * x_speed
 
     def vertical_speed(y):
-        x_cell = x[..., None]
+        x_cell = interval_x[..., None]
         dx_cell = x_speed[..., None]
         field_speed = (
             tangent[0]
@@ -136,8 +198,10 @@ def _conic_ring_tangents(
         root_speed = -(field_speed + radial_gradient * dx_cell) / jnp.where(
             vertical_gradient != 0, vertical_gradient, 1
         )
-        on_lower = jnp.abs(y - polygon_lower[..., None]) < 1e-10
-        on_upper = jnp.abs(y - polygon_upper[..., None]) < 1e-10
+        # A conic root at a polygon vertex belongs to the polygon edge. The
+        # two interval evaluations can differ at this degenerate endpoint.
+        on_lower = jnp.abs(y - polygon_lower[..., None]) < 1e-8
+        on_upper = jnp.abs(y - polygon_upper[..., None]) < 1e-8
         return jnp.where(
             on_lower,
             lower_speed[..., None],
@@ -480,6 +544,7 @@ def book_tangent(
                 signed[index],
                 read.fragment_selected[index],
                 quadrature.segments,
+                inward_endpoints=True,
             )
             interior = integrate(index, rings, counts)
             ring_velocity = _conic_ring_tangents(
@@ -491,6 +556,7 @@ def book_tangent(
                 signed_tangent[index],
                 read.fragment_selected[index],
                 quadrature.segments,
+                inward_endpoints=True,
             )
             boundary = jax.vmap(
                 lambda ring, velocity, number: moving_polygon_current_moment_tangent(
@@ -564,3 +630,217 @@ def book_tangent(
             for raw, value in zip(raw_tangent, booked[:3], strict=True)
         )
     )
+
+
+def book_tangent_channels(
+    psi,
+    psi_tangent,
+    read,
+    field_tangent,
+    axis_tangent,
+    boundary_tangent,
+    geometry,
+    profile,
+    density_gradient,
+    quadrature,
+    booked,
+    boundary_channels,
+):
+    """Evaluate every local booking channel over shared cell polygons."""
+    cells, samples = psi.shape
+    channels = psi_tangent.shape[0]
+    if psi_tangent.shape != (channels, cells, samples):
+        raise ValueError("flux tangents must carry a channel and every cell")
+    coefficients = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi)
+    coefficient_rate = jnp.einsum("nij,cnj->cni", geometry.fit_inverse, psi_tangent)
+    span = read.boundary_flux - read.axis_flux
+    span_rate = boundary_tangent - axis_tangent
+    normalized = coefficients.at[:, 0].add(-read.axis_flux) / span
+    normalized_rate = coefficient_rate.at[:, :, 0].add(-axis_tangent[:, None]) / span
+    normalized_rate -= normalized[None] * (span_rate / span)[:, None, None]
+    signed = quadrature.sigma * read.field_coefficients
+    signed = signed.at[:, 0].add(-quadrature.sigma * read.boundary_flux)
+    signed_rate = quadrature.sigma * field_tangent
+    signed_rate = signed_rate.at[:, :, 0].add(
+        -quadrature.sigma * boundary_tangent[:, None]
+    )
+
+    def interior(index, rings, counts):
+        centre = geometry.centre[index]
+        pitch = geometry.pitch[index]
+        points, weights = _quadrature_from_arrays(
+            rings,
+            counts,
+            jnp.broadcast_to(centre, (len(rings), 2)),
+            counts >= 3,
+            signed=True,
+        )
+        local = (points - centre) / pitch
+        radial, vertical = local[..., 0], local[..., 1]
+        basis = jnp.stack(
+            (
+                jnp.ones_like(radial),
+                radial,
+                vertical,
+                radial**2,
+                radial * vertical,
+                vertical**2,
+            ),
+            axis=-1,
+        )
+        flux = jnp.einsum("rpk,k->rp", basis, normalized[index])
+        weight = weights * density_gradient(points[..., 0], flux)
+        relative = points - centre
+        moment_basis = jnp.stack(
+            (jnp.ones_like(weight), relative[..., 0], relative[..., 1]), axis=-1
+        )
+        integral_basis = jnp.sum(
+            weight[..., None, None] * basis[..., :, None] * moment_basis[..., None, :],
+            axis=(0, 1),
+        )
+        return normalized_rate[:, index] @ integral_basis
+
+    def whole_cell(index):
+        return interior(
+            index,
+            geometry.vertices[index][None],
+            geometry.vertex_count[index][None],
+        )
+
+    def cut_cell(index):
+        centre = geometry.centre[index]
+        vertices = geometry.vertices[index]
+        count = geometry.vertex_count[index]
+
+        def conic(_):
+            rings, counts, valid = _conic_rings(
+                vertices,
+                count,
+                centre,
+                geometry.pitch[index],
+                signed[index],
+                read.fragment_selected[index],
+                quadrature.segments,
+                inward_endpoints=True,
+            )
+            fixed = interior(index, rings, counts)
+
+            velocity = jax.vmap(
+                lambda direction: _conic_ring_tangents(
+                    vertices,
+                    count,
+                    centre,
+                    geometry.pitch[index],
+                    signed[index],
+                    direction,
+                    read.fragment_selected[index],
+                    quadrature.segments,
+                    inward_endpoints=True,
+                )
+            )(signed_rate[boundary_channels, index])
+            slot = jnp.arange(rings.shape[1])
+            following = jnp.where(slot[None] + 1 < counts[:, None], slot + 1, 0)
+            next_ring = jnp.take_along_axis(
+                rings, jnp.broadcast_to(following[..., None], rings.shape), axis=1
+            )
+            edge = next_ring - rings
+            node = jnp.asarray(_UNIT_NODE, dtype=psi.dtype)
+            weight = jnp.asarray(_UNIT_WEIGHT, dtype=psi.dtype)
+            point = rings[:, :, None] + node[None, None, :, None] * edge[:, :, None]
+            local = (point - centre) / geometry.pitch[index]
+            radial, vertical = local[..., 0], local[..., 1]
+            basis = jnp.stack(
+                (
+                    jnp.ones_like(radial),
+                    radial,
+                    vertical,
+                    radial**2,
+                    radial * vertical,
+                    vertical**2,
+                ),
+                axis=-1,
+            )
+            flux = jnp.einsum("rvqk,k->rvq", basis, normalized[index])
+            density = profile.current_density(point[..., 0], flux)
+            next_velocity = jnp.take_along_axis(
+                velocity,
+                jnp.broadcast_to(following[None, :, :, None], velocity.shape),
+                axis=2,
+            )
+            speed = (
+                velocity[:, :, :, None]
+                + node[None, None, None, :, None]
+                * (next_velocity - velocity)[:, :, :, None]
+            )
+            cross = (
+                speed[..., 0] * edge[None, :, :, None, 1]
+                - speed[..., 1] * edge[None, :, :, None, 0]
+            )
+            weighted = jnp.where(
+                slot[None, :, None] < counts[:, None, None],
+                weight[None, None] * density * cross,
+                0.0,
+            )
+            relative = point - centre
+            moving = jnp.stack(
+                (
+                    jnp.sum(weighted, axis=(1, 2, 3)),
+                    jnp.sum(weighted * relative[None, ..., 0], axis=(1, 2, 3)),
+                    jnp.sum(weighted * relative[None, ..., 1], axis=(1, 2, 3)),
+                ),
+                axis=-1,
+            )
+
+            moving = (
+                jnp.zeros((channels, 3), dtype=psi.dtype)
+                .at[boundary_channels]
+                .set(moving)
+            )
+            return jnp.where(valid, fixed + moving, jnp.nan)
+
+        def normal(_):
+            rings, counts = _normal_rings(
+                vertices,
+                count,
+                centre,
+                read.saddle_form,
+                read.fragment_selected[index],
+                read.edge_interval[index],
+                quadrature.segments,
+            )
+            return interior(index, rings, counts)
+
+        return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
+
+    full = read.membership >= 1 - 1e-14
+    cut = (read.membership > 0) & ~full
+    whole = jax.vmap(whole_cell)(jnp.arange(cells))
+    whole = jnp.where(full[:, None, None], whole, 0.0)
+    batch_width = min(4, cells)
+    cut_count = jnp.sum(cut, dtype=jnp.int32)
+    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
+    cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
+
+    def add_batch(batch, carried):
+        start = batch * batch_width
+        indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
+        active = start + jnp.arange(batch_width) < cut_count
+        response = jax.vmap(cut_cell)(indices)
+        return carried.at[indices].add(jnp.where(active[:, None, None], response, 0.0))
+
+    cuts = jax.lax.fori_loop(
+        0,
+        (cut_count + batch_width - 1) // batch_width,
+        add_batch,
+        jnp.zeros_like(whole),
+    )
+    raw = whole + cuts
+    total_rate = jnp.sum(raw[:, :, 0], axis=0)
+    scale_rate = (
+        jnp.zeros_like(total_rate)
+        if quadrature.target_current is None
+        else -total_rate / booked.raw_current
+    )
+    moment = jnp.stack(tuple(booked[:3]), axis=-1)
+    response = booked.normalization * raw + scale_rate[None, :, None] * moment[:, None]
+    return jnp.moveaxis(jnp.where(booked.valid, response, jnp.nan), 1, -1)

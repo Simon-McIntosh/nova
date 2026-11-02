@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_bank_step_launch_fusion.py:18-20 fails if the existing current alias stops referring to clip_quadrature's scalar routine, but survives restoration of the duplicate body inside book_tangent_channels.",
+    "tests/test_bank_step_launch_fusion.py:23 fails if support_read no longer calls the shared batched routine; :24-25 fail if quadrature constants are introduced directly into that support_read function, but neither reads the formerly duplicated current function.",
+    "tests/test_bank_step_launch_fusion.py:43-45 fail if the two-ring analytic current or first moments deviate from fixed expected values; :56-62 fail if the doubled velocity channel ceases to double those independent expected moments.",
+    "tests/test_bank_step_launch_fusion.py:85 fails if the mocked one-cell Newton update differs from fixed -1 entries or if a host float conversion of booked current aborts JIT tracing, as shown by fused-final-negative-control.log.",
+    "No added assertion compares an output to the same supplied input; the weak identity assertion instead observes the wrong owner for the deduplication regression."
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/current.py:741",
+    "nova/equilibrium/support_read.py:1019",
+    "nova/equilibrium/support_read.py:1093",
+    "nova/equilibrium/support_read.py:1320",
+    "scripts/prototypes/bank_step_booking/measure.py:52"
+  ],
+  "completed_at": "2026-11-02T18:22:06Z",
+  "dispatched_at": "2026-11-02T18:13:08Z",
+  "evidence": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/final-suite-head-summary.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/final-suite-base-summary.log",
+    "figure_render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/stage-wall-final.png",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/fused-final-negative-control.log",
+    "p100_base": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/baseline-p100.log",
+    "p100_final": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T170222952240-bank-step-launch-fusion/fused-final-p100.log"
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/current.py",
+      "id": "f6e32277486",
+      "line": 781,
+      "severity": "blocking",
+      "text": "The retained 64-cell cut batch brings the P100 whole step to 3,029 launches and 957.50 ms versus 14,427 launches and 635.24 ms at base; the live plan's 100-launch target is missed and wall time regresses 51%, with no H200 result to establish the 0.5 ms limit."
+    },
+    {
+      "file": "tests/test_bank_step_launch_fusion.py",
+      "id": "fe20d973a4f",
+      "line": 22,
+      "severity": "blocking",
+      "text": "The shared-integral guard inspects support_read._normal_geometry_booking_tangent, but the duplicated boundary body was removed from current.book_tangent_channels; restoring that body while leaving support_read unchanged keeps every added assertion green, so the deduplication has no regression test."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read each of the 16 commits from 8b9b8321 to 242c6809: the diff shares the boundary integral, vectors geometry channels, batches cut sensitivities, and adds measurements, a figure, a fragment and three tests.",
+    "done_when": "The live plan \u00a73 requires at most 0.5 ms and 100 launches on H200; fused-final-p100.log:30-50 records 957.50 ms, 3,029 launches and a 4.160e-11 fresh residual on P100, while H200 was unavailable.",
+    "goal": "brief.txt:1-8 asks to consolidate the moving boundary integral, profile each warm stage, and fuse the bank step; current.py:741 and support_read.py:1019 share the owner, but bank-step-launch-fusion.html:15 reports 3,029 launches and a 51% P100 wall regression.",
+    "manifest": "The source manifest.md records 16 commits, final P100 metrics, six matching CPU book-field digests, complete paired suite arms with zero failures, and a red scratch mutation log; its status remains in-progress.",
+    "write_paths": "The source manifest.md:3 grants the three product modules, one test, the prototype directory, evidence fragment and figure directory; all 16 paths in git diff 8b9b8321..242c6809 lie within those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_launch_fusion.py:43-62 fixes independent analytic moment values and :85 fails the recorded host-materialization mutation, but :18-25 does not detect restoring the removed duplicate in current.py:741.",
+    "evidence": "fused-final-p100.log:3-50 has warm stage and fresh-solve receipts and final-suite-base-summary.log/final-suite-head-summary.log record complete zero-failure arms, but no H200 latency or 100-launch pass is recorded.",
+    "fit": "current.py:786-805 uses the surrounding JAX scan and vmap idiom, and plot.py:10 imports the existing text checker, although the static default width of 64 at current.py:46 causes the measured wall regression.",
+    "goal_fidelity": "current.py:781-805 reduces cut integration launches, but bank-step-launch-fusion.html:15-19 reports 3,029 whole-step launches and a 957.50 ms final P100 wall against 14,427 and 635.24 ms at base.",
+    "reuse": "clip_quadrature.py:252-324 already owns the moving polygon integral and the new batched wrapper extends it; plot.py:10 imports the existing records and text checker from bank_step_booking/plot.py instead of copying them.",
+    "scope_discipline": "The 16 changed paths enumerated by git diff 8b9b8321..242c6809 all fall under the source manifest.md:3 write grants and implement the node's integration, measurement or evidence tasks."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt:1-8 asks to consolidate the moving boundary integral, profile each warm stage, and fuse the bank step; current.py:741 and support_read.py:1019 share the owner, but bank-step-launch-fusion.html:15 reports 3,029 launches and a 51% P100 wall regression.\nVERDICT done_when: The live plan \u00a73 requires at most 0.5 ms and 100 launches on H200; fused-final-p100.log:30-50 records 957.50 ms, 3,029 launches and a 4.160e-11 fresh residual on P100, while H200 was unavailable.\nVERDICT write_paths: The source manifest.md:3 grants the three product modules, one test, the prototype directory, evidence fragment and figure directory; all 16 paths in git diff 8b9b8321..242c6809 lie within those grants.\nVERDICT manifest: The source manifest.md records 16 commits, final P100 metrics, six matching CPU book-field digests, complete paired suite arms with zero failures, and a red scratch mutation log; its status remains in-progress.\nVERDICT diff: Read each of the 16 commits from 8b9b8321 to 242c6809: the diff shares the boundary integral, vectors geometry channels, batches cut sensitivities, and adds measurements, a figure, a fragment and three tests.\nCALL_SITES: nova/equilibrium/current.py:741, nova/equilibrium/support_read.py:1019, nova/equilibrium/support_read.py:1093, nova/equilibrium/support_read.py:1320, scripts/prototypes/bank_step_booking/measure.py:52\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: current.py:781-805 reduces cut integration launches, but bank-step-launch-fusion.html:15-19 reports 3,029 whole-step launches and a 957.50 ms final P100 wall against 14,427 and 635.24 ms at base.\nSCORE evidence: 15\nJUSTIFICATION evidence: fused-final-p100.log:3-50 has warm stage and fresh-solve receipts and final-suite-base-summary.log/final-suite-head-summary.log record complete zero-failure arms, but no H200 latency or 100-launch pass is recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 16 changed paths enumerated by git diff 8b9b8321..242c6809 all fall under the source manifest.md:3 write grants and implement the node's integration, measurement or evidence tasks.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_bank_step_launch_fusion.py:43-62 fixes independent analytic moment values and :85 fails the recorded host-materialization mutation, but :18-25 does not detect restoring the removed duplicate in current.py:741.\nSCORE fit: 15\nJUSTIFICATION fit: current.py:786-805 uses the surrounding JAX scan and vmap idiom, and plot.py:10 imports the existing text checker, although the static default width of 64 at current.py:46 causes the measured wall regression.\nSCORE reuse: 20\nJUSTIFICATION reuse: clip_quadrature.py:252-324 already owns the moving polygon integral and the new batched wrapper extends it; plot.py:10 imports the existing records and text checker from bank_step_booking/plot.py instead of copying them.\nFINDING nova/equilibrium/current.py:781 blocking: The retained 64-cell cut batch brings the P100 whole step to 3,029 launches and 957.50 ms versus 14,427 launches and 635.24 ms at base; the live plan's 100-launch target is missed and wall time regresses 51%, with no H200 result to establish the 0.5 ms limit.\nFINDING tests/test_bank_step_launch_fusion.py:22 blocking: The shared-integral guard inspects support_read._normal_geometry_booking_tangent, but the duplicated boundary body was removed from current.book_tangent_channels; restoring that body while leaving support_read unchanged keeps every added assertion green, so the deduplication has no regression test.",
+  "review_run_id": "r-20261102T181153785217-review-of-bank-step-launch-fusion-242c6809e51d",
+  "reviewed_base_sha": "8b9b8321d1bd77ef67613df12374055678d58529",
+  "reviewed_head_sha": "242c6809e51d6596418796451e08f867ad6ccda3",
+  "reviewed_run_id": "r-20261102T170222952240-bank-step-launch-fusion",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T18:24:33.345254+00:00",
+  "total": 90
+}

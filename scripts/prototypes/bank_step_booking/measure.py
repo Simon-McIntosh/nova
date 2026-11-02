@@ -28,7 +28,7 @@ def emit(name, **values):
     print(name, json.dumps(values, sort_keys=True, default=float), flush=True)
 
 
-def run(arm, trace):
+def run(arm, trace, max_steps):
     bank, cache, roots, convention, policy, profile, quadrature, moments, analytic = (
         machine("diverted")
     )
@@ -86,7 +86,7 @@ def run(arm, trace):
     previous = None
     walls = []
     refactors = 0
-    for index in range(12):
+    for index in range(max_steps):
         support = read(moments)
         current = residual(moments, support)
         before = magnitude(current)
@@ -170,6 +170,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--arm", choices=("fresh", "reuse"), required=True)
     parser.add_argument("--trace", type=Path)
+    parser.add_argument("--max-steps", type=int, default=30)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     emit(
@@ -184,4 +185,4 @@ if __name__ == "__main__":
         backend=jax.default_backend(),
     )
     assert jax.config.jax_enable_x64
-    run(args.arm, args.trace)
+    run(args.arm, args.trace, args.max_steps)

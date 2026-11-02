@@ -21,8 +21,8 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="142">
-<meta name="plan-modified" content="2026-10-25">
+<meta name="plan-version" content="143">
+<meta name="plan-modified" content="2026-11-02">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
   <title>Separatrix Spline Extraction | nova</title>
@@ -634,6 +634,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T123744574236-sse-branch-assembler" data-who="boundary-arms" data-when="2026-08-26T12:58:21Z">
     <div class="r-comment-body"><p>The production spline graph now emits one topologically selected closed branch separately from deterministic saddle-ended open legs with fixed capacity, exact-zero padding, and fail-closed overflow.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s3-saddle-cell-repair" data-who="reckon-review" data-when="2026-11-02T19:40:00Z">
+    <div class="r-comment-body"><p>The saddle cell is repaired in <code>391458c7a</code>. Segment nodes now follow their endpoints, and an edge carrying two crossings ranks them along the edge. Each arm reaches the X-point along its Hessian asymptote. The arms now sit within 0.06–0.17 mm of the spline level set, against 0.9–8.4 mm before, and the lobe no longer overshoots the saddle. The MAST centroid panels were redrawn in <code>b34e2a4da</code>. <a href="/nova/evidence/archive/separatrix-spline-extraction-landed.html#s3-saddle-cell-repair">evidence</a></p></div>
 </div>
 </section>
 </main>

@@ -13,13 +13,10 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import jax
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import numpy as np
 import nova
 from nova.biot import polygonanalytic
+
+import certificate_panel
 
 assert jax.config.jax_enable_x64 is True
 
@@ -73,29 +70,9 @@ def main():
     if banked is not None:
         raise RuntimeError(f"banked part receipt served: receipt={banked}")
     solver = part["solver"]
-    data = part["render_data"]
-    args.panel.parent.mkdir(parents=True, exist_ok=True)
-    figure = certificate._plot(
-        np.asarray(data["coordinates_rz_m"]),
-        np.asarray(data["terminal_flux_wb"]),
-        np.asarray(data["analytic_flux_wb"]),
-        np.asarray(data["derivative_coordinates_rz_m"]),
-        {
-            name: np.asarray(data["error_fields"][name])
-            for name in certificate.NORM_FIELDS
-        },
-        np.asarray(data["boundary_rz_m"]),
-        np.asarray(data["wall_units_rz_m"][0]),
-        data["terminal_topology"],
-        data["analytic_topology"],
-        args.panel,
-        (
-            f"{args.case} · {certificate._slug(args.requested_cells)} · "
-            f"{solver['qualification']}"
-        ),
+    checked = certificate_panel.draw(
+        part, args.panel, certificate_panel.row_title(part)
     )
-    plt.close(figure)
-    args.panel.with_suffix(".png").unlink(missing_ok=True)
     row = {
         "case": part["case"],
         "requested_cells": part["requested_cells"],
@@ -117,6 +94,7 @@ def main():
         "render_source": source,
         "banked_receipt": banked,
         "panel": str(args.panel),
+        "panel_labels_checked": checked,
     }
     args.output.write_text(json.dumps(row, indent=2, default=str) + "\n")
     print("CERTIFICATE_ROW " + json.dumps(row, default=str), flush=True)

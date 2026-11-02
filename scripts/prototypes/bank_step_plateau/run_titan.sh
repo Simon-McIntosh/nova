@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 export TMPDIR=/tmp JAX_PLATFORMS=gpu
-repo=$(realpath "$(dirname "$0")/../../..")
+repo=${BANK_PLATEAU_WORKTREE:?}
 run=${BANK_PLATEAU_RUN_DIR:?}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 script=$repo/scripts/prototypes/bank_step_plateau/measure.py

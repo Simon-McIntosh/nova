@@ -10,19 +10,62 @@ import inspect
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.equilibrium import clip_quadrature, current, support_read
 
 
-def test_geometry_tangent_uses_shared_boundary_integral():
+def test_geometry_tangent_uses_shared_boundary_integral(monkeypatch):
+    from tests.test_support_read import UnitDensity, _case
+
     assert (
         current.moving_polygon_current_moment_tangent
         is clip_quadrature.moving_polygon_current_moment_tangent
     )
+    assert (
+        current.moving_polygon_current_moment_tangents
+        is clip_quadrature.moving_polygon_current_moment_tangents
+    )
+
+    operands, cache, roots, pitch, step, _, _ = _case("diverted")
+    support, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    cells, samples = operands.sample_index.shape
+    moments = tuple(jnp.zeros(cells) for _ in range(3))
+    psi = support_read.nodal_jets(operands, moments)[operands.sample_index, 0]
+    quadrature = current.Quadrature(sigma=1.0, segments=8)
+
+    def shared_boundary_integral(*_args):
+        raise RuntimeError("batched boundary integral reached")
+
+    monkeypatch.setattr(
+        current, "moving_polygon_current_moment_tangents", shared_boundary_integral
+    )
+    with pytest.raises(RuntimeError, match="batched boundary integral reached"):
+        jax.eval_shape(
+            lambda: current.book_tangent_channels(
+                psi,
+                jnp.zeros((1, cells, samples)),
+                support.reading,
+                jnp.zeros((1, cells, 6)),
+                jnp.zeros(1),
+                jnp.ones(1),
+                operands.geometry,
+                UnitDensity(),
+                lambda radius, _flux: jnp.ones_like(radius),
+                quadrature,
+                booked,
+                jnp.asarray([0]),
+            )
+        )
+
     source = inspect.getsource(support_read._normal_geometry_booking_tangent)
     assert "clip_quadrature.moving_polygon_current_moment_tangents(" in source
     assert "_UNIT_NODE" not in source
     assert "_UNIT_WEIGHT" not in source
+    current_source = inspect.getsource(current.book_tangent_channels)
+    assert "moving_polygon_current_moment_tangents(" in current_source
+    assert "_UNIT_NODE" not in current_source
+    assert "_UNIT_WEIGHT" not in current_source
 
 
 def test_batched_boundary_integral_matches_single_ring_rule():

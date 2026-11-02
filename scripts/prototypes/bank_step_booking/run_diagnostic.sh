@@ -13,6 +13,8 @@ trap finish EXIT
 printf 'REVISION=%s TREE=%s CWD=%s\n' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$PWD"
 printf 'COMMAND=%s\n' '/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/bank_step_booking/diagnose.py'
 git -C "$repo" archive HEAD nova tests | tar -x -C "$scratch"
-patch --directory "$scratch" --strip 1 --input "$run/failed-vectorized-tangent.patch"
+if ! rg -q '^def book_tangent_channels\(' "$scratch/nova/equilibrium/current.py"; then
+    patch --directory "$scratch" --strip 1 --input "$run/failed-vectorized-tangent.patch"
+fi
 export PYTHONPATH="$scratch"
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$repo/scripts/prototypes/bank_step_booking/diagnose.py"

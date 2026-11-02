@@ -111,9 +111,30 @@ def _conic_ring_tangents(
         & (fraction <= 1 + 1e-12)
     )
     edge_y = local[:, 1] + fraction * edge[:, 1]
-    lower_edge = jnp.argmin(jnp.where(live_edge, edge_y, jnp.inf), axis=-1)
-    upper_edge = jnp.argmax(jnp.where(live_edge, edge_y, -jnp.inf), axis=-1)
     edge_slope = edge[:, 1] / jnp.where(edge[:, 0] != 0, edge[:, 0], 1)
+    lower_y = jnp.min(jnp.where(live_edge, edge_y, jnp.inf), axis=-1)
+    upper_y = jnp.max(jnp.where(live_edge, edge_y, -jnp.inf), axis=-1)
+    probe = x + 1e-9 * jnp.sign(x_speed)
+    probe_fraction = (probe[..., None] - local[:, 0]) / jnp.where(
+        edge[:, 0] != 0, edge[:, 0], 1
+    )
+    forward_edge = (
+        (slot < count)
+        & (edge[:, 0] != 0)
+        & (probe_fraction >= -1e-12)
+        & (probe_fraction <= 1 + 1e-12)
+    )
+
+    def owning_edge(bound):
+        near = live_edge & (jnp.abs(edge_y - bound[..., None]) < 1e-8)
+        moving = near & forward_edge
+        candidates = jnp.where(jnp.any(moving, axis=-1, keepdims=True), moving, near)
+        return jnp.argmin(jnp.where(candidates, jnp.abs(edge_slope), jnp.inf), axis=-1)
+
+    # At a polygon vertex, use the edge entered as the slice moves. Two edges
+    # share the same height there, so a raw argmin/argmax can flip on roundoff.
+    lower_edge = owning_edge(lower_y)
+    upper_edge = owning_edge(upper_y)
     lower_speed = edge_slope[lower_edge] * x_speed
     upper_speed = edge_slope[upper_edge] * x_speed
 

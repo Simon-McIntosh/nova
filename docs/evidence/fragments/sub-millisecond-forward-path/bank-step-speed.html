@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step speed | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-speed-landing">Bank step speed</h1>
+<p id="bank-step-speed-summary">The published diverted 550-cell bank measured 368.64 ms per warm step on the H200 with exact condition diagnostics. The repaired default omits those two dense condition estimates for multicell systems, while single-cell diagnostic systems and explicit requests retain them. A test that makes the condition estimator raise proves the multicell and explicit fast branches skip it; the base version fails that test. The final fast step could not be timed on an H200: the one-card submission remained pending on Resources for more than ten minutes. The required titan fallback measures 5,740.83 ms per warm step and 26,062 kernel launches on a P100. Those are P100 numbers, not an H200 latency claim. The candidate algebraic geometry derivative failed its directional comparison and was rolled back, preserving the converged equation.</p>
+<figure id="bank-step-speed-stage-wall"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-speed/stage-wall.svg" alt="Isolated bank-step stage walls for the baseline H200 run and the fast-path P100 fallback on a logarithmic millisecond scale"><figcaption>Warm isolated stages on the published diverted bank: grey is the diagnostic H200 baseline, green is the fast-path titan P100 fallback. The different devices make these a stage attribution, not a speedup comparison. The full Jacobian contains the booking tangent, so their bars are not additive. The dotted line is the H200 0.5 ms step target. The read is context outside that target. The SVG was rendered to PNG and visually checked.</figcaption></figure>
+<table id="bank-step-speed-baseline"><thead><tr><th>Baseline stage</th><th>Warm wall [ms]</th><th>Device time</th><th>Launches</th></tr></thead><tbody>
+<tr><td>Read, outside step</td><td>35.87</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Flux and booking residual</td><td>5.08</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Local booking tangent</td><td>120.47</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Geometry tangent, one direction</td><td>2.18</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Full Jacobian</td><td>143.03</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Equilibration</td><td>0.78</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>LU factor</td><td>5.73</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>LU solve</td><td>1.00</td><td>unresolved</td><td>unresolved</td></tr>
+<tr><td>Whole step</td><td>368.64</td><td>unresolved</td><td>unresolved</td></tr>
+</tbody></table>
+<p id="bank-step-speed-trace">The first H200 profiler trace reached its 5,000,000-event cap while recording compilation and could not establish GPU time or launch count. The repaired profiler warms every stage before tracing. Its titan trace has 174,273 events, including 113,135 GPU events and ten stage annotations; that positive control establishes the parser saw the device. Stage labels live in each event's <code>args.long_name</code>. The table combines the median of three synchronised warm calls with device durations and kernel counts from one traced call; profiler overhead makes the traced whole-step wall 5,974.97 ms versus the untraced median 5,740.83 ms. Device duration sums GPU events, including copies; launches count kernels and exclude copies.</p>
+<table id="bank-step-speed-fast-stage"><thead><tr><th>Fast-path stage, titan P100</th><th>Warm wall [ms]</th><th>Device duration [ms]</th><th>Kernel launches</th></tr></thead><tbody>
+<tr><td>Read, outside step</td><td>1,651.72</td><td>1,720.58</td><td>20,379</td></tr>
+<tr><td>Flux and booking residual</td><td>323.29</td><td>332.41</td><td>1,503</td></tr>
+<tr><td>Local booking tangent</td><td>5,290.81</td><td>5,494.45</td><td>14,858</td></tr>
+<tr><td>Geometry tangent, one direction</td><td>3.68</td><td>3.13</td><td>274</td></tr>
+<tr><td>Full Jacobian</td><td>5,381.76</td><td>5,580.84</td><td>19,917</td></tr>
+<tr><td>Equilibration</td><td>1.19</td><td>0.96</td><td>20</td></tr>
+<tr><td>LU factor</td><td>10.36</td><td>10.17</td><td>118</td></tr>
+<tr><td>LU solve</td><td>1.24</td><td>1.06</td><td>8</td></tr>
+<tr><td>Whole step, read excluded</td><td>5,740.83</td><td>5,950.15</td><td>26,062</td></tr>
+</tbody></table>
+<p id="bank-step-speed-validation">The focused base suite passed its one test and the head suite passed both tests. Reversing the multicell default to the reviewed base makes <code>test_multicell_step_omits_condition_estimates_by_default</code> fail inside <code>jnp.linalg.cond</code>. A scratch fast branch that computes and discards both estimates makes <code>test_condition_diagnostics_do_not_change_update</code> fail, while the head suite passes. The titan fresh-read solve converged in eight steps to 8.61e-12; axis, saddle and boundary ratios were 1.05e-5, 9.25e-6 and 2.59e-5, within the 5e-4, 5e-4 and 1e-4 oracle budgets. The retained H200 baseline had converged in three steps to 1.00e-11.</p>
+<p id="bank-step-speed-receipts">The durable run directory is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T223038646111-bank-step-speed</code>. The stage walls come from <code>profile.log</code> and <code>profile-titan.log</code>; device durations and launches come from the committed parser's <code>parse-titan-committed.log</code>; fresh convergence and oracle ratios come from <code>converge-titan.log</code>. The base and head tests are <code>suite-base.log</code> and <code>suite-head.log</code>, and both mutation refusals are in <code>negative-default.log</code> and <code>negative-discard.log</code>. Each gate log names its code revision and ends with an exit receipt.</p>
+<p id="bank-step-speed-geometry">The candidate closed-form geometry response failed against the retained directional reference at the diverted trial state: relative error 2788.81, with a nonzero reference norm. The Bell Hessian rate agreed to 1.11e-14 and the raw cubic-root rate agreed to 4.27e-16 when supplied the same form tangent. Differentiating the moving clipping bound brought the sorted-root rate to 1.05e-11 relative, but a ring velocity still differed by 1.29e8 versus 34.97. The affected ring is a straight edge ring: the published geometry has nine vertex slots, so the first 234 rings are straight, and the worst ring was 183. Matching a saved interval endpoint to the nearest ray-root fraction, even on the same edge, cannot identify the selected root when fractions coincide. The next derivative must carry the rate through the complete sorted cut sequence and sector mask. The candidate was removed from product source and its failed test log retained in the run record. The earlier 1.00e-11 fresh residual and oracle ratios remain the converged baseline evidence.</p>
+<p id="bank-step-speed-next">The H200 submission with one GPU, one CPU and 16 GB stayed pending on Resources after ten minutes and was cancelled by job id; the group A node had a four-card, unlimited-duration serving job. Titan admitted the fallback. On P100, the 5,290.81 ms local booking tangent carries 92% of the whole-step warm wall, and the full Jacobian includes it. The next lever is to vectorise the fifteen local booking channels and fuse their assembly; LU at 10.36 ms is not the first target. A fresh H200 profile of that fast path, with device events and launch count, remains necessary to judge the 0.5 ms and 100-launch limits.</p>
+</main></body></html>

@@ -315,6 +315,82 @@ def main():
             print("FIRST_DIFFERING_FRAGMENT", ring_index, pair)
             break
 
+    serial_batch = cut_index[:32]
+    serial_slot = int(jnp.argmax(serial_batch == cell))
+
+    def channel_outer(index):
+        field = jax.nn.one_hot(jnp.clip(index - samples, 0, 5), 6)
+        field *= (index >= samples) & (index < samples + 6)
+        direction = quadrature.sigma * field
+        direction = direction.at[0].add(
+            -quadrature.sigma * (index == samples + 7).astype(psi.dtype)
+        )
+
+        def one_cell(cell_index):
+            ring, numbers, _ = current._conic_rings(
+                geometry.vertices[cell_index],
+                geometry.vertex_count[cell_index],
+                geometry.centre[cell_index],
+                geometry.pitch[cell_index],
+                signed[cell_index],
+                reading.fragment_selected[cell_index],
+                quadrature.segments,
+            )
+            velocity = current._conic_ring_tangents(
+                geometry.vertices[cell_index],
+                geometry.vertex_count[cell_index],
+                geometry.centre[cell_index],
+                geometry.pitch[cell_index],
+                signed[cell_index],
+                direction,
+                reading.fragment_selected[cell_index],
+                quadrature.segments,
+            )
+            moving = jax.vmap(
+                lambda one_ring, speed, number: moving_polygon_current_moment_tangent(
+                    one_ring,
+                    speed,
+                    number,
+                    geometry.centre[cell_index],
+                    geometry.pitch[cell_index],
+                    jnp.zeros(6),
+                    UnitDensity(),
+                )
+            )(ring, velocity, numbers)
+            return velocity, moving.vertical_moment
+
+        return jax.vmap(one_cell)(serial_batch)
+
+    outer_velocity, outer_moving = jax.jit(jax.vmap(channel_outer))(indices)
+    outer_velocity = np.asarray(outer_velocity[channel, serial_slot])
+    outer_moving = np.asarray(outer_moving[channel, serial_slot])
+    print(
+        "CHANNEL_OUTER_MOVING",
+        float(np.sum(outer_moving)),
+        "VECTOR_MOVING",
+        float(np.sum(np.asarray(nested))),
+    )
+    for ring_index, (old, new) in enumerate(zip(outer_moving, np.asarray(nested))):
+        if abs(old - new) > 1e-12:
+            print("CHANNEL_OUTER_FIRST_FRAGMENT", ring_index, old, new)
+            vertex_difference = np.max(
+                np.abs(
+                    outer_velocity[ring_index] - np.asarray(serial_velocity[ring_index])
+                ),
+                axis=1,
+            )
+            vertex = int(np.argmax(vertex_difference))
+            print(
+                "CHANNEL_OUTER_FIRST_VERTEX",
+                ring_index,
+                vertex,
+                "serial",
+                outer_velocity[ring_index, vertex].tolist(),
+                "vector",
+                np.asarray(serial_velocity[ring_index, vertex]).tolist(),
+            )
+            break
+
     def terms(direction):
         velocity = current._conic_ring_tangents(
             vertices,

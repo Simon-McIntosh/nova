@@ -8,10 +8,11 @@ export TMPDIR=/tmp JAX_PLATFORMS=cpu
 root=$(git -C "$SLURM_SUBMIT_DIR" rev-parse --show-toplevel)
 base_revision="${1:?base revision required}"
 logs="${2:?log directory required}"
+prefix="${3:-}"
 scratch=$(mktemp -d "$TMPDIR/bank-geometry-suite-XXXXXX")
 trap 'rm -rf "$scratch"' EXIT
 mkdir -p "$scratch/base"
-git -C "$root" archive "$base_revision" nova tests scripts pyproject.toml | tar -xf - -C "$scratch/base"
+git -C "$root" archive "$base_revision" nova tests scripts pyproject.toml conftest.py | tar -xf - -C "$scratch/base"
 overall=0
 for arm in base head; do
     if [ "$arm" = base ]; then
@@ -29,13 +30,13 @@ for arm in base head; do
             continue
         fi
         temp="$scratch/$arm-$file"
-        command="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider $target --basetemp=$temp -vv"
-        log="$logs/$arm-$file.log"
+        command="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' $target --basetemp=$temp -vv"
+        log="$logs/$prefix$arm-$file.log"
         {
             printf 'revision=%s tree=%s command=%s\n' "$revision" "$tree" "$command"
             printf 'measurement_cwd=%s\n' "$(realpath "$tree")"
             /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova, nova.equilibrium.support_read as module; print("nova.__file__=" + nova.__file__); print("module.__file__=" + module.__file__)'
-            /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider "$target" --basetemp="$temp" -vv
+            /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' "$target" --basetemp="$temp" -vv
             result=$?
             echo "EXIT=$result"
         } > "$log" 2>&1

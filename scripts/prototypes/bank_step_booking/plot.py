@@ -50,6 +50,7 @@ def check_text(fig):
 
 def main(baseline, after, svg, png):
     plt.style.use("data-ink")
+    plt.rcParams["svg.fonttype"] = "none"
     before = {item["name"]: item["median_ms"] for item in records(baseline, "STAGE ")}
     current = {item["name"]: item["median_ms"] for item in records(after, "STAGE ")}
     names = [label for _, label in STAGES]

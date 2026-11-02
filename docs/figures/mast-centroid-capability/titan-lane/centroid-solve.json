@@ -24,12 +24,12 @@
       "closed_drawn": 1,
       "open_drawn": 2
     },
-    "boundary_clipped_cells": 1461,
+    "boundary_clipped_cells": 1455,
     "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
     "boundary_vertex_count": 901,
     "coil_section_count": 938,
     "coupling": "none; cell geometry only, no Biot build",
-    "cut_at_boundary_cells": 258,
+    "cut_at_boundary_cells": 266,
     "delivered_cells": 4286,
     "requested_cells": 4000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
@@ -210,7 +210,7 @@
     "polished_inside_wall": true,
     "relative_gradient_maximum": 1e-06,
     "saddle_flux_wb": -1.2615756394635096,
-    "state_sha256": "22c38892a0a25701364c6c6e68eafa87b7b8f500ce00d303c6b03d40a46371cc",
+    "state_sha256": "c4efeb38dcfab1310160cea6d0922202f6ad4787f2f70db2abfe4fd96ec98913",
     "verdict": "confirmed_smooth_saddle"
   },
   "warm_solves": [

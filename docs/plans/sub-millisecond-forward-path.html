@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-modified" content="2026-11-02">
 </head>
 <body>
@@ -316,7 +316,10 @@
     <div class="r-comment-body"><p>Batched local booking channels reduce the P100 booking tangent from 5290.81 to 1076.64 ms and whole step from 5740.83 to 1489.62 ms, with 8687 launches and fresh residual 2.25e-11; docs/evidence/fragments/sub-millisecond-forward-path/bank-step-speed.html carries the rendered same-device stage-wall figure and the H200/geometry limits.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261102T102725209438-review-of-bank-step-geometry-130b030f24da" data-who="reckon-build" data-when="2026-11-02T10:41:42Z">
-    <div class="r-comment-body"><p>Parsed independent review of 67ad6e9c33b3441fa5725784e3b3f3312f04c39f..130b030f24daa672ab0cf690fff840085602f623 is stored under the reviewed run&#x27;s review-records directory, with six scores and zero added failures.</p></div>
+    <div class="r-comment-body"><p>Parsed independent review of 67ad6e9c33b3441fa5725784e3b3f3312f04c39f..130b030f24daa672ab0cf690fff840085602f623 is stored under the reviewed run's review-records directory, with six scores and zero added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261102T092806597431-bank-step-geometry" data-who="reckon-build" data-when="2026-11-02T10:26:24Z">
+    <div class="r-comment-body"><p>Closed-form Bell and sorted-cut geometry removes per-step JVP; titan 550-cell all-channel gaps are 1.3512e-11 trial and 5.9965e-11 converged, with a fresh-read solve and oracle ratios recorded in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-geometry.html.</p></div>
 </div>
 </section>
 </main>

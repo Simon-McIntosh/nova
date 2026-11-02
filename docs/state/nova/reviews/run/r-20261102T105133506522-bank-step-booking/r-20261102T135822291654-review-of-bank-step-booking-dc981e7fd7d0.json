@@ -31,6 +31,13 @@
     "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/negative-control.log",
     "titan_final": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T105133506522-bank-step-booking/titan-four.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-step-booking-dc981e7fd7d0",
+      "recorded_at": "2026-11-02T14:49:42.818687+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_step_booking/plot.py",

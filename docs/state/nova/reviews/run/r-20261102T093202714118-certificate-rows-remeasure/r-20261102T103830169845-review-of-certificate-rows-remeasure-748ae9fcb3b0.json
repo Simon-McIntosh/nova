@@ -1,0 +1,111 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "scripts/prototypes/certificate_rows_remeasure/row.py:20 fails when nova.jax.config.configure_dtypes leaves jax_enable_x64 false; it is a real guard, and it is falsifiable.",
+    "scripts/prototypes/certificate_rows_remeasure/row.py:88 is not an assertion but is the value the done_when's 'receipt status solved' rests on: receipt.get('status', 'solved') emits the passing answer whenever the key is absent, and neither part file carries a receipt key, so the emitted 'solved' cannot fail and does not distinguish a fresh solve from an unattributed part.",
+    "scripts/prototypes/certificate_rows_remeasure/render_panel.py:153 fails when any visible text artist's window extent leaves the figure canvas; falsifiable by a long direct label.",
+    "scripts/prototypes/certificate_rows_remeasure/render_panel.py:157 fails when two visible text artists' bounding boxes overlap; falsifiable by placing two labels in one clear-space slot.",
+    "scripts/prototypes/certificate_rows_remeasure/render_panel.py:172 fails when the SVG size substitution does not match exactly once; falsifiable by a matplotlib markup change."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-02T10:50:13.310Z",
+  "dispatched_at": "2026-11-02T10:40:50Z",
+  "evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "baseline_suite_note": "The reviewed node recorded neither a baseline_suite nor an after_suite arm; it changes no product code and adds no test, so the added-failure delta is zero by construction rather than by measurement, and this review did not run the suite.",
+    "gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/rows/limited-550/run2/row.log",
+    "gate_log_note": "The log named by the source manifest's tests line: one header at revision be1011854 and a bare EXIT=1 after a TypeError in row.py's panel build.",
+    "row_receipts": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/rows/diverted-300/row.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/rows/limited-550/run2/row.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/rows/private-550/run2/cold-solve.json"
+    ]
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/manifest.md",
+      "id": "fbdac580161",
+      "line": 10,
+      "severity": "blocking",
+      "text": "The tests line names the limited-550 row.py command, and the log it points at (rows/limited-550/run2/row.log) carries one header at revision be1011854 and ends with a bare EXIT=1 after a TypeError in _roots; the row.json and panel.json stamped 11:33 have no covering log, so the node's declared gate reads failed and the successful rebuild is unrecorded."
+    },
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/row.py",
+      "id": "f86fe86b744",
+      "line": 88,
+      "severity": "non-blocking",
+      "text": "receipt_status is emitted as receipt.get('status', 'solved'), and neither part file carries a receipt key, so the 'solved' column and the evidence fragment's 'every row reports receipt_status=solved' are produced by the absence of a key rather than by a driver-recorded status; the driver's real marker is figure.render_source=fresh_production_solve, which the row drops."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html",
+      "id": "fdddd18fe56",
+      "line": 52,
+      "severity": "non-blocking",
+      "text": "The prose says the CPU rows ran on --partition=sirius, but the diverted row's own lane receipt records partition=titan, node 98dci4-gpu-0002, job 1302701 (rows/diverted-300/row.json), contradicting the table at line 28 and the brief's CPU-lane instruction."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html",
+      "id": "ffc959371a5",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "The private row's 'cuda, Tesla P100 16 GB' and '1327.0 job wall' appear in neither rows/private-550/run2/row.log nor cold-solve.json; the device rests on run_gpu_arm2.sh setting JAX_PLATFORMS=cuda on a titan allocation, and the wall on no recorded source."
+    },
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/run_rows.sh",
+      "id": "f749e97c795",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "The log header prints the revision argument rather than the tree's head, so the diverted row's log names revision 67ad6e9c3 while the row.py it executed exists only from be1011854 onward, leaving the code that produced the reading unattributable from the log."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html",
+      "id": "f6e0d7c07b5",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "The table's three different devices and partitions show the rows ran in separate allocations (jobs 1302701, 1302775, 1302778) rather than the single SLURM job the brief specifies; the readings are independent measurements and are unaffected, but the run shape departs from the brief undiscussed."
+    },
+    {
+      "file": "scripts/prototypes/certificate_rows_remeasure/render_panel.py",
+      "id": "f2d4eae4821",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "This composes a solved-versus-analytic certificate flux panel from the same nova.media owners that benchmarks/solovev_certificate.py:2020 _plot already composes for the same rows; it duplicates that composition rather than extending or parameterising it, so the two figures can drift."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the six commits individually: be1011854 adds the three driver scripts, bb9ba3de3 and 170916895 adjust row.py, 3fabd39b6 and a9494c9be add the evidence fragment and two panels, and 748ae9fcb deletes the three PNG twins, leaving seven changed paths.",
+    "done_when": "The brief's per-row measure (residual, converged flag, qualification, trips, device, wall) is present for the two certificate rows in rows/diverted-300/row.json and rows/limited-550/run2/row.json and for the moment row in rows/private-550/run2/cold-solve.json, but the private row's device and job wall appear only in the evidence table, and the promised 'receipt status solved' is a default in row.py:88 rather than a read value.",
+    "goal": "The source brief.txt:1-6 asks for three certificate rows re-measured in fresh processes with residual, converged, qualification, trips, device and wall, plus a poloidal panel per row; certificate-rows-remeasure.html:26-31 and rows/*/row.json carry all three rows, so the goal is met on the readings themselves.",
+    "manifest": "The source manifest.md:4-19 records six commits, three row receipts, a retry_failures entry for the crashed row helper and outside_scope for the two unqualified rows; its line 10 tests field points at rows/limited-550/run2/row.log, which ends EXIT=1.",
+    "write_paths": "The source manifest.md:3 grants scripts/prototypes/certificate_rows_remeasure, the evidence fragment, and docs/figures/certificate-rows-remeasure and docs/figures/converged-forward-solve/certificate-rows-remeasure; git diff --stat 67ad6e9c3..748ae9fcb lists only paths inside those grants."
+  },
+  "justifications": {
+    "durability": "No test file is added and no automated lane runs the new scripts; the guards in render_panel.py:153-172 fire only when a panel is rendered by hand, so nothing reddens if the row measurement or the panel composition regresses.",
+    "evidence": "The terminal residual, trips and qualification in row.py's row.json agree with the part receipts (rows/limited-550/run2/private/parts/...json solver.terminal_fixed_point_residual 0.04016839392109527), but the manifest's tests line cites a log that ends EXIT=1 and the 'receipt_status=solved' column is emitted by a default rather than read from the driver.",
+    "fit": "row.py, render_panel.py and run_rows.sh follow the surrounding prototype idiom and compose nova.media owners, though row.py:88 defaults a status field and the files carry no trailing newline.",
+    "goal_fidelity": "All three rows are measured and tabled with residual, converged flag, qualification, trips and wall (docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:26-31), but the carve-out into separate allocations left the private row's device unrecorded and the receipt column vacuous.",
+    "reuse": "render_panel.py:33 re-implements the solved-versus-analytic certificate panel that benchmarks/solovev_certificate.py:2020 _plot already renders from the same nova.media owners, without extending it.",
+    "scope_discipline": "Every one of the seven paths in git diff 67ad6e9c3..748ae9fcb lies inside the four grants in the source manifest.md:3, and the run's own scratch (rows/) sits outside the repository."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source brief.txt:1-6 asks for three certificate rows re-measured in fresh processes with residual, converged, qualification, trips, device and wall plus a poloidal panel per row, and docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:26-31 with rows/*/row.json carries all three rows.\nVERDICT done_when: the per-row measure is present in rows/diverted-300/row.json, rows/limited-550/run2/row.json and rows/private-550/run2/cold-solve.json, but the private row's device and job wall are in the table only and the 'receipt status solved' column is a default at row.py:88 rather than a recorded status.\nVERDICT write_paths: the source manifest.md:3 grants four paths and git diff --stat 67ad6e9c3..748ae9fcb lists seven paths, all inside them.\nVERDICT manifest: the source manifest.md:4-19 records six commits, three row receipts, one retry_failures entry and outside_scope for the two unqualified rows, and its line 10 tests field points at a log that ends EXIT=1.\nVERDICT diff: read all six commits; be1011854 adds the three driver scripts, bb9ba3de3 and 170916895 adjust row.py, 3fabd39b6 and a9494c9be add the evidence fragment and panels, and 748ae9fcb deletes the three PNG twins.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:26-31 tables all three rows with residual, converged, qualification, trips, device and wall.\nSCORE evidence: 9\nJUSTIFICATION evidence: rows/limited-550/run2/row.log ends EXIT=1 while row.py:88 emits 'solved' from a default, so the declared gate fails and the receipt column is not read from the driver.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff 67ad6e9c3..748ae9fcb sits inside the four grants listed at the source manifest.md:3.\nSCORE durability: 6\nJUSTIFICATION durability: no test is added and the only guards are render_panel.py:153-172, which run when a panel is rendered by hand and never in a test lane.\nSCORE fit: 16\nJUSTIFICATION fit: render_panel.py composes nova.media.ink and nova.media.poloidal owners as benchmarks/solovev_certificate.py:66 does, though row.py:88 defaults a status field.\nSCORE reuse: 5\nJUSTIFICATION reuse: render_panel.py:33 re-implements the certificate panel composed at benchmarks/solovev_certificate.py:2020 without extending it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T093202714118-certificate-rows-remeasure/manifest.md:10 blocking: the tests line names a command whose cited log ends EXIT=1 and the successful rebuild at 11:33 has no log.\nFINDING scripts/prototypes/certificate_rows_remeasure/row.py:88 non-blocking: receipt_status defaults to 'solved', so the done_when's receipt check is vacuous for parts carrying no receipt key.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:52 non-blocking: the prose says the CPU rows ran on sirius while rows/diverted-300/row.json records partition=titan.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:30 non-blocking: the private row's device and 1327.0 s job wall are in neither its log nor cold-solve.json.\nFINDING scripts/prototypes/certificate_rows_remeasure/run_rows.sh:27 non-blocking: the log header prints the revision argument, so the diverted log names 67ad6e9c3 while the executed row.py starts at be1011854.\nFINDING docs/evidence/fragments/converged-forward-solve/certificate-rows-remeasure.html:28 non-blocking: the rows ran in three allocations against the brief's single SLURM job.\nFINDING scripts/prototypes/certificate_rows_remeasure/render_panel.py:33 non-blocking: duplicates the certificate panel composition owned by benchmarks/solovev_certificate.py:2020.",
+  "review_run_id": "r-20261102T103830169845-review-of-certificate-rows-remeasure-748ae9fcb3b0",
+  "reviewed_base_sha": "67ad6e9c33b3441fa5725784e3b3f3312f04c39f",
+  "reviewed_head_sha": "748ae9fcb3b00767b7266cc6e653f8ab4da346cd",
+  "reviewed_run_id": "r-20261102T093202714118-certificate-rows-remeasure",
+  "scores": {
+    "durability": 6,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T10:53:37.100743+00:00",
+  "total": 70
+}

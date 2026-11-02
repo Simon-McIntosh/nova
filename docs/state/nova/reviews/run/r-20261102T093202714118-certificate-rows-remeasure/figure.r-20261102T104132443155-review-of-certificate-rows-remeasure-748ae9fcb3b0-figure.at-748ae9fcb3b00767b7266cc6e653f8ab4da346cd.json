@@ -1,0 +1,130 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This figure review ran no suite, so the count is the neutral value the record shape requires and not a measurement.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+    "image-1.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+    "image-2.png": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
+  },
+  "attachment_mapping_basis": "Each attachment was identified from what it draws, not from file order. image-0 carries an admitted X-point near the bottom of the vessel and a solved axis displaced above the analytic one, which is the diverted single-null row (solved (1.8001608410035406, 0.35890956521291556) m above analytic (1.7878074752250435, 0.046513016111756206) m). image-1 carries two separated axis triangles with the blue solved one outboard of the grey reference by about 18 px, which is the limited row (solved x 6.4806569817254855 against analytic 6.199014565254948). image-2 carries a single axis position with the two contour families drawn on top of one another, which is the converged private moment solve the caption calls 'indistinguishable at this level array'.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T10:44:05Z",
+  "figure_checks": {
+    "clipping": "Zero ink pixels in the outer 4 px frame of every attachment (measured on all three). No text leaves the canvas, consistent with the renderer's own check at render_panel.py:140-160.",
+    "marker_measurement": "Eroded blob detection on the rendered pixels: on image-0 the grey axis triangle occupies x 717..728, y 356..368 and a second grey mark x 647..652, y 632..637 sits at the bottom null; on image-1 the grey axis triangle occupies x 728..740, y 381..393 with the blue solved triangle immediately outboard at x 744..751. Grey is drawn solid in both panels, while the legend swatch for 'analytic axis' is hollow (render_panel.py:111-120).",
+    "panel_coverage": "Non-white ink between y 150 and y 690 spans x 508..890 on image-0, x 535..864 on image-1 and x 546..853 on image-2, which is 27.3 %, 23.5 % and 21.9 % of the 1399 px canvas width. The legend row spans x 305..1093, so the key is roughly twice the width of the panel it keys.",
+    "rendered_size": "All three attachments are 1399x720 px. The renderer sets figsize 14x7.2 at 100 dpi (render_panel.py:49), which is the slide canvas the repository's plotting rule names.",
+    "source_of_marks": "render_panel.py:75-94 calls nova.media.poloidal.draw_nulls twice, which draws the magnetic axis filled (poloidal.py:604-617 passes color=style.axis_color with no facecolor override), the admitted X-point as a filled cross (poloidal.py:618-663) and the strike points as discs; render_panel.py:95-105 then overlays a hollow triangle on the reference axis. The hollow overlay's transparent interior lets the filled grey below show through, which is why the legend's hollow swatch matches nothing in the panel."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+      "rubric": {
+        "contrast": "pass. Legend and contour text render in near-black on white; the reference grey #676767 reads at about 5.7:1, and the solved blue #3366cc at about 5.4:1, both well above the 3:1 floor.",
+        "data_ink": "pass. Line contours only, 3.0 pt solved against 1.5 pt dashed reference, one 4 px vessel outline and the null marks; no fill, no gradient, no grid, axes off. The solved contours bunch into overlapping strokes against the outboard wall (six thick blue blobs between y 309 and y 428 at x 865..882) because that is where the displaced field puts them, not because of styling.",
+        "decoration": "pass. Nothing is drawn that is not data or its key.",
+        "label_collision": "pass. Zero ink in the outer 4 px frame of the render, no text is clipped, and the four legend entries are separated by clear gaps.",
+        "legibility": "pass, with the defects recorded as findings 1, 2 and 4. The panel reads at a glance: one vessel outline, a dashed grey analytic contour stack, five blue solved contours crossing the lower half and crowding to the outboard wall, and a four-entry frameless legend above, all at 14 pt in a 1399x720 render. What does not read at a glance is the mark vocabulary: the grey triangle at the plasma centre and the grey cross at the bottom null carry no legend entry, so a reader cannot tell which mark is the axis and which is the diverted X-point.",
+        "table_form": "pass. A poloidal flux state read against its reference is a spatial relationship; the row's scalar numbers are already in the evidence page's table, and no scalar is drawn here."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+      "rubric": {
+        "contrast": "pass. Same palette as the diverted panel; all text near-black on white, both line colours above 5:1 against white.",
+        "data_ink": "pass. Two contour families, one vessel outline, two axis marks. No fill, no gradient, no grid, axes off.",
+        "decoration": "pass. None.",
+        "label_collision": "pass. Zero ink in the outer 4 px frame; no text clipped or overlapping. The two axis marks sit adjacent but clear of one another (grey core x 728..740, blue x 744..751).",
+        "legibility": "pass, with the defects recorded as findings 1, 2 and 4. The comparison the row exists to make is visible: seven blue solved contours follow the analytic shape with a constant inward-left displacement across the whole stack, and the two axis marks are separated on the midplane, which is the 0.28 m outboard offset the caption states. The defect is that the analytic axis is drawn as a solid grey triangle about 18 px tall against a blue solved triangle about 10 px tall, so the two marks are told apart by colour and size rather than by the hollow-against-filled cue the legend shows.",
+        "table_form": "pass. A spatial flux comparison, not a table."
+      }
+    },
+    {
+      "attachment": "image-2.png",
+      "figure": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg",
+      "rubric": {
+        "contrast": "pass. Near-black legend text on white; the grey axis mark reads at about 4.6:1 at the size drawn.",
+        "data_ink": "pass. Eleven contour strokes and one axis mark; no fill, no grid, axes off.",
+        "decoration": "pass. None.",
+        "label_collision": "pass. Zero ink in the outer 4 px frame; no text clipped or overlapping.",
+        "legibility": "pass, with the defect recorded as finding 3. Eight evenly spaced blue contours fill the vessel and a single axis mark sits at the centre, which is a converged state read at a glance. The legend names a dashed grey 'analytic flux' that appears nowhere in the panel as a distinguishable line, so a reader seeing the figure alone cannot tell whether the reference was drawn, omitted, or covered.",
+        "table_form": "pass. A converged flux state drawn against its reference is a spatial relationship."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "folded: a follow-up plan section on converged-forward-solve adding the X-point and strike-point entries to the panel legend for all three panels",
+      "evidence": "image-0.png rendered pixels; render_panel.py:75-94 draws the nulls through draw_nulls while the legend at 107-136 lists flux and axis only",
+      "file": "scripts/prototypes/certificate_rows_remeasure/render_panel.py",
+      "id": "f4eab27bfab",
+      "line": 107,
+      "severity": "non-blocking",
+      "summary": "The legend keys four marks -- analytic flux, solved flux, analytic axis, solved axis -- while the panels draw two further mark types, the admitted X-point and the strike points, which appear in the render unkeyed. On image-0 the X-point is the grey cross at the bottom of the vessel (eroded blob x 647..652, y 632..637), and it is the mark that makes the row a diverted single-null case rather than a limited one; the legend gives the reader no entry for it, and the evidence text does not name it either. A reader can see the field, so nothing is hidden, but cannot tell from the figure what the cross is. The panel is otherwise the clearest of the three and the defect does not hold the node."
+    },
+    {
+      "disposition": "folded: the same follow-up plan section, which should either draw the reference axis hollow only or draw both axes as keyed",
+      "evidence": "image-1.png and image-0.png rendered pixels; render_panel.py:95-105,111-129; nova/media/poloidal.py:604-617",
+      "file": "scripts/prototypes/certificate_rows_remeasure/render_panel.py",
+      "id": "f8d2ce6a304",
+      "line": 111,
+      "severity": "non-blocking",
+      "summary": "The 'analytic axis' legend swatch is drawn hollow, but in every panel the analytical axis renders as a solid grey triangle. draw_nulls draws the axis filled (poloidal.py:604-617) and the hollow overlay at render_panel.py:95-105 has a transparent interior, so the filled grey shows through and the hollow cue is lost. Measured on image-1, the analytic axis is a solid grey triangle occupying x 728..740, y 381..393, about 18 px tall, against a solid blue solved triangle about 10 px tall at x 744..751. The two axes are therefore separated by colour and by size, not by the hollow-against-filled distinction the key promises -- and colour alone fails for a colour-blind reader. The marks remain distinguishable in these renders, so the defect is recorded rather than blocking."
+    },
+    {
+      "disposition": "exempted: the coincidence is the measurement, and thickening the reference to make it visible would misrepresent which field is the answer",
+      "evidence": "image-2.png rendered pixels: no grey contour pixels outside the axis mark region; evidence fragment private section states the coincidence",
+      "file": "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg",
+      "id": "ff79e584ab9",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend names a dashed grey 'analytic flux', and no dashed grey contour is visible anywhere in the panel: the eight drawn contours are all solid blue. That is the correct depiction of a state whose two fields coincide to 4.7e-15, and the caption says so in words ('The solved and reference contours are indistinguishable at this level array'), but a reader who has the figure alone may read it as a reference that was never drawn. Drawing the reference beneath the solved line at a thinner weight, or adding one dashed segment called out as coincident, would make the absence a statement rather than an ambiguity."
+    },
+    {
+      "disposition": "folded: the same follow-up plan section, which may size the panel to its content or inset it",
+      "evidence": "measured panel-band column spans and legend ink span on all three attachments",
+      "file": "scripts/prototypes/certificate_rows_remeasure/render_panel.py",
+      "id": "fd1c5e3f842",
+      "line": 49,
+      "severity": "non-blocking",
+      "summary": "The panel occupies a small minority of the canvas. Measured non-white ink between y 150 and y 690 spans 27.3 % of the 1399 px width on image-0, 23.5 % on image-1 and 21.9 % on image-2, because the poloidal axes are held at equal aspect inside a 14 x 7.2 in landscape canvas (render_panel.py:49,106). The legend row spans x 305..1093, roughly twice the panel's width. The consequences are drawn detail: on image-0 the solved contours crowd into overlapping strokes at the outboard wall and the knot at the bottom null is hard to follow at the delivered size. The 14 x 7.2 canvas is the repository's slide size, so this is a call about fitting a portrait panel to it rather than a styling error."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "None of the three captions only repeats its figure's title. Each carries its own row's terminal residual, converged flag, axis coordinates and the direction of the discrepancy, and the panels carry no titles of their own, so identity comes from the file name and the caption.",
+    "finding_materiality": "Four findings, none blocking. No label is clipped, none overlaps another label or the data, and no text is unreadable, so none of the blocking categories is met. The defects are that three mark types drawn in the panels (the X-point, the strike points and, in effect, the analytic axis as a filled rather than hollow triangle) are not keyed as the legend shows them, and that the converged panel's reference contours are invisible because they coincide with the solved ones.",
+    "rendered_artifact": "All three attachments were opened and inspected as images at their native 1399x720 size; verdicts were formed from the rendered pixels, and no SVG was opened, listed, searched, rendered or shown. The reviewed head removed the PNG twins (748ae9fcb deletes the three .png files), so the attachments are the reviewer-supplied renders of the three committed panels rather than files still tracked at the head."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "Every number quoted here was measured on the attachments (canvas size, outer-frame ink count, panel-band column spans, legend ink span, eroded marker blob boxes) or read from the drawing script the run's diff shows (scripts/prototypes/certificate_rows_remeasure/render_panel.py) and the media module it calls.",
+    "legibility": "Read from the rendered PNGs alone. The pass is a statement about the contours, the vessel and the legend; the mark-identification and reference-visibility defects are carried as findings rather than as a failed item, because each still leaves the field itself readable.",
+    "scope_discipline": "This review is read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261102T104132443155-review-of-certificate-rows-remeasure-748ae9fcb3b0-figure",
+  "reviewed_base_sha": "67ad6e9c33b3441fa5725784e3b3f3312f04c39f",
+  "reviewed_figures": [
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/diverted-300.svg",
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/limited-550.svg",
+    "docs/figures/converged-forward-solve/certificate-rows-remeasure/private-550.svg"
+  ],
+  "reviewed_head_sha": "748ae9fcb3b00767b7266cc6e653f8ab4da346cd",
+  "reviewed_run_id": "r-20261102T093202714118-certificate-rows-remeasure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass, with the null-marker identification defect recorded as findings 1 and 2 (non-blocking)",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T10:52:21.408648+00:00",
+  "total": null
+}

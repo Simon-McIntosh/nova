@@ -265,15 +265,29 @@ def moving_polygon_current_moment_tangent(
     The oriented boundary integral differentiates exactly the polygon the
     booking uses, including its chord approximation of a conic segment.
     """
+    edge, node, following, kernel = _moving_edge_kernel(
+        vertices, vertex_count, centre, pitch, normalized_coefficient, profile
+    )
+    rate = _moving_edge_rate(velocity, edge, node, following)
+    totals = jnp.sum(rate[..., None] * kernel, axis=(-3, -2))
+    return ClippedCurrentMoments(totals[..., 0], totals[..., 1], totals[..., 2])
+
+
+def _moving_edge_kernel(vertices, vertex_count, centre, pitch, coefficient, profile):
+    """Build every channel-independent term of the moving-edge integral once.
+
+    The edge geometry, the flux basis, the density and the moment arm do not
+    depend on the velocity channel, so they are contracted into one kernel
+    ``(rings, edges, nodes, 3)`` before any per-channel work. The measured
+    bank's density profile is a polynomial in ``(R, psi)`` per call, so
+    re-evaluating it once per channel was pure repetition.
+    """
     slot = jnp.arange(vertices.shape[0])
     following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
     edge = vertices[following] - vertices
-    velocity_edge = velocity[following] - velocity
     node = jnp.asarray(_UNIT_NODE, dtype=vertices.dtype)
     weight = jnp.asarray(_UNIT_WEIGHT, dtype=vertices.dtype)
     point = vertices[:, None] + node[None, :, None] * edge[:, None]
-    speed = velocity[:, None] + node[None, :, None] * velocity_edge[:, None]
-    cross = speed[..., 0] * edge[:, None, 1] - speed[..., 1] * edge[:, None, 0]
     local = (point - centre) / pitch
     radial, vertical = local[..., 0], local[..., 1]
     basis = jnp.stack(
@@ -287,37 +301,56 @@ def moving_polygon_current_moment_tangent(
         ),
         axis=-1,
     )
-    flux = jnp.einsum("ijk,k->ij", basis, normalized_coefficient)
+    flux = jnp.einsum("ijk,k->ij", basis, coefficient)
     density = profile.current_density(point[..., 0], flux)
-    weighted = jnp.where(
-        slot[:, None] < vertex_count, weight[None] * cross * density, 0.0
-    )
     relative = point - centre
-    return ClippedCurrentMoments(
-        jnp.sum(weighted),
-        jnp.sum(weighted * relative[..., 0]),
-        jnp.sum(weighted * relative[..., 1]),
+    moment = jnp.stack(
+        (jnp.ones_like(density), relative[..., 0], relative[..., 1]), axis=-1
     )
+    live = slot[:, None] < vertex_count
+    kernel = jnp.where(
+        live[..., None], (weight[None] * density)[..., None] * moment, 0.0
+    )
+    return edge, node, following, kernel
+
+
+def _moving_edge_rate(velocity, edge, node, following):
+    """Interpolate the edge normal speed along each edge's nodes.
+
+    Accepts one velocity field ``(edges, 2)`` or a stack of channels
+    ``(channels, edges, 2)``; the per-channel work is one difference and two
+    multiplies, since every geometry term is already folded into the kernel.
+    """
+    velocity_edge = jnp.take_along_axis(
+        velocity, following[..., None], axis=-2
+    ) - velocity
+    speed = velocity[..., None, :] + node[None, None, :, None] * velocity_edge[..., None, :]
+    return speed[..., 0] * edge[..., None, 1] - speed[..., 1] * edge[..., None, 0]
 
 
 def moving_polygon_current_moment_tangents(
     vertices, velocity, vertex_count, centre, pitch, normalized_coefficient, profile
 ) -> ClippedCurrentMoments:
-    """Integrate moving rings, optionally for several velocity channels."""
-    integrate_rings = jax.vmap(
-        moving_polygon_current_moment_tangent,
-        in_axes=(0, 0, 0, None, None, None, None),
+    """Integrate moving rings, optionally for several velocity channels.
+
+    Every channel shares the same rings, so the channel-independent kernel is
+    built once for all rings and each channel pays only its edge-speed
+    difference, two products and the contraction.
+    """
+    build = jax.vmap(
+        _moving_edge_kernel,
+        in_axes=(0, 0, None, None, None, None),
     )
+    edge, node, following, kernel = build(
+        vertices, vertex_count, centre, pitch, normalized_coefficient, profile
+    )
+    node = node[0]
 
     def integrate(speed):
-        return integrate_rings(
-            vertices,
-            speed,
-            vertex_count,
-            centre,
-            pitch,
-            normalized_coefficient,
-            profile,
+        rate = _moving_edge_rate(speed, edge, node, following)
+        totals = jnp.sum(rate[..., None] * kernel, axis=(-3, -2))
+        return ClippedCurrentMoments(
+            totals[..., 0], totals[..., 1], totals[..., 2]
         )
 
     if velocity.ndim == vertices.ndim + 1:

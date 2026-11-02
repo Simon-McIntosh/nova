@@ -707,102 +707,105 @@ def book_tangent_channels(
             geometry.vertex_count[index][None],
         )
 
-    def cut_cell(index):
+    def conic_cell(index):
         centre = geometry.centre[index]
         vertices = geometry.vertices[index]
         count = geometry.vertex_count[index]
-
-        def conic(_):
-            rings, counts, valid = _conic_rings(
+        rings, counts, valid = _conic_rings(
+            vertices,
+            count,
+            centre,
+            geometry.pitch[index],
+            signed[index],
+            read.fragment_selected[index],
+            quadrature.segments,
+            inward_endpoints=True,
+        )
+        fixed = interior(index, rings, counts)
+        velocity = jax.vmap(
+            lambda direction: _conic_ring_tangents(
                 vertices,
                 count,
                 centre,
                 geometry.pitch[index],
                 signed[index],
+                direction,
                 read.fragment_selected[index],
                 quadrature.segments,
                 inward_endpoints=True,
             )
-            fixed = interior(index, rings, counts)
+        )(signed_rate[boundary_channels, index])
+        moved = moving_polygon_current_moment_tangents(
+            rings,
+            velocity,
+            counts,
+            centre,
+            geometry.pitch[index],
+            normalized[index],
+            profile,
+        )
+        moving = jnp.stack(tuple(jnp.sum(value, axis=1) for value in moved), axis=-1)
+        moving = (
+            jnp.zeros((channels, 3), dtype=psi.dtype)
+            .at[boundary_channels]
+            .set(moving)
+        )
+        return jnp.where(valid, fixed + moving, jnp.nan)
 
-            velocity = jax.vmap(
-                lambda direction: _conic_ring_tangents(
-                    vertices,
-                    count,
-                    centre,
-                    geometry.pitch[index],
-                    signed[index],
-                    direction,
-                    read.fragment_selected[index],
-                    quadrature.segments,
-                    inward_endpoints=True,
-                )
-            )(signed_rate[boundary_channels, index])
-            moved = moving_polygon_current_moment_tangents(
-                rings,
-                velocity,
-                counts,
-                centre,
-                geometry.pitch[index],
-                normalized[index],
-                profile,
-            )
-            moving = jnp.stack(
-                tuple(jnp.sum(value, axis=1) for value in moved), axis=-1
-            )
-
-            moving = (
-                jnp.zeros((channels, 3), dtype=psi.dtype)
-                .at[boundary_channels]
-                .set(moving)
-            )
-            return jnp.where(valid, fixed + moving, jnp.nan)
-
-        def normal(_):
-            rings, counts = _normal_rings(
-                vertices,
-                count,
-                centre,
-                read.saddle_form,
-                read.fragment_selected[index],
-                read.edge_interval[index],
-                quadrature.segments,
-            )
-            return interior(index, rings, counts)
-
-        return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
+    def normal_cell(index):
+        centre = geometry.centre[index]
+        rings, counts = _normal_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            centre,
+            read.saddle_form,
+            read.fragment_selected[index],
+            read.edge_interval[index],
+            quadrature.segments,
+        )
+        return interior(index, rings, counts)
 
     full = read.membership >= 1 - 1e-14
     cut = (read.membership > 0) & ~full
-    whole = jax.vmap(whole_cell)(jnp.arange(cells))
-    whole = jnp.where(full[:, None, None], whole, 0.0)
     if quadrature.cut_batch_width < 1:
         raise ValueError("cut batch width must be positive")
     batch_width = min(quadrature.cut_batch_width, cells)
-    cut_count = jnp.sum(cut, dtype=jnp.int32)
-    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
-    cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
 
-    def add_batch(carried, batch):
-        start = batch * batch_width
-        indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
-        active = start + jnp.arange(batch_width) < cut_count
+    def bucket(mask, evaluate):
+        count = jnp.sum(mask, dtype=jnp.int32)
+        index = jnp.nonzero(mask, size=cells, fill_value=0)[0]
+        index = jnp.pad(index, (0, (-cells) % batch_width))
 
-        def integrate(values):
-            response = jax.vmap(cut_cell)(indices)
-            return values.at[indices].add(
-                jnp.where(active[:, None, None], response, 0.0)
-            )
+        def add_batch(carried, batch):
+            start = batch * batch_width
+            indices = jax.lax.dynamic_slice(index, (start,), (batch_width,))
+            active = start + jnp.arange(batch_width) < count
 
-        return jax.lax.cond(
-            start < cut_count, integrate, lambda value: value, carried
-        ), None
+            def integrate(values):
+                response = jax.vmap(evaluate)(indices)
+                return values.at[indices].add(
+                    jnp.where(active[:, None, None], response, 0.0)
+                )
 
-    cuts, _ = jax.lax.scan(
-        add_batch,
-        jnp.zeros_like(whole),
-        jnp.arange(len(cut_index) // batch_width),
-    )
+            return jax.lax.cond(
+                start < count, integrate, lambda value: value, carried
+            ), None
+
+        total, _ = jax.lax.scan(
+            add_batch,
+            jnp.zeros((channels, cells, 3), dtype=psi.dtype),
+            jnp.arange(len(index) // batch_width),
+        )
+        return total
+
+    # A cell's moving-edge term exists only where the clipped conic boundary
+    # itself moves, so the two cut populations are evaluated as separate
+    # static buckets instead of one batch paying the conic integral for
+    # normal-form cells that cannot use it.
+    moving_cut = cut & ~read.normal_form_cells
+    normal_cut = cut & read.normal_form_cells
+    whole = bucket(full, whole_cell)
+    cuts = bucket(moving_cut, conic_cell) + bucket(normal_cut, normal_cell)
     raw = whole + cuts
     total_rate = jnp.sum(raw[:, :, 0], axis=0)
     scale_rate = (

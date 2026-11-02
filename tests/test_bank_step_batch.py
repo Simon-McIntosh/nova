@@ -81,7 +81,7 @@ def _stack(lanes):
 
 
 def _largest_residual(residual):
-    return jnp.max(jnp.abs(jnp.concatenate(residual.residual, axis=1)), axis=1)
+    return jnp.max(jnp.abs(jnp.concatenate(residual.residual, axis=-1)), axis=-1)
 
 
 @pytest.mark.slow

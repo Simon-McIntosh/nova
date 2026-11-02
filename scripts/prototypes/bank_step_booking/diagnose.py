@@ -507,6 +507,51 @@ def main():
         float(serial_all.vertical_moment[channel, cell]),
     )
 
+    target_centre = np.asarray(centre)
+    original_tangents = current._conic_ring_tangents
+
+    def report_velocity(one_centre, one_direction, ring_seven, ring_ten):
+        if (
+            np.max(np.abs(one_centre - target_centre)) < 1e-12
+            and abs(one_direction[2] - 1.0) < 1e-12
+        ):
+            print(
+                "ACTUAL_SERIAL_VELOCITY",
+                "ring7",
+                ring_seven.tolist(),
+                "ring10",
+                ring_ten.tolist(),
+            )
+
+    def traced_tangents(
+        vertices, count, one_centre, pitch, coefficient, direction, selection, segments
+    ):
+        velocity = original_tangents(
+            vertices,
+            count,
+            one_centre,
+            pitch,
+            coefficient,
+            direction,
+            selection,
+            segments,
+        )
+        jax.debug.callback(
+            report_velocity, one_centre, direction, velocity[7], velocity[10]
+        )
+        return velocity
+
+    current._conic_ring_tangents = traced_tangents
+    try:
+
+        def debug_reference(index):
+            return serial_reference(index)
+
+        debug_result = jax.jit(jax.vmap(debug_reference))(indices)
+        print("DEBUG_SERIAL_VALUE", float(debug_result.vertical_moment[channel, cell]))
+    finally:
+        current._conic_ring_tangents = original_tangents
+
     def terms(direction):
         velocity = current._conic_ring_tangents(
             vertices,

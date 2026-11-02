@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_review": "The caption does not merely repeat the figure title: it names the device and case (titan P100, 550-cell diverted bank), binds grey and green to their series, and now names the green configuration as the density-basis contraction with four cut lanes. It states that the read is outside the Newton step, warns that the Jacobian and whole-step rows include preceding work and are not additive, gives the three synchronized warm calls behind each median, and records the render-and-check step. Its series naming matches the legend on the render; the legend/caption mismatch recorded against the earlier head is answered here.",
+  "completed_at": "2026-11-02T15:04:53.301Z",
+  "dispatched_at": "2026-11-02T14:59:13Z",
+  "figures": [
+    {
+      "grapher": "scripts/prototypes/bank_step_booking/plot.py",
+      "path": "docs/figures/sub-millisecond-forward-path/bank-step-booking/stage-wall.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T145721166586-review-of-bank-step-booking-420d0abb7b57-figure/image-0.png",
+      "rendered_size": "1399x720"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The brief requires one linear axis so every stage shares a comparable scale, and the exact reuse measurement is tabled in the evidence fragment beside the figure; a broken or inset axis would trade one honest scale for a second, incomparable one.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "f1b88e178c6",
+      "line": 70,
+      "severity": "non-blocking",
+      "summary": "The x limit is taken from the largest value (1,660.14 ms times 1.08, about 1,793 ms), so the LU factor pair at 10.44 and 10.36 ms spans roughly 0.08 ms, or about 0.04 px on the 1399 px render. Both markers land immediately against the y-axis spine (measured at x 425-430 against a spine at x=419) and the two are separated only by the series' vertical offset, so the row shows that factorisation is negligible but cannot show the pair or the 0.08 ms change the evidence table reports."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The grey/green pair is one feature colour against a neutral, which is the repository's stated convention for a measurement set against what it replaces, and the two series are also separated by a fixed vertical offset in every row.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "fc022af5141",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "The two series are told apart by colour alone: identical 2.6 pt solid strokes and identical filled circular markers, with a legend key (line 74) that draws a plain 3 pt line carrying neither the marker nor a dash. A reader who cannot separate #929292 from #2e8b57 has only the lightness difference between a mid grey and a dark green, and the legend gives no second cue to match against the plotted marks."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The repository's data-ink rules discourage redundant value labels on a comparison chart, and the per-stage values and their ratios are stated in the caption and tabled immediately below the figure.",
+      "file": "scripts/prototypes/bank_step_booking/plot.py",
+      "id": "f7cddce779c",
+      "line": 65,
+      "severity": "non-blocking",
+      "summary": "No row carries its value and the panel draws no gridlines, so every number must be interpolated against the 200 ms ticks. The reductions the figure exists to show (booking tangent 1,076.97 to 231.24 ms, whole step 1,486.11 to 634.30 ms) can be read as a large shortening but not to better than a few tens of milliseconds from the picture alone."
+    }
+  ],
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261102T145721166586-review-of-bank-step-booking-420d0abb7b57-figure",
+  "reviewed_base_sha": "731c57cae56fd34c025c798fdfa909cb234e740d",
+  "reviewed_head_sha": "420d0abb7b57eaf7f577a78da92b94c0bb59574e",
+  "reviewed_run_id": "r-20261102T105133506522-bank-step-booking",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass: all text (tick labels, stage labels, axis label, legend text) is near-black on white. The legend keys are #929292 (about 3.1:1) and #2e8b57 (about 4.25:1), both clearing the 3:1 floor for graphical marks, and neither hue is used for text.",
+    "data_ink": "pass: the ink is the data. Each row is one 2.6 pt stroke and one filled endpoint marker per series, with no fills, bands, shadows or shading anywhere in the panel.",
+    "decoration": "pass: no gridlines, no gradient and no background fill; the top and right spines are absent, and the only scale furniture is the left spine, the bottom axis and its 200 ms ticks.",
+    "label_collision": "pass: measured on the render, the longest tick label (read (outside step)) begins around x=220 and no tick label is clipped at the canvas edge; the longest label row (LU factor) ends at x=405 against a left spine at x=419, so no text touches a marker or the axis, and the plot.py text-clipping and text-overlap assertions passed when the figure was drawn.",
+    "legibility": "pass: all six stage labels, both legend entries and the axis label read at a glance on the 1399x720 render; every row's two endpoints are separable. The one place the picture goes quiet is the LU factor row, whose pair spans 0.08 ms on a 0-to-1,793 ms axis and so reads only as 'negligible'; recorded as a non-blocking finding rather than a block, because the row's message survives and the exact pair is tabled beside the figure.",
+    "table_form": "pass: plotting two configurations against six stages shows a magnitude comparison as length, which is what the reader takes from it; the twelve exact values remain in the evidence table directly below the figure, so nothing is shown that only a table could carry."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T15:04:53.898426+00:00",
+  "total": null
+}

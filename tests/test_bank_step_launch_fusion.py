@@ -44,6 +44,23 @@ def test_batched_boundary_integral_matches_single_ring_rule():
     np.testing.assert_allclose(actual.radial_moment, (0.3, 0.6), atol=1e-13)
     np.testing.assert_allclose(actual.vertical_moment, (0.0, 0.0), atol=1e-13)
 
+    channels = clip_quadrature.moving_polygon_current_moment_tangents(
+        vertices,
+        jnp.stack((velocity, 2 * velocity)),
+        count,
+        centre,
+        1.0,
+        coefficient,
+        profile,
+    )
+    np.testing.assert_allclose(
+        channels.cell_current, ((0.4, 0.4), (0.8, 0.8)), atol=1e-13
+    )
+    np.testing.assert_allclose(
+        channels.radial_moment, ((0.3, 0.6), (0.6, 1.2)), atol=1e-13
+    )
+    np.testing.assert_allclose(channels.vertical_moment, 0.0, atol=1e-13)
+
 
 def test_newton_step_traces_booking_through_assembly(monkeypatch):
     def residual(_operands, values, *_args):

@@ -303,11 +303,26 @@ def moving_polygon_current_moment_tangent(
 def moving_polygon_current_moment_tangents(
     vertices, velocity, vertex_count, centre, pitch, normalized_coefficient, profile
 ) -> ClippedCurrentMoments:
-    """Integrate a bank of moving rings through the shared boundary rule."""
-    return jax.vmap(
+    """Integrate moving rings, optionally for several velocity channels."""
+    integrate_rings = jax.vmap(
         moving_polygon_current_moment_tangent,
         in_axes=(0, 0, 0, None, None, None, None),
-    )(vertices, velocity, vertex_count, centre, pitch, normalized_coefficient, profile)
+    )
+
+    def integrate(speed):
+        return integrate_rings(
+            vertices,
+            speed,
+            vertex_count,
+            centre,
+            pitch,
+            normalized_coefficient,
+            profile,
+        )
+
+    if velocity.ndim == vertices.ndim + 1:
+        return jax.vmap(integrate)(velocity)
+    return integrate(velocity)
 
 
 def cut_capacity_edge_bound() -> int:

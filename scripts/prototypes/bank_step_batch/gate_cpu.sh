@@ -2,7 +2,7 @@
 #SBATCH --job-name=bank-step-batch-gate
 #SBATCH --partition=sirius
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=64G
+#SBATCH --mem=256G
 #SBATCH --time=01:00:00
 set -u
 

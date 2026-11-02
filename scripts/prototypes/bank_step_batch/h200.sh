@@ -13,6 +13,7 @@ RUN_DIR=${1:?run directory required}
 ARM=${2:-both}
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp
+unset JAX_PLATFORMS
 export PYTHONPATH="$ROOT"
 export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 

@@ -66,6 +66,52 @@ def timed(compiled, args, repeats=REPEATS):
     return min(walls), walls
 
 
+def chunked(function, count, chunk=8):
+    """Apply ``function`` to lanes in fixed chunks, so peak memory is bounded.
+
+    A batch larger than ``chunk`` lanes shares the launch cost within each
+    chunk and not across chunks, which is the price of keeping every
+    intermediate inside the card's memory.
+    """
+    inner = jax.vmap(function, in_axes=(0, 0, 0))
+
+    def run(stacked, support, booked):
+        parts = []
+        for start in range(0, count, chunk):
+            width = min(chunk, count - start)
+            window = jax.tree_util.tree_map(
+                lambda value: jax.lax.slice_in_dim(value, start, start + width),
+                (stacked, support, booked),
+            )
+            parts.append(inner(*window))
+        return jax.tree_util.tree_map(
+            lambda *pieces: jnp.concatenate(pieces), *parts
+        )
+
+    return run
+
+
+def chunked_args(function, count, chunk=8):
+    """The same chunking for a program that already takes a batched leading axis."""
+
+    def run(first, second):
+        parts = []
+        for start in range(0, count, chunk):
+            width = min(chunk, count - start)
+            window = jax.tree_util.tree_map(
+                lambda value: jax.lax.slice_in_dim(value, start, start + width),
+                first,
+            )
+            parts.append(
+                function(window, jax.lax.slice_in_dim(second, start, start + width))
+            )
+        return jax.tree_util.tree_map(
+            lambda *pieces: jnp.concatenate(pieces), *parts
+        )
+
+    return run
+
+
 def memory_mb():
     stats = jax.devices()[0].memory_stats()
     if not stats:
@@ -172,7 +218,7 @@ def run_stage_arm(run_dir):
         _record_arm(run_dir, "BATCH", slices=count, memory=memory)
 
         for name, function in stages.items():
-            batched = jax.jit(jax.vmap(function, in_axes=(0, 0, 0)))
+            batched = jax.jit(chunked(function, count))
             wall, walls = timed(batched, (stacked, support, booked))
             _record_arm(
                 run_dir,
@@ -184,9 +230,7 @@ def run_stage_arm(run_dir):
                 walls_ms=walls,
             )
 
-        matrix = jax.jit(jax.vmap(stages["assembly"], in_axes=(0, 0, 0)))(
-            stacked, support, booked
-        )
+        matrix = jax.jit(chunked(stages["assembly"], count))(stacked, support, booked)
         jax.block_until_ready(matrix)
         equilibration = jax.jit(
             jax.vmap(
@@ -214,7 +258,7 @@ def run_stage_arm(run_dir):
         jax.block_until_ready(row)
 
         for name, function in (("read", read_program), ("whole_step", step_program)):
-            compiled = jax.jit(function)
+            compiled = jax.jit(chunked_args(function, count))
             wall, walls = timed(compiled, (stacked, seeds))
             trace_dir = run_dir / f"trace-s{count}-{name}"
             trace_dir.mkdir(parents=True, exist_ok=True)

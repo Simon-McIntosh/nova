@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-02T19:11:28.076Z",
+  "dispatched_at": "2026-11-02T19:04:04Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:167",
+      "id": "reasoning-1",
+      "reason": "a node implementing \u00a75 as written silently changes the physics of every non-converged panel and the plan never says the displayed field changes identity, only that it gains resolution.",
+      "text": "\u00a75 argues the only defect is interpolation and then specifies a map evaluated from currents (\"evaluated exactly as ForwardFluxOperator.raster_image evaluates the lattice\"), but benchmarks/mast_centroid_solve_panels.py:788 draws the solved state (`solved_psi`), and raster_image is the operator applied to the currents implied by that state, equal to it only at convergence \u2014 so on the non-converged arm of every \u00a77 figure the panel would show a field the solver never terminated at, and \u00a75's \"offset between the two saddles\" would be the terminal residual rather than the discretisation offset it is offered as",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:171",
+      "id": "done_when-1",
+      "reason": "the gate cannot fail on the one thing \u00a76 and \u00a77 exist to change, so the plan would accept a redraw that did not happen.",
+      "text": "\u00a76's done-when (1) asserts the panels \"draw both their contours and their separatrix from one \u00a75 map\" but its measurable clauses are label cleanliness (1), schema contents (2) and receipt fields (3); none observes the drawn panel, so a node that adds the currents to the npz and records the spacing in the receipt while leaving the painter on the 33\u00d733 raster passes all three, and \u00a77 repeats the same gap at line 175",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:179",
+      "id": "done_when-2",
+      "reason": "a rewrite of the August record would be committed and the gate would report it unchanged; comparing against the stated HEAD (`git diff <base> -- <paths>`) is the measurement the clause intends.",
+      "text": "\u00a78's done-when (2) uses `git diff --stat` with no revision argument to prove the 2026-08-29 receipt, figures and preregistration are unchanged, but an unargumented `git diff` compares working tree to index and reads empty as soon as the edit is staged or committed \u2014 exactly the failure mode the clause guards against, since the node is required to commit",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "408b99394303e1ccd6f09e079ae571c489080832",
+  "plan_fingerprint": "306ffd002c71e775ada9b4faad4d1012d6e014621146ee6e3f0261e5a78e637b",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 145,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261102T190316618396-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "e27a32672e9aa806b87d07f245003818eeafc909",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited commit, module, symbol, figure path and plan href resolves; `/nova/plans/*` hrefs resolve with `.html` appended.",
+    "done_when": "a finding \u2014 \u00a76 and \u00a77 require the panels be \"drawn from the \u00a75 map\" but no clause can distinguish that from a still-lattice redraw, and \u00a78's \"git diff --stat empty\" reads empty once the change is committed.",
+    "evidence_paths": "pass \u2014 receipts and figures land under docs/figures/**, the large arrays go to the GPFS evidence root per \u00a78, and no gate writes to a session scratchpad or node-local temporary directory.",
+    "naming": "pass \u2014 the new sections carry no plan labels, gate IDs or ticket numbers into symbols or comments, and `forward-gs-2026-11` is a dated evidence directory rather than a source path.",
+    "reasoning": "a finding \u2014 \u00a75's display map is evaluated from the terminal currents (raster_image) while the producer draws the solved state, so on a non-converged state the change is a field substitution, not a resolution improvement, and \u00a77's converged-vs-nonconverged contrast loses its meaning.",
+    "single_goal": "pass \u2014 each of s5\u2013s8 names one deliverable (the fine-map builder, the four centroid panels, the five coil-edit panels, the dated DIII-D re-run), each with three done-when clauses.",
+    "wiring": "pass \u2014 s6, s7 and s8 declare depends-on s5 and s5 is the builder they consume; the plan-blocks relationship to efit-baseline-demonstration is declared and matches \u00a74's \"geometry input to the demonstration gate\"."
+  },
+  "section_digests": {
+    "_document": "20871759e6642425d9d94294ffce36dc0bce4d4af89739e1fa6cfd48d013a450",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "4f824270eb6a6507674bf7cc0efcfdba0caab97bb277e1d9cbe063911e4cdec6",
+    "s6": "a121bfde9d485397dd684e381cb7d75285b5be6c1cb68f28c939ac6fb58686d6",
+    "s7": "b219c3c9613557d0e970e52adc4c4edcfab6d5e11cf1809deb13f7fac26a7c05",
+    "s8": "75fd022245b32a65958d737c024c804425285378d523038d6fe429ebd42f4381"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T19:21:23.706910+00:00"
+}

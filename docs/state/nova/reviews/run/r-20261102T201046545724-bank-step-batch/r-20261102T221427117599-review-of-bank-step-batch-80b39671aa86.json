@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/test_bank_step_batch.py::test_batched_solve_reaches_the_single_solve_flux",
+    "tests/test_bank_step_batch.py::test_one_stale_lane_rebuilds_the_whole_batch"
+  ],
+  "completed_at": "2026-11-02T22:32:03.398Z",
+  "dispatched_at": "2026-11-02T22:15:57Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_step_batch.py",
+      "id": "f2de6643627",
+      "line": 41,
+      "severity": "blocking",
+      "text": "EQUALITY is 1e-10, while the node's done_when requires the batched per-lane result to equal the single-slice step to 1e-12; the landed test also compares converged flux after a 1e-10 residual loop rather than a per-lane step result, so the asserted measure is weaker than the one the node is judged by and does not establish it."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "f830d0b8883",
+      "line": 64,
+      "severity": "blocking",
+      "text": "The landed fragment records that the equality clause failed (maximum relative difference 1.09e-6) and that the CPU arm where the clause was to be measured never ran (line 72), so the node lands with its gate unmet; waverun/regate.log at REVISION=80b39671aa86 ends '2 failed ... EXIT=1' and waverun/cpu-final.log carries a header with no result, leaving no recorded pass for the done_when."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "fe23b9559cb",
+      "line": 61,
+      "severity": "non-blocking",
+      "text": "The fragment states the test compares each batched lane against the same state stepped alone 'to a relative 1e-12', but the test at this same revision asserts rtol=EQUALITY with EQUALITY = 1e-10 (tests/test_bank_step_batch.py:41,192); the record contradicts the code it describes."
+    },
+    {
+      "file": "tests/test_bank_step_batch.py",
+      "id": "fea2c1519ef",
+      "line": 83,
+      "severity": "non-blocking",
+      "text": "_largest_residual concatenates on the trailing axis, yet the recorded gate log for this revision (waverun/regate.log) still raises 'ValueError: axis 1 is out of bounds for array of dimension 1' at this line for the single-lane residual, so either that log does not belong to the revision it is labelled with or the helper is still wrong for a one-dimensional residual; the run records neither resolution."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261102T221427117599-review-of-bank-step-batch-80b39671aa86",
+  "reviewed_base_sha": "2b384a68a6a021658c8ba4e0ca47863237f3a55b",
+  "reviewed_head_sha": "80b39671aa863ae12e1acb7c31a341726efc0663",
+  "reviewed_run_id": "r-20261102T201046545724-bank-step-batch",
+  "scores": {
+    "durability": 8,
+    "evidence": 7,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T22:38:46.756710+00:00",
+  "total": 79
+}

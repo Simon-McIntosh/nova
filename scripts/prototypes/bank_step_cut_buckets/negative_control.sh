@@ -23,11 +23,11 @@ LOG="$RUN/negative-control.log"
 {
     printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
         "$(git -C "$ROOT" rev-parse HEAD)" "$SCRATCH" "$PWD" \
-        "$PY -m pytest -p no:cacheprovider tests/test_bank_step_cut_buckets.py::test_branch_selection_is_outside_cell_vmap -q"
+        "$PY -m pytest -p no:cacheprovider tests/test_bank_step_cut_buckets.py::test_cell_vmap_has_no_per_cell_branch -q"
     "$PY" -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
     set +e
     "$PY" -m pytest -p no:cacheprovider \
-        tests/test_bank_step_cut_buckets.py::test_branch_selection_is_outside_cell_vmap \
+        tests/test_bank_step_cut_buckets.py::test_cell_vmap_has_no_per_cell_branch \
         -q --basetemp="$SCRATCH/basetemp"
     code=$?
     set -e

@@ -23,11 +23,12 @@ def test_normal_cut_count_over_batch_capacity():
         (np.asarray(reading.membership) > 0)
         & (np.asarray(reading.membership) < 1 - 1e-14)
     )
-    assert len(cut) > current._NORMAL_CUT_BATCH_WIDTH
-    chosen = cut[: current._NORMAL_CUT_BATCH_WIDTH + 1]
+    capacity = 8
+    assert len(cut) > capacity
+    chosen = cut[: capacity + 1]
     flags = jnp.zeros_like(reading.normal_form_cells).at[chosen].set(True)
     reading = reading._replace(normal_form_cells=flags)
-    assert int(jnp.count_nonzero(flags)) > current._NORMAL_CUT_BATCH_WIDTH
+    assert int(jnp.count_nonzero(flags)) > capacity
 
     psi = support_read.nodal_jets(
         operands, tuple(jnp.zeros_like(booked.cell_current) for _ in range(3))
@@ -54,8 +55,9 @@ def test_normal_cut_count_over_batch_capacity():
         quadrature,
         booked,
     )
-    observed = jax.jit(
-        lambda flux, local_read: current.book_tangent_channels(
+
+    def batched(flux, local_read):
+        return current.book_tangent_channels(
             flux,
             direction[None],
             local_read,
@@ -69,7 +71,8 @@ def test_normal_cut_count_over_batch_capacity():
             booked,
             jnp.asarray([0]),
         )
-    )(psi, reading)
+
+    observed = jax.jit(batched)(psi, reading)
     np.testing.assert_allclose(
         np.asarray(observed[..., 0]),
         np.stack(tuple(map(np.asarray, expected)), axis=-1),
@@ -79,6 +82,6 @@ def test_normal_cut_count_over_batch_capacity():
     )
 
 
-def test_branch_selection_is_outside_cell_vmap():
+def test_cell_vmap_has_no_per_cell_branch():
     source = inspect.getsource(current.book_tangent_channels)
     assert "jax.vmap(cut_cell)" not in source

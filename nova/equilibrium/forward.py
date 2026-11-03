@@ -1972,7 +1972,6 @@ class ForwardProfile:
                 constraint_pairs=constraint_pairs,
                 **options,
             )
-        external = self.operator.external(current, prescribed_current)
         program = self._accelerated_history_program(
             route,
             requested_class=requested_class,
@@ -1981,7 +1980,8 @@ class ForwardProfile:
         )
         history = program(
             initial_flux,
-            external,
+            current,
+            prescribed_current,
             self.operator,
             None if target_current is None else jnp.asarray(target_current),
         )
@@ -1995,7 +1995,8 @@ class ForwardProfile:
             )
             live_history = live_program(
                 history.state,
-                external,
+                current,
+                prescribed_current,
                 self.operator,
                 None if target_current is None else jnp.asarray(target_current),
             )
@@ -2029,15 +2030,21 @@ class ForwardProfile:
         live_read_fallback: bool = False,
         **options,
     ) -> Callable[
-        [jax.Array, jax.Array, ForwardFluxOperator, jax.Array | None],
+        [
+            jax.Array,
+            jax.Array | None,
+            jax.Array | None,
+            ForwardFluxOperator,
+            jax.Array | None,
+        ],
         fixed_point.FixedPointResult,
     ]:
         """Return one compiled history program for a static solve configuration.
 
         The callable is retained by the profile so repeated conductor states
-        reuse the same JAX function identity. Initial flux and exterior flux
-        remain explicit array arguments; topology callbacks and policy values
-        are static properties of the mesh program.
+        reuse the same JAX function identity. Initial flux, conductor currents
+        and target current remain explicit arguments; topology callbacks and
+        policy values are static properties of the mesh program.
         """
 
         def static_value(value):
@@ -2095,10 +2102,12 @@ class ForwardProfile:
 
             def solve(
                 initial_flux,
-                external,
+                current,
+                prescribed_current,
                 operator,
                 target_value,
             ):
+                external = operator.external(current, prescribed_current)
                 if live_read_fallback:
                     return fixed_point.newton_krylov(
                         mapped,
@@ -2126,10 +2135,12 @@ class ForwardProfile:
 
             def solve(
                 initial_flux,
-                external,
+                current,
+                prescribed_current,
                 operator,
                 target_value,
             ):
+                external = operator.external(current, prescribed_current)
                 return scheme(
                     mapped,
                     initial_flux,

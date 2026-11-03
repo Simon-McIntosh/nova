@@ -182,6 +182,10 @@ def run_target_once(
     ]
     environment = dict(os.environ)
     environment.update(arm_environment(arm, root))
+    if arm != "c":
+        environment.pop("JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES", None)
+    if arm != "d":
+        environment.pop("XLA_FLAGS", None)
     environment["NOVA_BOOK_RESULTS"] = str(results)
     started = perf_counter()
     completed = subprocess.run(

@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "cosmetic: missing trailing newline in a prototype script, not caught by the configured ruff rules",
       "recorded_at": "2026-11-03T07:56:06.758674+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "style: positional STAGES tuple in a prototype plot script; no behaviour defect",
+      "recorded_at": "2026-11-03T07:56:25.823537+00:00"
     }
   },
   "findings": [

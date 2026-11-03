@@ -1,0 +1,120 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": {
+    "tests/test_database.py": {
+      "189": "Fails if a legacy and owner group collide, or the legacy fixture is not written.",
+      "197": "Fails if the identity-only key is accepted; this check also requires the specific stale-key message.",
+      "199": "Fails if the refused legacy value enters reader.data.",
+      "201": "Fails if load_build() does not rebuild once.",
+      "202": "Fails if the legacy fixture remains after write, subject to the shared-key fixture limitation.",
+      "203": "Fails if reader.data does not hold the fixed rebuilt -102.454 Wb.",
+      "204": "Fails if the owner group does not hold that fixed rebuilt value.",
+      "220": "Fails if an owner key with no convention attribute triggers a rebuild.",
+      "221": "Fails if load_build() changes any field of the independently supplied expected dataset."
+    },
+    "tests/test_equilibrium_reader_cocos.py": {
+      "278": "Fails if an unkeyed marker-only group is accepted.",
+      "280": "Fails if a refused group still merges its psi_boundary into the reader.",
+      "286": "Fails if convention_store stops returning SignalStore.",
+      "287": "Fails only if convention_store and the NOVA_CONVENTION import differ; changing the shared constant moves both sides.",
+      "289": "Fails if different COCOS values produce the same cache key.",
+      "291": "Fails if a foreign-key group is served by the reader.",
+      "296": "Fails if store() writes the supplied -5 Wb under another group or changes its value.",
+      "299": "Fails if load() cannot read the owner group or changes its -5 Wb value.",
+      "300": "Fails if the foreign group was overwritten or deleted instead of kept isolated.",
+      "303": "Fails if delete_group() leaves the owner group present.",
+      "304": "Fails if delete_group() also removes the foreign group.",
+      "321": "Fails if load_build() serves the legacy group without invoking build.",
+      "322": "Fails if rebuilt -5 Wb is absent from the owner group.",
+      "323": "Fails if legacy_group() still reports the fixture after the rebuild.",
+      "325": "Fails if a warm second load rebuilds again."
+    },
+    "tests/test_internal_convention_owner.py": {
+      "152": "Fails if foreign and owner groups collide or the foreign write is absent.",
+      "153": "Fails if a misleading cocos=17 attribute authorizes the foreign-key group.",
+      "155": "Fails if a refused foreign value still merges into the reader.",
+      "158": "Fails if load_build() does not rebuild once.",
+      "159": "Fails if reader.data differs from the fixed rebuilt -102.454 Wb.",
+      "160": "Fails if the owner key does not contain the fixed rebuilt value.",
+      "161": "Fails if the foreign +102.454 Wb group is overwritten or deleted.",
+      "173": "Fails if an owner key without an attribute marker is rebuilt.",
+      "174": "Fails if the loaded owner dataset differs from the independently supplied expected dataset."
+    },
+    "tests/test_pointconstraint.py": {
+      "69": "Fails if the DD3 or DD4 input digits are refused rather than translated.",
+      "89": "Fails if the translator or inverse constraint changes the boundary flux away from the independently calculated -5 Wb contour."
+    }
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/database/datafile.py:27:Datafile.load_build",
+    "nova/imas/pulsedesign.py:705:BenchmarkDesign.__post_init__",
+    "nova/imas/ensemble.py:60:Ensemble._load_attrs"
+  ],
+  "completed_at": "2026-11-03T07:57:03Z",
+  "dispatched_at": "2026-11-03T07:42:29Z",
+  "failure_delta_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063752378003-dd-convention-consolidation/covering-head.log",
+    "after_summary": "69 passed, 33 skipped, 13 warnings in 333.61s (0:05:33); EXIT=0",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063752378003-dd-convention-consolidation/covering-base.log",
+    "baseline_summary": "65 passed, 33 skipped, 13 warnings in 303.04s (0:05:03); EXIT=0"
+  },
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_reader_cocos.py",
+      "line": "287",
+      "severity": "non-blocking",
+      "text": "non-blocking: store.cocos is assigned NOVA_CONVENTION in convention_store and then compared with that same constant, so changing the constant leaves this assertion green; exempted because the independent fixed-sign assertion elsewhere in this file and the foreign-key refusal still exercise the behavior."
+    },
+    {
+      "file": "tests/test_equilibrium_reader_cocos.py",
+      "line": "310",
+      "severity": "non-blocking",
+      "text": "non-blocking: the legacy fixture takes its group from the same legacy_cache_key method used by the reader, so a wrong compatibility key moves both sides and the test stays green against a real historical key; folded into legacy-equilibrium-cache-reclaim to pin a prior key independently."
+    },
+    {
+      "file": "nova/imas/equilibrium.py",
+      "line": "925",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new convention-keyed store bypasses the old reader's flat equilibrium group, while SignalStore.reclaim_legacy_group only recognizes its own identity-hash legacy key, leaving the old flat group on disk after a successful rebuild; folded into legacy-equilibrium-cache-reclaim for targeted removal."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "commits 13fca071ea4e928a4a47243769ebf22c9869bf32 through aab290682ff4ad153e3f0693bdc06e01781e1a75 change one cache implementation, three test files plus the analytic boundary test, and docs/evidence/fragments/dd-cocos-ingest/dd-convention-consolidation.html.",
+    "done_when": "prompt.txt:112 requires the writer, owner, cache and wall checks plus record corrections; covering-base.log and covering-head.log completed at 65 and 69 passes with the same 33 skips and zero failures, and the named mutation logs show refusals.",
+    "goal": "prompt.txt:38 asks to close the COCOS 17 consolidation followup, and nova/imas/equilibrium.py:925-959 delegates cache access while tests/test_pointconstraint.py:52-90 and the evidence fragment close its remaining record items.",
+    "manifest": "manifest.md records five commits, six changed paths, complete baseline_suite and after_suite receipts, zero added failures, and the red writer-map.log negative control.",
+    "write_paths": "prompt.txt:77-89 and the widened orientation_write_paths in the reviewed manifest cover all six paths in the base-to-head diff, including the two cache contract test files admitted by the scope acknowledgement."
+  },
+  "justifications": {
+    "durability": "tests/test_pointconstraint.py:89 and tests/test_internal_convention_owner.py:153 fail on recorded translation and foreign-key mutations, while tests/test_equilibrium_reader_cocos.py:287 and :310 contain assertions or fixtures that follow values supplied by the test.",
+    "evidence": "covering-base.log and covering-head.log report 65 and 69 passes with 33 skips each and exit 0, while cache-reproduction.log and foreign-key-control.log show the guarded read accepting the old marker and refusing a foreign key after the change.",
+    "fit": "nova/imas/equilibrium.py:925-959 uses the existing SignalStore and Datafile.load_build protocol and introduces no forbidden plan or version label in source symbols.",
+    "goal_fidelity": "nova/imas/equilibrium.py:925-959 routes cache reads, writes and eviction through SignalStore, while tests/test_pointconstraint.py:52-90 supplies the independent boundary-flux oracle the followup asks for.",
+    "reuse": "the capability search in nova/io and nova/database found SignalStore in nova/io/signalstore.py:33 as the existing cache-key and refusal owner, which the new convention_store property wraps rather than duplicates.",
+    "scope_discipline": "the six paths in git diff 2d2172dd7b06548d06c634fe8b3def7acd88f9b4..aab290682ff4ad153e3f0693bdc06e01781e1a75 are all in the reviewed manifest's orientation_write_paths, with the two extra test files covered by the recorded widening."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 asks to close the COCOS 17 consolidation followup, and nova/imas/equilibrium.py:925-959 delegates cache access while tests/test_pointconstraint.py:52-90 and the evidence fragment close its remaining record items.\nVERDICT done_when: prompt.txt:112 requires the writer, owner, cache and wall checks plus record corrections; covering-base.log and covering-head.log completed at 65 and 69 passes with the same 33 skips and zero failures, and the named mutation logs show refusals.\nVERDICT write_paths: prompt.txt:77-89 and the widened orientation_write_paths in the reviewed manifest cover all six paths in the base-to-head diff, including the two cache contract test files admitted by the scope acknowledgement.\nVERDICT manifest: manifest.md records five commits, six changed paths, complete baseline_suite and after_suite receipts, zero added failures, and the red writer-map.log negative control.\nVERDICT diff: commits 13fca071ea4e928a4a47243769ebf22c9869bf32 through aab290682ff4ad153e3f0693bdc06e01781e1a75 change one cache implementation, three test files plus the analytic boundary test, and docs/evidence/fragments/dd-cocos-ingest/dd-convention-consolidation.html.\nCALL_SITES: nova/database/datafile.py:27:Datafile.load_build, nova/imas/pulsedesign.py:705:BenchmarkDesign.__post_init__, nova/imas/ensemble.py:60:Ensemble._load_attrs\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/imas/equilibrium.py:925-959 routes cache reads, writes and eviction through SignalStore, while tests/test_pointconstraint.py:52-90 supplies the independent boundary-flux oracle the followup asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: covering-base.log and covering-head.log report 65 and 69 passes with 33 skips each and exit 0, while cache-reproduction.log and foreign-key-control.log show the guarded read accepting the old marker and refusing a foreign key after the change.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the six paths in git diff 2d2172dd7b06548d06c634fe8b3def7acd88f9b4..aab290682ff4ad153e3f0693bdc06e01781e1a75 are all in the reviewed manifest's orientation_write_paths, with the two extra test files covered by the recorded widening.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_pointconstraint.py:89 and tests/test_internal_convention_owner.py:153 fail on recorded translation and foreign-key mutations, while tests/test_equilibrium_reader_cocos.py:287 and :310 contain assertions or fixtures that follow values supplied by the test.\nSCORE fit: 19\nJUSTIFICATION fit: nova/imas/equilibrium.py:925-959 uses the existing SignalStore and Datafile.load_build protocol and introduces no forbidden plan or version label in source symbols.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search in nova/io and nova/database found SignalStore in nova/io/signalstore.py:33 as the existing cache-key and refusal owner, which the new convention_store property wraps rather than duplicates.\nFINDING tests/test_equilibrium_reader_cocos.py:287 non-blocking: store.cocos is assigned NOVA_CONVENTION in convention_store and then compared with that same constant, so changing the constant leaves this assertion green; exempted because the independent fixed-sign assertion elsewhere in this file and the foreign-key refusal still exercise the behavior.\nFINDING tests/test_equilibrium_reader_cocos.py:310 non-blocking: the legacy fixture takes its group from the same legacy_cache_key method used by the reader, so a wrong compatibility key moves both sides and the test stays green against a real historical key; folded into legacy-equilibrium-cache-reclaim to pin a prior key independently.\nFINDING nova/imas/equilibrium.py:925 non-blocking: the new convention-keyed store bypasses the old reader's flat equilibrium group, while SignalStore.reclaim_legacy_group only recognizes its own identity-hash legacy key, leaving the old flat group on disk after a successful rebuild; folded into legacy-equilibrium-cache-reclaim for targeted removal.\n",
+  "review_run_id": "r-20261103T073834240507-review-of-dd-convention-consolidation-aab290682ff4",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "aab290682ff4ad153e3f0693bdc06e01781e1a75",
+  "reviewed_run_id": "r-20261103T063752378003-dd-convention-consolidation",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T08:06:48.928691+00:00",
+  "total": 112
+}

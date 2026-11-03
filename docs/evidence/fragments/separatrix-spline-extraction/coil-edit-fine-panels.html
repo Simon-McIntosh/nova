@@ -56,6 +56,14 @@ each, state 19 among them, and the four that remain open trace a cycle admitting
 no closed candidate while state 1 admits no cycle at all. The connectivity test
 passes 42 of 42 at the regenerated archive.</p>
 
+<p id="coil-edit-fine-panels-control">A one-percent rise of one stored
+conductor current moves the drawn map by <code>2.90e-2 Wb</code>, 0.79% of its
+<code>3.67 Wb</code> peak, so the contours follow the state rather than a cached
+current vector. The first form of that control read exactly zero, and it was
+the control that was wrong: it perturbed the panel's current but reused a
+coupling that had already contracted the unperturbed one. The coupling is now
+built per current, as the machine path builds it.</p>
+
 <p id="coil-edit-fine-panels-caption">The caption is wrapped to the canvas. A
 first render set it as one line, which ran past both edges of every figure it
 was drawn on; the caption is now filled to 150 characters and every redrawn

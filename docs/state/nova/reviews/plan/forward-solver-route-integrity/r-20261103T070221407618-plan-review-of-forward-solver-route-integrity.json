@@ -1,0 +1,88 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-03T08:33:32.301Z",
+  "dispatched_at": "2026-11-03T08:26:42Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:477",
+      "id": "done_when-1",
+      "reason": "a builder dispatched on \u00a77 cannot satisfy or honestly falsify its done-when, and can only report the gate conflict, so the section as written cannot be closed.",
+      "text": "\u00a77's done-when is \"both cases converged in exact clip mode at the reduced rung with the terminal saddle inside the position bound\", while the same section's map-fidelity gate at line 556 rules that \"Exact mode passes nowhere\" and that \"every 132-cell diverted reading made today stands as a record of an invalid footing, not as a finding about the solver\", backed by the measured exact-mode mismatch at line 567 (relative sup 0.447979374 / RMS 0.490527303 at requested 110 cells, 0.120137644 / 0.165753628 even at 2500) against a 1e-2 pass bound \u2014 so the section demands a convergence reading on a footing its own gate says cannot carry one",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:477",
+      "id": "reasoning-1",
+      "reason": "the section's whole mechanism for producing the next node is a record that names no mechanism, so the dispatch either waits on a receipt that will never arrive or writes a repair with no attributed cause.",
+      "text": "\u00a77 states the repair node \"is authored from the ladder's receipt\", but line 607 states \"the repair node is authored from the first-step record instead\", and both candidate records decline: the accepted partial ladder (line 469) attributes no operator landing at all and its \"stricter full-ladder validator still refuses completion\", while the first-step record (line 522) concludes \"The map's large null space alone does not identify the mechanism of this collapse\" and authors no repair",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:478",
+      "id": "reasoning-2",
+      "reason": "the declared next node has already run and its verdict is partly unavailable, so dispatching it as written repeats a completed allocation and yields the same qualified answer.",
+      "text": "\u00a77 names `pcrf-production-route-trip-panels` as \"first node of the next session, locked by decision mechanism-before-commit\", but the same section records that node's measurement as complete: line 605 reports the trip-panel job finished and the verdict as census-read (both exact arms lose the admitted saddle on trip 1 with finite support moments throughout), and lines 604-606 note that \"rejected inner-trial support finiteness is not measured\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:476",
+      "id": "reasoning-3",
+      "reason": "\u00a77's premise that the construction differs from the converged 2026-09-15 receipt \"only in carrier identity and seed state\" needs a reproducible trip count to hold; two unreconciled counts for one construction leave the attribution argument resting on a number that is not stable.",
+      "text": "the diverted production route at `f5af729a9` is recorded twice with different trip counts and residuals that \u00a77 then relies on: line 455 gives four trips at 0.17503373772714848, and line 465 gives six trips at 0.17491774151339107 for the same revision, case and construction, while line 476 quotes \"residual 0.175 after four trips\" without reconciling the two",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:477",
+      "id": "anchors_resolve-1",
+      "reason": "the hygiene work list and the decision that gates \u00a77's first node are unreachable from the plan a builder is dispatched on, and the only pointer to them is an unlinked reference to a superseded plan.",
+      "text": "\u00a77 refers to \"followup f-pcrf-003\" (line 477) and to decision `mechanism-before-commit` (line 478) as the lock on its first node, but this plan's followups carry only `f-fsri-*` ids and its decisions carry only `krylov-slice-2-acceptance`, `newton-krylov-third-repair`, `state-machine-acceptance` and `fusion-autotuner`; both targets exist only in `docs/plans/plasma-cell-read-fidelity.html`, which is now `superseded`, and the provenance note (line 475) redirects section numbers only",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:435",
+      "id": "reasoning-4",
+      "reason": "the node measures each candidate's uncertainty radius and prints the merge decision, so the merge criterion is answered from the measurement rather than from this summary sentence; the error misstates the cluster's size but does not change what the node must do.",
+      "text": "\u00a76 says \"three qualified saddle candidates within 2.3 cm of each other\" and prints the three as (1.511, -1.028), (1.493, -1.019), (1.507, -1.000) m, whose extreme pair \u2014 the first and the third \u2014 is 2.83 cm apart (the other two pairs are 2.01 cm and 2.36 cm), so the sentence's span claim is contradicted by the coordinates in the same sentence",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "bde586f9dcf14fa2a84dee42d1d081813692f29f",
+  "plan_fingerprint": "a15fa4b251c9409ba62486a9cc9d1a29141f7051b1760a5c2a411d9c65e6682b",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 146,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261103T070221407618-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "15032427f4fe8d65c11e644a3770d333029a7e18",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a77 cites followup `f-pcrf-003` and decision `mechanism-before-commit`, neither of which exists in this plan.",
+    "done_when": "a finding \u2014 \u00a77's section-level done-when requires convergence in exact clip mode at the reduced rung, which the same section's map-fidelity gate declares unmeasurable.",
+    "evidence_paths": "pass \u2014 the receipts \u00a76 and \u00a77 cite are on durable paths (`docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.json`, `docs/figures/plasma-cell-read-fidelity/map-fidelity/map-fidelity.json`, `docs/figures/exact-mode-production-ladder/production-route-ladder.json` all present), and the archive anchors they name (`#terminal-state-trip-arms`, `#analytic-map-fidelity`, `#production-route-ladder-final`) resolve in `docs/evidence/archive/plasma-cell-read-fidelity-landed.html`.",
+    "naming": "pass \u2014 the moved text introduces no plan labels, stage names or ticket numbers into code, symbols or comments; `pcrf-` prefixes appear only in dispatch node ids, not in source.",
+    "reasoning": "four findings \u2014 the repair node has two contradictory authors each of which its own record declined, a node declared \"first of the next session\" has already run, a trip count the section relies on is recorded two ways for the same construction and revision, and \u00a76's saddle-cluster separation contradicts the three coordinates printed beside it.",
+    "single_goal": "pass \u2014 every named node (e.g. `pcrf-production-route-trip-panels`, `pcrf-vertical-constraint-on-the-certificate-route`, `pcrf-certificate-gate-is-a-live-test`) carries one deliverable and one verdict.",
+    "wiring": "pass \u2014 the merge is wired correctly: plasma-cell-read-fidelity is marked `superseded` with s1/s4 `deferred`, so \u00a76 and \u00a77 are not dispatchable twice, plan-blocks gained `single-grid-solver-cutover` (the direction \u00a77's done-when needs) and plan-informs gained the three plans \u00a76's attribution names as owner."
+  },
+  "section_digests": {
+    "_document": "161b896dcf0ce1c5ab426fadd385cb5cd8028f94069a3332652a603e358c4620",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978",
+    "s5": "3eceab734ef256613c430ffb3fca1ab6698059a2fabc81dcdbb92c6a02473985",
+    "s6": "8f6cd14a730dcd4c297288745f7a509fd40315df2a6cb263a407e46b8fb95192",
+    "s7": "cf27d604344c1ff56edeaa1c954737eea2e487f3552d1f268954d93a6d12d53b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T08:38:29.157176+00:00"
+}

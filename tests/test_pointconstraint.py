@@ -6,7 +6,9 @@ import pytest
 import xarray
 
 from nova.equilibrium.inverse import Constraint, Control, InverseDesign
+from nova.imas.getslice import GetSlice
 from nova.imas.test_utilities import mark
+from nova.io.sourcemap import translate_equilibrium
 
 
 @pytest.fixture
@@ -47,30 +49,44 @@ def test_constraint_point_index():
     assert np.allclose(constraint.index("bz"), [1, 3])
 
 
-def test_inverse_boundary_flux_carries_the_reader_sign():
-    """The boundary-psi constraint takes the reader's COCOS 17 value unchanged.
+@pytest.mark.parametrize("dd_version,stored_flux", [("3.39.0", 5.0), ("4.1.0", -5.0)])
+def test_inverse_boundary_flux_carries_the_reader_sign(dd_version, stored_flux):
+    """The read-to-constraint seam agrees with psi = -((R - 6)^2 + Z^2).
 
-    The reader translates the source's flux sense once, so the value it serves
-    already carries nova's internal convention and the constraint applies no
-    second negation. A synthetic read with a known sign is what makes that
-    checkable without a solved equilibrium: the constraint must hold the value
-    it was handed, and a compensating negation would show here as its opposite.
+    The four boundary points lie on that analytic field's -5 Wb contour.
+    DD3 stores +5 Wb and DD4 stores -5 Wb; translating either must give the
+    same physical constraint, measured independently from the point geometry.
     """
+    signals = translate_equilibrium(
+        source_name="analytic boundary",
+        dd_version=dd_version,
+        ip=1.0e6,
+        psi_axis=0.0,
+        psi_boundary=stored_flux,
+        q=1.0,
+        b0=5.3,
+    )
+    assert not signals.blocked
 
     class SyntheticRead(InverseDesign):
-        boundary_flux = -5.0
         square = False
         strike = False
         limiter = False
-        control_points = np.ones((8, 2))
+        control_points = np.array(
+            [[7, 2], [5, 2], [5, -2], [7, -2], [6, 0], [6, 0], [6, 0], [6, 0]]
+        )
 
         def __getitem__(self, key):
             assert key == "psi_boundary"
-            return self.boundary_flux
+            return GetSlice.translated(
+                signals, "equilibrium/boundary_separatrix/psi", stored_flux
+            )
 
     control = object.__new__(SyntheticRead)
     control.update_constraints()
-    assert np.allclose(control.constraint.poloidal_flux[:4], -5.0)
+    radius, height = control.control_points[:4].T
+    analytic_flux = -((radius - 6) ** 2 + height**2)
+    np.testing.assert_array_equal(control.constraint.poloidal_flux[:4], analytic_flux)
     assert np.allclose(control.constraint.poloidal_flux[4:], 0.0)
 
 

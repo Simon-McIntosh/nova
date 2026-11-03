@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so this is the neutral value the record shape requires and not a measurement. No base/head gate pair was read and no added failure is claimed.",
+  "attachment_map": {
+    "waverun/per-slice-wall.png": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg"
+  },
+  "attachment_note": "No image was copied into this node's directory. The render judged is the one the reviewed run's manifest names as its inspected PNG: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/waverun/per-slice-wall.png, 1400x720 RGB at 100 dpi, mtime 2026-11-03 07:29:57, the file cited by the manifest artifacts line and by waverun/figure.log (OVERLAP_CHECK=clean, PNG (1400, 720), EXIT=0). It carries the assembly-ring fix committed at 57d53a3be (2026-11-03 07:32), rendered from the working tree just before that commit. The stale pre-fix render at the run-directory root (per-slice-wall.png, 60969 bytes, 2026-11-02 22:25, still carrying the old opaque assembly broken by the tangent) is not named by the run and was not judged. Every verdict was formed on the PNG at native resolution and on 5x-12x nearest-neighbour magnifications of the crowded top band, the four marker columns and both truncation labels; no SVG and no other image was opened, read, rendered or searched.",
+  "completed_at": "2026-11-03T08:07:03Z",
+  "dispatched_at": "2026-11-03T07:28:48Z",
+  "figure_checks": {
+    "caption": "Read at the reviewed head in docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html:36-37. The caption is not a restatement of a title (the figure carries none): it names the state, the axes, the sampling floor, the reason the read and whole-step series fall, the halted booking/assembly pair with the ring rationale, and the truncation at sixteen slices. The alt text states the plotted values, which match the render: read 53.8 to 12.9 and whole step 190.3 to 131.0 between one and sixteen slices, booking tangent 109.6/108.9/109.0 and assembly 109.6/110.7/110.5 at four/sixteen/sixty-four, 121.2 and 125.3 at one. The fragment at this revision carries one img element with one alt text.",
+    "clipping": "Ink bounding box on the 1400x720 render is x 21..1379, y 20..698; the outer 1, 2, 4 and 8 px frames each contain 0 ink pixels, so no text or data is clipped.",
+    "contrast_measurement": "WCAG relative-luminance contrast against white computed per series colour: #54a24b 3.16, #b279a2 3.41, #4c78a8 4.61, #b8560f 4.80, #2f6b5e 6.20, #6f4fa8 6.25, #1b1b1b 17.22.",
+    "render": "Judged only from waverun/per-slice-wall.png. Pixel measurements were taken on the RGB array; the probe scripts and their outputs are under /tmp/reckon-crew-scratch/r-20261103T064428906922-review-of-bank-step-batch-ec5ba1ad5bcf-figure/.",
+    "series_visibility": "Core-pixel counts in the y 80..135 marker band at x 142/540/938/1338: booking tangent 80/84/83/77, assembly 43/58/36/61. The assembly ring is drawn hollow with markerfacecolor none (plot.py:21, size 11, edge 2.0) over the tangent square (plot.py:19, size 6) at zorder 4 under the tangent's 6, so the ring shows around the square at every column rather than being covered.",
+    "text_geometry": "Legend occupies rows 40..85 (row 1 x 539..1359). The whole-step data line is at row 91..93 between x 800..830, clearing the legend descenders by 6 px. Two in-place labels: 'whole step truncated at 16' rows 118..134 x 947..1172; 'read truncated at 16' rows 295..307 x 948..1140."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg",
+      "render": "waverun/per-slice-wall.png (1400x720, dpi 100)",
+      "rubric": {
+        "contrast": "pass. Near-black text on white throughout; the lowest series-line contrast is geometry #54a24b at 3.16:1, above the 3:1 floor.",
+        "data_ink": "pass. Seven lines and their markers only; no non-data ink beyond the two spines, ticks, labels and the frameless legend.",
+        "decoration": "pass. No grid, fill, span, gradient or background styling.",
+        "label_collision": "pass. Zero ink in the outer 8 px frame; no label-on-label or label-on-data overlap; the tightest text clearance is 6 px above the tangent line and the tightest mark-to-legend clearance is ~1 px (finding 1, non-blocking).",
+        "legibility": "pass. Seven series readable at every batch size; the hollow-assembly-ring plus filled-tangent-square construction keeps both coincident series visible (assembly 43/58/36/61 core px against tangent 80/84/83/77 at the four columns).",
+        "table_form": "pass. A per-slice cost against batch size across seven series is a curve set, not tabulated information."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_batch/plot.py",
+      "id": "fc0071422ee",
+      "line": 95,
+      "severity": "non-blocking",
+      "summary": "The whole-step truncation cross at the 16-slice column (drawn by plot.py:68-77, markersize 11) reaches up to row 86, while the 'geometry tangent' legend row sits immediately above with its descenders down to row 85, a clearance of about one pixel. The legend is placed at loc='upper right' (plot.py:95) over the band the highest series occupies, and the module's own overlap guard (plot.py:104-114) compares only Text artists against each other, so a text-versus-data-mark near-touch like this is not caught. Nothing overlaps and both the legend word and the cross remain readable, but the marker reads as crowding the legend at a glance."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261103T064428906922-review-of-bank-step-batch-ec5ba1ad5bcf-figure",
+  "reviewed_base_sha": "2b384a68a6a021658c8ba4e0ca47863237f3a55b",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg"
+  ],
+  "reviewed_head_sha": "ec5ba1ad5bcf6a8ebcb667d33a9b2f81a1b64800",
+  "reviewed_run_id": "r-20261102T201046545724-bank-step-batch",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC per-slice-wall.svg legibility: pass. All seven series read at a glance at every batch size. The assembly is now a wide hollow mauve ring with the booking tangent's small filled teal square visible inside it: at the 1-, 4-, 16- and 64-slice columns the marker bands carry 43, 58, 36 and 61 assembly core pixels against 80, 84, 83 and 77 tangent pixels, so neither is erased. Read, residual-and-booking, geometry tangent and LU factor are separated by position and marker shape.",
+    "RUBRIC per-slice-wall.svg data_ink: pass. Seven 3.0 pt lines and their markers are the only ink in the panel; no gradient, band, fill, shading or secondary mark anywhere in the 1400x720 image.",
+    "RUBRIC per-slice-wall.svg decoration: pass. No gridlines, no background fill and no styled theme: the top and right spines are hidden (plot.py:93) and ax.grid(False) at plot.py:94; only the two scaled spines, their ticks and labels remain.",
+    "RUBRIC per-slice-wall.svg contrast: pass. Every text element is near-black on white, and the two in-place truncation labels read at 6.25:1 (read, #6f4fa8) and 17.22:1 (whole step, #1b1b1b). Every series colour also clears the repository's 3:1 data-line floor on white: geometry #54a24b 3.16:1, assembly #b279a2 3.41:1, residual #4c78a8 4.61:1, LU #b8560f 4.80:1, booking #2f6b5e 6.20:1, read #6f4fa8 6.25:1.",
+    "RUBRIC per-slice-wall.svg table_form: pass. Per-slice wall in milliseconds against slices per batch across seven stage series is a genuine plotted relationship whose differing slopes (read and whole step falling, the two tangents and the assembly flat) are a shape fact a table of the same numbers would not carry on its own.",
+    "RUBRIC per-slice-wall.svg label_collision: pass. Nothing is clipped: ink occupies x 21..1379 and y 20..698 of the 1400x720 canvas, leaving 20-21 px of margin, and the outer 8 px frame contains zero ink. No text overlaps another. The in-place labels sit in clear space: the 'whole step truncated at 16' text occupies rows 118..134 while the tangent line under it ends at row 112, a 6 px clearance, and the 'read truncated at 16' text (rows 295..307) clears the LU line below it (rows 326..374). The tightest clearance in the figure is the whole-step truncation cross at the 16-slice column (rows 86..101) against the 'geometry tangent' legend descenders immediately above (rows 83..85), recorded as non-blocking finding 1."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T07:55:35.467718+00:00",
+  "total": null
+}

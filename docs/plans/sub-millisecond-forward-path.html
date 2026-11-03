@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="111">
+<meta name="plan-version" content="112">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -428,6 +428,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261102T201046545724-bank-step-batch" data-who="reckon-build" data-when="2026-11-03T06:36:24Z">
     <div class="r-comment-body"><p>bank-step-batch adds support_read.step_batch and measures it at the diverted 550-cell state on one H200: batching does not help the step as built, because the read falls from 53.81 to 12.87 ms per slice between one and sixteen slices while the vmapped booking tangent and its assembly stay at 109 to 111 ms per slice against 27.87 ms unbatched, and the same five fusions cost 4.5 times as much per lane under vmap with nothing converted into a sort or a select; the residual alternation between 3.19e-10 and 1.64e-7 belongs to the operator iteration and not to the batch, and the batch pays for its slowest lane (20 to 22 steps at four lanes against 3 unbatched), while the frozen-lane batch meets the 1e-10 bound on every lane and agrees with each lane own solve inside a precision budget of 1e-8 of the flux span and 5e-4 of the minor radius.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261103T064428906922-review-of-bank-step-batch-ec5ba1ad5bcf-figure" data-who="reckon-build" data-when="2026-11-03T08:07:03Z">
+    <div class="r-comment-body"><p>independent figure review of r-20261102T201046545724-bank-step-batch at head ec5ba1ad5bcf, judged only from waverun/per-slice-wall.png: six rubric items all pass, the assembly hollow-ring fix is visible at all four batch-size columns (43/58/36/61 core px against tangent 80/84/83/77), every series colour clears 3:1 on white (lowest geometry 3.16:1), nothing is clipped (ink margins 20-21 px, outer 8 px frame empty), and one non-blocking finding records the whole-step truncation cross approaching the geometry-tangent legend descender to about one pixel.</p></div>
 </div>
 </section>
 </main>

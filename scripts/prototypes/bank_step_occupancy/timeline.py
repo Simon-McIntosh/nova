@@ -1,9 +1,11 @@
 """Summarise device activity within one warm Newton call."""
 
 import argparse
+from collections import Counter
 import gzip
 import json
 from pathlib import Path
+import re
 
 
 def main(path: Path, arm_log: Path):
@@ -38,20 +40,24 @@ def main(path: Path, arm_log: Path):
         end = max(
             event["ts"] + event["dur"] for event in events if event.get("ph") == "X"
         )
-    kernels = sorted(
+    device_events = sorted(
         (
             event
             for event in events
             if event.get("ph") == "X"
             and event.get("pid") in devices
-            and not event.get("name", "").startswith(("Memcpy", "Memset"))
             and start <= event["ts"] < end
         ),
         key=lambda event: event["ts"],
     )
+    kernels = [
+        event
+        for event in device_events
+        if not event.get("name", "").startswith(("Memcpy", "Memset"))
+    ]
     assert kernels, "trace has no GPU kernels; cannot infer idle time"
     intervals = []
-    for event in kernels:
+    for event in device_events:
         left, right = event["ts"], event["ts"] + event["dur"]
         if intervals and left <= intervals[-1][1]:
             intervals[-1][1] = max(intervals[-1][1], right)
@@ -59,8 +65,8 @@ def main(path: Path, arm_log: Path):
             intervals.append([left, right])
     busy = sum(right - left for left, right in intervals)
     gaps = []
-    for earlier, later in zip(kernels, kernels[1:], strict=False):
-        gap = later["ts"] - (earlier["ts"] + earlier["dur"])
+    for earlier, later in zip(intervals, intervals[1:], strict=False):
+        gap = later[0] - earlier[1]
         if gap > 0:
             gaps.append((gap, earlier, later))
     gaps.sort(key=lambda row: row[0], reverse=True)
@@ -71,12 +77,36 @@ def main(path: Path, arm_log: Path):
         if event.get("ph") == "X" and event.get("pid") not in devices
     ]
 
-    def host_after(timestamp):
-        following = [event for event in host if timestamp <= event["ts"] < end]
+    def host_after(start_time, end_time):
+        following = [event for event in host if start_time <= event["ts"] < end_time]
         if not following:
-            return "none inside compiled dispatch"
+            return "none in gap"
         event = min(following, key=lambda item: item["ts"])
         return event.get("args", {}).get("long_name", event.get("name", "unknown"))
+
+    def adjacent_kernel(timestamp, direction):
+        if direction == "before":
+            eligible = [event for event in kernels if event["ts"] < timestamp]
+            return (
+                max(eligible, key=lambda item: item["ts"])["name"]
+                if eligible
+                else "none"
+            )
+        eligible = [event for event in kernels if event["ts"] >= timestamp]
+        return (
+            min(eligible, key=lambda item: item["ts"])["name"] if eligible else "none"
+        )
+
+    copies = [event for event in device_events if event["name"] == "MemcpyD2H"]
+    copy_bytes = sum(
+        int(match.group(1))
+        for event in copies
+        if (
+            match := re.search(
+                r"size:(\d+)", event.get("args", {}).get("memcpy_details", "")
+            )
+        )
+    )
 
     print(
         "TIMELINE "
@@ -86,16 +116,22 @@ def main(path: Path, arm_log: Path):
                 "gpu_busy_ms": busy / 1000,
                 "busy_fraction": busy / (1000 * measured_wall),
                 "kernels": len(kernels),
+                "device_to_host_copies": len(copies),
+                "device_to_host_bytes": copy_bytes,
+                "device_to_host_hlo": dict(
+                    Counter(
+                        event.get("args", {}).get("hlo_op", "unknown")
+                        for event in copies
+                    )
+                ),
                 "gpu_devices": sorted(map(str, devices)),
                 "window": "annotation" if spans else "single-step trace",
                 "idle_gaps": [
                     {
                         "ms": gap / 1000,
-                        "preceding_kernel": earlier["name"],
-                        "following_kernel": later["name"],
-                        "following_host_call": host_after(
-                            earlier["ts"] + earlier["dur"]
-                        ),
+                        "preceding_kernel": adjacent_kernel(earlier[1], "before"),
+                        "following_kernel": adjacent_kernel(later[0], "after"),
+                        "following_host_call": host_after(earlier[1], later[0]),
                     }
                     for gap, earlier, later in gaps[:5]
                 ],

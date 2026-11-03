@@ -8,6 +8,11 @@
       "kind": "exempted",
       "reason": "the grey segment includes profiler overhead; the fragment table gives the overhead per arm, and the verdict rests on the table",
       "recorded_at": "2026-11-03T08:42:59.386044+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "busy and wall values are in the adjacent table",
+      "recorded_at": "2026-11-03T08:43:06.804371+00:00"
     }
   },
   "findings": [

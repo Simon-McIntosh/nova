@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-03T09:51:45.190Z",
+  "dispatched_at": "2026-11-03T09:36:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "reasoning-1",
+      "reason": "a node has two incompatible readings, either pasting the state at the 46 promoted nodes (which makes clause 1's equality a copy rather than an evaluation and leaves a discontinuous drawn field, exactly the artefact the display map exists to remove) or evaluating the imaged field (which fails clauses 1 and 2 by about 2.8e-2 Wb against a bound of ten residual, about 6% of the 0.46 Wb level band), and the plan settles neither.",
+      "text": "\u00a79 defines the map the solve iterates as `flux_map` plus the constrained rows' `flux_delta` and requires the display map to be \"the continuation of that map to the display points\"; but that map's trip boundary is `mapped = jnp.where(promoted, state, image)` (nova/equilibrium/reduced_newton.py:976), a per-node paste of the trial state over the residual-shadow nodes, which the fragment \u00a79 cites as its diagnosis measures as the largest component of the state gap (2.786e-02 Wb on the converged edit, against 2.405e-03 Wb for the compensating flux)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "anchors_resolve-1",
+      "reason": "the node that must implement \u00a79 cannot open the diagnosis it is told to build from, and the 2.4 mWb / 4.6 mWb premise cannot be checked before the code is written.",
+      "text": "\u00a79 rests its root cause on \"the coil-edit node's diagnosis (fragment `coil-edit-fine-panels`)\" and on per-figure `panel-receipt.json` files, but `docs/evidence/fragments/separatrix-spline-extraction/coil-edit-fine-panels.html` exists only in commits 1f1391bd0, b5e324c0a and 131f313f4, none of which is an ancestor of main HEAD, and `git ls-tree -r HEAD | grep panel-receipt.json` returns nothing, so neither the fragment nor those receipts are in the tree a node will work in",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "done_when-1",
+      "reason": "a node can satisfy \u00a79's gate and then satisfy \u00a76/\u00a77's own gates while the constraint compensation is still never persisted, drawing the same map \u00a79 exists to reject, so the mechanism would land and reach no corrected figure.",
+      "text": "\u00a79's body requires that \"the builder therefore takes the terminal state vector and the constraint compensation as inputs, and producers persist both\", while \u00a79's three clauses gate only the builder and a state the test itself produces, and the dependent producers' gates (\u00a76 done-when 2, \u00a77 done-when 2) still enumerate the state archives as carrying \"the conductor currents and cell moments\" only",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "wiring-1",
+      "reason": "\u00a75 is already done, so no dispatch order changes, and the receipt line \u00a79 replaces is a one-line edit the section already names.",
+      "text": "\u00a79 declares `data-links=\"separatrix-spline-extraction#s5\"` and changes \u00a75's builder contract (\"that equality replaces the `raster_image` reproduction in the receipt\"), yet the section-depends-on map declares only s6/s7/s8 \u2192 s9 and no s9 \u2192 s5, while \u00a75 stays declared done with a done-when that still asserts the `raster_image` reproduction",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "f4371710d78554f5b1f14093432dd08a6ba57c8f",
+  "plan_fingerprint": "74f8b6c5b62a2b5c35fadb65b8eb3eac6b0529df96fce543b991cc17a8867109",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 173,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261103T082151622884-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "66d6e5ff9cc06d951b105f448d1c168c20337deb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the fragment \u00a79 cites for its diagnosis, and every panel receipt beside the figures, are unreachable from the primary branch.",
+    "done_when": "a finding \u2014 \u00a79 requires the terminal state vector and the constrained rows' compensation to be persisted, but no clause of its own gate, nor \u00a76's or \u00a77's, measures that persistence.",
+    "evidence_paths": "pass \u2014 the gate artefacts \u00a79 points at would live under docs/figures/\u2026 with the figures, not in a scratch or node-local path; their reachability is reported under anchors_resolve.",
+    "naming": "pass \u2014 \u00a79's symbols (`build_display_flux_map`, `max_node_mismatch_wb`, `flux_delta`) name mechanisms, and no plan label, stage name or ticket number reaches code.",
+    "reasoning": "a finding \u2014 the stated root cause matches the cited diagnosis, but the mechanism \u00a79 specifies treats a node-wise shadow pass-through as a term a display map can carry off the lattice, which the cited evidence measures as the largest part of the gap.",
+    "single_goal": "pass \u2014 \u00a79 carries one goal, making the display map the map the reduced solve iterates, and its three clauses are one gate on that goal.",
+    "wiring": "a finding \u2014 \u00a79 consumes \u00a75's builder and supersedes part of its receipt, but the section-depends-on map carries only s6/s7/s8 \u2192 s9 and no s9 \u2192 s5 edge."
+  },
+  "section_digests": {
+    "_document": "60d9533660fe8ab74376cdbe4f1c04919f61bc4dc0e55c8f101936e8fc0ef6c8",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "d71e8b500bdc0cfd69c5d0503f55d882093c5461130524b9a10a13b1815aa997",
+    "s7": "9ddcc4be93a921b78a5112d7c3e86c585b544accf7e06869b5b37c6c329d3878",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d",
+    "s9": "ae87e68b479d2142c15f329eee69d023da195ca773097704f306fd4b10385779"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T10:16:25.132712+00:00"
+}

@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 import platform
 import socket
+import sys
 import subprocess
 import threading
 import time
@@ -1169,13 +1170,28 @@ def _write_diagnostics(
     *,
     prepared: dict[str, Any],
     rows: list[dict[str, Any]],
+    panel: dict[str, Any] | None = None,
 ) -> None:
-    """Persist the per-edit convergence forensics beside the latency receipt."""
+    """Persist the per-edit convergence forensics beside the latency receipt.
+
+    ``panel`` is the rendered panel's own report, present once the panel has
+    been drawn: it carries the display map's spacing and the agreement of that
+    map with the operator's raster, so a reader can tell what the contours were
+    evaluated on from the record rather than from the drawing.
+    """
     document = {
         "schema": "nova.coil-edit-nonconvergence",
         "source_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
+        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+        "scheduler": _scheduler(),
+        "runtime": {
+            "host": platform.node(),
+            "device": jax.devices()[0].device_kind,
+            "platform": jax.devices()[0].platform,
+            "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+        },
         "case": {
             "machine": "MAST",
             "shot": SHOT,
@@ -1201,6 +1217,8 @@ def _write_diagnostics(
         "summary": _group_nonconverged(rows),
         "edits": rows,
     }
+    if panel is not None:
+        document["display_map"] = panel["display_map"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(document, indent=2, sort_keys=True, allow_nan=False) + "\n",
@@ -2327,6 +2345,20 @@ def _render_panel(
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
+        "display_map": {
+            label: {
+                "spacing_m": float(loaded[label]["display"].spacing_m),
+                "reproduction_relative_error": float(
+                    loaded[label]["display"].reproduction_relative_error
+                ),
+                "max_node_mismatch_wb": float(
+                    loaded[label]["display"].max_node_mismatch_wb
+                ),
+                "saddle_converged": bool(loaded[label]["display"].saddle_converged),
+            }
+            for label in ("converged", "failed")
+            if loaded[label].get("display") is not None
+        },
     }
 
 
@@ -2984,6 +3016,7 @@ def run(
                 circuit_context=prepared.get("circuit_context"),
             )
             print("PANEL=" + json.dumps(panel, sort_keys=True), flush=True)
+            _write_diagnostics(diagnostics, prepared=prepared, rows=rows, panel=panel)
         except (RuntimeError, KeyError) as error:
             print(f"PANEL_SKIPPED reason={error}", flush=True)
         receipt = _receipt_document(

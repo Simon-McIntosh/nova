@@ -1355,6 +1355,26 @@ def _refuse_inconsistent_persisted_pairs(data: Any) -> dict[int, float]:
     return residuals
 
 
+def _panel_moments(
+    profile: Any, state: Any, requested_class: Any
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the state's plasma current moments, so a panel can be re-drawn.
+
+    A display map contracts these three columns against the machine coupling at
+    whatever points it is asked for, so persisting them beside the lattice
+    field is what lets a panel be drawn from the state rather than from the
+    raster the solve happened to be carried on.
+    """
+    moments = profile.operator.current_moments_and_observation(state, requested_class)[
+        0
+    ]
+    return (
+        np.asarray(moments.cell_current, dtype=np.float64),
+        np.asarray(moments.radial_moment, dtype=np.float64),
+        np.asarray(moments.vertical_moment, dtype=np.float64),
+    )
+
+
 def _write_panel_data(
     path: Path,
     *,
@@ -1430,6 +1450,11 @@ def _write_panel_data(
             continue
         field = _grid_field(state["psi"], state["shape"])
         payload[f"psi_{position}"] = field
+        payload[f"current_{position}"] = np.asarray(state["current"], dtype=float)
+        moments = state["moments"]
+        payload[f"cell_current_{position}"] = np.asarray(moments[0], dtype=float)
+        payload[f"radial_moment_{position}"] = np.asarray(moments[1], dtype=float)
+        payload[f"vertical_moment_{position}"] = np.asarray(moments[2], dtype=float)
         payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
         axis = np.asarray(state["nulls"]["axis"], dtype=float).reshape(2)
         payload[f"axis_{position}"] = axis
@@ -2702,6 +2727,8 @@ def run(
                     ),
                     "nulls": _null_points(profile, result.state),
                     "branches": _branches_of(profile, result.state, raster_flux),
+                    "current": np.asarray(current, dtype=float),
+                    "moments": _panel_moments(profile, result.state, requested_class),
                 }
             )
             rows.append(row)

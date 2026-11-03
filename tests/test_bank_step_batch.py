@@ -228,13 +228,17 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
                 )
             )
         )
-        x_point_gap = float(
-            np.max(
-                np.abs(
-                    np.asarray(batched_lane.reading.x_point)
-                    - np.asarray(solo.reading.x_point)
-                )
-            )
+        # The read carries every qualified X-point in seed order, so the pair
+        # is compared where both solves admit one.
+        valid_points = np.asarray(batched_lane.reading.x_point_valid, dtype=bool) & (
+            np.asarray(solo.reading.x_point_valid, dtype=bool)
+        )
+        point_gaps = np.abs(
+            np.asarray(batched_lane.reading.x_points)
+            - np.asarray(solo.reading.x_points)
+        )
+        x_point_gap = (
+            float(point_gaps[valid_points].max()) if valid_points.any() else 0.0
         )
         boundary_gap = abs(
             float(batched_lane.reading.boundary_flux)

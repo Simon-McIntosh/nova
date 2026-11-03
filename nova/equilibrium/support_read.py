@@ -1466,6 +1466,8 @@ class SolveResult(NamedTuple):
     reads: jax.Array
     freezes: jax.Array
     unfreezes: jax.Array
+    residual_path: jax.Array
+    update_path: jax.Array
 
 
 def solve_batch(
@@ -1545,6 +1547,8 @@ def solve_batch(
         jnp.full((lanes,), jnp.inf, dtype),
         jnp.zeros(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
+        jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
+        jnp.full((lanes, max_steps), jnp.nan, dtype),
         jnp.ones(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
@@ -1572,6 +1576,8 @@ def solve_batch(
             reads,
             freezes,
             unfreezes,
+            residual_path,
+            update_path,
         ) = carried
         cut_now = (fresh.reading.membership > 0) & (
             fresh.reading.membership < 1 - 1e-14
@@ -1688,6 +1694,10 @@ def solve_batch(
             & (next_norm <= tolerance)
             & ~drift
         )
+        slot = jnp.max(steps)
+        update_norm = jnp.max(
+            jnp.abs(jnp.concatenate(correction.update, axis=-1)), axis=-1
+        )
         return (
             candidate,
             next_read,
@@ -1706,6 +1716,8 @@ def solve_batch(
             reads + active.astype(jnp.int32),
             freezes + start_freeze.astype(jnp.int32),
             unfreezes + (changed | drift).astype(jnp.int32),
+            residual_path.at[:, slot + 1].set(next_norm),
+            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0)),
         )
 
     final = jax.lax.while_loop(keep_going, advance, initial)
@@ -1719,6 +1731,8 @@ def solve_batch(
         final[14],
         final[15],
         final[16],
+        final[17],
+        final[18],
     )
 
 

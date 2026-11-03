@@ -5,6 +5,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.jax.config import configure_dtypes
 
@@ -167,3 +168,145 @@ def test_step_cap_reports_nonconvergence(monkeypatch):
     assert not bool(result.converged)
     assert int(result.steps) == 1
     assert float(result.residual) > 1e-10
+
+
+@pytest.fixture(scope="module")
+def diverted_case():
+    from scripts.prototypes.bank_newton_step.measure import machine
+
+    bank, cache, roots, convention, policy, profile, quadrature, moments, _ = machine(
+        "diverted"
+    )
+    seeds = roots + 0.03 * jnp.median(bank.geometry.pitch)
+    return bank, cache, roots, seeds, convention, policy, profile, quadrature, moments
+
+
+def _device_solve(case, *, reuse_factor, freeze_active_set):
+    bank, cache, roots, seeds, convention, policy, profile, quadrature, moments = case
+
+    def gradient(radius, flux):
+        return jnp.zeros_like(radius)
+
+    run = jax.jit(
+        lambda state: support_read.solve(
+            bank,
+            cache,
+            state,
+            seeds,
+            roots,
+            convention,
+            policy,
+            profile,
+            gradient,
+            quadrature,
+            max_steps=60,
+            reuse_factor=reuse_factor,
+            freeze_active_set=freeze_active_set,
+        )
+    )
+    result = run(moments)
+    jax.block_until_ready(result)
+    return result
+
+
+@pytest.fixture(scope="module")
+def fresh_solution(diverted_case):
+    return _device_solve(diverted_case, reuse_factor=False, freeze_active_set=False)
+
+
+@pytest.fixture(scope="module")
+def reused_solution(diverted_case, fresh_solution):
+    assert bool(fresh_solution.converged)
+    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=False)
+
+
+@pytest.fixture(scope="module")
+def frozen_solution(diverted_case, reused_solution):
+    assert bool(reused_solution.converged)
+    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=True)
+
+
+@pytest.mark.slow
+def test_fresh_factor_trajectory_matches_prototype(diverted_case, fresh_solution):
+    bank, cache, roots, seeds, convention, policy, profile, quadrature, moments = (
+        diverted_case
+    )
+
+    @jax.jit
+    def read(state):
+        return support_read.read(bank, cache, state, seeds, roots, convention, policy)
+
+    @jax.jit
+    def step(state, support):
+        return support_read.newton_step(
+            bank,
+            state,
+            support,
+            profile,
+            lambda radius, flux: jnp.zeros_like(radius),
+            quadrature,
+            fresh_geometry=True,
+            condition_diagnostics=False,
+        )
+
+    @jax.jit
+    def norm(state, support):
+        residual = support_read.step_residual(
+            bank, state, state, support, profile, quadrature
+        )
+        return jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
+
+    staged = fresh_solution
+    assert bool(staged.converged)
+    expected_residuals = []
+    expected_updates = []
+    state = moments
+    for index in range(60):
+        support = read(state)
+        fresh_norm = float(norm(state, support))
+        expected_residuals.append(fresh_norm)
+        if fresh_norm <= 1e-10:
+            break
+        correction = step(state, support)
+        update = float(jnp.max(jnp.abs(jnp.concatenate(correction.update))))
+        expected_updates.append(update)
+        print(
+            f"TRAJECTORY step={index} residual={fresh_norm:.12e} update={update:.12e}"
+        )
+        state = tuple(
+            value + change
+            for value, change in zip(state, correction.update, strict=True)
+        )
+    assert len(expected_updates) == int(staged.steps)
+    np.testing.assert_allclose(
+        np.asarray(staged.residual_path[: len(expected_residuals)]),
+        expected_residuals,
+        rtol=1e-9,
+        atol=0,
+    )
+    np.testing.assert_allclose(
+        np.asarray(staged.update_path[: len(expected_updates)]),
+        expected_updates,
+        rtol=1e-9,
+        atol=0,
+    )
+
+
+@pytest.mark.slow
+def test_factor_reuse_trajectory_converges(fresh_solution, reused_solution):
+    fresh, reused = fresh_solution, reused_solution
+    print("FRESH", np.asarray(fresh.residual_path[: int(fresh.steps) + 1]))
+    print("REUSED", np.asarray(reused.residual_path[: int(reused.steps) + 1]))
+    assert bool(fresh.converged) and bool(reused.converged)
+    assert int(reused.steps) <= int(fresh.steps) + 2
+    assert int(reused.refactors) < int(reused.steps)
+
+
+@pytest.mark.slow
+def test_active_set_freeze_trajectory_converges(reused_solution, frozen_solution):
+    reused, frozen = reused_solution, frozen_solution
+    print("UNFROZEN", np.asarray(reused.residual_path[: int(reused.steps) + 1]))
+    print("FROZEN", np.asarray(frozen.residual_path[: int(frozen.steps) + 1]))
+    assert bool(reused.converged) and bool(frozen.converged)
+    assert int(frozen.freezes) >= 1
+    assert float(frozen.residual) <= 1e-10

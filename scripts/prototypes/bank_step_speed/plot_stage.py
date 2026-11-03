@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.text import Text
 
 
 LABELS = {
@@ -33,15 +34,29 @@ def stages(path):
     return values
 
 
-def readable(value):
+def readable(value, axis_scale="log"):
+    if axis_scale == "linear":
+        return f"{value:.2f}"
     return f"{value:.2f}" if value < 10 else f"{value:.0f}"
 
 
-def main(baseline, after, svg, png, before_label, after_label):
+def main(
+    baseline,
+    after,
+    svg,
+    png,
+    before_label,
+    after_label,
+    axis_scale="log",
+    selected_stages=None,
+    stage_labels=None,
+):
+    if axis_scale not in {"log", "linear"}:
+        raise ValueError(f"unsupported axis scale: {axis_scale}")
     plt.style.use("data-ink")
     before = stages(baseline)
     current = stages(after) if after else None
-    names = list(LABELS)
+    names = list(selected_stages) if selected_stages is not None else list(LABELS)
     y = np.arange(len(names))
     fig, ax = plt.subplots(figsize=(14, 7.2))
     if current:
@@ -66,9 +81,9 @@ def main(baseline, after, svg, png, before_label, after_label):
                 (0.19, current[name], "#2e8b57"),
             ):
                 ax.text(
-                    value * 1.08,
+                    value * 1.08 if axis_scale == "log" else value + 0.5,
                     index + offset,
-                    readable(value),
+                    readable(value, axis_scale),
                     va="center",
                     color=color,
                 )
@@ -78,24 +93,50 @@ def main(baseline, after, svg, png, before_label, after_label):
         for index, name in enumerate(names):
             value = before[name]
             ax.text(
-                value * 1.08,
+                value * 1.08 if axis_scale == "log" else value + 0.5,
                 index,
-                readable(value),
+                readable(value, axis_scale),
                 va="center",
                 color="#2e8b57" if name == "whole_step" else "#666666",
             )
-    ax.axvline(0.5, color="#777777", linestyle=":", linewidth=1.2)
-    ax.set_xscale("log")
-    maximum = max(before.values())
+    maximum = max(before[name] for name in names)
     if current:
-        maximum = max(maximum, *current.values())
-    ax.set_xlim(0.2, max(1000, maximum * 1.6))
-    ax.set_yticks(y, [LABELS[name] for name in names])
+        maximum = max(maximum, *(current[name] for name in names))
+    if axis_scale == "log":
+        ax.axvline(0.5, color="#777777", linestyle=":", linewidth=1.2)
+        ax.set_xscale("log")
+        ax.set_xlim(0.2, max(1000, maximum * 1.6))
+    else:
+        ax.set_xlim(0, maximum * 1.23)
+        ticks = ax.get_xticks()
+        ax.set_xticks(ticks[(ticks >= 0) & (ticks <= ax.get_xlim()[1])])
+    ax.set_yticks(y, [(stage_labels or LABELS)[name] for name in names])
     ax.invert_yaxis()
     ax.set_xlabel("warm wall [ms]")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
     fig.subplots_adjust(left=0.33, right=0.97, top=0.87, bottom=0.13)
+    if axis_scale == "linear":
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        labels = [
+            artist
+            for artist in fig.findobj(match=Text)
+            if artist.get_visible() and artist.get_text()
+        ]
+        bounds = [(artist, artist.get_window_extent(renderer)) for artist in labels]
+        for artist, box in bounds:
+            if not fig.bbox.contains(*box.get_points()[0]) or not fig.bbox.contains(
+                *box.get_points()[1]
+            ):
+                raise ValueError(f"text outside canvas: {artist.get_text()}")
+        for index, (first_artist, first_box) in enumerate(bounds):
+            for second_artist, second_box in bounds[index + 1 :]:
+                if first_box.overlaps(second_box):
+                    raise ValueError(
+                        f"text collision: {first_artist.get_text()} / "
+                        f"{second_artist.get_text()}"
+                    )
     svg.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(svg)
     fig.savefig(png, dpi=200)
@@ -104,7 +145,9 @@ def main(baseline, after, svg, png, before_label, after_label):
     root.getroot().set("width", "31.1cm")
     root.getroot().set("height", "16cm")
     root.write(svg, encoding="unicode", xml_declaration=True)
-    svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n")
+    svg.write_text(
+        "\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n"
+    )
 
 
 if __name__ == "__main__":
@@ -115,6 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--after-label", default="current")
     parser.add_argument("--svg", type=Path, required=True)
     parser.add_argument("--png", type=Path, required=True)
+    parser.add_argument("--axis-scale", choices=("log", "linear"), default="log")
     args = parser.parse_args()
     main(
         args.baseline,
@@ -123,4 +167,5 @@ if __name__ == "__main__":
         args.png,
         args.before_label,
         args.after_label,
+        args.axis_scale,
     )

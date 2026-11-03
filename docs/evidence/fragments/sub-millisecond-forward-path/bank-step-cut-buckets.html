@@ -1,0 +1,25 @@
+<section id="bank-step-cut-buckets-landing">
+  <h2>Cut-cell booking branches on their selected cells</h2>
+  <p>The booked conic and normal-form interiors now run in separate fixed-shape index batches. The diverted bank has four normal-form cut cells in the recorded H200 census, so the normal batch width is eight. A larger population takes additional eight-cell batches; a nine-cell test exercises that overflow. Padding is masked before the responses are scattered into cell order.</p>
+  <p>The defect reproduced in the base arm: <code>jax.lax.cond(read.normal_form_cells[index], normal, conic, None)</code> sat inside <code>jax.vmap(cut_cell)</code>, and the optimized HLO carried both cut interiors at batch width 64. Its tagged normal interior had shape <code>f64[64,6,346,4096]</code> and the conic interior <code>f64[64,6,84,8192]</code>; the warm booking tangent was 27.766 ms. The head normal interior is <code>f64[8,6,346,4096]</code>, and the conic interior stays at width 64. Each cell reaches only its selected branch.</p>
+  <figure id="bank-step-cut-buckets-stage-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg" alt="Paired base and bucketed warm stage walls on one H200, with separate bars for coincident values.">
+    <figcaption>Warm stage walls on reserved H200 98dci4-gpu-0003, sequential base and head arms in allocation 1303981, medians of three synchronized calls per stage. The horizontal axis is linear; separate grey and green bars keep near-equal stages visible. The booking tangent falls from 27.77 to 13.80 ms and the whole step from 43.07 to 28.92 ms. The SVG was rendered to PNG and visually checked for clipped or overlapping labels.</figcaption>
+  </figure>
+  <table id="bank-step-cut-buckets-device-table">
+    <caption>Warm walls and profiler launches from the same allocation. The optimized HLO call-site census uses <code>tangent_site</code> frontend attributes on the full, conic and normal interiors; each arm retains those three distinct compiled interiors, while the head reduces the normal interior's executing batch from 64 to 8 cells.</caption>
+    <thead><tr><th>Measure</th><th>Base</th><th>Bucketed</th></tr></thead>
+    <tbody>
+      <tr><td>Booking tangent wall [ms]</td><td>27.766</td><td>13.799</td></tr>
+      <tr><td>Booking tangent launches</td><td>518</td><td>697</td></tr>
+      <tr><td>Whole-step wall [ms]</td><td>43.068</td><td>28.916</td></tr>
+      <tr><td>Whole-step launches</td><td>2,804</td><td>2,984</td></tr>
+      <tr><td>Compiled cell-interior copies</td><td>3</td><td>3</td></tr>
+      <tr><td>Normal interior batch cells</td><td>64</td><td>8</td></tr>
+    </tbody>
+  </table>
+  <p id="bank-step-cut-buckets-correctness">On sirius CPU, current, radial and vertical moments, raw current, normalization, validity and all booking channels match the base with maximum relative difference 0.0, below 1e-12. The fresh-read solve converges in seven refactorized steps with residual <code>8.093609611589106e-11</code>. Its oracle ratios are axis <code>1.0477237644351832e-5</code> and X-point <code>9.25482639896726e-6</code> against <code>5e-4</code>, and boundary flux <code>2.5906191535823503e-5</code> against <code>1e-4</code>. The nine-normal-cell overflow test passes against the scalar booking tangent.</p>
+  <p id="bank-step-cut-buckets-control">The scratch negative control restores the per-cell conditional inside the cut-cell <code>vmap</code>. It returns to three compiled interior call sites and the base-arm 27.766 ms tangent wall. The branch-placement regression check fails on that source, while it passes at the head; the optimized-HLO batch shapes above independently show the amount of normal-branch work.</p>
+  <p id="bank-step-cut-buckets-receipts">The paired H200 logs are <code>h200-base.log</code> and <code>h200-head.log</code>, with tagged optimized HLO in <code>h200-hlo-base.txt</code> and <code>h200-hlo-head.txt</code>. The sirius records are <code>parity-sirius.log</code> and <code>fresh-sirius.log</code>. The overflow gate and red scratch control are <code>overflow-final-head.log</code> and <code>negative-control.log</code>. All live under the node's crew run directory.</p>
+  <p id="bank-step-cut-buckets-provenance">The base arm used the prior tagged copy of <code>current.py</code> at SHA-256 <code>fdbd9574048e6f7d</code>; a diff against base revision <code>2d2172dd7b06548d</code> shows only XLA frontend-attribute contexts, leaving arithmetic unchanged. The bucketed source is SHA-256 <code>98553293201a0f46</code>. Each arm's <code>MODULE=</code> header resolves into its own scratch mirror, while the wrapper's <code>REVISION=</code> names the submitting worktree head. The interior census counts the one tagged floating-point rank-four concatenation in each call site, not all tagged concatenations, since gather indexing adds smaller integer ones.</p>
+</section>

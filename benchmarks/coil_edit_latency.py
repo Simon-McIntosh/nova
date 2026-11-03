@@ -3375,6 +3375,20 @@ def main() -> None:
     panel_parser = subparsers.add_parser("panel")
     panel_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
     panel_parser.add_argument("--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE)
+    panel_parser.add_argument(
+        "--display-map",
+        action="store_true",
+        help="draw the panel from the display map, which needs the machine frame",
+    )
+    panel_parser.add_argument(
+        "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
+    )
+    panel_parser.add_argument(
+        "--receipt",
+        type=Path,
+        default=None,
+        help="write the render's host, command and map spacing beside the figure",
+    )
     check_parser = subparsers.add_parser("checkcase")
     check_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
@@ -3402,13 +3416,43 @@ def main() -> None:
             impose_vertical_centroid=not arguments.without_vertical_centroid,
         )
     elif arguments.command == "panel":
-        print(
-            json.dumps(
-                _render_panel(arguments.panel_data, arguments.panel_figure),
-                indent=2,
-                sort_keys=True,
-            )
+        profile = None
+        circuit_context = None
+        if arguments.display_map:
+            _require_measurement_host()
+            configure_dtypes()
+            profile, prepared, _carrier = _prepare_case(arguments.carrier)
+            circuit_context = prepared.get("circuit_context")
+        panel = _render_panel(
+            arguments.panel_data,
+            arguments.panel_figure,
+            profile=profile,
+            circuit_context=circuit_context,
         )
+        if arguments.receipt is not None:
+            arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
+            arguments.receipt.write_text(
+                json.dumps(
+                    {
+                        "schema": "nova.coil-edit-panel-render",
+                        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                        "scheduler": _scheduler(),
+                        "runtime": {
+                            "host": platform.node(),
+                            "device": jax.devices()[0].device_kind,
+                            "platform": jax.devices()[0].platform,
+                            "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+                        },
+                        "display_map": panel["display_map"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                    allow_nan=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        print(json.dumps(panel, indent=2, sort_keys=True))
     elif arguments.command == "checkcase":
         print(json.dumps(_check_case(arguments.carrier), indent=2, sort_keys=True))
     elif arguments.command == "probe":

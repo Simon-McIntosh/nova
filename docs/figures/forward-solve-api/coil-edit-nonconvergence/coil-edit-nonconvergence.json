@@ -94,6 +94,20 @@
     }
   },
   "command": "benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr-raster.png --panel-data docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz --panel-figure docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+  "display_map": {
+    "converged": {
+      "max_node_mismatch_wb": 0.0024050743460606316,
+      "reproduction_relative_error": 6.780338952939714e-12,
+      "saddle_converged": true,
+      "spacing_m": 0.01
+    },
+    "failed": {
+      "max_node_mismatch_wb": 0.0343824430086318,
+      "reproduction_relative_error": 7.1967014727409325e-12,
+      "saddle_converged": true,
+      "spacing_m": 0.01
+    }
+  },
   "edits": [
     {
       "achieved_class": {
@@ -1753,7 +1767,7 @@
   },
   "schema": "nova.coil-edit-nonconvergence",
   "seed_probe_definition": "one trip closed with zero Newton steps on this edit's current vector, seeded from the state the edit starts from; the reported residual is the seed's own residual on the edited operator, measured without the vertical current-centre row so it stays the same quantity every earlier sweep recorded",
-  "source_revision": "2ed26d9a0c0cb1283901e54b5795d42530925f81",
+  "source_revision": "6fef9cc336ebb25d0d5b42c7e95416ca1ffe735b",
   "summary": {
     "convergence": {
       "converged_points": [

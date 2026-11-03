@@ -19,16 +19,11 @@ from nova.graphics.line import Chart
 from nova.imas.getslice import GetSlice, ids_vacuum_field, vacuum_field
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
+from nova.io.signalstore import SignalStore, StaleConventionError
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 
 CONVENTION_ATTR = "cocos"
-"""Dataset attribute naming the convention the cached fields are in.
-
-The cache identity is the source's pulse, run and Data Dictionary version,
-none of which the reader's own convention changes, so the convention cannot be
-read off the group name. It is written beside the fields instead, and one name
-is used by the writer and the load check so the two cannot disagree.
-"""
+"""Informational field convention; SignalStore owns the cache identity."""
 
 
 @dataclass
@@ -578,7 +573,7 @@ class Equilibrium(Chart, GetSlice):
         """Read every convention-bearing field of the dataset in COCOS 17.
 
         The Data Dictionary fixes a read's COCOS by its major version -- DD3 is
-        and DD4 is COCOS 17 -- and each slice's observables pin the digits its
+        COCOS 11 and DD4 is COCOS 17 -- and each slice's observables pin the digits its
         version implies. A read whose digits contradict its version is refused
         by :meth:`check_convention` before the profile nodes are walked, so
         every field reached here is conforming and is converted through
@@ -927,34 +922,43 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         self.name = "equilibrium"
         super().__post_init__()
 
-    def load(self):
-        """Load the cached dataset, refusing one written under another convention.
+    @property
+    def convention_store(self) -> SignalStore:
+        """Bind the source and logical group to the shared convention-keyed store.
 
-        A cache entry is labelled by the source's identity and its Data
-        Dictionary version, both of which are unchanged by this reader's own
-        convention: an entry written before the reader translated to COCOS 17
-        holds the source's convention in fields whose names are identical. The
-        recorded convention is therefore required on load, and an entry that
-        carries none, or another, is evicted so the caller rebuilds it rather than
-        serving raw quantities as though they carried the reader's convention.
-
-        Raises
-        ------
-        FileNotFoundError
-            The cached data carries no convention, or one other than
-            ``NOVA_CONVENTION``. ``Datafile.load_build`` reads this as a cache
-            miss and rebuilds.
+        The logical group retains occurrence and in-memory IDS content identity.
+        SignalStore adds the DD version and the translated fields' COCOS to its
+        physical key, so an attribute on an unkeyed group cannot authorize a hit.
         """
-        loaded = super().load()
-        stored = self.data.attrs.get(CONVENTION_ATTR)
-        if stored != NOVA_CONVENTION:
-            self.delete_group()
-            self.data = type(self.data)()
-            raise FileNotFoundError(
-                f"cached equilibrium data at {self.group} carries convention "
-                f"{stored!r}, not {NOVA_CONVENTION}"
-            )
-        return loaded
+        return SignalStore(
+            filename=self.filepath.name,
+            dirname=self.filepath.parent,
+            hostname=self.hostname,
+            uri=json.dumps({"uri": self.uri, "group": self.group}, sort_keys=True),
+            dd_version=str(self.dd_version),
+            cocos=NOVA_CONVENTION,
+        )
+
+    def load(self):
+        """Read the convention-keyed entry, rebuilding a refused legacy entry."""
+        try:
+            data = self.convention_store.read()
+        except StaleConventionError as error:
+            raise FileNotFoundError(str(error)) from error
+        self.data = self.data.merge(
+            data, combine_attrs="drop_conflicts", compat="override"
+        )
+        return self
+
+    def store(self, mode=None):
+        """Publish translated data through the convention-keyed store owner."""
+        self.convention_store.write(self.data)
+        return self
+
+    def delete_group(self):
+        """Evict only this reader's convention-keyed entry."""
+        self.convention_store.delete_group()
+        return self
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""

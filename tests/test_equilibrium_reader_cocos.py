@@ -16,14 +16,18 @@ pulse was written in.
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import replace
 
 import imas
 import numpy as np
+from packaging.version import Version
 import pytest
+import xarray
 
 from nova.imas.dataset import IdsBase
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.getslice import GetSlice
+from nova.io.signalstore import SignalStore
 from nova.io.sourcemap import NOVA_CONVENTION, translate_equilibrium
 from nova_cocos import DODPSI_LIKE, IP_LIKE, PSI_LIKE, convention, convention_transform
 
@@ -74,11 +78,9 @@ def imasdb_root(monkeypatch):
 
     ``EquilibriumData(pulse, run)`` composes its path from ``$IMAS_HOME`` when
     it opens the pulse, while the guard below needs the same tree before the
-    reader is built, so both sides read this variable. A shell exporting another
-    root would otherwise open a tree that does not hold these pulses and turn a
-    missing database into a red test, which is what happened to the coordinator
-    gate: the refusal assertions failed on ``master.h5`` not found rather than
-    on the reader's own message.
+    reader is built, so both sides read this variable. Pinning it keeps the
+    availability check and the reader on the same pulse tree, so a missing
+    ``master.h5`` cannot stand in for a convention refusal.
     """
     monkeypatch.setenv("IMAS_HOME", IMAS_HOME)
 
@@ -249,3 +251,75 @@ def test_full_build_completes_on_a_dd3_pulse():
     equilibrium = open_equilibrium(*UNCACHED)
     assert equilibrium.data.attrs["cocos"] == NOVA_CONVENTION
     assert equilibrium.wall is not None
+
+
+@pytest.fixture
+def cached_reader(tmp_path):
+    """Bind the persistence seam to a local store without opening an IDS."""
+    reader = object.__new__(EquilibriumData)
+    reader.filename = "equilibrium"
+    reader.dirname = tmp_path
+    reader.host = None
+    reader.group = "equilibrium"
+    reader._uri = "imas:hdf5?path=/synthetic/pulse#equilibrium:0"
+    reader._dd_version = Version("3.39.0")
+    reader.data = xarray.Dataset()
+    return reader
+
+
+def test_cache_marker_alone_cannot_authorize_an_equilibrium_read(cached_reader):
+    """Only the convention-bearing key selects a cache, even with a marker."""
+    xarray.Dataset({"psi_boundary": ("time", [5.0])}, attrs={"cocos": 17}).to_zarr(
+        cached_reader.filepath,
+        group=cached_reader.group,
+        mode="w",
+        consolidated=False,
+    )
+    with pytest.raises(FileNotFoundError):
+        cached_reader.load()
+    assert "psi_boundary" not in cached_reader.data
+
+
+def test_cache_uses_signalstore_convention_keys(cached_reader):
+    """A foreign key misses; the same source's internal key serves its data."""
+    store = cached_reader.convention_store
+    assert isinstance(store, SignalStore)
+    assert store.cocos == NOVA_CONVENTION
+    foreign = replace(store, cocos=11, group=None)
+    assert foreign.cache_key != store.cache_key
+    foreign.write(xarray.Dataset({"psi_boundary": ("time", [5.0])}))
+    with pytest.raises(FileNotFoundError):
+        cached_reader.load()
+
+    cached_reader.data = xarray.Dataset({"psi_boundary": ("time", [-5.0])})
+    cached_reader.store()
+    np.testing.assert_array_equal(store.read().psi_boundary, [-5.0])
+    cached_reader.data = xarray.Dataset()
+    cached_reader.load()
+    np.testing.assert_array_equal(cached_reader.data.psi_boundary, [-5.0])
+    np.testing.assert_array_equal(foreign.read().psi_boundary, [5.0])
+
+    cached_reader.delete_group()
+    assert not store.cached()
+    assert foreign.cached()
+
+
+def test_cache_rebuilds_a_signalstore_legacy_key(cached_reader, monkeypatch):
+    """A refused identity-only entry rebuilds through the shared store owner."""
+    store = cached_reader.convention_store
+    legacy = replace(store, group=store.legacy_cache_key)
+    legacy.write(xarray.Dataset({"psi_boundary": ("time", [5.0])}))
+    calls = []
+
+    def build(reader):
+        calls.append("build")
+        reader.data = xarray.Dataset({"psi_boundary": ("time", [-5.0])})
+
+    monkeypatch.setattr(EquilibriumData, "ids", property(lambda self: object()))
+    monkeypatch.setattr(EquilibriumData, "build", build)
+    cached_reader.load_build()
+    assert calls == ["build"]
+    np.testing.assert_array_equal(store.read().psi_boundary, [-5.0])
+    assert store.legacy_group() is None
+    cached_reader.load_build()
+    assert calls == ["build"]

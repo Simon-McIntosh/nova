@@ -33,20 +33,9 @@ from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
 from nova.imas.dataset import open_db_entry
 from nova.database.filepath import diiid_machine_source
 from nova.media.sources.frame import EquilibriumFrame, MachineGeometry, Pulse
+from nova.utilities.axes import uniform_axis
 
 NETCDF_SOURCE = diiid_machine_source()
-
-
-def _uniform_axis(stored: Any, name: str) -> np.ndarray:
-    """Return an endpoint-preserving uniform axis, or refuse a ragged one."""
-    axis = np.asarray(stored, dtype=float)
-    if axis.ndim != 1 or axis.size < 2 or not np.all(np.diff(axis) > 0.0):
-        raise ValueError(f"{name} must be a one-dimensional increasing axis")
-    expected = np.linspace(axis[0], axis[-1], axis.size)
-    tolerance = 1.0e-6 * max(1.0, abs(float(axis[-1])))
-    if float(np.max(np.abs(axis - expected))) > tolerance:
-        raise ValueError(f"{name} is not uniform to {tolerance:.3g} m")
-    return expected
 
 
 def _points(nodes: Any) -> np.ndarray:
@@ -112,8 +101,12 @@ def read_frame(equilibrium: Any, index: int) -> EquilibriumFrame:
     """Return one equilibrium time slice as a machine-neutral record."""
     slice_ = equilibrium.time_slice[index]
     profiles = slice_.profiles_2d[0]
-    radius = _uniform_axis(profiles.grid.dim1, "profiles_2d/grid/dim1")
-    height = _uniform_axis(profiles.grid.dim2, "profiles_2d/grid/dim2")
+    radius, _ = uniform_axis(
+        profiles.grid.dim1, "profiles_2d/grid/dim1", relative_tolerance=1e-6
+    )
+    height, _ = uniform_axis(
+        profiles.grid.dim2, "profiles_2d/grid/dim2", relative_tolerance=1e-6
+    )
     stored = np.asarray(profiles.psi, dtype=float)
     if stored.shape != (radius.size, height.size):
         raise ValueError(

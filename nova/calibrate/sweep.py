@@ -51,6 +51,7 @@ from nova.calibrate.transition import (
 )
 from nova.calibrate.windows import PulseWindow, classify_pulse
 from nova.database.filepath import derived_cache_root, portable_path
+from nova.io.json import write_atomic
 
 DRIVE_THRESHOLD = 1.0e3
 """Absolute current that labels a conductor as driven, in amperes."""
@@ -373,11 +374,7 @@ def sweep_chunk(
 def write_chunk(path: Path | str, result: Mapping[str, Any]) -> None:
     """Write one complete chunk atomically so interruption never looks complete."""
 
-    destination = Path(path)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    staged = destination.with_suffix(destination.suffix + ".partial")
-    staged.write_text(json.dumps(result, separators=(",", ":"), sort_keys=True))
-    staged.replace(destination)
+    write_atomic(path, result, separators=(",", ":"))
 
 
 def read_chunks(paths: Iterable[Path | str]) -> list[dict[str, Any]]:

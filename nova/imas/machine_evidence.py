@@ -30,7 +30,7 @@ class EvidenceError(MachineDescriptionError):
     """Raised when a field's evidence record is malformed or inadmissible."""
 
 
-def canonical_json(payload: Mapping[str, Any]) -> bytes:
+def canonical_json(payload: Mapping[str, Any], *, newline: bool = True) -> bytes:
     """Serialize to timestamp-free, byte-stable JSON."""
 
     return (
@@ -40,7 +40,7 @@ def canonical_json(payload: Mapping[str, Any]) -> bytes:
             separators=(",", ":"),
             sort_keys=True,
         )
-        + "\n"
+        + ("\n" if newline else "")
     ).encode()
 
 
@@ -65,11 +65,15 @@ def require_string(
     value: Any,
     context: str,
     error: type[MachineDescriptionError],
+    *,
+    trimmed: bool = False,
 ) -> str:
-    """Require a string field."""
+    """Require a string field, optionally non-empty with no outer whitespace."""
 
     if not isinstance(value, str):
         raise error(f"{context} must be a string")
+    if trimmed and (not value or value.strip() != value):
+        raise error(f"{context} must be non-empty trimmed text")
     return value
 
 
@@ -111,17 +115,13 @@ def require_float(
     return float(value)
 
 
-def _trimmed(value: Any, context: str) -> str:
-    text = require_string(value, context, EvidenceError)
-    if not text or text.strip() != text:
-        raise EvidenceError(f"{context} must be non-empty trimmed text")
-    return text
-
-
 def _trimmed_sequence(values: Any, context: str) -> tuple[str, ...]:
     if isinstance(values, str) or not isinstance(values, Iterable):
         raise EvidenceError(f"{context} must be a sequence of strings")
-    result = tuple(_trimmed(value, f"{context} entry") for value in values)
+    result = tuple(
+        require_string(value, f"{context} entry", EvidenceError, trimmed=True)
+        for value in values
+    )
     if len(set(result)) != len(result):
         raise EvidenceError(f"{context} must be unique")
     return result
@@ -156,7 +156,7 @@ class SourceReference:
             (self.locator, "source locator"),
             (self.machine, "source machine"),
         ):
-            _trimmed(value, context)
+            require_string(value, context, EvidenceError, trimmed=True)
         if not self.url.startswith("https://"):
             raise EvidenceError(f"source url must be https: {self.url!r}")
         if self.machine != self.machine.lower():
@@ -212,7 +212,7 @@ class Uncertainty:
             raise EvidenceError(
                 f"uncertainty upper bound {upper} precedes lower bound {lower}"
             )
-        _trimmed(self.unit, "uncertainty unit")
+        require_string(self.unit, "uncertainty unit", EvidenceError, trimmed=True)
 
     def contains(self, value: float) -> bool:
         """Return whether ``value`` lies inside the closed interval."""
@@ -268,8 +268,10 @@ class EvidenceRecord:
     def validate(self) -> None:
         """Reject a record whose provenance does not support its state."""
 
-        _trimmed(self.path, "record path")
-        _trimmed(self.statement, f"statement for {self.path!r}")
+        require_string(self.path, "record path", EvidenceError, trimmed=True)
+        require_string(
+            self.statement, f"statement for {self.path!r}", EvidenceError, trimmed=True
+        )
         if not isinstance(self.evidence, FieldEvidence):
             raise EvidenceError(f"unknown evidence state {self.evidence!r}")
         first = require_int(self.first_shot, "record first shot", EvidenceError)

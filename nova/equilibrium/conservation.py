@@ -81,6 +81,7 @@ from nova.equilibrium.observation import (
     declared_field_function_squared,
     declared_pressure,
 )
+from nova.utilities.axes import uniform_axis
 
 __all__ = [
     "ConservationLedger",
@@ -146,14 +147,12 @@ class FluxLattice:
         """Validate a uniformly spaced, strictly increasing lattice."""
         for name in ("radius", "height"):
             axis = np.asarray(getattr(self, name), dtype=np.float64)
-            if axis.ndim != 1 or axis.size < 2 * STENCIL_MARGIN + 3:
-                raise ValueError(
-                    f"{name} must be one dimensional with at least "
-                    f"{2 * STENCIL_MARGIN + 3} nodes"
-                )
-            step = np.diff(axis)
-            if np.any(step <= 0) or not np.allclose(step, step[0], rtol=1e-12):
-                raise ValueError(f"{name} must be uniformly spaced and increasing")
+            uniform_axis(
+                getattr(self, name),
+                name,
+                minimum_size=2 * STENCIL_MARGIN + 3,
+                tolerance=1e-8,
+            )
             object.__setattr__(self, name, axis)
         if self.radius[0] <= 0.0:
             raise ValueError("radius must be strictly positive")

@@ -33,6 +33,8 @@ from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
 
 from nova.database.filepath import mast_level1_shots, mast_level2_shots
+from nova.imas.machine_evidence import canonical_json
+from nova.io.json import write_atomic
 
 DEFAULT_LEVEL1_ROOT = mast_level1_shots()
 DEFAULT_LEVEL2_ROOT = mast_level2_shots()
@@ -197,9 +199,7 @@ def _write_fingerprint_checkpoint(
             for row in sorted(rows, key=lambda row: row.shot)
         ],
     }
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    temporary.replace(path)
+    write_atomic(path, payload, indent=2, newline=True)
 
 
 def _read_fingerprint_checkpoint(
@@ -444,7 +444,7 @@ class MachineGeometryRegistry:
 def stable_digest(payload: Mapping[str, Any], *, length: int = 64) -> str:
     """Return a deterministic SHA-256 digest for JSON-compatible data."""
 
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    encoded = canonical_json(payload, newline=False)
     return hashlib.sha256(encoded).hexdigest()[:length]
 
 

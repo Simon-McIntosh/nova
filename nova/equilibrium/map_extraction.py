@@ -30,6 +30,7 @@ from scipy.constants import mu_0
 
 from nova.equilibrium.conservation import FluxLattice, delta_star
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+from nova.utilities.axes import uniform_axis
 
 __all__ = [
     "ChordSamplingReceipt",
@@ -106,18 +107,6 @@ class ChordSamplingReceipt:
     boundary_flux: float
 
 
-def _uniform_axis(values: ArrayLike, name: str) -> tuple[NDArray[np.float64], float]:
-    axis = np.asarray(values, dtype=np.float64)
-    if axis.ndim != 1 or axis.size < 3:
-        raise ValueError(f"{name} must be one dimensional with at least three nodes")
-    difference = np.diff(axis)
-    if np.any(difference <= 0.0):
-        raise ValueError(f"{name} must be strictly increasing")
-    if not np.allclose(difference, difference[0], rtol=1.0e-12, atol=0.0):
-        raise ValueError(f"{name} must be uniformly spaced")
-    return axis, float(difference[0])
-
-
 def _map(values: ArrayLike, shape: tuple[int, int], name: str) -> NDArray[np.float64]:
     field = np.asarray(values, dtype=np.float64)
     if field.shape == (shape[0] * shape[1],):
@@ -139,8 +128,10 @@ def apply_delta_star(
     required or inferred by this operation.
     """
 
-    radius_axis, radial_step = _uniform_axis(radius, "radius")
-    height_axis, vertical_step = _uniform_axis(height, "height")
+    _, radial_step = uniform_axis(radius, "radius", minimum_size=3, tolerance=1e-12)
+    _, vertical_step = uniform_axis(height, "height", minimum_size=3, tolerance=1e-12)
+    radius_axis = np.asarray(radius, dtype=np.float64)
+    height_axis = np.asarray(height, dtype=np.float64)
     shape = (radius_axis.size, height_axis.size)
     flux_map = _map(flux, shape, "flux")
     mesh = FluxLattice(radius_axis, height_axis)
@@ -396,8 +387,10 @@ def sample_chord_psi_norm(
     label.
     """
 
-    radius_axis, _ = _uniform_axis(radius, "radius")
-    height_axis, _ = _uniform_axis(height, "height")
+    uniform_axis(radius, "radius", minimum_size=3, tolerance=1e-12)
+    uniform_axis(height, "height", minimum_size=3, tolerance=1e-12)
+    radius_axis = np.asarray(radius, dtype=np.float64)
+    height_axis = np.asarray(height, dtype=np.float64)
     shape = (radius_axis.size, height_axis.size)
     flux_map = jnp.asarray(flux, dtype=jnp.float64)
     if flux_map.shape == (shape[0] * shape[1],):

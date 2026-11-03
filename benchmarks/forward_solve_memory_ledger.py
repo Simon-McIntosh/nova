@@ -3,9 +3,9 @@
 Runs the DIII-D forward-gs producer through one frame's profile build and one
 solve on the present route, recording host RSS by phase, the largest live
 arrays with their owning attributes, the compiled map program's memory
-analysis, and the operand-cache files read. It then attempts the §1 operator
-bank for the same machine shape and records the bank's bytes beside the
-present route, or the refusal that stops the attempt and the code it comes
+analysis, and the operand-cache files read. It then attempts the per-machine
+operator bank for the same shape and records the bank's bytes beside the
+present route, or the refusal that stops the attempt. Every number is
 labelled with the rung and device it was measured on.
 
 The ledger is written as JSON and a Markdown table under the output directory.
@@ -374,7 +374,7 @@ def main() -> None:
     state["program"] = compile_memory(profile, seed)
     state["arrays"]["solved"] = largest_arrays()
 
-    # The §1 operator bank for the same shape, or its refusal.
+    # The per-machine operator bank for the same shape, or its refusal.
     from nova.equilibrium import support_read
 
     attempt: dict = {"builder": "support_read.SupportOperands.from_rows"}

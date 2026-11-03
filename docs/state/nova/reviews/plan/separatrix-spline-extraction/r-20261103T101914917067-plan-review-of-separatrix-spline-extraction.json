@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-03T10:27:48.767Z",
+  "dispatched_at": "2026-11-03T10:22:09Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "anchors_resolve-1",
+      "reason": "a node dispatched on s9 must either block on the missing fragment or create it and overwrite the diagnosis it is told to extend.",
+      "text": "done-when (3) requires the fragment `coil-edit-fine-panels` to state each panel's promoted-node count and nearest promoted distance, but that file exists only at commit 131f313f4 and is absent from main (docs/evidence/fragments/separatrix-spline-extraction/ holds centroid-state-guard, cpu-lane-centroid-regen, fine-flux-display-map, fine-flux-display-repair, remove-wall-height-exclusion, and not this one); the plan names no unit that lands it",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "done_when-1",
+      "reason": "the paste this section is about is then never exercised, so the gate passes on a state that cannot discriminate the defect.",
+      "text": "done-when (1) judges the mismatch \"over the non-promoted nodes\" on \"a converged coil-edit state (residual at most 1e-8) that the test produces\", and no clause requires that state to have at least one promoted node; with an empty promoted set the restriction is the whole lattice, the display map equals the imaged state by construction, and the nearest-promoted-node distance is undefined",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:183",
+      "id": "done_when-2",
+      "reason": "a node recording the masked figure under the existing name changes the meaning a landed section's done-when and its reproduction test read, and no later reader can tell which number a panel receipt holds.",
+      "text": "done-when (1) says \"The receipt reports that figure\" without naming a field, while \u00a75's landed `max_node_mismatch_wb` (nova/equilibrium/display_flux.py:204-230) is documented as the largest deviation over all lattice nodes and \u00a75 done-when (2) measures it that way",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html:182",
+      "id": "reasoning-1",
+      "reason": "a node reading the section list takes the goal to be the reproduction the body has established is impossible, which is the wrong mechanism to implement.",
+      "text": "the section heading \"The display map reproduces the map the solve iterates\" contradicts the body it now carries (\"No field of currents reproduces it, so no display map can continue it off the lattice\") and the done-when, which judges only non-promoted nodes",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "008fff3c80b51bea7e135cfd8d530a285596eba9",
+  "plan_fingerprint": "23d6903cd58eeab26b9355a504b2bf56080932a445bf5b621434e8e316b31f51",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 174,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261103T101914917067-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "96c0d333d371007de15fd5f079234d7b2d839262",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 `nova/equilibrium/reduced_newton.py:976` is exactly `mapped = jnp.where(promoted, state, image)` and run `r-20261102T204241022825-coil-edit-fine-panels` exists, but the fragment \u00a79 done-when (3) assigns work to exists only at commit `131f313f4` and is absent from main.",
+    "done_when": "a finding \u2014 \u00a79 done-when (1) lets the test choose its own state and never requires that state to carry a promoted node, so the section's own discriminator can go unexercised; and (1) reports \"that figure\" into an unspecified receipt field while \u00a75's landed `max_node_mismatch_wb` already means the all-node mismatch.",
+    "evidence_paths": "pass \u2014 the receipts and the state archives \u00a79 names are the committed figure receipts beside each figure (`panel-receipt.json`, `panel-states.npz`), which survive the run; no scratch path is named.",
+    "naming": "pass \u2014 `build_display_flux_map` and the receipt vocabulary name what they measure; no plan, stage or ticket label reaches a symbol or comment.",
+    "reasoning": "a finding \u2014 \u00a79's root cause is the one its evidence shows (the three terms close the gap to 1.1e-16 in the cited fragment, and `promoted` is returned by the reduced solve so the mask is reachable), but the section's heading still asserts the reproduction its body has abandoned.",
+    "single_goal": "pass \u2014 \u00a79's three clauses are one deliverable: the display map's gap is made measurable (builder takes the solve's own inputs, producers persist what it needs, the fragment states where it cannot certify).",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s6, s7, s8 \u2192 s9 and s9 \u2192 s5, which matches \u00a79's new obligations (it consumes \u00a75's builder and imposes persistence on the s6/s7 producers), so the direction is correct."
+  },
+  "section_digests": {
+    "_document": "60d9533660fe8ab74376cdbe4f1c04919f61bc4dc0e55c8f101936e8fc0ef6c8",
+    "s1": "d17ed4877a2074a61672b9f92db3003fd23a8872448b6d3492ac304d772672c7",
+    "s2": "4976da4e39aa97f81c96e6e72c6f99b9a15f2c3b7d9f43676bc832706ac214ad",
+    "s3": "8cf922a7c08aa667f21c06be442ee726827021f56991ef59aa8bdd515b98aa5e",
+    "s4": "64bf854f56a741c018b28ba84aa39f1b387c87b9fda76f08ef2a6bfdd8f06bc3",
+    "s5": "233b68213cc67f79fa0d41a419c33792c959656dac2b657e69844a655f877a99",
+    "s6": "d71e8b500bdc0cfd69c5d0503f55d882093c5461130524b9a10a13b1815aa997",
+    "s7": "9ddcc4be93a921b78a5112d7c3e86c585b544accf7e06869b5b37c6c329d3878",
+    "s8": "f84fb1ccfebf09fecdf537ff7adbaac09cf35e2be0726d44318f493b627c206d",
+    "s9": "224677ba8adce4c3c3ae646a660b0da6aa14e4dff92fb7911ae1de749cfdb49a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T10:36:34.579057+00:00"
+}

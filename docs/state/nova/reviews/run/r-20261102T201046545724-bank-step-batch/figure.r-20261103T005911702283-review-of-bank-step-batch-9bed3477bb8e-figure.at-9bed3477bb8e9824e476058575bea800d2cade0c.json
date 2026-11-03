@@ -6,7 +6,7 @@
     "image-0.png": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg"
   },
   "attachment_note": "One rendered image was handed to this node (image-0.png, 1399x709 RGBA, dpi 100 render of the per-slice-wall figure at the reviewed head). Every verdict below was formed on that rendered PNG at native resolution and on magnified crops of it (2x full, 4x of the two coincident-series bands, 10x of the four marker positions), never on the SVG source, which was not opened. The PNG was matched to the figure by the fragment's img src and by the run's manifest changed_paths, which names this figure and its plot.py.",
-  "completed_at": "",
+  "completed_at": "2026-11-03T01:08:28.519Z",
   "dispatched_at": "2026-11-03T01:00:10Z",
   "figure_checks": {
     "caption": "The caption is not a restatement of a title: the figure carries no title, and the caption states the state (diverted 550-cell, one H200), the axes, the sampling floor (minimum of five calls per point), the reading, and the truncation of the whole-step series. Its one naming mismatch is recorded as finding 4.",
@@ -78,6 +78,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-03T01:08:31.889154+00:00",
+  "timestamp": "2026-11-03T04:47:09.254823+00:00",
   "total": null
 }

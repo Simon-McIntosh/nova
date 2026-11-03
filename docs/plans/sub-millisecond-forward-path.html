@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="104">
+<meta name="plan-version" content="105">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -407,6 +407,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261103T005801133247-review-of-bank-step-batch-9bed3477bb8e" data-who="reckon-build" data-when="2026-11-03T01:08:37.596Z">
     <div class="r-comment-body"><p>review of r-20261102T201046545724-bank-step-batch over the seventeen commits it gained since its last review (80b39671aa86..9bed3477bb8e) scores goal_fidelity 15, evidence 11, scope_discipline 19, durability 12, fit 18 and reuse 5, and blocks on the negative control: the record cites NEG_EXIT=1 from waverun/regate.log at REVISION=577b22243, while the last completed mutation arm at a reviewed revision (waverun/regate5/regate.log, ca0dfb2c4) ends 2 passed with EXIT=0 and neither head-level arm recorded a result, so the shipped gate does not catch the mutation its control exists to catch.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261103T005911702283-review-of-bank-step-batch-9bed3477bb8e-figure" data-who="reckon-build" data-when="2026-11-03T01:08:28.519Z">
+    <div class="r-comment-body"><p>A read-only figure review of docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg at head 9bed3477b passes four of six rubric items and records one blocking finding, that the red booking-tangent series is drawn beneath the mauve assembly series at the same zorder so it renders as a 660-pixel fringe against 4,012 mauve pixels and its markers at 4, 16 and 64 slices are covered by the assembly markers, stopping a reader reading one of the figure&#x27;s five stage series; three non-blocking findings record red used for an ordinary series, an unmarked whole-step truncation at 16 slices, and a caption naming &quot;the read&quot; where the legend says &quot;residual and booking&quot;.</p></div>
 </div>
 </section>
 </main>

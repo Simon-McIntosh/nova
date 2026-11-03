@@ -26,6 +26,13 @@
     "gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/logs/gate-final.log",
     "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/logs/negative-control.log"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-fine-flux-display-repair-efe6cb32543c",
+      "recorded_at": "2026-11-03T00:41:39.949546+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_display_flux.py",

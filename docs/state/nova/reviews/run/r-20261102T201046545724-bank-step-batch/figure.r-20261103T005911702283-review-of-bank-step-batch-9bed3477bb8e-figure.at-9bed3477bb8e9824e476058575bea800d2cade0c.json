@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so this is the neutral value the record shape requires and not a measurement. No base/head gate pair was read and no added failure is claimed.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg"
+  },
+  "attachment_note": "One rendered image was handed to this node (image-0.png, 1399x709 RGBA, dpi 100 render of the per-slice-wall figure at the reviewed head). Every verdict below was formed on that rendered PNG at native resolution and on magnified crops of it (2x full, 4x of the two coincident-series bands, 10x of the four marker positions), never on the SVG source, which was not opened. The PNG was matched to the figure by the fragment's img src and by the run's manifest changed_paths, which names this figure and its plot.py.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T01:00:10Z",
+  "figure_checks": {
+    "caption": "The caption is not a restatement of a title: the figure carries no title, and the caption states the state (diverted 550-cell, one H200), the axes, the sampling floor (minimum of five calls per point), the reading, and the truncation of the whole-step series. Its one naming mismatch is recorded as finding 4.",
+    "clipping": "Ink bounding box on the 1399x709 render is x 10..1389, y 9..697, leaving 10 px left, 9 px top, 9 px right and 11 px bottom of margin; the outer 2, 4 and 8 px frames each contain 0 ink pixels, so no text or data is clipped.",
+    "legend": "The 3x2 frameless legend at the panel's upper right is clear: dark ink in the legend column band x 940..1390 occupies only rows 28..46 and 58..75, and no data ink reaches that region because the whole-step series ends at the 16-slice column.",
+    "render": "Judged only from image-0.png, the rendered PNG named in this review: native resolution, plus 2x/4x/10x LANCZOS crops of the legend band, the two coincident-series bands near 110 ms, and each of the four marker columns. The SVG and every other image in the run directory were not opened.",
+    "series_visibility": "Colour-masked pixel counts in the y 78..140 band where the two top stage series run: mauve #b279a2 4012 core pixels against red #e45756 660, at the same 3.0 pt stroke width and the same marker size. The four marker columns are x 125 (1 slice), 454 (4), 783 (16) and 1113 (64): the red series has 2, 0, 1 and 1 core pixels in those columns respectively, against 8-11 mauve pixels each, so the booking-tangent markers at 4, 16 and 64 slices are covered by the assembly markers. The two series are 108.97 ms and 110.55 ms at 64 slices (the run's own table), which is under one pixel of separation on this axis."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg",
+      "render": "image-0.png (1399x709, dpi 100)",
+      "rubric": {
+        "contrast": "pass. Near-black text on white throughout; the 0.20-200 ms decade labels 10^0, 10^1, 10^2 are clear.",
+        "data_ink": "pass. Six 3.0 pt lines and their markers only; no non-data ink beyond the two axes and their labels.",
+        "decoration": "pass. No grid, fill, span, gradient or background styling.",
+        "label_collision": "pass. Nothing clipped (zero ink in the outer 8 px frame), no label on a label, no label on data.",
+        "legibility": "fail. Five of six series read at a glance; the booking tangent cannot be read as its own series because the assembly line is drawn over it and their values differ by about 1.5 ms across a three-decade log axis. See finding 1 for the measurement.",
+        "table_form": "pass. A per-slice cost against batch size across six stage series is a curve set, not a table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg",
+      "id": "f4598a5432a",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The booking tangent series is not visible as its own series. It is drawn before the assembly series and at the same zorder (scripts/prototypes/bank_step_batch/plot.py:40-45, where every stage is plotted with zorder=3 in tuple order), so the mauve assembly line and its markers cover it wherever the two coincide. They coincide almost everywhere: 108.97 ms against 110.55 ms at 64 slices, under one pixel apart on this three-decade axis. Measured on the render, the mauve series has 4,012 core pixels in the band where the pair runs against 660 for the red one, and in the marker columns for 4, 16 and 64 slices the red series has 0, 1 and 1 core pixels against 8-11 mauve pixels each, so all three booking-tangent markers are hidden behind the assembly markers. The legend still promises a red 'booking tangent' series and a reader comparing the swatch with the plotted band cannot tell which of the two lines is which, or verify that the booking-tangent value at 64 slices is 109 ms rather than the assembly 111 ms. The stage breakdown is the figure's whole purpose, so a reader is stopped on one of its five stage series. A second cue (a dash pattern, a marker shape, or a lightness step) would separate them without moving the data."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_batch/plot.py",
+      "id": "fc9c7834555",
+      "line": 15,
+      "severity": "non-blocking",
+      "summary": "The booking tangent is drawn in #e45756, a red, for an ordinary stage series. The repository's plotting rules keep red for a limit being broken (AGENTS.md, 'Spend colour on the subject'), and this figure has no limit and no failure: the series is the largest per-slice stage cost that batching does not reduce. On the page the red reads as an alarm or a breached threshold, which is the opposite of what the series means, and it is also the colour most easily confused with the neighbouring mauve assembly line at this size."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_batch/plot.py",
+      "id": "f70e1e6037a",
+      "line": 41,
+      "severity": "non-blocking",
+      "summary": "The whole-step series stops at 16 slices because its 64-slice measurement never landed (the measurement job segfaulted, per the caption), and nothing in the figure marks that as a truncation rather than an end point. A missing stage row becomes np.nan at plot.py:41 and simply drops the point, so the near-black series ends mid-frame with an ordinary marker. A reader who does not read the caption can take the absence of a 64-slice whole-step point as an oversight, or mistake the flatter 131 ms end point for the stage having converged. The caption does state the segfault, so this is a figure-only gap, not a wrong picture."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "ff30cc5b1ba",
+      "line": 37,
+      "severity": "non-blocking",
+      "summary": "The caption says 'The whole step and the read fall with batch size', but no series in the figure is named 'the read': the falling series beside the whole step is labelled 'residual and booking'. A reader who follows the caption to the legend finds no 'read' entry and has to infer that the read's per-slice cost is the residual-and-booking series. Naming the series the caption means would remove the inference."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261103T005911702283-review-of-bank-step-batch-9bed3477bb8e-figure",
+  "reviewed_base_sha": "2b384a68a6a021658c8ba4e0ca47863237f3a55b",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg"
+  ],
+  "reviewed_head_sha": "9bed3477bb8e9824e476058575bea800d2cade0c",
+  "reviewed_run_id": "r-20261102T201046545724-bank-step-batch",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC per-slice-wall.svg legibility: fail. Five of the six series read at a glance on the log-log axes, but the booking tangent (red #e45756) is drawn beneath the assembly series (mauve #b279a2) and the two lie about 1.5 ms apart on a three-decade axis, so the red series renders as a thin fringe and its markers at 4, 16 and 64 slices are covered by the mauve markers; one of the five stage series cannot be read as its own series. Finding 1.",
+    "RUBRIC per-slice-wall.svg data_ink: pass. Five coloured 3.0 pt lines with 7 px circular markers plus one near-black whole-step line are the only ink in the panel; no gradient, band, fill or shading anywhere in the image.",
+    "RUBRIC per-slice-wall.svg decoration: pass. No gridlines, no background fill, no styled theme; the top and right spines are removed and only the two carrying a scale remain (plot.py:51-52).",
+    "RUBRIC per-slice-wall.svg contrast: pass. Every text element is near-black (#0b0b0b to #1b1b1b) on white at 14 pt tick and legend text and 16 pt axis labels; the y-axis label 'per-slice wall [ms]' and the x-axis label 'slices per batch' are both fully legible.",
+    "RUBRIC per-slice-wall.svg table_form: pass. Per-slice wall against slices per batch is a genuine plotted relationship, not a table in disguise: the fall in per-slice cost with batch size and the flatness of two of the stages are shape facts the 24 underlying numbers do not carry on their own.",
+    "RUBRIC per-slice-wall.svg label_collision: pass. Zero ink in the outer 8 px frame of the 1399x709 render (ink bounding box x 10..1389, y 9..697), so nothing is clipped. No text element overlaps another. The three-column, two-row frameless legend sits in the empty upper-right area (the whole-step series ends at 16 slices, so no data reaches that region) and clears the plotted data by more than 10 px."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T01:08:31.889154+00:00",
+  "total": null
+}

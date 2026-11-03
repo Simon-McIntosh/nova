@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-03T01:08:37.596Z",
+  "dispatched_at": "2026-11-03T00:59:02Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "f76ec4e1b98",
+      "line": 281,
+      "severity": "blocking",
+      "text": "The record says the negative control was re-run against the repaired code and took the gate red with NEG_EXIT=1, citing waverun/regate.log; that log's header is REVISION=577b22243, seven commits before the reviewed head 9bed3477b, and every later mutation arm shows the control failing to fire: waverun/regate5/regate.log (REVISION=ca0dfb2c4) ends '2 passed ... EXIT=0' with NEG_EXIT=0, while the head-level arms record no result at all (regate6 ends after the SCRATCH header, and waverun/negative/negative.log at REVISION=6da453c46 stops mid-run with no EXIT). The mutation lowers step_batch's read to the same per-lane `read` the equality clause compares a lane against, so the flux-agreement clause passes under it; the shipped gate therefore does not catch the defect the control exists to catch, and the manifest's rubric.negative-control line rests on a stale revision."
+    },
+    {
+      "file": "tests/test_bank_step_batch.py",
+      "id": "f466ffdd965",
+      "line": 275,
+      "severity": "non-blocking",
+      "text": "The lane-distinctness assertion compares initial[0][0] against initial[0][1], both of which the test itself built from built[\"moments\"] and LANE_PERTURBATION at line 161; both sides move together and are independent of the code under test, so a step_batch that broadcast lane 0's operands across the lane axis would still satisfy it. It is the one clause aimed at the broadcast regression and it has no power over it."
+    },
+    {
+      "file": "tests/test_bank_step_batch.py",
+      "id": "f7cc14cd6b5",
+      "line": 244,
+      "severity": "non-blocking",
+      "text": "x_point_gap is set to 0.0 when no X-point is valid in both solves, so the assertion at line 260 passes vacuously whenever the read admits none; an empty X-point set is reported as agreement rather than as the absence it is. The recorded run did see valid points (x_point 4.885e-15 m), so the clause is not vacuous here, but nothing in the test notices a state where it would be."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "fee8df6d4ce",
+      "line": 298,
+      "severity": "non-blocking",
+      "text": "The sixteen-lane list of lanes at or below the 1e-10 bound opens with 1.52e-09, which is above that bound and is an iteration-2 value (waverun/trace.log, index 2, lane with 1.5188277302513598e-09), not an iteration-12 one; at iteration 12 the twelfth in-bound value is 1.458e-11. The count of twelve is right and the listed value is not, so the sentence contradicts its own bound."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "f2095d01c1b",
+      "line": 286,
+      "severity": "non-blocking",
+      "text": "The negative-control paragraph calls 2.0e-8 Wb 'four orders above the 1e-12 floor the comparison now carries', but the comparison no longer carries a 1e-12 floor: tests/test_bank_step_batch.py:41,254 judge flux against FLUX_SPAN_BUDGET * span = 1e-8 of a 0.0358738 Wb span, about 3.59e-10 Wb. The stated margin is against a tolerance the test does not use."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "f7c3070c231",
+      "line": 141,
+      "severity": "non-blocking",
+      "text": "The freeze table and the 16-iteration exit at [8.7795e-11, 4.4864e-11, 6.6933e-12, 5.2410e-11] have no log on disk: no file under the run directory contains those values, and the receipts paragraph names none for them. They verify only in the worker's own stream (resume-3.jsonl, the TRACE_BATCH_EXIT line for four slices with steps 16), so a reader of the fragment cannot open the receipt that produced the table."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_batch/trace.sh",
+      "id": "f7d712f8521",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "trace.sh, diagnose.sh and negative.sh each reproduce the body of scripts/prototypes/bank_step_batch/regate.sh verbatim \u2014 the same SBATCH block, ROOT/RUN_DIR/PY/TMPDIR/PYTHONPATH/cache setup, REVISION header and exit trailer \u2014 differing only in the payload and the log name; they duplicate the launcher rather than extending it with a parameter."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261103T005801133247-review-of-bank-step-batch-9bed3477bb8e",
+  "reviewed_base_sha": "80b39671aa863ae12e1acb7c31a341726efc0663",
+  "reviewed_head_sha": "9bed3477bb8e9824e476058575bea800d2cade0c",
+  "reviewed_run_id": "r-20261102T201046545724-bank-step-batch",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T04:44:59.127688+00:00",
+  "total": 80
+}

@@ -9,6 +9,11 @@
       "kind": "exempted",
       "reason": "cosmetic: the fragment names 299841a4c as the gate head; the two later commits touch only plot.py, the figure and the fragment, and the review confirms the gate stands for ec5ba1ad5; recorded in the merge body",
       "recorded_at": "2026-11-03T07:55:50.065584+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "cosmetic: the figure log header names the earlier revision; the review reproduced the committed SVG byte-identically from the cited stage log",
+      "recorded_at": "2026-11-03T07:55:58.062007+00:00"
     }
   },
   "findings": [

@@ -3634,7 +3634,14 @@ class ForwardFluxOperator:
         )
         safe_unscaled = jnp.where(admissible, unscaled, jnp.ones_like(unscaled))
         amplitude = jnp.where(admissible, target / safe_unscaled, jnp.nan)
-        if not isinstance(admissible, jax.core.Tracer) and not bool(admissible):
+        # The admissibility flag can reduce to a concrete value while an
+        # operand is still traced, so the refusal is decided from the operands
+        # rather than from the flag: a traced operand takes the non-finite
+        # amplitude the solver rejects, and only a fully concrete call raises.
+        concrete = not any(
+            isinstance(value, jax.core.Tracer) for value in (target, unscaled)
+        )
+        if concrete and not bool(admissible):
             target_value = float(target)
             unscaled_value = float(unscaled)
             if not np.isfinite(target_value) or not np.isfinite(unscaled_value):

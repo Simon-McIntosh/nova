@@ -8,7 +8,12 @@ flux a stored state's own currents produce, evaluated at 10 mm. The coupling is
 built in the benchmark from the machine the state was solved on: the external
 term is the stored circuit fields contracted with the panel's prescribed
 currents, and the plasma term is the uniform, radial and vertical moment triple
-over the operator's own cells. <code>nova/equilibrium/display_flux.py</code> is
+over the operator's own cells, taken from the operator's normalised-current
+route at the solve's target current. That route is asked for its moment triple
+directly, because the builder's own normalised branch traces a clipped support
+that an operator carrying point moments and no moment geometry cannot provide;
+the render receipts name the observation entry point of the same route.
+<code>nova/equilibrium/display_flux.py</code> is
 unchanged.</p>
 
 <p id="coil-edit-fine-panels-test">The map is pinned against the operator that
@@ -64,34 +69,53 @@ than attributing the shift to whichever subject line reads closest.</p>
   edit beside the non-converged 9th, both evaluated on a 10 mm display map. The
   right-hand panel is not a converged state, so it draws the flux of the
   terminal currents rather than a solved boundary; its largest node mismatch
-  against the operator raster is <code>3.4e-2 Wb</code> against
-  <code>2.4e-3 Wb</code> on the left, and both maps reproduce their operator to
+  against the state it is drawn from is <code>5.6e-2 Wb</code> against
+  <code>4.6e-3 Wb</code> on the left, and both maps reproduce their operator to
   about <code>7e-12</code> relative.</figcaption>
 </figure>
 
-<p id="coil-edit-fine-panels-mismatch">The two panels disagree with the
-state they were drawn from by <code>2.405e-03 Wb</code> (converged) and
-<code>3.438e-02 Wb</code> (non-converged) while each reproduces its operator
-raster to <code>6.78e-12</code> and <code>7.20e-12</code>. Three candidate
-terms were measured on the mast-centroid archive at the lattice nodes. The
-operator carries a thirteen-conductor external current whose every entry is
-zero, so the term a drawing that passed <code>current=0</code> would omit is
-exactly <code>0.0 Wb</code>: an external conductor is not the separator, and
-the coupling omits nothing there. A gauge constant is not it either: the field
-<code>raster - state</code> has a mean of <code>4.54e-04 Wb</code> against a
-maximum of <code>2.41e-03 Wb</code>, and removing its mean leaves
-<code>1.95e-03 Wb</code> and removing a fitted plane leaves
-<code>1.95e-03 Wb</code>. What separates them is the plasma current amplitude.
-The solve's fixed point applies the target-current normalisation to its
-moments, and on this state the amplitude is <code>0.99841</code> — the solved
-state carries <code>0.159%</code> less plasma current than the unnormalised
-moments the raster images. Fitting one common scale against the plasma term
-gives <code>-1.587e-03</code> of a <code>1.039 Wb</code> plasma peak, which is
-<code>1.65e-03 Wb</code> of the <code>2.41e-03 Wb</code>, and leaves
-<code>8.2e-04 Wb</code> from the two moment routes' own support. So the panels
-are drawn unchanged: the coupling carries no omitted term, the stored state is
-not a fixed point of the plain moment image, and redrawing would move contours
-by a quantity the solve itself accounts for.</p>
+<p id="coil-edit-fine-panels-mismatch">The panel draws the operator's own
+normalised current moments of the stored state at the solve's target current,
+so it images the route the fixed point is terminated on rather than the
+unnormalised moments the archive carries. Measured against the state it draws,
+that route is further away, not closer, while the map still reproduces the
+operator raster to <code>6.77e-12</code> (converged) and
+<code>7.18e-12</code> (non-converged): the largest node mismatch rose from
+<code>2.405e-03</code> to <code>4.585e-03 Wb</code> on the converged panel and
+from <code>3.438e-02</code> to <code>5.577e-02 Wb</code> on the non-converged
+one. The term that separates them is the normalisation factor applied in the
+opposite direction. The operator derives an amplitude of
+<code>0.99841</code> (<code>target / sum(cell_current)</code>) and scales the
+moment triple by it; the stored state instead stands above the unnormalised
+image by the reciprocal, <code>1/0.99841 = 1.00159</code>, which is the
+<code>1.587e-03</code> fitted plasma scale of the <code>1.039 Wb</code> plasma
+peak. Multiplying the moments by <code>0.99841</code> therefore moves the
+drawn field away from the state by exactly that amount, which is why the
+converged panel's mismatch does not fall to the solver residual but grows: the
+stored state is not a fixed point of the normalisation this route applies, and
+no value of that amplitude closes it. The other candidates were ruled out at
+the lattice nodes: the operator's thirteen-conductor external current is all
+zero, so an omitted conductor contributes <code>0.0 Wb</code>; and the
+difference is not a gauge constant, since removing its mean
+(<code>4.54e-04 Wb</code> of a <code>2.41e-03 Wb</code> maximum) or a fitted
+plane leaves <code>1.95e-03 Wb</code>. Redrawing stopped here: the panels are
+drawn on the normalised route as directed, the before and after mismatch are
+both recorded, and the state's own relation to the normalisation is the term a
+further redraw cannot settle.</p>
+
+<p id="coil-edit-fine-panels-titan-outstanding">Three of the five panels are
+redrawn on that route: the forward-solve-api, mast-centroid-capability and
+cpu-compile-abort row figures, from the H200 archive, each by its own job
+(<code>1303942</code>, <code>1303960</code>, <code>1303961</code>) on
+<code>98dci4-gpu-0003</code>, all three carrying the same numbers because they
+read byte-identical archives. The two P100-set panels are <em>not</em>
+redrawn and still show the previous unnormalised drawing (largest node
+mismatches <code>2.405e-03 Wb</code> and <code>3.438e-02 Wb</code>). The titan
+render was submitted three times: the first job was cancelled at its time
+limit with the first of its two panels still compiling, and the two
+resubmissions were refused after the launcher's pending window expired on a
+resource reason with no free card on the node, so those figures carry the older
+route and must be redrawn on the P100 rung before this record is closed.</p>
 
 <p id="coil-edit-fine-panels-receipts">Each figure carries a
 <code>panel-receipt.json</code> beside it. Every field in it is read from an

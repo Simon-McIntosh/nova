@@ -1437,6 +1437,7 @@ def _panel_display_map(
     *,
     spacing: float,
     coupling: Any = None,
+    target_current: Any = None,
 ):
     """Return one stored panel state's field evaluated on the display grid.
 
@@ -1444,20 +1445,30 @@ def _panel_display_map(
     the fitted circuits when absent, and a caller may pass its own so the
     moment and state assembly here can be measured against a machine it can
     state exactly.
+
+    The moments are the solver's own. The fixed point is terminated on the
+    operator's target-current normalisation, so the panel asks the operator for
+    that same normalised moment triple rather than imaging the unnormalised
+    moments a producer would store or derive by another route; the panel then
+    draws the field the solve ended at. The moments are passed explicitly
+    because the builder's own normalised branch traces the clipped support of a
+    linear-moment operator, and this machine's operator carries point moments
+    with no moment geometry.
     """
     from nova.equilibrium.display_flux import build_display_flux_map
-    from nova.equilibrium.stencil_mesh import CellCurrentMoments
 
     lattice = profile.lattice
     if coupling is None:
         coupling = _panel_display_coupling(
             circuit_context["group"], circuit_context["row"], lattice, panel["current"]
         )
-    cell_current, radial, vertical = panel["moments"]
-    moments = CellCurrentMoments(
-        jnp.asarray(cell_current), jnp.asarray(radial), jnp.asarray(vertical)
-    )
-    state = np.asarray(panel["psi"], dtype=np.float64).T.ravel()
+    if target_current is None:
+        raise ValueError("a panel display map requires the solve's target current")
+    state = jnp.asarray(np.asarray(panel["psi"], dtype=np.float64).T.ravel())
+    requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    moments = profile.operator.normalised_current_moments(
+        state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
+    )[0]
     saddle_index = int(panel["saddle_index"])
     xpoints = np.asarray(panel["xpoints"], dtype=np.float64).reshape(-1, 2)
     seed = (
@@ -1471,6 +1482,8 @@ def _panel_display_map(
         spacing=spacing,
         current=jnp.zeros_like(profile.operator.external_current),
         prescribed_current=jnp.asarray(panel["current"], dtype=np.float64),
+        target_current=jnp.asarray(target_current, dtype=jnp.float64),
+        requested_class=requested_class,
         axis_rz=np.asarray(panel["axis"], dtype=np.float64),
         xpoint_rz=np.asarray(seed, dtype=np.float64),
     )
@@ -2215,9 +2228,11 @@ def _constraint_note(centroid: dict[str, Any] | None) -> str:
 def _panel_display_note(loaded: dict[str, Any]) -> str:
     """Return the caption clause a panel drawn from a display map carries.
 
-    A non-converged edit is not a fixed point, so its map is the field of the
-    terminal currents rather than the iterate the solver stopped at; the note
-    names that and gives the largest node mismatch between the two.
+    The map images the operator's normalised-current observation of the state,
+    the route the solve terminates on, so the note names that and gives the
+    largest node mismatch between the drawn map and the state: the solver's own
+    residual on a converged state, and the distance it stopped short of a fixed
+    point on a non-converged one.
     """
     parts = []
     for label, word in (("converged", "converged"), ("failed", "non-converged")):
@@ -2225,8 +2240,8 @@ def _panel_display_note(loaded: dict[str, Any]) -> str:
         if display is None:
             continue
         parts.append(
-            "%s panel draws the field of the terminal currents on a %.0f mm map, "
-            "largest node mismatch %.3e Wb"
+            "the %s panel draws the normalised plasma moments of its state on a "
+            "%.0f mm map, largest node mismatch %.3e Wb"
             % (
                 word,
                 1.0e3 * display.spacing_m,
@@ -2244,6 +2259,7 @@ def _render_panel(
     *,
     profile: Any = None,
     circuit_context: dict[str, Any] | None = None,
+    target_current: Any = None,
 ) -> dict[str, Any]:
     """Write the converged-versus-non-converged poloidal panel.
 
@@ -2263,6 +2279,7 @@ def _render_panel(
                 circuit_context,
                 panel,
                 spacing=DEFAULT_DISPLAY_SPACING,
+                target_current=target_current,
             )
     figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
 
@@ -2353,18 +2370,26 @@ def _render_panel(
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
         "display_map": {
-            label: {
-                "spacing_m": float(loaded[label]["display"].spacing_m),
-                "reproduction_relative_error": float(
-                    loaded[label]["display"].reproduction_relative_error
-                ),
-                "max_node_mismatch_wb": float(
-                    loaded[label]["display"].max_node_mismatch_wb
-                ),
-                "saddle_converged": bool(loaded[label]["display"].saddle_converged),
-            }
-            for label in ("converged", "failed")
-            if loaded[label].get("display") is not None
+            "moments_route": (
+                "operator.normalised_current_moments_and_observation of the state "
+                "at the solve's target current"
+            ),
+            "panels": {
+                label: {
+                    "spacing_m": float(loaded[label]["display"].spacing_m),
+                    "reproduction_relative_error": float(
+                        loaded[label]["display"].reproduction_relative_error
+                    ),
+                    "max_node_mismatch_wb": float(
+                        loaded[label]["display"].max_node_mismatch_wb
+                    ),
+                    "saddle_converged": bool(
+                        loaded[label]["display"].saddle_converged,
+                    ),
+                }
+                for label in ("converged", "failed")
+                if loaded[label].get("display") is not None
+            },
         },
     }
 
@@ -3417,6 +3442,7 @@ def main() -> None:
         )
     elif arguments.command == "panel":
         profile = None
+        prepared = None
         circuit_context = None
         if arguments.display_map:
             _require_measurement_host()
@@ -3428,6 +3454,7 @@ def main() -> None:
             arguments.panel_figure,
             profile=profile,
             circuit_context=circuit_context,
+            target_current=(None if prepared is None else prepared["target_current"]),
         )
         if arguments.receipt is not None:
             arguments.receipt.parent.mkdir(parents=True, exist_ok=True)

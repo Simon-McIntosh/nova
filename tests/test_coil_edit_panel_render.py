@@ -12,6 +12,7 @@ the operator never saw.
 from __future__ import annotations
 
 import os
+from typing import Any
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
 
@@ -114,7 +115,7 @@ def _profile() -> tuple[ForwardProfile, FluxLattice]:
     plasma = _plasma_columns(cells, cells, dr, dz)
     angle = 2.0 * np.pi * np.arange(12) / 12
     wall = np.c_[1.0 + 0.15 * np.cos(angle), 0.15 * np.sin(angle)]
-    node = lattice.node_count
+    node = cells.shape[0]
     profile = ForwardProfile.from_lattice(
         lattice,
         _source(),
@@ -155,12 +156,49 @@ def _moments(lattice: FluxLattice) -> CellCurrentMoments:
     )
 
 
+def _solved_moments_operator(operator: Any, moments: CellCurrentMoments) -> Any:
+    """Return the operator with its own moment observation held at ``moments``.
+
+    The real route reads a topology on the state, which a synthetic lattice
+    cannot qualify. Everything else -- the raster, the drive, the wall -- is the
+    built operator, and the panel asks this method for its moments, so a map
+    that fell back to another moment route would fail the raster comparison.
+    """
+
+    class _Operator:
+        """Expose the built operator with one stated moment observation."""
+
+        external_current = operator.external_current
+
+        @staticmethod
+        def raster_image(moment_value, current=None, prescribed_current=None):
+            """Return the operator's own raster of one moment triple."""
+            return operator.raster_image(
+                moment_value, current=current, prescribed_current=prescribed_current
+            )
+
+        @staticmethod
+        def normalised_current_moments(state, target_current, requested_class=None):
+            """Return the route the solve terminates on, held at the state."""
+            del state, target_current, requested_class
+            return moments, None
+
+    return _Operator()
+
+
+class _PanelProfile:
+    """Expose a profile whose operator answers with one stated moment triple."""
+
+    def __init__(self, profile: Any, moments: CellCurrentMoments) -> None:
+        self.lattice = profile.lattice
+        self.operator = _solved_moments_operator(profile.operator, moments)
+
+
 def _coupling(lattice: FluxLattice) -> DisplayCoupling:
     """Return the coupling the panel renderer contracts the state against."""
     cells = np.asarray(lattice.coordinate, dtype=float)
     dr = float(np.diff(lattice.radius).mean())
     dz = float(np.diff(lattice.height).mean())
-    node = cells.shape[0]
 
     def plasma(points: np.ndarray):
         """Return the plasma moment columns at ``points``."""
@@ -200,10 +238,11 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
         "axis": np.asarray([1.0, 0.0]),
     }
     display = _panel_display_map(
-        profile,
+        _PanelProfile(profile, moments),
         {},
         panel,
         spacing=DEFAULT_DISPLAY_SPACING,
         coupling=_coupling(lattice),
+        target_current=1.0e6,
     )
     assert display.reproduction_relative_error < 1.0e-10

@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-solve-driver-landing">Bank solve driver</h1>
-<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check and device wall remain pending.</p>
+<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check passed six tests. The requested H200 wall remains unmeasured because the single reserved-card submission stayed pending on resources for ten minutes and was cancelled under the allocation rule.</p>
 <section id="bank-solve-driver-trajectory">
 <h2>Same-seed CPU trajectories</h2>
 <p>The direct arm repeats the existing prototype's fresh-read and full-step calls at each iterate; the staged arm is one <code>jax.lax.while_loop</code> with factor reuse and active-set freezing switched off. Both use the same 550-cell operands, seed moments, profile, quadrature, stationary seeds and x64 dtype. Every update in the direct arm has length one. The residual is the maximum absolute moment mismatch after a fresh read; the update is the maximum absolute Newton correction.</p>
@@ -47,5 +47,9 @@
 <tr><td>Reuse after at least 10× contraction</td><td>9</td><td>5</td><td>10</td><td>172</td><td>2.367528395553e-11</td></tr>
 </tbody></table>
 <p>Both reuse rules converge, but neither saves enough refactors to pay for its extra reads and steps. The product solve therefore refactors on every step by default; factor reuse remains an explicit opt-in, and the active-set freeze remains enabled.</p>
+</section>
+<section id="bank-solve-driver-device-allocation">
+<h2>Device allocation receipt</h2>
+<p>Job <code>1304326</code> was submitted to betelgeuse with reservation <code>gpu_0003_grpA</code>, one GPU, four CPUs and 64 GB. Its submit time was 2026-11-03 09:43:27 UTC. It was still pending with reason <code>Resources</code> after ten minutes, so the job was cancelled at 09:53:52 UTC. The scheduler recorded <code>CANCELLED</code> and no device payload ran. There is no H200 per-slice wall, 16-lane precision receipt or wall figure from this allocation.</p>
 </section>
 </main></body></html>

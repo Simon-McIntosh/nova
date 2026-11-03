@@ -138,6 +138,7 @@ def _provenance() -> dict[str, Any]:
         "host": platform.node(),
         "python": platform.python_version(),
         "jax": jax.__version__,
+        "x64": bool(jax.config.jax_enable_x64),
         "jax_platforms": os.environ.get("JAX_PLATFORMS"),
         "platform": device.platform,
         "device_kind": device.device_kind,
@@ -1039,6 +1040,10 @@ def panels(
     """
     from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 
+    configure_dtypes()
+    if jax.config.jax_enable_x64 is not True:
+        raise RuntimeError("extended precision did not take before any array was built")
+
     data, coupling, display, _shape, _lattice_radius, _lattice_height, _solved = (
         _panel_state_display(state_path, spacing)
     )
@@ -1824,6 +1829,9 @@ def _render_family(
 
 
 def main() -> None:
+    configure_dtypes()
+    if jax.config.jax_enable_x64 is not True:
+        raise RuntimeError("extended precision did not take before any array was built")
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
     for name in ("run", "panels", "series", "family"):

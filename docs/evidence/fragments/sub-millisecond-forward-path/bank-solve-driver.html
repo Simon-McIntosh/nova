@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank solve driver | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-solve-driver-landing">Bank solve driver</h1>
+<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. The factor-rule cost comparison and device wall remain pending.</p>
+<section id="bank-solve-driver-trajectory">
+<h2>Same-seed CPU trajectories</h2>
+<p>The direct arm repeats the existing prototype's fresh-read and full-step calls at each iterate; the staged arm is one <code>jax.lax.while_loop</code> with factor reuse and active-set freezing switched off. Both use the same 550-cell operands, seed moments, profile, quadrature, stationary seeds and x64 dtype. Every update in the direct arm has length one. The residual is the maximum absolute moment mismatch after a fresh read; the update is the maximum absolute Newton correction.</p>
+<table id="bank-solve-driver-trajectory-table"><thead><tr><th>Step</th><th>Direct fresh residual</th><th>Direct update norm</th><th>Staged fresh residual</th><th>Staged update norm</th></tr></thead><tbody>
+<tr><td>0</td><td>9.962644994073e-2</td><td>1.116307309156e-1</td><td>9.962644994073e-2</td><td>1.116307309156e-1</td></tr>
+<tr><td>1</td><td>3.284071679417e-4</td><td>7.551404650656e-5</td><td>3.284071664638e-4</td><td>7.551404747840e-5</td></tr>
+<tr><td>2</td><td>1.644200437086e-7</td><td>2.180536109159e-7</td><td>1.644200445239e-7</td><td>2.181715290236e-7</td></tr>
+<tr><td>3</td><td>3.187726660463e-10</td><td>3.188915260811e-10</td><td>3.558398020687e-11</td><td>accepted</td></tr>
+<tr><td>4</td><td>3.187732707804e-10</td><td>3.188920282399e-10</td><td>—</td><td>—</td></tr>
+<tr><td>5</td><td>3.187733545214e-10</td><td>3.188920372603e-10</td><td>—</td><td>—</td></tr>
+<tr><td>6</td><td>3.187741020924e-10</td><td>3.188928567085e-10</td><td>—</td><td>—</td></tr>
+<tr><td>7</td><td>4.575895218295e-11</td><td>accepted</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p id="bank-solve-driver-trajectory-explanation">The prototype does not carry the stale step-1 read: both arms refresh support, and the batch-one compiled path's roundoff-scale difference after the first update is consistent with the nonsmooth clipped read taking it through the 1e-7 plateau in three rather than seven steps.</p>
+<table id="bank-solve-driver-precision-table"><thead><tr><th>Terminal comparison</th><th>Measured gap</th><th>Budget</th></tr></thead><tbody>
+<tr><td>Flux supremum / span</td><td>2.773714852327e-13</td><td>1e-8</td></tr>
+<tr><td>Axis position / minor radius</td><td>3.034220055264e-14</td><td>5e-4</td></tr>
+<tr><td>X-point position / minor radius</td><td>1.298921493009e-14</td><td>5e-4</td></tr>
+<tr><td>Boundary flux / span</td><td>4.222337596960e-14</td><td>1e-4</td></tr>
+<tr><td>Direct fresh residual</td><td>4.575895218295e-11</td><td>at most 1e-10</td></tr>
+<tr><td>Staged fresh residual</td><td>3.558398020687e-11</td><td>at most 1e-10</td></tr>
+</tbody></table>
+<p>The CPU receipt is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T080040158512-bank-solve-driver/cpu-budget-cost.log</code>, launched at revision <code>b087938055be6ad386421f2773deda401c51073b</code>. Its full suite summary and factor-rule rows follow later in the same log.</p>
+</section>
+</main></body></html>

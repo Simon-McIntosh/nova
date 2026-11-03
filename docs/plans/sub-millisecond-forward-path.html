@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="102">
+<meta name="plan-version" content="103">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -400,7 +400,10 @@
     <div class="r-comment-body"><p>Independent review of a17a1f2a4..1f63ff43c stored at both declared review-record paths with six scores (goal_fidelity 10, evidence 15, scope_discipline 20, durability 8, fit 14, reuse 10), zero added failures, and six non-blocking findings: the repaired caption still attributes revision 7b2a7898 to a base arm whose own log records 6a404a566, the provenance check's revision and current-path helpers are never called, its table assertion covers only the wall columns, its allocation guard is an exact phrase, h200_pair.sh ends with an unconditional EXIT=0, and it duplicates h200_arm.sh's arm runner.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261102T234626061239-review-of-bank-step-booking-once-1f63ff43ccf7-figure" data-who="reckon-build" data-when="2026-11-02T23:59:10.429Z">
-    <div class="r-comment-body"><p>Figure review of r-20261102T215004202991-bank-step-booking-once at head 1f63ff43c is parsed read-only: all six figure rubric items pass on the rendered 1400x720 PNG, with four non-blocking findings on the drawing script (title &#x27;whole Newton step&#x27; not in the committed script, a read()/STAGE_DEVICE mismatch that prevents regeneration, green on the regressed arm, and independent per-panel y-limits) and no blocking finding.</p></div>
+    <div class="r-comment-body"><p>Figure review of r-20261102T215004202991-bank-step-booking-once at head 1f63ff43c is parsed read-only: all six figure rubric items pass on the rendered 1400x720 PNG, with four non-blocking findings on the drawing script (title 'whole Newton step' not in the committed script, a read()/STAGE_DEVICE mismatch that prevents regeneration, green on the regressed arm, and independent per-panel y-limits) and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261102T215004202991-bank-step-booking-once" data-who="reckon-build" data-when="2026-11-02T23:39:20Z">
+    <div class="r-comment-body"><p>The booking tangent&#x27;s duplicate is the per-cell normal-form/conic choice inside book_tangent_channels, lowered as a select so both branch interiors are computed for every cut cell; selecting one ring set before integrating drops the emitted interior copies from three to two but costs the H200 9.83 ms of tangent wall (27.83 base against 37.86 ms) and 10.92 ms of step wall (42.84 against 53.76), so the source change was reverted and the measured negative result is landed at docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html with a before/after stage figure.</p></div>
 </div>
 </section>
 </main>

@@ -30,8 +30,8 @@
     },
     "1": {
       "kind": "exempted",
-      "reason": "non-blocking, noted at landing",
-      "recorded_at": "2026-11-03T08:40:35.961567+00:00"
+      "reason": "one-off measurement script; raw trace receipts retained under the run directory",
+      "recorded_at": "2026-11-03T08:42:43.384840+00:00"
     },
     "2": {
       "kind": "exempted",

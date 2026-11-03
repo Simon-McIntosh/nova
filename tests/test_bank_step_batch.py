@@ -158,6 +158,7 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
             support_read.step_residual(bank, one, one, one_support, profile, quadrature)
         )
 
+    initial = tuple(np.asarray(value) for value in stacked)
     hold = np.zeros(LANES, dtype=bool)
     steps = 0
     trace = []
@@ -266,10 +267,12 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
         f"single steps {separate_steps}"
     )
 
-    # The lanes are genuinely distinct states: a batch that broadcast one
-    # lane's state across the axis would return equal fluxes and pass a
-    # comparison written against a single shared state.
-    assert not np.allclose(np.asarray(stacked[0][0]), np.asarray(stacked[0][1]))
+    # The lanes start as genuinely distinct states: a batch that broadcast one
+    # lane's input across the axis would begin from one state and agree with
+    # itself. Two perturbed lanes may still reach the same fixed point, so the
+    # distinctness is asserted where it is a property of the input, not of the
+    # solution.
+    assert not np.allclose(initial[0][0], initial[0][1])
 
     sample = tuple(value[0] for value in stacked)
     exact = support_read.newton_step(

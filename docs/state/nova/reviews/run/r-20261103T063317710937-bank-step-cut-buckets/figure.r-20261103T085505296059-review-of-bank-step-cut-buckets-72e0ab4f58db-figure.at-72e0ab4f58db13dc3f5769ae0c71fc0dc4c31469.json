@@ -10,6 +10,13 @@
       "repository_path": "docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-cut-buckets",
+      "recorded_at": "2026-11-03T09:18:08.970368+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_step_speed/plot_stage.py",

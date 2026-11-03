@@ -1,0 +1,47 @@
+{
+  "caption": "the non-converged panel is drawn from the terminal currents and its caption gives the largest node mismatch",
+  "display_map": {
+    "converged": {
+      "max_node_mismatch_wb": 0.0024050743460606316,
+      "reproduction_relative_error": 6.780338952939714e-12,
+      "saddle_converged": true,
+      "spacing_m": 0.01
+    },
+    "failed": {
+      "max_node_mismatch_wb": 0.0343824430086318,
+      "reproduction_relative_error": 7.1967014727409325e-12,
+      "saddle_converged": true,
+      "spacing_m": 0.01
+    }
+  },
+  "figure": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+  "figure_vector": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.svg",
+  "render": {
+    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/mast-centroid-capability/panel-states.npz --panel-figure docs/figures/mast-centroid-capability/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render-h200.json",
+    "cpus_per_task": "8",
+    "device": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "job_id": "1303890",
+    "partition": "betelgeuse",
+    "platform": "gpu",
+    "read_archive": "docs/figures/mast-centroid-capability/panel-states.npz",
+    "read_archive_md5": "d40d470fa0923e225b26e743457cd863",
+    "receipt": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render-h200.json",
+    "written_as": "converged-vs-nonconverged.png"
+  },
+  "schema": "nova.coil-edit-panel-receipt",
+  "set": "cpu-compile-abort-regeneration-row",
+  "solve": {
+    "cancelled": null,
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr-raster.png --panel-data docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz --panel-figure docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "exit_status": "2",
+    "exit_status_note": "2 is the benchmark's own non-converged verdict, not a crash",
+    "jax_platforms": "cuda,cpu",
+    "job_id": "1303883",
+    "log": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr4.log",
+    "partition": "betelgeuse",
+    "source_revision": "48c5e92294d55d242f26704ff6c319faa2e3e1bd"
+  },
+  "state_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
+  "state_archive_md5": "d40d470fa0923e225b26e743457cd863"
+}

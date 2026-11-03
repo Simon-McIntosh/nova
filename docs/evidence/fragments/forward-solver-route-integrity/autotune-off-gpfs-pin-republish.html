@@ -1,0 +1,29 @@
+<!-- fragment: autotune-off-gpfs-pin-republish -->
+<section id="autotune-off-gpfs-pin-republish">
+<h3>Pre-warm rows and pin publication</h3>
+<p>Job 1304343's log begins its first fixture-floor invocation with repeated
+<code>CUDA_ERROR_OUT_OF_MEMORY</code> requests for 104.85 GiB. Its traceback
+shows a missing cached key at
+<code>/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr</code>
+and a rebuild through the oracle machine's process pool. The launcher invoked
+<code>--reposed-fixture-floor</code> four times with different <code>--case</code>
+arguments, although that mode loops all four cases itself. The repaired launcher
+runs the floor once, keeps its fixture store and figures in node-local scratch,
+turns off JAX GPU preallocation for child processes, and requests four cores
+within the reserved share.</p>
+<p>The launcher now counts files under the per-fusion autotune directory and
+publishes the pin only after every row, the executable-entry count, and that
+zero-file check succeed. The focused CPU suite passed 8 tests at the base and
+10 at the changed head. Seeding one autotune file in the count test made
+<code>test_autotune_count_accepts_a_compile_only_directory</code> fail with
+count 1 and exit 1; the unseeded head arm passes.</p>
+<p>H200 job 1304470 is running against main revision
+<code>defca1acf17c40d5ceb1ec6163fe6befc788b738</code>. Its fixture-floor
+receipt completed with status 0, 651 cache hits, 3,784 persisted misses,
+34.0 recorded compile seconds and 4,653 executable entries in
+<code>runtime-d23b975337df890821f8</code>. The identity and lane rows, pin
+publication, lane dry run, and retired-directory removal remain pending this
+job's final receipt. The currently pinned directory
+<code>runtime-7b315420b55b91bffb05</code> still holds 19,270 compile entries
+and 31,667 autotune files.</p>
+</section>

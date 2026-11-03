@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="114">
+<meta name="plan-version" content="115">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -437,6 +437,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261103T074008112526-bank-step-occupancy" data-who="reckon-build" data-when="2026-11-03T08:11:42Z">
     <div class="r-comment-body"><p>The single-dispatch H200 warm step took 43.736 ms at base and 29.185 ms bucketed, with 40.021 and 25.308 ms GPU busy; both fresh-read residuals passed 1e-10; see docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html and docs/figures/sub-millisecond-forward-path/bank-step-occupancy/occupancy.svg.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261103T081743975943-review-of-bank-step-occupancy-d5f726143fc9-figure" data-who="reckon-build" data-when="2026-11-03T08:29:15.577Z">
+    <div class="r-comment-body"><p>The occupancy figure passes all six rubric items as a rendered PNG; three non-blocking findings are recorded, none blocking, so the review does not hold the node.</p></div>
 </div>
 </section>
 </main>

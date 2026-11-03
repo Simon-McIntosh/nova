@@ -158,7 +158,12 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
             support_read.step_residual(bank, one, one, one_support, profile, quadrature)
         )
 
-    initial = tuple(np.asarray(value) for value in stacked)
+    probe = batch(stacked, jnp.zeros(LANES, dtype=bool))
+    jax.block_until_ready(probe.step.update)
+    probe_update = np.asarray(probe.step.update[0])
+    assert not np.allclose(probe_update[0], probe_update[1]), (
+        "the batched step returned one lane's update for every lane"
+    )
     hold = np.zeros(LANES, dtype=bool)
     steps = 0
     trace = []
@@ -240,9 +245,11 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
             np.asarray(batched_lane.reading.x_points)
             - np.asarray(solo.reading.x_points)
         )
-        x_point_gap = (
-            float(point_gaps[valid_points].max()) if valid_points.any() else 0.0
+        assert valid_points.any(), (
+            f"lane {lane} admits no X-point in both solves, so the position "
+            "clause would pass on an empty set"
         )
+        x_point_gap = float(point_gaps[valid_points].max())
         boundary_gap = abs(
             float(batched_lane.reading.boundary_flux)
             - float(solo.reading.boundary_flux)
@@ -267,12 +274,10 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
         f"single steps {separate_steps}"
     )
 
-    # The lanes start as genuinely distinct states: a batch that broadcast one
-    # lane's input across the axis would begin from one state and agree with
-    # itself. Two perturbed lanes may still reach the same fixed point, so the
-    # distinctness is asserted where it is a property of the input, not of the
-    # solution.
-    assert not np.allclose(initial[0][0], initial[0][1])
+    # Two independently perturbed lanes may reach the same fixed point, so the
+    # converged states can be equal without the batch having broadcast one
+    # lane. The distinctness is asserted above, on the step's own per-lane
+    # output at the perturbed state, which is where a broadcast shows.
 
     sample = tuple(value[0] for value in stacked)
     exact = support_read.newton_step(

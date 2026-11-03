@@ -1,10 +1,10 @@
-"""Run the step gate against a scratch copy whose read decision sits in the map.
+"""Run the step gate against a scratch copy that broadcasts one lane's state.
 
-The mutation replaces :func:`support_read.step_batch`'s batch-uniform read with
-a ``vmap`` of the single-lane read, so the rebuild decision is formed inside
-the map and each lane decides for itself. That is the defect the branch clause
-refuses: a batch carrying one stale track must rebuild every lane and report
-the rebuild on every lane.
+The mutation replaces :func:`support_read.step_batch`'s per-lane operands with
+the first lane's operands broadcast across the lane axis, which is the defect
+the gate exists to catch: a batch that shares one lane across the lane axis is
+not a batch over independent slices, and every lane converges to the first
+lane's solution instead of its own.
 """
 
 import argparse
@@ -27,20 +27,21 @@ BATCHED = """    support = read_batch(
         tracking=tracking,
     )"""
 
-MUTANT = """    support = jax.vmap(
-        lambda state, seed, warm, track: read(
-            operands,
-            cache,
-            state,
-            seed,
-            warm,
-            convention,
-            policy,
-            axis_sign,
-            iterations=iterations,
-            tracking=track,
-        )
-    )(moments, seeds, previous, tracking)"""
+MUTANT = """    moments = jax.tree_util.tree_map(
+        lambda value: jnp.broadcast_to(value[0], value.shape), moments
+    )
+    support = read_batch(
+        operands,
+        cache,
+        moments,
+        seeds,
+        previous,
+        convention,
+        policy,
+        axis_sign,
+        iterations=iterations,
+        tracking=tracking,
+    )"""
 
 
 SHADOW = """import sys

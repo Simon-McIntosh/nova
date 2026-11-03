@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-11-03T11:09:59Z",
   "dispatched_at": "2026-11-03T10:58:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-solve-driver",
+      "recorded_at": "2026-11-03T11:19:31.651116+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/support_read.py",

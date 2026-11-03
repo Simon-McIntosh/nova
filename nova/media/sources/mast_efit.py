@@ -35,6 +35,7 @@ from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.io.sourcemap import mast_flux_factor
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.media.sources.frame import EquilibriumFrame, MachineGeometry, Pulse
+from nova.utilities.axes import uniform_axis
 
 _SECTION_COLUMNS = (
     "fcoil_r",
@@ -44,29 +45,6 @@ _SECTION_COLUMNS = (
     "fcoil_ang1",
     "fcoil_ang2",
 )
-
-
-def _uniform_axis(stored: np.ndarray, name: str) -> np.ndarray:
-    """Return an endpoint-preserving uniform axis, or refuse a ragged one.
-
-    The comparison is against the reconstructed axis at the STORED precision,
-    not against the spacing. Differencing float32 coordinates amplifies their
-    representation error by the ratio of coordinate to spacing -- here about a
-    factor of sixty -- so a spacing test rejects an axis that is uniform to
-    every bit the archive actually holds.
-    """
-    axis = np.asarray(stored)
-    if axis.ndim != 1 or axis.size < 2 or not np.all(np.diff(axis) > 0.0):
-        raise ValueError(f"{name} must be a one-dimensional increasing axis")
-    expected = np.linspace(axis[0], axis[-1], axis.size, dtype=axis.dtype)
-    tolerance = 16.0 * np.finfo(axis.dtype).eps * max(1.0, abs(float(axis[-1])))
-    deviation = float(np.max(np.abs(axis - expected)))
-    if deviation > tolerance:
-        raise ValueError(
-            f"{name} is non-uniform at {axis.dtype} precision: "
-            f"{deviation:.6g} exceeds {tolerance:.6g}"
-        )
-    return np.linspace(float(axis[0]), float(axis[-1]), axis.size)
 
 
 def _finite_pairs(radius: np.ndarray, height: np.ndarray) -> np.ndarray:
@@ -105,8 +83,8 @@ def read_geometry(group: Any) -> MachineGeometry:
 
 def read_frame(group: Any, index: int) -> EquilibriumFrame:
     """Return one time slice as a machine-neutral record."""
-    radius = _uniform_axis(np.asarray(group["gridr"]), "efm/gridr")
-    height = _uniform_axis(np.asarray(group["gridz"]), "efm/gridz")
+    radius, _ = uniform_axis(np.asarray(group["gridr"]), "efm/gridr")
+    height, _ = uniform_axis(np.asarray(group["gridz"]), "efm/gridz")
     x_points = np.array(
         [
             [float(group["xpoint1_rc"][index]), float(group["xpoint1_zc"][index])],

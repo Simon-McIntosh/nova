@@ -60,6 +60,7 @@ from nova.imas.parity_tolerances import (
     registered_tolerances,
     scorecard_verdicts,
 )
+from nova.io.json import write_atomic
 
 DEFAULT_ARTIFACT = Path("docs/figures/spine-efit-parity/frozen-six-scorecard.json")
 DEFAULT_FIGURE_DIR = DEFAULT_ARTIFACT.parent
@@ -575,13 +576,7 @@ def _json_value(value: Any) -> Any:
 def _bank_report(report: Any, path: Path) -> None:
     """Write the scorecard atomically as strict, deterministic JSON."""
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(
-        json.dumps(_json_value(asdict(report)), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    temporary.replace(path)
+    write_atomic(path, _json_value(asdict(report)), indent=2, newline=True)
 
 
 def bank_production_partition(

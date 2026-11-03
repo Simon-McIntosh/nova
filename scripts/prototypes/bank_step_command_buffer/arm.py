@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import subprocess
+import time
 from pathlib import Path
 from time import perf_counter
 
@@ -343,6 +344,7 @@ def main():
         with jax.profiler.TraceAnnotation(f"stage:{name}"):
             result = compiled(*args)
             jax.block_until_ready(result)
+    time.sleep(2.0)
     jax.profiler.stop_trace()
     emit("TRACE_PATH", path=str(trace))
 

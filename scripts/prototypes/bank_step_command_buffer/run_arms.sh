@@ -19,7 +19,7 @@ off_flags="--xla_gpu_enable_command_buffer="
 on_flags="--xla_gpu_enable_command_buffer=FUSION,CUBLAS,WHILE,CONDITIONAL --xla_enable_command_buffers_during_profiling=true"
 
 status=0
-for width in 1 16; do
+for width in ${3:-1 16}; do
   for arm in off on; do
     if [ "$arm" = off ]; then flags=$off_flags; else flags=$on_flags; fi
     trace=$(mktemp -d "$RUN/trace-$arm-$width-XXXXXX") || exit 2

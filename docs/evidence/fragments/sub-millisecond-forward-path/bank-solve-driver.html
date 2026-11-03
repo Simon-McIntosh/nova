@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-solve-driver-landing">Bank solve driver</h1>
-<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check passed six tests. The requested H200 wall remains unmeasured because the single reserved-card submission stayed pending on resources for ten minutes and was cancelled under the allocation rule.</p>
+<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check passed six tests. A two-core, 48 GB H200 measurement is running after the initial four-core request could not be allocated.</p>
 <section id="bank-solve-driver-trajectory">
 <h2>Same-seed CPU trajectories</h2>
 <p>The direct arm repeats the existing prototype's fresh-read and full-step calls at each iterate; the staged arm is one <code>jax.lax.while_loop</code> with factor reuse and active-set freezing switched off. Both use the same 550-cell operands, seed moments, profile, quadrature, stationary seeds and x64 dtype. Every update in the direct arm has length one. The residual is the maximum absolute moment mismatch after a fresh read; the update is the maximum absolute Newton correction.</p>
@@ -50,6 +50,6 @@
 </section>
 <section id="bank-solve-driver-device-allocation">
 <h2>Device allocation receipt</h2>
-<p>Job <code>1304326</code> was submitted to betelgeuse with reservation <code>gpu_0003_grpA</code>, one GPU, four CPUs and 64 GB. Its submit time was 2026-11-03 09:43:27 UTC. It was still pending with reason <code>Resources</code> after ten minutes, so the job was cancelled at 09:53:52 UTC. The scheduler recorded <code>CANCELLED</code> and no device payload ran. There is no H200 per-slice wall, 16-lane precision receipt or wall figure from this allocation.</p>
+<p>Job <code>1304326</code> requested one GPU, four CPUs and 64 GB. It remained pending with reason <code>Resources</code> for ten minutes and was cancelled at 09:53:52 UTC. That observation established only that this job shape could not be allocated then. The later node inventory showed eight GPUs allocated, and the reservation's 30 cores also carried a four-core candidate job. Job <code>1304370</code> requested one GPU, two CPUs and 48 GB under the same reservation; it started on <code>98dci4-gpu-0003</code> within one minute. Its log header identifies the worker revision <code>19dd4cbbf4a3bdd7a1c1e95309da059c6af45d06</code>. Measurement results follow when that job completes.</p>
 </section>
 </main></body></html>

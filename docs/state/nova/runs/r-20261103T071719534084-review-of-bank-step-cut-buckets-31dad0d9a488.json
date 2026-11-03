@@ -1,0 +1,527 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "bde586f9dcf14fa2a84dee42d1d081813692f29f",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488/brief.md",
+    "sha256": "05bace4937b41a8e209bb76ab7820bd1aa0de311d8f1d35b6f5f41661f8e80c1"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 5380224,
+      "cached_input_tokens_cumulative": 5380224,
+      "input_tokens": 5489763,
+      "input_tokens_cumulative": 5489763,
+      "output_tokens": 16194,
+      "output_tokens_cumulative": 16194,
+      "reasoning_output_tokens": 6742,
+      "reasoning_output_tokens_cumulative": 6742
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-03T07:33:18Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-03T07:21:45Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 0.24386253931315735,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-04T06:37:21Z, which is after this node's 3600s horizon ending 2026-11-03T08:17:39.985924+00:00",
+    "horizon_ends_at": "2026-11-03T08:17:39.985924+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-03T07:17:38Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-04T06:37:21Z",
+    "resets_at": "2026-11-04T06:37:21Z",
+    "seconds_until_reset": 83982,
+    "state": "quiet",
+    "utilisation_pct": 21.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-03T07:17:38Z",
+    "read_at": "2026-11-03T07:17:39Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 21.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-03T07:33:18Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-03T07:33:18Z",
+        "resets_at": 1793774241,
+        "used_percent": 22.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488/manifest.md",
+  "member": "disposable-r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "review run; it writes no code",
+  "node": "review-of-bank-step-cut-buckets-31dad0d9a488",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488/brief.md",
+    "brief_sha256": "05bace4937b41a8e209bb76ab7820bd1aa0de311d8f1d35b6f5f41661f8e80c1",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261103T063317710937-bank-step-cut-buckets stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261103T063317710937-bank-step-cut-buckets, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261103T063317710937-bank-step-cut-buckets",
+    "id": "review-of-bank-step-cut-buckets-31dad0d9a488",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-03T07:17:38Z",
+      "read_at": "2026-11-03T07:17:39Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 21.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488/manifest.md",
+    "negative_control": "",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/review-records/r-20261103T063317710937-bank-step-cut-buckets.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/review-records/r-20261103T063317710937-bank-step-cut-buckets.at-31dad0d9a48813b2be16bfae05274be63a58cb2d.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 0.24379295106627427,
+      "derived": 0.947525344722553,
+      "drain_hours": 168.0,
+      "effective_limit": 0.947525344722553,
+      "elapsed_fraction": 0.8613866770205026,
+      "elapsed_hours": 144.71296173944444,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-04T06:37:21+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1793686984-4a0250",
+        "pace_multiple": null,
+        "remaining_seconds": 83833.337738,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-03T07:20:12.306000+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.79,
+      "remaining_windows": null,
+      "resets_at": "2026-11-04T06:37:21+00:00",
+      "state": "observed",
+      "utilisation": 0.21,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": null,
+      "decided_by": null,
+      "margin": null,
+      "name": "review-of-bank-step-cut-buckets-31dad0d9a488",
+      "score": 0.625,
+      "state": "unknown",
+      "verdict": null,
+      "window_fill": null
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": -4.643738,
+        "observed_at": "2026-11-03T07:20:12.306000+00:00",
+        "period": "seven_day",
+        "resets_at": "2026-11-04T06:37:21+00:00",
+        "state": "observed",
+        "utilisation": 0.21,
+        "window_minutes": 10080
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1793686984-4a0250",
+    "member": "codex",
+    "node": "review-of-bank-step-cut-buckets-31dad0d9a488",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-03T07:20:07.662262+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5004.164,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1665.057,
+      "context-estimate": 127.534,
+      "records": 2478.3,
+      "verdict-inputs": 919.784
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "bde586f9dcf14fa2a84dee42d1d081813692f29f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488",
+    "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+    "reviewed_head_sha": "31dad0d9a48813b2be16bfae05274be63a58cb2d",
+    "scores": {
+      "durability": 8,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 4,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 86
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1a04a-3031-7be0-872b-4b6f61c1ea87",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 5380224,
+    "cumulative_input_tokens": 10869987,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 22936
+  },
+  "time_budget": "60m",
+  "tool_steps": 59.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 649,
+        "exit_record": {
+          "attempt": 7,
+          "ended_during": "working",
+          "ended_pids": [
+            3216360,
+            3252722,
+            3252731,
+            3216507,
+            3216540,
+            3216506,
+            3216542
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-11-03T06:41:15Z",
+          "last_record_type": "system",
+          "launched_at": "2026-11-03T06:25:39Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261102T201046545724-bank-step-batch",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 47341,
+          "worker_pid": 3214942
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-03T06:41:15Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2228,
+        "log_fresh": false,
+        "manifest_commits": [
+          "ec5ba1ad5 57d53a3be 299841a4c 18b6aa787 98f309cef 7b9c467e4 bfeffaad7 68d084736 8bc5b7331 cd28c3212 fc5fb72a7 3bf4965dd b67f7d0c6 309045edb 80b39671a abd3198a4 98b6bb91d c3124432d 577b22243 ba23b9912 5b1f7e44f 6a3d7084a 59e7af2e0 5c3b277da 3924cf06f c67c79aa2"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "3cae26d962bfa0bca08f7792041d25128bd45ad3623d42250f67e53a01994652",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261102T201046545724-bank-step-batch --gate <verdict> --commit ec5ba1ad5bcf6a8ebcb667d33a9b2f81a1b64800",
+        "node": "bank-step-batch",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": "parsed",
+        "run_id": "r-20261102T201046545724-bank-step-batch",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 2530,
+        "terminal_at": "2026-11-03T06:36:09Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-step-batch"
+      }
+    ]
+  },
+  "wall_seconds": 693,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-03T07:33:22Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-03T07:22:29Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 57116322,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488/codex-home/cache"
+      },
+      {
+        "bytes": 28835209,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 172,
+    "worker_pid": 3575566
+  },
+  "worker_seconds": 693,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

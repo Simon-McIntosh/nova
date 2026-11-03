@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/suite-head-booking.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/suite-base-booking.log",
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1093:_local_booking_sensitivities"
+  ],
+  "completed_at": "2026-11-03T07:33:18Z",
+  "dispatched_at": "2026-11-03T07:21:45Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_step_cut_buckets.py",
+      "line": "26",
+      "severity": "blocking",
+      "text": "blocking: capacity is hard-coded to eight rather than read from current._NORMAL_CUT_BATCH_WIDTH, so changing the production width to 16 leaves the nine-cell test green without exercising overflow."
+    },
+    {
+      "file": "tests/test_bank_step_cut_buckets.py",
+      "line": "81",
+      "severity": "blocking",
+      "text": "blocking: equal_nan=True with no finite-value witness lets a synthetic invalid normal-cell setup pass on matching NaNs, so the overflow comparison need not prove a numerical result."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_cut_buckets/plot.py",
+      "line": "26",
+      "severity": "blocking",
+      "text": "blocking: the new parser and paired-stage plot duplicate scripts/prototypes/bank_step_speed/plot_stage.py:26-70 instead of extending its plotting capability with a linear-axis option."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read all seven commits from base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4 through head 31dad0d9a48813b2be16bfae05274be63a58cb2d; current.py changes the cut selection, the test and scripts add gates, and the final commit records the evidence figure and table.",
+    "done_when": "the source brief.txt requires parity, fresh residual, oracle bounds and sequential H200 base/head timing; parity-sirius.log, fresh-sirius.log and h200-base.log/h200-head.log record those measures, though the overflow assertion has a gap.",
+    "goal": "the source brief.txt asks for selected-branch cut booking, and nova/equilibrium/current.py:817-819 routes conic and normal cells into separate fixed-width scans.",
+    "manifest": "the source manifest.md reports complete, seven commits, numerical receipts, gate logs and the red negative-control.log, whose EXIT=1 is visible.",
+    "write_paths": "the source manifest.md declares six write scopes, and all ten paths in git diff 2d2172dd..31dad0d9 fall inside those scopes."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_cut_buckets.py:26 fixes the test capacity independently of the production constant, line 81 permits all-NaN equality, and line 87 detects only one exact source spelling despite the red negative-control.log.",
+    "evidence": "h200-base.log:6 and h200-head.log:6 record 27.766 and 13.799 ms, while parity-sirius.log:3 and fresh-sirius.log:31 record field parity and the fresh residual.",
+    "fit": "nova/equilibrium/current.py:790-819 retains the surrounding compact-index-and-scan idiom and adds no forbidden stage or version names.",
+    "goal_fidelity": "nova/equilibrium/current.py:817-819 evaluates separate conic and normal buckets, and h200-head.log records the normal interior at width eight rather than 64.",
+    "reuse": "scripts/prototypes/bank_step_cut_buckets/plot.py:26-45 duplicates the stage-log parser and paired-bar plotting already owned by scripts/prototypes/bank_step_speed/plot_stage.py:26-70 instead of extending that owner for a linear axis.",
+    "scope_discipline": "the ten paths in git diff 2d2172dd..31dad0d9 are covered by the source manifest.md orientation_write_paths, including the figure and evidence fragment."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source brief.txt asks for selected-branch cut booking, and nova/equilibrium/current.py:817-819 routes conic and normal cells into separate fixed-width scans.\nVERDICT done_when: the source brief.txt requires parity, fresh residual, oracle bounds and sequential H200 base/head timing; parity-sirius.log, fresh-sirius.log and h200-base.log/h200-head.log record those measures, though the overflow assertion has a gap.\nVERDICT write_paths: the source manifest.md declares six write scopes, and all ten paths in git diff 2d2172dd..31dad0d9 fall inside those scopes.\nVERDICT manifest: the source manifest.md reports complete, seven commits, numerical receipts, gate logs and the red negative-control.log, whose EXIT=1 is visible.\nVERDICT diff: read all seven commits from base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4 through head 31dad0d9a48813b2be16bfae05274be63a58cb2d; current.py changes the cut selection, the test and scripts add gates, and the final commit records the evidence figure and table.\nCALL_SITES: nova/equilibrium/support_read.py:1093:_local_booking_sensitivities\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:817-819 evaluates separate conic and normal buckets, and h200-head.log records the normal interior at width eight rather than 64.\nSCORE evidence: 18\nJUSTIFICATION evidence: h200-base.log:6 and h200-head.log:6 record 27.766 and 13.799 ms, while parity-sirius.log:3 and fresh-sirius.log:31 record field parity and the fresh residual.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the ten paths in git diff 2d2172dd..31dad0d9 are covered by the source manifest.md orientation_write_paths, including the figure and evidence fragment.\nSCORE durability: 8\nJUSTIFICATION durability: tests/test_bank_step_cut_buckets.py:26 fixes the test capacity independently of the production constant, line 81 permits all-NaN equality, and line 87 detects only one exact source spelling despite the red negative-control.log.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/current.py:790-819 retains the surrounding compact-index-and-scan idiom and adds no forbidden stage or version names.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/prototypes/bank_step_cut_buckets/plot.py:26-45 duplicates the stage-log parser and paired-bar plotting already owned by scripts/prototypes/bank_step_speed/plot_stage.py:26-70 instead of extending that owner for a linear axis.\nFINDING tests/test_bank_step_cut_buckets.py:26 blocking: capacity is hard-coded to eight rather than read from current._NORMAL_CUT_BATCH_WIDTH, so changing the production width to 16 leaves the nine-cell test green without exercising overflow.\nFINDING tests/test_bank_step_cut_buckets.py:81 blocking: equal_nan=True with no finite-value witness lets a synthetic invalid normal-cell setup pass on matching NaNs, so the overflow comparison need not prove a numerical result.\nFINDING scripts/prototypes/bank_step_cut_buckets/plot.py:26 blocking: the new parser and paired-stage plot duplicate scripts/prototypes/bank_step_speed/plot_stage.py:26-70 instead of extending its plotting capability with a linear-axis option.\n",
+  "review_run_id": "r-20261103T071719534084-review-of-bank-step-cut-buckets-31dad0d9a488",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "31dad0d9a48813b2be16bfae05274be63a58cb2d",
+  "reviewed_run_id": "r-20261103T063317710937-bank-step-cut-buckets",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T07:40:29.118353+00:00",
+  "total": 86
+}

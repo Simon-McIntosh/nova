@@ -145,6 +145,26 @@ def test_mem_zero_is_refused(tmp_path: Path) -> None:
     assert "--mem=0" in (result.stderr + result.stdout)
 
 
+def test_payload_disables_the_xla_autotune_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES", "all")
+    log = tmp_path / "lane.log"
+    result = _launch(
+        "--in-place",
+        "--mode",
+        "python-c",
+        "--log",
+        str(log),
+        "--",
+        "import os; print(os.environ['JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES'])",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none\n" in log.read_text()
+    assert "\nnone\n" in log.read_text()
+
+
 H200_CALLER = REPOSITORY_ROOT / "scripts" / "h200_test_lane" / "run.sh"
 
 

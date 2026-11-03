@@ -1,0 +1,9 @@
+<section id="autotune-off-gpfs-exports-landing">
+  <p>The general compute-lane payload now exports <code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code>
+    and prints the value in its launch log. An in-place launch with the setting removed from its inherited
+    environment previously printed <code>AUTOTUNE_SETTING=MISSING</code>; the payload test now starts with
+    a conflicting inherited value and checks that the launched target receives <code>none</code>.</p>
+  <p>The focused configuration and launcher suite passed 34 tests at base and 35 with the change, with zero
+    added failures. Deleting the pre-warm export in a scratch copy failed its pinning test (exit 1); the
+    intact launcher, pre-warm, playable server and cache-identity checks all pass.</p>
+</section>

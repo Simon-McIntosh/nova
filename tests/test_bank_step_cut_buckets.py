@@ -25,10 +25,15 @@ def test_normal_cut_count_over_batch_capacity():
     )
     capacity = current._NORMAL_CUT_BATCH_WIDTH
     assert len(cut) > capacity
-    chosen = cut[: capacity + 1]
+    live_normal = cut[np.asarray(reading.normal_form_cells)[cut]]
+    assert len(live_normal) > 0
+    overflow_cell = live_normal[0]
+    chosen = np.concatenate((cut[cut != overflow_cell][:capacity], [overflow_cell]))
     flags = jnp.zeros_like(reading.normal_form_cells).at[chosen].set(True)
     reading = reading._replace(normal_form_cells=flags)
-    assert int(jnp.count_nonzero(flags)) > capacity
+    normal_count = int(jnp.count_nonzero(flags))
+    assert normal_count == capacity + 1
+    assert (normal_count + capacity - 1) // capacity > 1
 
     psi = support_read.nodal_jets(
         operands, tuple(jnp.zeros_like(booked.cell_current) for _ in range(3))
@@ -75,16 +80,18 @@ def test_normal_cut_count_over_batch_capacity():
     observed = jax.jit(batched)(psi, reading)
     actual_values = np.asarray(observed[..., 0])
     expected_values = np.stack(tuple(map(np.asarray, expected)), axis=-1)
-    overflow_cell = chosen[-1]
+    assert chosen[-1] == overflow_cell
     assert bool(np.asarray(support.reading.normal_form_cells)[overflow_cell])
+    booked_current = np.asarray(booked.cell_current)[overflow_cell]
+    assert np.isfinite(booked_current)
+    assert booked_current != 0
     assert np.isfinite(expected_values[overflow_cell]).all()
     assert np.isfinite(actual_values[overflow_cell]).all()
     np.testing.assert_allclose(
-        actual_values,
-        expected_values,
+        actual_values[overflow_cell],
+        expected_values[overflow_cell],
         rtol=1e-10,
         atol=1e-10,
-        equal_nan=True,
     )
 
 

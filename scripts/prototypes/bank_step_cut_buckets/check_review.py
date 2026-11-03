@@ -16,6 +16,8 @@ def main(path: Path, check: str) -> None:
         "finite": (
             "np.isfinite(expected_values[overflow_cell]).all()" in source
             and "np.isfinite(actual_values[overflow_cell]).all()" in source
+            and "assert booked_current != 0" in source
+            and "equal_nan=True" not in source
         ),
     }
     passed = checks[check]

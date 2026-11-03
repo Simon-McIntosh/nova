@@ -1,0 +1,20 @@
+<section data-reckon="evidence" id="mast-centroid-fine-panels">
+<h2>MAST centroid panels on the fine display map</h2>
+
+<p id="mast-centroid-fine-panels-summary">The three committed centroid states
+are re-solved with the producer and drawn from the display map rather than from
+the 33 by 33 and 65 by 65 lattice raster. Each <code>panel-fields.npz</code> now
+carries the conductor currents and the plasma cell moments, so the panel pair is
+redrawn without a solve: the producer contracts those sources against the shot
+store's coupling through <code>build_display_flux_map</code> at the 10 mm
+spacing floor, and the separatrix, its saddle and the boundary the plasma mesh is
+cut against all come off the map's own spline.</p>
+
+<p id="mast-centroid-fine-panels-gate">The redraw gate opens each state, rebuilds
+the map from its stored currents and moments, and asserts that the drawn
+contour vertices leave the lattice rows. Its negative control moves one stored
+conductor current by one percent: the contour paths move, so a redraw that
+ignored the stored currents would not pass. Each rendered SVG is converted to
+PNG and inspected; the labels check reports zero clipped and zero overlapping
+labels.</p>
+</section>

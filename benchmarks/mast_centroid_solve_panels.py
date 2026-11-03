@@ -23,11 +23,13 @@ cut by the wall or by the separatrix.
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
 import platform
 import subprocess
+import sys
 import time
 from typing import Any
 
@@ -44,6 +46,11 @@ from benchmarks import coil_edit_latency as edit
 from benchmarks import mast_response_carrier_warm as response_carrier
 from nova.biot.fieldnull import FieldNull
 from nova.catalog.mast_geometry import shaped_section_vertices
+from nova.equilibrium.display_flux import (
+    DEFAULT_SPACING,
+    DisplayCoupling,
+    build_display_flux_map,
+)
 from nova.equilibrium.forward import _lattice_cells
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.topology import TopologyClass
@@ -94,6 +101,10 @@ PANEL_STATE_KEYS = frozenset(
         "height",
         "vacuum_psi",
         "solved_psi",
+        "conductor_current",
+        "cell_current",
+        "radial_moment",
+        "vertical_moment",
         "wall_offsets",
         "wall_radius",
         "wall_height",
@@ -189,6 +200,221 @@ def _coil_outlines(shot: int) -> np.ndarray:
         ],
         dtype=float,
     )
+
+
+#: Conductor response columns per target set, so a redraw and its perturbed arm
+#: pay the section kernels once.
+_CIRCUIT_RESPONSE: dict[tuple[tuple[int, ...], bytes], np.ndarray] = {}
+
+
+def _machine_coupling(
+    lattice: Any, conductor_current: np.ndarray
+) -> DisplayCoupling:
+    """Return the shot store's coupling at arbitrary display points.
+
+    The conductors are the fitted circuits the solve reads, composed from their
+    stored sections against the machine's passive geometry; the plasma columns
+    are the same rectangular-cell response the lattice target is built from.
+    Nothing here re-solves or interpolates the lattice, and the currents are the
+    ones the state carries, so a display point is evaluated from the state's own
+    sources.
+    """
+    import zarr
+
+    from benchmarks import efit_forward_parity_slice as parity
+    from nova.catalog.mast_geometry import MachineGeometryRegistry
+    from nova.imas.mast_solve_inputs import SHOT_STORE
+
+    group = zarr.open_group(str(SHOT_STORE / f"{edit.SHOT}.zarr"), mode="r")["efm"]
+    geometry = (
+        MachineGeometryRegistry.default().select(edit.SHOT).configuration.geometry
+    )
+    _families, _drives, active_mapping = parity._circuit_drives(
+        group, edit.SLICE_INDEX, geometry, "fcoil_c"
+    )
+    cells = np.asarray(lattice.coordinate, dtype=np.float64)
+    dr = float(lattice.radial_step)
+    dz = float(lattice.vertical_step)
+    drive = np.asarray(conductor_current, dtype=np.float64)
+
+    def plasma(points: np.ndarray):
+        """Return the rectangular-cell plasma columns at ``points``."""
+        uniform = parity._plasma_response(np.asarray(points), cells, dr, dz)
+        zeros = np.zeros_like(uniform)
+        return uniform, zeros, zeros
+
+    def external(points: np.ndarray) -> np.ndarray:
+        """Return the fitted conductors' flux at ``points`` [Wb]."""
+        target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
+        key = (target.shape, target.tobytes())
+        response = _CIRCUIT_RESPONSE.get(key)
+        if response is None:
+            records, _audit = parity._stored_circuit_fields(
+                group, edit.SLICE_INDEX, target, geometry, active_mapping
+            )
+            response = np.column_stack(
+                [record["response_wb_per_a"] for record in records]
+            )
+            _CIRCUIT_RESPONSE[key] = response
+        return response @ drive
+
+    return DisplayCoupling(plasma=plasma, external=external)
+
+
+def _lattice_spline(values: np.ndarray, radius: np.ndarray, height: np.ndarray):
+    """Return the cubic tensor spline through one lattice field."""
+    from scipy.interpolate import RectBivariateSpline
+
+    return RectBivariateSpline(
+        np.asarray(radius, dtype=float),
+        np.asarray(height, dtype=float),
+        np.asarray(values, dtype=float),
+        kx=3,
+        ky=3,
+        s=0.0,
+    )
+
+
+def _polish(spline, seed: np.ndarray) -> dict[str, Any]:
+    """Return the stationary point the spline's own Newton polish reaches."""
+    point = np.asarray(seed, dtype=float).reshape(2).copy()
+    for _ in range(80):
+        gradient = np.asarray(
+            [spline.ev(point[0], point[1], dx=1, dy=0),
+             spline.ev(point[0], point[1], dx=0, dy=1)],
+            dtype=float,
+        )
+        hessian = np.asarray(
+            [
+                [
+                    spline.ev(point[0], point[1], dx=2, dy=0),
+                    spline.ev(point[0], point[1], dx=1, dy=1),
+                ],
+                [
+                    spline.ev(point[0], point[1], dx=1, dy=1),
+                    spline.ev(point[0], point[1], dx=0, dy=2),
+                ],
+            ],
+            dtype=float,
+        )
+        try:
+            step = np.linalg.solve(hessian, gradient)
+        except np.linalg.LinAlgError:
+            break
+        point -= step
+        if float(np.max(np.abs(step))) < 1.0e-12:
+            break
+    gradient = np.asarray(
+        [spline.ev(point[0], point[1], dx=1, dy=0),
+         spline.ev(point[0], point[1], dx=0, dy=1)],
+        dtype=float,
+    )
+    hessian = np.asarray(
+        [
+            [
+                spline.ev(point[0], point[1], dx=2, dy=0),
+                spline.ev(point[0], point[1], dx=1, dy=1),
+            ],
+            [
+                spline.ev(point[0], point[1], dx=1, dy=1),
+                spline.ev(point[0], point[1], dx=0, dy=2),
+            ],
+        ],
+        dtype=float,
+    )
+    eigenvalues = np.linalg.eigvalsh(hessian)
+    return {
+        "coordinate_m": [float(value) for value in point],
+        "gradient_norm_wb_per_m": float(np.linalg.norm(gradient)),
+        "hessian_determinant": float(np.linalg.det(hessian)),
+        "hessian_eigenvalues": [float(value) for value in eigenvalues],
+    }
+
+
+def _saddle_validation(state_path: Path, receipt_path: Path) -> dict[str, Any]:
+    """Measure and pin the lattice spline's saddle on the state it describes.
+
+    The pin is the state file's own digest, so a receipt that still carries the
+    previous solve's hash refuses rather than confirming a state it never saw.
+    """
+    import hashlib
+
+    data = np.load(state_path, allow_pickle=False)
+    shape = tuple(int(value) for value in np.asarray(data["shape"]))
+    radius = np.asarray(data["radius"], dtype=float)
+    height = np.asarray(data["height"], dtype=float)
+    solved = np.asarray(data["solved_psi"], dtype=float).reshape(shape).T
+    x_points = np.asarray(data["x_points"], dtype=float).reshape(-1, 2)
+    saddle_index = int(np.asarray(data["saddle_index"]))
+    seed = x_points[saddle_index]
+    spline = _lattice_spline(solved, radius, height)
+    marker = _polish(spline, seed)
+    polished = _polish(spline, np.asarray(marker["coordinate_m"]))
+    level = float(spline.ev(*marker["coordinate_m"]))
+    relative_maximum = 1.0e-6
+    units = _restore_units(data)
+    from nova.media.sources.frame import inside_wall_units
+
+    grid_radius, grid_height = np.meshgrid(radius, height, indexing="ij")
+    grid_points = np.column_stack((grid_radius.ravel(), grid_height.ravel()))
+    inside = np.asarray(
+        inside_wall_units(grid_points, units), dtype=bool
+    )
+    gradient = np.hypot(
+        spline.ev(grid_radius.ravel(), grid_height.ravel(), dx=1, dy=0),
+        spline.ev(grid_radius.ravel(), grid_height.ravel(), dx=0, dy=1),
+    )
+    median_gradient = float(np.median(gradient[inside]))
+    polished_inside = bool(
+        np.asarray(
+            inside_wall_units(
+                np.asarray(polished["coordinate_m"], dtype=float)[None, :], units
+            ),
+            dtype=bool,
+        )[0]
+    )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    validation = {
+        "method": (
+            "scipy.interpolate.RectBivariateSpline(kx=3, ky=3, s=0), "
+            "analytic-gradient Newton polish"
+        ),
+        "marker": marker,
+        "polished": polished,
+        "saddle_flux_wb": level,
+        "polish_converged": bool(
+            polished["gradient_norm_wb_per_m"] <= 1.0e-6 * max(median_gradient, 1e-30)
+        ),
+        "polish_distance_m": float(
+            np.linalg.norm(
+                np.asarray(polished["coordinate_m"])
+                - np.asarray(marker["coordinate_m"])
+            )
+        ),
+        "polished_inside_wall": polished_inside,
+        "polished_gradient_to_median": float(
+            polished["gradient_norm_wb_per_m"] / max(median_gradient, 1.0e-30)
+        ),
+        "marker_gradient_to_median": float(
+            marker["gradient_norm_wb_per_m"] / max(median_gradient, 1.0e-30)
+        ),
+        "median_in_wall_gradient_wb_per_m": median_gradient,
+        "in_wall_grid_count": int(np.count_nonzero(inside)),
+        "relative_gradient_maximum": relative_maximum,
+        "state_sha256": hashlib.sha256(state_path.read_bytes()).hexdigest(),
+    }
+    validation["verdict"] = (
+        "confirmed_smooth_saddle"
+        if marker["hessian_determinant"] < 0.0
+        and polished["hessian_determinant"] < 0.0
+        else "no_saddle_at_marker"
+    )
+    receipt["vacuum_saddle_validation"] = validation
+    receipt_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return validation
 
 
 def _branches(profile: Any, state: Any, topology: Any) -> dict[str, np.ndarray]:
@@ -556,6 +782,7 @@ def measure(
     nulls = edit._null_points(profile, cold.state)
     branches = _branches(profile, cold.state, achieved)
     coils = _coil_outlines(edit.SHOT)
+    moments = operator.current_moments_and_observation(cold.state, requested)[0]
 
     payload: dict[str, Any] = {
         "radius": np.asarray(lattice.radius, dtype=float),
@@ -563,6 +790,10 @@ def measure(
         "shape": np.asarray(lattice.shape, dtype=int),
         "vacuum_psi": vacuum,
         "solved_psi": solved,
+        "conductor_current": np.asarray(base_current, dtype=float),
+        "cell_current": np.asarray(moments.cell_current, dtype=float),
+        "radial_moment": np.asarray(moments.radial_moment, dtype=float),
+        "vertical_moment": np.asarray(moments.vertical_moment, dtype=float),
         "cell_polygons": cells,
         "cell_label": label,
         "cell_psi_norm": psi_norm,
@@ -586,6 +817,10 @@ def measure(
         "identity": f"{edit.SHOT}/{edit.SLICE_INDEX} mixed",
         "source_revision": _source_revision(),
         "runtime": _provenance(),
+        "invocation": {
+            "argv": [str(value) for value in sys.argv],
+            "cwd": os.getcwd(),
+        },
         "evidence_inputs": {
             "response_carrier": carrier,
             "persistent_compilation_cache": cache.receipt(),
@@ -654,6 +889,12 @@ def measure(
         encoding="utf-8",
     )
     print("RECEIPT=" + str(receipt_path), flush=True)
+    validation = _saddle_validation(state_path, receipt_path)
+    print(
+        f"SADDLE verdict={validation['verdict']} "
+        f"offset_mm={validation['polish_distance_m'] * 1.0e3:.3f}",
+        flush=True,
+    )
 
 
 def _solved_boundary(
@@ -694,8 +935,90 @@ def _solved_boundary(
     return best[1]
 
 
+@dataclass(frozen=True)
+class _PanelOperator:
+    """A stored state's lattice image, evaluated through its own coupling.
+
+    The image is the conductor and plasma-moment contraction the solve's grid
+    target carries, built here from the same kernels the display map uses, so
+    ``raster_image`` reproduces the state without a second solve.
+    """
+
+    lattice: Any
+    coupling: DisplayCoupling
+
+    def raster_image(self, moments, current=None, prescribed_current=None):
+        """Return the coupling's image at the lattice nodes [Wb]."""
+        coordinate = np.asarray(self.lattice.coordinate, dtype=np.float64)
+        uniform, radial, vertical = self.coupling.plasma(coordinate)
+        image = (
+            np.asarray(uniform) @ np.asarray(moments.cell_current)
+            + np.asarray(radial) @ np.asarray(moments.radial_moment)
+            + np.asarray(vertical) @ np.asarray(moments.vertical_moment)
+        )
+        return jnp.asarray(image + self.coupling.external(coordinate))
+
+
+@dataclass(frozen=True)
+class _PanelProfile:
+    """The lattice and its coupling, as the display-map builder reads them."""
+
+    operator: _PanelOperator
+
+    @property
+    def lattice(self):
+        """Return the lattice the operator is built on."""
+        return self.operator.lattice
+
+
+def _panel_state_display(state_path: Path, spacing: float):
+    """Return the state's currents, moments and fine display map.
+
+    Nothing is solved here: the currents and cell moments come out of the
+    display grid.  Each of them is drawn on the map's own resolution.
+    """
+    from nova.equilibrium.conservation import FluxLattice
+    from nova.equilibrium.stencil_mesh import CellCurrentMoments
+
+    data = np.load(state_path, allow_pickle=False)
+    missing = PANEL_STATE_KEYS.difference(data.files)
+    if missing:
+        raise KeyError(f"panel state is missing {sorted(missing)}")
+    shape = tuple(int(value) for value in np.asarray(data["shape"]))
+    radius = np.asarray(data["radius"], dtype=float)
+    height = np.asarray(data["height"], dtype=float)
+    solved = np.asarray(data["solved_psi"], dtype=float).reshape(shape).T
+    conductor_current = np.asarray(data["conductor_current"], dtype=float)
+    moments = CellCurrentMoments(
+        jnp.asarray(np.asarray(data["cell_current"], dtype=float)),
+        jnp.asarray(np.asarray(data["radial_moment"], dtype=float)),
+        jnp.asarray(np.asarray(data["vertical_moment"], dtype=float)),
+    )
+    lattice = FluxLattice(radius, height)
+    coupling = _machine_coupling(lattice, conductor_current)
+    profile = _PanelProfile(_PanelOperator(lattice, coupling))
+    axis = np.asarray(data["axis"], dtype=float)
+    x_points = np.asarray(data["x_points"], dtype=float).reshape(-1, 2)
+    saddle = int(np.asarray(data["saddle_index"]))
+    display = build_display_flux_map(
+        profile,
+        np.asarray(data["solved_psi"], dtype=float),
+        coupling=coupling,
+        moments=moments,
+        spacing=spacing,
+        axis_rz=axis,
+        xpoint_rz=x_points[saddle],
+        chunk=2048,
+    )
+    return data, coupling, display, shape, radius, height, solved
+
+
 def panels(
-    state_path: Path, figure_path: Path, receipt_path: Path, hex_cells: int
+    state_path: Path,
+    figure_path: Path,
+    receipt_path: Path,
+    hex_cells: int,
+    spacing: float = DEFAULT_SPACING,
 ) -> None:
     """Draw the conductor-only and the solved panel from the persisted fields.
 
@@ -713,15 +1036,19 @@ def panels(
     """
     from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
 
-    data = np.load(state_path, allow_pickle=False)
-    missing = PANEL_STATE_KEYS.difference(data.files)
-    if missing:
-        raise KeyError(f"panel state is missing {sorted(missing)}")
-    shape = tuple(int(value) for value in np.asarray(data["shape"]))
-    radius = np.asarray(data["radius"], dtype=float)
-    height = np.asarray(data["height"], dtype=float)
-    vacuum = np.asarray(data["vacuum_psi"], dtype=float).reshape(shape).T
-    solved = np.asarray(data["solved_psi"], dtype=float).reshape(shape).T
+    data, coupling, display, _shape, _lattice_radius, _lattice_height, _solved = (
+        _panel_state_display(state_path, spacing)
+    )
+    radius = display.radius
+    height = display.height
+    solved = display.flux
+    grid_radius, grid_height = np.meshgrid(radius, height, indexing="ij")
+    vacuum = np.asarray(
+        coupling.external(
+            np.column_stack((grid_radius.ravel(), grid_height.ravel()))
+        ),
+        dtype=float,
+    ).reshape(radius.size, height.size)
     units = _restore_units(data)
     coils = np.asarray(data["coil_outlines"], dtype=float)
     boundary_flux = float(np.asarray(data["boundary_flux"]))
@@ -729,7 +1056,7 @@ def panels(
     x_points = np.asarray(data["x_points"], dtype=float).reshape(-1, 2)
     saddle = int(np.asarray(data["saddle_index"]))
     branches = {
-        name: np.asarray(data[f"branch_{name}"])
+        name: np.asarray(display.branches[name])
         for name in (
             "closed_controls_rz",
             "closed_valid",
@@ -763,7 +1090,7 @@ def panels(
         )
         poloidal.draw_wall(panel, units=units)
 
-    poloidal.draw_flux_contours(axes[0], radius, height, vacuum, levels)
+    poloidal.draw_flux_contours(axes[0], radius, height, vacuum.T, levels)
     # The vacuum panel has its own stationary points; solved-state landmarks
     # describe a different field and cannot stand in for them.
     o_mask, x_mask = FieldNull.categorize_2d(vacuum.T)
@@ -785,7 +1112,7 @@ def panels(
     axes[0].set_title("conductors only, no plasma", fontsize=9)
 
     poloidal.draw_plasma_cells(axes[1], clipped, alpha=CELL_ALPHA)
-    poloidal.draw_flux_contours(axes[1], radius, height, solved, levels)
+    poloidal.draw_flux_contours(axes[1], radius, height, solved.T, levels)
     # The boundary is one of the drawn contours, not a separate red curve: same
     # ink, slightly heavier, so it reads as the surface the level array already
     # contains rather than as an overlay from somewhere else.
@@ -797,7 +1124,11 @@ def panels(
         closed_linewidth=BOUNDARY_LINEWIDTH,
         open_linewidth=BOUNDARY_LINEWIDTH,
     )
-    admitted = x_points[saddle : saddle + 1] if x_points.size else None
+    admitted = (
+        np.asarray(display.saddle_rz, dtype=float)[None, :]
+        if np.all(np.isfinite(display.saddle_rz))
+        else None
+    )
     other = np.delete(x_points, saddle, axis=0) if x_points.shape[0] > 1 else None
     poloidal.draw_nulls(
         axes[1],
@@ -839,6 +1170,21 @@ def panels(
     plt.close(figure)
     drawn = {
         **mesh_provenance,
+        "display_map": {
+            "source": (
+                "nova.equilibrium.display_flux.build_display_flux_map from the "
+                "state's stored conductor currents and cell moments"
+            ),
+            "spacing_m": float(display.spacing_m),
+            "shape": [int(value) for value in display.shape],
+            "saddle_offset_mm": float(display.saddle_offset_mm),
+            "saddle_converged": bool(display.saddle_converged),
+            "max_node_mismatch_wb": float(display.max_node_mismatch_wb),
+            "reproduction_relative_error": float(
+                display.reproduction_relative_error
+            ),
+            "build_seconds": float(display.build_seconds),
+        },
         "boundary_source": (
             "assemble_separatrix_branches on the solved lattice spline, split "
             "at the admitted saddle"
@@ -1487,6 +1833,7 @@ def main() -> None:
         )
         item.add_argument("--hex-cells", type=int, default=DEFAULT_HEX_CELLS)
         item.add_argument("--grid-points", type=int, default=None)
+        item.add_argument("--spacing", type=float, default=DEFAULT_SPACING)
     arguments = parser.parse_args()
     if arguments.command == "family":
         family(
@@ -1516,6 +1863,7 @@ def main() -> None:
             arguments.figure,
             arguments.receipt,
             arguments.hex_cells,
+            arguments.spacing,
         )
 
 

@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-solve-driver-landing">Bank solve driver</h1>
-<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. The factor-rule cost comparison and device wall remain pending.</p>
+<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check and device wall remain pending.</p>
 <section id="bank-solve-driver-trajectory">
 <h2>Same-seed CPU trajectories</h2>
 <p>The direct arm repeats the existing prototype's fresh-read and full-step calls at each iterate; the staged arm is one <code>jax.lax.while_loop</code> with factor reuse and active-set freezing switched off. Both use the same 550-cell operands, seed moments, profile, quadrature, stationary seeds and x64 dtype. Every update in the direct arm has length one. The residual is the maximum absolute moment mismatch after a fresh read; the update is the maximum absolute Newton correction.</p>
@@ -37,5 +37,15 @@
 <tr><td>Staged fresh residual</td><td>3.558398020687e-11</td><td>at most 1e-10</td></tr>
 </tbody></table>
 <p>The CPU receipt is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T080040158512-bank-solve-driver/cpu-budget-cost.log</code>, launched at revision <code>b087938055be6ad386421f2773deda401c51073b</code>. Its full suite summary and factor-rule rows follow later in the same log.</p>
+</section>
+<section id="bank-solve-driver-factor-cost">
+<h2>Factor reuse is off by default</h2>
+<p>The CPU cost comparison uses the measured H200 stage budget of about 20 ms for booking tangent, Jacobian and LU per refactor, plus about 8 ms for residual and read per step. The estimate is <code>20 × refactors + 8 × steps</code>; it ranks rules on this seed and is not a measured whole-solve wall.</p>
+<table id="bank-solve-driver-factor-cost-table"><thead><tr><th>Rule</th><th>Steps</th><th>Refactors</th><th>Reads</th><th>Estimated wall [ms]</th><th>Fresh terminal residual</th></tr></thead><tbody>
+<tr><td>Refactor every step</td><td>3</td><td>3</td><td>4</td><td>84</td><td>3.558398020687e-11</td></tr>
+<tr><td>Reuse after at least 2× contraction</td><td>7</td><td>3</td><td>8</td><td>116</td><td>1.976729890885e-11</td></tr>
+<tr><td>Reuse after at least 10× contraction</td><td>9</td><td>5</td><td>10</td><td>172</td><td>2.367528395553e-11</td></tr>
+</tbody></table>
+<p>Both reuse rules converge, but neither saves enough refactors to pay for its extra reads and steps. The product solve therefore refactors on every step by default; factor reuse remains an explicit opt-in, and the active-set freeze remains enabled.</p>
 </section>
 </main></body></html>

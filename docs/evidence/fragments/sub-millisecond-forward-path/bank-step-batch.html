@@ -36,6 +36,7 @@
     <img src="/nova/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg" alt="Per-slice wall against slices per batch on a log axis: the whole step falls from 190 to 131 milliseconds per slice between one and sixteen slices, while the booking tangent and assembly stay near 109 milliseconds per slice at every batch size.">
     <img src="/nova/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg" alt="Per-slice wall against slices per batch on log axes: the read falls from 53.8 to 12.9 milliseconds per slice between one and sixteen slices, the whole step falls from 190 to 131, while the booking tangent (dashed, dark green) and its assembly (mauve) stay near 109 and 111 milliseconds per slice at every batch size.">
     <figcaption>Per-slice wall against slices per batch at the diverted 550-cell state on one H200, log axes, minimum of five calls per point. The <em>read</em> series is the read stage; the <em>whole step</em> is the full Newton step. The read and the whole step fall with batch size because they share per-call launches; the booking tangent (dashed, square markers, drawn over its assembly) and the assembly do not, because their cost is per-lane work. Where a series ends before the last batch size the figure marks it with a cross and says so in place: the whole step and the read stop at sixteen slices, where the measurement job ended with a segmentation fault, and that is a truncated measurement rather than a value.</figcaption>
+  </figure>
 
   <h3 id="bank-step-batch-kernels">What vmap made of the booking tangent</h3>
 
@@ -167,16 +168,7 @@
   table above, that is the whole claim: the alternation is the operator's, and
   the freeze lets a batch satisfy a whole-batch bound that a naive loop never
   reaches because it keeps stepping lanes that have already arrived — lane 3
-  spends iterations 3 to 19 on the plateau and holds the batch there.
-
-  <p>The held values are the measurement that the freeze works: a lane that has
-  met the bound reports the same residual at every later iteration, where before
-  it moved. The batch exits <code>converged: true</code> after 16 iterations
-  with residuals <code>[8.7795e-11, 4.4864e-11, 6.6933e-12, 5.2410e-11]</code>,
-  every lane at or below the 1e-10 bound. Composed with the unbatched table
-  above, that is the whole claim: the alternation is the operator's, and the
-  freeze lets a batch satisfy a whole-batch bound that a naive loop never
-  reaches because it keeps stepping lanes that have already arrived.</p>
+  spends iterations 3 to 19 on the plateau and holds the batch there.</p>
 
   <h3 id="bank-step-batch-steps">What the batch pays for</h3>
 

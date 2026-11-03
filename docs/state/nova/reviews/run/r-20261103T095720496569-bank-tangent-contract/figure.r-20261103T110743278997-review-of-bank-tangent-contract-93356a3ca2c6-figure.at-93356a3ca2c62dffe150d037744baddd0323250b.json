@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg": "scripts/prototypes/bank_tangent_contract/plot.py",
+    "image-0.png (1399x720 RGB, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg"
+  },
+  "attachment_note": "The single attached PNG was opened with Read and judged as a picture, at its native 1399x720 and in upscaled crops of the lower-left, lower-right and upper-right regions of the panels. Per the review brief no SVG and no other image was opened, read, listed, searched or rendered; the drawing script was read only to anchor findings to a line of code. The attachment is mapped to the repository figure path by the reviewed run's own caption, which names the committed SVG, and by the run's changed_paths listing that figure.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T11:10:55Z",
+  "figure_checks": {
+    "caption_independence": "The figcaption in the evidence fragment is not a restatement of a title: the figure carries no title, and the caption names the allocation and job number (1304372), states that the 'head' legend names a candidate that was later rejected, states that each wall is the median of three synchronized warm calls, and says what each panel shows (the left the 10.16 ms and 10.12 ms cost, the right the peak after one tangent call and one unchunked sixteen-lane call). It does not duplicate the axis labels or the printed values.",
+    "clipping": "Counted on the attached 1399x720 render: non-white pixels in the outer 1 px frame = 0, 2 px frame = 0, 3 px frame = 0. Nothing is cut off at the canvas edge, and no axis label, tick label, value label or legend entry is truncated.",
+    "label_geometry": "Verified on upscaled 2x crops of the lower-left, lower-right and upper-right regions. The '13.8' label sits above and clear of its dot in the booking-tangent position; '3.5' and '3.1' in the one-slice position are horizontally separated and each sits above its own dot; '62.3' and '45.5' in the sixteen-lane position are far apart vertically and horizontally. The figure-level legend ('base', 'head') sits in clear space above both panels with no collision against the panel tops, the y tick at 70, or the left panel's tick at 50.",
+    "palette": "Two series only: base in neutral grey #929292 and head in green #2e8b57. This follows the repository's rule that a comparison uses one feature colour for the subject and grey for what it is set against, that a population is never drawn in black, and that grey sits near 3:1 on white rather than at a washed-out 2:1.",
+    "render_provenance": "The attached image-0.png was opened with the Read tool and judged directly; it is a 1399x720 RGB raster. The reviewed head 93356a3ca2 is the reviewed run's own head commit, and its changed_paths list the figure at docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg with the evidence fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html, whose figcaption names that same file and states that it was rendered to PNG and visually checked. No SVG was opened, listed, searched or rendered, per the review brief; the mapping from the attachment to the repository path rests on the reviewed run's own record and caption.",
+    "value_fidelity": "The eight printed values were checked against the reviewed run's own receipts as recorded in its manifest: tangent wall 13.812 to 23.973 ms renders as 13.8 and 24.0; step wall 29.074 to 39.191 ms renders as 29.1 and 39.2; sixteen-lane peak 62344168704 to 45470880768 bytes renders as 62.3 and 45.5 GB. The figure's numbers are the receipts' numbers, rounded to one decimal, not a re-derivation."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg",
+      "rubric": {
+        "contrast": "pass, with finding 1. The axis labels, the tick labels and the category labels are all #52514e at about 7.9:1 on white. The eight value labels take their series colour: grey #929292 at 3.11:1 and green #2e8b57 at 4.25:1, both below the 4.5:1 AA threshold for text of this size. Readable in the render, but the grey labels in particular are faint at native size.",
+        "data_ink": "pass. Eight dots at s=140, eight labels, two axis labels, six y tick labels per panel, two category tick sets and a frameless legend. No redundant series, no error bars, no annotations beyond the values themselves.",
+        "decoration": "pass. Plain white canvas. No gridlines, no background fill or band, no gradient, no frame; matplotlib's default top and right spines are explicitly hidden on both panels and the grid is set off, so the panel reads as marks against one scale per side.",
+        "label_collision": "pass. Zero non-white pixels in the outer 3 px frame in each direction. Each value label sits about 1.1 units (left panel) or 1.6 units (right panel) above its mark, in a clear band; the nearest pair, the grey 3.5 and the green 3.1 in the right panel, is separated by both the 0.26-unit arm offset and a 0.4-unit height difference, and the upscaled crop shows them touching neither each other nor their dots. No label crosses a spine, a tick or another label.",
+        "legibility": "pass. Left panel is 'wall [ms]' against the categories 'booking tangent' and 'whole step', with grey marks at 13.8 and 29.1 and green marks at 24.0 and 39.2. Right panel is 'peak device memory [GB]' against 'one slice' and '16 lanes', with grey at 3.5 and 62.3 and green at 3.1 and 45.5. Both axes are linear, y ticks run 0-50 on the left and 0-70 on the right, and every mark carries its own numeric label above it. The candidate's trade -- roughly a third less peak memory at sixteen lanes for ten milliseconds more wall -- is readable without reading the caption.",
+        "table_form": "pass. Two panels of a paired before/after comparison; the plotted relationship is the arm-to-arm displacement within each measure, and the two panels keep wall in milliseconds apart from peak memory in gigabytes so neither is forced onto a shared scale."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_tangent_contract/plot.py",
+      "id": "f98bbc4191d",
+      "line": 53,
+      "severity": "non-blocking",
+      "summary": "Every value label is drawn in its series colour, so the four grey base labels render at 3.11:1 against white (#929292) and the four green head labels at 4.25:1 (#2e8b57), both below the 4.5:1 AA threshold for text at this size. Measured on the attached render: the grey labels '13.8', '29.1', '3.5' and '62.3' are the faintest text on the page and the grey pair in the right panel sits against a large empty area where there is no mark nearby to carry the eye. The repository's data-ink rule sanctions #929292 at about 3:1 as a population mark colour, and that is the right choice for the dots; the defect is that the same colour is reused for small text, where 3:1 is below the threshold. One change addresses both panels: pass the label colour explicitly at `axis.text` (plot.py:53) and use a darker ink for the text while leaving the mark colours at COLORS (plot.py:13) unchanged. Does not hold the node -- all eight values are legible as rendered, and no reader loses a number."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "Pass. The caption supplies context the picture cannot carry -- that 'head' is a rejected candidate, the allocation, the call count, and what each panel measures -- rather than repeating the panel labels.",
+    "finding_materiality": "One non-blocking finding, no blocking finding. No label is clipped (0 non-white pixels in the outer 3 px frame at every band width), no label overlaps another label or a mark, all text is readable, all eight data values are visible and correctly placed, and nothing on the canvas is decorative fill.",
+    "rendered_artifact": "The single attached PNG was opened with Read and inspected at native resolution and in 2x crops of the three regions where labels and marks are densest.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the run manifest; the temporary crops used for inspection were written under the run's scratch directory."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `crew check --review --record` before the manifest is closed.",
+    "evidence": "Clipping was measured as a figure-wide pixel count, and contrast was computed from the colours actually present in the render rather than from the palette the script declares.",
+    "legibility": "Read from the attached render and its upscaled crops, not from the drawing script or any markup.",
+    "scope_discipline": "No source, figure, caption or evidence file was modified; every finding is recorded here and nowhere else."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261103T110743278997-review-of-bank-tangent-contract-93356a3ca2c6-figure",
+  "reviewed_base_sha": "8ff5dae2a49a63fcfac9f3dd9dea53a9c8744626",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg"
+  ],
+  "reviewed_head_sha": "93356a3ca2c62dffe150d037744baddd0323250b",
+  "reviewed_run_id": "r-20261103T095720496569-bank-tangent-contract",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Two side-by-side panels with a frameless two-entry legend across the top. All eight measured values are printed directly above their marks (13.8, 24.0, 29.1, 39.2 on wall; 3.5, 3.1, 62.3, 45.5 on peak device memory) and the message -- memory falls while wall rises -- reads at a glance.",
+    "RUBRIC data_ink: pass. The ink is eight filled dots, eight value labels, two axis labels, two category tick sets, y tick labels, the axis spines and the legend. No series is drawn twice, nothing is filled or shaded behind the data.",
+    "RUBRIC decoration: pass. White background with no gradient, no fill, no band, no zebra, no shadow. Top and right spines are removed on both panels and both axes carry gridlines off, so the only non-data furniture is the left and bottom spines that carry the scale.",
+    "RUBRIC contrast: pass for the axis and tick text, which is near-black #52514e at about 7.9:1 on white; the coloured value labels are recorded as finding 1 (the grey series at 3.11:1 and the green at 4.25:1, below the 4.5:1 AA threshold for text at this size). Every label is still readable, so the item passes with the defect noted.",
+    "RUBRIC table_form: pass. Every value is annotated, so a table could carry the same numbers, but the figure's job is the displacement between the base and candidate arms at each of four measures on one canvas, and that cross-arm comparison is read as a paired dot plot more directly than as a table row. The two panels separate the two physical quantities, so no single plot mixes incompatible scales.",
+    "RUBRIC label_collision: pass. Zero non-white pixels in the outer 1, 2 and 3 pixel frames of the 1399x720 render, so nothing is clipped at the canvas edge. Upscaled crops of every label-heavy region show each value label clear above its own dot and clear of its neighbour; the two smallest pairs (3.5 against 3.1, and 13.8 against 24.0) are separated both horizontally by the arm offset and vertically by their own values."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T11:16:54.214030+00:00",
+  "total": null
+}

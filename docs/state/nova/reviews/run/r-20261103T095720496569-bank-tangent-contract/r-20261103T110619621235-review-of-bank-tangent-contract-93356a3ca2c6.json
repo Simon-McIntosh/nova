@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Compared the reviewed run's completed base suite (2 failures) with its completed candidate suite (0 failures); the candidate test was removed before the reviewed head, so this zero is not a final-head regression gate.",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:_local_booking_sensitivities:1094",
+    "nova/equilibrium/support_read.py:step_jacobian:1137",
+    "nova/equilibrium/support_read.py:newton_step:1321",
+    "nova/equilibrium/support_read.py:step_batch:1431"
+  ],
+  "completed_at": "2026-11-03T11:18:02Z",
+  "dispatched_at": "2026-11-03T11:07:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html",
+      "line": "3",
+      "severity": "blocking",
+      "text": "blocking: The recorded head retains the base tangent and its channel-by-sample HLO buffers, so the source node's contraction goal is unmet; repair the implementation or explicitly recast this node as a negative-result investigation before treating it as the completed contract."
+    },
+    {
+      "file": "scripts/prototypes/bank_tangent_contract/h200.sh",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: An arm can end EXIT=1 in its receipt while the runner itself exits 0 after the loop, so a rerun can look green to its caller; disposition exempted because both archived arm receipts were read individually and this rejected prototype has no active acceptance gate."
+    },
+    {
+      "file": "scripts/prototypes/bank_tangent_contract/h200.sh",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: This script duplicates the scratch-arm runner in scripts/prototypes/bank_step_cut_buckets/compare.sh:12 rather than extending it; disposition exempted because the experiment is archived and no production route calls either runner."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "the nine commits from 8ff5dae2 to 93356a3c add, measure and revert current.py and the two memory assertions; the final diff is limited to six prototype files, one fragment and one SVG, with no product-source change.",
+    "done_when": "prompt.txt:127-128 requires CPU parity, paired H200 wall and memory, and fresh-read precision; parity-sirius.log, h200-base.log, h200-head.log and fresh-sirius.log record those candidate measures, while the final source has no contraction to gate.",
+    "goal": "the source prompt.txt:38 asks for a contracted booking tangent, but git diff of nova/equilibrium/current.py from the recorded base to this head is empty and the fragment at line 3 says the candidate was rejected.",
+    "manifest": "the source manifest.md records nine commits, a complete negative-result landing, two baseline suite failures and zero candidate suite failures, with the source restore receipt at source-restore.log.",
+    "write_paths": "prompt.txt:96-103 grants the two source files, tangent test and prototype, fragment and figure paths; the final diff adds only the eight prototype, fragment and figure paths inside that scope."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_tangent_contract.py:77 and :82 would fail at compiled temporaries of at least 3 GB and 55 GB, respectively, but faff966d removes both tests, leaving only plot.py:83-104 checks for clipped or colliding text, which cannot fail on restored sample-scaled product code.",
+    "evidence": "h200-base.log and h200-head.log each end EXIT=0 with paired wall and peak-byte receipts, and fresh-sirius.log ends EXIT=0, but suite-head.log ran at candidate revision 9492da1 rather than reviewed head 93356a3.",
+    "fit": "scripts/prototypes/bank_tangent_contract/plot.py:23-73 uses the local data-ink style and the rendered figure is readable, while h200.sh:27-29 does not propagate an arm failure to its own exit status.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:3 accurately records the rejected candidate, while nova/equilibrium/current.py at the reviewed head equals the base and retains sample-scaled intermediates.",
+    "reuse": "scripts/prototypes/bank_tangent_contract/h200.sh:7-25 duplicates the scratch-arm setup and sequential runner already owned by scripts/prototypes/bank_step_cut_buckets/compare.sh:12-50 rather than extending that owner.",
+    "scope_discipline": "git diff 8ff5dae2..93356a3c changes only scripts/prototypes/bank_tangent_contract, the declared fragment and the declared figure, all listed in prompt.txt:96-103."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source prompt.txt:38 asks for a contracted booking tangent, but git diff of nova/equilibrium/current.py from the recorded base to this head is empty and the fragment at line 3 says the candidate was rejected.\nVERDICT done_when: prompt.txt:127-128 requires CPU parity, paired H200 wall and memory, and fresh-read precision; parity-sirius.log, h200-base.log, h200-head.log and fresh-sirius.log record those candidate measures, while the final source has no contraction to gate.\nVERDICT write_paths: prompt.txt:96-103 grants the two source files, tangent test and prototype, fragment and figure paths; the final diff adds only the eight prototype, fragment and figure paths inside that scope.\nVERDICT manifest: the source manifest.md records nine commits, a complete negative-result landing, two baseline suite failures and zero candidate suite failures, with the source restore receipt at source-restore.log.\nVERDICT diff: the nine commits from 8ff5dae2 to 93356a3c add, measure and revert current.py and the two memory assertions; the final diff is limited to six prototype files, one fragment and one SVG, with no product-source change.\nCALL_SITES: nova/equilibrium/support_read.py:_local_booking_sensitivities:1094, nova/equilibrium/support_read.py:step_jacobian:1137, nova/equilibrium/support_read.py:newton_step:1321, nova/equilibrium/support_read.py:step_batch:1431\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:3 accurately records the rejected candidate, while nova/equilibrium/current.py at the reviewed head equals the base and retains sample-scaled intermediates.\nSCORE evidence: 16\nJUSTIFICATION evidence: h200-base.log and h200-head.log each end EXIT=0 with paired wall and peak-byte receipts, and fresh-sirius.log ends EXIT=0, but suite-head.log ran at candidate revision 9492da1 rather than reviewed head 93356a3.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 8ff5dae2..93356a3c changes only scripts/prototypes/bank_tangent_contract, the declared fragment and the declared figure, all listed in prompt.txt:96-103.\nSCORE durability: 3\nJUSTIFICATION durability: tests/test_bank_tangent_contract.py:77 and :82 would fail at compiled temporaries of at least 3 GB and 55 GB, respectively, but faff966d removes both tests, leaving only plot.py:83-104 checks for clipped or colliding text, which cannot fail on restored sample-scaled product code.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/bank_tangent_contract/plot.py:23-73 uses the local data-ink style and the rendered figure is readable, while h200.sh:27-29 does not propagate an arm failure to its own exit status.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_tangent_contract/h200.sh:7-25 duplicates the scratch-arm setup and sequential runner already owned by scripts/prototypes/bank_step_cut_buckets/compare.sh:12-50 rather than extending that owner.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:3 blocking: The recorded head retains the base tangent and its channel-by-sample HLO buffers, so the source node's contraction goal is unmet; repair the implementation or explicitly recast this node as a negative-result investigation before treating it as the completed contract.\nFINDING scripts/prototypes/bank_tangent_contract/h200.sh:27 non-blocking: An arm can end EXIT=1 in its receipt while the runner itself exits 0 after the loop, so a rerun can look green to its caller; disposition exempted because both archived arm receipts were read individually and this rejected prototype has no active acceptance gate.\nFINDING scripts/prototypes/bank_tangent_contract/h200.sh:7 non-blocking: This script duplicates the scratch-arm runner in scripts/prototypes/bank_step_cut_buckets/compare.sh:12 rather than extending it; disposition exempted because the experiment is archived and no production route calls either runner.\n",
+  "review_run_id": "r-20261103T110619621235-review-of-bank-tangent-contract-93356a3ca2c6",
+  "reviewed_base_sha": "8ff5dae2a49a63fcfac9f3dd9dea53a9c8744626",
+  "reviewed_head_sha": "93356a3ca2c62dffe150d037744baddd0323250b",
+  "reviewed_run_id": "r-20261103T095720496569-bank-tangent-contract",
+  "scores": {
+    "durability": 3,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 6,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T11:49:53.463512+00:00",
+  "total": 66
+}

@@ -196,7 +196,9 @@ if [[ -z "${log_path}" ]]; then
   exit 2
 fi
 
-readonly repository_root="$(git -C "${LANE_DIRECTORY}/../.." rev-parse --show-toplevel)"
+# Keep the compiled source revision selectable when the launcher resides in a
+# different worktree from the checkout whose revision the lane pins.
+readonly repository_root="$(realpath -e -- "${NOVA_PREWARM_SOURCE_ROOT:-$(git -C "${LANE_DIRECTORY}/../.." rev-parse --show-toplevel)}")"
 readonly source_revision="$(git -C "${repository_root}" rev-parse HEAD)"
 readonly script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
 readonly resolved_log="$(realpath -m -- "${log_path}")"

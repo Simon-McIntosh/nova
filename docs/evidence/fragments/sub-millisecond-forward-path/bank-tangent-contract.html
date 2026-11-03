@@ -1,0 +1,34 @@
+<section id="bank-tangent-contract-landing">
+  <h2>Local booking tangent contracts each channel before the next</h2>
+  <p>The fixed polygon interior now evaluates one normalized-flux channel at a time, reducing its weighted samples into current, radial and vertical moments inside a fixed three-channel tile. The moving conic edge path similarly integrates each velocity channel before advancing. The tile bounds the sample tensor independently of the total number of booking channels.</p>
+  <table id="bank-tangent-contract-hlo">
+    <caption>Three largest logical floating-point intermediates in the base H200 optimized HLO, ranked by shape bytes. These are HLO producers inside fusions; compiled physical temporary allocation is tabled separately below.</caption>
+    <thead><tr><th>Shape</th><th>Bytes</th><th>Python call site at base</th></tr></thead>
+    <tbody>
+      <tr><td><code>f64[64,6,3,84,8192]</code></td><td>6,341,787,648</td><td><code>current.py:702</code>, interior weighted basis times moment basis</td></tr>
+      <tr><td><code>f64[64,6,84,8192]</code></td><td>2,113,929,216</td><td><code>current.py:684–694</code>, interior polynomial-basis stack</td></tr>
+      <tr><td><code>f64[8,6,3,346,4096]</code></td><td>1,632,632,832</td><td><code>current.py:702</code>, normal-form interior weighted basis times moment basis</td></tr>
+    </tbody>
+  </table>
+  <p id="bank-tangent-contract-hlo-check">The defect reproduced in this node's base arm: its optimized H200 HLO at <code>hlo-base.txt</code> contains the large conic and normal-form shapes above, and <code>current.py</code> and <code>clip_quadrature.py</code> are byte-identical to the preceding recorded revision. The base shapes' six-wide dimension is the polynomial basis, and the three-wide dimension is the moment basis; the 15 local tangent channels appear after that sample reduction. The head HLO's largest floating-point shape is <code>f64[64,3,84,8192]</code> (1,056,964,608 bytes), where three is the fixed channel tile. The search for a full-channel sample tensor returns none on that HLO and finds the base tensor on the unchanged source as its positive control.</p>
+  <figure id="bank-tangent-contract-comparison">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg" alt="Base and contracted booking tangent compared on linear wall and peak device memory axes; head uses less memory but takes longer.">
+    <figcaption>Sequential base and head arms in one reserved H200 allocation, job 1304372. Each wall is the median of three synchronized warm calls. Both panels have linear axes and separate grey and green marks; every value is labelled. The left panel shows that the memory contraction costs 10.16 ms in the tangent and 10.12 ms in the whole step. The right panel shows the peak device bytes after one tangent call and one unchunked sixteen-lane tangent call. The SVG was rendered to PNG and visually checked for clipping, overlap and visible series.</figcaption>
+  </figure>
+  <table id="bank-tangent-contract-measure">
+    <caption>Same-allocation H200 base against head. The peak counts come from the device's <code>peak_bytes_in_use</code>; compiled temporary sizes are shown separately because fused HLO intermediates are not all physical allocations.</caption>
+    <thead><tr><th>Measure</th><th>Base</th><th>Head</th></tr></thead>
+    <tbody>
+      <tr><td>One-slice booking tangent wall [ms]</td><td>13.812</td><td>23.973</td></tr>
+      <tr><td>One-slice whole-step wall [ms]</td><td>29.074</td><td>39.191</td></tr>
+      <tr><td>One-slice tangent peak device bytes</td><td>3,517,641,728</td><td>3,101,514,496</td></tr>
+      <tr><td>One-slice compiled tangent temporary bytes</td><td>3,238,962,088</td><td>2,822,813,880</td></tr>
+      <tr><td>Sixteen-lane tangent peak device bytes</td><td>62,344,168,704</td><td>45,470,880,768</td></tr>
+      <tr><td>Sixteen-lane compiled tangent temporary bytes</td><td>62,027,393,640</td><td>45,154,095,224</td></tr>
+      <tr><td>Sixteen-lane tangent unchunked</td><td>executed</td><td>executed</td></tr>
+    </tbody>
+  </table>
+  <p id="bank-tangent-contract-correctness">On sirius CPU the final channel arrays match the base within <code>4.1518238092023775e-17</code> relative, below <code>1e-12</code>. The final fresh-read solve converges in five steps at residual <code>2.9686475500056986e-11</code>. Axis and X-point errors are <code>1.0477269387492131e-5</code> and <code>9.254857018010794e-6</code> of the minor radius, under <code>5e-4</code>; boundary-flux error is <code>2.5906258738474384e-5</code> of the flux span, under <code>1e-4</code>.</p>
+  <p id="bank-tangent-contract-control">The scratch negative control restores the base materialized interior and runs the new memory checks. Both fail: the one-slice compiled temporary is <code>3,238,962,088</code> bytes against a <code>3,000,000,000</code> byte ceiling, and the sixteen-lane temporary is <code>62,027,393,384</code> bytes against a <code>55,000,000,000</code> byte ceiling. The head passes both checks. The standalone base tangent itself executes unchunked at sixteen lanes on this card; the earlier out-of-memory result concerned the larger <code>step_jacobian</code> assembly, so it is not represented as a tangent failure here.</p>
+  <p id="bank-tangent-contract-receipts">Receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract</code>. <code>h200-base.log</code> and <code>h200-head.log</code> hold the sequential device arms and end in <code>EXIT=0</code>; <code>hlo-base.txt</code> and <code>hlo-head.txt</code> hold their optimized HLO. <code>parity-sirius.log</code> and <code>fresh-sirius.log</code> end in <code>EXIT=0</code>. <code>suite-base.log</code> ends in <code>EXIT=1</code> with both memory test IDs failing, while <code>suite-head.log</code> ends in <code>EXIT=0</code> with two passes. The base H200 log's first line states the base revision and its <code>MODULE</code> path resolves inside the scratch tree. Its Python <code>HEADER</code> revision field instead reports the runner worktree head; the measurement harness was corrected after this allocation launched, so that field is not used to identify the base arm.</p>
+</section>

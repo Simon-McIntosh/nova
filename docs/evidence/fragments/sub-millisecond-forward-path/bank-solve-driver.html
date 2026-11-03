@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-solve-driver-landing">Bank solve driver</h1>
-<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check passed six tests. A reserved H200 measured the warm converged solve at one and sixteen slices, and all sixteen lanes passed their own-solve and analytic-oracle precision checks. The sixteen-lane per-slice wall is slower than the one-lane staged wall because the batch runs until its slowest lane converges.</p>
+<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. A later review exposed two defects in the frozen active set; both now have failing reproductions and passing focused CPU checks. The full CPU file and device measurement are being rerun at the repaired head. The H200 table below names the earlier revision and will be replaced by the repaired-head receipt.</p>
 <section id="bank-solve-driver-trajectory">
 <h2>Same-seed CPU trajectories</h2>
 <p>The direct arm repeats the existing prototype's fresh-read and full-step calls at each iterate; the staged arm is one <code>jax.lax.while_loop</code> with factor reuse and active-set freezing switched off. Both use the same 550-cell operands, seed moments, profile, quadrature, stationary seeds and x64 dtype. Every update in the direct arm has length one. The residual is the maximum absolute moment mismatch after a fresh read; the update is the maximum absolute Newton correction.</p>
@@ -37,6 +37,11 @@
 <tr><td>Staged fresh residual</td><td>3.558398020687e-11</td><td>at most 1e-10</td></tr>
 </tbody></table>
 <p>The CPU receipt is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T080040158512-bank-solve-driver/cpu-budget-cost.log</code>, launched at revision <code>b087938055be6ad386421f2773deda401c51073b</code>. Its full suite summary and factor-rule rows follow later in the same log.</p>
+</section>
+<section id="bank-solve-driver-freeze-review">
+<h2>Frozen-set review and repair</h2>
+<p>At the unfixed revision <code>60f83ab3a3e456e261d43eb4c592b548a8c4849e</code>, a boundary move inside unchanged cut and normal-form sets produced a fresh area fraction of <code>0.41</code> while the frozen Newton step used <code>0.40</code>, a 2.439% relative residual difference. A fragment switch inside the same cut cell was accepted after one step with zero unfreezes. Both focused tests failed, with <code>EXIT=1</code>, in <code>frozen-reproduction.log</code>.</p>
+<p>The repair at <code>0f0da63a8a22aa731913d06b74026c8d012998fb</code> carries only discrete cut, normal-form and fragment decisions. It keeps the current read's fractional membership and other continuous fields, checks fragment selection in current and candidate drift, and refuses acceptance on either change. The strengthened same-state residual comparison at <code>7108e749fa408b34c4445f2fff92c51f2d80c03a</code> measured frozen and fresh residuals both <code>4.1e-8</code> after the boundary moved, with zero relative difference. The fragment-switch test measured two steps and one unfreeze; both focused tests passed on sirius. Removing fragment selection from the next-read drift check in a scratch module made the fragment-switch test fail at one step, <code>EXIT=1</code>, in <code>fragment-negative.log</code>.</p>
 </section>
 <section id="bank-solve-driver-factor-cost">
 <h2>Factor reuse is off by default</h2>

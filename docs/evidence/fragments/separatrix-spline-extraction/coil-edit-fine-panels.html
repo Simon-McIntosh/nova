@@ -30,6 +30,34 @@ rather than a crash. The terminal pair for each set is edit 12
 edit 9 (<code>fraction 0.00</code>, residual <code>6.61e-03</code>, active set
 settled).</p>
 
+<p id="coil-edit-fine-panels-outcome">The converged set moved between the
+revision the sweep was first run at and the one the panels are drawn at.
+Twenty 2% edits from a cold solve converged on edits
+<code>{0, 2, 13, 17}</code> at <code>15b3aa2f8</code> and on
+<code>{0, 1, 11, 12, 13}</code> at <code>6fef9cc33</code>, so the panels draw
+edit 12 and edit 9 where the earlier record drew edit 2 and edit 7. This node
+does not cause it. Every commit behind this record under
+<code>benchmarks/</code>, <code>tests/</code> and <code>docs/</code> leaves
+<code>nova/</code> untouched — <code>git diff --stat 3ef818dfa..HEAD --
+nova/</code> prints nothing — so no line landed here reaches the solve. Inside
+<code>git log 15b3aa2f8..6fef9cc33 -- nova/equilibrium</code> 274 non-merge
+commits touch the solver. Three of them change the convergence decision in
+<code>reduced_newton.py</code>: <code>a359f8fed</code> serves the reduced
+residual and tangent requests from one owner, and <code>2acda367b</code> and
+<code>624f8727d</code> refuse a non-finite cell moment at the solve host loops
+and at the last trip. None of the three can raise a converged count, since two
+of them only add refusals and the third is a refactor, so the shift is in the
+iterates the residual is measured on rather than in the criterion. That path is
+what the rest of the range moves: 77 of the 274 commits touch
+<code>reduced_newton.py</code>, <code>current.py</code>,
+<code>stencil_mesh.py</code>, <code>forward_operator.py</code> or
+<code>fixed_point.py</code>, and 46 of those carry a
+<code>feat</code>, <code>fix</code> or <code>revert</code> subject, so they
+change the iterates and not only their cost. Naming the single commit that
+carried an edit across the tolerance would need the sweep re-run at
+intermediate revisions; this node did not run it, and the record says so rather
+than attributing the shift to whichever subject line reads closest.</p>
+
 <figure id="coil-edit-fine-panels-figure">
   <img src="/nova/figures/mast-centroid-capability/converged-vs-nonconverged.png" alt="Two MAST poloidal panels at 10 mm display spacing: the converged edit 12 state and the non-converged edit 9 state, each with the vessel, its separatrix branches, and its own magnetic axis and admitted saddle markers." />
   <figcaption>The panel each coil-edit figure set draws: the converged 12th
@@ -40,6 +68,30 @@ settled).</p>
   <code>2.4e-3 Wb</code> on the left, and both maps reproduce their operator to
   about <code>7e-12</code> relative.</figcaption>
 </figure>
+
+<p id="coil-edit-fine-panels-mismatch">The two panels disagree with the
+state they were drawn from by <code>2.405e-03 Wb</code> (converged) and
+<code>3.438e-02 Wb</code> (non-converged) while each reproduces its operator
+raster to <code>6.78e-12</code> and <code>7.20e-12</code>. Three candidate
+terms were measured on the mast-centroid archive at the lattice nodes. The
+operator carries a thirteen-conductor external current whose every entry is
+zero, so the term a drawing that passed <code>current=0</code> would omit is
+exactly <code>0.0 Wb</code>: an external conductor is not the separator, and
+the coupling omits nothing there. A gauge constant is not it either: the field
+<code>raster - state</code> has a mean of <code>4.54e-04 Wb</code> against a
+maximum of <code>2.41e-03 Wb</code>, and removing its mean leaves
+<code>1.95e-03 Wb</code> and removing a fitted plane leaves
+<code>1.95e-03 Wb</code>. What separates them is the plasma current amplitude.
+The solve's fixed point applies the target-current normalisation to its
+moments, and on this state the amplitude is <code>0.99841</code> — the solved
+state carries <code>0.159%</code> less plasma current than the unnormalised
+moments the raster images. Fitting one common scale against the plasma term
+gives <code>-1.587e-03</code> of a <code>1.039 Wb</code> plasma peak, which is
+<code>1.65e-03 Wb</code> of the <code>2.41e-03 Wb</code>, and leaves
+<code>8.2e-04 Wb</code> from the two moment routes' own support. So the panels
+are drawn unchanged: the coupling carries no omitted term, the stored state is
+not a fixed point of the plain moment image, and redrawing would move contours
+by a quantity the solve itself accounts for.</p>
 
 <p id="coil-edit-fine-panels-receipts">Each figure carries a
 <code>panel-receipt.json</code> beside it. Every field in it is read from an

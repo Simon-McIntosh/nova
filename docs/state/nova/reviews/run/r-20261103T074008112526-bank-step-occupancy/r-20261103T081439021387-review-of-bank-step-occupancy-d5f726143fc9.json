@@ -16,6 +16,11 @@
       "kind": "exempted",
       "reason": "measurement-only node: its durable output is the evidence fragment and raw H200 logs, not product code",
       "recorded_at": "2026-11-03T08:43:23.418536+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "measurement-only node: its prototype scripts are not product code and are not reused",
+      "recorded_at": "2026-11-03T08:43:32.172077+00:00"
     }
   },
   "dispatched_at": "2026-11-03T08:17:13Z",

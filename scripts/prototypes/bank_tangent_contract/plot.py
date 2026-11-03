@@ -1,45 +1,42 @@
 """Compare warm booking wall and device storage on one H200."""
 
+import argparse
 import json
 import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.text import Text
+from matplotlib.transforms import Bbox
 
-RUN = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract"
-)
-OUT = Path(
-    "docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg"
-)
 COLORS = {"base": "#929292", "head": "#2e8b57"}
 
 
-def record(arm, label):
-    for line in (RUN / f"h200-{arm}.log").read_text().splitlines():
+def record(path, label):
+    for line in path.read_text().splitlines():
         if line.startswith(label + " "):
             return json.loads(line[len(label) + 1 :])
-    raise ValueError(f"missing {label} receipt for {arm}")
+    raise ValueError(f"missing {label} receipt in {path}")
 
 
-def main():
+def main(base, head, out):
     plt.style.use("data-ink")
     fig, axes = plt.subplots(1, 2, figsize=(14, 7.2))
     categories = (("booking tangent", "whole step"), ("one slice", "16 lanes"))
     series = {
         "base": (
-            (record("base", "TANGENT")["wall_ms"], record("base", "STEP")["wall_ms"]),
+            (record(base, "TANGENT")["wall_ms"], record(base, "STEP")["wall_ms"]),
             (
-                record("base", "TANGENT")["memory"]["temp_size_in_bytes"] / 1e9,
-                record("base", "BATCH_COMPILED")["memory"]["temp_size_in_bytes"] / 1e9,
+                record(base, "TANGENT")["memory"]["temp_size_in_bytes"] / 1e9,
+                record(base, "BATCH_COMPILED")["memory"]["temp_size_in_bytes"] / 1e9,
             ),
         ),
         "head": (
-            (record("head", "TANGENT")["wall_ms"], record("head", "STEP")["wall_ms"]),
+            (record(head, "TANGENT")["wall_ms"], record(head, "STEP")["wall_ms"]),
             (
-                record("head", "TANGENT")["memory"]["temp_size_in_bytes"] / 1e9,
-                record("head", "BATCH_COMPILED")["memory"]["temp_size_in_bytes"] / 1e9,
+                record(head, "TANGENT")["memory"]["temp_size_in_bytes"] / 1e9,
+                record(head, "BATCH_COMPILED")["memory"]["temp_size_in_bytes"] / 1e9,
             ),
         ),
     }
@@ -74,16 +71,52 @@ def main():
         bbox_to_anchor=(0.5, 0.97),
     )
     fig.subplots_adjust(left=0.09, right=0.98, bottom=0.16, top=0.82, wspace=0.28)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT, format="svg")
-    svg = OUT.read_text()
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    labels = [
+        artist
+        for artist in fig.findobj(match=Text)
+        if artist.get_visible() and artist.get_text()
+    ]
+    bounds = [(artist, artist.get_window_extent(renderer)) for artist in labels]
+    for artist, box in bounds:
+        if not fig.bbox.contains(*box.get_points()[0]) or not fig.bbox.contains(
+            *box.get_points()[1]
+        ):
+            raise ValueError(f"text outside canvas: {artist.get_text()}")
+    for index, (first, first_box) in enumerate(bounds):
+        for second, second_box in bounds[index + 1 :]:
+            if first_box.overlaps(second_box):
+                raise ValueError(
+                    f"text collision: {first.get_text()} / {second.get_text()}"
+                )
+    for panel, axis in enumerate(axes):
+        for arm, offset in (("base", -0.13), ("head", 0.13)):
+            for position, value in zip(
+                np.arange(2) + offset, series[arm][panel], strict=True
+            ):
+                x, y = axis.transData.transform((position, value))
+                mark = Bbox.from_bounds(x - 8, y - 8, 16, 16)
+                for artist, box in bounds:
+                    if re.fullmatch(r"\d+\.\d", artist.get_text()) and box.overlaps(
+                        mark
+                    ):
+                        raise ValueError(f"text over data: {artist.get_text()}")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, format="svg")
+    svg = out.read_text()
     svg = re.sub(
         r'width="[^"]+" height="[^"]+"', 'width="31.1cm" height="16cm"', svg, count=1
     )
-    OUT.write_text(svg)
+    out.write_text(svg)
     plt.close(fig)
-    print(OUT)
+    print(out)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("base", type=Path)
+    parser.add_argument("head", type=Path)
+    parser.add_argument("out", type=Path)
+    args = parser.parse_args()
+    main(args.base, args.head, args.out)

@@ -7,6 +7,7 @@ configure_dtypes()
 
 import argparse
 import json
+import os
 import subprocess
 from pathlib import Path
 from time import perf_counter
@@ -56,7 +57,8 @@ def main():
     emit(
         "HEADER",
         arm=args.arm,
-        revision=subprocess.check_output(
+        revision=os.environ.get("BANK_TANGENT_ARM_REVISION")
+        or subprocess.check_output(
             ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
         ).strip(),
         tree=str(root),

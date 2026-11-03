@@ -20,7 +20,7 @@ for arm in base head; do
   LOG="$RUN/h200-$arm.log"
   (
     cd "$TREE" || exit 1
-    export PYTHONPATH="$TREE:$ROOT" JAX_PLATFORMS=cuda XLA_PYTHON_CLIENT_PREALLOCATE=false
+    export PYTHONPATH="$TREE:$ROOT" JAX_PLATFORMS=cuda XLA_PYTHON_CLIENT_PREALLOCATE=false BANK_TANGENT_ARM_REVISION="$REV"
     printf '# revision: %s tree: %s cwd: %s command: %s\n' "$REV" "$TREE" "$PWD" "$PY -m scripts.prototypes.bank_tangent_contract.measure --arm $arm --hlo $RUN/hlo-$arm.txt"
     "$PY" -m scripts.prototypes.bank_tangent_contract.measure --arm "$arm" --hlo "$RUN/hlo-$arm.txt"
   ) > "$LOG" 2>&1

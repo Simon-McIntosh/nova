@@ -156,6 +156,24 @@ class ConstraintFunctional(Protocol[Payload]):
     ) -> jax.Array: ...
 
 
+def _constraint_residual(
+    functional: ConstraintFunctional[object],
+    profile: ForwardProfile,
+    context: ConstraintContext,
+    unknown: jax.Array,
+    payload: object,
+    target: jax.Array,
+    scale: jax.Array,
+    *,
+    payload_is_active_mask: bool = False,
+) -> jax.Array:
+    """Apply one scaled-observation residual, retaining inactive row values."""
+    residual = (functional.observed(profile, context, payload) - target) / scale
+    if not payload_is_active_mask or payload is None:
+        return residual
+    return jnp.where(jnp.asarray(payload, dtype=bool), residual, unknown)
+
+
 class CompensatingUnknown(Protocol):
     """Map normalized solver unknowns to physical values and flux images."""
 
@@ -1104,10 +1122,16 @@ class CurrentCentroidConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        held = (self.observed(profile, context, payload) - target) / scale
-        if payload is None:
-            return held
-        return jnp.where(jnp.asarray(payload, dtype=bool), held, unknown)
+        return _constraint_residual(
+            self,
+            profile,
+            context,
+            unknown,
+            payload,
+            target,
+            scale,
+            payload_is_active_mask=True,
+        )
 
     def dual_flux_image(
         self,
@@ -1187,8 +1211,9 @@ class FluxLevelConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        return _constraint_residual(
+            self, profile, context, unknown, payload, target, scale
+        )
 
     def dual_flux_image(
         self,
@@ -1480,8 +1505,9 @@ class IsofluxConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        return _constraint_residual(
+            self, profile, context, unknown, payload, target, scale
+        )
 
     def dual_flux_image(
         self,
@@ -1528,8 +1554,9 @@ class XPointConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        return _constraint_residual(
+            self, profile, context, unknown, payload, target, scale
+        )
 
     def dual_flux_image(
         self,
@@ -1604,8 +1631,9 @@ class FieldComponentConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        return _constraint_residual(
+            self, profile, context, unknown, payload, target, scale
+        )
 
     def dual_flux_image(
         self,
@@ -1666,8 +1694,9 @@ class WallGapConstraint:
         target: jax.Array,
         scale: jax.Array,
     ) -> jax.Array:
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        return _constraint_residual(
+            self, profile, context, unknown, payload, target, scale
+        )
 
     def dual_flux_image(
         self,
@@ -1782,8 +1811,9 @@ class ExternalShafranovConstraint:
         scale: jax.Array,
     ) -> jax.Array:
         """Return the implied combination against the extracted target."""
-        del unknown
-        return (self.observed(profile, context, payload) - target) / scale
+        return _constraint_residual(
+            self, profile, context, unknown, payload, target, scale
+        )
 
     def dual_flux_image(
         self,

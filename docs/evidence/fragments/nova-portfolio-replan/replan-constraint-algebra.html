@@ -1,0 +1,50 @@
+<section id="replan-constraint-algebra-landing">
+  <h2>One scaled residual implementation</h2>
+  <p id="replan-constraint-algebra-base-census">
+    The base census of the seven concrete constraint methods reproduced the
+    duplicated algebra: six contain
+    <code>return (self.observed(profile, context, payload) - target) / scale</code>.
+    <code>CurrentCentroidConstraint</code> computes the same scaled observation
+    into <code>held</code>, then selects the carried unknown for inactive rows.
+  </p>
+  <p id="replan-constraint-algebra-shared-helper">
+    Commit <code>ee3a96d79</code> introduces
+    <code>_constraint_residual</code> as the single scaled-observation formula;
+    all seven concrete methods delegate to it. The centroid method passes an
+    explicit active-mask option, preserving its inactive-row values. The other
+    rows still call their own <code>observed(profile, context, payload)</code>;
+    their quantities, payloads, pair registration and dual-flux images remain
+    in their existing owners.
+  </p>
+  <p id="replan-constraint-algebra-pinned-values">
+    <code>tests/test_constraint_residual_algebra.py</code> pins each method to
+    its base value on a fixed linear flux state and fixed moment observation:
+    centroid <code>[1, -2]</code>, flux level <code>[-0.5, 0.25]</code>,
+    isoflux <code>[-1.25]</code>, X-point <code>[0.5, 0.5]</code>, field
+    <code>[-1.9098593171, 2.2441318158]</code>, wall gap <code>[2]</code>,
+    and Shafranov <code>[-0.8903176005]</code>. Every row passes through
+    <code>jax.jit(jax.vmap(...))</code> with its row axis preserved. The focused
+    base and committed-head arms each report 27 passed and 5 deselected; the
+    head adds no failure ID.
+  </p>
+  <p id="replan-constraint-algebra-negative-control">
+    The negative control adds <code>1.0</code> to the field observation inside
+    the shared helper in a scratch copy. Pytest reports that it imported the
+    scratch module, and only
+    <code>test_residual_matches_base_value_and_traces_over_batch[field]</code>
+    fails: 1 failed, 6 passed, <code>EXIT=1</code>. An initial probe passed all
+    seven because the worktree test configuration imported the unmutated
+    package; that result was excluded after the import path was checked inside
+    the isolated test process.
+  </p>
+  <p id="replan-constraint-algebra-broad-arm">
+    A broader exploratory selection that included reduced-Newton integration
+    tests is incomplete: it recorded one failure in
+    <code>test_an_empty_tuple_reproduces_the_unconstrained_solve</code>, then
+    Python aborted in JAX <code>backend_compile_and_load</code> during
+    <code>test_a_moved_target_is_reached_and_warm_starting_is_no_worse</code>
+    (<code>EXIT=134</code>) without a suite summary. It is not used as the base
+    or head comparison; the complete focused logs and the incomplete log are
+    recorded in the worker manifest.
+  </p>
+</section>

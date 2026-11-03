@@ -6,6 +6,7 @@ import numpy as np
 import re
 
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
+from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
 from tests.test_forward_solve_request import _completed_profile
 
@@ -54,6 +55,7 @@ def test_typed_requests_reuse_the_compiled_solve_across_coil_edits(monkeypatch):
             source_profile=profile.source,
             seed_policy=ExplicitSolveSeed(seed),
             policy_overrides={"route": "picard", "relaxation": 1.0},
+            requested_class=TopologyClass.DIVERTED,
             current=jnp.asarray(ordinary),
             prescribed_current=jnp.asarray(prescribed),
         )

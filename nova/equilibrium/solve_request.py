@@ -574,6 +574,7 @@ class ForwardSolveRequest:
     policy: ForwardSolvePolicy
     route: SolveRoute
     target_current: object | None = None
+    requested_class: object | None = None
     constraint_pins: ConstraintPinSet | None = None
     constraint_pairs: tuple[ConstraintPair, ...] = ()
     vertical_pin: VerticalPositionPin | None = None

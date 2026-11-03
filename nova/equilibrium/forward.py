@@ -2683,6 +2683,11 @@ class ForwardProfile:
             cached_machine=policy.cached_machine,
             compilation_cache=False,
             **policy.kernel_options(),
+            **(
+                {"requested_class": request.requested_class}
+                if request.requested_class is not None
+                else {}
+            ),
         )
         wall_seconds = time.perf_counter() - started
         if policy.compilation_cache:
@@ -2791,6 +2796,7 @@ class ForwardProfile:
             array_signature(request.current),
             array_signature(request.target_current),
             array_signature(request.prescribed_current),
+            request.requested_class,
             constraint_signature,
             request.enforce,
         )

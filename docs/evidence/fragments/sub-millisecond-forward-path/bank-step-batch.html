@@ -322,7 +322,10 @@
   budget numbers, <code>waverun/diagnose.log</code> for the 64-cell non-finite
   diagnosis (job 1303781), <code>waverun/h200-stage.log</code> for the stage
   wall (job 1303785), and <code>waverun/figure.log</code> for the figure
-  render, which reports a clean overlap check and a 1400 by 720 canvas, with the
+  render, which reports a clean overlap check, a 1400 by 720 canvas, and the
+  visible-pixel count of each series at the four batch sizes (booking tangent
+  255, 393, 327 and 216 pixels against assembly 249, 242, 272 and 174 at one,
+  four, sixteen and sixty-four slices, so both read at every column), with the
   inspected PNG at <code>waverun/per-slice-wall.png</code>. Job 1303782 was launched from the
   repaired working tree before it was committed, so its <code>REVISION</code>
   line reads 98b6bb91d while the code it ran is c3124432d.</p>

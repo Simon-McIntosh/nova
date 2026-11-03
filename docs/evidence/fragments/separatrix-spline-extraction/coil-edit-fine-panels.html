@@ -23,7 +23,10 @@ produced the state. A re-solved state's panel map is compared with
 <code>reproduction_relative_error</code> rather than a value it recomputed. On the real MAST states the two lanes
 record <code>6.78e-12</code> and <code>7.20e-12</code>, so the coupling frames
 agree with the operator's to eleven digits rather than merely passing the
-floor.</p>
+floor. That check pins the coupling's arithmetic and says nothing about the
+solve: <code>raster_image</code> is not the map the solve iterates, so eleven
+digits of agreement with it is not agreement with the terminal state — the
+term the display leaves out is measured below.</p>
 
 <p id="coil-edit-fine-panels-resolve">Each of the four figure sets was
 re-solved on the lane its receipt names, twenty 2% warm edits from a cold solve,
@@ -74,34 +77,98 @@ than attributing the shift to whichever subject line reads closest.</p>
   about <code>7e-12</code> relative.</figcaption>
 </figure>
 
-<p id="coil-edit-fine-panels-mismatch">The panel draws the operator's own
-normalised current moments of the stored state at the solve's target current,
-so it images the route the fixed point is terminated on rather than the
-unnormalised moments the archive carries. Measured against the state it draws,
-that route is further away, not closer, while the map still reproduces the
-operator raster to <code>6.77e-12</code> (converged) and
-<code>7.18e-12</code> (non-converged): the largest node mismatch rose from
-<code>2.405e-03</code> to <code>4.585e-03 Wb</code> on the converged panel and
-from <code>3.438e-02</code> to <code>5.577e-02 Wb</code> on the non-converged
-one. The term that separates them is the normalisation factor applied in the
-opposite direction. The operator derives an amplitude of
-<code>0.99841</code> (<code>target / sum(cell_current)</code>) and scales the
-moment triple by it; the stored state instead stands above the unnormalised
-image by the reciprocal, <code>1/0.99841 = 1.00159</code>, which is the
-<code>1.587e-03</code> fitted plasma scale of the <code>1.039 Wb</code> plasma
-peak. Multiplying the moments by <code>0.99841</code> therefore moves the
-drawn field away from the state by exactly that amount, which is why the
-converged panel's mismatch does not fall to the solver residual but grows: the
-stored state is not a fixed point of the normalisation this route applies, and
-no value of that amplitude closes it. The other candidates were ruled out at
-the lattice nodes: the operator's thirteen-conductor external current is all
-zero, so an omitted conductor contributes <code>0.0 Wb</code>; and the
-difference is not a gauge constant, since removing its mean
-(<code>4.54e-04 Wb</code> of a <code>2.41e-03 Wb</code> maximum) or a fitted
-plane leaves <code>1.95e-03 Wb</code>. Redrawing stopped here: the panels are
-drawn on the normalised route as directed, the before and after mismatch are
-both recorded, and the state's own relation to the normalisation is the term a
-further redraw cannot settle.</p>
+<p id="coil-edit-fine-panels-map">The display builder reproduces the wrong
+reference. The map the solve iterates is the trip boundary of the constrained
+reduced solve, <code>nova/equilibrium/reduced_newton.py:926</code>: it reads
+the moments at the trial flux (<code>_current_moments</code>,
+<code>reduced_newton.py:353</code>, normalised when the solve carries a target
+current), images them with
+<code>external + operator.current_moment_image(moments)</code> plus the
+registered rows' compensating flux
+(<code>_image</code>, <code>reduced_newton.py:572</code>), and then passes the
+promoted nodes through unchanged
+(<code>mapped = jnp.where(promoted, state, image)</code>,
+<code>reduced_newton.py:976</code>), where <code>promoted</code> is the
+residual-shadow mask at that state against the frozen one. The raster the
+display checks against,
+<code>ForwardFluxOperator.raster_image</code>
+(<code>nova/equilibrium/forward_operator.py:2938</code>), is only
+<code>external + grid.internal(moments)</code>: it carries neither the
+constrained row's compensation nor the promotion, so the display can reproduce
+it to eleven digits while sitting away from the state the solve terminated on.
+The operator does expose the right map, as
+<code>ForwardFluxOperator.__call__</code>
+(<code>forward_operator.py:3946</code>) and <code>flux_map</code>
+(<code>forward_operator.py:3986</code>): external plus the plasma image, then
+the residual-shadow pass-through.</p>
+
+<p id="coil-edit-fine-panels-mismatch">Measured at the two terminal edits of the
+mast-centroid archive, the terms are these, all at the 33 by 33 lattice nodes.
+The archive's field is <em>not</em> the state's own flux: it stands
+<code>2.786e-02 Wb</code> from the terminal state on the converged edit, 2.1%
+of the <code>1.3155 Wb</code> field peak, and <code>3.505e-02 Wb</code> on the
+non-converged one. That gap is the residual-shadow promotion — 46 nodes on the
+converged edit, 25 on the non-converged one — where the trip boundary passes the
+state through instead of imaging it. The archive is the operator's raster of
+the terminal state's normalised moments <em>plus</em> the constrained row's
+compensating flux: subtracting
+<code>external + grid.internal(moments)</code> from it leaves
+<code>2.405e-03 Wb</code> (converged) and <code>3.438e-02 Wb</code>
+(non-converged one) — the compensating current the vertical-centroid row
+spent, which the sweep folds into the prescribed vector before it images and
+which the archive does not record separately. The operator's stored external
+current contributes <code>0.0 Wb</code> on both panels, since its thirteen
+conductors are all zero and the display passes a zero current, so no conductor
+term is missing. Across the two moment routes the term is
+<code>3.894e-02 Wb</code> (converged) and <code>0.608e-02 Wb</code>
+(non-converged), and the three sum to
+<code>F - raster(unnormalised moments)</code> to <code>1.1e-16</code>, so
+nothing is left over. On this state the trip boundary maps it to
+<code>1.60e-02 Wb</code> from itself while the normalised and unnormalised
+raster routes sit <code>2.79e-02</code> and <code>3.89e-02 Wb</code> from it:
+the two missing terms are structural, not a scalar, so no value of the
+normalisation amplitude closes either gap.</p>
+
+<p id="coil-edit-fine-panels-normalisation">The normalisation is a real term, but
+a small one: <code>1.6e-3</code> relative, third in size behind the promotion
+on the converged panel and behind both the promotion and the compensation on
+the non-converged one. A reading that took the normalisation reciprocal for the
+whole gap is consistent with the numbers only while the comparison is made
+against the raster; against the state, which is the quantity the solve
+terminates on, it accounts for about 6% of the converged difference.</p>
+
+<p id="coil-edit-fine-panels-route">What the display would need, therefore, is
+the trip boundary rather than the raster: evaluate the operator's own map at
+the terminal state — <code>ForwardFluxOperator.__call__</code> or
+<code>flux_map</code>, which carry the plasma image and the residual-shadow
+pass-through — and add the constrained rows'
+<code>flux_delta</code>.
+That in turn needs two things the archive does not carry. It stores the 33 by
+33 raster and the prescribed current vector, not the terminal state vector
+(1126 entries at this operator: the lattice plus its wall and direct-sample
+rows), and it does not store the compensating current the vertical-centroid
+row spent, which the solve folds into the prescribed vector before it images.
+A second, independent defect sits in the panel path itself: it recomputes the
+moments from the archived raster
+(<code>benchmarks/coil_edit_latency.py:1466</code>) and never reads the
+archive's own <code>cell_current_i</code> column, which is the true state's
+already-normalised moment triple and the only quantity in the archive taken
+from the solve rather than from an image of it.</p>
+
+<p id="coil-edit-fine-panels-replay">The replay is what licenses reading those
+terms as the published panels'. Twenty warm edits re-run from the prepared seed
+at this revision reproduce the archived terminal exactly: the re-run edit 12
+reports residual <code>5.730339e-09</code> against the archive's
+<code>5.730339e-09</code>, and its state differs from the archived field by
+<code>2.786e-02 Wb</code> — the promotion term, not a trajectory difference.
+Both ran on a P100; the archived sweep ran at revision
+<code>4fbb492f1</code> on the H200 lane, and the residual agreement is the
+check that the re-run is the same solve. The H200 lane was refused for this
+round — the reservation stood at seven of eight cards and the launcher's
+pending window expired twice (<code>1304005</code>, <code>1304006</code>) — so
+the re-render of the two P100-set figures that this node owes has not been
+done. Redrawing stopped before this round, as directed, and nothing under
+<code>nova/</code> was changed.</p>
 
 <p id="coil-edit-fine-panels-titan-outstanding">Three of the five panels are
 redrawn on that route: the forward-solve-api, mast-centroid-capability and

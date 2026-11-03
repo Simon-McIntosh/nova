@@ -10,6 +10,34 @@ store's coupling through <code>build_display_flux_map</code> at the 10 mm
 spacing floor, and the separatrix, its saddle and the boundary the plasma mesh is
 cut against all come off the map's own spline.</p>
 
+<p id="mast-centroid-fine-panels-cost">The panel render was measured before it was trusted. On the cpu lane the
+coupling build costs 0.23 s, but the conductor kernel costs 0.083 s per display
+point and the rectangular-cell kernel a further 0.022 s per point; the 10 mm map
+carries 78195 points, so one panel would spend about 6470 s in the conductor
+kernel and 1760 s in the plasma kernel if it were evaluated point by point. That
+is the whole reason a render did not finish in 27 minutes, and it is a defect in
+the render's inner loop, not a budget shortfall: both kernels depend only on the
+geometry and the target points, never on the state.</p>
+
+<table id="mast-centroid-fine-panels-cost-table">
+<caption>Measured cost of one panel's display build, cpu lane, 64-point sample.</caption>
+<thead><tr><th>stage</th><th>seconds</th><th>projected over 78195 points</th></tr></thead>
+<tbody>
+<tr><td>coupling build (shot store, 938 section trace)</td><td>0.23</td><td>0.23</td></tr>
+<tr><td>conductor kernel, per point</td><td>0.0827</td><td>6470</td></tr>
+<tr><td>rectangular-cell kernel, per point</td><td>0.0225</td><td>1760</td></tr>
+<tr><td>moment contraction, per point</td><td>under 0.001</td><td>under 1</td></tr>
+</tbody>
+</table>
+
+<p id="mast-centroid-fine-panels-fix">The producer therefore builds each
+coupling once per lane, exactly and with no interpolation, over the fixed
+display grid and the lattice nodes, splitting the work across ten spawned
+worker processes that never touch JAX, and caches the pair under the operand
+root keyed by a digest of the geometry, the points and the shot. A panel is then
+a matrix-vector product with its currents, and so is every perturbed arm of the
+control.</p>
+
 <p id="mast-centroid-fine-panels-gate">The redraw gate opens each state, rebuilds
 the map from its stored currents and moments, and asserts that the drawn
 contour vertices leave the lattice rows. Its negative control moves one stored

@@ -1,0 +1,64 @@
+<section data-reckon="evidence" id="coil-edit-fine-panels">
+<h2>Coil-edit panels drawn from a fine display map</h2>
+
+<p id="coil-edit-fine-panels-coupling">The coil-edit panel drew its contours
+from the lattice raster alone, so a 20 mm lattice showed as a 20 mm staircase
+and no reading finer than the solve grid was available. The panel now draws the
+flux a stored state's own currents produce, evaluated at 10 mm. The coupling is
+built in the benchmark from the machine the state was solved on: the external
+term is the stored circuit fields contracted with the panel's prescribed
+currents, and the plasma term is the uniform, radial and vertical moment triple
+over the operator's own cells. <code>nova/equilibrium/display_flux.py</code> is
+unchanged.</p>
+
+<p id="coil-edit-fine-panels-test">The map is pinned against the operator that
+produced the state. A re-solved state's panel map is compared with
+<code>operator.raster_image</code> at the lattice nodes and must reproduce it to
+<code>1e-10</code> relative, and it asserts the drawn map's own
+<code>reproduction_relative_error</code> rather than a value it recomputed. On the real MAST states the two lanes
+record <code>6.78e-12</code> and <code>7.20e-12</code>, so the coupling frames
+agree with the operator's to eleven digits rather than merely passing the
+floor.</p>
+
+<p id="coil-edit-fine-panels-resolve">Each of the four figure sets was
+re-solved on the lane its receipt names, twenty 2% warm edits from a cold solve,
+one job per set. Every job reached edit 20 with the compilation cache warm after
+the first edit, and every job's terminal marker is
+<code>EXIT_STATUS=2</code>, which is the benchmark's own non-converged verdict
+rather than a crash. The terminal pair for each set is edit 12
+(<code>fraction +0.06</code>, residual <code>5.73e-09</code>, converged) and
+edit 9 (<code>fraction 0.00</code>, residual <code>6.61e-03</code>, active set
+settled).</p>
+
+<figure id="coil-edit-fine-panels-figure">
+  <img src="/nova/figures/mast-centroid-capability/converged-vs-nonconverged.png" alt="Two MAST poloidal panels at 10 mm display spacing: the converged edit 12 state and the non-converged edit 9 state, each with the vessel, its separatrix branches, and its own magnetic axis and admitted saddle markers." />
+  <figcaption>The panel each coil-edit figure set draws: the converged 12th
+  edit beside the non-converged 9th, both evaluated on a 10 mm display map. The
+  right-hand panel is not a converged state, so it draws the flux of the
+  terminal currents rather than a solved boundary; its largest node mismatch
+  against the operator raster is <code>3.4e-2 Wb</code> against
+  <code>2.4e-3 Wb</code> on the left, and both maps reproduce their operator to
+  about <code>7e-12</code> relative.</figcaption>
+</figure>
+
+<p id="coil-edit-fine-panels-states">Each regenerated
+<code>panel-states.npz</code> carries the drawn states' conductor currents, cell
+currents and both linear moment columns, so a panel can be redrawn from the
+archive alone. The three figures fed by the H200 archive are byte-identical,
+which is expected: they are the same sweep read by three documents. The two
+titan figures share a second archive whose states differ from the H200 set in
+the last bits only.</p>
+
+<p id="coil-edit-fine-panels-pins">The persisted-state terms are re-measured
+against the regenerated archives. Fifteen of the twenty states now close a
+separatrix where eleven did: the four that changed close with two open branches
+each, state 19 among them, and the four that remain open trace a cycle admitting
+no closed candidate while state 1 admits no cycle at all. The connectivity test
+passes 42 of 42 at the regenerated archive.</p>
+
+<p id="coil-edit-fine-panels-caption">The caption is wrapped to the canvas. A
+first render set it as one line, which ran past both edges of every figure it
+was drawn on; the caption is now filled to 150 characters and every redrawn
+figure is rendered to PNG and inspected for clipped and overlapping text before
+it is committed.</p>
+</section>

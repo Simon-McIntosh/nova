@@ -65,7 +65,7 @@ def test_batch_reuses_factor_without_rebuilding_jacobians(monkeypatch):
 
     def jacobian(_operands, moments, *_args, **_kwargs):
         jax.debug.callback(lambda value: builds.append(int(value)), moments[0][0])
-        return 2 * jnp.eye(3, dtype=moments[0].dtype)
+        return 1.5 * jnp.eye(3, dtype=moments[0].dtype)
 
     monkeypatch.setattr(support_read, "read_batch", _toy_read)
     monkeypatch.setattr(support_read, "step_residual", _toy_residual)

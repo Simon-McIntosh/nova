@@ -55,6 +55,7 @@ from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import (
+    DEFAULT_SPACING as DISPLAY_DEFAULT_SPACING,
     DisplayCoupling,
     DisplayFluxMap,
     build_display_flux_map,
@@ -89,12 +90,16 @@ from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.wall_mask import inside_polygon
 from nova.imas.diiid_description import (
+    CIRCUIT_DRIVEN_CONDUCTORS,
     POLOIDAL_CONDUCTORS,
+    active_coil_response_from_imas,
     dataset_machine_description,
     geometry_digest,
     vacuum_response,
 )
 from nova.imas.diiid_current import (
+    DEFAULT_ACTIVE_COIL_DD_VERSION,
+    DEFAULT_ACTIVE_COIL_ENTRY,
     circuit_current_map,
     complete_profile_current_adapter,
     shipped_current_at,
@@ -113,6 +118,10 @@ PREREGISTRATION_NAME = "forward_gs_preregistration.json"
 RECEIPT_NAME = "forward_gs_receipt.json"
 PARTIAL_RECEIPT_NAME = "forward_gs_partial_receipt.json"
 FRAME_FIGURE_NAME = "frame_flux_comparison.png"
+#: Display map spacing [m] and evaluation chunk, shared by the prefetched
+#: conductor response and the build that consumes it.
+DISPLAY_SPACING = DISPLAY_DEFAULT_SPACING
+DISPLAY_CHUNK = 4096
 COHORT_FIGURE_NAME = "cohort_match_summary.png"
 PUBLICATION_DIRECTORY = "/nova/figures/diiid-forward-onboarding/forward-gs"
 DEFAULT_DISPLACEMENT_OUTPUT = Path(
@@ -1429,25 +1438,96 @@ def _assembled_boundary_geometry(
     return closed, open_branches
 
 
+def _display_external(
+    profile: ForwardProfile, machine, points: np.ndarray
+) -> np.ndarray:
+    """Return the operator's own external flux [Wb] at ``points``.
+
+    The conductor columns are the vacuum response of every conductor that
+    carries axisymmetric flux, in the order the operator's response matrix
+    carries them, followed by the active-coil columns the circuit adapter
+    appended; the current vector is the operator's own complete one, so the
+    column order and the currents cannot drift apart.
+    """
+
+    carriers = [
+        conductor
+        for conductor in machine.physical.conductors
+        if conductor.vertices is not None
+        and conductor.turns.affects_axisymmetric_poloidal_flux
+    ]
+    complete = np.asarray(profile.operator.external_current, dtype=float)
+    if complete.size != len(carriers) + len(CIRCUIT_DRIVEN_CONDUCTORS):
+        raise RuntimeError(
+            "display coupling does not match the operator's conductor response"
+        )
+    points = np.asarray(points, dtype=float)
+    flux = np.zeros(points.shape[0], dtype=np.float64)
+    for conductor, value in zip(carriers, complete[: len(carriers)], strict=True):
+        flux += (
+            value * polygon_greens(points[:, 0], points[:, 1], conductor.vertices)[0]
+        )
+    appended = complete[len(carriers) :]
+    if appended.size:
+        _names, response, _receipt = active_coil_response_from_imas(
+            DEFAULT_ACTIVE_COIL_ENTRY,
+            DEFAULT_ACTIVE_COIL_DD_VERSION,
+            CIRCUIT_DRIVEN_CONDUCTORS,
+            points[:, 0],
+            points[:, 1],
+        )
+        flux += np.asarray(response, dtype=float).T @ appended
+    return flux
+
+
+def _display_grid(
+    lattice, spacing: float = DISPLAY_SPACING
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the display radius, height and points of ``lattice``."""
+
+    radius = np.asarray(lattice.radius, dtype=float)
+    height = np.asarray(lattice.height, dtype=float)
+    display_radius = np.arange(radius[0], radius[-1] + 0.5 * spacing, spacing)
+    display_height = np.arange(height[0], height[-1] + 0.5 * spacing, spacing)
+    radius_grid, height_grid = np.meshgrid(
+        display_radius, display_height, indexing="ij"
+    )
+    return (
+        display_radius,
+        display_height,
+        np.c_[radius_grid.ravel(), height_grid.ravel()],
+    )
+
+
 def _display_coupling(
-    profile: ForwardProfile, machine, names: tuple[str, ...], current: np.ndarray
-) -> DisplayCoupling:
+    profile: ForwardProfile, machine, chunk: int = DISPLAY_CHUNK
+) -> tuple[DisplayCoupling, np.ndarray, np.ndarray]:
     """Return the target-point coupling the frame's own solve was built from.
 
     The plasma columns are the same uniform ``hybrid_greens`` block the solve
     lattice consumes, evaluated at whatever points the panel asks for; the
     operator carries no radial or vertical plasma moment matrices here, so
     those columns are zero exactly as the solve's own raster image is.  The
-    conductor flux is the vacuum response contracted against the frame's
-    complete 24-conductor current.
+    conductor flux is the operator's own extended response, read once for the
+    whole display grid and the lattice nodes together: the metal-entry read is
+    the expensive part of that response and a chunk-sized request would pay it
+    once per chunk.
     """
 
     lattice = profile.lattice
     cells = np.asarray(lattice.coordinate, dtype=float)
     width = float(np.diff(np.asarray(lattice.radius, dtype=float)).mean())
     vertical_extent = float(np.diff(np.asarray(lattice.height, dtype=float)).mean())
-    by_name = {item.name: item for item in machine.physical.conductors}
-    vertices = [by_name[name].vertices for name in names]
+    display_radius, display_height, points = _display_grid(lattice)
+    targets = np.concatenate((points, cells))
+    flux = _display_external(profile, machine, targets)
+    served: dict[bytes, np.ndarray] = {}
+    offset = 0
+    for source in (points, cells):
+        for start in range(0, source.shape[0], chunk):
+            block = np.ascontiguousarray(source[start : start + chunk], dtype=float)
+            served[block.tobytes()] = flux[offset : offset + block.shape[0]]
+            offset += block.shape[0]
 
     def plasma(points: np.ndarray):
         """Return the uniform, radial and vertical plasma columns."""
@@ -1458,28 +1538,41 @@ def _display_coupling(
 
     def external(points: np.ndarray) -> np.ndarray:
         """Return the conductor-only flux [Wb] at ``points``."""
-        points = np.asarray(points, dtype=float)
-        flux = np.zeros(points.shape[0], dtype=np.float64)
-        for vertex, value in zip(vertices, current, strict=True):
-            flux += value * polygon_greens(points[:, 0], points[:, 1], vertex)[0]
-        return flux
+        block = np.ascontiguousarray(points, dtype=float)
+        cached = served.get(block.tobytes())
+        if cached is None:
+            cached = _display_external(profile, machine, block)
+            served[block.tobytes()] = cached
+        return cached
 
-    return DisplayCoupling(plasma=plasma, external=external)
+    return (
+        DisplayCoupling(plasma=plasma, external=external),
+        display_radius,
+        display_height,
+    )
 
 
 def _display_map(
-    profile: ForwardProfile,
-    equilibrium,
-    machine,
-    names: tuple[str, ...],
-    current: np.ndarray,
+    profile: ForwardProfile, equilibrium, machine
 ) -> tuple[DisplayFluxMap, dict[str, Any]]:
     """Return the frame's fine display map and the rig it was drawn from."""
 
-    coupling = _display_coupling(profile, machine, names, current)
+    coupling, display_radius, display_height = _display_coupling(profile, machine)
     display = build_display_flux_map(
-        profile, np.asarray(equilibrium.flux, dtype=float), coupling=coupling
+        profile,
+        np.asarray(equilibrium.flux, dtype=float),
+        coupling=coupling,
+        spacing=DISPLAY_SPACING,
+        chunk=DISPLAY_CHUNK,
     )
+    if display.radius.shape != display_radius.shape or not np.allclose(
+        display.radius, display_radius
+    ):
+        raise RuntimeError("display map grid does not match the prefetched grid")
+    if display.height.shape != display_height.shape or not np.allclose(
+        display.height, display_height
+    ):
+        raise RuntimeError("display map grid does not match the prefetched grid")
     return display, {"coupling": coupling}
 
 
@@ -2027,13 +2120,7 @@ def solve_frame(
     )
     display = None
     try:
-        display, _rig = _display_map(
-            profile,
-            equilibrium,
-            machine,
-            tuple(current_adapter.resolution.names),
-            complete_current,
-        )
+        display, _rig = _display_map(profile, equilibrium, machine)
         display_closed, display_open = _display_separatrix(display)
         display_comparison = compare_closed_boundaries(
             display_closed,

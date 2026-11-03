@@ -48,10 +48,14 @@ pin still names <code>runtime-7b315420b55b91bffb05</code> at source revision
 was removed: the old pin remains live, and the user-cache paths lie outside
 this worker's write grant. The pre-warm input and allocation repair is required
 before a fresh pin and lane dry-run verification can land.</p>
-<p>A dedicated pre-warm worker is running H200 job <code>1304470</code> with a
-single fixture-floor row and local oracle storage. That row has a completed
-receipt (status 0, 34 compile seconds, 651 hits and 3,784 misses). The job is
-still in its compile-identity row; the published pin remains old. Its final
-receipt, zero-autotune count and lane resolver must be read before changing
-this blocked result to a publication claim.</p>
+<p>A dedicated pre-warm worker launched H200 job <code>1304470</code> with a
+single fixture-floor row and local oracle storage. Its fixture-floor receipt
+passed (status 0, 34 compile seconds, 651 hits and 3,784 misses), but the
+compile-identity row failed (status 1, 365 compile seconds, 900 hits and 10
+misses): the terminal-state flux difference was <code>4.4786e-11</code> against
+a <code>1e-14</code> limit. The pre-warm publisher requires every row to pass,
+so this attempt cannot publish a fresh pin. The pin still names the old
+runtime. Repair of the failing test or its pre-warm row selection lies outside
+this worker's write grant; a completed successful receipt, zero-autotune count
+and lane resolution are still needed for a publication claim.</p>
 </section>

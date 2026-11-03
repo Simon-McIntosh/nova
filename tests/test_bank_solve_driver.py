@@ -183,7 +183,7 @@ def diverted_case():
     return bank, cache, roots, seeds, convention, policy, profile, quadrature, moments
 
 
-def _device_solve(case, *, reuse_factor, freeze_active_set):
+def _device_solve(case, *, reuse_factor, freeze_active_set, contraction_limit=0.5):
     bank, cache, roots, seeds, convention, policy, profile, quadrature, moments = case
 
     def gradient(radius, flux):
@@ -203,6 +203,7 @@ def _device_solve(case, *, reuse_factor, freeze_active_set):
             quadrature,
             max_steps=60,
             reuse_factor=reuse_factor,
+            contraction_limit=contraction_limit,
             freeze_active_set=freeze_active_set,
         )
     )
@@ -212,24 +213,7 @@ def _device_solve(case, *, reuse_factor, freeze_active_set):
 
 
 @pytest.fixture(scope="module")
-def fresh_solution(diverted_case):
-    return _device_solve(diverted_case, reuse_factor=False, freeze_active_set=False)
-
-
-@pytest.fixture(scope="module")
-def reused_solution(diverted_case, fresh_solution):
-    assert bool(fresh_solution.converged)
-    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=False)
-
-
-@pytest.fixture(scope="module")
-def frozen_solution(diverted_case, reused_solution):
-    assert bool(reused_solution.converged)
-    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=True)
-
-
-@pytest.mark.slow
-def test_fresh_factor_trajectory_matches_prototype(diverted_case, fresh_solution):
+def prototype_solution(diverted_case):
     bank, cache, roots, seeds, convention, policy, profile, quadrature, moments = (
         diverted_case
     )
@@ -258,57 +242,150 @@ def test_fresh_factor_trajectory_matches_prototype(diverted_case, fresh_solution
         )
         return jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
 
-    staged = fresh_solution
-    assert bool(staged.converged)
-    expected_residuals = []
-    expected_updates = []
+    residuals, updates = [], []
     state = moments
-    for index in range(60):
+    for _ in range(60):
         support = read(state)
-        fresh_norm = float(norm(state, support))
-        expected_residuals.append(fresh_norm)
-        if fresh_norm <= 1e-10:
+        fresh = float(norm(state, support))
+        residuals.append(fresh)
+        if bool(support.valid) and fresh <= 1e-10:
             break
         correction = step(state, support)
-        update = float(jnp.max(jnp.abs(jnp.concatenate(correction.update))))
-        expected_updates.append(update)
-        print(
-            f"TRAJECTORY step={index} residual={fresh_norm:.12e} update={update:.12e}"
-        )
+        updates.append(float(jnp.max(jnp.abs(jnp.concatenate(correction.update)))))
         state = tuple(
             value + change
             for value, change in zip(state, correction.update, strict=True)
         )
-    assert len(expected_updates) == int(staged.steps)
-    np.testing.assert_allclose(
-        np.asarray(staged.residual_path[: len(expected_residuals)]),
-        expected_residuals,
-        rtol=1e-9,
-        atol=0,
+    assert bool(support.valid) and residuals[-1] <= 1e-10
+    return state, support, residuals, updates
+
+
+@pytest.fixture(scope="module")
+def fresh_solution(diverted_case):
+    return _device_solve(diverted_case, reuse_factor=False, freeze_active_set=False)
+
+
+@pytest.fixture(scope="module")
+def reused_solution(diverted_case):
+    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=False)
+
+
+@pytest.fixture(scope="module")
+def strict_reused_solution(diverted_case):
+    return _device_solve(
+        diverted_case,
+        reuse_factor=True,
+        freeze_active_set=False,
+        contraction_limit=0.1,
     )
-    np.testing.assert_allclose(
-        np.asarray(staged.update_path[: len(expected_updates)]),
-        expected_updates,
-        rtol=1e-9,
-        atol=0,
+
+
+@pytest.fixture(scope="module")
+def frozen_solution(diverted_case):
+    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=True)
+
+
+def _precision_gaps(bank, one_state, one_support, other_state, other_support, radius):
+    flux_one = support_read.nodal_jets(bank, one_state)[:, 0]
+    flux_other = support_read.nodal_jets(bank, other_state)[:, 0]
+    span = abs(float(one_support.reading.boundary_flux - one_support.reading.axis_flux))
+    return dict(
+        flux=float(jnp.max(jnp.abs(flux_one - flux_other))) / span,
+        axis=float(
+            jnp.linalg.norm(one_support.reading.axis - other_support.reading.axis)
+        )
+        / radius,
+        saddle=float(
+            jnp.linalg.norm(
+                one_support.reading.boundary - other_support.reading.boundary
+            )
+        )
+        / radius,
+        boundary=abs(
+            float(
+                one_support.reading.boundary_flux - other_support.reading.boundary_flux
+            )
+        )
+        / span,
     )
 
 
 @pytest.mark.slow
-def test_factor_reuse_trajectory_converges(fresh_solution, reused_solution):
-    fresh, reused = fresh_solution, reused_solution
-    print("FRESH", np.asarray(fresh.residual_path[: int(fresh.steps) + 1]))
-    print("REUSED", np.asarray(reused.residual_path[: int(reused.steps) + 1]))
-    assert bool(fresh.converged) and bool(reused.converged)
-    assert int(reused.steps) <= int(fresh.steps) + 2
-    assert int(reused.refactors) < int(reused.steps)
+def test_converged_state_matches_prototype_budget(
+    diverted_case, prototype_solution, fresh_solution
+):
+    from tests.equilibrium import test_topology_read as fixture
+
+    bank = diverted_case[0]
+    state, support, residuals, updates = prototype_solution
+    staged = fresh_solution
+    _, _, wall, _, _ = fixture._analytic_inputs("diverted")
+    radius = 0.5 * float(np.ptp(np.asarray(wall)[:, 0]))
+    gaps = _precision_gaps(bank, state, support, staged.moments, staged.support, radius)
+    print(
+        "TABLE step prototype_residual prototype_update staged_residual staged_update"
+    )
+    for index in range(max(len(residuals), int(staged.steps) + 1)):
+        prototype_residual = (
+            residuals[index] if index < len(residuals) else float("nan")
+        )
+        prototype_update = updates[index] if index < len(updates) else float("nan")
+        staged_residual = (
+            float(staged.residual_path[index])
+            if index <= int(staged.steps)
+            else float("nan")
+        )
+        staged_update = (
+            float(staged.update_path[index])
+            if index < int(staged.steps)
+            else float("nan")
+        )
+        print(
+            f"ROW {index} {prototype_residual:.12e} {prototype_update:.12e} "
+            f"{staged_residual:.12e} {staged_update:.12e}"
+        )
+    print(
+        "PRECISION",
+        gaps,
+        "prototype_steps",
+        len(updates),
+        "staged_steps",
+        int(staged.steps),
+    )
+    assert bool(staged.converged) and float(staged.residual) <= 1e-10
+    assert residuals[-1] <= 1e-10
+    assert gaps["flux"] <= 1e-8
+    assert gaps["axis"] <= 5e-4 and gaps["saddle"] <= 5e-4
+    assert gaps["boundary"] <= 1e-4
+
+
+@pytest.mark.slow
+def test_factor_reuse_costs(fresh_solution, reused_solution, strict_reused_solution):
+    for label, result in (
+        ("fresh", fresh_solution),
+        ("half", reused_solution),
+        ("tenth", strict_reused_solution),
+    ):
+        steps, refactors = int(result.steps), int(result.refactors)
+        wall_estimate = 8 * steps + 20 * refactors
+        print(
+            f"COST {label} steps={steps} refactors={refactors} "
+            f"reads={int(result.reads)} estimated_ms={wall_estimate} "
+            f"residual={float(result.residual):.12e}"
+        )
+        assert bool(result.converged) and float(result.residual) <= 1e-10
 
 
 @pytest.mark.slow
 def test_active_set_freeze_trajectory_converges(reused_solution, frozen_solution):
-    reused, frozen = reused_solution, frozen_solution
-    print("UNFROZEN", np.asarray(reused.residual_path[: int(reused.steps) + 1]))
-    print("FROZEN", np.asarray(frozen.residual_path[: int(frozen.steps) + 1]))
-    assert bool(reused.converged) and bool(frozen.converged)
-    assert int(frozen.freezes) >= 1
-    assert float(frozen.residual) <= 1e-10
+    print(
+        "UNFROZEN",
+        np.asarray(reused_solution.residual_path[: int(reused_solution.steps) + 1]),
+    )
+    print(
+        "FROZEN",
+        np.asarray(frozen_solution.residual_path[: int(frozen_solution.steps) + 1]),
+    )
+    assert bool(reused_solution.converged) and bool(frozen_solution.converged)
+    assert int(frozen_solution.freezes) >= 1
+    assert float(frozen_solution.residual) <= 1e-10

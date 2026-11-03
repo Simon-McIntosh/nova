@@ -1487,6 +1487,7 @@ def solve_batch(
     tolerance: float = 1e-10,
     freeze_threshold: float = 1e-6,
     reuse_factor: bool = True,
+    contraction_limit: float = 0.5,
     freeze_active_set: bool = True,
     iterations: int = 12,
 ) -> SolveResult:
@@ -1626,7 +1627,7 @@ def solve_batch(
         ratio = current_norm / previous_norm
         active = ~done
         rebuild = ~have_factor | jnp.any(
-            active & (~jnp.isfinite(ratio) | (ratio > 0.5) | changed)
+            active & (~jnp.isfinite(ratio) | (ratio > contraction_limit) | changed)
         )
         if not reuse_factor:
             rebuild = jnp.asarray(True)

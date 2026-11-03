@@ -7,6 +7,13 @@ PHASE-END line with its wall, host RSS before and after, and peak RSS. The
 solve is split into trace-and-lower, compile, first execute and warm execute so
 memory is attributed to the stage that holds it rather than to "the solve".
 
+The ledger JSON is rewritten atomically at every phase boundary, and once more
+on SIGTERM, so a run stopped at its time limit or killed for its memory leaves
+every phase, census and analysis it had reached on disk instead of nothing. The
+file names the phase that was still in flight and carries an explicit
+``completed`` flag, so a partial ledger is distinguishable from a whole one
+without reading the log.
+
 Every number carries the rung and device it was measured on.
 """
 
@@ -18,6 +25,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import signal
 import subprocess
 import sys
 from time import perf_counter
@@ -116,10 +124,44 @@ def largest_arrays(limit: int = 0, floor: int = 1 << 1) -> dict:
     }
 
 
+def persist(state: dict) -> Path | None:
+    """Write the ledger as it stands, atomically, so a stopped run keeps it."""
+    directory = state.get("output_path")
+    if directory is None:
+        return None
+    target = directory / f"ledger-{state['file_arm']}.json"
+    scratch = directory / f".ledger-{state['file_arm']}.part.json"
+    phases = state["phases"]
+    if phases:
+        peak = [row for row in phases if row.get("rss_after")]
+        if peak:
+            peak_row = max(peak, key=lambda row: row["rss_after"].get("ru_maxrss", 0))
+            state["peak_rss"] = peak_row["phase"]
+            state["peak_rss_bytes"] = peak_row["rss_after"].get("ru_maxrss")
+    state["phases_completed"] = [row["phase"] for row in phases]
+    scratch.write_text(json.dumps(state, indent=2, sort_keys=True, default=str) + "\n")
+    scratch.replace(target)
+    print(
+        f"LEDGER {target} phases={len(phases)} completed={state.get('completed')}",
+        flush=True,
+    )
+    return target
+
+
+def census(state: dict, label: str, limit: int) -> None:
+    """Record the largest live arrays, naming the census before it starts."""
+    state["census_inflight"] = label
+    persist(state)
+    state["arrays"][label] = largest_arrays(limit)
+    state["census_inflight"] = None
+    persist(state)
+
+
 def begin(state: dict, name: str) -> dict:
     marker = {"phase": name, "rss_before": host_rss(), "jax_before": jax_memory()}
     print(f"PHASE-BEGIN {name} rss={marker['rss_before'].get('VmRSS')}", flush=True)
     state["inflight"] = marker
+    persist(state)
     return marker
 
 
@@ -134,6 +176,7 @@ def end(state: dict, name: str, started: float, extra: dict | None = None) -> No
     if extra:
         row.update(extra)
     state["phases"].append(row)
+    state["inflight"] = None
     print(
         f"PHASE-END {name} seconds={row['seconds']:.3f} "
         f"rss_before={row['rss_before'].get('VmRSS') if row['rss_before'] else None} "
@@ -141,6 +184,7 @@ def end(state: dict, name: str, started: float, extra: dict | None = None) -> No
         f"peak={row['rss_after'].get('ru_maxrss')}",
         flush=True,
     )
+    persist(state)
 
 
 def phase(state: dict, name: str):
@@ -189,6 +233,10 @@ def main() -> None:
     arguments.output.mkdir(parents=True, exist_ok=True)
     state: dict = {
         "arm": arguments.arm,
+        "output_path": arguments.output.resolve(),
+        "file_arm": arguments.arm,
+        "completed": False,
+        "inflight": None,
         "phases": [],
         "arrays": {},
         "banner": {
@@ -229,6 +277,15 @@ def main() -> None:
             flush=True,
         )
         arguments.arm = "gpu"
+    state["file_arm"] = arguments.arm
+
+    def persist_on_stop(signum, frame):
+        state["stop_signal"] = signal.Signals(signum).name
+        persist(state)
+        raise SystemExit(128 + signum)
+
+    signal.signal(signal.SIGTERM, persist_on_stop)
+    persist(state)
 
     from nova.jax.config import configure_dtypes
 
@@ -320,7 +377,7 @@ def main() -> None:
         "lattice_shape": list(built.label.shape),
         "seed_bytes": int(built.seed.nbytes),
     }
-    state["arrays"]["profile-build"] = largest_arrays(arguments.array_limit)
+    census(state, "profile-build", arguments.array_limit)
 
     profile, seed = built.profile, built.seed
     current = producer._source_current(
@@ -335,9 +392,9 @@ def main() -> None:
         carrier_identity=f"ledger:{paths[0].name}:{frame}",
     )
 
-    map_program = jax.jit(lambda flux: profile.flux_map(
-        producer.jnp.asarray(current)
-    )(flux))
+    map_program = jax.jit(
+        lambda flux: profile.flux_map(producer.jnp.asarray(current))(flux)
+    )
 
     with phase(state, f"{arguments.arm}:solve-trace-and-lower"):
         lowered = map_program.lower(producer.jnp.asarray(seed))
@@ -356,8 +413,7 @@ def main() -> None:
             state["memory_analysis"] = {
                 name: int(getattr(analysis, name))
                 for name in dir(analysis)
-                if not name.startswith("_")
-                and isinstance(getattr(analysis, name), int)
+                if not name.startswith("_") and isinstance(getattr(analysis, name), int)
             }
         except Exception as error:
             state["memory_analysis"] = f"unavailable: {error}"
@@ -379,7 +435,7 @@ def main() -> None:
     with phase(state, f"{arguments.arm}:solve-warm-execute"):
         warm = compiled(producer.jnp.asarray(seed))
         jax.tree_util.tree_map(lambda a: a.block_until_ready(), warm)
-    state["arrays"]["after-warm-execute"] = largest_arrays(arguments.array_limit)
+    census(state, "after-warm-execute", arguments.array_limit)
 
     if not os.environ.get("NOVA_LEDGER_SKIP_PRESENT_ROUTE"):
         with phase(state, f"{arguments.arm}:present-route-solve"):
@@ -389,10 +445,12 @@ def main() -> None:
                 "qualified": bool(receipt.qualified),
                 "residual": float(receipt.equilibrium.fixed_point.residual),
                 "newton_steps": int(
-                    getattr(receipt.equilibrium.fixed_point, "active_set_iterations", -1)
+                    getattr(
+                        receipt.equilibrium.fixed_point, "active_set_iterations", -1
+                    )
                 ),
             }
-    state["arrays"]["solved"] = largest_arrays(arguments.array_limit)
+    census(state, "solved", arguments.array_limit)
 
     from nova.equilibrium import support_read
 
@@ -401,13 +459,18 @@ def main() -> None:
         try:
             geometry = profile.operator.grid
             bank = support_read.SupportOperands.from_rows(
-                geometry, plasma_to_grid, plasma_to_wall[:, :1], bucket=len(plasma_to_grid)
+                geometry,
+                plasma_to_grid,
+                plasma_to_wall[:, :1],
+                bucket=len(plasma_to_grid),
             )
             attempt["result"] = {
                 "built": True,
                 "bucket": bank.bucket,
                 "rows_bytes": int(bank.rows.size * bank.rows.dtype.itemsize),
-                "exterior_bytes": int(bank.exterior.size * bank.exterior.dtype.itemsize),
+                "exterior_bytes": int(
+                    bank.exterior.size * bank.exterior.dtype.itemsize
+                ),
             }
         except Exception as error:
             attempt["result"] = {
@@ -417,14 +480,9 @@ def main() -> None:
             }
         state["bank_attempt"] = attempt
 
-    phases = state["phases"]
-    peak_row = max(phases, key=lambda row: row["rss_after"].get("ru_maxrss", 0))
-    state["peak_rss"] = peak_row["phase"]
-    state["peak_rss_bytes"] = peak_row["rss_after"].get("ru_maxrss")
-    (arguments.output / f"ledger-{arguments.arm}.json").write_text(
-        json.dumps(state, indent=2, sort_keys=True, default=str) + "\n"
-    )
-    print(f"LEDGER {arguments.output / f'ledger-{arguments.arm}.json'}", flush=True)
+    state["completed"] = True
+    state["stop_signal"] = None
+    persist(state)
     print(f"PEAK {state['peak_rss']} {state['peak_rss_bytes']}", flush=True)
 
 

@@ -1494,9 +1494,9 @@ def solve_batch(
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
     A fresh read certifies every accepted state. Once close to the root, the
-    booking keeps the clipped and normal-form cell sets of the first close read
-    while their continuous geometry remains current. A changed fresh set
-    releases that lock and requires another Newton update. Factor reuse is
+    booking keeps the cut-cell, normal-form and fragment decisions of the first
+    close read while every continuous reading remains current. A changed fresh
+    decision releases that lock and requires another Newton update. Factor reuse is
     opt-in because extra iterations can cost more than the skipped refactors.
     """
     lanes, cells = moments[0].shape
@@ -1520,6 +1520,16 @@ def solve_batch(
         )(state, reading)
         return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
 
+    def selection_changed(reading, cut_set, normal_set, fragments):
+        cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
+        return (
+            jnp.any(cut != cut_set, axis=-1)
+            | jnp.any(reading.normal_form_cells != normal_set, axis=-1)
+            | jnp.any(
+                (reading.fragment_selected != fragments).reshape(lanes, -1), axis=-1
+            )
+        )
+
     norm = magnitude(moments, support)
     accepted = support.valid & jnp.isfinite(norm) & (norm <= tolerance)
     size = 3 * cells
@@ -1532,7 +1542,6 @@ def solve_batch(
         jnp.zeros((lanes, size), jnp.int32),
     )
     empty_set = jnp.zeros_like(support.reading.normal_form_cells)
-    locked_membership = support.reading.membership
     locked_fragments = support.reading.fragment_selected
     initial = (
         moments,
@@ -1542,7 +1551,6 @@ def solve_batch(
         jnp.zeros(lanes, bool),
         empty_set,
         empty_set,
-        locked_membership,
         locked_fragments,
         empty_factor,
         jnp.asarray(False),
@@ -1557,7 +1565,7 @@ def solve_batch(
     )
 
     def keep_going(carried):
-        return jnp.any(~carried[3]) & (jnp.max(carried[12]) < max_steps)
+        return jnp.any(~carried[3]) & (jnp.max(carried[11]) < max_steps)
 
     def advance(carried):
         (
@@ -1568,7 +1576,6 @@ def solve_batch(
             frozen,
             cut_set,
             normal_set,
-            locked_membership,
             locked_fragments,
             factor,
             have_factor,
@@ -1585,9 +1592,8 @@ def solve_batch(
             fresh.reading.membership < 1 - 1e-14
         )
         normal_now = fresh.reading.normal_form_cells
-        changed = frozen & (
-            jnp.any(cut_now != cut_set, axis=-1)
-            | jnp.any(normal_now != normal_set, axis=-1)
+        changed = frozen & selection_changed(
+            fresh.reading, cut_set, normal_set, locked_fragments
         )
         start_freeze = (
             (~done)
@@ -1601,9 +1607,6 @@ def solve_batch(
         lock = (frozen & ~changed) | start_freeze
         cut_set = jnp.where(start_freeze[:, None], cut_now, cut_set)
         normal_set = jnp.where(start_freeze[:, None], normal_now, normal_set)
-        locked_membership = jnp.where(
-            start_freeze[:, None], fresh.reading.membership, locked_membership
-        )
         locked_fragments = jnp.where(
             start_freeze.reshape(
                 (lanes,) + (1,) * (fresh.reading.fragment_selected.ndim - 1)
@@ -1612,9 +1615,6 @@ def solve_batch(
             locked_fragments,
         )
         step_reading = fresh.reading._replace(
-            membership=jnp.where(
-                lock[:, None], locked_membership, fresh.reading.membership
-            ),
             normal_form_cells=jnp.where(lock[:, None], normal_set, normal_now),
             fragment_selected=jnp.where(
                 lock.reshape(
@@ -1683,17 +1683,14 @@ def solve_batch(
             iterations=iterations,
         )
         next_norm = magnitude(candidate, next_read)
-        next_cut = (next_read.reading.membership > 0) & (
-            next_read.reading.membership < 1 - 1e-14
-        )
-        drift = lock & (
-            jnp.any(next_cut != cut_set, axis=-1)
-            | jnp.any(next_read.reading.normal_form_cells != normal_set, axis=-1)
+        drift = lock & selection_changed(
+            next_read.reading, cut_set, normal_set, locked_fragments
         )
         next_done = done | (
             next_read.valid
             & jnp.isfinite(next_norm)
             & (next_norm <= tolerance)
+            & ~changed
             & ~drift
         )
         slot = jnp.max(steps)
@@ -1708,7 +1705,6 @@ def solve_batch(
             lock & ~drift,
             cut_set,
             normal_set,
-            locked_membership,
             locked_fragments,
             correction.factor,
             jnp.asarray(True),
@@ -1728,13 +1724,13 @@ def solve_batch(
         final[1],
         final[2],
         final[3],
+        final[11],
         final[12],
         final[13],
         final[14],
         final[15],
         final[16],
         final[17],
-        final[18],
     )
 
 

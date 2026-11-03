@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="147">
+<meta name="plan-version" content="148">
 <meta name="plan-modified" content="2026-11-03">
 <meta name="plan-blocks" content="millisecond-converged-solve,single-grid-solver-cutover">
 <meta name="plan-impl" content="0.67">
@@ -1142,6 +1142,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-pin-republish-after-hessian" data-who="reckon-build" data-when="2026-10-27T07:40:00Z">
     <div class="r-comment-body"><p><strong>Item 5 (republish the pin) is deferred until the moment-field Hessian repair lands.</strong> Lead decision 2026-10-27. The attempt <code>xla-autotune-pin-republish</code> (run r-20261020T063401929208) was blocked on 2026-10-20 for two reasons: pre-warm rows ran out of GPU memory, and an oracle fixture was missing. It cancelled job 1290841 before publishing, so the published pin is intact. That run is discarded, and its record commit is kept at <code>refs/reckon/archive/xla-autotune-pin-republish</code> (9dc6916ab). The repair under way in converged-forward-solve §4 changes <code>nova/biot/polygonanalytic.py</code>, which changes the compiled programs, so a pin published before it lands would be stale at once. Redispatch item 5 from a main revision that carries that repair, with both blockers named in the brief: size the pre-warm rows to the card's memory, and name the oracle fixture's path. Item 3's removal of <code>runtime-7b315420b55b91bffb05</code> still follows item 5.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261103T085805559004-review-of-autotune-off-gpfs-exports-f895cb3678cc" data-who="reckon-build" data-when="2026-11-03T09:08:29Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/review-records/r-20261103T084338137814-autotune-off-gpfs-exports.json — parsed independent review of base e81319b5afaa4ff807d810d56d16073de958f54f and head f895cb3678cc248bd2b609536328cd71d8744ec2, six dimensions scored, zero added suite failures, one non-blocking finding.</p></div>
 </div>
 </section>
 </main>

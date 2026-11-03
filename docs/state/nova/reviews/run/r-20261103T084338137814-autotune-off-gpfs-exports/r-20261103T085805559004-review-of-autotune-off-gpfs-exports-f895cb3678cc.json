@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's completed baseline_suite and after_suite arms: baseline.log and head.log both end in EXIT=0 and report 34 passed and 35 passed, with no FAILED IDs; set difference is empty.",
+  "call_sites": [
+    "scripts/nova_lane/run.sh:224",
+    "scripts/nova_lane/run.sh:331",
+    "scripts/h200_test_lane/run.sh:41",
+    "scripts/nova_lane/standing_suite.sh:173"
+  ],
+  "completed_at": "2026-11-03T09:08:29Z",
+  "dispatched_at": "2026-11-03T09:00:48Z",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The verified production callers do not supply a conflicting override: standing_suite.sh passes none, and the H200 caller's prelude explicitly exports none.",
+      "file": "scripts/nova_lane/run.sh",
+      "id": "f83c1d5b5e9",
+      "line": "130",
+      "severity": "non-blocking",
+      "text": "run_payload exports none before applying --env pairs and before evaluating the caller prelude at line 162; either can change the value delivered to the target after the new log header was written, so the header alone cannot certify the final payload environment."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified four production call sites",
+    "diff": "read commit f895cb3678cc248bd2b609536328cd71d8744ec2 against e81319b5afaa4ff807d810d56d16073de958f54f; scripts/nova_lane/run.sh adds the export and log line, tests/test_nova_lane_launcher.py adds one launched-process test, and the fragment records the outcome.",
+    "done_when": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/prompt.txt:115; baseline.log records 34 passed and head.log 35 passed with EXIT=0, while the added launched-process assertion tests the general payload and the run's red control targets the existing pre-warm pin.",
+    "goal": "read the source goal in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/prompt.txt:38; scripts/nova_lane/run.sh:130 exports none in the common payload, covering the verified callers, subject to explicit later overrides.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/manifest.md; it reports status complete, commit f895cb3678cc248bd2b609536328cd71d8744ec2, the focused gate and its logs, and both readable suite arms with zero failing IDs.",
+    "write_paths": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/manifest.md:3; the single commit changes scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and its landing fragment, all within the declared paths."
+  },
+  "justifications": {
+    "durability": "In tests/test_nova_lane_launcher.py:163-165 the exit assertion fails on launch failure, the header assertion fails if logging loses none, and the child-output assertion fails if deleting run.sh:130 lets the inherited all reach the target; each compares with a fixed expected value.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/baseline.log and head.log record complete 34-pass and 35-pass gates at the reviewed revisions with EXIT=0, but /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/negative-control-red.log mutates the pre-warm export rather than the new general-lane export.",
+    "fit": "scripts/nova_lane/run.sh:130 and :146 extend the existing run_payload export and launch-header pattern with mechanism-named settings and no forbidden source labels.",
+    "goal_fidelity": "scripts/nova_lane/run.sh:130 sets the off-switch in the shared payload used by the verified callers, although lines 132 and 162 allow a caller to replace it later.",
+    "reuse": "A search of scripts, benchmarks and nova for the off-switch and general launcher found the existing owner scripts/nova_lane/run.sh:118 and route-specific exports in scripts/h200_test_lane/run.sh:25, prewarm.sh:59 and scripts/playable_server/payload.sh:26; this commit extends the common owner.",
+    "scope_discipline": "The diff from e81319b5afaa4ff807d810d56d16073de958f54f to f895cb3678cc248bd2b609536328cd71d8744ec2 changes only the three paths allowed by /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/manifest.md:3."
+  },
+  "node": "review-of-autotune-off-gpfs-exports-f895cb3678cc",
+  "node:reviewed": "autotune-off-gpfs-exports",
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the source goal in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/prompt.txt:38; scripts/nova_lane/run.sh:130 exports none in the common payload, covering the verified callers, subject to explicit later overrides.\nVERDICT done_when: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/prompt.txt:115; baseline.log records 34 passed and head.log 35 passed with EXIT=0, while the added launched-process assertion tests the general payload and the run's red control targets the existing pre-warm pin.\nVERDICT write_paths: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/manifest.md:3; the single commit changes scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and its landing fragment, all within the declared paths.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/manifest.md; it reports status complete, commit f895cb3678cc248bd2b609536328cd71d8744ec2, the focused gate and its logs, and both readable suite arms with zero failing IDs.\nVERDICT diff: read commit f895cb3678cc248bd2b609536328cd71d8744ec2 against e81319b5afaa4ff807d810d56d16073de958f54f; scripts/nova_lane/run.sh adds the export and log line, tests/test_nova_lane_launcher.py adds one launched-process test, and the fragment records the outcome.\nCALL_SITES: scripts/nova_lane/run.sh:224, scripts/nova_lane/run.sh:331, scripts/h200_test_lane/run.sh:41, scripts/nova_lane/standing_suite.sh:173\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/nova_lane/run.sh:130 sets the off-switch in the shared payload used by the verified callers, although lines 132 and 162 allow a caller to replace it later.\nSCORE evidence: 17\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/baseline.log and head.log record complete 34-pass and 35-pass gates at the reviewed revisions with EXIT=0, but /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/negative-control-red.log mutates the pre-warm export rather than the new general-lane export.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from e81319b5afaa4ff807d810d56d16073de958f54f to f895cb3678cc248bd2b609536328cd71d8744ec2 changes only the three paths allowed by /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T084338137814-autotune-off-gpfs-exports/manifest.md:3.\nSCORE durability: 18\nJUSTIFICATION durability: In tests/test_nova_lane_launcher.py:163-165 the exit assertion fails on launch failure, the header assertion fails if logging loses none, and the child-output assertion fails if deleting run.sh:130 lets the inherited all reach the target; each compares with a fixed expected value.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/nova_lane/run.sh:130 and :146 extend the existing run_payload export and launch-header pattern with mechanism-named settings and no forbidden source labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: A search of scripts, benchmarks and nova for the off-switch and general launcher found the existing owner scripts/nova_lane/run.sh:118 and route-specific exports in scripts/h200_test_lane/run.sh:25, prewarm.sh:59 and scripts/playable_server/payload.sh:26; this commit extends the common owner.\nFINDING scripts/nova_lane/run.sh:130 non-blocking: run_payload exports none before applying --env pairs and before evaluating the caller prelude at line 162; either can change the value delivered to the target after the new log header was written, so the header alone cannot certify the final payload environment. Disposition: exempted, because The verified production callers do not supply a conflicting override: standing_suite.sh passes none, and the H200 caller's prelude explicitly exports none.",
+  "review_run_id": "r-20261103T085805559004-review-of-autotune-off-gpfs-exports-f895cb3678cc",
+  "reviewed_base_sha": "e81319b5afaa4ff807d810d56d16073de958f54f",
+  "reviewed_head_sha": "f895cb3678cc248bd2b609536328cd71d8744ec2",
+  "reviewed_run_id": "r-20261103T084338137814-autotune-off-gpfs-exports",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T09:09:48.616147+00:00",
+  "total": 111
+}

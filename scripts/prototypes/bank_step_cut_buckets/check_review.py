@@ -11,7 +11,8 @@ def main(path: Path, check: str) -> None:
     checks = {
         "capacity": (
             "capacity = current._NORMAL_CUT_BATCH_WIDTH" in source
-            and "chosen = cut[: capacity + 1]" in source
+            and "assert normal_count == capacity + 1" in source
+            and "assert int(gathered[capacity]) == overflow_cell" in source
         ),
         "finite": (
             "np.isfinite(expected_values[overflow_cell]).all()" in source

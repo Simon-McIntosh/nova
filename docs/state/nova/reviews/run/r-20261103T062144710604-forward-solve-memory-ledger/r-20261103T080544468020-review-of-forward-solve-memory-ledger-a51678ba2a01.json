@@ -1,0 +1,97 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run carries no baseline_suite or after_suite arms in its manifest, so there is no base/head pair to take a set difference over and no added failure id can be derived. The run is a measurement node that changes no product source, and the two files it adds are imported by nothing, so the zero is a measured absence of a suite arm rather than a clean base/head delta; it is recorded as zero with no ids and is not evidence of a green suite.",
+  "call_sites": [],
+  "completed_at": "2026-11-03T09:45:20.534Z",
+  "dispatched_at": "2026-11-03T09:33:46Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "benchmarks/forward_solve_memory_ledger.py",
+      "id": "f1c7a4e29b0",
+      "line": 424,
+      "severity": "blocking",
+      "text": "The ledger JSON is written once, at the last statement of main(), so a run that is stopped before the end writes nothing at all; both measurement jobs (1304001 and 1304021) were cancelled DUE TO TIME LIMIT after their present-route solve and before this line, so docs/research/forward-solve-memory-ledger/ exists on disk and is empty and git ls-tree a51678ba2 shows no ledger committed, which loses the array census, the memory_analysis, the serialized executable size and the operand-cache inventory the done-when names; the repository already solves this exact hazard in benchmarks/compile_host_memory.py, whose docstring states it persists a part receipt as each rung lands so an out-of-memory kill loses one rung rather than the run."
+    },
+    {
+      "disposition": null,
+      "file": "benchmarks/forward_solve_memory_ledger.py",
+      "id": "a2d91f3c7e4",
+      "line": 348,
+      "severity": "non-blocking",
+      "text": "The done-when asks for the HLO constant BYTES and the probe records text.count(\"constant(\"), a count of literal sites rather than their byte size, so the one quantity that would say how much of the lowering is embedded weights is recorded as a number that cannot answer it."
+    },
+    {
+      "disposition": null,
+      "file": "docs/research/forward-solve-memory-ledger.html",
+      "id": "b8e05d2a1f6",
+      "line": 64,
+      "severity": "non-blocking",
+      "text": "The seven owner rows in the section 3 table sum to 12.41 GB (9.58 + 0.68 + 0.47 + 0.69 + 0.77 + 0.21 + 0.010), not the 12.48 GB and 98.2 % the text states, which is 97.7 % of the 12.705 GB peak, and the run's own manifest records 96.25 % for the same quantity, so one headline attribution number is carried three ways in two artefacts, none of them matching the table beside it."
+    },
+    {
+      "disposition": null,
+      "file": "benchmarks/forward_solve_memory_ledger.py",
+      "id": "c3f6b0e8d17",
+      "line": 403,
+      "severity": "non-blocking",
+      "text": "The bank attempt passes plasma_to_grid (1089 x 1089) as the rows argument and plasma_to_wall[:, :1] as exterior, but SupportOperands.rows is shaped (nodes, source cells, three moments, six jet entries) as its docstring at nova/equilibrium/support_read.py:48 states, so the call cannot succeed even against a geometry that carries sample_points and the AttributeError it records at :410 is only the first of two independent mismatches; the doc's conclusion at :78 is correct on the types, but this call does not distinguish a type refusal from the probe's own operand misuse."
+    },
+    {
+      "disposition": null,
+      "file": "benchmarks/forward_solve_memory_ledger.py",
+      "id": "d9a4e17f2b8",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "jax_memory() carries a dead `try: pass / except Exception: pass` block left from an earlier draft, which reads as a silently skipped check whose condition was removed and which no reader can distinguish from one that was meant to run."
+    },
+    {
+      "disposition": null,
+      "file": "docs/research/forward-solve-memory-ledger.html",
+      "id": "e5b2c63a904",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "The done-when asks for one figure, a stacked bar of the two routes' peak memory by owner, and the section 2 and section 3 tables stand with no figure beside them anywhere in docs/research/forward-solve-memory-ledger.html; the manifest records this under outside_scope as docs/figures lying outside the fence, which is honest about the site convention but leaves the deliverable short."
+    },
+    {
+      "disposition": null,
+      "file": "benchmarks/forward_solve_memory_ledger.py",
+      "id": "f0d8c41d6a3",
+      "line": 35,
+      "severity": "non-blocking",
+      "text": "host_rss() re-derives the peak-resident helper benchmarks/compile_host_memory.py:77 already owns as _rusage_peak, and the surrounding receipt fields (executable size, HLO counts, memory analysis, one rung per subprocess) restate that module's mechanism without importing it, so a node measuring memory now has two instruments and the newer one lacks the durable part receipt the older one documents."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Searched benchmarks/, nova/, tests/, scripts/ and docs/plans/ for the new module; nothing imports benchmarks.forward_solve_memory_ledger, so it has no production call site, and the only reference to the research doc is prose in docs/plans/forward-solve-api.html:582.",
+    "diff": "Read all eight commits against 2a260648053774bfdfd6192253a7e20f5c1551af: 942b8b99f adds the probe, b935f3501 scrubs a plan-section reference from its docstring, 2220f8334 splits the phases and adds PHASE-BEGIN/END, 8173f9418 adds the missing __main__ guard, 31cd8331b/21f668221/8f7bb894a add and extend the research doc, a51678ba2 adds the NOVA_LEDGER_SKIP_PRESENT_ROUTE bypass.",
+    "done_when": "The done_when names a ledger written under docs/research/forward-solve-memory-ledger/ carrying host RSS per phase, the 30 largest live arrays, the compiled solve's memory_analysis, HLO constant bytes, serialized executable size and the operand-cache files read, plus a >=90% attribution, a bank byte comparison or a cited refusal, and one stacked-bar figure; git ls-tree a51678ba2 shows only the .html under docs/research/, the directory docs/research/forward-solve-memory-ledger/ exists on disk and is empty, and no figure exists, while the refusal (docs/research/forward-solve-memory-ledger.html:78) and the attribution table (:50) are present.",
+    "goal": "Read the source goal in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T062144710604-forward-solve-memory-ledger/brief.md (done-when items 1-3); the landed commit adds benchmarks/forward_solve_memory_ledger.py and docs/research/forward-solve-memory-ledger.html, which measure the DIII-D producer phase by phase on two rungs and argue the memory is the per-request solve program, but the ledger artifact the goal names was never written.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T062144710604-forward-solve-memory-ledger/manifest.md; it records status complete, eight commits 942b8b99f..a51678ba2, six retry_failures, the literal probe command, and its checkpoint names the gap that no completed job wrote the array census or device memory_stats().",
+    "write_paths": "The declared write paths are benchmarks/forward_solve_memory_ledger.py, docs/research/forward-solve-memory-ledger.html and docs/research/forward-solve-memory-ledger; git diff --stat 2a26064..a51678b reports exactly the first two, 559 insertions and no product source, so the diff is inside its fence."
+  },
+  "notes": {
+    "measurement_verification": "Re-read the run's own evidence rather than the manifest's summary. logs/ledger-h200-20261103T070147Z.log ends with PHASE-END cpu:present-route-solve seconds=1163.123 rss_before=2357751808 rss_after=12006780928 peak=12705509376 followed by `slurmstepd: error: *** JOB 1304001 ... CANCELLED ... DUE TO TIME LIMIT ***`, which matches the doc's 12.007 GB after / 12.705 GB peak / 1163.1 s exactly, and logs/ledger-gpu-20261103T072220Z.log matches section 6's 21.990 / 22.277 / 687.9. The headline numbers are real measurements at revision 8173f9418 on the nodes and jobs the doc names.",
+    "no_negative_control_run": "No mutation was applied to the node; this is a reading review and the reading bound held.",
+    "review_scope": "Read the run's brief, manifest, classification and eight-commit diff against 2a26064, the run's own gate logs under <run>/logs/, and the one owner read the reuse bound allows: benchmarks/compile_host_memory.py and benchmarks/h200_solve_stage_profile.py."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261103T080544468020-review-of-forward-solve-memory-ledger-a51678ba2a01",
+  "reviewed_base_sha": "2a260648053774bfdfd6192253a7e20f5c1551af",
+  "reviewed_head_sha": "a51678ba2a013ad537d88f81b41d3071f1c75a7f",
+  "reviewed_run_id": "r-20261103T062144710604-forward-solve-memory-ledger",
+  "rubric": "text",
+  "scores": {
+    "durability": 3,
+    "evidence": 11,
+    "fit": 14,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T10:22:34.045766+00:00",
+  "total": 66
+}

@@ -48,4 +48,10 @@ pin still names <code>runtime-7b315420b55b91bffb05</code> at source revision
 was removed: the old pin remains live, and the user-cache paths lie outside
 this worker's write grant. The pre-warm input and allocation repair is required
 before a fresh pin and lane dry-run verification can land.</p>
+<p>A dedicated pre-warm worker is running H200 job <code>1304470</code> with a
+single fixture-floor row and local oracle storage. That row has a completed
+receipt (status 0, 34 compile seconds, 651 hits and 3,784 misses). The job is
+still in its compile-identity row; the published pin remains old. Its final
+receipt, zero-autotune count and lane resolver must be read before changing
+this blocked result to a publication claim.</p>
 </section>

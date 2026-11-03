@@ -1547,11 +1547,11 @@ def solve_batch(
         jnp.full((lanes,), jnp.inf, dtype),
         jnp.zeros(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
-        jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
-        jnp.full((lanes, max_steps), jnp.nan, dtype),
         jnp.ones(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
+        jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
+        jnp.full((lanes, max_steps), jnp.nan, dtype),
     )
 
     def keep_going(carried):

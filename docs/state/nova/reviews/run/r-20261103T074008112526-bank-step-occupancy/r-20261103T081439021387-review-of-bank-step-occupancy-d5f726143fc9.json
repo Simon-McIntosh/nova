@@ -22,6 +22,13 @@
     "bucketed_timeline": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy/1304046-bucketed-timeline.log",
     "suite_arm_basis": "Neither suite arm is recorded in the source manifest; zero added failures is an unobserved count, not a paired-suite pass."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-03T08:40:24.115192+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html",

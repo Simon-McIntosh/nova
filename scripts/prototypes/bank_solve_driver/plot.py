@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from math import ceil
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -68,11 +69,13 @@ def main():
     walls = [wall / scale for wall in walls]
     colours = ["#929292", "#286eae", "#286eae"]
     for y, value, colour in zip((2, 1, 0), walls, colours, strict=True):
-        ax.hlines(y, 0, value, color=colour, linewidth=3.0, zorder=2)
+        ax.hlines(y, 0, value, color=colour, linewidth=2.6 if y == 2 else 3.0, zorder=2)
         ax.plot(value, y, "o", color=colour, markersize=10, zorder=3)
     ax.set_yticks((2, 1, 0), names)
-    ax.set_xlim(0, max(walls) * 1.12)
-    ax.set_xticks([max(walls) * index / 4 for index in range(5)])
+    tick = 0.5 if max(walls) <= 2 else float(ceil(max(walls) / 4))
+    upper = tick * ceil(max(walls) / tick)
+    ax.set_xlim(0, upper * 1.06)
+    ax.set_xticks([tick * index for index in range(ceil(upper / tick) + 1)])
     ax.xaxis.set_major_formatter(StrMethodFormatter("{x:.1f}"))
     ax.set_ylim(-0.5, 2.5)
     ax.set_xlabel(f"Converged solve wall per slice [{unit}]")

@@ -2639,9 +2639,14 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
     display_values = restored.get("display_map")
     if display_values is not None:
         display_values = dict(display_values)
+        for name in ("saddle_rz_m", "lattice_saddle_rz_m"):
+            display_values[name] = tuple(
+                _checkpoint_float(value) for value in display_values[name]
+            )
+        display_values["conductor_response_shape"] = tuple(
+            display_values["conductor_response_shape"]
+        )
         for name in (
-            "saddle_rz_m",
-            "lattice_saddle_rz_m",
             "separatrix_symmetric_sup_distance_m",
             "separatrix_symmetric_rms_distance_m",
             "separatrix_saddle_to_label_x_m",
@@ -2653,9 +2658,6 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
             "conductor_response_build_seconds",
         ):
             display_values[name] = _checkpoint_float(display_values[name])
-        display_values["conductor_response_shape"] = tuple(
-            display_values["conductor_response_shape"]
-        )
         restored["display_map"] = DisplayMapRecord(**display_values)
     return FrameResult(**restored)
 

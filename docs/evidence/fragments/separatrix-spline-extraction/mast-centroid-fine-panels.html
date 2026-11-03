@@ -30,6 +30,15 @@ geometry and the target points, never on the state.</p>
 </tbody>
 </table>
 
+<p id="mast-centroid-fine-panels-cost-block">The cost is real compute rather than per-call launch overhead, so a bigger
+block cannot buy it back. Feeding the same kernel 64, 256 and 1024 display
+points costs 6.08 s, 18.70 s and 82.99 s: 0.095, 0.073 and 0.081 s per point,
+flat within a fifth of the mean. Nothing amortises, because each point
+contributes its own pair of sums over the 938 stored conductor sections and the
+1089 rectangular plasma cells. The 78195-point map is therefore about 6300 s of
+single-core work however it is bundled, and only parallelism or a device placed
+across the point axis reduces it.
+
 <p id="mast-centroid-fine-panels-fix">The producer therefore builds each
 coupling once per lane, exactly and with no interpolation, over the fixed
 display grid and the lattice nodes, splitting the work across ten spawned

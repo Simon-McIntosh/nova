@@ -1,14 +1,13 @@
 """Attribute the present-route forward-solve producer's memory to named owners.
 
 Runs the DIII-D forward-gs producer through one frame's profile build and one
-solve on the present route, recording host RSS by phase, the largest live
-arrays with their owning attributes, the compiled map program's memory
-analysis, and the operand-cache files read. It then attempts the per-machine
-operator bank for the same shape and records the bank's bytes beside the
-present route, or the refusal that stops the attempt. Every number is
-labelled with the rung and device it was measured on.
+solve on the present route. Each phase prints a PHASE-BEGIN line and flushes it
+before the work starts, so a phase that dies silently is still named, then a
+PHASE-END line with its wall, host RSS before and after, and peak RSS. The
+solve is split into trace-and-lower, compile, first execute and warm execute so
+memory is attributed to the stage that holds it rather than to "the solve".
 
-The ledger is written as JSON and a Markdown table under the output directory.
+Every number carries the rung and device it was measured on.
 """
 
 from __future__ import annotations
@@ -42,28 +41,31 @@ def host_rss() -> dict[str, int]:
 def jax_memory() -> dict:
     try:
         import jax
-    except Exception as error:  # pragma: no cover
+    except Exception as error:
         return {"import": f"unavailable: {type(error).__name__}: {error}"}
     memory: dict = {"backend": jax.default_backend()}
     memory["devices"] = [str(device) for device in jax.local_devices()]
+    try:
+        pass
+    except Exception:
+        pass
     try:
         stats = jax.local_devices()[0].memory_stats()
         memory["device_memory_stats"] = (
             None if stats is None else {k: int(v) for k, v in stats.items()}
         )
-    except Exception as error:  # pragma: no cover - backend dependent
+    except Exception as error:
         memory["device_memory_stats"] = f"unavailable: {type(error).__name__}: {error}"
     try:
         live = jax.live_arrays()
         memory["live_array_bytes"] = int(sum(a.size * a.dtype.itemsize for a in live))
         memory["live_array_count"] = len(live)
-    except Exception as error:  # pragma: no cover
+    except Exception as error:
         memory["live_array_bytes"] = f"unavailable: {type(error).__name__}: {error}"
     return memory
 
 
 def _owner_names(target: object) -> list[str]:
-    """Return candidate ``object.attribute`` names that reference ``target``."""
     names: list[str] = []
     for referrer in gc.get_referrers(target):
         attributes = getattr(referrer, "__dict__", None)
@@ -84,8 +86,7 @@ def _owner_names(target: object) -> list[str]:
     return names
 
 
-def largest_arrays(limit: int = 30, floor: int = 1 << 1) -> dict:
-    """Return the largest live arrays with shape, dtype, bytes and owners."""
+def largest_arrays(limit: int = 0, floor: int = 1 << 1) -> dict:
     import jax
     import numpy as np
 
@@ -115,75 +116,50 @@ def largest_arrays(limit: int = 30, floor: int = 1 << 1) -> dict:
     }
 
 
-def compile_memory(profile, seed) -> dict:
-    """Record the map program's memory analysis, constant bytes and size."""
-    import jax.numpy as jnp
-
-    record: dict = {}
-    program = jax.jit(lambda flux: profile.flux_map(jnp.asarray(flux)))
-    try:
-        compiled = program.lower(jnp.asarray(seed)).compile()
-    except Exception as error:
-        return {"compiled": f"unavailable: {type(error).__name__}: {error}"}
-    record["compiled"] = True
-    try:
-        analysis = compiled.memory_analysis()
-        record["memory_analysis"] = {
-            name: int(getattr(analysis, name))
-            for name in dir(analysis)
-            if not name.startswith("_")
-            and isinstance(getattr(analysis, name), int)
-        }
-    except Exception as error:
-        record["memory_analysis"] = f"unavailable: {error}"
-    try:
-        text = compiled.as_text()
-        record["hlo_text_bytes"] = len(text.encode())
-        record["hlo_constant_literals"] = text.count("constant(")
-    except Exception as error:
-        record["as_text"] = f"unavailable: {error}"
-    for name in ("serialized_executable", "as_bytes"):
-        try:
-            payload = getattr(compiled, name)
-            payload = payload() if callable(payload) else payload
-            record["serialized_executable_bytes"] = len(bytes(payload))
-            break
-        except Exception:
-            continue
-    return record
+def begin(state: dict, name: str) -> dict:
+    marker = {"phase": name, "rss_before": host_rss(), "jax_before": jax_memory()}
+    print(f"PHASE-BEGIN {name} rss={marker['rss_before'].get('VmRSS')}", flush=True)
+    state["inflight"] = marker
+    return marker
 
 
-def cache_inventory(root: Path) -> dict:
-    rows = []
-    if root and root.exists():
-        for path in root.rglob("*"):
-            if path.is_file():
-                stat = path.stat()
-                rows.append(
-                    {
-                        "path": str(path),
-                        "bytes": stat.st_size,
-                        "mtime": stat.st_mtime,
-                    }
-                )
-    rows.sort(key=lambda row: row["bytes"], reverse=True)
-    return {
-        "root": str(root),
-        "exists": bool(root and root.exists()),
-        "file_count": len(rows),
-        "total_bytes": sum(row["bytes"] for row in rows),
-        "largest": rows[:50],
+def end(state: dict, name: str, started: float, extra: dict | None = None) -> None:
+    row = {
+        "phase": name,
+        "seconds": perf_counter() - started,
+        "rss_before": state.get("inflight", {}).get("rss_before"),
+        "rss_after": host_rss(),
+        "jax": jax_memory(),
     }
-
-
-def import_peak(python: str, module: str, env: dict) -> dict:
-    """Peak RSS of a fresh interpreter that imports ``module`` and nothing else."""
-    code = (
-        "import json, resource\n"
-        f"import {module}\n"
-        "print(json.dumps({'ru_maxrss_bytes': "
-        "resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024}))\n"
+    if extra:
+        row.update(extra)
+    state["phases"].append(row)
+    print(
+        f"PHASE-END {name} seconds={row['seconds']:.3f} "
+        f"rss_before={row['rss_before'].get('VmRSS') if row['rss_before'] else None} "
+        f"rss_after={row['rss_after'].get('VmRSS')} "
+        f"peak={row['rss_after'].get('ru_maxrss')}",
+        flush=True,
     )
+
+
+def phase(state: dict, name: str):
+    """Context manager measuring one phase."""
+
+    class _Phase:
+        def __enter__(self):
+            self.started = perf_counter()
+            self.marker = begin(state, name)
+            return self
+
+        def __exit__(self, kind, value, trace):
+            end(state, name, self.started)
+            return False
+
+    return _Phase()
+
+
+def import_peak(python: str, code: str, env: dict) -> dict:
     started = perf_counter()
     result = subprocess.run(
         [python, "-c", code], capture_output=True, text=True, env=env, cwd=str(ROOT)
@@ -205,14 +181,14 @@ def import_peak(python: str, module: str, env: dict) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=Path, default=None)
     parser.add_argument("--machine-artifact-cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--frame-limit", type=int, default=1)
-    parser.add_argument("--configurable", action="store_true")
+    parser.add_argument("--arm", default="gpu", choices=("cpu", "gpu", "both"))
+    parser.add_argument("--array-limit", type=int, default=30)
     arguments = parser.parse_args()
     arguments.output.mkdir(parents=True, exist_ok=True)
     state: dict = {
+        "arm": arguments.arm,
         "phases": [],
         "arrays": {},
         "banner": {
@@ -221,136 +197,136 @@ def main() -> None:
             ).strip(),
             "tree": str(ROOT),
             "cwd": str(Path.cwd().resolve()),
-            "python": os.environ.get("NOVA_LEDGER_PYTHON", sys.executable),
+            "python": sys.executable,
             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
             "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
             "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.uname().nodename,
         },
     }
+    print(f"BANNER {json.dumps(state['banner'], sort_keys=True)}", flush=True)
+    if arguments.arm == "both":
+        child_env = dict(os.environ)
+        child_env["JAX_PLATFORMS"] = "cpu"
+        started_child = perf_counter()
+        child = subprocess.run(
+            [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "--machine-artifact-cache",
+                str(arguments.machine_artifact_cache),
+                "--output",
+                str(arguments.output),
+                "--arm",
+                "cpu",
+            ],
+            env=child_env,
+            cwd=str(ROOT),
+        )
+        print(
+            f"CPU_ARM returncode={child.returncode} "
+            f"seconds={perf_counter() - started_child}",
+            flush=True,
+        )
+        arguments.arm = "gpu"
 
     from nova.jax.config import configure_dtypes
 
-    started = perf_counter()
-    configure_dtypes()
-    import jax
+    with phase(state, f"{arguments.arm}:import-nova-jax"):
+        configure_dtypes()
+        import jax
 
-    assert jax.config.jax_enable_x64 is True
-    state["banner"]["x64"] = True
-    mark(state, "python-import-nova-jax", started)
+        assert jax.config.jax_enable_x64 is True
+    state["x64"] = True
 
-    import benchmarks.diiid_forward_gs_match as producer
+    with phase(state, f"{arguments.arm}:producer-import"):
+        import benchmarks.diiid_forward_gs_match as producer
 
-    state["banner"]["producer_module"] = producer.__file__
-    state["import_peak"] = {
-        "bare_python": import_peak(
-            state["banner"]["python"], "benchmarks.diiid_forward_gs_match",
-            dict(os.environ),
-        ),
-    }
-    state["banner"]["module_cwd"] = str(Path.cwd().resolve())
+    if arguments.arm == "gpu":
+        with phase(state, f"{arguments.arm}:spawn-pool-worker-rss"):
+            state["spawn_pool"] = {
+                "bare_import": import_peak(
+                    sys.executable,
+                    "import json,resource\n"
+                    "import benchmarks.diiid_forward_gs_match\n"
+                    "print(json.dumps({'ru_maxrss_bytes': "
+                    "resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024}))\n",
+                    dict(os.environ),
+                )
+            }
 
-    # Machine description and frame selection.
-    started = perf_counter()
-    data = arguments.data or producer.DEFAULT_DATA
-    paths = sorted(Path(data).glob("*.parquet"))
-    if not paths:
-        raise RuntimeError(f"no parquet rows under {data}")
-    row = producer._read(
-        paths[0],
-        producer._LABEL_COLUMNS
-        + producer._GEOMETRY_COLUMNS
-        + producer._CURRENT_COLUMNS
-        + producer._PLASMA_CURRENT_COLUMNS,
-    )
-    frame = producer._eligible_frame(row)
-    if frame is None:
-        raise RuntimeError(f"{paths[0].name} carries no eligible diverted frame")
-    machine = producer.dataset_machine_description(
-        row, source_row=str(row.get("_source_path", "corpus row"))
-    )
-    mark(
-        state,
-        "machine-description",
-        started,
-        {"row": paths[0].name, "frame": frame, "physical": type(machine.physical).__name__},
-    )
+    with phase(state, f"{arguments.arm}:machine-description"):
+        data = producer.DEFAULT_DATA
+        paths = sorted(Path(data).glob("*.parquet"))
+        if not paths:
+            raise RuntimeError(f"no parquet rows under {data}")
+        row = producer._read(
+            paths[0],
+            producer._LABEL_COLUMNS
+            + producer._GEOMETRY_COLUMNS
+            + producer._CURRENT_COLUMNS
+            + producer._PLASMA_CURRENT_COLUMNS,
+        )
+        frame = producer._eligible_frame(row)
+        if frame is None:
+            raise RuntimeError(f"{paths[0].name} carries no eligible diverted frame")
+        machine = producer.dataset_machine_description(
+            row, source_row=str(row.get("_source_path", "corpus row"))
+        )
+        state["row"] = {"file": paths[0].name, "frame": frame}
 
-    # Coupling operators: the present route's operand build.
-    started = perf_counter()
-    radius_full, height_full = producer.canonical_axes(row)
-    stride = producer.REGISTERED_GRID_STRIDE
-    radius = radius_full[::stride]
-    height = height_full[::stride]
-    couplings = producer._couplings(
-        row,
-        machine,
-        radius,
-        height,
-        None,
-        arguments.machine_artifact_cache,
-        producer.DEFAULT_MACHINE_ARTIFACT_DIGEST,
-    )
-    names, wall, inside, source_to_grid, source_to_wall, plasma_to_grid, plasma_to_wall = (
-        couplings[0],
-        couplings[1],
-        couplings[2],
-        couplings[3],
-        couplings[4],
-        couplings[5],
-        couplings[6],
-    )
-    operand_bytes = {
-        "source_to_grid": source_to_grid.nbytes,
-        "source_to_wall": source_to_wall.nbytes,
-        "plasma_to_grid": plasma_to_grid.nbytes,
-        "plasma_to_wall": plasma_to_wall.nbytes,
-        "wall_coordinate": wall.nbytes,
-        "inside_material": inside.nbytes,
-    }
-    mark(
-        state,
-        "operand-build",
-        started,
-        {
+    with phase(state, f"{arguments.arm}:operand-build"):
+        radius_full, height_full = producer.canonical_axes(row)
+        stride = producer.REGISTERED_GRID_STRIDE
+        radius = radius_full[::stride]
+        height = height_full[::stride]
+        couplings = producer._couplings(
+            row,
+            machine,
+            radius,
+            height,
+            None,
+            arguments.machine_artifact_cache,
+            producer.DEFAULT_MACHINE_ARTIFACT_DIGEST,
+        )
+        names, wall, inside = couplings[0], couplings[1], couplings[2]
+        source_to_grid, source_to_wall = couplings[3], couplings[4]
+        plasma_to_grid, plasma_to_wall = couplings[5], couplings[6]
+        operand_bytes = {
+            "source_to_grid": int(source_to_grid.nbytes),
+            "source_to_wall": int(source_to_wall.nbytes),
+            "plasma_to_grid": int(plasma_to_grid.nbytes),
+            "plasma_to_wall": int(plasma_to_wall.nbytes),
+            "wall_coordinate": int(wall.nbytes),
+            "inside_material": int(inside.nbytes),
+        }
+        state["operands"] = {
             "grid_nodes": int(plasma_to_grid.shape[0]),
             "wall_rows": int(plasma_to_wall.shape[0]),
             "conductor_sources": int(source_to_grid.shape[1]),
-            "operand_bytes": operand_bytes,
-            "operand_total_bytes": sum(operand_bytes.values()),
-        },
-    )
-    state["arrays"]["operand-build"] = largest_arrays()
-    state["operand_cache"] = cache_inventory(arguments.machine_artifact_cache)
+            "bytes": operand_bytes,
+            "total_bytes": sum(operand_bytes.values()),
+        }
 
-    # Profile build.
-    started = perf_counter()
-    built = producer._build_profile(
-        row,
-        frame,
-        machine_artifact_cache=arguments.machine_artifact_cache,
-        machine_artifact_digest=producer.DEFAULT_MACHINE_ARTIFACT_DIGEST,
-    )
-    mark(
-        state,
-        "profile-build",
-        started,
-        {
-            "lattice_nodes": int(built.label.size),
-            "lattice_shape": list(built.label.shape),
-            "seed_bytes": int(built.seed.nbytes),
-        },
-    )
-    state["arrays"]["profile-build"] = largest_arrays()
+    with phase(state, f"{arguments.arm}:profile-build"):
+        built = producer._build_profile(
+            row,
+            frame,
+            machine_artifact_cache=arguments.machine_artifact_cache,
+            machine_artifact_digest=producer.DEFAULT_MACHINE_ARTIFACT_DIGEST,
+        )
+    state["profile"] = {
+        "lattice_nodes": int(built.label.size),
+        "lattice_shape": list(built.label.shape),
+        "seed_bytes": int(built.seed.nbytes),
+    }
+    state["arrays"]["profile-build"] = largest_arrays(arguments.array_limit)
 
-    # One solve on the present route, with the compiled map program measured.
-    profile = built.profile
-    seed = built.seed
-    target = float(producer._target_current(row, float(row["efit_times"][frame])))
-    from nova.equilibrium.solve_request import ExplicitSolveSeed
-
+    profile, seed = built.profile, built.seed
     current = producer._source_current(
         row, machine.physical, names, float(row["efit_times"][frame])
     )
+    target = float(producer._target_current(row, float(row["efit_times"][frame])))
     request = producer._registered_solve_request(
         profile,
         seed,
@@ -358,68 +334,94 @@ def main() -> None:
         target,
         carrier_identity=f"ledger:{paths[0].name}:{frame}",
     )
-    started = perf_counter()
-    receipt = profile.solve(request)
-    receipt.equilibrium.flux.block_until_ready()
-    mark(
-        state,
-        "compile-and-first-solve",
-        started,
-        {
+
+    map_program = jax.jit(lambda flux: profile.flux_map(
+        producer.jnp.asarray(current)
+    )(flux))
+
+    with phase(state, f"{arguments.arm}:solve-trace-and-lower"):
+        lowered = map_program.lower(producer.jnp.asarray(seed))
+        text = lowered.as_text()
+        state["hlo"] = {
+            "text_bytes": len(text.encode()),
+            "text_lines": text.count("\n"),
+            "constant_literals": text.count("constant("),
+        }
+        print(f"HLO_BYTES {len(text.encode())}", flush=True)
+
+    with phase(state, f"{arguments.arm}:solve-compile"):
+        compiled = lowered.compile()
+        try:
+            analysis = compiled.memory_analysis()
+            state["memory_analysis"] = {
+                name: int(getattr(analysis, name))
+                for name in dir(analysis)
+                if not name.startswith("_")
+                and isinstance(getattr(analysis, name), int)
+            }
+        except Exception as error:
+            state["memory_analysis"] = f"unavailable: {error}"
+        for name in ("serialized_executable", "as_bytes"):
+            try:
+                payload = getattr(compiled, name)
+                payload = payload() if callable(payload) else payload
+                state["serialized_executable_bytes"] = len(bytes(payload))
+                break
+            except Exception:
+                continue
+        if "serialized_executable_bytes" not in state:
+            state["serialized_executable_bytes"] = "unavailable"
+
+    with phase(state, f"{arguments.arm}:solve-first-execute"):
+        first = compiled(producer.jnp.asarray(seed))
+        jax.tree_util.tree_map(lambda a: a.block_until_ready(), first)
+
+    with phase(state, f"{arguments.arm}:solve-warm-execute"):
+        warm = compiled(producer.jnp.asarray(seed))
+        jax.tree_util.tree_map(lambda a: a.block_until_ready(), warm)
+    state["arrays"]["after-warm-execute"] = largest_arrays(arguments.array_limit)
+
+    with phase(state, f"{arguments.arm}:present-route-solve"):
+        receipt = profile.solve(request)
+        receipt.equilibrium.flux.block_until_ready()
+        state["solve"] = {
             "qualified": bool(receipt.qualified),
             "residual": float(receipt.equilibrium.fixed_point.residual),
-            "newton_steps": int(getattr(receipt.equilibrium.fixed_point, "active_set_iterations", -1)),
-        },
-    )
-    state["program"] = compile_memory(profile, seed)
-    state["arrays"]["solved"] = largest_arrays()
+            "newton_steps": int(
+                getattr(receipt.equilibrium.fixed_point, "active_set_iterations", -1)
+            ),
+        }
+    state["arrays"]["solved"] = largest_arrays(arguments.array_limit)
 
-    # The per-machine operator bank for the same shape, or its refusal.
     from nova.equilibrium import support_read
 
-    attempt: dict = {"builder": "support_read.SupportOperands.from_rows"}
-    try:
-        geometry = profile.operator.grid
-        operands = support_read.SupportOperands.from_rows(
-            geometry, plasma_to_grid, plasma_to_wall[:, :1]
-        )
-        attempt["result"] = {"built": True, "bucket": operands.bucket}
-    except Exception as error:
-        attempt["result"] = {
-            "built": False,
-            "exception": type(error).__name__,
-            "message": str(error),
-        }
-    state["bank_attempt"] = attempt
+    with phase(state, f"{arguments.arm}:bank-attempt"):
+        attempt: dict = {"builder": "support_read.SupportOperands.from_rows"}
+        try:
+            geometry = profile.operator.grid
+            bank = support_read.SupportOperands.from_rows(
+                geometry, plasma_to_grid, plasma_to_wall[:, :1], bucket=len(plasma_to_grid)
+            )
+            attempt["result"] = {
+                "built": True,
+                "bucket": bank.bucket,
+                "rows_bytes": int(bank.rows.size * bank.rows.dtype.itemsize),
+                "exterior_bytes": int(bank.exterior.size * bank.exterior.dtype.itemsize),
+            }
+        except Exception as error:
+            attempt["result"] = {
+                "built": False,
+                "exception": type(error).__name__,
+                "message": str(error)[:800],
+            }
+        state["bank_attempt"] = attempt
 
-    peak = max(row["rss"]["ru_maxrss"] for row in state["phases"])
-    state["peak_rss"] = peak
-    state["peak_rss_phase"] = max(
-        state["phases"], key=lambda row: row["rss"]["ru_maxrss"]
-    )["phase"]
-    (arguments.output / "ledger.json").write_text(
+    phases = state["phases"]
+    peak_row = max(phases, key=lambda row: row["rss_after"].get("ru_maxrss", 0))
+    state["peak_rss"] = peak_row["phase"]
+    state["peak_rss_bytes"] = peak_row["rss_after"].get("ru_maxrss")
+    (arguments.output / f"ledger-{arguments.arm}.json").write_text(
         json.dumps(state, indent=2, sort_keys=True, default=str) + "\n"
     )
-    print(f"LEDGER {arguments.output / 'ledger.json'}", flush=True)
-    print(f"PEAK {peak}", flush=True)
-
-
-def mark(state: dict, name: str, started: float, extra: dict | None = None) -> None:
-    row = {
-        "phase": name,
-        "seconds": perf_counter() - started,
-        "rss": host_rss(),
-        "jax": jax_memory(),
-    }
-    if extra:
-        row.update(extra)
-    state["phases"].append(row)
-    print(
-        f"PHASE {name} seconds={row['seconds']:.3f} "
-        f"rss={row['rss'].get('VmRSS')} peak={row['rss'].get('ru_maxrss')}",
-        flush=True,
-    )
-
-
-if __name__ == "__main__":
-    main()
+    print(f"LEDGER {arguments.output / f'ledger-{arguments.arm}.json'}", flush=True)
+    print(f"PEAK {state['peak_rss']} {state['peak_rss_bytes']}", flush=True)

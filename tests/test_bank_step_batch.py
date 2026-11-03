@@ -215,8 +215,10 @@ def test_batched_solve_reaches_the_single_solve_flux(built):
             f"lane {lane} residual below the bound: batched {batched_residual:.3e} "
             f"solo {solo_residual:.3e}"
         )
-        span = float(
-            batched_lane.reading.boundary_flux - batched_lane.reading.axis_flux
+        # The span is signed by the convention (this COCOS gives a negative
+        # span); the budget is a magnitude.
+        span = abs(
+            float(batched_lane.reading.boundary_flux - batched_lane.reading.axis_flux)
         )
         spans.append(span)
         flux_gap = float(np.max(np.abs(flux_everywhere(one) - flux_everywhere(alone))))

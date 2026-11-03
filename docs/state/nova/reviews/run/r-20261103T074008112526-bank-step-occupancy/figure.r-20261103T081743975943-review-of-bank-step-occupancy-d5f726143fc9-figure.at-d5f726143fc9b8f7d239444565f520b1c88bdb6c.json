@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "busy and wall values are in the adjacent table",
       "recorded_at": "2026-11-03T08:43:06.804371+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "layout only; no information lost",
+      "recorded_at": "2026-11-03T08:43:13.758677+00:00"
     }
   },
   "findings": [

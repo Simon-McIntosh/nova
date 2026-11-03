@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T08:22:41Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_occupancy/plot.py",
+      "id": "f2191fe81ab",
+      "line": 80,
+      "severity": "non-blocking",
+      "summary": "The grey segment is labelled 'GPU idle' but is computed as wall_ms minus gpu_busy_ms (plot.py:64-65), which is idle time plus profiler overhead; the fragment's own table puts the profiler overhead at about 4.3 ms (base) and 6.2 ms (bucketed), so the legend overstates GPU idleness by that much in each arm."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_occupancy/plot.py",
+      "id": "f299c55a23e",
+      "line": 82,
+      "severity": "non-blocking",
+      "summary": "Only the total wall is labelled; neither busy segment carries its value (40.02 ms of 48.01, 25.31 ms of 35.35), so the busy fraction the figure exists to show can only be estimated by eye rather than read."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_occupancy/plot.py",
+      "id": "fe46b09e3ea",
+      "line": 70,
+      "severity": "non-blocking",
+      "summary": "Two bars at height 0.44 on a 14 x 7.2 in canvas fill a small share of the figure, leaving most of the area empty and thinning the visual payload."
+    }
+  ],
+  "notes": "Reviewed the rendered PNG image-0.png for docs/figures/sub-millisecond-forward-path/bank-step-occupancy/occupancy.svg, drawn by scripts/prototypes/bank_step_occupancy/plot.py at the reviewed head. The bars read 48.01 ms (Base) and 35.35 ms (Bucketed), matching the profiled trace walls in the caption (48.006 and 35.346 ms) rather than the unprofiled medians the fragment headline quotes (43.736 and 29.185 ms); the caption states that distinction, so the picture is internally consistent and a caption that only repeated a title is not the case here. No finding blocks.\nRUBRIC legibility: Pass: Both arms, the green/grey split, the axis label and the two wall values (48.01 ms, 35.35 ms) are readable at a glance.\nRUBRIC data_ink: Pass: The two bars carry the visual weight; no gradients, scatter or decorative fills are present.\nRUBRIC decoration: Pass: White background, a bottom spine only, no gridlines and a single frameless figure legend above the bars.\nRUBRIC contrast: Pass: Axis label, tick labels, category labels, legend text and value labels all sit clearly against the white background.\nRUBRIC table_form: Pass: The image shows the busy/idle partition of two runs as stacked bars, a plotted relationship; the numbers also exist in the fragment table, but the partition is not itself a table.\nRUBRIC label_collision: Pass: No label is clipped at the canvas edge, and the category, value, tick and legend labels do not overlap each other or the bars.",
+  "project": "nova",
+  "review_run_id": "r-20261103T081743975943-review-of-bank-step-occupancy-d5f726143fc9-figure",
+  "reviewed_base_sha": "12f122cd26af34934fa7a5f70c9919a3aa780021",
+  "reviewed_head_sha": "d5f726143fc9b8f7d239444565f520b1c88bdb6c",
+  "reviewed_run_id": "r-20261103T074008112526-bank-step-occupancy",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass: Axis label, tick labels, category labels, legend text and value labels all sit clearly against the white background.",
+    "data_ink": "Pass: The two bars carry the visual weight; no gradients, scatter or decorative fills are present.",
+    "decoration": "Pass: White background, a bottom spine only, no gridlines and a single frameless figure legend above the bars.",
+    "label_collision": "Pass: No label is clipped at the canvas edge, and the category, value, tick and legend labels do not overlap each other or the bars.",
+    "legibility": "Pass: Both arms, the green/grey split, the axis label and the two wall values (48.01 ms, 35.35 ms) are readable at a glance.",
+    "table_form": "Pass: The image shows the busy/idle partition of two runs as stacked bars, a plotted relationship; the numbers also exist in the fragment table, but the partition is not itself a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T08:30:00Z",
+  "total": null
+}

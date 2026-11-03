@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "arm.py:52 fails if x64 is disabled; arm.py:53 fails on a non-GPU backend; neither guards occupancy arithmetic.",
+    "arm.py:138 fails when a fresh-read solved-equation residual exceeds 1e-10 after at most 20 iterations, so a step regression that prevents convergence can redden it; the final residual is computed independently through read and step_residual at lines 130-131.",
+    "timeline.py:19 fails if the arm receipt has zero or multiple TRACE rows, line 35 fails with multiple whole-step annotations, and line 58 fails if the trace has no GPU kernels; none checks the numerical busy or idle calculation.",
+    "plot.py:17 fails unless the timeline log has exactly one TIMELINE row, lines 43-48 fail on clipped or overlapping included text, and line 66 fails if reported busy exceeds reported wall; none checks that the bars match an independent GPU trace.",
+    "No added assertion compares a returned value with the same input value supplied to the code under test."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-03T08:27:10Z",
+  "dispatched_at": "2026-11-03T08:17:13Z",
+  "evidence": {
+    "after_suite": null,
+    "allocation_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy/allocation-1304046.log",
+    "base_arm": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy/1304046-base-h200.log",
+    "base_timeline": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy/1304046-base-timeline.log",
+    "baseline_suite": null,
+    "bucketed_arm": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy/1304046-bucketed-h200.log",
+    "bucketed_timeline": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy/1304046-bucketed-timeline.log",
+    "suite_arm_basis": "Neither suite arm is recorded in the source manifest; zero added failures is an unobserved count, not a paired-suite pass."
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html",
+      "id": "f07ef9401ae",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "The above-0.8 device-bound classification uses profiled GPU time divided by a different unprofiled call's wall; the directly paired bucketed fraction is 0.716, so the threshold conclusion is an estimate rather than an observed ratio. Suggested disposition: exempted because both fractions are printed and device activity still dominates the paired call."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_occupancy/timeline.py",
+      "id": "f602af915ef",
+      "line": 59,
+      "severity": "non-blocking",
+      "text": "No regression test would fail if the interval-union or idle-gap calculation changes incorrectly; the current assertions only require an arm trace and at least one kernel. Suggested disposition: exempted for this one-off measurement script while retaining its raw trace receipts."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_occupancy/plot.py",
+      "id": "f59681099cc",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "check_text reimplements the figure text clipping and overlap guard in scripts/prototypes/bank_step_booking/plot.py:30-46 instead of extending its owner. Suggested disposition: exempted for this self-contained prototype plot."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "the seven commits from 2ce05be0 through d5f72614 add an arm runner, trace parser, plot, SVG, and evidence fragment; docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:17-18 distinguishes estimated occupancy from paired trace occupancy.",
+    "done_when": "brief.txt:8-17 requires normal wall, trace busy time and gaps, jit and sync counts, and fresh residuals; 1304046-base-h200.log and 1304046-bucketed-h200.log end EXIT=0 and report 43.736/29.185 ms with residuals below 1e-10.",
+    "goal": "brief.txt:1-18 requests an unsynchronised H200 occupancy comparison; docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:3-47 records both arms, their traces, and the device-work verdict.",
+    "manifest": "source manifest.md:5-24 declares complete, seven commits, four arm/timeline logs, no baseline_suite or after_suite, and 40.021/25.308 ms device activity; the named receipts exist and end EXIT=0.",
+    "write_paths": "source manifest.md:3 grants the occupancy prototype directory, evidence fragment, and figure directory; git diff 12f122cd..d5f72614 changes only those six paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_step_occupancy/arm.py:138 independently rejects a fresh residual above 1e-10, but no test asserts the trace parser's busy-time or occupancy calculation at timeline.py:59-73.",
+    "evidence": "1304046-base-timeline.log and 1304046-bucketed-timeline.log show 40.021/25.308 ms busy and 0.834/0.716 paired fractions, while docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:17 uses separate normal-wall denominators for its higher estimates.",
+    "fit": "scripts/prototypes/bank_step_occupancy/arm.py:63-84 follows the existing jax.jit measurement idiom and its capability names contain no forbidden plan or release label.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:14-23 answers the measurement brief, while line 47 draws its above-0.8 verdict from an estimated cross-run ratio.",
+    "reuse": "scripts/prototypes/bank_step_occupancy/plot.py:21-48 duplicates the text clipping and overlap guard already owned by scripts/prototypes/bank_step_booking/plot.py:30-46; timeline.py extends earlier trace parsers with interval union and gap analysis.",
+    "scope_discipline": "git diff 12f122cd..d5f72614 lists only scripts/prototypes/bank_step_occupancy, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html, and its figure SVG, all named by source manifest.md:3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt:1-18 requests an unsynchronised H200 occupancy comparison; docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:3-47 records both arms, their traces, and the device-work verdict.\nVERDICT done_when: brief.txt:8-17 requires normal wall, trace busy time and gaps, jit and sync counts, and fresh residuals; 1304046-base-h200.log and 1304046-bucketed-h200.log end EXIT=0 and report 43.736/29.185 ms with residuals below 1e-10.\nVERDICT write_paths: source manifest.md:3 grants the occupancy prototype directory, evidence fragment, and figure directory; git diff 12f122cd..d5f72614 changes only those six paths.\nVERDICT manifest: source manifest.md:5-24 declares complete, seven commits, four arm/timeline logs, no baseline_suite or after_suite, and 40.021/25.308 ms device activity; the named receipts exist and end EXIT=0.\nVERDICT diff: the seven commits from 2ce05be0 through d5f72614 add an arm runner, trace parser, plot, SVG, and evidence fragment; docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:17-18 distinguishes estimated occupancy from paired trace occupancy.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:14-23 answers the measurement brief, while line 47 draws its above-0.8 verdict from an estimated cross-run ratio.\nSCORE evidence: 16\nJUSTIFICATION evidence: 1304046-base-timeline.log and 1304046-bucketed-timeline.log show 40.021/25.308 ms busy and 0.834/0.716 paired fractions, while docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:17 uses separate normal-wall denominators for its higher estimates.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 12f122cd..d5f72614 lists only scripts/prototypes/bank_step_occupancy, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html, and its figure SVG, all named by source manifest.md:3.\nSCORE durability: 5\nJUSTIFICATION durability: scripts/prototypes/bank_step_occupancy/arm.py:138 independently rejects a fresh residual above 1e-10, but no test asserts the trace parser's busy-time or occupancy calculation at timeline.py:59-73.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_step_occupancy/arm.py:63-84 follows the existing jax.jit measurement idiom and its capability names contain no forbidden plan or release label.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_step_occupancy/plot.py:21-48 duplicates the text clipping and overlap guard already owned by scripts/prototypes/bank_step_booking/plot.py:30-46; timeline.py extends earlier trace parsers with interval union and gap analysis.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-occupancy.html:47 non-blocking: The above-0.8 device-bound classification uses profiled GPU time divided by a different unprofiled call's wall; the directly paired bucketed fraction is 0.716, so the threshold conclusion is an estimate rather than an observed ratio. Suggested disposition: exempted because both fractions are printed and device activity still dominates the paired call.\nFINDING scripts/prototypes/bank_step_occupancy/timeline.py:59 non-blocking: No regression test would fail if the interval-union or idle-gap calculation changes incorrectly; the current assertions only require an arm trace and at least one kernel. Suggested disposition: exempted for this one-off measurement script while retaining its raw trace receipts.\nFINDING scripts/prototypes/bank_step_occupancy/plot.py:21 non-blocking: check_text reimplements the figure text clipping and overlap guard in scripts/prototypes/bank_step_booking/plot.py:30-46 instead of extending its owner. Suggested disposition: exempted for this self-contained prototype plot.",
+  "review_run_id": "r-20261103T081439021387-review-of-bank-step-occupancy-d5f726143fc9",
+  "reviewed_base_sha": "12f122cd26af34934fa7a5f70c9919a3aa780021",
+  "reviewed_head_sha": "d5f726143fc9b8f7d239444565f520b1c88bdb6c",
+  "reviewed_run_id": "r-20261103T074008112526-bank-step-occupancy",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T08:36:51.468065+00:00",
+  "total": 81
+}

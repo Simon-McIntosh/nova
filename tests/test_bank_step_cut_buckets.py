@@ -24,16 +24,30 @@ def test_normal_cut_count_over_batch_capacity():
         & (np.asarray(reading.membership) < 1 - 1e-14)
     )
     capacity = current._NORMAL_CUT_BATCH_WIDTH
-    assert len(cut) > capacity
     live_normal = cut[np.asarray(reading.normal_form_cells)[cut]]
     assert len(live_normal) > 0
-    overflow_cell = live_normal[0]
-    chosen = np.concatenate((cut[cut != overflow_cell][:capacity], [overflow_cell]))
+    overflow_cell = live_normal[-1]
+    assert overflow_cell >= capacity
+    earlier_cut = cut[cut < overflow_cell]
+    earlier_cells = np.arange(overflow_cell)
+    extra = earlier_cells[~np.isin(earlier_cells, earlier_cut)]
+    prefix = np.concatenate((earlier_cut, extra))[:capacity]
+    assert len(prefix) == capacity
+    synthetic_cut = prefix[~np.isin(prefix, cut)]
+    membership = reading.membership.at[synthetic_cut].set(0.5)
+    chosen = np.concatenate((prefix, [overflow_cell]))
     flags = jnp.zeros_like(reading.normal_form_cells).at[chosen].set(True)
-    reading = reading._replace(normal_form_cells=flags)
-    normal_count = int(jnp.count_nonzero(flags))
+    reading = reading._replace(membership=membership, normal_form_cells=flags)
+    normal = (
+        (reading.membership > 0)
+        & (reading.membership < 1 - 1e-14)
+        & reading.normal_form_cells
+    )
+    normal_count = int(jnp.count_nonzero(normal))
     assert normal_count == capacity + 1
     assert (normal_count + capacity - 1) // capacity > 1
+    gathered = jnp.nonzero(normal, size=reading.membership.size, fill_value=0)[0]
+    assert int(gathered[capacity]) == overflow_cell
 
     psi = support_read.nodal_jets(
         operands, tuple(jnp.zeros_like(booked.cell_current) for _ in range(3))
@@ -80,7 +94,6 @@ def test_normal_cut_count_over_batch_capacity():
     observed = jax.jit(batched)(psi, reading)
     actual_values = np.asarray(observed[..., 0])
     expected_values = np.stack(tuple(map(np.asarray, expected)), axis=-1)
-    assert chosen[-1] == overflow_cell
     assert bool(np.asarray(support.reading.normal_form_cells)[overflow_cell])
     booked_current = np.asarray(booked.cell_current)[overflow_cell]
     assert np.isfinite(booked_current)

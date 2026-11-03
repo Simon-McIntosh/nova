@@ -1,0 +1,144 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite; the count and the id list are the neutral values the record shape requires, not a measurement. No `scores` field included: a figure review carries no six-dimension text scores.",
+  "attachment_map": {
+    "image-1.png (1400x608 RGB)": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "image-3.png (1400x608 RGB)": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+    "image-5.png (1400x608 RGB)": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "image-7.png (1400x608 RGB)": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "image-9.png (1400x608 RGB)": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png"
+  },
+  "attachment_note": "All five attachments were opened with Read and judged directly as images. Every one of them is the same render: the five files are byte-identical to each other (md5 209a791ad02f, 1400x608). They are a resample of the picture committed at each of the five repository paths, which are themselves pixel-identical to one another (raw RGB sha256 c2627f6e044b00a9, 1484x644) even though two distinct PNG encodings appear among them (md5 7176ac9413 and 577622401b6c differ only in encoding: a PIL difference of the two decodes returns bbox None). Every measurement below is taken from the pixels of those renders, plus crops of the same file upscaled for reading small type, and PIL/numpy counts. No SVG was opened, read, listed, searched, rendered or git-showed, per the brief; the two script lines cited in the findings are the run's own commit history and its benchmark script, cited only where the run's diff shows that script draws the figure.",
+  "completed_at": "2026-11-03T05:35:47.654Z",
+  "dispatched_at": "2026-11-03T05:13:23Z",
+  "figure_checks": {
+    "caption_independence": "The figure carries no separate title, so the caption does not repeat one. It is accurate about what is drawn: it names the level range (0.3416 to -0.1224 Wb), says the reference is the unedited equilibrium with its own saddle, says the solver's own saddle is drawn where it falls, says both null sets are drawn in their own styles and that other qualified nulls are hollow, says the wall is drawn, and gives the largest node mismatch for each panel (2.405e-03 and 3.438e-02 Wb), which matches the receipt's display_map values. I read the word 'unedited' at 3x magnification rather than by eye at native size, because at native size it reads as 'undedited'; it is spelled correctly.",
+    "clipping": "Non-white pixels in the outer 1, 2 and 3 px frames: the caption block and the drawing band are both fully inside the canvas, the smallest margin anywhere is 7 px above the first caption line and 42 px at each side of the longest caption line (1400 px wide on a 1484 px canvas). Nothing is cut off.",
+    "null_markers": "Both panels draw the magnetic axis as a solid triangle and the admitted saddle as a filled cross, and both sets are drawn: at the saddle the blue reference cross and the orange solved cross are both present and visibly offset where the two fields disagree. This meets the project rule that a solved null drawn alone would read as the answer.",
+    "provenance_and_identity": "The five attachments are one render (all byte-identical), and the five repository PNGs are one picture (all pixel-identical at 1484x644). I checked whether that identity is a copy defect before judging it, because a defect and an honest duplicate look the same from the outside: the panel-state files behind them differ in 222 of 317 numeric arrays, but the flux maps agree to 2.2e-15 Wb (reference_psi max abs difference 1.55e-15; reference_axis_flux 2.2e-16; axis_0 6.7e-16; terminal_residual 5.1e-16), so the five directories hold the same solve to machine precision and the identical pictures are honest. No finding is raised on the identity itself.",
+    "render_matches_reviewed_head": "The rendered panels agree with the drawing code committed at the reviewed head. At 1f1391bd0a62, benchmarks/coil_edit_latency.py builds the figure at figsize=(10.6, 4.6), which is the 1484x644 render at 140 dpi; it sets each panel title at line 2273 from the format 'edit %d  %+d%%  residual %.3e  converged %s  trips %d', and assembles the caption at line 2303, wrapping it into the figure by design. The caption read off the PNG matches that source clause for clause, including the closing 'wall drawn'. The line numbers cited here and in the findings are the reviewed head's, checked with `git show HEAD:benchmarks/coil_edit_latency.py` rather than by reading the working copy, because the working tree of that directory carries another session's uncommitted edits to that script (+61/-17) and to tests/test_coil_edit_panel_render.py (+42) which shift them by eleven lines.",
+    "render_provenance": "Every figure was judged from the attached PNGs at their native size and from upscaled crops (3x and 4x, LANCZOS) of the caption block, both panel titles, the two core regions and the two saddle regions. No SVG was read."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+      "rubric": {
+        "contrast": "pass. Caption, panel titles and the wall are near-black on white; the two data series are an orange and a blue clear of the white ground and distinguishable from each other, so no text is lost and no series is lost to low contrast.",
+        "data_ink": "defect recorded as finding 1: the six-line caption is rendered into the raster and carries 53.7% of the figure's ink (53,525 of 99,588 dark pixels in rows 0-169) against 46.3% for both panels together (46,063 dark pixels in rows 170-643). The prose outweighs the data it explains.",
+        "decoration": "pass. Ground is pure white with no gradient, band or background fill; the only ink inside the panels is contour lines, the wall, the coil legs and the null markers. Spines, ticks and gridlines are absent, as the project's poloidal rule requires, and scale comes from the machine geometry drawn in the panel.",
+        "label_collision": "pass. Nothing is clipped: the caption block spans x 42-1441 on a 1484 px canvas (42 px clear at each side) and starts at y 7, and the drawing band spans x 260-1381, y 170-637. Text blocks do not touch: caption line 6 ends at y 134 with its descenders and the panel titles occupy y 148-170, a 14 px gap. No label sits over the data.",
+        "legibility": "readable at a glance as a two-panel poloidal flux comparison: the wall, both coil legs, the two null sets and the contour levels all read without strain. Defect recorded as finding 2: the panel titles carry '+6%'/'+0%' and 'trips 3', and nothing in the image defines either quantity.",
+        "table_form": "pass. The content is two spatially arranged poloidal cross-sections with flux contours; no part of it is naturally a table."
+      }
+    },
+    {
+      "attachment": "image-3.png",
+      "figure": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+      "rubric": {
+        "contrast": "pass. Caption, panel titles and the wall are near-black on white; the two data series are an orange and a blue clear of the white ground and distinguishable from each other, so no text is lost and no series is lost to low contrast.",
+        "data_ink": "defect recorded as finding 1: the six-line caption is rendered into the raster and carries 53.7% of the figure's ink (53,525 of 99,588 dark pixels in rows 0-169) against 46.3% for both panels together (46,063 dark pixels in rows 170-643). The prose outweighs the data it explains.",
+        "decoration": "pass. Ground is pure white with no gradient, band or background fill; the only ink inside the panels is contour lines, the wall, the coil legs and the null markers. Spines, ticks and gridlines are absent, as the project's poloidal rule requires, and scale comes from the machine geometry drawn in the panel.",
+        "label_collision": "pass. Nothing is clipped: the caption block spans x 42-1441 on a 1484 px canvas (42 px clear at each side) and starts at y 7, and the drawing band spans x 260-1381, y 170-637. Text blocks do not touch: caption line 6 ends at y 134 with its descenders and the panel titles occupy y 148-170, a 14 px gap. No label sits over the data.",
+        "legibility": "readable at a glance as a two-panel poloidal flux comparison: the wall, both coil legs, the two null sets and the contour levels all read without strain. Defect recorded as finding 2: the panel titles carry '+6%'/'+0%' and 'trips 3', and nothing in the image defines either quantity.",
+        "table_form": "pass. The content is two spatially arranged poloidal cross-sections with flux contours; no part of it is naturally a table."
+      }
+    },
+    {
+      "attachment": "image-5.png",
+      "figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+      "rubric": {
+        "contrast": "pass. Caption, panel titles and the wall are near-black on white; the two data series are an orange and a blue clear of the white ground and distinguishable from each other, so no text is lost and no series is lost to low contrast.",
+        "data_ink": "defect recorded as finding 1: the six-line caption is rendered into the raster and carries 53.7% of the figure's ink (53,525 of 99,588 dark pixels in rows 0-169) against 46.3% for both panels together (46,063 dark pixels in rows 170-643). The prose outweighs the data it explains.",
+        "decoration": "pass. Ground is pure white with no gradient, band or background fill; the only ink inside the panels is contour lines, the wall, the coil legs and the null markers. Spines, ticks and gridlines are absent, as the project's poloidal rule requires, and scale comes from the machine geometry drawn in the panel.",
+        "label_collision": "pass. Nothing is clipped: the caption block spans x 42-1441 on a 1484 px canvas (42 px clear at each side) and starts at y 7, and the drawing band spans x 260-1381, y 170-637. Text blocks do not touch: caption line 6 ends at y 134 with its descenders and the panel titles occupy y 148-170, a 14 px gap. No label sits over the data.",
+        "legibility": "readable at a glance as a two-panel poloidal flux comparison: the wall, both coil legs, the two null sets and the contour levels all read without strain. Defect recorded as finding 2: the panel titles carry '+6%'/'+0%' and 'trips 3', and nothing in the image defines either quantity.",
+        "table_form": "pass. The content is two spatially arranged poloidal cross-sections with flux contours; no part of it is naturally a table."
+      }
+    },
+    {
+      "attachment": "image-7.png",
+      "figure": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+      "rubric": {
+        "contrast": "pass. Caption, panel titles and the wall are near-black on white; the two data series are an orange and a blue clear of the white ground and distinguishable from each other, so no text is lost and no series is lost to low contrast.",
+        "data_ink": "defect recorded as finding 1: the six-line caption is rendered into the raster and carries 53.7% of the figure's ink (53,525 of 99,588 dark pixels in rows 0-169) against 46.3% for both panels together (46,063 dark pixels in rows 170-643). The prose outweighs the data it explains.",
+        "decoration": "pass. Ground is pure white with no gradient, band or background fill; the only ink inside the panels is contour lines, the wall, the coil legs and the null markers. Spines, ticks and gridlines are absent, as the project's poloidal rule requires, and scale comes from the machine geometry drawn in the panel.",
+        "label_collision": "pass. Nothing is clipped: the caption block spans x 42-1441 on a 1484 px canvas (42 px clear at each side) and starts at y 7, and the drawing band spans x 260-1381, y 170-637. Text blocks do not touch: caption line 6 ends at y 134 with its descenders and the panel titles occupy y 148-170, a 14 px gap. No label sits over the data.",
+        "legibility": "readable at a glance as a two-panel poloidal flux comparison: the wall, both coil legs, the two null sets and the contour levels all read without strain. Defect recorded as finding 2: the panel titles carry '+6%'/'+0%' and 'trips 3', and nothing in the image defines either quantity.",
+        "table_form": "pass. The content is two spatially arranged poloidal cross-sections with flux contours; no part of it is naturally a table."
+      }
+    },
+    {
+      "attachment": "image-9.png",
+      "figure": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+      "rubric": {
+        "contrast": "pass. Caption, panel titles and the wall are near-black on white; the two data series are an orange and a blue clear of the white ground and distinguishable from each other, so no text is lost and no series is lost to low contrast.",
+        "data_ink": "defect recorded as finding 1: the six-line caption is rendered into the raster and carries 53.7% of the figure's ink (53,525 of 99,588 dark pixels in rows 0-169) against 46.3% for both panels together (46,063 dark pixels in rows 170-643). The prose outweighs the data it explains.",
+        "decoration": "pass. Ground is pure white with no gradient, band or background fill; the only ink inside the panels is contour lines, the wall, the coil legs and the null markers. Spines, ticks and gridlines are absent, as the project's poloidal rule requires, and scale comes from the machine geometry drawn in the panel.",
+        "label_collision": "pass. Nothing is clipped: the caption block spans x 42-1441 on a 1484 px canvas (42 px clear at each side) and starts at y 7, and the drawing band spans x 260-1381, y 170-637. Text blocks do not touch: caption line 6 ends at y 134 with its descenders and the panel titles occupy y 148-170, a 14 px gap. No label sits over the data.",
+        "legibility": "readable at a glance as a two-panel poloidal flux comparison: the wall, both coil legs, the two null sets and the contour levels all read without strain. Defect recorded as finding 2: the panel titles carry '+6%'/'+0%' and 'trips 3', and nothing in the image defines either quantity.",
+        "table_form": "pass. The content is two spatially arranged poloidal cross-sections with flux contours; no part of it is naturally a table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f1c0a53e9b7",
+      "line": 2303,
+      "severity": "non-blocking",
+      "summary": "The six-line caption is rendered inside the raster instead of being left to the page caption, and it outweighs the data: measured on the 1484x644 render, rows 0-169 carry 53,525 dark pixels (53.7% of the figure's ink) against 46,063 for both poloidal panels (46.3%), and the text block occupies 26.4% of the canvas height. The effect on a reader is that the first thing met is a run-on paragraph of pipe-separated clauses (level range, current-centre row and its tolerance, both saddle positions, null-mismatch figures) in which the two panels' numbers are separated only by the words 'converged'. The panels are still fully readable, so this does not hold the node; it is recorded because the figure is 30% shorter, and its data 2.4x more prominent, once the prose moves to the page. Disposition: folded into the panel-caption node, which should re-render these five panels with the caption left to the evidence fragment."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f2b81d4c073",
+      "line": 2273,
+      "severity": "non-blocking",
+      "summary": "Both panel titles print two quantities the figure never defines: 'edit 12  +6%' and 'edit 9  +0%' on the left and right, and 'trips 3' on both. Neither the caption block nor anywhere else in the image says what the percentage is a percentage of, nor what a 'trip' counts. A reader can tell which panel converged from the 'converged yes/no' word, so the headline survives; but a reader cannot check whether the two panels differ by the perturbation size or by the solve's history, which is the comparison the figure exists to support. Recorded as a legibility defect, not as a blocker, because it does not stop the reader reaching the picture. Disposition: folded into the panel-caption node, to be resolved by a one-clause gloss in the caption rather than by widening the title."
+    },
+    {
+      "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+      "id": "f3d94e1a28c",
+      "line": 2273,
+      "severity": "non-blocking",
+      "summary": "Each panel's title is offset about 80 px left of the panel it names and runs about 1.65x the panel's width, so the titles sit over whitespace rather than over their panels: measured on the render, the left title spans x 45-693 (centre 369) against a left panel spanning x 260-651 (centre 455), and the right title spans x 802-1424 (centre 1113) against a right panel spanning x 1004-1381 (centre 1192). The right title's left end therefore starts 202 px inside the 352-px blank gap that separates the panels. Titles are still adjacent to their panels and no text overlaps, so the association is not ambiguous; this is recorded because the offset and the 352-px gap make a two-panel comparison read as two loose labels above a mostly empty canvas. Disposition: folded into the panel-caption node, alongside the caption move."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The figure carries no title for the caption to repeat; the caption is accurate about the drawing it describes, and is recorded as a finding only because it is rendered into the raster and outweighs the data.",
+    "finding_materiality": "Three non-blocking findings, no blocking finding. No label is clipped, no label overlaps another label or the data, no text is unreadable, and nothing the figure claims to show is hidden from the reader.",
+    "rendered_artifact": "The five attached PNGs were opened and inspected at native size and in upscaled crops of the caption, the titles, the panel cores and the saddle regions.",
+    "scope": "Read-only. No figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and this run's manifest."
+  },
+  "justifications": {
+    "evidence": "Identity comes from byte and pixel comparison of the five named PNGs (raw RGB sha256 c2627f6e044b00a9 at 1484x644); the honest-duplicate conclusion comes from a float comparison of the stored panel states, not from the pictures. Reviewed base 3ef818dfaef2 is an ancestor of the reviewed head 1f1391bd0a62, 20 commits between them.",
+    "legibility": "Read from the attached PNGs and from upscaled crops of the same files; every geometric claim (margins, gaps, ink shares, block extents) is measured in pixels rather than judged by eye.",
+    "scope_discipline": "The brief's read-only rule was kept and its no-SVG rule was kept: every finding is anchored to a figure's repository path, or to a line of benchmarks/coil_edit_latency.py which the run's own commits show drawing this figure."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261103T051152845514-review-of-coil-edit-fine-panels-1f1391bd0a62-figure",
+  "reviewed_base_sha": "3ef818dfaef2a36da8fd0d6e0c34272ec5259218",
+  "reviewed_figures": [
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png"
+  ],
+  "reviewed_head_sha": "1f1391bd0a62944a9db45b84afaf6fc8f3442c2a",
+  "reviewed_run_id": "r-20261102T204241022825-coil-edit-fine-panels",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass, with the undefined '+6%'/'+0%' and 'trips 3' in the panel titles recorded as finding 2. The picture itself - wall, coil legs, both null sets, contour levels - reads at a glance.",
+    "RUBRIC data_ink: defect recorded as finding 1. The caption rendered into the raster carries 53.7% of the ink against 46.3% for both panels.",
+    "RUBRIC decoration: pass. Pure white ground, no gradient, fill, band or styling; contour levels are data.",
+    "RUBRIC contrast: pass. Near-black text on white; the orange and blue series are clear of the ground and of each other.",
+    "RUBRIC table_form: pass. Two poloidal cross-sections with flux contours; nothing in it is naturally a table.",
+    "RUBRIC label_collision: pass. No label is clipped (42 px / 7 px clear at the caption block, drawing band inside x 260-1381, y 170-637), no two text blocks touch (14 px between caption and titles), and no label sits over the data."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T05:35:50.275257+00:00",
+  "total": null
+}

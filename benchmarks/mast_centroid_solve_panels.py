@@ -207,6 +207,171 @@ def _coil_outlines(shot: int) -> np.ndarray:
 #: pay the section kernels once.
 _CIRCUIT_RESPONSE: dict[tuple[tuple[int, ...], bytes], np.ndarray] = {}
 
+#: Prepared unit-current responses per target set, filled by _panel_response.
+#: The conductor and plasma kernels depend on geometry and target points only,
+#: never on the state, so one build serves every panel and every perturbation.
+_PANEL_RESPONSE: dict[tuple[tuple[int, ...], bytes], tuple[np.ndarray, np.ndarray]] = {}
+
+RESPONSE_WORKERS = 10
+RESPONSE_CHUNK = 2048
+
+
+def _display_points(radius: np.ndarray, height: np.ndarray, spacing: float):
+    """Return the display grid the flux-map builder forms from these nodes."""
+    radial = np.arange(
+        float(radius[0]), float(radius[-1]) + 0.5 * spacing, spacing
+    )
+    vertical = np.arange(
+        float(height[0]), float(height[-1]) + 0.5 * spacing, spacing
+    )
+    grid_radius, grid_height = np.meshgrid(radial, vertical, indexing="ij")
+    return np.c_[grid_radius.ravel(), grid_height.ravel()]
+
+
+def _panel_response_chunk(payload):
+    """Return one chunk's unit conductor response and plasma column.
+
+    This runs in a spawned worker: it touches only the shot store and the
+    rectangular-cell kernel, and never JAX, so a build cannot contend with the
+    parent's solver state.
+    """
+    shot, slice_index, points, cells, dr, dz = payload
+    import zarr
+
+    from benchmarks import efit_forward_parity_slice as parity
+    from nova.catalog.mast_geometry import MachineGeometryRegistry
+    import nova.imas.mast_solve_inputs as solve_inputs
+
+    group = zarr.open_group(
+        str(solve_inputs.SHOT_STORE / f"{shot}.zarr"), mode="r"
+    )["efm"]
+    geometry = (
+        MachineGeometryRegistry.default().select(shot).configuration.geometry
+    )
+    _families, _drives, active_mapping = parity._circuit_drives(
+        group, slice_index, geometry, "fcoil_c"
+    )
+    records, _audit = parity._stored_circuit_fields(
+        group, slice_index, points, geometry, active_mapping
+    )
+    external = np.column_stack(
+        [np.asarray(record["response_wb_per_a"], dtype=float) for record in records]
+    )
+    plasma = np.asarray(parity._plasma_response(points, cells, dr, dz), dtype=float)
+    return external, plasma
+
+
+def _panel_response_path(digest: str) -> Path:
+    """Return the operand-cache path holding one prepared response."""
+    from nova.database.filepath import operand_cache_root
+
+    return operand_cache_root() / "mast-centroid-panel-response" / f"{digest}.npz"
+
+
+def _panel_response(
+    lattice: Any, points: np.ndarray, workers: int = RESPONSE_WORKERS
+):
+    """Build or load the unit-current responses for one fixed point set."""
+    import hashlib
+    from concurrent.futures import ProcessPoolExecutor
+    import multiprocessing
+
+    target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
+    key = (target.shape, target.tobytes())
+    cached = _PANEL_RESPONSE.get(key)
+    if cached is not None:
+        return cached
+    cells = np.ascontiguousarray(np.asarray(lattice.coordinate, dtype=np.float64))
+    dr = float(lattice.radial_step)
+    dz = float(lattice.vertical_step)
+    digest = hashlib.sha256()
+    for part in (
+        str(edit.SHOT).encode(),
+        str(edit.SLICE_INDEX).encode(),
+        target.tobytes(),
+        cells.tobytes(),
+        np.asarray([dr, dz], dtype=np.float64).tobytes(),
+    ):
+        digest.update(part)
+    path = _panel_response_path(digest.hexdigest())
+    if path.exists():
+        with np.load(path, allow_pickle=False) as stored:
+            prepared = (
+                np.asarray(stored["external"], dtype=float),
+                np.asarray(stored["plasma"], dtype=float),
+            )
+        _PANEL_RESPONSE[key] = prepared
+        return prepared
+
+    external = np.zeros((target.shape[0], 1), dtype=float)
+    plasma = np.zeros((target.shape[0], 1), dtype=float)
+    bounds = range(0, target.shape[0], RESPONSE_CHUNK)
+    payloads = [
+        (
+            edit.SHOT,
+            edit.SLICE_INDEX,
+            target[start : start + RESPONSE_CHUNK],
+            cells,
+            dr,
+            dz,
+        )
+        for start in bounds
+    ]
+    context = multiprocessing.get_context("spawn")
+    columns: int | None = None
+    with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
+        for start, (block, column) in zip(
+            bounds, pool.map(_panel_response_chunk, payloads), strict=True
+        ):
+            stop = start + block.shape[0]
+            if columns is None:
+                columns = block.shape[1]
+                external = np.zeros((target.shape[0], columns), dtype=float)
+                plasma = np.zeros((target.shape[0], column.shape[1]), dtype=float)
+            external[start:stop] = block
+            plasma[start:stop] = column
+    prepared = (external, plasma)
+    _PANEL_RESPONSE[key] = prepared
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(path, external=external, plasma=plasma)
+    return prepared
+
+
+def prepare_response(state_path: Path, spacing: float = DEFAULT_SPACING) -> None:
+    """Build and cache one lane's unit-current responses, reporting the wall."""
+    from nova.equilibrium.conservation import FluxLattice
+
+    data = np.load(state_path, allow_pickle=False)
+    radius = np.asarray(data["radius"], dtype=float)
+    height = np.asarray(data["height"], dtype=float)
+    lattice = FluxLattice(radius, height)
+    points = _display_points(radius, height, spacing)
+    started = time.perf_counter()
+    external, plasma = _panel_response(lattice, points)
+    print(
+        "MATRIX points=%d circuits=%d build_s=%.3f lane=%s"
+        % (
+            points.shape[0],
+            external.shape[1],
+            time.perf_counter() - started,
+            state_path.parent.name,
+        ),
+        flush=True,
+    )
+    started = time.perf_counter()
+    nodes = _panel_response(lattice, np.asarray(lattice.coordinate, dtype=float))
+    print(
+        "MATRIX nodes=%d circuits=%d build_s=%.3f lane=%s"
+        % (
+            np.asarray(lattice.coordinate).shape[0],
+            nodes[0].shape[1],
+            time.perf_counter() - started,
+            state_path.parent.name,
+        ),
+        flush=True,
+    )
+    del plasma
+
 
 def _machine_coupling(
     lattice: Any, conductor_current: np.ndarray
@@ -240,7 +405,13 @@ def _machine_coupling(
 
     def plasma(points: np.ndarray):
         """Return the rectangular-cell plasma columns at ``points``."""
-        uniform = parity._plasma_response(np.asarray(points), cells, dr, dz)
+        target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
+        prepared = _PANEL_RESPONSE.get((target.shape, target.tobytes()))
+        if prepared is not None:
+            uniform = prepared[1]
+            zeros = np.zeros_like(uniform)
+            return uniform, zeros, zeros
+        uniform = parity._plasma_response(target, cells, dr, dz)
         zeros = np.zeros_like(uniform)
         return uniform, zeros, zeros
 
@@ -248,6 +419,9 @@ def _machine_coupling(
         """Return the fitted conductors' flux at ``points`` [Wb]."""
         target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
         key = (target.shape, target.tobytes())
+        prepared = _PANEL_RESPONSE.get(key)
+        if prepared is not None:
+            return prepared[0] @ drive
         response = _CIRCUIT_RESPONSE.get(key)
         if response is None:
             records, _audit = parity._stored_circuit_fields(
@@ -999,6 +1173,10 @@ def _panel_state_display(state_path: Path, spacing: float):
         jnp.asarray(np.asarray(data["vertical_moment"], dtype=float)),
     )
     lattice = FluxLattice(radius, height)
+    # One exact build of the unit-current responses serves the map, the lattice
+    # node check and every perturbation of this lane's currents.
+    _panel_response(lattice, _display_points(radius, height, spacing))
+    _panel_response(lattice, np.asarray(lattice.coordinate, dtype=np.float64))
     coupling = _machine_coupling(lattice, conductor_current)
     profile = _PanelProfile(_PanelOperator(lattice, coupling))
     axis = np.asarray(data["axis"], dtype=float)
@@ -1834,7 +2012,7 @@ def main() -> None:
         raise RuntimeError("extended precision did not take before any array was built")
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for name in ("run", "panels", "series", "family"):
+    for name in ("run", "panels", "matrix", "series", "family"):
         item = subparsers.add_parser(name)
         item.add_argument("--state", type=Path, default=DEFAULT_STATE)
         item.add_argument("--receipt", type=Path, default=DEFAULT_RECEIPT)
@@ -1861,6 +2039,8 @@ def main() -> None:
             arguments.grid_points,
             arguments.hex_cells,
         )
+    elif arguments.command == "matrix":
+        prepare_response(arguments.state, arguments.spacing)
     elif arguments.command == "run":
         measure(
             arguments.state,

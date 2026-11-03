@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-03T05:46:25.603Z",
   "dispatched_at": "2026-11-03T05:31:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-batch",
+      "recorded_at": "2026-11-03T06:24:14.571281+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",

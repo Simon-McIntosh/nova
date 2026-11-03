@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="115">
+<meta name="plan-version" content="116">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -117,15 +117,6 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="precision-budget" data-choice="read-1mm-flux-1e-4" data-by="lead" data-when="2026-10-28T14:11:35+00:00" data-recommended="read-1cm-flux-1e-3" data-recommended-by="reckon-build">
-    <p class="r-dec-q">What precision does the production path owe the analytic oracle?</p>
-    <p class="r-dec-opts">
-      <button class="r-opt" data-value="read-1cm-flux-1e-3">Axis and X-point within 1 cm, boundary flux within 1e-3 of the span, solved residual at most 1e-10</button>
-      <button class="r-opt chosen" data-value="read-1mm-flux-1e-4">Axis and X-point within 1 mm, boundary flux within 1e-4 of the span, solved residual at most 1e-10</button>
-      <button class="r-opt" data-value="flux-1e-8">Flux within 1e-8 relative everywhere, the present analytic standard</button>
-      </p>
-    <p class="r-dec-rat">Lead decision 2026-10-28: the tighter budget, stated as ratios of machine size rather than absolute lengths, since this is a forward solve and measurement error does not enter. Magnetic axis and X-point within 5e-4 of the plasma minor radius (1.0 mm at ITER&#x27;s a = 2.0 m), boundary flux within 1e-4 of the flux span, and a solved residual of at most 1e-10. A ULP-level budget is what set the cost of the present route.</p>
-    </div>
 <div class="r-dec" data-key="both-routes-viable" data-choice="both-viable" data-by="lead" data-when="2026-10-28" data-sections="s4">
     <p class="r-dec-q">Both forward routes stay viable</p>
     <p class="r-dec-ctx">&lt;p&gt;The fast path is added beside the present route, not in place of it. The request seam today admits one numerical route.&lt;/p&gt;</p>
@@ -134,15 +125,6 @@
       <button class="r-opt" data-value="fast-replaces">fast-replaces</button>
       </p>
     <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-28. The fast route becomes a new &lt;code&gt;SolveRoute&lt;/code&gt; value selected through &lt;code&gt;ForwardSolveRequest&lt;/code&gt;. The present route stays selectable and tested. §4 holds it to no regression on the certificate rows (same convergence status and terminal residual as at base), not to a convergence it does not reach today.&lt;/p&gt;</p>
-    </div>
-<div class="r-dec" data-key="read-bound-per-slice" data-choice="per-slice-batch-16" data-by="lead" data-when="2026-10-29T06:54:50+00:00" data-sections="s2">
-    <p class="r-dec-q">Is the tracked read held to 0.2 ms per call or per slice at batch 16?</p>
-    <p class="r-dec-ctx">&lt;p&gt;On the H200 the tracked read is 1.225 ms per call over 805 launches, and the warm stationary-point solve alone is 0.63–0.82 ms in 55 launches, so launch fusion cannot bring a single call to 0.2 ms.&lt;/p&gt;</p>
-    <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="per-slice-batch-16">per-slice-batch-16</button>
-      <button class="r-opt" data-value="per-call">per-call</button>
-      </p>
-    <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-29. §4&#x27;s 1 ms target is per slice at batch 16 or more, so the read is held to 0.2 ms per slice batched over 16 or more slices, with the batch-1 wall tabled beside it.&lt;/p&gt;</p>
     </div>
 <div class="r-dec" data-key="fast-route-equation" data-choice="own-equation-vs-oracle" data-by="lead" data-when="2026-10-29T16:47:32+00:00" data-sections="s3,s4">
     <p class="r-dec-q">Which equation is the fast route held to?</p>
@@ -153,6 +135,24 @@
       <button class="r-opt" data-value="converged-state-parity">converged-state-parity</button>
       </p>
     <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-29. The fast route converges its own equation and is judged against the analytic oracle under the locked precision budget, as §4 already requires. Same-iterate parity with the present route is dropped; both routes stay viable and are compared only at the converged state, each against the oracle.&lt;/p&gt;</p>
+    </div>
+<div class="r-dec" data-key="precision-budget" data-choice="read-1mm-flux-1e-4" data-by="lead" data-when="2026-10-28T14:11:35+00:00" data-recommended="read-1cm-flux-1e-3" data-recommended-by="reckon-build">
+    <p class="r-dec-q">What precision does the production path owe the analytic oracle?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="read-1cm-flux-1e-3">Axis and X-point within 1 cm, boundary flux within 1e-3 of the span, solved residual at most 1e-10</button>
+      <button class="r-opt chosen" data-value="read-1mm-flux-1e-4">Axis and X-point within 1 mm, boundary flux within 1e-4 of the span, solved residual at most 1e-10</button>
+      <button class="r-opt" data-value="flux-1e-8">Flux within 1e-8 relative everywhere, the present analytic standard</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-10-28: the tighter budget, stated as ratios of machine size rather than absolute lengths, since this is a forward solve and measurement error does not enter. Magnetic axis and X-point within 5e-4 of the plasma minor radius (1.0 mm at ITER&#x27;s a = 2.0 m), boundary flux within 1e-4 of the flux span, and a solved residual of at most 1e-10. A ULP-level budget is what set the cost of the present route.</p>
+    </div>
+<div class="r-dec" data-key="read-bound-per-slice" data-choice="per-slice-batch-16" data-by="lead" data-when="2026-10-29T06:54:50+00:00" data-sections="s2">
+    <p class="r-dec-q">Is the tracked read held to 0.2 ms per call or per slice at batch 16?</p>
+    <p class="r-dec-ctx">&lt;p&gt;On the H200 the tracked read is 1.225 ms per call over 805 launches, and the warm stationary-point solve alone is 0.63–0.82 ms in 55 launches, so launch fusion cannot bring a single call to 0.2 ms.&lt;/p&gt;</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="per-slice-batch-16">per-slice-batch-16</button>
+      <button class="r-opt" data-value="per-call">per-call</button>
+      </p>
+    <p class="r-dec-rat">&lt;p&gt;Lead decision 2026-10-29. §4&#x27;s 1 ms target is per slice at batch 16 or more, so the read is held to 0.2 ms per slice batched over 16 or more slices, with the batch-1 wall tabled beside it.&lt;/p&gt;</p>
     </div>
 </section>
 
@@ -440,6 +440,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261103T081743975943-review-of-bank-step-occupancy-d5f726143fc9-figure" data-who="reckon-build" data-when="2026-11-03T08:29:15.577Z">
     <div class="r-comment-body"><p>The occupancy figure passes all six rubric items as a rendered PNG; three non-blocking findings are recorded, none blocking, so the review does not hold the node.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261103T085318109670-review-of-bank-step-cut-buckets-72e0ab4f58db" data-who="reckon-build" data-when="2026-11-03T09:05:26Z">
+    <div class="r-comment-body"><p>Parsed independent review of 31dad0d9a48813b2be16bfae05274be63a58cb2d..72e0ab4f58db13dc3f5769ae0c71fc0dc4c31469 is stored at both declared review-record paths with six scores, zero added failures, one blocking and two non-blocking findings.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/suite-head-booking.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/suite-base-booking.log",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1094:_local_booking_sensitivities",
+    "scripts/prototypes/bank_step_cut_buckets/plot.py:28:main"
+  ],
+  "completed_at": "2026-11-03T09:05:26Z",
+  "dispatched_at": "2026-11-03T08:54:48Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_step_cut_buckets.py",
+      "line": "83",
+      "severity": "blocking",
+      "text": "blocking: chosen[-1] is the locally appended overflow_cell, but current.py:792 gathers flagged indices in ascending order; the test and its count assertion can pass with the only valid normal-form cell in the first bucket, so the numerical comparison at lines 90-95 does not prove overflow-bucket correctness."
+    },
+    {
+      "disposition": "folded",
+      "file": "scripts/prototypes/bank_step_cut_buckets/check_review.py",
+      "folded_into": "bank-step-cut-buckets overflow-witness repair",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "non-blocking: the capacity check requires the old chosen = cut[: capacity + 1] text, absent from the reviewed test, so this added checker rejects its own head; folded into the bank-step-cut-buckets overflow-witness repair."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The duplicate is confined to a test-only probe and does not fork production behavior.",
+      "file": "scripts/prototypes/bank_step_cut_buckets/probe_guards.py",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: load duplicates the path-based module loader in scripts/prototypes/bank_step_cut_buckets/verify.py:20-25 rather than extending or wrapping it; exempted because this test-only probe does not fork production behavior."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "The ten commits from 31dad0d9..72e0ab4f change eight test, script, figure and evidence paths; scripts/prototypes/bank_step_cut_buckets/plot.py:7-37 now calls the shared stage plotter and the rendered stage-wall image is legible.",
+    "done_when": "The source brief.txt requires parity, fresh residual, oracle bounds, timing, launches and compiled interiors; source manifest.md cites measured H200 and sirius receipts, but tests/test_bank_step_cut_buckets.py:31-36 does not prove the valid numerical witness reaches the second bucket.",
+    "goal": "The source brief.txt requests selected-branch cut booking and a paired H200 record; the delta in tests/test_bank_step_cut_buckets.py:26-95 repairs the overflow gate while nova/equilibrium/current.py:817-819 remains unchanged.",
+    "manifest": "The source manifest.md reports complete with eighteen commits, zero failures in both completed suite arms, focused repair gate and red controls; suite-base-booking.log:18-19 and suite-head-booking.log:5-6 confirm the paired suite result.",
+    "write_paths": "The source manifest.md orientation_write_paths covers all eight paths in git diff 31dad0d9..72e0ab4f, including the explicitly widened scripts/prototypes/bank_step_speed/plot_stage.py."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_cut_buckets.py:83 compares chosen[-1] to the value appended to chosen and line 36 infers two buckets from the supplied flags, so neither assertion fails when the valid cell is handled by the first sorted bucket.",
+    "evidence": "suite-base-booking.log:18-19 and suite-head-booking.log:5-6 are complete green arms, while behavior-capacity-reverted.log:2-4 and negative-finite-sirius.log:4-6 reproduce the prior guard failures.",
+    "fit": "scripts/prototypes/bank_step_speed/plot_stage.py:43-53 extends the existing plot interface, but scripts/prototypes/bank_step_cut_buckets/check_review.py:14 requires a test spelling absent from the reviewed head.",
+    "goal_fidelity": "tests/test_bank_step_cut_buckets.py:26-36 tracks live capacity, and scripts/prototypes/bank_step_cut_buckets/plot.py:28-37 uses the shared renderer, but line 83 does not prove a valid cell occupies the overflow bucket.",
+    "reuse": "scripts/prototypes/bank_step_cut_buckets/plot.py:7 extends scripts/prototypes/bank_step_speed/plot_stage.py:27-34, while scripts/prototypes/bank_step_cut_buckets/probe_guards.py:23-28 duplicates the module loader already owned by scripts/prototypes/bank_step_cut_buckets/verify.py:20-25.",
+    "scope_discipline": "The eight paths in git diff 31dad0d9..72e0ab4f are all within the source manifest.md orientation_write_paths, including the explicitly granted scripts/prototypes/bank_step_speed/plot_stage.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt requests selected-branch cut booking and a paired H200 record; the delta in tests/test_bank_step_cut_buckets.py:26-95 repairs the overflow gate while nova/equilibrium/current.py:817-819 remains unchanged.\nVERDICT done_when: The source brief.txt requires parity, fresh residual, oracle bounds, timing, launches and compiled interiors; source manifest.md cites measured H200 and sirius receipts, but tests/test_bank_step_cut_buckets.py:31-36 does not prove the valid numerical witness reaches the second bucket.\nVERDICT write_paths: The source manifest.md orientation_write_paths covers all eight paths in git diff 31dad0d9..72e0ab4f, including the explicitly widened scripts/prototypes/bank_step_speed/plot_stage.py.\nVERDICT manifest: The source manifest.md reports complete with eighteen commits, zero failures in both completed suite arms, focused repair gate and red controls; suite-base-booking.log:18-19 and suite-head-booking.log:5-6 confirm the paired suite result.\nVERDICT diff: The ten commits from 31dad0d9..72e0ab4f change eight test, script, figure and evidence paths; scripts/prototypes/bank_step_cut_buckets/plot.py:7-37 now calls the shared stage plotter and the rendered stage-wall image is legible.\nCALL_SITES: nova/equilibrium/support_read.py:1094:_local_booking_sensitivities, scripts/prototypes/bank_step_cut_buckets/plot.py:28:main\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/test_bank_step_cut_buckets.py:26-36 tracks live capacity, and scripts/prototypes/bank_step_cut_buckets/plot.py:28-37 uses the shared renderer, but line 83 does not prove a valid cell occupies the overflow bucket.\nSCORE evidence: 14\nJUSTIFICATION evidence: suite-base-booking.log:18-19 and suite-head-booking.log:5-6 are complete green arms, while behavior-capacity-reverted.log:2-4 and negative-finite-sirius.log:4-6 reproduce the prior guard failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eight paths in git diff 31dad0d9..72e0ab4f are all within the source manifest.md orientation_write_paths, including the explicitly granted scripts/prototypes/bank_step_speed/plot_stage.py.\nSCORE durability: 10\nJUSTIFICATION durability: tests/test_bank_step_cut_buckets.py:83 compares chosen[-1] to the value appended to chosen and line 36 infers two buckets from the supplied flags, so neither assertion fails when the valid cell is handled by the first sorted bucket.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/bank_step_speed/plot_stage.py:43-53 extends the existing plot interface, but scripts/prototypes/bank_step_cut_buckets/check_review.py:14 requires a test spelling absent from the reviewed head.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_step_cut_buckets/plot.py:7 extends scripts/prototypes/bank_step_speed/plot_stage.py:27-34, while scripts/prototypes/bank_step_cut_buckets/probe_guards.py:23-28 duplicates the module loader already owned by scripts/prototypes/bank_step_cut_buckets/verify.py:20-25.\nFINDING tests/test_bank_step_cut_buckets.py:83 blocking: chosen[-1] is the locally appended overflow_cell, but current.py:792 gathers flagged indices in ascending order; the test and its count assertion can pass with the only valid normal-form cell in the first bucket, so the numerical comparison at lines 90-95 does not prove overflow-bucket correctness.\nFINDING scripts/prototypes/bank_step_cut_buckets/check_review.py:14 non-blocking: the capacity check requires the old chosen = cut[: capacity + 1] text, absent from the reviewed test, so this added checker rejects its own head; folded into the bank-step-cut-buckets overflow-witness repair.\nFINDING scripts/prototypes/bank_step_cut_buckets/probe_guards.py:23 non-blocking: load duplicates the path-based module loader in scripts/prototypes/bank_step_cut_buckets/verify.py:20-25 rather than extending or wrapping it; exempted because this test-only probe does not fork production behavior.\n",
+  "review_run_id": "r-20261103T085318109670-review-of-bank-step-cut-buckets-72e0ab4f58db",
+  "reviewed_base_sha": "31dad0d9a48813b2be16bfae05274be63a58cb2d",
+  "reviewed_head_sha": "72e0ab4f58db13dc3f5769ae0c71fc0dc4c31469",
+  "reviewed_run_id": "r-20261103T063317710937-bank-step-cut-buckets",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T09:13:37.958167+00:00",
+  "total": 79
+}

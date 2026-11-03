@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T08:58:23Z",
+  "figures_reviewed": [
+    {
+      "drawing_script": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T085505296059-review-of-bank-step-cut-buckets-72e0ab4f58db-figure/image-0.png",
+      "repository_path": "docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f304bbe1b38",
+      "line": 81,
+      "severity": "non-blocking",
+      "summary": "The bucketed arm's value labels are drawn in the bar fill colour #2e8b57, giving about 4.25:1 against white where the grey arm's labels use #666666 at about 5.7:1; fourteen-point direct labels sit marginally under the 4.5:1 AA threshold, so the after-arm numbers are the harder of the two sets to read at a glance even though they are the ones the figure exists to report."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: category labels at #525150 (about 8:1 on white), axis text near black (about 19:1), grey value labels at #666666 (about 5.7:1) and both bar fills above 3:1 on white; the green value labels reuse the bar green at about 4.25:1, marginally under the 4.5:1 AA threshold for 14 pt text, recorded as a non-blocking finding.",
+    "data_ink": "pass: bar length is the only quantity encoded, the four numbers a reader needs (booking tangent 27.77 to 13.80 ms, whole step 43.07 to 28.92 ms) are visible as bars and written at their ends, and nothing else is drawn on the plot field.",
+    "decoration": "pass: white background, two flat fills (#929292 grey, #2e8b57 green), no gridlines, no band, no gradient, no frame and no title text; only the left axis line, the bottom axis line and their tick marks are present.",
+    "label_collision": "pass: no label is clipped and none overlaps another label or the data. The longest category label starts at x=247 of a 1399 px render, the bottom axis label ends at y=683 of 720, the rightmost value label ends at x=1358, and every value label begins 7 px beyond its bar end with a 5 px gap between the paired bars.",
+    "legibility": "pass: five category rows, each with a grey base bar above a green bucketed bar, a linear warm wall [ms] axis ticked 0 to 50, a frameless two-entry legend at the top, and every bar ending in its own two-decimal value label; the whole picture reads at a glance.",
+    "table_form": "pass: this is a paired before/after magnitude comparison in which bar length carries the point; the launch counts and compiled-interior census that are naturally tabular live in the evidence fragment's device table, not in the image."
+  },
+  "prior_finding_state": "The previous figure review at head 31dad0d9a488 recorded one non-blocking finding that the four stage rows read as a decomposition of the whole step while summing to 70.64 ms base against a 43.07 ms whole-step bar. At the reviewed head the evidence fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-step-cut-buckets.html states 'These stage rows overlap and do not sum to the whole-step bar', so that finding is answered by the caption and is not repeated here.",
+  "project": "nova",
+  "raw_text": "RUBRIC reviewed: image-0.png, the rendered PNG of docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg at reviewed head 72e0ab4f58db13dc3f5769ae0c71fc0dc4c31469 over base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4; judged only from the rendered image.\nRUBRIC legibility: pass: five rows of paired grey and green bars on a linear warm wall [ms] axis (0-50) with a two-entry legend and a value label at every bar end; readable at a glance.\nRUBRIC data_ink: pass: bar length carries the measurement, the booking-tangent and whole-step changes are visible as bar lengths, and each value is written at its bar end; no gridlines or shading.\nRUBRIC decoration: pass: white background, two flat fills, no gradient, band, frame or title.\nRUBRIC contrast: pass: category and axis text are dark on white, grey value labels at about 5.7:1; the green value labels reuse the bar green at about 4.25:1, recorded as a non-blocking finding.\nRUBRIC table_form: pass: a paired before/after magnitude comparison where bar length is the point; tabular launch and census data stay in the evidence table.\nRUBRIC label_collision: pass: no clipped or overlapping label; the longest category label starts at x=247 of 1399, the axis label ends at y=683 of 720, and each value label clears its bar end by 7 px.\nFINDING scripts/prototypes/bank_step_speed/plot_stage.py:81: non-blocking: the bucketed arm's value labels use the #2e8b57 bar fill, about 4.25:1 on white against the grey arm's #666666 at about 5.7:1, marginally under the 4.5:1 AA threshold for 14 pt labels.\n",
+  "review_run_id": "r-20261103T085505296059-review-of-bank-step-cut-buckets-72e0ab4f58db-figure",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "72e0ab4f58db13dc3f5769ae0c71fc0dc4c31469",
+  "reviewed_run_id": "r-20261103T063317710937-bank-step-cut-buckets",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T09:06:10.062891+00:00",
+  "total": null
+}

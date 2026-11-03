@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="110">
+<meta name="plan-version" content="111">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -425,6 +425,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261103T072230495942-review-of-bank-step-cut-buckets-31dad0d9a488-figure" data-who="reckon-build" data-when="2026-11-03T07:48:22.712Z">
     <div class="r-comment-body"><p>no plan section is edited by this node; the deliverable is the figure review record, which promotion reads as the figure review of run r-20261103T063317710937-bank-step-cut-buckets at head 31dad0d9a48813b2be16bfae05274be63a58cb2d.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261102T201046545724-bank-step-batch" data-who="reckon-build" data-when="2026-11-03T06:36:24Z">
+    <div class="r-comment-body"><p>bank-step-batch adds support_read.step_batch and measures it at the diverted 550-cell state on one H200: batching does not help the step as built, because the read falls from 53.81 to 12.87 ms per slice between one and sixteen slices while the vmapped booking tangent and its assembly stay at 109 to 111 ms per slice against 27.87 ms unbatched, and the same five fusions cost 4.5 times as much per lane under vmap with nothing converted into a sort or a select; the residual alternation between 3.19e-10 and 1.64e-7 belongs to the operator iteration and not to the batch, and the batch pays for its slowest lane (20 to 22 steps at four lanes against 3 unbatched), while the frozen-lane batch meets the 1e-10 bound on every lane and agrees with each lane own solve inside a precision budget of 1e-8 of the flux span and 5e-4 of the minor radius.</p></div>
 </div>
 </section>
 </main>

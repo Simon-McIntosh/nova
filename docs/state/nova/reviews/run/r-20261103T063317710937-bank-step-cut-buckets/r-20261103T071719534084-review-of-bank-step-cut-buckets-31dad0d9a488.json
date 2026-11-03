@@ -10,6 +10,18 @@
     "nova/equilibrium/support_read.py:1093:_local_booking_sensitivities"
   ],
   "completed_at": "2026-11-03T07:33:18Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bank-step-cut-buckets",
+      "recorded_at": "2026-11-03T07:41:51.029791+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-step-cut-buckets",
+      "recorded_at": "2026-11-03T07:41:54.804629+00:00"
+    }
+  },
   "dispatched_at": "2026-11-03T07:21:45Z",
   "finding_dispositions": {
     "0": {
@@ -21,6 +33,11 @@
       "kind": "folded",
       "node": "bank-step-cut-buckets",
       "recorded_at": "2026-11-03T07:41:34.831322+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-step-cut-buckets",
+      "recorded_at": "2026-11-03T07:41:47.762234+00:00"
     }
   },
   "findings": [

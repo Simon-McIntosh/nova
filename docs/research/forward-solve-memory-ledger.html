@@ -80,10 +80,27 @@
 
 <h2 id="s5">§5 — The spawn-pool OOM</h2>
 <p>A worker process that has imported the producer module and built nothing else holds <strong>0.672 GB</strong> resident, of which 0.467 GB is the interpreter, <code>nova</code> and <code>jaxlib</code> and 0.205 GB is the producer module's own import. The task on top of that import is the machine description (0.68 GB) plus the operands (0.11 GB) plus profile build (0.77 GB transient), and then the solve's 9.58 GB.</p>
-<p>Ten such workers each rebuilding the operands and each compiling a solve program is therefore <strong>at least 6.7 GB of import floor alone</strong>, plus 9.58 GB per worker that reaches a solve, before any input data: 10 × 0.672 GB = 6.7 GB idle, and 10 × (0.672 + 9.58 + 1.5) ≈ 118 GB once each is solving. That is the OOM on titan: the pool does not fail because one worker is large, it fails because the <strong>per-worker solve program is 9.58 GB and is traced and compiled in every process</strong>. The 26,500 × 24 conductor matrix that ran out of memory is 5.1 MB as an array; the pool rebuilt a program around it in ten processes at once.</p>
+<p>Ten such workers each rebuilding the operands and each compiling a solve program is therefore <strong>at least 6.7 GB of import floor alone on a CPU node, or 43.8 GB on a GPU node</strong>, where one worker's import alone is the 4.38 GB measured in §6. Adding the solve, one GPU worker that reaches it holds 22.28 GB: ten of them is 223 GB, which is past titan's 256 GB once the launcher and the input data hold anything at all. That is the OOM on titan, and it is not the conductor matrix: the pool does not fail because one worker is large, it fails because the <strong>per-worker solve program is 9.58 GB on CPU and 15.91 GB on the H200 rung, and it is traced and compiled again in every process</strong>. The 26,500 × 24 conductor matrix that ran out of memory is 5.1 MB as an array.</p>
 
 <h2 id="s6">§6 — The device arm</h2>
-<p>Recorded in <code>ledger-gpu.json</code> beside this document, from the separate H200 submission. Its memory statistics are taken from <code>memory_stats()</code> and are not comparable line-for-line with the host RSS above; the row is labelled on the rung it ran on. Where the device arm completes, its rows stand beside the CPU rows and the rung is printed on every line.</p>
+<p>The same producer on the H200 rung (node <code>98dci4-gpu-0003</code>, <code>JAX_PLATFORMS=cuda,cpu</code>, SLURM job 1304021, revision 8173f9418). Host RSS, not device bytes — the device statistics are in the run's log and its ledger JSON.</p>
+<table>
+<thead><tr><th>Phase</th><th>Wall s</th><th>RSS after GB</th><th>Peak GB</th></tr></thead>
+<tbody>
+<tr><td>interpreter + nova/jax import (CUDA backend)</td><td>3.2</td><td>0.632</td><td>0.628</td></tr>
+<tr><td>producer module import</td><td>5.6</td><td><strong>4.380</strong></td><td>4.377</td></tr>
+<tr><td>machine description</td><td>0.45</td><td>5.068</td><td>5.066</td></tr>
+<tr><td>operand build</td><td>14.1</td><td>5.174</td><td>5.212</td></tr>
+<tr><td>profile build</td><td>5.1</td><td>5.374</td><td>5.970</td></tr>
+<tr><td>flux-map trace and lower</td><td>3.2</td><td>5.601</td><td>5.970</td></tr>
+<tr><td>flux-map compile</td><td>10.1</td><td>6.074</td><td>6.071</td></tr>
+<tr><td>flux-map first execute</td><td>0.080</td><td>6.078</td><td>6.075</td></tr>
+<tr><td>flux-map warm execute</td><td>0.013</td><td>6.078</td><td>6.075</td></tr>
+<tr><td><strong>present-route solve</strong></td><td><strong>687.9</strong></td><td><strong>21.990</strong></td><td><strong>22.277</strong></td></tr>
+</tbody>
+</table>
+<p>Two rung facts follow. The solve phase's growth is <strong>15.91 GB on the H200 against 9.58 GB on the CPU rung</strong>, so a device-rung attribution must not be read as a CPU one; the shape and the phase are identical and only the backend's lowering and buffers differ. And the import floor is <strong>4.38 GB per process on a GPU node against 0.672 GB on a CPU node</strong>, which is the number that governs a spawn pool placed on a GPU node.</p>
+<p>The job's own accounting: <code>sacct</code> MaxRSS <strong>11,838,892 KiB (11.29 GiB)</strong> for the CPU-rung job 1304001, which ran 40 minutes and was stopped at its time limit in the array census; the H200 job 1304021 likewise reached its limit after the solve phase. Neither job wrote its ledger JSON, so the array census, the bank attempt outcome and the device <code>memory_stats()</code> are not in hand: they are the next reader's first command, and §9 says so.</p>
 
 <h2 id="s7">§7 — The display coupling</h2>
 <p><strong>Yes — the display coupling can be served from the bank's own response builders, evaluated at display points, instead of each producer's per-point kernel.</strong> <code>nova/equilibrium/display_flux.py</code>'s <code>DisplayCoupling</code> is a pair of callables: <code>plasma(points)</code> returns the uniform, radial and vertical moment columns at <code>(n, 2)</code> target points, and <code>external(points)</code> returns the conductor response there. That is exactly what a <code>SupportOperands</code> carries, at mesh nodes rather than at display points: <code>rows</code> is the moment-blocked source response and <code>exterior</code> the external jet.</p>
@@ -102,7 +119,7 @@
 </table>
 
 <h2 id="s9">§9 — What this does not settle</h2>
-<p>The 9.58 GB is measured as a phase, not yet split inside it: the array census and the solve program's <code>memory_analysis()</code> are in the ledger JSON and are the next reader's first stop. The solve's own trace/lower/compile split is not recorded, so the statement "the program is 9.58 GB" is about where the memory is <em>allocated</em>, not which of lowering, compile or execution holds it. The device arm's numbers belong to the H200 and are reported with their own rung.</p>
+<p>The 9.58 GB on the CPU rung and 15.91 GB on the H200 rung are measured as phases, not yet split inside them. The array census and the solve program's <code>memory_analysis()</code> were written by no job that reached its time limit, so they are the next reader's first measurement rather than a conclusion of this record. The statement "the phase costs 9.58 GB" is about where the memory is <em>allocated</em>, not which of lowering, compile or execution holds it. A follow-up that takes the census at intervals while the solve phase runs will answer that; the probe already emits a begin line per phase, so the phase is named even when a job is stopped at its limit.</p>
 </main>
 </body>
 </html>

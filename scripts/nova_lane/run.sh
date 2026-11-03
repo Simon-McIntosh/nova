@@ -127,6 +127,7 @@ run_payload() {
   if ((${#pythonpath_extra[@]})); then extra=":$(join_by ':' "${pythonpath_extra[@]}")"; fi
   export PYTHONPATH="${repository_root}${extra}"
   export JAX_PLATFORMS="${platforms}"
+  export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none
   local pair
   for pair in ${env_pairs[@]+"${env_pairs[@]}"}; do export "${pair?}"; done
 
@@ -142,6 +143,7 @@ run_payload() {
     printf 'PYTHON=%s\n' "${SHARED_PYTHON}"
     printf 'PYTHONPATH=%s\n' "${PYTHONPATH}"
     printf 'JAX_PLATFORMS=%s\n' "${JAX_PLATFORMS}"
+    printf 'JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=%s\n' "${JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES}"
     printf 'TMPDIR=%s\n' "${TMPDIR}"
     printf 'MODE=%s\n' "${mode}"
     if [[ "${mode}" == pytest ]]; then printf 'PYTEST_TIMEOUT=%s\n' "${pytest_timeout}"; fi

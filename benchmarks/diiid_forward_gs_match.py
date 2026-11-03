@@ -54,6 +54,11 @@ from benchmarks.diiid_corpus_conventions import (
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.display_flux import (
+    DisplayCoupling,
+    DisplayFluxMap,
+    build_display_flux_map,
+)
 from nova.equilibrium.connectivity_boundary import (
     traced_margin_candidate_diagnostics,
 )
@@ -279,6 +284,32 @@ class MatchMetrics:
 
 
 @dataclass(frozen=True)
+class DisplayMapRecord:
+    """One frame's fine display flux map, as receipts and panels read it.
+
+    The map is evaluated from the state's own currents on a grid finer than the
+    solve lattice, so its separatrix is the field's own rather than a linear
+    interpolation of the lattice's cells.
+    """
+
+    spacing_m: float
+    radial_points: int
+    vertical_points: int
+    saddle_rz_m: tuple[float, float]
+    lattice_saddle_rz_m: tuple[float, float]
+    saddle_offset_mm: float
+    saddle_converged: bool
+    saddle_flux_wb: float
+    separatrix_symmetric_sup_distance_m: float | None
+    separatrix_symmetric_rms_distance_m: float | None
+    separatrix_saddle_to_label_x_m: float | None
+    separatrix_closed_points: int
+    max_node_mismatch_wb: float
+    reproduction_relative_error: float
+    build_seconds: float
+
+
+@dataclass(frozen=True)
 class LandmarkDisplacement:
     """Signed Nova-minus-EFIT displacement of one geometric landmark."""
 
@@ -332,6 +363,7 @@ class FrameResult:
     solve_exception_class: str | None = None
     displacement_decomposition: DisplacementDecomposition | None = None
     banked_read: dict[str, Any] = field(default_factory=dict)
+    display_map: DisplayMapRecord | None = None
 
 
 @dataclass(frozen=True)
@@ -1397,6 +1429,80 @@ def _assembled_boundary_geometry(
     return closed, open_branches
 
 
+def _display_coupling(
+    profile: ForwardProfile, machine, names: tuple[str, ...], current: np.ndarray
+) -> DisplayCoupling:
+    """Return the target-point coupling the frame's own solve was built from.
+
+    The plasma columns are the same uniform ``hybrid_greens`` block the solve
+    lattice consumes, evaluated at whatever points the panel asks for; the
+    operator carries no radial or vertical plasma moment matrices here, so
+    those columns are zero exactly as the solve's own raster image is.  The
+    conductor flux is the vacuum response contracted against the frame's
+    complete 24-conductor current.
+    """
+
+    lattice = profile.lattice
+    cells = np.asarray(lattice.coordinate, dtype=float)
+    width = float(np.diff(np.asarray(lattice.radius, dtype=float)).mean())
+    vertical_extent = float(np.diff(np.asarray(lattice.height, dtype=float)).mean())
+    by_name = {item.name: item for item in machine.physical.conductors}
+    vertices = [by_name[name].vertices for name in names]
+
+    def plasma(points: np.ndarray):
+        """Return the uniform, radial and vertical plasma columns."""
+        block = _green_block(
+            np.asarray(points, dtype=float), cells, width, vertical_extent
+        )
+        return block, np.zeros_like(block), np.zeros_like(block)
+
+    def external(points: np.ndarray) -> np.ndarray:
+        """Return the conductor-only flux [Wb] at ``points``."""
+        points = np.asarray(points, dtype=float)
+        flux = np.zeros(points.shape[0], dtype=np.float64)
+        for vertex, value in zip(vertices, current, strict=True):
+            flux += value * polygon_greens(points[:, 0], points[:, 1], vertex)[0]
+        return flux
+
+    return DisplayCoupling(plasma=plasma, external=external)
+
+
+def _display_map(
+    profile: ForwardProfile,
+    equilibrium,
+    machine,
+    names: tuple[str, ...],
+    current: np.ndarray,
+) -> tuple[DisplayFluxMap, dict[str, Any]]:
+    """Return the frame's fine display map and the rig it was drawn from."""
+
+    coupling = _display_coupling(profile, machine, names, current)
+    display = build_display_flux_map(
+        profile, np.asarray(equilibrium.flux, dtype=float), coupling=coupling
+    )
+    return display, {"coupling": coupling}
+
+
+def _display_separatrix(
+    display,
+) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
+    """Return the display map's own closed separatrix and its open legs."""
+
+    branches = display.branches
+    if not branches:
+        return np.zeros((0, 2)), ()
+    closed = _sample_cubic_branch(
+        branches["closed_controls_rz"], branches["closed_valid"]
+    )
+    open_branches = tuple(
+        _sample_cubic_branch(
+            branches["open_controls_rz"][index], branches["open_valid"][index]
+        )
+        for index in np.flatnonzero(branches["open_branch_valid"])
+    )
+    return closed, open_branches
+
+
 def _grid_axis_rz(
     radius: np.ndarray,
     height: np.ndarray,
@@ -1916,6 +2022,58 @@ def solve_frame(
         reference_x_points_rz_m=labelled_x_point[None, :],
         read_status="qualified_axis",
     )
+    machine = dataset_machine_description(
+        row, source_row=str(row.get("_source_path", "corpus row"))
+    )
+    display = None
+    try:
+        display, _rig = _display_map(
+            profile,
+            equilibrium,
+            machine,
+            tuple(current_adapter.resolution.names),
+            complete_current,
+        )
+        display_closed, display_open = _display_separatrix(display)
+        display_comparison = compare_closed_boundaries(
+            display_closed,
+            labelled_closed_boundary,
+            class_margin=float(topology.class_margin),
+            reference_mode=BoundaryMode.DIVERTED,
+            predicted_saddle_rz_m=np.asarray(display.saddle_rz, dtype=float),
+            reference_x_points_rz_m=labelled_x_point[None, :],
+        )
+        display_record = DisplayMapRecord(
+            spacing_m=float(display.spacing_m),
+            radial_points=int(display.radius.size),
+            vertical_points=int(display.height.size),
+            saddle_rz_m=tuple(float(value) for value in display.saddle_rz),
+            lattice_saddle_rz_m=tuple(
+                float(value) for value in display.lattice_saddle_rz
+            ),
+            saddle_offset_mm=float(display.saddle_offset_mm),
+            saddle_converged=bool(display.saddle_converged),
+            saddle_flux_wb=float(display.saddle_flux),
+            separatrix_symmetric_sup_distance_m=(
+                display_comparison.symmetric_sup_distance_m
+            ),
+            separatrix_symmetric_rms_distance_m=(
+                display_comparison.symmetric_rms_distance_m
+            ),
+            separatrix_saddle_to_label_x_m=display_comparison.x_point_distance_m,
+            separatrix_closed_points=int(display_closed.shape[0]),
+            max_node_mismatch_wb=float(display.max_node_mismatch_wb),
+            reproduction_relative_error=float(display.reproduction_relative_error),
+            build_seconds=float(display.build_seconds),
+        )
+    except (NoQualifiedAxisError, ConstraintViolationError) as error:
+        display_record = None
+        display_closed, display_open = np.zeros((0, 2)), ()
+        print(
+            f"DISPLAY_MAP_UNAVAILABLE {Path(row['_source_path']).name}:{frame} "
+            f"{type(error).__name__}: {error}",
+            flush=True,
+        )
     result = FrameResult(
         shot=Path(row["_source_path"]).name,
         frame=frame,
@@ -1967,6 +2125,7 @@ def solve_frame(
         resolved_defaults=resolved_defaults,
         displacement_decomposition=displacement_decomposition,
         banked_read=banked_read,
+        display_map=display_record,
     )
     fields = {
         "radius": np.asarray(radius),
@@ -1978,6 +2137,15 @@ def solve_frame(
         "predicted_closed_boundary": predicted_closed_boundary,
         "predicted_terminal_boundary": predicted_terminal_boundary,
         "predicted_open_branches": predicted_open_branches,
+        "display": display,
+        "display_closed_boundary": display_closed,
+        "display_open_branches": display_open,
+        "display_axis_rz": (
+            None if display is None else np.asarray(topology.axis, dtype=float)
+        ),
+        "display_saddle_rz": (
+            None if display is None else np.asarray(display.saddle_rz, dtype=float)
+        ),
         "pseudo_wall": wall,
     }
     return result, fields
@@ -2256,6 +2424,23 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
     restored["active_set_cycle_damping_activations"] = tuple(
         restored["active_set_cycle_damping_activations"]
     )
+    display_values = restored.get("display_map")
+    if display_values is not None:
+        display_values = dict(display_values)
+        for name in (
+            "saddle_rz_m",
+            "lattice_saddle_rz_m",
+            "separatrix_symmetric_sup_distance_m",
+            "separatrix_symmetric_rms_distance_m",
+            "separatrix_saddle_to_label_x_m",
+            "saddle_offset_mm",
+            "saddle_flux_wb",
+            "max_node_mismatch_wb",
+            "reproduction_relative_error",
+            "build_seconds",
+        ):
+            display_values[name] = _checkpoint_float(display_values[name])
+        restored["display_map"] = DisplayMapRecord(**display_values)
     return FrameResult(**restored)
 
 
@@ -2597,9 +2782,65 @@ def summarize(
                     >= REGISTERED_MEDIAN_INTERIOR_R2_BAR
                     else "FAIL"
                 ),
+                "fine_map": (
+                    None if item.display_map is None else asdict(item.display_map)
+                ),
             }
             for item in results
         ],
+        "fine_map_separatrix": {
+            "source": (
+                "nova.equilibrium.display_flux.build_display_flux_map on the "
+                "state's own currents, separatrix assembled at the map's own "
+                "polished saddle value"
+            ),
+            "separation_definition": (
+                "symmetric nearest-point sup and RMS distance between the "
+                "fine-map closed separatrix and the labelled EFIT LCFS"
+            ),
+            "frames_drawn": sum(1 for item in results if item.display_map is not None),
+            "frames_with_separatrix": sum(
+                1
+                for item in results
+                if item.display_map is not None
+                and item.display_map.separatrix_closed_points > 0
+            ),
+            "symmetric_rms_distance_m": _optional_distribution(
+                [
+                    item.display_map.separatrix_symmetric_rms_distance_m
+                    for item in results
+                    if item.display_map is not None
+                ]
+            ),
+            "symmetric_sup_distance_m": _optional_distribution(
+                [
+                    item.display_map.separatrix_symmetric_sup_distance_m
+                    for item in results
+                    if item.display_map is not None
+                ]
+            ),
+            "saddle_offset_mm": _optional_distribution(
+                [
+                    item.display_map.saddle_offset_mm
+                    for item in results
+                    if item.display_map is not None
+                ]
+            ),
+            "max_node_mismatch_wb": _optional_distribution(
+                [
+                    item.display_map.max_node_mismatch_wb
+                    for item in results
+                    if item.display_map is not None
+                ]
+            ),
+            "reproduction_relative_error": _optional_distribution(
+                [
+                    item.display_map.reproduction_relative_error
+                    for item in results
+                    if item.display_map is not None
+                ]
+            ),
+        },
         "metrics": {
             "interior_r_squared": _distribution(r_squared),
             "interior_fractional_rms": _distribution(
@@ -2678,45 +2919,93 @@ def frame_figure(
             )
             continue
         radius, height = frame["radius"], frame["height"]
-        columns = (
-            ("labelled", "Labelled psi", "viridis"),
-            ("predicted", "Forward psi", "viridis"),
-            ("difference", "Forward - label", "coolwarm"),
-        )
-        for axis, (name, title, colour) in zip(row_axes, columns, strict=True):
-            image = axis.pcolormesh(
-                radius, height, frame[name].T, shading="auto", cmap=colour
-            )
+        display = frame.get("display")
+        label_min = float(np.nanmin(frame["labelled"]))
+        label_max = float(np.nanmax(frame["labelled"]))
+        levels = np.linspace(label_min, label_max, 21)
+        for axis, name in zip(row_axes[:2], ("labelled", "display"), strict=True):
+            if name == "display" and display is not None:
+                axis.contour(
+                    np.asarray(display.radius),
+                    np.asarray(display.height),
+                    np.asarray(display.flux).T,
+                    levels=levels,
+                    colors="tab:blue",
+                    linewidths=0.5,
+                )
+            else:
+                axis.contour(
+                    radius,
+                    height,
+                    frame["labelled"].T,
+                    levels=levels,
+                    colors="0.35",
+                    linewidths=0.5,
+                )
             axis.plot(
                 frame["labelled_closed_boundary"][:, 0],
                 frame["labelled_closed_boundary"][:, 1],
                 color="black",
-                linewidth=0.8,
+                linewidth=0.9,
                 label="label LCFS",
             )
-            if len(frame["predicted_closed_boundary"]):
+            if len(frame["display_closed_boundary"]):
                 axis.plot(
-                    frame["predicted_closed_boundary"][:, 0],
-                    frame["predicted_closed_boundary"][:, 1],
+                    frame["display_closed_boundary"][:, 0],
+                    frame["display_closed_boundary"][:, 1],
                     color="tab:red",
-                    linestyle="--",
-                    linewidth=0.9,
-                    label="forward closed boundary",
+                    linewidth=1.1,
+                    label="fine-map separatrix",
                 )
-            for branch in frame["predicted_open_branches"]:
+            for branch in frame["display_open_branches"]:
                 axis.plot(
                     branch[:, 0],
                     branch[:, 1],
                     color="tab:red",
                     linestyle=":",
-                    linewidth=0.7,
-                    label="forward open leg",
+                    linewidth=0.8,
+                    label="fine-map open leg",
+                )
+            axis_rz = frame["display_axis_rz"]
+            if axis_rz is not None and np.all(np.isfinite(axis_rz)):
+                axis.plot(
+                    float(axis_rz[0]),
+                    float(axis_rz[1]),
+                    marker="^",
+                    color="black",
+                    markersize=5,
+                    linestyle="none",
+                    label="magnetic axis",
+                )
+            saddle_rz = frame["display_saddle_rz"]
+            if saddle_rz is not None and np.all(np.isfinite(saddle_rz)):
+                axis.plot(
+                    float(saddle_rz[0]),
+                    float(saddle_rz[1]),
+                    marker="P",
+                    color="tab:red",
+                    markersize=6,
+                    linestyle="none",
+                    label="admitted X-point",
                 )
             axis.set_aspect("equal")
             axis.set_xlabel("R [m]")
             axis.set_ylabel("Z [m]")
-            axis.set_title(title)
-            figure.colorbar(image, ax=axis, label="total poloidal flux [Wb]")
+            axis.set_title("Labelled psi" if name == "labelled" else "Forward psi")
+        span = label_max - label_min
+        contour = row_axes[2].contour(
+            radius,
+            height,
+            frame["difference"].T,
+            levels=np.linspace(-0.1 * span, 0.1 * span, 21),
+            colors="0.2",
+            linewidths=0.5,
+        )
+        row_axes[2].set_aspect("equal")
+        row_axes[2].set_xlabel("R [m]")
+        row_axes[2].set_ylabel("Z [m]")
+        row_axes[2].set_title("Forward - label")
+        figure.colorbar(contour, ax=row_axes[2], label="flux difference [Wb]")
         row_axes[0].text(
             0.01,
             0.99,
@@ -2726,19 +3015,30 @@ def frame_figure(
             transform=row_axes[0].transAxes,
             va="top",
             fontsize=7,
-            color="white",
         )
     axes[0, 0].legend(loc="lower left", fontsize=7)
     figure.savefig(path, dpi=180)
     plt.close(figure)
 
 
-def cohort_figure(results: list[FrameResult], path: Path) -> None:
+def _separatrix_metric(result: FrameResult, name: str) -> float:
+    """Return a fine-map separatrix measurement, NaN when none was drawn."""
+
+    record = result.display_map
+    if record is None:
+        return float("nan")
+    value = getattr(record, name)
+    return float("nan") if value is None else float(value)
+
+
+def cohort_figure(
+    results: list[FrameResult], fields: list[dict[str, Any]], path: Path
+) -> None:
     """Plot the four declared match categories over the complete cohort."""
 
     index = np.arange(len(results))
     labels = [f"{Path(item.shot).stem[-6:]}:{item.frame}" for item in results]
-    figure, axes = plt.subplots(2, 2, figsize=(11, 7), constrained_layout=True)
+    figure, axes = plt.subplots(2, 3, figsize=(16, 7), constrained_layout=True)
     axes[0, 0].plot(
         index, [item.metrics.interior_r_squared for item in results], "o-", label="R2"
     )
@@ -2777,9 +3077,29 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
         "^:",
         label="saddle to EFIT X",
     )
+    axes[0, 1].plot(
+        index,
+        [
+            _separatrix_metric(item, "separatrix_symmetric_rms_distance_m")
+            for item in results
+        ],
+        "o--",
+        color="tab:purple",
+        label="fine-map separatrix RMS",
+    )
+    axes[0, 1].plot(
+        index,
+        [
+            _separatrix_metric(item, "separatrix_symmetric_sup_distance_m")
+            for item in results
+        ],
+        "s--",
+        color="tab:purple",
+        label="fine-map separatrix sup",
+    )
     axes[0, 1].set_title("Closed-boundary and X-point separation")
     axes[0, 1].set_ylabel("m")
-    axes[0, 1].legend(fontsize=8)
+    axes[0, 1].legend(fontsize=7)
     axes[1, 0].plot(
         index,
         [item.metrics.magnetic_axis_displacement_mm for item in results],
@@ -2794,9 +3114,43 @@ def cohort_figure(results: list[FrameResult], path: Path) -> None:
         "o-",
     )
     axes[1, 1].set_title("Signed relative q95 error")
-    for axis in axes.ravel():
+    axes[0, 2].plot(
+        index,
+        [_separatrix_metric(item, "saddle_offset_mm") for item in results],
+        "o-",
+        label="lattice-to-map saddle offset",
+    )
+    axes[0, 2].plot(
+        index,
+        [
+            float("nan")
+            if item.display_map is None
+            else 1.0e3 * item.display_map.max_node_mismatch_wb
+            for item in results
+        ],
+        "s:",
+        color="tab:orange",
+        label="node mismatch [mWb]",
+    )
+    axes[0, 2].set_title("Fine-map interior consistency")
+    axes[0, 2].set_ylabel("mm or mWb")
+    axes[0, 2].legend(fontsize=7)
+    overlay = axes[1, 2]
+    for item, frame in zip(results, fields, strict=True):
+        labelled = frame.get("labelled_closed_boundary")
+        if labelled is not None:
+            labelled = np.asarray(labelled, dtype=float)
+            overlay.plot(labelled[:, 0], labelled[:, 1], color="0.55", linewidth=0.8)
+        closed = frame.get("display_closed_boundary")
+        if closed is not None and len(closed):
+            closed = np.asarray(closed, dtype=float)
+            overlay.plot(closed[:, 0], closed[:, 1], color="tab:red", linewidth=1.0)
+    overlay.set_aspect("equal")
+    overlay.set_title("Cohort separatrix: label (grey) and fine map (red)")
+    overlay.set_xlabel("R [m]")
+    overlay.set_ylabel("Z [m]")
+    for axis in (axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1], axes[0, 2]):
         axis.set_xticks(index, labels, rotation=45, ha="right", fontsize=7)
-        axis.grid(alpha=0.25)
     figure.savefig(path, dpi=180)
     plt.close(figure)
 
@@ -4995,7 +5349,7 @@ def run(
     _record_publication_artifacts(receipt, output)
     if not restored_results:
         frame_figure(results, fields, output / FRAME_FIGURE_NAME)
-    cohort_figure(results, output / COHORT_FIGURE_NAME)
+    cohort_figure(results, fields, output / COHORT_FIGURE_NAME)
     displacement_path = displacement_output / DISPLACEMENT_FIGURE_NAME
     displacement_figure(results, fields, displacement_path)
     receipt["result"]["displacement_decomposition"]["figure"] = {

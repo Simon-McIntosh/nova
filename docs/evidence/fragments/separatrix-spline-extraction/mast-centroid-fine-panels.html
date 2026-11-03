@@ -47,6 +47,18 @@ root keyed by a digest of the geometry, the points and the shot. A panel is then
 a matrix-vector product with its currents, and so is every perturbed arm of the
 control.</p>
 
+<p id="mast-centroid-fine-panels-floor">The floor is enforced by the builder itself, not by convention: asking it for 0.1 m
+raises <code>display spacing 0.1 m is coarser than the 0.01 m floor</code>, so a
+cheaper render cannot be had by drawing a coarser map and reading it as if it
+were the fine one. A panel is either the 78195-point map or it is not the map.</p>
+
+<p id="mast-centroid-fine-panels-landing">landing: the render cost is measured and bounded, and the display-map
+builder's 10 mm floor is confirmed to be enforced rather than advisory, so the
+panel is 78195 points of fixed, non-amortising compute and nothing cheaper
+counts as the map. The panels themselves are not drawn: the response build has
+not completed, so the redraw gate, the one-percent current control and the PNG
+inspection have not run and are not claimed here.</p>
+
 <p id="mast-centroid-fine-panels-gate">The redraw gate opens each state, rebuilds
 the map from its stored currents and moments, and asserts that the drawn
 contour vertices leave the lattice rows. Its negative control moves one stored

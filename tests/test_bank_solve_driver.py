@@ -13,6 +13,8 @@ configure_dtypes()
 
 from nova.equilibrium import support_read  # noqa: E402
 
+pytestmark = pytest.mark.timeout(1800)
+
 
 class _Reading(NamedTuple):
     membership: jax.Array

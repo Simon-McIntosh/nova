@@ -3,31 +3,31 @@
     "coil_circuit_index": 8,
     "coil_family": "p4_upper",
     "constraint": {
-      "ampere_scale_a": 1152028.202020775,
+      "ampere_scale_a": 1152028.202020777,
       "components": [
         "centroid_z"
       ],
       "definition": "vertical current-centre row, matrix-led over the active mapping",
-      "direction_authority_m_per_a": 8.680343052764662e-07,
+      "direction_authority_m_per_a": 8.680343052764648e-07,
       "drivable_circuits": [
         {
           "circuit": 0,
-          "direction_weight": 0.0835940414387149,
+          "direction_weight": 0.08359404143871882,
           "family": "sol"
         },
         {
           "circuit": 1,
-          "direction_weight": 0.10400910522040814,
+          "direction_weight": 0.10400910522040775,
           "family": "p2_inner_upper"
         },
         {
           "circuit": 2,
-          "direction_weight": 0.13341932655374986,
+          "direction_weight": 0.13341932655374933,
           "family": "p2_outer_upper"
         },
         {
           "circuit": 3,
-          "direction_weight": -0.11918423801521272,
+          "direction_weight": -0.11918423801521269,
           "family": "p2_inner_lower"
         },
         {
@@ -47,39 +47,39 @@
         },
         {
           "circuit": 7,
-          "direction_weight": 0.7191092134103783,
+          "direction_weight": 0.7191092134103787,
           "family": "p4_upper"
         },
         {
           "circuit": 8,
-          "direction_weight": -0.6515561288868682,
+          "direction_weight": -0.6515561288868678,
           "family": "p4_lower"
         },
         {
           "circuit": 9,
-          "direction_weight": 0.5413924725673205,
+          "direction_weight": 0.5413924725673223,
           "family": "p5_upper"
         },
         {
           "circuit": 10,
-          "direction_weight": -0.4883380437073274,
+          "direction_weight": -0.4883380437073262,
           "family": "p5_lower"
         },
         {
           "circuit": 11,
-          "direction_weight": 0.840890402758656,
+          "direction_weight": 0.8408904027586572,
           "family": "p6_upper"
         },
         {
           "circuit": 12,
-          "direction_weight": -0.7577011723556494,
+          "direction_weight": -0.7577011723556487,
           "family": "p6_lower"
         }
       ],
       "position_scale_m": 4.0,
       "selection_rule": "dominant_authority",
       "support": "all_domain",
-      "target_m": 0.03167978092304395,
+      "target_m": 0.031679780923043376,
       "tolerance_m": 1e-06
     },
     "machine": "MAST",
@@ -93,6 +93,7 @@
       "trip_boundary": "fused"
     }
   },
+  "command": "benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr-raster.png --panel-data docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz --panel-figure docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
   "edits": [
     {
       "achieved_class": {
@@ -119,12 +120,12 @@
       "persistent_cache_hits_after": 14,
       "persistent_cache_hits_before": 13,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 0,
-      "persistent_cache_misses_before": 0,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": false,
       "raster_separatrix_vertex_count": 138,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 4643.73647980392,
+      "receipt_wall_milliseconds": 4178.03331092,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -144,18 +145,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.05309179787633928,
+        "residual": 0.05309179787633882,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           18
         ],
         "trip_residual_trace": [
-          0.05309179787633928
+          0.05309179787633882
         ]
       },
-      "solve_wall_milliseconds": 91506.77890703082,
-      "terminal_residual": 1.6253046405485843e-10,
+      "solve_wall_milliseconds": 49701.22741907835,
+      "terminal_residual": 1.6253045653182302e-10,
       "termination": "converged",
       "trip_count": 4,
       "trip_mask_difference_trace": [
@@ -165,22 +166,22 @@
         0
       ],
       "trip_residual_trace": [
-        0.02385570833389106,
-        0.01586786164923978,
-        1.5808287751786494e-10,
-        1.6253046405485843e-10
+        0.023855708333891022,
+        0.015867861649239975,
+        1.5808286811407067e-10,
+        1.6253045653182302e-10
       ],
       "vertical_centroid": {
-        "compensating_current_a": 6400.7318392221905,
-        "compensating_current_norm_a": 13786.574573147278,
-        "observed_m": 0.031679781522685774,
+        "compensating_current_a": 6400.731839222178,
+        "compensating_current_norm_a": 13786.574573147254,
+        "observed_m": 0.03167978152268516,
         "qualified": true,
-        "residual_m": 5.996418223075395e-10,
-        "scaled_residual": 1.4991045557688487e-10,
-        "target_m": 0.03167978092304395,
+        "residual_m": 5.9964178761307e-10,
+        "scaled_residual": 1.499104469032675e-10,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 96150.51415376365,
+      "wall_milliseconds": 53879.25956957042,
       "warm_seed_source": "converged base frame at the shot current"
     },
     {
@@ -203,15 +204,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 138,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 425.4876356571913,
+      "receipt_wall_milliseconds": 253.99025343358517,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -229,18 +230,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.021843590315794612,
+        "residual": 0.02184359031579471,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           45
         ],
         "trip_residual_trace": [
-          0.021843590315794612
+          0.02184359031579471
         ]
       },
-      "solve_wall_milliseconds": 1686.1898880451918,
-      "terminal_residual": 3.1235639881358423e-09,
+      "solve_wall_milliseconds": 1082.2795443236828,
+      "terminal_residual": 3.1235639956017156e-09,
       "termination": "converged",
       "trip_count": 2,
       "trip_mask_difference_trace": [
@@ -248,20 +249,20 @@
         0
       ],
       "trip_residual_trace": [
-        3.159305504073124e-09,
-        3.1235639881358423e-09
+        3.1593055040731227e-09,
+        3.1235639956017156e-09
       ],
       "vertical_centroid": {
-        "compensating_current_a": 5714.010679970113,
-        "compensating_current_norm_a": 12307.441762900162,
-        "observed_m": 0.031679792535390425,
+        "compensating_current_a": 5714.01067997011,
+        "compensating_current_norm_a": 12307.441762900156,
+        "observed_m": 0.03167979253538989,
         "qualified": true,
-        "residual_m": 1.1612346473288682e-08,
-        "scaled_residual": 2.9030866183221704e-09,
-        "target_m": 0.03167978092304395,
+        "residual_m": 1.1612346514922045e-08,
+        "scaled_residual": 2.9030866287305113e-09,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 2111.6762328892946,
+      "wall_milliseconds": 1336.2644203007221,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -284,15 +285,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 143,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 394.74560506641865,
+      "receipt_wall_milliseconds": 236.72682605683804,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -310,18 +311,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.01932392862296848,
+        "residual": 0.019323928622968563,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           18
         ],
         "trip_residual_trace": [
-          0.01932392862296848
+          0.019323928622968563
         ]
       },
-      "solve_wall_milliseconds": 2372.8509694337845,
-      "terminal_residual": 0.005295594131335747,
+      "solve_wall_milliseconds": 1363.0367070436478,
+      "terminal_residual": 0.005295594131335789,
       "termination": "active_set_settled",
       "trip_count": 2,
       "trip_mask_difference_trace": [
@@ -329,20 +330,20 @@
         0
       ],
       "trip_residual_trace": [
-        0.014406293460702949,
-        0.005295594131335747
+        0.014406293460702945,
+        0.005295594131335789
       ],
       "vertical_centroid": {
         "compensating_current_a": 5050.10063655565,
-        "compensating_current_norm_a": 10877.441951424353,
-        "observed_m": 0.051659062556660716,
+        "compensating_current_norm_a": 10877.441951424356,
+        "observed_m": 0.05165906255666031,
         "qualified": false,
-        "residual_m": 0.019979281633616765,
-        "scaled_residual": 0.004994820408404191,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.01997928163361693,
+        "scaled_residual": 0.004994820408404233,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 2767.59603433311,
+      "wall_milliseconds": 1599.7633170336485,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -351,7 +352,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.12260167775452158,
+      "boundary_displacement_m": 0.1226016777545218,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -162971.75124999997,
       "compilation_cache": "hit",
@@ -367,15 +368,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 146,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 395.4154085367918,
+      "receipt_wall_milliseconds": 222.840690985322,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -395,18 +396,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.012045148360549625,
+        "residual": 0.012045148360549806,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           23
         ],
         "trip_residual_trace": [
-          0.012045148360549625
+          0.012045148360549806
         ]
       },
-      "solve_wall_milliseconds": 3538.2299590855837,
-      "terminal_residual": 0.005433738200795326,
+      "solve_wall_milliseconds": 2165.8844873309135,
+      "terminal_residual": 0.005433738200795315,
       "termination": "active_set_settled",
       "trip_count": 4,
       "trip_mask_difference_trace": [
@@ -416,22 +417,22 @@
         0
       ],
       "trip_residual_trace": [
-        0.00595837226551152,
-        0.013784626675796635,
-        0.005488296348494594,
-        0.005433738200795326
+        0.005958372265511487,
+        0.0137846266757968,
+        0.005488296348494578,
+        0.005433738200795315
       ],
       "vertical_centroid": {
-        "compensating_current_a": 4127.622277587606,
+        "compensating_current_a": 4127.622277587604,
         "compensating_current_norm_a": 8890.510299313002,
-        "observed_m": 0.05237561115826914,
+        "observed_m": 0.0523756111582685,
         "qualified": false,
-        "residual_m": 0.020695830235225192,
-        "scaled_residual": 0.005173957558806298,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.020695830235225122,
+        "scaled_residual": 0.005173957558806281,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3933.644764125347,
+      "wall_milliseconds": 2388.724971562624,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -440,7 +441,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.11054373252808114,
+      "boundary_displacement_m": 0.11054373252808136,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -166675.65468749998,
       "compilation_cache": "hit",
@@ -457,15 +458,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 146,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 445.61887346208096,
+      "receipt_wall_milliseconds": 339.07673694193363,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -486,18 +487,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.010169127989609469,
+        "residual": 0.010169127989609285,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           43
         ],
         "trip_residual_trace": [
-          0.010169127989609469
+          0.010169127989609285
         ]
       },
-      "solve_wall_milliseconds": 3534.650245681405,
-      "terminal_residual": 0.005639483770661577,
+      "solve_wall_milliseconds": 2284.1310407966375,
+      "terminal_residual": 0.005639483770661504,
       "termination": "active_set_settled",
       "trip_count": 5,
       "trip_mask_difference_trace": [
@@ -508,23 +509,23 @@
         0
       ],
       "trip_residual_trace": [
-        0.005805478180594939,
-        0.00855544391105162,
-        0.006984032634883558,
-        0.005676479973091665,
-        0.005639483770661577
+        0.005805478180594941,
+        0.008555443911051603,
+        0.006984032634883672,
+        0.005676479973091617,
+        0.005639483770661504
       ],
       "vertical_centroid": {
-        "compensating_current_a": 3594.7684332893623,
-        "compensating_current_norm_a": 7742.79321858952,
-        "observed_m": 0.053303217015299144,
+        "compensating_current_a": 3594.768433289356,
+        "compensating_current_norm_a": 7742.793218589508,
+        "observed_m": 0.05330321701529831,
         "qualified": false,
-        "residual_m": 0.021623436092255192,
-        "scaled_residual": 0.005405859023063798,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.021623436092254936,
+        "scaled_residual": 0.005405859023063734,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3980.2682623267174,
+      "wall_milliseconds": 2623.2074927538633,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -533,7 +534,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.10301142802355942,
+      "boundary_displacement_m": 0.10301142802355827,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -170379.55812499998,
       "compilation_cache": "hit",
@@ -546,15 +547,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 144,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 398.29384349286556,
+      "receipt_wall_milliseconds": 244.9430599808693,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1
@@ -571,37 +572,37 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.008816290764806741,
+        "residual": 0.008816290764806828,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           44
         ],
         "trip_residual_trace": [
-          0.008816290764806741
+          0.008816290764806828
         ]
       },
-      "solve_wall_milliseconds": 1456.5367866307497,
-      "terminal_residual": 0.006117473082976719,
+      "solve_wall_milliseconds": 903.9267394691706,
+      "terminal_residual": 0.006117473082976676,
       "termination": "active_set_settled",
       "trip_count": 1,
       "trip_mask_difference_trace": [
         0
       ],
       "trip_residual_trace": [
-        0.006117473082976719
+        0.006117473082976676
       ],
       "vertical_centroid": {
-        "compensating_current_a": 2514.658124000376,
-        "compensating_current_norm_a": 5416.337166331702,
-        "observed_m": 0.05539947279012549,
+        "compensating_current_a": 2514.6581240003684,
+        "compensating_current_norm_a": 5416.337166331687,
+        "observed_m": 0.05539947279012474,
         "qualified": false,
-        "residual_m": 0.02371969186708154,
-        "scaled_residual": 0.005929922966770385,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.023719691867081366,
+        "scaled_residual": 0.0059299229667703415,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 1854.8299819231033,
+      "wall_milliseconds": 1148.8696113228798,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -610,7 +611,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.10605616741240494,
+      "boundary_displacement_m": 0.10605616741237145,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -174083.4615625,
       "compilation_cache": "hit",
@@ -625,15 +626,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 144,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 426.51359736919403,
+      "receipt_wall_milliseconds": 267.8768839687109,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -652,18 +653,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.007054449260198684,
+        "residual": 0.007054449260198771,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           45
         ],
         "trip_residual_trace": [
-          0.007054449260198684
+          0.007054449260198771
         ]
       },
-      "solve_wall_milliseconds": 2633.8248942047358,
-      "terminal_residual": 0.005934265032096903,
+      "solve_wall_milliseconds": 1719.7918239980936,
+      "terminal_residual": 0.0059342650320968774,
       "termination": "active_set_settled",
       "trip_count": 3,
       "trip_mask_difference_trace": [
@@ -672,21 +673,21 @@
         0
       ],
       "trip_residual_trace": [
-        0.008168349502373606,
-        0.007125222299564785,
-        0.005934265032096903
+        0.008168349502373646,
+        0.007125222299564761,
+        0.0059342650320968774
       ],
       "vertical_centroid": {
-        "compensating_current_a": 2396.235579972841,
-        "compensating_current_norm_a": 5161.266140800998,
-        "observed_m": 0.054772299291606576,
+        "compensating_current_a": 2396.2355799728484,
+        "compensating_current_norm_a": 5161.266140801015,
+        "observed_m": 0.05477229929160591,
         "qualified": false,
-        "residual_m": 0.023092518368562624,
-        "scaled_residual": 0.005773129592140656,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.023092518368562534,
+        "scaled_residual": 0.0057731295921406335,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3060.338055714965,
+      "wall_milliseconds": 1987.6683503389359,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -709,15 +710,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 140,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 433.32515098154545,
+      "receipt_wall_milliseconds": 225.48698261380196,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -735,18 +736,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.006093451387010827,
+        "residual": 0.006093451387011184,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           45
         ],
         "trip_residual_trace": [
-          0.006093451387010827
+          0.006093451387011184
         ]
       },
-      "solve_wall_milliseconds": 3376.211339607835,
-      "terminal_residual": 0.00045599459075924966,
+      "solve_wall_milliseconds": 1878.7583746016026,
+      "terminal_residual": 0.0004559945907592585,
       "termination": "active_set_settled",
       "trip_count": 2,
       "trip_mask_difference_trace": [
@@ -754,20 +755,20 @@
         0
       ],
       "trip_residual_trace": [
-        0.0051543202498605944,
-        0.00045599459075924966
+        0.005154320249860607,
+        0.0004559945907592585
       ],
       "vertical_centroid": {
-        "compensating_current_a": 1404.718340668895,
-        "compensating_current_norm_a": 3025.631231608164,
-        "observed_m": 0.033457370620352596,
+        "compensating_current_a": 1404.7183406689035,
+        "compensating_current_norm_a": 3025.6312316081826,
+        "observed_m": 0.03345737062035207,
         "qualified": false,
-        "residual_m": 0.0017775896973086444,
-        "scaled_residual": 0.0004443974243271611,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.001777589697308693,
+        "scaled_residual": 0.00044439742432717325,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3809.534292668104,
+      "wall_milliseconds": 2104.2451672255993,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -789,15 +790,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 140,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 416.1176588386297,
+      "receipt_wall_milliseconds": 224.4015522301197,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1
@@ -814,37 +815,37 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.0036948416933637396,
+        "residual": 0.0036948416933639196,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           22
         ],
         "trip_residual_trace": [
-          0.0036948416933637396
+          0.0036948416933639196
         ]
       },
-      "solve_wall_milliseconds": 1377.3969262838364,
-      "terminal_residual": 0.002910882415738939,
+      "solve_wall_milliseconds": 726.0845173150301,
+      "terminal_residual": 0.002910882415739069,
       "termination": "active_set_settled",
       "trip_count": 1,
       "trip_mask_difference_trace": [
         0
       ],
       "trip_residual_trace": [
-        0.002910882415738939
+        0.002910882415739069
       ],
       "vertical_centroid": {
-        "compensating_current_a": 517.2219117266936,
-        "compensating_current_norm_a": 1114.0473677073117,
-        "observed_m": 0.04315954128489009,
+        "compensating_current_a": 517.2219117266919,
+        "compensating_current_norm_a": 1114.0473677073082,
+        "observed_m": 0.04315954128489003,
         "qualified": false,
-        "residual_m": 0.011479760361846142,
-        "scaled_residual": 0.0028699400904615355,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.011479760361846655,
+        "scaled_residual": 0.002869940090461664,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 1793.509067967534,
+      "wall_milliseconds": 950.4858572036028,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -853,7 +854,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.11180862396489559,
+      "boundary_displacement_m": 0.11180862396489549,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -185195.17187499997,
       "compilation_cache": "hit",
@@ -868,15 +869,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 136,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 389.7049408406019,
+      "receipt_wall_milliseconds": 214.91126157343388,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -895,18 +896,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.0023328337302153408,
+        "residual": 0.0023328337302152735,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           22
         ],
         "trip_residual_trace": [
-          0.0023328337302153408
+          0.0023328337302152735
         ]
       },
-      "solve_wall_milliseconds": 3472.2076430916786,
-      "terminal_residual": 0.006612423233950622,
+      "solve_wall_milliseconds": 2056.253543123603,
+      "terminal_residual": 0.006612423233950687,
       "termination": "active_set_settled",
       "trip_count": 3,
       "trip_mask_difference_trace": [
@@ -915,21 +916,21 @@
         0
       ],
       "trip_residual_trace": [
-        0.008814635521062658,
-        0.006519449458372826,
-        0.006612423233950622
+        0.008814635521062628,
+        0.006519449458372889,
+        0.006612423233950687
       ],
       "vertical_centroid": {
-        "compensating_current_a": 769.8483801810683,
-        "compensating_current_norm_a": 1658.1810283545144,
-        "observed_m": 0.058058635775684694,
+        "compensating_current_a": 769.848380181086,
+        "compensating_current_norm_a": 1658.1810283545528,
+        "observed_m": 0.05805863577568439,
         "qualified": false,
-        "residual_m": 0.026378854852640743,
-        "scaled_residual": 0.006594713713160186,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.026378854852641014,
+        "scaled_residual": 0.006594713713160253,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3861.9103394448757,
+      "wall_milliseconds": 2271.164510399103,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -938,7 +939,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.06138462247221875,
+      "boundary_displacement_m": 0.061384622472218715,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -188899.07531249998,
       "compilation_cache": "hit",
@@ -952,15 +953,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 140,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 388.26938532292843,
+      "receipt_wall_milliseconds": 238.10558766126633,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -978,18 +979,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.0028367379153369596,
+        "residual": 0.002836737915336871,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           26
         ],
         "trip_residual_trace": [
-          0.0028367379153369596
+          0.002836737915336871
         ]
       },
-      "solve_wall_milliseconds": 2365.590922534466,
-      "terminal_residual": 0.00017312551195721712,
+      "solve_wall_milliseconds": 1397.6001497358084,
+      "terminal_residual": 0.00017312551195721026,
       "termination": "active_set_settled",
       "trip_count": 2,
       "trip_mask_difference_trace": [
@@ -997,20 +998,20 @@
         0
       ],
       "trip_residual_trace": [
-        0.008014734265825085,
-        0.00017312551195721712
+        0.008014734265825097,
+        0.00017312551195721026
       ],
       "vertical_centroid": {
-        "compensating_current_a": -613.0383124059714,
-        "compensating_current_norm_a": 1320.4268859368935,
-        "observed_m": 0.030975465173909925,
+        "compensating_current_a": -613.0383124059547,
+        "compensating_current_norm_a": 1320.426885936858,
+        "observed_m": 0.030975465173909363,
         "qualified": false,
-        "residual_m": -0.0007043157491340261,
-        "scaled_residual": -0.00017607893728350654,
-        "target_m": 0.03167978092304395,
+        "residual_m": -0.0007043157491340123,
+        "scaled_residual": -0.00017607893728350307,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 2753.85769456625,
+      "wall_milliseconds": 1635.705279186368,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1034,15 +1035,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 136,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 400.5230516195297,
+      "receipt_wall_milliseconds": 235.00663228332996,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -1071,8 +1072,8 @@
           0.0034725185210903167
         ]
       },
-      "solve_wall_milliseconds": 3551.353996619582,
-      "terminal_residual": 1.761911208640866e-11,
+      "solve_wall_milliseconds": 2095.749268308282,
+      "terminal_residual": 1.7619621582882493e-11,
       "termination": "converged",
       "trip_count": 3,
       "trip_mask_difference_trace": [
@@ -1081,21 +1082,21 @@
         0
       ],
       "trip_residual_trace": [
-        0.0068489569448055565,
-        0.006159434627923847,
-        1.761911208640866e-11
+        0.006848956944805474,
+        0.006159434627923859,
+        1.7619621582882493e-11
       ],
       "vertical_centroid": {
-        "compensating_current_a": -1007.9464210549858,
-        "compensating_current_norm_a": 2171.0218219827984,
-        "observed_m": 0.031679780923078084,
+        "compensating_current_a": -1007.9464210549613,
+        "compensating_current_norm_a": 2171.021821982746,
+        "observed_m": 0.03167978092307752,
         "qualified": true,
-        "residual_m": 3.4132419113319656e-14,
-        "scaled_residual": 8.533104778329914e-15,
-        "target_m": 0.03167978092304395,
+        "residual_m": 3.414629690112747e-14,
+        "scaled_residual": 8.536574225281868e-15,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3951.8752731382847,
+      "wall_milliseconds": 2330.7557217776775,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1104,7 +1105,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.06441471633325603,
+      "boundary_displacement_m": 0.0644147163332561,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -196306.88218749996,
       "compilation_cache": "hit",
@@ -1119,15 +1120,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 136,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 405.18506802618504,
+      "receipt_wall_milliseconds": 228.47490198910236,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -1146,18 +1147,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.004537675328168329,
+        "residual": 0.004537675328168246,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           24
         ],
         "trip_residual_trace": [
-          0.004537675328168329
+          0.004537675328168246
         ]
       },
-      "solve_wall_milliseconds": 4041.936857625842,
-      "terminal_residual": 5.730339026944669e-09,
+      "solve_wall_milliseconds": 2398.620830848813,
+      "terminal_residual": 5.730338776314839e-09,
       "termination": "converged",
       "trip_count": 3,
       "trip_mask_difference_trace": [
@@ -1166,21 +1167,21 @@
         0
       ],
       "trip_residual_trace": [
-        0.006703978721670615,
-        0.004727603917894021,
-        5.730339026944669e-09
+        0.00670397872167058,
+        0.0047276039178941135,
+        5.730338776314839e-09
       ],
       "vertical_centroid": {
-        "compensating_current_a": -1461.1432045994925,
-        "compensating_current_norm_a": 3147.1650833455615,
-        "observed_m": 0.03167978303941616,
+        "compensating_current_a": -1461.1432045994711,
+        "compensating_current_norm_a": 3147.1650833455165,
+        "observed_m": 0.0316797830394156,
         "qualified": true,
-        "residual_m": 2.116372209426398e-09,
-        "scaled_residual": 5.290930523565995e-10,
-        "target_m": 0.03167978092304395,
+        "residual_m": 2.116372223304186e-09,
+        "scaled_residual": 5.290930558260465e-10,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 4447.120003402233,
+      "wall_milliseconds": 2627.094302326441,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1189,7 +1190,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.07347459337013675,
+      "boundary_displacement_m": 0.07347459337013687,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -200010.78562499996,
       "compilation_cache": "hit",
@@ -1204,15 +1205,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 137,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 398.4353803098202,
+      "receipt_wall_milliseconds": 241.3255050778389,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -1231,18 +1232,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.005767155065575801,
+        "residual": 0.005767155065575802,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           24
         ],
         "trip_residual_trace": [
-          0.005767155065575801
+          0.005767155065575802
         ]
       },
-      "solve_wall_milliseconds": 3401.3743065297604,
-      "terminal_residual": 8.125707630646471e-10,
+      "solve_wall_milliseconds": 2002.8638988733292,
+      "terminal_residual": 8.125707500900917e-10,
       "termination": "converged",
       "trip_count": 3,
       "trip_mask_difference_trace": [
@@ -1251,21 +1252,21 @@
         0
       ],
       "trip_residual_trace": [
-        0.0072339854952982,
-        0.004370655446303197,
-        8.125707630646471e-10
+        0.007233985495298192,
+        0.004370655446303288,
+        8.125707500900917e-10
       ],
       "vertical_centroid": {
-        "compensating_current_a": -1875.15867596316,
-        "compensating_current_norm_a": 4038.915482169571,
-        "observed_m": 0.03167978111121748,
+        "compensating_current_a": -1875.1586759631396,
+        "compensating_current_norm_a": 4038.915482169528,
+        "observed_m": 0.03167978111121691,
         "qualified": true,
-        "residual_m": 1.881735253728145e-10,
-        "scaled_residual": 4.704338134320363e-11,
-        "target_m": 0.03167978092304395,
+        "residual_m": 1.8817353231170841e-10,
+        "scaled_residual": 4.7043383077927103e-11,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3799.807818606496,
+      "wall_milliseconds": 2244.189076125622,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1274,7 +1275,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.07916678549570329,
+      "boundary_displacement_m": 0.07916678549570343,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -203714.68906249997,
       "compilation_cache": "hit",
@@ -1287,15 +1288,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 139,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 419.01655308902264,
+      "receipt_wall_milliseconds": 230.04076071083546,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -1312,37 +1313,37 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.0069298962406486855,
+        "residual": 0.006929896240648606,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           24
         ],
         "trip_residual_trace": [
-          0.0069298962406486855
+          0.006929896240648606
         ]
       },
-      "solve_wall_milliseconds": 2666.5790770202875,
-      "terminal_residual": 4.879342164346729e-05,
+      "solve_wall_milliseconds": 1594.0202865749598,
+      "terminal_residual": 4.8793421643518364e-05,
       "termination": "active_set_settled",
       "trip_count": 1,
       "trip_mask_difference_trace": [
         0
       ],
       "trip_residual_trace": [
-        4.879342164346729e-05
+        4.8793421643518364e-05
       ],
       "vertical_centroid": {
-        "compensating_current_a": -2334.7838294029734,
-        "compensating_current_norm_a": 5028.904847879707,
-        "observed_m": 0.0318544068278435,
+        "compensating_current_a": -2334.7838294029493,
+        "compensating_current_norm_a": 5028.904847879656,
+        "observed_m": 0.031854406827842664,
         "qualified": false,
-        "residual_m": 0.00017462590479954548,
-        "scaled_residual": 4.365647619988637e-05,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.00017462590479928874,
+        "scaled_residual": 4.3656476199822186e-05,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3085.594115778804,
+      "wall_milliseconds": 1824.0605257451534,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1364,15 +1365,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 137,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 379.02520410716534,
+      "receipt_wall_milliseconds": 232.26712830364704,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1
@@ -1389,37 +1390,37 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.008142645214688042,
+        "residual": 0.008142645214687964,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           24
         ],
         "trip_residual_trace": [
-          0.008142645214688042
+          0.008142645214687964
         ]
       },
-      "solve_wall_milliseconds": 1755.951352417469,
-      "terminal_residual": 0.0012295331199717852,
+      "solve_wall_milliseconds": 1042.7372492849827,
+      "terminal_residual": 0.0012295331199714326,
       "termination": "active_set_settled",
       "trip_count": 1,
       "trip_mask_difference_trace": [
         0
       ],
       "trip_residual_trace": [
-        0.0012295331199717852
+        0.0012295331199714326
       ],
       "vertical_centroid": {
-        "compensating_current_a": -3187.2647332993615,
-        "compensating_current_norm_a": 6865.06856305571,
-        "observed_m": 0.03455110434615934,
+        "compensating_current_a": -3187.264733299357,
+        "compensating_current_norm_a": 6865.068563055702,
+        "observed_m": 0.034551104346158816,
         "qualified": false,
-        "residual_m": 0.002871323423115392,
-        "scaled_residual": 0.000717830855778848,
-        "target_m": 0.03167978092304395,
+        "residual_m": 0.0028713234231154405,
+        "scaled_residual": 0.0007178308557788601,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 2134.9740270525217,
+      "wall_milliseconds": 1275.003993883729,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1442,15 +1443,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 139,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 404.02331203222275,
+      "receipt_wall_milliseconds": 221.93160839378834,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -1468,18 +1469,18 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.009183473977990362,
+        "residual": 0.00918347397799052,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           24
         ],
         "trip_residual_trace": [
-          0.009183473977990362
+          0.00918347397799052
         ]
       },
-      "solve_wall_milliseconds": 2827.569704502821,
-      "terminal_residual": 0.0030071002632867864,
+      "solve_wall_milliseconds": 1833.4766831248999,
+      "terminal_residual": 0.00300710026328679,
       "termination": "active_set_settled",
       "trip_count": 2,
       "trip_mask_difference_trace": [
@@ -1487,20 +1488,20 @@
         0
       ],
       "trip_residual_trace": [
-        0.0016724601998513275,
-        0.0030071002632867864
+        0.0016724601998513806,
+        0.00300710026328679
       ],
       "vertical_centroid": {
-        "compensating_current_a": -3291.4004239401115,
-        "compensating_current_norm_a": 7089.367049667416,
-        "observed_m": 0.018242942951697042,
+        "compensating_current_a": -3291.4004239400997,
+        "compensating_current_norm_a": 7089.367049667392,
+        "observed_m": 0.018242942951696456,
         "qualified": false,
-        "residual_m": -0.01343683797134691,
-        "scaled_residual": -0.0033592094928367273,
-        "target_m": 0.03167978092304395,
+        "residual_m": -0.01343683797134692,
+        "scaled_residual": -0.00335920949283673,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3231.5890081226826,
+      "wall_milliseconds": 2055.4080940783024,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1522,15 +1523,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 139,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 408.76427479088306,
+      "receipt_wall_milliseconds": 234.56365801393986,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1
@@ -1547,37 +1548,37 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.00963588353563002,
+        "residual": 0.009635883535630175,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           26
         ],
         "trip_residual_trace": [
-          0.00963588353563002
+          0.009635883535630175
         ]
       },
-      "solve_wall_milliseconds": 1727.7512047439814,
-      "terminal_residual": 0.001668645022625268,
+      "solve_wall_milliseconds": 899.8097646981478,
+      "terminal_residual": 0.0016686450226253181,
       "termination": "active_set_settled",
       "trip_count": 1,
       "trip_mask_difference_trace": [
         0
       ],
       "trip_residual_trace": [
-        0.001668645022625268
+        0.0016686450226253181
       ],
       "vertical_centroid": {
-        "compensating_current_a": -3346.7718801948386,
-        "compensating_current_norm_a": 7208.631960314308,
-        "observed_m": 0.024078818796254627,
+        "compensating_current_a": -3346.7718801948595,
+        "compensating_current_norm_a": 7208.631960314356,
+        "observed_m": 0.024078818796253815,
         "qualified": false,
-        "residual_m": -0.007600962126789325,
-        "scaled_residual": -0.0019002405316973312,
-        "target_m": 0.03167978092304395,
+        "residual_m": -0.007600962126789561,
+        "scaled_residual": -0.0019002405316973902,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 2136.508783325553,
+      "wall_milliseconds": 1134.3731917440891,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1599,15 +1600,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 135,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 451.087299734354,
+      "receipt_wall_milliseconds": 223.8110974431038,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -1624,17 +1625,17 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.010251334398847697,
+        "residual": 0.010251334398847622,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           26
         ],
         "trip_residual_trace": [
-          0.010251334398847697
+          0.010251334398847622
         ]
       },
-      "solve_wall_milliseconds": 2799.2675993591547,
+      "solve_wall_milliseconds": 1566.527707502246,
       "terminal_residual": 7.185262845263632e-07,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -1645,16 +1646,16 @@
         7.185262845263632e-07
       ],
       "vertical_centroid": {
-        "compensating_current_a": -4475.356046497001,
-        "compensating_current_norm_a": 9639.496142977641,
-        "observed_m": 0.03168126995297013,
+        "compensating_current_a": -4475.356046496983,
+        "compensating_current_norm_a": 9639.496142977605,
+        "observed_m": 0.03168126995296951,
         "qualified": false,
-        "residual_m": 1.4890299261799411e-06,
-        "scaled_residual": 3.722574815449853e-07,
-        "target_m": 0.03167978092304395,
+        "residual_m": 1.4890299261313689e-06,
+        "scaled_residual": 3.722574815328422e-07,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 3250.3477297723293,
+      "wall_milliseconds": 1790.3382275253534,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1676,15 +1677,15 @@
       ],
       "off_support_leakage_wb": 0.0,
       "persistent_cache_hit_count": 0,
-      "persistent_cache_hits_after": 14,
-      "persistent_cache_hits_before": 14,
+      "persistent_cache_hits_after": 16,
+      "persistent_cache_hits_before": 16,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 2,
-      "persistent_cache_misses_before": 2,
+      "persistent_cache_misses_after": 1,
+      "persistent_cache_misses_before": 1,
       "program_reused": true,
       "raster_separatrix_vertex_count": 135,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 372.5944310426712,
+      "receipt_wall_milliseconds": 224.38121400773525,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -1701,43 +1702,58 @@
           "read_status": "qualified"
         },
         "converged": false,
-        "residual": 0.012027221486878181,
+        "residual": 0.012027221486878403,
         "termination": "active_set_iteration_budget_exhausted",
         "trip_count": 1,
         "trip_mask_difference_trace": [
           26
         ],
         "trip_residual_trace": [
-          0.012027221486878181
+          0.012027221486878403
         ]
       },
-      "solve_wall_milliseconds": 2451.9300926476717,
-      "terminal_residual": 6.58479763264966e-07,
+      "solve_wall_milliseconds": 1580.891441553831,
+      "terminal_residual": 6.58479763170087e-07,
       "termination": "active_set_settled",
       "trip_count": 1,
       "trip_mask_difference_trace": [
         0
       ],
       "trip_residual_trace": [
-        6.58479763264966e-07
+        6.58479763170087e-07
       ],
       "vertical_centroid": {
-        "compensating_current_a": -5027.368520718191,
-        "compensating_current_norm_a": 10828.479111225655,
-        "observed_m": 0.03167974717197391,
+        "compensating_current_a": -5027.368520718174,
+        "compensating_current_norm_a": 10828.47911122562,
+        "observed_m": 0.03167974717197331,
         "qualified": true,
-        "residual_m": -3.37510700429422e-08,
-        "scaled_residual": -8.43776751073555e-09,
-        "target_m": 0.03167978092304395,
+        "residual_m": -3.375107006375888e-08,
+        "scaled_residual": -8.43776751593972e-09,
+        "target_m": 0.031679780923043376,
         "tolerance_m": 1e-06
       },
-      "wall_milliseconds": 2824.520917609334,
+      "wall_milliseconds": 1805.2724041044712,
       "warm_seed_source": "previous edit terminal state"
     }
   ],
+  "runtime": {
+    "device": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax_platforms": "cuda,cpu",
+    "platform": "gpu"
+  },
+  "scheduler": {
+    "accepted_time_limit": "00:35:00",
+    "cpus_per_task": "8",
+    "job_id": "1303883",
+    "job_name": "nova-lane",
+    "node": "98dci4-gpu-0003.iter.org",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA"
+  },
   "schema": "nova.coil-edit-nonconvergence",
   "seed_probe_definition": "one trip closed with zero Newton steps on this edit's current vector, seeded from the state the edit starts from; the reported residual is the seed's own residual on the edited operator, measured without the vertical current-centre row so it stays the same quantity every earlier sweep recorded",
-  "source_revision": "26dd6c2f957a1e1525d4bec11641efb114e474ab",
+  "source_revision": "2ed26d9a0c0cb1283901e54b5795d42530925f81",
   "summary": {
     "convergence": {
       "converged_points": [

@@ -1,0 +1,94 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg"
+  },
+  "attachment_note": "Only the attached PNG was opened and judged. No SVG and no other image was read, listed, searched, rendered or shown; the drawing script was read from the reviewed head only to anchor findings to source lines. Provenance is by construction rather than assumed: the reviewed range contains exactly one figure-adding commit (8890aefcd, +326 lines at that path) and one drawing script (scripts/prototypes/bank_solve_driver/plot.py, added by 8b1935676 and last changed by f70d4882d), the PNG is 1399x720 which is 14.0 x 7.2 in at 100 dpi as plot.py:64 declares, and the three bar endpoints decode to the three walls the reviewed evidence table records (see figure_checks.pixel_measurement).",
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T11:02:08Z",
+  "evidence_inputs": [
+    "The figure is the only image in the reviewed range: 8890aefcd adds docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg (+326) and edits the evidence fragment (+14/-3); no other image path appears in git log --name-only 62e8ba872..8890aefcd.",
+    "The attached PNG renders 1399x720 while the caption says '1400 \u00d7 720 PNG render' and plot.py:50 prints CANVAS=1400x720. A one-pixel rounding difference with no effect on what a reader sees; recorded so the receipt and the artifact are not claimed to agree exactly when they do not.",
+    "The three bars decode from the render to 1.14, 0.67 and 1.87 s, matching the evidence table's 1.123, 0.658 and 1.869 s rows. The figure and the table reconcile.",
+    "The longest bar is the sixteen-slice row, which without the caption would read as a regression; the caption and the summary paragraph both explain that the batch runs until its slowest lane converges. No figure change is implied."
+  ],
+  "figure_checks": {
+    "caption_independence": "The caption is not a restatement of a title: the figure carries no title, and the caption names the machine and the measurement conditions ('One reserved H200 for the final complete measurement, warm execution after compilation, read included'), reports the batch total (29.910 s) and states the reading the longest bar would otherwise contradict ('The sixteen-lane per-slice wall is slower than the one-lane staged wall because the batch runs until its slowest lane converges'). That is the caption doing work the figure cannot do, and it is accurate about the drawing.",
+    "clipping": "Attached render 1399x720: non-white pixel counts in the outer 1 px, 2 px and 3 px frames are 0, 0 and 0. Nothing is clipped.",
+    "contrast_measurement": "Sampled from the render rather than assumed: text pixels are (82, 81, 78) = #52514e, the blue bar core is (40, 110, 174) = #286eae, the grey bar core is (146, 146, 146) = #929292, and the background is pure white (255, 255, 255) at all four corners.",
+    "pixel_measurement": "Axis mapping from the five x tick label centres: 0.0 at x=349.5, 0.5 at x=571, 0.9 at x=793, 1.4 at x=1015, 1.9 at x=1237, i.e. 221.75 px per tick. Bar endpoints measured as the last strongly coloured pixel of each bar run, less the 5 px marker radius: prototype (grey #929292, rows y=127-129) ends at x=889 giving 1.14 s against the table's 1.123 s; staged 1 slice (blue #286eae, rows y=311-314) ends at x=668 giving 0.67 s against 0.658 s; staged 16 slices (blue, rows y=496-498) ends at x=1243 giving 1.87 s against 1.869 s. All three land within one marker radius of the recorded values, in the recorded order.",
+    "render_provenance": "Only image-0.png (1399x720 RGBA) was opened. It matches plot.py:64's figsize=(14, 7.2) at dpi=100 (1399 px wide is matplotlib's integer rounding of 1400). Decoded bar endpoints agree with the reviewed evidence table, which is what establishes that this PNG is the figure under review rather than a lookalike: see pixel_measurement.",
+    "source_anchor_note": "Two source lines are cited, both in the reviewed head: plot.py:75 sets the x ticks at max*index/4 with a one-decimal formatter, which is the mechanism behind finding 1, and plot.py:69-71 draws every series at linewidth=3.0, which is the mechanism behind finding 2."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg",
+      "rubric": {
+        "contrast": "pass. All glyphs render in #52514e on white, which measures about 7.6:1 and clears 4.5:1 by a wide margin at every text size present. The blue data series #286eae measures about 5.4:1 on white and the grey #929292 about 3.1:1, so neither series is lost to low contrast and the grey sits above the 3:1 floor the style states.",
+        "data_ink": "pass. Ink on the canvas is three bars, three 10 px end markers, one left spine, one bottom spine, three y tick marks, five x tick labels, three y tick labels and one axis label. No gridline, no reference band, no box, no shadow, no annotation. Finding 2 records a weight deviation that does not add ink, only redistributes it between two series.",
+        "decoration": "pass. No gradient, no background fill of any kind (white everywhere outside the marks), no decorative styling. Top and right spines are absent (plot.py:81), the grid is off (plot.py:82).",
+        "label_collision": "pass. Zero non-white pixels in the outer 1 px, 2 px and 3 px frames of the 1399x720 render, so nothing is clipped at the canvas edge. Measured positions: the three y labels end at x=335 (the widest), their tick marks run x=342 to x=349 at each row centre, the left spine is at x=349-350 and the bars begin at x=351, so no y label touches a tick mark, the spine or a bar. The x tick labels occupy disjoint bands at x=336-363, 558-584, 780-806, 1002-1028 and 1224-1250, and the axis label sits 3 px below them at y=628-649. No label overlaps another label, a marker or a bar.",
+        "legibility": "pass. Three horizontal lollipop rows on one linear seconds axis, labelled top to bottom 'prototype \u00b7 1 slice', 'staged \u00b7 1 slice', 'staged \u00b7 16 slices', with the axis label 'Converged solve wall per slice [s]'. The reader gets the comparison at a glance: the grey prototype row reaches furthest of the two single-slice rows and the blue staged sixteen-slice row reaches furthest overall. Text is crisp at the delivered 1399 px width, y labels measure 18-19 px tall and the axis label about 22 px, both comfortably above the page's body text. The one legibility deduction is the tick scale, finding 1.",
+        "table_form": "pass. The figure shows three magnitudes against one shared linear axis, which is a plotted relationship rather than a table: the ordering and the relative gaps are what it exists to convey. The page states the exact numbers in a seven-column table immediately above the figure, so the figure is not standing in for tabular data and no reader has to decode numbers from a picture. The figure was required by the reviewed run's brief, which asked for a per-slice wall figure on a linear axis."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "The three values are stated exactly in the table above the figure, the ordering is unambiguous at a glance, and nothing is misread; redrawing is a refinement for a later figure pass rather than a reason to hold this node.",
+      "file": "scripts/prototypes/bank_solve_driver/plot.py",
+      "id": "f35244ea11b",
+      "line": 75,
+      "severity": "non-blocking",
+      "summary": "The x axis is ticked at 0.0, 0.5, 0.9, 1.4 and 1.9 s because plot.py:75 places five ticks at max*index/4 (0, 0.467, 0.934, 1.401, 1.868 for max=1.869) and plot.py:76 formats them to one decimal, so two of the five labels are rounded from values that were never round. The effect a reader sees is an axis whose spacing looks arbitrary: the gap between '0.5' and '0.9' reads as 0.4 and the gap between '0.9' and '1.4' reads as 0.5, and the three walls (0.658, 1.123 and 1.869 s) all land between ticks, so no value can be read off the axis without interpolation. One round-number locator or a direct value label at each marker would fix it; the page table carries the exact numbers, which is why this does not hold the node."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "The two series differ in hue and lightness and are separately labelled on the y axis, so the weight deviation costs legibility nothing; it is a style conformance point for a later redraw.",
+      "file": "scripts/prototypes/bank_solve_driver/plot.py",
+      "id": "f1484741bd4",
+      "line": 71,
+      "severity": "non-blocking",
+      "summary": "Every series is stroked at linewidth=3.0, so the grey prototype comparison row is drawn as heavily as the blue staged rows the figure exists to show. The repository's plotting rule allots 3.0 pt to the headline series and 2.6 pt to other data series, and this figure's subject is the staged driver measured against the prototype; drawing the baseline at the headline weight puts equal visual emphasis on the thing being replaced. Both series are still told apart by colour (blue #286eae against grey #929292, about 5.4:1 and 3.1:1 on white), so nothing is lost and no reader is misled, which is why this does not hold the node."
+    }
+  ],
+  "item_verdicts": {
+    "caption": "Read and judged only for whether it repeats the title: it does not, and it independently states the measurement conditions and the reason the longest bar is longest. No caption defect recorded.",
+    "finding_materiality": "Two non-blocking findings and no blocking finding. Nothing is clipped (0 non-white pixels in the outer 3 px frame), no label overlaps a label, a marker or a bar, all text is about 7.6:1 on white, and the data are plainly visible and correctly ordered, so none of the blocking categories is met.",
+    "rendered_artifact": "The single attached figure was opened with the Read tool and judged as an image at its native 1399x720. The written verdicts are the reading of that image, supported by pixel measurements taken from the same file; no SVG was opened, listed, searched, rendered or shown.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "contrast": "Sampled the actual glyph and series colours from the render rather than reading them from source, then computed contrast against pure white.",
+    "data_ink": "Enumerated the marks present on the canvas from the render and the drawing loop: three bars, three markers, three spines and tick furniture, and nothing else.",
+    "decoration": "Confirmed no background fill anywhere (all four corners pure white) and no top or right spine in the render, matching plot.py:81-82.",
+    "label_collision": "Measured clipping bands at 1, 2 and 3 px and the horizontal extents of every label band in the render.",
+    "legibility": "Read from the attached render at native size and confirmed by measuring the five tick label positions (221.75 px apart) and the three bar endpoints in that same file.",
+    "table_form": "The figure plots three magnitudes on a shared linear axis, which conveys ordering and relative gap; the exact numbers are separately carried by the page table."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261103T110015363659-review-of-bank-solve-driver-8890aefcd78a-figure",
+  "reviewed_base_sha": "62e8ba872fde49906c90e234a4ea0c2e478e150c",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg"
+  ],
+  "reviewed_head_sha": "8890aefcd78a4ffc0bdde274a6b0a4b5649b6422",
+  "reviewed_run_id": "r-20261103T080040158512-bank-solve-driver",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass, with one non-blocking axis-scale defect recorded as finding 1 (the x ticks fall at 0.0, 0.5, 0.9, 1.4, 1.9 s, so the three walls cannot be read off the axis without interpolation between non-round ticks).",
+    "RUBRIC data_ink: pass, with one non-blocking weight defect recorded as finding 2 (the grey prototype comparison series is drawn at the 3.0 pt headline weight rather than the 2.6 pt comparison weight, so the baseline carries the same visual weight as the subject).",
+    "RUBRIC decoration: pass (no gridlines, no background fill, no gradient, no drop shadow; top and right spines removed).",
+    "RUBRIC contrast: pass (all text is #52514e on white, about 7.6:1; the blue subject series is #286eae at about 5.4:1 and the grey comparison series #929292 at about 3.1:1 against white).",
+    "RUBRIC table_form: pass (a three-row comparison of one quantity on a shared linear axis is a plotted relationship; the page carries the exact numbers as a table above the figure, so the image is not an image of a table).",
+    "RUBRIC label_collision: pass (zero non-white pixels in the outer 3 px frame; no text overlaps another text, a marker or a bar; the widest y label ends 6 px short of its tick mark)."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T11:11:21.856853+00:00",
+  "total": null
+}

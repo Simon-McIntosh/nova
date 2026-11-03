@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1416",
+    "nova/equilibrium/support_read.py:1503",
+    "nova/equilibrium/support_read.py:1674",
+    "nova/equilibrium/support_read.py:1756"
+  ],
+  "completed_at": "2026-11-03T11:09:59Z",
+  "dispatched_at": "2026-11-03T10:58:48Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f72f23ca832",
+      "line": "1615",
+      "severity": "blocking",
+      "text": "The frozen branch substitutes locked_membership, a fractional area value computed from selected fragment area, for the current read's membership; this freezes a continuous booking quantity rather than only the cut-cell set and makes Newton corrections solve a stale-area residual while geometry moves."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f5b068af34a",
+      "line": "1689",
+      "severity": "blocking",
+      "text": "The drift and acceptance checks compare only the cut-cell and normal-form masks, although :1619-1624 also freezes fragment_selected; when the selected fragment changes within the same cut cells, the solver can accept without the required unfreeze and extra fresh step."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the 25 commits from 8e86ede37 through 8890aefcd and their 14-path diff against 62e8ba8; the solver, tests, measurements, evidence fragment and figure all stay in the declared scope.",
+    "done_when": "The source prompt's FENCE \u2014 EVIDENCE requires the diverted 550-cell solve, analytic and own-lane precision, one H200 allocation with 1/16-slice walls and counts, and sirius CPU tests; h200-oracle-final.log:4-24 and cpu-committed-head.log:20 record those measures.",
+    "goal": "The source prompt's goal is a one-program bank solve with factor reuse and a frozen active set; nova/equilibrium/support_read.py:1473 adds solve_batch and :1740 adds solve, while :1615 and :1689 leave the frozen-set contract incomplete.",
+    "manifest": "The reviewed run's manifest.md reports 25 commits, the final H200 receipt, six passing CPU tests, and baseline_suite/after_suite with the same two failing IDs; the named logs confirm those summaries.",
+    "write_paths": "The source prompt:103-108 grants support_read.py, test_bank_solve_driver.py, the bank_solve_driver prototype directory, and its evidence and figure paths; git diff 62e8ba8..8890aef lists only those 14 paths."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_solve_driver.py:99-100 fail on scalar flags, :135-139 on false convergence, wrong refactor counts, extra Jacobian builds or uniform lane steps, :171-173 on cap misreporting, :260 and :356-360 on failed fresh solves or independent precision budgets, :377 on failed reuse variants, and :390-392 on failed freezing or convergence, while measure.py:127,189,196-198,223,230,293-301 reject wrong dtype and analytic or own-lane breaches; :138 compares two counters advanced together and no assertion forces changed fragment selection or moving fractional membership.",
+    "evidence": "h200-oracle-final.log:4-24 records 0.658 s single and 1.869 s per slice at sixteen lanes with all residuals below 1e-10, while cpu-committed-head.log:20 records six passes and the paired suite logs have identical two-failure sets.",
+    "fit": "nova/equilibrium/support_read.py:1473 extends the module that owns read_batch, newton_step and step_residual, follows its JAX NamedTuple and lax.while_loop idiom, and introduces no prohibited plan-labelled source name.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1473-1769 supplies the staged loop, batch refactor branch and capped fresh residual, but :1615 freezes fractional occupancy and :1689 omits fragment-selection drift.",
+    "reuse": "nova/equilibrium/support_read.py:1473 and :1740 extend the bank read and Newton owner; a capability search found nova/equilibrium/solve.py:48 and :122, but that generic JVP-based pure-map solver cannot preserve this module's analytic bank Jacobian and fresh topology read.",
+    "scope_discipline": "git diff 62e8ba872fde49906c90e234a4ea0c2e478e150c..8890aefcd78a4ffc0bdde274a6b0a4b5649b6422 touches exactly the 14 paths granted by the source prompt:103-108."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt's goal is a one-program bank solve with factor reuse and a frozen active set; nova/equilibrium/support_read.py:1473 adds solve_batch and :1740 adds solve, while :1615 and :1689 leave the frozen-set contract incomplete.\nVERDICT done_when: The source prompt's FENCE \u2014 EVIDENCE requires the diverted 550-cell solve, analytic and own-lane precision, one H200 allocation with 1/16-slice walls and counts, and sirius CPU tests; h200-oracle-final.log:4-24 and cpu-committed-head.log:20 record those measures.\nVERDICT write_paths: The source prompt:103-108 grants support_read.py, test_bank_solve_driver.py, the bank_solve_driver prototype directory, and its evidence and figure paths; git diff 62e8ba8..8890aef lists only those 14 paths.\nVERDICT manifest: The reviewed run's manifest.md reports 25 commits, the final H200 receipt, six passing CPU tests, and baseline_suite/after_suite with the same two failing IDs; the named logs confirm those summaries.\nVERDICT diff: Read the 25 commits from 8e86ede37 through 8890aefcd and their 14-path diff against 62e8ba8; the solver, tests, measurements, evidence fragment and figure all stay in the declared scope.\nCALL_SITES: nova/equilibrium/support_read.py:1416, nova/equilibrium/support_read.py:1503, nova/equilibrium/support_read.py:1674, nova/equilibrium/support_read.py:1756\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1473-1769 supplies the staged loop, batch refactor branch and capped fresh residual, but :1615 freezes fractional occupancy and :1689 omits fragment-selection drift.\nSCORE evidence: 17\nJUSTIFICATION evidence: h200-oracle-final.log:4-24 records 0.658 s single and 1.869 s per slice at sixteen lanes with all residuals below 1e-10, while cpu-committed-head.log:20 records six passes and the paired suite logs have identical two-failure sets.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 62e8ba872fde49906c90e234a4ea0c2e478e150c..8890aefcd78a4ffc0bdde274a6b0a4b5649b6422 touches exactly the 14 paths granted by the source prompt:103-108.\nSCORE durability: 10\nJUSTIFICATION durability: tests/test_bank_solve_driver.py:99-100 fail on scalar flags, :135-139 on false convergence, wrong refactor counts, extra Jacobian builds or uniform lane steps, :171-173 on cap misreporting, :260 and :356-360 on failed fresh solves or independent precision budgets, :377 on failed reuse variants, and :390-392 on failed freezing or convergence, while measure.py:127,189,196-198,223,230,293-301 reject wrong dtype and analytic or own-lane breaches; :138 compares two counters advanced together and no assertion forces changed fragment selection or moving fractional membership.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/support_read.py:1473 extends the module that owns read_batch, newton_step and step_residual, follows its JAX NamedTuple and lax.while_loop idiom, and introduces no prohibited plan-labelled source name.\nSCORE reuse: 19\nJUSTIFICATION reuse: nova/equilibrium/support_read.py:1473 and :1740 extend the bank read and Newton owner; a capability search found nova/equilibrium/solve.py:48 and :122, but that generic JVP-based pure-map solver cannot preserve this module's analytic bank Jacobian and fresh topology read.\nFINDING nova/equilibrium/support_read.py:1615 blocking: The frozen branch substitutes locked_membership, a fractional area value computed from selected fragment area, for the current read's membership; this freezes a continuous booking quantity rather than only the cut-cell set and makes Newton corrections solve a stale-area residual while geometry moves.\nFINDING nova/equilibrium/support_read.py:1689 blocking: The drift and acceptance checks compare only the cut-cell and normal-form masks, although :1619-1624 also freezes fragment_selected; when the selected fragment changes within the same cut cells, the solver can accept without the required unfreeze and extra fresh step.\n",
+  "review_run_id": "r-20261103T105612201331-review-of-bank-solve-driver-8890aefcd78a",
+  "reviewed_base_sha": "62e8ba872fde49906c90e234a4ea0c2e478e150c",
+  "reviewed_head_sha": "8890aefcd78a4ffc0bdde274a6b0a4b5649b6422",
+  "reviewed_run_id": "r-20261103T080040158512-bank-solve-driver",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T11:15:17.802765+00:00",
+  "total": 97
+}

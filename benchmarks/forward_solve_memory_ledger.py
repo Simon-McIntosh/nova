@@ -381,16 +381,17 @@ def main() -> None:
         jax.tree_util.tree_map(lambda a: a.block_until_ready(), warm)
     state["arrays"]["after-warm-execute"] = largest_arrays(arguments.array_limit)
 
-    with phase(state, f"{arguments.arm}:present-route-solve"):
-        receipt = profile.solve(request)
-        receipt.equilibrium.flux.block_until_ready()
-        state["solve"] = {
-            "qualified": bool(receipt.qualified),
-            "residual": float(receipt.equilibrium.fixed_point.residual),
-            "newton_steps": int(
-                getattr(receipt.equilibrium.fixed_point, "active_set_iterations", -1)
-            ),
-        }
+    if not os.environ.get("NOVA_LEDGER_SKIP_PRESENT_ROUTE"):
+        with phase(state, f"{arguments.arm}:present-route-solve"):
+            receipt = profile.solve(request)
+            receipt.equilibrium.flux.block_until_ready()
+            state["solve"] = {
+                "qualified": bool(receipt.qualified),
+                "residual": float(receipt.equilibrium.fixed_point.residual),
+                "newton_steps": int(
+                    getattr(receipt.equilibrium.fixed_point, "active_set_iterations", -1)
+                ),
+            }
     state["arrays"]["solved"] = largest_arrays(arguments.array_limit)
 
     from nova.equilibrium import support_read

@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-03T07:48:22.712Z",
+  "dispatched_at": "2026-11-03T07:31:13Z",
+  "figures_reviewed": [
+    {
+      "drawing_script": "scripts/prototypes/bank_step_cut_buckets/plot.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T072230495942-review-of-bank-step-cut-buckets-31dad0d9a488-figure/image-0.png",
+      "repository_path": "docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg",
+      "id": "ffc286aada1",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The four stage rows drawn above the whole-step row read as a decomposition of it, but they sum to 70.64 ms on the base arm against a 43.07 ms whole-step bar, and neither the figure nor its caption states which rows compose the whole step, so a reader cannot reconcile the parts with the total.",
+      "text": "The four stage rows drawn above the whole-step row read as a decomposition of it, but they sum to 70.64 ms on the base arm against a 43.07 ms whole-step bar, and neither the figure nor its caption states which rows compose the whole step, so a reader cannot reconcile the parts with the total."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: dark value labels on white (base #555555 about 7.5:1, bucketed #216d45 about 6.3:1) and both bar fills above 3:1 against white (grey about 3.1:1, green about 4.3:1).",
+    "data_ink": "pass: bar length carries the measurement, the legend names the two series and each bar's value is written at its end; no gridlines, no shading, no plotted decoration.",
+    "decoration": "pass: white background, two flat bar colours (#929292 base, #2e8b57 bucketed), no gradient, band, frame or styled theme.",
+    "label_collision": "pass: every label is complete and clear of the other labels and of the bars; the longest category label (residual and booking) clears the left canvas edge by 6 px of a 1399x720 render and the axis label clears the bottom edge.",
+    "legibility": "pass: five stage rows with paired grey and green bars on a linear warm wall [ms] axis (0-50), each bar ending in its own two-decimal value label; readable at a glance, with the one relation the reader cannot resolve (which rows compose the whole step) recorded as a finding.",
+    "table_form": "pass: a paired before/after magnitude comparison, where the bar length is the point of the figure; the run's launch and compiled-copy counts live in the evidence table instead."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC reviewed: image-0.png, the rendered PNG of docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg at head 31dad0d9a48813b2be16bfae05274be63a58cb2d; judged only from the rendered image.\nRUBRIC legibility: pass: five stage rows with paired grey and green bars on a linear warm wall [ms] axis (0-50), each bar ending in its own value label; readable at a glance.\nRUBRIC data_ink: pass: bar length carries the measurement, the legend names the two series, and each bar's value is written at its end; no gridlines or shading.\nRUBRIC decoration: pass: white background, two flat bar colours, no gradient, band or decorative styling.\nRUBRIC contrast: pass: dark value labels on white and both bar fills above 3:1 against white.\nRUBRIC table_form: pass: a paired before/after magnitude comparison where bar length is the point; not information naturally given as a table.\nRUBRIC label_collision: pass: no label is clipped, overlaps another label, or overlaps the bars; the longest category label clears the left canvas edge by 6 px.\nFINDING docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg: non-blocking: the four stage rows above the whole-step row read as a decomposition of it, but they sum to 70.64 ms base against a 43.07 ms whole step and the figure states no relation between them.\n",
+  "review_run_id": "r-20261103T072230495942-review-of-bank-step-cut-buckets-31dad0d9a488-figure",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "31dad0d9a48813b2be16bfae05274be63a58cb2d",
+  "reviewed_run_id": "r-20261103T063317710937-bank-step-cut-buckets",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T07:50:23.410755+00:00",
+  "total": null
+}

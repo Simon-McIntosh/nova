@@ -7,12 +7,15 @@
   <meta name="plan-evidence-for" content="dd-cocos-ingest">
   <meta name="plan-verifies" content="dd-cocos-ingest#s4">
   <meta name="plan-recorded-at" content="2026-11-03">
-  <meta name="plan-verdict" content="partial">
+  <meta name="plan-verdict" content="pass">
   <title>Convention consolidation | nova</title>
 </head>
 <body>
 <main>
   <h1 id="dd-convention-consolidation-outcome">One cache convention mechanism</h1>
+  <p><strong>The expanded covering gate has zero added failures:</strong>
+  65 passed and 33 skipped at the original base; 69 passed and 33 skipped at
+  the completed source-and-test head. Both runs completed with exit 0.</p>
   <p>At base <code>2d2172dd7b06548d06c634fe8b3def7acd88f9b4</code>,
   the convention aliases, vacuum-field delegation, writer default, and database-free
   writer and wall tests already exist. They are verified here rather than replaced.
@@ -35,8 +38,8 @@
   <table>
     <thead><tr><th>Measurement</th><th>Result</th></tr></thead>
     <tbody>
-      <tr><td>Baseline covering suite</td><td>37 passed, 14 skipped, 12 warnings in 102.88 s; exit 0.</td></tr>
-      <tr><td>Head covering suite, with three added cache tests and both analytic boundary arms</td><td>2 failed, 39 passed, 14 skipped, 13 warnings in 133.47 s; exit 1. The unresolved scope entries are recorded in the delivery manifest.</td></tr>
+      <tr><td>Initial covering baseline, before adding the database file</td><td>37 passed, 14 skipped, 12 warnings in 102.88 s; exit 0.</td></tr>
+      <tr><td>Intermediate head before the cache fixtures were migrated</td><td>2 failed, 39 passed, 14 skipped, 13 warnings in 133.47 s; exit 1. The two failures prompted the test-file scope extension and are retained in <code>head.log</code>.</td></tr>
       <tr><td>Focused cache checks</td><td>3 passed in 6.46 s.</td></tr>
       <tr><td>Database-free writer</td><td>All four existing tests pass at base and head. Dropping the factor separately at the global, separatrix and map write sites fails the writer's own assertion each time: one failed test and exit 1 per mutation.</td></tr>
       <tr><td>Wall DD version</td><td>Both existing tests pass at base and head. Dropping the pulse's DD version argument fails both tests, including the assertion that the argument carries the pulse's major: 2 failed in 20.01 s; exit 1.</td></tr>
@@ -50,6 +53,39 @@
   <code>writer-boundary.log</code>, <code>writer-map.log</code>, and
   <code>wall-version.log</code>. Tests ran on the existing CPU allocation, with
   scratch copies and basetemps below its run-owned <code>TMPDIR</code>.</p>
+
+  <h2 id="dd-convention-consolidation-cache-fixtures">Convention-keyed cache fixtures</h2>
+  <p>The authorized fixture update is committed at
+  <code>14038bf0b19f8dea0419dc9b84de09562ead9796</code>. Both cache tests in
+  <code>tests/test_internal_convention_owner.py</code> and the matching contract in
+  <code>tests/test_database.py</code> now write through <code>SignalStore</code>,
+  with an explicit source URI and DD version. The foreign-key fixture deliberately
+  carries a misleading <code>cocos=17</code> attribute: the read still raises
+  <code>FileNotFoundError</code>, and the rebuild produces −102.454 Wb instead of
+  serving the foreign +102.454 Wb. The owner-key fixture carries no convention
+  attribute and is served unchanged without a rebuild. The identity-only legacy
+  key is refused, rebuilt under the convention key and reclaimed.</p>
+  <p>All four repaired checks pass in <code>cache-contracts.log</code>:
+  4 passed in 20.64 s. A scratch mutation that makes the reader select the foreign
+  COCOS 11 key fails the refusal assertion with
+  <code>DID NOT RAISE FileNotFoundError</code>: 1 failed in 19.29 s, exit 1,
+  recorded in <code>foreign-key-control.log</code>. Marker-based acceptance is
+  not present in the implementation or the revised fixture contract.</p>
+  <table>
+    <thead><tr><th>Expanded covering arm</th><th>Revision</th><th>Completed result</th></tr></thead>
+    <tbody>
+      <tr><td><code>covering-base.log</code></td><td><code>2d2172dd7b06548d06c634fe8b3def7acd88f9b4</code></td><td>65 passed, 33 skipped, 13 warnings in 303.04 s; exit 0.</td></tr>
+      <tr><td><code>covering-head.log</code></td><td><code>14038bf0b19f8dea0419dc9b84de09562ead9796</code></td><td>69 passed, 33 skipped, 13 warnings in 333.61 s; exit 0.</td></tr>
+    </tbody>
+  </table>
+  <p>Both arms cover the complete writer-convention, wall-DD-version,
+  internal-convention-owner, point-constraint, getslice, signalstore-convention-key
+  and database test files. The head also runs the three added database-free
+  equilibrium-cache checks. Together with the additional DD boundary-oracle arm,
+  those account for the four added passes. The same 33 database-availability skips
+  remain on both arms. The base ran from an extraction of its stated revision;
+  both logs print the imported module path and working directory. These completed
+  receipts replace the intermediate gate as the delivery measure.</p>
 
   <h2 id="dd-convention-consolidation-record-corrections">Four record corrections</h2>
   <ol>

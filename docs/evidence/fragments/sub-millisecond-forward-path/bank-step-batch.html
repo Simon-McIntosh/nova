@@ -255,13 +255,13 @@
     <tr><td>single-lane residual, each lane</td><td>1e-10</td><td>at or below 1e-10</td></tr>
   </table>
 
-  <p>The gate run is job 1303836, which ended <code>2 passed</code> with exit 0;
-  its log is <code>waverun/regate6/regate.log</code>. The table's numbers are
-  printed by the clause and were captured by job 1303834, which ran the same
-  clause on the same state and failed only on the input-distinctness assertion
-  that followed it, so a green run's own stdout is not the source. Pytest
-  captures a passing test's output, and the run that printed these gaps is the
-  one on disk.</p>
+  <p>The gate run is job 1303925, which ended <code>2 passed</code> with exit 0
+  at revision <code>bfeffaad7</code>, the head these findings were fixed on; its
+  log is <code>waverun/final/gate.log</code>, and the negative control ran in the
+  same job as <code>waverun/final/negative.log</code>. The table's numbers come
+  from job 1303834, which ran the same clause on the same state and printed the
+  gaps; pytest captures a passing test's output, so a green run's own stdout is
+  not the source.</p>
 
   <p>The tolerance history is worth stating because it was the defect. The
   clause first asserted <code>rtol=1e-10, atol=0</code> per cell and failed on
@@ -278,19 +278,25 @@
   and the one- and four-slice reads reproduce at 53.80 and 20.32 ms. The
   timing headline stands unchanged.</p>
 
-  <p>The negative control was re-run against the repaired code in the same job.
-  Its mutation moves the batch-uniform read decision inside the <code>vmap</code>,
-  and the mutated batch takes the convergence clause red:
-  <code>NEG_EXIT=1</code>, with lane 0's radial flux disagreeing with that
-  lane's own solve in 75 of 550 cells at a maximum relative difference of
-  5.2e-8 and an absolute one of 2.0e-8. The gate's flux clause allows 1e-8 of
-  the lane's flux span, about 3.59e-10 Wb, so an observed difference of 2.0e-8
-  Wb stands roughly fifty times above the largest gap the clause admits and the
-  budget does not soften the control.
-  The batch still converged under the mutation (1.97e-11 and 4.53e-11 in 13
-  steps), which is the point: the mutation is caught by the flux, not by
-  failure to converge. Its log is <code>waverun/regate.log</code> (job 1303787),
-  which carries the gate result and the mutation arm in one stream.</p>
+  <p>The negative control was re-run at the same head as the green gate, in the
+  same job (job 1303925, <code>waverun/final/negative.log</code>). Its mutation
+  broadcasts the first lane's moments across the lane axis inside
+  <code>step_batch</code>, before the read: every lane is then read at lane 0's
+  state, which is the regression the gate exists to catch. The control takes the
+  step's own per-lane output red — <code>EXIT=1</code>, with
+  <code>the batched step returned one lane's update for every lane</code>
+  raised at <code>tests/test_bank_step_batch.py:164</code>, on the probe that
+  compares the two lanes' updates at the perturbed state. The clause reads
+  <code>step_batch</code>'s return value rather than the test's inputs, so a
+  broadcast cannot satisfy it by construction.</p>
+
+  <p>The mutation is caught there rather than further down, so this control
+  demonstrates the distinctness clause and not the precision budget: a batch
+  that shares one lane never reaches the per-lane comparison. The earlier
+  control moved the read decision inside the <code>vmap</code> and did reach
+  the flux clause, at 5.2e-8 relative and 2.0e-8 Wb absolute against a
+  <code>1e-8</code>-of-span budget of 3.59e-10 Wb. Both mutations are red; the
+  current one is red at the first clause that can see a shared lane.</p>
 
   <p><strong>At sixteen lanes the batch does not meet the bound in the window
   it was given.</strong> The four-lane series converges at 20 steps, but the
@@ -309,14 +315,16 @@
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:
-  <code>waverun/trace.log</code> for the per-iteration tables (job 1303782),
-  <code>waverun/regate6/regate.log</code> for the green precision-budget gate
-  (job 1303836), <code>waverun/regate4/regate.log</code> and
-  <code>waverun/regate5/regate.log</code> for the runs that printed the budget
-  numbers, <code>waverun/diagnose.log</code> for the 64-cell non-finite
-  diagnosis (job 1303781), and <code>waverun/h200-stage.log</code> for the stage
-  wall at the repaired revision (job 1303785). Job 1303782 was launched from the
+  <code>waverun/trace.log</code> for the per-iteration tables (jobs 1303782 and
+  1303790), <code>waverun/final/gate.log</code> for the green precision-budget
+  gate and <code>waverun/final/negative.log</code> for the control (one job,
+  1303925, revision <code>bfeffaad7</code>), <code>waverun/regate4/regate.log</code>
+  and <code>waverun/regate5/regate.log</code> for the runs that printed the
+  budget numbers, <code>waverun/diagnose.log</code> for the 64-cell non-finite
+  diagnosis (job 1303781), <code>waverun/h200-stage.log</code> for the stage
+  wall (job 1303785), and <code>waverun/final/figure.log</code> for the figure
+  render, whose overlap check passes and whose PNG was inspected at
+  <code>waverun/per-slice-wall.png</code>. Job 1303782 was launched from the
   repaired working tree before it was committed, so its <code>REVISION</code>
-  line reads 98b6bb91d while the code it ran is c3124432d; jobs 1303785 and
-  1303836 record the commit they ran.</p>
+  line reads 98b6bb91d while the code it ran is c3124432d.</p>
 </section>

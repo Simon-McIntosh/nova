@@ -188,7 +188,9 @@ def main():
     assert bool(one.converged) and float(one.residual) <= 1e-10
 
     _, _, wall, _, _ = fixture._analytic_inputs("diverted")
-    oracle, _ = analytic_oracle(analytic, roots, one.support.reading, wall)
+    oracle, reference_roots = analytic_oracle(
+        analytic, roots, one.support.reading, wall
+    )
     emit("ORACLE", **oracle)
     assert oracle["axis_ratio"] <= 5e-4
     assert oracle["saddle_ratio"] <= 5e-4
@@ -220,6 +222,7 @@ def main():
     assert bool(jnp.all(many.converged))
     span = abs(float(one.support.reading.boundary_flux - one.support.reading.axis_flux))
     radius = oracle["minor_radius"]
+    reference_boundary_flux = float(analytic.value(jnp.asarray(reference_roots[1])))
     for lane in range(16):
         own = single(tuple(value[lane] for value in states))
         jax.block_until_ready(own)
@@ -254,6 +257,25 @@ def main():
             )
             / span
         )
+        oracle_axis = (
+            float(jnp.linalg.norm(many.support.reading.axis[lane] - reference_roots[0]))
+            / radius
+        )
+        oracle_saddle = (
+            float(
+                jnp.linalg.norm(
+                    many.support.reading.boundary[lane] - reference_roots[1]
+                )
+            )
+            / radius
+        )
+        oracle_boundary = (
+            abs(
+                float(many.support.reading.boundary_flux[lane])
+                - reference_boundary_flux
+            )
+            / oracle["flux_span"]
+        )
         emit(
             "LANE",
             lane=lane,
@@ -261,6 +283,9 @@ def main():
             axis_ratio=axis_gap,
             saddle_ratio=saddle_gap,
             boundary_ratio=boundary_gap,
+            oracle_axis_ratio=oracle_axis,
+            oracle_saddle_ratio=oracle_saddle,
+            oracle_boundary_ratio=oracle_boundary,
             single_residual=float(own.residual),
             batch_residual=float(many.residual[lane]),
         )
@@ -269,6 +294,9 @@ def main():
             and axis_gap <= 5e-4
             and saddle_gap <= 5e-4
             and boundary_gap <= 1e-4
+            and oracle_axis <= 5e-4
+            and oracle_saddle <= 5e-4
+            and oracle_boundary <= 1e-4
         )
 
 

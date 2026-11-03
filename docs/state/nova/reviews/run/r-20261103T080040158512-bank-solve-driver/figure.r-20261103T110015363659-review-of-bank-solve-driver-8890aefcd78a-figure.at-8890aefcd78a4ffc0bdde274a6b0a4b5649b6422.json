@@ -6,7 +6,7 @@
     "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg"
   },
   "attachment_note": "Only the attached PNG was opened and judged. No SVG and no other image was read, listed, searched, rendered or shown; the drawing script was read from the reviewed head only to anchor findings to source lines. Provenance is by construction rather than assumed: the reviewed range contains exactly one figure-adding commit (8890aefcd, +326 lines at that path) and one drawing script (scripts/prototypes/bank_solve_driver/plot.py, added by 8b1935676 and last changed by f70d4882d), the PNG is 1399x720 which is 14.0 x 7.2 in at 100 dpi as plot.py:64 declares, and the three bar endpoints decode to the three walls the reviewed evidence table records (see figure_checks.pixel_measurement).",
-  "completed_at": "",
+  "completed_at": "2026-11-03T11:11:17.040Z",
   "dispatched_at": "2026-11-03T11:02:08Z",
   "evidence_inputs": [
     "The figure is the only image in the reviewed range: 8890aefcd adds docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg (+326) and edits the evidence fragment (+14/-3); no other image path appears in git log --name-only 62e8ba872..8890aefcd.",
@@ -89,6 +89,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-03T11:11:21.856853+00:00",
+  "timestamp": "2026-11-03T11:16:59.568384+00:00",
   "total": null
 }

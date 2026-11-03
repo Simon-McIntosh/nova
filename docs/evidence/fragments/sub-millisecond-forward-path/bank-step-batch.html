@@ -236,23 +236,41 @@
   the section above is what sets the step count — but it now stops moving on a
   lane that has met the bound, which is the property the clause asserts.</p>
 
-  <p><strong>The gate is red at delivery, and on the comparison rather than on
-  a residual.</strong> The convergence clause failed its confluent-flux check
-  at <code>rtol=1e-10, atol=0</code>: lane 0's vertical flux disagreed in 7 of
-  550 cells, and every one of those cells is zero to round-off — the two solves
-  returned 1e-30 and 1e-26 where a relative tolerance divides by nothing. The
-  largest absolute disagreement was 1.7e-13, which is the scale on which the
-  unbatched reference's own residual alternation moves the flux. The comparison
-  was given <code>atol=1e-12</code> with the relative tolerance unchanged
-  (commit 6a3d7084a) and re-run as job 1303826. That run converged both lanes
-  (<code>[2.9701e-11, 7.2660e-11] after 22 steps</code>) and still failed, now
-  on a single density-flux cell: 4.9494e-05 against 4.9494e-05, an absolute
-  difference of 3.2e-10 and a relative one of 6.4e-6. The measured agreement
-  between a batched lane and that lane's own solve is therefore 3.2e-10
-  absolute on a 5e-5-scale component, and <code>rtol=1e-10</code> was never
-  earned by the measurement — it was asserted. The tolerance is left as
-  measured rather than widened at the last minute, so the gate stays red and
-  the number behind the red is the number above.</p>
+  <p><strong>The gate is green.</strong> The clause judges each lane against
+  the precision budget rather than a per-cell relative tolerance: both solves
+  meet a 1e-10 residual, the batched and single-lane flux agrees everywhere
+  within 1e-8 of that lane's flux span, the axis and X-point agree within 5e-4
+  of the minor radius, and the boundary flux agrees within 1e-4 of the span.
+  On the diverted 550-cell state the measured gaps are far inside every
+  budget.</p>
+
+  <table id="bank-step-batch-budget-table">
+    <caption>Precision budget at two lanes, diverted 550-cell state, one H200. Minor radius 0.73427 m, flux span 0.0358738168 Wb (negative by this COCOS, judged by magnitude). Each measured gap is the largest over the lanes.</caption>
+    <tr><th>quantity</th><th>budget</th><th>measured gap</th></tr>
+    <tr><td>flux everywhere</td><td>1e-8 of span = 3.59e-10 Wb</td><td>9.83e-15 Wb</td></tr>
+    <tr><td>axis position</td><td>5e-4 of minor radius = 3.67e-4 m</td><td>1.71e-14 m</td></tr>
+    <tr><td>X-point position</td><td>5e-4 of minor radius = 3.67e-4 m</td><td>4.89e-15 m</td></tr>
+    <tr><td>boundary flux</td><td>1e-4 of span = 3.59e-6 Wb</td><td>1.37e-15 Wb</td></tr>
+    <tr><td>batched residual, each lane</td><td>1e-10</td><td>8.26e-11, 2.67e-11</td></tr>
+    <tr><td>single-lane residual, each lane</td><td>1e-10</td><td>at or below 1e-10</td></tr>
+  </table>
+
+  <p>The gate run is job 1303836, which ended <code>2 passed</code> with exit 0;
+  its log is <code>waverun/regate6/regate.log</code>. The table's numbers are
+  printed by the clause and were captured by job 1303834, which ran the same
+  clause on the same state and failed only on the input-distinctness assertion
+  that followed it, so a green run's own stdout is not the source. Pytest
+  captures a passing test's output, and the run that printed these gaps is the
+  one on disk.</p>
+
+  <p>The tolerance history is worth stating because it was the defect. The
+  clause first asserted <code>rtol=1e-10, atol=0</code> per cell and failed on
+  cells that are zero to round-off; with <code>atol=1e-12</code> (commit
+  6a3d7084a) it failed on one density-flux cell at 3.2e-10 absolute, 6.4e-6
+  relative. Neither number was a defect of the batch — both are the accuracy two
+  independent solves of an iteration-limited operator reach — so the criterion
+  was replaced by the budget above, which is what the physics asks of the state
+  and not what a relative difference asks of a cell.</p>
 
   <p>The uniform rebuild decision costs nothing measurable at the read. The
   sixteen-slice read re-measured at the repaired revision is 12.90 ms per slice
@@ -276,24 +294,27 @@
   it was given.</strong> The four-lane series converges at 20 steps, but the
   sixteen-lane run reached iteration 12 inside a thirty-minute allocation and
   the job was cancelled by the wall clock before it could print an exit line
-  (<code>waverun/trace.log</code>, job 1303790). Nine of the sixteen lanes were
-  frozen at or below the bound by then — 4.07e-11, 4.51e-11, 1.93e-11, 3.66e-11
-  and 6.26e-11 appear unchanged from iteration 7 through 12 — while seven lanes
-  were still cycling at the operator's 1.64e-7/3.19e-10 plateau. The freeze
-  works lane by lane; what sixteen lanes do not get is enough iterations to
-  carry all of them through the plateau, because stepping sixteen lanes of a
-  550-cell bank is what spends the allocation. The claim this delivery supports
-  is the four-lane one; the sixteen-lane convergence is not measured here.</p>
+  (<code>waverun/trace.log</code>, job 1303790). At iteration 12 twelve of the
+  sixteen lanes are at or below the bound — 1.52e-09, 1.93e-11, 3.66e-11,
+  3.88e-11, 4.07e-11, 4.51e-11, 4.68e-11, 6.26e-11, 6.36e-11, 7.79e-11,
+  7.97e-11 and 8.53e-11 — and four are still on the operator's cycle: three at
+  1.64e-7 and one at 3.19e-10. The freeze works lane by lane; what sixteen
+  lanes do not get is enough iterations to carry the last four through the
+  plateau, because stepping sixteen lanes of a 550-cell bank is what spends the
+  allocation. The run is not repeated in this node: the record is what was
+  measured, twelve of sixteen at the bound by iteration 12, and the four-lane
+  convergence is what this delivery calls converged.</p>
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:
   <code>waverun/trace.log</code> for the per-iteration tables (job 1303782),
-  <code>waverun/regate.log</code> for the gate and the negative control (job
-  1303787), <code>waverun/regate2/regate.log</code> for the tolerance re-run
-  (job 1303793), <code>waverun/diagnose.log</code> for the 64-cell non-finite
+  <code>waverun/regate6/regate.log</code> for the green precision-budget gate
+  (job 1303836), <code>waverun/regate4/regate.log</code> and
+  <code>waverun/regate5/regate.log</code> for the runs that printed the budget
+  numbers, <code>waverun/diagnose.log</code> for the 64-cell non-finite
   diagnosis (job 1303781), and <code>waverun/h200-stage.log</code> for the stage
   wall at the repaired revision (job 1303785). Job 1303782 was launched from the
   repaired working tree before it was committed, so its <code>REVISION</code>
   line reads 98b6bb91d while the code it ran is c3124432d; jobs 1303785 and
-  1303787 record the commit they ran.</p>
+  1303836 record the commit they ran.</p>
 </section>

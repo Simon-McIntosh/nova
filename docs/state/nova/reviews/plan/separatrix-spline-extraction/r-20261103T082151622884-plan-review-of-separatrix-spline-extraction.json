@@ -59,6 +59,15 @@
       "finding": "anchors_resolve-1",
       "reason": "",
       "when": "2026-11-03T10:18:09.142183+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f4371710d78554f5b1f14093432dd08a6ba57c8f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-11-03T10:18:27.814852+00:00"
     }
   ],
   "responses": {
@@ -69,6 +78,14 @@
       "commit_basis": "edit",
       "reason": "",
       "when": "2026-11-03T10:18:09.142183+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f4371710d78554f5b1f14093432dd08a6ba57c8f",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-03T10:18:27.814852+00:00"
     },
     "reasoning-1": {
       "action": "acted",

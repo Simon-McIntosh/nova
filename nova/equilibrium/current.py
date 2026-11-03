@@ -63,6 +63,7 @@ class Booking(NamedTuple):
 
 
 _NORMAL_CUT_BATCH_WIDTH = 8
+_TANGENT_CHANNEL_TILE = 3
 
 
 def _inward_interval_points(x, left, right):
@@ -706,7 +707,9 @@ def book_tangent_channels(
                 )
             )
 
-        return jax.lax.map(channel_moments, normalized_rate[:, index])
+        return jax.lax.map(
+            channel_moments, normalized_rate[:, index], batch_size=_TANGENT_CHANNEL_TILE
+        )
 
     def whole_cell(index):
         with xla_metadata.set_xla_metadata(tangent_site="interior:whole"):
@@ -758,7 +761,11 @@ def book_tangent_channels(
                 )
                 return jnp.stack(tuple(jnp.sum(value) for value in moved))
 
-            moving = jax.lax.map(moving_channel, signed_rate[boundary_channels, index])
+            moving = jax.lax.map(
+                moving_channel,
+                signed_rate[boundary_channels, index],
+                batch_size=_TANGENT_CHANNEL_TILE,
+            )
 
             moving = (
                 jnp.zeros((channels, 3), dtype=psi.dtype)

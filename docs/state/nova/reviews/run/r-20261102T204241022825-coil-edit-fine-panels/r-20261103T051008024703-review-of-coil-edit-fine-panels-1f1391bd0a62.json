@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:main",
+    "benchmarks/coil_edit_latency.py:run",
+    "benchmarks/coil_edit_latency.py:_write_panel_data",
+    "benchmarks/mast_centroid_solve_panels"
+  ],
+  "completed_at": "2026-11-03T05:28:23.860Z",
+  "dispatched_at": "2026-11-03T05:11:31Z",
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "207",
+      "severity": "blocking",
+      "text": "blocking: the render test injects its own coupling and a synthetic operator, so it never runs benchmarks/coil_edit_latency.py:_panel_display_coupling and never loads any of the five committed panel-states.npz archives, which is what the plan's done_when (1) asks for, so the code that actually draws every figure has no test."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "2259",
+      "severity": "non-blocking",
+      "text": "non-blocking: a state file without a current key silently keeps the lattice raster, so an archive that lost its currents draws a plausible solve-resolution figure instead of failing, and the absent archive test is what would have caught it."
+    },
+    {
+      "file": "tests/test_flux_surface_connectivity.py",
+      "line": "880",
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring still says eight open states trace a cycle and one admits none, while the re-measured PERSISTED_STATE_TERMS pins four cycle-tracing states (0, 2, 7, 8) plus state 1, and line 874 still says state 19 carries its own wider control displacement when state 19 now uses the default 1e-3."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "99",
+      "severity": "non-blocking",
+      "text": "non-blocking: DEFAULT_DISPLAY_SPACING restates nova/equilibrium/display_flux.py:44 DEFAULT_SPACING, so the 10 mm floor can drift between the two copies."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T204241022825-coil-edit-fine-panels/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests line states a result rather than the literal command a shell was handed, so promotion can only recover the gate from the log header, and neither gate log names the revision it ran at."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all twenty commits from 3ef818dfa to 1f1391bd0; the code change is confined to benchmarks/coil_edit_latency.py (_panel_display_coupling, _panel_display_map, _panel_moments, the display branch of _paint_panel, the wrapped caption, the panel receipts and the new archive keys), tests/test_coil_edit_panel_render.py, the re-measured PERSISTED_STATE_TERMS, the five figures with their receipts and archives, and the evidence fragment, with nova/ untouched.",
+    "done_when": "the done_when asks a render test to redraw each of the five figures' panels from its own state file and to carry a failing 1 percent conductor-current control; tests/test_coil_edit_panel_render.py:176 instead draws one synthetic 7x7 lattice with a coupling it supplies itself and states no control, so clause (1) is not asserted, while clause (2) is met by the five committed archives and their receipts.",
+    "goal": "the goal is the five coil-edit converged-vs-nonconverged figures re-solved and drawn from fine flux maps, and all five were redrawn at 10 mm through nova/equilibrium/display_flux.build_display_flux_map, with docs/figures/single-grid-solver-cutover/panel-receipt.json and docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json recording spacing_m 0.01 and reproduction errors 6.78e-12 and 7.20e-12.",
+    "manifest": "read the delivered attempt-5 manifest, since the live file now reads status in-progress under a resume; it records the 43-passed gate, the archive md5s d40d470f and 3a446573, the per-figure receipts and the re-measured pins, but its tests line at manifest.md:13 is a prose summary rather than the literal command and neither gate log names the revision it ran at.",
+    "write_paths": "the fence names three mast-centroid files individually plus four figure directories, the benchmark and both test files; every landed path is inside them except docs/figures/mast-centroid-capability/panel-states.npz and docs/figures/mast-centroid-capability/panel-receipt.json, which the manifest reports under outside_scope."
+  },
+  "justifications": {
+    "durability": "no test fails if benchmarks/coil_edit_latency.py:_panel_display_coupling regresses, because tests/test_coil_edit_panel_render.py:207 hands the builder its own coupling, and the 1 percent control that would catch it is an uncommitted scratch script under /tmp rather than a test.",
+    "evidence": "the gate recorded at tests/test_coil_edit_panel_render.py:209 asserts only a synthetic map against a synthetic operator, so it measures neither the done_when's five-archive redraw nor its 1 percent control, although the shipped receipts do record the real 6.78e-12 and 7.20e-12 reproduction errors and the recorded gate is green at 43 passed.",
+    "fit": "the added helpers follow the module's own naming and style, but tests/test_flux_surface_connectivity.py:880 documents a mechanism the re-measured table no longer pins.",
+    "goal_fidelity": "all five figures under docs/figures/forward-solve-api/coil-edit-nonconvergence, docs/figures/mast-centroid-capability, docs/figures/single-grid-solver-cutover and docs/figures/cpu-compile-abort/coil-edit-regeneration-row are redrawn at 10 mm from the display map and their non-converged captions carry the largest node mismatch.",
+    "reuse": "benchmarks/coil_edit_latency.py:99 introduces DEFAULT_DISPLAY_SPACING for a floor nova/equilibrium/display_flux.py:44 already owns as DEFAULT_SPACING, while the coupling and moment route correctly reuse parity._plasma_response, parity._stored_circuit_fields and the operator's cell_current.",
+    "scope_discipline": "two files under docs/figures/mast-centroid-capability/ (panel-states.npz and panel-receipt.json) fall outside the file-by-file fence and are disclosed under outside_scope rather than hidden."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is the five coil-edit converged-vs-nonconverged figures re-solved and drawn from fine flux maps, and all five were redrawn at 10 mm through nova/equilibrium/display_flux.build_display_flux_map, with docs/figures/single-grid-solver-cutover/panel-receipt.json and docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json recording spacing_m 0.01 and reproduction errors 6.78e-12 and 7.20e-12.\nVERDICT done_when: the done_when asks a render test to redraw each of the five figures' panels from its own state file and to carry a failing 1 percent conductor-current control; tests/test_coil_edit_panel_render.py:176 instead draws one synthetic 7x7 lattice with a coupling it supplies itself and states no control, so clause (1) is not asserted, while clause (2) is met by the five committed archives and their receipts.\nVERDICT write_paths: the fence names three mast-centroid files individually plus four figure directories, the benchmark and both test files; every landed path is inside them except docs/figures/mast-centroid-capability/panel-states.npz and docs/figures/mast-centroid-capability/panel-receipt.json, which the manifest reports under outside_scope.\nVERDICT manifest: read the delivered attempt-5 manifest, since the live file now reads status in-progress under a resume; it records the 43-passed gate, the archive md5s d40d470f and 3a446573, the per-figure receipts and the re-measured pins, but its tests line at manifest.md:13 is a prose summary rather than the literal command and neither gate log names the revision it ran at.\nVERDICT diff: read all twenty commits from 3ef818dfa to 1f1391bd0; the code change is confined to benchmarks/coil_edit_latency.py (_panel_display_coupling, _panel_display_map, _panel_moments, the display branch of _paint_panel, the wrapped caption, the panel receipts and the new archive keys), tests/test_coil_edit_panel_render.py, the re-measured PERSISTED_STATE_TERMS, the five figures with their receipts and archives, and the evidence fragment, with nova/ untouched.\nCALL_SITES: benchmarks/coil_edit_latency.py:main, benchmarks/coil_edit_latency.py:run, benchmarks/coil_edit_latency.py:_write_panel_data, benchmarks/mast_centroid_solve_panels\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all five figures under docs/figures/forward-solve-api/coil-edit-nonconvergence, docs/figures/mast-centroid-capability, docs/figures/single-grid-solver-cutover and docs/figures/cpu-compile-abort/coil-edit-regeneration-row are redrawn at 10 mm from the display map and their non-converged captions carry the largest node mismatch.\nSCORE evidence: 11\nJUSTIFICATION evidence: the gate recorded at tests/test_coil_edit_panel_render.py:209 asserts only a synthetic map against a synthetic operator, so it measures neither the done_when's five-archive redraw nor its 1 percent control, although the shipped receipts do record the real 6.78e-12 and 7.20e-12 reproduction errors and the recorded gate is green at 43 passed.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: two files under docs/figures/mast-centroid-capability/ (panel-states.npz and panel-receipt.json) fall outside the file-by-file fence and are disclosed under outside_scope rather than hidden.\nSCORE durability: 9\nJUSTIFICATION durability: no test fails if benchmarks/coil_edit_latency.py:_panel_display_coupling regresses, because tests/test_coil_edit_panel_render.py:207 hands the builder its own coupling, and the 1 percent control that would catch it is an uncommitted scratch script under /tmp rather than a test.\nSCORE fit: 16\nJUSTIFICATION fit: the added helpers follow the module's own naming and style, but tests/test_flux_surface_connectivity.py:880 documents a mechanism the re-measured table no longer pins.\nSCORE fit: 16\nSCORE reuse: 15\nJUSTIFICATION reuse: benchmarks/coil_edit_latency.py:99 introduces DEFAULT_DISPLAY_SPACING for a floor nova/equilibrium/display_flux.py:44 already owns as DEFAULT_SPACING, while the coupling and moment route correctly reuse parity._plasma_response, parity._stored_circuit_fields and the operator's cell_current.\nFINDING tests/test_coil_edit_panel_render.py:207 blocking: the render test injects its own coupling and a synthetic operator, so it never runs benchmarks/coil_edit_latency.py:_panel_display_coupling and never loads any of the five committed panel-states.npz archives, which is what the plan's done_when (1) asks for, so the code that actually draws every figure has no test.\nFINDING benchmarks/coil_edit_latency.py:2259 non-blocking: a state file without a current key silently keeps the lattice raster, so an archive that lost its currents draws a plausible solve-resolution figure instead of failing, and the absent archive test is what would have caught it.\nFINDING tests/test_flux_surface_connectivity.py:880 non-blocking: the docstring still says eight open states trace a cycle and one admits none, while the re-measured PERSISTED_STATE_TERMS pins four cycle-tracing states (0, 2, 7, 8) plus state 1, and line 874 still says state 19 carries its own wider control displacement when state 19 now uses the default 1e-3.\nFINDING benchmarks/coil_edit_latency.py:99 non-blocking: DEFAULT_DISPLAY_SPACING restates nova/equilibrium/display_flux.py:44 DEFAULT_SPACING, so the 10 mm floor can drift between the two copies.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T204241022825-coil-edit-fine-panels/manifest.md:13 non-blocking: the tests line states a result rather than the literal command a shell was handed, so promotion can only recover the gate from the log header, and neither gate log names the revision it ran at.",
+  "review_run_id": "r-20261103T051008024703-review-of-coil-edit-fine-panels-1f1391bd0a62",
+  "reviewed_base_sha": "3ef818dfaef2a36da8fd0d6e0c34272ec5259218",
+  "reviewed_head_sha": "1f1391bd0a62944a9db45b84afaf6fc8f3442c2a",
+  "reviewed_run_id": "r-20261102T204241022825-coil-edit-fine-panels",
+  "scores": {
+    "durability": 9,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T05:33:16.715469+00:00",
+  "total": 86
+}

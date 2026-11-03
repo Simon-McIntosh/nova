@@ -1414,15 +1414,23 @@ def _panel_display_map(
     panel: dict[str, Any],
     *,
     spacing: float,
+    coupling: Any = None,
 ):
-    """Return one stored panel state's field evaluated on the display grid."""
+    """Return one stored panel state's field evaluated on the display grid.
+
+    ``coupling`` is the machine coupling the map contracts; it is built from
+    the fitted circuits when absent, and a caller may pass its own so the
+    moment and state assembly here can be measured against a machine it can
+    state exactly.
+    """
     from nova.equilibrium.display_flux import build_display_flux_map
     from nova.equilibrium.stencil_mesh import CellCurrentMoments
 
     lattice = profile.lattice
-    coupling = _panel_display_coupling(
-        circuit_context["group"], circuit_context["row"], lattice, panel["current"]
-    )
+    if coupling is None:
+        coupling = _panel_display_coupling(
+            circuit_context["group"], circuit_context["row"], lattice, panel["current"]
+        )
     cell_current, radial, vertical = panel["moments"]
     moments = CellCurrentMoments(
         jnp.asarray(cell_current), jnp.asarray(radial), jnp.asarray(vertical)

@@ -19,10 +19,12 @@ from __future__ import annotations
 
 import argparse
 import base64
+import concurrent.futures
 import gc
 import hashlib
 import json
 import math
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -53,6 +55,7 @@ from benchmarks.diiid_corpus_conventions import (
 )
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
+from nova.database.filepath import operand_cache_root, portable_path
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import (
     DEFAULT_SPACING as DISPLAY_DEFAULT_SPACING,
@@ -122,6 +125,12 @@ FRAME_FIGURE_NAME = "frame_flux_comparison.png"
 #: conductor response and the build that consumes it.
 DISPLAY_SPACING = DISPLAY_DEFAULT_SPACING
 DISPLAY_CHUNK = 4096
+#: Processes and per-task point count of the conductor-response build.  The
+#: response is exact -- every column is an integral kernel evaluated at every
+#: target -- and the kernel costs about 0.12 s per point per column set, so the
+#: build is split across processes inside the allocation and written once.
+DISPLAY_RESPONSE_PROCESSES = 10
+DISPLAY_RESPONSE_CHUNK = 256
 COHORT_FIGURE_NAME = "cohort_match_summary.png"
 PUBLICATION_DIRECTORY = "/nova/figures/diiid-forward-onboarding/forward-gs"
 DEFAULT_DISPLACEMENT_OUTPUT = Path(
@@ -316,6 +325,12 @@ class DisplayMapRecord:
     max_node_mismatch_wb: float
     reproduction_relative_error: float
     build_seconds: float
+    conductor_response_path: str
+    conductor_response_digest: str
+    conductor_response_shape: tuple[int, int]
+    conductor_response_processes: int
+    conductor_response_build_seconds: float
+    conductor_response_loaded_from_cache: bool
 
 
 @dataclass(frozen=True)
@@ -1438,46 +1453,27 @@ def _assembled_boundary_geometry(
     return closed, open_branches
 
 
-def _display_external(
-    profile: ForwardProfile, machine, points: np.ndarray
-) -> np.ndarray:
-    """Return the operator's own external flux [Wb] at ``points``.
+def _conductor_carriers(machine) -> list[np.ndarray]:
+    """Return the machine conductor sections [m] in the operator's order."""
 
-    The conductor columns are the vacuum response of every conductor that
-    carries axisymmetric flux, in the order the operator's response matrix
-    carries them, followed by the active-coil columns the circuit adapter
-    appended; the current vector is the operator's own complete one, so the
-    column order and the currents cannot drift apart.
-    """
-
-    carriers = [
-        conductor
+    return [
+        np.asarray(conductor.vertices, dtype=float)
         for conductor in machine.physical.conductors
         if conductor.vertices is not None
         and conductor.turns.affects_axisymmetric_poloidal_flux
     ]
-    complete = np.asarray(profile.operator.external_current, dtype=float)
-    if complete.size != len(carriers) + len(CIRCUIT_DRIVEN_CONDUCTORS):
-        raise RuntimeError(
-            "display coupling does not match the operator's conductor response"
-        )
-    points = np.asarray(points, dtype=float)
-    flux = np.zeros(points.shape[0], dtype=np.float64)
-    for conductor, value in zip(carriers, complete[: len(carriers)], strict=True):
-        flux += (
-            value * polygon_greens(points[:, 0], points[:, 1], conductor.vertices)[0]
-        )
-    appended = complete[len(carriers) :]
-    if appended.size:
-        _names, response, _receipt = active_coil_response_from_imas(
-            DEFAULT_ACTIVE_COIL_ENTRY,
-            DEFAULT_ACTIVE_COIL_DD_VERSION,
-            CIRCUIT_DRIVEN_CONDUCTORS,
-            points[:, 0],
-            points[:, 1],
-        )
-        flux += np.asarray(response, dtype=float).T @ appended
-    return flux
+
+
+def _conductor_columns(task) -> np.ndarray:
+    """Return one point block's exact per-ampere flux columns, shape (n, points)."""
+
+    carriers, entry, dd_version, active_names, radius, height = task
+    columns = [polygon_greens(radius, height, vertices)[0] for vertices in carriers]
+    _names, active, _receipt = active_coil_response_from_imas(
+        entry, dd_version, active_names, radius, height
+    )
+    columns.extend(np.asarray(active, dtype=float))
+    return np.stack(columns)
 
 
 def _display_grid(
@@ -1499,19 +1495,101 @@ def _display_grid(
     )
 
 
+def _conductor_response_path(points: np.ndarray) -> tuple[Path, str]:
+    """Return the cache path and digest of one target set's response matrix."""
+
+    digest = hashlib.sha256()
+    digest.update(str(DEFAULT_ACTIVE_COIL_ENTRY).encode())
+    digest.update(DEFAULT_ACTIVE_COIL_DD_VERSION.encode())
+    digest.update(",".join(CIRCUIT_DRIVEN_CONDUCTORS).encode())
+    digest.update(np.ascontiguousarray(points, dtype=np.float64).tobytes())
+    key = digest.hexdigest()
+    root = operand_cache_root() / "diiid-forward-gs"
+    return root / f"display-conductor-response-{key[:16]}.npy", key
+
+
+def _build_conductor_response(
+    machine, points: np.ndarray
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Return the exact conductor response matrix at ``points`` and its receipt.
+
+    Every column is one conductor's total poloidal flux per ampere, evaluated at
+    every target by the same integral kernel the solve uses, so the display map
+    is the matrix contracted with the operator's own current vector.  The build
+    depends on the coil geometry and the targets only, never on the frame, so it
+    runs once, is written under the shared evidence root, and is read back by
+    every later frame.
+    """
+
+    path, key = _conductor_response_path(points)
+    carriers = _conductor_carriers(machine)
+    columns = len(carriers) + len(CIRCUIT_DRIVEN_CONDUCTORS)
+    record: dict[str, Any] = {
+        "path": portable_path(path),
+        "digest": key,
+        "columns": columns,
+        "points": int(points.shape[0]),
+        "processes": DISPLAY_RESPONSE_PROCESSES,
+    }
+    if path.exists():
+        response = np.load(path)
+        if response.shape != (points.shape[0], columns):
+            raise RuntimeError(
+                f"cached conductor response has shape {response.shape}, "
+                f"expected {(points.shape[0], columns)}"
+            )
+        record["build_seconds"] = 0.0
+        record["loaded_from_cache"] = True
+        record["shape"] = list(response.shape)
+        return response, record
+    targets = np.ascontiguousarray(points, dtype=np.float64)
+    tasks = [
+        (
+            carriers,
+            str(DEFAULT_ACTIVE_COIL_ENTRY),
+            DEFAULT_ACTIVE_COIL_DD_VERSION,
+            CIRCUIT_DRIVEN_CONDUCTORS,
+            targets[start : start + DISPLAY_RESPONSE_CHUNK, 0],
+            targets[start : start + DISPLAY_RESPONSE_CHUNK, 1],
+        )
+        for start in range(0, targets.shape[0], DISPLAY_RESPONSE_CHUNK)
+    ]
+    started = time.perf_counter()
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=DISPLAY_RESPONSE_PROCESSES,
+        mp_context=multiprocessing.get_context("spawn"),
+    ) as pool:
+        blocks = list(pool.map(_conductor_columns, tasks))
+    seconds = time.perf_counter() - started
+    response = np.concatenate(blocks, axis=1).T
+    if response.shape != (points.shape[0], columns):
+        raise RuntimeError(
+            f"conductor response has shape {response.shape}, "
+            f"expected {(points.shape[0], columns)}"
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    staged = path.with_name(path.name + ".partial")
+    with staged.open("wb") as handle:
+        np.save(handle, response)
+    staged.replace(path)
+    record["build_seconds"] = seconds
+    record["loaded_from_cache"] = False
+    record["shape"] = list(response.shape)
+    return response, record
+
+
 def _display_coupling(
     profile: ForwardProfile, machine, chunk: int = DISPLAY_CHUNK
-) -> tuple[DisplayCoupling, np.ndarray, np.ndarray]:
+) -> tuple[DisplayCoupling, np.ndarray, np.ndarray, dict[str, Any]]:
     """Return the target-point coupling the frame's own solve was built from.
 
     The plasma columns are the same uniform ``hybrid_greens`` block the solve
     lattice consumes, evaluated at whatever points the panel asks for; the
     operator carries no radial or vertical plasma moment matrices here, so
     those columns are zero exactly as the solve's own raster image is.  The
-    conductor flux is the operator's own extended response, read once for the
-    whole display grid and the lattice nodes together: the metal-entry read is
-    the expensive part of that response and a chunk-sized request would pay it
-    once per chunk.
+    conductor flux is the response matrix read once for the display grid and
+    the lattice nodes together, contracted with the operator's own current
+    vector.
     """
 
     lattice = profile.lattice
@@ -1520,14 +1598,14 @@ def _display_coupling(
     vertical_extent = float(np.diff(np.asarray(lattice.height, dtype=float)).mean())
     display_radius, display_height, points = _display_grid(lattice)
     targets = np.concatenate((points, cells))
-    flux = _display_external(profile, machine, targets)
+    response, record = _build_conductor_response(machine, targets)
+    complete = np.asarray(profile.operator.external_current, dtype=float)
+    if complete.size != response.shape[1]:
+        raise RuntimeError(
+            "display coupling does not match the operator's conductor response"
+        )
+    rows = {point.tobytes(): index for index, point in enumerate(targets)}
     served: dict[bytes, np.ndarray] = {}
-    offset = 0
-    for source in (points, cells):
-        for start in range(0, source.shape[0], chunk):
-            block = np.ascontiguousarray(source[start : start + chunk], dtype=float)
-            served[block.tobytes()] = flux[offset : offset + block.shape[0]]
-            offset += block.shape[0]
 
     def plasma(points: np.ndarray):
         """Return the uniform, radial and vertical plasma columns."""
@@ -1539,16 +1617,23 @@ def _display_coupling(
     def external(points: np.ndarray) -> np.ndarray:
         """Return the conductor-only flux [Wb] at ``points``."""
         block = np.ascontiguousarray(points, dtype=float)
-        cached = served.get(block.tobytes())
+        key = block.tobytes()
+        cached = served.get(key)
         if cached is None:
-            cached = _display_external(profile, machine, block)
-            served[block.tobytes()] = cached
+            indices = np.fromiter(
+                (rows[point.tobytes()] for point in block),
+                dtype=np.intp,
+                count=block.shape[0],
+            )
+            cached = response[indices] @ complete
+            served[key] = cached
         return cached
 
     return (
         DisplayCoupling(plasma=plasma, external=external),
         display_radius,
         display_height,
+        record,
     )
 
 
@@ -1557,7 +1642,9 @@ def _display_map(
 ) -> tuple[DisplayFluxMap, dict[str, Any]]:
     """Return the frame's fine display map and the rig it was drawn from."""
 
-    coupling, display_radius, display_height = _display_coupling(profile, machine)
+    coupling, display_radius, display_height, record = _display_coupling(
+        profile, machine
+    )
     display = build_display_flux_map(
         profile,
         np.asarray(equilibrium.flux, dtype=float),
@@ -1573,7 +1660,7 @@ def _display_map(
         display.height, display_height
     ):
         raise RuntimeError("display map grid does not match the prefetched grid")
-    return display, {"coupling": coupling}
+    return display, {"coupling": coupling, "conductor_response": record}
 
 
 def _display_separatrix(
@@ -2120,7 +2207,8 @@ def solve_frame(
     )
     display = None
     try:
-        display, _rig = _display_map(profile, equilibrium, machine)
+        display, display_rig = _display_map(profile, equilibrium, machine)
+        conductor_response = display_rig["conductor_response"]
         display_closed, display_open = _display_separatrix(display)
         display_comparison = compare_closed_boundaries(
             display_closed,
@@ -2152,6 +2240,14 @@ def solve_frame(
             max_node_mismatch_wb=float(display.max_node_mismatch_wb),
             reproduction_relative_error=float(display.reproduction_relative_error),
             build_seconds=float(display.build_seconds),
+            conductor_response_path=conductor_response["path"],
+            conductor_response_digest=conductor_response["digest"],
+            conductor_response_shape=tuple(conductor_response["shape"]),
+            conductor_response_processes=int(conductor_response["processes"]),
+            conductor_response_build_seconds=float(conductor_response["build_seconds"]),
+            conductor_response_loaded_from_cache=bool(
+                conductor_response["loaded_from_cache"]
+            ),
         )
     except (NoQualifiedAxisError, ConstraintViolationError) as error:
         display_record = None
@@ -2525,8 +2621,12 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
             "max_node_mismatch_wb",
             "reproduction_relative_error",
             "build_seconds",
+            "conductor_response_build_seconds",
         ):
             display_values[name] = _checkpoint_float(display_values[name])
+        display_values["conductor_response_shape"] = tuple(
+            display_values["conductor_response_shape"]
+        )
         restored["display_map"] = DisplayMapRecord(**display_values)
     return FrameResult(**restored)
 
@@ -2933,6 +3033,20 @@ def summarize(
                     if item.display_map is not None
                 ]
             ),
+            "conductor_response": [
+                {
+                    "path": item.display_map.conductor_response_path,
+                    "digest": item.display_map.conductor_response_digest,
+                    "shape": list(item.display_map.conductor_response_shape),
+                    "processes": item.display_map.conductor_response_processes,
+                    "build_seconds": item.display_map.conductor_response_build_seconds,
+                    "loaded_from_cache": (
+                        item.display_map.conductor_response_loaded_from_cache
+                    ),
+                }
+                for item in results
+                if item.display_map is not None
+            ],
         },
         "metrics": {
             "interior_r_squared": _distribution(r_squared),

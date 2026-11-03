@@ -56,6 +56,7 @@ def main():
     args = parser.parse_args()
     data = [("Base", row(args.base)), ("Bucketed", row(args.bucketed))]
     plt.style.use("data-ink")
+    plt.rcParams["svg.fonttype"] = "none"
     figure, axis = plt.subplots(figsize=(14, 7.2))
     busy_color = "#2e8b57"
     idle_color = "#929292"

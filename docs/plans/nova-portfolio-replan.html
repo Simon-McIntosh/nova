@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-11-03">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -184,6 +184,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261103T064034359291-replan-small-primitives" data-who="reckon-build" data-when="2026-11-03T07:09:56Z">
     <div class="r-comment-body"><p>Four axis checks, three temporary receipt writers and two evidence copies now have one owner per group; the committed-head suite added zero failures (178 passed/1 failed at base, 183 passed/1 failed at head), and the spacing mutation failed the float32 test.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261103T074305389249-review-of-replan-constraint-algebra-9a6feaeeea63" data-who="reckon-build" data-when="2026-11-03T07:55:13Z">
+    <div class="r-comment-body"><p>Stored parsed independent review for source run r-20261103T063929675095-replan-constraint-algebra at base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4 and head 9a6feaeeea631a8668ae129bbcf506bd1f629f75; scores 20/17/20/15/19/20, zero added failures, one non-blocking finding and no blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-nova-fd-20261006-size-ceiling-in-shared-hook" data-who="nova-fd" data-when="2026-10-06T02:30:00Z">
     <div class="r-comment-body"><p>2026-10-06, for f-replan-receipts-out-of-git: the size ceiling is not a second commit-time mechanism. artifacts-carry-no-worktree-paths §4 (S27) adds nova's one commit-time hook, <code>scripts/git-hooks/pre-commit</code>, a read-only shim enabled through <code>core.hooksPath</code>. The receipts migration adds the ceiling as a second check line in that hook, in its own migration commit, after the hook lands. Its negative control is a test file above the ceiling refused by that hook.</p></div>

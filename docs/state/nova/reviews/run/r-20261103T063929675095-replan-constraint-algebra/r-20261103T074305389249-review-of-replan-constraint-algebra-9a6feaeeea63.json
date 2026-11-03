@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/constraint.py:336 constraint_residual_jvp",
+    "nova/equilibrium/constraint.py:2094 constraint row evaluation",
+    "nova/equilibrium/reduced_newton.py:2388 reduced solve rows"
+  ],
+  "completed_at": "2026-11-03T07:55:13Z",
+  "dispatched_at": "2026-11-03T07:45:15Z",
+  "findings": [
+    {
+      "file": "tests/test_constraint_residual_algebra.py",
+      "line": "140",
+      "severity": "non-blocking",
+      "text": "non-blocking: restoring the seven old scaled formulas would leave all added assertions green, so the test pins behavior but not consolidation; exempted because the declared done_when asks for pinned base values while the one-formula census is separately verified from constraint.py:159-174 and its seven call sites."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "commit ee3a96d79 changes nova/equilibrium/constraint.py and adds tests/test_constraint_residual_algebra.py, while commit 9a6feaeee adds only docs/evidence/fragments/nova-portfolio-replan/replan-constraint-algebra.html; the former replaces seven local formulas with calls to the helper at constraint.py:159.",
+    "done_when": "prompt.txt:107 requires one implementation, pinned base values, preserved JAX axes, and no added constraint-test failures; tests/test_constraint_residual_algebra.py:129-150 and the complete base-focused-tests.log and after-focused-tests.log record 27 passed in each arm with zero added IDs.",
+    "goal": "prompt.txt:38 and docs/plans/nova-portfolio-replan.html:71 require one tested residual implementation for seven methods, and nova/equilibrium/constraint.py:159 owns the sole scaled formula reached by all seven.",
+    "manifest": "the source manifest.md records commits ee3a96d79 and 9a6feaeee, the two complete focused suite arms, and negative-control-verified.log with one field-case failure and EXIT=1.",
+    "write_paths": "prompt.txt:77-81 grants constraint.py, the residual test, the evidence fragment, and its figure directory; the three paths in git diff 2d2172dd7..9a6feaeee are inside that scope."
+  },
+  "justifications": {
+    "durability": "tests/test_constraint_residual_algebra.py:140 fails when an observed value or scale changes, line 143 fails when the batch row axis changes, and lines 144-149 fail when traced values change, but these independent assertions do not detect restored duplicate formulas.",
+    "evidence": "base-focused-tests.log and after-focused-tests.log each end with 27 passed, 5 deselected, EXIT=0 at recorded revisions, and negative-control-verified.log shows the field-observation mutation failing the pinned field case.",
+    "fit": "nova/equilibrium/constraint.py:159 places the private helper beside ConstraintFunctional and preserves each residual signature and registration; the added names in constraint.py and tests/test_constraint_residual_algebra.py carry no forbidden plan labels.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:159-174 computes the shared scaled observation and preserves centroid inactive rows, with seven delegations at lines 1125, 1214, 1508, 1557, 1634, 1697, and 1814.",
+    "reuse": "the capability search found nova/equilibrium/observation.py:599 moment_residual, which owns optional MomentTargets and computes its own relative scales, while constraint.py:159 extends the existing ConstraintFunctional owner for supplied targets, scales, and centroid masks.",
+    "scope_discipline": "git diff 2d2172dd7..9a6feaeee changes only nova/equilibrium/constraint.py, tests/test_constraint_residual_algebra.py, and docs/evidence/fragments/nova-portfolio-replan/replan-constraint-algebra.html, all named in prompt.txt:77-81."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 and docs/plans/nova-portfolio-replan.html:71 require one tested residual implementation for seven methods, and nova/equilibrium/constraint.py:159 owns the sole scaled formula reached by all seven.\nVERDICT done_when: prompt.txt:107 requires one implementation, pinned base values, preserved JAX axes, and no added constraint-test failures; tests/test_constraint_residual_algebra.py:129-150 and the complete base-focused-tests.log and after-focused-tests.log record 27 passed in each arm with zero added IDs.\nVERDICT write_paths: prompt.txt:77-81 grants constraint.py, the residual test, the evidence fragment, and its figure directory; the three paths in git diff 2d2172dd7..9a6feaeee are inside that scope.\nVERDICT manifest: the source manifest.md records commits ee3a96d79 and 9a6feaeee, the two complete focused suite arms, and negative-control-verified.log with one field-case failure and EXIT=1.\nVERDICT diff: commit ee3a96d79 changes nova/equilibrium/constraint.py and adds tests/test_constraint_residual_algebra.py, while commit 9a6feaeee adds only docs/evidence/fragments/nova-portfolio-replan/replan-constraint-algebra.html; the former replaces seven local formulas with calls to the helper at constraint.py:159.\nCALL_SITES: nova/equilibrium/constraint.py:336 constraint_residual_jvp, nova/equilibrium/constraint.py:2094 constraint row evaluation, nova/equilibrium/reduced_newton.py:2388 reduced solve rows\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:159-174 computes the shared scaled observation and preserves centroid inactive rows, with seven delegations at lines 1125, 1214, 1508, 1557, 1634, 1697, and 1814.\nSCORE evidence: 17\nJUSTIFICATION evidence: base-focused-tests.log and after-focused-tests.log each end with 27 passed, 5 deselected, EXIT=0 at recorded revisions, and negative-control-verified.log shows the field-observation mutation failing the pinned field case.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 2d2172dd7..9a6feaeee changes only nova/equilibrium/constraint.py, tests/test_constraint_residual_algebra.py, and docs/evidence/fragments/nova-portfolio-replan/replan-constraint-algebra.html, all named in prompt.txt:77-81.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_constraint_residual_algebra.py:140 fails when an observed value or scale changes, line 143 fails when the batch row axis changes, and lines 144-149 fail when traced values change, but these independent assertions do not detect restored duplicate formulas.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/constraint.py:159 places the private helper beside ConstraintFunctional and preserves each residual signature and registration; the added names in constraint.py and tests/test_constraint_residual_algebra.py carry no forbidden plan labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search found nova/equilibrium/observation.py:599 moment_residual, which owns optional MomentTargets and computes its own relative scales, while constraint.py:159 extends the existing ConstraintFunctional owner for supplied targets, scales, and centroid masks.\nFINDING tests/test_constraint_residual_algebra.py:140 non-blocking: restoring the seven old scaled formulas would leave all added assertions green, so the test pins behavior but not consolidation; exempted because the declared done_when asks for pinned base values while the one-formula census is separately verified from constraint.py:159-174 and its seven call sites.\n",
+  "review_run_id": "r-20261103T074305389249-review-of-replan-constraint-algebra-9a6feaeeea63",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "9a6feaeeea631a8668ae129bbcf506bd1f629f75",
+  "reviewed_run_id": "r-20261103T063929675095-replan-constraint-algebra",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T08:05:11.429146+00:00",
+  "total": 111
+}

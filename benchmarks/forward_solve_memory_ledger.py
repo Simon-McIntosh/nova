@@ -425,3 +425,7 @@ def main() -> None:
     )
     print(f"LEDGER {arguments.output / f'ledger-{arguments.arm}.json'}", flush=True)
     print(f"PEAK {state['peak_rss']} {state['peak_rss_bytes']}", flush=True)
+
+
+if __name__ == "__main__":
+    main()

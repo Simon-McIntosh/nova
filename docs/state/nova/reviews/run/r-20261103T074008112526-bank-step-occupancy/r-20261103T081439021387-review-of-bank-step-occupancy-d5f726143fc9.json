@@ -11,6 +11,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-03T08:27:10Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "measurement-only node: its durable output is the evidence fragment and raw H200 logs, not product code",
+      "recorded_at": "2026-11-03T08:43:23.418536+00:00"
+    }
+  },
   "dispatched_at": "2026-11-03T08:17:13Z",
   "evidence": {
     "after_suite": null,

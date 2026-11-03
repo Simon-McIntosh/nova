@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="101">
 <meta name="plan-modified" content="2026-11-03">
 </head>
 <body>
@@ -395,6 +395,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261102T225926691749-review-of-bank-step-booking-once-a17a1f2a4d2d-figure" data-who="reckon-build" data-when="2026-11-02T23:17:20.410Z">
     <div class="r-comment-body"><p>Figure review of r-20261102T215004202991-bank-step-booking-once at a17a1f2a4 is parsed: all six rubric items pass (legible two-panel linear-axis bar chart, data ink is the four bars; no grid, fill or gradient; text dark on white; nothing clipped or overlapping), with four non-blocking findings, and no finding blocks the node.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261102T234443751156-review-of-bank-step-booking-once-1f63ff43ccf7" data-who="reckon-build" data-when="2026-11-02T23:57:42.947Z">
+    <div class="r-comment-body"><p>Independent review of a17a1f2a4..1f63ff43c stored at both declared review-record paths with six scores (goal_fidelity 10, evidence 15, scope_discipline 20, durability 8, fit 14, reuse 10), zero added failures, and six non-blocking findings: the repaired caption still attributes revision 7b2a7898 to a base arm whose own log records 6a404a566, the provenance check&#x27;s revision and current-path helpers are never called, its table assertion covers only the wall columns, its allocation guard is an exact phrase, h200_pair.sh ends with an unconditional EXIT=0, and it duplicates h200_arm.sh&#x27;s arm runner.</p></div>
 </div>
 </section>
 </main>

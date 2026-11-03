@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-02T23:57:42.947Z",
+  "dispatched_at": "2026-11-02T23:46:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html",
+      "id": "b1e7c40a2d1",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "The table caption (and the figcaption at line 4) states both arms sat in a worktree recorded at revision 7b2a7898, but h200-base2.log:1 records ARM=base2 REVISION=6a404a5663f8482e41e54ed50b2b30bc2290be28 and the fragment's own receipts paragraph at line 37 says the base arm is \"job 1303773 at revision 6a404a566\", so the caption contradicts the receipt it cites; 6a404a566 is a descendant of 7b2a7898 and the two trees differ, so the revision does partly identify the arms and only the current.py digest distinguishes the sources, which is what the caption should say."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py",
+      "id": "4c90be1f7a3",
+      "line": 49,
+      "severity": "non-blocking",
+      "text": "revision(path) is defined at line 49 and current_path(path) at line 60, and neither is called anywhere in main(), so the module docstring's claim that \"each named log's recorded revision must be the revision the fragment attributes to it\" is not implemented; this is why the 7b2a7898-against-6a404a566 contradiction in the fragment passes the check, and current_path() is exactly the instrument that would have caught the h200-base.log mislabelling programmatically instead of in prose."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py",
+      "id": "d2a5f8c09be",
+      "line": 74,
+      "severity": "non-blocking",
+      "text": "table_rows() keeps only cells[1] and cells[2], the two wall columns, so the launches and device columns are never asserted; the delta's own headline correction of the frozen-geometry device cell from 41.23 to 29.43 ms is therefore unguarded \u2014 measured by rewriting that cell back to 41.23 in a copy of the head fragment, on which the check still prints PASS and exits 0."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py",
+      "id": "e83b17ad4f6",
+      "line": 108,
+      "severity": "non-blocking",
+      "text": "the guard against the old provenance claim is an exact-phrase test for \"both arms from one allocation\", so any other wording passes; measured by rewriting the figcaption's \"separate allocations\" to \"a single allocation\" in a copy of the head fragment, on which the check still prints PASS and exits 0."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/h200_pair.sh",
+      "id": "7f0c4b92e15",
+      "line": 49,
+      "severity": "non-blocking",
+      "text": "the script ends by printing EXIT=0 unconditionally after the arm loop, so a run in which both arms failed still ends with an EXIT=0 line, which is exactly the line a promotion gate receipt reads as success; the per-arm status is only on the EXIT_ARM= line the reader has to hunt for."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/h200_pair.sh",
+      "id": "a5d1e63c078",
+      "line": 43,
+      "severity": "non-blocking",
+      "text": "the per-arm sequence \u2014 profile, find the trace, parse_trace, print an ARM=/REVISION= header \u2014 duplicates scripts/prototypes/bank_step_booking_once/h200_arm.sh:14-20 in the same directory rather than extending it (the only new ingredient is the mirror tree, which h200_arm.sh could take as an argument), so two launchers must now be kept in step as the profile module's interface changes."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the single commit 1f63ff43c against a17a1f2a4: it changes the evidence fragment's two captions and receipts paragraph and the frozen-geometry device cell, and adds check_fragment_provenance.py (158 lines) and h200_pair.sh (50 lines); no product source and no test file.",
+    "done_when": "The done_when requires the six book() fields digest-identical, a fresh-read residual at most 1e-10, oracle ratios within budget, and a before/after table of tangent wall, whole-step wall, launches and emitted copies; the delta repairs the table's provenance and verifies its wall columns against the named logs, but the manifest's outside_scope still records that no fresh-read residual and no oracle ratio were measured, and the table is now explicitly a cross-allocation pair.",
+    "goal": "The node goal is to find why the booking tangent's compiled programs are emitted twice, remove the duplicate, and table the before and after walls on one H200; the commit under review is the provenance repair of that table, and nova/equilibrium/current.py is still the base source (sha256 048a2fa0 at 6a404a566, 7b2a7898, a17a1f2a4 and 1f63ff43c), so the diagnosis and the negative measurement stand and the duplicate is still computed.",
+    "manifest": "Read at the reviewed run's manifest.md; it records the repair as checkpoint and landing, the provenance negative control with its log, and outside_scope conceding that no same-allocation pair and no fresh-read residual or oracle ratio were produced; baseline_suite and after_suite are both empty, so no suite arm is recorded.",
+    "write_paths": "The source node declared nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py, tests/test_bank_step_booking_once.py, scripts/prototypes/bank_step_booking_once, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html and docs/figures/sub-millisecond-forward-path/bank-step-booking-once; the delta touches three files, two under scripts/prototypes/bank_step_booking_once and the evidence fragment, all inside those paths."
+  },
+  "justifications": {
+    "durability": "check_fragment_provenance.py is a real check with a recorded negative control (the pre-repair fragment yields four FAIL lines and EXIT=0's opposite at provenance-negative-control.log:6-10), but no test or gate invokes it, its docstring's revision check is unimplemented at line 49, and reverting the corrected 29.43 ms cell to 41.23 still passes, so the change's own correction is not protected.",
+    "evidence": "The delta makes the table checkable and mostly corrects it \u2014 the arm digests 048a2fa0 and fdbd9574 verify against current-base.py and current-cond-preserved.py, the two allocations verify against jobs 1303773 and 1303768, the repeat run's 37.03 against 37.19 device ms and its 490/2,776 launches verify against h200-base.log and h200-prefix.log \u2014 but its own caption at line 18 attributes revision 7b2a7898 to a base arm whose log records 6a404a566.",
+    "fit": "the two added scripts follow the layout and header convention of h200_arm.sh:6-20 in the same directory and carry no plan or ticket label, but the overclaiming module docstring and the dead revision() and current_path() helpers at lines 49 and 60 do not match the directory's working style.",
+    "goal_fidelity": "nova/equilibrium/current.py is byte-identical to the base at every revision from 6a404a566 to 1f63ff43c, so the duplicate the goal names is still computed and only the evidence record improved; the delta does not advance the node's stated deliverable beyond the table it repairs.",
+    "reuse": "check_fragment_provenance.py has no owner to duplicate \u2014 the other check_*.py scripts are per-study and none verifies a fragment table against logs \u2014 while h200_pair.sh:43-45 re-implements the profile-and-parse arm sequence that h200_arm.sh:14-20 already owns without extending it.",
+    "scope_discipline": "git diff a17a1f2a4..1f63ff43c changes only bank-step-booking-once.html, check_fragment_provenance.py and h200_pair.sh, all inside the declared write paths, with no product source, no test and no other study touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to find why the booking tangent's compiled programs are emitted twice, remove the duplicate, and table the before and after walls on one H200; the commit under review is the provenance repair of that table, and nova/equilibrium/current.py is still the base source (sha256 048a2fa0 at 6a404a566, 7b2a7898, a17a1f2a4 and 1f63ff43c), so the diagnosis and the negative measurement stand and the duplicate is still computed.\nVERDICT done_when: The done_when requires the six book() fields digest-identical, a fresh-read residual at most 1e-10, oracle ratios within budget, and a before/after table of tangent wall, whole-step wall, launches and emitted copies; the delta repairs the table's provenance and verifies its wall columns against the named logs, but the manifest's outside_scope still records that no fresh-read residual and no oracle ratio were measured, and the table is now explicitly a cross-allocation pair.\nVERDICT write_paths: The source node declared nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py, tests/test_bank_step_booking_once.py, scripts/prototypes/bank_step_booking_once, docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html and docs/figures/sub-millisecond-forward-path/bank-step-booking-once; the delta touches three files, two under scripts/prototypes/bank_step_booking_once and the evidence fragment, all inside those paths.\nVERDICT manifest: Read at the reviewed run's manifest.md; it records the repair as checkpoint and landing, the provenance negative control with its log, and outside_scope conceding that no same-allocation pair and no fresh-read residual or oracle ratio were produced; baseline_suite and after_suite are both empty, so no suite arm is recorded.\nVERDICT diff: Read the single commit 1f63ff43c against a17a1f2a4: it changes the evidence fragment's two captions and receipts paragraph and the frozen-geometry device cell, and adds check_fragment_provenance.py (158 lines) and h200_pair.sh (50 lines); no product source and no test file.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py is byte-identical to the base at every revision from 6a404a566 to 1f63ff43c, so the duplicate the goal names is still computed and only the evidence record improved.\nSCORE evidence: 15\nJUSTIFICATION evidence: the delta makes the table checkable and mostly corrects it, but its caption at docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:18 attributes revision 7b2a7898 to a base arm whose h200-base2.log:1 records 6a404a566.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff a17a1f2a4..1f63ff43c changes only bank-step-booking-once.html, check_fragment_provenance.py and h200_pair.sh, all inside the declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: no test or gate invokes check_fragment_provenance.py, its docstring's revision check is unimplemented at line 49, and reverting the corrected 29.43 ms cell to 41.23 still passes the check.\nSCORE fit: 14\nJUSTIFICATION fit: the scripts follow h200_arm.sh:6-20's header convention, but check_fragment_provenance.py:49 and :60 carry dead helpers behind an overclaiming docstring.\nSCORE reuse: 10\nJUSTIFICATION reuse: h200_pair.sh:43-45 re-implements the profile-and-parse arm sequence that h200_arm.sh:14-20 owns without extending it, while check_fragment_provenance.py duplicates no existing owner.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html:18 non-blocking: The table caption (and the figcaption at line 4) states both arms sat in a worktree recorded at revision 7b2a7898, but h200-base2.log:1 records ARM=base2 REVISION=6a404a5663f8482e41e54ed50b2b30bc2290be28 and the fragment's own receipts paragraph at line 37 says the base arm is \"job 1303773 at revision 6a404a566\", so the caption contradicts the receipt it cites; 6a404a566 is a descendant of 7b2a7898 and the two trees differ, so the revision does partly identify the arms and only the current.py digest distinguishes the sources, which is what the caption should say.\nFINDING scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py:49 non-blocking: revision(path) is defined at line 49 and current_path(path) at line 60, and neither is called anywhere in main(), so the module docstring's claim that \"each named log's recorded revision must be the revision the fragment attributes to it\" is not implemented; this is why the 7b2a7898-against-6a404a566 contradiction in the fragment passes the check, and current_path() is exactly the instrument that would have caught the h200-base.log mislabelling programmatically instead of in prose.\nFINDING scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py:74 non-blocking: table_rows() keeps only cells[1] and cells[2], the two wall columns, so the launches and device columns are never asserted; the delta's own headline correction of the frozen-geometry device cell from 41.23 to 29.43 ms is therefore unguarded \u2014 measured by rewriting that cell back to 41.23 in a copy of the head fragment, on which the check still prints PASS and exits 0.\nFINDING scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py:108 non-blocking: the guard against the old provenance claim is an exact-phrase test for \"both arms from one allocation\", so any other wording passes; measured by rewriting the figcaption's \"separate allocations\" to \"a single allocation\" in a copy of the head fragment, on which the check still prints PASS and exits 0.\nFINDING scripts/prototypes/bank_step_booking_once/h200_pair.sh:49 non-blocking: the script ends by printing EXIT=0 unconditionally after the arm loop, so a run in which both arms failed still ends with an EXIT=0 line, which is exactly the line a promotion gate receipt reads as success; the per-arm status is only on the EXIT_ARM= line the reader has to hunt for.\nFINDING scripts/prototypes/bank_step_booking_once/h200_pair.sh:43 non-blocking: the per-arm sequence \u2014 profile, find the trace, parse_trace, print an ARM=/REVISION= header \u2014 duplicates scripts/prototypes/bank_step_booking_once/h200_arm.sh:14-20 in the same directory rather than extending it (the only new ingredient is the mirror tree, which h200_arm.sh could take as an argument), so two launchers must now be kept in step as the profile module's interface changes.\n",
+  "review_run_id": "r-20261102T234443751156-review-of-bank-step-booking-once-1f63ff43ccf7",
+  "reviewed_base_sha": "a17a1f2a4d2db21ef87b5b693038d4cf1181723f",
+  "reviewed_head_sha": "1f63ff43ccf7e31aea92f71a01b3e976c7f736e2",
+  "reviewed_run_id": "r-20261102T215004202991-bank-step-booking-once",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 10,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-02T23:58:00.000000+00:00",
+  "total": 77
+}

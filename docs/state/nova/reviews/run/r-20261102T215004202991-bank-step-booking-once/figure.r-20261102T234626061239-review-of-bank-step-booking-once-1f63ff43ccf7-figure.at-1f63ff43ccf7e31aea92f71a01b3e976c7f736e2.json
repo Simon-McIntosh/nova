@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "No suite ran for this figure review and no suite delta is measured; the count is 0 with an empty id list, not the difference of two arms this rubric took.",
+  "attachments_opened": [
+    "image-0.png"
+  ],
+  "attachments_unopenable": [],
+  "caption_review": "The page figcaption names both panels, the reserved H200, the sample basis (medians of three synchronised calls per arm), the four values, which allocation each arm ran as, and what the change was and what it cost. It does not merely repeat the title, so it is not recorded as a finding.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-02T23:47:44Z",
+  "figures_inspected": [
+    "docs/figures/sub-millisecond-forward-path/bank-step-booking-once/bank-step-booking-once.png"
+  ],
+  "figures_reviewed": [
+    {
+      "attached_image": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-booking-once/bank-step-booking-once.png",
+      "figure_markup_path": "docs/figures/sub-millisecond-forward-path/bank-step-booking-once/bank-step-booking-once.svg",
+      "kind": "two-panel bar chart, booking tangent and whole Newton step, base against collapsed source",
+      "rendered_size_px": [
+        1400,
+        720
+      ],
+      "rubric": {
+        "contrast": "pass - every text artist is near-black on white; the base bars are mid grey #929292 at about 3:1 on white, which reads as data without competing with the green arm.",
+        "data_ink": "pass - the four bars are the only data marks; the panel titles, axis labels and value labels are all that accompanies them.",
+        "decoration": "pass - no gridlines, no background fill, no gradient; the top and right spines are absent on both panels and only the left scale and bottom category axis are drawn.",
+        "label_collision": "pass - no text is clipped at the canvas edge on either panel, the value labels sit clear above their bars, and no label overlaps another or the data.",
+        "legibility": "pass - two side-by-side panels titled 'booking tangent' and 'whole Newton step' read at a glance: linear y axes in ms labelled 'warm wall [ms]', paired bars labelled 'base' and 'collapsed', each bar carrying its value above it.",
+        "table_form": "pass - four scalars could be tabulated, but the paired before/after bars are the requested stage-comparison form and make the direction and size of the change immediate."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/plot_stage_compare.py",
+      "id": "f26aef00616",
+      "line": 13,
+      "severity": "non-blocking",
+      "summary": "The rendered PNG's right-hand panel title reads 'whole Newton step', but the only committed revision of this script maps the stage key whole_step to 'whole step' on line 13. The drawing script and the attached artifact therefore disagree, so the picture under review cannot be shown to be the committed script's own output: either the attachment is a stale render or the figure was drawn from a different revision of the script. The reader sees a legible title either way, so this does not hold the node, but the artifact and its script must be reconciled before the figure is treated as evidence for the landed record."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/plot_stage_compare.py",
+      "id": "fde7215bbf9",
+      "line": 19,
+      "severity": "non-blocking",
+      "summary": "read() matches only 'STAGE_DEVICE name=<name> wall_ms=<value>' but main() calls it with name 'base' and 'head' (lines 26-27), which no stage row carries, so both dicts are empty and line 32 raises KeyError on base_values[key]. Reproduced against the cited receipts in the run directory: h200-prefix.log prints 'STAGE_DEVICE name=read|residual_and_booking|local_booking_tangent|...', never name=base or name=head, and h200-base2.log carries no STAGE_DEVICE lines at all, using 'STAGE {\"median_ms\": ..., \"name\": ...}' instead. Neither arm can be regenerated from this script, so the committed figure is not reproducible from the committed receipt path."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/plot_stage_compare.py",
+      "id": "fae00aa1182",
+      "line": 33,
+      "severity": "non-blocking",
+      "summary": "The collapsed arm is drawn in the feature green (#2e8b57) and the base arm in grey (#929292), but the collapsed arm is the regression: 37.86 ms against 27.83 ms on the tangent and 53.76 ms against 42.84 ms on the step. Green conventionally reads as improvement, so a reader who scans by colour rather than by the value labels can read the taller green bar as the better result in a figure whose whole point is that it got worse. A neutral or warning-toned feature colour, or grey for both arms with the change annotated, would remove the inversion."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_once/plot_stage_compare.py",
+      "id": "f90b5236ddc",
+      "line": 37,
+      "severity": "non-blocking",
+      "summary": "Each panel sets its own limit from its own maximum (max(values) * 1.25), giving the left panel a range near 0-47 ms and the right near 0-67 ms. Both start at zero, which limits the damage, but equal bar heights then encode different durations across panels, so a reader comparing the panels by eye under-reads how much larger the whole step is than the tangent. One y-limit shared by both panels would make the cross-panel comparison honest."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass - all text near-black on white; base bars mid grey #929292 at about 3:1, which reads as data and recedes.",
+    "data_ink": "pass - the four bars are the only data marks.",
+    "decoration": "pass - no gridlines, background fill or gradient; top and right spines removed on both panels.",
+    "label_collision": "pass - nothing clipped at the canvas edge, value labels clear above their bars, no label over another or over the data.",
+    "legibility": "pass - both panels read at a glance: titled, linear ms axes from zero, paired bars with their values above them, and the arm names 'base' and 'collapsed' resolved by the page caption.",
+    "table_form": "pass - four scalars could be tabulated, but the paired before/after bars are the requested form and show the change at a glance."
+  },
+  "project": "nova",
+  "raw_text": "Reviewed the single attached PNG (image-0.png, 1400x720) as the rendered artifact; no SVG and no other image was opened.\n\nFIGURE docs/figures/sub-millisecond-forward-path/bank-step-booking-once/bank-step-booking-once.png (image-0.png)\nRUBRIC legibility: pass - two titled side-by-side panels, linear ms axes from zero, paired bars with their values above them; arm names resolved by the caption.\nRUBRIC data_ink: pass - the four bars are the only data marks.\nRUBRIC decoration: pass - no gridlines, background fill or gradient; top and right spines removed.\nRUBRIC contrast: pass - all text near-black on white; base bars mid grey #929292 at about 3:1.\nRUBRIC table_form: pass - paired before/after bars are the requested stage comparison; not a table.\nRUBRIC label_collision: pass - nothing clipped, no overlap of labels or data.\n\nFour non-blocking findings on the drawing script; no blocking finding.",
+  "review_run_id": "r-20261102T234626061239-review-of-bank-step-booking-once-1f63ff43ccf7-figure",
+  "reviewed_base_sha": "7b2a7898126c14e955b42de709c9b66a112bf00c",
+  "reviewed_head_sha": "1f63ff43ccf7e31aea92f71a01b3e976c7f736e2",
+  "reviewed_run_id": "r-20261102T215004202991-bank-step-booking-once",
+  "reviewing_run_id": "r-20261102T234626061239-review-of-bank-step-booking-once-1f63ff43ccf7-figure",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T00:55:00+00:00",
+  "total": null
+}

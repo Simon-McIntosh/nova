@@ -14,6 +14,11 @@
       "kind": "exempted",
       "reason": "cosmetic: the figure log header names the earlier revision; the review reproduced the committed SVG byte-identically from the cited stage log",
       "recorded_at": "2026-11-03T07:55:58.062007+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "cosmetic: missing trailing newline in a prototype script, not caught by the configured ruff rules",
+      "recorded_at": "2026-11-03T07:56:06.758674+00:00"
     }
   },
   "findings": [

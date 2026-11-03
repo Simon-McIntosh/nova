@@ -2603,10 +2603,16 @@ def _publication_artifact_records(output: Path) -> dict[str, dict[str, str]]:
         "cohort_match_summary": COHORT_FIGURE_NAME,
         "strict_forward_match_receipt": RECEIPT_NAME,
     }
+    try:
+        served = "/nova/figures/" + str(
+            output.resolve().relative_to((Path("docs") / "figures").resolve())
+        )
+    except ValueError:
+        served = PUBLICATION_DIRECTORY
     return {
         identity: {
             "filesystem_path": str(output / filename),
-            "publication_path": f"{PUBLICATION_DIRECTORY}/{filename}",
+            "publication_path": f"{served}/{filename}",
         }
         for identity, filename in filenames.items()
     }

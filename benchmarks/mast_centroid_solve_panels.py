@@ -391,6 +391,9 @@ def _saddle_validation(state_path: Path, receipt_path: Path) -> dict[str, Any]:
                 - np.asarray(marker["coordinate_m"])
             )
         ),
+        "lattice_saddle_offset_m": float(
+            np.linalg.norm(np.asarray(polished["coordinate_m"]) - np.asarray(seed))
+        ),
         "polished_inside_wall": polished_inside,
         "polished_gradient_to_median": float(
             polished["gradient_norm_wb_per_m"] / max(median_gradient, 1.0e-30)

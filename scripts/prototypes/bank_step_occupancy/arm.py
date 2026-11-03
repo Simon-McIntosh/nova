@@ -7,6 +7,7 @@ configure_dtypes()
 
 import argparse
 import json
+import time
 from pathlib import Path
 from time import perf_counter
 
@@ -55,8 +56,10 @@ def main():
         "diverted"
     )
     seeds = roots + 0.03 * jnp.median(bank.geometry.pitch)
+
     def gradient(radius, flux):
         return jnp.zeros_like(radius)
+
     read = jax.jit(
         lambda state: support_read.read(
             bank, cache, state, seeds, roots, convention, policy
@@ -99,12 +102,19 @@ def main():
     )
 
     args.trace.mkdir(parents=True, exist_ok=True)
-    jax.profiler.start_trace(str(args.trace), create_perfetto_link=False)
+    options = jax.profiler.ProfileOptions()
+    options.host_tracer_level = 2
+    jax.profiler.start_trace(
+        str(args.trace), create_perfetto_link=False, profiler_options=options
+    )
+    started = perf_counter()
     with jax.profiler.TraceAnnotation("whole_warm_step"):
         result = step(moments, support)
         jax.block_until_ready(result)
+    trace_wall = 1000 * (perf_counter() - started)
+    time.sleep(2.0)
     jax.profiler.stop_trace()
-    emit("TRACE", path=str(args.trace))
+    emit("TRACE", path=str(args.trace), step_wall_ms=trace_wall)
 
     state = moments
     for iteration in range(20):

@@ -30,7 +30,7 @@ for arm in base bucketed; do
         code=$?
         if [ "$code" -eq 0 ]; then
             trace_file=$(find "$trace" -maxdepth 5 -name '*.trace.json.gz' -print -quit)
-            "$PY" "$ROOT/scripts/prototypes/bank_step_occupancy/timeline.py" "$trace_file"
+            "$PY" "$ROOT/scripts/prototypes/bank_step_occupancy/timeline.py" "$trace_file" --arm-log "$log"
             code=$?
         fi
         printf 'EXIT=%s\n' "$code"

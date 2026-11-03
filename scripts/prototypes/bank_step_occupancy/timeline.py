@@ -6,9 +6,16 @@ import json
 from pathlib import Path
 
 
-def main(path: Path):
+def main(path: Path, arm_log: Path):
     with gzip.open(path, "rt") as stream:
         events = json.load(stream)["traceEvents"]
+    trace_rows = [
+        json.loads(line.partition(" ")[2])
+        for line in arm_log.read_text().splitlines()
+        if line.startswith("TRACE ")
+    ]
+    assert len(trace_rows) == 1
+    measured_wall = trace_rows[0]["step_wall_ms"]
     devices = {
         event["pid"]
         for event in events
@@ -22,9 +29,15 @@ def main(path: Path):
         if event.get("ph") == "X"
         and event.get("args", {}).get("long_name") == "whole_warm_step"
     ]
-    assert len(spans) == 1, f"expected one step annotation, got {len(spans)}"
-    span = spans[0]
-    start, end = span["ts"], span["ts"] + span["dur"]
+    if spans:
+        assert len(spans) == 1
+        span = spans[0]
+        start, end = span["ts"], span["ts"] + span["dur"]
+    else:
+        start = min(event["ts"] for event in events if event.get("ph") == "X")
+        end = max(
+            event["ts"] + event["dur"] for event in events if event.get("ph") == "X"
+        )
     kernels = sorted(
         (
             event
@@ -69,11 +82,12 @@ def main(path: Path):
         "TIMELINE "
         + json.dumps(
             {
-                "wall_ms": span["dur"] / 1000,
+                "wall_ms": measured_wall,
                 "gpu_busy_ms": busy / 1000,
-                "busy_fraction": busy / span["dur"],
+                "busy_fraction": busy / (1000 * measured_wall),
                 "kernels": len(kernels),
                 "gpu_devices": sorted(map(str, devices)),
+                "window": "annotation" if spans else "single-step trace",
                 "idle_gaps": [
                     {
                         "ms": gap / 1000,
@@ -99,4 +113,6 @@ def main(path: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("trace", type=Path)
-    main(parser.parse_args().trace)
+    parser.add_argument("--arm-log", type=Path, required=True)
+    args = parser.parse_args()
+    main(args.trace, args.arm_log)

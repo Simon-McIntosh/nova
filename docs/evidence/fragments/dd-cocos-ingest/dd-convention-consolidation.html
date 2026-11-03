@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="dd-cocos-ingest">
+  <meta name="plan-verifies" content="dd-cocos-ingest#s4">
+  <meta name="plan-recorded-at" content="2026-11-03">
+  <meta name="plan-verdict" content="partial">
+  <title>Convention consolidation | nova</title>
+</head>
+<body>
+<main>
+  <h1 id="dd-convention-consolidation-outcome">One cache convention mechanism</h1>
+  <p>At base <code>2d2172dd7b06548d06c634fe8b3def7acd88f9b4</code>,
+  the convention aliases, vacuum-field delegation, writer default, and database-free
+  writer and wall tests already exist. They are verified here rather than replaced.
+  <code>EquilibriumData</code> now delegates cache reads, writes and eviction to
+  <code>SignalStore</code>, whose physical key carries the source identity, DD version
+  and stored COCOS. The source URI and logical IDS group remain in that identity.
+  The dataset's <code>cocos</code> attribute is descriptive metadata, not a second
+  acceptance rule. The cache implementation is committed at
+  <code>12879ade117817bf6561c774382fe3f7a0f7032c</code>.</p>
+  <p>The reproduction is a real unkeyed zarr entry with <code>cocos=17</code>:
+  <code>test_cache_marker_alone_cannot_authorize_an_equilibrium_read</code> fails
+  against the base with <code>DID NOT RAISE FileNotFoundError</code>. At the changed
+  head it passes, along with two tests showing foreign-key isolation, a readable
+  internal-convention entry without an attribute marker, targeted eviction, and
+  refusal followed by rebuild and reclamation of a SignalStore legacy key.
+  An unkeyed equilibrium group is not selected or automatically deleted; its first
+  read rebuilds into the convention-keyed group.</p>
+
+  <h2 id="dd-convention-consolidation-measures">Tests and controls</h2>
+  <table>
+    <thead><tr><th>Measurement</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline covering suite</td><td>37 passed, 14 skipped, 12 warnings in 102.88 s; exit 0.</td></tr>
+      <tr><td>Head covering suite, with three added cache tests and both analytic boundary arms</td><td>2 failed, 39 passed, 14 skipped, 13 warnings in 133.47 s; exit 1. The unresolved scope entries are recorded in the delivery manifest.</td></tr>
+      <tr><td>Focused cache checks</td><td>3 passed in 6.46 s.</td></tr>
+      <tr><td>Database-free writer</td><td>All four existing tests pass at base and head. Dropping the factor separately at the global, separatrix and map write sites fails the writer's own assertion each time: one failed test and exit 1 per mutation.</td></tr>
+      <tr><td>Wall DD version</td><td>Both existing tests pass at base and head. Dropping the pulse's DD version argument fails both tests, including the assertion that the argument carries the pulse's major: 2 failed in 20.01 s; exit 1.</td></tr>
+      <tr><td>Convention owner and vacuum-field reader</td><td>The five existing checks pass at base and head: both aliases read the owner, a foreign observation convention is refused, and the field reader covers scalar, per-slice, fallback and absent values.</td></tr>
+    </tbody>
+  </table>
+  <p>Logs, literal commands, revisions, mutation diffs and suite receipts are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063752378003-dd-convention-consolidation</code>:
+  <code>baseline.log</code>, <code>head.log</code>, <code>cache-reproduction.log</code>,
+  <code>cache-head.log</code>, <code>writer-global.log</code>,
+  <code>writer-boundary.log</code>, <code>writer-map.log</code>, and
+  <code>wall-version.log</code>. Tests ran on the existing CPU allocation, with
+  scratch copies and basetemps below its run-owned <code>TMPDIR</code>.</p>
+
+  <h2 id="dd-convention-consolidation-record-corrections">Four record corrections</h2>
+  <ol>
+    <li><code>tests/test_equilibrium_reader_cocos.py::imasdb_root</code> now states
+    the mechanism: the availability check and the reader must resolve the same
+    pulse tree, so a missing <code>master.h5</code> cannot substitute for a convention
+    refusal. The fixture no longer attributes that rule to a role.</li>
+    <li><code>tests/test_pointconstraint.py::test_inverse_boundary_flux_carries_the_reader_sign</code>
+    now compares the read-to-constraint path with the independent field
+    ψ = −((R − 6)² + Z²). Four geometric points give −5 Wb; DD3 supplies +5 Wb and
+    DD4 supplies −5 Wb. Both converge to that oracle through the production translator.
+    This test is committed at <code>13fca071ea4e928a4a47243769ebf22c9869bf32</code>.
+    Its file reports 7 passed, 14 skipped, 2 warnings in 8.15 s. Bypassing the
+    production translation in a scratch copy fails the DD3 arm while DD4 still
+    passes: 1 failed, 1 passed, 2 warnings in 18.64 s, exit 1, recorded in
+    <code>boundary-translation.log</code>.</li>
+    <li>This paragraph supersedes the final-head claim and three quoted durations
+    in the <a href="/nova/evidence/fragments/dd-cocos-ingest/dd-equilibrium-reader#dd-equilibrium-reader-gate">reader's gate record</a>.
+    The inspected <code>final-head-*.log</code> files name
+    <code>fa01f7936ddbce01b3674e2c7e566d5218e1e37a</code>, not the eventual merged head.
+    Their actual summaries are listed below. The live plan's replacement authority
+    is the coordinator gate at <code>f34052635bfcae825855698b802a23f66dc88213</code>,
+    as named in <a href="/nova/plans/dd-cocos-ingest#f-ddc-004">the consolidation followup</a>.
+    No duration from the earlier logs is attributed to that merge here.</li>
+    <li>This paragraph supplements the
+    <a href="/nova/evidence/fragments/dd-cocos-ingest/dd-internal-sites#dd-internal-sites-search">internal-sites sign-search record</a>:
+    its sharp-hit list omitted <code>nova/biot/contour.py:198</code>,
+    <code>psi = norm(psi)</code>, present at <code>f0cf63219</code> and still present
+    at line 203 of this head. Removing its COCOS comment does not remove the
+    <code>norm(psi)</code> search hit. The expression is caller-supplied normalization,
+    not a fixed convention sign. The same broad search currently finds 132 lines in
+    30 files; a planted control is found on all three authored lines. The count is
+    a current-tree measurement, not a replacement count for the historical tree.</li>
+  </ol>
+  <table>
+    <thead><tr><th>Historical log</th><th>Quoted duration</th><th>Actual summary</th></tr></thead>
+    <tbody>
+      <tr><td><code>final-head-test_database.log</code></td><td>94.72 s</td><td>28 passed, 19 skipped in 86.25 s; exit 0.</td></tr>
+      <tr><td><code>final-head-test_pointconstraint.log</code></td><td>7.30 s</td><td>6 passed, 14 skipped, 2 warnings in 5.01 s; exit 0.</td></tr>
+      <tr><td><code>final-head-test_iter_sectioned_conductor_set.log</code></td><td>15.15 s</td><td>12 passed in 16.03 s; exit 0.</td></tr>
+    </tbody>
+  </table>
+  <p>The historical logs are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T154924795618-dd-equilibrium-reader/logs</code>.
+  Their revision headers and summaries, together with the sign search and its
+  positive control, are copied into <code>record-audit.log</code> in this run.
+  The earlier fragments remain intact; these corrections append to their record.
+  This fragment does not resolve the driving followup or close the plan section.</p>
+</main>
+</body>
+</html>

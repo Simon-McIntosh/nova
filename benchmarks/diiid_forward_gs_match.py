@@ -1464,6 +1464,12 @@ def _conductor_carriers(machine) -> list[np.ndarray]:
     ]
 
 
+def _pin_worker_to_cpu() -> None:
+    """Keep each build process off the device the solve holds."""
+
+    os.environ["JAX_PLATFORMS"] = "cpu"
+
+
 def _conductor_columns(task) -> np.ndarray:
     """Return one point block's exact per-ampere flux columns, shape (n, points)."""
 
@@ -1558,6 +1564,7 @@ def _build_conductor_response(
     with concurrent.futures.ProcessPoolExecutor(
         max_workers=DISPLAY_RESPONSE_PROCESSES,
         mp_context=multiprocessing.get_context("spawn"),
+        initializer=_pin_worker_to_cpu,
     ) as pool:
         blocks = list(pool.map(_conductor_columns, tasks))
     seconds = time.perf_counter() - started

@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/suite-head-booking.log",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-step-cut-buckets/suite-base-booking.log",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-03T09:37:35Z",
+  "dispatched_at": "2026-11-03T09:31:05Z",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "These two assertions are fixture sanity checks; the independent scalar comparison and recorded red bucket mutation supply the behavioral guard.",
+      "file": "tests/test_bank_step_cut_buckets.py",
+      "line": "47",
+      "severity": "non-blocking",
+      "text": "non-blocking: normal_count at lines 47-48 is computed from flags the test constructed with capacity + 1, so these assertions do not independently detect a product regression; exempted because durability rests on the live gathered witness and numerical comparison."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read ce72484b, b1a72fd and 0fcf413 commit by commit: tests/test_bank_step_cut_buckets.py:26-50 builds a sorted overflow witness, check_review.py:12-16 follows it, and bank-step-cut-buckets.html:42-48 corrects the evidence and cites a red bucket mutation.",
+    "done_when": "The source prompt.txt:142-143 requires paired H200 speed, CPU parity, overflow, fresh residual and oracle bounds; h200-base-receipt.log:8,19 and h200-head-receipt.log:8,19 show 27.766 to 13.799 ms tangent and 43.068 to 28.916 ms step, while overflow-order-head.log and fresh-sirius.log:24-27 cover the repaired gate and solve.",
+    "goal": "The source prompt.txt:38 asks for branch interiors evaluated only on selected cells; the delta repairs the overflow test at tests/test_bank_step_cut_buckets.py:26-50 and leaves the bucketed product at nova/equilibrium/current.py:817-819 intact.",
+    "manifest": "The source manifest.md reports complete, names all three new commits and records both completed suite arms with zero failures; suite-base-booking.log and suite-head-booking.log each end with five passed and EXIT=0.",
+    "write_paths": "The source manifest.md orientation_write_paths includes all three paths in git diff 72e0ab4f58db..0fcf413849a8; no additional path changed."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_cut_buckets.py:50 and :103-108 connect the independently selected live cell to the second product bucket and scalar result; the +1.0 mutation reddens this comparison, whereas lines 47-48 only check the constructed fixture.",
+    "evidence": "overflow-order-corrupt-head.log ends with the repaired numerical comparison failing on a +1.0 second-bucket error while overflow-order-corrupt-parent.log passes it; the source suite receipts each record five passed and EXIT=0.",
+    "fit": "tests/test_bank_step_cut_buckets.py:41-50 uses the same cut mask and jnp.nonzero gather as current.py:817 and :792, and check_review.py:12-16 updates its existing capacity probe without a new naming violation.",
+    "goal_fidelity": "tests/test_bank_step_cut_buckets.py:49-50 confirms the live witness is at the overflow gather position, and current.py:817-819 still evaluates selected conic and normal cells separately.",
+    "reuse": "No new definition was added; tests/test_bank_step_cut_buckets.py:18 extends the existing overflow test and check_review.py:9 extends its existing checker, while a capability search found probe_guards.py:31-53 as an existing fixture probe rather than a duplicated production owner.",
+    "scope_discipline": "The three paths in git diff 72e0ab4f58db..0fcf413849a8 are all included in source manifest.md orientation_write_paths and concern the overflow witness, its checker and its evidence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt.txt:38 asks for branch interiors evaluated only on selected cells; the delta repairs the overflow test at tests/test_bank_step_cut_buckets.py:26-50 and leaves the bucketed product at nova/equilibrium/current.py:817-819 intact.\nVERDICT done_when: The source prompt.txt:142-143 requires paired H200 speed, CPU parity, overflow, fresh residual and oracle bounds; h200-base-receipt.log:8,19 and h200-head-receipt.log:8,19 show 27.766 to 13.799 ms tangent and 43.068 to 28.916 ms step, while overflow-order-head.log and fresh-sirius.log:24-27 cover the repaired gate and solve.\nVERDICT write_paths: The source manifest.md orientation_write_paths includes all three paths in git diff 72e0ab4f58db..0fcf413849a8; no additional path changed.\nVERDICT manifest: The source manifest.md reports complete, names all three new commits and records both completed suite arms with zero failures; suite-base-booking.log and suite-head-booking.log each end with five passed and EXIT=0.\nVERDICT diff: Read ce72484b, b1a72fd and 0fcf413 commit by commit: tests/test_bank_step_cut_buckets.py:26-50 builds a sorted overflow witness, check_review.py:12-16 follows it, and bank-step-cut-buckets.html:42-48 corrects the evidence and cites a red bucket mutation.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_bank_step_cut_buckets.py:49-50 confirms the live witness is at the overflow gather position, and current.py:817-819 still evaluates selected conic and normal cells separately.\nSCORE evidence: 18\nJUSTIFICATION evidence: overflow-order-corrupt-head.log ends with the repaired numerical comparison failing on a +1.0 second-bucket error while overflow-order-corrupt-parent.log passes it; the source suite receipts each record five passed and EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The three paths in git diff 72e0ab4f58db..0fcf413849a8 are all included in source manifest.md orientation_write_paths and concern the overflow witness, its checker and its evidence.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_bank_step_cut_buckets.py:50 and :103-108 connect the independently selected live cell to the second product bucket and scalar result; the +1.0 mutation reddens this comparison, whereas lines 47-48 only check the constructed fixture.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_bank_step_cut_buckets.py:41-50 uses the same cut mask and jnp.nonzero gather as current.py:817 and :792, and check_review.py:12-16 updates its existing capacity probe without a new naming violation.\nSCORE reuse: 20\nJUSTIFICATION reuse: No new definition was added; tests/test_bank_step_cut_buckets.py:18 extends the existing overflow test and check_review.py:9 extends its existing checker, while a capability search found probe_guards.py:31-53 as an existing fixture probe rather than a duplicated production owner.\nFINDING tests/test_bank_step_cut_buckets.py:47 non-blocking: normal_count at lines 47-48 is computed from flags the test constructed with capacity + 1, so these assertions do not independently detect a product regression; exempted because durability rests on the live gathered witness and numerical comparison.\n",
+  "review_run_id": "r-20261103T092953896676-review-of-bank-step-cut-buckets-0fcf413849a8",
+  "reviewed_base_sha": "72e0ab4f58db13dc3f5769ae0c71fc0dc4c31469",
+  "reviewed_head_sha": "0fcf413849a81e8885fa5f0cc308fb0110cc69f9",
+  "reviewed_run_id": "r-20261103T063317710937-bank-step-cut-buckets",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T09:49:32.379906+00:00",
+  "total": 113
+}

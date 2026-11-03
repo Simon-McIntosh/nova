@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T09:33:47Z",
+  "figures_reviewed": [
+    {
+      "drawing_script": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T093115245061-review-of-bank-step-cut-buckets-0fcf413849a8-figure/image-0.png",
+      "repository_path": "docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_speed/plot_stage.py",
+      "id": "f304bbe1b38",
+      "line": 81,
+      "severity": "non-blocking",
+      "summary": "The bucketed arm's value labels are drawn in the bar fill colour #2e8b57, measuring about 4.25:1 against white where the base arm's labels use #666666 at about 5.7:1; the after-arm numbers are therefore the harder of the two sets to read at a glance even though they are the ones the figure exists to report, and they sit marginally under the 4.5:1 AA threshold for labels of this size. The defect reproduces unchanged at this head in the rendered PNG."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: category labels at #525150 measure about 7.9:1 against white, axis text near black (measured #0b0b0b) about 19:1, grey value labels at #666666 about 5.7:1; both bar fills clear the repository's 3:1 mark floor (grey about 3.1:1, green about 4.3:1). The green value labels reuse the bar green at about 4.25:1, marginally under the 4.5:1 AA threshold for 4 mm-class direct labels, recorded as a non-blocking finding.",
+    "data_ink": "pass: bar length is the only quantity encoded and nothing else is drawn on the plot field; the ten values are written at their bar ends, so a reader gets both the ratio and the number without a table, and there is no gridline, band or shading competing with the bars.",
+    "decoration": "pass: white background, two flat fills (grey #929292 for base, green #2e8b57 for bucketed), no gradient, no background fill, no band, no frame and no title text; only the left and bottom axis lines and their tick marks are present.",
+    "label_collision": "pass: no label is clipped and none overlaps another label or the data. Measured on the 1399x720 render: ink spans x 247 to 1358 and y 47 to 683, leaving 41 px of clear canvas at the right and 37 px at the bottom; the longest category label (residual and booking) starts at x=247, the rightmost value label ends at x=1358, and the paired arms are drawn at separate vertical offsets so the near-equal rows (read, residual and booking, moving geometry) show both bars and both labels.",
+    "legibility": "pass: five category rows (read, residual and booking, booking tangent, moving geometry, whole step), each with a grey base bar above a green bucketed bar, a linear warm wall [ms] axis ticked 0 to 50, a frameless two-entry legend at the top, and every one of the ten bars ending in its own two-decimal value label; the picture reads at a glance and the two changes the figure exists to report (booking tangent 27.77 to 13.80 ms, whole step 43.07 to 28.92 ms) are visible as bar lengths before any number is read.",
+    "table_form": "pass: this is a paired before/after magnitude comparison in which bar length carries the point across five stages at once; the launch counts and the compiled-interior census that are naturally tabular live in the evidence fragment's device table, not in the image."
+  },
+  "prior_finding_state": "The review at head 31dad0d9a488 recorded one non-blocking finding that the four stage rows read as a decomposition of the whole step while summing to 70.64 ms base against a 43.07 ms whole-step bar. The evidence fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-step-cut-buckets.html states 'These stage rows overlap and do not sum to the whole-step bar' and 'read sits outside the step', so that finding stays answered at this head and is not repeated. The review at head 72e0ab4f58db13dc3f5769ae0c71fc0dc4c31469 recorded the green value-label contrast finding; it still reproduces in the rendered PNG at this head and is recorded again rather than dropped.",
+  "project": "nova",
+  "raw_text": "RUBRIC reviewed: image-0.png, the rendered PNG (1399x720) of docs/figures/sub-millisecond-forward-path/bank-step-cut-buckets/stage-wall.svg at reviewed head 0fcf413849a81e8885fa5f0cc308fb0110cc69f9 over base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4; judged only from the rendered image.\nRUBRIC legibility: pass: five category rows of paired grey and green bars on a linear warm wall [ms] axis ticked 0 to 50, a frameless two-entry legend, and a two-decimal value label at every bar end; readable at a glance.\nRUBRIC data_ink: pass: bar length carries the measurement, all ten values are written at their bar ends, and nothing else is drawn on the plot field.\nRUBRIC decoration: pass: white background, two flat fills, no gradient, band, frame or title.\nRUBRIC contrast: pass: category and axis text are dark on white at about 7.9:1 and 19:1, grey value labels about 5.7:1, both bar fills above 3:1; the green value labels reuse the bar green at about 4.25:1, recorded as a non-blocking finding.\nRUBRIC table_form: pass: a paired before/after magnitude comparison where bar length is the point; tabular launch and census data stay in the evidence table.\nRUBRIC label_collision: pass: no clipped or overlapping label; ink spans x 247 to 1358 of 1399 and y 47 to 683 of 720, and the paired arms are vertically offset so near-equal rows keep both bars and both labels.\nFINDING scripts/prototypes/bank_step_speed/plot_stage.py:81: non-blocking: the bucketed arm's value labels use the #2e8b57 bar fill, about 4.25:1 on white against the base arm's #666666 at about 5.7:1, marginally under the 4.5:1 AA threshold for labels of this size.\n",
+  "review_run_id": "r-20261103T093115245061-review-of-bank-step-cut-buckets-0fcf413849a8-figure",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "0fcf413849a81e8885fa5f0cc308fb0110cc69f9",
+  "reviewed_run_id": "r-20261103T063317710937-bank-step-cut-buckets",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T09:43:58.753314+00:00",
+  "total": null
+}

@@ -5,6 +5,7 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+import argparse
 import json
 from pathlib import Path
 import subprocess
@@ -104,6 +105,11 @@ def prototype(
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--reuse", choices=("none", "half", "tenth"), required=True)
+    args = parser.parse_args()
+    reuse = args.reuse != "none"
+    contraction_limit = 0.1 if args.reuse == "tenth" else 0.5
     revision = subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
     ).strip()
@@ -115,6 +121,7 @@ def main():
         nova=nova.__file__,
         module=support_read.__file__,
         backend=jax.default_backend(),
+        reuse=args.reuse,
     )
     assert jax.config.jax_enable_x64
     bank, cache, roots, convention, policy, profile, quadrature, moments, analytic = (
@@ -139,6 +146,8 @@ def main():
             gradient,
             quadrature,
             max_steps=60,
+            reuse_factor=reuse,
+            contraction_limit=contraction_limit,
         )
 
     @jax.jit
@@ -155,6 +164,8 @@ def main():
             gradient,
             quadrature,
             max_steps=60,
+            reuse_factor=reuse,
+            contraction_limit=contraction_limit,
         )
 
     single(moments)

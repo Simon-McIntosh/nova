@@ -5,9 +5,9 @@ ROOT=$(git rev-parse --show-toplevel)
 export PYTHONPATH="$ROOT"
 SCRATCH=$(mktemp -d "$TMPDIR"/bank-solve-driver-XXXXXX)
 trap 'rm -rf "$SCRATCH"' EXIT
-COMMAND='/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/bank_solve_driver/measure.py'
+COMMAND="/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/bank_solve_driver/measure.py $*"
 printf 'REVISION=%s TREE=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$COMMAND"
-/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/bank_solve_driver/measure.py
+/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/bank_solve_driver/measure.py "$@"
 result=$?
 printf 'EXIT=%s\n' "$result"
 exit "$result"

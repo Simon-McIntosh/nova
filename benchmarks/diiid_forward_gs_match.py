@@ -1664,10 +1664,20 @@ def _display_map(
     coupling, display_radius, display_height, record = _display_coupling(
         profile, machine
     )
+    # The operator forms current moments one of two ways, and each entry point
+    # refuses the construction the other serves. Ask for the moments this
+    # operator carries and hand them to the map, so it never has to guess.
+    operator = profile.operator
+    moments = (
+        None
+        if operator.use_linear_moments
+        else operator.read_with_current_moments(jnp.asarray(equilibrium.flux), None)[2]
+    )
     display = build_display_flux_map(
         profile,
         np.asarray(equilibrium.flux, dtype=float),
         coupling=coupling,
+        moments=moments,
         spacing=DISPLAY_SPACING,
         chunk=DISPLAY_CHUNK,
     )

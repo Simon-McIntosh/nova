@@ -174,7 +174,7 @@ DEFAULT_MARGIN_FRAME_OUTPUT = Path(
     "docs/figures/plateau-input-attribution/margin-frame-remeasure.json"
 )
 DEFAULT_MACHINE_ARTIFACT_CACHE = Path(
-    "/run/user/39486/reckon-artifact-repaired-ring-cache"
+    "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache"
 )
 DEFAULT_MACHINE_ARTIFACT_DIGEST = (
     "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"

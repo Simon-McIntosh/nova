@@ -62,9 +62,10 @@ def prototype(
             fresh_geometry=True,
         )
 
-    read(seed)
     support = read(seed)
-    step(seed, support)
+    jax.block_until_ready(support)
+    jax.block_until_ready(residual(seed, support))
+    jax.block_until_ready(step(seed, support))
     started = perf_counter()
     state = seed
     reads = 0

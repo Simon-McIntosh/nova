@@ -13,7 +13,7 @@
 </head>
 <body><main class="plan-doc">
 <h1 id="bank-solve-driver-landing">Bank solve driver</h1>
-<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check passed six tests. A two-core, 48 GB H200 measurement is running after the initial four-core request could not be allocated.</p>
+<p id="bank-solve-driver-summary">The staged driver refreshes support after every Newton update. On sirius CPU, the direct prototype path and the staged batch-one path both converge from the diverted 550-cell seed to a fresh residual below 1e-10, and their terminal flux and nulls agree inside the locked precision budget. Refactoring every step is cheaper on the measured stage-cost model than either reuse rule. The final default-with-freeze check passed six tests. A complete two-core, 48 GB H200 measurement with warm timing and per-lane analytic checks is queued; its table and wall figure will follow the receipt.</p>
 <section id="bank-solve-driver-trajectory">
 <h2>Same-seed CPU trajectories</h2>
 <p>The direct arm repeats the existing prototype's fresh-read and full-step calls at each iterate; the staged arm is one <code>jax.lax.while_loop</code> with factor reuse and active-set freezing switched off. Both use the same 550-cell operands, seed moments, profile, quadrature, stationary seeds and x64 dtype. Every update in the direct arm has length one. The residual is the maximum absolute moment mismatch after a fresh read; the update is the maximum absolute Newton correction.</p>
@@ -47,6 +47,10 @@
 <tr><td>Reuse after at least 10× contraction</td><td>9</td><td>5</td><td>10</td><td>172</td><td>2.367528395553e-11</td></tr>
 </tbody></table>
 <p>Both reuse rules converge, but neither saves enough refactors to pay for its extra reads and steps. The product solve therefore refactors on every step by default; factor reuse remains an explicit opt-in, and the active-set freeze remains enabled.</p>
+</section>
+<section id="bank-solve-driver-h200-wall">
+<h2>Converged H200 solve wall</h2>
+<p>The first accepted device receipt used worker revision <code>19dd4cbbf4a3bdd7a1c1e95309da059c6af45d06</code> and ended <code>EXIT=0</code>. It established convergence of the one- and sixteen-slice arms and each lane's agreement with its own solve. Its prototype wall is excluded from comparison: the prototype residual JIT compiled inside that timer. The follow-up measurement script, committed at <code>112a3bfa5f75e63cf0762518a881b25665704c35</code>, warms that residual and adds per-lane analytic-oracle ratios. The CPU six-test gate ran at worker revision <code>78115430d146acd585911489ab7939703f4066e3</code>; the cost table ran at <code>b087938055be6ad386421f2773deda401c51073b</code>. The main checkout was <code>8ff5dae2a49a63fcfac9f3dd9dea53a9c8744626</code> at the first device submission and was not used by any arm. It contains the separately landed cut-cell buckets, so this worker's wall will not measure their merged effect.</p>
 </section>
 <section id="bank-solve-driver-device-allocation">
 <h2>Device allocation receipt</h2>

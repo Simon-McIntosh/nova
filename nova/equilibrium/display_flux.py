@@ -10,27 +10,53 @@ The coupling is supplied by the caller as :class:`DisplayCoupling`, a pair of
 callables over target points.  Every producer already owns one -- the same
 ``hybrid_greens`` columns and circuit response rows it builds its lattice target
 from -- so this module adds no kernel of its own and never interpolates the
-lattice.
+lattice.  The moment product is carried by :class:`nova.biot.target.FluxTarget`,
+built once per evaluation chunk, so the uniform, radial and vertical columns
+contract exactly as the forward operator's own grid target contracts them
+rather than through a second copy of that product rule.
 
 The lattice spline stays the solve's authority.  The map equals the state at the
 lattice nodes only when the state is a converged fixed point, so the builder
-reports the largest node mismatch it sees, and the saddle it polishes on its own
-grid beside the saddle of the lattice spline.
+reports the largest node mismatch it sees.  The saddle of the map, and the
+separatrix branches drawn from it, are read off the map's own tensor spline
+through the same stationary-point polish and branch assembler the solve uses.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import time
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.biot.null import Null1D
+from nova.biot.target import FluxTarget
+from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+from nova.equilibrium.separatrix_branches import (
+    assemble_separatrix_branches,
+)
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.linalg.tensor_spline import fit_tensor_spline
 
-#: Display spacing [m] the plan fixes as the coarsest a panel may be drawn at.
+#: Display spacing [m]: the coarsest a panel may be drawn at.
 DEFAULT_SPACING = 0.010
+
+#: Branch fields the map publishes, in the assembler's own vocabulary.
+BRANCH_KEYS = (
+    "closed_controls_rz",
+    "closed_valid",
+    "closed_segment_count",
+    "open_controls_rz",
+    "open_valid",
+    "open_branch_valid",
+    "open_branch_count",
+    "open_segment_count",
+    "closed_candidate_count",
+    "well_formed",
+)
 
 
 @dataclass(frozen=True)
@@ -57,113 +83,122 @@ class DisplayFluxMap:
     saddle_flux: float
     lattice_saddle_rz: np.ndarray
     saddle_offset_mm: float
-    max_node_mismatch_wb: float
-    reproduction_relative_error: float
-    spacing_m: float
-    build_seconds: float
+    branches: dict[str, np.ndarray] = field(default_factory=dict)
+    saddle_converged: bool = False
+    max_node_mismatch_wb: float = float("nan")
+    reproduction_relative_error: float = float("nan")
+    spacing_m: float = DEFAULT_SPACING
+    build_seconds: float = 0.0
 
     @property
     def shape(self) -> tuple[int, int]:
         """Return the map extent as ``(radial, vertical)``."""
         return self.flux.shape
 
+    @property
+    def well_formed(self) -> bool:
+        """Return whether the map's separatrix assembly is well formed."""
+        if "well_formed" not in self.branches:
+            return False
+        return bool(np.asarray(self.branches["well_formed"]))
 
-def _grid(points: np.ndarray, coupling: DisplayCoupling, chunk: int):
-    """Evaluate the coupling over ``points`` in bounded blocks."""
-    uniform = np.empty((points.shape[0], 0), dtype=np.float64)
-    radial = uniform
-    vertical = uniform
-    external = np.empty(points.shape[0], dtype=np.float64)
+
+def _target(coupling: DisplayCoupling, block: np.ndarray) -> FluxTarget:
+    """Return the flux target of one block of display points.
+
+    The target carries the plasma moment columns only: the external callable
+    returns a flux sum rather than source columns, so there is no external
+    product for the target to carry.
+    """
+    uniform, radial, vertical = (
+        np.asarray(column, dtype=np.float64) for column in coupling.plasma(block)
+    )
+    return FluxTarget(
+        source_target=jnp.zeros((block.shape[0], 0), dtype=jnp.float64),
+        plasma_target=jnp.asarray(uniform),
+        null=Null1D(jnp.asarray(block, dtype=jnp.float64)),
+        plasma_target_r=jnp.asarray(radial),
+        plasma_target_z=jnp.asarray(vertical),
+    )
+
+
+def _flux(
+    coupling: DisplayCoupling, points: np.ndarray, moments, chunk: int
+) -> np.ndarray:
+    """Return the conductor-plus-plasma flux at ``points`` [Wb].
+
+    Each chunk contracts its own moment columns through a
+    :class:`FluxTarget`, so the uniform, radial and vertical moments are
+    combined by the owner of that product rather than restated here.
+    """
+    flux = np.empty(points.shape[0], dtype=np.float64)
     for start in range(0, points.shape[0], chunk):
         block = points[start : start + chunk]
-        block_uniform, block_radial, block_vertical = coupling.plasma(block)
-        external[start : start + chunk] = np.asarray(
-            coupling.external(block), dtype=np.float64
-        )
-        if uniform.shape[1] == 0:
-            uniform = np.empty((points.shape[0], np.shape(block_uniform)[1]))
-            radial = np.empty_like(uniform)
-            vertical = np.empty_like(uniform)
-        stop = start + block.shape[0]
-        uniform[start:stop] = np.asarray(block_uniform, dtype=np.float64)
-        radial[start:stop] = np.asarray(block_radial, dtype=np.float64)
-        vertical[start:stop] = np.asarray(block_vertical, dtype=np.float64)
-    return external, uniform, radial, vertical
-
-
-def _moment_flux(coupling: DisplayCoupling, points: np.ndarray, moments, chunk: int):
-    """Return the conductor-plus-plasma flux at ``points``."""
-    external, uniform, radial, vertical = _grid(points, coupling, chunk)
-    flux = external.copy()
-    for block, values in zip(
-        (uniform, radial, vertical),
-        moments,
-        strict=True,
-    ):
-        if block.shape[1] == 0:
-            continue
-        flux += block @ np.asarray(values, dtype=np.float64)
+        flux[start : start + block.shape[0]] = np.asarray(
+            _target(coupling, block).internal(moments), dtype=np.float64
+        ) + np.asarray(coupling.external(block), dtype=np.float64)
     return flux
 
 
-def _evaluation(surface, point):
-    """Return the spline's value and gradient at ``point``."""
-    values = surface.evaluate(jnp.asarray(point[0]), jnp.asarray(point[1]))
-    gradient = np.asarray(
-        [values.radial_derivative, values.vertical_derivative], dtype=np.float64
-    ).reshape(2)
-    return float(np.asarray(values.value).reshape(())), gradient
+def _stationary_saddle(
+    values: np.ndarray, radius: np.ndarray, height: np.ndarray, xpoint_rz
+) -> tuple[np.ndarray, float, bool]:
+    """Return ``values``' own polished saddle, its flux and whether it is one.
 
-
-def _polished_saddle(values, radius, height, xpoint_rz):
-    """Return the map's own stationary saddle and the flux it carries.
-
-    The saddle is the stationary point of the map's own tensor spline nearest
-    where the caller says the read found one.  It is polished by Newton steps on
-    the spline gradient from the mid-cell point of the cell whose two central
-    differences change sign, which is the same stationary point the map carries
-    at its own resolution rather than one carried over from another grid.
+    The polish runs on the field's own tensor spline from a seed inside the
+    saddle's cell, so the returned coordinate is a stationary point of this
+    field rather than a coordinate carried over from another grid.
+    ``xpoint_rz`` only selects which stationary cell is meant.  A point that
+    the polish does not converge to, or whose Hessian is not of saddle type,
+    is reported as absent: the position and flux are NaN and the caller draws
+    no separatrix from it, so a seed that lands on an extremum cannot be read
+    downstream as a saddle.
     """
-    surface = fit_tensor_spline(radius, height, values)
-    host = np.asarray(values, dtype=np.float64)
-    radial_step = float(radius[1] - radius[0])
-    vertical_step = float(height[1] - height[0])
-    radial_slope = np.gradient(host, radial_step, axis=1)
-    vertical_slope = np.gradient(host, vertical_step, axis=0)
-    sign_r = np.sign(radial_slope[1:-1, 1:-1] * radial_slope[1:-1, 2:])
-    sign_z = np.sign(vertical_slope[1:-1, 1:-1] * vertical_slope[2:, 1:-1])
-    row, column = np.nonzero((sign_r < 0.0) & (sign_z < 0.0))
-    if row.size == 0:
-        return np.full(2, np.nan), float("nan")
-    candidate = np.c_[
-        np.asarray(radius)[column + 1] + 0.5 * radial_step,
-        np.asarray(height)[row + 1] + 0.5 * vertical_step,
-    ]
-    nearest = int(
-        np.argmin(np.linalg.norm(candidate - np.asarray(xpoint_rz)[None, :], axis=1))
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
     )
-    point = candidate[nearest]
-    for _step in range(20):
-        _value, gradient = _evaluation(surface, point)
-        if np.linalg.norm(gradient) < 1.0e-9:
-            break
-        offset = 1.0e-4 * np.maximum(np.abs(point), 1.0e-3)
-        hessian = np.column_stack(
-            (
-                (_evaluation(surface, point + [offset[0], 0.0])[1] - gradient)
-                / offset[0],
-                (_evaluation(surface, point + [0.0, offset[1]])[1] - gradient)
-                / offset[1],
-            )
+    seed = np.asarray(xpoint_rz, dtype=np.float64).reshape(2)
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed)[None, :],
+        jnp.ones((1,), dtype=bool),
+    )
+    position = np.asarray(polished["position_rz"], dtype=np.float64).reshape(2)
+    value = np.asarray(polished["value"], dtype=np.float64).reshape(())
+    converged = bool(np.asarray(polished["converged"]).reshape(()))
+    hessian_type = int(np.asarray(polished["hessian_type"]).reshape(()))
+    if converged and hessian_type < 0 and np.all(np.isfinite(position)):
+        return position, float(value), True
+    return np.full(2, np.nan), float("nan"), False
+
+
+def _branches(
+    values: np.ndarray,
+    radius: np.ndarray,
+    height: np.ndarray,
+    level: float,
+    axis_rz: np.ndarray,
+) -> dict[str, np.ndarray]:
+    """Assemble the field's own separatrix at its admitted-saddle level."""
+    assembled = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(values),
+            jnp.asarray(radius),
+            jnp.asarray(height),
+            jnp.asarray(level),
+            jnp.asarray(axis_rz),
         )
-        try:
-            point = point - np.linalg.solve(hessian, gradient)
-        except np.linalg.LinAlgError:
-            break
-        if not np.all(np.isfinite(point)):
-            point = candidate[nearest]
-            break
-    return point, _evaluation(surface, point)[0]
+    )
+    return {key: np.asarray(assembled[key]) for key in BRANCH_KEYS}
+
+
+def _topology_state(operator, state, requested_class):
+    """Return the operator's own axis and X-point read of ``state``."""
+    try:
+        _masks, topology = operator.read(state, requested_class)
+    except NoQualifiedAxisError:
+        return None
+    return topology
 
 
 def build_display_flux_map(
@@ -178,6 +213,7 @@ def build_display_flux_map(
     prescribed_current=None,
     target_current=None,
     requested_class=None,
+    axis_rz=None,
     xpoint_rz=None,
     chunk: int = 4096,
 ) -> DisplayFluxMap:
@@ -188,7 +224,12 @@ def build_display_flux_map(
     deviation of that evaluation from the operator's own ``raster_image`` at the
     lattice nodes, and ``max_node_mismatch_wb`` the largest deviation from the
     state itself: zero for a converged fixed point, the fixed-point residual
-    otherwise.
+    otherwise.  The saddles of the map and of the lattice spline are each
+    polished on their own spline, and the map's separatrix branches are
+    assembled on the map at the map's own saddle value.  A polish that does not
+    land on a saddle -- either it fails to converge or the Hessian there is not
+    of saddle type -- is reported as absent: the saddle position and value are
+    NaN, ``saddle_converged`` is False, and no branches are assembled.
     """
     started = time.perf_counter()
     if spacing > DEFAULT_SPACING:
@@ -220,11 +261,10 @@ def build_display_flux_map(
     height = np.arange(bounds[2], bounds[3] + 0.5 * spacing, spacing)
     radius_grid, height_grid = np.meshgrid(radius, height, indexing="ij")
     points = np.c_[radius_grid.ravel(), height_grid.ravel()]
-    flux = _moment_flux(coupling, points, nodewise, chunk).reshape(
-        radius.size, height.size
-    )
+    flux = _flux(coupling, points, nodewise, chunk).reshape(radius.size, height.size)
+    values = flux.T
 
-    node_flux = _moment_flux(coupling, np.asarray(lattice.coordinate), nodewise, chunk)
+    node_flux = _flux(coupling, np.asarray(lattice.coordinate), nodewise, chunk)
     raster = np.asarray(
         operator.raster_image(
             moments, current=current, prescribed_current=prescribed_current
@@ -236,20 +276,40 @@ def build_display_flux_map(
     reproduction = float(np.max(np.abs(node_flux - raster))) / scale
     mismatch = float(np.max(np.abs(node_flux - state_nodes)))
 
-    if xpoint_rz is None:
-        _masks, topology = operator.read(state, requested_class)
+    topology = None
+    if axis_rz is None or xpoint_rz is None:
+        topology = _topology_state(operator, state, requested_class)
+    if axis_rz is None and topology is not None:
+        axis_rz = topology.axis
+    if xpoint_rz is None and topology is not None:
         xpoint_rz = topology.x_point
-    xpoint_rz = np.asarray(xpoint_rz, dtype=np.float64).reshape(-1)[:2]
 
-    saddle_rz, saddle_flux = _polished_saddle(
-        np.asarray(flux.T), radius, height, xpoint_rz
-    )
-    lattice_values = jnp.asarray(np.asarray(state)[: lattice.node_count]).reshape(
-        lattice.shape
-    )
-    lattice_saddle_rz, _lattice_flux = _polished_saddle(
-        np.asarray(lattice_values).T, radius_nodes, height_nodes, xpoint_rz
-    )
+    lattice_values = np.asarray(
+        np.asarray(state, dtype=np.float64)[: lattice.node_count]
+    ).reshape(tuple(int(value) for value in np.asarray(lattice.shape)))
+    lattice_values = lattice_values.T
+
+    saddle_converged = False
+    if xpoint_rz is None:
+        saddle_rz = np.full(2, np.nan)
+        saddle_flux = float("nan")
+        lattice_saddle_rz = np.full(2, np.nan)
+        branches: dict[str, np.ndarray] = {}
+    else:
+        seed = np.asarray(xpoint_rz, dtype=np.float64).reshape(-1)[:2]
+        saddle_rz, saddle_flux, saddle_converged = _stationary_saddle(
+            values, radius, height, seed
+        )
+        lattice_saddle_rz, _lattice_flux, _lattice_converged = _stationary_saddle(
+            lattice_values, radius_nodes, height_nodes, seed
+        )
+        if axis_rz is None or not saddle_converged:
+            branches = {}
+        else:
+            branches = _branches(
+                values, radius, height, saddle_flux, np.asarray(axis_rz).reshape(2)
+            )
+    offset = float(1.0e3 * np.linalg.norm(saddle_rz - lattice_saddle_rz))
     return DisplayFluxMap(
         radius=radius,
         height=height,
@@ -257,9 +317,9 @@ def build_display_flux_map(
         saddle_rz=np.asarray(saddle_rz, dtype=np.float64),
         saddle_flux=saddle_flux,
         lattice_saddle_rz=np.asarray(lattice_saddle_rz, dtype=np.float64),
-        saddle_offset_mm=float(
-            1.0e3 * np.linalg.norm(np.asarray(saddle_rz) - lattice_saddle_rz)
-        ),
+        saddle_offset_mm=offset,
+        branches=branches,
+        saddle_converged=saddle_converged,
         max_node_mismatch_wb=mismatch,
         reproduction_relative_error=reproduction,
         spacing_m=float(spacing),
@@ -268,6 +328,7 @@ def build_display_flux_map(
 
 
 __all__ = [
+    "BRANCH_KEYS",
     "DEFAULT_SPACING",
     "DisplayCoupling",
     "DisplayFluxMap",

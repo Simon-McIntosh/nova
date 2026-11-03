@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-03T05:46:25.603Z",
+  "dispatched_at": "2026-11-03T05:31:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "f8400dec8f7",
+      "line": 325,
+      "severity": "non-blocking",
+      "text": "The receipts paragraph cites waverun/final/figure.log for the figure render and overlap check, and that path does not exist under the run directory; the render log that does exist is waverun/final-titan/figure.log (REVISION=7b9c467e4, OVERLAP_CHECK=clean, PNG written to waverun/per-slice-wall.png). The fact it asserts is true and the receipt a reader is told to open is not there, so the render check cannot be verified from the fragment alone. The figure itself does regenerate byte-identically (21464 bytes, differing only in dc:date and matplotlib element ids) from waverun/h200-stage.log through scripts/prototypes/bank_step_batch/plot.py, whose overlap check passes."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/manifest.md",
+      "id": "fe0e0e0ddfa",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "The artifacts line presents waverun/head/gate.log and waverun/head/negative.log as 'same arms re-run at the head 299841a4c', but when the record was written only waverun/head/gate.log existed and it held two header lines and no EXIT= line, while waverun/head/negative.log did not exist at all. Both arms have since completed at that revision and are correct (gate: 2 passed in 823.97s, EXIT=0; control: 1 failed, 1 passed, EXIT=1 with the lane-broadcast AssertionError at tests/test_bank_step_batch.py:164), so the statement has become true after the fact rather than having been recorded when it was made. A record that declares work complete on arms still running cannot be told apart from one whose arms failed, until someone re-reads the logs."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_batch/plot.py",
+      "id": "f323b026710",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "stage_walls gives its WALL and STAGE branches identical bodies (both assign item['per_slice_ms'] into the same dict by (name, slices)), so the two-branch test carries no distinction and one branch would express the same behaviour."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261103T052938821903-review-of-bank-step-batch-299841a4c1f0",
+  "reviewed_base_sha": "9bed3477bb8e9824e476058575bea800d2cade0c",
+  "reviewed_head_sha": "299841a4c1f0d11a79a030e954a244721f948f3e",
+  "reviewed_run_id": "r-20261102T201046545724-bank-step-batch",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T06:18:52.524547+00:00",
+  "total": 104
+}

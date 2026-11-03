@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,fixed-point,jax,convergence,h200">
   <meta name="plan-informs" content="plasma-cell-topology-authority,gs-absolute-accuracy-gates,cut-cell-current-attribution">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
   <title>Forward solver route integrity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="146">
+<meta name="plan-version" content="147">
 <meta name="plan-modified" content="2026-11-03">
 <meta name="plan-blocks" content="millisecond-converged-solve,single-grid-solver-cutover">
 <meta name="plan-impl" content="0.67">
@@ -428,7 +428,7 @@
 
 
 <h2 id="s6">§6 — The terminal-state figure shows one active-set trip, not a solve</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
 <p><em>Moved from <a href="/nova/plans/plasma-cell-read-fidelity">plasma-cell-read-fidelity</a> §1 on 2026-11-03, when the lead merged that plan into this one. Section numbers inside this text (§1–§4) refer to plasma-cell-read-fidelity, whose landed §2 and §3 stay recorded there.</em></p>
 <p><strong>What the figure is.</strong> <code>docs/figures/plasma-cell-topology-authority/solve-path/device/terminal-polish-contours.png</code> draws the analytic Solov'ev flux beside the state returned by <code>ForwardProfile.solve</code> in <code>tests/test_solve_path_census_inputs.py::test_exact_mode_solve_retains_census_samples</code> on the 132-cell hex mesh (requested 110, exact clip mode). The terminal panel reads residual 0.152, converged=False, the terminal X-point 8.2 cm from the reference and the axis 0.9 cm off; the relative RMS difference between the two node-value fields is 17 percent. The two panels share one Delaunay triangulation of the 730 state nodes and one level array, so the waviness is in the state values, not in the rendering.</p>
 <p><strong>What the receipts already say.</strong> The test replaces the certificate solve request's policy with <code>active_set_steps=1</code> (one active-set trip, chosen to keep the census-input check cheap), so the drawn state is the state after the first trip. The certificate's own receipt for the same case at the same rung, <code>docs/figures/gs-absolute-accuracy/solovev/production-route-parts/diverted-single-null-production-route-reduced.json</code>, reads converged in two trips at 132 cells, and the exact-clip seed receipt for the second test case (<code>weak-rotation-reactor-static</code>, 135 cells) reads converged in two trips as well. The candidate explanation is therefore that the figure records an unfinished solve, not a solver that cannot converge on the hex cells; the certificate at 1074 cells reads converged=False after six trips, which is a separate matter owned by the certificate plan and is not this section's subject.</p>
@@ -471,7 +471,7 @@
 </div>
 
 <h2 id="s7">§7 — Follow-on: the exact-mode production route at the reduced rung</h2>
-<section data-reckon="section" data-id="s7" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s7" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
 <p><em>Moved from <a href="/nova/plans/plasma-cell-read-fidelity">plasma-cell-read-fidelity</a> §4 on 2026-11-03, when the lead merged that plan into this one. Section numbers inside this text (§1–§4) refer to plasma-cell-read-fidelity, whose landed §2 and §3 stay recorded there.</em></p>
 <p><strong>State at the 2026-09-23 halt.</strong> §2 and §3 are landed and promoted. §1 has moved twice: the figure was not a truncated solve, and the nonconvergence is not a landing in the 09-22 window, because the test construction never converged at any measured rung. What remains open is a property of the certificate production route itself: in exact clip mode at requested 110 cells on main, the diverted case settles at residual 0.175 after four trips with its admitted saddle 1.33 m from the reference near the outboard midplane, and the reactor-static case at 0.075, while the production route in the certificate's own receipts converged in two trips at this rung on 2026-09-15 (9aebe5fae, seeded from a current-centroid disc, clip mode unrecorded). The two constructions measured side by side differ only in carrier identity and seed state, so the seed policy is a candidate beside the operator landings of the week. The production-route ladder (node in §1) runs the certificate's own construction at each revision from main back to 9aebe5fae in one H200 job, with per-trip counts of non-finite clipped-support moments, because S19 found that a cut-cell capacity overflow at capacity one makes the clipped support fail closed to nan, and a nan support is the shape that loses a saddle by a metre.</p>
 <p><strong>What this section owns once the ladder lands.</strong> One repair node, authored from the ladder's receipt: if a rung is named, the mechanism that rung introduced is corrected and the two cases converge again under the certificate default policy with the terminal X-point inside the certificate position bound; if the ladder is one way, the seed policy is measured first (the current-centroid disc seed against the explicit analytic seed at main) before any operator change; in either case the S19 capacity repair in <code>clip_quadrature.py</code> is rerun as the newest rung when it lands, and the certificate residual bound of 1e-12 is stated beside the measured floors so a reader knows what converged means here. The done-when is the certificate's: both cases converged in exact clip mode at the reduced rung with the terminal saddle inside the position bound, the ladder regression and the twelve-row parity unchanged, and the cutover's convergence claim (single-grid-solver-cutover §1) re-based on that receipt. The record-hygiene items the four reviews left are listed in followup f-pcrf-003 and are local-lane work.</p>
@@ -608,6 +608,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fusion-autotuner" data-choice="keep-default" data-by="smc" data-when="2026-10-20T06:07:44+00:00" data-sections="s5">
+    <p class="r-dec-q">Does nova keep XLA&#x27;s experimental per-fusion autotuner on?</p>
+    <p class="r-dec-ctx">Decided from §5&#x27;s arm (d) against arm (c), which compares compile wall with steady-state solve wall. In the drained run, 165 of 4,051 fusions (4%) chose the Triton block-level emitter over the native one; that is what disabling gives up. The prewarm&#x27;s jit_while programs took 241 and 248 s to compile, and how much of that is autotuning is unmeasured. Disabling changes XLA_FLAGS and therefore the runtime directory, so it needs a fresh pre-warm.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="keep-default">keep the autotuner on, as JAX ships it</button>
+      <button class="r-opt" data-value="disable">set --xla_gpu_experimental_enable_fusion_autotuner=false for every nova route</button>
+      </p>
+    <p class="r-dec-rat">The four-arm titan measurement (job 1290668, docs/research/xla-autotune-cache-on-gpfs.html) found no measurable effect of the fusion autotuner or its cache: cold compile 76.0 to 81.0 s from the same eight programs in every arm, the same 266 compile entries and hits, and steady passes overlapping at 152 to 222 s. The autotuner stays at XLA&#x27;s default; its per-fusion cache is turned off through jax_persistent_cache_enable_xla_caches=none, which writes zero autotune files, whereas --xla_gpu_experimental_enable_fusion_autotuner=false still writes twelve per run that nothing prunes.</p>
+    </div>
 <div class="r-dec" data-key="krylov-slice-2-acceptance" data-choice="hold until vmapped cost is at or below the per-site base; name the diverted-move mechanism first" data-by="lead" data-when="2026-09-24T06:41:39+00:00">
     <p class="r-dec-q">krylov-slice-2-acceptance</p>
     <p class="r-dec-rat">Lead decisions 2026-09-23 on slice 2: the exit loop alone left the vmapped width-16 cost at 1.75x, and the non-converged diverted rung moved 0.216. Both had to be explained or fixed before landing. The mechanism step showed the move is main&#x27;s operator change, with the loop differing only by bounded reassociation. The batching rule then reached 0.98x.</p>
@@ -629,15 +638,6 @@
       <button class="r-opt" data-value="tolerance">terminal states within a stated tolerance</button>
       </p>
     <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
-    </div>
-<div class="r-dec" data-key="fusion-autotuner" data-choice="keep-default" data-by="smc" data-when="2026-10-20T06:07:44+00:00" data-sections="s5">
-    <p class="r-dec-q">Does nova keep XLA&#x27;s experimental per-fusion autotuner on?</p>
-    <p class="r-dec-ctx">Decided from §5&#x27;s arm (d) against arm (c), which compares compile wall with steady-state solve wall. In the drained run, 165 of 4,051 fusions (4%) chose the Triton block-level emitter over the native one; that is what disabling gives up. The prewarm&#x27;s jit_while programs took 241 and 248 s to compile, and how much of that is autotuning is unmeasured. Disabling changes XLA_FLAGS and therefore the runtime directory, so it needs a fresh pre-warm.</p>
-    <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="keep-default">keep the autotuner on, as JAX ships it</button>
-      <button class="r-opt" data-value="disable">set --xla_gpu_experimental_enable_fusion_autotuner=false for every nova route</button>
-      </p>
-    <p class="r-dec-rat">The four-arm titan measurement (job 1290668, docs/research/xla-autotune-cache-on-gpfs.html) found no measurable effect of the fusion autotuner or its cache: cold compile 76.0 to 81.0 s from the same eight programs in every arm, the same 266 compile entries and hits, and steady passes overlapping at 152 to 222 s. The autotuner stays at XLA&#x27;s default; its per-fusion cache is turned off through jax_persistent_cache_enable_xla_caches=none, which writes zero autotune files, whereas --xla_gpu_experimental_enable_fusion_autotuner=false still writes twelve per run that nothing prunes.</p>
     </div>
 </section>
 
@@ -839,6 +839,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-merge-pcrf-2026-11-03" data-who="coordinator" data-when="2026-11-03">
     <div class="r-comment-body"><p>The lead merged <a href="/nova/plans/plasma-cell-read-fidelity">plasma-cell-read-fidelity</a> into this plan on 2026-11-03. Its two open sections moved here verbatim: its §1 (the terminal-state figure and the production-route ladder) is now §6, and its §4 (the exact-mode production route at the reduced rung) is now §7. Each moved section opens with a provenance note. Its landed §2 and §3 stay recorded there. Its links moved with it: this plan now blocks single-grid-solver-cutover and informs plasma-cell-topology-authority, gs-absolute-accuracy-gates and cut-cell-current-attribution.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-defer-s6-s7-2026-11-03" data-who="coordinator" data-when="2026-11-03">
+    <div class="r-comment-body"><p><strong>§6 and §7 are deferred for re-authoring.</strong> The content review of the merge found that the two sections moved from plasma-cell-read-fidelity are stale against their own records:</p><ul><li>§7's done-when asks for exact-mode convergence that its map-fidelity gate rules unmeasurable, at 0.45 sup mismatch against a 1e-2 bound.</li><li>Its repair node has two declared authors, and both records decline.</li><li>Its declared first node has already run.</li><li>The f5af729a9 trip count is recorded as both four and six.</li><li>It cites a followup and a decision that live only in the retired plan.</li></ul><p>Present-route exact-mode convergence also now sits beside the fast route in sub-millisecond-forward-path, so the sections need re-authoring against today's state before any dispatch. Nothing is dispatched from them until then. §5 is unaffected.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
     <div class="r-comment-body"><p>§1 attempts now stand at two on the codex node plus the earlier local-lane partial, so the next dispatch is the third attempt and takes the strongest capability class available with the design fixed by the decision <code>newton-krylov-third-repair</code>. The codex run <code>r-20260919T090428129698</code> holds nova/equilibrium/forward.py and forward_operator.py while blocked; its worktree carries route telemetry tests, a frozen-domain label tracker, the live-map Newton repair and a staged residual-against-step renderer under docs/figures/millisecond-converged-solve/newton-krylov-route/render.py that has not yet produced its figure.</p></div>

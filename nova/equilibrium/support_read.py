@@ -1484,6 +1484,8 @@ def solve_batch(
     max_steps: int = 60,
     tolerance: float = 1e-10,
     freeze_threshold: float = 1e-6,
+    reuse_factor: bool = True,
+    freeze_active_set: bool = True,
     iterations: int = 12,
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
@@ -1586,6 +1588,8 @@ def solve_batch(
             & fresh.valid
             & (current_norm < freeze_threshold)
         )
+        if not freeze_active_set:
+            start_freeze = jnp.zeros_like(start_freeze)
         lock = (frozen & ~changed) | start_freeze
         cut_set = jnp.where(start_freeze[:, None], cut_now, cut_set)
         normal_set = jnp.where(start_freeze[:, None], normal_now, normal_set)
@@ -1618,6 +1622,8 @@ def solve_batch(
         rebuild = ~have_factor | jnp.any(
             active & (~jnp.isfinite(ratio) | (ratio > 0.5) | changed)
         )
+        if not reuse_factor:
+            rebuild = jnp.asarray(True)
 
         def one_with_factor(items):
             one, one_read, prior = items
@@ -1662,12 +1668,11 @@ def solve_batch(
             cache,
             candidate,
             seeds,
-            fresh.stationary.position,
+            previous,
             convention,
             policy,
             axis_sign,
             iterations=iterations,
-            tracking=tracking_of(fresh),
         )
         next_norm = magnitude(candidate, next_read)
         next_cut = (next_read.reading.membership > 0) & (

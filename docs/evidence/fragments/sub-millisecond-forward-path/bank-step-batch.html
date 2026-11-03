@@ -223,9 +223,16 @@
   returned 1e-30 and 1e-26 where a relative tolerance divides by nothing. The
   largest absolute disagreement was 1.7e-13, which is the scale on which the
   unbatched reference's own residual alternation moves the flux. The comparison
-  now carries <code>atol=1e-12</code> with the relative tolerance unchanged
-  (commit 6a3d7084a), and the re-run is job 1303793, queued at the deadline;
-  its result is not in this delivery.</p>
+  was given <code>atol=1e-12</code> with the relative tolerance unchanged
+  (commit 6a3d7084a) and re-run as job 1303826. That run converged both lanes
+  (<code>[2.9701e-11, 7.2660e-11] after 22 steps</code>) and still failed, now
+  on a single density-flux cell: 4.9494e-05 against 4.9494e-05, an absolute
+  difference of 3.2e-10 and a relative one of 6.4e-6. The measured agreement
+  between a batched lane and that lane's own solve is therefore 3.2e-10
+  absolute on a 5e-5-scale component, and <code>rtol=1e-10</code> was never
+  earned by the measurement — it was asserted. The tolerance is left as
+  measured rather than widened at the last minute, so the gate stays red and
+  the number behind the red is the number above.</p>
 
   <p>The uniform rebuild decision costs nothing measurable at the read. The
   sixteen-slice read re-measured at the repaired revision is 12.90 ms per slice
@@ -245,10 +252,18 @@
   failure to converge. Its log is <code>waverun/regate.log</code> (job 1303787),
   which carries the gate result and the mutation arm in one stream.</p>
 
-  <p>The sixteen-lane per-lane trace (job 1303790) was queued at the deadline
-  and began running minutes later; the per-lane table this delivery carries is
-  the four-lane one, and the sixteen-lane exit line is
-  <code>waverun/trace.log</code>.</p>
+  <p><strong>At sixteen lanes the batch does not meet the bound in the window
+  it was given.</strong> The four-lane series converges at 20 steps, but the
+  sixteen-lane run reached iteration 12 inside a thirty-minute allocation and
+  the job was cancelled by the wall clock before it could print an exit line
+  (<code>waverun/trace.log</code>, job 1303790). Nine of the sixteen lanes were
+  frozen at or below the bound by then — 4.07e-11, 4.51e-11, 1.93e-11, 3.66e-11
+  and 6.26e-11 appear unchanged from iteration 7 through 12 — while seven lanes
+  were still cycling at the operator's 1.64e-7/3.19e-10 plateau. The freeze
+  works lane by lane; what sixteen lanes do not get is enough iterations to
+  carry all of them through the plateau, because stepping sixteen lanes of a
+  550-cell bank is what spends the allocation. The claim this delivery supports
+  is the four-lane one; the sixteen-lane convergence is not measured here.</p>
 
   <p>Receipts are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch</code>:

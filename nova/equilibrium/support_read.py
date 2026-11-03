@@ -1486,7 +1486,7 @@ def solve_batch(
     max_steps: int = 60,
     tolerance: float = 1e-10,
     freeze_threshold: float = 1e-6,
-    reuse_factor: bool = True,
+    reuse_factor: bool = False,
     contraction_limit: float = 0.5,
     freeze_active_set: bool = True,
     iterations: int = 12,
@@ -1496,7 +1496,8 @@ def solve_batch(
     A fresh read certifies every accepted state. Once close to the root, the
     booking keeps the clipped and normal-form cell sets of the first close read
     while their continuous geometry remains current. A changed fresh set
-    releases that lock and requires another Newton update.
+    releases that lock and requires another Newton update. Factor reuse is
+    opt-in because extra iterations can cost more than the skipped refactors.
     """
     lanes, cells = moments[0].shape
     support = read_batch(

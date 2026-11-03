@@ -127,6 +127,7 @@ def test_batch_reuses_factor_without_rebuilding_jacobians(monkeypatch):
             None,
             max_steps=8,
             tolerance=0.1,
+            reuse_factor=True,
         )
     )
     result = run(states)
@@ -282,7 +283,7 @@ def strict_reused_solution(diverted_case):
 
 @pytest.fixture(scope="module")
 def frozen_solution(diverted_case):
-    return _device_solve(diverted_case, reuse_factor=True, freeze_active_set=True)
+    return _device_solve(diverted_case, reuse_factor=False, freeze_active_set=True)
 
 
 def _precision_gaps(bank, one_state, one_support, other_state, other_support, radius):
@@ -377,15 +378,15 @@ def test_factor_reuse_costs(fresh_solution, reused_solution, strict_reused_solut
 
 
 @pytest.mark.slow
-def test_active_set_freeze_trajectory_converges(reused_solution, frozen_solution):
+def test_active_set_freeze_trajectory_converges(fresh_solution, frozen_solution):
     print(
         "UNFROZEN",
-        np.asarray(reused_solution.residual_path[: int(reused_solution.steps) + 1]),
+        np.asarray(fresh_solution.residual_path[: int(fresh_solution.steps) + 1]),
     )
     print(
         "FROZEN",
         np.asarray(frozen_solution.residual_path[: int(frozen_solution.steps) + 1]),
     )
-    assert bool(reused_solution.converged) and bool(frozen_solution.converged)
+    assert bool(fresh_solution.converged) and bool(frozen_solution.converged)
     assert int(frozen_solution.freezes) >= 1
     assert float(frozen_solution.residual) <= 1e-10

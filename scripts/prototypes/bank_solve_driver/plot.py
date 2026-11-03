@@ -23,7 +23,7 @@ def record(log, label):
     raise ValueError(f"{label} is missing from {log}")
 
 
-def save_checked(fig):
+def save_checked(fig, output):
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     canvas = fig.bbox
@@ -40,18 +40,19 @@ def save_checked(fig):
                 raise ValueError(
                     f"text overlap: {left.get_text()} / {right.get_text()}"
                 )
-    FIGURE.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(FIGURE)
-    root = ET.parse(FIGURE)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output)
+    root = ET.parse(output)
     root.getroot().set("width", "31.1cm")
     root.getroot().set("height", "16cm")
-    root.write(FIGURE, encoding="unicode", xml_declaration=True)
-    print(f"FIGURE={FIGURE} TEXT_CHECK=passed CANVAS=1400x720", flush=True)
+    root.write(output, encoding="unicode", xml_declaration=True)
+    print(f"FIGURE={output} TEXT_CHECK=passed CANVAS=1400x720", flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("log", type=Path)
+    parser.add_argument("--output", type=Path, default=FIGURE)
     args = parser.parse_args()
     single = record(args.log, "SINGLE")
     prototype = record(args.log, "PROTOTYPE")
@@ -75,7 +76,7 @@ def main():
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
     fig.subplots_adjust(left=0.25, right=0.96, bottom=0.18, top=0.95)
-    save_checked(fig)
+    save_checked(fig, args.output)
     plt.close(fig)
 
 

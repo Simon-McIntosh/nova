@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "manifest.md:16-17 records completed base and head suites. Both have only tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline failing; baseline-suite.log ends 178 passed, 1 failed, EXIT=1 and after-suite-final.log ends 183 passed, 1 failed, EXIT=1, so head failure ids minus base failure ids is empty.",
+  "assertion_analysis": [
+    "tests/test_shared_primitives.py:17-18: the independent literal linspace and step fail if endpoint reconstruction or step changes; negative-control.log confirms the float32 axis assertion reddens under spacing differencing.",
+    "tests/test_shared_primitives.py:22-25: the two raises fail if ragged axes or undersized axes are admitted.",
+    "tests/test_shared_primitives.py:33-39: literal JSON bytes fail on changed ordering, indentation, newline or compact separators; directory listing fails on a left-behind temporary; the TypeError and unchanged bytes fail on permissive or destructive serialization.",
+    "tests/test_shared_primitives.py:45-49: literal canonical bytes and whitespace refusal fail if those contracts change; the JSON roundtrip is a weaker value check but not used as the sole guard.",
+    "tests/test_shared_primitives.py:57-58: the literal compact JSON digest fails if stable_digest changes the bytes it hashes; the expectation is independent of the function under test.",
+    "No added assertion compares an observed value to an expected value computed by the same production helper; the remaining gaps are missing assertions for caller delegation and fsync."
+  ],
+  "call_site_count": 10,
+  "call_sites": [
+    "nova/equilibrium/map_extraction.py:128",
+    "nova/equilibrium/map_extraction.py:387",
+    "nova/equilibrium/conservation.py:147",
+    "nova/media/sources/diiid_efit.py:101",
+    "nova/media/sources/mast_efit.py:83",
+    "nova/calibrate/sweep.py:373",
+    "nova/catalog/mast_geometry.py:199",
+    "nova/catalog/mast_geometry.py:444",
+    "nova/imas/mast_parity_gate.py:576",
+    "nova/imas/machine_evidence.py:115"
+  ],
+  "completed_at": "2026-11-03T07:33:06Z",
+  "dispatched_at": "2026-11-03T07:21:13Z",
+  "findings": [
+    {
+      "file": "tests/test_shared_primitives.py",
+      "line": "31",
+      "text": "non-blocking: the atomic-writer test checks bytes, cleanup and failed serialization, but removing os.fsync or changing os.replace to a direct write in nova/io/json.py:39-47 leaves its assertions green; the writer\u2019s durability and atomic replacement contract has no regression guard."
+    },
+    {
+      "file": "tests/test_shared_primitives.py",
+      "line": "13",
+      "text": "non-blocking: the axis tests invoke uniform_axis directly and do not assert that the four production sites continue to delegate to it; restoring a private caller check can recreate the duplication while these tests remain green, so the zero-copy census is a one-time measurement."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified production callers in the first implementation commit: nova/equilibrium/map_extraction.py:128, nova/equilibrium/map_extraction.py:387, nova/equilibrium/conservation.py:147, nova/media/sources/diiid_efit.py:101, nova/media/sources/mast_efit.py:83, nova/calibrate/sweep.py:373, nova/catalog/mast_geometry.py:199, nova/catalog/mast_geometry.py:444, nova/imas/mast_parity_gate.py:576, nova/imas/machine_evidence.py:115",
+    "diff": "Read cd4018d4 and 55eadf83 commit by commit against 2d2172dd; the first consolidates axes, JSON receipts and machine-evidence helpers with five new tests, and the second adds only the landing fragment under docs/evidence/fragments/nova-portfolio-replan/replan-small-primitives.html.",
+    "done_when": "Read prompt.txt:116-117 and plan \u00a74; duplicate-census.log reports one owner and zero named copies for every group, and baseline-suite.log and after-suite-final.log show the same one failure with 178 versus 183 passes.",
+    "goal": "Read the dispatched goal in prompt.txt:37-38; nova/utilities/axes.py:9 and nova/io/json.py:12 now own the uniform-axis check and atomic JSON writer used by the named production sites.",
+    "manifest": "Read manifest.md:5-20; it names both commits, the completed base and head suites, their identical failing ID, a zero-duplicate census, and negative-control.log with the float32 test failing under the spacing mutation.",
+    "write_paths": "Read manifest.md:3; git diff 2d2172dd..55eadf83 changes twelve files, all within the thirteen declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_shared_primitives.py:13-58 has independent literal axis, byte and digest expectations and negative guards, but no assertion fails if a production caller restores its private check or nova/io/json.py:39-47 loses fsync.",
+    "evidence": "manifest.md:16-19 names completed base and head logs with the same failing ID and a zero-duplicate census, while negative-control.log fails the float32 test; the cited code-depth candidate directory is absent, so the census is limited to the plan\u2019s named sites.",
+    "fit": "nova/utilities/axes.py:9 uses a neutral utilities module and nova/io/json.py:12 uses the I/O package, with caller minimum lengths and byte formatting preserved through explicit arguments at nova/equilibrium/map_extraction.py:128 and nova/catalog/mast_geometry.py:199.",
+    "goal_fidelity": "nova/utilities/axes.py:9-41 and nova/io/json.py:12-50 implement the two requested owners, and the changed callers at nova/media/sources/mast_efit.py:83 and nova/calibrate/sweep.py:373 route through them.",
+    "reuse": "The capability search over nova found no other uniform-axis owner; nova/equilibrium/fixed_point.py:185-218 owns binary checkpoint persistence, whose pid-scoped replace and fsync pattern nova/io/json.py:30-47 adopts for JSON, while nova/imas/machine_evidence.py:33/64 remains the canonical-byte and string owner.",
+    "scope_discipline": "The twelve paths in git diff 2d2172dd..55eadf83, including tests/test_shared_primitives.py and the landing fragment, are all in manifest.md:3 and no adjacent node path changed."
+  },
+  "node": "review-of-replan-small-primitives-55eadf83321c",
+  "node:reviewed": "replan-small-primitives",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the dispatched goal in prompt.txt:37-38; nova/utilities/axes.py:9 and nova/io/json.py:12 now own the uniform-axis check and atomic JSON writer used by the named production sites.\nVERDICT done_when: Read prompt.txt:116-117 and plan \u00a74; duplicate-census.log reports one owner and zero named copies for every group, and baseline-suite.log and after-suite-final.log show the same one failure with 178 versus 183 passes.\nVERDICT write_paths: Read manifest.md:3; git diff 2d2172dd..55eadf83 changes twelve files, all within the thirteen declared write paths.\nVERDICT manifest: Read manifest.md:5-20; it names both commits, the completed base and head suites, their identical failing ID, a zero-duplicate census, and negative-control.log with the float32 test failing under the spacing mutation.\nVERDICT diff: Read cd4018d4 and 55eadf83 commit by commit against 2d2172dd; the first consolidates axes, JSON receipts and machine-evidence helpers with five new tests, and the second adds only the landing fragment under docs/evidence/fragments/nova-portfolio-replan/replan-small-primitives.html.\nCALL_SITES: nova/equilibrium/map_extraction.py:128, nova/equilibrium/map_extraction.py:387, nova/equilibrium/conservation.py:147, nova/media/sources/diiid_efit.py:101, nova/media/sources/mast_efit.py:83, nova/calibrate/sweep.py:373, nova/catalog/mast_geometry.py:199, nova/catalog/mast_geometry.py:444, nova/imas/mast_parity_gate.py:576, nova/imas/machine_evidence.py:115\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/utilities/axes.py:9-41 and nova/io/json.py:12-50 implement the two requested owners, and the changed callers at nova/media/sources/mast_efit.py:83 and nova/calibrate/sweep.py:373 route through them.\nSCORE evidence: 17\nJUSTIFICATION evidence: manifest.md:16-19 names completed base and head logs with the same failing ID and a zero-duplicate census, while negative-control.log fails the float32 test; the cited code-depth candidate directory is absent, so the census is limited to the plan\u2019s named sites.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The twelve paths in git diff 2d2172dd..55eadf83, including tests/test_shared_primitives.py and the landing fragment, are all in manifest.md:3 and no adjacent node path changed.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_shared_primitives.py:13-58 has independent literal axis, byte and digest expectations and negative guards, but no assertion fails if a production caller restores its private check or nova/io/json.py:39-47 loses fsync.\nSCORE fit: 19\nJUSTIFICATION fit: nova/utilities/axes.py:9 uses a neutral utilities module and nova/io/json.py:12 uses the I/O package, with caller minimum lengths and byte formatting preserved through explicit arguments at nova/equilibrium/map_extraction.py:128 and nova/catalog/mast_geometry.py:199.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search over nova found no other uniform-axis owner; nova/equilibrium/fixed_point.py:185-218 owns binary checkpoint persistence, whose pid-scoped replace and fsync pattern nova/io/json.py:30-47 adopts for JSON, while nova/imas/machine_evidence.py:33/64 remains the canonical-byte and string owner.\nFINDING tests/test_shared_primitives.py:31 non-blocking: the atomic-writer test checks bytes, cleanup and failed serialization, but removing os.fsync or changing os.replace to a direct write in nova/io/json.py:39-47 leaves its assertions green; the writer\u2019s durability and atomic replacement contract has no regression guard.\nFINDING tests/test_shared_primitives.py:13 non-blocking: the axis tests invoke uniform_axis directly and do not assert that the four production sites continue to delegate to it; restoring a private caller check can recreate the duplication while these tests remain green, so the zero-copy census is a one-time measurement.",
+  "review_run_id": "r-20261103T071720915608-review-of-replan-small-primitives-55eadf83321c",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_head_sha": "55eadf83321c9dfbdfe83d6b6a597f797ace4b23",
+  "reviewed_run_id": "r-20261103T064034359291-replan-small-primitives",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T07:28:15.659442+00:00",
+  "total": 110
+}

@@ -17,8 +17,8 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="55">
-<meta name="plan-modified" content="2026-10-27">
+<meta name="plan-version" content="56">
+<meta name="plan-modified" content="2026-11-03">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -179,6 +179,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T163709063251-review-of-provenance-receipt-repair-e9b8f266c877" data-who="reckon-build" data-when="2026-10-27T16:48:12.688Z">
     <div class="r-comment-body"><p>Reviewed r-20261027T161501103880-provenance-receipt-repair at base 624860447b7cd10c494a88e3178d46c5f983fe74 and head e9b8f266c87700919465a5a56bb3622eb3eca5ff; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 20, added_failure_count 0, one non-blocking finding that the guard still enumerates the provenance leaves allowed to drift by index, zero blocking findings.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261103T071720915608-review-of-replan-small-primitives-55eadf83321c" data-who="reckon-build" data-when="2026-11-03T07:33:06Z">
+    <div class="r-comment-body"><p>Parsed independent review at reviewed base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4 and head 55eadf83321c9dfbdfe83d6b6a597f797ace4b23: scores 19/17/20/15/19/20, zero added failures, two non-blocking durability findings and no blocking findings.</p></div>
+</div>
 <div class="r-comment" data-section="_top" data-id="c-nova-fd-20261006-size-ceiling-in-shared-hook" data-who="nova-fd" data-when="2026-10-06T02:30:00Z">
     <div class="r-comment-body"><p>2026-10-06, for f-replan-receipts-out-of-git: the size ceiling is not a second commit-time mechanism. artifacts-carry-no-worktree-paths §4 (S27) adds nova's one commit-time hook, <code>scripts/git-hooks/pre-commit</code>, a read-only shim enabled through <code>core.hooksPath</code>. The receipts migration adds the ceiling as a second check line in that hook, in its own migration commit, after the hook lands. Its negative control is a test file above the ceiling refused by that hook.</p></div>
 </div>
@@ -219,7 +222,7 @@ Done when: the report lists each coupling with files, line counts, refactor and 
     <div class="r-comment-body"><p>review of replan-gpfs-data-root at head cffa9ce3b39f0c28702e9b06052dfd29156c9deb (base 60aa92783c40ca8b2a712a37ec2b4e0eefe0ad52) scores 19/15/19/17/18/19 with four non-blocking findings and zero added failures; no blocking finding, so the node can land.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T174920487824-review-of-replan-evidence-tooling-paths-6bd5d0ac027c" data-who="reckon-build" data-when="2026-10-27T18:24:09.259Z">
-    <div class="r-comment-body"><p>The commit gained since the prior review (6bd5d0ac) restores the three per-benchmark receipt overrides the prior review called lost, imports Any so the accessor passes the repository lint gate, and adds two subprocess probes that redden if either the override precedence or the crew-root fallback regresses; scores are goal_fidelity 19, evidence 15, scope_discipline 20, durability 17, fit 18, reuse 20, with three non-blocking findings on the manifest&#x27;s stale after-arm revision, an unlogged head run of the test module, and the unchanged base-arm self-check.</p></div>
+    <div class="r-comment-body"><p>The commit gained since the prior review (6bd5d0ac) restores the three per-benchmark receipt overrides the prior review called lost, imports Any so the accessor passes the repository lint gate, and adds two subprocess probes that redden if either the override precedence or the crew-root fallback regresses; scores are goal_fidelity 19, evidence 15, scope_discipline 20, durability 17, fit 18, reuse 20, with three non-blocking findings on the manifest's stale after-arm revision, an unlogged head run of the test module, and the unchanged base-arm self-check.</p></div>
 </div>
 </section>
 </main>

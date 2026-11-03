@@ -2094,20 +2094,30 @@ class ForwardProfile:
                 state, requested_class, previous_shadow=previous
             )
 
+        def solve_arguments(arguments):
+            if len(arguments) == 4:
+                current, prescribed_current, operator, target_value = arguments
+                external = operator.external(current, prescribed_current)
+            elif len(arguments) == 3:
+                external, operator, target_value = arguments
+            elif len(arguments) == 1:
+                (external,) = arguments
+                operator = self.operator
+                target_value = target_current
+            else:
+                raise TypeError(
+                    "solve expects one, three, or four operands after the seed"
+                )
+            return external, operator, target_value
+
         if route == "newton_krylov":
             newton_shadowed_map = _shared_shadowed_map(shadowed_map)
 
             def live_shadowed_map(*arguments):
                 return shadowed_map(*arguments)
 
-            def solve(
-                initial_flux,
-                current,
-                prescribed_current,
-                operator,
-                target_value,
-            ):
-                external = operator.external(current, prescribed_current)
+            def solve(initial_flux, *arguments):
+                external, operator, target_value = solve_arguments(arguments)
                 if live_read_fallback:
                     return fixed_point.newton_krylov(
                         mapped,
@@ -2133,14 +2143,8 @@ class ForwardProfile:
         else:
             scheme = fixed_point.picard if route == "picard" else fixed_point.anderson
 
-            def solve(
-                initial_flux,
-                current,
-                prescribed_current,
-                operator,
-                target_value,
-            ):
-                external = operator.external(current, prescribed_current)
+            def solve(initial_flux, *arguments):
+                external, operator, target_value = solve_arguments(arguments)
                 return scheme(
                     mapped,
                     initial_flux,

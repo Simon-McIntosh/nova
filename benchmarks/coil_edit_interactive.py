@@ -34,6 +34,7 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
         carrier, impose_vertical_centroid=False
     )
     state = prepared["initial"]
+    last_converged_edit = None
     base_current = np.asarray(prepared["prescribed_current"], dtype=np.float64)
     coil_index = int(prepared["circuit_index"])
     target = float(prepared["target_current"])
@@ -77,7 +78,7 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
         jax.block_until_ready(receipt.equilibrium.flux)
         wall_ms = 1_000.0 * (time.perf_counter() - started)
         history = receipt.equilibrium.fixed_point
-        state = receipt.equilibrium.flux
+        converged = bool(np.asarray(history.converged))
         program = next(iter(profile._accelerated_program_cache.values()))
         if first_program is None:
             first_program = program
@@ -87,7 +88,8 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
             "coil_current_a": float(current[coil_index]),
             "wall_milliseconds": wall_ms,
             "trip_count": int(np.asarray(history.active_set_iterations)),
-            "converged": bool(np.asarray(history.converged)),
+            "converged": converged,
+            "seed_from_edit_index": last_converged_edit,
             "qualified": bool(np.asarray(receipt.qualified)),
             "terminal_residual": float(np.asarray(history.residual)),
             "process_program_reused": program is first_program,
@@ -98,6 +100,9 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
         rows.append(row)
         output.write_text(json.dumps(document, indent=2, default=str) + "\n")
         print("EDIT " + json.dumps(row, sort_keys=True), flush=True)
+        if converged:
+            state = receipt.equilibrium.flux
+            last_converged_edit = edit_index
     warm_walls = [float(row["wall_milliseconds"]) for row in rows[1:]]
     document["summary"] = {
         "edit_count": len(rows),
@@ -113,6 +118,14 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
             bool(row["process_program_reused"]) for row in rows[1:]
         ),
     }
+    failures = []
+    if document["summary"]["median_warm_wall_milliseconds"] >= 100.0:
+        failures.append("warm median must be below 100 ms")
+    if document["summary"]["converged_count"] != len(rows):
+        failures.append("every edit must converge")
+    if document["summary"]["persistent_hit_events_after_first"] < len(rows) - 1:
+        failures.append("persistent cache must report a hit after every first edit")
+    document["summary"]["acceptance_failures"] = failures
     document["measurement_state"] = "complete"
     output.write_text(json.dumps(document, indent=2, default=str) + "\n")
     print("SUMMARY " + json.dumps(document["summary"], sort_keys=True), flush=True)
@@ -126,7 +139,10 @@ def main() -> None:
         "--carrier", type=Path, default=mast_response_carrier_warm.DEFAULT_CARRIER
     )
     arguments = parser.parse_args()
-    run(arguments.output, arguments.carrier)
+    result = run(arguments.output, arguments.carrier)
+    if result["summary"]["acceptance_failures"]:
+        print("GATE_REFUSED " + json.dumps(result["summary"]["acceptance_failures"]))
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

@@ -4,8 +4,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import re
+from types import SimpleNamespace
 import pytest
 
+from benchmarks import coil_edit_interactive
 from nova.equilibrium.fixed_point import FixedPointResult
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.topology import TopologyClass
@@ -109,3 +111,113 @@ def test_explicit_pin_omission_uses_unconstrained_krylov_route(monkeypatch):
 
     assert observed_routes == ["newton_krylov"]
     assert bool(receipt.qualified)
+
+
+def test_existing_audit_lowering_calls_remain_callable(monkeypatch):
+    configure_dtypes()
+    profile, _, _ = _completed_profile(monkeypatch)
+    program = profile._accelerated_history_program(
+        "picard", evaluations=1, relaxation=1.0
+    )
+    seed = jnp.zeros(4)
+    external = profile.operator.external(None, None)
+
+    assert program.lower(seed, external).compiler_ir(dialect="stablehlo") is not None
+    assert (
+        program.lower(seed, external, profile.operator, None).compiler_ir(
+            dialect="stablehlo"
+        )
+        is not None
+    )
+
+
+def test_interactive_sweep_keeps_last_converged_seed(monkeypatch, tmp_path):
+    configure_dtypes()
+    initial = jnp.asarray((1.0,))
+    seeds = []
+
+    class Profile:
+        source = object()
+        _accelerated_program_cache = {"program": object()}
+
+        def solve(self, request):
+            seeds.append(np.asarray(request.seed_policy.state).copy())
+            index = len(seeds) - 1
+            return SimpleNamespace(
+                equilibrium=SimpleNamespace(
+                    flux=jnp.asarray((10.0 + index,)),
+                    fixed_point=SimpleNamespace(
+                        active_set_iterations=jnp.asarray(1),
+                        converged=jnp.asarray(index != 0),
+                        residual=jnp.asarray(0.0),
+                    ),
+                ),
+                qualified=jnp.asarray(index != 0),
+                compilation_cache_hit=index != 0,
+            )
+
+    monkeypatch.setattr(
+        coil_edit_interactive.coil_edit_latency,
+        "_require_measurement_host",
+        lambda: None,
+    )
+    monkeypatch.setattr(
+        coil_edit_interactive.coil_edit_latency,
+        "_prepare_case",
+        lambda *_args, **_kwargs: (
+            Profile(),
+            {
+                "initial": initial,
+                "prescribed_current": np.asarray((100.0,)),
+                "circuit_index": 0,
+                "target_current": 1.0,
+                "coil_mapping": {"family": "position"},
+            },
+            {"semantic_identity": "fixture"},
+        ),
+    )
+    monkeypatch.setattr(
+        coil_edit_interactive,
+        "configure_persistent_compilation_cache",
+        lambda *_args: SimpleNamespace(directory=tmp_path),
+    )
+    monkeypatch.setattr(
+        coil_edit_interactive.coil_edit_latency,
+        "_cache_monitor",
+        lambda: {"hits": 0, "misses": 0},
+    )
+    monkeypatch.setattr(
+        coil_edit_interactive.ForwardSolveRequest,
+        "from_defaults",
+        staticmethod(lambda **kwargs: SimpleNamespace(**kwargs)),
+    )
+
+    receipt = coil_edit_interactive.run(tmp_path / "sweep.json", tmp_path / "carrier")
+
+    assert len(receipt["rows"]) == 20
+    np.testing.assert_array_equal(seeds[1], initial)
+    np.testing.assert_array_equal(seeds[2], jnp.asarray((11.0,)))
+    assert receipt["rows"][1]["seed_from_edit_index"] is None
+    assert receipt["rows"][2]["seed_from_edit_index"] == 1
+    assert "every edit must converge" in receipt["summary"]["acceptance_failures"]
+    assert any(
+        "persistent cache" in reason
+        for reason in receipt["summary"]["acceptance_failures"]
+    )
+
+
+def test_interactive_sweep_refuses_failed_acceptance(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        coil_edit_interactive,
+        "run",
+        lambda *_args: {
+            "summary": {"acceptance_failures": ["warm wall exceeds limit"]}
+        },
+    )
+    monkeypatch.setattr(
+        "sys.argv", ["coil_edit_interactive", "--output", str(tmp_path / "sweep.json")]
+    )
+
+    with pytest.raises(SystemExit) as raised:
+        coil_edit_interactive.main()
+    assert raised.value.code == 1

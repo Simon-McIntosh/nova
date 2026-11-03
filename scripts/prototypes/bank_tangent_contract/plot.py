@@ -28,15 +28,15 @@ def main(base, head, out):
         "base": (
             (record(base, "TANGENT")["wall_ms"], record(base, "STEP")["wall_ms"]),
             (
-                record(base, "TANGENT")["memory"]["temp_size_in_bytes"] / 1e9,
-                record(base, "BATCH_COMPILED")["memory"]["temp_size_in_bytes"] / 1e9,
+                record(base, "TANGENT")["device"]["peak_bytes_in_use"] / 1e9,
+                record(base, "BATCH_EXECUTED")["device"]["peak_bytes_in_use"] / 1e9,
             ),
         ),
         "head": (
             (record(head, "TANGENT")["wall_ms"], record(head, "STEP")["wall_ms"]),
             (
-                record(head, "TANGENT")["memory"]["temp_size_in_bytes"] / 1e9,
-                record(head, "BATCH_COMPILED")["memory"]["temp_size_in_bytes"] / 1e9,
+                record(head, "TANGENT")["device"]["peak_bytes_in_use"] / 1e9,
+                record(head, "BATCH_EXECUTED")["device"]["peak_bytes_in_use"] / 1e9,
             ),
         ),
     }
@@ -57,7 +57,7 @@ def main(base, head, out):
         axis.set_xticks((0, 1), categories[panel])
         axis.set_xlim(-0.38, 1.38)
         axis.set_ylim(0, 70 if panel else 54)
-        axis.set_ylabel("wall [ms]" if panel == 0 else "temporary device memory [GB]")
+        axis.set_ylabel("wall [ms]" if panel == 0 else "peak device memory [GB]")
         axis.spines["top"].set_visible(False)
         axis.spines["right"].set_visible(False)
         axis.grid(False)

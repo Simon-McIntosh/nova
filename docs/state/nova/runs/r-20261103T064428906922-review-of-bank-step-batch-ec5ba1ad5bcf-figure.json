@@ -124,6 +124,31 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "1dd216fae6e9e6c70768104ff6ce07aacd440add",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 152294,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261103T064428906922-review-of-bank-step-batch-ec5ba1ad5bcf-figure",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 152294,
+        "path": "/tmp/reckon-crew-scratch/r-20261103T064428906922-review-of-bank-step-batch-ec5ba1ad5bcf-figure"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {},
+      "worktrees": []
+    },
+    "worktree_released": false,
+    "worktree_withheld": "no worktree recorded for this run"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

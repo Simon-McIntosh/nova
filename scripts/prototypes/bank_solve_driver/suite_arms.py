@@ -33,7 +33,7 @@ def arm(label, revision, tree, log_path, scratch, head):
         "no:cacheprovider",
         *TARGETS,
         "-q",
-        f"--basetemp={scratch / label}",
+        f"--basetemp={scratch / (label + '-pytest')}",
     ]
     with log_path.open("w") as log:
         log.write(f"REVISION={revision} TREE={tree} COMMAND={' '.join(command)}\n")

@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 
 import matplotlib.pyplot as plt
 from matplotlib.text import Text
+from matplotlib.ticker import StrMethodFormatter
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -63,14 +64,18 @@ def main():
     fig, ax = plt.subplots(figsize=(14, 7.2), dpi=100)
     names = ["prototype · 1 slice", "staged · 1 slice", "staged · 16 slices"]
     walls = [prototype["wall_ms"], single["wall_ms"], batch["per_slice_ms"]]
+    scale, unit = (1000, "s") if max(walls) >= 1000 else (1, "ms")
+    walls = [wall / scale for wall in walls]
     colours = ["#929292", "#286eae", "#286eae"]
     for y, value, colour in zip((2, 1, 0), walls, colours, strict=True):
         ax.hlines(y, 0, value, color=colour, linewidth=3.0, zorder=2)
         ax.plot(value, y, "o", color=colour, markersize=10, zorder=3)
     ax.set_yticks((2, 1, 0), names)
     ax.set_xlim(0, max(walls) * 1.12)
+    ax.set_xticks([max(walls) * index / 4 for index in range(5)])
+    ax.xaxis.set_major_formatter(StrMethodFormatter("{x:.1f}"))
     ax.set_ylim(-0.5, 2.5)
-    ax.set_xlabel("Converged solve wall per slice [ms]")
+    ax.set_xlabel(f"Converged solve wall per slice [{unit}]")
     ax.tick_params(axis="both", labelsize=14)
     ax.xaxis.label.set_size(16)
     ax.spines[["top", "right"]].set_visible(False)

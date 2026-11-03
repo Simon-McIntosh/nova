@@ -3,6 +3,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
+import re
 
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.jax.config import configure_dtypes
@@ -13,6 +14,7 @@ def test_coil_edits_share_one_program_without_current_constants(monkeypatch):
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     profile, ordinary_response, prescribed_response = _completed_profile(monkeypatch)
+    profile.operator.external_current = jnp.asarray((127_021.0, 131_027.0))
     program = profile._accelerated_history_program(
         "picard", evaluations=1, relaxation=1.0
     )
@@ -21,8 +23,13 @@ def test_coil_edits_share_one_program_without_current_constants(monkeypatch):
     prescribed = jnp.asarray((107_011.0, 109_013.0, 113_017.0))
     lowered = program.lower(seed, ordinary, prescribed, profile.operator, None)
     hlo = str(lowered.compiler_ir(dialect="stablehlo"))
-    for value in (*ordinary, *prescribed):
-        assert str(int(value)) not in hlo
+    hlo_numbers = (
+        float(token)
+        for token in re.findall(r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][-+]?\d+)?", hlo)
+    )
+    hlo_values = set(hlo_numbers)
+    for value in (*ordinary, *prescribed, *profile.operator.external_current):
+        assert float(value) not in hlo_values
 
     first = program(seed, ordinary, prescribed, profile.operator, None)
     second = program(seed, ordinary + 1.0, prescribed + 1.0, profile.operator, None)
@@ -52,6 +59,7 @@ def test_typed_requests_reuse_the_compiled_solve_across_coil_edits(monkeypatch):
         )
 
     first = profile.solve(request((3.0, 5.0), (7.0, 11.0, 13.0)))
+    first_program = next(iter(profile._accelerated_program_cache.values()))
     second = profile.solve(request((17.0, 19.0), (23.0, 29.0, 31.0)))
     np.testing.assert_allclose(
         second.equilibrium.flux,
@@ -60,3 +68,4 @@ def test_typed_requests_reuse_the_compiled_solve_across_coil_edits(monkeypatch):
     )
     assert first.compilation_cache_hit is False
     assert second.compilation_cache_hit is True
+    assert next(iter(profile._accelerated_program_cache.values())) is first_program

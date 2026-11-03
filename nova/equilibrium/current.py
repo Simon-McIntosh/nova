@@ -681,28 +681,32 @@ def book_tangent_channels(
         )
         local = (points - centre) / pitch
         radial, vertical = local[..., 0], local[..., 1]
-        basis = jnp.stack(
-            (
-                jnp.ones_like(radial),
-                radial,
-                vertical,
-                radial**2,
-                radial * vertical,
-                vertical**2,
-            ),
-            axis=-1,
-        )
-        flux = jnp.einsum("rpk,k->rp", basis, normalized[index])
+
+        def polynomial(coefficient):
+            return (
+                coefficient[0]
+                + coefficient[1] * radial
+                + coefficient[2] * vertical
+                + coefficient[3] * radial**2
+                + coefficient[4] * radial * vertical
+                + coefficient[5] * vertical**2
+            )
+
+        flux = polynomial(normalized[index])
         weight = weights * density_gradient(points[..., 0], flux)
         relative = points - centre
-        moment_basis = jnp.stack(
-            (jnp.ones_like(weight), relative[..., 0], relative[..., 1]), axis=-1
-        )
-        integral_basis = jnp.sum(
-            weight[..., None, None] * basis[..., :, None] * moment_basis[..., None, :],
-            axis=(0, 1),
-        )
-        return normalized_rate[:, index] @ integral_basis
+
+        def channel_moments(coefficient):
+            weighted = weight * polynomial(coefficient)
+            return jnp.stack(
+                (
+                    jnp.sum(weighted),
+                    jnp.sum(weighted * relative[..., 0]),
+                    jnp.sum(weighted * relative[..., 1]),
+                )
+            )
+
+        return jax.lax.map(channel_moments, normalized_rate[:, index])
 
     def whole_cell(index):
         with xla_metadata.set_xla_metadata(tangent_site="interior:whole"):
@@ -731,8 +735,8 @@ def book_tangent_channels(
             with xla_metadata.set_xla_metadata(tangent_site="interior:conic"):
                 fixed = interior(index, rings, counts)
 
-            velocity = jax.vmap(
-                lambda direction: _conic_ring_tangents(
+            def moving_channel(direction):
+                velocity = _conic_ring_tangents(
                     vertices,
                     count,
                     centre,
@@ -743,19 +747,18 @@ def book_tangent_channels(
                     quadrature.segments,
                     inward_endpoints=True,
                 )
-            )(signed_rate[boundary_channels, index])
-            moved = moving_polygon_current_moment_tangents(
-                rings,
-                velocity,
-                counts,
-                centre,
-                geometry.pitch[index],
-                normalized[index],
-                profile,
-            )
-            moving = jnp.stack(
-                tuple(jnp.sum(value, axis=1) for value in moved), axis=-1
-            )
+                moved = moving_polygon_current_moment_tangents(
+                    rings,
+                    velocity,
+                    counts,
+                    centre,
+                    geometry.pitch[index],
+                    normalized[index],
+                    profile,
+                )
+                return jnp.stack(tuple(jnp.sum(value) for value in moved))
+
+            moving = jax.lax.map(moving_channel, signed_rate[boundary_channels, index])
 
             moving = (
                 jnp.zeros((channels, 3), dtype=psi.dtype)

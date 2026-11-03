@@ -115,10 +115,19 @@ def test_frozen_set_keeps_fresh_continuous_area(monkeypatch):
         )
 
     def step(operands, moments, support, *args, **kwargs):
+        fresh = jax.tree.map(
+            lambda value: value[0],
+            read(None, None, tuple(value[None] for value in moments)),
+        )
+        frozen_residual = residual(None, moments, moments, support).residual[0][0]
+        fresh_residual = residual(None, moments, moments, fresh).residual[0][0]
         jax.debug.callback(
-            lambda boundary, area: observed.append((float(boundary), float(area))),
+            lambda boundary, frozen, unfrozen: observed.append(
+                (float(boundary), float(frozen), float(unfrozen))
+            ),
             support.reading.boundary[0],
-            support.reading.membership[0],
+            frozen_residual,
+            fresh_residual,
         )
         result = _unit_update(operands, moments, support, *args, **kwargs)
         return result._replace(update=(0.1 * result.update[0], *result.update[1:]))
@@ -146,10 +155,15 @@ def test_frozen_set_keeps_fresh_continuous_area(monkeypatch):
     )
     jax.block_until_ready(run(state))
     assert len(observed) == 2
-    boundary, frozen_area = observed[1]
-    fresh_area = 0.4 + 0.1 * boundary
-    relative_residual_gap = abs(frozen_area - fresh_area) / fresh_area
-    print("FROZEN_AREA", boundary, frozen_area, fresh_area, relative_residual_gap)
+    boundary, frozen_residual, fresh_residual = observed[1]
+    relative_residual_gap = abs(frozen_residual - fresh_residual) / abs(fresh_residual)
+    print(
+        "FROZEN_RESIDUAL",
+        boundary,
+        frozen_residual,
+        fresh_residual,
+        relative_residual_gap,
+    )
     assert boundary > 0 and relative_residual_gap <= 1e-12
 
 

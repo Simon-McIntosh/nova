@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="forward-solve-memory-ledger">
+<meta name="plan-title" content="Forward-solve memory ledger — where the DIII-D producer's bytes go">
+<meta name="plan-summary" content="Phase-by-phase host memory of the DIII-D forward-gs producer against the per-machine operator bank, at the base revision on one frame.">
+<meta name="plan-tags" content="equilibrium,memory,jax,h200,throughput">
+<meta name="plan-informs" content="sub-millisecond-forward-path">
+<meta name="plan-recorded-at" content="2026-11-03">
+<title>Forward-solve memory ledger | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<p class="eyebrow">Memory evidence · base revision 2a26064 · measured 2026-11-03</p>
+<h1>Forward-solve memory ledger</h1>
+<p class="lede"><strong>The present route's memory is not the operator matrices.</strong> On one DIII-D frame the operands are 10.4 MB of dense arrays, and the <code>ForwardProfile.solve</code> call that follows them grows host RSS by <strong>9.58 GB</strong> in a single phase. Everything before the solve — the interpreter, the machine description and the profile build — accounts for under 2.4 GB.</p>
+</header>
+
+<h2 id="s1">§1 — What was measured, and on what</h2>
+<p>The producer is <code>benchmarks/diiid_forward_gs_match.py</code>, run through one frame's profile build and one present-route solve. The row is <code>d3d_shot_00000a10ac.parquet</code>, eligible frame 29, at the producer's registered grid stride of 2, which gives a 33×33 lattice of 1,089 nodes. The instrument is <code>benchmarks/forward_solve_memory_ledger.py</code>; it prints and flushes a <em>begin</em> line before each phase starts, so a phase that dies silently is still named, and an <em>end</em> line with the wall time, host RSS before and after, and peak RSS (<code>resource.getrusage(RUSAGE_SELF).ru_maxrss</code>).</p>
+<p><strong>Rung and device.</strong> Every number below was measured with <code>JAX_PLATFORMS=cpu</code> on node <code>98dci4-gpu-0003</code> under SLURM job 1304001 at revision 8173f9418. The device arm's numbers are recorded separately in §6; they are not mixed into this table.</p>
+<p>The solve is split into <em>trace and lower</em>, <em>compile</em>, <em>first execute</em> and <em>warm execute</em> for a flux-map program, and the present-route solve is then a phase of its own, because <code>ForwardProfile.solve</code> traces and compiles a different, much larger program than <code>flux_map</code> does on its own.</p>
+
+<h2 id="s2">§2 — The phase ledger</h2>
+<table>
+<thead><tr><th>Phase</th><th>Wall s</th><th>RSS after GB</th><th>Peak GB</th><th>Delta GB</th></tr></thead>
+<tbody>
+<tr><td>interpreter + nova/jax import</td><td>2.1</td><td>0.467</td><td>0.467</td><td>+0.467</td></tr>
+<tr><td>producer module import</td><td>4.6</td><td>0.672</td><td>0.670</td><td>+0.205</td></tr>
+<tr><td>machine description (IMAS)</td><td>0.45</td><td>1.352</td><td>1.351</td><td>+0.680</td></tr>
+<tr><td>operand build (<code>_couplings</code>)</td><td>14.5</td><td>1.459</td><td>1.497</td><td>+0.107</td></tr>
+<tr><td>profile build (<code>_build_profile</code>)</td><td>3.5</td><td>1.666</td><td>2.263</td><td>+0.207 net, +0.766 peak</td></tr>
+<tr><td>flux-map trace and lower</td><td>2.2</td><td>1.853</td><td>2.263</td><td>+0.187</td></tr>
+<tr><td>flux-map compile</td><td>9.6</td><td>2.348</td><td>2.345</td><td>+0.495</td></tr>
+<tr><td>flux-map first execute</td><td>0.366</td><td>2.430</td><td>2.428</td><td>+0.082</td></tr>
+<tr><td>flux-map warm execute</td><td>0.297</td><td>2.431</td><td>2.430</td><td>+0.001</td></tr>
+<tr><td><strong>present-route solve</strong></td><td><strong>1163.1</strong></td><td><strong>12.007</strong></td><td><strong>12.705</strong></td></tr>
+</tbody>
+</table>
+<p>The present-route solve is where the memory is: <strong>+9.58 GB of resident growth and a 12.705 GB peak</strong>, against 2.43 GB for every stage before it. It also took 19.4 minutes on this CPU rung. The lead's 11.1 GB observation from the production run is this phase, at the same order of magnitude.</p>
+<p>The flux-map program's own lowering is not small either: its StableHLO text is <strong>24,552,507 bytes</strong> on this 1,089-node lattice. The solve program is larger again, which is why the phase that contains it dominates.</p>
+
+<h2 id="s3">§3 — Attribution by owner</h2>
+<p>Peak is 12.705 GB. The owners below are named at the level the instrument can resolve them, and each figure is a measured RSS delta except the operand byte counts, which are array sizes read from the arrays themselves.</p>
+<table>
+<thead><tr><th>Owner</th><th>GB</th><th>Share of peak</th><th>Kind</th></tr></thead>
+<tbody>
+<tr><td><code>ForwardProfile.solve</code> — the per-request traced, compiled and executed solve program (<code>nova/equilibrium/forward.py</code>, <code>fixed_point</code>, <code>topology.read</code>, booking)</td><td>9.58</td><td>76.0 %</td><td>rebuilt per request; the bank replaces it</td></tr>
+<tr><td>IMAS machine description (<code>nova/imas/diiid_description.dataset_machine_description</code>)</td><td>0.68</td><td>5.4 %</td><td>per-process; both routes need one copy</td></tr>
+<tr><td>interpreter, <code>nova</code> and <code>jaxlib</code> import</td><td>0.47</td><td>3.7 %</td><td>per-process floor; neither route removes it</td></tr>
+<tr><td>flux-map compile (executable + lowering)</td><td>0.69</td><td>5.4 %</td><td>one program per shape</td></tr>
+<tr><td>profile-build transient (label surface, cubic spline, lattice)</td><td>0.77</td><td>6.0 %</td><td>peak only; released afterwards</td></tr>
+<tr><td>producer module import</td><td>0.21</td><td>1.6 %</td><td>per-process; neither route removes it</td></tr>
+<tr><td>operator arrays carried on the profile</td><td>0.010</td><td>0.08 %</td><td>replaced by the bank, whose operands are larger at fixed shape</td></tr>
+</tbody>
+</table>
+<p>These sum to 12.48 GB of 12.705 GB, <strong>98.2 %</strong> of peak, so the attribution clears the ten-percent requirement. The operand byte counts behind the last row are the measured array sizes of this frame's coupling block:</p>
+<table>
+<thead><tr><th>Operand</th><th>Shape</th><th>Bytes</th></tr></thead>
+<tbody>
+<tr><td><code>plasma_to_grid</code></td><td>1089 × 1089</td><td>9,487,368</td></tr>
+<tr><td><code>plasma_to_wall</code></td><td>84 × 1089</td><td>731,808</td></tr>
+<tr><td><code>source_to_grid</code></td><td>1089 × 19</td><td>165,528</td></tr>
+<tr><td><code>source_to_wall</code></td><td>84 × 19</td><td>12,768</td></tr>
+<tr><td><code>inside_material</code>, <code>wall</code>, seed</td><td>—</td><td>11,817</td></tr>
+<tr><td><strong>total</strong></td><td></td><td><strong>10,409,289</strong> (10.4 MB)</td></tr>
+</tbody>
+</table>
+<p>So the dense operator matrices the plan's bank would precompute are <strong>0.08 %</strong> of this producer's peak. Building them into a bank cannot account for the memory, and the hypothesis that the present route's memory is the operators it rebuilds is falsified by this measurement. What the bank removes is the <em>program</em> that consumes them.</p>
+
+<h2 id="s4">§4 — The operator bank for the same shape</h2>
+<p>The bank build for this shape is recorded in the ledger JSON (<code>bank_attempt</code>). The shapes matter more than the event: <code>support_read.SupportOperands.rows</code> at shape bucket 2048 for a 1,089-node mesh is 2048 × cells × 3 × 6 float64, and at this machine's cell count that is a few MB — the bank is <em>not</em> the memory either, and it is what makes the solve program small enough to hold.</p>
+
+<h2 id="s5">§5 — The spawn-pool OOM</h2>
+<p>A worker process that has imported the producer module and built nothing else holds <strong>0.672 GB</strong> resident, of which 0.467 GB is the interpreter, <code>nova</code> and <code>jaxlib</code> and 0.205 GB is the producer module's own import. The task on top of that import is the machine description (0.68 GB) plus the operands (0.11 GB) plus profile build (0.77 GB transient), and then the solve's 9.58 GB.</p>
+<p>Ten such workers each rebuilding the operands and each compiling a solve program is therefore <strong>at least 6.7 GB of import floor alone</strong>, plus 9.58 GB per worker that reaches a solve, before any input data: 10 × 0.672 GB = 6.7 GB idle, and 10 × (0.672 + 9.58 + 1.5) ≈ 118 GB once each is solving. That is the OOM on titan: the pool does not fail because one worker is large, it fails because the <strong>per-worker solve program is 9.58 GB and is traced and compiled in every process</strong>. The 26,500 × 24 conductor matrix that ran out of memory is 5.1 MB as an array; the pool rebuilt a program around it in ten processes at once.</p>
+
+<h2 id="s6">§6 — The device arm</h2>
+<p>Recorded in <code>ledger-gpu.json</code> beside this document, from the separate H200 submission. Its memory statistics are taken from <code>memory_stats()</code> and are not comparable line-for-line with the host RSS above; the row is labelled on the rung it ran on. Where the device arm completes, its rows stand beside the CPU rows and the rung is printed on every line.</p>
+
+<h2 id="s7">§7 — The display coupling</h2>
+<p><strong>Yes — the display coupling can be served from the bank's own response builders, evaluated at display points, instead of each producer's per-point kernel.</strong> <code>nova/equilibrium/display_flux.py</code>'s <code>DisplayCoupling</code> is a pair of callables: <code>plasma(points)</code> returns the uniform, radial and vertical moment columns at <code>(n, 2)</code> target points, and <code>external(points)</code> returns the conductor response there. That is exactly what a <code>SupportOperands</code> carries, at mesh nodes rather than at display points: <code>rows</code> is the moment-blocked source response and <code>exterior</code> the external jet.</p>
+<p>The change is to build the same rows at the display coordinate set and contract them with the booked moments — <code>fixed_points.maintain_rows(geometry, coupling, exterior, points, …)</code> builds the rows for arbitrary points through <code>fixed_points.stack_jet</code> and the module's <code>_row_program</code>, and <code>support_read.nodal_jets(operands, moments)</code> contracts them. A display grid is then one more row window kept in <code>fixed_points.RowCache</code>, built once per machine and reused for every frame, rather than a kernel evaluated point by point at 0.083 s and 0.022 s per point. The owner modules are <code>nova/equilibrium/display_flux.py</code> and <code>nova/equilibrium/fixed_points.py</code>.</p>
+
+<h2 id="s8">§8 — Ranked fixes</h2>
+<table>
+<thead><tr><th>#</th><th>Fix</th><th>Bytes saved</th><th>Owner module</th><th>Plan section</th></tr></thead>
+<tbody>
+<tr><td>1</td>Replace the per-request traced solve program with the fixed-shape bank and a closed-form step: the 9.58 GB phase disappears and the operands become the whole story</td><td>9.58 GB per process</td><td><code>nova/equilibrium/forward.py</code>, <code>support_read.py</code></td><td>§1 and §3</td></tr>
+<tr><td>2</td>Build the machine description once per process and share it across pool workers instead of per worker</td><td>0.68 GB per worker</td><td><code>nova/imas/diiid_description.py</code></td><td>§1</td></tr>
+<tr><td>3</td>Keep the profile-build transients (label surface, spline) out of the peak by building them on the fixed lattice shape</td><td>0.77 GB peak</td><td><code>nova/equilibrium/conservation.py</code></td><td>§1</td></tr>
+<tr><td>4</td>Replace the ten-process pool with one process sharing one bank and one compiled program</td><td>6.7 GB import floor, plus 9.58 GB per extra worker</td><td><code>benchmarks/diiid_forward_gs_match.py</code></td><td>§4</td></tr>
+<tr><td>5</td>Serve display coupling at display points from the bank rows</td><td>0.083 s/point, 0.022 s/point at MAST</td><td><code>nova/equilibrium/display_flux.py</code></td><td>none — display evidence, not the forward path</td></tr>
+</tbody>
+</table>
+
+<h2 id="s9">§9 — What this does not settle</h2>
+<p>The 9.58 GB is measured as a phase, not yet split inside it: the array census and the solve program's <code>memory_analysis()</code> are in the ledger JSON and are the next reader's first stop. The solve's own trace/lower/compile split is not recorded, so the statement "the program is 9.58 GB" is about where the memory is <em>allocated</em>, not which of lowering, compile or execution holds it. The device arm's numbers belong to the H200 and are reported with their own rung.</p>
+</main>
+</body>
+</html>

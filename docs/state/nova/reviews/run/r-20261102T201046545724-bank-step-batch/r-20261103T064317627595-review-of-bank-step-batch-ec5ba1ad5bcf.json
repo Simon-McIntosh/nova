@@ -4,6 +4,13 @@
   "added_failure_note": "Derived from the reviewed run's own gate arms. The reviewed manifest records baseline_suite and after_suite as null, so no base/head pair exists to difference; the only readable arm is the head gate at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/waverun/head/gate.log, whose last lines are '2 passed in 823.97s' and a bare 'EXIT=0', i.e. zero failures. The control arm waverun/head/negative.log ends '1 failed, 1 passed ... EXIT=1' with the single failure id tests/test_bank_step_batch.py::test_batched_solve_reaches_the_single_solve_flux, which is the mutation the control exists to make red, not an added failure of the head. The reviewed delta touches no test file and no product source, so no test outcome can have moved: the three changed paths are plot.py, the SVG and the evidence fragment, and `git diff --stat 299841a4c ec5ba1ad5` lists nothing else.",
   "completed_at": "2026-11-03T07:06:40.430Z",
   "dispatched_at": "2026-11-03T06:45:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "cosmetic: the fragment names 299841a4c as the gate head; the two later commits touch only plot.py, the figure and the fragment, and the review confirms the gate stands for ec5ba1ad5; recorded in the merge body",
+      "recorded_at": "2026-11-03T07:55:50.065584+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",

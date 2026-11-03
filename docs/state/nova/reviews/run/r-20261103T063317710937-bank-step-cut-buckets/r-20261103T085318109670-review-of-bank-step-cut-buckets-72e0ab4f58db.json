@@ -11,6 +11,13 @@
     "scripts/prototypes/bank_step_cut_buckets/plot.py:28:main"
   ],
   "completed_at": "2026-11-03T09:05:26Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-step-cut-buckets",
+      "recorded_at": "2026-11-03T09:18:15.865465+00:00"
+    }
+  },
   "dispatched_at": "2026-11-03T08:54:48Z",
   "finding_dispositions": {
     "0": {

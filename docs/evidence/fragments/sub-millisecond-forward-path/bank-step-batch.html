@@ -170,6 +170,26 @@
   freeze lets a batch satisfy a whole-batch bound that a naive loop never
   reaches because it keeps stepping lanes that have already arrived.</p>
 
+  <h3 id="bank-step-batch-steps">What the batch pays for</h3>
+
+  <p>A lane that reaches the plateau late holds the whole batch there, because
+  the batch steps until every lane has met the bound. The counts are measured,
+  not modelled:</p>
+
+  <table id="bank-step-batch-steps-table">
+    <caption>Steps to reach the 1e-10 residual bound at the diverted 550-cell state on one H200, by solve width. The unbatched single-slice solve reaches 9.28e-12 in 3 steps; the batch reaches the bound only when its slowest lane does, so four lanes cost 20 to 22 steps for one lane's six-iteration plateau crossing.</caption>
+    <tr><th>solve</th><th>steps to the bound</th><th>source</th></tr>
+    <tr><td>single slice, unbatched</td><td>3</td><td>waverun/trace.log, job 1303790</td></tr>
+    <tr><td>one lane, batched</td><td>5 to 6</td><td>waverun/trace.log, jobs 1303790 and 1303782</td></tr>
+    <tr><td>four lanes, batched</td><td>20 to 22</td><td>waverun/trace.log job 1303790 (20), waverun/regate2/regate.log job 1303826 (22)</td></tr>
+    <tr><td>sixteen lanes, batched</td><td>not reached in 12 iterations</td><td>waverun/trace.log, job 1303790</td></tr>
+  </table>
+
+  <p>That is the cost of the shared program: the batch is as fast per slice as
+  its lanes allow and no faster than its slowest lane, and a lane on the
+  operator's 1.64e-7/3.19e-10 cycle spends six iterations there. The same
+  effect is why sixteen lanes did not finish inside their allocation.</p>
+
   <h3 id="bank-step-batch-condition">What the factor actually resolves</h3>
 
   <p>The condition estimate was measured, not inferred, at the converged

@@ -22,8 +22,8 @@
 <meta name="plan-blocks" content="batched-operator-boundary,imas-ambix:physics-carried-playable-plasma">
 <title>Forward solve API | nova</title>
 <meta name="plan-impl" content="0.985">
-<meta name="plan-version" content="154">
-<meta name="plan-modified" content="2026-10-08">
+<meta name="plan-version" content="155">
+<meta name="plan-modified" content="2026-11-03">
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
@@ -362,6 +362,9 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260922T165225717709-fsa-port-the-regenerated-fixture-onto-the-current-driver" data-who="reckon-ship" data-when="2026-09-22T17:22:22Z">
     <div class="r-comment-body"><p>fixture regeneration ported onto the current coil-edit driver: merge of 269bcbaac onto 1153d9e89 keeping both contracts; guard arms 3 and 4 passed, connectivity 43 passed, census CENSUS_AGREES=1 within eight epsilons, unconditional-tuple control red; merged 0f9750ebc</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261103T083730322931-review-of-fsa-traced-coil-edit-7406b0c27e0c" data-who="reckon-build" data-when="2026-11-03T08:48:09Z">
+    <div class="r-comment-body"><p>Independent review of r-20261103T064248678456-fsa-traced-coil-edit at 7406b0c27e0c2c349a7c03996b37013c8bf56fda is stored in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/review-records/r-20261103T064248678456-fsa-traced-coil-edit.at-7406b0c27e0c2c349a7c03996b37013c8bf56fda.json; scores are 14/15/20/16/16/19 across the six dimensions, added failures 0, with three blocking findings.</p></div>
+</div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260904T123306247283-fsa-solve-budget-drift-inventory" data-who="fsa-budget-audit" data-when="2026-09-04T12:50:46Z">
     <div class="r-comment-body"><p>737 pinned solver-control sites (4 in nova/, 300 in benchmarks/, 14 in docs/figures producers, 419 in tests): 12 distinct Newton budgets and 14 distinct GMRES budgets in active paths, three conflicting would-be authorities (ForwardProfile newton_steps 4, the kernel's GMRES 8 with warmup 8, PerturbedSeedPolicy 10 and 30), the MAST bank produced at Newton 12, GMRES 12, warmup 0; single-source recommendation for a ForwardSolveRequest/Policy and a fail-closed default-wiring test</p></div>
 </div>
@@ -633,7 +636,7 @@
     <div class="r-comment-body"><p>tests/test_default_wiring.py is the single production default-wiring owner; the public-seam assertion is scoped to each route's calling function bodies (measure_fixture; _mast_states and _diiid_state) with the whole-file private-kernel absence kept, and target_current is asserted on the topology routes; 72 passed at head c487d8e7; both the private-kernel and seam-removal negative controls fail by test id [solovev-oracle-and-rebaseline] (EXIT=1).</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261008T013855714976-review-of-fsa-default-wiring-one-owner" data-who="reckon-build" data-when="2026-10-08T02:07:34.541Z">
-    <div class="r-comment-body"><p>An independent review of r-20261008T004526423871-fsa-default-wiring-one-owner at head 6b176f703b7ef65f91d2fdc42fddc2681974c9e4 is stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T004526423871-fsa-default-wiring-one-owner.at-6b176f703b7ef65f91d2fdc42fddc2681974c9e4.json and at its legacy sibling without the .at- sibling suffix, scoring goal_fidelity 19, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (total 116, verdict pass); the base..head range is exactly the three declared paths, both prior follow-on findings are resolved and their negative controls fire, and added_failure_count is a measured 0 from the run&#x27;s own gate logs.</p></div>
+    <div class="r-comment-body"><p>An independent review of r-20261008T004526423871-fsa-default-wiring-one-owner at head 6b176f703b7ef65f91d2fdc42fddc2681974c9e4 is stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T004526423871-fsa-default-wiring-one-owner.at-6b176f703b7ef65f91d2fdc42fddc2681974c9e4.json and at its legacy sibling without the .at- sibling suffix, scoring goal_fidelity 19, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (total 116, verdict pass); the base..head range is exactly the three declared paths, both prior follow-on findings are resolved and their negative controls fire, and added_failure_count is a measured 0 from the run's own gate logs.</p></div>
 </div>
 </section>
 </main>

@@ -23,7 +23,7 @@ def test_normal_cut_count_over_batch_capacity():
         (np.asarray(reading.membership) > 0)
         & (np.asarray(reading.membership) < 1 - 1e-14)
     )
-    capacity = 8
+    capacity = current._NORMAL_CUT_BATCH_WIDTH
     assert len(cut) > capacity
     chosen = cut[: capacity + 1]
     flags = jnp.zeros_like(reading.normal_form_cells).at[chosen].set(True)
@@ -73,9 +73,15 @@ def test_normal_cut_count_over_batch_capacity():
         )
 
     observed = jax.jit(batched)(psi, reading)
+    actual_values = np.asarray(observed[..., 0])
+    expected_values = np.stack(tuple(map(np.asarray, expected)), axis=-1)
+    overflow_cell = chosen[-1]
+    assert bool(np.asarray(support.reading.normal_form_cells)[overflow_cell])
+    assert np.isfinite(expected_values[overflow_cell]).all()
+    assert np.isfinite(actual_values[overflow_cell]).all()
     np.testing.assert_allclose(
-        np.asarray(observed[..., 0]),
-        np.stack(tuple(map(np.asarray, expected)), axis=-1),
+        actual_values,
+        expected_values,
         rtol=1e-10,
         atol=1e-10,
         equal_nan=True,

@@ -2629,6 +2629,8 @@ class ForwardProfile:
     def _vertical_pin_for_request(
         request: ForwardSolveRequest,
     ) -> VerticalPositionPin | None:
+        if request.vertical_pin == "omit":
+            return None
         if request.vertical_pin is not None:
             return request.vertical_pin
         if request.route == "newton_krylov":

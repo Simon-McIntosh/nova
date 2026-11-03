@@ -58,6 +58,7 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
             carrier_identity=str(carrier),
             source_profile=profile.source,
             seed_policy=ExplicitSolveSeed(state),
+            vertical_pin="omit",
             requested_class=TopologyClass.DIVERTED,
             prescribed_current=jnp.asarray(current),
             target_current=jnp.asarray(target),

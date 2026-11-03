@@ -4,7 +4,9 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import re
+import pytest
 
+from nova.equilibrium.fixed_point import FixedPointResult
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
@@ -71,3 +73,39 @@ def test_typed_requests_reuse_the_compiled_solve_across_coil_edits(monkeypatch):
     assert first.compilation_cache_hit is False
     assert second.compilation_cache_hit is True
     assert next(iter(profile._accelerated_program_cache.values())) is first_program
+
+
+def test_explicit_pin_omission_uses_unconstrained_krylov_route(monkeypatch):
+    configure_dtypes()
+    profile, _ordinary_response, _prescribed_response = _completed_profile(monkeypatch)
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="linear-carrier",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.zeros(4)),
+        vertical_pin="omit",
+        prescribed_current=jnp.asarray((7.0, 11.0, 13.0)),
+        policy_overrides={"newton_steps": 1, "gmres_iterations": 1, "warmup": 0},
+    )
+
+    observed_routes = []
+
+    def history_program(route, **_options):
+        observed_routes.append(route)
+        return lambda seed, *_arguments: FixedPointResult(
+            state=seed,
+            residual=jnp.asarray(0.0),
+            trace=jnp.asarray((0.0,)),
+            converged=jnp.asarray(True),
+        )
+
+    monkeypatch.setattr(profile, "_accelerated_history_program", history_program)
+    monkeypatch.setattr(
+        profile,
+        "_solve_augmented_constraints",
+        lambda *_args, **_kwargs: pytest.fail("augmented route selected"),
+    )
+
+    receipt = profile.solve(request)
+
+    assert observed_routes == ["newton_krylov"]
+    assert bool(receipt.qualified)

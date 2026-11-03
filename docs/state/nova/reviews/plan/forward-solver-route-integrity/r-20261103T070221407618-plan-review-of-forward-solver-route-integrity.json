@@ -57,7 +57,28 @@
   "plan_slug": "forward-solver-route-integrity",
   "plan_version": 146,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bde586f9dcf14fa2a84dee42d1d081813692f29f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-11-03T08:41:04.180351+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "bde586f9dcf14fa2a84dee42d1d081813692f29f",
+      "commit_basis": "edit",
+      "reason": "",
+      "when": "2026-11-03T08:41:04.180351+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solver-route-integrity/r-20261103T070221407618-plan-review-of-forward-solver-route-integrity.json",
   "review_run_id": "r-20261103T070221407618-plan-review-of-forward-solver-route-integrity",
   "reviewed_blob_sha": "15032427f4fe8d65c11e644a3770d333029a7e18",
   "rubric": "content",

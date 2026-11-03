@@ -13,6 +13,7 @@ trap 'rm -rf "$SCRATCH"' EXIT
 printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$PWD" "$ROOT/scripts/prototypes/bank_step_occupancy/run.sh $ROOT $RUN $BASE $HEAD"
 
 status=0
+tag=${SLURM_JOB_ID:-manual}
 for arm in base bucketed; do
     if [ "$arm" = base ]; then revision=$BASE; else revision=$HEAD; fi
     source="$SCRATCH/$arm"
@@ -20,8 +21,8 @@ for arm in base bucketed; do
     git -C "$ROOT" archive "$revision" nova scripts tests benchmarks pyproject.toml | tar -xf - -C "$source"
     code=$?
     if [ "$code" -ne 0 ]; then status=$code; break; fi
-    trace="$RUN/trace-$arm"
-    log="$RUN/$arm-h200.log"
+    trace="$RUN/trace-$tag-$arm"
+    log="$RUN/$tag-$arm-h200.log"
     (
         export PYTHONPATH="$source" TMPDIR=/tmp
         cd "$source" || exit 2

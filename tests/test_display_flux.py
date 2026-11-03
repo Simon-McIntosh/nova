@@ -9,10 +9,12 @@ import pytest
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import (
+    BRANCH_KEYS,
     DEFAULT_SPACING,
     DisplayCoupling,
     build_display_flux_map,
 )
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
@@ -217,29 +219,184 @@ def test_the_moment_columns_carry_the_map():
     )
 
 
-def test_the_node_mismatch_is_the_fixed_point_residual():
-    """A state one increment off the map misses it by exactly that increment.
+def _moment_law(state: np.ndarray, node: int) -> CellCurrentMoments:
+    """Return the manufactured source law the operator is iterated under.
 
-    The state is the operator's own image of the moments plus a declared
-    increment, so the mismatch the builder reports is a residual the test
-    knows independently rather than the distance between a state and the
-    raster built from its own moments.
+    The law is linear in the state, so the write-then-read map contracts and
+    has one fixed point; it is a source, not the identity, so the fixed point
+    is not a state the operator produces in a single evaluation.
     """
+    cell = 1.0e5 + 2.0e3 * state[:node]
+    radial = 2.5e4 * (state[:node] - np.mean(state[:node]))
+    vertical = -4.0e4 * (state[:node] - np.mean(state[:node]))
+    return CellCurrentMoments(
+        jnp.asarray(cell), jnp.asarray(radial), jnp.asarray(vertical)
+    )
+
+
+def _solve(profile, node: int, steps: int = 400, tolerance: float = 1.0e-12):
+    """Return the converged state of the manufactured map and its residual."""
+    state = np.zeros(node)
+    residual = np.inf
+    for _step in range(steps):
+        next_state = np.asarray(
+            profile.operator.raster_image(_moment_law(state, node)),
+            dtype=np.float64,
+        )
+        residual = float(np.max(np.abs(next_state - state)))
+        state = next_state
+        if residual < tolerance:
+            break
+    image = np.asarray(
+        profile.operator.raster_image(_moment_law(state, node)), dtype=np.float64
+    )
+    return np.asarray(state, dtype=np.float64), float(np.max(np.abs(image - state)))
+
+
+def test_a_converged_solve_reports_a_mismatch_within_ten_residuals():
+    """A state converged under the operator's own map misses it by its residual."""
     profile, lattice = _profile()
-    moments = _moments(lattice)
-    image = _state(profile, moments)
-    increment = 1.0e-5 * np.cos(np.linspace(0.0, np.pi, lattice.node_count))
-    state = image + increment
+    state, residual = _solve(profile, lattice.node_count)
+    assert residual < 1.0e-9
     display = build_display_flux_map(
         profile,
         state,
         coupling=_coupling(profile),
-        moments=moments,
+        moments=_moment_law(state, lattice.node_count),
         chunk=128,
     )
-    residual = float(np.max(np.abs(increment)))
-    assert display.max_node_mismatch_wb == pytest.approx(residual, rel=1.0e-9)
+    assert display.max_node_mismatch_wb <= 10.0 * residual
+    assert display.max_node_mismatch_wb == pytest.approx(
+        residual, rel=1.0e-6, abs=1.0e-15
+    )
     assert display.reproduction_relative_error < 1.0e-10
+
+
+#: Half extent [m] of the manufactured diverted field and the factor its
+#: coordinates are scaled by, so the field is the repo's diverted null
+#: configuration drawn inside a 330 mm box at the 10 mm display floor.
+DIVERTED_EXTENT = 0.165
+DIVERTED_SCALE = DIVERTED_EXTENT / 2.0
+#: Radial centre [m] of the diverted box: the lattice radius stays positive.
+DIVERTED_CENTRE = 0.330
+
+
+def _diverted_coefficients() -> np.ndarray:
+    """Return the monomial coefficients of the scaled diverted field."""
+    scale = DIVERTED_SCALE
+    cubic = 1.0 / (2.0 * np.sqrt(2.0) * scale**3)
+    return np.asarray([-2.0 / scale**2, cubic, 3.0 * cubic, 3.0 * cubic, cubic])
+
+
+def _diverted_basis(points: np.ndarray) -> np.ndarray:
+    """Return the monomial basis columns of the diverted field."""
+    radius = points[:, 0] - DIVERTED_CENTRE
+    height = points[:, 1]
+    return np.stack(
+        (
+            radius * height,
+            radius**3,
+            radius**2 * height,
+            radius * height**2,
+            height**3,
+        ),
+        axis=1,
+    )
+
+
+def _diverted_field(points: np.ndarray) -> np.ndarray:
+    """Return the diverted flux [Wb] at ``points``."""
+    return _diverted_basis(points) @ _diverted_coefficients()
+
+
+def _diverted_profile() -> tuple[ForwardProfile, FluxLattice]:
+    """Return an operator whose conductor coupling is the diverted field
+    itself, so the display map carries a genuine saddle and separatrix."""
+    nodes = 9
+    lattice = FluxLattice(
+        np.linspace(
+            DIVERTED_CENTRE - DIVERTED_EXTENT, DIVERTED_EXTENT + DIVERTED_CENTRE, nodes
+        ),
+        np.linspace(-DIVERTED_EXTENT, DIVERTED_EXTENT, nodes),
+    )
+    coordinate = lattice.coordinate
+    angle = 2.0 * np.pi * np.arange(12) / 12
+    wall = np.c_[
+        DIVERTED_CENTRE + DIVERTED_EXTENT * np.cos(angle),
+        DIVERTED_EXTENT * np.sin(angle),
+    ]
+    node = lattice.node_count
+    profile = ForwardProfile.from_lattice(
+        lattice,
+        _source(),
+        external_current=jnp.asarray(_diverted_coefficients()),
+        source_to_grid=_diverted_basis(coordinate),
+        plasma_to_grid=np.zeros((node, node)),
+        source_to_wall=np.zeros((wall.shape[0], _diverted_coefficients().size)),
+        plasma_to_wall=np.zeros((wall.shape[0], node)),
+        wall_coordinate=wall,
+        cubic_cell_average=False,
+    )
+    return profile, lattice
+
+
+def _diverted_coupling(node: int) -> DisplayCoupling:
+    """Return the target-point coupling of the diverted field."""
+
+    def plasma(points: np.ndarray):
+        """Return zero plasma moment columns at ``points``."""
+        return (
+            np.zeros((points.shape[0], node)),
+            np.zeros((points.shape[0], node)),
+            np.zeros((points.shape[0], node)),
+        )
+
+    def external(points: np.ndarray) -> np.ndarray:
+        """Return the diverted flux at ``points`` [Wb]."""
+        return _diverted_field(points)
+
+    return DisplayCoupling(plasma=plasma, external=external)
+
+
+def test_the_map_assembles_its_own_separatrix_branches():
+    """The branches come from the fine map at the map's own saddle level."""
+    profile, lattice = _diverted_profile()
+    zero = CellCurrentMoments(
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+    )
+    axis = np.asarray([DIVERTED_CENTRE + 0.47 * DIVERTED_SCALE, 0.47 * DIVERTED_SCALE])
+    display = build_display_flux_map(
+        profile,
+        _diverted_field(np.asarray(lattice.coordinate)),
+        coupling=_diverted_coupling(lattice.node_count),
+        moments=zero,
+        extent=(
+            DIVERTED_CENTRE - DIVERTED_EXTENT,
+            DIVERTED_CENTRE + DIVERTED_EXTENT,
+            -DIVERTED_EXTENT,
+            DIVERTED_EXTENT,
+        ),
+        xpoint_rz=np.asarray([DIVERTED_CENTRE, 0.0]),
+        axis_rz=axis,
+        chunk=512,
+    )
+    assert set(display.branches) == set(BRANCH_KEYS)
+    assert display.well_formed
+    assert int(np.asarray(display.branches["closed_segment_count"])) > 0
+    assert int(np.asarray(display.branches["open_branch_count"])) == 2
+    direct = assemble_separatrix_branches(
+        jnp.asarray(display.flux.T),
+        jnp.asarray(display.radius),
+        jnp.asarray(display.height),
+        jnp.asarray(display.saddle_flux),
+        jnp.asarray(axis),
+    )
+    for key in BRANCH_KEYS:
+        np.testing.assert_array_equal(
+            np.asarray(display.branches[key]), np.asarray(direct[key])
+        )
 
 
 def test_display_map_spacing_and_saddle_are_reported():

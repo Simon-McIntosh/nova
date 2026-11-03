@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-03T09:05:26Z",
   "dispatched_at": "2026-11-03T08:54:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-cut-buckets",
+      "recorded_at": "2026-11-03T09:17:50.328991+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_bank_step_cut_buckets.py",

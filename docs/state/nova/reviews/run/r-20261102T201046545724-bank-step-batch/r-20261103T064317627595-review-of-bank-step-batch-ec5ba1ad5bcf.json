@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own gate arms. The reviewed manifest records baseline_suite and after_suite as null, so no base/head pair exists to difference; the only readable arm is the head gate at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/waverun/head/gate.log, whose last lines are '2 passed in 823.97s' and a bare 'EXIT=0', i.e. zero failures. The control arm waverun/head/negative.log ends '1 failed, 1 passed ... EXIT=1' with the single failure id tests/test_bank_step_batch.py::test_batched_solve_reaches_the_single_solve_flux, which is the mutation the control exists to make red, not an added failure of the head. The reviewed delta touches no test file and no product source, so no test outcome can have moved: the three changed paths are plot.py, the SVG and the evidence fragment, and `git diff --stat 299841a4c ec5ba1ad5` lists nothing else.",
+  "completed_at": "2026-11-03T07:06:40.430Z",
+  "dispatched_at": "2026-11-03T06:45:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-batch.html",
+      "id": "f1f942ae611",
+      "line": 257,
+      "severity": "non-blocking",
+      "text": "The gate paragraph calls revision 299841a4c 'the head this delivery ends on', and the delivery ends at ec5ba1ad5, two commits later. The gate at 299841a4c is still valid for this delivery because commits 57d53a3be and ec5ba1ad5 touch only scripts/prototypes/bank_step_batch/plot.py, per-slice-wall.svg and this fragment, but the sentence names a revision the delivery does not end on, so a reader comparing the fragment against the promoted head reads a claim that is false at the head."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/waverun/figure.log",
+      "id": "fc918d4dc9e",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The render receipt the fragment now cites opens 'REVISION=299841a4c1f0d11a79a030e954a244721f948f3e', but the figure it documents is the output of plot.py as of 57d53a3be: re-running that plot.py over waverun/h200-stage.log reproduces the committed per-slice-wall.svg at 21565 bytes, byte-identical after normalising the element ids and the dc:date stamp, and the ring markers the log's own COLUMN_CHECK counts do not exist in the 299841a4c script. The receipt therefore names the revision before the fix it records. The COLUMN_CHECK block has no producer either: no file in the repository at ec5ba1ad5 and no file in the run directory emits the strings OVERLAP_CHECK or COLUMN_CHECK (`git grep` and a repository-wide search both return only the log itself), so the check cannot be re-run by a later reader."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_batch/plot.py",
+      "id": "fec129d1c0a",
+      "line": 122,
+      "severity": "non-blocking",
+      "text": "The file no longer ends with a newline; `git diff 299841a4c ec5ba1ad5 -- scripts/prototypes/bank_step_batch/plot.py` closes with '\\ No newline at end of file'. The repository's ruff configuration selects E and F only, so W292 does not catch it and the file passes lint while breaking the convention every other module in the tree follows."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_batch/plot.py",
+      "id": "f46cbb21b83",
+      "line": 14,
+      "severity": "non-blocking",
+      "text": "STAGES now carries eight positional fields per entry with a bare trailing boolean (:21), and main unpacks all eight (:44). The `hollow` flag is the seventh sense in which these are not interchangeable strings, which is the case a named record is for, and the repository's own style rule asks for dataclasses for data classes. It is readable as written and is recorded because the next added field costs another silent positional."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261103T064317627595-review-of-bank-step-batch-ec5ba1ad5bcf",
+  "reviewed_base_sha": "299841a4c1f0d11a79a030e954a244721f948f3e",
+  "reviewed_head_sha": "ec5ba1ad5bcf6a8ebcb667d33a9b2f81a1b64800",
+  "reviewed_run_id": "r-20261102T201046545724-bank-step-batch",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T07:17:46.761627+00:00",
+  "total": 101
+}

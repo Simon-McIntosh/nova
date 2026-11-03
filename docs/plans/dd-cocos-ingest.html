@@ -24,7 +24,7 @@
   <title>DD COCOS Ingest | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="119">
+<meta name="plan-version" content="120">
 <meta name="plan-modified" content="2026-11-03">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;dd-cocos-ingest#s1&quot;],&quot;s3&quot;:[&quot;dd-cocos-ingest#s2&quot;],&quot;s4&quot;:[&quot;dd-cocos-ingest#s3&quot;],&quot;s5&quot;:[&quot;dd-cocos-ingest#s1&quot;,&quot;dd-cocos-ingest#s2&quot;]}">
 </head>
@@ -263,6 +263,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261103T073834240507-review-of-dd-convention-consolidation-aab290682ff4" data-who="reckon-build" data-when="2026-11-03T07:57:03Z">
     <div class="r-comment-body"><p>parsed review of r-20261103T063752378003-dd-convention-consolidation at base 2d2172dd7b06548d06c634fe8b3def7acd88f9b4 and head aab290682ff4ad153e3f0693bdc06e01781e1a75; scores 18/18/20/17/19/20 for goal_fidelity/evidence/scope_discipline/durability/fit/reuse, zero added failures, three non-blocking findings, no blocking findings; stored at the revision-specific review-records path.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261103T063752378003-dd-convention-consolidation" data-who="reckon-build" data-when="2026-11-03T07:25:22Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/dd-cocos-ingest/dd-convention-consolidation.html#dd-convention-consolidation-outcome records SignalStore-backed equilibrium persistence, convention-keyed cache fixtures, the analytic boundary oracle, verification of the existing writer/wall owners, and all four record corrections; expanded base 65 passed/33 skipped and head 69 passed/33 skipped, both exit 0 with zero added failures. Three writer mutations each fail one assertion; dropping the wall DD argument fails two; bypassing translation fails DD3 alone; selecting a foreign cache key fails the refusal assertion.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261023T132220183554-review-of-edge-consistency-measure-9b6422bb0416" data-who="reckon-build" data-when="2026-10-23T14:19:26.357Z">
     <div class="r-comment-body"><p>Independent review of run r-20261023T123603187543-edge-consistency-measure, read at base e69f4b60af04df8259ef914dee3136a3c55f6cb2 and head 9b6422bb0416e2a358b91c9389c1810d863b1bd0. All five checklist items carry a verdict and all six dimensions a score: goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 16, reuse 5. Five non-blocking findings, no blocking finding: the measure duplicates the structured-grid current-density read nova/equilibrium/map_extraction.py:132 already owns (agrees to 4.0e-16 relative rather than extending it), the inside-is-None default at nova/imas/edge_consistency.py:166 scores psi_norm &lt;= 1 only while the docstring promises 0 &lt;= psi_norm &lt;= 1 (inert on the analytic fixture), tests/test_edge_consistency.py:196 compares two runs of the same code, the reviewed manifest's after_suite.log_path at line 19 names a directory rather than a log file, and every head-arm gate log of the reviewed run opens with a revision header naming the base commit while the negative-control log's command line is prose. The landed change is sound: the lift is arithmetic-identical for the parity chain, the order fit is 1.97 against the stencil's 2.00, the perturbation is detected and the band-only negative control reddens three tests the head arm does not fail.</p></div>

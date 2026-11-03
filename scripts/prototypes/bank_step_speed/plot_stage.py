@@ -34,7 +34,9 @@ def stages(path):
     return values
 
 
-def readable(value):
+def readable(value, axis_scale="log"):
+    if axis_scale == "linear":
+        return f"{value:.2f}"
     return f"{value:.2f}" if value < 10 else f"{value:.0f}"
 
 
@@ -81,7 +83,7 @@ def main(
                 ax.text(
                     value * 1.08 if axis_scale == "log" else value + 0.5,
                     index + offset,
-                    readable(value),
+                    readable(value, axis_scale),
                     va="center",
                     color=color,
                 )
@@ -93,7 +95,7 @@ def main(
             ax.text(
                 value * 1.08 if axis_scale == "log" else value + 0.5,
                 index,
-                readable(value),
+                readable(value, axis_scale),
                 va="center",
                 color="#2e8b57" if name == "whole_step" else "#666666",
             )

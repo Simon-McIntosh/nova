@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 
 import matplotlib
@@ -13,6 +12,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.text import Text
+
+from scripts.prototypes.bank_step_speed.plot_stage import stages as read_stages
 
 STAGES = (
     ("read", "read"),
@@ -23,18 +24,8 @@ STAGES = (
 )
 
 
-def stages(path):
-    values = {}
-    for line in Path(path).read_text().splitlines():
-        match = re.match(r"STAGE (\{.*\})", line)
-        if match:
-            entry = json.loads(match.group(1))
-            values[entry["name"]] = float(entry["median_ms"])
-    return values
-
-
 def main(base, head, output):
-    before, after = stages(base), stages(head)
+    before, after = read_stages(Path(base)), read_stages(Path(head))
     plt.style.use(Path.home() / "Code/dotfiles/matplotlib/stylelib/data-ink.mplstyle")
     fig, ax = plt.subplots(figsize=(14, 7.2), layout="constrained")
     rows = np.arange(len(STAGES))

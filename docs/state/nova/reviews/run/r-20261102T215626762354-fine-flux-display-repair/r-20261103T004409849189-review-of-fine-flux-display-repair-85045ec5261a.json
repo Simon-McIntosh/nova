@@ -1,0 +1,87 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    "tests/test_display_flux.py:269 asserts the reproduction relative error under 1e-10; dropping a moment column or contracting in the wrong order reddens it, and logs/negative-control.log shows it red at 2.53e-2 under a swapped column.",
+    "tests/test_display_flux.py:265-268 compares display.max_node_mismatch_wb against a residual the test computed through operator.raster_image, a different implementation from the builder's FluxTarget path at display_flux.py:119-136, so a wrong operand in either path reddens it; logs/control-mismatch.log shows it red when the report is zeroed.",
+    "tests/test_display_flux.py:383-386 assert the branch dict's key set, well-formedness and the one-lobe/two-leg counts; replacing the builder's assembly with an empty dict reddens them (logs/control-branches.log), and they would also catch a level so wrong that the assembly degenerates.",
+    "tests/test_display_flux.py:394-397 compares every branch array to a direct assemble_separatrix_branches call, but passes display.saddle_flux, display.flux, display.radius and display.height into that call, so the comparison pins the field and grid arguments and not the level: a builder that assembled at the lattice saddle's value would satisfy it.",
+    "tests/test_display_flux.py:460-464 assert the refusal on an O-point seed; restoring the fail-open fallback in display_flux.py:166-176 reddens them.",
+    "tests/test_display_flux.py:423 asserts the saddle lies within 20 mm of the seed the test supplied at :419, so it cannot distinguish a polished saddle from an unchanged seed."
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-03T00:54:46.224Z",
+  "dispatched_at": "2026-11-03T00:45:59Z",
+  "evidence": {
+    "added_failure_source": "The reviewed manifest records no baseline_suite or after_suite block, so added_failure_count is derived from the only post-change arm on record, logs/gate-fail-closed.log, which reports 7 passed and EXIT=0 and therefore carries no failing ids.",
+    "after_suite": null,
+    "baseline_suite": null,
+    "gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/logs/gate-fail-closed.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/logs/negative-control.log"
+  },
+  "findings": [
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "e1a6d5251dd",
+      "line": 391,
+      "severity": "non-blocking",
+      "text": "The reference assembly is called with display.saddle_flux, the builder's own output, so both sides of the equality at :395 move together on the level; a regression that assembled the separatrix at the lattice saddle's level or at the axis value instead of the map's polished saddle would leave every assertion in the test green, and the commit message's claim that a wrong level is visible to the gate is not borne out."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "05056098808",
+      "line": 423,
+      "severity": "non-blocking",
+      "text": "xpoint_rz is [DIVERTED_CENTRE, 0.0] at :419 and the assertion accepts a saddle within 20 mm of that same point, so the test also passes if the polish never moves the seed; only tests/test_display_flux.py:460-464 distinguishes a real polish from a returned seed, and it exercises the extremum path rather than the saddle path."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "c2ca45480a5",
+      "line": 304,
+      "severity": "non-blocking",
+      "text": "_diverted_field re-implements the diverted-null configuration already defined at tests/test_separatrix_branches.py:29 instead of importing or parameterising that owner, so the two fixtures can drift and the fragment's claim that it is the same null configuration the branch assembler's tests use holds only for this copy."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "dd4627ae3f5",
+      "line": 303,
+      "severity": "non-blocking",
+      "text": "The lattice saddle's convergence flag is discarded, so a lattice polish that fails yields lattice_saddle_rz NaN and saddle_offset_mm NaN while saddle_converged reads True, and a panel reporting the offset would report NaN with no signal that the lattice read failed."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read b6d73028f and 85045ec52 against efe6cb325 commit by commit: b6d73028f replaces the declared-increment test with an operator-map fixed point and adds the diverted branch fixture, 85045ec52 closes the fail-open saddle and adds saddle_converged to DisplayFluxMap.",
+    "done_when": "Plan section 5's gate asks for a 1e-10 reproduction at the lattice nodes, the state reproduced on a converged state within the solve's terminal residual, a map at 10 mm with its own saddle and offset, and a failing negative control; tests/test_display_flux.py:269 asserts the reproduction, :265-268 the converged mismatch, :424-431 the spacing and saddle reports, and logs/negative-control.log ends EXIT=1 at 2.53e-2.",
+    "goal": "The node's goal (brief.md:5-11, plan docs/plans/separatrix-spline-extraction.html section 5) is to repair display_flux.py before sections 6-8 consume it; the two commits close both blocking findings of the prior review -- nova/equilibrium/display_flux.py:145-176 deletes the finite-difference saddle search and fails closed on a polish that does not converge or lands on a non-saddle Hessian, and tests/test_display_flux.py:253 and :358 read a converged fixed point and the map's own branches.",
+    "manifest": "Read; it records status complete, commits efe6cb325/b6d73028f/85045ec52, the gate command and logs/gate-fail-closed.log (7 passed, EXIT=0), a declared negative control plus two further mutation controls, and it states under outside_scope that a free-boundary profile.solve remains unavailable on the manufactured machine.",
+    "write_paths": "The node's declared write paths are nova/equilibrium/display_flux.py, tests/test_display_flux.py and the two docs/evidence/fragments/separatrix-spline-extraction fragments; git diff efe6cb325..85045ec52 touches exactly those four and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_display_flux.py:383 and :385-386 redden when the builder's assembly call is replaced with an empty dict, and :460-464 reddens when the fail-open is restored, but :391 feeds the builder's own display.saddle_flux back into the reference call, so a wrong level derivation survives every assertion.",
+    "evidence": "logs/gate-fail-closed.log records 7 passed and EXIT=0, but its header names revision b6d73028f with (working tree) rather than the landed head 85045ec52, and the reviewed manifest carries no baseline_suite or after_suite arm.",
+    "fit": "nova/equilibrium/display_flux.py:33-40 carries the plain functional module docstring with the earlier plan reference removed, and the new fields and helpers follow the frozen-dataclass and numpy/JAX idiom of the surrounding module.",
+    "goal_fidelity": "nova/equilibrium/display_flux.py:166-176 refuses a polished point whose Hessian is not of saddle type and returns a NaN saddle, so the brief's one-saddle-authority correction lands and the separatrix is no longer assembled through an arbitrary stationary point.",
+    "reuse": "The production additions extend their owners (display_flux.py:119-136 builds a FluxTarget per chunk, :145 uses polish_stationary_points, :178-192 uses assemble_separatrix_branches), but tests/test_display_flux.py:304 re-declares the diverted-null field that tests/test_separatrix_branches.py:29 already owns, which is the ceiling this rubric sets for one duplicated definition.",
+    "scope_discipline": "Every path in git diff efe6cb325..85045ec52 is one of the node's four declared write paths, and no plan, painter or producer file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal (brief.md:5-11, plan docs/plans/separatrix-spline-extraction.html section 5) is to repair display_flux.py before sections 6-8 consume it; the two commits close both blocking findings of the prior review -- nova/equilibrium/display_flux.py:145-176 deletes the finite-difference saddle search and fails closed on a polish that does not converge or lands on a non-saddle Hessian, and tests/test_display_flux.py:253 and :358 read a converged fixed point and the map's own branches.\nVERDICT done_when: plan section 5's gate asks for a 1e-10 reproduction at the lattice nodes, the state reproduced on a converged state within the solve's terminal residual, a map at 10 mm with its own saddle and offset, and a failing negative control; tests/test_display_flux.py:269 asserts the reproduction, :265-268 the converged mismatch, :424-431 the spacing and saddle reports, and logs/negative-control.log ends EXIT=1 at 2.53e-2.\nVERDICT write_paths: the node's declared write paths are nova/equilibrium/display_flux.py, tests/test_display_flux.py and the two docs/evidence/fragments/separatrix-spline-extraction fragments; git diff efe6cb325..85045ec52 touches exactly those four and nothing else.\nVERDICT manifest: read; it records status complete, commits efe6cb325/b6d73028f/85045ec52, the gate command and logs/gate-fail-closed.log (7 passed, EXIT=0), a declared negative control and two further mutation controls, and it states under outside_scope that a free-boundary profile.solve remains unavailable on the manufactured machine.\nVERDICT diff: read b6d73028f and 85045ec52 against efe6cb325 commit by commit: b6d73028f replaces the declared-increment test with an operator-map fixed point and adds the diverted branch fixture, 85045ec52 closes the fail-open saddle and adds saddle_converged to DisplayFluxMap.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/display_flux.py:166-176 refuses a polished point whose Hessian is not of saddle type and returns a NaN saddle, so the brief's one-saddle-authority correction lands and the separatrix is no longer assembled through an arbitrary stationary point.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-fail-closed.log records 7 passed and EXIT=0, but its header names revision b6d73028f with (working tree) rather than the landed head 85045ec52, and the reviewed manifest carries no baseline_suite or after_suite arm.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff efe6cb325..85045ec52 is one of the node's four declared write paths, and no plan, painter or producer file is touched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_display_flux.py:383 and :385-386 redden when the builder's assembly call is replaced with an empty dict (logs/control-branches.log) and :460-464 reddens when the fail-open is restored, but :391 feeds the builder's own display.saddle_flux back into the reference call, so a wrong level derivation survives every assertion.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/display_flux.py:33-40 carries the plain functional module docstring with the earlier plan reference removed, and the new fields and helpers follow the frozen-dataclass and numpy/JAX idiom of the surrounding module.\nSCORE reuse: 5\nJUSTIFICATION reuse: the production additions extend their owners (display_flux.py:119-136 builds a FluxTarget per chunk, :145 uses polish_stationary_points, :178-192 uses assemble_separatrix_branches), but tests/test_display_flux.py:304 re-declares the diverted-null field that tests/test_separatrix_branches.py:29 already owns, which is the ceiling this rubric sets for one duplicated definition.\nFINDING tests/test_display_flux.py:391 non-blocking: the reference assembly is called with display.saddle_flux, the builder's own output, so both sides of the equality at :395 move together on the level; a regression that assembled the separatrix at the lattice saddle's level or at the axis value instead of the map's polished saddle would leave every assertion in the test green, and the commit message's claim that a wrong level is visible to the gate is not borne out.\nFINDING tests/test_display_flux.py:423 non-blocking: xpoint_rz is [DIVERTED_CENTRE, 0.0] at :419 and the assertion accepts a saddle within 20 mm of that same point, so the test also passes if the polish never moves the seed; only tests/test_display_flux.py:460-464 distinguishes a real polish from a returned seed, and it exercises the extremum path rather than the saddle path.\nFINDING tests/test_display_flux.py:304 non-blocking: _diverted_field re-implements the diverted-null configuration already defined at tests/test_separatrix_branches.py:29 instead of importing or parameterising that owner, so the two fixtures can drift and the fragment's claim that it is the same null configuration the branch assembler's tests use holds only for this copy.\nFINDING nova/equilibrium/display_flux.py:303 non-blocking: the lattice saddle's convergence flag is discarded, so a lattice polish that fails yields lattice_saddle_rz NaN and saddle_offset_mm NaN while saddle_converged reads True, and a panel reporting the offset would report NaN with no signal that the lattice read failed.\n",
+  "review_run_id": "r-20261103T004409849189-review-of-fine-flux-display-repair-85045ec5261a",
+  "reviewed_base_sha": "efe6cb32543c5b02e144711fc3d8a93fa85c0110",
+  "reviewed_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215626762354-fine-flux-display-repair/brief.md",
+  "reviewed_head_sha": "85045ec5261a608a1dc69ce0eaddb2d64bdb892b",
+  "reviewed_run_id": "r-20261102T215626762354-fine-flux-display-repair",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T01:30:00+00:00",
+  "total": 89
+}

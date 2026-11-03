@@ -9,17 +9,18 @@ from matplotlib.ticker import NullLocator, NullFormatter
 import numpy as np
 
 
-# The booking tangent and its assembly land within a pixel of each other, so
-# the two series are separated by hue, dash and marker, and the tangent is
-# drawn over the assembly rather than under it.
+# The booking tangent and its assembly land within about a pixel of each other,
+# so neither may be drawn opaquely over the other. The assembly is drawn as a
+# wide hollow ring and the tangent as a small filled square on top of it, kept
+# apart also by dash: the ring shows around every mark the tangent places.
 STAGES = (
-    ("read", "read", "#6f4fa8", "-", "D", 5),
-    ("residual_and_booking", "residual and booking", "#4c78a8", "-", "o", 3),
-    ("local_booking_tangent", "booking tangent", "#2f6b5e", "--", "s", 5),
-    ("geometry_tangent", "geometry tangent", "#54a24b", "-", "o", 3),
-    ("assembly", "assembly", "#b279a2", "-", "o", 4),
-    ("lu_factor", "LU factor", "#f58518", "-", "o", 3),
-    ("whole_step", "whole step", "#1b1b1b", "-", "o", 6),
+    ("read", "read", "#6f4fa8", "-", "D", 5, 7, False),
+    ("residual_and_booking", "residual and booking", "#4c78a8", "-", "o", 3, 7, False),
+    ("local_booking_tangent", "booking tangent", "#2f6b5e", "--", "s", 6, 6, False),
+    ("geometry_tangent", "geometry tangent", "#54a24b", "-", "o", 3, 7, False),
+    ("assembly", "assembly", "#b279a2", "-", "o", 4, 11, True),
+    ("lu_factor", "LU factor", "#b8560f", "-", "o", 3, 7, False),
+    ("whole_step", "whole step", "#1b1b1b", "-", "o", 7, 7, False),
 )
 
 
@@ -30,11 +31,7 @@ def stage_walls(path):
         if kind not in {"WALL", "STAGE"}:
             continue
         item = json.loads(payload)
-        item["kind"] = kind
-        if item["kind"] == "WALL":
-            walls[(item["name"], item["slices"])] = item["per_slice_ms"]
-        elif item["kind"] == "STAGE":
-            walls[(item["name"], item["slices"])] = item["per_slice_ms"]
+        walls[(item["name"], item["slices"])] = item["per_slice_ms"]
     return walls
 
 
@@ -44,7 +41,7 @@ def main(stage_log, svg, png):
     walls = stage_walls(Path(stage_log))
     batches = sorted({slices for _name, slices in walls})
     fig, ax = plt.subplots(figsize=(14, 7.2))
-    for name, label, colour, style, marker, order in STAGES:
+    for name, label, colour, style, marker, order, size, hollow in STAGES:
         values = [walls.get((name, count), np.nan) for count in batches]
         ax.plot(
             batches,
@@ -53,7 +50,9 @@ def main(stage_log, svg, png):
             linewidth=3.0,
             linestyle=style,
             marker=marker,
-            markersize=7,
+            markersize=size,
+            markerfacecolor="none" if hollow else colour,
+            markeredgewidth=2.0 if hollow else 1.0,
             label=label,
             zorder=order,
         )
@@ -81,7 +80,7 @@ def main(stage_log, svg, png):
                 xy=(last, height),
                 xytext=(4, -16),
                 textcoords="offset points",
-                fontsize=12,
+                fontsize=14,
                 color=colour,
                 ha="left",
                 va="top",
@@ -94,7 +93,7 @@ def main(stage_log, svg, png):
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
     ax.legend(frameon=False, fontsize=14, loc="upper right", ncols=4)
-    ax.set_xlim(batches[0] * 0.85, batches[-1] * 3.2)
+    ax.set_xlim(batches[0] * 0.85, batches[-1] * 1.15)
     finite = [value for value in walls.values() if value]
     ax.set_ylim(min(finite) * 0.6, max(finite) * 1.8)
     ax.yaxis.set_minor_locator(NullLocator())
@@ -113,8 +112,8 @@ def main(stage_log, svg, png):
                 raise ValueError(
                     f"overlapping figure text: {first.get_text()} / {second.get_text()}"
                 )
-    fig.savefig(svg, bbox_inches="tight")
-    fig.savefig(png, dpi=100, bbox_inches="tight")
+    fig.savefig(svg)
+    fig.savefig(png, dpi=100)
 
 
 if __name__ == "__main__":

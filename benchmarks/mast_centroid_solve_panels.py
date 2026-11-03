@@ -782,7 +782,7 @@ def measure(
     nulls = edit._null_points(profile, cold.state)
     branches = _branches(profile, cold.state, achieved)
     coils = _coil_outlines(edit.SHOT)
-    moments = operator.current_moments_and_observation(cold.state, requested)[0]
+    moments = operator.cell_current_moments(cold.state, requested)
 
     payload: dict[str, Any] = {
         "radius": np.asarray(lattice.radius, dtype=float),

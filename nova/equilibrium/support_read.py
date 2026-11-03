@@ -376,14 +376,13 @@ def read_batch(
             )
         )(stack, moments, jets)
 
-    lanes = jnp.shape(stack.cells)[:1]
     if tracking is None:
         return jax.vmap(
             lambda stencil, reading: _verdict(
                 stencil,
                 reading,
-                jnp.ones(lanes, dtype=bool),
-                jnp.ones(lanes, dtype=jnp.int32),
+                jnp.asarray(True),
+                jnp.asarray(1, dtype=jnp.int32),
             )
         )(stack, whole_mesh())
 

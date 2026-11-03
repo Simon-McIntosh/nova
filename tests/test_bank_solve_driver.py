@@ -59,6 +59,44 @@ def _toy_residual(_operands, base, state, support, _profile, _quadrature):
     )
 
 
+def test_first_batched_read_has_one_rebuild_flag_per_lane(monkeypatch):
+    """The first read must match the shape of subsequent tracked reads."""
+    monkeypatch.setattr(
+        support_read,
+        "stationary_stencil",
+        lambda _bank, _cache, _state, _seed, warm, *_args, **_kwargs: (
+            support_read.Stencil(
+                _Stationary(warm), jnp.zeros((1,), jnp.int32), jnp.asarray(False)
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        support_read,
+        "_rebuilt_reading",
+        lambda *_args: _Reading(
+            jnp.asarray([0.5]), jnp.asarray([False]), jnp.asarray([[True]])
+        ),
+    )
+    monkeypatch.setattr(
+        support_read,
+        "_verdict",
+        lambda stencil, reading, rebuilt, rebuilds: _Support(
+            stencil.solved,
+            reading,
+            jnp.asarray(True),
+            stencil.cells,
+            stencil.saddle_live,
+            rebuilds,
+            rebuilt,
+        ),
+    )
+    states = tuple(jnp.ones((3, 1)) for _ in range(3))
+    seeds = jnp.zeros((3, 1, 2))
+    first = support_read.read_batch(None, None, states, seeds, seeds, None, None)
+    assert first.rebuilt.shape == (3,)
+    assert first.rebuilds.shape == (3,)
+
+
 def test_batch_reuses_factor_without_rebuilding_jacobians(monkeypatch):
     """A batch-level branch skips every Jacobian on contracting steps."""
     builds = []

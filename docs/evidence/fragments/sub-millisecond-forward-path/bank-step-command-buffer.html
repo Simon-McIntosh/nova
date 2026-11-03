@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank step under command buffers | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-command-buffer-landing">Bank Newton step under XLA GPU command buffers</h1>
+<p id="bank-step-command-buffer-summary">On one H200, enabling XLA's command buffers leaves the warm diverted 550-cell Newton step unchanged: 43.64 ms without and 44.20 ms with at one slice, and the stage walls move by under 2% in either direction. The only stage that loses most of its launches is the batched residual and booking, whose launches fall from 1,509 to 223 while its device time falls from 9.32 to 1.29 ms and its wall stays at 13.3 ms. The batched read instead gains launches, 33,766 to 40,364, and slows from 172.5 to 166.6 ms in the timed arm. These numbers say the step's wall at one slice is arithmetic- and host-bound rather than launch-bound, and that the launch reduction command buffers do deliver on the batched residual does not translate into wall.</p>
+
+<section id="bank-step-command-buffer-method"><h2>Method and flags</h2>
+<p>Every arm ran in a fresh process on the installed jaxlib, so the flags took effect before JAX initialised. The off arm sets <code>--xla_gpu_enable_command_buffer=</code>, the empty list. The on arm sets <code>--xla_gpu_enable_command_buffer=FUSION,CUBLAS,WHILE,CONDITIONAL</code> together with <code>--xla_enable_command_buffers_during_profiling=true</code>. The build does not accept <code>CUSOLVER</code> as a command-buffer type: naming it fails flag parsing with <code>Illegal value for --xla_gpu_enable_command_buffer 'CUSOLVER'</code>, and the plugin's own enum literals are <code>FUSION</code>, <code>CUBLAS</code>, <code>CUBLASLT</code>, <code>CUDNN</code>, <code>TRITON</code>, <code>WHILE</code>, <code>CONDITIONAL</code>, <code>DEFAULT</code> and <code>NONE</code>. The dense solver calls therefore run without a dedicated command-buffer type on this build.</p>
+<p>Each stage is one <code>jax.jit</code> call warmed once and then timed three times with <code>jax.block_until_ready</code> after each call; the table reports the median. Kernel launches are counted from a JAX profiler trace of one warm call per stage, by matching GPU kernel events to the trace's stage annotations. Wall is the synchronized host wall; device time is the sum of the GPU events inside the same annotation.</p>
+<p>Two trace configurations were needed and neither captured both quantities at one slice. A one-slice trace started with explicit <code>ProfileOptions</code> recorded 27,994 GPU events, 25,528 of them kernels, over one warm call of all eight stages, but recorded no stage annotations. A one-slice trace started with the default options recorded the eight stage annotations and no GPU events, reproduced in two separate allocations. The launch counts below are therefore per stage only where a single trace carried both, at batch sixteen; the one-slice column reports wall alone, and the one-slice off arm counts 25,528 kernels across its eight warm calls in aggregate.</p>
+</section>
+
+<section id="bank-step-command-buffer-stage"><h2>Warm stage wall and launches</h2>
+<table id="bank-step-command-buffer-stage-table"><thead><tr><th>Stage</th><th>One slice, off<br>ms / launches</th><th>One slice, on<br>ms / launches</th><th>Batch 16, off<br>ms / launches</th><th>Batch 16, on<br>ms / launches</th><th>H200 launcher base<br>ms / launches</th></tr></thead><tbody>
+<tr><td>Read outside step</td><td>52.23 / wall only</td><td>50.50 / wall only</td><td>172.47 / 33,766</td><td>166.56 / 40,364</td><td>35.69 / 20,143</td></tr>
+<tr><td>Residual and booking</td><td>5.88 / wall only</td><td>5.71 / wall only</td><td>11.68 / 1,509</td><td>11.67 / 223</td><td>5.22 / 1,366</td></tr>
+<tr><td>Local booking tangent</td><td>27.71 / wall only</td><td>28.02 / wall only</td><td>not measured</td><td>not measured</td><td>27.87 / 518</td></tr>
+<tr><td>Jacobian</td><td>32.87 / wall only</td><td>33.12 / wall only</td><td>not measured</td><td>not measured</td><td>32.65 / 850</td></tr>
+<tr><td>Equilibration</td><td>0.62 / wall only</td><td>0.86 / wall only</td><td>not measured</td><td>not measured</td><td>0.88 / 20</td></tr>
+<tr><td>LU factor</td><td>5.73 / wall only</td><td>5.82 / wall only</td><td>not measured</td><td>not measured</td><td>5.86 / 117</td></tr>
+<tr><td>LU solve</td><td>1.13 / wall only</td><td>1.00 / wall only</td><td>not measured</td><td>not measured</td><td>1.02 / 8</td></tr>
+<tr><td>Whole step</td><td>43.64 / wall only</td><td>44.20 / wall only</td><td>not measured</td><td>not measured</td><td>43.11 / 2,804</td></tr>
+</tbody></table>
+<p>Every figure is H200 device time on 98dci4-gpu-0003. The base column is the same-allocation booking-batch arm of <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-step-launch-fusion">bank-step-launch-fusion</a>, measured with the same stage profiler at revision 2d2172dd7; this node's arms ran at 14af1e459 plus c402ca8a0 and reproduce that whole-step figure within 1.3%.</p>
+<p>The batch-16 dense stages were not measured. Their batched assembly asks XLA for a lanes by channels by cells tensor of about 116 GB, and the local booking tangent failed at 118.95 GiB under <code>jit_batched_tangent</code> with the 141 GB device otherwise occupied. Only the read and the residual and booking fit at that width on one H200.</p>
+</section>
+
+<section id="bank-step-command-buffer-convergence"><h2>Converged result and equality between arms</h2>
+<p>Both arms solve the same diverted 550-cell seed. The off arm reached a fresh-read solved-equation residual of 1.229e-11 in 3 Newton steps and the on arm 1.229e-11, its own receipt reading 1.072e-11, in 3 steps; both are below the 1e-10 bound. The converged moment states agree to 3.19e-10 absolute on a state whose largest magnitude is 179.6, a relative difference of 1.78e-12, inside the 1e-12-and-below clause. Command buffers therefore change no arithmetic here.</p>
+<p>Compile seconds per arm and the persistent-cache hit were not recorded, because the driver did not time its compilations. That clause is unmet.</p>
+</section>
+
+<section id="bank-step-command-buffer-verdict"><h2>Which stages are launch-bound</h2>
+<p>On these numbers command buffers buy the one-slice step nothing: every stage wall moves by less than 2% in either direction and the whole step goes from 43.64 to 44.20 ms. Because the one-slice launch split was not measured, this is a statement about wall rather than about the launch share of it. The batched comparison is where launches are counted, and there while the largest stage walls are the booking tangent at 27.7 ms, the Jacobian at 32.9 ms and the read at 52.2 ms. The batched residual is the one stage whose launches collapse, 1,509 to 223, and there the device time falls from 9.32 to 1.29 ms while its wall stays at 13.3 ms, which places its wall in host-side dispatch and shape work rather than in either launch or arithmetic. The batched read gains launches and wall under the same flags. The arithmetic cut that the section needs is therefore in the tangent and Jacobian kernels themselves, not in how they are launched.</p>
+</section>
+
+<section id="bank-step-command-buffer-receipts"><h2>Receipts</h2>
+<p>The driver is <code>scripts/prototypes/bank_step_command_buffer/</code> (<code>arm.py</code>, <code>compare.py</code>, <code>run_arms.sh</code>) at commit 17d04b441. Job 1303999 ran on partition <code>betelgeuse</code> in reservation <code>gpu_0003_grpA</code>, one card, and wrote under <code>/home/ITER/mcintos/.cache/nova-bank-step-command-buffer/</code>: <code>command-buffer-1303999.log</code> plus <code>run-20261103b/arm-off-width-1.log</code>, <code>arm-on-width-1.log</code>, <code>arm-off-width-16.log</code>, <code>arm-on-width-16.log</code> and their trace directories. Job 1304009 repeated the one-slice arms under <code>run-20261103c</code> to test whether the missing GPU events were a recording race; they were not, and it reproduced the converged-state comparison at 1.78e-12 relative. The earlier job 1303991 measured the same arms before the command-buffer value and trace options were corrected, and supplied the 25,528-kernel aggregate above; its log and traces are kept beside them.</p>
+</section>
+
+</main></body>
+</html>

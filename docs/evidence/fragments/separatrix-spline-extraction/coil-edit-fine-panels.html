@@ -41,6 +41,17 @@ settled).</p>
   about <code>7e-12</code> relative.</figcaption>
 </figure>
 
+<p id="coil-edit-fine-panels-receipts">Each figure carries a
+<code>panel-receipt.json</code> beside it. Every field in it is read from an
+artefact on disk: the solve's job id, partition, source revision and exact
+command from the lane log; the render's job, partition, device, host and
+command from the render receipt; the map spacing and both reproduction errors;
+and the digest of the state archive the render read. The two titan solves were
+cancelled at their time limit after writing their states and before drawing
+their panels, which the receipt records rather than leaving a missing exit
+status to be read as a clean one; the panels were then drawn from those states
+by the render-only job.</p>
+
 <p id="coil-edit-fine-panels-states">Each regenerated
 <code>panel-states.npz</code> carries the drawn states' conductor currents, cell
 currents and both linear moment columns, so a panel can be redrawn from the
@@ -54,7 +65,9 @@ against the regenerated archives. Fifteen of the twenty states now close a
 separatrix where eleven did: the four that changed close with two open branches
 each, state 19 among them, and the four that remain open trace a cycle admitting
 no closed candidate while state 1 admits no cycle at all. The connectivity test
-passes 42 of 42 at the regenerated archive.</p>
+passes 42 of 42 at the regenerated archive, and with the panel render test
+beside it the pair passes 43 of 43 at the landed revision, in one CPU process
+on the fleet allocation.</p>
 
 <p id="coil-edit-fine-panels-control">A one-percent rise of one stored
 conductor current moves the drawn map by <code>2.90e-2 Wb</code>, 0.79% of its
@@ -64,7 +77,11 @@ the control that was wrong: it perturbed the panel's current but reused a
 coupling that had already contracted the unperturbed one. The coupling is now
 built per current, as the machine path builds it.</p>
 
-<p id="coil-edit-fine-panels-caption">The caption is wrapped to the canvas. A
+<p id="coil-edit-fine-panels-caption">The cutover figure is
+<code>titan-converged-vs-nonconverged</code>, the name its landing record and
+the archive citing it use; the render wrote its own file name, so the pair was moved
+onto that name and the stray one dropped rather than left as a second figure.
+The caption is wrapped to the canvas. A
 first render set it as one line, which ran past both edges of every figure it
 was drawn on; the caption is now filled to 150 characters and every redrawn
 figure is rendered to PNG and inspected for clipped and overlapping text before

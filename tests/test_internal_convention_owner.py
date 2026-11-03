@@ -4,21 +4,21 @@ The internal convention is stated once, in
 :mod:`nova.equilibrium.convention`, and every other name for it reads that
 statement. The two shared rules this module guards have one owner each: the
 toroidal field a slice is read against belongs to
-:mod:`nova.imas.getslice`, and the cached equilibrium data's convention is a
-single recorded marker read back on load.
+:mod:`nova.imas.getslice`, and :mod:`nova.io.signalstore` keys cached equilibrium
+data by its stored convention.
 """
 
 from __future__ import annotations
 
 import inspect
 import re
+from dataclasses import replace
 from types import SimpleNamespace
 
-import fsspec
 import numpy as np
+from packaging.version import Version
 import pytest
 import xarray
-import zarr
 
 from nova.diagnostics.thomson import ForwardEquilibrium
 from nova.equilibrium import observation_kernels
@@ -26,7 +26,7 @@ from nova.equilibrium.convention import COCOS
 from nova.io import sourcemap
 from nova.io.sourcemap import DD3_CONVENTION
 from nova.imas import getslice
-from nova.imas.equilibrium import CONVENTION_ATTR, Equilibrium, EquilibriumData
+from nova.imas.equilibrium import Equilibrium, EquilibriumData
 
 
 def _literal_assignment(source: str, name: str) -> bool:
@@ -115,12 +115,12 @@ def _reader_on(store, group):
     and bound to the store directly.
     """
     reader = object.__new__(EquilibriumData)
-    reader.filename = "equilibrium_test"
+    reader.filename = store.name
     reader.group = group
-    reader.dirname = str(store.parent)
-    reader.basename = store.name
-    reader.hostname = None
-    reader.fsys = fsspec.filesystem("file")
+    reader.dirname = store.parent
+    reader.host = None
+    reader._uri = "imas:hdf5?path=/synthetic/pulse#equilibrium:0"
+    reader._dd_version = Version("3.39.0")
     reader.data = xarray.Dataset()
     reader._ids = SimpleNamespace(metadata=SimpleNamespace(name="equilibrium"))
     return reader
@@ -128,58 +128,47 @@ def _reader_on(store, group):
 
 def _reader_through(store, group, monkeypatch, calls):
     """Bind a reader to ``store`` and record every rebuild it asks for."""
-    monkeypatch.setattr(EquilibriumData, "filepath", property(lambda self: store))
-    monkeypatch.setattr(
-        EquilibriumData,
-        "build",
-        lambda self: (calls.append("build"), self)[1],
-    )
+
+    def build(reader):
+        calls.append("build")
+        reader.data = xarray.Dataset({"psi_boundary": ("time", [-102.454])})
+
+    monkeypatch.setattr(EquilibriumData, "build", build)
     return _reader_on(store, group)
 
 
 def test_cached_equilibrium_under_the_other_convention_is_refused(
     tmp_path, monkeypatch
 ):
-    """A cached entry of a foreign convention is evicted, never served.
-
-    The cache identity is the source's identity, which the reader's convention
-    does not change, so the convention travels as a recorded marker and a load
-    that finds another (or none) refuses the entry: it is evicted and rebuilt
-    rather than serving fields in a convention this reader did not produce.
-    """
+    """A foreign-convention key misses even if its attribute names the owner."""
     store = tmp_path / "equilibrium_cache.zarr"
-    xarray.Dataset(
-        {"psi_boundary": ("time", [102.454])},
-        attrs={CONVENTION_ATTR: DD3_CONVENTION},
-    ).astype(float).to_zarr(
-        store, group="equilibrium_foreign", mode="a", consolidated=False
-    )
-
     calls: list[str] = []
-    reader = _reader_through(store, "equilibrium_foreign", monkeypatch, calls)
-    reader.load_build()
+    reader = _reader_through(store, "equilibrium", monkeypatch, calls)
+    owner = reader.convention_store
+    foreign = replace(owner, cocos=DD3_CONVENTION, group=None)
+    foreign.write(
+        xarray.Dataset({"psi_boundary": ("time", [102.454])}, attrs={"cocos": COCOS})
+    )
+    assert foreign.cached() and not owner.cached()
+    with pytest.raises(FileNotFoundError):
+        reader.load()
+    assert "psi_boundary" not in reader.data
 
+    reader.load_build()
     assert calls == ["build"], "a foreign-convention entry must be rebuilt"
-    root = zarr.open_group(store=str(store), mode="r")
-    if "equilibrium_foreign" in root:
-        assert "psi_boundary" not in root["equilibrium_foreign"].array_keys(), (
-            "the refused entry's raw fields must not be served"
-        )
+    np.testing.assert_array_equal(reader.data.psi_boundary, [-102.454])
+    np.testing.assert_array_equal(owner.read().psi_boundary, [-102.454])
+    np.testing.assert_array_equal(foreign.read().psi_boundary, [102.454])
 
 
 def test_cached_equilibrium_in_the_owner_convention_is_served(tmp_path, monkeypatch):
-    """An entry recording the reader's own convention is served unchanged."""
+    """An owner-convention key serves its entry without an attribute marker."""
     store = tmp_path / "equilibrium_cache.zarr"
-    xarray.Dataset(
-        {"psi_boundary": ("time", [-102.454])},
-        attrs={CONVENTION_ATTR: COCOS},
-    ).astype(float).to_zarr(
-        store, group="equilibrium_current", mode="a", consolidated=False
-    )
-
     calls: list[str] = []
-    reader = _reader_through(store, "equilibrium_current", monkeypatch, calls)
+    reader = _reader_through(store, "equilibrium", monkeypatch, calls)
+    expected = xarray.Dataset({"psi_boundary": ("time", [-102.454])})
+    reader.convention_store.write(expected)
     reader.load_build()
 
     assert calls == [], "a conforming cache entry must not be rebuilt"
-    assert float(reader.data["psi_boundary"][0]) == -102.454
+    xarray.testing.assert_identical(reader.data, expected)

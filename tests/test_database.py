@@ -1,8 +1,8 @@
+from dataclasses import replace
 from types import SimpleNamespace
 
-import fsspec
-
 import numpy as np
+from packaging.version import Version
 import pandas
 import pytest
 import xarray
@@ -168,70 +168,57 @@ def reader_on(store, group):
     resolved through them.
     """
     reader = object.__new__(EquilibriumData)
-    reader.filename = "equilibrium_test"
+    reader.filename = store.name
     reader.group = group
-    reader.dirname = str(store.parent)
-    reader.basename = store.name
-    reader.hostname = None
-    reader.fsys = fsspec.filesystem("file")
+    reader.dirname = store.parent
+    reader.host = None
+    reader._uri = "imas:hdf5?path=/synthetic/pulse#equilibrium:0"
+    reader._dd_version = Version("3.39.0")
     reader.data = xarray.Dataset()
     reader._ids = IdsStub()
     return reader
 
 
 def test_cached_equilibrium_without_the_convention_is_rebuilt(tmp_path, monkeypatch):
-    """A cached entry carrying no convention is refused rather than served.
-
-    The cache identity is the source's pulse, run and Data Dictionary version,
-    none of which the reader's own convention changes, so an entry written
-    before the reader translated to COCOS 17 is found by the same name and holds
-    the source's signed quantities. Requiring the recorded convention on load is
-    what separates the two, and the eviction is what makes the refusal a rebuild
-    rather than an error.
-    """
+    """An identity-only key is refused and replaced by the convention-keyed entry."""
     store = tmp_path / "equilibrium_cache.zarr"
-    xarray.Dataset(
-        {"psi_boundary": ("time", [102.454])},
-        attrs={"cocos": 11},
-    ).to_zarr(store, group="equilibrium_stale", mode="a", consolidated=False)
+    reader = reader_on(store, "equilibrium")
+    owner = reader.convention_store
+    legacy = replace(owner, group=owner.legacy_cache_key)
+    legacy.write(xarray.Dataset({"psi_boundary": ("time", [102.454])}))
+    assert legacy.cached() and not owner.cached()
     calls = []
-    monkeypatch.setattr(EquilibriumData, "filepath", property(lambda self: store))
-    monkeypatch.setattr(
-        EquilibriumData,
-        "build",
-        lambda self: (calls.append("build"), self)[1],
-    )
-    reader_on(store, "equilibrium_stale").load_build()
+
+    def build(reader):
+        calls.append("build")
+        reader.data = xarray.Dataset({"psi_boundary": ("time", [-102.454])})
+
+    monkeypatch.setattr(EquilibriumData, "build", build)
+    with pytest.raises(FileNotFoundError, match="before the key carried"):
+        reader.load()
+    assert "psi_boundary" not in reader.data
+    reader.load_build()
     assert calls == ["build"], "a cache entry without the convention must be rebuilt"
-    # The rebuild replaces the entry in place, so the group is still there and
-    # the raw quantity it held is not: a reader that serves this store now sees
-    # rebuilt data rather than the source's own convention.
-    with xarray.open_zarr(
-        store, group="equilibrium_stale", consolidated=False
-    ) as served:
-        assert "psi_boundary" not in served
+    assert not legacy.cached()
+    np.testing.assert_array_equal(reader.data.psi_boundary, [-102.454])
+    np.testing.assert_array_equal(owner.read().psi_boundary, [-102.454])
 
 
 def test_cached_equilibrium_with_the_convention_is_served(tmp_path, monkeypatch):
-    """An entry that records the reader's convention is served without a rebuild."""
-    from nova.io.sourcemap import NOVA_CONVENTION
-
+    """The convention-bearing key serves an entry with no attribute marker."""
     store = tmp_path / "equilibrium_cache.zarr"
-    xarray.Dataset(
-        {"psi_boundary": ("time", [-102.454])},
-        attrs={"cocos": NOVA_CONVENTION},
-    ).to_zarr(store, group="equilibrium_current", mode="a", consolidated=False)
+    reader = reader_on(store, "equilibrium")
+    expected = xarray.Dataset({"psi_boundary": ("time", [-102.454])})
+    reader.convention_store.write(expected)
     calls = []
-    monkeypatch.setattr(EquilibriumData, "filepath", property(lambda self: store))
     monkeypatch.setattr(
         EquilibriumData,
         "build",
         lambda self: (calls.append("build"), self)[1],
     )
-    reader = reader_on(store, "equilibrium_current")
     reader.load_build()
     assert calls == [], "a conforming cache entry must not be rebuilt"
-    assert float(reader.data["psi_boundary"][0]) == -102.454
+    xarray.testing.assert_identical(reader.data, expected)
 
 
 @mark["equilibrium"]

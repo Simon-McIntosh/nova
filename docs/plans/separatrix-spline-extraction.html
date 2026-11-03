@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="169">
+<meta name="plan-version" content="170">
 <meta name="plan-modified" content="2026-11-03">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -670,6 +670,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261103T004409849189-review-of-fine-flux-display-repair-85045ec5261a" data-who="reckon-build" data-when="2026-11-03T00:54:46.224Z">
     <div class="r-comment-body"><p>Review of r-20261102T215626762354-fine-flux-display-repair at efe6cb325..85045ec52 stored parsed at both granted record paths; scores 17/15/19/15/18/5 across goal_fidelity, evidence, scope_discipline, durability, fit, reuse; four non-blocking findings (branch-level assertion is self-referential, saddle-position assertion matches the seed, a duplicated diverted-field test fixture, and a discarded lattice-saddle convergence flag); added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261102T215626762354-fine-flux-display-repair" data-who="reckon-build" data-when="2026-11-03T00:39:34Z">
+    <div class="r-comment-body"><p>display_flux.py polishes both saddles through polish_stationary_points on the field&#x27;s own tensor spline and now fails closed — a polish that does not converge, or whose Hessian determinant is not negative, yields a NaN saddle position and value, saddle_converged false and no branches, so well_formed reads false; a converged saddle&#x27;s own polished value is the level the separatrix is assembled at. The moment columns contract through FluxTarget. The suite iterates the operator&#x27;s own raster map to convergence and asserts the reported node mismatch against that solve&#x27;s terminal residual, asserts the map&#x27;s own branch assembly element-wise against a direct assemble_separatrix_branches call on the map&#x27;s field, and seeds the diverted fixture at its O-point to assert the refusal. Seven tests pass; the reproduction holds below 1e-10 with non-zero radial and vertical moments.</p></div>
 </div>
 </section>
 </main>

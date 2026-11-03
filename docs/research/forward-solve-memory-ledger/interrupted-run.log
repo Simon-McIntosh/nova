@@ -1,0 +1,43 @@
+BANNER {"cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/forward-solve-memory-ledger", "jax_platforms": "cpu", "node": "98dci4-clu-2068.iter.org", "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python", "revision": "a51678ba2a013ad537d88f81b41d3071f1c75a7f", "slurm_job_id": "1291586", "slurm_partition": "rigel", "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/forward-solve-memory-ledger"}
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=0 completed=False
+PHASE-BEGIN cpu:import-nova-jax rss=144801792
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=0 completed=False
+PHASE-END cpu:import-nova-jax seconds=13.386 rss_before=144801792 rss_after=462225408 peak=462225408
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=1 completed=False
+PHASE-BEGIN cpu:producer-import rss=462225408
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=1 completed=False
+PHASE-END cpu:producer-import seconds=14.080 rss_before=462225408 rss_after=668037120 peak=668037120
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=2 completed=False
+PHASE-BEGIN cpu:machine-description rss=668041216
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=2 completed=False
+PHASE-END cpu:machine-description seconds=0.921 rss_before=668041216 rss_after=1355538432 peak=1355571200
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=3 completed=False
+PHASE-BEGIN cpu:operand-build rss=1355571200
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=3 completed=False
+PHASE-END cpu:operand-build seconds=51.342 rss_before=1355571200 rss_after=1463066624 peak=1501020160
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=4 completed=False
+PHASE-BEGIN cpu:profile-build rss=1463066624
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=4 completed=False
+PHASE-END cpu:profile-build seconds=8.459 rss_before=1463066624 rss_after=1664978944 peak=2264936448
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=5 completed=False
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=5 completed=False
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=5 completed=False
+PHASE-BEGIN cpu:solve-trace-and-lower rss=1677426688
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=5 completed=False
+HLO_BYTES 24552507
+PHASE-END cpu:solve-trace-and-lower seconds=5.900 rss_before=1677426688 rss_after=1852076032 peak=2264936448
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=6 completed=False
+PHASE-BEGIN cpu:solve-compile rss=1852076032
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=6 completed=False
+PHASE-END cpu:solve-compile seconds=26.226 rss_before=1852076032 rss_after=2397364224 peak=2397364224
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=7 completed=False
+PHASE-BEGIN cpu:solve-first-execute rss=2397364224
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=7 completed=False
+PHASE-END cpu:solve-first-execute seconds=0.742 rss_before=2397364224 rss_after=2490089472 peak=2490089472
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=8 completed=False
+PHASE-BEGIN cpu:solve-warm-execute rss=2416390144
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=8 completed=False
+PHASE-END cpu:solve-warm-execute seconds=0.609 rss_before=2416390144 rss_after=2493943808 peak=2493943808
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=9 completed=False
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=9 completed=False
+LEDGER /dev/shm/39486-fleet-1291586/negctl/out-fixed/ledger-cpu.json phases=9 completed=False

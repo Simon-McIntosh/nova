@@ -154,6 +154,12 @@
 <p>The removal candidates after the off-switch are the autotune subtrees in the user runtime and kernel caches. The pinned <code>runtime-7b315420b55b91bffb05</code> directory is removable only after the new pin is published and no running gate serves it; unlike the user-cache subtrees, its compile entries are removed with the retired directory. Compile entries and access-time companions in the other user caches remain available for reuse.</p>
 </section>
 
+<section id="titan-gate">
+<h2>Current-main titan gate: no new autotune files</h2>
+<p>The certificate row <code>test_analytic_certificate_moments[550-diverted]</code> ran twice through <code>scripts/nova_lane/run.sh --force-submit --rungs titan</code> at main revision <code>ab5f5e4d659f80eca58c0d9edae90a810cad9de0</code>, jobs <strong>1304315</strong> and <strong>1304320</strong>. Both passed on the P100. The instrument counted all files below any <code>xla_gpu_per_fusion_autotune_cache_dir</code> in the served pinned directory before and after each pass: <strong>31,667 before, 31,667 after, delta 0</strong> on both. The nonzero starting count is a positive control that the scan sees existing autotune files.</p>
+<p>The first pass recorded <strong>241 compile-cache hits and 27 misses</strong>; the second recorded <strong>268 hits and 0 misses</strong>, with zero compile seconds. The unchanged autotune count and the warm second pass show that the lane's off setting closes the GPFS autotune write path while leaving persistent compile-cache reuse intact. The logs <code>titan-main-head.log</code> and <code>titan-main-head-repeat.log</code> in the worker run directory carry the source revision, per-pass guard receipt, counts and exit status.</p>
+</section>
+
 <section id="s5">
 <h2>Method and reproduction</h2>
 <p>Harness: <code>benchmarks/xla_autotune_cache_arms.py</code>, one cache root per arm under node-local <code>/tmp</code>, <code>JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0</code>, one cold pass then three repeats, the cache guard loaded per pass with its miss budget raised so the guard reports rather than refuses. Submitted through <code>scripts/nova_lane/run.sh --rungs titan</code> as job 1290668. Receipt with every per-program row: the run directory's <code>titan-arms-3.json</code>; per-pass logs in <code>xla-autotune-arm-logs/</code>.</p>

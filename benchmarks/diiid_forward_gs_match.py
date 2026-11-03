@@ -1561,12 +1561,24 @@ def _build_conductor_response(
         for start in range(0, targets.shape[0], DISPLAY_RESPONSE_CHUNK)
     ]
     started = time.perf_counter()
-    with concurrent.futures.ProcessPoolExecutor(
-        max_workers=DISPLAY_RESPONSE_PROCESSES,
-        mp_context=multiprocessing.get_context("spawn"),
-        initializer=_pin_worker_to_cpu,
-    ) as pool:
-        blocks = list(pool.map(_conductor_columns, tasks))
+    # A spawned worker inherits this process's environment at the moment it is
+    # created and builds its own JAX backend on import, which an initializer
+    # cannot preempt. Scope the variable around the spawn so a build never
+    # stands up a device context beside the solve holding the card.
+    platforms = os.environ.get("JAX_PLATFORMS")
+    os.environ["JAX_PLATFORMS"] = "cpu"
+    try:
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=DISPLAY_RESPONSE_PROCESSES,
+            mp_context=multiprocessing.get_context("spawn"),
+            initializer=_pin_worker_to_cpu,
+        ) as pool:
+            blocks = list(pool.map(_conductor_columns, tasks))
+    finally:
+        if platforms is None:
+            os.environ.pop("JAX_PLATFORMS", None)
+        else:
+            os.environ["JAX_PLATFORMS"] = platforms
     seconds = time.perf_counter() - started
     response = np.concatenate(blocks, axis=1).T
     if response.shape != (points.shape[0], columns):

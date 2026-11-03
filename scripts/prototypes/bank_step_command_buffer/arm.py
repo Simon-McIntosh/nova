@@ -145,7 +145,9 @@ def solve(width, bank, cache, roots, convention, policy, profile, quadrature, mo
     return state, terminal
 
 
-def measure_stages(width, bank, cache, roots, convention, policy, profile, quadrature, moments):
+def measure_stages(
+    stages, width, bank, cache, roots, convention, policy, profile, quadrature, moments
+):
     if width == 1:
         seeds = roots + 0.03 * jnp.median(bank.geometry.pitch)
         support = measure(
@@ -229,6 +231,8 @@ def measure_stages(width, bank, cache, roots, convention, policy, profile, quadr
 
     residual_b = measure("residual_and_booking", batched_residual, moments_b, support_b)
     booked_b = residual_b.booked
+    if "dense" not in stages:
+        return
 
     def batched_tangent(state, support, booked):
         return jax.vmap(
@@ -287,6 +291,7 @@ def main():
     parser.add_argument("--arm", choices=("off", "on"), required=True)
     parser.add_argument("--width", type=int, default=1)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--stages", default="read,residual,dense")
     arguments = parser.parse_args()
     width = arguments.width
 
@@ -310,25 +315,30 @@ def main():
     bank, cache, roots, convention, policy, profile, quadrature, moments, _ = machine(
         "diverted"
     )
+    stages = arguments.stages.split(",")
     measure_stages(
-        width, bank, cache, roots, convention, policy, profile, quadrature, moments
+        stages,
+        width,
+        bank,
+        cache,
+        roots,
+        convention,
+        policy,
+        profile,
+        quadrature,
+        moments,
     )
-    moments_final, terminal = solve(
-        width, bank, cache, roots, convention, policy, profile, quadrature, moments
-    )
-    output = arguments.output
-    output.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(output, *[np.asarray(value) for value in moments_final])
-    emit("STATE", path=str(output), fresh_residual=terminal)
+    if "dense" in stages:
+        moments_final, terminal = solve(
+            width, bank, cache, roots, convention, policy, profile, quadrature, moments
+        )
+        output = arguments.output
+        output.parent.mkdir(parents=True, exist_ok=True)
+        np.savez(output, *[np.asarray(value) for value in moments_final])
+        emit("STATE", path=str(output), fresh_residual=terminal)
 
     trace = Path(os.environ["BANK_STEP_TRACE_DIR"])
-    options = jax.profiler.ProfileOptions()
-    options.enable_hlo_proto = False
-    options.host_tracer_level = 0
-    options.python_tracer_level = 0
-    jax.profiler.start_trace(
-        str(trace), create_perfetto_link=False, profiler_options=options
-    )
+    jax.profiler.start_trace(str(trace), create_perfetto_link=False)
     for name, compiled, args in MEASURED_STAGES:
         with jax.profiler.TraceAnnotation(f"stage:{name}"):
             result = compiled(*args)

@@ -20,6 +20,7 @@ class _Reading(NamedTuple):
     membership: jax.Array
     normal_form_cells: jax.Array
     fragment_selected: jax.Array
+    boundary: jax.Array | None = None
 
 
 class _Stationary(NamedTuple):
@@ -60,6 +61,140 @@ def _toy_residual(_operands, base, state, support, _profile, _quadrature):
         support.reading,
         support.valid,
     )
+
+
+def _moving_support(states, membership, fragments):
+    lanes = states[0].shape[0]
+    return _Support(
+        _Stationary(jnp.zeros((lanes, 1, 2))),
+        _Reading(
+            membership[:, None],
+            jnp.zeros((lanes, 1), bool),
+            fragments[:, None, None],
+            states[0],
+        ),
+        jnp.ones(lanes, bool),
+        jnp.zeros((lanes, 1), jnp.int32),
+        jnp.zeros(lanes, bool),
+        jnp.zeros(lanes, jnp.int32),
+        jnp.zeros(lanes, bool),
+    )
+
+
+def _unit_update(_operands, moments, _support, *_args, **_kwargs):
+    update = (jnp.ones_like(moments[0]),) + tuple(
+        jnp.zeros_like(value) for value in moments[1:]
+    )
+    size = sum(value.size for value in moments)
+    matrix = jnp.eye(size, dtype=moments[0].dtype)
+    factor = support_read.NewtonFactor(
+        matrix, jnp.ones(size), jnp.ones(size), matrix, jnp.zeros(size, jnp.int32)
+    )
+    return support_read.NewtonStep(
+        update, 1.0, 1.0, 0.0, jnp.asarray(True), factor, jnp.asarray(True)
+    )
+
+
+def test_frozen_set_keeps_fresh_continuous_area(monkeypatch):
+    """Moving a boundary within fixed cells must not freeze its area fraction."""
+    observed = []
+
+    def read(_operands, _cache, states, *_args, **_kwargs):
+        position = states[0][:, 0]
+        return _moving_support(
+            states, 0.4 + 0.1 * position, jnp.ones_like(position, bool)
+        )
+
+    def residual(_operands, _base, state, support, *_args):
+        area = support.reading.membership * 1e-7
+        return support_read.StepResidual(
+            (area, jnp.zeros_like(state[1]), jnp.zeros_like(state[2])),
+            (*state, jnp.asarray(1.0)),
+            support.reading,
+            support.valid,
+        )
+
+    def step(operands, moments, support, *args, **kwargs):
+        jax.debug.callback(
+            lambda boundary, area: observed.append((float(boundary), float(area))),
+            support.reading.boundary[0],
+            support.reading.membership[0],
+        )
+        result = _unit_update(operands, moments, support, *args, **kwargs)
+        return result._replace(update=(0.1 * result.update[0], *result.update[1:]))
+
+    monkeypatch.setattr(support_read, "read_batch", read)
+    monkeypatch.setattr(support_read, "step_residual", residual)
+    monkeypatch.setattr(support_read, "newton_step", step)
+    state = tuple(jnp.zeros((1, 1)) for _ in range(3))
+    seeds = jnp.zeros((1, 1, 2))
+    run = jax.jit(
+        lambda values: support_read.solve_batch(
+            None,
+            None,
+            values,
+            seeds,
+            seeds,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=2,
+            tolerance=1e-10,
+        )
+    )
+    jax.block_until_ready(run(state))
+    assert len(observed) == 2
+    boundary, frozen_area = observed[1]
+    fresh_area = 0.4 + 0.1 * boundary
+    relative_residual_gap = abs(frozen_area - fresh_area) / fresh_area
+    print("FROZEN_AREA", boundary, frozen_area, fresh_area, relative_residual_gap)
+    assert boundary > 0 and relative_residual_gap <= 1e-12
+
+
+def test_fragment_switch_forces_fresh_extra_step(monkeypatch):
+    """A changed fragment within the same cut cell releases the frozen set."""
+
+    def read(_operands, _cache, states, *_args, **_kwargs):
+        position = states[0][:, 0]
+        return _moving_support(states, jnp.full_like(position, 0.5), position >= 1)
+
+    def residual(_operands, _base, state, support, *_args):
+        value = jnp.where(state[0] >= 1, 1e-12, 1e-7)
+        return support_read.StepResidual(
+            (value, jnp.zeros_like(state[1]), jnp.zeros_like(state[2])),
+            (*state, jnp.asarray(1.0)),
+            support.reading,
+            support.valid,
+        )
+
+    monkeypatch.setattr(support_read, "read_batch", read)
+    monkeypatch.setattr(support_read, "step_residual", residual)
+    monkeypatch.setattr(support_read, "newton_step", _unit_update)
+    state = tuple(jnp.zeros((1, 1)) for _ in range(3))
+    seeds = jnp.zeros((1, 1, 2))
+    result = jax.jit(
+        lambda values: support_read.solve_batch(
+            None,
+            None,
+            values,
+            seeds,
+            seeds,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=3,
+            tolerance=1e-10,
+        )
+    )(state)
+    jax.block_until_ready(result)
+    print("FRAGMENT_SWITCH", int(result.steps[0]), int(result.unfreezes[0]))
+    assert bool(result.converged[0])
+    assert int(result.steps[0]) == 2
+    assert int(result.unfreezes[0]) == 1
 
 
 def test_first_batched_read_has_one_rebuild_flag_per_lane(monkeypatch):

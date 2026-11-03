@@ -7,4 +7,5 @@
 #SBATCH --mem=64G
 #SBATCH --time=00:45:00
 set -u
-source "$(dirname "$0")/payload.sh"
+ROOT=${ROOT:?worktree root required}
+source "$ROOT/scripts/prototypes/bank_step_batch/payload.sh"

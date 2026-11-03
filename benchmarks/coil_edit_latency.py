@@ -1447,23 +1447,23 @@ def _panel_display_map(
 
 
 def _panel_moments(
-    profile: Any, state: Any, requested_class: Any
+    profile: Any, state: Any, requested_class: Any, target_current: Any
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Return the state's plasma current moments, so a panel can be re-drawn.
 
     A display map contracts these three columns against the machine coupling at
     whatever points it is asked for, so persisting them beside the lattice
     field is what lets a panel be drawn from the state rather than from the
-    raster the solve happened to be carried on.
+    raster the solve happened to be carried on.  This operator carries a
+    point-cell current and no linear-moment columns, so the radial and vertical
+    moments are zero and the map contracts the uniform column alone.
     """
-    moments = profile.operator.current_moments_and_observation(state, requested_class)[
-        0
-    ]
-    return (
-        np.asarray(moments.cell_current, dtype=np.float64),
-        np.asarray(moments.radial_moment, dtype=np.float64),
-        np.asarray(moments.vertical_moment, dtype=np.float64),
+    cell_current = np.asarray(
+        profile.operator.cell_current(state, requested_class, target_current),
+        dtype=np.float64,
     )
+    zeros = np.zeros_like(cell_current)
+    return cell_current, zeros, zeros
 
 
 def _write_panel_data(
@@ -2894,7 +2894,9 @@ def run(
                     "nulls": _null_points(profile, result.state),
                     "branches": _branches_of(profile, result.state, raster_flux),
                     "current": np.asarray(current, dtype=float),
-                    "moments": _panel_moments(profile, result.state, requested_class),
+                    "moments": _panel_moments(
+                        profile, result.state, requested_class, target_current
+                    ),
                 }
             )
             rows.append(row)

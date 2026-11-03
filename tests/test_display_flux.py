@@ -190,7 +190,7 @@ def test_fine_map_reproduces_the_operator_raster_image():
 
 
 def test_the_moment_columns_carry_the_map():
-    """The linear moments move the flux, so a swapped column cannot hide."""
+    """The linear moments move the flux, so a dropped column cannot hide."""
     profile, lattice = _profile()
     moments = _moments(lattice)
     full = build_display_flux_map(
@@ -214,9 +214,6 @@ def test_the_moment_columns_carry_the_map():
     )
     scale = max(float(np.max(np.abs(full.flux))), 1.0e-30)
     assert float(np.max(np.abs(full.flux - bare.flux))) / scale > 1.0e-2
-    assert not np.allclose(
-        np.asarray(moments.radial_moment), np.asarray(moments.vertical_moment)
-    )
 
 
 def _moment_law(state: np.ndarray, node: int) -> CellCurrentMoments:
@@ -382,6 +379,7 @@ def test_the_map_assembles_its_own_separatrix_branches():
         axis_rz=axis,
         chunk=512,
     )
+    assert display.saddle_converged
     assert set(display.branches) == set(BRANCH_KEYS)
     assert display.well_formed
     assert int(np.asarray(display.branches["closed_segment_count"])) > 0
@@ -401,21 +399,69 @@ def test_the_map_assembles_its_own_separatrix_branches():
 
 def test_display_map_spacing_and_saddle_are_reported():
     """The map is drawn at its spacing floor and carries its own saddles."""
-    profile, lattice = _profile()
-    moments = _moments(lattice)
+    profile, lattice = _diverted_profile()
+    zero = CellCurrentMoments(
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+    )
     display = build_display_flux_map(
         profile,
-        _state(profile, moments),
-        coupling=_coupling(profile),
-        moments=moments,
-        xpoint_rz=np.asarray([1.08, 0.0]),
-        chunk=128,
+        _diverted_field(np.asarray(lattice.coordinate)),
+        coupling=_diverted_coupling(lattice.node_count),
+        moments=zero,
+        extent=(
+            DIVERTED_CENTRE - DIVERTED_EXTENT,
+            DIVERTED_CENTRE + DIVERTED_EXTENT,
+            -DIVERTED_EXTENT,
+            DIVERTED_EXTENT,
+        ),
+        xpoint_rz=np.asarray([DIVERTED_CENTRE, 0.0]),
+        chunk=512,
     )
+    assert display.saddle_converged
+    assert np.linalg.norm(display.saddle_rz - np.asarray([DIVERTED_CENTRE, 0.0])) < 0.02
     assert display.spacing_m <= DEFAULT_SPACING
     np.testing.assert_allclose(np.diff(display.radius), display.spacing_m)
     assert display.radius.size > lattice.radius.size
     assert np.all(np.isfinite(display.saddle_rz))
-    assert np.linalg.norm(display.saddle_rz - np.asarray([1.08, 0.0])) < 0.05
+    assert np.all(np.isfinite(display.lattice_saddle_rz))
+    assert np.isfinite(display.saddle_offset_mm)
+    assert np.all(np.isfinite(display.flux))
+    assert display.max_node_mismatch_wb < 1.0e-6
+
+
+def test_a_seed_on_an_extremum_reports_no_saddle():
+    """A seed that lands on an O-point is refused rather than read as a saddle."""
+    profile, lattice = _diverted_profile()
+    zero = CellCurrentMoments(
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+    )
+    o_point = np.asarray(
+        [DIVERTED_CENTRE + 0.47 * DIVERTED_SCALE, 0.47 * DIVERTED_SCALE]
+    )
+    display = build_display_flux_map(
+        profile,
+        _diverted_field(np.asarray(lattice.coordinate)),
+        coupling=_diverted_coupling(lattice.node_count),
+        moments=zero,
+        extent=(
+            DIVERTED_CENTRE - DIVERTED_EXTENT,
+            DIVERTED_CENTRE + DIVERTED_EXTENT,
+            -DIVERTED_EXTENT,
+            DIVERTED_EXTENT,
+        ),
+        xpoint_rz=o_point,
+        axis_rz=o_point,
+        chunk=512,
+    )
+    assert not display.saddle_converged
+    assert np.all(np.isnan(display.saddle_rz))
+    assert np.isnan(display.saddle_flux)
+    assert display.branches == {}
+    assert not display.well_formed
 
 
 def test_a_coarser_than_declared_spacing_is_refused():

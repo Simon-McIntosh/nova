@@ -84,6 +84,7 @@ class DisplayFluxMap:
     lattice_saddle_rz: np.ndarray
     saddle_offset_mm: float
     branches: dict[str, np.ndarray] = field(default_factory=dict)
+    saddle_converged: bool = False
     max_node_mismatch_wb: float = float("nan")
     reproduction_relative_error: float = float("nan")
     spacing_m: float = DEFAULT_SPACING
@@ -141,14 +142,17 @@ def _flux(
 
 def _stationary_saddle(
     values: np.ndarray, radius: np.ndarray, height: np.ndarray, xpoint_rz
-) -> tuple[np.ndarray, float]:
-    """Return ``values``' own polished stationary point and its flux.
+) -> tuple[np.ndarray, float, bool]:
+    """Return ``values``' own polished saddle, its flux and whether it is one.
 
     The polish runs on the field's own tensor spline from a seed inside the
     saddle's cell, so the returned coordinate is a stationary point of this
     field rather than a coordinate carried over from another grid.
-    ``xpoint_rz`` only selects which stationary cell is meant; where the polish
-    does not land, the seed coordinate and the field value there are returned.
+    ``xpoint_rz`` only selects which stationary cell is meant.  A point that
+    the polish does not converge to, or whose Hessian is not of saddle type,
+    is reported as absent: the position and flux are NaN and the caller draws
+    no separatrix from it, so a seed that lands on an extremum cannot be read
+    downstream as a saddle.
     """
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
@@ -162,10 +166,10 @@ def _stationary_saddle(
     position = np.asarray(polished["position_rz"], dtype=np.float64).reshape(2)
     value = np.asarray(polished["value"], dtype=np.float64).reshape(())
     converged = bool(np.asarray(polished["converged"]).reshape(()))
-    if converged and np.all(np.isfinite(position)):
-        return position, float(value)
-    evaluation = surface.evaluate(jnp.asarray(seed[0]), jnp.asarray(seed[1]))
-    return seed, float(np.asarray(evaluation.value).reshape(()))
+    hessian_type = int(np.asarray(polished["hessian_type"]).reshape(()))
+    if converged and hessian_type < 0 and np.all(np.isfinite(position)):
+        return position, float(value), True
+    return np.full(2, np.nan), float("nan"), False
 
 
 def _branches(
@@ -222,7 +226,10 @@ def build_display_flux_map(
     state itself: zero for a converged fixed point, the fixed-point residual
     otherwise.  The saddles of the map and of the lattice spline are each
     polished on their own spline, and the map's separatrix branches are
-    assembled on the map at the map's own admitted-saddle level.
+    assembled on the map at the map's own saddle value.  A polish that does not
+    land on a saddle -- either it fails to converge or the Hessian there is not
+    of saddle type -- is reported as absent: the saddle position and value are
+    NaN, ``saddle_converged`` is False, and no branches are assembled.
     """
     started = time.perf_counter()
     if spacing > DEFAULT_SPACING:
@@ -282,6 +289,7 @@ def build_display_flux_map(
     ).reshape(tuple(int(value) for value in np.asarray(lattice.shape)))
     lattice_values = lattice_values.T
 
+    saddle_converged = False
     if xpoint_rz is None:
         saddle_rz = np.full(2, np.nan)
         saddle_flux = float("nan")
@@ -289,11 +297,13 @@ def build_display_flux_map(
         branches: dict[str, np.ndarray] = {}
     else:
         seed = np.asarray(xpoint_rz, dtype=np.float64).reshape(-1)[:2]
-        saddle_rz, saddle_flux = _stationary_saddle(values, radius, height, seed)
-        lattice_saddle_rz, _lattice_flux = _stationary_saddle(
+        saddle_rz, saddle_flux, saddle_converged = _stationary_saddle(
+            values, radius, height, seed
+        )
+        lattice_saddle_rz, _lattice_flux, _lattice_converged = _stationary_saddle(
             lattice_values, radius_nodes, height_nodes, seed
         )
-        if axis_rz is None:
+        if axis_rz is None or not saddle_converged:
             branches = {}
         else:
             branches = _branches(
@@ -309,6 +319,7 @@ def build_display_flux_map(
         lattice_saddle_rz=np.asarray(lattice_saddle_rz, dtype=np.float64),
         saddle_offset_mm=offset,
         branches=branches,
+        saddle_converged=saddle_converged,
         max_node_mismatch_wb=mismatch,
         reproduction_relative_error=reproduction,
         spacing_m=float(spacing),

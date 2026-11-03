@@ -8,23 +8,28 @@ uses, and evaluates its plasma coupling through the operator's own
 fine map's saddle and the lattice spline's saddle are polished with
 <code>polish_stationary_points</code> on a tensor spline fit of the field, and
 the map's separatrix branches are assembled with
-<code>assemble_separatrix_branches</code> at the level
-<code>boundary_flux_at_admitted_saddle</code> reads from the map's own saddle
-cell, so a panel draws the separatrix and the contours from one field.</p>
+<code>assemble_separatrix_branches</code> at the polished saddle's own value —
+the same stationary value <code>boundary_flux_at_admitted_saddle</code> reads
+from that field, taken here from the polish the map has already run — so a
+panel draws the separatrix and the contours from one field.</p>
 
 <h3>Measure</h3>
 
 <table id="fine-flux-display-repair-measure">
 <caption>Manufactured forward operator, 9 by 9 lattice (100 mm cells), display
-map at the 10 mm floor, 81 by 91 points. Five tests, one command.</caption>
+map at the 10 mm floor, 81 by 91 points. Seven tests, one command.</caption>
 <tr><th>quantity</th><th>value</th></tr>
 <tr><td>map at the lattice nodes against <code>raster_image</code>, relative
 (with non-zero radial and vertical moment columns)</td><td>&lt; 1e-10 (gate)</td></tr>
-<tr><td>node mismatch on a state one declared increment off the operator's
-image</td><td>equal to that increment to 1e-9 relative</td></tr>
-<tr><td>separatrix branches assembled on the map</td><td>returned; the map
-exposes <code>branches</code> and <code>well_formed</code></td></tr>
-<tr><td>gate wall</td><td>230 s, 5 passed, host CPU</td></tr>
+<tr><td>node mismatch on a state converged under the operator's own map</td>
+<td>equal to that solve's terminal residual to 1e-6 relative, and within ten
+times it</td></tr>
+<tr><td>separatrix branches assembled on the map</td><td>well formed, one
+closed lobe and two legs, every array equal to a direct
+<code>assemble_separatrix_branches</code> call on the map's own field</td></tr>
+<tr><td>a seed on the field's O-point</td><td>no saddle reported: NaN position
+and flux, <code>saddle_converged</code> false, no branches</td></tr>
+<tr><td>gate wall</td><td>7 passed in 148 s, host CPU</td></tr>
 </table>
 
 <h3>Negative control</h3>
@@ -53,6 +58,18 @@ display map built from that converged state reports a node mismatch equal to
 that residual (asserted to 1e-6 relative, and within ten times it, as the
 section requires). Zeroing the builder's mismatch report reddens the test,
 whose log is <code>control-mismatch.log</code>.</p>
+
+<h3>A saddle that is not one is reported absent</h3>
+
+<p id="fine-flux-display-repair-absent-saddle">The polish is the only authority
+on where the saddle is, so it is not allowed to fail open. When it does not
+converge, or when the Hessian at the polished point is not of saddle type, the
+map reports the saddle position and value as NaN, carries
+<code>saddle_converged</code> false and assembles no branches, so
+<code>well_formed</code> reads false. Without that, a seed landing on an
+extremum would return the seed coordinate and the field's value there, and the
+panel would draw a separatrix through an O-point. A test seeds the diverted
+fixture at its own O-point and asserts exactly that refusal.</p>
 
 <h3>The separatrix is asserted, not just assembled</h3>
 

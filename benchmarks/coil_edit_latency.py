@@ -28,6 +28,7 @@ import platform
 import socket
 import sys
 import subprocess
+import textwrap
 import threading
 import time
 from typing import Any
@@ -91,6 +92,9 @@ DEFAULT_PANEL_DATA = DIAGNOSTIC_ROOT / "panel-states.npz"
 DEFAULT_PANEL_FIGURE = DIAGNOSTIC_ROOT / "converged-vs-nonconverged.png"
 SHOT = 22086
 SLICE_INDEX = 43
+#: Characters per line the panel caption is wrapped to, so it stays on the canvas.
+CAPTION_WIDTH = 150
+
 #: Display spacing [m] of the panel map, the coarsest the builder admits.
 DEFAULT_DISPLAY_SPACING = 0.010
 SWEEP_FRACTIONS = np.arange(-0.20, 0.201, 0.02, dtype=np.float64)
@@ -2296,7 +2300,7 @@ def _render_panel(
         for label in ("converged", "failed")
     )
     constraint_note = _constraint_note(loaded.get("vertical_centroid"))
-    figure.suptitle(
+    caption = (
         "terminal poloidal flux on shared levels between the axis and boundary "
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
@@ -2320,12 +2324,15 @@ def _render_panel(
             solved_orderings[0],
             solved_notes[1],
             solved_orderings[1],
-        ),
+        )
+    )
+    # The caption states every distinction the panel draws and is longer than
+    # one line of the canvas; wrapped, it stays inside the figure rather than
+    # being cut at both edges.
+    figure.suptitle(
+        textwrap.fill(caption + _panel_display_note(loaded), CAPTION_WIDTH),
         fontsize=9,
     )
-    display_note = _panel_display_note(loaded)
-    if display_note:
-        figure.suptitle(str(figure._suptitle.get_text()) + display_note, fontsize=9)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=140)
     vector_path = figure_path.with_suffix(".svg")

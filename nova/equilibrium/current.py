@@ -11,6 +11,7 @@ from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
+from jax.experimental import xla_metadata
 
 from nova.equilibrium import topology
 from nova.equilibrium.clip_quadrature import (
@@ -59,6 +60,9 @@ class Booking(NamedTuple):
     raw_current: jax.Array
     normalization: jax.Array
     valid: jax.Array
+
+
+_NORMAL_CUT_BATCH_WIDTH = 8
 
 
 def _inward_interval_points(x, left, right):
@@ -701,18 +705,19 @@ def book_tangent_channels(
         return normalized_rate[:, index] @ integral_basis
 
     def whole_cell(index):
-        return interior(
-            index,
-            geometry.vertices[index][None],
-            geometry.vertex_count[index][None],
-        )
+        with xla_metadata.set_xla_metadata(tangent_site="interior:whole"):
+            return interior(
+                index,
+                geometry.vertices[index][None],
+                geometry.vertex_count[index][None],
+            )
 
-    def cut_cell(index):
+    def conic_cell(index):
         centre = geometry.centre[index]
         vertices = geometry.vertices[index]
         count = geometry.vertex_count[index]
 
-        def conic(_):
+        def evaluate():
             rings, counts, valid = _conic_rings(
                 vertices,
                 count,
@@ -723,7 +728,8 @@ def book_tangent_channels(
                 quadrature.segments,
                 inward_endpoints=True,
             )
-            fixed = interior(index, rings, counts)
+            with xla_metadata.set_xla_metadata(tangent_site="interior:conic"):
+                fixed = interior(index, rings, counts)
 
             velocity = jax.vmap(
                 lambda direction: _conic_ring_tangents(
@@ -758,19 +764,20 @@ def book_tangent_channels(
             )
             return jnp.where(valid, fixed + moving, jnp.nan)
 
-        def normal(_):
-            rings, counts = _normal_rings(
-                vertices,
-                count,
-                centre,
-                read.saddle_form,
-                read.fragment_selected[index],
-                read.edge_interval[index],
-                quadrature.segments,
-            )
-            return interior(index, rings, counts)
+        return evaluate()
 
-        return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
+    def normal_cell(index):
+        rings, counts = _normal_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            read.saddle_form,
+            read.fragment_selected[index],
+            read.edge_interval[index],
+            quadrature.segments,
+        )
+        with xla_metadata.set_xla_metadata(tangent_site="interior:normal"):
+            return interior(index, rings, counts)
 
     full = read.membership >= 1 - 1e-14
     cut = (read.membership > 0) & ~full
@@ -779,30 +786,37 @@ def book_tangent_channels(
     if quadrature.cut_batch_width < 1:
         raise ValueError("cut batch width must be positive")
     batch_width = min(quadrature.cut_batch_width, cells)
-    cut_count = jnp.sum(cut, dtype=jnp.int32)
-    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
-    cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
 
-    def add_batch(carried, batch):
-        start = batch * batch_width
-        indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
-        active = start + jnp.arange(batch_width) < cut_count
+    def integrate_bucket(mask, width, evaluate):
+        count = jnp.sum(mask, dtype=jnp.int32)
+        indices = jnp.nonzero(mask, size=cells, fill_value=0)[0]
+        indices = jnp.pad(indices, (0, (-cells) % width))
 
-        def integrate(values):
-            response = jax.vmap(cut_cell)(indices)
-            return values.at[indices].add(
-                jnp.where(active[:, None, None], response, 0.0)
-            )
+        def add_batch(carried, batch):
+            start = batch * width
+            selected = jax.lax.dynamic_slice(indices, (start,), (width,))
+            active = start + jnp.arange(width) < count
 
-        return jax.lax.cond(
-            start < cut_count, integrate, lambda value: value, carried
-        ), None
+            def integrate(values):
+                response = jax.vmap(evaluate)(selected)
+                return values.at[selected].add(
+                    jnp.where(active[:, None, None], response, 0.0)
+                )
 
-    cuts, _ = jax.lax.scan(
-        add_batch,
-        jnp.zeros_like(whole),
-        jnp.arange(len(cut_index) // batch_width),
-    )
+            return jax.lax.cond(
+                start < count, integrate, lambda value: value, carried
+            ), None
+
+        result, _ = jax.lax.scan(
+            add_batch,
+            jnp.zeros_like(whole),
+            jnp.arange(len(indices) // width),
+        )
+        return result
+
+    normal = cut & read.normal_form_cells
+    cuts = integrate_bucket(cut & ~normal, batch_width, conic_cell)
+    cuts += integrate_bucket(normal, min(_NORMAL_CUT_BATCH_WIDTH, cells), normal_cell)
     raw = whole + cuts
     total_rate = jnp.sum(raw[:, :, 0], axis=0)
     scale_rate = (

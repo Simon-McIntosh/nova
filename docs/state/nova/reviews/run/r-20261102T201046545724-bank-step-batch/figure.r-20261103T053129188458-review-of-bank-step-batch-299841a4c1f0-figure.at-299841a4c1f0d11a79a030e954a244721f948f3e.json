@@ -6,7 +6,7 @@
     "waverun/per-slice-wall.png": "docs/figures/sub-millisecond-forward-path/bank-step-batch/per-slice-wall.svg"
   },
   "attachment_note": "No image was copied into this node's directory, so the render judged is the one the run itself names as its inspected PNG: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201046545724-bank-step-batch/waverun/per-slice-wall.png (1378x698 RGBA, 100 dpi, sha256 02dce32a2df20ebc77de0d2f7aa64d5a440f52c74f5b3a07ccadc67036ca227f), the file cited by the run's manifest artifacts line and by the evidence fragment's source list. It is dated 2026-11-03 05:58, one commit before the reviewed head; the head commit 299841a4c re-rendered the SVG and its own commit body states that the geometry, series and labels are unchanged and only the embedded element ids and date stamp were regenerated, so this PNG is taken as the head's visual. The stale pre-fix render at the run-directory root (60969 bytes, 2026-11-02 22:25, still carrying the red booking-tangent series the head replaced) was not judged. Every verdict was formed on the PNG at native resolution and on magnified views of it (2x of the top band, 6x and 10x of the coincident-series markers); no SVG and no other image was opened, rendered, searched or shown.",
-  "completed_at": "",
+  "completed_at": "2026-11-03T06:15:22.025Z",
   "dispatched_at": "2026-11-03T05:56:29Z",
   "figure_checks": {
     "caption": "The caption is not a restatement of a title: the figure carries no title, and the caption names the state (diverted 550-cell, one H200), the axes, the sampling floor (minimum of five calls per point), the reading, and the truncation of the read and whole-step series with its cause. It does not warn that the assembly is hidden by the tangent drawn over it. The two img elements and the numerically wrong 'stay near 109 and 111 at every batch size' claim are findings 3 and 4.",
@@ -92,6 +92,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-03T06:15:26.156457+00:00",
+  "timestamp": "2026-11-03T06:21:37.805092+00:00",
   "total": null
 }

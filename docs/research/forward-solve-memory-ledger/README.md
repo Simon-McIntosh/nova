@@ -13,3 +13,8 @@ reached, the flux-map `memory_analysis()` and StableHLO size, and
 was stopped.
 
 It is a partial record of an interrupted run, not the study's measurement.
+
+The log opens with the `# command:` line that produced it, so the receipt can be
+re-run without reading this file. Re-running writes `ledger-cpu.json` here; the
+archived ledger's `output_path` field records the scratch directory this run
+actually used.

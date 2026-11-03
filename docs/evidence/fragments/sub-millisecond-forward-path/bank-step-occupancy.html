@@ -1,0 +1,50 @@
+<section id="bank-step-occupancy-landing">
+  <h2>Warm Newton step spends most of its wall on the H200</h2>
+  <p id="bank-step-occupancy-summary">The unsynchronised, one-slice, 550-cell Newton call takes 43.736 ms at the archived base and 29.185 ms with bucketed cut cells, measured sequentially in one reserved H200 allocation. The device trace contains 40.021 and 25.308 ms of activity. Relative to the normal warm wall, those are 91.5% and 86.7% occupied: device work dominates both arms. Both converged with a fresh read, at residuals 2.553e-11 and 3.254e-11, below 1e-10.</p>
+
+  <figure id="bank-step-occupancy-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-step-occupancy/occupancy.svg" alt="Linear busy and idle bars for base and bucketed H200 warm Newton steps">
+    <figcaption>The bars show the profiled calls: device-event busy time is green; the rest of the trace wall, including profiler overhead, is grey. Base trace wall is 48.006 ms and bucketed trace wall is 35.346 ms. Normal unprofiled medians are lower, 43.736 and 29.185 ms, and supply the operational occupancy estimate in the table. The data-ink SVG passed the text-boundary and overlap check, was rendered to PNG, and was visually inspected.</figcaption>
+  </figure>
+
+  <table id="bank-step-occupancy-measurements">
+    <caption>One warm call per profiler trace, with one block-until-ready at its end; normal wall is the median of three separate warm calls without the profiler. Device time is the union of all GPU event intervals, including copies and memsets, so concurrent events are not double-counted.</caption>
+    <thead><tr><th>Measure</th><th>Base</th><th>Bucketed</th></tr></thead>
+    <tbody>
+      <tr><td>Normal wall [ms]</td><td>43.736</td><td>29.185</td></tr>
+      <tr><td>Profiled wall [ms]</td><td>48.006</td><td>35.346</td></tr>
+      <tr><td>GPU busy [ms]</td><td>40.021</td><td>25.308</td></tr>
+      <tr><td>Busy / normal wall, estimate</td><td>0.915</td><td>0.867</td></tr>
+      <tr><td>Busy / profiled wall, directly paired</td><td>0.834</td><td>0.716</td></tr>
+      <tr><td>GPU kernels</td><td>2,805</td><td>3,195</td></tr>
+      <tr><td>Separate Python jit dispatches / step</td><td>1</td><td>1</td></tr>
+      <tr><td>Python host syncs inside / at end</td><td>0 / 1</td><td>0 / 1</td></tr>
+      <tr><td>XLA device-to-host copies / bytes</td><td>74 / 95</td><td>74 / 95</td></tr>
+      <tr><td>Fresh-read residual / steps</td><td>2.553e-11 / 6</td><td>3.254e-11 / 4</td></tr>
+    </tbody>
+  </table>
+
+  <p id="bank-step-occupancy-boundaries">The timed boundary is <code>jax.jit</code> at <code>scripts/prototypes/bank_step_occupancy/arm.py:73</code>, calling <code>support_read.newton_step</code> at <code>arm.py:74</code> and <code>nova/equilibrium/support_read.py:1288</code>; it dispatches once at <code>arm.py:92</code> and synchronises once at <code>arm.py:93</code>. The profiler repeats that boundary at <code>arm.py:112–113</code>. The read at <code>arm.py:63–67</code> and fresh-residual evaluation at <code>arm.py:68–72</code> are separate jit boundaries outside the measured step. The solve's <code>np.asarray</code> conversions in <code>arm.py:27–31</code> and <code>arm.py:136</code> occur after those calls for the fresh-read check. There is no <code>.item()</code>, <code>float()</code>, <code>bool()</code> or <code>np.asarray()</code> of a device value inside <code>newton_step</code> or its compiled call chain. The NumPy arrays in <code>support_read.py:596–598</code> are static polynomial tables formed during tracing, not device-to-host transfers.</p>
+  <p id="bank-step-occupancy-runtime-copies">The 74 device-to-host events are visible in each trace even though the Python step has no host materialization. XLA copies 71 one-byte predicates to pinned host memory and three eight-byte values to pageable memory. The trace attributes them to compiled <code>while</code>, <code>cond</code> and <code>eigh</code> operations (51, 10 and 3 events, plus 10 events at other while sites); these HLO operations have no separate Python jit dispatch. The copies occupy about 0.198 ms of summed event time per arm. The source-level owner is the compiled step boundary above; the profiler does not provide a Python file and line for each lowered HLO copy.</p>
+
+  <table id="bank-step-occupancy-gaps">
+    <caption>Five largest intervals with no GPU event in each trace. The host entry is the first recorded host event that begins in the gap, not a Python call; all occur within the one compiled dispatch.</caption>
+    <thead><tr><th>Arm</th><th>Gap [ms]</th><th>Preceding → following kernel</th><th>Following host event</th></tr></thead>
+    <tbody>
+      <tr><td>Base</td><td>0.550</td><td>wrapped_compare → loop_broadcast_fusion_11</td><td>command_buffer_435</td></tr>
+      <tr><td>Base</td><td>0.421</td><td>wrapped_compare → memcpy32_post</td><td>command_buffer_213</td></tr>
+      <tr><td>Base</td><td>0.411</td><td>loop_broadcast_fusion_17 → memcpy32_post</td><td>command_buffer_72</td></tr>
+      <tr><td>Base</td><td>0.401</td><td>memcpy32_post → loop_and_fusion_8</td><td>command_buffer::execute</td></tr>
+      <tr><td>Base</td><td>0.199</td><td>wrapped_compare → input_concatenate_fusion_52</td><td>command_buffer_492</td></tr>
+      <tr><td>Bucketed</td><td>0.503</td><td>wrapped_compare_1 → loop_broadcast_fusion_13</td><td>command_buffer_454</td></tr>
+      <tr><td>Bucketed</td><td>0.374</td><td>wrapped_compare_1 → memcpy32_post</td><td>command_buffer_189</td></tr>
+      <tr><td>Bucketed</td><td>0.356</td><td>memcpy32_post → loop_and_fusion_7</td><td>command_buffer::execute</td></tr>
+      <tr><td>Bucketed</td><td>0.270</td><td>loop_broadcast_fusion_19 → memcpy32_post</td><td>command_buffer_81</td></tr>
+      <tr><td>Bucketed</td><td>0.181</td><td>wrapped_compare_1 → input_concatenate_fusion_47</td><td>command_buffer_511</td></tr>
+    </tbody>
+  </table>
+
+  <p id="bank-step-occupancy-verdict">The normal-call occupancy estimate exceeds 0.8 in both arms, so the present bottleneck is device work; the bucketed change reduces that work by 14.713 ms and normal wall by 14.552 ms. Profiler overhead is material, especially at the head: it adds 6.161 ms over the normal median and lowers the directly paired trace fraction to 0.716, so that fraction alone would overstate normal host cost. The three largest base kernels are two <code>input_reduce_fusion_9</code> instances at 3.870 and 3.869 ms, then <code>loop_concatenate_fusion</code> at 2.809 ms. At the head they are two <code>input_reduce_fusion_9</code> instances at 2.277 and 2.273 ms, then a cuBLAS FP64 GEMM at 1.265 ms (full kernel name in the trace receipt). The 74 predicate/value copies and the largest host command-buffer gaps remain useful follow-up targets once device arithmetic falls further; no Python loop or extra jit boundary is inside this measured step.</p>
+
+  <p id="bank-step-occupancy-receipts">The paired H200 allocation is 1304046 on 98dci4-gpu-0003, submitted to betelgeuse with reservation <code>gpu_0003_grpA</code>, one GPU, four CPUs and 64 GB. It extracted base <code>12f122cd26af34934fa7a5f70c9919a3aa780021</code> and bucketed <code>31dad0d9a48813b2be16bfae05274be63a58cb2d</code> into separate node-local scratch trees and ran them sequentially. Arm logs <code>1304046-base-h200.log</code> and <code>1304046-bucketed-h200.log</code>, corrected all-device timeline logs with the same stems, traces and the inspected PNG are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T074008112526-bank-step-occupancy</code>. Each arm log prints its resolved source module and ends <code>EXIT=0</code>. The first allocation 1304034 supplied a positive-control base trace and solve but its copied submission script omitted a parser argument; its failed receipt remains in that directory and is not used for the comparison.</p>
+</section>

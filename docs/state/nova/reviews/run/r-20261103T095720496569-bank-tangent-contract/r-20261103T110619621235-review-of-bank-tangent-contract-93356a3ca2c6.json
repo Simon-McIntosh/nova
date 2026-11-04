@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-03T11:18:02Z",
   "dispatched_at": "2026-11-03T11:07:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-tangent-contract-93356a3ca2c6",
+      "recorded_at": "2026-11-04T08:55:26.511754+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html",

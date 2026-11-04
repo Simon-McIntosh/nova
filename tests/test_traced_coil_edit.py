@@ -200,9 +200,10 @@ def test_interactive_sweep_keeps_last_converged_seed(monkeypatch, tmp_path):
     assert receipt["rows"][1]["seed_from_edit_index"] is None
     assert receipt["rows"][2]["seed_from_edit_index"] == 1
     assert "every edit must converge" in receipt["summary"]["acceptance_failures"]
-    assert any(
-        "persistent cache" in reason
-        for reason in receipt["summary"]["acceptance_failures"]
+    assert receipt["summary"]["edit_reuse_verified"]
+    assert receipt["summary"]["persistent_lookup_events_after_first"] == 0
+    assert not any(
+        "cache" in reason for reason in receipt["summary"]["acceptance_failures"]
     )
 
 
@@ -221,3 +222,25 @@ def test_interactive_sweep_refuses_failed_acceptance(monkeypatch, tmp_path):
     with pytest.raises(SystemExit) as raised:
         coil_edit_interactive.main()
     assert raised.value.code == 1
+
+
+def test_edit_reuse_accepts_retained_program_without_cache_lookup():
+    rows = [
+        {
+            "process_program_reused": True,
+            "request_cache_hit": False,
+            "persistent_miss_events": 1,
+        },
+        {
+            "process_program_reused": True,
+            "request_cache_hit": True,
+            "persistent_miss_events": 0,
+        },
+    ]
+
+    assert coil_edit_interactive._edit_reuse_verified(rows)
+    rows[1]["persistent_miss_events"] = 1
+    assert not coil_edit_interactive._edit_reuse_verified(rows)
+    rows[1]["persistent_miss_events"] = 0
+    rows[1]["request_cache_hit"] = False
+    assert not coil_edit_interactive._edit_reuse_verified(rows)

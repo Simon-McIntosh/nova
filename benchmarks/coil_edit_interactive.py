@@ -21,6 +21,16 @@ from nova.jax.config import (
 )
 
 
+def _edit_reuse_verified(rows: list[dict[str, object]]) -> bool:
+    """Require later edits to enter one executable without a new cache miss."""
+    return all(
+        bool(row["process_program_reused"])
+        and bool(row["request_cache_hit"])
+        and int(row["persistent_miss_events"]) == 0
+        for row in rows[1:]
+    )
+
+
 def run(output: Path, carrier: Path) -> dict[str, object]:
     """Persist each warm edit immediately so an interrupted sweep is legible."""
     configure_dtypes()
@@ -114,6 +124,11 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
         "persistent_hit_events_after_first": sum(
             int(row["persistent_hit_events"]) for row in rows[1:]
         ),
+        "persistent_lookup_events_after_first": sum(
+            int(row["persistent_hit_events"]) + int(row["persistent_miss_events"])
+            for row in rows[1:]
+        ),
+        "edit_reuse_verified": _edit_reuse_verified(rows),
         "program_reused_after_first": all(
             bool(row["process_program_reused"]) for row in rows[1:]
         ),
@@ -123,8 +138,8 @@ def run(output: Path, carrier: Path) -> dict[str, object]:
         failures.append("warm median must be below 100 ms")
     if document["summary"]["converged_count"] != len(rows):
         failures.append("every edit must converge")
-    if document["summary"]["persistent_hit_events_after_first"] < len(rows) - 1:
-        failures.append("persistent cache must report a hit after every first edit")
+    if not document["summary"]["edit_reuse_verified"]:
+        failures.append("later edits must reuse the executable without cache misses")
     document["summary"]["acceptance_failures"] = failures
     document["measurement_state"] = "complete"
     output.write_text(json.dumps(document, indent=2, default=str) + "\n")

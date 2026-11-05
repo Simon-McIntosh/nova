@@ -6,7 +6,7 @@
     "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg"
   },
   "attachment_note": "Only the attached PNG was opened and judged. No SVG and no other image was opened, read, listed, searched, rendered or shown; the drawing script and the evidence fragment were read from the reviewed head and are cited only to anchor findings and provenance. Provenance is by decoding rather than by assumption: plot.py:64 declares figsize=(14, 7.2) at dpi=100, which is 1399x720 after matplotlib's integer rounding, and the three marks decode to 1.400, 0.646 and 1.709 s against the reviewed evidence table's 1.398, 0.645 and 1.710 s. This render is not the one judged at the previous figure review: that review recorded bars at 1.123, 0.658 and 1.869 s on ticks 0.5/0.9/1.4/1.9, whereas this attachment carries round ticks and the refreshed walls, consistent with 5d27b275b and 029970018 touching the figure after it.",
-  "completed_at": "",
+  "completed_at": "2026-11-05T06:20:45.843Z",
   "dispatched_at": "2026-11-05T06:11:00Z",
   "evidence_inputs": [
     "The attached PNG decodes to 1.400, 0.646 and 1.709 s against the reviewed evidence table's 1.398, 0.645 and 1.710 s rows, so the figure and the table reconcile.",

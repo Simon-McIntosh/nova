@@ -31,6 +31,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "value-label contrast in the figure of a rejected experiment; values are tabled in the fragment",
+      "recorded_at": "2026-11-05T05:56:00.236245+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_tangent_contract/plot.py",

@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1477 _panel_display_map calls build_display_flux_map without promoted or compensation"
+  ],
+  "completed_at": "2026-11-05T15:51:48.193Z",
+  "dispatched_at": "2026-11-05T15:44:58Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "f9870d5d70a",
+      "line": "378",
+      "severity": "non-blocking",
+      "text": "non-blocking: nearest_promoted_to_xpoint_m is measured from the caller's xpoint_rz seed, while its docstring at :265 states the distance is taken to the polished X-point; the polished position is saddle_rz computed at :355-357, so a producer that seeds off a coarse guess records the distance to the seed rather than to the X-point the field name and caption claim."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "f7d156dac0a",
+      "line": "290",
+      "severity": "non-blocking",
+      "text": "non-blocking: the done_when names a test on a converged coil-edit-shaped state modelled on tests/test_promoted_mask_result.py's warm MAST edit, run as one H200 job; the landed test builds a manufactured 9x9 FluxLattice from _profile() and hand-sets promoted[[10,11,20]], so no solve-produced promoted_mask is ever exercised and the ForwardEquilibrium.promoted_mask plumbing the goal names is untested end-to-end. The substitution is disclosed in the manifest's evidence_inputs and blockers."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "fb40c50b1df",
+      "line": "398",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only production call site, benchmarks/coil_edit_latency.py:1477, passes neither promoted nor compensation, so max_solved_node_mismatch_wb degenerates to max_node_mismatch_wb, promoted_node_count is 0 and nearest_promoted_to_xpoint_m is nan in every runtime path; deferred to the coil-edit and MAST producers by the done_when, but no production code can currently populate the new receipt fields."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T144157857660-display-map-solve-currents/head-fast.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T144157857660-display-map-solve-currents/negative-control.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Searched build_display_flux_map across nova/, tests/, benchmarks/, apps/ and scripts/: the single non-test caller is benchmarks/coil_edit_latency.py:1477, which does not pass the new parameters.",
+    "diff": "Read all three commits against the base: d35aaf1dc changes nova/equilibrium/display_flux.py and tests/test_display_flux.py, 6939118bf adds docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg, and 028d56c35 adds docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html.",
+    "done_when": "The done_when names a converged coil-edit-shaped state with at least one promoted node asserting max_solved_node_mismatch_wb at most ten times its residual, slow-marked and run as one H200 job; tests/test_display_flux.py:319 asserts the ten-residual bound on a manufactured 9x9 lattice with three hand-set promoted nodes, head-fast.log ends 9 passed with EXIT=0, and negative-control.log ends 1 failed with EXIT=1 at the same assertion.",
+    "goal": "The goal is to draw the display map from the solve's own currents and judge it on the nodes the solve claims; nova/equilibrium/display_flux.py:289-341 adds the promoted mask exclusion and :154-166 adds the compensation conductor-current term, and :398-400 report the three new fields beside an unchanged max_node_mismatch_wb at :397.",
+    "manifest": "The source manifest states status complete, names commits d35aaf1dc, 6939118bf and 028d56c35, records the gate command and its 9-passed result, names head-fast.log and negative-control.log, and discloses the manufactured-state substitution and the deferred real-machine arm in evidence_inputs and blockers.",
+    "write_paths": "The source brief's fence grants nova/equilibrium/display_flux.py, tests/test_display_flux.py, docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html and docs/figures/separatrix-spline-extraction/display-map-solve-currents; git diff 87e6c326426ac3212f1da5cf8f88a5dc5e40b39c..028d56c3520837ab2ed47b93197dcb3f2469d25b changes exactly those four paths."
+  },
+  "justifications": {
+    "durability": "tests/test_display_flux.py:318-324 fails if the promoted mask is ignored (the 0.05 Wb paste would reach max_solved_node_mismatch_wb) and :354 fails if the compensation term is dropped, and negative-control.log shows the latter class of mutation reddening the assertion at :319.",
+    "evidence": "The gate asserts the ten-residual bound at tests/test_display_flux.py:319 and its result is recorded in head-fast.log (9 passed, EXIT=0), but the state is a manufactured 9x9 lattice rather than the coil-edit-shaped state the done_when names, and the run is CPU rather than the named H200 job.",
+    "fit": "nova/equilibrium/display_flux.py:141-166 extends the module's existing _flux sum and dataclass idiom, uses mechanism-named identifiers, and carries no plan or ticket labels.",
+    "goal_fidelity": "nova/equilibrium/display_flux.py:289-341 takes the solve's promoted mask, keeps max_node_mismatch_wb at :397 as the all-node figure, and reports max_solved_node_mismatch_wb, promoted_node_count and nearest_promoted_to_xpoint_m at :398-400.",
+    "reuse": "The change extends the module's own DisplayFluxMap and _flux and reuses FluxTarget (:106-129) and the solve's promoted mask instead of recomputing it; a capability search over nova/equilibrium for a promoted-mask or nearest-node distance owner found none to duplicate.",
+    "scope_discipline": "Every path in git diff 87e6c326426ac3212f1da5cf8f88a5dc5e40b39c..028d56c3520837ab2ed47b93197dcb3f2469d25b is inside the brief's four fenced paths and nothing outside them changed."
+  },
+  "project": "nova",
+  "raw_text": "",
+  "review_run_id": "r-20261105T153830797594-review-of-display-map-solve-currents-028d56c35208",
+  "reviewed_base_sha": "87e6c326426ac3212f1da5cf8f88a5dc5e40b39c",
+  "reviewed_head_sha": "028d56c3520837ab2ed47b93197dcb3f2469d25b",
+  "reviewed_run_id": "r-20261105T144157857660-display-map-solve-currents",
+  "scores": {
+    "durability": 18,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T15:55:16.105143+00:00",
+  "total": 104
+}

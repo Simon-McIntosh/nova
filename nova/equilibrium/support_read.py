@@ -1502,8 +1502,10 @@ def solve_batch(
     booking keeps the cut-cell, normal-form and fragment decisions of the first
     close read while every continuous reading remains current. A changed fresh
     decision or failed contraction releases that lock. Candidate updates halve
-    until their fresh residual contracts, retaining the incumbent if none improves.
-    Factor reuse is opt-in because extra iterations can cost more than refactors.
+    until their fresh residual contracts. If no halving improves the incumbent,
+    retain the smallest-residual valid trial: retaining the incumbent can stall
+    at a non-smooth residual plateau above tolerance. Factor reuse is opt-in
+    because extra iterations can cost more than skipped refactors.
     """
     lanes, cells = moments[0].shape
     support = read_batch(
@@ -1703,6 +1705,7 @@ def solve_batch(
             active=active,
             max_steps=8,
             tolerance=tolerance,
+            keep_incumbent=False,
         )
         candidate, next_read, next_norm = (
             search.state,

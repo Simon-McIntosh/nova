@@ -130,7 +130,7 @@ def test_frozen_set_keeps_fresh_continuous_area(monkeypatch):
             fresh_residual,
         )
         result = _unit_update(operands, moments, support, *args, **kwargs)
-        return result._replace(update=(-0.1 * result.update[0], *result.update[1:]))
+        return result._replace(update=(0.1 * result.update[0], *result.update[1:]))
 
     monkeypatch.setattr(support_read, "read_batch", read)
     monkeypatch.setattr(support_read, "step_residual", residual)
@@ -164,7 +164,7 @@ def test_frozen_set_keeps_fresh_continuous_area(monkeypatch):
         fresh_residual,
         relative_residual_gap,
     )
-    assert boundary < 0 and relative_residual_gap <= 1e-12
+    assert boundary > 0 and relative_residual_gap <= 1e-12
 
 
 def test_fragment_switch_forces_fresh_extra_step(monkeypatch):
@@ -397,6 +397,19 @@ def test_dyadic_search_keeps_incumbent_and_rejects_invalid_trials():
     np.testing.assert_array_equal(result.auxiliary, result.state)
     np.testing.assert_array_equal(result.scale, [0.5, 0.0, 0.0])
     np.testing.assert_array_equal(result.evaluations, [2, 3, 0])
+
+    uphill = _damped_scale(
+        lambda candidate: (candidate[0], jnp.asarray(True), candidate),
+        jnp.array([1.0]),
+        jnp.array([1.0]),
+        jnp.asarray(1.0),
+        jnp.array([1.0]),
+        max_steps=3,
+        keep_incumbent=False,
+    )
+    np.testing.assert_array_equal(uphill.state, [1.25])
+    np.testing.assert_array_equal(uphill.auxiliary, uphill.state)
+    assert float(uphill.residual) == 1.25
 
 
 @pytest.fixture(scope="module")

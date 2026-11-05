@@ -55,13 +55,19 @@ not merely carried through it.</p>
 
 <figure id="display-map-solve-currents-figure">
 <img src="/nova/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg"
-     alt="Left: the 9 by 9 lattice with three promoted nodes marked and the X-point seed. Right: map-minus-state at every lattice node on a logarithmic axis, the solved nodes at the fixed-point residual and the promoted nodes at 5e-2 Wb, with hollow markers showing the same nodes when the compensating conductor flux the constrained route carries is withheld."/>
-<figcaption>The lattice with its promoted set, and the per-node deviation of the
-map from the converged state for the two populations. Promoted nodes carry a
-piece of the iterate no field of currents reproduces, so the unmasked figure is
-their paste; the nodes the solve claims sit at the residual. The hollow markers
-are the same nodes with the constrained rows' compensating conductor flux
-withheld, which is the quantity the constrained route images with.</figcaption>
+     alt="Left: a 9 by 9 lattice with 78 solved nodes as grey dots, three promoted nodes as red diamonds, and a cross marking the X-point seed. Right: absolute map-minus-state mismatch in mWb, with the same filled markers and hollow circles for solved nodes when compensation is withheld. A shared legend identifies all markers."/>
+<figcaption>Manufactured 9&nbsp;&times;&nbsp;9 lattice: 78 solved nodes (grey
+filled circles), three promoted nodes (red diamonds), and the supplied X-point
+seed (cross), which is not a certified saddle. The same colours and shapes name
+the populations in both panels. The solved-node mismatch peaks at
+5.684e-10&nbsp;mWb, equal to the fixed-point residual; the promoted nodes carry
+50.0&nbsp;mWb of pasted trial-state mismatch. Hollow circles show only the
+78 solved nodes with compensation withheld, reaching 8.000&nbsp;mWb.
+The dotted line is ten residuals. The vertical scale is logarithmic above
+1e-10&nbsp;mWb and linear below it, so every sample, including zero, remains
+visible without a plotting floor. The legend sits outside the data and the
+annotation ink exceeds 4.5:1 contrast on white. Rebuild with
+<code>benchmarks/display_map_promoted_figure.py</code>.</figcaption>
 </figure>
 
 <p id="display-map-solve-currents-coil-edit">The real-machine arm of this

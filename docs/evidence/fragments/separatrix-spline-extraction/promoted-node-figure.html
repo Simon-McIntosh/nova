@@ -1,0 +1,32 @@
+<section data-reckon="evidence" id="promoted-node-figure">
+<h2>Promoted and solved nodes have one readable marker vocabulary</h2>
+<p id="promoted-node-figure-result">The committed renderer
+<code>benchmarks/display_map_promoted_figure.py</code> rebuilds the
+<a href="/nova/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg">promoted-node mismatch figure</a>
+from the manufactured fixture in <code>tests/test_display_flux.py</code>, through
+<code>build_display_flux_map</code> and the repository's checked save function.
+The shared legend identifies the grey solved nodes, red promoted diamonds,
+X-point seed and hollow compensation-withheld circles without putting a name
+on top of its data. The logarithmic scale has a linear interval at zero, so
+small mismatches remain visible. The original fragment's caption identifies
+the populations, units, scale and seed explicitly.</p>
+<table id="promoted-node-figure-measure">
+<caption>Rebuilt manufactured fixture; this is not a real-machine solve.</caption>
+<tr><th>Quantity</th><th>Measured value</th></tr>
+<tr><td>Lattice population</td><td>81 nodes: 78 solved, 3 promoted</td></tr>
+<tr><td>Solved-node maximum and fixed-point residual</td><td>5.684341886080801e-10 mWb each</td></tr>
+<tr><td>All-node maximum</td><td>49.999999999837286 mWb</td></tr>
+<tr><td>Solved-node maximum, compensation withheld</td><td>8.000000000216723 mWb</td></tr>
+<tr><td>Operator-raster reproduction relative error</td><td>0.0</td></tr>
+<tr><td>Minimum text contrast on white</td><td>7.937:1</td></tr>
+<tr><td>Checked-save violations</td><td>0 clipped labels; 0 text overlaps; 0 labels over data</td></tr>
+</table>
+<p id="promoted-node-figure-control">The defect reproduced in the starting
+SVG: the word “promoted” crossed the diamond at radius 0.8 m and height
+−0.225 m. The rebuilt SVG was rendered to a 1400 × 720 PNG and inspected.
+A scratch figure that puts “promoted” at the promoted-marker centroid is
+refused by the same save function with
+<code>ValueError: text over plotted data: 'promoted'</code>, exit 1.
+The normal rebuild exits 0. The render and control logs and the inspected PNG
+are retained with the worker manifest; no plan state is changed here.</p>
+</section>

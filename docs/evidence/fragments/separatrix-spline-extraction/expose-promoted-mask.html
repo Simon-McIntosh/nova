@@ -62,24 +62,39 @@ axis read succeeds and the promoted count is zero. A discriminating fixture
 therefore needs a diverted private-flux geometry that also carries a qualified
 axis, which this node's scope does not contain.</p>
 
-<p id="expose-promoted-mask-gate">The fast lane is green: the five tests that
-run without the slow marker pass (887&nbsp;s on the allocation node, per-test
-bound raised for that run because the repository's 300&nbsp;s expired on one
-test without an assertion failing). Those tests assert the dtype, the shape
-and the equality assertions on both routes and on the receipt; the count
-assertion that could never hold on this fixture has been removed from them
-rather than left failing. On the wall-limited fixture the all-false control
-does not discriminate, because the unmutated mask is all-false there too. The
-control that does discriminate is the one recorded above, on the warm
-coil-edit state.</p>
+<p id="expose-promoted-mask-gate">The fast lane is green at the landed head: five
+tests pass and the slow one is deselected (5 passed, 1 deselected in
+549&nbsp;s on one H200 job, 8 cores and 128&nbsp;GB, per-test bound raised to
+1800&nbsp;s for the run because the repository's 300&nbsp;s expired on one test
+without an assertion failing). Those five assert the mask's dtype, its shape
+and its equality with the solve's own terminal promoted set on the host route,
+on the compiled route, across the two routes, on the profile receipt, and on a
+solve given no trip budget. None of them asserts a promoted-node count, because
+this fixture cannot promote a node; the count assertion lives only in the slow
+test. On the wall-limited fixture the all-false mutation is not discriminated,
+because the unmutated mask is all-false there too. The control that does
+discriminate is the one recorded above, on the warm coil-edit state.</p>
+
+<p id="expose-promoted-mask-slow">The slow test runs in the same job as its own
+arm and passes (1 passed, 5 deselected in 210&nbsp;s). It replays the sweep's
+first twelve edits through the host route and asserts the terminal mask is
+non-empty and equals the mask recorded at the solve's closing read, then
+replays the last of those edits through the compiled route and asserts that
+route's returned mask is non-empty and equals the single compiled trip's own
+terminal set, read against the shadow the warm seed carries. Both routes are
+therefore covered on a state that really promotes nodes.</p>
 
 <p id="expose-promoted-mask-unmeasured">Not measured: zero added failures for
-<code>tests/test_reduced_newton.py</code>. The file exceeds this host's budget
-(a single test of it ran to 477&nbsp;s, and the earlier full-file attempt had no
-test complete in nine minutes), so no head and base pair completed; the base
-arm reached seven passes before it was stopped to free memory, and a head arm
-run beside three concurrent heavy pytest processes was killed by the memory
-watchdog (exit 137). The change is additive to that module's result types, and
-the one targeted test over the trip boundary it touches passes at head, but
-that is not the same statement and is not claimed as one.</p>
+<code>tests/test_reduced_newton.py</code>. The file does not fit one
+allocation: in the same job as the two green arms, the base arm ran four tests
+in thirty-two minutes and was cancelled by the job's time limit before it
+finished (its log ends after <code>F...</code>, with no summary line), and the
+head arm never started. What those four tests do establish is the opposite of
+an added failure: the file's first test,
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>,
+fails at the base revision as well, so the failure seen at head is not one this
+change introduced. The change is additive to that module's result types, and
+the tests over the trip boundary it touches pass; a whole-file base and head
+pair is still owed, and splitting that file into its own long-lived allocation
+is the node that owes it.</p>
 </section>

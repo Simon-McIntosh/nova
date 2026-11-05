@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "prototype wrapper's EXIT=2 on its closing echo came after every measurement line was written; the log records them and the manifest says so; no product effect",
       "recorded_at": "2026-11-05T09:31:15.415638+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "control.py is a prototype check; the closure finding it guards is stated as not met in the fragment, so a stronger control changes no conclusion",
+      "recorded_at": "2026-11-05T09:31:26.081066+00:00"
     }
   },
   "findings": [

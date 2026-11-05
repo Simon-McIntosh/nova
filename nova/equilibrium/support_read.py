@@ -1107,6 +1107,9 @@ def _local_booking_sensitivities(
     )
 
 
+_FRESH_GEOMETRY_NODE_CAPACITY = 3
+
+
 def step_jacobian(
     operands,
     moments,
@@ -1118,7 +1121,12 @@ def step_jacobian(
     *,
     fresh_geometry: bool = False,
 ):
-    """Compose the bank with closed-form cell-local booking sensitivities."""
+    """Compose the bank with closed-form cell-local booking sensitivities.
+
+    Fresh geometry admits one Bell triangle across the curvature stencil.
+    A stencil crossing into further nodes returns a nonfinite matrix, so its
+    truncated geometry cannot supply an accepted Newton correction.
+    """
     if booked is None:
         psi = nodal_jets(operands, moments)[operands.sample_index, 0]
         booked = current.book(
@@ -1206,7 +1214,9 @@ def step_jacobian(
         )
         first = ~jnp.any(duplicate, axis=1)
         count = jnp.sum(first, dtype=jnp.int32)
-        nodes = stencil[jnp.nonzero(first, size=stencil.size, fill_value=0)[0]]
+        nodes = stencil[
+            jnp.nonzero(first, size=_FRESH_GEOMETRY_NODE_CAPACITY, fill_value=0)[0]
+        ]
         jet_rows = operands.rows[nodes]
         channels = jnp.transpose(jet_rows, (0, 3, 2, 1)).reshape(-1, 3 * cells)
 
@@ -1221,12 +1231,14 @@ def step_jacobian(
             )
             return jnp.stack(tuple(response), axis=-1)
 
-        channel_index = jnp.arange(6 * stencil.size)
+        channel_index = jnp.arange(6 * _FRESH_GEOMETRY_NODE_CAPACITY)
         local = jax.vmap(local_channel)(channel_index)
         local = jnp.where((channel_index < 6 * count)[:, None, None], local, 0.0)
         response = jnp.einsum("kco,ki->coi", local, channels)
         response = jnp.transpose(response, (1, 0, 2)).reshape(3 * cells, 3 * cells)
-        matrix = matrix - response
+        matrix = jnp.where(
+            count <= _FRESH_GEOMETRY_NODE_CAPACITY, matrix - response, jnp.nan
+        )
     return matrix
 
 
@@ -1677,7 +1689,7 @@ def solve_batch(
 
         correction = jax.lax.cond(
             rebuild,
-            lambda _: jax.lax.map(one_fresh, (state, step_support)),
+            lambda _: jax.vmap(one_fresh)((state, step_support)),
             lambda _: jax.lax.map(one_with_factor, (state, step_support, factor)),
             None,
         )

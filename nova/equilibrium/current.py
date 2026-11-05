@@ -792,27 +792,20 @@ def book_tangent_channels(
         indices = jnp.nonzero(mask, size=cells, fill_value=0)[0]
         indices = jnp.pad(indices, (0, (-cells) % width))
 
-        def add_batch(carried, batch):
+        def add_batch(batch, carried):
             start = batch * width
             selected = jax.lax.dynamic_slice(indices, (start,), (width,))
             active = start + jnp.arange(width) < count
+            response = jax.vmap(evaluate)(selected)
+            return carried.at[selected].add(
+                jnp.where(active[:, None, None], response, 0.0)
+            )
 
-            def integrate(values):
-                response = jax.vmap(evaluate)(selected)
-                return values.at[selected].add(
-                    jnp.where(active[:, None, None], response, 0.0)
-                )
-
-            return jax.lax.cond(
-                start < count, integrate, lambda value: value, carried
-            ), None
-
-        result, _ = jax.lax.scan(
-            add_batch,
-            jnp.zeros_like(whole),
-            jnp.arange(len(indices) // width),
+        # A batched conditional evaluates both branches. Bound the loop by
+        # the selected population so empty padded buckets never integrate.
+        return jax.lax.fori_loop(
+            0, (count + width - 1) // width, add_batch, jnp.zeros_like(whole)
         )
-        return result
 
     normal = cut & read.normal_form_cells
     cuts = integrate_bucket(cut & ~normal, batch_width, conic_cell)

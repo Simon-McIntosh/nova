@@ -108,8 +108,10 @@ def main():
                 output[f"{lanes}:{data['name']}"] = data["median_ms"]
 
         with patch.object(timer, "emit", emit):
+
             def function(b, m, s, p):
                 return jacobians(b, m, s, p, profile, quadrature)
+
             result = timer.measure("assembly", function, bank, states, support, booked)
             assert np.isfinite(np.asarray(result)).all()
             if args.matrices:
@@ -125,8 +127,10 @@ def main():
                     ("vmap", lambda f, x: jax.vmap(f)(x)),
                 ):
                     for name in ("local", "geometry"):
+
                         def function(b, m, s, p, f=functions[name], mapper=mapper):
                             return mapper(lambda x: f(b, *x), (m, s, p))
+
                         timer.measure(
                             f"{name}_{mapping}", function, bank, states, support, booked
                         )
@@ -167,6 +171,10 @@ def main():
             ),
         ):
             cycle.main()
+        if args.arm == "head":
+            from scripts.prototypes.bank_step_booking_batch.control import main
+
+            main(args.run, args.revision)
 
 
 if __name__ == "__main__":

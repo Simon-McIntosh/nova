@@ -1,0 +1,61 @@
+<!-- fragment: autotune-off-gpfs-measure -->
+<section id="autotune-off-gpfs-measure">
+<h3>The gate's autotune writes stopped while the compile cache still served the certificate</h3>
+
+<p>The current-main titan certificate row ran twice at
+<code>ab5f5e4d659f80eca58c0d9edae90a810cad9de0</code> (jobs
+<code>1304315</code> and <code>1304320</code>). Both passed. The scan counted
+31,667 existing files under the served pin's autotune subdirectory before and
+after each run, a zero-file delta against a nonzero positive control. The second
+pass reported 268 compile-cache hits, zero misses and zero compile seconds.
+The first pass reported 241 hits and 27 misses.</p>
+
+<p>The H200 four-arm harness ran as one job (<code>1304309</code>) at
+<code>ac82024aced18088837c6d23941631ad29e9fd10</code>. All sixteen
+certificate passes exited zero. The general lane exports the autotune off
+setting, so the harness now clears that inherited value for its default arms;
+before the repair arm (a) created zero autotune files despite a passing cold
+target. After the repair its declared control held: arm (a) created 1,365
+autotune files and arm (c) created none. Each cold arm had 257 compile-cache
+misses, and every repeat had 268 hits and zero misses.</p>
+
+<table id="autotune-off-gpfs-measure-arms">
+<caption>H200 cold compile wall and files created under node-local cache roots.</caption>
+<tr><th>arm</th><th>compile [s]</th><th>compile files</th><th>autotune files</th><th>steady median [s]</th></tr>
+<tr><td>a: JAX default</td><td>50.0</td><td>257</td><td>1365</td><td>80.1</td></tr>
+<tr><td>b: warm autotune</td><td>47.0</td><td>257</td><td>1365</td><td>81.3</td></tr>
+<tr><td>c: cache off</td><td>54.0</td><td>257</td><td>0</td><td>86.7</td></tr>
+<tr><td>d: autotuner off</td><td>48.0</td><td>257</td><td>12</td><td>88.9</td></tr>
+</table>
+
+<p>The seven-second cold compile difference between arms (b) and (c) is about
+27 ms per miss at the guard's one-second per-program resolution. The three
+steady solve ranges overlap for some arms in this sequential measurement, so the
+recommendation remains to keep the fusion autotuner enabled and set XLA's
+persistent caches to <code>none</code>: arm (c) closes the GPFS write path, while
+arm (d) still writes twelve files. The
+<a href="/nova/research/xla-autotune-cache-on-gpfs.html">research record</a>
+holds the full table, figure, inventory and removal candidates.</p>
+
+<p><strong>Pin publication remains blocked.</strong> Four-core H200 pre-warm
+job <code>1304343</code> selected
+<code>runtime-d23b975337df890821f8</code> and wrote 869 compile entries with
+zero autotune files, but its certificate rows hit device-memory exhaustion
+and a missing <code>analytic_oracle_hex_machine_1000.zarr</code> fixture. No row
+receipt was written, so the job was cancelled before pin publication. The
+pin still names <code>runtime-7b315420b55b91bffb05</code> at source revision
+<code>eb565ed4cd2cf248c1996df5b6171b9e22bd9fce</code>. No cache directory
+was removed: the old pin remains live, and the user-cache paths lie outside
+this worker's write grant. The pre-warm input and allocation repair is required
+before a fresh pin and lane dry-run verification can land.</p>
+<p>A dedicated pre-warm worker launched H200 job <code>1304470</code> with a
+single fixture-floor row and local oracle storage. Its fixture-floor receipt
+passed (status 0, 34 compile seconds, 651 hits and 3,784 misses), but the
+compile-identity row failed (status 1, 365 compile seconds, 900 hits and 10
+misses): the terminal-state flux difference was <code>4.4786e-11</code> against
+a <code>1e-14</code> limit. The pre-warm publisher requires every row to pass,
+so this attempt cannot publish a fresh pin. The pin still names the old
+runtime. Repair of the failing test or its pre-warm row selection lies outside
+this worker's write grant; a completed successful receipt, zero-autotune count
+and lane resolution are still needed for a publication claim.</p>
+</section>

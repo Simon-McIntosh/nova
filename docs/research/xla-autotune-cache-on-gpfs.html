@@ -18,9 +18,9 @@
 <body>
 <main class="plan-doc">
 <header>
-<p class="eyebrow">Cache measurement · titan job 1290668 · H200 job 1290845 · measured 2026-10-20</p>
+<p class="eyebrow">Cache measurement · titan jobs 1304315/1304320 · H200 job 1304309 · updated 2026-11-03</p>
 <h1>XLA autotune cache writes on GPFS</h1>
-<p class="lede"><strong>The per-fusion autotune cache buys nothing measurable on the certificate target, and the two ways of turning it off are not equivalent.</strong> Four arms were measured on one titan P100, then repeated on one H200 NVL: the JAX default on a cold cache, the compile cache cleared with the autotune subtree kept, the persistent cache's XLA caches set to <code>none</code>, and the experimental fusion autotuner disabled by XLA flag. Compile wall, steady solve wall and the files each arm left under its cache root separate the four. Disabling the autotuner leaves twelve autotune files behind; setting the XLA cache to <code>none</code> leaves none.</p>
+<p class="lede"><strong>Turning XLA's per-fusion autotune cache off stopped GPFS autotune writes while the persistent compile cache kept serving warm programs.</strong> Four arms were measured on one titan P100, then repeated on one H200 NVL: the JAX default on a cold cache, the compile cache cleared with the autotune subtree kept, the persistent cache's XLA caches set to <code>none</code>, and the experimental fusion autotuner disabled by XLA flag. Compile wall, steady solve wall and the files each arm left under its cache root separate the four. Disabling the autotuner leaves twelve autotune files behind; setting the XLA cache to <code>none</code> leaves none.</p>
 </header>
 
 <h2 id="s1">§1 — What was measured</h2>
@@ -114,9 +114,78 @@
   <figcaption>Per arm, H200 job 1290845: the cold compile wall as one bar (blue, one measurement per arm), and the three steady-state solve passes as points (amber) with a rule at their median — three points per arm and a median tick, not a bar of the median. The compile bars sit within 40.0 to 45.0&nbsp;s of each other, one program's rounding. The points are the honest reading of the steady state: an arm's three passes span up to 6.6&nbsp;s and the arms' spans overlap, so arm (a)'s median sits 1.2&nbsp;s below arm (d)'s while (d)'s fastest pass is within 2&nbsp;s of (a)'s slowest.</figcaption>
 </figure>
 
+<section id="h200-current">
+<h2>Four-arm H200 remeasurement with the lane off setting</h2>
+<p>At revision <code>ac82024aced18088837c6d23941631ad29e9fd10</code>, job <strong>1304309</strong> ran the four-arm harness on one H200 NVL. The general launcher exports <code>JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none</code>; the harness now clears that inherited setting for arms (a), (b) and (d), so arm (a) actually exercises JAX's default and the negative control can speak. All sixteen target passes passed. Arm (a) created <strong>1,365</strong> autotune files and arm (c) created <strong>zero</strong>: <code>NEGATIVE_CONTROL=holds arm_a=1365 arm_c=0</code>.</p>
+<table>
+<caption>One cold certificate pass and three steady passes per arm, H200 job 1304309. Cold compile wall sums the guard's per-program seconds; steady values are whole pytest-process walls. The first cache pair is cold hits/misses; each repeat had 268 hits and 0 misses.</caption>
+<thead><tr><th>Arm</th><th>Cold pass [s]</th><th>Cold compile [s]</th><th>Cold hits/misses</th><th>Steady passes [s]</th><th>Steady median [s]</th><th>Compile files</th><th>Autotune files</th></tr></thead>
+<tbody>
+<tr><th>(a) JAX default</th><td>142.3</td><td>50.0</td><td>11/257</td><td>76.1 / 80.1 / 86.6</td><td>80.1</td><td>257</td><td>1365</td></tr>
+<tr><th>(b) compile cleared, autotune kept</th><td>139.3</td><td>47.0</td><td>11/257</td><td>81.3 / 81.6 / 79.6</td><td>81.3</td><td>257</td><td>1365</td></tr>
+<tr><th>(c) autotune cache off</th><td>159.2</td><td>54.0</td><td>11/257</td><td>93.8 / 86.7 / 84.8</td><td>86.7</td><td>257</td><td>0</td></tr>
+<tr><th>(d) fusion autotuner off</th><td>145.8</td><td>48.0</td><td>11/257</td><td>91.0 / 88.9 / 83.0</td><td>88.9</td><td>257</td><td>12</td></tr>
+</tbody></table>
+<figure>
+<img src="/nova/figures/forward-solver-route-integrity/autotune-off-gpfs-measure/xla-autotune-arms-walls.svg" alt="Cold compile wall bars and three separate steady solve points per arm, with median ticks">
+<figcaption>H200 job 1304309. Blue bars are one cold compile measurement per arm; amber points are three steady solves and short lines mark their medians. The 47 versus 54 second cold compile difference between arms (b) and (c) is 7 seconds over 257 cold misses, about 27 ms per miss at the guard's one-second resolution. Solve walls overlap between the default and cache-off arms, and the arms ran sequentially, so this small sample does not isolate a solve-wall effect from node load.</figcaption>
+</figure>
+<p><strong>Recommendation:</strong> keep the fusion autotuner enabled and set the persistent XLA cache setting to <code>none</code>. The cache-off arm wrote no autotune file while still giving all three warm passes 268 compile-cache hits and zero misses. The alternative XLA flag wrote 12 autotune files. The 7-second cold compile difference is small beside the full pass wall and the one-second per-program resolution; it does not justify a GPFS write path that has already blocked H200 teardown. The full per-program receipt is <code>h200-arms-fixed.json</code>, with each pass log under <code>h200-arm-logs-fixed/</code> in the worker run directory.</p>
+</section>
+
 <h2 id="s4">§4 — What this measurement does not cover</h2>
 
-<p>One row of one driver on one P100, three repeats per arm, one cold pass each; the six certificate rows are not measured individually. The steady walls carry a spread of 152 to 222&nbsp;s across the table, most of which is node load rather than cache configuration, so no claim here rests on a solve-wall difference smaller than that scatter. The per-program compile record resolves to whole seconds. Inventorying the pinned root's contents and listing what may be removed belong to the node that owns the cache configuration; this page records only what the four arms created under their own fresh roots.</p>
+<p>One row of one driver on one P100, three repeats per arm, one cold pass each; the six certificate rows are not measured individually. The steady walls carry a spread of 152 to 222&nbsp;s across the table, most of which is node load rather than cache configuration, so no claim here rests on a solve-wall difference smaller than that scatter. The per-program compile record resolves to whole seconds. The cache-root inventory and removal candidates are recorded below; the four-arm measurement itself used fresh node-local roots.</p>
+
+<section id="cache-inventory">
+<h2>Cache directory inventory before republishing the pin</h2>
+<p>Each row counts files beneath one runtime directory, or beneath the separate kernel cache. Compile entries end in <code>-cache</code>; autotune entries lie beneath <code>xla_gpu_per_fusion_autotune_cache_dir</code>. The last-write timestamp is the latest file modification, in UTC. The pinned directory was still serving a titan gate when this snapshot was taken, so no removal is claimed here.</p>
+<table>
+<caption>Cache roots observed on 2026-11-03, before the new pre-warm pin. Full paths and counts are retained in the run receipt.</caption>
+<thead><tr><th>Root</th><th>Directory</th><th>Compile files</th><th>Autotune files</th><th>Other files</th><th>Last write UTC</th></tr></thead>
+<tbody>
+<tr><td>user runtime</td><td><code>runtime-0340c6126519e4c6742a</code></td><td>97</td><td>0</td><td>98</td><td>2026-09-09T11:45:49</td></tr>
+<tr><td>user runtime</td><td><code>runtime-0745ecebea4cb264e054</code></td><td>1441</td><td>92098</td><td>1436</td><td>2026-10-23T21:35:17</td></tr>
+<tr><td>user runtime</td><td><code>runtime-25e085280f54263e1c4c</code></td><td>1</td><td>46</td><td>2</td><td>2026-09-09T13:20:50</td></tr>
+<tr><td>user runtime</td><td><code>runtime-5bb51ee8af2abbf38d62</code></td><td>69</td><td>0</td><td>70</td><td>2026-11-03T08:24:59</td></tr>
+<tr><td>user runtime</td><td><code>runtime-6f30831af8e50c9f8d3a</code></td><td>91</td><td>0</td><td>92</td><td>2026-09-16T21:38:35</td></tr>
+<tr><td>user runtime</td><td><code>runtime-6fdae1ee7e31f3aa7070</code></td><td>100</td><td>1887</td><td>101</td><td>2026-09-09T13:00:09</td></tr>
+<tr><td>user runtime</td><td><code>runtime-89e087bb65e20c5fe0c9</code></td><td>31</td><td>0</td><td>32</td><td>2026-10-06T01:17:57</td></tr>
+<tr><td>user runtime</td><td><code>runtime-ab0dbbc67db2b33418b7</code></td><td>17</td><td>342</td><td>18</td><td>2026-09-08T14:20:55</td></tr>
+<tr><td>user runtime</td><td><code>runtime-abdc43c0d16f90d9417b</code></td><td>12</td><td>0</td><td>13</td><td>2026-09-02T10:19:58</td></tr>
+<tr><td>user runtime</td><td><code>runtime-af490bab7ca473174d70</code></td><td>91</td><td>0</td><td>92</td><td>2026-11-03T02:37:30</td></tr>
+<tr><td>user runtime</td><td><code>runtime-cb82fcedca3c49a48216</code></td><td>0</td><td>0</td><td>1</td><td>2026-09-07T10:28:17</td></tr>
+<tr><td>user runtime</td><td><code>runtime-cbd2c52be4da4657e887</code></td><td>4</td><td>0</td><td>5</td><td>2026-09-16T21:06:01</td></tr>
+<tr><td>user runtime</td><td><code>runtime-d5aa9180337b1ddf4186</code></td><td>110</td><td>5915</td><td>111</td><td>2026-10-03T15:05:03</td></tr>
+<tr><td>user runtime</td><td><code>runtime-dfec7ea6a46f05232fe7</code></td><td>51</td><td>0</td><td>52</td><td>2026-11-03T09:16:58</td></tr>
+<tr><td>user runtime</td><td><code>runtime-ea5c55820be3d80549fe</code></td><td>2458</td><td>0</td><td>2459</td><td>2026-10-23T20:33:50</td></tr>
+<tr><td>user runtime</td><td><code>runtime-f204a4500ecf846ca010</code></td><td>41</td><td>0</td><td>42</td><td>2026-09-23T10:03:17</td></tr>
+<tr><td>user runtime</td><td><code>runtime-ff159320363a74a93b07</code></td><td>10</td><td>2472</td><td>11</td><td>2026-09-14T19:53:53</td></tr>
+<tr><td>kernel</td><td><code>kernels</code></td><td>333</td><td>5274</td><td>334</td><td>2026-08-24T00:44:33</td></tr>
+<tr><td>pinned</td><td><code>runtime-0745ecebea4cb264e054</code></td><td>157</td><td>17761</td><td>158</td><td>2026-10-04T02:36:45</td></tr>
+<tr><td>pinned</td><td><code>runtime-7b315420b55b91bffb05</code></td><td>18987</td><td>31667</td><td>0</td><td>2026-11-03T09:19:14</td></tr>
+<tr><td>pinned</td><td><code>runtime-af490bab7ca473174d70</code></td><td>13</td><td>0</td><td>14</td><td>2026-11-03T03:32:35</td></tr>
+<tr><td>pinned</td><td><code>runtime-d23b975337df890821f8</code></td><td>2</td><td>0</td><td>0</td><td>2026-10-20T06:38:03</td></tr>
+<tr><td>pinned</td><td><code>runtime-d5aa9180337b1ddf4186</code></td><td>13</td><td>3037</td><td>14</td><td>2026-09-23T07:20:53</td></tr>
+<tr><td>pinned</td><td><code>runtime-dfec7ea6a46f05232fe7</code></td><td>18</td><td>0</td><td>19</td><td>2026-11-03T01:55:04</td></tr>
+<tr><td>pinned</td><td><code>runtime-ea5c55820be3d80549fe</code></td><td>295</td><td>0</td><td>296</td><td>2026-10-03T17:14:11</td></tr>
+</tbody></table>
+<p>The removal candidates after the off-switch are the autotune subtrees in the user runtime and kernel caches. The pinned <code>runtime-7b315420b55b91bffb05</code> directory is removable only after the new pin is published and no running gate serves it; unlike the user-cache subtrees, its compile entries are removed with the retired directory. Compile entries and access-time companions in the other user caches remain available for reuse.</p>
+</section>
+
+<section id="titan-gate">
+<h2>Current-main titan gate: no new autotune files</h2>
+<p>The certificate row <code>test_analytic_certificate_moments[550-diverted]</code> ran twice through <code>scripts/nova_lane/run.sh --force-submit --rungs titan</code> at main revision <code>ab5f5e4d659f80eca58c0d9edae90a810cad9de0</code>, jobs <strong>1304315</strong> and <strong>1304320</strong>. Both passed on the P100. The instrument counted all files below any <code>xla_gpu_per_fusion_autotune_cache_dir</code> in the served pinned directory before and after each pass: <strong>31,667 before, 31,667 after, delta 0</strong> on both. The nonzero starting count is a positive control that the scan sees existing autotune files.</p>
+<p>The first pass recorded <strong>241 compile-cache hits and 27 misses</strong>; the second recorded <strong>268 hits and 0 misses</strong>, with zero compile seconds. The unchanged autotune count and the warm second pass show that the lane's off setting closes the GPFS autotune write path while leaving persistent compile-cache reuse intact. The logs <code>titan-main-head.log</code> and <code>titan-main-head-repeat.log</code> in the worker run directory carry the source revision, per-pass guard receipt, counts and exit status.</p>
+</section>
+
+<section id="pin-attempt">
+<h2>Pre-warm publication attempt and removal listing</h2>
+<p>The eight-core <code>prewarm.sh --wait</code> submission stayed pending while a peer job held the reservation. Its four-core equivalent ran the same <code>prewarm.sh --payload</code> as one H200 job, <strong>1304343</strong>, from main revision <code>8ff5dae2a49a63fcfac9f3dd9dea53a9c8744626</code>. The payload selected <code>runtime-d23b975337df890821f8</code>, distinct from the old pinned <code>runtime-7b315420b55b91bffb05</code>. After cancellation the selected directory held 869 compile entries and <strong>zero</strong> files in any autotune subtree.</p>
+<p><strong>The pin was not republished.</strong> The certificate rows reproduced the pre-warm blockers: <code>CUDA_ERROR_OUT_OF_MEMORY</code> while attempting a 104.85 GiB device allocation, and a missing <code>analytic_oracle_hex_machine_1000.zarr</code> fixture. No row receipt was written, so the job was cancelled before it could publish a partial pin. Reading <code>prewarm-latest.json</code> afterward still gave source revision <code>eb565ed4cd2cf248c1996df5b6171b9e22bd9fce</code> and the old runtime directory. A dry run of <code>scripts/h200_test_lane/run.sh</code> showed the pinned-directory resolver in its payload prelude; evaluating that resolver still served <code>runtime-7b315420b55b91bffb05</code>, as recorded in <code>lane-dry-run.txt</code>.</p>
+<p><strong>Removal listing:</strong> nothing was removed. The 31,667 autotune files in the still-pinned directory remain because the lane serves it. The user-runtime and kernel autotune subtrees listed in the inventory table are removal candidates after the off setting is deployed, but their paths are outside this worker's write grant. The pre-warm row sizing and missing fixture also lie outside that grant. The next step is to repair those inputs, rerun the pre-warm from a stable main revision, verify its receipt and lane dry run, then retire the old pin when no running lane job names it.</p>
+<p><strong>Follow-on remains blocked.</strong> Dedicated H200 pre-warm job <code>1304470</code> passed its fixture-floor row with status 0, 34 compile seconds, 651 hits and 3,784 misses. Its compile-identity row completed with status 1, 365 compile seconds, 900 hits and 10 misses: <code>test_traced_exterior_preserves_the_certificate_terminal_state</code> measured a relative flux difference of <code>4.4786e-11</code> against <code>1e-14</code>. The publisher retains a failed aggregate status and therefore cannot publish this run's directory even if later rows pass. The pin and lane resolver still name the old runtime. A fully passing row receipt, zero-autotune count and lane resolution must be checked before this page claims a fresh pin.</p>
+</section>
 
 <section id="s5">
 <h2>Method and reproduction</h2>

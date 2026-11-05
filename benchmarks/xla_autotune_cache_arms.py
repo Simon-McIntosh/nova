@@ -182,6 +182,10 @@ def run_target_once(
     ]
     environment = dict(os.environ)
     environment.update(arm_environment(arm, root))
+    if arm != "c":
+        environment.pop("JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES", None)
+    if arm != "d":
+        environment.pop("XLA_FLAGS", None)
     environment["NOVA_BOOK_RESULTS"] = str(results)
     started = perf_counter()
     completed = subprocess.run(
@@ -401,13 +405,13 @@ def figure_from_receipt(
     passes = [receipt["arms"][arm]["steady_seconds"] for arm in arms]
     positions = np.arange(len(arms))
     width = 0.36
-    figure, axes = plt.subplots(figsize=(14, 6))
+    figure, axes = plt.subplots(figsize=(14, 7.2))
     axes.bar(
         positions - width / 2,
         compile_wall,
         width,
         color=COLOURS["compile"],
-        label="cold compile wall (one pass per arm)",
+        label="cold compile",
         zorder=2,
     )
     for index, values in enumerate(passes):
@@ -421,7 +425,7 @@ def figure_from_receipt(
             s=70,
             color=COLOURS["solve"],
             zorder=4,
-            label="steady-state solve pass (three per arm)" if index == 0 else None,
+            label="steady solve" if index == 0 else None,
         )
         axes.hlines(
             float(np.median(values)),
@@ -430,7 +434,7 @@ def figure_from_receipt(
             color=COLOURS["solve"],
             linewidth=2.4,
             zorder=5,
-            label="median pass" if index == 0 else None,
+            label="median" if index == 0 else None,
         )
     axes.set_xticks(positions)
     axes.set_xticklabels([f"{arm}: {ARM_LABELS[arm]}" for arm in arms])

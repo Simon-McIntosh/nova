@@ -87,6 +87,16 @@
       "note": "s8 done-when (2) now states the tolerance: the toroidal average agrees with the axisymmetric s6 result within 2 % beyond 2 m from the legs (cc22ac1a0).",
       "reason": "",
       "when": "2026-11-05T21:27:10.758976+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Prototype and imas-efit receipts copied to /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/ and cited there; the mu_r 1000 / 1 cm cell reads 1.4 % (5756b61db, cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-05T21:27:40.257185+00:00"
     }
   ],
   "responses": {
@@ -98,6 +108,15 @@
       "note": "s8 done-when (2) now states the tolerance: the toroidal average agrees with the axisymmetric s6 result within 2 % beyond 2 m from the legs (cc22ac1a0).",
       "reason": "",
       "when": "2026-11-05T21:27:10.758976+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "note": "Prototype and imas-efit receipts copied to /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/ and cited there; the mu_r 1000 / 1 cm cell reads 1.4 % (5756b61db, cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-05T21:27:40.257185+00:00"
     },
     "wiring-1": {
       "action": "acted",

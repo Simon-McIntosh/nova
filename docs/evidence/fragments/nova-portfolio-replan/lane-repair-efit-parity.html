@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EFIT parity fast lane triage</title>
+<meta name="plan" content="nova-portfolio-replan">
+<meta name="node" content="lane-repair-efit-parity">
+</head>
+<body>
+<main>
+<article id="lane-repair-efit-parity-landing" class="landing" data-node="lane-repair-efit-parity" data-plan="nova-portfolio-replan">
+<h2>EFIT parity fast lane triage</h2>
+<p>At <code>1de330a8fbf781c2db6f9734efdaf53e47fe75b4</code>, a serial five-file gate stopped inside pytest's 300 s failure formatter before a summary (<code>EXIT=3</code>). Focused reruns identified two benchmark defects outside this node's write scope. No product or test file was changed.</p>
+<table>
+<thead><tr><th>Census group</th><th>In-place observation</th><th>Cause and owner</th></tr></thead>
+<tbody>
+<tr><td>Tared external field: ten setup errors</td><td>Representative test errored in 239.43 s, <code>EXIT=1</code>: <q>not enough values to unpack (expected 5, got 4)</q>.</td><td><code>benchmarks/efit_parity_tared_external_field.py:331</code> unpacks five results from <code>ForwardFluxOperator._support_partition</code>, whose current return at <code>nova/equilibrium/forward_operator.py:3333</code> has four. The benchmark owner is outside scope.</td></tr>
+<tr><td>Boundary volume, field instrument and inductance partition: eighteen setup errors</td><td>The boundary representative errored in 203.93 s, <code>EXIT=1</code>: <q>no closed unit-boundary branch encloses the solved axis</q>. The printed branch reaches the lattice edge at <code>z = ±2</code>.</td><td>The banked terminal-state reconstruction in <code>benchmarks/efit_parity_boundary_volume.py:162</code> passes open unit contours to the strict selector in <code>benchmarks/efit_parity_root_geometry.py:139</code>; both benchmark owners are outside scope.</td></tr>
+<tr><td>Fixed boundary seed: one xdist worker crash marked out of memory</td><td>The named test passed serially in 272.16 s, <code>EXIT=0</code>.</td><td>The census crash is a lane resource outcome; no test defect reproduced in the serial allocation.</td></tr>
+<tr><td>Native grid interpolation: one missing constant</td><td>The named constrained-arm test failed in 54.74 s, <code>EXIT=1</code>, on <code>REFERENCE_NATIVE_GRID_POINTS</code>. An explicit 95-point call to <code>_benchmark_spatial_grid</code> passed with a 95 by 95 bicubic map, <code>EXIT=0</code>.</td><td><code>tests/test_forward_parity_constrained_arm.py:143</code> still expects a constant removed when the grid count became an explicit argument. The test owner is outside scope.</td></tr>
+</tbody>
+</table>
+<p>The focused logs are <code>tare-baseline.log</code>, <code>boundary-baseline.log</code>, <code>fixed-boundary-baseline.log</code>, <code>native-grid-baseline.log</code> and <code>native-grid-probe.log</code> in this node's run directory. The remaining census tests were not rerun after their shared fixture owner was found outside scope.</p>
+</article>
+</main>
+</body>
+</html>

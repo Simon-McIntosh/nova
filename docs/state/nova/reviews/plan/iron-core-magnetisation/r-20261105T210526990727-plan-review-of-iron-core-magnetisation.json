@@ -1,0 +1,89 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-05T21:17:53.920Z",
+  "dispatched_at": "2026-11-05T21:12:10Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:24",
+      "id": "wiring-1",
+      "reason": "the queue releases `s9` the moment `s6` lands, and its own done-when then cannot be met until `s8` exists, so the node either blocks or is passed with two of its three models reported.",
+      "text": "`s9` declares `depends-on: [iron-core-magnetisation#s6]`, yet its done-when (1) reports \"air core, axisymmetric iron and the limb-corrected iron\", and the limb correction is produced only by `s8`, which is `implementable` and declared to depend on `s6` alone, so nothing orders or admits `s9` after `s8`",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:24",
+      "id": "wiring-2",
+      "reason": "the pointer holds the plan's most expensive node behind an unrelated cross-repo migration that the seam does not need, and a dependency that names the wrong node is exactly the ordering error the declaration exists to prevent.",
+      "text": "`s7` (\u00a77, the elevated-risk forward-solve node) declares `depends-on: [iron-core-magnetisation#s6, forward-solve-api#s2]`, but `forward-solve-api#s2` is \"Migrate the routes onto the contract\" (unlanded), while the public seam \u00a77 names as what it waits on \u2014 `ForwardSolveRequest`/`ForwardProfile.solve` in `nova/equilibrium/solve_request.py` \u2014 landed as `forward-solve-api#s1` on 2026-09-06",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:306",
+      "id": "done_when-1",
+      "reason": "the node cannot decide a pass, and the only way to satisfy the clause as written is to choose the number after seeing the comparison, which measures nothing.",
+      "text": "\u00a78 done-when (2) requires \"its toroidal average agrees with the axisymmetric \u00a76 result beyond 2 m to within the stated tolerance\", but no tolerance is stated in \u00a78, \u00a76 or anywhere else in the plan",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:92",
+      "id": "evidence_paths-1",
+      "reason": "a headline evidence table cannot be re-read by a later node from a cache path, and the one unfinished cell shows the coupling already costing a reader the answer.",
+      "text": "the plan's prototype evidence root is `~/.cache/nova-iron-research/`, a per-user cache with no durability guarantee and outside the repository and the GPFS evidence root the project uses for receipts; it is already out of step with the plan's own table, whose \u03bc<sub>r</sub> = 1000 / 1 cm cell reads `running` (line 117) while `shell-mu1000.json` in that directory holds the completed measurement (largest relative error 0.0138)",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:166",
+      "id": "anchors_resolve-1",
+      "reason": "\u00a79 is dispatched on the broader, separately supported fact that no iron model has been checked against WEST data, so the 3 % figure sharpens the motivation without any node's work depending on it.",
+      "text": "\"in-vessel magnetics fit equally well with and without iron (BPOL and BTNG residuals change by under 3 %)\" is the claim \u00a79's premise rests on (\"Nothing yet checks any iron model against WEST data\") and no receipt, figure or log is cited for it",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:302",
+      "id": "reasoning-1",
+      "reason": "if the decay length is half the quoted figure the discrete-limb correction is confined to roughly half the radius, which changes what \u00a78 must measure and how far its \u03c6-resolved report is useful.",
+      "text": "\u00a78 states \"The n = 6 departure from the average decays over roughly R/6 \u2248 0.8 m\", which requires a major radius near 4.8 m; WEST's major radius is about 2.25\u20132.5 m, giving R/6 \u2248 0.4 m, and the plan states R nowhere, so the number cannot be checked from the plan and the \"within about 2 m of the legs\" extent that sets \u00a78's scope is derived from it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "68a28ce582593826cdb547027a8360551b8944a7",
+  "plan_fingerprint": "d1d0aa2af8bcd5ee25190803371a3f34673ec9124534edf59ce904ff214f49c0",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261105T210526990727-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "7af422bdf650ea8377350d24655687449d3c72ce",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the sentence that motivates \u00a79, \"in-vessel magnetics fit equally well with and without iron (BPOL and BTNG residuals change by under 3 %)\", carries no receipt.",
+    "done_when": "a finding \u2014 \u00a78's done-when (2) measures agreement against \"the stated tolerance\" and no tolerance is stated anywhere in the plan.",
+    "evidence_paths": "a finding \u2014 every prototype receipt is cited under `~/.cache/nova-iron-research/`, a per-user cache, and the \u00a71 table still publishes `running` for a cell that directory now answers.",
+    "naming": "pass \u2014 the new module and symbol names state mechanism (`sheet.py`, `M`\u2013`c(|B|)B`, the tile/census vocabulary); no plan label, stage name or ticket id reaches code, and \u00a71's \"defects found and fixed\" paragraph reads as prototype rationale rather than changelog prose.",
+    "reasoning": "a finding \u2014 \u00a78's decay scale \"R/6 \u2248 0.8 m\" implies a major radius of 4.8 m, and the plan never states WEST's R.",
+    "single_goal": "pass \u2014 each of `s2`\u2013`s9` names one deliverable, and the three clauses of each done-when measure that one deliverable.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` sends `s7` to `forward-solve-api#s2`, but the seam \u00a77 says it waits on landed as that plan's `s1`."
+  },
+  "section_digests": {
+    "_document": "6745ac97c9601504390ccca2658014f33e184c706f5ab9e54630410066b59baa",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "3a8c34912849443766836b77546da22e6de21ffe83b2921d0d141b7120620117",
+    "s2": "24bce76aa5ab32065d66db3da100e5613c4731b38b7bb166c5c52f3a662f5536",
+    "s3": "a2aff1947a86ca47470a9e1e03ef4b3fd539ddf15281352595549dbc7dea8bd6",
+    "s4": "945144c59aa602b9f4923f72a49d52f3d481bdc4f373dc511864e8bdeb1433ea",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "e2b5c5f00ca0e565d64fa7efeb36b813de5dff49bd9d8f9df50258b33591b167",
+    "s7": "f66aee6e99bd855a5321e3ee54b1f498723aadd9f57b16355a50fa84673f5e16",
+    "s8": "7f74d0a76c08416a7138231413b32569378e5d81d18a252eb5b801aa7317cb83",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T21:23:54.176311+00:00"
+}

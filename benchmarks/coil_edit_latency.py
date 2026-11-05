@@ -1438,6 +1438,7 @@ def _panel_display_map(
     spacing: float,
     coupling: Any = None,
     target_current: Any = None,
+    compensation: Any = None,
 ):
     """Return one stored panel state's field evaluated on the display grid.
 
@@ -1464,11 +1465,31 @@ def _panel_display_map(
         )
     if target_current is None:
         raise ValueError("a panel display map requires the solve's target current")
-    state = jnp.asarray(np.asarray(panel["psi"], dtype=np.float64).T.ravel())
+    state = jnp.asarray(
+        panel.get("state", np.asarray(panel["psi"], dtype=np.float64).T.ravel()),
+        dtype=jnp.float64,
+    )
     requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
-    moments = profile.operator.normalised_current_moments(
-        state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
-    )[0]
+    if "moments" in panel:
+        from nova.equilibrium.stencil_mesh import CellCurrentMoments
+
+        moments = CellCurrentMoments(
+            *(jnp.asarray(value) for value in panel["moments"])
+        )
+    else:
+        moments = profile.operator.normalised_current_moments(
+            state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
+        )[0]
+    compensating_current = np.asarray(
+        panel.get("compensating_current", np.zeros_like(panel["current"])), dtype=float
+    )
+    if compensation is None and np.any(compensating_current):
+        compensation = _panel_display_coupling(
+            circuit_context["group"],
+            circuit_context["row"],
+            lattice,
+            compensating_current,
+        ).external
     saddle_index = int(panel["saddle_index"])
     xpoints = np.asarray(panel["xpoints"], dtype=np.float64).reshape(-1, 2)
     seed = (
@@ -1486,6 +1507,8 @@ def _panel_display_map(
         requested_class=requested_class,
         axis_rz=np.asarray(panel["axis"], dtype=np.float64),
         xpoint_rz=np.asarray(seed, dtype=np.float64),
+        promoted=panel.get("promoted_mask"),
+        compensation=compensation,
     )
 
 
@@ -1585,6 +1608,13 @@ def _write_panel_data(
         field = _grid_field(state["psi"], state["shape"])
         payload[f"psi_{position}"] = field
         payload[f"current_{position}"] = np.asarray(state["current"], dtype=float)
+        payload[f"state_{position}"] = np.asarray(state["state"], dtype=float)
+        payload[f"promoted_mask_{position}"] = np.asarray(
+            state["promoted_mask"], dtype=bool
+        )
+        payload[f"compensating_current_{position}"] = np.asarray(
+            state["compensating_current"], dtype=float
+        )
         moments = state["moments"]
         payload[f"cell_current_{position}"] = np.asarray(moments[0], dtype=float)
         payload[f"radial_moment_{position}"] = np.asarray(moments[1], dtype=float)
@@ -1957,6 +1987,10 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
                     np.asarray(data["%s_%d" % (key, position)], dtype=float)
                     for key in ("cell_current", "radial_moment", "vertical_moment")
                 )
+                for key in ("state", "promoted_mask", "compensating_current"):
+                    name = "%s_%d" % (key, position)
+                    if name in data.files:
+                        panel[key] = np.asarray(data[name])
             panel["branches"] = _load_branches(data, "branches_%d_" % position)
             if panel["branches"] is None:
                 panel["branches"] = _assemble_raster_branches(
@@ -2115,7 +2149,10 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         axis, loaded["reference_branches"], "#3366cc", loaded["reference_separatrix"]
     )
     panel["branches_drawn"] = _draw_branch_set(
-        axis, panel["branches"], "#cc7722", panel["separatrix"]
+        axis,
+        display.branches if display is not None else panel["branches"],
+        "#cc7722",
+        panel["separatrix"],
     )
 
     _draw_null_set(
@@ -2126,11 +2163,19 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         "#3366cc",
         loaded["wall"],
     )
+    drawn_xpoints = np.asarray(panel["xpoints"], dtype=float).reshape(-1, 2).copy()
+    saddle_index = panel["saddle_index"]
+    if (
+        display is not None
+        and display.saddle_converged
+        and 0 <= saddle_index < len(drawn_xpoints)
+    ):
+        drawn_xpoints[saddle_index] = display.saddle_rz
     _draw_null_set(
         axis,
         panel["axis"],
-        panel["xpoints"],
-        panel["saddle_index"],
+        drawn_xpoints,
+        saddle_index,
         "#cc7722",
         loaded["wall"],
     )
@@ -2240,12 +2285,17 @@ def _panel_display_note(loaded: dict[str, Any]) -> str:
         if display is None:
             continue
         parts.append(
-            "the %s panel draws the normalised plasma moments of its state on a "
-            "%.0f mm map, largest node mismatch %.3e Wb"
+            "the %s panel draws the field of its terminal currents on a "
+            "%.0f mm map, largest node mismatch %.3e Wb, solved-node "
+            "mismatch %.3e Wb, %d promoted nodes, nearest promoted node "
+            "%.3f m from its polished X-point"
             % (
                 word,
                 1.0e3 * display.spacing_m,
                 display.max_node_mismatch_wb,
+                display.max_solved_node_mismatch_wb,
+                display.promoted_node_count,
+                display.nearest_promoted_to_xpoint_m,
             )
         )
     if not parts:
@@ -2281,6 +2331,11 @@ def _render_panel(
                 spacing=DEFAULT_DISPLAY_SPACING,
                 target_current=target_current,
             )
+            if panel["converged"] and "state" in panel:
+                assert (
+                    panel["display"].max_solved_node_mismatch_wb
+                    <= 10 * panel["residual"]
+                ), "converged panel's solved-node mismatch exceeds ten residuals"
     figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
 
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
@@ -2382,6 +2437,19 @@ def _render_panel(
                     ),
                     "max_node_mismatch_wb": float(
                         loaded[label]["display"].max_node_mismatch_wb
+                    ),
+                    "max_solved_node_mismatch_wb": float(
+                        loaded[label]["display"].max_solved_node_mismatch_wb
+                    ),
+                    "promoted_node_count": int(
+                        loaded[label]["display"].promoted_node_count
+                    ),
+                    "nearest_promoted_to_xpoint_m": (
+                        float(loaded[label]["display"].nearest_promoted_to_xpoint_m)
+                        if np.isfinite(
+                            loaded[label]["display"].nearest_promoted_to_xpoint_m
+                        )
+                        else None
                     ),
                     "saddle_converged": bool(
                         loaded[label]["display"].saddle_converged,
@@ -2966,6 +3034,14 @@ def run(
                     "nulls": _null_points(profile, result.state),
                     "branches": _branches_of(profile, result.state, raster_flux),
                     "current": np.asarray(current, dtype=float),
+                    "state": np.asarray(result.state, dtype=float),
+                    "promoted_mask": np.asarray(result.promoted_mask, dtype=bool),
+                    "compensating_current": np.asarray(
+                        result.compensating_current
+                        if result.compensating_current is not None
+                        else np.zeros_like(current),
+                        dtype=float,
+                    ),
                     "moments": _panel_moments(
                         profile, result.state, requested_class, target_current
                     ),
@@ -3046,6 +3122,7 @@ def run(
                 panel_figure,
                 profile=profile,
                 circuit_context=prepared.get("circuit_context"),
+                target_current=target_current,
             )
             print("PANEL=" + json.dumps(panel, sort_keys=True), flush=True)
             _write_diagnostics(diagnostics, prepared=prepared, rows=rows, panel=panel)

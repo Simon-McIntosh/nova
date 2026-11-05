@@ -21,7 +21,14 @@ import jax.numpy as jnp
 import numpy as np
 from dataclasses import replace
 
-from benchmarks.coil_edit_latency import DEFAULT_DISPLAY_SPACING, _panel_display_map
+from pathlib import Path
+
+from benchmarks.coil_edit_latency import (
+    DEFAULT_DISPLAY_SPACING,
+    _panel_display_map,
+    _panel_load,
+    _prepare_case,
+)
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import DisplayCoupling
@@ -31,6 +38,7 @@ from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 from nova.linalg.interpolant import Linear
+from benchmarks import mast_response_carrier_warm as response_carrier
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True, (
@@ -246,3 +254,27 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
         target_current=1.0e6,
     )
     assert display.reproduction_relative_error < 1.0e-10
+
+
+def test_committed_converged_panel_uses_its_terminal_currents():
+    """Read the solve's state, promotion and compensation through its producer."""
+    archive = Path(
+        "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+    )
+    loaded = _panel_load(archive)
+    panel = loaded["converged"]
+    assert panel["converged"]
+    assert panel["residual"] <= 1.0e-8
+    assert np.any(panel["promoted_mask"])
+    assert np.any(panel["compensating_current"])
+    profile, prepared, _carrier = _prepare_case(response_carrier.DEFAULT_CARRIER)
+    display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        panel,
+        spacing=DEFAULT_DISPLAY_SPACING,
+        target_current=prepared["target_current"],
+    )
+    assert display.max_solved_node_mismatch_wb <= 10 * panel["residual"]
+    assert display.promoted_node_count == int(np.count_nonzero(panel["promoted_mask"]))
+    assert np.isfinite(display.nearest_promoted_to_xpoint_m)

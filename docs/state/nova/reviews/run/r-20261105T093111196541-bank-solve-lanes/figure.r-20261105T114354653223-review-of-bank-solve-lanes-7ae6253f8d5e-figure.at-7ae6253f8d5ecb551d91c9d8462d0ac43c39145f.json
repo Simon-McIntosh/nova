@@ -8,6 +8,13 @@
   "completed_at": "2026-11-05T11:54:55.778Z",
   "dispatched_at": "2026-11-05T11:46:54Z",
   "figure_under_review": "docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking counting or style point in a measurement record; the mechanism (a period-2 cycle held by the frozen active set) stands, and the step counts are being measured directly by the cycle-fix node",
+      "recorded_at": "2026-11-05T12:02:43.531732+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_solve_lanes/plot.py",

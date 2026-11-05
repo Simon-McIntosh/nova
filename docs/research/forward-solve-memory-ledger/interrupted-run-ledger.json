@@ -1,0 +1,595 @@
+{
+  "arm": "cpu",
+  "arrays": {
+    "profile-build": {
+      "enumerated_arrays": 30,
+      "floor_bytes": 2,
+      "top": [
+        {
+          "bytes": 9487368,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.plasma_target_r"
+          ],
+          "shape": [
+            1089,
+            1089
+          ]
+        },
+        {
+          "bytes": 9487368,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.plasma_target_z"
+          ],
+          "shape": [
+            1089,
+            1089
+          ]
+        },
+        {
+          "bytes": 9487368,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.plasma_target"
+          ],
+          "shape": [
+            1089,
+            1089
+          ]
+        },
+        {
+          "bytes": 731808,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.plasma_target_r"
+          ],
+          "shape": [
+            84,
+            1089
+          ]
+        },
+        {
+          "bytes": 731808,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.plasma_target_z"
+          ],
+          "shape": [
+            84,
+            1089
+          ]
+        },
+        {
+          "bytes": 731808,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.plasma_target"
+          ],
+          "shape": [
+            84,
+            1089
+          ]
+        },
+        {
+          "bytes": 165528,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.source_target"
+          ],
+          "shape": [
+            1089,
+            19
+          ]
+        },
+        {
+          "bytes": 12768,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "FluxTarget.source_target"
+          ],
+          "shape": [
+            84,
+            19
+          ]
+        },
+        {
+          "bytes": 152,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "cell:external_current"
+          ],
+          "shape": [
+            19
+          ]
+        },
+        {
+          "bytes": 152,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": [
+            19
+          ]
+        },
+        {
+          "bytes": 152,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": [
+            19
+          ]
+        },
+        {
+          "bytes": 152,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": [
+            19
+          ]
+        },
+        {
+          "bytes": 152,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": [
+            19
+          ]
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "ForwardSource.boundary_pressure"
+          ],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [
+            "ForwardSource.boundary_field_function"
+          ],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "int32",
+          "kind": "ArrayImpl",
+          "owners": [
+            "Topology.wall_unit_offsets"
+          ],
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8,
+          "dtype": "int32",
+          "kind": "ArrayImpl",
+          "owners": [
+            "Topology.wall_unit_offsets"
+          ],
+          "shape": [
+            2
+          ]
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "MaskedConstant",
+          "owners": [
+            "cell:masked",
+            "cell:masked_singleton",
+            "cell:masked"
+          ],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "ArrayImpl",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 8,
+          "dtype": "float64",
+          "kind": "MaskedArray",
+          "owners": [],
+          "shape": []
+        },
+        {
+          "bytes": 4,
+          "dtype": "int32",
+          "kind": "ArrayImpl",
+          "owners": [
+            "cell:wall_unit_index",
+            "cell:wall_unit_index"
+          ],
+          "shape": []
+        }
+      ],
+      "total_enumerated_bytes": 30836716
+    }
+  },
+  "banner": {
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/forward-solve-memory-ledger",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-2068.iter.org",
+    "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "revision": "a51678ba2a013ad537d88f81b41d3071f1c75a7f",
+    "slurm_job_id": "1291586",
+    "slurm_partition": "rigel",
+    "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/forward-solve-memory-ledger"
+  },
+  "census_inflight": "after-warm-execute",
+  "completed": false,
+  "file_arm": "cpu",
+  "hlo": {
+    "constant_literals": 0,
+    "text_bytes": 24552507,
+    "text_lines": 22058
+  },
+  "inflight": null,
+  "memory_analysis": {
+    "alias_size_in_bytes": 0,
+    "argument_size_in_bytes": 9384,
+    "generated_code_size_in_bytes": 0,
+    "host_alias_size_in_bytes": 0,
+    "host_argument_size_in_bytes": 0,
+    "host_generated_code_size_in_bytes": 0,
+    "host_output_size_in_bytes": 0,
+    "host_temp_size_in_bytes": 0,
+    "output_size_in_bytes": 9384,
+    "peak_memory_in_bytes": 12323551,
+    "temp_size_in_bytes": 73696704
+  },
+  "operands": {
+    "bytes": {
+      "inside_material": 1089,
+      "plasma_to_grid": 9487368,
+      "plasma_to_wall": 731808,
+      "source_to_grid": 165528,
+      "source_to_wall": 12768,
+      "wall_coordinate": 1344
+    },
+    "conductor_sources": 19,
+    "grid_nodes": 1089,
+    "total_bytes": 10399905,
+    "wall_rows": 84
+  },
+  "output_path": "/dev/shm/39486-fleet-1291586/negctl/out-fixed",
+  "peak_rss": "cpu:solve-warm-execute",
+  "peak_rss_bytes": 2493943808,
+  "phases": [
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 0,
+        "live_array_count": 0
+      },
+      "phase": "cpu:import-nova-jax",
+      "rss_after": {
+        "VmHWM": 462225408,
+        "VmPeak": 8761774080,
+        "VmRSS": 462225408,
+        "ru_maxrss": 462225408
+      },
+      "rss_before": {
+        "VmHWM": 144801792,
+        "VmPeak": 940310528,
+        "VmRSS": 144801792,
+        "ru_maxrss": 144805888
+      },
+      "seconds": 13.38587372098118
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 4,
+        "live_array_count": 1
+      },
+      "phase": "cpu:producer-import",
+      "rss_after": {
+        "VmHWM": 668037120,
+        "VmPeak": 11742556160,
+        "VmRSS": 668037120,
+        "ru_maxrss": 668037120
+      },
+      "rss_before": {
+        "VmHWM": 462225408,
+        "VmPeak": 8761774080,
+        "VmRSS": 462225408,
+        "ru_maxrss": 462225408
+      },
+      "seconds": 14.080290030688047
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 4,
+        "live_array_count": 1
+      },
+      "phase": "cpu:machine-description",
+      "rss_after": {
+        "VmHWM": 1355538432,
+        "VmPeak": 13958901760,
+        "VmRSS": 1355538432,
+        "ru_maxrss": 1355571200
+      },
+      "rss_before": {
+        "VmHWM": 668041216,
+        "VmPeak": 11742556160,
+        "VmRSS": 668041216,
+        "ru_maxrss": 668041216
+      },
+      "seconds": 0.9206783189438283
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 4,
+        "live_array_count": 1
+      },
+      "phase": "cpu:operand-build",
+      "rss_after": {
+        "VmHWM": 1501020160,
+        "VmPeak": 14104195072,
+        "VmRSS": 1463066624,
+        "ru_maxrss": 1501020160
+      },
+      "rss_before": {
+        "VmHWM": 1355571200,
+        "VmPeak": 13958901760,
+        "VmRSS": 1355571200,
+        "ru_maxrss": 1355571200
+      },
+      "seconds": 51.34179250570014
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 30836704,
+        "live_array_count": 32
+      },
+      "phase": "cpu:profile-build",
+      "rss_after": {
+        "VmHWM": 2264936448,
+        "VmPeak": 14831624192,
+        "VmRSS": 1664978944,
+        "ru_maxrss": 2264936448
+      },
+      "rss_before": {
+        "VmHWM": 1501020160,
+        "VmPeak": 14104195072,
+        "VmRSS": 1463066624,
+        "ru_maxrss": 1501020160
+      },
+      "seconds": 8.458969908766448
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 61673516,
+        "live_array_count": 77
+      },
+      "phase": "cpu:solve-trace-and-lower",
+      "rss_after": {
+        "VmHWM": 2264936448,
+        "VmPeak": 15430393856,
+        "VmRSS": 1852076032,
+        "ru_maxrss": 2264936448
+      },
+      "rss_before": {
+        "VmHWM": 2264936448,
+        "VmPeak": 14831624192,
+        "VmRSS": 1677426688,
+        "ru_maxrss": 2264936448
+      },
+      "seconds": 5.900425611995161
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 61673516,
+        "live_array_count": 77
+      },
+      "phase": "cpu:solve-compile",
+      "rss_after": {
+        "VmHWM": 2397364224,
+        "VmPeak": 19049279488,
+        "VmRSS": 2397364224,
+        "ru_maxrss": 2397364224
+      },
+      "rss_before": {
+        "VmHWM": 2264936448,
+        "VmPeak": 15430393856,
+        "VmRSS": 1852076032,
+        "ru_maxrss": 2264936448
+      },
+      "seconds": 26.22572121815756
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 61682900,
+        "live_array_count": 78
+      },
+      "phase": "cpu:solve-first-execute",
+      "rss_after": {
+        "VmHWM": 2490089472,
+        "VmPeak": 19108622336,
+        "VmRSS": 2490089472,
+        "ru_maxrss": 2490089472
+      },
+      "rss_before": {
+        "VmHWM": 2397364224,
+        "VmPeak": 19049279488,
+        "VmRSS": 2397364224,
+        "ru_maxrss": 2397364224
+      },
+      "seconds": 0.7422984978184104
+    },
+    {
+      "jax": {
+        "backend": "cpu",
+        "device_memory_stats": null,
+        "devices": [
+          "cpu:0"
+        ],
+        "live_array_bytes": 61692284,
+        "live_array_count": 79
+      },
+      "phase": "cpu:solve-warm-execute",
+      "rss_after": {
+        "VmHWM": 2493943808,
+        "VmPeak": 19108622336,
+        "VmRSS": 2493943808,
+        "ru_maxrss": 2493943808
+      },
+      "rss_before": {
+        "VmHWM": 2490089472,
+        "VmPeak": 19108622336,
+        "VmRSS": 2416390144,
+        "ru_maxrss": 2490089472
+      },
+      "seconds": 0.6089953910559416
+    }
+  ],
+  "phases_completed": [
+    "cpu:import-nova-jax",
+    "cpu:producer-import",
+    "cpu:machine-description",
+    "cpu:operand-build",
+    "cpu:profile-build",
+    "cpu:solve-trace-and-lower",
+    "cpu:solve-compile",
+    "cpu:solve-first-execute",
+    "cpu:solve-warm-execute"
+  ],
+  "profile": {
+    "lattice_nodes": 1089,
+    "lattice_shape": [
+      33,
+      33
+    ],
+    "seed_bytes": 9384
+  },
+  "row": {
+    "file": "d3d_shot_00000a10ac.parquet",
+    "frame": 29
+  },
+  "serialized_executable_bytes": "unavailable",
+  "stop_signal": "SIGTERM",
+  "x64": true
+}

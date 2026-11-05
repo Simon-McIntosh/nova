@@ -57,7 +57,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 1,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "s9 now also waits on iron-core-magnetisation#s8 (cc22ac1a0), so it is released only once the limb-corrected iron exists.",
+      "reason": "",
+      "when": "2026-11-05T21:25:37.363049+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "note": "s9 now also waits on iron-core-magnetisation#s8 (cc22ac1a0), so it is released only once the limb-corrected iron exists.",
+      "reason": "",
+      "when": "2026-11-05T21:25:37.363049+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261105T210526990727-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261105T210526990727-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "7af422bdf650ea8377350d24655687449d3c72ce",
   "rubric": "content",

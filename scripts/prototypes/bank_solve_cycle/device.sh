@@ -18,13 +18,14 @@ base=$4
 shift 4
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 mkdir -p "$scratch/base"
-git -C "$repo" archive "$base" nova scripts tests pyproject.toml uv.lock | tar -x -C "$scratch/base"
+git -C "$repo" archive "$base" nova scripts tests benchmarks pyproject.toml uv.lock | tar -x -C "$scratch/base"
 for arm in "$@"; do
   tree="$repo"
   revision=$(git -C "$repo" rev-parse HEAD)
   if [ "$arm" = base ]; then tree="$scratch/base"; revision=$base; fi
   log="$run/$label-$arm.log"
   command="$python $repo/scripts/prototypes/bank_solve_cycle/measure.py --revision $revision --output $run/$label-$arm.json"
+  if [ "${CYCLE_TRACE:-0}" = 1 ]; then command="$python $repo/scripts/prototypes/bank_solve_cycle/trace.py --output $run/$label-$arm.json"; fi
   printf '# revision: %s tree: %s command: %s\n' "$revision" "$tree" "$command" > "$log"
   PYTHONPATH="$tree" $command >> "$log" 2>&1
   code=$?

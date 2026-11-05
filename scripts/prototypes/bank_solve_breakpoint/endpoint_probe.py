@@ -50,8 +50,9 @@ def main():
     original = sr.current._conic_rings
 
     def interior(*args, **kwargs):
-        if "inward_endpoints" in inspect.signature(original).parameters:
-            kwargs["inward_endpoints"] = True
+        if "inward_endpoints" not in inspect.signature(original).parameters:
+            raise ValueError("endpoint contrast requires the archived split-rule owner")
+        kwargs["inward_endpoints"] = True
         return original(*args, **kwargs)
 
     with patch.object(sr.current, "_conic_rings", interior):

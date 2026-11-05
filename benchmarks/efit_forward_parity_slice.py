@@ -3540,8 +3540,8 @@ def _passive_inclusive_solve(
     try:
         request = ForwardSolveRequest.from_defaults(
             carrier_identity=(
-                f"mast-passive:{context['reference']['shot']}:"
-                f"{context['reference']['slice_index']}"
+                f"mast-passive:{case['reference']['shot']}:"
+                f"{case['reference']['slice_index']}"
             ),
             source_profile=profile.source,
             seed_policy=ExplicitSolveSeed(jnp.asarray(case["state"])),

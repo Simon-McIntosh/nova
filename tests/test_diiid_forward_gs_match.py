@@ -39,13 +39,6 @@ def test_publication_artifact_records_are_stable_and_strict(tmp_path):
     publication_artifacts = gate._record_publication_artifacts(receipt, tmp_path)
 
     assert publication_artifacts == {
-        "poloidal_frame_comparison": {
-            "filesystem_path": str(tmp_path / "frame_flux_comparison.png"),
-            "publication_path": (
-                "/nova/figures/diiid-forward-onboarding/forward-gs/"
-                "frame_flux_comparison.png"
-            ),
-        },
         "cohort_match_summary": {
             "filesystem_path": str(tmp_path / "cohort_match_summary.png"),
             "publication_path": (

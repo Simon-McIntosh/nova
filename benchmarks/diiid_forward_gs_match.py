@@ -331,6 +331,10 @@ class DisplayMapRecord:
     conductor_response_processes: int
     conductor_response_build_seconds: float
     conductor_response_loaded_from_cache: bool
+    operand_path: str | None = None
+    operand_digest: str | None = None
+    operand_bytes: int | None = None
+    operand_fields: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -1656,8 +1660,186 @@ def _display_coupling(
     )
 
 
+def _stored_conductor_response(record: dict[str, Any]) -> np.ndarray:
+    """Return the response matrix the coupling contracted, read from its path."""
+
+    response = np.load(Path(record["path"]).expanduser())
+    expected = tuple(record["shape"])
+    if response.shape != expected:
+        raise RuntimeError(
+            f"stored conductor response has shape {response.shape}, expected {expected}"
+        )
+    return response
+
+
+def _frame_operand_path(tag: str) -> Path:
+    """Return the artifact path of one frame's persisted display operands."""
+
+    safe = "".join(
+        character if character.isalnum() or character in "-_" else "-"
+        for character in tag
+    )
+    root = operand_cache_root() / "diiid-forward-gs"
+    return root / f"frame-display-{safe}.npz"
+
+
+def _empty_dense(values) -> np.ndarray:
+    """Return ``values`` as a dense float array, and an empty one for None."""
+
+    if values is None:
+        return np.zeros((0,), dtype=np.float64)
+    return np.asarray(values, dtype=np.float64)
+
+
+def _persist_frame_operands(
+    *,
+    tag: str,
+    profile: ForwardProfile,
+    equilibrium,
+    display: DisplayFluxMap,
+    response: np.ndarray,
+    conductor_current: np.ndarray,
+) -> dict[str, Any]:
+    """Write one frame's display operands and return the artifact's receipt.
+
+    Everything a later panel needs is written beside the conductor response
+    matrix and named in the receipt, so a redraw is one matrix product rather
+    than a re-solve: the terminal state vector, the display grid and its field,
+    the conductor term the matrix produces and the plasma term that completes
+    it, the assembled branch polygons, and the solve's own promoted domain mask
+    and constraint compensation where it exposes them.  The display points
+    occupy the leading block of the response matrix's target set, so their row
+    indices are the leading range and are recorded rather than assumed.
+    """
+
+    lattice = profile.lattice
+    _radius, _height, points = _display_grid(lattice)
+    rows = np.arange(points.shape[0], dtype=np.intp)
+    conductor_current = np.asarray(conductor_current, dtype=np.float64)
+    conductor_flux = np.asarray(response[rows] @ conductor_current, dtype=np.float64)
+    flux = np.asarray(display.flux, dtype=np.float64)
+    payload: dict[str, np.ndarray] = {
+        "state": np.asarray(equilibrium.flux, dtype=np.float64),
+        "display_points": points,
+        "display_radius": np.asarray(display.radius, dtype=np.float64),
+        "display_height": np.asarray(display.height, dtype=np.float64),
+        "flux": flux,
+        "conductor_flux": conductor_flux,
+        "plasma_flux": flux.ravel() - conductor_flux,
+        "conductor_current": conductor_current,
+        "response_row_index": rows,
+        "spacing_m": np.asarray(display.spacing_m, dtype=np.float64),
+        "saddle_rz": np.asarray(display.saddle_rz, dtype=np.float64),
+        "saddle_flux": np.asarray(display.saddle_flux, dtype=np.float64),
+        "saddle_converged": np.asarray(display.saddle_converged),
+        "lattice_saddle_rz": np.asarray(display.lattice_saddle_rz, dtype=np.float64),
+        "saddle_offset_mm": np.asarray(display.saddle_offset_mm, dtype=np.float64),
+        "max_node_mismatch_wb": np.asarray(
+            display.max_node_mismatch_wb, dtype=np.float64
+        ),
+        "reproduction_relative_error": np.asarray(
+            display.reproduction_relative_error, dtype=np.float64
+        ),
+    }
+    for key, value in display.branches.items():
+        payload[f"branch_{key}"] = np.asarray(value)
+    domains = getattr(equilibrium, "domains", None)
+    if domains is not None:
+        payload["domain_label"] = np.asarray(domains.label, dtype=np.int64)
+        payload["domain_psi_norm"] = np.asarray(domains.psi_norm, dtype=np.float64)
+        payload["domain_core"] = np.asarray(domains.core, dtype=bool)
+    constraints = tuple(getattr(equilibrium, "constraints", ()) or ())
+    if constraints:
+        payload["constraint_observed"] = np.asarray(
+            [
+                np.asarray(record.observed, dtype=np.float64).ravel()
+                for record in constraints
+            ]
+        )
+        payload["constraint_target"] = np.asarray(
+            [
+                np.asarray(record.target, dtype=np.float64).ravel()
+                for record in constraints
+            ]
+        )
+        payload["constraint_physical_residual"] = np.asarray(
+            [
+                np.asarray(record.physical_residual, dtype=np.float64).ravel()
+                for record in constraints
+            ]
+        )
+        payload["constraint_qualified"] = np.asarray(
+            [np.asarray(record.qualified, dtype=bool).ravel() for record in constraints]
+        )
+        payload["constraint_physical_unknown"] = np.asarray(
+            [
+                np.asarray(record.physical_unknown, dtype=np.float64).ravel()
+                for record in constraints
+            ]
+        )
+        directions = [
+            _empty_dense(record.compensator_direction).ravel() for record in constraints
+        ]
+        payload["constraint_compensator_lengths"] = np.asarray(
+            [direction.size for direction in directions], dtype=np.int64
+        )
+        payload["constraint_compensator_direction"] = (
+            np.concatenate(directions) if directions else np.zeros((0,), np.float64)
+        )
+        authority = []
+        for record in constraints:
+            values = np.asarray(
+                record.compensator_authority
+                if record.compensator_authority is not None
+                else np.zeros((0,), dtype=np.float64),
+                dtype=np.float64,
+            ).ravel()
+            authority.append(float(values[0]) if values.size else float("nan"))
+        payload["constraint_compensator_authority"] = np.asarray(
+            authority, dtype=np.float64
+        )
+    path = _frame_operand_path(tag)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, **payload)
+    with path.open("rb") as stream:
+        digest = hashlib.sha256(stream.read()).hexdigest()
+    return {
+        "path": portable_path(path),
+        "digest": digest,
+        "bytes": int(path.stat().st_size),
+        "fields": sorted(payload),
+        "response_row_index": int(rows[-1] + 1) if rows.size else 0,
+    }
+
+
+def load_frame_operands(path: Path) -> dict[str, np.ndarray]:
+    """Return one persisted frame artifact as plain arrays."""
+
+    with np.load(path) as data:
+        return {key: np.asarray(data[key]) for key in data.files}
+
+
+def rebuild_display_flux(
+    operands: dict[str, np.ndarray], response: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the display field rebuilt from a persisted frame and its matrix.
+
+    The conductor term is the exact matrix product of the frame's conductor
+    current with the response rows its display points occupy; the plasma term
+    is the uniform Green block the same map carried, persisted alongside.  The
+    two together are the field the panel draws, so a redraw needs no solve.
+    """
+
+    conductor = np.asarray(
+        response[operands["response_row_index"]] @ operands["conductor_current"],
+        dtype=np.float64,
+    )
+    plasma = np.asarray(operands["plasma_flux"], dtype=np.float64)
+    return conductor + plasma, conductor
+
+
 def _display_map(
-    profile: ForwardProfile, equilibrium, machine
+    profile: ForwardProfile, equilibrium, machine, tag: str | None = None
 ) -> tuple[DisplayFluxMap, dict[str, Any]]:
     """Return the frame's fine display map and the rig it was drawn from."""
 
@@ -1689,7 +1871,23 @@ def _display_map(
         display.height, display_height
     ):
         raise RuntimeError("display map grid does not match the prefetched grid")
-    return display, {"coupling": coupling, "conductor_response": record}
+    operands = None
+    if tag is not None:
+        operands = _persist_frame_operands(
+            tag=tag,
+            profile=profile,
+            equilibrium=equilibrium,
+            display=display,
+            response=_stored_conductor_response(record),
+            conductor_current=np.asarray(
+                profile.operator.external_current, dtype=np.float64
+            ),
+        )
+    return display, {
+        "coupling": coupling,
+        "conductor_response": record,
+        "operands": operands,
+    }
 
 
 def _display_separatrix(
@@ -2236,8 +2434,14 @@ def solve_frame(
     )
     display = None
     try:
-        display, display_rig = _display_map(profile, equilibrium, machine)
+        display, display_rig = _display_map(
+            profile,
+            equilibrium,
+            machine,
+            tag=f"{Path(row['_source_path']).name}-{frame}",
+        )
         conductor_response = display_rig["conductor_response"]
+        operands = display_rig["operands"]
         display_closed, display_open = _display_separatrix(display)
         display_comparison = compare_closed_boundaries(
             display_closed,
@@ -2277,6 +2481,10 @@ def solve_frame(
             conductor_response_loaded_from_cache=bool(
                 conductor_response["loaded_from_cache"]
             ),
+            operand_path=None if operands is None else operands["path"],
+            operand_digest=None if operands is None else operands["digest"],
+            operand_bytes=None if operands is None else operands["bytes"],
+            operand_fields=() if operands is None else tuple(operands["fields"]),
         )
     except (NoQualifiedAxisError, ConstraintViolationError) as error:
         display_record = None
@@ -2646,6 +2854,10 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
         display_values["conductor_response_shape"] = tuple(
             display_values["conductor_response_shape"]
         )
+        if "operand_fields" in display_values:
+            display_values["operand_fields"] = tuple(
+                display_values["operand_fields"] or ()
+            )
         for name in (
             "separatrix_symmetric_sup_distance_m",
             "separatrix_symmetric_rms_distance_m",
@@ -2814,10 +3026,15 @@ def _active_set_receipt(result: object) -> dict[str, Any]:
 
 
 def _publication_artifact_records(output: Path) -> dict[str, dict[str, str]]:
-    """Separate rendered destinations from stable project publication identities."""
+    """Separate rendered destinations from stable project publication identities.
+
+    The poloidal comparison is not registered here: its panels are drawn from
+    each frame's persisted display operands, so it is regenerated outside the
+    bank from those artifacts rather than from a solve that would have to be
+    repeated to redraw it.
+    """
 
     filenames = {
-        "poloidal_frame_comparison": FRAME_FIGURE_NAME,
         "cohort_match_summary": COHORT_FIGURE_NAME,
         "strict_forward_match_receipt": RECEIPT_NAME,
     }
@@ -5585,8 +5802,6 @@ def run(
         }
     )
     _record_publication_artifacts(receipt, output)
-    if not restored_results:
-        frame_figure(results, fields, output / FRAME_FIGURE_NAME)
     cohort_figure(results, fields, output / COHORT_FIGURE_NAME)
     displacement_path = displacement_output / DISPLACEMENT_FIGURE_NAME
     displacement_figure(results, fields, displacement_path)

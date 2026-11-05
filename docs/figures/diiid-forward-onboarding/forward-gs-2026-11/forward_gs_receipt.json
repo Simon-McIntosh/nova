@@ -120,10 +120,6 @@
       "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png"
     },
-    "poloidal_frame_comparison": {
-      "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
-      "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png"
-    },
     "strict_forward_match_receipt": {
       "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json"
@@ -3724,6 +3720,12 @@
       "statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent"
     },
     "registered_median_interior_r_squared_bar": 0.90155
+  },
+  "withdrawn_artifacts": {
+    "poloidal_frame_comparison": {
+      "withdrawn_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+      "reason": "withdrawn under the plotting review: the panels carried overlapping text and were not drawn in the house style. The poloidal comparison is regenerated after the display map draws the field of the solve's own currents, from each frame's persisted display operands (frame-display-*.npz beside the conductor response), so no re-splice or re-solve is needed."
+    }
   },
   "tree_stamp": {
     "benchmark_sha256": "5ee17c95b1450db7c70318d0b0259e246eb898b4e03fccfa0dac211a15087779",

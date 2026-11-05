@@ -87,20 +87,28 @@ a verdict of the measurement, not a failure of the run.</caption>
 <tr><td><code>d3d_shot_0040ca9bdc</code></td><td>137</td><td>5</td><td>6.237e-02</td><td>no</td><td>diverted, as labelled</td><td>saddle 29 mm from the labelled X-point</td></tr>
 </table>
 
-<figure id="forward-gs-remeasure-figure-frame">
-<img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png"
-alt="Labelled and forward poloidal flux contours for each of the five frames, with the difference panel">
-<figcaption>Labelled and forward poloidal flux contours at 21 shared levels for
-the five frames, with the labelled LCFS and the magnetic axis and admitted
-X-points marked on both, beside the flux difference. Frame 144 is drawn as
-unavailable because its solve raised before any geometry existed. Rendering
-these panels is what showed that no frame assembled a closed fine-map
-separatrix. <strong>This panel set is the producer's original drawing and is
-the one figure not yet redrawn in the house style:</strong> the fine-map field,
-the contour geometry and the boundary polygons were never persisted, so the
-panels cannot be rebuilt from the committed record without re-solving, which
-this node may not do.</figcaption>
-</figure>
+<div id="forward-gs-remeasure-poloidal-status">
+<p>The poloidal flux comparison is <strong>withdrawn</strong> and is
+regenerated after the display map is changed to draw the field of the solve's
+own currents, judged on non-promoted nodes
+(<code>separatrix-spline-extraction</code> §9). The withdrawn panel set carried
+overlapping text and was not drawn in the house style, and it could not be
+redrawn from the committed record because the fine-map field and the boundary
+polygons were never persisted. The producer now writes, per frame under the
+GPFS operand root beside the conductor response, the terminal state vector, the
+display grid and its field, the conductor term the response matrix produces and
+the plasma term that completes it, the assembled branch polygons, and the
+solve's promoted domain mask and constraint compensation; each artifact's path
+and digest is recorded in the receipt. A test rebuilds a persisted frame's
+display field from its own conductor matrix and asserts agreement to 1e-12, so
+the regenerated comparison is one matrix product rather than a re-solve.</p>
+<p>The measurement itself is unchanged by that withdrawal: <strong>0 of 5
+frames converge under the registered criterion, and the median interior
+R-squared is -0.651</strong> against the registered bar of 0.90155. Rendering
+the five frames is what showed that no frame assembled a closed fine-map
+separatrix, and that finding is recorded in the receipt on every frame rather
+than carried by the withdrawn figure.</p>
+</div>
 
 <figure id="forward-gs-remeasure-figure-cohort">
 <img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png"

@@ -1249,12 +1249,6 @@ def _assembler_flags(display, axis_rz) -> dict:
         "available": True,
         "well_formed": bool(np.asarray(assembled["well_formed"])),
         "overflow": bool(np.asarray(assembled["overflow"])),
-        "closed_candidate_count": int(
-            np.asarray(assembled["closed_candidate_count"])
-        ),
-        "closed_segment_count": int(np.asarray(assembled["closed_segment_count"])),
-        "open_branch_count": int(np.asarray(assembled["open_branch_count"])),
-        "open_segment_count": int(np.asarray(assembled["open_segment_count"])),
     }
 
 

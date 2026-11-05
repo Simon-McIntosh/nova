@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Diffed the manifest's baseline_suite (base edge file at 1de330a8, 3 failures, completed true, log base-edge.log) against after_suite (edge file at 06b201381, 1 failure, completed true, log after-edge.log). The single head failure, tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_line_moments], is a subset of the base three, so no failure was added. No vertex suite arm is readable on either side of the pair recorded here, so this figure is the edge file's and does not speak for the vertex file.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T11:57:37.587Z",
+  "dispatched_at": "2026-11-05T11:51:18Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html",
+      "line": "50",
+      "severity": "blocking",
+      "text": "blocking: the fragment states 'both near-corner checks printed failure markers' and, at :49, that 'the changed head vertex arm printed failures for both near-corner reference tests before either returned reference rows', but no cited log contains any such line. after-vertex.log ends at the TRUNCATED arsinh_terms row and the job's cancellation, never reaching test_composed_corner_signed_offsets or the two near-corner tests, and head-vertex.log holds only scratch-tree removal output with zero IDENTITY lines. The conclusion that the vertex arm is unreadable stands on the missing pytest summary, but this specific observation is asserted for a run that did not produce it, which is exactly what an evidence fragment exists to prevent."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "non-blocking: the classification table's Measure or owner column says 'representative signed samples by distance decade are now selected' for near-corner exact integral (:31) and 'the signed-decade selection applies to both tests' (:37), but commit 65f344bd6 reverted that selection and tests/biot/test_vertex_term_tangents.py is at head byte-identical to the base revision. The later section at :49 corrects this, so a reader who reads the whole fragment is not misled, but the table row still describes a mitigation that is not in the tree; the two near-corner failures are the one class in the table left with neither a passing result nor a named owner file, which is the gap against the done_when."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: five of the fourteen classified rows (edge flux-line-moments truncated control, vertex composed signed offsets, vertex arsinh truncated control, vertex horizontal-flux truncated control, vertex flux-moment truncated control) are labelled 'census resource failure', a third category outside the two the done_when admits ('stale test' or 'product defect'). The evidence behind each is a passing row in a completed base arm, so the classification is defensible, but a reader checking the done_when against the table finds five rows that answer a different question than the one asked."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all ten commits 5f9e94cab..02459d0cd against 1de330a8: eight are docs-only fragment edits, 06b201381 changes tests/biot/test_edge_term_tangents.py (+4/-7: adds EDGE_RESIDUAL_TOLERANCE = 1e-11 at :50 and selects it for second_residual at :275, and deletes the strict xfail over test_near_edge_tangent_meets_reference), and 65f344b restores tests/biot/test_vertex_term_tangents.py to its base content so the net vertex diff is empty.",
+    "done_when": "The done_when asks that every listed failure pass or carry a named owner; the edge arm satisfies it (1 failure remaining, owned by nova/biot/polygonanalytic.py), but the two near-corner vertex tests are classified at docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html:31 and :37 as 'test workload defect' with the mitigation reverted in 65f344b, so they neither pass nor carry an owner file, and the vertex after arm produced no pytest summary.",
+    "goal": "The goal is to repair the biot vertex- and edge-term tangent failures the fast-lane census recorded; the landed diff repairs the edge half only, changing two expectations in tests/biot/test_edge_term_tangents.py:50 and :452, and leaves tests/biot/test_vertex_term_tangents.py byte-identical to 1de330a8, so all four vertex tangent-identity mismatches (2.180e-9, 2.323e-5, 9.897e-7, 5.680e-5 against a 1e-9 bound) are unchanged.",
+    "manifest": "Read; it records status complete (repaired from the worker's own as-delivered 'blocked' at manifest.md.asdelivered:5 by status-repair.json at 11:46:56Z), a completed base and head edge pair with failure ids, an admitted negative control at negative-control.log, five named source mismatches for nova/biot/polygonanalytic.py, and rubric.implementation/verification left 'partial'; the checkpoint says the vertex head job timed out with no readable summary.",
+    "write_paths": "Read the manifest's four declared paths (two tests/biot files, the evidence fragment, the figures directory) and the diff of 1de330a8..02459d0c; the two changed files, tests/biot/test_edge_term_tangents.py and docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html, lie inside them, and docs/figures was not used."
+  },
+  "justifications": {
+    "durability": "Removing the strict xfail at tests/biot/test_edge_term_tangents.py:452 activates an assertion comparing the hand rule against a 50-digit independent reference derivative, which reddens on any regression past 1e-9, and the 1e-11 bound at :50 is falsified by the retained negative control, but the loosening itself has only ~3x headroom over the measured 3.370e-12 so a drift smaller than a factor of three would pass unremarked.",
+    "evidence": "The edge pair is real and reconcilable (base-edge.log '3 failed, 8 passed' against after-edge.log '1 failed, 10 passed', both completed), and negative-control.log shows test_tangent_matches_base_jvp[second_residual] failing at EXIT=1 under the restored 1e-13 bound, but the vertex after arm at /work/projects/imas_gpu/sophelio/evidence/lane-repair-biot-tangents/after-vertex.log has no summary and no EXIT, and no log records the near-corner failures the fragment asserts.",
+    "fit": "tests/biot/test_edge_term_tangents.py:50 declares EDGE_RESIDUAL_TOLERANCE beside the existing local SCAN_TOLERANCE at :49, matching the file's own idiom, and no plan, run or ticket identifier appears in the added code or the fragment.",
+    "goal_fidelity": "tests/biot/test_vertex_term_tangents.py is identical at 02459d0c and 1de330a8 (git diff --stat returns nothing), so the vertex half of the goal landed no change while tests/biot/test_edge_term_tangents.py:275 repairs the edge second-residual bound.",
+    "reuse": "The added constant extends the tolerance vocabulary the file already owns (SCAN_TOLERANCE locally, EXACT_TOLERANCE imported from tests/biot/tangent_identity.py:56) rather than forking a second mechanism, and a search over tests/biot for tolerance owners found only that pair.",
+    "scope_discipline": "Every path in the diff of 1de330a8..02459d0c lies inside the four declared write paths, and no product source, plan or sprint state was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to repair the biot vertex- and edge-term tangent failures; the landed diff changes only tests/biot/test_edge_term_tangents.py:50 and :275 and leaves tests/biot/test_vertex_term_tangents.py identical to 1de330a8, so the vertex half of the goal landed no repair.\nVERDICT done_when: The done_when requires every listed failure to pass or carry a named owner; the edge arm meets it with one failure owned by nova/biot/polygonanalytic.py, but the two near-corner vertex tests at docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html:31 and :37 neither pass nor name an owner and the vertex after arm has no summary.\nVERDICT write_paths: The manifest declares two tests/biot files, the evidence fragment and a figures directory; both files in the diff of 1de330a8..02459d0c lie inside them and no figure directory was used.\nVERDICT manifest: Read; it records status complete repaired from the as-delivered 'blocked', a completed base and head edge pair, an admitted negative control at negative-control.log, and rubric.implementation and rubric.verification left 'partial'.\nVERDICT diff: Read all ten commits against 1de330a8; eight are docs-only fragment edits, 06b201381 changes the edge test file by +4/-7 and 65f344b restores the vertex test file to its base content, leaving an empty vertex diff.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: tests/biot/test_vertex_term_tangents.py is identical at 02459d0c and 1de330a8, so the vertex tangent failures the goal names are untouched while tests/biot/test_edge_term_tangents.py:275 repairs one edge bound.\nSCORE evidence: 11\nJUSTIFICATION evidence: base-edge.log and after-edge.log reconcile at 3 failed and 1 failed with negative-control.log admitted at EXIT=1, but after-vertex.log carries no summary and no EXIT and the fragment asserts near-corner failures no log records.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff of 1de330a8..02459d0c lies inside the manifest's four declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: removing the strict xfail at tests/biot/test_edge_term_tangents.py:452 activates an assertion against an independent 50-digit reference and the 1e-11 bound at :50 is falsified by the retained negative control, though it leaves only ~3x headroom over the measured 3.370e-12.\nSCORE fit: 18\nJUSTIFICATION fit: tests/biot/test_edge_term_tangents.py:50 declares EDGE_RESIDUAL_TOLERANCE beside the file's own SCAN_TOLERANCE at :49 and carries no plan or ticket identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: the new constant extends the tolerance vocabulary tests/biot/tangent_identity.py:56 already owns rather than forking a mechanism; no second tolerance owner exists in tests/biot.\nFINDING docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html:50 blocking: the fragment asserts that both near-corner checks printed failure markers in the head vertex arm, but after-vertex.log ends at the TRUNCATED arsinh_terms row before those tests run and head-vertex.log holds only scratch cleanup, so an observation is recorded for a run that did not produce it.\nFINDING docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html:31 non-blocking: the table says the signed-decade selection is now in the tree for both near-corner tests, but 65f344b reverted it and tests/biot/test_vertex_term_tangents.py is byte-identical to base at head, leaving those two failures with neither a passing result nor a named owner.\nFINDING docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html:29 non-blocking: five of the fourteen classification rows use a third category, 'census resource failure', outside the stale-test or product-defect pair the done_when admits.",
+  "review_run_id": "r-20261105T115003486952-review-of-lane-repair-biot-tangents-02459d0cd9a6",
+  "reviewed_base_sha": "1de330a8fbf781c2db6f9734efdaf53e47fe75b4",
+  "reviewed_head_sha": "02459d0cd9a694eed3fb379f821beb388f12b172",
+  "reviewed_run_id": "r-20261105T083537886594-lane-repair-biot-tangents",
+  "scores": {
+    "durability": 16,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 9,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T12:58:00+00:00",
+  "total": 93
+}

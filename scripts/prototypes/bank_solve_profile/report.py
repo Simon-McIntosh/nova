@@ -6,20 +6,14 @@ import argparse
 import json
 from pathlib import Path
 
+from scripts.prototypes.bank_solve_profile import receipts
+
 ROOT = Path(__file__).resolve().parents[3]
 FRAGMENT = (
     ROOT
     / "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html"
 )
-NAMES = [
-    "read census",
-    "read decision",
-    "read geometry",
-    "step residual",
-    "step assembly",
-    "factor",
-    "back-solve",
-]
+NAMES = receipts.NAMES
 
 
 def parse(path, prefixes):
@@ -49,17 +43,10 @@ def revision(path):
 
 
 def stages_at(rows, lanes):
-    medians = {row["name"]: row["median_ms"] for row in rows if row["lanes"] == lanes}
-    return {
-        "read census": medians["census"],
-        "read decision": medians["topology"] - medians["support_geometry"],
-        "read geometry": medians["fit"] + medians["support_geometry"],
-        "step residual": 2.0 * medians["residual"],
-        "step assembly": medians["assembly"],
-        "factor": medians["factor"],
-        "back-solve": medians["backsolve"],
-        "whole": medians["whole_solve"],
-    }
+    medians = {(row["lanes"], row["name"]): row["median_ms"] for row in rows}
+    values = receipts.stages_at(medians, lanes)
+    values["whole"] = medians[(lanes, "whole_solve")]
+    return values
 
 
 def main():

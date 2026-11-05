@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.text import Text
 from matplotlib.ticker import StrMethodFormatter
 
+from scripts.prototypes.bank_solve_profile import receipts
+
 ROOT = Path(__file__).resolve().parents[3]
 FIGURE = (
     ROOT
@@ -30,35 +32,14 @@ STAGES = [
 ]
 
 
-def records(log):
-    """Every stage and solve receipt, keyed by lane count."""
-    stages = {}
-    solves = {}
-    for line in Path(log).read_text().splitlines():
-        if line.startswith("STAGE "):
-            row = json.loads(line.partition(" ")[2])
-            stages[(row["lanes"], row["name"])] = row["median_ms"]
-        elif line.startswith("SOLVE "):
-            row = json.loads(line.partition(" ")[2])
-            solves[row["lanes"]] = row
-    return stages, solves
-
-
-def split(stages, solves, lanes):
+def split(log, lanes):
     """Per-iterate stage wall in ms for one lane count."""
-    named = {
-        "read census": stages[(lanes, "census")],
-        "read decision": stages[(lanes, "topology")]
-        - stages[(lanes, "support_geometry")],
-        "read geometry": stages[(lanes, "fit")] + stages[(lanes, "support_geometry")],
-        "step residual": 2.0 * stages[(lanes, "residual")],
-        "step assembly": stages[(lanes, "assembly")],
-        "factor": stages[(lanes, "factor")],
-        "back-solve": stages[(lanes, "backsolve")],
-    }
-    whole = solves[lanes]
-    iterate = stages[(lanes, "whole_solve")] / whole["max_steps"]
-    return named, iterate, whole
+    medians, solves = receipts.read(log)
+    return (
+        receipts.stages_at(medians, lanes),
+        receipts.iterate(medians, solves, lanes),
+        solves[lanes],
+    )
 
 
 def save_checked(fig, output):
@@ -92,15 +73,14 @@ def main():
     parser.add_argument("log", type=Path)
     parser.add_argument("--output", type=Path, default=FIGURE)
     args = parser.parse_args()
-    stages, solves = records(args.log)
-    arm_one, iterate_one, whole_one = split(stages, solves, 1)
-    arm_sixteen, iterate_sixteen, whole_sixteen = split(stages, solves, 16)
+    arm_one, iterate_one, whole_one = split(args.log, 1)
+    arm_sixteen, iterate_sixteen, whole_sixteen = split(args.log, 16)
     report = {
         "per_iterate": {"one": arm_one, "sixteen": arm_sixteen},
         "iterate_ms": {"one": iterate_one, "sixteen": iterate_sixteen},
         "closure": {
-            "one": sum(arm_one[name] for name, _ in STAGES) / iterate_one,
-            "sixteen": sum(arm_sixteen[name] for name, _ in STAGES) / iterate_sixteen,
+            "one": receipts.closure(arm_one, iterate_one),
+            "sixteen": receipts.closure(arm_sixteen, iterate_sixteen),
         },
         "solve": {"one": whole_one, "sixteen": whole_sixteen},
     }

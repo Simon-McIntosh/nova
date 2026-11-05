@@ -39,6 +39,10 @@
 </table>
 <p>The source tangent defects are outside this node's write paths. The test repairs are in commit <code>06b20138130730d7fc67aa34478973fb6ac3bd94</code>; a fresh head gate and a reverted-assertion negative control are running in job <code>1306078</code>.</p>
 </section>
+<section id="lane-repair-biot-tangents-negative-control">
+<h2>Reverted-bound control</h2>
+<p>The head job copied the edge test into node-local scratch and restored the original <code>1e-13</code> second-residual bound. That one test failed with <code>EXIT=1</code> and the failure id <code>test_tangent_matches_base_jvp[second_residual]</code>. The original bound therefore still detects the observed mismatch. The changed head edge arm has printed a passing second-residual row at <code>3.370e-12</code> under its <code>1e-11</code> bound; its full-file receipt remains pending.</p>
+</section>
 </main>
 </body>
 </html>

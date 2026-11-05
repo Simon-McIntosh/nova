@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-05T20:09:09.809Z",
   "dispatched_at": "2026-11-05T19:52:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-coil-edit-panels-on-solve-currents-73edf130f61b",
+      "recorded_at": "2026-11-05T21:39:42.358838+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/display_flux.py",

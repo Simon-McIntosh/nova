@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-05T19:26:42.153Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-prototype-provenance",
+      "recorded_at": "2026-11-05T19:32:11.907591+00:00"
+    }
+  },
   "dispatched_at": "2026-11-05T19:17:33Z",
   "finding_dispositions": {
     "0": {

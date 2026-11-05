@@ -3,6 +3,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.jax.config import configure_dtypes
 
@@ -82,3 +83,44 @@ def test_cycle_lane_is_accepted_within_two_steps(monkeypatch):
     assert float(jnp.max(result.residual)) <= 1e-10
     assert int(result.steps[2]) == 0
     np.testing.assert_array_equal(np.asarray(result.moments[0]), 0.0)
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(1800)
+def test_diverted_lanes_leave_near_root_cycle():
+    """Restart the certificate lanes where fresh residuals first permit freezing."""
+    from scripts.prototypes.bank_solve_read import measure as reference
+
+    bank, cache, roots, convention, policy, profile, quadrature, moments, _ = (
+        reference.machine("diverted")
+    )
+    lanes = 16
+    scales = jnp.linspace(2e-5, 6e-5, lanes)
+    states = tuple(value[None] * (1 + scales[:, None]) for value in moments)
+    seeds = roots + 0.03 * jnp.median(bank.geometry.pitch)
+    seeds = jnp.broadcast_to(seeds, (lanes, *seeds.shape))
+    previous = jnp.broadcast_to(roots, (lanes, *roots.shape))
+
+    def run(state, operands, limit):
+        return support_read.solve_batch(
+            operands,
+            cache,
+            state,
+            seeds,
+            previous,
+            convention,
+            policy,
+            profile,
+            lambda radius, flux: jnp.zeros_like(radius),
+            quadrature,
+            max_steps=limit,
+        )
+
+    checkpoint = jax.jit(run, static_argnums=2)(states, bank, 2)
+    assert float(jnp.max(checkpoint.residual)) < 1e-6
+    assert not bool(jnp.all(checkpoint.converged))
+    result = jax.jit(run, static_argnums=2)(checkpoint.moments, bank, 8)
+    jax.block_until_ready(result)
+    print("DIVERTED_CYCLE", np.asarray(result.steps), np.asarray(result.residual))
+    assert bool(jnp.all(result.converged)), "cycle lanes exceed eight restart steps"
+    assert float(jnp.max(result.residual)) <= 1e-10

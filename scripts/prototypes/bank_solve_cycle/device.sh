@@ -10,7 +10,7 @@ export TMPDIR=/tmp
 scratch=$(mktemp -d "$TMPDIR/bank-cycle-XXXXXX")
 trap 'rm -rvf "$scratch"' EXIT
 export TMPDIR="$scratch"
-export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 JAX_PLATFORMS=cuda
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 JAX_PLATFORMS=cuda,cpu
 repo=$1
 run=$2
 label=$3

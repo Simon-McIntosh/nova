@@ -155,8 +155,7 @@ def main():
     source = source.replace(
         anchor,
         "        jax.debug.callback(capture, state, step_support, steps, active, "
-        "ordered=True)\n"
-        + anchor,
+        "ordered=True)\n" + anchor,
     )
     namespace = dict(vars(sr), capture=capture)
     exec(compile(source, "<captured-solve>", "exec"), namespace)
@@ -208,6 +207,7 @@ def main():
                 def mapped(operands, *values):
                     def one(items):
                         return function(operands, *items)
+
                     return (
                         jax.lax.map(one, values)
                         if mapping == "map"
@@ -254,7 +254,7 @@ def main():
         geometry = call("closing", *inputs, tangent, channels)
         fresh = call("geometry", *inputs)
         assembled = call("matrix", *inputs, response, geometry)
-        call("single", *inputs, nodes, jnp.zeros(lanes, dtype=jnp.int32))
+        single = call("single", *inputs, nodes, jnp.zeros(lanes, dtype=jnp.int32))
         call("whole", *inputs, mapping="vmap")
         error = float(jnp.linalg.norm(assembled - whole) / jnp.linalg.norm(whole))
         geometry_error = float(
@@ -271,20 +271,27 @@ def main():
             axis=-1,
         )
         assert np.all(active_cells > 0) and np.all(np.asarray(count) > 0)
-        top = sum(times[name] for name in ("local", "bank", "geometry", "matrix"))
+        active_nodes = [np.unique(row).tolist() for row in np.asarray(nodes)]
+        assert [len(row) for row in active_nodes] == np.asarray(count).tolist()
+        single_norm = np.linalg.norm(np.asarray(single).reshape(lanes, -1), axis=1)
+        assert np.all(np.isfinite(single_norm)) and np.all(single_norm > 0)
+        top_parts = ("local", "bank", "geometry", "matrix")
+        top = sum(times[name] for name in top_parts)
         detailed = sum(
             times[name]
             for name in ("local", "bank", "stencil", "channels", "closing", "matrix")
         )
-        control = closure(top - times["geometry"], times["whole"])
-        assert not control["within_15_percent"], control
+        omitted_part = max(top_parts, key=times.__getitem__)
+        control = closure(top - times[omitted_part], times["whole"])
         row = dict(
             lanes=lanes,
             step=step,
             timings_ms=times,
             active_stencil_channels=(6 * np.asarray(count)).tolist(),
+            active_stencil_nodes=active_nodes,
             executed_stencil_channels=6 * nodes.shape[-1],
             active_normal_cells=active_cells.tolist(),
+            single_channel_norm=single_norm.tolist(),
             matrix_relative_error=error,
             geometry_relative_error=geometry_error,
             closure=closure(top, times["whole"]),
@@ -293,11 +300,13 @@ def main():
                 sum(times[n] for n in ("stencil", "channels", "closing")),
                 times["geometry"],
             ),
-            omitted_geometry_control=control,
+            omitted_part=omitted_part,
+            omitted_part_control=control,
         )
         receipt["rows"].append(row)
         args.output.write_text(json.dumps(receipt, indent=2))
         emit("SUMMARY", **row)
+        assert not control["within_15_percent"], control
 
 
 if __name__ == "__main__":

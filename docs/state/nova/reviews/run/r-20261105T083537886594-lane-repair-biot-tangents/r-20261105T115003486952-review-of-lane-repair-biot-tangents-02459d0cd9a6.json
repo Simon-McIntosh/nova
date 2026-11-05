@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-05T11:57:37.587Z",
   "dispatched_at": "2026-11-05T11:51:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "polygon-analytic-tangents",
+      "recorded_at": "2026-11-05T12:04:53.571951+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html",

@@ -88,7 +88,11 @@ back empty, the plasma cells are not cut against it and no separatrix or
 open leg appears on the plasma panel. The refusal is reported, not worked
 around: no fallback contour is added in its place, because a contour of the
 display map would wander between nodes and would not be the curve the plasma
-mesh is meant to be cut against. __FLAGS__ Because the boundary is empty the
+mesh is meant to be cut against. The assembler's own verdict is asked for the
+same field and recorded on the panel receipt as <code>boundary_assembler</code>,
+which reports its <code>well_formed</code> and <code>overflow</code> flags;
+the record for these panels is not yet written, so neither flag is stated here
+rather than stated from a guess. Because the boundary is empty the
 plasma mesh is built and then draws nothing, which is why the right-hand panel
 shows no grey cells: the field and the plasma response behind it are drawn, the
 cut surface is not.</p>

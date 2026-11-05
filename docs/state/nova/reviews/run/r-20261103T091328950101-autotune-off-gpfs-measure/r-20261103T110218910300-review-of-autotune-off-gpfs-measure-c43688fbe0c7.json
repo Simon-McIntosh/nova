@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-11-03T11:11:09Z",
   "dispatched_at": "2026-11-03T11:03:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-autotune-off-gpfs-measure-c43688fbe0c7",
+      "recorded_at": "2026-11-05T06:23:01.357040+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html",

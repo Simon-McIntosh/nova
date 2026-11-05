@@ -20,6 +20,21 @@ lattice nodes only when the state is a converged fixed point, so the builder
 reports the largest node mismatch it sees.  The saddle of the map, and the
 separatrix branches drawn from it, are read off the map's own tensor spline
 through the same stationary-point polish and branch assembler the solve uses.
+
+Where the solve is claimed to be a field of currents it is judged on the nodes
+it claims: a reduced solve's closing trip keeps the trial state on the nodes it
+promotes instead of the map's image, so those nodes carry a piece of the iterate
+no field of the cell currents reproduces.  The builder therefore takes the
+solve's own promoted mask and reports the node mismatch over the nodes it does
+not promote, beside the unmasked figure it has always reported, the promoted
+count and the distance from the nearest promoted node to the polished X-point.
+
+The field a constrained route images is not only its conductor currents and cell
+moments: a compensating conductor current folded into the prescribed vector
+before imaging contributes flux of its own.  That term enters through
+``compensation`` as a conductor-current flux and is added to the same sum the
+external conductor flux is carried in, so the map is drawn from the currents the
+solve actually imaged with.
 """
 
 from __future__ import annotations
@@ -86,6 +101,9 @@ class DisplayFluxMap:
     branches: dict[str, np.ndarray] = field(default_factory=dict)
     saddle_converged: bool = False
     max_node_mismatch_wb: float = float("nan")
+    max_solved_node_mismatch_wb: float = float("nan")
+    promoted_node_count: int = 0
+    nearest_promoted_to_xpoint_m: float = float("nan")
     reproduction_relative_error: float = float("nan")
     spacing_m: float = DEFAULT_SPACING
     build_seconds: float = 0.0
@@ -123,20 +141,31 @@ def _target(coupling: DisplayCoupling, block: np.ndarray) -> FluxTarget:
 
 
 def _flux(
-    coupling: DisplayCoupling, points: np.ndarray, moments, chunk: int
+    coupling: DisplayCoupling,
+    points: np.ndarray,
+    moments,
+    chunk: int,
+    compensation: Callable[[np.ndarray], np.ndarray] | None = None,
 ) -> np.ndarray:
     """Return the conductor-plus-plasma flux at ``points`` [Wb].
 
     Each chunk contracts its own moment columns through a
     :class:`FluxTarget`, so the uniform, radial and vertical moments are
-    combined by the owner of that product rather than restated here.
+    combined by the owner of that product rather than restated here.  The
+    compensating conductor currents a constrained route folds into its
+    prescribed vector are carried in the same sum as the external conductor
+    flux, so they are one conductor-current term rather than a second
+    coupling.
     """
     flux = np.empty(points.shape[0], dtype=np.float64)
     for start in range(0, points.shape[0], chunk):
         block = points[start : start + chunk]
-        flux[start : start + block.shape[0]] = np.asarray(
+        total = np.asarray(
             _target(coupling, block).internal(moments), dtype=np.float64
         ) + np.asarray(coupling.external(block), dtype=np.float64)
+        if compensation is not None:
+            total = total + np.asarray(compensation(block), dtype=np.float64)
+        flux[start : start + block.shape[0]] = total
     return flux
 
 
@@ -216,15 +245,25 @@ def build_display_flux_map(
     axis_rz=None,
     xpoint_rz=None,
     chunk: int = 4096,
+    promoted=None,
+    compensation: Callable[[np.ndarray], np.ndarray] | None = None,
 ) -> DisplayFluxMap:
     """Return one state's field on a fine display grid.
 
-    The map is evaluated from the state's own conductor and plasma currents at
-    every display point.  ``reproduction_relative_error`` is the largest
-    deviation of that evaluation from the operator's own ``raster_image`` at the
-    lattice nodes, and ``max_node_mismatch_wb`` the largest deviation from the
-    state itself: zero for a converged fixed point, the fixed-point residual
-    otherwise.  The saddles of the map and of the lattice spline are each
+    The map is evaluated from the state's own conductor and plasma currents,
+    plus the compensating conductor currents ``compensation`` carries when a
+    constrained route supplied them, at every display point.
+    ``reproduction_relative_error`` is the largest deviation of that evaluation
+    from the operator's own ``raster_image`` at the lattice nodes, and
+    ``max_node_mismatch_wb`` the largest deviation from the state itself over
+    every lattice node: zero for a converged fixed point, the fixed-point
+    residual otherwise.  ``promoted`` is the solve's own mask of the nodes its
+    closing trip kept at the trial state; those nodes carry a piece of the
+    iterate no field of currents reproduces, so they are excluded from
+    ``max_solved_node_mismatch_wb``, which is the mismatch over the nodes the
+    solve does claim.  ``promoted_node_count`` and
+    ``nearest_promoted_to_xpoint_m`` locate that set, the distance being taken
+    to the polished X-point.  The saddles of the map and of the lattice spline are each
     polished on their own spline, and the map's separatrix branches are
     assembled on the map at the map's own saddle value.  A polish that does not
     land on a saddle -- either it fails to converge or the Hessian there is not
@@ -248,6 +287,16 @@ def build_display_flux_map(
                 state, target_current, requested_class
             )[0]
     nodewise = (moments.cell_current, moments.radial_moment, moments.vertical_moment)
+    node_count = int(lattice.node_count)
+    if promoted is None:
+        promoted_nodes = np.zeros(node_count, dtype=bool)
+    else:
+        promoted_nodes = np.asarray(promoted, dtype=bool).reshape(-1)
+        if promoted_nodes.size != node_count:
+            raise ValueError(
+                f"the promoted mask names {promoted_nodes.size} nodes, "
+                f"the lattice carries {node_count}"
+            )
 
     radius_nodes = np.asarray(lattice.radius, dtype=np.float64)
     height_nodes = np.asarray(lattice.height, dtype=np.float64)
@@ -261,20 +310,35 @@ def build_display_flux_map(
     height = np.arange(bounds[2], bounds[3] + 0.5 * spacing, spacing)
     radius_grid, height_grid = np.meshgrid(radius, height, indexing="ij")
     points = np.c_[radius_grid.ravel(), height_grid.ravel()]
-    flux = _flux(coupling, points, nodewise, chunk).reshape(radius.size, height.size)
+    flux = _flux(coupling, points, nodewise, chunk, compensation).reshape(
+        radius.size, height.size
+    )
     values = flux.T
 
-    node_flux = _flux(coupling, np.asarray(lattice.coordinate), nodewise, chunk)
+    node_coordinate = np.asarray(lattice.coordinate)
+    node_flux = _flux(coupling, node_coordinate, nodewise, chunk, compensation)
+    compensation_nodes = (
+        np.zeros(node_count, dtype=np.float64)
+        if compensation is None
+        else np.asarray(compensation(node_coordinate), dtype=np.float64)
+    )
     raster = np.asarray(
         operator.raster_image(
             moments, current=current, prescribed_current=prescribed_current
-        )[: lattice.node_count],
+        )[:node_count],
         dtype=np.float64,
     )
-    state_nodes = np.asarray(state, dtype=np.float64)[: lattice.node_count]
+    state_nodes = np.asarray(state, dtype=np.float64)[:node_count]
     scale = max(float(np.max(np.abs(raster))), 1.0e-30)
-    reproduction = float(np.max(np.abs(node_flux - raster))) / scale
-    mismatch = float(np.max(np.abs(node_flux - state_nodes)))
+    reproduction = (
+        float(np.max(np.abs(node_flux - compensation_nodes - raster))) / scale
+    )
+    deviation = np.abs(node_flux - state_nodes)
+    mismatch = float(np.max(deviation))
+    solved_nodes = ~promoted_nodes
+    solved_mismatch = (
+        float(np.max(deviation[solved_nodes])) if solved_nodes.any() else float("nan")
+    )
 
     topology = None
     if axis_rz is None or xpoint_rz is None:
@@ -310,6 +374,16 @@ def build_display_flux_map(
                 values, radius, height, saddle_flux, np.asarray(axis_rz).reshape(2)
             )
     offset = float(1.0e3 * np.linalg.norm(saddle_rz - lattice_saddle_rz))
+    nearest_promoted = float("nan")
+    if promoted_nodes.any():
+        reference = (
+            None
+            if xpoint_rz is None
+            else np.asarray(xpoint_rz, dtype=np.float64).reshape(-1)[:2]
+        )
+        if reference is not None and np.all(np.isfinite(reference)):
+            offsets = node_coordinate[promoted_nodes] - reference
+            nearest_promoted = float(np.min(np.linalg.norm(offsets, axis=1)))
     return DisplayFluxMap(
         radius=radius,
         height=height,
@@ -321,6 +395,9 @@ def build_display_flux_map(
         branches=branches,
         saddle_converged=saddle_converged,
         max_node_mismatch_wb=mismatch,
+        max_solved_node_mismatch_wb=solved_mismatch,
+        promoted_node_count=int(np.count_nonzero(promoted_nodes)),
+        nearest_promoted_to_xpoint_m=nearest_promoted,
         reproduction_relative_error=reproduction,
         spacing_m=float(spacing),
         build_seconds=time.perf_counter() - started,

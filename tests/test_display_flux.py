@@ -250,6 +250,110 @@ def _solve(profile, node: int, steps: int = 400, tolerance: float = 1.0e-12):
     return np.asarray(state, dtype=np.float64), float(np.max(np.abs(image - state)))
 
 
+#: Amplitude [Wb] of the compensating conductor flux the constrained route
+#: carries.  It is far above the fixed-point residual, so a build that drops it
+#: cannot hold the solved-node mismatch.
+COMPENSATION_WB = 0.02
+
+
+def _compensation(points: np.ndarray) -> np.ndarray:
+    """Return the compensating conductor flux [Wb] at ``points``.
+
+    A constrained route folds a compensating conductor current into its
+    prescribed vector before imaging, and that current carries flux of its own.
+    The manufactured term varies with radius, so a build that drops it, or that
+    adds it in the wrong place, moves the map at the lattice nodes.
+    """
+    return COMPENSATION_WB * (points[:, 0] - 1.0)
+
+
+def _solve_with_compensation(profile, node: int, steps: int = 400):
+    """Return the fixed point of the operator's map including compensation."""
+    coordinate = np.asarray(profile.lattice.coordinate)
+    state = np.zeros(node)
+    residual = np.inf
+    for _step in range(steps):
+        next_state = np.asarray(
+            profile.operator.raster_image(_moment_law(state, node)),
+            dtype=np.float64,
+        ) + _compensation(coordinate)
+        residual = float(np.max(np.max(np.abs(next_state - state))))
+        state = next_state
+        if residual < 1.0e-12:
+            break
+    image = np.asarray(
+        profile.operator.raster_image(_moment_law(state, node)), dtype=np.float64
+    ) + _compensation(coordinate)
+    return state, float(np.max(np.abs(image - state)))
+
+
+def test_promoted_nodes_are_excluded_from_the_solved_mismatch():
+    """The mask the solve returns is what the receipt's solved figure excludes.
+
+    The state is the fixed point of the map that carries the compensating
+    conductor flux, so every node the solve claims matches it.  A trial state
+    is pasted onto three promoted nodes, exactly as the closing trip keeps the
+    trial state there, which makes the unmasked mismatch large while the figure
+    over the claimed nodes stays at the fixed-point residual.
+    """
+    profile, lattice = _profile()
+    node = lattice.node_count
+    state, residual = _solve_with_compensation(profile, node)
+    assert residual < 1.0e-9
+    promoted = np.zeros(node, dtype=bool)
+    promoted[[10, 11, 20]] = True
+    trial = state.copy()
+    trial[promoted] += 0.05
+    xpoint = np.asarray([1.0, 0.0])
+    display = build_display_flux_map(
+        profile,
+        trial,
+        coupling=_coupling(profile),
+        moments=_moment_law(state, node),
+        promoted=promoted,
+        compensation=_compensation,
+        xpoint_rz=xpoint,
+        chunk=128,
+    )
+    assert display.promoted_node_count == 3
+    assert display.max_solved_node_mismatch_wb <= 10.0 * residual
+    assert display.max_node_mismatch_wb >= 0.049
+    assert display.max_solved_node_mismatch_wb == pytest.approx(
+        residual, rel=1.0e-6, abs=1.0e-15
+    )
+    offset = np.asarray(lattice.coordinate)[promoted] - xpoint
+    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+        float(np.min(np.linalg.norm(offset, axis=1))), rel=1.0e-12
+    )
+    assert display.reproduction_relative_error < 1.0e-10
+
+
+def test_dropping_the_compensation_moves_the_solved_mismatch():
+    """The compensating conductor flux is part of the field the solve imaged.
+
+    The same state and the same mask are built with the compensation withheld.
+    The figure over the claimed nodes then leaves the residual by the
+    compensation's own amplitude, which is the failure the receipt exists to
+    expose.
+    """
+    profile, lattice = _profile()
+    node = lattice.node_count
+    state, residual = _solve_with_compensation(profile, node)
+    promoted = np.zeros(node, dtype=bool)
+    promoted[[10, 11, 20]] = True
+    trial = state.copy()
+    trial[promoted] += 0.05
+    withheld = build_display_flux_map(
+        profile,
+        trial,
+        coupling=_coupling(profile),
+        moments=_moment_law(state, node),
+        promoted=promoted,
+        chunk=128,
+    )
+    assert withheld.max_solved_node_mismatch_wb > 10.0 * residual
+
+
 def test_a_converged_solve_reports_a_mismatch_within_ten_residuals():
     """A state converged under the operator's own map misses it by its residual."""
     profile, lattice = _profile()

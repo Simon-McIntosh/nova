@@ -42,7 +42,7 @@ def main():
     payload = json.loads(args.receipt.read_text())
     high, low, at_high, at_low = two_step_split(payload)
     print(f"HIGH {high:.3e} LOW {low:.3e} LANES_AT_HIGH {at_high} AT_LOW {at_low}")
-    claim = f"nine of them exactly at that level and seven already between"
+    claim = "nine of them exactly at that level and seven already between"
     if claim not in text:
         raise SystemExit("the record does not state the two-level split at iterate 2")
     if (at_high, at_low) != (9, 7):

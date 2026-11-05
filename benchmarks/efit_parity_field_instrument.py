@@ -11,7 +11,6 @@ import jax.numpy as jnp
 import matplotlib
 import numpy as np
 import zarr
-from matplotlib.path import Path as MplPath
 
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt  # noqa: E402
@@ -32,6 +31,7 @@ from benchmarks.efit_parity_inductance_partition import (  # noqa: E402
     SOURCE_RECEIPT,
     TARGET_SHOT,
     _boundary_moments,
+    _cell_partition,
     _source_digests,
     _terminal_observation,
 )
@@ -119,17 +119,17 @@ def _support_receipt(
     solved_contour: np.ndarray | None,
     stored_contour: np.ndarray,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    coordinates = np.asarray(profile.lattice.coordinate, dtype=np.float64)
-    stored_inside = MplPath(stored_contour, closed=True).contains_points(
-        coordinates, radius=1.0e-12
+    """Measure both supports through the single cell-partition owner."""
+    stored = _cell_partition(
+        profile, equilibrium, stored_contour, solved_branch=False
     )
-    solved_inside = (
-        MplPath(solved_contour, closed=True).contains_points(
-            coordinates, radius=1.0e-12
-        )
+    solved = (
+        _cell_partition(profile, equilibrium, solved_contour, solved_branch=False)
         if solved_contour is not None
         else None
     )
+    stored_inside = stored["inside"]
+    solved_inside = solved["inside"] if solved is not None else None
     cell_area = np.asarray(profile.operator.area, dtype=np.float64)
     cell_radius = np.asarray(profile.lattice.node_radius, dtype=np.float64)
     cell_volume = 2.0 * np.pi * cell_radius * cell_area
@@ -143,6 +143,9 @@ def _support_receipt(
     net_area_change = stored_area - solved_area if solved_area is not None else None
     support = {
         "definition": "mesh-cell centroids inside the stored LCFS contour",
+        "membership_owner": (
+            "benchmarks.efit_parity_inductance_partition._cell_partition"
+        ),
         "authoritative_cell_count": int(np.count_nonzero(stored_inside)),
         "banked_solved_branch_cell_count": int(np.count_nonzero(solved_inside))
         if solved_inside is not None
@@ -185,11 +188,7 @@ def _support_receipt(
             "any support rebaseline are undefined."
         ),
     }
-    partition = {
-        "inside": stored_inside,
-        "cell_current": np.asarray(equilibrium.cell_current, dtype=np.float64),
-    }
-    return partition, support
+    return stored, support
 
 
 def _outcome(

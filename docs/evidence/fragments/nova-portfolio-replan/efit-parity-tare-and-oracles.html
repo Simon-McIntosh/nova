@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EFIT parity tare measurement and independent oracles</title>
+<meta name="plan" content="nova-portfolio-replan">
+<meta name="node" content="efit-parity-tare-and-oracles">
+</head>
+<body>
+<main>
+<article id="efit-parity-tare-and-oracles-landing" class="landing" data-node="efit-parity-tare-and-oracles" data-plan="nova-portfolio-replan">
+<h2>EFIT parity tare measurement and independent oracles</h2>
+<p>The tare module was measured on the GPU at both revisions and the parity assertions were moved off the benchmark's own arithmetic. Landed at <code>647f298cf</code> on base <code>0509bb27f</code>; five paths changed: the three parity benchmarks and the boundary-volume and inductance-partition test modules.</p>
+<table id="efit-parity-tare-and-oracles-changes">
+<thead><tr><th>Finding</th><th>Repair</th></tr></thead>
+<tbody>
+<tr><td>Three measurements computed cell support membership on three separate paths.</td><td><code>benchmarks.efit_parity_inductance_partition._cell_partition</code> owns it through <code>_cell_membership</code>; the field instrument reads both of its supports (stored LCFS and the open solved contour) from that function with <code>solved_branch=False</code>, which drops only the claims a stored region cannot make (core containment and the banked-current pins).</td></tr>
+<tr><td>The bank-agreement refusal could not fire: it was gated on a closed solved boundary, and the banked terminal state's unit contour is open.</td><td>Extracted as <code>_require_bank_agreement</code> and driven by a test on a closed contour: a mismatched core volume raises, a matched one returns true, and no closed boundary reports the comparison undecidable rather than refused.</td></tr>
+<tr><td>The 234-cell live core and the 95-cell banked support were pinned as an expected pair.</td><td>Both counts are reported with a <code>core_support_divergence</code> block and checked against the moment receipt's current table. Measured: the live core carries 933 023.8 A of the 933 034.9 A reconstructed total, the banked support 416 958.3 A of it, so the two supports differ in both cells and current. Neither pair is an asserted expectation.</td></tr>
+<tr><td>Test expectations repeated the benchmark expressions they were meant to check.</td><td>The polygon quadrature is checked against closed-form solids of revolution (a rectangle, <code>V = pi (R2^2 - R1^2)(Z2 - Z1)</code>, and a circle, <code>V = 2 pi^2 a^2 R</code>, both to 1e-9); the current assertions read the banked <code>current_supports</code> table instead of re-dividing the live values.</td></tr>
+</tbody>
+</table>
+<table id="efit-parity-tare-and-oracles-measures">
+<caption>Commands and their summaries. Both arms of every comparison run at the same revision pair: base <code>0509bb27f</code>, head <code>647f298cf</code>.</caption>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="efit-parity-tare-and-oracles-measure-inplace"><td>Base arm in place, boundary-volume + inductance-partition + field-instrument</td><td>19 passed in 215.46 s (<code>EXIT=0</code>), before any change.</td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-head-six"><td>Head arm in place, the five parity files that solve on CPU</td><td>33 passed in 434.36 s (<code>EXIT=0</code>) against a base of 19 + 12 passed: the two extra tests are the closed-form volume and bank-agreement cases this node added, and nothing failed.</td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-base-other-two"><td>Base arm in place, fixed-boundary-seed + constrained-arm</td><td>12 passed in 287.67 s (<code>EXIT=0</code>); head arm of the same two files, 12 passed in 252.61 s.</td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-tare-gpu"><td>Tare module, base and head arms in one h200 job (job 1306208, <code>scripts/nova_lane/run.sh --mode script --force-submit --rungs h200,titan</code>)</td><td><span id="efit-parity-tare-and-oracles-tare-result">base: 4 passed, 10 errors in 708.72 s, <code>=== ARM_EXIT arm=base exit=1</code>. Head: 4 passed, 10 errors in 691.98 s, <code>=== ARM_EXIT arm=head exit=1</code>. Zero added failures between the arms.</span> All ten errors are <code>ERROR at setup</code> on the module fixture, each carrying <code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code> while the fixture compiled the six constrained solves; the failing stack is <code>run_control</code> &rarr; <code>_solve_row</code> &rarr; <code>_passive_inclusive_solve</code> &rarr; <code>profile.solve</code> &rarr; JAX <code>backend_compile_and_load</code>, i.e. compilation, not assertion. The same ten fail at both revisions, before any code under test runs, so the arm pair reports scaffolding and not a regression.</td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-negative"><td>Negative control: the reconstructed total current multiplied by 1.001 in a scratch copy of the head tree</td><td>1 failed, 1 passed, <code>EXIT=1</code>. The independent-oracle assertion failed against the banked all-domain current; the recomputed assertion it replaced stayed green against the same mutated value.</td></tr>
+</tbody>
+</table>
+<p id="efit-parity-tare-and-oracles-census">The module collects fourteen IDs. Four pass in both arms, needing no fixture: <code>test_mesh_floor_classifier_uses_preregistered_order_bands</code>, <code>test_mesh_receipt_preserves_the_split_and_never_pools_residuals</code>, <code>test_all_five_tared_floors_scale_down_on_the_fine_grid</code> and <code>test_mesh_receipt_is_tree_stamped_and_protected_digests_remain_green</code>. Ten depend on the module fixture and time out at setup in both arms: <code>test_tare_closes_all_six_references_at_roundoff</code>, <code>test_delta_star_current_is_partitioned_against_each_declared_support</code>, <code>test_tare_uses_the_existing_operator_and_preserves_reference_gauge</code>, <code>test_protected_banked_artifacts_and_control_caveat_are_explicit</code>, <code>test_external_field_figure_compares_tared_and_passive_inclusive_maps</code>, <code>test_all_six_current_constrained_solves_are_reported</code>, <code>test_raw_and_instrument_controlled_rows_are_banked_side_by_side</code>, <code>test_representative_field_instrument_ratio_reproduces_the_bank</code>, <code>test_solovev_null_qualifies_the_declared_support_split</code> and <code>test_analytic_null_reports_absolute_and_span_errors_against_bank</code>. A second h200 job repeats both arms with <code>--timeout 3600</code>; it ended <code>TIMEOUT</code> at 2026-11-05T15:47:20 after 45 minutes with its base arm still unsolved, so it carries no second verdict and the timeout reading above stands. Its log is <code>logs/tare-gpu-two-arm-longtimeout.log</code>.</p>
+<p>The negative control's scratch tree imported <code>benchmarks/efit_parity_boundary_volume.py</code> from <code>/work/projects/imas_gpu/sophelio/scratch/r-20261105T132414718225-efit-parity-tare-and-oracles/arms/negcontrol</code>; its log is <code>logs/negative-control.log</code> in this node's run directory.</p>
+</article>
+</main>
+</body>
+</html>

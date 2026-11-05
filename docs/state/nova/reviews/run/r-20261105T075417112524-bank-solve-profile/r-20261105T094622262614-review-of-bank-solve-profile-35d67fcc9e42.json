@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run is a measurement node whose brief declares no test arms; its manifest carries no baseline_suite or after_suite block and the run directory holds no suite log, so there are no failure ids to add. The only gate is h200-rerun-1306018.out, which ends EXIT=0, and negative-control.log, which ends EXIT=0.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T09:57:43.230Z",
+  "dispatched_at": "2026-11-05T09:51:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html",
+      "id": "fff1429994d",
+      "line": "108",
+      "severity": "non-blocking",
+      "text": "non-blocking: the lane section states a median of 8 steps, but the 4566 ms it derives at line 115-116 is 7.5 x 608.85, the receipt's own median_steps (h200-rerun-1306018.out SOLVE lanes=16), so a reader recomputing from the stated 8 and 15 gets 4871 ms and a 53 % straggler saving rather than the 50 % printed here; the binding figure of this section cannot be reproduced from its own stated inputs."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html",
+      "id": "f26780609b7",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "non-blocking: the stage table divides the whole-solve wall by 3 and 15 steps taken from one run, and the fragment never says that the same seed converged in 6 and 29 steps in the preceding receipt, though the reviewed manifest claims this limitation is recorded in the fragment; the 9133 ms batch wall and the 50 % straggler bound are therefore run-dependent in a way a reader of this document alone cannot see."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_profile/fixture.py",
+      "id": "fc5050ee4d1",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: build() re-implements the seed and lane perturbation that scripts/prototypes/bank_solve_read/measure.py:95-97 already owns, which the brief named as the module to reuse and told the node not to rebuild, and the docstring at line 7 justifies the fork with a claim that is false - that module guards its entry point at measure.py:236 and imports without running a measurement, so the recipe could have been factored out of it rather than copied."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html",
+      "id": "f3c8e1580b9",
+      "line": "130",
+      "severity": "non-blocking",
+      "text": "non-blocking: the marginal section asserts every commit between 2a21f478f and 6889117f5 touches only scripts/, but cb1c139ba and 46cc4aff2 touch docs/figures and docs/evidence; the substantive claim that the measured product code is identical does hold (git diff --name-only 6889117f5..2a21f478f matches no nova/ path), so this is a wrong justification for a right conclusion."
+    }
+  ],
+  "item_aggregate": "all six checklist items read; five verdicts emitted, call sites recorded as none",
+  "item_verdicts": {
+    "diff": "read all four commits 1f6433f..35d67fc one by one: 5e1697e36 consolidates the fixture into one module, 2a21f478f replaces the tautological control with probes of the production closure, 9575e398e commits the sbatch launcher beside the wrapper, and 35d67fcc9 regenerates the fragment and figure from job 1306018.",
+    "done_when": "the brief's measure - each stage its own jitted call at the solve's shapes, warmed, block_until_ready, median of at least 10 repeats, the whole solve timed as the product runs it, and the stage sum within 15 % of it or the residual reported - is what scripts/prototypes/bank_solve_profile/measure.py runs; the closure misses at 1.89x and 3.09x and the fragment reports both residuals with their sign at bank-solve-profile.html:78-87 rather than absorbing them into a remainder stage.",
+    "goal": "the node goal is to split the converged bank solve's per-iterate wall into stages at one and sixteen slices, table the steps each lane takes, and land an evidence fragment with one figure; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html carries all three and h200-rerun-1306018.out holds the seven STAGE medians and the SOLVE receipt behind them.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T075417112524-bank-solve-profile/manifest.md; status complete, twelve commits, a tests line naming sbatch job 1306018 plus control.py, negative-control.log at exit 0, and baseline_suite/after_suite absent because this is a measurement node with no test arms.",
+    "write_paths": "the reviewed manifest's orientation_write_paths are scripts/prototypes/bank_solve_profile, docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html and docs/figures/sub-millisecond-forward-path/bank-solve-profile; all twelve paths in the diff lie inside them."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_solve_profile/control.py:38-56 now drives the production closure from outside and its inert arm is shown failing at negative-control.log:3 and :7, but nothing invokes that script and no test exists, so a regression is caught only by a reader who remembers to run it.",
+    "evidence": "every fragment number reconciles with h200-rerun-1306018.out and the log's WRAPPER digest a0b24e7b matches the committed scripts/prototypes/bank_solve_profile/run_h200.sh, but the fragment misstates the per-lane median it computes from (line 108) and omits the run-to-run step-count variation the manifest says it discloses.",
+    "fit": "scripts/prototypes/bank_solve_profile/receipts.py follows the sibling prototype idiom and introduces no forbidden name, though the docstring at fixture.py:7 makes a claim contradicted by scripts/prototypes/bank_solve_read/measure.py:236.",
+    "goal_fidelity": "the range 1f6433f..35d67fc answers the node goal's three work items at docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html - stage table at both batch sizes, per-lane step table, one rendered figure - and adds only the repair the goal implies.",
+    "reuse": "scripts/prototypes/bank_solve_profile/fixture.py:57 re-implements the seed and lane perturbation owned by scripts/prototypes/bank_solve_read/measure.py:95-97, the module the brief named for reuse, without extending or wrapping it.",
+    "scope_discipline": "git diff --stat 1f6433f..35d67fc lists twelve files and every one is under scripts/prototypes/bank_solve_profile, docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html or docs/figures/sub-millisecond-forward-path/bank-solve-profile, with no product source and no test."
+  },
+  "node": "review-of-bank-solve-profile-35d67fcc9e42",
+  "node:reviewed": "bank-solve-profile",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to split the converged bank solve's per-iterate wall into stages at one and sixteen slices, table each lane's step count, and land an evidence fragment with one figure; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html carries all three.\nVERDICT done_when: the brief's measure is run by scripts/prototypes/bank_solve_profile/measure.py and its result is recorded in h200-rerun-1306018.out; the 15 % closure requirement is missed and the residual is reported at bank-solve-profile.html:78-87 rather than absorbed.\nVERDICT write_paths: read the reviewed manifest's declared paths; all twelve paths in git diff 1f6433f..35d67fc are inside scripts/prototypes/bank_solve_profile, the one evidence fragment and the one figure directory.\nVERDICT manifest: read; it records status complete, twelve commits, sbatch job 1306018 and control.py as the gate, and negative-control.log; baseline_suite and after_suite are absent because the node declares no test arms.\nVERDICT diff: read commit by commit against 1f6433fb8; four commits, 410 insertions and 239 deletions across twelve files, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html lands all three work items and the range's only additions are the repairs the goal implies.\nSCORE evidence: 15\nJUSTIFICATION evidence: every fragment number reconciles with h200-rerun-1306018.out and run_h200.sh's committed digest matches the log's WRAPPER line, but the median at bank-solve-profile.html:108 does not reproduce the figure derived from it.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all twelve paths in the diff lie under the three declared write paths, with no product file and no test added.\nSCORE durability: 10\nJUSTIFICATION durability: control.py:38-56 probes the production closure and its inert arm fails at negative-control.log:3, but no test and no runner invokes it, so a regression is caught only when someone runs the script.\nSCORE fit: 16\nJUSTIFICATION fit: receipts.py and fixture.py follow the sibling prototype idiom and add no forbidden name, though the fixture.py:7 docstring states something the owner module contradicts.\nSCORE reuse: 5\nJUSTIFICATION reuse: fixture.py:57 duplicates the seed and lane recipe that scripts/prototypes/bank_solve_read/measure.py:95-97 owns rather than extending or wrapping it.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html:108 non-blocking: the section states a median of 8 steps but derives 4566 ms from 7.5, so the printed straggler saving of 50 % cannot be recomputed from the numbers given.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html:66 non-blocking: the per-iterate wall divides by one run's step counts without disclosing that the same seed took 6 and 29 steps in the preceding receipt, so the batch wall and the straggler bound read as properties of the problem rather than of this run.\nFINDING scripts/prototypes/bank_solve_profile/fixture.py:57 non-blocking: build() re-implements the seed and lane perturbation owned by scripts/prototypes/bank_solve_read/measure.py:95-97 against the brief's instruction not to rebuild the fixture, and the docstring at line 7 justifies it with a false claim about that module being unimportable.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html:130 non-blocking: the claim that every commit between the two receipts touches only scripts/ is false (two touch docs/), though the product-code claim it supports is true.\n",
+  "review_run_id": "r-20261105T094622262614-review-of-bank-solve-profile-35d67fcc9e42",
+  "reviewed_base_sha": "1f6433fb8677dea2d32997933cb5e71a9ebecdf0",
+  "reviewed_head_sha": "35d67fcc9e424f9d195c0cf82fcd80e6ec7aadf2",
+  "reviewed_run_id": "r-20261105T075417112524-bank-solve-profile",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T10:58:00+00:00",
+  "total": 83
+}

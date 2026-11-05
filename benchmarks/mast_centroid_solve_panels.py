@@ -1175,7 +1175,8 @@ def _panel_state_display(state_path: Path, spacing: float):
     lattice = FluxLattice(radius, height)
     # One exact build of the unit-current responses serves the map, the lattice
     # node check and every perturbation of this lane's currents.
-    _panel_response(lattice, _display_points(radius, height, spacing))
+    points = _display_points(radius, height, spacing)
+    _panel_response(lattice, points)
     _panel_response(lattice, np.asarray(lattice.coordinate, dtype=np.float64))
     coupling = _machine_coupling(lattice, conductor_current)
     profile = _PanelProfile(_PanelOperator(lattice, coupling))
@@ -1190,7 +1191,11 @@ def _panel_state_display(state_path: Path, spacing: float):
         spacing=spacing,
         axis_rz=axis,
         xpoint_rz=x_points[saddle],
-        chunk=2048,
+        # The response is prepared for the whole point set, so the map is
+        # contracted in one block: a smaller chunk hands the coupling a
+        # sub-array it holds no prepared response for, and both kernels fall
+        # back to being evaluated point by point at their full cost.
+        chunk=int(points.shape[0]),
     )
     return data, coupling, display, shape, radius, height, solved
 

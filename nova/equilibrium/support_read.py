@@ -1464,8 +1464,6 @@ class SolveResult(NamedTuple):
     steps: jax.Array
     refactors: jax.Array
     reads: jax.Array
-    tracked_reads: jax.Array
-    certificates: jax.Array
     freezes: jax.Array
     unfreezes: jax.Array
     residual_path: jax.Array
@@ -1495,18 +1493,11 @@ def solve_batch(
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
-    A fresh read certifies the accepted state. Each iterate otherwise takes the
-    read's tracked branch: the carried :class:`TrackingState` supplies the
-    connected-domain decision while :func:`rebuild_needed` reports no cell or
-    ownership change, so the whole-mesh rebuild is skipped. The gate is applied
-    once for the batch, as :func:`read_batch` forms it, never per lane under a
-    ``vmap``. The certificate read after the loop always rebuilds, so the
-    reported residual is a fresh read's and never a tracked one. Once close to
-    the root, the booking keeps the cut-cell, normal-form and fragment decisions
-    of the first close read while every continuous reading remains current. A
-    changed fresh decision releases that lock and requires another Newton
-    update. Factor reuse is opt-in because extra iterations can cost more than
-    the skipped refactors.
+    A fresh read certifies every accepted state. Once close to the root, the
+    booking keeps the cut-cell, normal-form and fragment decisions of the first
+    close read while every continuous reading remains current. A changed fresh
+    decision releases that lock and requires another Newton update. Factor reuse is
+    opt-in because extra iterations can cost more than the skipped refactors.
     """
     lanes, cells = moments[0].shape
     support = read_batch(
@@ -1571,8 +1562,6 @@ def solve_batch(
         jnp.zeros(lanes, jnp.int32),
         jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
         jnp.full((lanes, max_steps), jnp.nan, dtype),
-        jnp.zeros(lanes, jnp.int32),
-        jnp.asarray(False),
     )
 
     def keep_going(carried):
@@ -1598,8 +1587,6 @@ def solve_batch(
             unfreezes,
             residual_path,
             update_path,
-            tracked,
-            carried_previous,
         ) = carried
         cut_now = (fresh.reading.membership > 0) & (
             fresh.reading.membership < 1 - 1e-14
@@ -1684,56 +1671,21 @@ def solve_batch(
             jnp.where(active[:, None], value + change, value)
             for value, change in zip(state, correction.update, strict=True)
         )
-        # The carried decision keeps its discrete cells but not their continuous
-# readings, so it is current only where the state has stopped moving. That is
-# the same regime the active-set freeze admits, and the batch takes one
-# decision for every lane.
-        steady = jnp.all(~active | (current_norm <= freeze_threshold)) & (
-            ~carried_previous
-        )
-        next_read = jax.lax.cond(
-            steady,
-            lambda _: read_batch(
-                operands,
-                cache,
-                candidate,
-                seeds,
-                previous,
-                convention,
-                policy,
-                axis_sign,
-                iterations=iterations,
-                tracking=TrackingState(
-                    fresh.cells,
-                    fresh.saddle_live,
-                    fresh.reading,
-                    fresh.rebuilds,
-                    fresh.valid,
-                ),
-            ),
-            lambda _: read_batch(
-                operands,
-                cache,
-                candidate,
-                seeds,
-                previous,
-                convention,
-                policy,
-                axis_sign,
-                iterations=iterations,
-            ),
-            None,
+        next_read = read_batch(
+            operands,
+            cache,
+            candidate,
+            seeds,
+            previous,
+            convention,
+            policy,
+            axis_sign,
+            iterations=iterations,
         )
         next_norm = magnitude(candidate, next_read)
         drift = lock & selection_changed(
             next_read.reading, cut_set, normal_set, locked_fragments
         )
-        # A carried decision describes the previous state's continuous geometry,
-        # so a second carry in a row would step from a reading that has drifted
-        # twice: the driver rebuilds on the iterate after a carry.
-        # A lane's discrete decisions are unchanged, so ``drift`` is the only
-        # set-consistency condition the acceptance needs: a lane the fresh
-        # decision released cannot also be holding the tracked one.
         next_done = done | (
             next_read.valid
             & jnp.isfinite(next_norm)
@@ -1763,40 +1715,17 @@ def solve_batch(
             unfreezes + (changed | drift).astype(jnp.int32),
             residual_path.at[:, slot + 1].set(next_norm),
             update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0)),
-            tracked + (active & (~next_read.rebuilt)).astype(jnp.int32),
-            steady,
         )
 
     final = jax.lax.while_loop(keep_going, advance, initial)
-    # The acceptance read always rebuilds: a residual read against a carried
-    # decision is the previous state's, and does not certify this one.
-    certificate = read_batch(
-        operands,
-        cache,
-        final[0],
-        seeds,
-        previous,
-        convention,
-        policy,
-        axis_sign,
-        iterations=iterations,
-    )
-    certificate_norm = magnitude(final[0], certificate)
-    certified = (
-        certificate.valid
-        & jnp.isfinite(certificate_norm)
-        & (certificate_norm <= tolerance)
-    )
     return SolveResult(
         final[0],
-        certificate,
-        certificate_norm,
-        certified,
+        final[1],
+        final[2],
+        final[3],
         final[11],
         final[12],
         final[13],
-        final[18],
-        jnp.ones_like(final[11]),
         final[14],
         final[15],
         final[16],

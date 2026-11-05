@@ -17,13 +17,31 @@ zero-file check succeed. The focused CPU suite passed 8 tests at the base and
 10 at the changed head. Seeding one autotune file in the count test made
 <code>test_autotune_count_accepts_a_compile_only_directory</code> fail with
 count 1 and exit 1; the unseeded head arm passes.</p>
-<p>H200 job 1304470 is running against main revision
-<code>defca1acf17c40d5ceb1ec6163fe6befc788b738</code>. Its fixture-floor
-receipt completed with status 0, 651 cache hits, 3,784 persisted misses,
-34.0 recorded compile seconds and 4,653 executable entries in
-<code>runtime-d23b975337df890821f8</code>. The identity and lane rows, pin
-publication, lane dry run, and retired-directory removal remain pending this
-job's final receipt. The currently pinned directory
-<code>runtime-7b315420b55b91bffb05</code> still holds 19,270 compile entries
-and 31,667 autotune files.</p>
+<p>H200 job 1304470 ran against main revision
+<code>defca1acf17c40d5ceb1ec6163fe6befc788b738</code> and exited 1 after
+64:15. Its three row receipts report:</p>
+<table>
+<tr><th>row</th><th>status</th><th>hits</th><th>persisted misses</th><th>compile [s]</th><th>served entries</th></tr>
+<tr><td>fixture floor</td><td>0</td><td>651</td><td>3,784</td><td>34</td><td>4,653</td></tr>
+<tr><td>compile identity</td><td>1</td><td>900</td><td>10</td><td>365</td><td>4,663</td></tr>
+<tr><td>forward-solve lane</td><td>0 (command 1)</td><td>218</td><td>1,492</td><td>426</td><td>6,155</td></tr>
+</table>
+<p>Every miss persisted, and the new
+<code>runtime-d23b975337df890821f8</code> held <strong>zero</strong> files under
+<code>xla_gpu_per_fusion_autotune_cache_dir</code>, counted by the same check
+that rejected the seeded-file negative control. The identity test
+<code>test_traced_exterior_preserves_the_certificate_terminal_state</code>
+failed at relative flux difference <code>4.478580602903604e-11</code> against
+<code>1e-14</code>. The forward-solve row had three test failures, recorded in
+the job log, but its compilation receipt remained valid. The identity row's
+nonzero status correctly withheld pin publication.</p>
+<p>The pin therefore still names source revision
+<code>eb565ed4cd2cf248c1996df5b6171b9e22bd9fce</code> and directory
+<code>runtime-7b315420b55b91bffb05</code>. That live directory holds 19,270
+compile entries and 31,667 autotune files. The lane dry run cannot serve a
+replacement pin yet, and the live old directory was not removed. The identity
+test's numerical failure needs a separate owner decision before another
+publication attempt. The complete job log and per-row receipt are
+<code>prewarm-main-core4.log</code> in this run and
+<code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/receipts/prewarm-defca1acf17c-1304470.jsonl</code>.</p>
 </section>

@@ -27,6 +27,50 @@ POPULATION = "#929292"
 FREEZE_THRESHOLD = 1e-6
 
 
+def covered_by(box, points, margin=2.0):
+    """How many plotted samples a text box covers, counting a clearance margin."""
+    if not len(points):
+        return 0
+    return int(
+        (
+            (points[:, 0] >= box.x0 - margin)
+            & (points[:, 0] <= box.x1 + margin)
+            & (points[:, 1] >= box.y0 - margin)
+            & (points[:, 1] <= box.y1 + margin)
+        ).sum()
+    )
+
+
+def plotted_points(fig, samples=48):
+    """Every plotted vertex and the interior of every plotted segment.
+
+    Sampling the segments, not only the vertices, is what makes a label that
+    sits in the gap between two vertices visible to the check: a polyline
+    crosses the gap whether or not a vertex lands in it. The sampling runs in
+    pixels, not in data coordinates, because that is what the renderer draws: a
+    segment on a log axis is a straight chord between two pixels, not the image
+    of a straight line in data space, and interpolating the data and then
+    transforming leaves the chord crossing a label the samples report as clear.
+    """
+    points = []
+    for axis in fig.axes:
+        transform = axis.transData
+        for line in axis.lines:
+            xy = np.asarray(line.get_xydata(), dtype=float)
+            if xy.size == 0:
+                continue
+            pixels = transform.transform(xy[:, :2])
+            if len(pixels) == 1:
+                points.append(pixels)
+                continue
+            starts, ends = pixels[:-1], pixels[1:]
+            weight = np.linspace(0.0, 1.0, samples)[:, None, None]
+            points.append(
+                (starts[None] * (1.0 - weight) + ends[None] * weight).reshape(-1, 2)
+            )
+    return np.concatenate(points) if points else np.zeros((0, 2))
+
+
 def save_checked(fig, output):
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
@@ -43,6 +87,15 @@ def save_checked(fig, output):
             if left_box.overlaps(right_box):
                 raise ValueError(
                     f"text overlap: {left.get_text()} / {right.get_text()}"
+                )
+    points = plotted_points(fig)
+    if len(points):
+        for item, box in boxes:
+            covered = covered_by(box, points)
+            if covered:
+                raise ValueError(
+                    f"text over plotted data: {item.get_text()!r} covers "
+                    f"{covered} data point(s)"
                 )
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output)
@@ -87,11 +140,7 @@ def main():
         if lane in colour:
             continue
         ax.plot(range(len(curve)), curve, color=POPULATION, linewidth=1.4, zorder=2)
-    for lane, name in (
-        (median_lane, "median"),
-        (second, "second slowest"),
-        (slowest, "slowest"),
-    ):
+    for lane in (median_lane, second, slowest):
         curve = curves[lane]
         iterate = list(range(len(curve)))
         ax.plot(iterate, curve, color=colour[lane], linewidth=3.0, zorder=5)
@@ -108,27 +157,19 @@ def main():
                 markeredgewidth=2.0,
                 zorder=7,
             )
-        ax.annotate(
-            f"lane {lane + 1}, {int(steps[lane])} steps ({name})",
-            (iterate[-1], curve[-1]),
-            textcoords="offset points",
-            xytext=(8, 0),
-            fontsize=14,
-            color=colour[lane],
-            va="center",
-            zorder=8,
+        ax.axhline(
+            FREEZE_THRESHOLD, color="#222222", linewidth=1.2, linestyle=":", zorder=3
         )
-    ax.axhline(
-        FREEZE_THRESHOLD, color="#222222", linewidth=1.2, linestyle=":", zorder=3
-    )
     ax.annotate(
         "freeze threshold, 1e-6",
-        (0, FREEZE_THRESHOLD),
+        (1.0, FREEZE_THRESHOLD),
+        xycoords=("axes fraction", "data"),
         textcoords="offset points",
-        xytext=(2, 5),
+        xytext=(0, 5),
+        ha="right",
         fontsize=14,
         color="#222222",
-        zorder=4,
+        zorder=9,
     )
     ax.set_yscale("log")
     ax.set_xlabel("iterate")
@@ -141,16 +182,26 @@ def main():
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
     handles = [
-        Line2D([], [], color=SLOW, linewidth=3.0, label=f"slowest lane {slowest + 1}"),
+        Line2D(
+            [],
+            [],
+            color=SLOW,
+            linewidth=3.0,
+            label=f"slowest lane {slowest + 1}, {int(steps[slowest])} steps",
+        ),
         Line2D(
             [],
             [],
             color=SLOW_SECOND,
             linewidth=3.0,
-            label=f"second slowest lane {second + 1}",
+            label=f"second slowest lane {second + 1}, {int(steps[second])} steps",
         ),
         Line2D(
-            [], [], color=MEDIAN, linewidth=3.0, label=f"median lane {median_lane + 1}"
+            [],
+            [],
+            color=MEDIAN,
+            linewidth=3.0,
+            label=f"median lane {median_lane + 1}, {int(steps[median_lane])} steps",
         ),
         Line2D([], [], color=POPULATION, linewidth=1.4, label="other 13 lanes"),
         Line2D(

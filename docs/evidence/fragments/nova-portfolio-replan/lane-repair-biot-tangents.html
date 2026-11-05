@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Biot tangent test reproduction</title>
+<meta name="plan" content="nova-portfolio-replan">
+<meta name="node" content="lane-repair-biot-tangents">
+</head>
+<body>
+<main>
+<section id="lane-repair-biot-tangents-reproduction">
+<h2>Biot tangent test reproduction</h2>
+<p>At revision <code>1de330a8fbf781c2db6f9734efdaf53e47fe75b4</code>, a serial CPU run of both tangent files passed the first vertex identity on all 10,000 samples, then its Python process was killed while compiling the next case. The run emitted <code>EXIT=137</code> without a pytest summary. The isolated <code>test_tangent_matches_primal_jvp[arsinh_terms]</code> also ended with <code>EXIT=137</code>. A trial that compiled batches of 1,000 while retaining all 10,000 inputs was killed again with <code>EXIT=137</code>; the trial edits were removed.</p>
+<p>The failed case therefore reproduces as a resource failure in this allocation, before its tangent assertion can be read. The remaining census failures in these two files were not reached by the serial run and remain unclassified at this revision. No product or test change was landed.</p>
+</section>
+</main>
+</body>
+</html>

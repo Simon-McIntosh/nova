@@ -1,6 +1,7 @@
 """A fresh residual line search escapes a continuous piecewise-linear cycle."""
 
 import json
+from pathlib import Path
 from time import perf_counter
 
 import jax
@@ -101,6 +102,13 @@ def test_diverted_lanes_leave_near_root_cycle(monkeypatch):
 
     from scripts.prototypes.bank_solve_cycle.observe import observe_updates
 
+    print(
+        "PROVENANCE",
+        reference.nova.__file__,
+        support_read.__file__,
+        str(Path.cwd().resolve()),
+        flush=True,
+    )
     observe_updates(monkeypatch)
     setup_start = perf_counter()
     bank, cache, roots, convention, policy, profile, quadrature, moments, _ = (

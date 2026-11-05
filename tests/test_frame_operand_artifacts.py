@@ -148,10 +148,10 @@ def test_persisted_bank_frame_rebuilds_to_one_em12():
     receipt_path = (
         Path(__file__).parents[1]
         / "docs/figures/diiid-forward-onboarding/forward-gs-2026-11"
-        / "forward_gs_receipt.json"
+        / "forward_gs_partial_receipt.json"
     )
     receipt = json.loads(receipt_path.read_text())
-    frames = receipt["result"]["frame_records"]
+    frames = receipt["frame_records"]
     record = next(item["display_map"] for item in frames if item["display_map"])
     assert record["operand_path"] and record["operand_digest"]
     artifact = Path(record["operand_path"])

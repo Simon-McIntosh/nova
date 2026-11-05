@@ -12,6 +12,13 @@
       "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093443067901-review-of-bank-step-channels-2aa3ece1c47c-figure/image-0.png"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the product change is not landed: it saved 2-3% of the tangent assembly for a 90 MiB per-operand cache, so the node closes as a negative result and its test and figure do not enter main",
+      "recorded_at": "2026-11-05T09:49:47.823860+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_step_channels/plot.py",

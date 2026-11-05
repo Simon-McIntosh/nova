@@ -25,7 +25,7 @@
 <thead><tr><th>Measure</th><th>Result</th></tr></thead>
 <tbody>
 <tr id="efit-parity-tare-and-oracles-measure-inplace"><td>Base arm in place, boundary-volume + inductance-partition + field-instrument</td><td>19 passed in 215.46 s (<code>EXIT=0</code>), before any change.</td></tr>
-<tr id="efit-parity-tare-and-oracles-measure-head-six"><td>Head arm in place, all six parity files</td><td>33 passed in 434.36 s (<code>EXIT=0</code>).</td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-head-six"><td>Head arm in place, the five parity files that solve on CPU</td><td>33 passed in 434.36 s (<code>EXIT=0</code>) against a base of 19 + 12 passed: the two extra tests are the closed-form volume and bank-agreement cases this node added, and nothing failed.</td></tr>
 <tr id="efit-parity-tare-and-oracles-measure-base-other-two"><td>Base arm in place, fixed-boundary-seed + constrained-arm</td><td>12 passed in 287.67 s (<code>EXIT=0</code>); head arm of the same two files, 12 passed in 252.61 s.</td></tr>
 <tr id="efit-parity-tare-and-oracles-measure-tare-gpu"><td>Tare module, base and head arms in one h200 job</td><td><span id="efit-parity-tare-and-oracles-tare-result">reported below</span></td></tr>
 <tr id="efit-parity-tare-and-oracles-measure-negative"><td>Negative control: the reconstructed total current multiplied by 1.001 in a scratch copy of the head tree</td><td>1 failed, 1 passed, <code>EXIT=1</code>. The independent-oracle assertion failed against the banked all-domain current; the recomputed assertion it replaced stayed green against the same mutated value.</td></tr>

@@ -1,0 +1,76 @@
+{
+  "added_failure_basis": "baseline-suite.log and after-suite.log both end EXIT=1 with the same two ids, tests/test_bank_newton_step.py::test_dense_newton_step_solves_scaled_residual and tests/test_bank_newton_step.py::test_bank_jvp_composes_flux_and_level_derivatives, so the after-minus-baseline set is empty.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_note": "No production call site invokes support_read.solve or solve_batch at the reviewed head: nova/equilibrium/forward.py:97 imports the module but :574 uses it only for the SupportOperands type, and the only callers are scripts/prototypes/bank_solve_driver/measure.py:138 and :156 plus tests/test_bank_solve_driver.py.",
+  "completed_at": "2026-11-05T06:24:45.378Z",
+  "dispatched_at": "2026-11-05T06:15:30Z",
+  "figure_note": "The SVG changed in 5d27b275b and 029970018: ticks are now round half-second values, the prototype stem is 2.6 pt and the staged stems 3.0 pt, and its 1399x720 render decodes to 1.400 / 0.646 / 1.709 s against the evidence table's 1.398 / 0.645 / 1.710 s; the separate figure review at this head records all six figure rubrics passing with one non-blocking legibility finding.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_driver/fragment_negative_control.py",
+      "id": "fcfc28feb2f",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The added 58-line script reproduces scripts/prototypes/bank_solve_driver/negative_control.py almost verbatim, differing only in its SOURCE, MUTATION and selected test id, so the scratch-mutation harness now has two copies that must be maintained in step."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-driver.html",
+      "id": "fab57e890a8",
+      "line": "65",
+      "severity": "non-blocking",
+      "text": "Three maxima are rounded one unit high in the last printed digit against h200-frozen-final.log \u2014 axis gap 5.0035e-11 against the log's 5.003442614e-11 (5.0034e-11), X-point gap 3.2308e-11 against 3.230702068e-11 (3.2307e-11), and the 9.8496e-11 fresh-residual maximum repeated at :62 against 9.849543403e-11 (9.8495e-11) \u2014 so the record does not exactly reconcile with the log it cites, although each error overstates the gap and changes no budget decision."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "fca1b2fef4c",
+      "line": "1693",
+      "severity": "non-blocking",
+      "text": "The added \"& ~changed\" acceptance guard cannot fire, because changed is recomputed at :1605 from the same carried reading that drift already cleared at :1686 before frozen was carried forward, so the fragment-switch protection the tests actually exercise is the drift term and this guard is unexercised logic."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T080040158512-bank-solve-driver/cpu-frozen-final.log",
+      "id": "f2048358a50",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The gate receipt names only the revision, tree and command, with no partition or job id, so the done-when clause that the CPU tests passed on sirius cannot be confirmed from the log itself."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 8890aefcd78a4ffc0bdde274a6b0a4b5649b6422; 60f83ab3a adds the two reproduction tests and their runner, 0f0da63a8 removes locked_membership and adds fragment drift and the changed-acceptance block, 357dcb657 adds the mutant harness, 5d27b275b fixes the figure ticks and weights, 7108e749 strengthens the frozen/fresh residual comparison, and f0c161e55 and 029970018 refresh the fragment and the checked SVG.",
+    "done_when": "The done_when requires a fresh residual at most 1e-10, axis and X-point within 5e-4 of the minor radius, boundary flux within 1e-4 of the span, per-lane agreement with each lane's own solve, one H200 allocation tabling the 1- and 16-slice walls with steps, refactors and reads, and CPU tests on sirius; h200-frozen-final.log:3-24 records max fresh residual 9.849543403e-11, oracle ratios 1.0477e-5 / 9.2549e-6 / 2.5906e-5 and sixteen LANE rows, and cpu-frozen-final.log:8 records 8 passed with EXIT=0.",
+    "goal": "The source node's goal is a one-program converged bank solve with factor reuse and a frozen active set, and the gained commits 8890aefc..029970018 repair exactly the frozen-set clause: nova/equilibrium/support_read.py:1523-1533 freezes only cut, normal-form and fragment decisions while every continuous read field stays current.",
+    "manifest": "Read; it records status complete, the sirius gate command and its log, H200 job 1304543 at the repaired head, the fragment-drop negative control at fragment-negative.log ending EXIT=1, and baseline and after suite arms with identical two-failure sets.",
+    "write_paths": "The source grant is nova/equilibrium/support_read.py, tests/test_bank_solve_driver.py, scripts/prototypes/bank_solve_driver, the bank-solve-driver fragment html and the bank-solve-driver figure directory; git diff --stat 8890aefcd78a4ffc0bdde274a6b0a4b5649b6422..029970018b86379031b5ddc97a84270a55a24005 touches exactly eight files and every one is inside those paths."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_solve_driver.py:166 and :196 redden on the unfixed solver, quoted at frozen-reproduction.log:4-5 as FROZEN_AREA 0.1 0.4 0.41000000000000003 0.024 and FRAGMENT_SWITCH 1 0, and the fragment test also reddens on the scratch drift mutant at fragment-negative.log:4; the strengthened residual form at :166 was itself only exercised on the repaired code.",
+    "evidence": "h200-frozen-final.log:3-24 records every done_when figure at the repaired source revision f0c161e55fd457172b44014cedecc9ccad138382 and cpu-frozen-final.log:8 records 8 passed EXIT=0, though three maxima are mis-rounded in docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-driver.html:65 and the CPU receipt does not name its partition.",
+    "fit": "nova/equilibrium/support_read.py:1523 follows the module's existing NamedTuple, jnp.where and lax.while_loop idiom and introduces only descriptive names (selection_changed, test_fragment_switch_forces_fresh_extra_step) with no plan, ticket or version label.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1523-1533 and :1595-1615 now carry only normal_form_cells and fragment_selected across a frozen step, so the frozen Newton step solves a current-area residual instead of the stale one the previous review found.",
+    "reuse": "the product change extends the owner at nova/equilibrium/support_read.py:1473, but the added scripts/prototypes/bank_solve_driver/fragment_negative_control.py:1 duplicates the scratch-mutation harness already owned by scripts/prototypes/bank_solve_driver/negative_control.py instead of extending it, which is the rubric's duplication case.",
+    "scope_discipline": "every path in git diff --stat 8890aefcd78a4ffc0bdde274a6b0a4b5649b6422..029970018b86379031b5ddc97a84270a55a24005 lies inside the source prompt's FENCE \u2014 SCOPE grant, and no held path such as nova/equilibrium/current.py appears in it."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is a one-program converged bank solve with factor reuse and a frozen active set, and the gained commits 8890aefc..029970018 repair exactly the frozen-set clause: nova/equilibrium/support_read.py:1523-1533 freezes only cut, normal-form and fragment decisions while every continuous read field stays current.\nVERDICT done_when: the done_when requires a fresh residual at most 1e-10, axis and X-point within 5e-4 of the minor radius, boundary flux within 1e-4 of the span, per-lane agreement with each lane's own solve, one H200 allocation tabling the 1- and 16-slice walls with steps, refactors and reads, and CPU tests on sirius; h200-frozen-final.log:3-24 records max fresh residual 9.849543403e-11, oracle ratios 1.0477e-5 / 9.2549e-6 / 2.5906e-5 and sixteen LANE rows, and cpu-frozen-final.log:8 records 8 passed with EXIT=0.\nVERDICT write_paths: the source grant is nova/equilibrium/support_read.py, tests/test_bank_solve_driver.py, scripts/prototypes/bank_solve_driver, the bank-solve-driver fragment html and the bank-solve-driver figure directory; git diff --stat 8890aefcd78a4ffc0bdde274a6b0a4b5649b6422..029970018b86379031b5ddc97a84270a55a24005 touches exactly eight files and every one is inside those paths.\nVERDICT manifest: read; it records status complete, the sirius gate command and its log, H200 job 1304543 at the repaired head, the fragment-drop negative control at fragment-negative.log ending EXIT=1, and baseline and after suite arms with identical two-failure sets.\nVERDICT diff: read commit by commit from 8890aefcd78a4ffc0bdde274a6b0a4b5649b6422; 60f83ab3a adds the two reproduction tests and their runner, 0f0da63a8 removes locked_membership and adds fragment drift and the changed-acceptance block, 357dcb657 adds the mutant harness, 5d27b275b fixes the figure ticks and weights, 7108e749 strengthens the frozen/fresh residual comparison, and f0c161e55 and 029970018 refresh the fragment and the checked SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1523-1533 and :1595-1615 now carry only normal_form_cells and fragment_selected across a frozen step, so the frozen Newton step solves a current-area residual instead of the stale one the previous review found.\nSCORE evidence: 16\nJUSTIFICATION evidence: h200-frozen-final.log:3-24 records every done_when figure at the repaired source revision f0c161e55fd457172b44014cedecc9ccad138382 and cpu-frozen-final.log:8 records 8 passed EXIT=0, though three maxima are mis-rounded in docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-driver.html:65 and the CPU receipt does not name its partition.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat 8890aefcd78a4ffc0bdde274a6b0a4b5649b6422..029970018b86379031b5ddc97a84270a55a24005 lies inside the source prompt's FENCE \u2014 SCOPE grant, and no held path such as nova/equilibrium/current.py appears in it.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_bank_solve_driver.py:166 and :196 redden on the unfixed solver, quoted at frozen-reproduction.log:4-5 as FROZEN_AREA 0.1 0.4 0.41000000000000003 0.024 and FRAGMENT_SWITCH 1 0, and the fragment test also reddens on the scratch drift mutant at fragment-negative.log:4; the strengthened residual form at :166 was itself only exercised on the repaired code.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/support_read.py:1523 follows the module's existing NamedTuple, jnp.where and lax.while_loop idiom and introduces only descriptive names (selection_changed, test_fragment_switch_forces_fresh_extra_step) with no plan, ticket or version label.\nSCORE reuse: 5\nJUSTIFICATION reuse: the product change extends the owner at nova/equilibrium/support_read.py:1473, but the added scripts/prototypes/bank_solve_driver/fragment_negative_control.py:1 duplicates the scratch-mutation harness already owned by scripts/prototypes/bank_solve_driver/negative_control.py instead of extending it, which is the rubric's duplication case.\nFINDING scripts/prototypes/bank_solve_driver/fragment_negative_control.py:1 non-blocking: the added 58-line script reproduces scripts/prototypes/bank_solve_driver/negative_control.py almost verbatim, differing only in its SOURCE, MUTATION and selected test id, so the scratch-mutation harness now has two copies that must be maintained in step.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-driver.html:65 non-blocking: three maxima are rounded one unit high in the last printed digit against h200-frozen-final.log \u2014 axis gap 5.0035e-11 against the log's 5.003442614e-11 (5.0034e-11), X-point gap 3.2308e-11 against 3.230702068e-11 (3.2307e-11), and the 9.8496e-11 fresh-residual maximum repeated at :62 against 9.849543403e-11 (9.8495e-11) \u2014 so the record does not exactly reconcile with the log it cites, although each error overstates the gap and changes no budget decision.\nFINDING nova/equilibrium/support_read.py:1693 non-blocking: the added \"& ~changed\" acceptance guard cannot fire, because changed is recomputed at :1605 from the same carried reading that drift already cleared at :1686 before frozen was carried forward, so the fragment-switch protection the tests actually exercise is the drift term and this guard is unexercised logic.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T080040158512-bank-solve-driver/cpu-frozen-final.log:1 non-blocking: the gate receipt names only the revision, tree and command, with no partition or job id, so the done-when clause that the CPU tests passed on sirius cannot be confirmed from the log itself.\n",
+  "review_run_id": "r-20261105T060942388103-review-of-bank-solve-driver-029970018b86",
+  "reviewed_base_sha": "8890aefcd78a4ffc0bdde274a6b0a4b5649b6422",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg"
+  ],
+  "reviewed_head_sha": "029970018b86379031b5ddc97a84270a55a24005",
+  "reviewed_run_id": "r-20261103T080040158512-bank-solve-driver",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T06:25:56.964237+00:00",
+  "total": 94
+}

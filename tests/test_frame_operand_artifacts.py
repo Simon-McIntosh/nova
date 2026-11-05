@@ -71,6 +71,7 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
     lattice = SimpleNamespace(
         radius=np.linspace(1.5, 1.9, 5),
         height=np.linspace(-0.2, 0.2, 5),
+        node_count=25,
     )
     display_radius, display_height, points = gate._display_grid(lattice)
     shape = (display_radius.size, display_height.size)
@@ -89,6 +90,9 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
         lattice_saddle_rz=np.asarray([1.71, 0.0]),
         saddle_offset_mm=10.0,
         max_node_mismatch_wb=1.0e-9,
+        max_solved_node_mismatch_wb=1.0e-9,
+        promoted_node_count=0,
+        nearest_promoted_to_xpoint_m=np.nan,
         reproduction_relative_error=3.0e-14,
         branches={
             "closed_controls_rz": np.zeros((3, 4, 2)),
@@ -103,6 +107,7 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
             core=np.ones(shape, dtype=bool),
         ),
         constraints=(),
+        promoted_mask=np.zeros(25, dtype=bool),
     )
     monkeypatch.setattr(
         gate, "_frame_operand_path", lambda tag: tmp_path / f"frame-display-{tag}.npz"
@@ -119,6 +124,7 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
     assert receipt["bytes"] > 0
     operands = gate.load_frame_operands(tmp_path / "frame-display-shot-3.npz")
     assert "state" in operands and "domain_core" in operands
+    assert "promoted_mask" in operands and "compensation_current" in operands
     assert "branch_closed_controls_rz" in operands
     field, conductor = gate.rebuild_display_flux(operands, response)
     assert np.allclose(field, 7.0, rtol=0.0, atol=1.0e-12)
@@ -159,6 +165,51 @@ def test_persisted_bank_frame_rebuilds_to_one_em12():
     tolerance = 1.0e-12 * max(1.0, float(np.max(np.abs(reference))))
     assert np.allclose(conductor, operands["conductor_flux"], rtol=0.0, atol=tolerance)
     assert np.allclose(field, reference, rtol=0.0, atol=tolerance)
+
+
+def test_display_map_uses_terminal_mask_and_constraint_compensation(monkeypatch):
+    """The producer passes the solved domain and compensating current flux."""
+
+    from types import SimpleNamespace
+
+    radius = np.linspace(1.0, 1.02, 3)
+    height = np.linspace(-0.01, 0.01, 3)
+    points = np.stack(np.meshgrid(radius, height, indexing="ij"), axis=-1).reshape(
+        -1, 2
+    )
+    lattice = SimpleNamespace(radius=radius, height=height, coordinate=points)
+    operator = SimpleNamespace(
+        external_current=np.asarray([1.0, 2.0]),
+        normalised_current_moments=lambda *args: (object(), None),
+    )
+    profile = SimpleNamespace(lattice=lattice, operator=operator)
+    constraint = SimpleNamespace(
+        compensator_direction=np.asarray([[1.0], [2.0]]),
+        physical_unknown=np.asarray([3.0]),
+    )
+    promoted = np.asarray([True] + [False] * 8)
+    equilibrium = SimpleNamespace(
+        flux=np.zeros(9), promoted_mask=promoted, constraints=(constraint,)
+    )
+    response = np.tile(np.asarray([0.5, 1.0]), (18, 1))
+    monkeypatch.setattr(
+        gate,
+        "_display_coupling",
+        lambda *args: (object(), radius, height, {"shape": [18, 2]}),
+    )
+    monkeypatch.setattr(gate, "_stored_conductor_response", lambda record: response)
+    seen = {}
+
+    def capture(*args, **kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(radius=radius, height=height)
+
+    monkeypatch.setattr(gate, "build_display_flux_map", capture)
+    _display, rig = gate._display_map(profile, equilibrium, object(), 7.0)
+    assert np.array_equal(seen["promoted"], promoted)
+    assert np.isclose(float(np.asarray(seen["target_current"])), 7.0)
+    assert np.allclose(rig["compensation_current"], [3.0, 6.0])
+    assert np.allclose(seen["compensation"](points), 7.5)
 
 
 def _refused_display():

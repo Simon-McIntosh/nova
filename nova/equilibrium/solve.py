@@ -17,6 +17,7 @@ with the state.
 """
 
 from dataclasses import dataclass
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -86,35 +87,98 @@ def factor(residual_fn, state, operands):
     return Factor(lu=lu, pivots=pivots)
 
 
-def _damped_scale(residual_fn, state, step, current, operands):
-    """Largest dyadic step scale in (0, 1] that reduces the infinity norm."""
-    dtype = state.dtype
+class _DampedResult(NamedTuple):
+    state: object
+    auxiliary: object
+    residual: jax.Array
+    scale: jax.Array
+    evaluations: jax.Array
+
+
+def _damped_scale(
+    evaluate,
+    state,
+    step,
+    current,
+    auxiliary,
+    *,
+    active=True,
+    max_steps=BACKTRACKING_STEPS,
+    tolerance=0.0,
+    keep_incumbent=True,
+):
+    """Search dyadic updates with one validity flag and mask per lane.
+
+    ``evaluate(state)`` returns the norm, validity and auxiliary read together.
+    State and auxiliary pytrees share the leading shape of ``current``; scalar
+    norms also work under vmap. Each pending lane stops at its first valid
+    reduction (or tolerance), retaining the incumbent if no trial improves it.
+    With ``keep_incumbent=False`` the smallest-residual valid trial is retained
+    instead, allowing escape from a non-smooth residual's local plateau.
+    ``evaluations`` counts whole-batch calls, including companion lanes.
+    """
+    dtype = current.dtype
+    active = jnp.broadcast_to(jnp.asarray(active, bool), current.shape)
+
+    def choose(mask, trial, retained):
+        return jax.tree.map(
+            lambda value, prior: jnp.where(
+                mask.reshape(mask.shape + (1,) * (value.ndim - mask.ndim)),
+                value,
+                prior,
+            ),
+            trial,
+            retained,
+        )
 
     def condition(carry):
-        _, found, index, _, _ = carry
-        return (~found) & (index < BACKTRACKING_STEPS)
+        return jnp.any(carry[6]) & (carry[5] < max_steps)
 
     def body(carry):
-        scale, found, index, best_scale, best_residual = carry
-        candidate_residual = _inf_norm(residual_fn(state + scale * step, operands))
-        take = candidate_residual < current
+        best, best_aux, best_norm, best_scale, scale, calls, pending, tried = carry
+        proposed = jax.tree.map(
+            lambda value, change: (
+                value
+                + scale.reshape(scale.shape + (1,) * (value.ndim - scale.ndim)) * change
+            ),
+            state,
+            step,
+        )
+        trial = choose(pending, proposed, best)
+        norm, valid, trial_aux = evaluate(trial)
+        valid = valid & jnp.isfinite(norm)
+        better = (
+            pending
+            & valid
+            & ((norm < best_norm) | (~tried & ~jnp.asarray(keep_incumbent)))
+        )
         return (
+            choose(better, trial, best),
+            choose(better, trial_aux, best_aux),
+            jnp.where(better, norm, best_norm),
+            jnp.where(better, scale, best_scale),
             scale * jnp.asarray(0.5, dtype),
-            found | take,
-            index + 1,
-            jnp.where(take, scale, best_scale),
-            jnp.where(take, candidate_residual, best_residual),
+            calls + 1,
+            pending & (~valid | ((norm >= current) & (norm > tolerance))),
+            tried | (pending & valid),
         )
 
     initial = (
-        jnp.asarray(1.0, dtype),
-        jnp.asarray(False),
+        state,
+        auxiliary,
+        jnp.where(jnp.isfinite(current), current, jnp.inf),
+        jnp.zeros_like(current),
+        jnp.ones_like(current),
         jnp.int32(0),
-        jnp.asarray(0.0, dtype),
-        current,
+        active,
+        jnp.zeros_like(active),
     )
-    _, _, _, best_scale, _ = jax.lax.while_loop(condition, body, initial)
-    return best_scale
+    best, best_aux, best_norm, scale, _, calls, _, _ = jax.lax.while_loop(
+        condition,
+        body,
+        initial,
+    )
+    return _DampedResult(best, best_aux, best_norm, scale, calls)
 
 
 def _result(state, residual, corrections, factored, tolerance):
@@ -137,9 +201,14 @@ def _cold(residual_fn, state, operands, tolerance, max_corrections):
         state, residual, corrections = carry
         current = factor(residual_fn, state, operands)
         step = jsp_linalg.lu_solve((current.lu, current.pivots), -residual)
-        scale = _damped_scale(residual_fn, state, step, _inf_norm(residual), operands)
-        state = state + scale * step
-        return state, residual_fn(state, operands), corrections + 1
+
+        def evaluate(candidate):
+            value = residual_fn(candidate, operands)
+            norm = _inf_norm(value)
+            return norm, jnp.isfinite(norm), value
+
+        trial = _damped_scale(evaluate, state, step, _inf_norm(residual), residual)
+        return trial.state, trial.auxiliary, corrections + 1
 
     initial = (state, residual_fn(state, operands), jnp.int32(0))
     state, residual, corrections = jax.lax.while_loop(condition, body, initial)

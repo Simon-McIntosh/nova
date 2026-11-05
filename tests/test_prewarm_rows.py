@@ -34,3 +34,10 @@ def test_autotune_count_refuses_one_persisted_file(tmp_path: Path) -> None:
     )
     assert result.returncode != 0
     assert result.stdout.strip() == "PREWARM_AUTOTUNE_FILES=1"
+
+
+def test_identity_row_allows_numerical_failure_after_cache_write() -> None:
+    launcher = (LANE / "prewarm.sh").read_text(encoding="utf-8")
+    assert "compile_row forward-compile-identity --allow-pytest-failures pytest" in (
+        launcher
+    )

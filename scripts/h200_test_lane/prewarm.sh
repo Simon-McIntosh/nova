@@ -114,7 +114,9 @@ run_payload() {
   # the same workload four times. Keep its figures and fixture store local.
   compile_row solve-fixture-floor \
     "${LANE_DIRECTORY}/prewarm_rows.py" fixture-floor "${output_directory}"
-  compile_row forward-compile-identity pytest \
+  # A numerical assertion can fail after every executable has been persisted.
+  # Keep its command status in the receipt without withholding the cache pin.
+  compile_row forward-compile-identity --allow-pytest-failures pytest \
     "${repository_root}/tests/test_forward_compile_identity.py" \
     -p no:cacheprovider -p cache_guard
   # The lane's own target. A cache key carries the jitted function's abstract

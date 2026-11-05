@@ -6,6 +6,13 @@
     "nova/equilibrium/support_read.py:1751 (solve calls solve_batch)"
   ],
   "completed_at": "2026-11-05T13:30:33.890Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "bank-solve-linesearch",
+      "recorded_at": "2026-11-05T13:36:07.906239+00:00"
+    }
+  },
   "dispatched_at": "2026-11-05T13:17:11Z",
   "finding_dispositions": {
     "0": {

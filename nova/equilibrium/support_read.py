@@ -1496,8 +1496,9 @@ def solve_batch(
     A fresh read certifies every accepted state. Once close to the root, the
     booking keeps the cut-cell, normal-form and fragment decisions of the first
     close read while every continuous reading remains current. A changed fresh
-    decision releases that lock and requires another Newton update. Factor reuse is
-    opt-in because extra iterations can cost more than the skipped refactors.
+    decision or failed contraction releases that lock. Candidate updates halve
+    until their fresh residual contracts, retaining the best valid trial. Factor
+    reuse is opt-in because extra iterations can cost more than skipped refactors.
     """
     lanes, cells = moments[0].shape
     support = read_batch(
@@ -1592,8 +1593,15 @@ def solve_batch(
             fresh.reading.membership < 1 - 1e-14
         )
         normal_now = fresh.reading.normal_form_cells
-        changed = frozen & selection_changed(
-            fresh.reading, cut_set, normal_set, locked_fragments
+        ratio = current_norm / previous_norm
+        changed = (
+            (~done)
+            & frozen
+            & (
+                selection_changed(fresh.reading, cut_set, normal_set, locked_fragments)
+                | ~jnp.isfinite(ratio)
+                | (ratio > contraction_limit)
+            )
         )
         start_freeze = (
             (~done)
@@ -1625,7 +1633,6 @@ def solve_batch(
             ),
         )
         step_support = fresh._replace(reading=step_reading)
-        ratio = current_norm / previous_norm
         active = ~done
         rebuild = ~have_factor | jnp.any(
             active & (~jnp.isfinite(ratio) | (ratio > contraction_limit) | changed)
@@ -1667,22 +1674,71 @@ def solve_batch(
             lambda _: jax.lax.map(one_with_factor, (state, step_support, factor)),
             None,
         )
-        candidate = tuple(
-            jnp.where(active[:, None], value + change, value)
-            for value, change in zip(state, correction.update, strict=True)
+
+        def choose(mask, trial, retained):
+            return jax.tree.map(
+                lambda trial_leaf, retained_leaf: jnp.where(
+                    mask.reshape((lanes,) + (1,) * (trial_leaf.ndim - 1)),
+                    trial_leaf,
+                    retained_leaf,
+                ),
+                trial,
+                retained,
+            )
+
+        def needs_trial(search):
+            return jnp.any(search[5]) & (jnp.max(search[4]) < 8)
+
+        def backtrack(search):
+            best, best_read, best_norm, scale, trials, pending = search
+            trial = tuple(
+                jnp.where(pending[:, None], value + scale[:, None] * change, kept)
+                for value, change, kept in zip(
+                    state, correction.update, best, strict=True
+                )
+            )
+            trial_read = read_batch(
+                operands,
+                cache,
+                trial,
+                seeds,
+                previous,
+                convention,
+                policy,
+                axis_sign,
+                iterations=iterations,
+            )
+            trial_norm = magnitude(trial, trial_read)
+            valid = trial_read.valid & jnp.isfinite(trial_norm)
+            better = pending & valid & ((trials == 0) | (trial_norm < best_norm))
+            return (
+                choose(better, trial, best),
+                choose(better, trial_read, best_read),
+                jnp.where(better, trial_norm, best_norm),
+                scale * 0.5,
+                trials + pending.astype(jnp.int32),
+                pending
+                & (
+                    ~valid
+                    | (
+                        (trial_norm >= current_norm)
+                        & (trial_norm > tolerance)
+                    )
+                ),
+            )
+
+        candidate, next_read, next_norm, _, trials, _ = jax.lax.while_loop(
+            needs_trial,
+            backtrack,
+            (
+                state,
+                fresh,
+                current_norm,
+                jnp.ones(lanes, dtype),
+                jnp.zeros(lanes, jnp.int32),
+                active,
+            ),
         )
-        next_read = read_batch(
-            operands,
-            cache,
-            candidate,
-            seeds,
-            previous,
-            convention,
-            policy,
-            axis_sign,
-            iterations=iterations,
-        )
-        next_norm = magnitude(candidate, next_read)
         drift = lock & selection_changed(
             next_read.reading, cut_set, normal_set, locked_fragments
         )
@@ -1694,7 +1750,16 @@ def solve_batch(
         )
         slot = jnp.max(steps)
         update_norm = jnp.max(
-            jnp.abs(jnp.concatenate(correction.update, axis=-1)), axis=-1
+            jnp.abs(
+                jnp.concatenate(
+                    tuple(
+                        after - before
+                        for after, before in zip(candidate, state, strict=True)
+                    ),
+                    axis=-1,
+                )
+            ),
+            axis=-1,
         )
         return (
             candidate,
@@ -1710,7 +1775,7 @@ def solve_batch(
             current_norm,
             steps + active.astype(jnp.int32),
             refactors + (active & rebuild).astype(jnp.int32),
-            reads + active.astype(jnp.int32),
+            reads + trials,
             freezes + start_freeze.astype(jnp.int32),
             unfreezes + (changed | drift).astype(jnp.int32),
             residual_path.at[:, slot + 1].set(next_norm),

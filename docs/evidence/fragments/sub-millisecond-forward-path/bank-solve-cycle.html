@@ -33,6 +33,18 @@ identifies moving continuous geometry, but does not isolate one formula as the c
 The callback trace itself changes numerical ordering and has a 14-step tail; it is
 excluded from all timing claims.</p>
 <h2 id="bank-solve-cycle-allocation-1">Allocation 1</h2><table><thead><tr><th>Arm</th><th>Slices</th><th>Call 1 [ms/slice]</th><th>Call 2 [ms/slice]</th><th>Steps per lane, in lane order</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>base</td><td>1</td><td>1358.33</td><td>528.99</td><td>5</td><td>2.002e-11</td></tr><tr><td>base</td><td>16</td><td>2129.43</td><td>2115.41</td><td>4, 29, 5, 16, 3, 8, 15, 56, 6, 3, 7, 11, 5, 5, 6, 7</td><td>9.534e-11</td></tr><tr><td>backtracking</td><td>1</td><td>632.82</td><td>347.11</td><td>3</td><td>2.605e-11</td></tr><tr><td>backtracking</td><td>16</td><td>743.70</td><td>713.62</td><td>4, 4, 4, 6, 8, 5, 3, 3, 10, 9, 5, 4, 5, 5, 7, 5</td><td>9.733e-11</td></tr></tbody></table><h2 id="bank-solve-cycle-allocation-2">Allocation 2</h2><table><thead><tr><th>Arm</th><th>Slices</th><th>Call 1 [ms/slice]</th><th>Call 2 [ms/slice]</th><th>Steps per lane, in lane order</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>base</td><td>1</td><td>1278.16</td><td>345.10</td><td>3</td><td>1.153e-11</td></tr><tr><td>base</td><td>16</td><td>888.07</td><td>874.35</td><td>23, 6, 9, 4, 4, 6, 11, 5, 21, 3, 14, 4, 6, 5, 12, 4</td><td>8.612e-11</td></tr><tr><td>backtracking</td><td>1</td><td>866.77</td><td>707.94</td><td>5</td><td>5.201e-12</td></tr><tr><td>backtracking</td><td>16</td><td>740.81</td><td>712.38</td><td>4, 6, 5, 5, 3, 9, 6, 5, 11, 3, 5, 6, 5, 5, 5, 4</td><td>9.382e-11</td></tr></tbody></table><p>Allocation 1: base 984992d77b67dfae996f365c05c3086b4f5f9886; head ae7b3f1935fe8ebc79538c2ad719f70112493908; logs contract-one-base.log and contract-one-head.log. Allocation 2: base 984992d77b67dfae996f365c05c3086b4f5f9886; head ba5824271133b141c6383b0bb2c6059a1f9e04dd; logs contract-two-base.log and contract-two-head.log.</p>
+<p id="bank-solve-cycle-single-slice">The 345.10 to 707.94 ms single-slice
+regression in allocation 2 accompanies <strong>two additional accepted Newton
+updates</strong>: five at head versus three at base, and one lock release versus
+zero. After update 2, base residuals go from 1.613e-9 directly to 1.153e-11;
+head takes 1.603e-9 → 7.922e-10 → 5.839e-10 → 5.201e-12. Its accepted
+update magnitudes over those last three updates are 2.706e-10, 6.683e-11 and
+2.017e-10. These are contracting accepted states, with no return to the
+1.6e-7 cycle level. The smaller accepted updates are consistent with damping
+near the root. The receipts retain accepted residual and update paths, but no
+rejected trial history or read counter; the exact number of trial halvings in
+that H200 call is therefore not recoverable. Two is the measured increase in
+accepted updates, not a claimed count of rejected backtracking trials.</p>
 <p>The preliminary backtracking arm required a twofold decrease on each trial.
 It reduced the sixteen-slice tails from 18 to 7 and 29 to 9, but regressed the
 single-slice wall from 344.81 to 4250.59 ms and 346.80 to 1026.64 ms.

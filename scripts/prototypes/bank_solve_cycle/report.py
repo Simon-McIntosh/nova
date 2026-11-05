@@ -288,6 +288,18 @@ excluded from all timing claims.</p>
         + escape(" ".join(provenance))
         + "</p>"
         + """
+<p id="bank-solve-cycle-single-slice">The 345.10 to 707.94 ms single-slice
+regression in allocation 2 accompanies <strong>two additional accepted Newton
+updates</strong>: five at head versus three at base, and one lock release versus
+zero. After update 2, base residuals go from 1.613e-9 directly to 1.153e-11;
+head takes 1.603e-9 → 7.922e-10 → 5.839e-10 → 5.201e-12. Its accepted
+update magnitudes over those last three updates are 2.706e-10, 6.683e-11 and
+2.017e-10. These are contracting accepted states, with no return to the
+1.6e-7 cycle level. The smaller accepted updates are consistent with damping
+near the root. The receipts retain accepted residual and update paths, but no
+rejected trial history or read counter; the exact number of trial halvings in
+that H200 call is therefore not recoverable. Two is the measured increase in
+accepted updates, not a claimed count of rejected backtracking trials.</p>
 <p>The preliminary backtracking arm required a twofold decrease on each trial.
 It reduced the sixteen-slice tails from 18 to 7 and 29 to 9, but regressed the
 single-slice wall from 344.81 to 4250.59 ms and 346.80 to 1026.64 ms.

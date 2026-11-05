@@ -16,12 +16,18 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+import shapely  # noqa: E402
 from matplotlib.collections import PolyCollection  # noqa: E402
 from matplotlib.path import Path  # noqa: E402
 from scipy.interpolate import RectBivariateSpline  # noqa: E402
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes  # noqa: E402
-from nova.media.poloidal import draw_coils, draw_nulls, draw_wall  # noqa: E402
+from nova.media.poloidal import (  # noqa: E402
+    draw_coils,
+    draw_nulls,
+    draw_plasma_cells,
+    draw_wall,
+)
 
 source, stem = sys.argv[1], sys.argv[2]
 d = pickle.load(open(source, "rb"))
@@ -105,8 +111,18 @@ pol.contour(
     colors=FLUX,
     linewidths=0.6,
     linestyles="solid",
-    zorder=STYLE.zorder_flux,
+    zorder=STYLE.zorder_plasma + 1,
 )
+if "plasma_cells" in d:
+    # a cell straddling the LCFS is drawn as its part inside it
+    region = shapely.Polygon(boundary)
+    clipped = []
+    for cell in d["plasma_cells"]:
+        part = shapely.Polygon(cell).intersection(region)
+        for piece in getattr(part, "geoms", [part]):
+            if piece.area > 0:
+                clipped.append(np.asarray(piece.exterior.coords))
+    draw_plasma_cells(pol, clipped, STYLE, linewidth=0.3)
 pol.plot(
     boundary[:, 0],
     boundary[:, 1],

@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "manifest.md baseline_suite uses baseline-suite-optout.log:194-198 (three failures) and after_suite uses repair-after-suite.log:162-165 (two failures); both head failures are among the baseline failures, so the set difference is empty. The repair parent replay has five failures at repair-baseline-suite.log:318-324 and the same two at the head.",
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/repair-after-suite.log",
+  "assertion_analysis": [
+    "tests/test_traced_coil_edit.py:13 x64 assertion fails if the dtype setup does not enable x64.",
+    "tests/test_traced_coil_edit.py:28-37 HLO sentinel assertions fail if an edited or stored conductor current is embedded as a numeric constant; the original closure mutation produced this failure.",
+    "tests/test_traced_coil_edit.py:41-48 state comparisons fail if either current vector is ignored or misweighted against the independent response matrices.",
+    "tests/test_traced_coil_edit.py:50 cache-size assertion fails if same-shape edits create multiple compiled variants.",
+    "tests/test_traced_coil_edit.py:74-78 typed-request state comparison fails if the second current edit is ignored or misweighted against the fixture response matrices.",
+    "tests/test_traced_coil_edit.py:79-81 cache-hit and identity assertions fail if the second request misses the request cache or replaces the retained program.",
+    "tests/test_traced_coil_edit.py:109-110 route and qualification assertions fail if explicit pin omission selects the augmented route or the mocked qualified solve loses qualification.",
+    "tests/test_traced_coil_edit.py:128-142 legacy lowering assertions fail if either one- or three-operand calls are no longer callable.",
+    "tests/test_traced_coil_edit.py:200-214 seed and receipt assertions fail if a nonconverged terminal state advances the seed, if a converged state does not, or if zero persistent hits and nonconvergence are omitted from acceptance failures.",
+    "tests/test_traced_coil_edit.py:222-223 exit assertion fails if the command returns successfully when its summary reports an acceptance failure.",
+    "No added assertion compares its result only to the variable it passed into the code under test; state expectations use response matrices, and the seed expectations use fixed mock outputs."
+  ],
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/baseline-suite-optout.log",
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/forward.py:1981",
+    "apps/playable/production.py:219",
+    "benchmarks/coil_edit_interactive.py:77",
+    "benchmarks/loop_structure_audit.py:224",
+    "benchmarks/profile_coefficients_recompile_audit.py:300",
+    "benchmarks/program_scope_census.py:992"
+  ],
+  "completed_at": "2026-11-03T11:21:06Z",
+  "dispatched_at": "2026-11-03T11:14:18Z",
+  "findings": [
+    {
+      "file": "benchmarks/coil_edit_interactive.py",
+      "line": "126",
+      "severity": "blocking",
+      "text": "blocking: the only complete H200 sweep predates the repair and fails the quantitative gate at 6107.488 ms warm median, 19/20 converged, and zero persistent hits after the first edit; no repaired hardware receipt establishes the required result."
+    },
+    {
+      "file": "benchmarks/coil_edit_interactive.py",
+      "line": "130",
+      "severity": "blocking",
+      "text": "blocking: the gate requires a persistent compilation-cache hit event on every later edit, although the measured retained executable serves all 19 later edits without any cache lookup; this predicate rejects in-process program reuse and cannot verify persistent-cache reuse on that path."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call sites",
+    "diff": "the ten commits from 77572485 through bb7855a5 change five granted paths; 309013cf repairs legacy lowering, converged seeding, and nonzero acceptance exit, while the last commit updates evidence.",
+    "done_when": "prompt.txt:113 requires traced currents and profile tables plus a twenty-point H200 warm sweep with converged seeds and persistent hits; repair-head.log:5 records 11 focused passes, but h200-sweep-optout.log:25 is pre-repair and records 6107.488 ms, 19/20 convergence, and zero later persistent hits.",
+    "goal": "prompt.txt:38 asks for a coil edit to be a traced call; nova/equilibrium/forward.py:1981 passes edited currents into the retained program, while the latest hardware receipt still misses interactive latency.",
+    "manifest": "manifest.md:5-22 lists ten commits, the focused and negative-control logs, both suite arms, and the unmet H200 measure.",
+    "write_paths": "manifest.md:3 grants seven paths; the base-to-head diff from 2d2172dd to bb7855a5 changes only five of them."
+  },
+  "justifications": {
+    "durability": "tests/test_traced_coil_edit.py:128-223 fail when old lowering, nonconverged seed advancement, or a successful exit on failed acceptance is reinstated, as repair-negative-control.log:164-168 records.",
+    "evidence": "repair-head.log:5 and repair-negative-control.log:164-168 document a green head and three red repair controls, while manifest.md:25 says no post-repair H200 sweep was produced.",
+    "fit": "nova/equilibrium/forward.py:2097 handles legacy one- and three-operand calls alongside traced four-operand calls and uses descriptive names consistent with the surrounding solver.",
+    "goal_fidelity": "nova/equilibrium/forward.py:1981 makes current vectors runtime arguments and benchmarks/coil_edit_interactive.py:77 calls the typed seam, but h200-sweep-optout.log:25 reports a 6107.488 ms median.",
+    "reuse": "nova/equilibrium/forward.py:2023 extends the existing program owner; benchmarks/coil_edit_interactive.py:28-34 reuses case preparation and cache monitoring from benchmarks/coil_edit_latency.py:292 and :570 for the typed-request sweep.",
+    "scope_discipline": "git diff 2d2172dd..bb7855a5 contains only the five files listed in manifest.md:6 as changed_paths, all within prompt.txt:77-84."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 asks for a coil edit to be a traced call; nova/equilibrium/forward.py:1981 passes edited currents into the retained program, while the latest hardware receipt still misses interactive latency.\nVERDICT done_when: prompt.txt:113 requires traced currents and profile tables plus a twenty-point H200 warm sweep with converged seeds and persistent hits; repair-head.log:5 records 11 focused passes, but h200-sweep-optout.log:25 is pre-repair and records 6107.488 ms, 19/20 convergence, and zero later persistent hits.\nVERDICT write_paths: manifest.md:3 grants seven paths; the base-to-head diff from 2d2172dd to bb7855a5 changes only five of them.\nVERDICT manifest: manifest.md:5-22 lists ten commits, the focused and negative-control logs, both suite arms, and the unmet H200 measure.\nVERDICT diff: the ten commits from 77572485 through bb7855a5 change five granted paths; 309013cf repairs legacy lowering, converged seeding, and nonzero acceptance exit, while the last commit updates evidence.\nCALL_SITES: nova/equilibrium/forward.py:1981, apps/playable/production.py:219, benchmarks/coil_edit_interactive.py:77, benchmarks/loop_structure_audit.py:224, benchmarks/profile_coefficients_recompile_audit.py:300, benchmarks/program_scope_census.py:992\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward.py:1981 makes current vectors runtime arguments and benchmarks/coil_edit_interactive.py:77 calls the typed seam, but h200-sweep-optout.log:25 reports a 6107.488 ms median.\nSCORE evidence: 12\nJUSTIFICATION evidence: repair-head.log:5 and repair-negative-control.log:164-168 document a green head and three red repair controls, while manifest.md:25 says no post-repair H200 sweep was produced.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 2d2172dd..bb7855a5 contains only the five files listed in manifest.md:6 as changed_paths, all within prompt.txt:77-84.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_traced_coil_edit.py:128-223 fail when old lowering, nonconverged seed advancement, or a successful exit on failed acceptance is reinstated, as repair-negative-control.log:164-168 records.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/forward.py:2097 handles legacy one- and three-operand calls alongside traced four-operand calls and uses descriptive names consistent with the surrounding solver.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/equilibrium/forward.py:2023 extends the existing program owner; benchmarks/coil_edit_interactive.py:28-34 reuses case preparation and cache monitoring from benchmarks/coil_edit_latency.py:292 and :570 for the typed-request sweep.\nFINDING benchmarks/coil_edit_interactive.py:126 blocking: the only complete H200 sweep predates the repair and fails the quantitative gate at 6107.488 ms warm median, 19/20 converged, and zero persistent hits after the first edit; no repaired hardware receipt establishes the required result.\nFINDING benchmarks/coil_edit_interactive.py:130 blocking: the gate requires a persistent compilation-cache hit event on every later edit, although the measured retained executable serves all 19 later edits without any cache lookup; this predicate rejects in-process program reuse and cannot verify persistent-cache reuse on that path.\n",
+  "review_run_id": "r-20261103T111253471015-review-of-fsa-traced-coil-edit-bb7855a5490d",
+  "reviewed_base_sha": "2d2172dd7b06548d06c634fe8b3def7acd88f9b4",
+  "reviewed_commits": [
+    "77572485ccfdb73a34c8188abd2d9dff3161c8a2",
+    "a164ae5ca48c872ab2f927ef93d4af46d5ae3b4c",
+    "334e8bed1e51139b1bbdd26f334ab4056cc94beb",
+    "35f94797c6455984255712deabf857b7951d5f5b",
+    "d39ee7e7fbfe26c31e78311d79c4f4bc1401c50e",
+    "6e09dc45753cfc4e53614c1c9054aa1ebacc92e9",
+    "8f4ab3d7ba74b42e26945452d1890797933871a2",
+    "7406b0c27e0c2c349a7c03996b37013c8bf56fda",
+    "309013cf212e05b7d631b666fe0d57b5cd6232d6",
+    "bb7855a5490d052a9eb1250681ecaee6f4e3afaf"
+  ],
+  "reviewed_head_sha": "bb7855a5490d052a9eb1250681ecaee6f4e3afaf",
+  "reviewed_run_id": "r-20261103T064248678456-fsa-traced-coil-edit",
+  "scores": {
+    "durability": 18,
+    "evidence": 12,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T05:55:22.185770+00:00",
+  "total": 104
+}

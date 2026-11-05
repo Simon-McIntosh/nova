@@ -22,8 +22,8 @@
 <meta name="plan-blocks" content="batched-operator-boundary,imas-ambix:physics-carried-playable-plasma">
 <title>Forward solve API | nova</title>
 <meta name="plan-impl" content="0.985">
-<meta name="plan-version" content="156">
-<meta name="plan-modified" content="2026-11-03">
+<meta name="plan-version" content="157">
+<meta name="plan-modified" content="2026-11-05">
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
@@ -364,6 +364,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261103T083730322931-review-of-fsa-traced-coil-edit-7406b0c27e0c" data-who="reckon-build" data-when="2026-11-03T08:48:09Z">
     <div class="r-comment-body"><p>Independent review of r-20261103T064248678456-fsa-traced-coil-edit at 7406b0c27e0c2c349a7c03996b37013c8bf56fda is stored in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/review-records/r-20261103T064248678456-fsa-traced-coil-edit.at-7406b0c27e0c2c349a7c03996b37013c8bf56fda.json; scores are 14/15/20/16/16/19 across the six dimensions, added failures 0, with three blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261103T111253471015-review-of-fsa-traced-coil-edit-bb7855a5490d" data-who="reckon-build" data-when="2026-11-03T11:21:06Z">
+    <div class="r-comment-body"><p>Parsed review of 2d2172dd7b06548d06c634fe8b3def7acd88f9b4..bb7855a5490d052a9eb1250681ecaee6f4e3afaf stored under the reviewed run; scores 15/12/20/18/19/20, zero added failures, two blocking findings about the unmet hardware gate and persistent-cache metric.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260904T123306247283-fsa-solve-budget-drift-inventory" data-who="fsa-budget-audit" data-when="2026-09-04T12:50:46Z">
     <div class="r-comment-body"><p>737 pinned solver-control sites (4 in nova/, 300 in benchmarks/, 14 in docs/figures producers, 419 in tests): 12 distinct Newton budgets and 14 distinct GMRES budgets in active paths, three conflicting would-be authorities (ForwardProfile newton_steps 4, the kernel's GMRES 8 with warmup 8, PerturbedSeedPolicy 10 and 30), the MAST bank produced at Newton 12, GMRES 12, warmup 0; single-source recommendation for a ForwardSolveRequest/Policy and a fail-closed default-wiring test</p></div>

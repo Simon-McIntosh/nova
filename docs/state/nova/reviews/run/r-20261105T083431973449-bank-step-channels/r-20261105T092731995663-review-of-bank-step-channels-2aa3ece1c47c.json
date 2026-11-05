@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:126 SupportOperands.from_rows",
+    "nova/equilibrium/support_read.py:1346 newton_step",
+    "nova/equilibrium/support_read.py:1872 read_bank",
+    "nova/equilibrium/forward.py:574 ForwardProfile.support_bank"
+  ],
+  "completed_at": "2026-11-05T09:44:36.200Z",
+  "dispatched_at": "2026-11-05T09:34:22Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_step_channels.py",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "non-blocking: the matrix-parity test is the only assertion that fails on a wrong channel cache and the negative control shows it failing at 4.9e-2, yet it calls pytest.skip unless BANK_REFERENCE_SOURCE names an archived base tree, and :23 marks the module slow so the repository's default lane excludes it; the shipped tree alone therefore cannot re-run the guard, and a later regression in the cached channels or the VJP rows would pass CI silently."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-channels.html",
+      "line": "45",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record attributes the 76.53% sixteen-slice converged-wall regression to the cached channels, but the assembled matrices agree to 1.35e-17, the one-slice step count moves the opposite way (4 to 3), and the worst head fresh residual sits at 9.607e-11 against the 1e-10 bound, so the batch wall is set by one lane at the convergence threshold; the record should name that lane and show the run repeating before the regression is read as a property of the change."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read commit by commit from 1de330a8f through 03d272e5f, d79451536, ee98954b8 and 2aa3ece1c; it adds the cached field and its two builders, replaces 3*cells directional fields with one VJP per stationary point, leaves the fresh_geometry branch untouched, and adds the test, prototypes, figure and evidence fragment.",
+    "done_when": "The done_when asks for matrix parity within 1e-12 at one and sixteen lanes, isolated and converged walls at 1 and 16 slices on one H200 with every precision budget met; the manifest and logs record 1.3541446305345831e-17 parity, 17 passing device lanes and both wall tables with EXIT=0 and EXIT=1 receipts.",
+    "goal": "The node goal is to cache the state-independent bank channels once per operand set and have step_jacobian read them; nova/equilibrium/support_read.py:75 declares the field, :517 builds it and :1186 reads it in place of the per-direction vmap.",
+    "manifest": "Read; it records four focused tests, eight driver tests and thirteen support tests passing at head, the 94380000-byte cache, and it prints the 76.53% sixteen-slice converged-wall regression rather than claiming a speedup.",
+    "write_paths": "The declared paths are nova/equilibrium/support_read.py, tests/test_bank_step_channels.py, scripts/prototypes/bank_step_channels and the two docs paths; every path in the diff lies inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_channels.py:82 fails on zeroed channels and on a wrong VJP row as the negative control shows, but :36 skips that test without an archived base tree and :23 keeps the whole module out of the default lane.",
+    "evidence": "the base-against-head walls and the precision table from scripts/prototypes/bank_step_channels/measure.py and compare.py are recorded with logs and EXIT lines, but the sixteen-slice converged-wall figure rests on one run whose step count swung 10 to 19 without an identified lane.",
+    "fit": "nova/equilibrium/support_read.py:530 uses the same jax.vjp-at-zero idiom as nova/equilibrium/fixed_point.py:3014 and the field docstring follows the class's leaf description, with the module's only @jax.jit introduced at :516.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1186 reads the cached channels and :534 supplies the axis and boundary rows by transpose, so the mechanism the goal names is what landed, though its measured end-to-end effect at sixteen slices is negative.",
+    "reuse": "no owner exists for cached bank channels; the search over nova/equilibrium found fixed_points.RowCache as a bounded coupling-row cache for point solves and the vjp row idiom only as a local expression, neither of which this addition re-implements.",
+    "scope_discipline": "every file in the diff of 1de330a8f..2aa3ece1c lies inside the declared write paths, and the fresh_geometry branch the brief excused is textually unchanged."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to cache the state-independent bank channels once per operand set and have step_jacobian read them; nova/equilibrium/support_read.py:75 declares the field, :517 builds it and :1186 reads it in place of the per-direction vmap.\nVERDICT done_when: The done_when asks for matrix parity within 1e-12 at one and sixteen lanes, isolated and converged walls at 1 and 16 slices on one H200 with every precision budget met; the manifest and logs record 1.3541446305345831e-17 parity, 17 passing device lanes and both wall tables with EXIT=0 and EXIT=1 receipts.\nVERDICT write_paths: The declared paths are nova/equilibrium/support_read.py, tests/test_bank_step_channels.py, scripts/prototypes/bank_step_channels and the two docs paths; every path in the diff lies inside them.\nVERDICT manifest: Read; it records four focused tests, eight driver tests and thirteen support tests passing at head, the 94380000-byte cache, and it prints the 76.53% sixteen-slice converged-wall regression rather than claiming a speedup.\nVERDICT diff: Read commit by commit from 1de330a8f through 03d272e5f, d79451536, ee98954b8 and 2aa3ece1c; it adds the cached field and its two builders, replaces 3*cells directional fields with one VJP per stationary point, leaves the fresh_geometry branch untouched, and adds the test, prototypes, figure and evidence fragment.\nCALL_SITES: nova/equilibrium/support_read.py:126 SupportOperands.from_rows, nova/equilibrium/support_read.py:1346 newton_step, nova/equilibrium/support_read.py:1872 read_bank, nova/equilibrium/forward.py:574 ForwardProfile.support_bank\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1186 reads the cached channels and :534 supplies the axis and boundary rows by transpose, so the mechanism the goal names is what landed, though its measured end-to-end effect at sixteen slices is negative.\nSCORE evidence: 16\nJUSTIFICATION evidence: the base-against-head walls and the precision table from scripts/prototypes/bank_step_channels/measure.py and compare.py are recorded with logs and EXIT lines, but the sixteen-slice converged-wall figure rests on one run whose step count swung 10 to 19 without an identified lane.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every file in the diff of 1de330a8f..2aa3ece1c lies inside the declared write paths, and the fresh_geometry branch the brief excused is textually unchanged.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_bank_step_channels.py:82 fails on zeroed channels and on a wrong VJP row as the negative control shows, but :36 skips that test without an archived base tree and :23 keeps the whole module out of the default lane.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/support_read.py:530 uses the same jax.vjp-at-zero idiom as nova/equilibrium/fixed_point.py:3014 and the field docstring follows the class's leaf description, with the module's only @jax.jit introduced at :516.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner exists for cached bank channels; the search over nova/equilibrium found fixed_points.RowCache as a bounded coupling-row cache for point solves and the vjp row idiom only as a local expression, neither of which this addition re-implements.\nFINDING tests/test_bank_step_channels.py:36 non-blocking: the matrix-parity test is the only assertion that fails on a wrong channel cache and the negative control shows it failing at 4.9e-2, yet it calls pytest.skip unless BANK_REFERENCE_SOURCE names an archived base tree, and :23 marks the module slow so the repository's default lane excludes it; the shipped tree alone therefore cannot re-run the guard, and a later regression in the cached channels or the VJP rows would pass CI silently.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-step-channels.html:45 non-blocking: the record attributes the 76.53% sixteen-slice converged-wall regression to the cached channels, but the assembled matrices agree to 1.35e-17, the one-slice step count moves the opposite way (4 to 3), and the worst head fresh residual sits at 9.607e-11 against the 1e-10 bound, so the batch wall is set by one lane at the convergence threshold; the record should name that lane and show the run repeating before the regression is read as a property of the change.",
+  "review_run_id": "r-20261105T092731995663-review-of-bank-step-channels-2aa3ece1c47c",
+  "reviewed_base_sha": "1de330a8fbf781c2db6f9734efdaf53e47fe75b4",
+  "reviewed_head_sha": "2aa3ece1c47cb7261a7b60c40f04b83c5db3b217",
+  "reviewed_run_id": "r-20261105T083431973449-bank-step-channels",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T09:46:03.608023+00:00",
+  "total": 103
+}

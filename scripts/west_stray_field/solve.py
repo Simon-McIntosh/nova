@@ -245,6 +245,13 @@ bgrid = np.hypot(
     np.asarray(coilset.grid.bz).reshape(psi.shape),
 )
 
+# finer map over the plasma so closed flux surfaces resolve
+coilset.grid.solve(2500, limit=[1.75, 3.15, -0.95, 0.95])
+psi_core = np.asarray(coilset.grid.psi_)
+core_x = np.asarray(coilset.grid.data.x)
+core_z = np.asarray(coilset.grid.data.z)
+print(f"core grid {core_x.size}x{core_z.size} solved", flush=True)
+
 with open(OUT, "wb") as f:
     pickle.dump(
         dict(
@@ -258,6 +265,9 @@ with open(OUT, "wb") as f:
             gz=gz,
             psi=psi,
             bgrid=bgrid,
+            psi_core=psi_core,
+            core_x=core_x,
+            core_z=core_z,
             radius=radius,
             lines=lines,
             bmag=bmag,

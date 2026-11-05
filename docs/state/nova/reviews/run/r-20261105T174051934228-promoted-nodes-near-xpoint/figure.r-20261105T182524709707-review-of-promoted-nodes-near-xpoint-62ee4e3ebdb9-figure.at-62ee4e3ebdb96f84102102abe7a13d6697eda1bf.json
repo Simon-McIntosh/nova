@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-05T18:28:11Z",
+  "figures_reviewed": [
+    "image-0.png (rendered from docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/promoted-nodes-panel.svg), 1400x720"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/promoted-nodes-panel.svg",
+      "id": "fd3b4935362",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The fragment's caption tells the reader 'Both polished saddles are drawn, the state's solid and the field of the currents' hollow', but the rendered PNG shows exactly one mark at the saddle: a single blue mark 15x14 px at x 648-662, y 190-203, with no second stationary-point mark in any other colour anywhere in the plot band (the only saturated non-orange pixels in the whole image are those 109 blue ones). The two saddles are 5.3 mm apart and the panel resolves about 6.4 mm per pixel (the promoted set's 0.568 m of R spans 89 px), so their centres fall less than one pixel apart and two markers roughly 14 px wide overprint completely. The 5.3 mm shift the node exists to report, and the existence of two saddles at all, are not visible to a reader."
+    },
+    {
+      "file": "docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/promoted-nodes-panel.svg",
+      "id": "fd3b4935362",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption labels the whole separatrix 'Dashed: the separatrix the state assembles, with its legs through the saddle', but in the PNG the closed separatrix is a dashed near-black line about 1.6 px thick while the legs through the saddle are drawn SOLID near-black at about 2.4 px \u2014 the two straight segments running out of the top of the wall and the bottom of the wall. A reader told the separatrix is dashed will read those solid leg segments as some other curve, and neither the solid style nor the legs carry a legend entry."
+    },
+    {
+      "file": "docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/promoted-nodes-panel.svg",
+      "id": "fd3b4935362",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The stationary points are not identified. The panel marks one: the blue saddle marker. The flux core (x 640-800, y 250-470) contains zero saturated pixels and no marker glyph, so the magnetic axis is never drawn, and the legend's three entries are 'promoted node (60)', 'separatrix, converged state' and 'converged state flux' \u2014 neither saddle appears in it, so a reader has no key for the one coloured stationary-point mark the figure does show and no way to know a second was intended."
+    },
+    {
+      "file": "docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/promoted-nodes-panel.svg",
+      "id": "fd3b4935362",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The panel is stranded in a narrow central strip. Its content spans x 587-838, 251 px of the 1400 px canvas width (17.9%), so 82% of the canvas is empty white; the legend above it spans x 258-1152 (894 px) and is therefore 3.6 times as wide as the data it describes. A canvas sized 14x7.2 in at 100 dpi holding a domain about 5:1 tall with an equal aspect fills the height and leaves the width to whitespace; in a ~900 px reckon column the panel renders about 160 px wide."
+    },
+    {
+      "file": "docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/promoted-nodes-panel.svg",
+      "id": "fd3b4935362",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 'converged state flux' legend key is a 1.2 pt #929292 line on white \u2014 the same faint grey the contours themselves are drawn in, and the lightest mark in the figure. At the rendered size the swatch is barely distinguishable from the background, so the reader has no reliable cue binding that legend entry to the grey contour lines that carry most of the panel's ink."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 every text run is the near-black legend label on a white background; no text sits on a coloured, shaded or gradient background, and no text is clipped or rendered in the panel's silver grey",
+    "data_ink": "fail \u2014 the data do not carry the visual weight: 82% of the canvas width is white margin and the three-entry legend (894 px wide) is more than three times the width of the panel it describes (251 px); the 'converged state flux' key is a 1.2 pt #929292 line that adds ink no reader can follow",
+    "decoration": "pass \u2014 no gradient, background fill or decorative styling appears anywhere in the PNG; the cross-hatch visible inside the two promoted-node clusters is overlapping hollow diamond markers, which is data rather than a fill",
+    "label_collision": "pass \u2014 the only labels are the three legend entries occupying y 3-21, fully inside the legend bbox x 258-1152 within the 1400x720 canvas; they do not overlap each other or the data, which begins at y 86, and nothing is clipped at a canvas edge",
+    "legibility": "fail \u2014 the poloidal panel occupies 251 px of the 1400 px canvas width (17.9%), leaving 82% of the canvas as empty white margin, while the legend spans 894 px, 3.6 times the panel; at the roughly 0.64 scale of a ~900 px reckon column the panel renders about 160 px wide, and the flux contours bunching against the right-hand wall merge into a near-solid grey band",
+    "table_form": "pass \u2014 the image is a poloidal flux map with the wall and the promoted-node set placed in R-Z; that is a spatial relationship the fragment's table cannot convey, and no tabular information is drawn as a picture"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T182524709707-review-of-promoted-nodes-near-xpoint-62ee4e3ebdb9-figure",
+  "reviewed_base_sha": "bd3b868dbcd2b60fe0b0840778324f8356861173",
+  "reviewed_head_sha": "62ee4e3ebdb96f84102102abe7a13d6697eda1bf",
+  "reviewed_run_id": "r-20261105T174051934228-promoted-nodes-near-xpoint",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T18:35:38.717496+00:00",
+  "total": null
+}

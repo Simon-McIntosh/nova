@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="144">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -523,7 +523,10 @@
     <div class="r-comment-body"><p>Review of r-20261105T093111196541-bank-solve-lanes over e2d9a3794..7ae6253f8 records goal_fidelity 18, evidence 15, scope_discipline 20, durability 13, fit 14, reuse 7 with eight non-blocking findings; the repairs correct the two blocking record errors and the struck-through figure label, while two numeric claims at the fragment's :19 and :64 still disagree with lanes-paths.json and the freeze-threshold line is unchecked by the new pixels test because plotted_points ignores the artist transform.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T114354653223-review-of-bank-solve-lanes-7ae6253f8d5e-figure" data-who="reckon-build" data-when="2026-11-05T11:54:55.778Z">
-    <div class="r-comment-body"><p>figure review of r-20261105T093111196541-bank-solve-lanes at 7ae6253f8: the residual-history render is legible and correctly labelled, the earlier blocking defect (the freeze-threshold annotation cut through by the plotted curves) is repaired and verified absent in the render, and the four remaining findings are non-blocking (orange second-slowest stroke at 2.76:1, the median lane&#x27;s lock marker fully occluded by the slowest lane&#x27;s at the same iterate, the legend&#x27;s lock swatch drawn in grey against lane-coloured marks, and roughly 22 % of the plot width empty past the last lane)</p></div>
+    <div class="r-comment-body"><p>figure review of r-20261105T093111196541-bank-solve-lanes at 7ae6253f8: the residual-history render is legible and correctly labelled, the earlier blocking defect (the freeze-threshold annotation cut through by the plotted curves) is repaired and verified absent in the render, and the four remaining findings are non-blocking (orange second-slowest stroke at 2.76:1, the median lane's lock marker fully occluded by the slowest lane's at the same iterate, the legend's lock swatch drawn in grey against lane-coloured marks, and roughly 22 % of the plot width empty past the last lane)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T093111196541-bank-solve-lanes" data-who="reckon-build" data-when="2026-11-05T11:19:22Z">
+    <div class="r-comment-body"><p>bank-solve-lanes measured on one H200 that after two Newton steps nine lanes of the sixteen-lane batch sit at 1.64e-7 and seven between 1.8e-9 and 2.3e-9, and that the remaining steps are a period-2 cycle between 1.6e-7 and 3.2e-10 held by the frozen active set, names release-on-non-contraction in solve_batch as the removal and estimates the slowest lane at 5 to 6 steps against 28, with the per-lane table and residual-history figure at docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html</p></div>
 </div>
 </section>
 </main>

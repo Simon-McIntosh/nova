@@ -45,7 +45,7 @@ FLUX = "#9a9a9a"
 GREY = "#929292"
 INK = "#333333"
 IRON = "#777777"
-WHITE_BOX = {"facecolor": "white", "edgecolor": "none", "pad": 2.5}
+WHITE_BOX = {"facecolor": "white", "edgecolor": "none", "pad": 2.5, "alpha": 0.75}
 
 radius = d["radius"]
 bmag = d["bmag"] * 1e3
@@ -83,6 +83,7 @@ plasma_psi = psi[in_plasma]
 psi_axis = float(plasma_psi[np.argmax(np.abs(plasma_psi - psi_lcfs))])
 step = abs(psi_axis - psi_lcfs) / 12
 low, high = np.percentile(psi, [0.5, 99.5])
+low, high = min(low, psi_axis), max(high, psi_axis)  # reach the magnetic axis
 levels = psi_lcfs + step * np.arange(
     np.floor((low - psi_lcfs) / step), np.ceil((high - psi_lcfs) / step) + 1
 )
@@ -182,7 +183,7 @@ def text(x, y, label, **kwargs):
     pol.text(x, y, label, fontsize=LABEL, color=INK, zorder=8, **kwargs)
 
 
-for name in ("Dh", "Db", "Eh", "Eb", "Fh", "Fb"):
+for name in ("Fh", "Fb"):
     text(coils[name]["r"], coils[name]["z"], name, ha="center", va="center")
 for name, side in (("Fh", 1), ("Fb", -1)):
     c = coils[name]
@@ -192,6 +193,7 @@ for name, side in (("Fh", 1), ("Fb", -1)):
         f"{d['currents'][name] * c['nturn'] / 1e6:+.3f} MA·t",
         ha="center",
         va="bottom" if side > 0 else "top",
+        bbox=WHITE_BOX,
     )
 text(
     boundary[:, 0].max() + 0.12,

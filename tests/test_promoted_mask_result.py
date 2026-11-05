@@ -8,21 +8,27 @@ state with no record of which nodes carry that piece.  These tests pin it on
 the result of both solve routes and on the profile receipt, and pin the
 all-false mask a solve that promotes nothing returns.
 
-The machine is the bootstrapped Solov'ev free-boundary problem
-``tests/test_reduced_newton.py`` builds, so the masks are read off a real
-free-boundary map rather than an algebraic identity.
+The fast lane reads the bootstrapped Solov'ev free-boundary problem
+``tests/test_reduced_newton.py`` builds, which carries no private-flux region
+and so promotes no node.  The promoting case is the warm MAST coil-edit
+machine the coil-edit sweep prepares: its converged edit state has a qualified
+saddle and a private-flux region, so its closing trip promotes nodes.
 """
 
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
     import jax.numpy as jnp
 
+    from benchmarks import coil_edit_latency, mast_response_carrier_warm
     from nova.equilibrium import reduced_newton
+    from nova.equilibrium.topology import TopologyClass
+    from nova.jax.config import configure_dtypes
     from tests.test_reduced_newton import (  # noqa: F401
         REDUCED_NEWTON_STEPS,
         SOLVE_TOLERANCE,
@@ -38,6 +44,10 @@ SINGLE_TRIP = 1
 #: Trip budget the full solves run under, matching the file the machine
 #: fixture lives in.
 ACTIVE_SET_STEPS = 12
+#: One-based coil edit whose converged state the non-convergence diagnosis
+#: replayed; the sweep's fraction array is zero-based, so edit 12 is its
+#: eleventh entry.
+DIAGNOSED_EDIT = 12
 
 
 def _seed_shadow(operator, seed):
@@ -185,3 +195,64 @@ def test_the_profile_solve_carries_the_promoted_mask(machine):
     )
     assert np.array_equal(returned, np.asarray(expected, dtype=bool))
     assert returned.sum() > 0
+
+
+@pytest.mark.slow
+def test_a_warm_coil_edit_state_carries_its_promoted_nodes():
+    """The converged warm coil-edit state promotes nodes and reports them.
+
+    The machine, its seed and the edited current vector come from the
+    coil-edit sweep's own preparation, so the state this asserts on is the one
+    that diagnosed the non-convergence: a diverted MAST frame whose closing
+    trip passes a set of nodes through instead of mapping them.  The solve is
+    warm, seeded from the prepared frame and chained through the earlier edits
+    of the sweep, which is the sequence that made that frame converge.  The
+    returned mask is compared against the mask recorded at the solve's own
+    closing read, so a result carrying the seed's shadow, an earlier edit's
+    set or an all-false array fails here.
+    """
+    configure_dtypes()
+    profile, prepared, _carrier = coil_edit_latency._prepare_case(
+        mast_response_carrier_warm.DEFAULT_CARRIER,
+        impose_vertical_centroid=False,
+    )
+    operator = profile.operator
+    requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    base_current = np.asarray(prepared["prescribed_current"], dtype=np.float64)
+    circuit_index = int(prepared["circuit_index"])
+    target_current = float(prepared["target_current"])
+    reads: list[np.ndarray] = []
+    original = operator.residual_shadow_mask
+
+    def recording(psi, requested_class=None, previous_shadow=None):
+        mask = original(psi, requested_class, previous_shadow)
+        reads.append(np.asarray(mask, dtype=bool))
+        return mask
+
+    state = prepared["initial"]
+    operator.residual_shadow_mask = recording
+    try:
+        for fraction in coil_edit_latency.EDIT_FRACTIONS[:DIAGNOSED_EDIT]:
+            current = base_current.copy()
+            current[circuit_index] *= 1.0 + fraction
+            reads.clear()
+            result = reduced_newton.solve_reduced_newton(
+                operator,
+                state,
+                requested_class=requested_class,
+                target_current=target_current,
+                prescribed_current=jnp.asarray(current),
+                tolerance=coil_edit_latency.COMPILED_SLICE_TOLERANCE,
+                newton_steps=coil_edit_latency.COMPILED_SLICE_NEWTON_STEPS,
+                active_set_steps=coil_edit_latency.COMPILED_SLICE_ACTIVE_SET_STEPS,
+                trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+            )
+            state = result.state
+    finally:
+        del operator.residual_shadow_mask
+
+    returned = np.asarray(result.promoted_mask)
+    assert returned.dtype == bool
+    assert bool(result.converged), float(result.terminal_residual)
+    assert returned.sum() > 0
+    assert np.array_equal(returned, reads[-1])

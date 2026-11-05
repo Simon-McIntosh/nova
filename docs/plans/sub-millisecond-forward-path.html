@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="135">
+<meta name="plan-version" content="136">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -500,6 +500,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T093443067901-review-of-bank-step-channels-2aa3ece1c47c-figure" data-who="reckon-build" data-when="2026-11-05T09:45:40.672Z">
     <div class="r-comment-body"><p>Figure review of run r-20261105T083431973449-bank-step-channels at head 2aa3ece1c47cb7261a7b60c40f04b83c5db3b217 against base 1de330a8fbf781c2db6f9734efdaf53e47fe75b4: all six rubric items pass on the rendered PNG, with one non-blocking contrast finding on the green value labels (4.25:1, 14 pt) anchored at scripts/prototypes/bank_step_channels/plot.py:60; the figure prints all eight per-slice values at their markers, labels the sixteen-slice rows as amortised, and shows the 76.5% sixteen-slice converged-wall regression rather than hiding it.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T083431973449-bank-step-channels" data-who="reckon-build" data-when="2026-11-05T09:15:21Z">
+    <div class="r-comment-body"><p>Cached the state-independent bank channels once per SupportOperands (94380000 bytes) and replaced axis/boundary directional fields with one VJP each; CPU full-matrix parity is at most 1.3541446305345831e-17 and all 17 H200 lanes pass precision. Isolated Jacobian wall falls 132.61→127.98 ms at 1 slice and 1620.75→1587.59 ms at 16, but converged wall per slice changes 425.22→309.73 and 386.50→682.31 ms respectively because the maximum batch iteration count rises 10→19. Evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-step-channels.html#bank-step-channels-landing; figure: docs/figures/sub-millisecond-forward-path/bank-step-channels/wall.svg.</p></div>
 </div>
 </section>
 </main>

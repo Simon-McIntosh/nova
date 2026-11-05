@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1400x720 RGBA, attached to this review run)": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg"
+  },
+  "attachment_note": "The single attached raster was opened with Read and judged directly as a picture. No SVG, no other image and no source markup was opened, listed, searched or rendered; every measurement below is read from the pixels of image-0.png. Provenance is asserted from the artifact and the page, not from the figure source: the figure directory named by the figure commit holds exactly one figure, the attached PNG is 1400x720 (the repository's 31.1 x 16 cm deck canvas), and the attachment's content -- a 9 by 9 lattice with three red promoted-node diamonds and an X-point seed on the left, per-lattice-node deviation on a logarithmic axis with a hollow withheld-compensation population on the right -- matches the run fragment's own alt text for this figure word for word.",
+  "completed_at": "2026-11-05T15:58:50.350Z",
+  "dispatched_at": "2026-11-05T15:51:03Z",
+  "figure_checks": {
+    "clipping": "Counts of non-white pixels in the outer frame of the 1400x720 render: top 0, bottom 0, left 0, right 0. Overall ink bounding box is y 20-693, x 20-1379, so every label and mark lies inside the canvas.",
+    "drawing_script_absent": "The run's diff adds the figure and the fragment only; no script that draws this figure is committed in the reviewed range (grep of the reviewed head for the figure name hits only the fragment's img tag). Findings are therefore anchored to the figure's repository path with a null line, as the record contract permits.",
+    "measurement_method": "Colour-classified pixel analysis of the single attached PNG with numpy/PIL: masks for red (r>140, r-g>60, r-b>60), grey (#929292 +/- 12), and green (g>60, g-r>25, r<160), used to locate label glyph runs and marker clusters in the same rows and columns.",
+    "pixel_measurements": "Left panel red (#C2392B) ink clusters: rows 440-458 x 175-286 (an isolated diamond at x 175-190, a second diamond at x 228-243, and the label glyphs between and around them), and rows 501-516 x 175-189 (the third promoted diamond). That is three promoted diamonds, matching the receipt's promoted_node_count of 3. Right panel red diamonds occupy rows 45-59, x 794-887 with a symmetric 6-40-6 row profile, i.e. three filled diamonds. The green solved series (#2E8B57) occupies rows 623-638, x 908-1240. The hollow withheld population occupies rows 90-130.",
+    "render_provenance": "image-0.png is 1400x720 8-bit RGBA, the repository's deck canvas at 100 dpi; it was opened with Read and judged as an image. The reviewed base 87e6c326 is the parent of the run's first commit and an ancestor of the reviewed head 028d56c3520837ab2ed47b93197dcb3f2469d25b."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg",
+      "rubric": {
+        "contrast": "Defect, non-blocking. The grey annotation 'solved nodes' and the grey axis furniture are #929292 (146,146,146), measured at 3.11:1 against white -- below the 4.5:1 normal-text threshold for text at the rendered ~19 px body size, though readable in the render. The near-black text (#52514E) measures about 8.6:1 and the red promoted marks (#C2392B) about 9.25:1, both clear. The green solved series (#2E8B57) reads about 4.25:1 against white, adequate for a mark.",
+        "data_ink": "Pass. Only data ink is present: 81 grey lattice marks, three red diamonds and one X-point cross with its label on the left; on the right, three red diamonds, a hollow-marker population across roughly 60 nodes, a dense green series of solved-node marks, and one dotted grey threshold line carrying the label 'ten residuals'. Nothing else is drawn.",
+        "decoration": "Pass. No gridlines, no background fill, no axvspan or shading band, no frame or drop shadow. Both panels keep only the left and bottom axes.",
+        "label_collision": "Defect, blocking. In the left panel the direct label 'promoted' occupies rows 442-460 of the 1400x720 render at x 194-286 and a promoted-node diamond fills x 228-243 of that same band (rows 444-454), so a marker is drawn inside the word; a second diamond sits at x 175-190 immediately before the label's first glyph. Text and markers are the same red, so the overlap is not merely crowding -- the glyphs are painted over. Nothing is clipped: non-white pixels in the outer 2 px frame of the render are 0 on every side, and the other labels do not touch data -- 'X-point' sits in clear space above the lattice row at y = 0.0, 'solved nodes' occupies rows 546-560 clear of the lattice row drawn at rows 505-512, and the right panel's 'with the compensation withheld' sits rows 65-80 with the red diamonds ending at row 59 and the hollow population starting at row 90.",
+        "legibility": "Defect, and blocking for the left panel's promoted population. The two panels are otherwise readable at a glance: the 9 by 9 lattice with its X-point, and the per-node deviation on a log axis from 1e-12 to 1e-1 Wb labelled 'map minus state [Wb]' against 'lattice node' 0 to 85. The left panel's direct label 'promoted' is placed on the same red diamonds it names and in the same red, so the word is interrupted by a filled diamond and the letters it covers are not recoverable; a reader sees roughly 'pro' then a diamond then 'ted' and must infer the word. The promoted population is the subject of the figure -- the caption's whole reading turns on separating the nodes the solve claims from the ones it closes on -- so an unreadable name on that population is a defect on the figure's central claim, not a cosmetic one.",
+        "table_form": "Pass. The figure depicts a spatial lattice with a marked seed and promoted set, and two per-node deviation populations against a threshold; that is a plotted relationship, not information naturally expressed as a table. The run's per-node receipt numbers appear as an HTML table in the fragment."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "attached image-0.png (1400x720); red-mask row/column map of the left panel rows 436-462, x 165-300; the same PNG's red clusters at rows 440-458 x 175-286 and rows 501-516 x 175-189",
+      "file": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg",
+      "id": "fe25d56fa7d",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The left panel's direct label 'promoted' is drawn through the promoted-node markers it names, and because the label and the markers are the same red the covered glyphs are unreadable. Measured on the 1400x720 render, the word occupies rows 442-460 at x 194-286 while a filled diamond occupies x 228-243 of the same band (rows 444-454), with a second diamond at x 175-190 immediately against the first glyph; a reader receives 'pro' + a solid red diamond + 'ted' rather than the word. The promoted population is the figure's subject -- the caption's reading is that these nodes carry 'a piece of the iterate no field of currents reproduces' -- so failing to name it in the panel costs the reader the one label that identifies the point of the picture on the left. It also strands the right panel, whose three red diamonds at 5e-2 Wb carry no label of their own and must be matched to the left panel's red by inference. Fix by moving the label clear of the marker band (offset perpendicular to the population, as the 'X-point' label is placed) or by drawing it in neutral ink so it does not merge with the markers."
+    },
+    {
+      "evidence": "attached image-0.png; green mask (#2E8B57) rows 623-638 x 908-1240 with no adjacent text; grey #929292 label 'solved nodes' rows 546-560 in the left panel; fragment figcaption at docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html:59-64",
+      "file": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg",
+      "id": "fe25d56fa7d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The right panel's solved-node series is drawn in green (#2E8B57) with no label and no legend entry, while the left panel uses grey #929292 for the same population under the label 'solved nodes'. The colour vocabulary therefore changes between panels without being stated: a reader who learns grey = solved on the left cannot know that green = solved on the right from the figure, and must recover it from the caption. The data are visible and the caption does say 'the solved nodes at the fixed-point residual', so nothing is hidden; the defect is that the identification is carried only by prose. Either give the green series a direct label on the right or draw the solved population in the same neutral grey on both panels."
+    },
+    {
+      "evidence": "attached image-0.png; ink row profile of the right panel x 700-1100 showing diamonds at rows 44-60, the label at rows 65-80 and the hollow population at rows 90-130",
+      "file": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg",
+      "id": "fe25d56fa7d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The label 'with the compensation withheld' sits between the two populations it does not distinguish: the red promoted diamonds end at row 59 and the hollow markers it describes begin at row 90, with the label occupying rows 65-80, i.e. 5 px under the diamonds and 10 px over the hollow series. Read top-down the label appears to name the red diamonds immediately above it, which are the promoted nodes at 5e-2 Wb, not the ~8e-3 Wb hollow population it is there to explain. The caption does state the encoding ('hollow markers showing the same nodes when the compensating conductor flux ... is withheld'), so a reader who reaches the caption recovers it. Placing the label beside the hollow series' own row, or adding a short leader from the label to the hollow markers, would remove the ambiguity."
+    },
+    {
+      "evidence": "attached image-0.png; exact pixel colour (146,146,146) sampled from the 'solved nodes' glyph run at rows 546-560 and luminance conversion to a 3.11:1 ratio against white",
+      "file": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg",
+      "id": "fe25d56fa7d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The grey annotation text is #929292 on white, measured 3.11:1, which is below the 4.5:1 normal-text threshold for text at the rendered ~19 px size. Affected: the direct labels 'solved nodes' and 'ten residuals'. The figure's data-marks rule asks for a mid neutral grey at about 3:1 for populations, but that value is a mark standard; applied to label text it leaves the annotations visibly lighter than every other piece of text on the page. Legible in the render, so not blocking; darkening the annotation ink to about #6b6b6b (5.3:1) would keep it clearly subordinate while clearing the threshold."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is not a restatement of a title. The figure carries no title -- identity is in the file name and the caption -- and the caption states the populations ('the per-node deviation of the map from the converged state for the two populations'), the reason the unmasked figure is a gap ('Promoted nodes carry a piece of the iterate no field of currents reproduces'), the encoding ('with the compensating conductor flux ... withheld, which is the quantity the constrained route images with') and the conclusion. It is accurate about what the render shows.",
+    "finding_materiality": "One blocking finding: the promoted population's label is unreadable where the markers cover it. Three non-blocking findings, all of which leave every mark visible and every other label readable. Nothing is clipped at the canvas edge, no text collides with text, and the figure does not depict tabular data.",
+    "rendered_artifact": "The single attached figure was opened with Read and inspected as an image at its native 1400x720, then examined by colour-classified pixel analysis of the same PNG to locate every text run and marker cluster.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest. No SVG was opened, searched, listed, rendered or shown."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "Provenance is by construction and by content: one figure in the named directory, a 1400x720 render on the repository's deck canvas, and content matching the fragment's alt text for this figure. The reviewed base is recorded as the parent of the run's first commit.",
+    "legibility": "Read from the attached render alone. The label/marker overlap is measured on the render's own pixels (red-mask row and column extents), not inferred from markup.",
+    "scope_discipline": "Findings are reported here only; nothing on disk outside the two record paths and the manifest was touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T154907169994-review-of-display-map-solve-currents-028d56c35208-figure",
+  "reviewed_base_sha": "87e6c326426ac3212f1da5cf8f88a5dc5e40b39c",
+  "reviewed_figures": [
+    "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg"
+  ],
+  "reviewed_head_sha": "028d56c3520837ab2ed47b93197dcb3f2469d25b",
+  "reviewed_run_id": "r-20261105T144157857660-display-map-solve-currents",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: defect -- in the left panel the direct label 'promoted' is drawn through the promoted-node markers and, because label and markers are the same red (#C2392B on white), the glyphs a marker sits on are swallowed; recorded as finding 1 (blocking).",
+    "RUBRIC data_ink: pass -- data carry the weight. No gridlines, no fill bands, no shading: the canvas holds 81 lattice marks, three promoted diamonds, one X-point cross and its label on the left, and two marker populations plus one dotted threshold line and its label on the right.",
+    "RUBRIC decoration: pass -- no gradient, background fill, frame, drop shadow or styled theme anywhere on either panel; top and right spines are absent on both, so only the axes carrying a scale are drawn.",
+    "RUBRIC contrast: defect -- the two grey annotations 'solved nodes' and the grey tick text are #929292 on white, measured 3.11:1, below the 4.5:1 normal-text threshold; the near-black text (#52514E) and the red marks (9.25:1) pass comfortably. Recorded as finding 4 (non-blocking), legible at the rendered size.",
+    "RUBRIC table_form: pass -- the image carries a spatial lattice and a per-node deviation series, a relationship no table carries; the per-node numbers the run certifies are supplied as a table in the fragment, not as an image of a table.",
+    "RUBRIC label_collision: defect -- the 'promoted' label sits on top of two promoted-node diamonds and a third glyph run of the word is broken by a marker; every other label is clear of data and nothing is clipped. Recorded as finding 1 (blocking)."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T15:58:53.003147+00:00",
+  "total": null
+}

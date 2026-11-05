@@ -27,7 +27,6 @@ STAGES = [
     ("step assembly", "#e07b39"),
     ("factor", "#7d5ba6"),
     ("back-solve", "#a05195"),
-    ("remainder", "#929292"),
 ]
 
 
@@ -59,7 +58,6 @@ def split(stages, solves, lanes):
     }
     whole = solves[lanes]
     iterate = stages[(lanes, "whole_solve")] / whole["max_steps"]
-    named["remainder"] = iterate - sum(named.values())
     return named, iterate, whole
 
 
@@ -101,9 +99,8 @@ def main():
         "per_iterate": {"one": arm_one, "sixteen": arm_sixteen},
         "iterate_ms": {"one": iterate_one, "sixteen": iterate_sixteen},
         "closure": {
-            "one": sum(arm_one[name] for name, _ in STAGES[:-1]) / iterate_one,
-            "sixteen": sum(arm_sixteen[name] for name, _ in STAGES[:-1])
-            / iterate_sixteen,
+            "one": sum(arm_one[name] for name, _ in STAGES) / iterate_one,
+            "sixteen": sum(arm_sixteen[name] for name, _ in STAGES) / iterate_sixteen,
         },
         "solve": {"one": whole_one, "sixteen": whole_sixteen},
     }
@@ -145,17 +142,26 @@ def main():
                     zorder=4,
                 )
             left += width
+        # The whole-solve wall is not the bar's end: the stage sum overruns it.
+        ax.plot(
+            [iterate, iterate],
+            [y - 0.30, y - 0.15],
+            color="#222222",
+            linewidth=1.4,
+            linestyle="--",
+            zorder=5,
+        )
         ax.text(
-            left,
-            y - 0.34,
-            f"{iterate:.1f} ms per iterate",
-            ha="right",
+            iterate,
+            y - 0.33,
+            f"whole solve, {iterate:.0f} ms per iterate",
+            ha="left",
             va="top",
             fontsize=14,
-            color="#333333",
-            zorder=4,
+            color="#222222",
+            zorder=5,
         )
-    ax.set_yticks([0, 1], [row[0] for row in rows])
+    ax.set_yticks([1, 0], [row[0] for row in rows])
     ax.set_ylim(-0.6, 1.55)
     ax.set_xlim(0, top)
     step = 10 ** math.floor(math.log10(top / 5.0))
@@ -165,6 +171,7 @@ def main():
     ax.set_autoscalex_on(False)
     ax.set_xlabel("Per-iterate wall by stage [ms]")
     ax.tick_params(axis="both", labelsize=14)
+    ax.tick_params(axis="y", length=0)
     ax.xaxis.label.set_size(16)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)

@@ -1447,14 +1447,11 @@ def _panel_display_map(
     moment and state assembly here can be measured against a machine it can
     state exactly.
 
-    The moments are the solver's own. The fixed point is terminated on the
-    operator's target-current normalisation, so the panel asks the operator for
-    that same normalised moment triple rather than imaging the unnormalised
-    moments a producer would store or derive by another route; the panel then
-    draws the field the solve ended at. The moments are passed explicitly
-    because the builder's own normalised branch traces the clipped support of a
-    linear-moment operator, and this machine's operator carries point moments
-    with no moment geometry.
+    The archive's moments are the solve's target-current-normalised triple;
+    they are contracted directly so a redraw cannot derive a different triple
+    from the lattice image. The terminal state and promoted mask judge the
+    drawing on the nodes the solve claims, while the constrained rows' current
+    is evaluated through the same circuit response as the main drive.
     """
     from nova.equilibrium.display_flux import build_display_flux_map
 
@@ -1600,6 +1597,10 @@ def _write_panel_data(
     payload["achieved_class"] = np.asarray(
         [state["class"] for state in panel_states], dtype=str
     )
+    try:
+        drawn_positions = set(_panel_edits(payload))
+    except RuntimeError:
+        drawn_positions = set(range(len(panel_states)))
     wall = _wall_units(profile.operator)
     inside = _wall_interior(payload["radius"], payload["height"], wall)
     for position, state in enumerate(panel_states):
@@ -1607,19 +1608,20 @@ def _write_panel_data(
             continue
         field = _grid_field(state["psi"], state["shape"])
         payload[f"psi_{position}"] = field
-        payload[f"current_{position}"] = np.asarray(state["current"], dtype=float)
-        payload[f"state_{position}"] = np.asarray(state["state"], dtype=float)
-        payload[f"promoted_mask_{position}"] = np.asarray(
-            state["promoted_mask"], dtype=bool
-        )
-        payload[f"compensating_current_{position}"] = np.asarray(
-            state["compensating_current"], dtype=float
-        )
-        moments = state["moments"]
-        payload[f"cell_current_{position}"] = np.asarray(moments[0], dtype=float)
-        payload[f"radial_moment_{position}"] = np.asarray(moments[1], dtype=float)
-        payload[f"vertical_moment_{position}"] = np.asarray(moments[2], dtype=float)
-        payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
+        if position in drawn_positions:
+            for key in ("current", "state", "promoted_mask", "compensating_current"):
+                if key in state:
+                    payload[f"{key}_{position}"] = np.asarray(state[key])
+            if "moments" in state:
+                for name, moment in zip(
+                    ("cell_current", "radial_moment", "vertical_moment"),
+                    state["moments"],
+                    strict=True,
+                ):
+                    payload[f"{name}_{position}"] = np.asarray(moment, dtype=float)
+            payload[f"separatrix_{position}"] = np.asarray(
+                state["separatrix"], dtype=float
+            )
         axis = np.asarray(state["nulls"]["axis"], dtype=float).reshape(2)
         payload[f"axis_{position}"] = axis
         x_points = np.asarray(state["nulls"]["x_points"], dtype=float).reshape(-1, 2)
@@ -1659,19 +1661,20 @@ def _write_panel_data(
         payload[f"xpoints_{position}"] = x_points
         payload[f"xpoint_flux_{position}"] = flux
         payload[f"saddle_index_{position}"] = np.asarray(saddle_index, dtype=int)
-        _persist_branches(
-            payload,
-            f"branches_{position}_",
-            _assemble_raster_branches(
-                payload["radius"],
-                payload["height"],
-                field,
-                axis,
-                x_points,
-                saddle_index,
-                inside,
-            ),
-        )
+        if position in drawn_positions:
+            _persist_branches(
+                payload,
+                f"branches_{position}_",
+                _assemble_raster_branches(
+                    payload["radius"],
+                    payload["height"],
+                    field,
+                    axis,
+                    x_points,
+                    saddle_index,
+                    inside,
+                ),
+            )
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **payload)
     # The guard measures the archive on disk rather than the arrays that were
@@ -2425,10 +2428,7 @@ def _render_panel(
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
         "display_map": {
-            "moments_route": (
-                "operator.normalised_current_moments_and_observation of the state "
-                "at the solve's target current"
-            ),
+            "moments_route": ("stored terminal moments at the solve's target current"),
             "panels": {
                 label: {
                     "spacing_m": float(loaded[label]["display"].spacing_m),

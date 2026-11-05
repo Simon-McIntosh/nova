@@ -12,6 +12,7 @@ the operator never saw.
 from __future__ import annotations
 
 import os
+import json
 from typing import Any
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
@@ -259,9 +260,19 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
 def test_committed_converged_panel_uses_its_terminal_currents():
     """Read the solve's state, promotion and compensation through its producer."""
     archive = Path(
-        "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_ARCHIVE",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        )
+    )
+    receipt = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_RECEIPT",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+        )
     )
     loaded = _panel_load(archive)
+    assert archive.stat().st_size <= 300_000
     panel = loaded["converged"]
     assert panel["converged"]
     assert panel["residual"] <= 1.0e-8
@@ -278,3 +289,11 @@ def test_committed_converged_panel_uses_its_terminal_currents():
     assert display.max_solved_node_mismatch_wb <= 10 * panel["residual"]
     assert display.promoted_node_count == int(np.count_nonzero(panel["promoted_mask"]))
     assert np.isfinite(display.nearest_promoted_to_xpoint_m)
+    reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
+    assert (
+        abs(
+            display.max_solved_node_mismatch_wb
+            - reported["max_solved_node_mismatch_wb"]
+        )
+        <= 1.0e-12
+    )

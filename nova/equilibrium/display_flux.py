@@ -292,11 +292,13 @@ def build_display_flux_map(
         promoted_nodes = np.zeros(node_count, dtype=bool)
     else:
         promoted_nodes = np.asarray(promoted, dtype=bool).reshape(-1)
-        if promoted_nodes.size != node_count:
+        state_size = np.asarray(state).size
+        if promoted_nodes.size not in (node_count, state_size):
             raise ValueError(
                 f"the promoted mask names {promoted_nodes.size} nodes, "
-                f"the lattice carries {node_count}"
+                f"the lattice carries {node_count} and the state {state_size}"
             )
+        promoted_nodes = promoted_nodes[:node_count]
 
     radius_nodes = np.asarray(lattice.radius, dtype=np.float64)
     height_nodes = np.asarray(lattice.height, dtype=np.float64)

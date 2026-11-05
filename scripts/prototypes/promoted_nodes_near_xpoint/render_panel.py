@@ -116,8 +116,13 @@ def _data_display_points(axes):
     return np.concatenate(pieces)
 
 
-def _box_clear(points, box, margin: float = 1.5) -> bool:
-    """Return whether no sampled data point falls inside ``box``."""
+def _box_clear(points, box, margin: float = 4.0) -> bool:
+    """Return whether no sampled data point falls inside ``box``.
+
+    The margin is four pixels rather than none: a glyph box measured before the
+    backend lays the text out can sit a pixel or two inside what is drawn, and
+    a bar that merely grazes a curve reads as touching it at any scale.
+    """
     if points.size == 0:
         return True
     inside = (
@@ -503,6 +508,22 @@ def render(
     figure.canvas.draw()
     axis.set_autoscale_on(False)
 
+    # The scale bar is placed first, in the window's lower-right corner away from
+# both separatrix legs, and the separation label then avoids it: the label
+# search reads every text already on the axes, the bar search does not.
+    _place_scale_bar(
+        zoom,
+        figure,
+        0.5e-3,
+        "0.5 mm",
+        [
+            (0.78, 0.10, True),
+            (0.78, 0.16, True),
+            (0.05, 0.10, True),
+            (0.78, 0.90, False),
+            (0.05, 0.90, False),
+        ],
+    )
     _place_label(
         zoom,
         figure,
@@ -510,26 +531,11 @@ def render(
         [
             (0.95, 0.93, "right"),
             (0.05, 0.93, "left"),
-            (0.95, 0.07, "right"),
             (0.05, 0.07, "left"),
             (0.95, 0.80, "right"),
             (0.05, 0.80, "left"),
         ],
         arrow_to=centre,
-    )
-    _place_scale_bar(
-        zoom,
-        figure,
-        0.5e-3,
-        "0.5 mm",
-        [
-            (0.05, 0.10, True),
-            (0.78, 0.10, True),
-            (0.05, 0.90, False),
-            (0.78, 0.90, False),
-            (0.05, 0.50, True),
-            (0.78, 0.50, True),
-        ],
     )
     # The map is dense at the saddle's height -- wall, separatrix, flux and
     # nodes all pass through the same band -- so the magnification is explained
@@ -637,7 +643,7 @@ def render(
     svg_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(svg_path, format="svg", metadata={"Date": None}, bbox_inches=None)
     png_path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(png_path, format="png", dpi=100, bbox_inches=None)
+    figure.savefig(png_path, format="png", dpi=140, bbox_inches=None)
     plt.close(figure)
     return {
         "svg": str(svg_path),

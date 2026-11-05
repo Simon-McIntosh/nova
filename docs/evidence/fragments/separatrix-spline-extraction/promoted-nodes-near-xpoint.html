@@ -36,7 +36,8 @@ offset of 0.4 mm between the map and the lattice spline.</p>
   <figcaption>The converged edit 12 at
   5.730e-09 Wb. Grey contours: the converged state's poloidal flux.
   Dashed near-black: the separatrix assembled on the converged state; the complete field of the
-  currents assembles no closed separatrix, so only one is drawn. Orange diamonds: the
+  currents is unassembled at the extractor's default branch capacity, so only one is drawn.
+  Orange diamonds: the
   60 promoted nodes. The solve's magnetic axis is the solid
   triangle; the two polished saddles are both drawn as X-point glyphs, the converged state's in
   near-black and the field of the currents' in blue. The right-hand window magnifies the
@@ -73,8 +74,8 @@ residual the field reproduces everywhere else.</p>
 <p>Re-polishing the X-point on that complete field moves the saddle
 <strong>0.354 mm</strong> (<var>R</var> -0.343 mm,
 <var>Z</var> +0.091 mm;
-<strong>0.004 lattice cells</strong> of 92.8 mm). The separatrix does not assemble on that field: <code>nova.equilibrium.display_flux._branches</code> returns no closed contour at the imaged level of -1.306e-01 Wb, so there are no lobe or leg directions to compare. The saddle itself still polishes, and the panel draws the converged state's separatrix alone rather than inventing a second contour.</p>
+<strong>0.004 lattice cells</strong> of 92.8 mm). The separatrix does not assemble on that field at the branch capacity <code>nova.equilibrium.display_flux._branches</code> defaults to, 256 segments: it returns no closed contour at the imaged level of -1.306e-01 Wb, and the contours this fine display map carries run past 677 segments, so the trip is capacity-bound rather than a statement about the field. There are therefore no lobe or leg directions to compare. The saddle itself still polishes, and the panel draws the converged state's separatrix alone rather than inventing a second contour.</p>
 
-<p>The converged near-X-point geometry is therefore the complete field's own to within 0.4 mm: re-polishing the saddle on the field of the complete currents moves it 0.354 mm (0.004 lattice cells of 92.8 mm), and that field leaves 7.468e-09 Wb on the nodes the solve does claim, against 2.621e-02 Wb on the promoted set, so the promotion, not the field, carries the gap. The separatrix assembles on that field with 0 vertices (<code>well_formed</code> False), so the lobe and leg angles are undefined rather than zero and no shape change is claimed.</p>
+<p>The converged near-X-point geometry is therefore the complete field's own to within 0.4 mm: re-polishing the saddle on the field of the complete currents moves it 0.354 mm (0.004 lattice cells of 92.8 mm), and that field leaves 7.468e-09 Wb on the nodes the solve does claim, against 2.621e-02 Wb on the promoted set, so the promotion, not the field, carries the gap. The separatrix does not assemble at the branch capacity the extractor defaults to, 256 segments, reaching 0 vertices with <code>well_formed</code> False, so the lobe and leg angles are undefined rather than zero and no shape change is claimed.</p>
 
 <p>A change to that reading belongs in the promotion rule: <code>ForwardFluxOperator.residual_shadow_mask</code> at <code>nova/equilibrium/forward_operator.py:3699</code>, which composes the mask, and the paste it feeds at <code>nova/equilibrium/reduced_newton.py:985</code> inside <code>trip_boundary</code> (<code>reduced_newton.py:935</code>).</p>

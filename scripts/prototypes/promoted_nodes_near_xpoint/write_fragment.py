@@ -64,10 +64,10 @@ def compose(receipt: dict, figure_src: str) -> str:
         )
     else:
         shape_clause = (
-            f"assembles on that field with {separatrix['image_closed_vertex_count']} "
-            f"vertices (<code>well_formed</code> {separatrix['image_well_formed']}), so the "
-            "lobe and leg angles are undefined rather than zero and no shape change is "
-            "claimed"
+            "does not assemble at the branch capacity the extractor defaults to, 256 "
+            f"segments, reaching {separatrix['image_closed_vertex_count']} vertices with "
+            f"<code>well_formed</code> {separatrix['image_well_formed']}, so the lobe and "
+            "leg angles are undefined rather than zero and no shape change is claimed"
         )
     verdict = (
         "The converged near-X-point geometry is therefore the complete field's own "
@@ -95,12 +95,14 @@ def compose(receipt: dict, figure_src: str) -> str:
         f"{separatrix['lobe_tip_shift_mm']:.1f} mm away."
         if assembled
         else (
-            "The separatrix does not assemble on that field: "
-            "<code>nova.equilibrium.display_flux._branches</code> returns no closed "
-            f"contour at the imaged level of {_sci(separatrix['image_level_wb'])} Wb, so "
-            "there are no lobe or leg directions to compare. The saddle itself still "
-            "polishes, and the panel draws the converged state's separatrix alone rather "
-            "than inventing a second contour."
+            "The separatrix does not assemble on that field at the branch capacity "
+            "<code>nova.equilibrium.display_flux._branches</code> defaults to, 256 "
+            "segments: it returns no closed contour at the imaged level of "
+            f"{_sci(separatrix['image_level_wb'])} Wb, and the contours this fine display "
+            "map carries run past 677 segments, so the trip is capacity-bound rather than "
+            "a statement about the field. There are therefore no lobe or leg directions to "
+            "compare. The saddle itself still polishes, and the panel draws the converged "
+            "state's separatrix alone rather than inventing a second contour."
         )
     )
     rule = (
@@ -149,7 +151,8 @@ offset of {complete["saddle_offset_mm"]:.1f} mm between the map and the lattice 
   <figcaption>The converged edit {receipt["edit_index"]} at
   {_sci(receipt["terminal_residual_wb"])} Wb. Grey contours: the converged state's poloidal flux.
   Dashed near-black: the separatrix assembled on the converged state; the complete field of the
-  currents assembles no closed separatrix, so only one is drawn. Orange diamonds: the
+  currents is unassembled at the extractor's default branch capacity, so only one is drawn.
+  Orange diamonds: the
   {receipt["promoted_node_count"]} promoted nodes. The solve's magnetic axis is the solid
   triangle; the two polished saddles are both drawn as X-point glyphs, the converged state's in
   near-black and the field of the currents' in blue. The right-hand window magnifies the

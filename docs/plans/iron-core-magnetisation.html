@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s2&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -88,8 +88,8 @@
       solves the material law <em>M</em> = c(|B|)&nbsp;B with
       c = (&mu;<sub>r</sub> &minus; 1)/(&mu;<sub>0</sub>&mu;<sub>r</sub>) by damped Newton on the
       differential permeability. Code:
-      <code>scripts/prototypes/iron_magnetisation/</code>; receipts under
-      <code>~/.cache/nova-iron-research/</code>.
+      <code>scripts/prototypes/iron_magnetisation/</code>; receipts under the GPFS evidence root
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/prototype/</code>.
     </p>
     <p>
       <strong>Uniform-field sphere.</strong> A linear sphere in a uniform field has a
@@ -165,7 +165,8 @@
       matter. The difference sits in the iron representation: imas-efit carries B-spline
       boundary currents with the permeability sampled at its observation points. Neither
       model is checked against measurement: in-vessel magnetics fit equally well with and
-      without iron (BPOL and BTNG residuals change by under 3&nbsp;%). §6 runs the closed-shell
+      without iron (BPOL and BTNG residuals change by under 3&nbsp;%; receipt
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/magnetics-residuals.json</code>). §6 runs the closed-shell
       control through imas-efit and §9 seeks a measurement that discriminates.
     </p>
     <p>
@@ -293,7 +294,9 @@
     <p>
       The iron responds to the plasma and the plasma to the iron, so a forward equilibrium with
       iron updates the magnetisation inside the Grad&ndash;Shafranov Newton step rather than once
-      before it. Enter through the public forward-solve seam, which this section waits on.
+      before it. Enter through the public forward-solve seam (<code>ForwardSolveRequest</code> in
+      <code>nova/equilibrium/solve_request.py</code>, landed as forward-solve-api §1), which this
+      section waits on.
     </p>
     <p>
       Done when (1) a WEST forward state with iron converges through the seam on the H200;
@@ -307,13 +310,14 @@
       The axisymmetric smear is right for the toroidal average far from the legs and wrong near
       them. Magnetise six limbs of their real section in the axisymmetric field and evaluate their
       field with nova's 3D Biot-Savart route, giving |B| along a radial line behind a limb and
-      between two limbs. The n&nbsp;=&nbsp;6 departure from the average decays over roughly
-      R/6 &asymp; 0.8&nbsp;m, so the correction matters within about 2&nbsp;m of the legs.
+      between two limbs. The limbs sit at R &asymp; 4.89&nbsp;m (their own radius, not the plasma major
+      radius), so their toroidal spacing is 2&pi;R/6 &asymp; 5.1&nbsp;m and the n&nbsp;=&nbsp;6 departure from the
+      average decays over roughly R/6 &asymp; 0.8&nbsp;m; the correction matters within about 2&nbsp;m of the legs.
     </p>
     <p>
       Done when (1) &phi;-resolved midplane |B| is reported behind and between limbs from the coil
-      edge to 6&nbsp;m; (2) its toroidal average agrees with the axisymmetric §6 result beyond 2&nbsp;m
-      to within the stated tolerance; (3) the limb dimensions used are the ones recorded in the
+      edge to 6&nbsp;m; (2) its toroidal average agrees with the axisymmetric §6 result beyond 2&nbsp;m from the legs
+      to within 2&nbsp;%; (3) the limb dimensions used are the ones recorded in the
       limb-geometry decision.
     </p>
 

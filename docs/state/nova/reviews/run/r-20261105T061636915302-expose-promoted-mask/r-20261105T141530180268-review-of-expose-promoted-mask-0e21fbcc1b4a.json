@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest declares no baseline_suite or after_suite arm (both null in the run's classification), and its own reduced-newton arms are unreadable for a delta. logs/reduced-newton-base.log:4 ends '.......Terminated' at EXIT=143 with no summary; logs/reduced-newton-head.log and logs/reduced-newton-head-alone.log end at EXIT=137 and EXIT=143 with the first test failing and no summary; arm-rn_base.log on GPFS ends 'F...' with no summary and no EXIT line. No arm names a failing test id. The zero recorded here is the count of readable added failures, not a measured delta.",
+  "call_sites": [
+    "nova/equilibrium/forward.py:ForwardProfile.solve (2945)",
+    "nova/equilibrium/forward.py:_solve_reduced_newton (2351)",
+    "nova/equilibrium/forward.py:ForwardProfile._receipt (1746)",
+    "nova/equilibrium/reduced_newton.py:solve_reduced_newton (1950)",
+    "nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton (2741)",
+    "nova/equilibrium/reduced_newton.py:solve_reduced_newton_compiled (3350)",
+    "nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton_compiled (3419)"
+  ],
+  "completed_at": "2026-11-05T14:28:18.452Z",
+  "dispatched_at": "2026-11-05T14:16:52Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T061636915302-expose-promoted-mask/manifest.md",
+      "id": "fda1336825c",
+      "line": 23,
+      "severity": "blocking",
+      "text": "the done_when's third clause, zero added failures for the reduced-newton and forward-solve test files against base, is unmeasured: baseline_suite and after_suite are null, logs/reduced-newton-base.log:4 ends '.......Terminated' with no summary line and no EXIT line, arm-rn_base.log ends 'F...' after four tests with no summary, the head arm for that file never completed, and no forward-solve arm was run at all. The landed gate at 6971a7afd covers only tests/test_promoted_mask_result.py, so the node's own measure has one clause with no readable evidence."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T061636915302-expose-promoted-mask/manifest.md",
+      "id": "fdd23423c03",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "negative_control_note states the control was measured on commit bac1660c2, while the control log's own header line and the lane log's SOURCE_REVISION both record 7013763b5, and in either case the control predates 6971a7afd, so the compiled-route guards added there (tests/test_promoted_mask_result.py:319-320) are verified by no mutation; a reader reconciling the note against the log sees a contradiction and cannot tell which revision the mutation was applied to."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T061636915302-expose-promoted-mask/manifest.md",
+      "id": "fda0ec58fb7",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "the commits line lists seven of the eight commits in the reviewed diff, omitting b854a4025, so a coordinator reconciling the record against the tree sees one landed commit unaccounted for."
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "id": "f01208a20a0",
+      "line": 2412,
+      "severity": "non-blocking",
+      "text": "the done_when asks for the mask carried through ForwardProfile.solve on both the host and the compiled route, but _REDUCED at nova/equilibrium/forward.py:200 contains only 'reduced_newton' and solve dispatches to _solve_reduced_newton at 2945 on the host route alone, so no compiled solve reaches ForwardEquilibrium; the compiled carry stops at ReducedNewtonResult and is asserted only there, leaving that half of the done_when with neither a path nor a measurement."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all eight commits against base 36fc1354 (446 insertions, 0 deletions); the production change is 32 lines surfacing an already-computed mask, the rest is one new test file and the landing fragment, and host[2] in nova/equilibrium/reduced_newton.py:3110 is confirmed against the compiled carry order at 1919 to be the shadow slot the boundary promotes into.",
+    "done_when": "the done_when asks for equality on a promoting fixture on both routes, an all-false mask where nothing is promoted, and zero added failures in the reduced-newton and forward-solve test files; tests/test_promoted_mask_result.py:288-314 measure the first two at the landed head, and the third is unmeasured.",
+    "goal": "the node goal is to carry the reduced solve's terminal promoted-node mask out on the same result for the host and compiled routes; nova/equilibrium/reduced_newton.py:338 adds the field, all four entry points set it, and nova/equilibrium/forward.py:2412 carries it onto ForwardEquilibrium.promoted_mask.",
+    "manifest": "read; it records the 5-passed fast arm and the 1-passed slow arm at 6971a7afd on H200 job 1305972, and states plainly in blockers that zero added failures for tests/test_reduced_newton.py is not established.",
+    "write_paths": "read the manifest's five declared paths; every one of the four changed files in the diff is inside them and the figures directory was left unused."
+  },
+  "justifications": {
+    "durability": "the assertion the declared all-false mutation reddens is `assert returned.sum() > 0` at tests/test_promoted_mask_result.py:294, confirmed by the control transcript at tests/test_promoted_mask_result.py:257 in the lane log, but the compiled-route guards at lines 319 and 320 postdate the control revision 7013763b5 and are exercised by no mutation, and the four fast-lane equality tests run on a fixture whose mask is all-false.",
+    "evidence": "the promoting-fixture equality is measured on both routes (arm-slow.log, 1 passed, EXIT=0) and the all-false case on the fast arm (arm-fast.log, 5 passed, EXIT=0), but the done_when's zero-added-failures clause has no readable arm: baseline_suite and after_suite are null and logs/reduced-newton-base.log:4 truncates at '.......Terminated' with no summary line and no successful exit.",
+    "fit": "the additions follow the trailing-default NamedTuple idiom of nova/equilibrium/forward.py:354 and use mechanism names (promoted_mask, SINGLE_TRIP, DIAGNOSED_EDIT) with no plan, stage or ticket identifier, though the per-field docstring at 355 is the only use of that form in the file.",
+    "goal_fidelity": "nova/equilibrium/reduced_newton.py:338 adds the field and lines 2130, 3094, 3414 and 3555 populate it at all four entry points, with nova/equilibrium/forward.py:2412 carrying it to ForwardEquilibrium.promoted_mask through the receipt at 1805.",
+    "reuse": "the change surfaces a mask the trip boundary already computes at nova/equilibrium/reduced_newton.py:965 and carries at 1569 rather than computing it again, and a grep for promoted_mask across nova/, tests/ and benchmarks/ returns only the new code, so no existing owner of that capability is forked.",
+    "scope_discipline": "all four changed files (nova/equilibrium/reduced_newton.py, nova/equilibrium/forward.py, tests/test_promoted_mask_result.py, docs/evidence/fragments/separatrix-spline-extraction/expose-promoted-mask.html) sit inside the five declared write paths, and docs/figures/separatrix-spline-extraction/expose-promoted-mask was not used."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T141530180268-review-of-expose-promoted-mask-0e21fbcc1b4a",
+  "reviewed_base_sha": "36fc135431c3dbfd82c86e20f61ed3d92abdd48d",
+  "reviewed_head_sha": "0e21fbcc1b4af44de6463c93d0705708d51cbd0d",
+  "reviewed_run_id": "r-20261105T061636915302-expose-promoted-mask",
+  "rubric": "review",
+  "scores": {
+    "durability": 14,
+    "evidence": 10,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T14:35:34.566173+00:00",
+  "total": 101
+}

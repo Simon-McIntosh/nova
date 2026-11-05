@@ -7,6 +7,13 @@
   "completed_at": "2026-11-05T06:24:45.378Z",
   "dispatched_at": "2026-11-05T06:15:30Z",
   "figure_note": "The SVG changed in 5d27b275b and 029970018: ticks are now round half-second values, the prototype stem is 2.6 pt and the staged stems 3.0 pt, and its 1399x720 render decodes to 1.400 / 0.646 / 1.709 s against the evidence table's 1.398 / 0.645 / 1.710 s; the separate figure review at this head records all six figure rubrics passing with one non-blocking legibility finding.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype scratch-mutation harness, not product code; noted for the next node that touches these scripts",
+      "recorded_at": "2026-11-05T06:30:38.448919+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_solve_driver/fragment_negative_control.py",

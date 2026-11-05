@@ -63,7 +63,13 @@ inspection have not run and are not claimed here.</p>
 the map from its stored currents and moments, and asserts that the drawn
 contour vertices leave the lattice rows. Its negative control moves one stored
 conductor current by one percent: the contour paths move, so a redraw that
-ignored the stored currents would not pass. Each rendered SVG is converted to
-PNG and inspected; the labels check reports zero clipped and zero overlapping
-labels.</p>
+ignored the stored currents would not pass.</p>
+
+<p id="mast-centroid-fine-panels-labels">The producer does not rely on a reader to notice a bad label. Before it saves,
+it measures the window extent of every text artist against the figure box and
+raises when any label is clipped or when two overlap, printing
+<code>LABEL_CHECK clipped=&lt;n&gt; overlapping=&lt;n&gt;</code> on the way. A panel
+is delivered only after its SVG is converted to PNG and looked at, and that
+inspection is reported with the panel it belongs to rather than asserted ahead of
+it.</p>
 </section>

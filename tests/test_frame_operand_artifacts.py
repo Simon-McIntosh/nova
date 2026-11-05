@@ -169,6 +169,48 @@ def test_persisted_bank_frame_rebuilds_to_one_em12():
     assert int(operands["promoted_node_count"]) == record["promoted_node_count"]
 
 
+def test_checkpointed_panels_rebuild_maps_and_keep_unavailable_frame():
+    """A resumed bank can render its saved maps and qualify an absent solve."""
+
+    receipt_path = (
+        Path(__file__).parents[1]
+        / "docs/figures/diiid-forward-onboarding/forward-gs-2026-11"
+        / "forward_gs_partial_receipt.json"
+    )
+    records = json.loads(receipt_path.read_text())["frame_records"]
+    assert len(records) >= 3
+    assert records[2]["operand_path"] is None
+    assert records[2]["operand_digest"] is None
+    assert records[2]["operand_unavailable_reason"].startswith(
+        "NoQualifiedAxisError:"
+    )
+    reconstructed = []
+    for record in records[:3]:
+        result = gate._frame_result_from_checkpoint(record)
+        selected = gate.SelectedFrame(
+            gate.DEFAULT_DATA / result.shot,
+            result.frame,
+            result.time_ms,
+            result.target_current_a,
+        )
+        reconstructed.append((result, gate._restored_panel_fields(selected, result)))
+    for result, fields in reconstructed[:2]:
+        assert result.operand_path and result.operand_digest
+        assert fields["display"] is not None
+        assert fields["display"].flux.shape == (
+            fields["display"].radius.size,
+            fields["display"].height.size,
+        )
+        assert "labelled" in fields and "labelled_closed_boundary" in fields
+    unavailable, fields = reconstructed[2]
+    assert unavailable.solve_exception_class == "NoQualifiedAxisError"
+    assert unavailable.operand_path is None
+    assert unavailable.operand_digest is None
+    assert unavailable.operand_unavailable_reason.startswith("NoQualifiedAxisError:")
+    assert fields["display"] is None
+    assert "labelled" in fields
+
+
 def test_display_map_uses_terminal_mask_and_constraint_compensation(monkeypatch):
     """The producer passes the solved domain and compensating current flux."""
 

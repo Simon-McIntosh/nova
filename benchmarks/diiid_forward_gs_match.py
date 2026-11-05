@@ -34,6 +34,7 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, NamedTuple
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
@@ -401,6 +402,9 @@ class FrameResult:
     displacement_decomposition: DisplacementDecomposition | None = None
     banked_read: dict[str, Any] = field(default_factory=dict)
     display_map: DisplayMapRecord | None = None
+    operand_path: str | None = None
+    operand_digest: str | None = None
+    operand_unavailable_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -2672,6 +2676,10 @@ def solve_frame(
         displacement_decomposition=displacement_decomposition,
         banked_read=banked_read,
         display_map=display_record,
+        operand_path=None if display_record is None else display_record.operand_path,
+        operand_digest=None
+        if display_record is None
+        else display_record.operand_digest,
     )
     fields = {
         "radius": np.asarray(radius),
@@ -2765,6 +2773,7 @@ def _retained_solve_failure(
         ),
         resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy).to_dict(),
         solve_exception_class=exception_class,
+        operand_unavailable_reason=f"{exception_class}: {error}",
         banked_read=banked_failed_read_summary(
             axis_rz_m=None,
             x_point_rz_m=None,
@@ -2789,6 +2798,71 @@ def _solve_frame_retaining_failure(
         return _retained_solve_failure(row, frame, expansion, error)
 
 
+def _restored_panel_fields(
+    selected: SelectedFrame, result: FrameResult
+) -> dict[str, Any]:
+    """Rebuild one checkpointed panel from its label and persisted operands."""
+
+    row = _read(selected.path, _LABEL_COLUMNS + _GEOMETRY_COLUMNS)
+    radius_full, height_full = canonical_axes(row)
+    radius = radius_full[::REGISTERED_GRID_STRIDE]
+    height = height_full[::REGISTERED_GRID_STRIDE]
+    label = corpus_flux_to_nova_total(
+        np.asarray(row["efit_psirz"][selected.frame], dtype=float)
+    ).T[::REGISTERED_GRID_STRIDE, ::REGISTERED_GRID_STRIDE]
+    count = int(row["efit_lcfs_n"][selected.frame])
+    boundary = np.c_[
+        np.asarray(row["efit_lcfs_r"][selected.frame][:count], dtype=float),
+        np.asarray(row["efit_lcfs_z"][selected.frame][:count], dtype=float),
+    ]
+    efit_x = boundary_gradient_minimum(
+        radius_full,
+        height_full,
+        np.asarray(row["efit_psirz"][selected.frame], dtype=float),
+        boundary,
+    )
+    fields: dict[str, Any] = {
+        "radius": radius,
+        "height": height,
+        "labelled": label,
+        "labelled_closed_boundary": boundary,
+        "labelled_axis_rz": _frame_reference_axis(row, selected.frame),
+        "labelled_x_rz": efit_x,
+        "pseudo_wall": pseudo_wall(
+            radius_full, height_full, result.pseudo_wall_expansion
+        ),
+        "display": None,
+        "display_closed_boundary": np.zeros((0, 2)),
+        "display_axis_rz": None,
+        "display_saddle_rz": None,
+    }
+    record = result.display_map
+    if record is None:
+        fields["plot_unavailable_reason"] = result.operand_unavailable_reason
+        return fields
+    if not result.operand_path or not result.operand_digest:
+        raise RuntimeError("a restored display frame has no persisted operand identity")
+    artifact = Path(result.operand_path).expanduser()
+    if hashlib.sha256(artifact.read_bytes()).hexdigest() != result.operand_digest:
+        raise RuntimeError(f"persisted frame operand digest changed: {artifact}")
+    operands = load_frame_operands(artifact)
+    response = np.load(Path(record.conductor_response_path).expanduser())
+    flux, _conductor = rebuild_display_flux(operands, response)
+    shape = (operands["display_radius"].size, operands["display_height"].size)
+    flux = flux.reshape(shape)
+    if not np.allclose(flux, operands["flux"], rtol=0.0, atol=1.0e-12):
+        raise RuntimeError(f"persisted frame field does not rebuild: {artifact}")
+    fields["display"] = SimpleNamespace(
+        radius=operands["display_radius"],
+        height=operands["display_height"],
+        flux=flux,
+    )
+    fields["display_closed_boundary"] = operands["separatrix_closed_rz"]
+    fields["display_axis_rz"] = result.banked_read.get("nova_axis_rz_m")
+    fields["display_saddle_rz"] = np.asarray(record.saddle_rz_m)
+    return fields
+
+
 def _solve_selected_frames(
     selected,
     baseline_expansion: float,
@@ -2802,8 +2876,8 @@ def _solve_selected_frames(
     if len(results) > len(selected):
         raise ValueError("restored frame prefix is longer than the declared cohort")
     fields: list[dict[str, Any]] = [
-        {"plot_unavailable_reason": "restored from frame checkpoint"}
-        for _result in results
+        _restored_panel_fields(selected_frame, result)
+        for selected_frame, result in zip(selected, results, strict=False)
     ]
     for number, selected_frame in enumerate(
         selected[len(results) :], start=len(results) + 1
@@ -2926,6 +3000,19 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
     """Rebuild one typed result from an atomically published frame checkpoint."""
 
     restored = dict(record)
+    if "operand_path" not in restored:
+        display = restored.get("display_map")
+        restored["operand_path"] = (
+            None if display is None else display.get("operand_path")
+        )
+        restored["operand_digest"] = (
+            None if display is None else display.get("operand_digest")
+        )
+        restored["operand_unavailable_reason"] = (
+            restored.get("solver_termination")
+            if restored.get("solve_exception_class") is not None
+            else None
+        )
     metric_values = dict(restored.pop("metrics"))
     for name in (
         "interior_r_squared",
@@ -2993,6 +3080,8 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
             "saddle_offset_mm",
             "saddle_flux_wb",
             "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
             "reproduction_relative_error",
             "build_seconds",
             "conductor_response_build_seconds",
@@ -3321,6 +3410,9 @@ def summarize(
             {
                 "shot": item.shot,
                 "frame": item.frame,
+                "operand_path": item.operand_path,
+                "operand_digest": item.operand_digest,
+                "operand_unavailable_reason": item.operand_unavailable_reason,
                 "interior_r_squared": item.metrics.interior_r_squared,
                 "iterations": item.iterations,
                 "active_set_iterations": item.active_set_iterations,
@@ -3466,8 +3558,11 @@ def render_frame_comparison(
 ) -> None:
     """Draw the five labelled and terminal-current fields in poloidal R–Z panels."""
 
-    figure, axes = plt.subplots(len(results), 1, figsize=(14, 16))
-    figure.subplots_adjust(left=0.34, right=0.94, top=0.92, bottom=0.03, hspace=0.08)
+    limiter, _limiter_receipt = _physical_wall_ring(
+        DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
+    )
+    figure, axes = plt.subplots(1, len(results), figsize=(14, 7.2))
+    figure.subplots_adjust(left=0.02, right=0.98, top=0.84, bottom=0.25, wspace=0.02)
     figure.legend(
         handles=(
             Line2D([], [], color="0.55", label="EFIT ψ [Wb]"),
@@ -3517,24 +3612,29 @@ def render_frame_comparison(
         zip(axes, results, fields, strict=True)
     ):
         poloidal_axes(axis)
-        label = f"{result.shot} · frame {result.frame}\nconverged={result.converged}"
+        label = f"{result.shot}\nframe {result.frame} · converged={result.converged}"
         if result.display_map is not None:
             display = result.display_map
+            distance = (
+                "—"
+                if display.promoted_node_count == 0
+                or not np.isfinite(display.nearest_promoted_to_xpoint_m)
+                else f"{display.nearest_promoted_to_xpoint_m:.3g} m"
+            )
             label += (
                 f"\nsolved-node mismatch {display.max_solved_node_mismatch_wb:.3g} Wb"
-                f"\npromoted {display.promoted_node_count}; "
-                f"nearest X {display.nearest_promoted_to_xpoint_m:.3g} m"
+                f"\npromoted {display.promoted_node_count}; nearest X {distance}"
             )
             if display.separatrix_closed_points == 0:
                 reason = display.separatrix_assembly or {}
-                count = reason.get("axis_enclosing_component_count")
-                label += f"\nno closed separatrix: {count} axis-enclosing cycles"
+                count = reason.get("closed_candidate_count")
+                label += f"\nno closed branch; {count} candidate(s)"
+        elif result.solve_exception_class == "NoQualifiedAxisError":
+            label += "\nunavailable: no qualified axis"
         else:
             label += f"\n{frame.get('plot_unavailable_reason', 'display unavailable')}"
         position = axis.get_position()
-        figure.text(
-            0.02, (position.y0 + position.y1) / 2, label, va="center", fontsize=9
-        )
+        figure.text(position.x0, 0.19, label, va="top", fontsize=8)
         if "labelled" not in frame:
             continue
         radius, height = frame["radius"], frame["height"]
@@ -3553,8 +3653,7 @@ def render_frame_comparison(
                 levels,
                 color=DEFAULT_INK.flux_color,
             )
-        wall = np.asarray(frame["pseudo_wall"], dtype=float)
-        draw_wall(axis, wall[:, 0], wall[:, 1])
+        draw_wall(axis, limiter[:, 0], limiter[:, 1])
         boundary = np.asarray(frame["labelled_closed_boundary"], dtype=float)
         axis.plot(boundary[:, 0], boundary[:, 1], color="0.2", linewidth=1.3)
         closed = np.asarray(frame["display_closed_boundary"], dtype=float)

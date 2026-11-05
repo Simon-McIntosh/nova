@@ -749,6 +749,9 @@
         "signed_relative_q95_error": 1.7350749764348985,
         "topology_class_agreement": true
       },
+      "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+      "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179.npz",
+      "operand_unavailable_reason": null,
       "pseudo_wall_expansion": 0.02,
       "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
       "reliable_flux_surfaces": 19,
@@ -1548,6 +1551,9 @@
         "signed_relative_q95_error": 0.32023935303099504,
         "topology_class_agreement": false
       },
+      "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+      "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+      "operand_unavailable_reason": null,
       "pseudo_wall_expansion": 0.02,
       "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
       "reliable_flux_surfaces": 19,
@@ -1653,6 +1659,9 @@
         "signed_relative_q95_error": null,
         "topology_class_agreement": null
       },
+      "operand_digest": null,
+      "operand_path": null,
+      "operand_unavailable_reason": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
       "pseudo_wall_expansion": 0.02,
       "pseudo_wall_statement": "solve failed before topology geometry was available",
       "reliable_flux_surfaces": 0,

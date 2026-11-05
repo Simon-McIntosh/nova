@@ -47,6 +47,7 @@
 <section id="lane-repair-biot-tangents-corner-followup">
 <h2>Near-corner followup</h2>
 <p>The changed head vertex arm printed failures for both near-corner reference tests before either returned reference rows. The reduced signed-decade input selection did not establish a passing fast check. Commit <code>65f344bd6e2b0ade255e92f0b7c855f11dfe3b72</code> restored the full original selection, leaving that runtime defect visible and the vertex test file identical to its base revision. The changed-arm traceback and terminal receipt are still pending.</p>
+<p>Job <code>1306078</code> ended at its 49-minute limit after the negative control and head edge file completed. The head vertex file produced no pytest summary or <code>EXIT=</code> receipt, so it is unreadable as a full-file after arm. Its printed identity failures match the base values, and both near-corner checks printed failure markers, but their changed-arm traceback was lost at the job limit. The batch <code>MaxRSS</code> was 32,859,192 K (about 31.3 GiB), below the 96 GB request. A complete final vertex gate and the exact cause of the repeated near-corner failures remain open.</p>
 </section>
 </main>
 </body>

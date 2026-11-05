@@ -15,6 +15,30 @@
 <p>A separate <code>all_debug</code> measurement was submitted as job <code>1306019</code> with eight CPUs, 96 GB and a 59-minute limit. It runs the base and head revisions from separate trees, in one fresh pytest process per file and arm. Each arm writes a revision, imported module path, working directory, command, pytest output and final exit code under <code>/work/projects/imas_gpu/sophelio/evidence/lane-repair-biot-tangents/</code>. The submitted revisions differ only by this evidence fragment, so the four arms are a control for resource effects; their results are pending.</p>
 <p>Header correction: the separate module-path probe in the submitted script runs before changing to the arm's directory. Its path therefore reflects the submission worktree, including on a scratch-base arm, and is not proof of the module pytest imported. The pytest command changes to the stated scratch directory and puts it first on <code>PYTHONPATH</code>; its base-arm provenance must be checked from a corrected probe before the receipt is promoted.</p>
 </section>
+<section id="lane-repair-biot-tangents-base-classification">
+<h2>Completed base-arm classification</h2>
+<p>Job <code>1306019</code> completed both base files before reaching its 59-minute limit during the head vertex arm. The base vertex file reported 6 failed, 7 passed, 5 deselected in 2,857.76 s; the base edge file reported 3 failed, 8 passed, 13 deselected in 624.56 s. The batch <code>MaxRSS</code> was 31,968,132 K (about 30.5 GiB), below the 96 GB request. A corrected scratch-directory import probe in completed job <code>1306076</code> printed its own <code>nova/biot/polygonanalytic.py</code> path and resolved scratch working directory. The base-arm header's contrary preflight path is retained as an instrument defect, not used for module provenance.</p>
+<table>
+<thead><tr><th>Census failure</th><th>Classification at this base</th><th>Measure or owner</th></tr></thead>
+<tbody>
+<tr><td>edge second-residual identity</td><td>stale exact bound</td><td>3.370e-12 against 1e-13; independent 50-digit hand and JVP errors 3.376e-12 and 3.476e-12. The test now uses 1e-11.</td></tr>
+<tr><td>edge flux-line-moments identity</td><td>product defect</td><td>1.021e-3 against 1e-9 with finite base JVP and exact primal; owner <code>nova/biot/polygonanalytic.py</code>.</td></tr>
+<tr><td>edge flux-line-moments truncated control</td><td>census resource failure</td><td>passed with a 1.000e+00 truncated error in the serial base arm.</td></tr>
+<tr><td>near-edge tangent reference</td><td>stale expected-failure marker</td><td>strict XPASS; 20 reference cases gave hand error 3.376e-12 at maximum. The marker is removed.</td></tr>
+<tr><td>vertex arsinh identity</td><td>product defect</td><td>2.180e-9 against 1e-9 on one of 10,000 samples; owner <code>nova/biot/polygonanalytic.py</code>.</td></tr>
+<tr><td>vertex composed signed offsets</td><td>census resource failure</td><td>passed; the largest printed derivative error was 2.773e-13.</td></tr>
+<tr><td>vertex arsinh truncated control</td><td>census resource failure</td><td>passed with a 1.634e+06 truncated error.</td></tr>
+<tr><td>near-corner exact integral</td><td>test workload defect</td><td>timed out waiting for thousands of 50-digit integrations; representative signed samples by distance decade are now selected.</td></tr>
+<tr><td>vertex weighted arsinh identity</td><td>product defect</td><td>2.323e-5 against 1e-9 over 2.88% of samples; owner <code>nova/biot/polygonanalytic.py</code>.</td></tr>
+<tr><td>vertex flux-moment identity</td><td>product defect</td><td>9.897e-7 against 1e-9 over 0.88% of samples; owner <code>nova/biot/polygonanalytic.py</code>.</td></tr>
+<tr><td>vertex horizontal-flux truncated control</td><td>census resource failure</td><td>passed with a 3.765e+10 truncated error.</td></tr>
+<tr><td>vertex horizontal-flux identity</td><td>product defect</td><td>5.680e-5 against 1e-9 over 3.72% of samples; owner <code>nova/biot/polygonanalytic.py</code>.</td></tr>
+<tr><td>vertex flux-moment truncated control</td><td>census resource failure</td><td>passed with a 1.228e+03 truncated error.</td></tr>
+<tr><td>near-corner radial reference</td><td>test workload defect</td><td>timed out on the same uncached integral batch; the signed-decade selection applies to both tests.</td></tr>
+</tbody>
+</table>
+<p>The source tangent defects are outside this node's write paths. The test repairs are in commit <code>06b20138130730d7fc67aa34478973fb6ac3bd94</code>; a fresh head gate and a reverted-assertion negative control are running in job <code>1306078</code>.</p>
+</section>
 </main>
 </body>
 </html>

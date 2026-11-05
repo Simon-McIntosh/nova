@@ -3,7 +3,8 @@
 <p><strong>CPU cycle gate fails at measured head d3ac7e1.</strong>
 Allocation 1306402 completed; its cycle suite reports
 <code>tests/test_bank_solve_cycle.py::test_diverted_lanes_leave_near_root_cycle</code>
-failed with “cycle lanes exceed eight restart updates”. The largest fresh
+failed at <code>AssertionError: cycle lanes exceed eight restart steps</code>.
+The largest fresh
 residual is <code>1.8366924464213426e-10</code> after eight restart updates,
 above the <code>1e-10</code> budget. The base cycle suite passes. This unmet
 gate prevents completion; the full result is recorded in the after-suite

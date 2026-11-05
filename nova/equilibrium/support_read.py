@@ -1721,7 +1721,7 @@ def solve_batch(
                 & (
                     ~valid
                     | (
-                        (trial_norm > contraction_limit * current_norm)
+                        (trial_norm >= current_norm)
                         & (trial_norm > tolerance)
                     )
                 ),

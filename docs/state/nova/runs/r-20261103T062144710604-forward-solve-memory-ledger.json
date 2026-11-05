@@ -798,6 +798,69 @@
   "plan_link": "sub-millisecond-forward-path",
   "promoted_by": null,
   "promoted_revision": "14ff79f2d9fb6a6ce1e5304c4b42953d7e4cbe2e",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 4938,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261103T062144710604-forward-solve-memory-ledger",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 4938,
+        "path": "/tmp/reckon-crew-scratch/r-20261103T062144710604-forward-solve-memory-ledger"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 1,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "dirty",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            "?? docs/research/forward-solve-memory-ledger/.ledger-cpu.part.json",
+            "?? docs/research/forward-solve-memory-ledger/ledger-cpu.json"
+          ],
+          "head": "14ff79f2d9fb6a6ce1e5304c4b42953d7e4cbe2e",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/forward-solve-memory-ledger",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:fcab90172b6b317d98507b8d53de7a5ebb153c828083b17b803ac172ddde7ef7",
+          "status_entries": [
+            {
+              "code": "??",
+              "path": "docs/research/forward-solve-memory-ledger/.ledger-cpu.part.json"
+            },
+            {
+              "code": "??",
+              "path": "docs/research/forward-solve-memory-ledger/ledger-cpu.json"
+            }
+          ],
+          "withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

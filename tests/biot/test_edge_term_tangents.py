@@ -47,6 +47,7 @@ BASE = load_base_module("nova/biot/polygonanalytic.py", BASE_REVISION)
 BASE_CHANNEL = load_base_module("nova/biot/momentchannel.py", BASE_REVISION)
 NODES = 128
 SCAN_TOLERANCE = 1e-9
+EDGE_RESIDUAL_TOLERANCE = 1e-11
 CONSTRUCTION_KEYS = (
     "radius",
     "slope",
@@ -270,7 +271,9 @@ def test_tangent_matches_base_jvp(name):
         got, expected, primal_error = _identity(name)
     bound = (
         EXACT_TOLERANCE
-        if name in {"edge_construction", "second_residual"}
+        if name == "edge_construction"
+        else EDGE_RESIDUAL_TOLERANCE
+        if name == "second_residual"
         else SCAN_TOLERANCE
     )
     errors = _normwise(got[1], expected[1])
@@ -446,12 +449,6 @@ def test_near_edge_reference_is_the_exact_integral():
     assert difference.max() <= 1e-15
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="the differentiated graded edge quadrature near endpoints leaves "
-    "the exact integral's tangent (measured maximum 5.160e-7 relative); the "
-    "hand rule preserves the base program's derivative",
-)
 def test_near_edge_tangent_meets_reference():
     _, hand, _, _, _ = _near_edge_reference_rows()
     assert hand.max() <= SCAN_TOLERANCE

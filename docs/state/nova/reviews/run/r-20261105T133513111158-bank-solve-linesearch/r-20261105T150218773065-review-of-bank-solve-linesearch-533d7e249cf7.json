@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "the twice-halving test asserts the true read count; the fixture-level invariant is a looser companion check and holds on the current fixture",
       "recorded_at": "2026-11-05T15:16:23.462358+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the incumbent-retention policy is guarded by the recorded H200 receipt (lanes 10 and 13 stall at 60 updates); a CPU fixture that stalls is not available at test cost",
+      "recorded_at": "2026-11-05T15:16:32.745128+00:00"
     }
   },
   "findings": [

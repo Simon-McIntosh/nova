@@ -1,0 +1,65 @@
+<section id="bank-step-booking-batch-landing">
+<h2>Batch populated booking buckets across Newton lanes</h2>
+<p><strong>Added CPU suite failure:</strong> ../../../../../../../../tmp/booking-verify-9VDjGx/head/tests/test_bank_solve_cycle.py::test_diverted_lanes_leave_near_root_cycle - AssertionError: cycle lanes exceed eight restart steps. It is carried by the follow-on convergence work.</p>
+<p>The initial H200 reproduction (allocation 1306388) isolates the excess
+outer-vmap cost to local booking:
+13.387 ms mapped versus 121.856 ms vectorized at one lane. Whole Jacobian assembly is
+18.837 versus 128.185 ms. Both compiled loops carry 9 conic and 69 normal padded
+buckets; the mapped control contains two bucket conditionals and the vectorized
+form contains none. The lane batching rule lowers those conditionals to selection,
+so empty padded buckets still integrate.</p>
+<p>The integration loop now stops at the selected population's bucket count.
+Ring quadrature likewise compacts live rings in groups of four and loops through
+every group, so the padded polygon capacity does not expand the expensive integral.
+Fresh Newton corrections use an outer vmap. Fresh geometry evaluates eighteen jet
+channels on three distinct Bell nodes, against 162 padded channels at base.
+A stencil exceeding three nodes returns a nonfinite matrix and cannot supply an
+accepted correction. The capacity-pressure test lowers the capacity to two and
+requires that refusal on the three-node seed.</p>
+<p>Sixteen-lane Jacobian scaling is <strong>3.385 times one lane</strong>,
+against a limit of four. Measurements use the production fresh-correction lane
+mapper, with explicit synchronized calls through the shared timing instrument.</p>
+<p>At 16 slices, the per-slice converged wall went from 693 to 739 ms. step_jacobian fell from 289 to 32 ms, but the per-iterate wall fell only from about 1109 to 985 ms, and the slowest lane took 12 updates against 10. The remaining iterate cost is outside the matrix.</p>
+<table id="bank-step-booking-batch-walls"><thead><tr><th>Arm</th><th>Lanes</th>
+<th>Jacobian [ms/batch]</th><th>Whole solve wall [ms]</th>
+<th>Per-iterate wall [ms]</th><th>Converged wall [ms/slice]</th>
+<th>Maximum updates</th>
+<th>Largest fresh residual</th></tr></thead>
+<tbody><tr><td>base</td><td>1</td><td>18.963</td><td>647.572</td><td>129.514</td><td>647.572</td><td>5</td><td>7.9693e-11</td></tr><tr><td>base</td><td>16</td><td>289.489</td><td>11086.072</td><td>1108.607</td><td>692.879</td><td>10</td><td>9.6036e-11</td></tr><tr><td>batched</td><td>1</td><td>9.395</td><td>323.131</td><td>107.710</td><td>323.131</td><td>3</td><td>1.3998e-11</td></tr><tr><td>batched</td><td>16</td><td>31.804</td><td>11824.859</td><td>985.405</td><td>739.054</td><td>12</td><td>9.8183e-11</td></tr></tbody></table>
+<figure id="bank-step-booking-batch-figure"><img
+src="/nova/figures/sub-millisecond-forward-path/bank-step-booking-batch/jacobian-wall.svg"
+alt="Jacobian wall against one and sixteen lanes, base and batched, on linear
+axes with values at markers"><figcaption>One reserved H200 allocation,
+1306401.
+Jacobian values are medians of three synchronized warm calls; the whole solve
+wall is its second execution after explicit compilation. The per-iterate value
+divides that whole solve wall by the slowest lane's update count, including
+reads and line search. The plot uses linear axes and prints milliseconds at
+every marker.</figcaption></figure>
+<p>The first bucket-only candidate scaled 9.45 times (15.624 to 147.719 ms) and
+missed the bound; its receipts remain under bucket-only. The table uses the
+live-ring compaction with sixteen-cell cut buckets. The capacity sweep measured
+one/sixteen-lane walls of 12.173/32.893 ms at width eight, 9.382/31.557 ms at
+width sixteen, and 8.086/33.801 ms at width thirty-two. Width sixteen minimizes
+the sixteen-lane wall among those choices. All paired terminal states satisfy
+the precision
+budget. Largest fresh residual:
+9.81828e-11; flux/span against base: 5.03376e-10;
+axis/minor radius: 5.00466e-11; X-point/minor radius:
+3.23059e-11; boundary flux/span: 6.72766e-11.
+The limits are respectively 1e-10, 1e-8, 5e-4, 5e-4 and 1e-4.</p>
+<p id="bank-step-booking-batch-provenance">Base revision:
+<code>221a7d483f5e9f3b717eced87e86e98c81b6cd7b</code>; measured head:
+<code>d3ac7e1deab9526fcd0dd29c56752fb607c18f4f</code>. Paired timing receipts, CPU suite
+logs, matrix-relative-error rows, overflow refusal, serial-lane mutation and
+rendered figure are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T152050418549-bank-step-booking-batch/paired</code>. The base is a git
+archive; every arm prints its imported module path. The standalone Newton-step
+closure performs no reads because its input already carries the completed read.
+The shared closure instrument sums residual, assembly, equilibration/factor
+and back-solve against the measured whole step.</p>
+<table id="bank-step-booking-batch-closure"><thead><tr><th>Arm</th><th>Lanes</th>
+<th>Stage sum / whole Newton step</th><th>Distinct geometry nodes per lane</th>
+</tr></thead><tbody><tr><td>base</td><td>1</td><td>1.02267</td><td>[3]</td></tr><tr><td>base</td><td>16</td><td>1.00751</td><td>[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]</td></tr><tr><td>head</td><td>1</td><td>0.98494</td><td>[3]</td></tr><tr><td>head</td><td>16</td><td>1.00595</td><td>[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]</td></tr></tbody></table>
+<table id="bank-step-booking-batch-tests"><thead><tr><th>Gate log</th>
+<th>Pytest summary</th></tr></thead><tbody><tr><td>cpu-base-test_bank_solve_cycle.log</td><td>3 passed in 1840.82s (0:30:40)</td></tr><tr><td>cpu-base-test_bank_solve_driver.log</td><td>10 passed in 533.07s (0:08:53)</td></tr><tr><td>cpu-base-test_support_read.log</td><td>13 passed, 2 skipped in 52.43s</td></tr><tr><td>rings-head-test_bank_solve_cycle.log</td><td>1 failed, 2 passed in 1208.18s (0:20:08)</td></tr><tr><td>rings-head-test_bank_solve_driver.log</td><td>10 passed in 315.23s (0:05:15)</td></tr><tr><td>rings-head-test_support_read.log</td><td>13 passed, 2 skipped in 37.61s</td></tr><tr><td>rings-head-booking.log</td><td>3 passed, 1 skipped in 122.95s (0:02:02)</td></tr><tr><td>scaling-head.log</td><td>1 passed, 3 deselected in 6.36s</td></tr><tr><td>negative-control.log</td><td>1 failed, 3 deselected in 6.45s</td></tr></tbody></table>
+</section>

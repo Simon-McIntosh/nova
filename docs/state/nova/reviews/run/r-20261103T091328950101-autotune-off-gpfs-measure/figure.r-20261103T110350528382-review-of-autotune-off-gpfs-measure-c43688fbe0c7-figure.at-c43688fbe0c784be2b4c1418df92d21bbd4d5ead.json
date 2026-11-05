@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-03T11:14:31.255Z",
   "dispatched_at": "2026-11-03T11:06:07Z",
   "evidence": [
     "Rendered artifact opened and judged: image-0.png, 1400x720 RGBA, for docs/figures/forward-solver-route-integrity/autotune-off-gpfs-measure/xla-autotune-arms-walls.svg.",
@@ -37,6 +37,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-03T12:10:08.220996+00:00",
+  "timestamp": "2026-11-05T06:22:38.901931+00:00",
   "total": null
 }

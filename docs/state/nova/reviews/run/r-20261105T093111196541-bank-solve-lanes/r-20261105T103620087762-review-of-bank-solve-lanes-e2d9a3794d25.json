@@ -1,0 +1,112 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T10:54:23.834Z",
+  "dispatched_at": "2026-11-05T10:40:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "65",
+      "severity": "blocking",
+      "text": "blocking: \"Every lane is below 2.3e-9 by iterate 2\" is false and is contradicted three lines above by the record's own table and by lanes-paths.json paths.residual[lane][2], where lanes 2, 3, 4, 5, 6, 8, 9, 15 and 16 sit at 1.64e-7; the paragraph's next sentence then starts from \"the plateau level of 1.6e-7\", so the estimate rests on a starting point the record refutes, and the same overstatement at :12 (\"within two orders of the tolerance after two Newton steps\") must be corrected with it."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "16",
+      "severity": "blocking",
+      "text": "blocking: the driver's step vector quoted for the failed host transcription, [5,14,7,11,18,9,5,12,12,11,6,9,5,6,5,11], is not the vector in the log that paragraph cites; lanes-trace.log's AssertionError prints [7,3,3,4,7,6,8,8,3,14,10,9,5,4,5,7], while the quoted vector is the earlier allocation's, so the two vectors are spliced across jobs and a reader cannot reproduce the stated disagreement."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"max 18, median 6\" misstates its own vector; [5,14,7,11,18,9,5,12,12,11,6,9,5,6,5,11] has median 9.0, and the manifest's evidence_inputs repeats the same 6."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"that iterate is 3 for seven lanes and 4 for eight\" miscounts; the trace gives first non-contracting iterate 3 for seven lanes, 4 for seven, and 5 for lane 3, with lane 8 never stalling."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "54",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"the residual falls 1.2e-1 to 3.9e-4 to 1.6e-7, roughly 2.4 decades per step\" misstates the second step, which is 3.4 decades; the same 2.4-to-2.5 figure is reused at :65 as the rate \"the first three unlocked steps already show\", while those steps show 2.49, 3.1 and 3.4 decades."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "55",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"the residual and the update take only two values\" is contradicted by the accepting iterate, which lands on a third, lower level (lane 5 ends at 1.08e-11, lane 7 at 5.4e-11) as the same paragraph's \"an iterate lands below both\" implies."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the brief's clause (1) asks the trace to record the condition estimate per iterate and changes in the cut-cell, normal-form and selected-fragment sets; the record answers the sets only by inference from a zero unfreeze counter and reports no condition estimate at all."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: save_checked is copied from scripts/prototypes/bank_solve_read/plot.py:33 (and bank_solve_profile/plot.py:45, bank_solve_driver/plot.py:28) instead of imported, so a fifth copy must be maintained; it also implements only two of the three mandated checks, which is why the freeze-threshold annotation renders struck through by the dotted line it names."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: the slowest lane is drawn in #c0442b red, which the style reserves for a limit being broken, and the second slowest in #d98a2b, in the muddy ochre family the style bans."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/run_h200.sh",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"echo EXIT=$?\" sits inside a brace group under set -e, so it is unreachable when trace.py fails; lanes-trace.log ends with the AssertionError traceback and carries no EXIT line, leaving a failed gate's status unreadable."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093111196541-bank-solve-lanes/manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests line reads \"none: this measurement node adds no tests ...\", a description rather than the literal command a shell was handed, so the gate receipt cannot be filled from it and must fall back to the log's own command header."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read both commits against ce0b96226de61cd7eb8e782b46dc855d179beacc: 4f5f53596 adds trace.py, plot.py, run_h200.sh, lanes-paths.json, the fragment and residual-history.svg, and e2d9a3794 changes one header line in run_h200.sh so a captured log carries a labelled command.",
+    "done_when": "The brief's three clauses are answered by scripts/prototypes/bank_solve_lanes/trace.py reading SolveResult.residual_path and update_path, the repeatability pair recorded in lanes-paths.log and lanes-trace.log, and the fragment carrying the per-lane table and one figure; clause (1)'s condition estimate is reported nowhere.",
+    "goal": "The goal is to trace why the slowest lanes of the batched bank solve take several times the median step count; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:55-60 names a period-2 cycle on two residual levels held by the frozen active set, and scripts/prototypes/bank_solve_lanes/lanes-paths.json paths.residual confirms the two levels (1.64e-7 and 3.19e-10) alternating on lanes 10, 5 and 7.",
+    "manifest": "Read; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093111196541-bank-solve-lanes/manifest.md names commits 4f5f53596 and e2d9a3794, records the accepted gate lanes-paths.log ending EXIT=0 and the failed host transcription, and repeats the fragment's misquoted median of 6 and its spliced driver vector.",
+    "write_paths": "The brief grants scripts/prototypes/bank_solve_lanes, the fragment file and the figure directory, and git diff ce0b96226..e2d9a3794 changes six files, every one inside those three grants, with no product code and no test file."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_solve_lanes/trace.py:400-401 asserts the trace against the driver and demonstrably fired at job 1306052, but nothing asserts the record's own numbers and several are wrong.",
+    "evidence": "lanes-paths.log ends EXIT=0 at revision ce0b96226 with the worktree's own support_read.py and a gpu backend, and every table column reproduces from lanes-paths.json, but three quoted numbers do not match their own sources (docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:19, :16, :65).",
+    "fit": "the scripts follow the sibling prototype idiom and import scripts.prototypes.bank_solve_read.measure, but plot.py:128 draws the slowest lane in the red the style reserves for a broken limit and plot.py:21 uses an ochre the style bans.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:55-60 gives the mechanism and docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:62-67 the removal and step estimate, but the brief's clause (1) condition estimate appears nowhere in the record.",
+    "reuse": "scripts/prototypes/bank_solve_lanes/plot.py:23 duplicates save_checked from scripts/prototypes/bank_solve_read/plot.py:33 rather than importing it, a fifth copy of that helper, though trace.py correctly imports measure.py.",
+    "scope_discipline": "git diff --stat ce0b96226de61cd7eb8e782b46dc855d179beacc..e2d9a3794d25b240ff5c950f63e8576e89d9a14f lists six files, all under scripts/prototypes/bank_solve_lanes or docs/evidence/fragments and docs/figures for sub-millisecond-forward-path, and no product file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to trace why the slowest lanes of the batched bank solve take several times the median step count; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:55-60 names a period-2 cycle on two residual levels held by the frozen active set, and scripts/prototypes/bank_solve_lanes/lanes-paths.json paths.residual confirms the two levels (1.64e-7 and 3.19e-10) alternating on lanes 10, 5 and 7.\nVERDICT done_when: The brief's three clauses are answered by scripts/prototypes/bank_solve_lanes/trace.py reading SolveResult.residual_path and update_path, the repeatability pair recorded in lanes-paths.log and lanes-trace.log, and the fragment carrying the per-lane table and one figure; clause (1)'s condition estimate is reported nowhere.\nVERDICT write_paths: The brief grants scripts/prototypes/bank_solve_lanes, the fragment file and the figure directory, and git diff ce0b96226..e2d9a3794 changes six files, every one inside those three grants, with no product code and no test file.\nVERDICT manifest: Read; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093111196541-bank-solve-lanes/manifest.md names commits 4f5f53596 and e2d9a3794, records the accepted gate lanes-paths.log ending EXIT=0 and the failed host transcription, and repeats the fragment's misquoted median of 6 and its spliced driver vector.\nVERDICT diff: Read both commits against ce0b96226de61cd7eb8e782b46dc855d179beacc: 4f5f53596 adds trace.py, plot.py, run_h200.sh, lanes-paths.json, the fragment and residual-history.svg, and e2d9a3794 changes one header line in run_h200.sh so a captured log carries a labelled command.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:55-60 gives the mechanism and docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:62-67 the removal and step estimate, but the brief's clause (1) condition estimate appears nowhere in the record.\nSCORE evidence: 10\nJUSTIFICATION evidence: lanes-paths.log ends EXIT=0 at revision ce0b96226 with the worktree's own support_read.py and a gpu backend, and every table column reproduces from lanes-paths.json, but three quoted numbers do not match their own sources (docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:19, :16, :65).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat ce0b96226de61cd7eb8e782b46dc855d179beacc..e2d9a3794d25b240ff5c950f63e8576e89d9a14f lists six files, all under scripts/prototypes/bank_solve_lanes or docs/evidence/fragments and docs/figures for sub-millisecond-forward-path, and no product file is touched.\nSCORE durability: 11\nJUSTIFICATION durability: scripts/prototypes/bank_solve_lanes/trace.py:400-401 asserts the trace against the driver and demonstrably fired at job 1306052, but nothing asserts the record's own numbers and several are wrong.\nSCORE fit: 14\nJUSTIFICATION fit: the scripts follow the sibling prototype idiom and import scripts.prototypes.bank_solve_read.measure, but plot.py:128 draws the slowest lane in the red the style reserves for a broken limit and plot.py:21 uses an ochre the style bans.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_solve_lanes/plot.py:23 duplicates save_checked from scripts/prototypes/bank_solve_read/plot.py:33 rather than importing it, a fifth copy of that helper, though trace.py correctly imports measure.py.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:65 blocking: \"Every lane is below 2.3e-9 by iterate 2\" is false and is contradicted three lines above by the record's own table and by lanes-paths.json paths.residual[lane][2], where lanes 2, 3, 4, 5, 6, 8, 9, 15 and 16 sit at 1.64e-7; the paragraph's next sentence then starts from \"the plateau level of 1.6e-7\", so the estimate rests on a starting point the record refutes, and the same overstatement at :12 (\"within two orders of the tolerance after two Newton steps\") must be corrected with it.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:16 blocking: the driver's step vector quoted for the failed host transcription, [5,14,7,11,18,9,5,12,12,11,6,9,5,6,5,11], is not the vector in the log that paragraph cites; lanes-trace.log's AssertionError prints [7,3,3,4,7,6,8,8,3,14,10,9,5,4,5,7], while the quoted vector is the earlier allocation's, so the two vectors are spliced across jobs and a reader cannot reproduce the stated disagreement.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:19 non-blocking: \"max 18, median 6\" misstates its own vector; [5,14,7,11,18,9,5,12,12,11,6,9,5,6,5,11] has median 9.0, and the manifest's evidence_inputs repeats the same 6.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:64 non-blocking: \"that iterate is 3 for seven lanes and 4 for eight\" miscounts; the trace gives first non-contracting iterate 3 for seven lanes, 4 for seven, and 5 for lane 3, with lane 8 never stalling.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:54 non-blocking: \"the residual falls 1.2e-1 to 3.9e-4 to 1.6e-7, roughly 2.4 decades per step\" misstates the second step, which is 3.4 decades; the same 2.4-to-2.5 figure is reused at :65 as the rate \"the first three unlocked steps already show\", while those steps show 2.49, 3.1 and 3.4 decades.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:55 non-blocking: \"the residual and the update take only two values\" is contradicted by the accepting iterate, which lands on a third, lower level (lane 5 ends at 1.08e-11, lane 7 at 5.4e-11) as the same paragraph's \"an iterate lands below both\" implies.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:15 non-blocking: the brief's clause (1) asks the trace to record the condition estimate per iterate and changes in the cut-cell, normal-form and selected-fragment sets; the record answers the sets only by inference from a zero unfreeze counter and reports no condition estimate at all.\nFINDING scripts/prototypes/bank_solve_lanes/plot.py:23 non-blocking: save_checked is copied from scripts/prototypes/bank_solve_read/plot.py:33 (and bank_solve_profile/plot.py:45, bank_solve_driver/plot.py:28) instead of imported, so a fifth copy must be maintained; it also implements only two of the three mandated checks, which is why the freeze-threshold annotation renders struck through by the dotted line it names.\nFINDING scripts/prototypes/bank_solve_lanes/plot.py:21 non-blocking: the slowest lane is drawn in #c0442b red, which the style reserves for a limit being broken, and the second slowest in #d98a2b, in the muddy ochre family the style bans.\nFINDING scripts/prototypes/bank_solve_lanes/run_h200.sh:17 non-blocking: \"echo EXIT=$?\" sits inside a brace group under set -e, so it is unreachable when trace.py fails; lanes-trace.log ends with the AssertionError traceback and carries no EXIT line, leaving a failed gate's status unreadable.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093111196541-bank-solve-lanes/manifest.md:11 non-blocking: the tests line reads \"none: this measurement node adds no tests ...\", a description rather than the literal command a shell was handed, so the gate receipt cannot be filled from it and must fall back to the log's own command header.\n",
+  "review_run_id": "r-20261105T103620087762-review-of-bank-solve-lanes-e2d9a3794d25",
+  "reviewed_base_sha": "ce0b96226de61cd7eb8e782b46dc855d179beacc",
+  "reviewed_head_sha": "e2d9a3794d25b240ff5c950f63e8576e89d9a14f",
+  "reviewed_run_id": "r-20261105T093111196541-bank-solve-lanes",
+  "scores": {
+    "durability": 11,
+    "evidence": 10,
+    "fit": 14,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T10:52:56.310431+00:00",
+  "total": 75
+}

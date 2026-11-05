@@ -1211,6 +1211,50 @@ def _panel_state_display(state_path: Path, spacing: float):
     return data, coupling, display, shape, radius, height, solved
 
 
+def _assembler_flags(display, axis_rz) -> dict:
+    """Return the branch assembler's own verdict on this display map.
+
+    A panel that draws no separatrix must say why, and the two flags that
+    decide it are ``well_formed`` and ``overflow``. The map publishes the first
+    with its branches but not the second, so the assembler is asked once more
+    on the same field. It reports a refusal rather than a fallback contour, and
+    the call is already compiled for this shape by the map build.
+    """
+    import jax
+    import jax.numpy as jnp
+
+    from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+
+    if not display.branches or not np.all(np.isfinite(display.saddle_rz)):
+        return {
+            "requested": True,
+            "available": False,
+            "well_formed": None,
+            "overflow": None,
+        }
+    assembled = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(display.flux),
+            jnp.asarray(display.radius),
+            jnp.asarray(display.height),
+            jnp.asarray(float(display.saddle_flux)),
+            jnp.asarray(np.asarray(axis_rz, dtype=np.float64).reshape(2)),
+        )
+    )
+    return {
+        "requested": True,
+        "available": True,
+        "well_formed": bool(np.asarray(assembled["well_formed"])),
+        "overflow": bool(np.asarray(assembled["overflow"])),
+        "closed_candidate_count": int(
+            np.asarray(assembled["closed_candidate_count"])
+        ),
+        "closed_segment_count": int(np.asarray(assembled["closed_segment_count"])),
+        "open_branch_count": int(np.asarray(assembled["open_branch_count"])),
+        "open_segment_count": int(np.asarray(assembled["open_segment_count"])),
+    }
+
+
 def panels(
     state_path: Path,
     figure_path: Path,
@@ -1403,6 +1447,7 @@ def panels(
             "x_points_inside_wall": int(len(vacuum_saddles)),
             **vacuum_tally,
         },
+        "boundary_assembler": _assembler_flags(display, magnetic_axis),
     }
     print(
         "FIGURE=%s hex_delivered=%d boundary_cells=%d cut=%d coils=%d "

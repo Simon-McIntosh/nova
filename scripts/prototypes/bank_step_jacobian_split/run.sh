@@ -11,7 +11,7 @@ scratch=$(mktemp -d "$TMPDIR/jacobian-split-XXXXXX")
 trap 'result=$?; rm -rvf "$scratch"; printf "EXIT=%s\n" "$result"' EXIT
 export TMPDIR="$scratch"
 export PYTHONPATH="$SLURM_SUBMIT_DIR"
-export JAX_PLATFORMS=cuda
+export JAX_PLATFORMS=cuda,cpu
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export MPLBACKEND=Agg
 export PYTHONDONTWRITEBYTECODE=1

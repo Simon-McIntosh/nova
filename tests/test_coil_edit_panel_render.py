@@ -322,6 +322,7 @@ def test_committed_converged_panel_uses_its_terminal_currents():
     )
     assert bool(np.asarray(narrow["branch_overflow"]))
     assert not bool(np.asarray(narrow["well_formed"]))
+    print("fine-grid control: branch_capacity=256, overflow=True, well_formed=False")
     reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
     assert (
         abs(

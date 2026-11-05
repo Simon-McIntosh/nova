@@ -17,11 +17,10 @@ from statistics import median
 from time import perf_counter
 
 import jax
-import jax.numpy as jnp
 
 import nova
 from nova.equilibrium import support_read
-from scripts.prototypes.bank_newton_step.measure import machine
+from scripts.prototypes.bank_solve_profile import fixture
 
 ITERATIONS = 12
 
@@ -54,19 +53,18 @@ def main():
         nova=nova.__file__,
         repeats=args.repeats,
     )
-    operands, cache, roots, convention, policy, profile, quadrature, moments, _ = (
-        machine("diverted")
-    )
-
-    def gradient(radius, flux):
-        return jnp.zeros_like(radius)
-
-    seeds = roots + 0.03 * jnp.median(operands.geometry.pitch)
     for lanes in (1, 16):
-        scales = jnp.linspace(2e-5, 6e-5, 16)[:lanes]
-        states = tuple(value[None] * (1 + scales[:, None]) for value in moments)
-        seeds_batch = jnp.broadcast_to(seeds, (lanes, *seeds.shape))
-        previous_batch = jnp.broadcast_to(roots, (lanes, *roots.shape))
+        batch = fixture.build(lanes)
+        operands = batch.operands
+        cache = batch.cache
+        states = batch.states
+        seeds_batch = batch.seeds_batch
+        previous_batch = batch.previous_batch
+        convention = batch.convention
+        policy = batch.policy
+        profile = batch.profile
+        quadrature = batch.quadrature
+        gradient = fixture.gradient
 
         @jax.jit
         def read(state):

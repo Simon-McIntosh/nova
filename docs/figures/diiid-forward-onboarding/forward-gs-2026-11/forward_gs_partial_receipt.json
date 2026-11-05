@@ -633,7 +633,7 @@
         }
       },
       "display_map": {
-        "build_seconds": 220.30572414584458,
+        "build_seconds": 207.77923438325524,
         "conductor_response_build_seconds": 0.0,
         "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
         "conductor_response_loaded_from_cache": true,
@@ -699,7 +699,7 @@
           "spacing_m",
           "state"
         ],
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179.npz",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
         "promoted_node_count": 0,
         "radial_points": 171,
         "reproduction_relative_error": 4.702771970109923e-14,
@@ -750,7 +750,7 @@
         "topology_class_agreement": true
       },
       "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
-      "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179.npz",
+      "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
       "operand_unavailable_reason": null,
       "pseudo_wall_expansion": 0.02,
       "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",

@@ -290,7 +290,9 @@ def test_committed_converged_panel_uses_its_terminal_currents():
         target_current=prepared["target_current"],
     )
     assert display.max_solved_node_mismatch_wb <= 10 * panel["residual"]
-    assert display.promoted_node_count == int(np.count_nonzero(panel["promoted_mask"]))
+    assert display.promoted_node_count == int(
+        np.count_nonzero(panel["promoted_mask"][: profile.lattice.node_count])
+    )
     assert np.isfinite(display.nearest_promoted_to_xpoint_m)
     reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
     assert (

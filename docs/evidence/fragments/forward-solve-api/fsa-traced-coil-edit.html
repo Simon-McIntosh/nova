@@ -1,0 +1,65 @@
+<section id="fsa-traced-coil-edit">
+  <h2>Traced coil edits on the forward request seam</h2>
+  <p>The retained jitted history program receives ordinary and prescribed conductor currents as array arguments and forms external flux inside the program. Source-profile tables and target current also enter as traced arguments over static host geometry. A typed request carries the requested topology class in its static cache identity, and an explicit <code>vertical_pin="omit"</code> selects the unconstrained MAST route for this sweep.</p>
+  <p>The focused CPU gate passes 8 of 8 checks. Lowering with distinct ordinary, prescribed and stored-current sentinels finds none as a StableHLO numeric constant, and two same-shape edits use one JIT executable. A scratch mutation that closes over the stored ordinary current and clears program retention fails both new tests; the HLO guard detects the 127021 A sentinel. The same ten-test base and head comparison has 3 base failures and 2 head failures, hence zero added failures; the two common failures come from the prescribed-current fixture, whose linear target lacks the <code>null</code> geometry field.</p>
+  <p>The H200 measurement used one allocation (job 1304033, batch state COMPLETED, exit 0:0, elapsed 7 min 31 s; one GPU, eight CPUs and 128 GiB on 98dci4-gpu-0003) and twenty points from −1% to +1% of one MAST <code>p4_upper</code> coil current. The first solve took 245.328 s and did not converge. Each later request took the preceding terminal flux as its seed; because edit 0 did not converge, edit 1 was not seeded from a converged state. The JSON receipt is complete and agrees with all twenty <code>EDIT</code> lines and the <code>SUMMARY</code> line in the job log.</p>
+  <table id="fsa-traced-coil-edit-sweep">
+    <caption>Measured coil edits. Request hit denotes the request-level cache report; persistent hit/miss counts are events observed during that edit. Wall is the blocked solve call, including request handling.</caption>
+    <thead><tr><th>Edit</th><th>Change [%]</th><th>Coil [kA]</th><th>Wall [s]</th><th>Trips</th><th>Converged</th><th>Qualified</th><th>Residual</th><th>Request hit</th><th>Persistent hit/miss</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>-1.0000</td><td>-183.3432</td><td>245.328</td><td>5</td><td>no</td><td>no</td><td>0.000303</td><td>no</td><td>2/1</td></tr>
+      <tr><td>1</td><td>-0.8947</td><td>-183.5382</td><td>8.353</td><td>2</td><td>yes</td><td>no</td><td>9.95e-09</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>2</td><td>-0.7895</td><td>-183.7331</td><td>9.548</td><td>9</td><td>yes</td><td>yes</td><td>1.52e-13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>3</td><td>-0.6842</td><td>-183.9280</td><td>9.251</td><td>9</td><td>yes</td><td>yes</td><td>1.25e-12</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>4</td><td>-0.5789</td><td>-184.1230</td><td>8.938</td><td>8</td><td>yes</td><td>yes</td><td>2.56e-11</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>5</td><td>-0.4737</td><td>-184.3179</td><td>7.204</td><td>8</td><td>yes</td><td>yes</td><td>4.43e-13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>6</td><td>-0.3684</td><td>-184.5129</td><td>7.837</td><td>8</td><td>yes</td><td>yes</td><td>1.19e-11</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>7</td><td>-0.2632</td><td>-184.7078</td><td>7.116</td><td>7</td><td>yes</td><td>yes</td><td>2.88e-12</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>8</td><td>-0.1579</td><td>-184.9028</td><td>6.629</td><td>7</td><td>yes</td><td>yes</td><td>4.11e-12</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>9</td><td>-0.0526</td><td>-185.0977</td><td>6.107</td><td>6</td><td>yes</td><td>yes</td><td>1.79e-12</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>10</td><td>+0.0526</td><td>-185.2926</td><td>5.884</td><td>6</td><td>yes</td><td>yes</td><td>3.82e-13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>11</td><td>+0.1579</td><td>-185.4876</td><td>4.550</td><td>6</td><td>yes</td><td>yes</td><td>3.64e-13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>12</td><td>+0.2632</td><td>-185.6825</td><td>5.394</td><td>6</td><td>yes</td><td>yes</td><td>4.07e-13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>13</td><td>+0.3684</td><td>-185.8775</td><td>5.300</td><td>5</td><td>yes</td><td>yes</td><td>6.03e-14</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>14</td><td>+0.4737</td><td>-186.0724</td><td>5.184</td><td>5</td><td>yes</td><td>yes</td><td>2.57e-13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>15</td><td>+0.5789</td><td>-186.2674</td><td>7.987</td><td>9</td><td>yes</td><td>no</td><td>5.58e-10</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>16</td><td>+0.6842</td><td>-186.4623</td><td>5.205</td><td>6</td><td>yes</td><td>yes</td><td>2.23e-16</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>17</td><td>+0.7895</td><td>-186.6572</td><td>5.368</td><td>6</td><td>yes</td><td>yes</td><td>5.82e-14</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>18</td><td>+0.8947</td><td>-186.8522</td><td>5.379</td><td>6</td><td>yes</td><td>yes</td><td>2.85e-14</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>19</td><td>+1.0000</td><td>-187.0471</td><td>5.375</td><td>6</td><td>yes</td><td>no</td><td>9.59e-09</td><td>yes</td><td>0/0</td></tr>
+    </tbody>
+  </table>
+  <p>Summary: 19/20 edits converged and 16/20 qualified. Warm edits 1–19 took 4.550–9.548 s, with a median of 6.107 s. All 19 later requests reported request-cache hits and reused the same in-process program object. The first edit recorded two persistent-cache hits and one miss, showing that the monitor observed cache events; every later edit recorded zero hits and zero misses. The retained executable therefore avoided further persistent-cache lookups, and the requested post-first persistent-hit count was not observed.</p>
+  <p>The measured gate remains open: warm calls cost seconds rather than tens of milliseconds, edit 0 did not converge, and the persistent cache recorded no hit after edit 0. The complete per-edit receipt is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/h200-sweep.json</code>; the matching log is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/h200-sweep-optout.log</code>.</p>
+  <p>The repair preserves the direct audit lowering forms while public requests trace both current vectors. The driver advances its seed only after convergence and records each seed source. The exit gate now requires a warm median below 100 ms, convergence on every edit, and retained executable reuse with request-cache hits and no later persistent-cache misses. Persistent cache lookup events remain visible diagnostics: a retained executable needs no later persistent lookup, so zero later persistent hits cannot demonstrate persistent-cache reuse.</p>
+  <h3 id="fsa-traced-coil-edit-repaired-sweep">Repaired H200 sweep</h3>
+  <p>Job 1305208 ran one twenty-edit MAST sweep on 98dci4-gpu-0003 with one GPU, eight CPUs and 128 GiB. The batch exit was 1:0 because the benchmark refused its completed measurement; it ran for 6 min 02 s and wrote twenty edit rows. Every row and the summary match the log. The first edit recorded three persistent-cache hits and no miss, proving the monitor saw a known event; later edits recorded no persistent lookup. All nineteen later requests hit the request cache and reused one process program.</p>
+  <table id="fsa-traced-coil-edit-repaired-rows">
+    <caption>Repaired sweep. Seed source is the last converged edit index; “initial” is the frozen carrier seed. Persistent values are hit/miss events during that edit.</caption>
+    <thead><tr><th>Edit</th><th>Change [%]</th><th>Coil [kA]</th><th>Wall [s]</th><th>Trips</th><th>Converged</th><th>Qualified</th><th>Residual</th><th>Seed source</th><th>Request hit</th><th>Persistent hit/miss</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>-1.0000</td><td>-183.3432</td><td>128.035</td><td>5</td><td>no</td><td>no</td><td>0.000303</td><td>initial</td><td>no</td><td>3/0</td></tr>
+      <tr><td>1</td><td>-0.8947</td><td>-183.5382</td><td>11.796</td><td>10</td><td>no</td><td>no</td><td>0.00102</td><td>initial</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>2</td><td>-0.7895</td><td>-183.7331</td><td>19.109</td><td>10</td><td>no</td><td>no</td><td>0.000537</td><td>initial</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>3</td><td>-0.6842</td><td>-183.9280</td><td>12.205</td><td>10</td><td>no</td><td>no</td><td>0.0011</td><td>initial</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>4</td><td>-0.5789</td><td>-184.1230</td><td>14.366</td><td>12</td><td>no</td><td>no</td><td>0.000507</td><td>initial</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>5</td><td>-0.4737</td><td>-184.3179</td><td>12.848</td><td>12</td><td>yes</td><td>yes</td><td>7.42e-12</td><td>initial</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>6</td><td>-0.3684</td><td>-184.5129</td><td>7.734</td><td>8</td><td>yes</td><td>yes</td><td>1.19e-11</td><td>5</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>7</td><td>-0.2632</td><td>-184.7078</td><td>6.985</td><td>7</td><td>yes</td><td>yes</td><td>2.88e-12</td><td>6</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>8</td><td>-0.1579</td><td>-184.9028</td><td>6.511</td><td>7</td><td>yes</td><td>yes</td><td>4.11e-12</td><td>7</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>9</td><td>-0.0526</td><td>-185.0977</td><td>6.012</td><td>6</td><td>yes</td><td>yes</td><td>1.79e-12</td><td>8</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>10</td><td>+0.0526</td><td>-185.2926</td><td>5.796</td><td>6</td><td>yes</td><td>yes</td><td>3.82e-13</td><td>9</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>11</td><td>+0.1579</td><td>-185.4876</td><td>4.436</td><td>6</td><td>yes</td><td>yes</td><td>3.64e-13</td><td>10</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>12</td><td>+0.2632</td><td>-185.6825</td><td>5.337</td><td>6</td><td>yes</td><td>yes</td><td>4.07e-13</td><td>11</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>13</td><td>+0.3684</td><td>-185.8775</td><td>5.176</td><td>5</td><td>yes</td><td>yes</td><td>6.03e-14</td><td>12</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>14</td><td>+0.4737</td><td>-186.0724</td><td>5.103</td><td>5</td><td>yes</td><td>yes</td><td>2.57e-13</td><td>13</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>15</td><td>+0.5789</td><td>-186.2674</td><td>7.858</td><td>9</td><td>yes</td><td>no</td><td>5.58e-10</td><td>14</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>16</td><td>+0.6842</td><td>-186.4623</td><td>5.119</td><td>6</td><td>yes</td><td>yes</td><td>2.67e-16</td><td>15</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>17</td><td>+0.7895</td><td>-186.6572</td><td>5.300</td><td>6</td><td>yes</td><td>yes</td><td>5.82e-14</td><td>16</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>18</td><td>+0.8947</td><td>-186.8522</td><td>5.267</td><td>6</td><td>yes</td><td>yes</td><td>2.82e-14</td><td>17</td><td>yes</td><td>0/0</td></tr>
+      <tr><td>19</td><td>+1.0000</td><td>-187.0471</td><td>5.313</td><td>6</td><td>yes</td><td>no</td><td>9.59e-09</td><td>18</td><td>yes</td><td>0/0</td></tr>
+    </tbody>
+  </table>
+  <p>Summary: 15/20 edits converged and 13/20 qualified. Warm edits 1–19 took 4.436–19.109 s, with a median of 6.012 s. Edits 0–4 did not converge. Edits 1–5 therefore reused the frozen carrier seed; edit 6 used converged edit 5, and later rows used the preceding converged edit. The gate refused the latency and all-point convergence criteria. The complete receipt is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/h200-sweep-second-repair.json</code> and the matching log is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T064248678456-fsa-traced-coil-edit/h200-sweep-second-repair.log</code>.</p>
+  <p>The repaired hardware receipt establishes correct in-process reuse and a truthful gate refusal. It does not establish tens-of-milliseconds latency, all-point convergence, or persistent-cache reuse after the first edit; no later persistent lookup occurred.</p>
+</section>

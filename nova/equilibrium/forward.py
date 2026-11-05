@@ -1972,7 +1972,6 @@ class ForwardProfile:
                 constraint_pairs=constraint_pairs,
                 **options,
             )
-        external = self.operator.external(current, prescribed_current)
         program = self._accelerated_history_program(
             route,
             requested_class=requested_class,
@@ -1981,7 +1980,8 @@ class ForwardProfile:
         )
         history = program(
             initial_flux,
-            external,
+            current,
+            prescribed_current,
             self.operator,
             None if target_current is None else jnp.asarray(target_current),
         )
@@ -1995,7 +1995,8 @@ class ForwardProfile:
             )
             live_history = live_program(
                 history.state,
-                external,
+                current,
+                prescribed_current,
                 self.operator,
                 None if target_current is None else jnp.asarray(target_current),
             )
@@ -2029,15 +2030,21 @@ class ForwardProfile:
         live_read_fallback: bool = False,
         **options,
     ) -> Callable[
-        [jax.Array, jax.Array, ForwardFluxOperator, jax.Array | None],
+        [
+            jax.Array,
+            jax.Array | None,
+            jax.Array | None,
+            ForwardFluxOperator,
+            jax.Array | None,
+        ],
         fixed_point.FixedPointResult,
     ]:
         """Return one compiled history program for a static solve configuration.
 
         The callable is retained by the profile so repeated conductor states
-        reuse the same JAX function identity. Initial flux and exterior flux
-        remain explicit array arguments; topology callbacks and policy values
-        are static properties of the mesh program.
+        reuse the same JAX function identity. Initial flux, conductor currents
+        and target current remain explicit arguments; topology callbacks and
+        policy values are static properties of the mesh program.
         """
 
         def static_value(value):
@@ -2087,18 +2094,30 @@ class ForwardProfile:
                 state, requested_class, previous_shadow=previous
             )
 
+        def solve_arguments(arguments):
+            if len(arguments) == 4:
+                current, prescribed_current, operator, target_value = arguments
+                external = operator.external(current, prescribed_current)
+            elif len(arguments) == 3:
+                external, operator, target_value = arguments
+            elif len(arguments) == 1:
+                (external,) = arguments
+                operator = self.operator
+                target_value = target_current
+            else:
+                raise TypeError(
+                    "solve expects one, three, or four operands after the seed"
+                )
+            return external, operator, target_value
+
         if route == "newton_krylov":
             newton_shadowed_map = _shared_shadowed_map(shadowed_map)
 
             def live_shadowed_map(*arguments):
                 return shadowed_map(*arguments)
 
-            def solve(
-                initial_flux,
-                external,
-                operator,
-                target_value,
-            ):
+            def solve(initial_flux, *arguments):
+                external, operator, target_value = solve_arguments(arguments)
                 if live_read_fallback:
                     return fixed_point.newton_krylov(
                         mapped,
@@ -2124,12 +2143,8 @@ class ForwardProfile:
         else:
             scheme = fixed_point.picard if route == "picard" else fixed_point.anderson
 
-            def solve(
-                initial_flux,
-                external,
-                operator,
-                target_value,
-            ):
+            def solve(initial_flux, *arguments):
+                external, operator, target_value = solve_arguments(arguments)
                 return scheme(
                     mapped,
                     initial_flux,
@@ -2618,6 +2633,8 @@ class ForwardProfile:
     def _vertical_pin_for_request(
         request: ForwardSolveRequest,
     ) -> VerticalPositionPin | None:
+        if request.vertical_pin == "omit":
+            return None
         if request.vertical_pin is not None:
             return request.vertical_pin
         if request.route == "newton_krylov":
@@ -2672,6 +2689,11 @@ class ForwardProfile:
             cached_machine=policy.cached_machine,
             compilation_cache=False,
             **policy.kernel_options(),
+            **(
+                {"requested_class": request.requested_class}
+                if request.requested_class is not None
+                else {}
+            ),
         )
         wall_seconds = time.perf_counter() - started
         if policy.compilation_cache:
@@ -2780,6 +2802,7 @@ class ForwardProfile:
             array_signature(request.current),
             array_signature(request.target_current),
             array_signature(request.prescribed_current),
+            request.requested_class,
             constraint_signature,
             request.enforce,
         )

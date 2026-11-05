@@ -563,6 +563,9 @@ class ForwardSolveRequest:
     constraints.  Existing ``constraint_pins`` remain post-solve validation
     claims, so the two meanings cannot be conflated.
 
+    ``vertical_pin="omit"`` explicitly selects the unconstrained Krylov route;
+    an absent pin retains the declared inactive row for fixed-shape requests.
+
     ``clip_mode`` is request-owned state.  An omitted mode resolves to the
     production ``"chord"`` default, while an explicit mode is carried through
     the request, its resolved defaults, and its receipt.
@@ -574,9 +577,10 @@ class ForwardSolveRequest:
     policy: ForwardSolvePolicy
     route: SolveRoute
     target_current: object | None = None
+    requested_class: object | None = None
     constraint_pins: ConstraintPinSet | None = None
     constraint_pairs: tuple[ConstraintPair, ...] = ()
-    vertical_pin: VerticalPositionPin | None = None
+    vertical_pin: VerticalPositionPin | Literal["omit"] | None = None
     current: object | None = None
     prescribed_current: object | None = None
     enforce: tuple[str, ...] = ()
@@ -592,6 +596,8 @@ class ForwardSolveRequest:
             raise ValueError("request route must equal its resolved policy route")
         object.__setattr__(self, "constraint_pairs", tuple(self.constraint_pairs))
         object.__setattr__(self, "enforce", tuple(self.enforce))
+        if isinstance(self.vertical_pin, str) and self.vertical_pin != "omit":
+            raise ValueError("vertical_pin must be a declared pin or 'omit'")
         if self.clip_mode not in {"chord", "exact", "chord_cells"}:
             raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
 

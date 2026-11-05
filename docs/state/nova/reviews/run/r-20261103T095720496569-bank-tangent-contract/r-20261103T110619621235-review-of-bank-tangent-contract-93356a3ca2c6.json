@@ -15,9 +15,9 @@
   "dispatched_at": "2026-11-03T11:07:35Z",
   "finding_dispositions": {
     "0": {
-      "kind": "folded",
-      "node": "repair-of-bank-tangent-contract-93356a3ca2c6",
-      "recorded_at": "2026-11-04T08:55:26.511754+00:00"
+      "kind": "exempted",
+      "reason": "acted on: the worker recast the node as a negative-result investigation at 94985df66, as the finding asked; the source matches the base, and the node completes as negative-result",
+      "recorded_at": "2026-11-05T05:55:35.714487+00:00"
     }
   },
   "findings": [

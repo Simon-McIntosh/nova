@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run recorded no baseline_suite or after_suite arm; its gate log gate-test.log at EXIT=0 shows 5 passed and its only red log is a deliberate limit mutation in a scratch copy, so no suite failure is attributable to the landed change",
+  "call_sites": [
+    "scripts/prototypes/bank_solve_cycle/report.py:66 compare",
+    "scripts/prototypes/bank_solve_linesearch/report.py:10",
+    "scripts/prototypes/bank_step_booking_batch/report.py:12",
+    "scripts/prototypes/bank_solve_breakpoint/report.py:12"
+  ],
+  "completed_at": "2026-11-05T21:39:58.820Z",
+  "dispatched_at": "2026-11-05T21:27:55Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_report_precision.py",
+      "line": "25",
+      "severity": "blocking",
+      "text": "blocking: span and minor_radius are both 1.0, so exchanging the flux denominator (span) with the axis denominator (minor_radius) in pair_gaps leaves every assertion true, which is the \"changed denominator\" half of the brief's measure and the claim the evidence fragment makes at bank-report-equivalence.html:17."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fifteen-prototype list omits certified_carrier_export, whose gate.sh:23 runs `PYTHONPATH=\"$tree\" \"$python\" -c 'import nova; print(nova.__file__)'` with no -P, so the count of probe-bearing prototypes still lacking the flag is sixteen."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-report-equivalence.html",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states the five tests pass in 7.3 s, but gate-test.log records 7.68 s and 7.33 s is the mutated copy's wall in negative-control.log, so the quoted figure comes from the wrong run."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 28cae2aa6; one commit 70192e11b touching tests/test_bank_report_precision.py, bank-prototype-provenance.html and bank-report-equivalence.html, 162 insertions and 3 deletions.",
+    "done_when": "the done_when asks for one inside-limit pair and four pairs each exceeding exactly one bound, with a changed limit or denominator failing; tests/test_bank_report_precision.py:44-104 supplies all five pairs, but span and minor_radius are both 1.0 so a swapped denominator is invisible.",
+    "goal": "the node's goal is that the shared paired-precision comparison be exercised on constructed receipts and its two dependents replayed byte-identically; tests/test_bank_report_precision.py:1 and both replay logs deliver that.",
+    "manifest": "read; it records status complete, gate-test.log at EXIT=0 with 5 passed in 7.68 s, negative-control.log at EXIT=1 with one failure, and the 67-invocation probe receipt.",
+    "write_paths": "the declared paths are tests/test_bank_report_precision.py and the two evidence fragments; every path in the commit is inside them, and the declared docs/figures directory is unused rather than written."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_report_precision.py:66-68 does redden when PAIR_LIMITS[\"flux\"] moves, as negative-control.log shows, but the fixture at tests/test_bank_report_precision.py:24-25 sets span and minor_radius both 1.0 so exchanging the two normalising units leaves every assertion true.",
+    "evidence": "the SUMMARY and PRECISION lines at linesearch-report.log and booking-report.log are byte-identical to the recorded report.log line 2 and report-corrected.log under cmp, and the 67/60 probe count reproduces at 28cae2aa6; the fragment at bank-report-equivalence.html:18 quotes 7.3 s against a gate log reading 7.68 s.",
+    "fit": "tests/test_bank_report_precision.py:5 imports the prototype owner the way tests/test_bank_newton_step.py does, and no symbol, filename or comment carries a plan or run identifier.",
+    "goal_fidelity": "tests/test_bank_report_precision.py:44-104 pins the owner at scripts/prototypes/bank_solve_cycle/report.py:21 and both dependents replay byte-identically, though the denominator half of the stated measure is unexercised.",
+    "reuse": "the change adds no production definition and pins the existing owner at scripts/prototypes/bank_solve_cycle/report.py:66 rather than forking a second comparison; a search of scripts/prototypes and tests found that owner already consumed by three reports.",
+    "scope_discipline": "every changed path in 70192e11b is one the source manifest declares, and the declared docs/figures path was not used."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that the shared paired-precision comparison be exercised on constructed receipts and its two dependents replayed byte-identically; tests/test_bank_report_precision.py:1 and both replay logs deliver that.\nVERDICT done_when: the done_when asks for one inside-limit pair and four pairs each exceeding exactly one bound, with a changed limit or denominator failing; tests/test_bank_report_precision.py:44-104 supplies all five pairs, but span and minor_radius are both 1.0 so a swapped denominator is invisible.\nVERDICT write_paths: the declared paths are tests/test_bank_report_precision.py and the two evidence fragments; every path in the commit is inside them, and the declared docs/figures directory is unused rather than written.\nVERDICT manifest: read; it records status complete, gate-test.log at EXIT=0 with 5 passed in 7.68 s, negative-control.log at EXIT=1 with one failure, and the 67-invocation probe receipt.\nVERDICT diff: read commit by commit against base 28cae2aa6; one commit 70192e11b touching tests/test_bank_report_precision.py, bank-prototype-provenance.html and bank-report-equivalence.html, 162 insertions and 3 deletions.\nCALL_SITES: scripts/prototypes/bank_solve_cycle/report.py:66 compare, scripts/prototypes/bank_solve_linesearch/report.py:10, scripts/prototypes/bank_step_booking_batch/report.py:12, scripts/prototypes/bank_solve_breakpoint/report.py:12\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/test_bank_report_precision.py:44-104 pins the owner at scripts/prototypes/bank_solve_cycle/report.py:21 and both dependents replay byte-identically, though the denominator half of the stated measure is unexercised.\nSCORE evidence: 14\nJUSTIFICATION evidence: the SUMMARY and PRECISION lines at linesearch-report.log and booking-report.log are byte-identical to the recorded report.log line 2 and report-corrected.log under cmp, and the 67/60 probe count reproduces at 28cae2aa6; the fragment at bank-report-equivalence.html:18 quotes 7.3 s against a gate log reading 7.68 s.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path in 70192e11b is one the source manifest declares, and the declared docs/figures path was not used.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_bank_report_precision.py:66-68 does redden when PAIR_LIMITS[\"flux\"] moves, as negative-control.log shows, but the fixture at tests/test_bank_report_precision.py:24-25 sets span and minor_radius both 1.0 so exchanging the two normalising units leaves every assertion true.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_bank_report_precision.py:5 imports the prototype owner the way tests/test_bank_newton_step.py does, and no symbol, filename or comment carries a plan or run identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no production definition and pins the existing owner at scripts/prototypes/bank_solve_cycle/report.py:66 rather than forking a second comparison; a search of scripts/prototypes and tests found that owner already consumed by three reports.\nFINDING tests/test_bank_report_precision.py:25 blocking: span and minor_radius are both 1.0, so exchanging the flux denominator (span) with the axis denominator (minor_radius) in pair_gaps leaves every assertion true, which is the \"changed denominator\" half of the brief's measure and the claim the evidence fragment makes at bank-report-equivalence.html:17.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html:25 non-blocking: the fifteen-prototype list omits certified_carrier_export, whose gate.sh:23 runs `PYTHONPATH=\"$tree\" \"$python\" -c 'import nova; print(nova.__file__)'` with no -P, so the count of probe-bearing prototypes still lacking the flag is sixteen.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-report-equivalence.html:18 non-blocking: the fragment states the five tests pass in 7.3 s, but gate-test.log records 7.68 s and 7.33 s is the mutated copy's wall in negative-control.log, so the quoted figure comes from the wrong run.",
+  "review_run_id": "r-20261105T212002610644-review-of-bank-report-equivalence-70192e11bd92",
+  "reviewed_base_sha": "28cae2aa6529dc80353fc0211feb70bcc9473b62",
+  "reviewed_head_sha": "70192e11bd923d859f5680be594330f4fe94c0f6",
+  "reviewed_run_id": "r-20261105T205425913419-bank-report-equivalence",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T21:47:30.641027+00:00",
+  "total": 101
+}

@@ -10,9 +10,7 @@ import importlib.util
 import inspect
 import json
 from pathlib import Path
-import shutil
 import subprocess
-import sys
 import textwrap
 from unittest.mock import patch
 
@@ -152,34 +150,6 @@ def main():
             json.dumps(rows, indent=2)
         )
         cycle.reference.emit("CLOSURE", **row)
-    if args.arm == "head":
-        for name in ("timings", "solve"):
-            shutil.copy2(
-                args.run / f"head-{name}.json", args.run / f"bucket-only-{name}.json"
-            )
-        from scripts.prototypes.bank_step_booking_batch.control import run
-
-        command = [
-            sys.executable,
-            str(Path(__file__).with_name("measure.py")),
-            "--run",
-            str(args.run),
-            "--arm",
-            "head",
-            "--revision",
-            args.revision,
-            "--solve",
-        ]
-        assert (
-            run(
-                command,
-                root,
-                args.run / "device-head-rings.log",
-                args.revision,
-                BOOKING_SKIP_CONTROL="1",
-            )
-            == 0
-        )
 
 
 if __name__ == "__main__":

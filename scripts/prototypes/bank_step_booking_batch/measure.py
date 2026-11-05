@@ -156,6 +156,15 @@ def main():
         (args.run / f"{args.arm}-timings.json").write_text(json.dumps(output, indent=2))
     if matrices:
         np.savez(args.run / f"{args.arm}-matrices.npz", **matrices)
+    if args.arm == "negative" and os.environ.get("BOOKING_TUNE") == "1":
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "booking_tune", Path(__file__).with_name("tune.py")
+        )
+        tuning = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tuning)
+        tuning.run(args.run, machine, inputs, jacobians, timer, cycle.reference.emit)
     if args.solve:
         with (
             patch.object(cycle.reference, "machine", lambda kind: machine),

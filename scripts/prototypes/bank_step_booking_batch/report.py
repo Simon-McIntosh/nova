@@ -33,8 +33,8 @@ def main():
     fig, ax = plt.subplots(figsize=(14, 7.2), dpi=100)
     color = InkStyle().flux_color
     for label, values, hue, dash, offset in [
-        ("base", base, "#929292", "--", (10, 16)),
-        ("batched", head, color, "-", (52, 3)),
+        ("base", base, "#929292", "--", (10, 24)),
+        ("batched", head, color, "-", (52, 12)),
     ]:
         walls = [values[f"{lanes}:assembly"] for lanes in (1, 16)]
         ax.plot(
@@ -138,7 +138,8 @@ reads and line search. The plot uses linear axes and prints milliseconds at
 every marker.</figcaption></figure>
 <p>The first bucket-only candidate scaled 9.45 times (15.624 to 147.719 ms) and
 missed the bound; its receipts remain under bucket-only. The table uses the
-subsequent live-ring compaction. All paired terminal states satisfy the precision budget. Largest fresh residual:
+subsequent live-ring compaction. All paired terminal states satisfy the precision
+budget. Largest fresh residual:
 {maximum["residual"]:.5e}; flux/span against base: {maximum["flux"]:.5e};
 axis/minor radius: {maximum["axis"]:.5e}; X-point/minor radius:
 {maximum["saddle"]:.5e}; boundary flux/span: {maximum["boundary_flux"]:.5e}.

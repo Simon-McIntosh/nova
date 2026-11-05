@@ -48,7 +48,7 @@ class Quadrature:
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
-    cut_batch_width: int = dataclass_field(default=64, metadata={"static": True})
+    cut_batch_width: int = dataclass_field(default=16, metadata={"static": True})
 
 
 class Booking(NamedTuple):

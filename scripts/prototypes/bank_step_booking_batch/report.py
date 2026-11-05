@@ -78,8 +78,9 @@ def main():
             row = next(
                 r for r in receipt["rows"] if r["lanes"] == lanes and r["call"] == 1
             )
+            whole_solve = row["wall_ms"]
             per_iterate = iterate(
-                {(lanes, "whole_solve"): row["wall_ms"]},
+                {(lanes, "whole_solve"): whole_solve},
                 {lanes: {"max_steps": max(row["steps"])}},
                 lanes,
             )
@@ -87,15 +88,35 @@ def main():
                 arm=arm,
                 lanes=lanes,
                 jacobian_ms=timings[f"{lanes}:assembly"],
-                iterate_ms=per_iterate,
+                whole_solve_ms=whole_solve,
+                per_iterate_ms=per_iterate,
                 per_slice_ms=row["per_slice_ms"],
                 steps=max(row["steps"]),
                 residual=max(row["residual"]),
             )
             summary.append(values)
             rows.append(
-                f"<tr><td>{arm}</td><td>{lanes}</td><td>{values['jacobian_ms']:.3f}</td><td>{per_iterate:.3f}</td><td>{row['per_slice_ms']:.3f}</td><td>{values['steps']}</td><td>{values['residual']:.4e}</td></tr>"
+                f"<tr><td>{arm}</td><td>{lanes}</td>"
+                f"<td>{values['jacobian_ms']:.3f}</td>"
+                f"<td>{whole_solve:.3f}</td><td>{per_iterate:.3f}</td>"
+                f"<td>{row['per_slice_ms']:.3f}</td><td>{values['steps']}</td>"
+                f"<td>{values['residual']:.4e}</td></tr>"
             )
+    base_sixteen = next(r for r in summary if r["arm"] == "base" and r["lanes"] == 16)
+    head_sixteen = next(
+        r for r in summary if r["arm"] == "batched" and r["lanes"] == 16
+    )
+    interpretation = (
+        "<p>At 16 slices, the per-slice converged wall went from "
+        f"{base_sixteen['per_slice_ms']:.0f} to "
+        f"{head_sixteen['per_slice_ms']:.0f} ms. step_jacobian fell from "
+        f"{base_sixteen['jacobian_ms']:.0f} to "
+        f"{head_sixteen['jacobian_ms']:.0f} ms, but the per-iterate wall fell "
+        f"only from about {base_sixteen['per_iterate_ms']:.0f} to "
+        f"{head_sixteen['per_iterate_ms']:.0f} ms, and the slowest lane took "
+        f"{head_sixteen['steps']} updates against {base_sixteen['steps']}. "
+        "The remaining iterate cost is outside the matrix.</p>"
+    )
     maximum = {
         key: max(r[key] for r in precision)
         for key in precision[0]
@@ -149,9 +170,9 @@ def main():
             f"<tr><td>{escape(path.name)}</td><td>{escape(result)}</td></tr>"
         )
     regression = (
-        "<p><strong>CPU regression remains:</strong> "
+        "<p><strong>Added CPU suite failure:</strong> "
         + escape("; ".join(failures))
-        + ". This node is not ready to promote.</p>"
+        + ". It is carried by the follow-on convergence work.</p>"
         if failures
         else ""
     )
@@ -177,9 +198,11 @@ requires that refusal on the three-node seed.</p>
 <p>Sixteen-lane Jacobian scaling is <strong>{ratio:.3f} times one lane</strong>,
 against a limit of four. Measurements use the production fresh-correction lane
 mapper, with explicit synchronized calls through the shared timing instrument.</p>
+{interpretation}
 <table id="bank-step-booking-batch-walls"><thead><tr><th>Arm</th><th>Lanes</th>
-<th>Jacobian [ms/batch]</th><th>Converged solve / maximum updates [ms]</th>
-<th>Converged wall [ms/slice]</th><th>Maximum updates</th>
+<th>Jacobian [ms/batch]</th><th>Whole solve wall [ms]</th>
+<th>Per-iterate wall [ms]</th><th>Converged wall [ms/slice]</th>
+<th>Maximum updates</th>
 <th>Largest fresh residual</th></tr></thead>
 <tbody>{"".join(rows)}</tbody></table>
 <figure id="bank-step-booking-batch-figure"><img
@@ -187,9 +210,9 @@ src="/nova/figures/{topic}/jacobian-wall.svg"
 alt="Jacobian wall against one and sixteen lanes, base and batched, on linear
 axes with values at markers"><figcaption>One reserved H200 allocation,
 {escape(args.job)}.
-Jacobian values are medians of three synchronized warm calls; the solve wall
-is its second execution after explicit compilation. The per-iterate value
-divides that complete solve wall by its maximum lane update count, including
+Jacobian values are medians of three synchronized warm calls; the whole solve
+wall is its second execution after explicit compilation. The per-iterate value
+divides that whole solve wall by the slowest lane's update count, including
 reads and line search. The plot uses linear axes and prints milliseconds at
 every marker.</figcaption></figure>
 <p>The first bucket-only candidate scaled 9.45 times (15.624 to 147.719 ms) and
@@ -209,9 +232,9 @@ The limits are respectively 1e-10, 1e-8, 5e-4, 5e-4 and 1e-4.</p>
 <code>{escape(solves[1]["revision"])}</code>. Paired timing receipts, CPU suite
 logs, matrix-relative-error rows, overflow refusal, serial-lane mutation and
 rendered figure are under <code>{escape(str(args.run))}</code>. The base is a git
-archive; every arm prints its imported module path. Read stages are zero in the
-standalone Newton-step closure because that step consumes an already-completed
-read. The shared closure instrument sums residual, assembly, equilibration/factor
+archive; every arm prints its imported module path. The standalone Newton-step
+closure performs no reads because its input already carries the completed read.
+The shared closure instrument sums residual, assembly, equilibration/factor
 and back-solve against the measured whole step.</p>
 <table id="bank-step-booking-batch-closure"><thead><tr><th>Arm</th><th>Lanes</th>
 <th>Stage sum / whole Newton step</th><th>Distinct geometry nodes per lane</th>

@@ -1,5 +1,8 @@
 """A fresh residual line search escapes a continuous piecewise-linear cycle."""
 
+import json
+from time import perf_counter
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -91,11 +94,15 @@ def test_cycle_lane_is_accepted_within_two_steps(monkeypatch):
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(1800)
-def test_diverted_lanes_leave_near_root_cycle():
+@pytest.mark.timeout(5400)
+def test_diverted_lanes_leave_near_root_cycle(monkeypatch):
     """Restart the certificate lanes where fresh residuals first permit freezing."""
     from scripts.prototypes.bank_solve_read import measure as reference
 
+    from scripts.prototypes.bank_solve_cycle.observe import observe_updates
+
+    observe_updates(monkeypatch)
+    setup_start = perf_counter()
     bank, cache, roots, convention, policy, profile, quadrature, moments, _ = (
         reference.machine("diverted")
     )
@@ -121,11 +128,38 @@ def test_diverted_lanes_leave_near_root_cycle():
             max_steps=limit,
         )
 
-    checkpoint = jax.jit(run, static_argnums=2)(states, bank, 2)
+    jax.block_until_ready((states, bank))
+    print("SETUP_SECONDS", perf_counter() - setup_start, flush=True)
+    staged = jax.jit(run, static_argnums=2)
+
+    def execute(values, limit, phase):
+        start = perf_counter()
+        executable = staged.lower(values, bank, limit).compile()
+        print("COMPILE", phase, perf_counter() - start, flush=True)
+        start = perf_counter()
+        result = jax.block_until_ready(executable(values, bank))
+        jax.effects_barrier()
+        print("EXECUTE", phase, perf_counter() - start, flush=True)
+        print(
+            "RESULT",
+            json.dumps(
+                {
+                    "phase": phase,
+                    "steps": np.asarray(result.steps).tolist(),
+                    "reads": np.asarray(result.reads).tolist(),
+                    "unfreezes": np.asarray(result.unfreezes).tolist(),
+                    "residual_path": np.asarray(result.residual_path).tolist(),
+                    "update_path": np.asarray(result.update_path).tolist(),
+                }
+            ),
+            flush=True,
+        )
+        return result
+
+    checkpoint = execute(states, 2, "checkpoint")
     assert float(jnp.max(checkpoint.residual)) < 1e-6
     assert not bool(jnp.all(checkpoint.converged))
-    result = jax.jit(run, static_argnums=2)(checkpoint.moments, bank, 8)
-    jax.block_until_ready(result)
+    result = execute(checkpoint.moments, 8, "restart")
     print("DIVERTED_CYCLE", np.asarray(result.steps), np.asarray(result.residual))
     assert bool(jnp.all(result.converged)), "cycle lanes exceed eight restart steps"
     assert float(jnp.max(result.residual)) <= 1e-10

@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-05T13:01:51.212Z",
   "dispatched_at": "2026-11-05T12:53:41Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "efit-parity-tare-and-oracles",
+      "recorded_at": "2026-11-05T13:07:16.788262+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_efit_parity_tared_external_field.py",

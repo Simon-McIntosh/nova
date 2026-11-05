@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/efit_parity_field_instrument.py:_support_receipt",
+    "benchmarks/efit_parity_inductance_partition.py:measure",
+    "benchmarks/efit_parity_boundary_volume.py:_reconstruct_contours"
+  ],
+  "completed_at": "2026-11-05T22:02:08.677Z",
+  "dispatched_at": "2026-11-05T21:54:48Z",
+  "findings": [
+    {
+      "file": "tests/test_efit_parity_inductance_partition.py",
+      "id": "f60e3b3371b",
+      "line": 76,
+      "severity": "non-blocking",
+      "text": "The assertion adds confined_core cell_current_a to closure direct_out_of_core_current_a and compares the sum with the banked all-domain current, but benchmarks/efit_parity_inductance_partition.py:418 defines direct_out_of_core_current_a as total - core_current, so the left side reduces to total and the assertion duplicates line 73 and cannot fail on any defect in the out-of-core value; the node's stated repair was to move expectations off the benchmark's own arithmetic and this one did not move."
+    },
+    {
+      "file": "benchmarks/efit_parity_inductance_partition.py",
+      "id": "fc8f9973415",
+      "line": 141,
+      "severity": "non-blocking",
+      "text": "Removing the overlap refusal leaves solved_branch=False unguarded: with core taken from the equilibrium and exterior taken as ~inside, a confined-core centroid outside a stored contour is counted in both the confined_core and outside_closed_branch records and its current is double-counted, contradicting the commit's claim that the three support sets are disjoint by construction; today only the field instrument calls this branch and consumes just the inside mask, so no landed receipt is wrong yet."
+    },
+    {
+      "file": "tests/test_efit_parity_inductance_partition.py",
+      "id": "fd7277eb934",
+      "line": 54,
+      "severity": "non-blocking",
+      "text": "The done_when asks that the 234-versus-95 core divergence no longer be pinned as expected, but lines 54, 58 and 65 now pin it in the opposite direction \u2014 requiring differing cell counts, a strictly larger live current and current_agrees False \u2014 so a legitimate live support that ever matched the banked one would fail the suite."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f4a6e8bc399",
+      "line": 14,
+      "severity": "non-blocking",
+      "text": "The baseline_suite and after_suite command fields name a single combined invocation carrying <base tree> and <worktree> placeholders and --timeout 3600, none of which appears in the COMMAND= header of logs/base-inplace.log, logs/base-other-two.log or logs/head-six.log, and the base arm actually ran as two separate invocations, so the recorded command cannot be re-run and does not name what ran."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Examined benchmarks/efit_parity_field_instrument.py:_support_receipt, benchmarks/efit_parity_inductance_partition.py:measure and benchmarks/efit_parity_boundary_volume.py:_reconstruct_contours; no runtime nova/ module imports any changed benchmark.",
+    "diff": "Read all seven commits against 0509bb27f commit by commit; 647f298cf carries the membership owner, the extracted bank guard and the oracle rewrites, 0ad74ecfd removes the vacuous overlap check, and c79e7df74 through eb5ab9708 touch only the landing fragment.",
+    "done_when": "The done_when names scripts/nova_lane/run.sh --force-submit --rungs h200,titan with a summary per arm and zero added failures; logs/tare-gpu-two-arm.log:1636 and :3259 carry '4 passed, 10 errors' for each arm and the fragment names all ten IDs, so its letter is met while the tare assertions themselves never ran.",
+    "goal": "The node goal is to measure the EFIT-parity tare file on the GPU and give the new parity assertions independent oracles; the oracle half landed at benchmarks/efit_parity_inductance_partition.py:112 and tests/test_efit_parity_boundary_volume.py:26, but the GPU half did not, because 10 of the module's 14 IDs error at setup in both arms of logs/tare-gpu-two-arm.log:1636.",
+    "manifest": "Read the reviewed run's manifest.md; its gate verdict and arm counts reconcile with logs/base-inplace.log, logs/head-six.log and logs/tare-gpu-two-arm.log, but its baseline_suite and after_suite command fields carry an unsubstituted placeholder and a --timeout 3600 flag no log's COMMAND= line contains.",
+    "write_paths": "Read the eight declared write paths; the six files in the diff against 0509bb27f are all inside them, and the granted docs/figures/nova-portfolio-replan/efit-parity-tare-and-oracles directory was left unwritten."
+  },
+  "justifications": {
+    "durability": "tests/test_efit_parity_boundary_volume.py:54 drives _require_bank_agreement on a closed contour and :27 checks _polygon_measure against analytic solids of revolution, and logs/negative-control.log:23 shows the fraction assertion red on a 1.001 mutation; tests/test_efit_parity_inductance_partition.py:76 is algebraically tautological and guards nothing.",
+    "evidence": "logs/tare-gpu-two-arm.log:1636 and :3259 each read '4 passed, 10 errors' with the identical ten IDs at base and head, so zero added failures is derived rather than claimed, and the fragment names every ID at docs/evidence/fragments/nova-portfolio-replan/efit-parity-tare-and-oracles.html; the tare assertions themselves were never reached.",
+    "fit": "_cell_membership, _cell_partition, _core_support_divergence and _require_bank_agreement at benchmarks/efit_parity_inductance_partition.py:111-207 follow the private-helper idiom of the surrounding benchmarks and carry no plan, version or ticket label.",
+    "goal_fidelity": "The independent-oracle half landed at benchmarks/efit_parity_inductance_partition.py:112 (one membership owner) and tests/test_efit_parity_boundary_volume.py:26 (closed-form volumes), but the GPU half did not: 10 of the tare module's 14 IDs error at setup in both arms of logs/tare-gpu-two-arm.log:1626-1636.",
+    "reuse": "A search of nova/ and benchmarks/ for contour containment (grep contains_points) found thirteen inline MplPath/PolygonPath calls and no reusable owner, so _cell_membership at benchmarks/efit_parity_inductance_partition.py:111 is the first owner and benchmarks/efit_parity_field_instrument.py:123 now consumes it instead of forking its own.",
+    "scope_discipline": "Every path in git diff --stat 0509bb27f..eb5ab9708 lies inside the eight declared write paths \u2014 three benchmarks, two test modules and the landing fragment \u2014 and the five docs-only commits touch only docs/evidence/fragments/nova-portfolio-replan/efit-parity-tare-and-oracles.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to measure the EFIT-parity tare file on the GPU and give the new parity assertions independent oracles; the oracle half landed at benchmarks/efit_parity_inductance_partition.py:112 and tests/test_efit_parity_boundary_volume.py:26, but the GPU half did not, because 10 of the module's 14 IDs error at setup in both arms of logs/tare-gpu-two-arm.log:1636.\nVERDICT done_when: The done_when names scripts/nova_lane/run.sh --force-submit --rungs h200,titan with a summary per arm and zero added failures; logs/tare-gpu-two-arm.log:1636 and :3259 carry '4 passed, 10 errors' for each arm and the fragment names all ten IDs, so its letter is met while the tare assertions themselves never ran.\nVERDICT write_paths: Read the eight declared write paths; the six files in the diff against 0509bb27f are all inside them, and the granted docs/figures/nova-portfolio-replan/efit-parity-tare-and-oracles directory was left unwritten.\nVERDICT manifest: Read the reviewed run's manifest.md; its gate verdict and arm counts reconcile with logs/base-inplace.log, logs/head-six.log and logs/tare-gpu-two-arm.log, but its baseline_suite and after_suite command fields carry an unsubstituted placeholder and a --timeout 3600 flag no log's COMMAND= line contains.\nVERDICT diff: Read all seven commits against 0509bb27f commit by commit; 647f298cf carries the membership owner, the extracted bank guard and the oracle rewrites, 0ad74ecfd removes the vacuous overlap check, and c79e7df74 through eb5ab9708 touch only the landing fragment.\nCALL_SITES: benchmarks/efit_parity_field_instrument.py:_support_receipt, benchmarks/efit_parity_inductance_partition.py:measure, benchmarks/efit_parity_boundary_volume.py:_reconstruct_contours\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: The independent-oracle half landed at benchmarks/efit_parity_inductance_partition.py:112 and tests/test_efit_parity_boundary_volume.py:26, but the GPU half did not: 10 of the tare module's 14 IDs error at setup in both arms of logs/tare-gpu-two-arm.log:1626-1636.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/tare-gpu-two-arm.log:1636 and :3259 each read '4 passed, 10 errors' with the identical ten IDs at base and head, so zero added failures is derived rather than claimed, and the fragment names every ID; the tare assertions themselves were never reached.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in git diff --stat 0509bb27f..eb5ab9708 lies inside the eight declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_efit_parity_boundary_volume.py:54 drives _require_bank_agreement on a closed contour and :27 checks _polygon_measure against analytic solids, but tests/test_efit_parity_inductance_partition.py:76 is algebraically tautological.\nSCORE fit: 18\nJUSTIFICATION fit: _cell_membership, _cell_partition, _core_support_divergence and _require_bank_agreement at benchmarks/efit_parity_inductance_partition.py:111-207 follow the private-helper idiom of the surrounding benchmarks and carry no plan, version or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: A search of nova/ and benchmarks/ for contour containment found thirteen inline MplPath/PolygonPath calls and no reusable owner, so _cell_membership at benchmarks/efit_parity_inductance_partition.py:111 is the first owner and benchmarks/efit_parity_field_instrument.py:123 consumes it.\nFINDING tests/test_efit_parity_inductance_partition.py:76 non-blocking: The assertion adds the confined-core current to closure direct_out_of_core_current_a and compares the sum with the banked all-domain current, but benchmarks/efit_parity_inductance_partition.py:418 defines that field as total - core_current, so the left side reduces to total and the assertion duplicates line 73 and cannot fail on any defect in the out-of-core value.\nFINDING benchmarks/efit_parity_inductance_partition.py:141 non-blocking: Removing the overlap refusal leaves the stored branch unguarded, so a core centroid outside a stored contour is counted in both the confined_core and outside_closed_branch records and double-counted, contradicting the commit's disjoint-by-construction claim.\nFINDING tests/test_efit_parity_inductance_partition.py:54 non-blocking: The tests now pin the core divergence in the opposite direction, requiring differing cell counts, a larger live current and current_agrees False, so a live support that matched the bank would fail.\nFINDING manifest.md:14 non-blocking: The baseline_suite and after_suite command fields name a combined invocation with unsubstituted placeholders and --timeout 3600 that no log's COMMAND= header contains, and the base arm ran as two separate invocations.\n",
+  "review_run_id": "r-20261105T215100438226-review-of-efit-parity-tare-and-oracles-eb5ab970859f",
+  "reviewed_base_sha": "0509bb27fe044ba00d94115883465a67b6193715",
+  "reviewed_head_sha": "eb5ab970859f55b36ecaedf140be0bf930dba76a",
+  "reviewed_run_id": "r-20261105T132414718225-efit-parity-tare-and-oracles",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T22:02:11.353550+00:00",
+  "total": 99
+}

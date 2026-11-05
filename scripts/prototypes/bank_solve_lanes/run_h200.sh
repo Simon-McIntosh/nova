@@ -11,7 +11,7 @@ cd "$WORKTREE"
 {
   echo "# revision $(git -C "$WORKTREE" rev-parse HEAD)"
   echo "# tree $WORKTREE"
-  echo "# command $PY scripts/prototypes/bank_solve_lanes/trace.py --arm head --out $OUT"
+  echo "# command: $PY scripts/prototypes/bank_solve_lanes/trace.py --arm head --out $OUT"
   PYTHONPATH="$WORKTREE" JAX_PLATFORMS=cuda "$PY" scripts/prototypes/bank_solve_lanes/trace.py \
     --arm head --out "$OUT"
   echo "EXIT=$?"

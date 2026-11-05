@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="151">
+<meta name="plan-version" content="152">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -548,6 +548,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T150218773065-review-of-bank-solve-linesearch-533d7e249cf7" data-who="reckon-build" data-when="2026-11-05T15:13:35.879Z">
     <div class="r-comment-body"><p>review-of-bank-solve-linesearch: parsed review of 533d7e249cf71ed8903d392deba95e71a0beacfb against 2f60ce9e499eda4507a2da6657d3c85b9025a59a, six dimensions 19/18/19/17/18/20, zero added failures, two non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T133513111158-bank-solve-linesearch" data-who="reckon-build" data-when="2026-11-05T14:58:01Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-linesearch.html#bank-solve-linesearch-landing — one dyadic search for cold and bank Newton; every companion read counted. Incumbent retention stalls lanes 10 and 13 at 60 updates, so the bank retains the best valid trial. Paired H200 wall 1110.550→1001.905 ms/slice, 62 reads/lane, all precision budgets pass. CPU base/head 30/32 passed with two unchanged skips and zero added failures; the pending-lane count mutation fails the twice-halving test with EXIT=1.</p></div>
 </div>
 </section>
 </main>

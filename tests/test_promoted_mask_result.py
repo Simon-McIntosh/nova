@@ -54,16 +54,20 @@ ACTIVE_SET_STEPS = 12
 DIAGNOSED_EDIT = 12
 
 
-def _seed_shadow(operator, seed):
+def _seed_shadow(operator, seed, requested_class=None):
     """Return the residual shadow the solve reads at its own seed."""
-    return jnp.ravel(jnp.asarray(operator.residual_shadow_mask(seed), dtype=bool))
+    return jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(seed, requested_class), dtype=bool)
+    )
 
 
-def _promoted_set(operator, state, previous_shadow):
+def _promoted_set(operator, state, previous_shadow, requested_class=None):
     """Return the promoted set a closing trip reads at one terminal state."""
     return jnp.ravel(
         jnp.asarray(
-            operator.residual_shadow_mask(state, previous_shadow=previous_shadow),
+            operator.residual_shadow_mask(
+                state, requested_class, previous_shadow=previous_shadow
+            ),
             dtype=bool,
         )
     )
@@ -156,17 +160,30 @@ def test_both_routes_report_the_same_promoted_set_on_one_trip(machine):
     )
 
 
-def test_a_solve_that_promotes_nothing_reports_an_all_false_mask(machine):
-    """A map that promotes no node returns an all-false mask, not a full one."""
+def test_a_solve_given_no_trip_reports_an_all_false_mask(machine):
+    """With no trip to close, the result carries no set at all.
+
+    The operator's read is stubbed to name one node, so the seed's shadow the
+    solve is handed is not empty and an all-false result cannot be the seed's
+    mask passed through: the two differ, and the zero-trip path is what makes
+    the difference.  One trip on the same stub then returns that named node,
+    which shows the field is not a constant.
+    """
     profile, seed = machine
     operator = profile.operator
     shape = np.shape(np.ravel(np.asarray(operator.residual_shadow_mask(seed))))
+    named = jnp.zeros(shape, dtype=bool).at[0].set(True)
 
-    operator.residual_shadow_mask = lambda *arguments, **keywords: jnp.zeros(
-        shape, dtype=bool
-    )
+    operator.residual_shadow_mask = lambda *arguments, **keywords: named
     try:
-        host = reduced_newton.solve_reduced_newton(
+        untripped = reduced_newton.solve_reduced_newton(
+            operator,
+            seed,
+            active_set_steps=0,
+            trip_boundary=reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+            **_solve_arguments(),
+        )
+        tripped = reduced_newton.solve_reduced_newton(
             operator,
             seed,
             active_set_steps=SINGLE_TRIP,
@@ -179,10 +196,11 @@ def test_a_solve_that_promotes_nothing_reports_an_all_false_mask(machine):
     finally:
         del operator.residual_shadow_mask
 
-    for result in (host, compiled):
-        returned = np.asarray(result.promoted_mask)
-        assert returned.shape == shape
-        assert not returned.any()
+    returned = np.asarray(untripped.promoted_mask)
+    assert returned.shape == shape
+    assert not returned.any()
+    assert np.asarray(tripped.promoted_mask).sum() == 1
+    assert np.array_equal(np.asarray(compiled.promoted_mask), np.asarray(named))
 
 
 def test_the_profile_solve_carries_the_promoted_mask(machine):
@@ -215,7 +233,10 @@ def test_a_warm_coil_edit_state_carries_its_promoted_nodes():
     of the sweep, which is the sequence that made that frame converge.  The
     returned mask is compared against the mask recorded at the solve's own
     closing read, so a result carrying the seed's shadow, an earlier edit's
-    set or an all-false array fails here.
+    set or an all-false array fails here.  The same warm edit is then replayed
+    through the compiled route, where the returned mask is compared against
+    that route's own terminal set, so a compiled carry that returned the seed
+    mask or an all-false array fails here too.
     """
     configure_dtypes()
     profile, prepared, _carrier = coil_edit_latency._prepare_case(
@@ -236,18 +257,22 @@ def test_a_warm_coil_edit_state_carries_its_promoted_nodes():
         return mask
 
     state = prepared["initial"]
+    warm_seed = state
+    latest_current = None
     operator.residual_shadow_mask = recording
     try:
         for fraction in coil_edit_latency.EDIT_FRACTIONS[:DIAGNOSED_EDIT]:
             current = base_current.copy()
             current[circuit_index] *= 1.0 + fraction
+            warm_seed = state
+            latest_current = jnp.asarray(current)
             reads.clear()
             result = reduced_newton.solve_reduced_newton(
                 operator,
                 state,
                 requested_class=requested_class,
                 target_current=target_current,
-                prescribed_current=jnp.asarray(current),
+                prescribed_current=latest_current,
                 tolerance=coil_edit_latency.COMPILED_SLICE_TOLERANCE,
                 newton_steps=coil_edit_latency.COMPILED_SLICE_NEWTON_STEPS,
                 active_set_steps=coil_edit_latency.COMPILED_SLICE_ACTIVE_SET_STEPS,
@@ -262,3 +287,28 @@ def test_a_warm_coil_edit_state_carries_its_promoted_nodes():
     assert bool(result.converged), float(result.terminal_residual)
     assert returned.sum() > 0
     assert np.array_equal(returned, reads[-1])
+
+    # The same warm edit through the compiled route: its own terminal set is
+    # what a single compiled trip forms at the state it returns, read against
+    # the shadow its seed carries.
+    compiled = reduced_newton.solve_reduced_newton_compiled(
+        operator,
+        warm_seed,
+        requested_class=requested_class,
+        target_current=target_current,
+        prescribed_current=latest_current,
+        tolerance=coil_edit_latency.COMPILED_SLICE_TOLERANCE,
+        newton_steps=coil_edit_latency.COMPILED_SLICE_NEWTON_STEPS,
+        active_set_steps=SINGLE_TRIP,
+    )
+    compiled_returned = np.asarray(compiled.promoted_mask)
+    compiled_expected = _promoted_set(
+        operator,
+        compiled.state,
+        _seed_shadow(operator, warm_seed),
+        requested_class,
+    )
+    assert compiled_returned.dtype == bool
+    assert compiled_returned.shape == np.shape(compiled_expected)
+    assert compiled_returned.sum() > 0
+    assert np.array_equal(compiled_returned, np.asarray(compiled_expected, dtype=bool))

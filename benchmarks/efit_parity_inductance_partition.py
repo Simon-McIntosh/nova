@@ -140,8 +140,6 @@ def _cell_partition(
         raise RuntimeError("a confined-core centroid lies outside the closed branch")
     interior_noncore = inside & ~core
     exterior = ~inside
-    if np.any(core & interior_noncore) or np.any(core & exterior):
-        raise RuntimeError("the three support sets overlap")
     if not np.all(core | interior_noncore | exterior):
         raise RuntimeError("the three support sets do not cover the mesh")
 

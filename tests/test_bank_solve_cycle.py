@@ -8,6 +8,7 @@ import pytest
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
+assert jax.config.jax_enable_x64
 
 from nova.equilibrium import support_read  # noqa: E402
 from tests.test_bank_solve_driver import _toy_read  # noqa: E402
@@ -33,11 +34,11 @@ def test_cycle_lane_is_accepted_within_two_steps(monkeypatch):
         slope = jnp.where(jnp.abs(value) < 1.0, 3.0, 1.0)
         update = (-equation / slope, jnp.zeros_like(value), jnp.zeros_like(value))
         size = sum(item.size for item in state)
-        eye = jnp.eye(size)
+        eye = jnp.eye(size, dtype=jnp.float64)
         factor = support_read.NewtonFactor(
             eye,
-            jnp.ones(size),
-            jnp.ones(size),
+            jnp.ones(size, dtype=jnp.float64),
+            jnp.ones(size, dtype=jnp.float64),
             eye,
             jnp.zeros(size, jnp.int32),
         )
@@ -54,8 +55,12 @@ def test_cycle_lane_is_accepted_within_two_steps(monkeypatch):
     monkeypatch.setattr(support_read, "read_batch", _toy_read)
     monkeypatch.setattr(support_read, "step_residual", residual)
     monkeypatch.setattr(support_read, "newton_step", step)
-    states = (jnp.array([[2.0], [-2.0], [0.0]]), jnp.zeros((3, 1)), jnp.zeros((3, 1)))
-    points = jnp.zeros((3, 1, 2))
+    states = (
+        jnp.array([[2.0], [-2.0], [0.0]], dtype=jnp.float64),
+        jnp.zeros((3, 1), dtype=jnp.float64),
+        jnp.zeros((3, 1), dtype=jnp.float64),
+    )
+    points = jnp.zeros((3, 1, 2), dtype=jnp.float64)
     result = jax.jit(
         lambda values: support_read.solve_batch(
             None,
@@ -139,8 +144,8 @@ def test_unchanged_decision_unlocks_when_residual_stalls(monkeypatch):
     monkeypatch.setattr(support_read, "read_batch", _toy_read)
     monkeypatch.setattr(support_read, "step_residual", _toy_residual)
     monkeypatch.setattr(support_read, "newton_step", stationary_step)
-    states = tuple(jnp.full((1, 1), 1e-7) for _ in range(3))
-    points = jnp.zeros((1, 1, 2))
+    states = tuple(jnp.full((1, 1), 1e-7, dtype=jnp.float64) for _ in range(3))
+    points = jnp.zeros((1, 1, 2), dtype=jnp.float64)
     result = jax.jit(
         lambda values: support_read.solve_batch(
             None,

@@ -29,6 +29,34 @@ STATE = "#1f2937"
 POPULATION = "#929292"
 
 
+def _assert_text_inside(figure):
+    """Refuse to write a figure whose text runs off the canvas or onto itself."""
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    canvas = figure.bbox
+    boxes = []
+    for text in figure.findobj(matplotlib.text.Text):
+        label = text.get_text().strip()
+        if not text.get_visible() or not label:
+            continue
+        box = text.get_window_extent(renderer)
+        if box.width <= 0.0 or box.height <= 0.0:
+            continue
+        if (
+            box.x0 < canvas.x0 - 1.0
+            or box.y0 < canvas.y0 - 1.0
+            or box.x1 > canvas.x1 + 1.0
+            or box.y1 > canvas.y1 + 1.0
+        ):
+            raise ValueError(f"text {label!r} extends past the canvas")
+        boxes.append((label, box))
+    for index, (label, box) in enumerate(boxes):
+        for other_label, other in boxes[index + 1 :]:
+            overlap = box.intersection(box, other)
+            if overlap is not None and overlap.width > 1.0 and overlap.height > 1.0:
+                raise ValueError(f"text {label!r} overlaps {other_label!r}")
+
+
 def _cubic_points(controls, valid, samples=8):
     """Sample one branch's valid cubic segments into an ordered polyline."""
     points = []
@@ -73,8 +101,16 @@ def render(
         float(np.quantile(interior, 0.02)), float(np.quantile(interior, 0.98)), 13
     )[1:-1]
 
-    figure, axis = plt.subplots(figsize=(14, 7.2), dpi=100)
+    figure = plt.figure(figsize=(14, 7.2), dpi=100)
+    figure.subplots_adjust(top=0.84)
+    grid = figure.add_gridspec(1, 2, width_ratios=(1.55, 1.0), wspace=0.06)
+    axis = figure.add_subplot(grid[0, 0])
+    zoom = figure.add_subplot(grid[0, 1])
     poloidal_axes(axis)
+    zoom.set_xticks([])
+    zoom.set_yticks([])
+    for spine in zoom.spines.values():
+        spine.set_visible(False)
     contours = draw_scattered_contours(
         axis,
         points[:, 0],
@@ -99,10 +135,7 @@ def render(
         zorder=3,
         label="separatrix assembled on the converged state",
     )
-    for controls_key, valid_key in (
-        ("state_open_controls", "state_open_valid"),
-
-    ):
+    for controls_key, valid_key in (("state_open_controls", "state_open_valid"),):
         controls = np.asarray(fields[controls_key], dtype=np.float64)
         valid = np.asarray(fields[valid_key], dtype=bool)
         colour = STATE
@@ -129,23 +162,32 @@ def render(
             linestyle=None if unit["closed"] else "--",
         )
 
-    state_style = DEFAULT_INK.variant(axis_color=STATE, xpoint_color=STATE)
-    image_style = DEFAULT_INK.variant(
-        axis_color=IMAGED, xpoint_color=IMAGED, axis_markersize=9, xpoint_markersize=10
-    )
+    state_saddle = np.asarray(fields["state_saddle"], dtype=np.float64).reshape(2)
+    image_saddle = np.asarray(fields["image_saddle"], dtype=np.float64).reshape(2)
+    magnetic_axis = np.asarray(fields["axis"], dtype=np.float64).reshape(2)
+
+    # The null vocabulary is a solid triangle for the axis, a filled cross for
+    # the admitted saddle and a hollow marker for every other null.  The
+    # converged state's own read admits its saddle, so that one is the filled
+    # cross; the saddle the field of the currents assembles is the second null
+    # of the pair and is drawn hollow.
+    state_null_style = DEFAULT_INK.variant(axis_color=STATE, xpoint_color=STATE)
     draw_nulls(
         axis,
-        np.asarray(fields["state_saddle"], dtype=np.float64),
-        None,
-        style=state_style,
+        magnetic_axis,
+        [state_saddle],
+        style=state_null_style,
         contain=wall_polygon,
     )
-    draw_nulls(
-        axis,
-        np.asarray(fields["image_saddle"], dtype=np.float64),
-        None,
-        style=image_style,
-        contain=wall_polygon,
+    axis.scatter(
+        *image_saddle,
+        marker="o",
+        s=90,
+        facecolor="none",
+        edgecolor=IMAGED,
+        linewidth=1.4,
+        zorder=DEFAULT_INK.zorder_markers,
+        label="saddle, field of the currents",
     )
     axis.scatter(
         promoted[:, 0],
@@ -160,6 +202,71 @@ def render(
     )
     axis.set_aspect("equal")
     axis.autoscale_view()
+
+    # The two saddles sit 5 mm apart, which is under one panel pixel on the
+    # whole-machine view, so the shift this node reports is only readable on a
+    # magnified window.  The window is square in the poloidal plane and its
+    # scale bar gives the reader the length without an axis.
+    span = float(np.linalg.norm(image_saddle - state_saddle))
+    centre = 0.5 * (state_saddle + image_saddle)
+    half = max(0.020, 3.0 * span)
+    zoom.plot(state_polyline[:, 0], state_polyline[:, 1], color=STATE, ls="--", lw=1.6)
+    zoom.plot(image_polyline[:, 0], image_polyline[:, 1], color=IMAGED, lw=2.4)
+    zoom.scatter(
+        *state_saddle,
+        marker=DEFAULT_INK.xpoint_marker,
+        s=180,
+        color=STATE,
+        linewidth=2.0,
+        zorder=6,
+    )
+    zoom.scatter(
+        *image_saddle,
+        marker="o",
+        s=150,
+        facecolor="none",
+        edgecolor=IMAGED,
+        linewidth=2.0,
+        zorder=6,
+    )
+    zoom.plot(
+        [state_saddle[0], image_saddle[0]],
+        [state_saddle[1], image_saddle[1]],
+        color=POPULATION,
+        lw=1.2,
+        zorder=4,
+    )
+    zoom.annotate(
+        f"{1.0e3 * span:.1f} mm",
+        xy=centre,
+        xytext=(0.06, 0.14),
+        textcoords="axes fraction",
+        fontsize=14,
+        color="#374151",
+        arrowprops={"arrowstyle": "-", "color": POPULATION, "lw": 1.0},
+        zorder=7,
+    )
+    bar = 0.010
+    zoom.plot(
+        [centre[0] - 0.5 * half + 0.006, centre[0] - 0.5 * half + 0.006 + bar],
+        [centre[1] - 0.92 * half, centre[1] - 0.92 * half],
+        color="#374151",
+        lw=2.0,
+    )
+    zoom.text(
+        centre[0] - 0.5 * half + 0.006 + 0.5 * bar,
+        centre[1] - 0.86 * half,
+        "10 mm",
+        ha="center",
+        va="bottom",
+        fontsize=14,
+        color="#374151",
+    )
+    zoom.set_xlim(centre[0] - half, centre[0] + half)
+    zoom.set_ylim(centre[1] - half, centre[1] + half)
+    zoom.set_aspect("equal")
+    zoom.set_anchor("W")
+
     figure.legend(
         handles=[
             plt.Line2D(
@@ -172,22 +279,45 @@ def render(
                 lw=0,
                 label=f"promoted node ({promoted.shape[0]})",
             ),
+            plt.Line2D([], [], color=IMAGED, lw=2.4, label="field of the currents"),
+            plt.Line2D([], [], color=STATE, lw=1.6, ls="--", label="converged state"),
+            plt.Line2D([], [], color=POPULATION, lw=1.2, label="converged state flux"),
             plt.Line2D(
                 [],
                 [],
                 color=STATE,
-                lw=1.6,
-                ls="--",
-                label="separatrix, converged state",
+                marker=DEFAULT_INK.xpoint_marker,
+                markersize=8,
+                lw=0,
+                label="saddle, converged state (filled)",
             ),
-            plt.Line2D([], [], color=POPULATION, lw=1.2, label="converged state flux"),
+            plt.Line2D(
+                [],
+                [],
+                color=IMAGED,
+                marker="o",
+                markersize=8,
+                markerfacecolor="none",
+                lw=0,
+                label="saddle, field of the currents (hollow)",
+            ),
+            plt.Line2D(
+                [],
+                [],
+                color=STATE,
+                marker=DEFAULT_INK.axis_marker,
+                markersize=8,
+                lw=0,
+                label="magnetic axis",
+            ),
         ],
         loc="upper center",
         ncol=4,
         frameon=False,
         fontsize=14,
-        bbox_to_anchor=(0.5, 1.02),
+        bbox_to_anchor=(0.5, 0.995),
     )
+    _assert_text_inside(figure)
     svg_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(svg_path, format="svg", metadata={"Date": None}, bbox_inches=None)
     png_path.parent.mkdir(parents=True, exist_ok=True)
@@ -200,6 +330,11 @@ def render(
         "promoted_marked": int(promoted.shape[0]),
         "state_polyline_vertices": int(state_polyline.shape[0]),
         "image_polyline_vertices": int(image_polyline.shape[0]),
+        "saddle_separation_mm": float(1.0e3 * span),
+        "zoom_window_mm": float(2.0e3 * half),
+        "magnetic_axis_rz": magnetic_axis.tolist(),
+        "state_saddle_rz": state_saddle.tolist(),
+        "image_saddle_rz": image_saddle.tolist(),
     }
 
 

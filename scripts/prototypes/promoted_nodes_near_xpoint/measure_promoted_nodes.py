@@ -236,13 +236,25 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         program = result.program
         terminal = result
 
-    node_count = int(lattice.node_count)
+    grid_count = int(lattice.node_count)
     mask = np.asarray(terminal.promoted_mask, dtype=bool).reshape(-1)
-    coordinates = np.asarray(lattice.coordinate, dtype=np.float64)
-    if mask.size != node_count or coordinates.shape[0] != node_count:
+    # The residual shadow is composed as the interior flood over the plasma
+    # grid followed by the private-wall shadow over the wall's own nodes, so
+    # the mask spans both and the wall nodes carry their own coordinates.
+    coordinates = np.concatenate(
+        (
+            np.asarray(lattice.coordinate, dtype=np.float64).reshape(-1, 2),
+            np.asarray(operator.wall.coordinate, dtype=np.float64).reshape(-1, 2),
+        ),
+        axis=0,
+    )
+    if mask.size != coordinates.shape[0]:
         raise RuntimeError(
-            f"mask {mask.size}, coordinates {coordinates.shape}, lattice {node_count}"
+            f"mask {mask.size} names {mask.size} nodes but the grid ({grid_count}) "
+            f"and wall ({coordinates.shape[0] - grid_count}) carry "
+            f"{coordinates.shape[0]} coordinates"
         )
+    node_count = mask.size
     state_nodes = np.asarray(state, dtype=np.float64)[:node_count]
 
     # The map of the currents on the lattice nodes: the field the sweep's own
@@ -261,9 +273,15 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     difference = image - state_nodes
 
     masks = operator.current_domain_masks(state, requested_class)
-    labels = np.asarray(masks.label).reshape(-1)
-    if labels.size != node_count:
-        labels = np.full(node_count, -1, dtype=np.int64)
+    grid_labels = np.asarray(masks.label).reshape(-1)
+    labels = np.concatenate(
+        (
+            grid_labels
+            if grid_labels.size == grid_count
+            else np.full(grid_count, -1, dtype=np.int64),
+            np.full(node_count - grid_count, int(PlasmaDomain.EXCLUDED_MATERIAL)),
+        )
+    )
 
     _masks_read, topology = operator.read(state, requested_class)
     axis = np.asarray(topology.axis, dtype=np.float64).reshape(2)
@@ -276,8 +294,8 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     shape = tuple(int(value) for value in np.asarray(lattice.shape))
     radius_nodes = np.asarray(lattice.radius, dtype=np.float64)
     height_nodes = np.asarray(lattice.height, dtype=np.float64)
-    state_field = state_nodes.reshape(shape).T
-    image_field = image.reshape(shape).T
+    state_field = state_nodes[:grid_count].reshape(shape).T
+    image_field = image[:grid_count].reshape(shape).T
 
     state_saddle, state_saddle_flux, state_saddle_ok = _stationary_saddle(
         state_field, radius_nodes, height_nodes, seed
@@ -339,8 +357,11 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         "chain": chain,
         "terminal_residual_wb": float(np.asarray(terminal.terminal_residual)),
         "converged": bool(np.asarray(terminal.converged)),
-        "promoted_node_count": int(mask.size and np.count_nonzero(mask)),
-        "lattice_node_count": node_count,
+        "promoted_node_count": int(np.count_nonzero(mask)),
+        "lattice_node_count": grid_count,
+        "physical_node_count": node_count,
+        "wall_node_count": node_count - grid_count,
+        "promoted_wall_node_count": int(np.count_nonzero(mask[grid_count:])),
         "lattice_shape": list(shape),
         "promoted": rows,
         "nearest_promoted_to_x_point_mm": float(1.0e3 * to_x_point[order[0]]),

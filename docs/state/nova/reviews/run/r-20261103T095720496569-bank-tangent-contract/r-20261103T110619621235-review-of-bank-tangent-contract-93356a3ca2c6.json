@@ -13,6 +13,11 @@
   ],
   "completed_at": "2026-11-03T11:18:02Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "negative-result node: the contraction was measured and not kept; the landed content is evidence and prototype scripts only",
+      "recorded_at": "2026-11-05T05:56:18.370432+00:00"
+    },
     "goal_fidelity": {
       "kind": "exempted",
       "reason": "negative-result node: the contraction was measured and not kept; the landed content is evidence and prototype scripts only",

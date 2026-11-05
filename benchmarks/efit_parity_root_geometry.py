@@ -157,6 +157,53 @@ def _closed_axis_branch(
     )
 
 
+def _boundary_branch_status(
+    branches: list[np.ndarray], axis_point: np.ndarray
+) -> tuple[np.ndarray | None, np.ndarray, dict[str, Any]]:
+    """Keep an open unit contour visible without treating it as a polygon."""
+    display = max(
+        branches,
+        key=lambda line: float(np.linalg.norm(np.diff(line, axis=0), axis=1).sum()),
+        default=np.empty((0, 2)),
+    )
+    try:
+        closed = _closed_axis_branch(branches, axis_point)
+    except RuntimeError:
+        gap = float(np.linalg.norm(display[0] - display[-1])) if len(display) else None
+        scale = max(float(np.ptp(display, axis=0).max()), 1.0) if len(display) else 1.0
+        is_open = gap is not None and gap > 1.0e-9 * scale
+        reason = (
+            "The unit boundary has separated endpoints and no closed branch "
+            "encloses the solved axis."
+            if is_open
+            else "No unit-boundary branch encloses the solved axis."
+        )
+        return (
+            None,
+            display,
+            {
+                "status": "open" if is_open else "unresolved",
+                "reason": reason,
+                "branch_count": len(branches),
+                "display_endpoint_gap_m": gap,
+                "display_endpoints_m": [display[0].tolist(), display[-1].tolist()]
+                if len(display)
+                else [],
+            },
+        )
+    return (
+        closed,
+        closed,
+        {
+            "status": "closed",
+            "reason": None,
+            "branch_count": len(branches),
+            "display_endpoint_gap_m": float(np.linalg.norm(closed[0] - closed[-1])),
+            "display_endpoints_m": [closed[0].tolist(), closed[-1].tolist()],
+        },
+    )
+
+
 def _distance_pair(left: np.ndarray, right: np.ndarray) -> dict[str, Any]:
     """Expose the aggregate and both directed components of the LCFS metric."""
     left_to_right = _nearest_neighbour_distribution(left, right)

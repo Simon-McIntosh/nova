@@ -25,7 +25,7 @@ from benchmarks.efit_parity_moment_definitions import (  # noqa: E402
 )
 from benchmarks.efit_parity_root_geometry import (  # noqa: E402
     _assert_reference,
-    _closed_axis_branch,
+    _boundary_branch_status,
     _sha256_array,
     _stored_lcfs,
     _unit_boundary_branches,
@@ -122,7 +122,7 @@ def _reconstruct_contours(
     source: dict[str, Any],
     store: Path,
     bank: Path,
-) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+) -> tuple[dict[str, np.ndarray | None], dict[str, Any]]:
     selected = next(
         item
         for item in select_slices_by_shot(bank)
@@ -159,7 +159,9 @@ def _reconstruct_contours(
         float(topology.axis_flux),
         float(topology.boundary_flux),
     )
-    solved = _closed_axis_branch(branches, np.asarray(topology.axis, dtype=np.float64))
+    solved, display, boundary_status = _boundary_branch_status(
+        branches, np.asarray(topology.axis, dtype=np.float64)
+    )
     stored = _stored_lcfs(context["group"], context["row"])
 
     core = np.asarray(equilibrium.domains.core, dtype=bool)
@@ -167,18 +169,27 @@ def _reconstruct_contours(
     cell_radius = np.asarray(profile.lattice.node_radius, dtype=np.float64)
     core_area = float(np.sum(cell_area[core]))
     core_volume = float(np.sum(2.0 * np.pi * cell_radius[core] * cell_area[core]))
+    cell_current = np.asarray(equilibrium.cell_current, dtype=np.float64)
+    live_core_current = float(np.sum(cell_current[core]))
+    live_total_current = float(np.sum(cell_current))
     banked_volume = source["moment_normalisation_attribution"][
         "solved_live_equilibrium"
     ]["plasma_volume_m3"]
-    if not np.isclose(core_volume, banked_volume, rtol=2.0e-14):
+    core_matches_banked = bool(np.isclose(core_volume, banked_volume, rtol=2.0e-14))
+    if solved is not None and not core_matches_banked:
         raise RuntimeError("reconstructed confined-core volume differs from the bank")
     return (
-        {"solved": solved, "stored": stored},
+        {"solved": solved, "display": display, "stored": stored},
         {
+            "boundary_status": boundary_status,
             "cell_count": int(core.size),
             "confined_core_cell_count": int(np.count_nonzero(core)),
             "confined_core_poloidal_area_m2": core_area,
             "confined_core_toroidal_volume_m3": core_volume,
+            "banked_confined_core_toroidal_volume_m3": banked_volume,
+            "reconstructed_core_matches_banked": core_matches_banked,
+            "live_core_current_a": live_core_current,
+            "live_total_current_a": live_total_current,
             "reconstructed_axis_m": [
                 float(value) for value in np.asarray(topology.axis)
             ],
@@ -267,9 +278,8 @@ def _boundary_support_rescore(
     }
 
 
-def _plot_contours(contours: dict[str, np.ndarray], path: Path) -> None:
+def _plot_contours(contours: dict[str, np.ndarray | None], path: Path) -> None:
     figure, axis = plt.subplots(figsize=(5.8, 6.2), constrained_layout=True)
-    solved = _closed_polygon(contours["solved"])
     stored = _closed_polygon(contours["stored"])
     axis.fill(
         stored[:, 0],
@@ -278,15 +288,26 @@ def _plot_contours(contours: dict[str, np.ndarray], path: Path) -> None:
         alpha=0.20,
         label="stored LCFS enclosed region",
     )
-    axis.fill(
-        solved[:, 0],
-        solved[:, 1],
-        color="#f58518",
-        alpha=0.24,
-        label="solved closed-branch enclosed region",
-    )
     axis.plot(stored[:, 0], stored[:, 1], color="#24527a", lw=1.4)
-    axis.plot(solved[:, 0], solved[:, 1], color="#b55d00", lw=1.4)
+    if contours["solved"] is None:
+        display = contours["display"]
+        axis.plot(
+            display[:, 0],
+            display[:, 1],
+            color="#b55d00",
+            lw=1.4,
+            label="open solved unit contour",
+        )
+    else:
+        solved = _closed_polygon(contours["solved"])
+        axis.fill(
+            solved[:, 0],
+            solved[:, 1],
+            color="#f58518",
+            alpha=0.24,
+            label="solved closed-branch enclosed region",
+        )
+        axis.plot(solved[:, 0], solved[:, 1], color="#b55d00", lw=1.4)
     axis.set_title("MAST 22086/43 boundary-enclosed regions")
     axis.set_xlabel("R [m]")
     axis.set_ylabel("Z [m]")
@@ -297,18 +318,138 @@ def _plot_contours(contours: dict[str, np.ndarray], path: Path) -> None:
     plt.close(figure)
 
 
+def _open_boundary_receipt(
+    source: dict[str, Any],
+    moment: dict[str, Any],
+    source_path: Path,
+    moment_path: Path,
+    integrity: dict[str, Any],
+    contours: dict[str, np.ndarray | None],
+    clipping: dict[str, Any],
+) -> dict[str, Any]:
+    """Retain independent banked facts and leave enclosed measures undefined."""
+    status = clipping["boundary_status"]
+    reason = status["reason"]
+    stored = _polygon_measure(contours["stored"])
+    attribution = source["moment_normalisation_attribution"]
+    published_solved = attribution["solved_live_equilibrium"]["plasma_volume_m3"]
+    published_reference = attribution["reference"]["plasma_volume_m3"]
+    currents = moment["current_supports"]
+    clipping.update(
+        {
+            "confined_core_current_a": clipping["live_core_current_a"],
+            "banked_confined_core_current_a": currents["confined_core"],
+            "pinned_all_domain_current_a": currents["all_domain_constrained"],
+            "confined_core_current_fraction": (
+                clipping["live_core_current_a"] / clipping["live_total_current_a"]
+            ),
+            "banked_confined_core_current_fraction": currents[
+                "confined_core_over_all_domain"
+            ],
+            "confined_core_area_fraction_of_solved_boundary": None,
+            "confined_core_volume_fraction_of_solved_boundary": None,
+            "area_fraction_minus_current_fraction": None,
+        }
+    )
+    undefined = {"status": "undefined_open_boundary", "reason": reason}
+    metrics = {
+        name: {
+            "original_signed_relative_deviation": moment[
+                "matched_definition_deviations"
+            ][name]["signed_relative_deviation"],
+            "boundary_adjusted_solved_integral": None,
+            "signed_relative_deviation": None,
+            "deficit_eliminated": None,
+        }
+        for name in ("poloidal_beta", "internal_inductance")
+    }
+    return {
+        "receipt": {
+            "kind": "boundary_enclosed_volume_reconciliation",
+            "shot": TARGET_SHOT,
+            "slice_index": 43,
+            "source_receipts": [str(source_path), str(moment_path)],
+            "source_receipt_sha256": {
+                str(source_path): hashlib.sha256(source_path.read_bytes()).hexdigest(),
+                str(moment_path): hashlib.sha256(moment_path.read_bytes()).hexdigest(),
+            },
+        },
+        "execution_contract": {
+            "nonlinear_solve_calls": 0,
+            "new_solved_equilibria": 0,
+            "equilibrium_observations_from_serialised_state": 1,
+            "contour_quadrature": "stored LCFS only; solved unit contour is open",
+        },
+        "boundary_status": status,
+        "contour_comparison_table": [
+            {
+                "contour": "solved_open_unit_boundary",
+                "status": "open",
+                "reason": reason,
+                "poloidal_area_m2": None,
+                "area_centroid_major_radius_m": None,
+                "exact_solid_of_revolution_m3": None,
+                "first_moment_approximation_m3": None,
+            },
+            {"contour": "stored_lcfs", **stored},
+        ],
+        "published_volume_comparison": {
+            "solved_m3": published_solved,
+            "reference_m3": published_reference,
+            "solved_over_reference": published_solved / published_reference,
+            "solved_published_over_own_boundary_enclosed": None,
+            "reference_published_over_own_boundary_enclosed": published_reference
+            / stored["exact_solid_of_revolution_m3"],
+            "disagreeing_published_volume": None,
+            "disagreement_factor_boundary_over_published": None,
+        },
+        "controlled_ratios": {
+            "solved_over_stored_poloidal_area": None,
+            "solved_over_stored_area_centroid_major_radius": None,
+            "solved_over_stored_boundary_enclosed_toroidal_volume": None,
+        },
+        "clipping": clipping,
+        "candidate_discrimination": {
+            name: {"verdict": "UNDEFINED_OPEN_BOUNDARY", "reason": reason}
+            for name in (
+                "confined_core_clipping",
+                "genuinely_different_curves",
+                "revolution_or_jacobian_convention",
+            )
+        },
+        "boundary_support_moment_rescore": {
+            **undefined,
+            "metrics": metrics,
+            "parity_consequence": {
+                "poloidal_beta_volume_deficit": "UNDEFINED",
+                "internal_inductance_volume_deficit": "UNDEFINED",
+            },
+        },
+        "protected_banked_artifacts": integrity,
+        "figure": str(OUTPUT_FIGURE),
+        "verdict": "UNDEFINED_OPEN_BOUNDARY",
+    }
+
+
 def reconcile(
     source_path: Path = SOURCE_RECEIPT,
     moment_path: Path = MOMENT_RECEIPT,
     store: Path = SHOT_STORE,
     bank: Path = DECOMPOSITION_BANK,
-) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+) -> tuple[dict[str, Any], dict[str, np.ndarray | None]]:
     """Return the zero-solve boundary-volume reconciliation and its contours."""
     configure_dtypes()
     source = json.loads(source_path.read_text())
     moment = json.loads(moment_path.read_text())
     integrity = _verify_protected_artifacts(source)
     contours, clipping = _reconstruct_contours(source, store, bank)
+    if contours["solved"] is None:
+        return (
+            _open_boundary_receipt(
+                source, moment, source_path, moment_path, integrity, contours, clipping
+            ),
+            contours,
+        )
     solved = _polygon_measure(contours["solved"])
     stored = _polygon_measure(contours["stored"])
     published_solved = source["moment_normalisation_attribution"][

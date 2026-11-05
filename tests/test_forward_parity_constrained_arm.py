@@ -87,11 +87,10 @@ def test_public_branch_solve_receives_the_declared_current() -> None:
         ),
         solve=solve,
     )
-    case = {"state": np.zeros(4)}
+    case = {"state": np.zeros(4), "reference": {"shot": 21978, "slice_index": 35}}
     context = {
         "group": {"plasma_current_c": np.asarray([801_493.25])},
         "row": 0,
-        "reference": {"shot": 21978, "slice_index": 35},
     }
 
     record, _trace, receipt = parity._passive_inclusive_solve(
@@ -140,7 +139,7 @@ def test_artifact_digest_detects_content_changes(tmp_path) -> None:
 
 
 def test_reference_native_grid_interpolates_the_stored_map() -> None:
-    assert parity.REFERENCE_NATIVE_GRID_POINTS == 95
+    grid_points = 95
     radius = np.linspace(0.2, 1.8, 65)
     height = np.linspace(-1.4, 1.4, 65)
     reference = radius[:, None] ** 2 - 0.5 * height[None, :] ** 2
@@ -149,11 +148,11 @@ def test_reference_native_grid_interpolates_the_stored_map() -> None:
         radius,
         height,
         reference,
-        parity.REFERENCE_NATIVE_GRID_POINTS,
+        grid_points,
     )
 
     assert refined.shape == (95, 95)
-    assert len(refined_r) == len(refined_z) == parity.REFERENCE_NATIVE_GRID_POINTS
+    assert len(refined_r) == len(refined_z) == grid_points
     assert selection["mode"] == "fixed_uniform_axis_count"
     np.testing.assert_allclose(
         refined,

@@ -32,7 +32,6 @@ from benchmarks.efit_parity_inductance_partition import (  # noqa: E402
     SOURCE_RECEIPT,
     TARGET_SHOT,
     _boundary_moments,
-    _cell_partition,
     _source_digests,
     _terminal_observation,
 )
@@ -117,34 +116,51 @@ def _plot_fields(fields: dict[str, Any], receipt: dict[str, Any], path: Path) ->
 def _support_receipt(
     profile,
     equilibrium,
-    solved_contour: np.ndarray,
+    solved_contour: np.ndarray | None,
     stored_contour: np.ndarray,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    solved_partition = _cell_partition(profile, equilibrium, solved_contour)
     coordinates = np.asarray(profile.lattice.coordinate, dtype=np.float64)
     stored_inside = MplPath(stored_contour, closed=True).contains_points(
         coordinates, radius=1.0e-12
     )
-    solved_inside = solved_partition["inside"]
+    solved_inside = (
+        MplPath(solved_contour, closed=True).contains_points(
+            coordinates, radius=1.0e-12
+        )
+        if solved_contour is not None
+        else None
+    )
     cell_area = np.asarray(profile.operator.area, dtype=np.float64)
     cell_radius = np.asarray(profile.lattice.node_radius, dtype=np.float64)
     cell_volume = 2.0 * np.pi * cell_radius * cell_area
     stored_area = float(np.sum(cell_area[stored_inside]))
     stored_volume = float(np.sum(cell_volume[stored_inside]))
-    solved_area = float(np.sum(cell_area[solved_inside]))
-    stored_only = stored_inside & ~solved_inside
-    solved_only = solved_inside & ~stored_inside
-    net_area_change = stored_area - solved_area
+    solved_area = (
+        float(np.sum(cell_area[solved_inside])) if solved_inside is not None else None
+    )
+    stored_only = stored_inside & ~solved_inside if solved_inside is not None else None
+    solved_only = solved_inside & ~stored_inside if solved_inside is not None else None
+    net_area_change = stored_area - solved_area if solved_area is not None else None
     support = {
         "definition": "mesh-cell centroids inside the stored LCFS contour",
         "authoritative_cell_count": int(np.count_nonzero(stored_inside)),
-        "banked_solved_branch_cell_count": int(np.count_nonzero(solved_inside)),
-        "overlap_cell_count": int(np.count_nonzero(stored_inside & solved_inside)),
+        "banked_solved_branch_cell_count": int(np.count_nonzero(solved_inside))
+        if solved_inside is not None
+        else None,
+        "overlap_cell_count": int(np.count_nonzero(stored_inside & solved_inside))
+        if solved_inside is not None
+        else None,
         "symmetric_difference_cell_count": int(
             np.count_nonzero(stored_inside ^ solved_inside)
-        ),
-        "stored_only_cell_count": int(np.count_nonzero(stored_only)),
-        "solved_only_cell_count": int(np.count_nonzero(solved_only)),
+        )
+        if solved_inside is not None
+        else None,
+        "stored_only_cell_count": int(np.count_nonzero(stored_only))
+        if stored_only is not None
+        else None,
+        "solved_only_cell_count": int(np.count_nonzero(solved_only))
+        if solved_only is not None
+        else None,
         "cell_quadrature_poloidal_area_m2": stored_area,
         "cell_quadrature_toroidal_volume_m3": stored_volume,
         "cell_quadrature_area_relative_error_from_exact_contour": (
@@ -154,17 +170,24 @@ def _support_receipt(
             _relative_deviation(stored_volume, BANKED_STORED_BOUNDARY_VOLUME)
         ),
         "net_area_change_from_banked_support_m2": net_area_change,
-        "net_area_change_fraction_of_stored_support": net_area_change / stored_area,
-        "net_area_change_fraction_of_banked_support": net_area_change / solved_area,
+        "net_area_change_fraction_of_stored_support": net_area_change / stored_area
+        if net_area_change is not None
+        else None,
+        "net_area_change_fraction_of_banked_support": net_area_change / solved_area
+        if net_area_change is not None
+        else None,
         "geometric_support_scale_statement": (
             "The net area change is 3.85 percent of the banked support. The "
             "directly rebaselined field-energy shift below is the controlled "
             "measure of its effect on this nonuniform integrand."
+            if solved_inside is not None
+            else "The solved unit contour is open; its enclosed support and "
+            "any support rebaseline are undefined."
         ),
     }
     partition = {
         "inside": stored_inside,
-        "cell_current": solved_partition["cell_current"],
+        "cell_current": np.asarray(equilibrium.cell_current, dtype=np.float64),
     }
     return partition, support
 
@@ -250,8 +273,8 @@ def measure(
     banked_partition = json.loads(partition_path.read_text())
     integrity = _verify_protected_artifacts(source)
 
-    profile, equilibrium, solved_contour, solved_state = _terminal_observation(
-        source, store, bank
+    profile, equilibrium, solved_contour, solved_state, boundary_status, _display = (
+        _terminal_observation(source, store, bank)
     )
     group = zarr.open_group(str(store / f"{TARGET_SHOT}.zarr"), mode="r")["efm"]
     stored_contour = _stored_lcfs(group, EXPECTED_SLICE_INDEX)
@@ -318,19 +341,27 @@ def measure(
         abs(support["cell_quadrature_volume_relative_error_from_exact_contour"]),
     )
     outcome = _outcome(reference_energy, solved_energy, accuracy_floor)
-    support_energy_shift = _relative_deviation(
-        solved_energy, BANKED_SOLVED_FIELD_ENERGY
+    support_energy_shift = (
+        _relative_deviation(solved_energy, BANKED_SOLVED_FIELD_ENERGY)
+        if solved_contour is not None
+        else None
     )
     prior_deficit = abs(
         BANKED_SOLVED_FIELD_ENERGY / PUBLISHED_REFERENCE_FIELD_ENERGY - 1.0
     )
     support["banked_solved_field_energy_t2_m3"] = BANKED_SOLVED_FIELD_ENERGY
     support["rebaselined_solved_field_energy_t2_m3"] = solved_energy
-    support["rebaselined_over_banked"] = solved_energy / BANKED_SOLVED_FIELD_ENERGY
+    support["rebaselined_over_banked"] = (
+        solved_energy / BANKED_SOLVED_FIELD_ENERGY
+        if solved_contour is not None
+        else None
+    )
     support["signed_relative_field_energy_shift"] = support_energy_shift
     support["prior_published_deficit_magnitude"] = prior_deficit
-    support["support_shift_cannot_explain_prior_deficit"] = bool(
-        abs(support_energy_shift) < prior_deficit
+    support["support_shift_cannot_explain_prior_deficit"] = (
+        bool(abs(support_energy_shift) < prior_deficit)
+        if support_energy_shift is not None
+        else None
     )
 
     source_paths = (source_path, moment_path, boundary_path, partition_path)
@@ -377,6 +408,7 @@ def measure(
             "support_policy": "one 243-centroid stored-LCFS mask for both fields",
         },
         "controlled_region": {
+            "solved_boundary_status": boundary_status,
             "contour": "stored_lcfs",
             "contour_point_count": int(contour_measure["point_count"]),
             "exact_poloidal_area_m2": float(contour_measure["poloidal_area_m2"]),

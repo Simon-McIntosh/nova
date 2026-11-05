@@ -328,8 +328,8 @@ def _solovev_separation_row(fixture: str, requested_cells: int) -> dict[str, Any
     valid = np.asarray(mesh.interior(), dtype=bool) & np.isfinite(recovered_density)
     recovered_density = np.where(valid, recovered_density, 0.0)
     recovered_current = recovered_density * np.asarray(mesh.cell_area)
-    masks, _topology, _sample, _core_support, _common_support = (
-        operator._support_partition(jnp.asarray(reference))
+    masks, _topology, _sample, _profile_support = operator._support_partition(
+        jnp.asarray(reference)
     )
     declared = np.asarray(operator.source.declared_support(masks), dtype=bool)
     declared_valid = declared & valid
@@ -1144,7 +1144,7 @@ def _solve_row(runtime: dict[str, Any]) -> dict[str, Any]:
     equilibrium = branch.equilibrium
     terminal_current = float(np.sum(np.asarray(equilibrium.cell_current)))
     nonzero = bool(abs(terminal_current) >= 0.01 * target_current)
-    converged_plasma = bool(branch.converged and nonzero)
+    converged_plasma = bool(branch.qualified and nonzero)
     if converged_plasma:
         outcome = "converged_plasma_root"
     elif nonzero:
@@ -1176,7 +1176,7 @@ def _solve_row(runtime: dict[str, Any]) -> dict[str, Any]:
             "route": "newton_krylov",
             "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
             "outcome_class": outcome,
-            "converged": bool(branch.converged),
+            "converged": bool(branch.qualified),
             "converged_plasma_root": converged_plasma,
             "terminal_residual": branch_receipt["residual"],
             "iterations": branch_receipt["iterations"],
@@ -1354,7 +1354,7 @@ def _mesh_terminal_row(runtime: dict[str, Any]) -> dict[str, Any]:
             "warmup_sweeps": parity_slice.WARMUP_SWEEPS,
             "relaxation": parity_slice.RELAXATION,
             "step_cap": parity_slice.STEP_CAP,
-            "converged": bool(branch.converged),
+            "converged": bool(branch.qualified),
             "terminal_residual": branch_receipt["residual"],
             "iterations": branch_receipt["iterations"],
             "residual_trajectory": solve["residual_trajectory"],

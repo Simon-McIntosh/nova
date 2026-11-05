@@ -27,7 +27,7 @@ def assemble(run, names, revision, destination):
         commands.append(
             "PYTHONPATH=" + shlex.quote(tree) + " " + header.split(" command: ", 1)[1]
         )
-        for match in re.finditer(r"^FAILED\s+(\S+)", text, re.MULTILINE):
+        for match in re.finditer(r"^FAILED[ \t]+(\S+::\S+)", text, re.MULTILINE):
             identity = match[1]
             position = identity.find("tests/")
             failure_ids.add(identity[position:] if position >= 0 else identity)

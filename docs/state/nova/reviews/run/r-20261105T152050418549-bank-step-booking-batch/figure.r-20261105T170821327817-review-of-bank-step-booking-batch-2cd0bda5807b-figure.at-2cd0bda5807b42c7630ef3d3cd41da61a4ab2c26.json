@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "No suite ran for this figure review and no suite delta is measured; the count is 0 with an empty id list, not the difference of two arms this rubric took.",
+  "attachments_opened": [
+    "image-0.png"
+  ],
+  "attachments_unopenable": [],
+  "caption_review": "The figcaption names the reserved H200 allocation, the sample basis (medians of three synchronized warm calls), what the whole-solve wall is measured as, how the per-iterate value is divided, and that the axes are linear with milliseconds printed at every marker. It does not merely repeat the figure's title or the panel's axis labels, so it is not recorded as a finding.",
+  "completed_at": "2026-11-05T17:18:16.806Z",
+  "dispatched_at": "2026-11-05T17:11:37Z",
+  "figures_reviewed": [
+    {
+      "attached_image": "image-0.png",
+      "drawing_script": "scripts/prototypes/bank_step_booking_batch/report.py",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-booking-batch/jacobian-wall.svg",
+      "kind": "single-panel line chart, Jacobian wall against lane count, base against batched",
+      "rendered_size_px": [
+        1399,
+        720
+      ],
+      "rubric": {
+        "contrast": "pass - every text artist is near-black (#111111 tick labels and legend text, #555555 for the two base annotations) or the feature blue #3366cc, all far above 4.5:1 on white. The base line is #929292, about 2.8:1 on white, which is the repository's supporting-series grey and reads clearly as a thin dashed line beside the solid blue.",
+        "data_ink": "pass - the data marks are two lines (3.0 pt feature blue, 2.6 pt grey) over four circular markers, and nothing else carries visual weight. No gridlines, no shaded band, no background fill, no fill under either line.",
+        "decoration": "pass - plain white ground; the top and right spines are absent and only the left scale and bottom category axis are drawn; no gradient, shadow, box frame or styled theme anywhere on the canvas.",
+        "label_collision": "fail - nothing is clipped at the canvas edge and no label overlaps another label or a data mark; but a base-line dash runs through the bounding box of the '18.96' label (measured on the rendered PNG: 11 grey line pixels inside the label box x 216-275, y 538-554, nearest text pixel 2.2 px away), so the highest-risk label is grazed rather than clear; and the '31.80' label is drawn about 1.2 lanes to the right of the 'batched' marker it belongs to.",
+        "legibility": "pass - one full-width panel reads at a glance: linear x axis labelled 'Lanes' ticked at 1, 4, 8, 12, 16; linear y axis labelled 'Jacobian wall [ms]' from zero with ticks every 50; two series resolved by an unframed upper-left legend ('base' grey dashed with markers, 'batched' blue solid with markers); every marker carries its value, so 18.96 / 289.49 / 9.39 / 31.80 are readable without the page text.",
+        "table_form": "pass - a wall against lane count with two arms is naturally a plotted scaling relationship, not tabulated information; the four values are also printed on the page's table beside the figure, so the plot adds the scaling shape rather than restating a table."
+      }
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "cosmetic label placement on a landed two-point scaling figure; values reconcile with the table and nothing is clipped or overlapping",
+      "recorded_at": "2026-11-05T17:45:01.156284+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "cosmetic label placement on a landed two-point scaling figure; values reconcile with the table and nothing is clipped or overlapping",
+      "recorded_at": "2026-11-05T17:45:03.706210+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "cosmetic label placement on a landed two-point scaling figure; values reconcile with the table and nothing is clipped or overlapping",
+      "recorded_at": "2026-11-05T17:45:06.020283+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_booking_batch/report.py",
+      "id": "f3a91c72d04",
+      "line": 38,
+      "severity": "non-blocking",
+      "summary": "The base arm's value labels use a (10, 24) point offset, which puts '18.96' directly above-right of the one-lane marker and into the rising grey line: on the rendered PNG the label box (x 216-275, y 538-554) contains 11 pixels of the #929292 line and the nearest text pixel is 2.2 px from it, so a dash grazes the top-right of the text. The digits remain readable and nothing is obscured, so this does not stop a reader, but the label is the only one on the canvas that the data run into; moving it below-left of the marker, or lifting the offset above the line's local slope, would clear it."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_batch/report.py",
+      "id": "f7c2e15ba83",
+      "line": 39,
+      "severity": "non-blocking",
+      "summary": "The 'batched' arm's labels use a (52, 12) point offset against the base arm's (10, 24), so '31.80' is drawn about 72 px - roughly 1.2 lanes - to the right of its marker, at about x = 17.2 in data units while the marker sits at lane 16. A reader has to infer which marker it belongs to from colour alone, and its position falls in the empty stretch of axis beyond the last measurement, where a value could be read as belonging to a lane that was never run. The label also sits above the line's y at that x, so it does not obviously annotate the endpoint. A consistent small offset for both arms would remove the ambiguity."
+    },
+    {
+      "file": "scripts/prototypes/bank_step_booking_batch/report.py",
+      "id": "fb0d4e68a15",
+      "line": 63,
+      "severity": "non-blocking",
+      "summary": "The x axis is ticked at 1, 4, 8, 12 and 16 but only lanes 1 and 16 were measured, and each arm is drawn as one straight segment between those two points. The ticks at 4, 8 and 12 therefore mark lane counts with no data under them, so the panel reads as a measured scaling curve sampled at five lane counts rather than as two endpoints joined by a straight line. The page's alt text and caption do say one and sixteen lanes, and the numeric table beside it carries only those two rows, so the reader who consults the page is corrected; the picture alone is not. Ticking only the measured lanes, or marking the segment as an interpolation, would make the figure honest on its own."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass - near-black and #3366cc text on white; base line #929292 at about 2.8:1 reads as a supporting dashed series.",
+    "data_ink": "pass - two lines and four markers are the only data marks; no gridlines, fills or bands.",
+    "decoration": "pass - white ground, top and right spines absent, no gradient, shading or styled theme.",
+    "label_collision": "fail - '18.96' is grazed by a base-line dash (2.2 px nearest text pixel) and '31.80' sits about 1.2 lanes right of its marker; nothing is clipped and no two labels overlap.",
+    "legibility": "pass - linear 'Lanes' against 'Jacobian wall [ms]', unframed legend upper left, values printed at all four markers; readable at a glance.",
+    "table_form": "pass - a two-arm scaling relationship is plotted, not a table restated as a picture."
+  },
+  "project": "nova",
+  "raw_text": "Reviewed the single attached PNG (image-0.png, 1399x720) as the rendered artifact; no SVG and no other image was opened. Values cross-checked against the page table at the reviewed head: 18.963, 289.489, 9.395, 31.804 ms, which the markers print as 18.96, 289.49, 9.39 and 31.80.\n\nFIGURE docs/figures/sub-millisecond-forward-path/bank-step-booking-batch/jacobian-wall.svg (attached render image-0.png)\nRUBRIC legibility: pass - linear 'Lanes' against 'Jacobian wall [ms]', unframed legend upper left, values printed at all four markers.\nRUBRIC data_ink: pass - two lines and four markers are the only data marks; no gridlines, fills or bands.\nRUBRIC decoration: pass - white ground, top and right spines absent, no gradient or shading.\nRUBRIC contrast: pass - near-black and #3366cc text on white; base line #929292 about 2.8:1 as a supporting dashed series.\nRUBRIC table_form: pass - a two-arm scaling relationship is plotted, not a table recast as a picture.\nRUBRIC label_collision: fail - '18.96' is grazed by a base-line dash (nearest text pixel 2.2 px, 11 line pixels inside the label box) and '31.80' sits about 1.2 lanes right of its marker; nothing clipped, no two labels overlap.\n\nThree non-blocking findings on the drawing script; no blocking finding, so the node is not held by the figure.",
+  "review_run_id": "r-20261105T170821327817-review-of-bank-step-booking-batch-2cd0bda5807b-figure",
+  "reviewed_base_sha": "221a7d483f5e9f3b717eced87e86e98c81b6cd7b",
+  "reviewed_head_sha": "2cd0bda5807b42c7630ef3d3cd41da61a4ab2c26",
+  "reviewed_run_id": "r-20261105T152050418549-bank-step-booking-batch",
+  "reviewing_run_id": "r-20261105T170821327817-review-of-bank-step-booking-batch-2cd0bda5807b-figure",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T17:15:49+00:00",
+  "total": null
+}

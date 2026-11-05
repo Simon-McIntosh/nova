@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Compared the reviewed run's baseline_suite (revision 8ff5dae2, completed, EXIT=1, 2 failures: tests/test_bank_tangent_contract.py::test_single_tangent_temporary_bytes and ::test_sixteen_lane_tangent_temporary_bytes) against its after_suite (revision 9492da1, completed, EXIT=0, 0 failures); suite-base.log and suite-head.log end in those EXIT= lines. The candidate test file was removed at faff966d, so the zero is a candidate-arm result, not a head regression gate.",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/current.py:639 book_tangent_channels",
+    "nova/equilibrium/support_read.py:1074 _local_booking_sensitivities",
+    "nova/equilibrium/support_read.py:1110 step_jacobian"
+  ],
+  "completed_at": "2026-11-05T06:05:47.554Z",
+  "dispatched_at": "2026-11-05T05:59:39Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html",
+      "line": "2",
+      "severity": "non-blocking",
+      "text": "non-blocking: The negative-result disposition is guarded only by an uncommitted run-directory phrase check (repair-head.log), so a later edit that keeps the three phrases while re-landing the contraction, or removes the heading without touching the paragraph, passes the guard and nothing in the committed tree fails; a committed test asserting the source-equality claim against the base revision would make the disposition durable."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: The paragraph says the out-of-memory limit lies in the larger support_read.step_jacobian assembly path and cites the bank-step-batch manifest's 118.95 GiB failure, but that manifest's failure_attribution classifies the event as scaffolding (an unchunked vmap of the booking tangent), so the source describes an unchunked caller rather than a code limit; the sentence should say the limit arises in an unchunked vmap of the tangent inside that assembly path."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "the single gained commit 94985df66 replaces the fragment's h2 and its opening p to declare a completed negative-result investigation with the channel-by-sample buffers retained and the implementation goal open; no other file and no source line changes.",
+    "done_when": "brief.txt:127-128 requires CPU parity, the paired H200 wall and memory table and fresh-read precision; h200-base.log, h200-head.log, parity-sirius.log and fresh-sirius.log all end EXIT=0 and record those measures, and every number restated in the changed paragraph reconciles with them, but the contraction itself is not gated at head.",
+    "goal": "brief.txt:38 asks for a booking tangent with no cell-by-channel-by-quadrature buffer, but the only gained commit 94985df66 changes two lines of docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:2-3 and does not deliver it; nova/equilibrium/current.py is identical to base 8ff5dae2 (git diff --exit-code base HEAD -- nova/ EXIT=0).",
+    "manifest": "read; manifest.md records status complete, ten commits beyond 8ff5dae2, the tests line as git diff --exit-code 8ff5dae2... HEAD -- nova/, the source-restore receipt NOVA_DIFF_EMPTY=1 with a positive control, the repair receipts, and the 62,344,168,704 to 45,470,880,768 byte sixteen-lane peak pair.",
+    "write_paths": "prompt.txt:96-103 grants nova/equilibrium/current.py, clip_quadrature.py, the tangent test, the prototype directory, the fragment and the figure; git diff --stat 93356a3ca..94985df66 touches only the fragment path."
+  },
+  "justifications": {
+    "durability": "the disposition check in repair-head.log ends FINDING_F4AF655FD22=answered EXIT=0 and its virtual revert in repair-virtual-revert.log ends EXIT=1 naming all three phrases missing, so it does fail on removal, but it is an uncommitted run-directory python -c phrase test and the committed tree has no test file at head (tests/test_bank_tangent_contract.py absent at 94985df66).",
+    "evidence": "every figure the changed paragraph states reconciles with h200-base.log and h200-head.log (23.973-13.812=10.16 ms tangent, 39.191-29.074=10.12 ms step, 62,344,168,704 B = 62.34 GB peak) and its citation scripts/prototypes/bank_step_batch/measure.py:178 resolves to support_read.step_jacobian, but after_suite ran at candidate 9492da1 rather than the reviewed head and no head-level gate measures the contraction.",
+    "fit": "the fragment keeps the sibling style of docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html and the commit subject docs(equilibrium): classify tangent study as negative result is conventional with a body and carries no plan or run identifier.",
+    "goal_fidelity": "the gained commit at docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:3 recasts the node as a completed negative-result investigation with the contraction goal open, which is the disposition the prior review permitted, while nova/equilibrium/current.py still equals base 8ff5dae2 and the stated contraction is not delivered.",
+    "reuse": "the diff adds no function, class or module - it edits two lines of an existing evidence fragment - so no capability is duplicated, and a search over docs/evidence/fragments and scripts/prototypes found no other owner for a negative-result disposition of this node.",
+    "scope_discipline": "git diff --stat 93356a3ca..94985df66 changes only docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html, inside the fragment path granted by prompt.txt:96-103, with two insertions and two deletions."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.txt:38 asks for a booking tangent with no cell-by-channel-by-quadrature buffer, but the only gained commit 94985df66 changes two lines of docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:2-3 and does not deliver it; nova/equilibrium/current.py is identical to base 8ff5dae2 (git diff --exit-code base HEAD -- nova/ EXIT=0).\nVERDICT done_when: brief.txt:127-128 requires CPU parity, the paired H200 wall and memory table and fresh-read precision; h200-base.log, h200-head.log, parity-sirius.log and fresh-sirius.log all end EXIT=0 and record those measures, and every number restated in the changed paragraph reconciles with them, but the contraction itself is not gated at head.\nVERDICT write_paths: prompt.txt:96-103 grants nova/equilibrium/current.py, clip_quadrature.py, the tangent test, the prototype directory, the fragment and the figure; git diff --stat 93356a3ca..94985df66 touches only the fragment path.\nVERDICT manifest: read; manifest.md records status complete, ten commits beyond 8ff5dae2, the tests line as git diff --exit-code 8ff5dae2... HEAD -- nova/, the source-restore receipt NOVA_DIFF_EMPTY=1 with a positive control, the repair receipts, and the 62,344,168,704 to 45,470,880,768 byte sixteen-lane peak pair.\nVERDICT diff: the single gained commit 94985df66 replaces the fragment's h2 and its opening p to declare a completed negative-result investigation with the channel-by-sample buffers retained and the implementation goal open; no other file and no source line changes.\nCALL_SITES: nova/equilibrium/current.py:639 book_tangent_channels, nova/equilibrium/support_read.py:1074 _local_booking_sensitivities, nova/equilibrium/support_read.py:1110 step_jacobian\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: the gained commit at docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:3 recasts the node as a completed negative-result investigation with the contraction goal open, which is the disposition the prior review permitted, while nova/equilibrium/current.py still equals base 8ff5dae2 and the stated contraction is not delivered.\nSCORE evidence: 15\nJUSTIFICATION evidence: every figure the changed paragraph states reconciles with h200-base.log and h200-head.log (23.973-13.812=10.16 ms tangent, 39.191-29.074=10.12 ms step, 62,344,168,704 B = 62.34 GB peak) and its citation scripts/prototypes/bank_step_batch/measure.py:178 resolves to support_read.step_jacobian, but after_suite ran at candidate 9492da1 rather than the reviewed head and no head-level gate measures the contraction.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 93356a3ca..94985df66 changes only docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html, inside the fragment path granted by prompt.txt:96-103, with two insertions and two deletions.\nSCORE durability: 12\nJUSTIFICATION durability: the disposition check in repair-head.log ends FINDING_F4AF655FD22=answered EXIT=0 and its virtual revert in repair-virtual-revert.log ends EXIT=1 naming all three phrases missing, so it does fail on removal, but it is an uncommitted run-directory python -c phrase test and the committed tree has no test file at head (tests/test_bank_tangent_contract.py absent at 94985df66).\nSCORE fit: 17\nJUSTIFICATION fit: the fragment keeps the sibling style of docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-once.html and the commit subject docs(equilibrium): classify tangent study as negative result is conventional with a body and carries no plan or run identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module - it edits two lines of an existing evidence fragment - so no capability is duplicated, and a search over docs/evidence/fragments and scripts/prototypes found no other owner for a negative-result disposition of this node.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:2 non-blocking: The negative-result disposition is guarded only by an uncommitted run-directory phrase check (repair-head.log), so a later edit that keeps the three phrases while re-landing the contraction, or removes the heading without touching the paragraph, passes the guard and nothing in the committed tree fails; a committed test asserting the source-equality claim against the base revision would make the disposition durable.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html:3 non-blocking: The paragraph says the out-of-memory limit lies in the larger support_read.step_jacobian assembly path and cites the bank-step-batch manifest's 118.95 GiB failure, but that manifest's failure_attribution classifies the event as scaffolding (an unchunked vmap of the booking tangent), so the source describes an unchunked caller rather than a code limit; the sentence should say the limit arises in an unchunked vmap of the tangent inside that assembly path.\n",
+  "review_run_id": "r-20261105T055412596291-review-of-bank-tangent-contract-94985df66469",
+  "reviewed_base_sha": "93356a3ca2c62dffe150d037744baddd0323250b",
+  "reviewed_head_sha": "94985df66469914f5bf6cc82b02a62bf88380ef0",
+  "reviewed_run_id": "r-20261103T095720496569-bank-tangent-contract",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 11,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T06:13:29.928430+00:00",
+  "total": 95
+}

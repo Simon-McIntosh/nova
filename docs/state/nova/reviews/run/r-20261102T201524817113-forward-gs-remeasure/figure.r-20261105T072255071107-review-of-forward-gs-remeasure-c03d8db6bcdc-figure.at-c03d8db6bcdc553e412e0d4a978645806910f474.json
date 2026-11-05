@@ -7,7 +7,7 @@
     "displacement_decomposition.png (1400x460 RGBA)": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
   },
   "attachment_note": "The reviewed head is not an ancestor of this review worktree's HEAD, so both committed PNG blobs were extracted from c03d8db6bc with `git show <head>:<path>` into run scratch and opened with Read at their native sizes (1400x720 and 1400x460). Only rendered pixels were judged; no SVG was opened, listed or rendered. Both files are additions in the reviewed range (git diff --name-status 3ef818df..c03d8db6bc -- docs/figures/ lists exactly these two PNGs, plus three JSON receipts). frame_flux_comparison.png was withdrawn by the reviewed run and is not present at the head, so it is not reviewed.",
-  "completed_at": "",
+  "completed_at": "2026-11-05T16:32:27.322Z",
   "dispatched_at": "2026-11-05T16:19:16Z",
   "figure_checks": {
     "canvas": "Both figures are 1400 px wide (14 in at 100 dpi), heights 720 and 460, matching the house canvas width.",
@@ -119,6 +119,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-05T16:32:32.379642+00:00",
+  "timestamp": "2026-11-05T16:40:35.246718+00:00",
   "total": null
 }

@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-modified" content="2026-11-05">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -204,7 +204,10 @@ Done when: the report lists each coupling with files, line counts, refactor and 
     <div class="r-comment-body"><p>Three test files repaired and one credential-refusal guard added; base 5 failed plus 5 errors became 11 passed, 4 unchanged registry-auth failures and zero errors on the fast selection; zero added failures.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261105T115003486952-review-of-lane-repair-biot-tangents-02459d0cd9a6" data-who="reckon-build" data-when="2026-11-05T11:57:37.587Z">
-    <div class="r-comment-body"><p>Independent review of r-20261105T083537886594-lane-repair-biot-tangents at 02459d0cd9a6: edge half repaired (3 base failures to 1, zero added, negative control admitted), vertex half landed no change and two near-corner failures carry no owner, and the fragment&#x27;s near-corner head-arm claim is unsupported by either cited log; one blocking finding on the fragment, two non-blocking.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261105T083537886594-lane-repair-biot-tangents at 02459d0cd9a6: edge half repaired (3 base failures to 1, zero added, negative control admitted), vertex half landed no change and two near-corner failures carry no owner, and the fragment's near-corner head-arm claim is unsupported by either cited log; one blocking finding on the fragment, two non-blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261105T083537886594-lane-repair-biot-tangents" data-who="reckon-build" data-when="2026-11-05T12:08:16Z">
+    <div class="r-comment-body"><p>Edge failures fell from 3 to 1 with zero added and a failing negative control; the 49m10s changed-head vertex arm has no named near-corner verdict or summary, while the base arm names two timeout failures and five source mismatches assigned to nova/biot/polygonanalytic.py.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-imas-hdf5-read-landed" data-who="reckon-build" data-when="2026-10-27T10:25:00Z">
     <div class="r-comment-body"><p><strong>replan-imas-hdf5-read landed at <code>117e41bd2</code></strong> (head <code>7084d3571</code>). <code>nova/imas/hdf5_read.py</code> is deleted. It read IMAS-written HDF5 through h5py and had no callers. No module under <code>nova/</code> imports h5py; the one search hit is a docstring in <code>validator_case.py</code>.</p><p>The 103 test modules that import nova.imas ran in base and head arms in one sirius job (1296790) and add no failure: 26 failing ids at base, 11 at head, all 11 already failing or erroring at base. The base arm's archive omitted <code>docs/</code>, so 8 tests errored at setup there. The review scored 20/15/20/13/18/20 with no blocking finding.</p><p>Still open in this section: replan-dbentry-constructor (delivered, review queued), replan-gpfs-data-root and replan-evidence-tooling-paths.</p></div>

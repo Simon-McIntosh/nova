@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T144345479503-review-of-bank-step-jacobian-split-4d4969f9b73f-figure/image-0.png (the rendered figure under review, opened and judged)"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-05T14:46:20Z",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "the figcaption states the nesting explicitly and the evidence table below the figure marks the same three rows with an arrow prefix, so the reader is warned before summing; not worth a redraw",
+      "file": "docs/figures/sub-millisecond-forward-path/bank-step-jacobian-split/paired-wall.svg",
+      "id": "fb1e1ef8a99",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The three subparts of the fresh-geometry branch (stencil construction, geometry channel calls, closing contraction) are drawn as ordinary sibling rows: the two-space indent carried in the label strings is invisible because matplotlib right-aligns tick labels, so the picture alone gives no cue that those three bars compose the 'Fresh geometry, whole' bar above them. A reader who sums every row will double-count. The figcaption states 'do not add its whole row to its subparts', so the nesting is recoverable from the caption rather than from the image."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "the extra digit carries real signal on bars too short to read off the axis, and the evidence table gives all values to three decimals for anyone comparing precisely",
+      "file": "scripts/prototypes/bank_step_jacobian_split/plot.py",
+      "id": "fc708dead0f",
+      "line": 50,
+      "severity": "non-blocking",
+      "summary": "Value annotation precision switches with magnitude: two decimals at or above 1 ms (2.64, 13.34) and three below it (0.285, 0.303, 0.267). The labels are the only way to read the sub-millisecond rows because the linear axis renders those bars a few pixels long, so a reader comparing a small row against a large one is comparing different precision."
+    }
+  ],
+  "method": "Opened the attached rendered PNG with an image reader and judged only what is visible in it: bar geometry, printed values, axis, legend, text contrast and label placement. Anchored findings to the figure's repository path and to the drawing script's annotation line. Read no SVG. The read-only brief was honoured: no file under review was edited, moved or redrawn.",
+  "project": "nova",
+  "review_run_id": "r-20261105T144345479503-review-of-bank-step-jacobian-split-4d4969f9b73f-figure",
+  "reviewed_base_sha": "4842c63b458f5218a4df0415903c8cc43a84c272",
+  "reviewed_head_sha": "4d4969f9b73f6d6299d218f06f82b30e24619ad8",
+  "reviewed_run_id": "r-20261105T133721949646-bank-step-jacobian-split",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: pass - eight parts each carry a name and a printed millisecond value, so every magnitude is readable at a glance without estimating a bar end",
+    "RUBRIC data_ink: pass - the bars are the only marks; no gradient, fill or shading is drawn and the printed values do not compete with them",
+    "RUBRIC decoration: pass - white background, no gridlines, top/right/left spines removed, frameless legend in clear space above the plot",
+    "RUBRIC contrast: pass - near-black part names and #333333 value labels on white, and both bar colours clear 3:1 against the background",
+    "RUBRIC table_form: pass - the eight parts are a decomposition of one quantity across two batch sizes, so paired bars show relative magnitude that a table would not; it is not a list of independent facts",
+    "RUBRIC label_collision: pass - no text is clipped by the canvas; the stacked value labels on the sub-millisecond rows (0.285/0.840, 0.267/0.814, 0.303/1.40) sit one above the other with visible clearance and none lands on a bar"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T14:53:05.741705+00:00",
+  "total": null,
+  "verdicts": {
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "pass",
+    "table_form": "pass"
+  }
+}

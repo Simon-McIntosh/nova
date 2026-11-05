@@ -10,7 +10,6 @@ import importlib.util
 import inspect
 import json
 from pathlib import Path
-import subprocess
 import textwrap
 from unittest.mock import patch
 
@@ -38,11 +37,6 @@ def main():
     parser.add_argument("--arm", required=True)
     parser.add_argument("--revision", required=True)
     args = parser.parse_args()
-    root = Path(__file__).resolve().parents[3]
-    if args.arm == "head":
-        args.revision = subprocess.check_output(
-            ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
-        ).strip()
     cycle.reference.emit(
         "HEADER",
         revision=args.revision,

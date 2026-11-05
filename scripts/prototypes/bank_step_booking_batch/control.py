@@ -53,7 +53,7 @@ def main(run_dir, revision):
             "-C",
             str(root),
             "archive",
-            "HEAD",
+            revision,
             "nova",
             "scripts",
             "tests",

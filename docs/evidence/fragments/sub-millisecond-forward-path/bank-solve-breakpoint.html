@@ -74,7 +74,7 @@ physical lane accepts within two restart updates: fifteen take one update,
 and lane 10 takes two. The largest terminal fresh residual is 9.303847e-11.
 The restart uses three fresh batch reads: its initial read and one per update,
 with no rejected trial. The two existing sampled-conic kernel tests also pass.
-The complete head suite and paired device measurements pass; the remaining baseline suite files are still running.</p>
+All paired suite files and device measurements are complete, with no added test failure.</p>
 <h3 id="bank-solve-breakpoint-device">Paired H200 measurement</h3>
 <p>One allocation, 1306481, requests two cores, one H200 and 48 GB. Both arms
 are git archives: base <code>bd3b868dbcd2b60fe0b0840778324f8356861173</code>
@@ -126,4 +126,37 @@ and <code>resumed/precision.json</code> beneath the run directory above.
 The plotted histories come from <code>resumed/cpu-base-test_bank_solve_cycle.log</code>
 and <code>resumed/cpu-head-test_bank_solve_cycle.log</code>, each with its
 actual module path, revision and terminal EXIT line.</p>
+<h3 id="bank-solve-breakpoint-validation">Completed paired suites</h3>
+<p>One sirius allocation, 1306480, ran a fresh pytest process and separate
+basetemp for each of the five files in each arm. Base records 32 passed,
+1 failed and 5 skipped; head records 33 passed and 5 skipped. Added failure
+count is zero. The sole base failure is
+<code>test_diverted_lanes_leave_near_root_cycle</code>, ending at
+1.83669245e-10 after eight restart updates; the unchanged head file is green.</p>
+<ul>
+<li><code>test_bank_solve_cycle.py</code>: base 1 failed, 2 passed in 1112.89s;
+head 3 passed in 287.45s.</li>
+<li><code>test_bank_solve_driver.py</code>: base 10 passed in 314.77s;
+head 10 passed in 309.79s.</li>
+<li><code>test_support_read.py</code>: base 13 passed, 2 skipped in 39.30s;
+head 13 passed, 2 skipped in 46.94s.</li>
+<li><code>test_bank_step_booking_batch.py</code>: base 1 passed, 3 skipped in
+39.25s; head 1 passed, 3 skipped in 45.66s.</li>
+<li><code>test_equilibrium_solve.py</code>: base 6 passed in 4.18s;
+head 6 passed in 4.58s.</li>
+</ul>
+<p>The five skips are unchanged: two limited-fixture stationary-point cases,
+two optional archived-matrix comparisons without their supplied matrix file,
+and the optional scaling test without its supplied timing file. The H200
+Jacobian measurements are independently present in the paired receipts; no
+skipped test is counted as a pass. The separate event-endpoint regression
+passes at head in 33.30s; its exact-primal mutation fails in 25.62s. The two
+existing sampled-conic kernel tests pass in 32.14s. Scoped Ruff and the final
+whitespace check pass.</p>
+<p>Suite summaries, literal commands, completed flags and normalized failure
+IDs are in <code>resumed/suite-receipts.json</code>,
+<code>resumed/base-suite.log</code> and <code>resumed/head-suite.log</code>.
+The negative control is <code>resumed/negative-control.log</code> (EXIT=1).
+The final figure and precision report is <code>resumed/report.log</code>
+(EXIT=0, no precision failures).</p>
 </section>

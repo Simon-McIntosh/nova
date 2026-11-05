@@ -1,0 +1,30 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-05T13:18:49Z",
+  "findings": [],
+  "item_verdicts": {
+    "contrast": "pass - axis labels, tick labels, panel titles and legend text render in near-black on an unshaded white background, and the grey population strokes at #929292 with the dotted limit at #666666 remain visible against white and against each other.",
+    "data_ink": "pass - the data carry the weight: sixteen residual trajectories per panel plus one dotted limit line, drawn as plain 2.6 pt strokes with the blue slowest lane at 3.0 pt on top (zorder 3). No fills, markers, shading or gradients; the only non-data ink is the panel title and the shared axis furniture.",
+    "decoration": "pass - no gradient, background fill, gridlines or styled theme appears in any panel. The legend at the top centre is frameless and sits outside the plotting area, and the panels are despined on the top and right edges.",
+    "label_collision": "pass - no label is clipped, overlapping another label, or overlapping the data. The legend clears the titles, the left-column 'fresh residual' labels and the bottom-row 'Newton iterate' labels sit in their own margins, titles are left-aligned inside their panels without touching the 10^0 tick label beside them, and the rightmost 60 tick label is fully inside the canvas edge. The dotted acceptance line at 1e-10 is drawn beneath all traces so it obscures no data point.",
+    "legibility": "pass - the rendered PNG (1399x720) opens clearly: four panels in a two by two grid with left-aligned titles 'Allocation 1 / 2, base / backtracking', a shared logarithmic fresh-residual axis spanning 1e-13 to 1e0 with decade ticks at 1e0, 1e-3, 1e-6, 1e-9 and 1e-12, and a shared Newton-iterate axis 0 to 60. Every fifteen-lane trajectory and the blue slowest-lane trace is readable at a glance without magnification.",
+    "table_form": "pass - the image plots two continuous quantities (fresh residual against Newton iterate) per lane; it depicts a trajectory relationship, not information that would read better as rows and columns."
+  },
+  "notes": "Judged only from the rendered PNG named in the review (image-0.png, 1399x720 RGBA). No SVG markup, other image or figure file was opened. The drawing script, scripts/prototypes/bank_solve_cycle/report.py, was read only to confirm the visual elements correspond to what the PNG shows (per-panel argmax slowest lane in blue, all other lanes grey, dotted 1e-10 acceptance limit, shared log axes); no finding is anchored to markup. The figure's own claim is visually verifiable in the render: the blue slowest-lane trace is the rightmost-ending trace in every panel and ends at roughly 56, 11, 23 and 11 iterates respectively. The caption in docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-cycle.html describes lanes, colour roles, the residual budget line and the histogram provenance, so it does not merely repeat the title.",
+  "project": "nova",
+  "read_only": true,
+  "rendered_image": "image-0.png",
+  "review_run_id": "r-20261105T131724226700-review-of-bank-solve-cycle-6c0ecaf17147-figure",
+  "reviewed_base_sha": "984992d77b67dfae996f365c05c3086b4f5f9886",
+  "reviewed_figure": "docs/figures/sub-millisecond-forward-path/bank-solve-cycle/residual-history.svg",
+  "reviewed_head_sha": "6c0ecaf17147d75764ccfa596747ff846af5a383",
+  "reviewed_run_id": "r-20261105T103757914702-bank-solve-cycle",
+  "rubric": "figure",
+  "status": "parsed",
+  "subject": "figure",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T13:28:24.299878+00:00",
+  "total": null
+}

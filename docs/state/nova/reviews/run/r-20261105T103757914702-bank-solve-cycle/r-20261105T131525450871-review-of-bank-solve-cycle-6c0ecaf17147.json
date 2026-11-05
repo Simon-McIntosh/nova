@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1751 (solve calls solve_batch)"
+  ],
+  "completed_at": "2026-11-05T13:30:33.890Z",
+  "dispatched_at": "2026-11-05T13:17:11Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": 1713,
+      "severity": "non-blocking",
+      "text": "the line search never treats the incumbent state as a trial: `better` accepts the first valid trial unconditionally via `(trials == 0)`, so when every halving still reads worse than the current state the lane moves to the best trial rather than staying put, and the fresh residual increases; base took the full step unconditionally so this is not a regression, but it is a weaker guarantee than the docstring's 'retaining the best valid trial' invites a reader to assume."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": 1778,
+      "severity": "non-blocking",
+      "text": "`reads + trials` counts trials per lane, so the companion read_batch that every while-loop iteration performs for lanes that are not themselves pending is uncounted, and SolveResult.reads no longer equals the number of fresh reads; the invariant asserted at tests/test_bank_solve_driver.py:287 (`reads == steps + 1`) happens to hold only because that fixture never backtracks twice."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_cycle/cpu.sh",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "the provenance probe runs `python -c` without `-P`, so the working directory (the head worktree) precedes PYTHONPATH and a base-arm log's header names the head module; stall-base-test_bank_solve_cycle.log:2 prints the worktree support_read.py for a run whose behaviour is the base arm (0 unfreezes against head 2), so only the outcome distinguishes the arms and the header cannot."
+    },
+    {
+      "file": "nova/equilibrium/solve.py",
+      "line": 89,
+      "severity": "non-blocking",
+      "text": "the added per-lane halving search at nova/equilibrium/support_read.py:1692 duplicates the repository's bounded dyadic backtracking search `_damped_scale`, which solves.test_driver's cold Newton path already uses; the new search is per-lane and validity-aware, but it does not extend or wrap that owner, so this is a duplication rather than an extension."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/support_read.py:1751 (solve calls solve_batch); no module outside support_read.py calls solve or solve_batch yet",
+    "diff": "read all 20 commits against 984992d77; the product change is +109/-22 in nova/equilibrium/support_read.py, the test file is new at 210 lines, and the rest is prototype measurement scripts, the fragment and the residual-history SVG, all inside the declared scope.",
+    "done_when": "the evidence fence at prompt.txt:129-133 requires release-on-non-contraction, halving when the 16-lane tail still exceeds 8, every lane inside the residual, flux, axis, X-point and boundary budgets, a sirius CPU test that fails on base, two H200 allocations at 1 and 16 slices, and a fragment with both tables and one figure; contract-one-head.log and contract-two-head.log give the two allocations (slowest lane 56->10 and 23->11, 713.62 and 712.38 ms/slice), cpu-base-test_bank_solve_cycle.log is the red base arm, and the fragment tables every budget.",
+    "goal": "prompt.txt:38 asks to make the batched bank solve leave the period-2 residual cycle its frozen active set holds; nova/equilibrium/support_read.py:1597-1606 releases the lock on non-contraction and :1692-1735 backtracks, and the controlled test records base steps [6,6] against head 1.",
+    "manifest": "read manifest.md; it records 20 commits, status complete, baseline_suite 2 failures and after_suite 0 with completed true and their logs, and a negative_control_log that ends EXIT=1 with the cycle test red at 6 steps.",
+    "write_paths": "the fence at prompt.txt:129-136 lists nova/equilibrium/support_read.py, tests/test_bank_solve_cycle.py, tests/test_bank_solve_driver.py, scripts/prototypes/bank_solve_cycle, the bank-solve-cycle evidence fragment and its figure directory; all 14 changed paths in the 20 commits are inside those six, and the driver test file is unchanged."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_solve_cycle.py:80 fails at base with 6 steps (cpu-base-test_bank_solve_cycle.log EXIT=1) and :191 fails at base with 0 unfreezes (stall-base-test_bank_solve_cycle.log EXIT=1), so both controls redden on the regression, but the changed read counter at support_read.py:1778 and the ~done guard at :1598 are exercised by no assertion that fails without them.",
+    "evidence": "the gate records base 2 failed / head 0 failed in restart-baseline-suite.log and restart-after-suite.log, the two H200 allocations are contract-one-head.log and contract-two-head.log with backend gpu and the fragment's tables, and the precision ratios sit inside every budget at docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-cycle.html, though the after_suite arm omits the two fast tests and no log header names the sirius host.",
+    "fit": "the added closures choose/needs_trial/backtrack at nova/equilibrium/support_read.py:1678-1735 follow the module's existing named-closure and jax.tree.map idiom, carry no plan or ticket identifier, and the only friction is the positional search[4]/search[5] indexing at :1690.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1597 releases a frozen active set on non-contraction (with the ~done guard) and :1692-1735 halves the update on the fresh residual, which is the goal at prompt.txt:38, verified by tests/test_bank_solve_cycle.py:11 recording base 6 steps against head 1.",
+    "reuse": "nova/equilibrium/solve.py:89 _damped_scale already owns a bounded dyadic backtracking search on a residual norm, and the added per-lane search at nova/equilibrium/support_read.py:1692 duplicates it rather than extending or wrapping it; the figure and measurement scripts do reuse nova.media.ink.InkStyle and scripts/prototypes/bank_solve_read/measure.py.",
+    "scope_discipline": "all 14 changed paths in the 20 commits lie inside the fence declared at prompt.txt (nova/equilibrium/support_read.py, tests/test_bank_solve_cycle.py, tests/test_bank_solve_driver.py, scripts/prototypes/bank_solve_cycle, the fragment and the figure), tests/test_bank_solve_driver.py is untouched, and no plan file was edited."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 asks to make the batched bank solve leave the period-2 residual cycle its frozen active set holds; nova/equilibrium/support_read.py:1597-1606 releases the lock on non-contraction and :1692-1735 backtracks, and tests/test_bank_solve_cycle.py records base steps [6,6] against head 1.\nVERDICT done_when: the evidence fence at prompt.txt:129-133 requires release-on-non-contraction, halving when the 16-lane tail still exceeds 8, every lane inside the residual, flux, axis, X-point and boundary budgets, a sirius CPU test that fails on base, two H200 allocations at 1 and 16 slices, and a fragment with both tables and one figure; contract-one-head.log and contract-two-head.log give the two allocations with slowest lane 56->10 and 23->11 at 713.62 and 712.38 ms/slice, cpu-base-test_bank_solve_cycle.log is the red base arm, and the fragment tables every precision budget.\nVERDICT write_paths: the fence at prompt.txt:129-136 lists nova/equilibrium/support_read.py, tests/test_bank_solve_cycle.py, tests/test_bank_solve_driver.py, scripts/prototypes/bank_solve_cycle, the bank-solve-cycle evidence fragment and its figure directory; all 14 changed paths across the 20 commits are inside those six and tests/test_bank_solve_driver.py is unchanged.\nVERDICT manifest: read manifest.md; it records 20 commits, status complete, baseline_suite 2 failures and after_suite 0 with completed true and their log paths, and a negative_control_log at cpu-base-test_bank_solve_cycle.log that ends EXIT=1 with the cycle test red at 6 steps.\nVERDICT diff: read all 20 commits against 984992d77; the product change is +109/-22 in nova/equilibrium/support_read.py, the test file is new at 210 lines, and the remainder is prototype measurement scripts, the evidence fragment and the residual-history SVG, all inside the declared scope.\nVERDICT call_sites: nova/equilibrium/support_read.py:1751 (solve calls solve_batch); no module outside support_read.py calls solve or solve_batch yet.\nCALL_SITES: nova/equilibrium/support_read.py:1751 (solve calls solve_batch)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1597 releases a frozen active set on non-contraction and :1692-1735 halves the update on the fresh residual, verified by tests/test_bank_solve_cycle.py:80 recording base 6 steps against head 1.\nSCORE evidence: 17\nJUSTIFICATION evidence: restart-baseline-suite.log records 2 failures and restart-after-suite.log 0, contract-one-head.log and contract-two-head.log carry the two H200 allocations with backend gpu, and the fragment tables every precision ratio inside budget, though after_suite omits the two fast tests and no header names the sirius host.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the 20 commits is inside the fence at prompt.txt:129-136 and tests/test_bank_solve_driver.py is untouched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_bank_solve_cycle.py:80 fails at base at 6 steps (cpu-base-test_bank_solve_cycle.log EXIT=1) and the stall control at :191 fails at base with 0 unfreezes, but the read counter at support_read.py:1778 and the ~done guard at :1598 are unguarded by any failing control.\nSCORE fit: 16\nJUSTIFICATION fit: the closures at nova/equilibrium/support_read.py:1678-1735 follow the module's named-closure and jax.tree.map idiom with no plan or ticket identifier, with the positional search[4]/search[5] indexing at :1690 the one friction.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/solve.py:89 _damped_scale already owns a bounded dyadic backtracking search, and the added per-lane search at nova/equilibrium/support_read.py:1692 duplicates rather than extends it, while the scripts do reuse nova.media.ink.InkStyle and scripts/prototypes/bank_solve_read/measure.py.\nFINDING nova/equilibrium/support_read.py:1713 non-blocking: `better` accepts the first valid trial unconditionally via `(trials == 0)`, so a lane whose every trial reads worse than its current state still moves to the best trial and its fresh residual rises; base took the full step unconditionally so this is no regression, but it is weaker than the docstring's 'retaining the best valid trial' suggests.\nFINDING nova/equilibrium/support_read.py:1778 non-blocking: `reads + trials` counts trials per lane and omits the companion read_batch every while-loop iteration performs for non-pending lanes, so SolveResult.reads no longer equals the fresh reads and the `reads == steps + 1` invariant at tests/test_bank_solve_driver.py:287 holds only while no lane backtracks twice.\nFINDING scripts/prototypes/bank_solve_cycle/cpu.sh:30 non-blocking: the provenance probe lacks `-P`, so cwd precedes PYTHONPATH and a base-arm log header names the head module; stall-base-test_bank_solve_cycle.log:2 prints the worktree support_read.py for a run whose behaviour is base (0 unfreezes against head 2).\nFINDING nova/equilibrium/solve.py:89 non-blocking: the added per-lane halving search at nova/equilibrium/support_read.py:1692 duplicates the repository's bounded dyadic backtracking search `_damped_scale` rather than extending or wrapping it.\n",
+  "review_run_id": "r-20261105T131525450871-review-of-bank-solve-cycle-6c0ecaf17147",
+  "reviewed_base_sha": "984992d77b67dfae996f365c05c3086b4f5f9886",
+  "reviewed_head_sha": "6c0ecaf17147d75764ccfa596747ff846af5a383",
+  "reviewed_run_id": "r-20261105T103757914702-bank-solve-cycle",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T13:32:31.567573+00:00",
+  "total": 92
+}

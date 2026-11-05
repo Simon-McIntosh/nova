@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-03T11:06:07Z",
+  "evidence": [
+    "Rendered artifact opened and judged: image-0.png, 1400x720 RGBA, for docs/figures/forward-solver-route-integrity/autotune-off-gpfs-measure/xla-autotune-arms-walls.svg.",
+    "Caption at docs/research/xla-autotune-cache-on-gpfs.html:131 describes the encoding, the 47 vs 54 s cold-compile difference and the sequential-run caveat; it does not merely repeat a title.",
+    "Bar fill is a single flat grey level in the raster (one level covers all four bars), so no gradient or shading is present.",
+    "x-tick label separation measured by column ink runs in rows 678-699: gaps of 84, 48 and 106 px between the four labels.",
+    "Canvas clipping check: first/last ink at x 20/1379 and y 17/697, all inside the 1400x720 canvas."
+  ],
+  "figures_reviewed": [
+    {
+      "caption_anchor": "docs/research/xla-autotune-cache-on-gpfs.html:131",
+      "drawing_script": "benchmarks/xla_autotune_cache_arms.py",
+      "path": "docs/figures/forward-solver-route-integrity/autotune-off-gpfs-measure/xla-autotune-arms-walls.svg",
+      "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T110350528382-review-of-autotune-off-gpfs-measure-c43688fbe0c7-figure/image-0.png"
+    }
+  ],
+  "findings": [],
+  "node": "review-of-autotune-off-gpfs-measure-c43688fbe0c7-figure",
+  "notes": "Read-only figure review; no file was edited, redrawn, relabelled or reformatted. The figure was judged only from the named rendered PNG; no SVG markup was read.",
+  "project": "nova",
+  "review_run_id": "r-20261103T110350528382-review-of-autotune-off-gpfs-measure-c43688fbe0c7-figure",
+  "reviewed_base_sha": "83ab9b6e07309b24eec1bced22e91c24c308a71d",
+  "reviewed_head_sha": "c43688fbe0c784be2b4c1418df92d21bbd4d5ead",
+  "reviewed_run_id": "r-20261103T091328950101-autotune-off-gpfs-measure",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "Pass. All text is near-black on white; the compile blue #3b6ea5 is 5.3:1 against white and the solve amber #b8791a is 3.6:1, both above the 3:1 floor for graphical marks, and the two hues are far apart for colour-blind readers.",
+    "data_ink": "Pass. Every mark encodes a measured value (four cold-compile bars, twelve solve points, four median rules); the bar fill is one flat colour with no gradient, and the image carries no ink that is not data, axis, legend or label.",
+    "decoration": "Pass. No gridlines, no background fill, no shading and no frame beyond the left and bottom spines; the legend is frameless and sits in clear space above the plot area.",
+    "label_collision": "Pass. Measured on the rendered PNG: the four x-tick labels occupy separate column runs with minimum inter-label gaps of 84, 48 and 106 px, nothing is clipped (ink spans x 20-1379 of 1400 and y 17-697 of 720), and no label sits over the plotted data.",
+    "legibility": "Pass. At 1400x720 the four arm labels and the three legend entries read without magnification; the y axis is titled 'wall [s]' with ticks at 0,20,40,60,80,100, and each arm shows its blue cold-compile bar and three amber solve points distinctly.",
+    "table_form": "Pass. The figure's job is the overlap of the three-pass solve ranges across arms, which a 4x4 table of numbers would not show at a glance; the bars and points are the right form and the underlying numbers are already tabulated in the page."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T12:10:08.220996+00:00",
+  "total": null
+}

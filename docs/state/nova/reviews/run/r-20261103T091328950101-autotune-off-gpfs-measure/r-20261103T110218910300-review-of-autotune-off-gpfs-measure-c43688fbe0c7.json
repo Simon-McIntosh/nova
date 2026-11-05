@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest has empty baseline_suite and after_suite fields, so no suite-wide differential can be measured. Its focused head gate at revision 8a7723be73665bc4e75d684f1882602fe8856a59 completed with four passes and no failing IDs; the set of added failing IDs is therefore empty for that gate regardless of the unrecorded baseline.",
+  "call_sites": [
+    "benchmarks/xla_autotune_cache_arms.py:213",
+    "benchmarks/xla_autotune_cache_arms.py:220",
+    "benchmarks/xla_autotune_cache_arms.py:491",
+    "benchmarks/xla_autotune_cache_arms.py:499"
+  ],
+  "completed_at": "2026-11-03T11:11:09Z",
+  "dispatched_at": "2026-11-03T11:03:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html",
+      "id": "fdeed6f2b95",
+      "line": "38",
+      "severity": "blocking",
+      "text": "The pre-warm attempt wrote no row receipt and did not publish a fresh pin; pin-state.log:2-3 confirms the old runtime is still served, so the source node's explicit publication and lane-resolution measure is unmet."
+    },
+    {
+      "disposition": "folded",
+      "disposition_node": "autotune-off-gpfs-measure-pin-repair",
+      "disposition_reason": "Add a child-environment regression test when repairing the blocked pre-warm and pin publication.",
+      "file": "benchmarks/xla_autotune_cache_arms.py",
+      "id": "f73431a4864",
+      "line": "185",
+      "severity": "non-blocking",
+      "text": "No added test exercises the new removal of inherited cache and XLA flags from child processes; reinstating the inherited off setting leaves the four focused tests green and can silently void the default arm until the expensive H200 control runs."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the benchmark's arm runner, plot branch, and main drive branch at the reviewed head.",
+    "diff": "Read commits 91f86a02564cb8a3914206f2979864ebe26b957a through c43688fbe0c784be2b4c1418df92d21bbd4d5ead against base 83ab9b6e07309b24eec1bced22e91c24c308a71d; benchmarks/xla_autotune_cache_arms.py:185-188 isolates arm settings, and the other changes document and plot results without adding test assertions.",
+    "done_when": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/prompt.txt:108-109; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/titan-main-head-repeat.log:29 records zero new autotune files and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/h200-arms-fixed.log:15 records a holding control, while /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/pin-state.log:2-3 shows the old pin still served.",
+    "goal": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/prompt.txt:38; the landed page documents the titan and H200 measurements, but docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html:38-49 says the requested fresh pin was not published.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/manifest.md:5-21; it reports six commits and complete status but expressly records no fresh pin, no row receipt, and no baseline_suite or after_suite arms.",
+    "write_paths": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/prompt.txt:78-83 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/manifest.md:3; the six commits change only benchmarks/xla_autotune_cache_arms.py, the research page, its SVG, and the assigned landing fragment."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertions; tests/test_xla_autotune_cache_arms.py:10-54 covers the existing receipt guard and plotting style, so deleting benchmarks/xla_autotune_cache_arms.py:185-188 would leave its four focused assertions green.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/h200-arms-fixed.log:15-22 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/titan-main-head-repeat.log:29-32 support the measured arms, while /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/pin-state.log:2-3 refutes the required fresh-pin gate.",
+    "fit": "benchmarks/xla_autotune_cache_arms.py:185-188 extends the existing per-arm environment setup with mechanism named settings, and the figure and page follow the existing measurement layout.",
+    "goal_fidelity": "docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html:38-49 records that the pin remains old, so the node achieves the two measurements but not its publication goal.",
+    "reuse": "The capability search for autotune-arm execution and plotting found the owner benchmarks/xla_autotune_cache_arms.py:163 and :376; the change extends those existing functions and adds no new function, class, or module.",
+    "scope_discipline": "The diff from 83ab9b6e07309b24eec1bced22e91c24c308a71d to c43688fbe0c784be2b4c1418df92d21bbd4d5ead changes only the four paths allowed by the source manifest.md:3."
+  },
+  "node": "review-of-autotune-off-gpfs-measure-c43688fbe0c7",
+  "node:reviewed": "autotune-off-gpfs-measure",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/prompt.txt:38; the landed page documents the titan and H200 measurements, but docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html:38-49 says the requested fresh pin was not published.\nVERDICT done_when: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/prompt.txt:108-109; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/titan-main-head-repeat.log:29 records zero new autotune files and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/h200-arms-fixed.log:15 records a holding control, while /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/pin-state.log:2-3 shows the old pin still served.\nVERDICT write_paths: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/prompt.txt:78-83 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/manifest.md:3; the six commits change only benchmarks/xla_autotune_cache_arms.py, the research page, its SVG, and the assigned landing fragment.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/manifest.md:5-21; it reports six commits and complete status but expressly records no fresh pin, no row receipt, and no baseline_suite or after_suite arms.\nVERDICT diff: Read commits 91f86a02564cb8a3914206f2979864ebe26b957a through c43688fbe0c784be2b4c1418df92d21bbd4d5ead against base 83ab9b6e07309b24eec1bced22e91c24c308a71d; benchmarks/xla_autotune_cache_arms.py:185-188 isolates arm settings, and the other changes document and plot results without adding test assertions.\nCALL_SITES: benchmarks/xla_autotune_cache_arms.py:213, benchmarks/xla_autotune_cache_arms.py:220, benchmarks/xla_autotune_cache_arms.py:491, benchmarks/xla_autotune_cache_arms.py:499\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html:38-49 records that the pin remains old, so the node achieves the two measurements but not its publication goal.\nSCORE evidence: 13\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/h200-arms-fixed.log:15-22 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/titan-main-head-repeat.log:29-32 support the measured arms, while /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T091328950101-autotune-off-gpfs-measure/pin-state.log:2-3 refutes the required fresh-pin gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from 83ab9b6e07309b24eec1bced22e91c24c308a71d to c43688fbe0c784be2b4c1418df92d21bbd4d5ead changes only the four paths allowed by the source manifest.md:3.\nSCORE durability: 6\nJUSTIFICATION durability: The diff adds no assertions; tests/test_xla_autotune_cache_arms.py:10-54 covers the existing receipt guard and plotting style, so deleting benchmarks/xla_autotune_cache_arms.py:185-188 would leave its four focused assertions green.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/xla_autotune_cache_arms.py:185-188 extends the existing per-arm environment setup with mechanism named settings, and the figure and page follow the existing measurement layout.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search for autotune-arm execution and plotting found the owner benchmarks/xla_autotune_cache_arms.py:163 and :376; the change extends those existing functions and adds no new function, class, or module.\nFINDING docs/evidence/fragments/forward-solver-route-integrity/autotune-off-gpfs-measure.html:38 blocking: The pre-warm attempt wrote no row receipt and did not publish a fresh pin; pin-state.log:2-3 confirms the old runtime is still served, so the source node's explicit publication and lane-resolution measure is unmet.\nFINDING benchmarks/xla_autotune_cache_arms.py:185 non-blocking: No added test exercises the new removal of inherited cache and XLA flags from child processes; reinstating the inherited off setting leaves the four focused tests green and can silently void the default arm until the expensive H200 control runs. Disposition: folded into autotune-off-gpfs-measure-pin-repair.",
+  "review_run_id": "r-20261103T110218910300-review-of-autotune-off-gpfs-measure-c43688fbe0c7",
+  "reviewed_base_sha": "83ab9b6e07309b24eec1bced22e91c24c308a71d",
+  "reviewed_head_sha": "c43688fbe0c784be2b4c1418df92d21bbd4d5ead",
+  "reviewed_run_id": "r-20261103T091328950101-autotune-off-gpfs-measure",
+  "scores": {
+    "durability": 6,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 11,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T06:20:42.269297+00:00",
+  "total": 88
+}

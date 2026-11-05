@@ -270,7 +270,9 @@ cycle</h1>
         + "</p>"
         + """
 <p>Releasing a frozen active set on non-contraction alone took 45 steps at sixteen
-lanes, against 22 at the base. Candidate halvings are therefore checked against a fresh
+lanes and 1691.63 ms per slice in an exploratory allocation. A separate base
+allocation took 22 steps and 833.69 ms per slice; these are not a paired timing
+comparison. Candidate halvings are therefore checked against a fresh
 read, in a bounded device loop with at most eight trials. Each lane retains its best
 valid trial; fresh validity and the original residual budget still govern
 acceptance.</p>

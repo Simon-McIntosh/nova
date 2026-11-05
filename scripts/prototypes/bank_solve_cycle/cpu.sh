@@ -22,6 +22,7 @@ for arm in "$@"; do
   revision=$(git -C "$repo" rev-parse HEAD)
   if [ "$arm" = base ]; then tree="$scratch/base"; revision=$base; fi
   for name in ${TEST_FILES:-test_bank_solve_cycle test_bank_solve_driver test_support_read}; do
+    if [ "$arm" != base ]; then revision=$(git -C "$repo" rev-parse HEAD); fi
     log="$run/${CPU_LABEL:-cpu}-$arm-$name.log"
     command=("$python" -m pytest -p no:cacheprovider "--basetemp=$scratch/$arm-$name" "$tree/tests/$name.py" -m "slow or not slow" -vv -s)
     printf -v command_text '%q ' "${command[@]}"

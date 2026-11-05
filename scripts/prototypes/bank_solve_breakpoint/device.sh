@@ -16,10 +16,6 @@ base=$3
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 mkdir -p "$scratch/base"
 git -C "$repo" archive "$base" nova scripts tests benchmarks pyproject.toml uv.lock conftest.py | tar -x -C "$scratch/base"
-log="$run/device-diagnose.log"
-printf '# revision: %s tree: %s command: PYTHONPATH=%s %s %s\n' "$base" "$scratch/base" "$scratch/base" "$python" "$repo/scripts/prototypes/bank_solve_breakpoint/diagnose.py" > "$log"
-PYTHONPATH="$scratch/base" "$python" "$repo/scripts/prototypes/bank_solve_breakpoint/diagnose.py" >> "$log" 2>&1
-echo "EXIT=$?" >> "$log"
 for ((attempt=0;attempt<240;attempt++)); do
   if [ -f "$run/head-ready" ]; then break; fi
   sleep 10

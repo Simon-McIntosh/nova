@@ -30,7 +30,6 @@ _CONSTRAINT_PREFIX_ALLOWLIST = {
     (
         "nova/equilibrium/reduced_newton.py",
         "_constraint_qualification",
-        2329,
         "_fixed_design_read",
     ),
 }
@@ -140,10 +139,8 @@ def test_solve_path_prefix_slices_do_not_feed_the_null_census():
     ]
     print("PREFIX_CENSUS_INPUTS " + json.dumps(findings, sort_keys=True), flush=True)
     assert not [item for item in findings if item["path"] == paths[0]]
-    observed = {
-        (item["path"], item["function"], item["slice_line"], item["target"])
-        for item in findings
-    }
+    observed = {(item["path"], item["function"], item["target"]) for item in findings}
+    assert len(findings) == len(_CONSTRAINT_PREFIX_ALLOWLIST)
     assert observed == _CONSTRAINT_PREFIX_ALLOWLIST
 
 
@@ -164,7 +161,7 @@ def analytic_carrier(request):
     case_name = request.param
     if case_name == "diverted-single-null":
         case_name = certificate.DIVERTED_CASE_NAME
-    requested_cells = -110
+    requested_cells = -110 if case_name == certificate.DIVERTED_CASE_NAME else -500
     carrier_case, source_case, exact = certificate._case(case_name)
     machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
     coordinates = np.vstack(

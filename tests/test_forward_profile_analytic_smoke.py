@@ -53,6 +53,20 @@ def _resolve(tmp_path: Path) -> vc.ValidatorCase:
         pytest.skip(f"validator registry unreachable: {error}")
 
 
+def test_analytic_registry_credentials_are_not_treated_as_unreachable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A rejected credential must reach the caller instead of skipping the rung."""
+    from nova.database.layer_fetch import LayerRegistryCredentialError
+
+    def reject_credentials(*_args, **_kwargs):
+        raise LayerRegistryCredentialError("registry credentials rejected")
+
+    monkeypatch.setattr(vc, "resolve_validator_case", reject_credentials)
+    with pytest.raises(LayerRegistryCredentialError, match="credentials rejected"):
+        _resolve(tmp_path)
+
+
 def _vacuum_map_residual(case: vc.ValidatorCase, scale: float) -> dict:
     """Return the vacuum map residual of the input coil against the reference.
 

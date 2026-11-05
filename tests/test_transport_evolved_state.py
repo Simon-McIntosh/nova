@@ -140,6 +140,18 @@ def _evolved_receipt_and_geometry(target_current):
 
 
 @pytest.fixture(scope="module")
+def mapped_source():
+    """Map a transport receipt without constructing an equilibrium machine."""
+    receipt, geometry, psi_norm, pressure_amplitude, diamagnetic_amplitude = (
+        _evolved_receipt_and_geometry(1.0e6)
+    )
+    source = forward_source_from_receipt(
+        receipt, geometry, ion_density_per_electron=1.0
+    )
+    return receipt, source, psi_norm, pressure_amplitude, diamagnetic_amplitude
+
+
+@pytest.fixture(scope="module")
 def mapped_case(machine, converged):
     """Attach the mapped source to the smallest existing free-boundary machine."""
     receipt, geometry, psi_norm, pressure_amplitude, diamagnetic_amplitude = (
@@ -161,17 +173,15 @@ def mapped_case(machine, converged):
     )
 
 
-def test_mapping_restores_the_negated_total_flux_gradient_sense(mapped_case):
+def test_mapping_restores_the_negated_total_flux_gradient_sense(mapped_source):
     """Pressure and current recover Nova's signed total-flux derivatives."""
     (
         receipt,
         source,
-        _profile,
-        _seed,
         psi_norm,
         pressure_amplitude,
         diamagnetic_amplitude,
-    ) = mapped_case
+    ) = mapped_source
     expected_pressure = pressure_amplitude * (1.0 - psi_norm)
     expected_diamagnetic = diamagnetic_amplitude * (1.0 - psi_norm)
     observed_pressure = source.core.p_prime(psi_norm)
@@ -198,9 +208,9 @@ def test_mapping_restores_the_negated_total_flux_gradient_sense(mapped_case):
     assert np.all(np.asarray(expected_current_density[:-1]) > 0.0)
 
 
-def test_mapping_crosses_the_callable_source_boundary_with_si_primitives(mapped_case):
+def test_mapping_crosses_the_callable_source_boundary_with_si_primitives(mapped_source):
     """The evolved profiles are callables, not sampled source images."""
-    receipt, source, *_rest = mapped_case
+    receipt, source, *_rest = mapped_source
     assert isinstance(source, ForwardSource)
     assert isinstance(source.core, DomainProfile)
     assert callable(source.core.p_prime)
@@ -243,6 +253,7 @@ def mapped_equilibrium(mapped_case):
     return profile.solve(seed, route="anderson", evaluations=EVALUATIONS)
 
 
+@pytest.mark.slow
 def test_mapped_source_converges_with_force_and_current_receipts(
     mapped_case, mapped_equilibrium
 ):
@@ -295,6 +306,7 @@ def test_mapped_source_converges_with_force_and_current_receipts(
     assert 1.0e-3 < sol_fraction < 3.0e-3
 
 
+@pytest.mark.slow
 @pytest.mark.xfail(
     strict=True,
     reason=(

@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/solve.py:246 solve -> _cold -> _damped_scale",
+    "nova/equilibrium/support_read.py:1789 solve -> solve_batch",
+    "scripts/prototypes/bank_solve_cycle/measure.py:48 support_read.solve_batch (imported by scripts/prototypes/bank_solve_linesearch/measure.py)",
+    "scripts/prototypes/bank_solve_driver/measure.py:156 support_read.solve_batch"
+  ],
+  "completed_at": "2026-11-05T15:13:35.879Z",
+  "dispatched_at": "2026-11-05T15:05:51Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_solve_driver.py",
+      "line": "288",
+      "severity": "non-blocking",
+      "text": "non-blocking: the replacement invariant reads == max(steps) + 1 is a fixture-specific coincidence that holds only because that fixture never backtracks, not the true count (1 + sum of batch evaluations); it would red spuriously if the fixture's convergence path changed a halving and it misstates the accounting contract, though the dedicated twice-halving test at :327 carries the real invariant with literal expectations."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "1708",
+      "severity": "non-blocking",
+      "text": "non-blocking: keep_incumbent=False is the load-bearing fix for the stalled lanes, but no CPU test fails if it is flipped back to True; the policy is guarded only by the H200 incumbent-head receipt (incumbent-head.log, EXIT=1 on lanes 10 and 13 at 60 updates), which is not part of any runnable gate."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T133513111158-bank-solve-linesearch/head-suite.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T133513111158-bank-solve-linesearch/base-suite.log",
+    "device_arms": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T133513111158-bank-solve-linesearch/device-head.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T133513111158-bank-solve-linesearch/negative-control.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read each gained commit from 2f60ce9e499eda4507a2da6657d3c85b9025a59a to 533d7e249cf71ed8903d392deba95e71a0beacfb; d72d0f8af replaces the bank's private search loop with solve.py:_damped_scale and counts batch evaluations, 12b2feee adds the companion-read and dyadic-policy tests plus the driver invariant, 16a3f55d adds keep_incumbent=False for the bank, and three docs commits add the fragment and helpers; no product or test file changes after 16a3f55d.",
+    "done_when": "The brief names four-file sirius base/head arms, a twice-halving counter test with a mutation control, and one H200 16-slice table with precision budgets; base-suite.log and head-suite.log record 30 and 32 passing with zero failures and end EXIT=0, negative-control.log ends 1 failed EXIT=1 with the pending-lane counter [4,2,1], and device-head.log records every lane converged with max residual 9.956e-11 and 62 reported reads.",
+    "goal": "The brief asks for one shared bounded dyadic search serving cold and bank Newton with per-lane validity, complete read counting, and one H200 table; nova/equilibrium/support_read.py:1699 now imports nova/equilibrium/solve.py:98 and passes a per-lane mask, the old bank backtrack loop is gone, reads adds search.evaluations at support_read.py:1751, and the fragment records the 16-lane table.",
+    "manifest": "Read; it lists six commits, states the CPU arms ran at 16a3f55d with 30/32 passing and zero added failures, records max residual 9.956e-11 across both H200 calls, names the pending-lane mutation as its negative control, and its cited logs exist with matching summaries and EXIT lines.",
+    "write_paths": "The brief grants nova/equilibrium/support_read.py, nova/equilibrium/solve.py, tests/test_bank_solve_driver.py, tests/test_bank_solve_cycle.py, scripts/prototypes/bank_solve_linesearch and the evidence fragment; the diff changes nine paths, every one inside that set, and tests/test_bank_solve_cycle.py is unchanged."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_solve_driver.py:370 asserts literal reads [4,4,4] and :358 asserts the observed read sequence [1,-3,-1,0], and the run's mutation of the counter to pending-lane accounting reddens exactly that test (negative-control.log, EXIT=1), but support_read.py:1708's keep_incumbent=False policy is guarded only by the H200 receipt.",
+    "evidence": "base-suite.log and head-suite.log are four freshly separated pytest arms each with a per-file basetemp, record 30 and 32 passes with two unchanged skips and zero failures, and end EXIT=0; the two H200 arms in device-base.log/device-head.log carry revisions, per-lane steps and reads, and the per-slice wall the fragment quotes.",
+    "fit": "nova/equilibrium/solve.py:98 keeps the module's existing jax.lax.while_loop backtracking idiom and its docstrings state mechanism rather than task, though support_read.py:26 imports the private helper across a module boundary and tests/test_bank_solve_driver.py:288 states a fixture coincidence as an invariant.",
+    "goal_fidelity": "nova/equilibrium/solve.py:98 serves both callers -- support_read.py:1699 passes active/tolerance/keep_incumbent=False and solve.py:210 uses the default incumbent policy -- and support_read.py:1751 counts every batch evaluation, with the stall escape justified by incumbent-head.log lanes 10 and 13 at 60 updates.",
+    "reuse": "The capability search over nova/equilibrium found the bounded dyadic search only at nova/equilibrium/solve.py:98 and the bank now extends it rather than keeping a second loop, and scripts/prototypes/bank_solve_linesearch/measure.py:8 imports scripts/prototypes/bank_solve_cycle/measure.py rather than copying it.",
+    "scope_discipline": "Every path in git diff --stat 2f60ce9e..533d7e24 (two product files, one test file, five helpers under the granted scripts/prototypes/bank_solve_linesearch directory, and the granted evidence fragment) lies inside the brief's declared writes."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The brief asks for one shared bounded dyadic search serving cold and bank Newton with per-lane validity, complete read counting and one H200 table; nova/equilibrium/support_read.py:1699 now imports nova/equilibrium/solve.py:98 and passes a per-lane mask, the old bank backtrack loop is gone, reads adds search.evaluations at support_read.py:1751, and the fragment records the 16-lane table.\nVERDICT done_when: The brief names four-file sirius base/head arms, a twice-halving counter test with a mutation control, and one H200 16-slice table with precision budgets; base-suite.log and head-suite.log record 30 and 32 passing with zero failures and end EXIT=0, negative-control.log ends 1 failed EXIT=1 with the pending-lane counter [4,2,1], and device-head.log records every lane converged with max residual 9.956e-11 and 62 reported reads.\nVERDICT write_paths: The brief grants nova/equilibrium/support_read.py, nova/equilibrium/solve.py, tests/test_bank_solve_driver.py, tests/test_bank_solve_cycle.py, scripts/prototypes/bank_solve_linesearch and the evidence fragment; the diff changes nine paths, every one inside that set, and tests/test_bank_solve_cycle.py is unchanged.\nVERDICT manifest: Read; it lists six commits, states the CPU arms ran at 16a3f55d with 30/32 passing and zero added failures, records max residual 9.956e-11 across both H200 calls, names the pending-lane mutation as its negative control, and its cited logs exist with matching summaries and EXIT lines.\nVERDICT diff: Read each gained commit from 2f60ce9e499eda4507a2da6657d3c85b9025a59a to 533d7e249cf71ed8903d392deba95e71a0beacfb; d72d0f8af replaces the bank's private search loop with solve.py:_damped_scale and counts batch evaluations, 12b2feee adds the companion-read and dyadic-policy tests plus the driver invariant, 16a3f55d adds keep_incumbent=False for the bank, and three docs commits add the fragment and helpers; no product or test file changes after 16a3f55d.\nCALL_SITES: nova/equilibrium/solve.py:246 solve -> _cold -> _damped_scale, nova/equilibrium/support_read.py:1789 solve -> solve_batch, scripts/prototypes/bank_solve_cycle/measure.py:48 support_read.solve_batch (imported by scripts/prototypes/bank_solve_linesearch/measure.py), scripts/prototypes/bank_solve_driver/measure.py:156 support_read.solve_batch\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve.py:98 serves both callers -- support_read.py:1699 passes active/tolerance/keep_incumbent=False and solve.py:210 uses the default incumbent policy -- and support_read.py:1751 counts every batch evaluation, with the stall escape justified by incumbent-head.log lanes 10 and 13 at 60 updates.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-suite.log and head-suite.log are four freshly separated pytest arms each with a per-file basetemp, record 30 and 32 passes with two unchanged skips and zero failures, and end EXIT=0; the two H200 arms in device-base.log/device-head.log carry revisions, per-lane steps and reads, and the per-slice wall the fragment quotes.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in git diff --stat 2f60ce9e..533d7e24 (two product files, one test file, five helpers under the granted scripts/prototypes/bank_solve_linesearch directory, and the granted evidence fragment) lies inside the brief's declared writes.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_bank_solve_driver.py:370 asserts literal reads [4,4,4] and :358 asserts the observed read sequence [1,-3,-1,0], and the run's mutation of the counter to pending-lane accounting reddens exactly that test (negative-control.log, EXIT=1), but support_read.py:1708's keep_incumbent=False policy is guarded only by the H200 receipt.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/solve.py:98 keeps the module's existing jax.lax.while_loop backtracking idiom and its docstrings state mechanism rather than task, though support_read.py:26 imports the private helper across a module boundary and tests/test_bank_solve_driver.py:288 states a fixture coincidence as an invariant.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search over nova/equilibrium found the bounded dyadic search only at nova/equilibrium/solve.py:98 and the bank now extends it rather than keeping a second loop, and scripts/prototypes/bank_solve_linesearch/measure.py:8 imports scripts/prototypes/bank_solve_cycle/measure.py rather than copying it.\nFINDING tests/test_bank_solve_driver.py:288 non-blocking: the replacement invariant reads == max(steps) + 1 is a fixture-specific coincidence that holds only because that fixture never backtracks, not the true count (1 + sum of batch evaluations); it would red spuriously if the fixture's convergence path changed a halving and it misstates the accounting contract, though the dedicated twice-halving test at :327 carries the real invariant with literal expectations.\nFINDING nova/equilibrium/support_read.py:1708 non-blocking: keep_incumbent=False is the load-bearing fix for the stalled lanes, but no CPU test fails if it is flipped back to True; the policy is guarded only by the H200 incumbent-head receipt (incumbent-head.log, EXIT=1 on lanes 10 and 13 at 60 updates), which is not part of any runnable gate.\n",
+  "review_run_id": "r-20261105T150218773065-review-of-bank-solve-linesearch-533d7e249cf7",
+  "reviewed_base_sha": "2f60ce9e499eda4507a2da6657d3c85b9025a59a",
+  "reviewed_head_sha": "533d7e249cf71ed8903d392deba95e71a0beacfb",
+  "reviewed_run_id": "r-20261105T133513111158-bank-solve-linesearch",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T15:12:17.690112+00:00",
+  "total": 111
+}

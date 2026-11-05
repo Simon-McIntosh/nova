@@ -377,9 +377,13 @@ def build_display_flux_map(
             )
     offset = float(1.0e3 * np.linalg.norm(saddle_rz - lattice_saddle_rz))
     nearest_promoted = float("nan")
-    if promoted_nodes.any():
-        if saddle_converged and np.all(np.isfinite(saddle_rz)):
-            offsets = node_coordinate[promoted_nodes] - saddle_rz
+    reference_rz = (
+        saddle_rz if saddle_converged and np.all(np.isfinite(saddle_rz)) else xpoint_rz
+    )
+    if promoted_nodes.any() and reference_rz is not None:
+        reference = np.asarray(reference_rz, dtype=np.float64).reshape(-1)[:2]
+        if np.all(np.isfinite(reference)):
+            offsets = node_coordinate[promoted_nodes] - reference
             nearest_promoted = float(np.min(np.linalg.norm(offsets, axis=1)))
     return DisplayFluxMap(
         radius=radius,

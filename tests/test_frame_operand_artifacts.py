@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from matplotlib.path import Path as PolygonPath
 import pytest
 
 from nova.database.filepath import operand_cache_root
@@ -211,4 +212,29 @@ def test_separatrix_falls_back_to_the_saddle_level_contour():
     enclosed = np.hypot(closed[:, 0] - 1.7, closed[:, 1])
     assert np.allclose(enclosed, 0.02**0.5, rtol=1.0e-3)
     assert diagnostics["closed_candidate_count"] == 2
+    assert diagnostics["saddle_level_points"] == closed.shape[0]
+
+
+def test_saddle_level_fallback_keeps_only_the_axis_enclosing_contour():
+    """A diverted level set yields the curve that encloses the axis, and no other.
+
+    The field's level set at the admitted saddle flux is a closed curve around
+    the axis, and a curve that closes away from the axis is not the separatrix.
+    The fallback must return the axis-enclosing one, so an outer contour cannot
+    be measured against the labelled boundary in its place.
+    """
+
+    radius = np.linspace(1.2, 2.2, 401)
+    height = np.linspace(-0.5, 0.5, 401)
+    radial, vertical = np.meshgrid(radius, height, indexing="ij")
+    offset = radial - 1.7
+    flux = (offset**2 - 0.09) ** 2 / 4.0 + 0.09 * vertical**2
+    display = _refused_display(radius, height, flux, 2.5e-3)
+    closed, _open, source, diagnostics = gate._display_separatrix(
+        display, np.asarray([1.7, 0.0])
+    )
+    assert source == "saddle_level_contour"
+    assert closed.shape[0] >= 4
+    assert PolygonPath(closed).contains_point((1.7, 0.0))
+    assert not PolygonPath(closed).contains_point((1.2, 0.0))
     assert diagnostics["saddle_level_points"] == closed.shape[0]

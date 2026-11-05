@@ -970,6 +970,7 @@ def _equilibrium_receipt(
         target_current,
         None,
         prescribed_current,
+        promoted_mask=result.promoted_mask,
     )
 
 
@@ -3035,7 +3036,12 @@ def run(
                     "branches": _branches_of(profile, result.state, raster_flux),
                     "current": np.asarray(current, dtype=float),
                     "state": np.asarray(result.state, dtype=float),
-                    "promoted_mask": np.asarray(result.promoted_mask, dtype=bool),
+                    "promoted_mask": np.asarray(
+                        equilibrium.promoted_mask
+                        if equilibrium is not None
+                        else result.promoted_mask,
+                        dtype=bool,
+                    ),
                     "compensating_current": np.asarray(
                         result.compensating_current
                         if result.compensating_current is not None

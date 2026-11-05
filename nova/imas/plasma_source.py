@@ -226,6 +226,7 @@ class PlasmaSource:
         slices = []
         dd_version = str(equilibrium.ids_properties.version_put.data_dictionary)
         b0 = np.asarray(equilibrium.vacuum_toroidal_field.b0, float).ravel()
+        equilibrium_time = np.asarray(equilibrium.time, float)
         selected = range(len(equilibrium.time_slice)) if indices is None else indices
         for index in selected:
             slice_ = equilibrium.time_slice[index]
@@ -249,7 +250,9 @@ class PlasmaSource:
                 )
             slices.append(
                 PlasmaSlice(
-                    time=float(slice_.time),
+                    # homogeneous_time == 1 makes the IDS time vector the clock;
+                    # a per-slice time field may carry a stale value there
+                    time=float(equilibrium_time[index]),
                     radius=np.asarray(map_.grid.dim1),
                     height=np.asarray(map_.grid.dim2),
                     psi=GetSlice.translated(

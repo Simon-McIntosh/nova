@@ -119,6 +119,25 @@ def test_dina_generic_source_reproduces_existing_prescription():
     )
 
 
+def test_from_imas_reads_the_ids_clock_not_the_slice_field():
+    """Under homogeneous_time == 1 the slice time is the IDS time vector entry.
+
+    WEST NICE 62751 stores 38.47 s in every time_slice[].time while its time
+    vector runs 38.27-38.44 s, so the per-slice field must not set the clock
+    that coil currents are interpolated at.
+    """
+    uri = f"imas:hdf5?path={IMASDB / '105069' / '3'}"
+    with imas.DBEntry(uri, "r", dd_version="3.39.0") as entry:
+        equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
+        active = entry.get("pf_active", lazy=False, autoconvert=False)
+    clock = float(equilibrium.time[200])
+    equilibrium.time_slice[200].time = clock + 1.0
+    source = PlasmaSource.from_imas(
+        equilibrium, active, provenance="DINA 105069/3", indices=[200]
+    )
+    assert source.slices[0].time == clock
+
+
 #: The two ITER DINA pulses the translator refuses, each with the digit its
 #: stored data contradicts.  Neither conforms to DD3's COCOS 11, so neither may
 #: reach a slice.

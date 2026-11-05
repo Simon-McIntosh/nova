@@ -328,8 +328,8 @@ def _solovev_separation_row(fixture: str, requested_cells: int) -> dict[str, Any
     valid = np.asarray(mesh.interior(), dtype=bool) & np.isfinite(recovered_density)
     recovered_density = np.where(valid, recovered_density, 0.0)
     recovered_current = recovered_density * np.asarray(mesh.cell_area)
-    masks, _topology, _sample, _core_support, _common_support = (
-        operator._support_partition(jnp.asarray(reference))
+    masks, _topology, _sample, _profile_support = operator._support_partition(
+        jnp.asarray(reference)
     )
     declared = np.asarray(operator.source.declared_support(masks), dtype=bool)
     declared_valid = declared & valid

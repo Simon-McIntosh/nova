@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="bank-solve-cycle">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<title>Bank residual cycle | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet"
+href="/_shared/dashboard.css">
+</head><body><main class="plan-doc"><h1 id="bank-solve-cycle-landing">Bank residual
+cycle</h1>
+<p>Allocation 1: slowest lane 18 to 7 steps; repeated per-slice wall 685.72 to 521.48 ms. Allocation 2: slowest lane 29 to 9 steps; repeated per-slice wall 1100.79 to 767.38 ms.</p>
+<p>Releasing a frozen active set on non-contraction alone took 45 steps at sixteen
+lanes, against 22 at the base. Candidate halvings are therefore checked against a fresh
+read, in a bounded device loop with at most eight trials. Each lane retains its best
+valid trial; fresh validity and the original residual budget still govern
+acceptance.</p>
+<p>The base trace saw a residual jump from 1.644200958e-7 to 3.187730151e-10 with 174
+edge-interval entries changing by at most 6.45276e-9 and 81 membership fractions by at
+most 2.07998e-9. Fragment selection and normal-form selection did not change. This
+identifies moving continuous geometry, but does not isolate one formula as the cause.
+The callback trace itself changes numerical ordering and has a 14-step tail; it is
+excluded from all timing claims.</p>
+<h2 id="bank-solve-cycle-allocation-1">Allocation 1</h2><table><thead><tr><th>Arm</th><th>Slices</th><th>Call 1 [ms/slice]</th><th>Call 2 [ms/slice]</th><th>Steps per lane, in lane order</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>base</td><td>1</td><td>601.31</td><td>344.81</td><td>3</td><td>2.183e-11</td></tr><tr><td>base</td><td>16</td><td>719.60</td><td>685.72</td><td>5, 14, 6, 12, 18, 9, 3, 7, 15, 18, 4, 18, 5, 11, 5, 11</td><td>9.052e-11</td></tr><tr><td>backtracking</td><td>1</td><td>4398.63</td><td>4250.59</td><td>10</td><td>6.669e-11</td></tr><tr><td>backtracking</td><td>16</td><td>533.87</td><td>521.48</td><td>4, 4, 4, 4, 3, 7, 4, 4, 7, 6, 4, 5, 5, 5, 6, 6</td><td>9.838e-11</td></tr></tbody></table><h2 id="bank-solve-cycle-allocation-2">Allocation 2</h2><table><thead><tr><th>Arm</th><th>Slices</th><th>Call 1 [ms/slice]</th><th>Call 2 [ms/slice]</th><th>Steps per lane, in lane order</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>base</td><td>1</td><td>704.42</td><td>346.80</td><td>3</td><td>9.052e-12</td></tr><tr><td>base</td><td>16</td><td>1112.57</td><td>1100.79</td><td>22, 6, 5, 29, 6, 5, 7, 5, 5, 4, 5, 5, 7, 5, 8, 6</td><td>9.420e-11</td></tr><tr><td>backtracking</td><td>1</td><td>1199.78</td><td>1026.64</td><td>5</td><td>2.429e-11</td></tr><tr><td>backtracking</td><td>16</td><td>780.03</td><td>767.38</td><td>5, 6, 4, 9, 6, 9, 4, 4, 6, 5, 4, 6, 6, 4, 7, 4</td><td>9.578e-11</td></tr></tbody></table><p>Allocation 1: base 984992d77b67dfae996f365c05c3086b4f5f9886; head 1b4e859676c845d3b8e69baef43b9938e459c190; logs pair-one-base.log and pair-one-head.log. Allocation 2: base 984992d77b67dfae996f365c05c3086b4f5f9886; head 708cabe8fc2c84c4ef684fb3e1418920810615ff; logs pair-two-base.log and pair-two-head.log.</p>
+<p>The one-slice arm regresses in both allocations: its second-call wall is
+4250.59 ms against 344.81 ms in the first, and 1026.64 ms against 346.80 ms
+in the second. The sixteen-slice result is a batch-tail improvement, not a
+universal latency improvement. The slowest lane in the second allocation
+still needs nine Newton updates.</p>
+<p>Each allocation ran both arms at one and sixteen slices, with two executable calls
+after explicit compilation. Call 1 includes first-execution device initialization; Call
+2 is the repeated converged wall used for the comparison. Both calls have identical lane
+counts within each arm. The seed, analytic oracle and solver are imported from the
+existing bank measurement module. The base is a git archive, with module paths and
+revisions printed in each log.</p>
+<figure id="bank-solve-cycle-history"><img
+src="/nova/figures/sub-millisecond-forward-path/bank-solve-cycle/residual-history.svg"
+alt="All lane fresh residuals at each Newton iterate, base beside backtracking in two
+allocations, on shared logarithmic axes"><figcaption>Sixteen lanes from the diverted
+550-cell seed, multipliers 2e-5 through 6e-5. The blue line is the slowest lane in each
+arm; all other lanes are grey. Histories come directly from SolveResult.residual_path
+and stop at each lane's acceptance. The dotted line is the unchanged 1e-10 residual
+limit. Calls shown are the second calls in each allocation. Text bounds and overlaps
+were checked and the PNG rendering was inspected.</figcaption></figure>
+<p>Head/base and oracle ratios across both allocations and calls:</p><table><thead><tr><th>Quantity</th><th>Largest ratio</th><th>Budget</th></tr></thead><tbody><tr><td>Fresh residual</td><td>9.8382e-11</td><td>1.0e-10</td></tr><tr><td>Head/base flux / span</td><td>5.0339e-10</td><td>1.0e-08</td></tr><tr><td>Head/base axis / minor radius</td><td>5.0037e-11</td><td>5.0e-04</td></tr><tr><td>Head/base X-point / minor radius</td><td>3.2306e-11</td><td>5.0e-04</td></tr><tr><td>Head/base boundary flux / span</td><td>6.7278e-11</td><td>1.0e-04</td></tr><tr><td>Oracle axis / minor radius</td><td>1.0477e-05</td><td>5.0e-04</td></tr><tr><td>Oracle X-point / minor radius</td><td>9.2549e-06</td><td>5.0e-04</td></tr><tr><td>Oracle boundary flux / span, upper bound</td><td>2.5906e-05</td><td>1.0e-04</td></tr></tbody></table>
+<p>Flux differs by at most the stated ratio of analytic span (budget 1e-8); axis
+and X-point by a ratio of minor radius (budget 5e-4); boundary flux by a ratio of span
+(budget 1e-4). The oracle boundary ratio is a conservative all-lane upper bound: the
+first lane's oracle error plus the largest difference from that lane.</p>
+<p>Raw receipts and gate logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T103757914702-bank-solve-cycle
+</code>. The controlled continuous-kink test starts at its exact two-cycle; the physical
+test restarts all sixteen certificate lanes after two production updates, below the
+freeze threshold, and requires fresh acceptance within eight further updates.</p>
+<h2 id="bank-solve-cycle-tests">CPU tests on sirius</h2><table><thead><tr><th>Log</th><th>Recorded result</th></tr></thead><tbody><tr><td>cycle-seed-base-test_bank_solve_cycle.log</td><td>1 failed, 1 passed in 1269.37s (0:21:09)</td></tr><tr><td>cpu-suite-head-test_bank_solve_cycle.log</td><td>running or pending</td></tr><tr><td>stall-base-test_bank_solve_cycle.log</td><td>1 failed, 2 deselected in 3.33s</td></tr><tr><td>stall-head-test_bank_solve_cycle.log</td><td>1 passed, 2 deselected in 3.83s</td></tr><tr><td>cpu-suite-base-test_bank_solve_driver.log</td><td>8 passed in 442.29s (0:07:22)</td></tr><tr><td>cpu-suite-head-test_bank_solve_driver.log</td><td>running or pending</td></tr><tr><td>cpu-suite-base-test_support_read.log</td><td>13 passed, 2 skipped in 47.24s</td></tr><tr><td>cpu-suite-head-test_support_read.log</td><td>running or pending</td></tr></tbody></table>
+<p>The exact continuous-kink cycle is the step-count negative control:
+base runs all six permitted updates and fails the two-update bound; head
+accepts in one. The unchanged-selection stall also fails at base (zero
+unfreezes) and passes at head (two). The physical CPU restart is an additional
+nonregression check: base already passes its eight-update budget, with a
+maximum of seven, so it is not claimed as the discriminating test.</p>
+</main></body></html>

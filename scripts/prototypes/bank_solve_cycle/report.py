@@ -112,12 +112,15 @@ def main():
                     np.arange(steps + 1),
                     values[: steps + 1],
                     color=color if lane == worst else "#929292",
-                    linewidth=3 if lane == worst else 1.2,
+                    linewidth=3 if lane == worst else 2.6,
                     zorder=3 if lane == worst else 2,
                 )
             ax.axhline(1e-10, color="#666666", linestyle=":", linewidth=1.2, zorder=1)
             ax.set_yscale("log")
             ax.set_ylim(1e-13, 1)
+            ax.set_yticks([1e-12, 1e-9, 1e-6, 1e-3, 1])
+            ax.set_xlim(0, 30)
+            ax.set_xticks(np.arange(0, 31, 5))
             arm_name = "base" if arm == 0 else "backtracking"
             ax.set_title(
                 f"Allocation {allocation + 1} · {arm_name}",
@@ -130,7 +133,7 @@ def main():
                 ax.set_xlabel("Newton iterate")
     fig.legend(
         handles=[
-            Line2D([], [], color="#929292", lw=1.2, label="other lanes"),
+            Line2D([], [], color="#929292", lw=2.6, label="other lanes"),
             Line2D([], [], color=color, lw=3, label="slowest lane in each arm"),
             Line2D([], [], color="#666666", lw=1.2, ls=":", label="acceptance limit"),
         ],
@@ -142,7 +145,13 @@ def main():
     save_checked(fig, args.figure)
     fig.savefig(args.run / "residual-history.png", dpi=100)
     tables = []
+    provenance = []
     for allocation, pair in enumerate(pairs):
+        label = ("pair-one", "pair-two")[allocation]
+        provenance.append(
+            f"Allocation {allocation + 1}: base {pair[0]['revision']}; "
+            f"head {pair[1]['revision']}; logs {label}-base.log and {label}-head.log."
+        )
         rows = []
         for arm, receipt in zip(("base", "backtracking"), pair, strict=True):
             for lanes in (1, 16):
@@ -182,9 +191,65 @@ def main():
         ),
         flush=True,
     )
+    summaries = []
+    for number, pair in enumerate(pairs, 1):
+        before, after = (arm["rows"][-1] for arm in pair)
+        summaries.append(
+            f"Allocation {number}: slowest lane {max(before['steps'])} to "
+            f"{max(after['steps'])} steps; repeated per-slice wall "
+            f"{before['per_slice_ms']:.2f} to {after['per_slice_ms']:.2f} ms."
+        )
+    summary = " ".join(summaries)
+    precision_rows = []
+    for label, key, limit in [
+        ("Fresh residual", "residual", 1e-10),
+        ("Head/base flux / span", "flux", 1e-8),
+        ("Head/base axis / minor radius", "axis", 5e-4),
+        ("Head/base X-point / minor radius", "saddle", 5e-4),
+        ("Head/base boundary flux / span", "boundary_flux", 1e-4),
+        ("Oracle axis / minor radius", "oracle_axis", 5e-4),
+        ("Oracle X-point / minor radius", "oracle_saddle", 5e-4),
+        ("Oracle boundary flux / span, upper bound", "oracle_boundary", 1e-4),
+    ]:
+        precision_rows.append(
+            f"<tr><td>{label}</td><td>{maximum[key]:.4e}</td><td>{limit:.1e}</td></tr>"
+        )
+    precision_table = (
+        "<table><thead><tr><th>Quantity</th><th>Largest ratio</th>"
+        "<th>Budget</th></tr></thead><tbody>"
+        + "".join(precision_rows)
+        + "</tbody></table>"
+    )
+    gate_rows = []
+    for name in (
+        "cycle-seed-base-test_bank_solve_cycle",
+        "cpu-suite-head-test_bank_solve_cycle",
+        "stall-base-test_bank_solve_cycle",
+        "stall-head-test_bank_solve_cycle",
+        "cpu-suite-base-test_bank_solve_driver",
+        "cpu-suite-head-test_bank_solve_driver",
+        "cpu-suite-base-test_support_read",
+        "cpu-suite-head-test_support_read",
+    ):
+        path = args.run / (name + ".log")
+        lines = path.read_text().splitlines() if path.exists() else []
+        summaries = [
+            line.strip("= ")
+            for line in lines
+            if line.startswith("===") and " in " in line
+        ]
+        complete = bool(lines and lines[-1].startswith("EXIT="))
+        outcome = summaries[-1] if summaries and complete else "running or pending"
+        gate_rows.append(f"<tr><td>{name}.log</td><td>{escape(outcome)}</td></tr>")
+    gates = (
+        '<h2 id="bank-solve-cycle-tests">CPU tests on sirius</h2>'
+        "<table><thead><tr><th>Log</th><th>Recorded result</th></tr>"
+        "</thead><tbody>" + "".join(gate_rows) + "</tbody></table>"
+    )
     text = (
         """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="bank-solve-cycle">
 <meta name="plan-evidence-for" content="sub-millisecond-forward-path">
 <meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
 <title>Bank residual cycle | nova</title>
@@ -192,6 +257,11 @@ def main():
 href="/_shared/dashboard.css">
 </head><body><main class="plan-doc"><h1 id="bank-solve-cycle-landing">Bank residual
 cycle</h1>
+"""
+        + "<p>"
+        + escape(summary)
+        + "</p>"
+        + """
 <p>Releasing a frozen active set on non-contraction alone took 45 steps at sixteen
 lanes, against 22 at the base. Candidate halvings are therefore checked against a fresh
 read, in a bounded device loop with at most eight trials. Each lane retains its best
@@ -205,7 +275,15 @@ The callback trace itself changes numerical ordering and has a 14-step tail; it 
 excluded from all timing claims.</p>
 """
         + "".join(tables)
+        + "<p>"
+        + escape(" ".join(provenance))
+        + "</p>"
         + """
+<p>The one-slice arm regresses in both allocations: its second-call wall is
+4250.59 ms against 344.81 ms in the first, and 1026.64 ms against 346.80 ms
+in the second. The sixteen-slice result is a batch-tail improvement, not a
+universal latency improvement. The slowest lane in the second allocation
+still needs nine Newton updates.</p>
 <p>Each allocation ran both arms at one and sixteen slices, with two executable calls
 after explicit compilation. Call 1 includes first-execution device initialization; Call
 2 is the repeated converged wall used for the comparison. Both calls have identical lane
@@ -221,10 +299,10 @@ arm; all other lanes are grey. Histories come directly from SolveResult.residual
 and stop at each lane's acceptance. The dotted line is the unchanged 1e-10 residual
 limit. Calls shown are the second calls in each allocation. Text bounds and overlaps
 were checked and the PNG rendering was inspected.</figcaption></figure>
-<p>Largest head/base and oracle ratios across both allocations and calls: <code>"""
-        + escape(json.dumps(maximum))
+<p>Head/base and oracle ratios across both allocations and calls:</p>"""
+        + precision_table
         + """
-</code>. Flux differs by at most the stated ratio of analytic span (budget 1e-8); axis
+<p>Flux differs by at most the stated ratio of analytic span (budget 1e-8); axis
 and X-point by a ratio of minor radius (budget 5e-4); boundary flux by a ratio of span
 (budget 1e-4). The oracle boundary ratio is a conservative all-lane upper bound: the
 first lane's oracle error plus the largest difference from that lane.</p>
@@ -234,6 +312,15 @@ first lane's oracle error plus the largest difference from that lane.</p>
 </code>. The controlled continuous-kink test starts at its exact two-cycle; the physical
 test restarts all sixteen certificate lanes after two production updates, below the
 freeze threshold, and requires fresh acceptance within eight further updates.</p>
+"""
+        + gates
+        + """
+<p>The exact continuous-kink cycle is the step-count negative control:
+base runs all six permitted updates and fails the two-update bound; head
+accepts in one. The unchanged-selection stall also fails at base (zero
+unfreezes) and passes at head (two). The physical CPU restart is an additional
+nonregression check: base already passes its eight-update budget, with a
+maximum of seven, so it is not claimed as the discriminating test.</p>
 </main></body></html>"""
     )
     args.fragment.parent.mkdir(parents=True, exist_ok=True)

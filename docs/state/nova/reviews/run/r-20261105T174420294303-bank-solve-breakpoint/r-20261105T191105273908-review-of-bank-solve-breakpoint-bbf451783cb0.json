@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-05T19:26:42.153Z",
   "dispatched_at": "2026-11-05T19:17:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-prototype-provenance",
+      "recorded_at": "2026-11-05T19:31:29.166757+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_solve_breakpoint/report.py",

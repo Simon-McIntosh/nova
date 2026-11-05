@@ -14,12 +14,12 @@
 <table>
 <thead><tr><th>Failure</th><th>Repair and measure</th></tr></thead>
 <tbody>
-<tr><td>Tare benchmark expected five support values.</td><td>The analytic carrier now reads the operator's four-value <code>_support_partition</code> return. The base fixture reproduced <q>not enough values to unpack (expected 5, got 4)</q>.</td></tr>
+<tr><td>Tare benchmark expected five support values and the passive solver read reference identity from the wrong object.</td><td>The analytic carrier now reads the operator's four-value <code>_support_partition</code> return. The first head arm then reached the passive solve and exposed <code>KeyError: 'reference'</code>; its carrier identity now reads shot and slice from the selected case. The base fixture reproduced <q>not enough values to unpack (expected 5, got 4)</q>.</td></tr>
 <tr><td>Native-grid test expected a removed constant.</td><td>The test supplies its 95-point intervention as an explicit argument. The 95 by 95 bicubic map passed a positive control; restoring the obsolete constant read in a scratch test failed the named test with <code>EXIT=1</code>.</td></tr>
 <tr><td>The banked terminal state's unit contour is open.</td><td>The strict closed-branch selector still refuses it. The receipt records the open endpoints and reason, with solved enclosed area, volume, current partition and dependent scores undefined. Stored-LCFS field measurements remain defined. The focused field, boundary and inductance tests passed 19 of 19. The live topology marks 234 core cells, while the banked receipt records 95; both are now reported separately rather than equated.</td></tr>
 </tbody>
 </table>
-<p>The six-file head gate is running under the declared bound. Its final totals and any remaining failure IDs are carried by the run manifest and <code>six-file-head.log</code>. The base arm is <code>six-file-base.log</code>, and the red scratch mutation is <code>negative-control.log</code>, all in this node's run directory.</p>
+<p>The first six-file head arm recorded 35 passed and 10 tare setup errors in 1274.65 s, all from that carrier lookup. The final six-file head result is carried by the run manifest and <code>six-file-head-rerun.log</code>. The base arm is <code>six-file-base.log</code>, and the red scratch mutation is <code>negative-control.log</code>, all in this node's run directory.</p>
 </article>
 </main>
 </body>

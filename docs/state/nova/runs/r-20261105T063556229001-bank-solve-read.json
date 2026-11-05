@@ -1,0 +1,455 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "af772d1b38aae5ee5770039c9bbc695b2a41e816",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T063556229001-bank-solve-read/brief.txt",
+    "sha256": "d4eb762f8ecd3c8e91cad7ad7767e14d147cd48126a753b2f7ab8e4a30cb8fd7"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 12252468,
+      "input_tokens_cumulative": 12252468,
+      "output_tokens": 71638,
+      "output_tokens_cumulative": 71638,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 0,
+    "files": 7,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1473,
+        "name": "solve_batch",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1474
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1736,
+        "name": "solve",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1737
+    },
+    {
+      "existing_function": {
+        "line": 336,
+        "name": "_device_solve",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 52,
+        "name": "run_gate",
+        "path": "scripts/prototypes/bank_solve_read/measure.py"
+      },
+      "window_line": 54
+    },
+    {
+      "existing_function": {
+        "line": 336,
+        "name": "_device_solve",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "batch",
+        "path": "scripts/prototypes/bank_solve_read/measure.py"
+      },
+      "window_line": 120
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "6bb067f7e60bbb6afc3cb3bbd4ce129c1772d438",
+    "a69023dc7e1910610b90d659758a78bd8286eca4",
+    "2c6959357375b12b25e0d754c714a39105bb754b",
+    "578c77dd835f8a2aea94733a8f098d6079375acf",
+    "1e18f66bdcaba43e82c5e97ee7b687cca5762290",
+    "356ddbafeabdbaa46456c16cb7051e71d30af431",
+    "1a6d5ce48d5a3f2649c42a38973e5dbb898ac2a9",
+    "43c10a7fcd3f8e526dbba9213f6c0433e5c384a7"
+  ],
+  "completed_at": "2026-11-05T07:24:38.860Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-05T06:39:57Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "gate": "failed",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-05T07:36:20.049445+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-05T06:36:20Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 6,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 11,
+    "mean_context": 213333,
+    "observed_at": "2026-11-05T06:36:20Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 6,
+      "aggregate_tokens_per_second": 180.747,
+      "detail": "",
+      "mean_tokens_per_second": 129.105,
+      "observed_at": "2026-11-05T06:36:20Z",
+      "runs": 1.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-05T07:24:38.860Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T063556229001-bank-solve-read/manifest.md",
+  "member": "disposable-r-20261105T063556229001-bank-solve-read",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_bank_solve_driver.py",
+      "tests/test_bank_solve_read.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "bank-solve-read",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov03/bank-solve-read.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T063556229001-bank-solve-read/brief.txt",
+    "brief_sha256": "d4eb762f8ecd3c8e91cad7ad7767e14d147cd48126a753b2f7ab8e4a30cb8fd7",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1057,
+          "cached_input_tokens": 515280,
+          "input_tokens": 516339,
+          "output_tokens": 443,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 516782,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "support_read.solve takes the tracked read whenever the rebuild gate allows and always rebuilds for the acceptance read, converging to the base state within the precision budget with fresh residual at most 1e-10; in one H200 allocation the per-slice converged wall at 1 and 16 slices is tabled for base and head with tracked reads, rebuild reads, steps and refactors per solve; CPU tests pass on sirius",
+    "estimated_hours": null,
+    "goal": "Make the bank solve take the tracked support read while the tracking state stays valid",
+    "id": "bank-solve-read",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-05T06:36:20Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 6,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 11,
+      "mean_context": 213333,
+      "observed_at": "2026-11-05T06:36:20Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 6,
+        "aggregate_tokens_per_second": 180.747,
+        "detail": "",
+        "mean_tokens_per_second": 129.105,
+        "observed_at": "2026-11-05T06:36:20Z",
+        "runs": 1.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T063556229001-bank-solve-read/manifest.md",
+    "negative_control": "in a scratch copy, force the rebuild branch on every iterate; the test that counts tracked reads per converged solve fails",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/support_read.py",
+      "tests/test_bank_solve_read.py",
+      "tests/test_bank_solve_driver.py",
+      "scripts/prototypes/bank_solve_read",
+      "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-read.html",
+      "docs/figures/sub-millisecond-forward-path/bank-solve-read"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 930058.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "bank-solve-read",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-05T06:39:18.061523+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "unreconciled runs are reviews of landed nodes, being promoted",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:state-render",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.162,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1492.0,
+      "context-estimate": 227.382,
+      "records": 465.932,
+      "verdict-inputs": 779.902
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "578c77dd835f8a2aea94733a8f098d6079375acf",
+  "resume_waiver": {
+    "reason": "negative result measured and landed; the follow-on is a new node on the read's continuous refresh",
+    "session_id": "879e9b2c-8d12-4aa9-9ba6-cfc59f42104e",
+    "source": "stream"
+  },
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261105T063556229001-bank-solve-read",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "879e9b2c-8d12-4aa9-9ba6-cfc59f42104e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 12252468,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2627.911,
+    "generated_tokens": 71638,
+    "generation_seconds": 833.169,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 75.0,
+    "machine_seconds": 1794.742,
+    "peak_input_tokens": 172554,
+    "tokens_per_second": 85.98,
+    "wall_tokens_per_second": 27.26
+  },
+  "time_budget": "60m",
+  "tool_steps": 104.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2681,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-05T07:24:43Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-05T06:40:11Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261105T063556229001-bank-solve-read",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14312,
+    "worker_pid": 309468
+  },
+  "worker_seconds": 2584,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-05T07:24:38.860Z",
+    "session_id": "879e9b2c-8d12-4aa9-9ba6-cfc59f42104e",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-solve-read"
+  }
+}

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="130">
+<meta name="plan-version" content="131">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -485,6 +485,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261103T080040158512-bank-solve-driver" data-who="reckon-build" data-when="2026-11-05T05:57:27Z">
     <div class="r-comment-body"><p>bank-solve-driver: discrete-only frozen-set solve, 8 passing CPU tests and H200 one/16-slice convergence and precision receipts; per-slice wall figure at docs/figures/sub-millisecond-forward-path/bank-solve-driver/per-slice-wall.svg</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T063556229001-bank-solve-read" data-who="reckon-build" data-when="2026-11-05T07:24:38.860Z">
+    <div class="r-comment-body"><p>The staged bank solve was measured taking the read&#x27;s tracked branch between Newton steps and cannot: a carried decision supplies the discrete cells exactly but keeps the previous state&#x27;s continuous geometry, so the step solves a lagged equation and the fresh residual stalls; the landed change is the removal of the redundant acceptance conjunct and the per-slice wall is unchanged (base 0.31 s at 1 slice, 0.58 s amortised at 16), with the tracked variant at 3.31 s and 2.04 s and nine of sixteen lanes uncertified.</p></div>
 </div>
 </section>
 </main>

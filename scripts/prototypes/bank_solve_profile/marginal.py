@@ -17,12 +17,11 @@ from statistics import median
 from time import perf_counter
 
 import jax
-import jax.numpy as jnp
 import numpy as np
 
 import nova
 from nova.equilibrium import support_read
-from scripts.prototypes.bank_newton_step.measure import machine
+from scripts.prototypes.bank_solve_profile import fixture
 
 
 def emit(label, **values):
@@ -40,17 +39,17 @@ def main():
         nova=nova.__file__,
         repeats=args.repeats,
     )
-    operands, cache, roots, convention, policy, profile, quadrature, moments, _ = (
-        machine("diverted")
-    )
-
-    def gradient(radius, flux):
-        return jnp.zeros_like(radius)
-
-    seeds = roots + 0.03 * jnp.median(operands.geometry.pitch)
-    states = tuple(value[None] for value in moments)
-    seeds_batch = jnp.broadcast_to(seeds, (1, *seeds.shape))
-    previous_batch = jnp.broadcast_to(roots, (1, *roots.shape))
+    batch = fixture.build(1, perturb=False)
+    operands = batch.operands
+    cache = batch.cache
+    states = batch.states
+    seeds_batch = batch.seeds_batch
+    previous_batch = batch.previous_batch
+    convention = batch.convention
+    policy = batch.policy
+    profile = batch.profile
+    quadrature = batch.quadrature
+    gradient = fixture.gradient
 
     for ceiling in (1, 2, 4, 6):
         solve = jax.jit(

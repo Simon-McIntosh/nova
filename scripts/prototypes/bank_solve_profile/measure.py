@@ -30,7 +30,7 @@ from jax.scipy import linalg
 
 import nova
 from nova.equilibrium import fixed_points, support_read, topology
-from scripts.prototypes.bank_newton_step.measure import machine
+from scripts.prototypes.bank_solve_profile import fixture as profile_fixture
 from tests.equilibrium import test_topology_read as fixture
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -83,18 +83,19 @@ def lane(view, index):
 
 
 def profile_lanes(lanes, repeats):
-    operands, cache, roots, convention, policy, profile, quadrature, moments, _ = (
-        machine("diverted")
-    )
-
-    def gradient(radius, flux):
-        return jnp.zeros_like(radius)
-
-    seeds = roots + 0.03 * jnp.median(operands.geometry.pitch)
-    scales = jnp.linspace(2e-5, 6e-5, 16)[:lanes]
-    states = tuple(value[None] * (1 + scales[:, None]) for value in moments)
-    seeds_batch = jnp.broadcast_to(seeds, (lanes, *seeds.shape))
-    previous_batch = jnp.broadcast_to(roots, (lanes, *roots.shape))
+    batch = profile_fixture.build(lanes)
+    operands = batch.operands
+    cache = batch.cache
+    roots = batch.roots
+    seeds = batch.seeds
+    states = batch.states
+    seeds_batch = batch.seeds_batch
+    previous_batch = batch.previous_batch
+    convention = batch.convention
+    policy = batch.policy
+    profile = batch.profile
+    quadrature = batch.quadrature
+    gradient = profile_fixture.gradient
     axis_sign = -1.0
 
     @jax.jit
@@ -274,9 +275,9 @@ def profile_lanes(lanes, repeats):
                 contraction_limit=0.5,
             )
 
-        one = single(moments)
+        one = single(batch.moments)
         jax.block_until_ready(one)
-        emitted = timed("single_solve", 1, single, moments, repeats=repeats)
+        emitted = timed("single_solve", 1, single, batch.moments, repeats=repeats)
         emit(
             "SINGLE",
             steps=counter(emitted, "steps"),

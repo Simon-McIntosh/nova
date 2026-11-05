@@ -44,7 +44,14 @@ def _contour_paths(display) -> np.ndarray:
         z=values.T,
         line_type=contourpy.LineType.Separate,
     )
-    return np.concatenate([np.asarray(line) for line in generator.lines(levels)])
+    # contourpy takes one level per call; every level's paths are compared.
+    return np.concatenate(
+        [
+            np.asarray(line)
+            for level in levels
+            for line in generator.lines(float(level))
+        ]
+    )
 
 
 def _perturbed_state(state_path: Path, target: Path) -> Path:
@@ -106,7 +113,8 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
     committed_nulls = committed.get("drawn_plasma_mesh", {}).get("vacuum_nulls")
     assert committed_nulls is not None, (
         f"{state_path.parent.name}: the committed receipt carries no drawn_plasma_mesh "
-        "record to compare the redraw against; regenerate it with the same panels command"
+        "record to compare the redraw against; regenerate it with the same "
+        "panels command"
     )
     assert vacuum_nulls == committed_nulls
     assert vacuum_nulls["other_x_points_drawn"] == vacuum_nulls["x_points_inside_wall"]

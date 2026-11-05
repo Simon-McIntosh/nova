@@ -268,6 +268,17 @@ def _panel_response_path(digest: str) -> Path:
     return operand_cache_root() / "mast-centroid-panel-response" / f"{digest}.npz"
 
 
+def _panel_response_key(points: np.ndarray, cells: np.ndarray) -> tuple:
+    """Return the in-memory key for one prepared response.
+
+    The cells are part of the key, not only the points: two lanes can share one
+    display grid while their lattices differ, and a key on the points alone
+    hands one lane's matrix to the other with a column count that does not
+    match its moments.
+    """
+    return (points.shape, points.tobytes(), cells.tobytes())
+
+
 def _panel_response(
     lattice: Any, points: np.ndarray, workers: int = RESPONSE_WORKERS
 ):
@@ -277,11 +288,11 @@ def _panel_response(
     import multiprocessing
 
     target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
-    key = (target.shape, target.tobytes())
+    cells = np.ascontiguousarray(np.asarray(lattice.coordinate, dtype=np.float64))
+    key = _panel_response_key(target, cells)
     cached = _PANEL_RESPONSE.get(key)
     if cached is not None:
         return cached
-    cells = np.ascontiguousarray(np.asarray(lattice.coordinate, dtype=np.float64))
     dr = float(lattice.radial_step)
     dz = float(lattice.vertical_step)
     digest = hashlib.sha256()
@@ -406,7 +417,7 @@ def _machine_coupling(
     def plasma(points: np.ndarray):
         """Return the rectangular-cell plasma columns at ``points``."""
         target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
-        prepared = _PANEL_RESPONSE.get((target.shape, target.tobytes()))
+        prepared = _PANEL_RESPONSE.get(_panel_response_key(target, cells))
         if prepared is not None:
             uniform = prepared[1]
             zeros = np.zeros_like(uniform)
@@ -418,7 +429,7 @@ def _machine_coupling(
     def external(points: np.ndarray) -> np.ndarray:
         """Return the fitted conductors' flux at ``points`` [Wb]."""
         target = np.ascontiguousarray(np.asarray(points, dtype=np.float64))
-        key = (target.shape, target.tobytes())
+        key = _panel_response_key(target, cells)
         prepared = _PANEL_RESPONSE.get(key)
         if prepared is not None:
             return prepared[0] @ drive

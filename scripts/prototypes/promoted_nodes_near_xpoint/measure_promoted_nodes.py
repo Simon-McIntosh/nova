@@ -53,6 +53,15 @@ DOMAIN_NAMES = {
 }
 
 
+def _json_default(value):
+    """Render the receipt's array-valued coordinates as plain JSON numbers."""
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    raise TypeError(f"{type(value).__name__} is not JSON serializable")
+
+
 def _segmented_distance(points, query):
     """Return the shortest distance from every query point to a polyline."""
     if points.shape[0] < 2:
@@ -510,7 +519,10 @@ def main() -> None:
     receipt, fields = measure(arguments.edit_index, arguments.carrier)
     arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
     arguments.receipt.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=True) + "\n",
+        json.dumps(
+            receipt, indent=2, sort_keys=True, allow_nan=True, default=_json_default
+        )
+        + "\n",
         encoding="utf-8",
     )
     np.savez_compressed(arguments.fields, **fields)
@@ -530,6 +542,7 @@ def main() -> None:
             indent=2,
             sort_keys=True,
             allow_nan=True,
+            default=_json_default,
         )
     )
 

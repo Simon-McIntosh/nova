@@ -63,6 +63,13 @@
   ],
   "completed_at": "2026-11-05T16:31:49.364Z",
   "dispatched_at": "2026-11-05T16:17:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the registered boundary separation is undefined because no frame assembles a closed separatrix: 0 of 5 solves converge, which the receipt records rather than inventing a value; that is the measured outcome of the re-run",
+      "recorded_at": "2026-11-05T16:42:56.746054+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json",

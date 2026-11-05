@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="plan-slug" content="bank-solve-linesearch">
+<meta name="plan-title" content="Shared dyadic bank backtracking">
+<meta name="plan-summary" content="One search, complete read counters and paired precision">
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<title>Shared bank backtracking | nova</title></head><body><main class="plan-doc">
+<h1 id="bank-solve-linesearch-landing">Shared dyadic backtracking and complete read counts</h1>
+<p>The cold Newton correction and the bank driver use one bounded dyadic search.
+Every batch read counts for every lane, including lanes already converged or no
+longer searching. The two-halving fixture observes four reads and requires
+[4, 4, 4]; the pending-lane counter reports [4, 2, 1] and fails.</p>
+<p>Keeping the incumbent when all trials are worse stalled the physical seed:
+lane 10: 60 updates, residual 1.593850e-10; lane 13: 60 updates, residual 3.656879e-10. This arm failed its convergence assertion with
+EXIT=1 in <code>incumbent-head.log</code>. The bank therefore uses the authorized
+fallback: retain the smallest-residual valid trial among the eight dyadic
+candidates when none improves. The docstring states this policy. Cold Newton
+retains its incumbent, and tests cover both policies through the same search.</p>
+<p>One H200, two cores and 48 GB; the existing cycle measurement is imported.
+Base <code>2f60ce9e499eda4507a2da6657d3c85b9025a59a</code>, head <code>16a3f55d638f71c093bc6a706c8bf7ef5166b3ae</code>, each
+from a git archive. Both executable calls after compilation are checked for
+precision; the table gives the second call. Repeated converged wall per slice:
+<strong>1110.550 → 1001.905 ms</strong>.
+Step counts vary between allocations, so this pair is not a general speed claim.
+First-call walls: 1144.442 →
+1013.331 ms/slice. Base read counters exclude companion
+reads and are shown as reported; head counts every actual batch evaluation.</p>
+<table id="bank-solve-linesearch-lanes"><thead><tr><th>Lane</th><th>Steps, base → head</th>
+<th>Reads, reported base → head</th><th>Fresh residual</th><th>Flux / span</th>
+<th>Axis / radius</th><th>X-point / radius</th><th>Boundary / span</th></tr></thead>
+<tbody><tr><td>1</td><td>4 → 14</td><td>5 → 62</td><td>8.600e-11</td><td>2.333e-13</td><td>2.270e-14</td><td>1.215e-14</td><td>3.531e-14</td></tr><tr><td>2</td><td>3 → 5</td><td>4 → 62</td><td>6.914e-11</td><td>3.482e-15</td><td>1.541e-14</td><td>1.090e-15</td><td>4.099e-16</td></tr><tr><td>3</td><td>6 → 3</td><td>9 → 62</td><td>5.205e-11</td><td>5.032e-10</td><td>5.001e-11</td><td>3.228e-11</td><td>6.722e-11</td></tr><tr><td>4</td><td>9 → 5</td><td>47 → 62</td><td>7.390e-11</td><td>5.032e-10</td><td>5.001e-11</td><td>3.230e-11</td><td>6.724e-11</td></tr><tr><td>5</td><td>3 → 7</td><td>4 → 62</td><td>9.956e-11</td><td>5.032e-10</td><td>5.000e-11</td><td>3.227e-11</td><td>6.722e-11</td></tr><tr><td>6</td><td>6 → 4</td><td>22 → 62</td><td>7.970e-11</td><td>5.338e-14</td><td>9.709e-15</td><td>7.614e-15</td><td>9.457e-15</td></tr><tr><td>7</td><td>10 → 5</td><td>14 → 62</td><td>8.356e-11</td><td>6.847e-14</td><td>1.501e-14</td><td>6.896e-15</td><td>7.793e-15</td></tr><tr><td>8</td><td>5 → 4</td><td>8 → 62</td><td>1.758e-11</td><td>5.034e-10</td><td>5.003e-11</td><td>3.229e-11</td><td>6.727e-11</td></tr><tr><td>9</td><td>13 → 5</td><td>47 → 62</td><td>1.993e-11</td><td>5.031e-10</td><td>4.999e-11</td><td>3.227e-11</td><td>6.719e-11</td></tr><tr><td>10</td><td>4 → 3</td><td>6 → 62</td><td>1.930e-11</td><td>4.642e-15</td><td>1.959e-15</td><td>9.563e-16</td><td>9.714e-17</td></tr><tr><td>11</td><td>6 → 3</td><td>15 → 62</td><td>7.000e-11</td><td>5.031e-10</td><td>5.001e-11</td><td>3.229e-11</td><td>6.719e-11</td></tr><tr><td>12</td><td>6 → 3</td><td>10 → 62</td><td>1.033e-11</td><td>1.431e-14</td><td>3.841e-15</td><td>3.448e-15</td><td>2.475e-15</td></tr><tr><td>13</td><td>12 → 3</td><td>46 → 62</td><td>6.816e-11</td><td>8.317e-14</td><td>3.002e-14</td><td>4.201e-15</td><td>9.558e-15</td></tr><tr><td>14</td><td>10 → 4</td><td>25 → 62</td><td>2.740e-11</td><td>5.034e-10</td><td>5.004e-11</td><td>3.230e-11</td><td>6.727e-11</td></tr><tr><td>15</td><td>6 → 4</td><td>9 → 62</td><td>5.490e-11</td><td>5.034e-10</td><td>5.004e-11</td><td>3.230e-11</td><td>6.727e-11</td></tr><tr><td>16</td><td>9 → 4</td><td>33 → 62</td><td>7.216e-11</td><td>5.033e-10</td><td>5.001e-11</td><td>3.229e-11</td><td>6.724e-11</td></tr></tbody></table>
+<p>Every lane must have fresh residual ≤ 1e-10, flux difference from base ≤ 1e-8
+of span, axis and X-point difference ≤ 5e-4 of minor radius, and boundary flux
+difference ≤ 1e-4 of span. The imported comparison also checks axis, X-point
+and boundary flux against the analytic oracle. Across both calls the largest
+flux difference is 5.0340e-10 of span; oracle axis,
+X-point and boundary ratios are 1.0477e-05,
+9.2549e-06 and
+2.5906e-05, respectively.</p>
+<p id="bank-solve-linesearch-cpu">Both four-file CPU arms completed on sirius,
+with a fresh pytest process and separate temporary directory per file.
+Base: 30 passed, 2 skipped. Head:
+32 passed, 2 skipped. All eight logs have pytest summaries and end with
+<code>EXIT=0</code>; there are zero added failures. By file, cycle is 3 → 3,
+driver 8 → 10, support read 13 → 13, and cold/chord solve 6 → 6 passing tests.
+The two unchanged skips are saddle/X-point checks on the limited fixture,
+which has neither. The cycle test file and its assertions are unchanged;
+both physical restart arms finish within seven updates.</p>
+<p>The scratch mutation restores pending-lane read accounting. Its only failure
+is <code>test_reads_include_companion_lanes_after_two_halvings</code>:
+four observed reads are reported as [4, 2, 1], failing the required [4, 4, 4].
+The head arm passes with [4, 4, 4]. The mutation log has the expected pytest
+summary, <code>1 failed in 3.44s</code>, and ends with <code>EXIT=1</code>.
+Receipts are <code>base-suite.log</code>, <code>head-suite.log</code> and
+<code>suite-receipts.json</code>; the control is <code>negative-control.log</code>.
+The suite receipts retain the literal commands with one leading
+<code>PYTHONPATH</code> assignment.</p>
+<p>Raw receipts and logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T133513111158-bank-solve-linesearch</code>;
+<code>device-base.log</code>, <code>device-head.log</code>, and
+<code>precision.json</code>. Each measurement log prints its revision, imported
+module and working directory and ends with its exit status.</p>
+</main></body></html>

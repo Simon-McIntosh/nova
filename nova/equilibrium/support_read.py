@@ -23,6 +23,7 @@ import numpy as np
 
 from nova.database import content_store
 from nova.equilibrium import clip_quadrature, current, fixed_points, topology
+from nova.equilibrium.solve import _damped_scale
 
 # Node and cell counts a machine's mesh is padded up to, so two geometries of
 # one bucket share one compiled program and the bank program is shape-static.
@@ -1455,7 +1456,11 @@ def step_batch(
 
 
 class SolveResult(NamedTuple):
-    """A capped bank solve certified by its terminal fresh read."""
+    """A capped bank solve certified by its terminal fresh read.
+
+    ``reads`` counts every fresh evaluation per lane, including companion reads
+    after a lane stops moving while another lane continues its search or solve.
+    """
 
     moments: tuple[jax.Array, jax.Array, jax.Array]
     support: SupportRead
@@ -1497,8 +1502,10 @@ def solve_batch(
     booking keeps the cut-cell, normal-form and fragment decisions of the first
     close read while every continuous reading remains current. A changed fresh
     decision or failed contraction releases that lock. Candidate updates halve
-    until their fresh residual contracts, retaining the best valid trial. Factor
-    reuse is opt-in because extra iterations can cost more than skipped refactors.
+    until their fresh residual contracts. If no halving improves the incumbent,
+    retain the smallest-residual valid trial: retaining the incumbent can stall
+    at a non-smooth residual plateau above tolerance. Factor reuse is opt-in
+    because extra iterations can cost more than skipped refactors.
     """
     lanes, cells = moments[0].shape
     support = read_batch(
@@ -1675,28 +1682,7 @@ def solve_batch(
             None,
         )
 
-        def choose(mask, trial, retained):
-            return jax.tree.map(
-                lambda trial_leaf, retained_leaf: jnp.where(
-                    mask.reshape((lanes,) + (1,) * (trial_leaf.ndim - 1)),
-                    trial_leaf,
-                    retained_leaf,
-                ),
-                trial,
-                retained,
-            )
-
-        def needs_trial(search):
-            return jnp.any(search[5]) & (jnp.max(search[4]) < 8)
-
-        def backtrack(search):
-            best, best_read, best_norm, scale, trials, pending = search
-            trial = tuple(
-                jnp.where(pending[:, None], value + scale[:, None] * change, kept)
-                for value, change, kept in zip(
-                    state, correction.update, best, strict=True
-                )
-            )
+        def evaluate(trial):
             trial_read = read_batch(
                 operands,
                 cache,
@@ -1708,36 +1694,23 @@ def solve_batch(
                 axis_sign,
                 iterations=iterations,
             )
-            trial_norm = magnitude(trial, trial_read)
-            valid = trial_read.valid & jnp.isfinite(trial_norm)
-            better = pending & valid & ((trials == 0) | (trial_norm < best_norm))
-            return (
-                choose(better, trial, best),
-                choose(better, trial_read, best_read),
-                jnp.where(better, trial_norm, best_norm),
-                scale * 0.5,
-                trials + pending.astype(jnp.int32),
-                pending
-                & (
-                    ~valid
-                    | (
-                        (trial_norm >= current_norm)
-                        & (trial_norm > tolerance)
-                    )
-                ),
-            )
+            return magnitude(trial, trial_read), trial_read.valid, trial_read
 
-        candidate, next_read, next_norm, _, trials, _ = jax.lax.while_loop(
-            needs_trial,
-            backtrack,
-            (
-                state,
-                fresh,
-                current_norm,
-                jnp.ones(lanes, dtype),
-                jnp.zeros(lanes, jnp.int32),
-                active,
-            ),
+        search = _damped_scale(
+            evaluate,
+            state,
+            correction.update,
+            current_norm,
+            fresh,
+            active=active,
+            max_steps=8,
+            tolerance=tolerance,
+            keep_incumbent=False,
+        )
+        candidate, next_read, next_norm = (
+            search.state,
+            search.auxiliary,
+            search.residual,
         )
         drift = lock & selection_changed(
             next_read.reading, cut_set, normal_set, locked_fragments
@@ -1775,7 +1748,7 @@ def solve_batch(
             current_norm,
             steps + active.astype(jnp.int32),
             refactors + (active & rebuild).astype(jnp.int32),
-            reads + trials,
+            reads + search.evaluations,
             freezes + start_freeze.astype(jnp.int32),
             unfreezes + (changed | drift).astype(jnp.int32),
             residual_path.at[:, slot + 1].set(next_norm),

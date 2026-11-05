@@ -284,7 +284,9 @@ def test_batch_reuses_factor_without_rebuilding_jacobians(monkeypatch):
     assert bool(jnp.all(result.converged))
     assert np.array_equal(np.asarray(result.refactors), [1, 1, 1])
     assert len(builds) == 3, f"Jacobian rebuilt {len(builds)} times for three lanes"
-    assert np.array_equal(np.asarray(result.reads), np.asarray(result.steps) + 1)
+    assert np.array_equal(
+        np.asarray(result.reads), np.full(3, int(jnp.max(result.steps)) + 1)
+    )
     assert len(set(np.asarray(result.steps))) > 1
 
 
@@ -320,6 +322,94 @@ def test_step_cap_reports_nonconvergence(monkeypatch):
     assert not bool(result.converged)
     assert int(result.steps) == 1
     assert float(result.residual) > 1e-10
+
+
+def test_reads_include_companion_lanes_after_two_halvings(monkeypatch):
+    """Every trial reads even the lanes accepted earlier or already at a root."""
+    observed = []
+
+    def read(*args, **kwargs):
+        jax.debug.callback(
+            lambda values: observed.append(np.asarray(values)), args[2][0]
+        )
+        return _toy_read(*args, **kwargs)
+
+    def jacobian(_operands, moments, *_args, **_kwargs):
+        slope = jnp.where(moments[0][0] == 1.0, 0.25, 1.0)
+        return slope * jnp.eye(3, dtype=moments[0].dtype)
+
+    monkeypatch.setattr(support_read, "read_batch", read)
+    monkeypatch.setattr(support_read, "step_residual", _toy_residual)
+    monkeypatch.setattr(support_read, "step_jacobian", jacobian)
+    states = tuple(
+        jnp.array([[1.0], [2.0], [0.0]], dtype=jnp.float64) for _ in range(3)
+    )
+    points = jnp.zeros((3, 1, 2), dtype=jnp.float64)
+    result = jax.jit(
+        lambda values: support_read.solve_batch(
+            None,
+            None,
+            values,
+            points,
+            points,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=1,
+        )
+    )(states)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    print("READ_ACCOUNTING", len(observed), np.asarray(result.reads).tolist())
+    np.testing.assert_array_equal(np.asarray(result.steps), [1, 1, 0])
+    np.testing.assert_array_equal(np.asarray(observed)[:, 0, 0], [1, -3, -1, 0])
+    assert bool(jnp.all(result.converged))
+    assert len(observed) == 4
+    np.testing.assert_array_equal(np.asarray(result.reads), [4, 4, 4])
+
+
+def test_dyadic_search_keeps_incumbent_and_rejects_invalid_trials():
+    """A masked lane stays still; invalid improvements cannot displace its read."""
+    from nova.equilibrium.solve import _damped_scale
+
+    def search(value, change, active):
+        def evaluate(candidate):
+            return jnp.abs(candidate[0]), candidate[0] != 0, candidate
+
+        return _damped_scale(
+            evaluate,
+            value,
+            change,
+            jnp.abs(value[0]),
+            value,
+            active=active,
+            max_steps=3,
+        )
+
+    result = jax.jit(jax.vmap(search))(
+        jnp.ones((3, 1), dtype=jnp.float64),
+        jnp.array([[-1.0], [1.0], [-1.0]], dtype=jnp.float64),
+        jnp.array([True, True, False]),
+    )
+    np.testing.assert_array_equal(result.state[:, 0], [0.5, 1.0, 1.0])
+    np.testing.assert_array_equal(result.auxiliary, result.state)
+    np.testing.assert_array_equal(result.scale, [0.5, 0.0, 0.0])
+    np.testing.assert_array_equal(result.evaluations, [2, 3, 0])
+
+    uphill = _damped_scale(
+        lambda candidate: (candidate[0], jnp.asarray(True), candidate),
+        jnp.array([1.0]),
+        jnp.array([1.0]),
+        jnp.asarray(1.0),
+        jnp.array([1.0]),
+        max_steps=3,
+        keep_incumbent=False,
+    )
+    np.testing.assert_array_equal(uphill.state, [1.25])
+    np.testing.assert_array_equal(uphill.auxiliary, uphill.state)
+    assert float(uphill.residual) == 1.25
 
 
 @pytest.fixture(scope="module")

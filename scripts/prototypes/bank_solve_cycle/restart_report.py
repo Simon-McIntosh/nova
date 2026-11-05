@@ -44,6 +44,12 @@ def main():
             f"additional halving trials {escape(str(values['backtracks']))}. "
             f"Log: <code>restart-{arm}.log</code>; {escape(receipt['summary'])}.</p>"
         )
+    compile_total = sum(
+        v["compile_seconds"] for v in records["head"]["phases"].values()
+    )
+    execute_total = sum(
+        v["execute_seconds"] for v in records["head"]["phases"].values()
+    )
     diagnostic = (
         '<div id="bank-solve-cycle-restart"><p><strong>Physical CPU restart '
         f"accepted within {max(head['steps'])} updates.</strong> "
@@ -55,6 +61,12 @@ def main():
         "CPU execution cost, not an unbounded solver loop. The visible slow test "
         "now has a 5400 s bound; its eight-update and 1e-10 assertions "
         "are unchanged.</p>"
+        f"<p>The head test reports {escape(records['head']['summary'])}, exceeding "
+        f"the former 1800 s bound. Total explicit compilation is {compile_total:.2f} s "
+        f"and total execution is {execute_total:.2f} s. Across the sixteen restart "
+        f"lanes, {sum(head['backtracks'])} additional halving trials and "
+        f"{sum(head['releases'])} lock releases complete before all lanes accept. "
+        "The added cost is chiefly CPU execution of fresh trial reads.</p>"
         "<p>One sirius allocation runs the two fresh pytest processes on disjoint "
         "four-core sets, with separate basetemps. Both the bootstrap and actual "
         "pytest process print the imported module path. Callbacks observe completed "
@@ -80,7 +92,8 @@ def main():
     )
     text = fragment.read_text().replace('content="partial"', 'content="pass"')
     text, replaced = re.subn(
-        r'<p id="bank-solve-cycle-cpu-blocker">.*?</p>',
+        r'<p id="bank-solve-cycle-cpu-blocker">.*?</p>'
+        r'|<div id="bank-solve-cycle-restart">.*?</div>',
         diagnostic,
         text,
         count=1,

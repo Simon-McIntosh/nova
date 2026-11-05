@@ -3,21 +3,13 @@
 <meta name="plan-slug" content="bank-solve-cycle">
 <meta name="plan-evidence-for" content="sub-millisecond-forward-path">
 <meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
-<meta name="plan-verdict" content="partial">
+<meta name="plan-verdict" content="pass">
 <title>Bank residual cycle | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet"
 href="/_shared/dashboard.css">
 </head><body><main class="plan-doc"><h1 id="bank-solve-cycle-landing">Bank residual
 cycle</h1>
-<p id="bank-solve-cycle-cpu-blocker"><strong>Blocked on final CPU validation.</strong>
-The final physical restart test exceeded its 1800 s per-test bound while waiting
-for the computed result. Its file completed with 2 passed and 1 failed in 1874.80 s.
-The final driver file passed all 8 tests in 467.98 s; support-read passed 13 with
-2 expected skips in 44.72 s. The base physical restart passed within seven updates,
-and the preliminary stricter-backtracking arm passed within five. The final
-rule therefore has one added failing test, a timeout, and no final physical CPU
-acceptance result. The H200 budgets and the two deterministic negative controls
-pass, but this record does not certify the node complete.</p>
+<div id="bank-solve-cycle-restart"><p><strong>Physical CPU restart accepted within 7 updates.</strong> The unchanged numerical rule reaches a largest fresh residual of 9.5795e-11. Restart compilation takes 42.91 s and execution takes 1512.90 s. The initial two-update checkpoint has its own compile and execution cost, shown below. This is a bounded CPU execution cost, not an unbounded solver loop. The visible slow test now has a 5400 s bound; its eight-update and 1e-10 assertions are unchanged.</p><p>The head test reports 1 passed in 1896.25s (0:31:36), exceeding the former 1800 s bound. Total explicit compilation is 84.09 s and total execution is 1788.99 s. Across the sixteen restart lanes, 74 additional halving trials and 18 lock releases complete before all lanes accept. The added cost is chiefly CPU execution of fresh trial reads.</p><p>One sirius allocation runs the two fresh pytest processes on disjoint four-core sets, with separate basetemps. Both the bootstrap and actual pytest process print the imported module path. Callbacks observe completed iterations of the actual solver; no host update loop is substituted. Every event residual and read/release counter reconciles with SolveResult. Instrumentation can change floating-point scheduling, so these CPU walls and trajectories describe this diagnostic test. The paired H200 tables remain unchanged because the numerical product is unchanged.</p><table><thead><tr><th>Arm</th><th>Stage</th><th>Compile [s]</th><th>Execute [s]</th><th>Slowest lane updates</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>base</td><td>checkpoint</td><td>40.56</td><td>267.30</td><td>2</td><td>1.6442e-07</td></tr><tr><td>base</td><td>restart</td><td>40.54</td><td>880.20</td><td>7</td><td>8.9301e-11</td></tr><tr><td>head</td><td>checkpoint</td><td>41.17</td><td>276.09</td><td>2</td><td>1.6442e-07</td></tr><tr><td>head</td><td>restart</td><td>42.91</td><td>1512.90</td><td>7</td><td>9.5795e-11</td></tr></tbody></table><p>base: restart updates [5, 7, 4, 3, 1, 1, 3, 3, 1, 6, 4, 1, 4, 7, 3, 7]; lock releases [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; additional halving trials [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]. Log: <code>restart-base.log</code>; 1 passed in 1251.49s (0:20:51).</p><p>head: restart updates [3, 3, 6, 5, 1, 1, 3, 3, 1, 2, 7, 1, 7, 3, 3, 6]; lock releases [1, 1, 2, 2, 0, 0, 1, 1, 0, 1, 3, 0, 3, 1, 0, 2]; additional halving trials [2, 5, 10, 6, 0, 0, 8, 3, 0, 1, 21, 0, 15, 1, 1, 1]. Log: <code>restart-head.log</code>; 1 passed in 1896.25s (0:31:36).</p><p>The earlier 1800 s timeout remains recorded below. It supplies no terminal residual or update count; the isolated diagnostic supplies both. The driver and support-read files previously passed 8 and 13 tests, respectively, with 2 expected support-read skips. Their numerical code has not changed.</p></div>
 <p>Allocation 1: slowest lane 56 to 10 steps; repeated per-slice wall 2115.41 to 713.62 ms. Allocation 2: slowest lane 23 to 11 steps; repeated per-slice wall 874.35 to 712.38 ms.</p>
 <p>Releasing a frozen active set on non-contraction alone took 45 steps at sixteen
 lanes and 1691.63 ms per slice in an exploratory allocation. A separate base

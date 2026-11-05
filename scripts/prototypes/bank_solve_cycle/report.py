@@ -264,6 +264,9 @@ def main():
 href="/_shared/dashboard.css">
 </head><body><main class="plan-doc"><h1 id="bank-solve-cycle-landing">Bank residual
 cycle</h1>
+<p id="bank-solve-cycle-cpu-blocker">CPU restart diagnostics are recorded in
+restart-base.log and restart-head.log; run restart_report.py after this report
+to reconcile their completed histories and insert the measured walls.</p>
 """
         + "<p>"
         + escape(summary)

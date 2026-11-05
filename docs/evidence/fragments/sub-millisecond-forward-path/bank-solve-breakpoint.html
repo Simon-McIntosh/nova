@@ -1,5 +1,6 @@
 <section id="bank-solve-breakpoint-landing">
-<h2>Fresh residual discontinuity with unchanged decisions</h2>
+<h2>Consistent conic endpoints restore near-root convergence</h2>
+<p><strong>All sixteen cycle lanes now converge within two restart updates; the H200 wall at sixteen slices falls from 589.893 to 126.757 ms per slice.</strong> Primal booking and its tangent use one interval rule. Solver acceptance and its 1e-10 precision requirement are unchanged.</p>
 <p><strong>Initial diagnosis before the interval-rule repair.</strong>
 At base <code>bd3b868dbcd2b60fe0b0840778324f8356861173</code>, the H200
 instrumented cycle fails its eight-update assertion. Every trial below is valid,
@@ -73,5 +74,56 @@ physical lane accepts within two restart updates: fifteen take one update,
 and lane 10 takes two. The largest terminal fresh residual is 9.303847e-11.
 The restart uses three fresh batch reads: its initial read and one per update,
 with no rejected trial. The two existing sampled-conic kernel tests also pass.
-The remaining paired suite and device measurements are pending.</p>
+The complete head suite and paired device measurements pass; the remaining baseline suite files are still running.</p>
+<h3 id="bank-solve-breakpoint-device">Paired H200 measurement</h3>
+<p>One allocation, 1306481, requests two cores, one H200 and 48 GB. Both arms
+are git archives: base <code>bd3b868dbcd2b60fe0b0840778324f8356861173</code>
+and head <code>bea3153ef1e330bfe98119ea4f60eb53796c1462</code>. The table gives
+call 2 after explicit compilation; both calls pass the precision checks. The
+Jacobian wall is the median of three synchronized calls. Whole solve wall
+includes every read, matrix and search trial; per-iterate wall divides it by
+the slowest lane's update count, and per-slice wall divides it by the batch
+width. Counts are zero-based lane order. Reads include companion evaluations
+after a lane has converged.</p>
+<table id="bank-solve-breakpoint-measurement"><thead><tr><th>Arm</th><th>Slices</th><th>Updates, lane order</th><th>Fresh reads, lane order</th><th>Jacobian [ms/batch]</th><th>Whole solve [ms]</th><th>Per iterate [ms]</th><th>Converged [ms/slice]</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>base</td><td>1</td><td>5</td><td>10</td><td>9.665</td><td>732.984</td><td>146.597</td><td>732.984</td><td>3.281286e-11</td></tr><tr><td>base</td><td>16</td><td>8, 7, 3, 11, 4, 4, 3, 7, 4, 9, 4, 3, 10, 3, 10, 4</td><td>49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49</td><td>31.906</td><td>9438.283</td><td>858.026</td><td>589.893</td><td>9.937651e-11</td></tr><tr><td>head</td><td>1</td><td>3</td><td>4</td><td>9.826</td><td>299.962</td><td>99.987</td><td>299.962</td><td>2.563638e-11</td></tr><tr><td>head</td><td>16</td><td>4, 5, 3, 4, 3, 5, 3, 3, 3, 4, 3, 3, 3, 3, 4, 3</td><td>8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8</td><td>31.661</td><td>2028.104</td><td>405.621</td><td>126.757</td><td>9.664802e-11</td></tr></tbody></table>
+<p>At sixteen slices, the whole solve falls from 9438.283 to 2028.104 ms,
+with 49 to 8 fresh reads per lane and a slowest-lane count of 11 to 5.
+The Jacobian stays near 32 ms. The measured per-slice speedup is 4.65,
+from one paired allocation; this is not a sub-millisecond solve.</p>
+<p>Every lane in both calls has a fresh residual at most 1e-10; head's largest
+is 9.664802e-11. Largest head/base differences are: flux/span 5.053273e-10
+(limit 1e-8), axis/minor radius 5.047492e-11 and X-point/minor radius
+3.261788e-11 (both limits 5e-4), and boundary flux/span 6.841947e-11
+(limit 1e-4). No limit is relaxed. The analytic-oracle errors are also checked
+on every lane. Head's largest axis and X-point ratios are 1.047727e-5 and
+9.254857e-6, against 5e-4; the boundary-flux ratio is at most 2.590626e-5,
+against 1e-4. Base oracle maxima are 1.047727e-5, 9.254857e-6 and 2.590633e-5,
+respectively. Boundary values are conservative bounds formed from the first
+lane's absolute oracle error plus each companion's difference from that lane.</p>
+<p id="bank-solve-breakpoint-search-tail">A smaller H200 search tail remains:
+eight reads for five updates include two batch trial reads beyond the initial
+read and one trial per update. Lane 1's accepted residuals after update 2 are
+1.699007e-9 → 1.567741e-10 → 1.084572e-10 → 7.933920e-11;
+lane 5's are 1.929521e-9 → 1.465423e-10 → 1.126068e-10 → 6.438938e-11.
+The timed receipt does not retain rejected trial norms, so it does not establish
+an essentially equal full-step refusal. No line-search change is made or
+claimed. The unchanged CPU restart uses full trials and converges within two
+updates.</p>
+<figure id="bank-solve-breakpoint-history"><img
+src="/nova/figures/sub-millisecond-forward-path/bank-solve-breakpoint/residual-history.svg"
+alt="Lane zero fresh residual against restart update: base remains above the acceptance limit after eight updates; corrected booking passes on its first update">
+<figcaption>Lane 0 of the unchanged sixteen-lane CPU cycle test on sirius.
+Each arm restarts after its own two production updates of the same analytic
+550-cell fixture; the corrected booking also changes that checkpoint's
+residual. Base ends at 1.836692e-10 after eight restart updates; head reaches
+4.662581e-11 after one. The vertical axis is logarithmic. The shared checked
+saver accepted all text bounds and overlaps, and the producer inspected the
+1400 × 720 PNG rendering. Only the SVG is committed.</figcaption></figure>
+<p>Paired receipts and the complete per-lane precision ledger are in
+<code>resumed/base-solve.json</code>, <code>resumed/head-solve.json</code>,
+<code>resumed/base-timings.json</code>, <code>resumed/head-timings.json</code>
+and <code>resumed/precision.json</code> beneath the run directory above.
+The plotted histories come from <code>resumed/cpu-base-test_bank_solve_cycle.log</code>
+and <code>resumed/cpu-head-test_bank_solve_cycle.log</code>, each with its
+actual module path, revision and terminal EXIT line.</p>
 </section>

@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is a measurement node whose manifest records empty baseline_suite and after_suite blocks and whose brief forbids test writes; no suite gate log exists in its run directory, so there is no baseline/after pair to difference and no added failure can be derived. The node's own gate logs are lanes-paths.log (EXIT=0) and lanes-trace.log (the deliberate negative result), neither of which is a suite arm.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T11:52:04.225Z",
+  "dispatched_at": "2026-11-05T11:43:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"that iterate is 3 for seven lanes and 4 for eight\" contradicts the receipt the same record quotes. Applying the proposed rule (ratio = current_norm/previous_norm > contraction_limit = 0.5, from nova/equilibrium/support_read.py:1631) to lanes-paths.json paths.residual gives 3 for seven lanes, 4 for seven lanes and 5 for two lanes (3 and 8), so the '4' bucket holds seven lanes, not eight. The consequence reaches the estimate at :65: a lane that releases at iterate 5 is accepted at 7, one step outside the stated '5 to 6' bound. This is the same line the prior review raised at :64 and neither repair commit changed it, although 6f18c4d08's subject is that the step counts should match the receipts."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the parenthetical after the first vector reads '(max 14, median 6)', but the median of [7,3,3,4,7,6,8,8,3,14,10,9,5,4,5,7] is 6.5, and 6 is the index of that allocation's median lane (plot-control.log's REPORT prints 'median\": 6, \"median_steps\": 10'). The parallel clause '(max 28, median 9.5)' is a step count, so the two halves of one sentence measure different quantities."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html",
+      "line": "54",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'roughly 2.4 decades per step' misdescribes the second of the two steps it introduces. lanes-paths.json gives 1.2e-1 to about 4e-4 (2.4 to 2.5 decades) and then to 1.64e-7 in nine lanes (3.4 decades) or to 1.8e-9 to 2.3e-9 in the other seven (5.3 to 5.5 decades), so only the first step is 2.4 decades. The line was rewritten by 6f18c4d08 and the trailing rate was carried over unchanged."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: plotted_points transforms every line with axis.transData regardless of the artist's own transform, so the freeze-threshold axhline (whose x data is axes-fraction [0,1]) is projected as data x=0..1 and sampled only over a sliver at the left edge at the wrong pixels. The record at :56 claims the check samples 'each segment in pixels ... where it is actually drawn', but the threshold line, which is the figure's key reference, is effectively unchecked across the axis, and the phantom segment can spuriously refuse a label near the left margin at 1e-6. The delivered figure happens to be clean, so nothing is mis-rendered today."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093111196541-bank-solve-lanes/plot-control.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the log's header names revision e2d9a3794, but the script it exercised, scripts/prototypes/bank_solve_lanes/plot_check_control.py, is first committed at a2dd12742 (12:15:48) while the log was written at 12:14:15, so the control ran against an uncommitted working tree. A reader who checks out the named revision cannot reproduce the control at all: plot_check_control.py does not exist there. The behaviour it reports is genuine, but the log does not name the code that produced it."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/fragment_check.py",
+      "line": "45",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record's numeric claim is guarded by a literal prose match ('nine of them exactly at that level and seven already between') rather than by a comparison of the stated levels with the receipt, so a correct rewording of the sentence fails the check while an edited level (1.64e-7 changed to, say, 1.6e-6) passes it. The retained negative control does not exercise the vector guard either: fragment-before-repair.html fails at this line first (I re-ran it, EXIT=1, 'the record does not state the two-level split at iterate 2'), so the vector check at line 54 is never reached by any recorded run, and no log of either fragment_check invocation was retained."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "line": "74",
+      "severity": "non-blocking",
+      "text": "non-blocking: save_checked remains a fifth copy of the same helper rather than a shared one \u2014 the same function exists at scripts/prototypes/bank_solve_read/plot.py:33, scripts/prototypes/bank_solve_profile/plot.py:64 and scripts/prototypes/bank_solve_driver/plot.py:28 \u2014 and this round's new capability (the text-over-data check, covered_by and plotted_points at :30 and :44) was added only to this copy, so the other three figures still cannot detect a label drawn over their data. The prior review raised the copy at this same line; this commit deepens it."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: the regenerated figure still paints the slowest lane in #c0442b, the colour the plot-style mandate reserves for a limit being broken, and the second slowest in #d98a2b, the muddy ochre family the mandate bans; both are visible in the rendered docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg as the two headline series. Raised by the prior review at the same lines and not addressed by the repair."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the five commits 6f18c4d08, a2dd12742, 256c9ced9, 072521991 and 7ae6253f8 against e2d9a3794; the diff touches the fragment (18 lines), the figure SVG, plot.py (+97/-... net), and adds fragment_check.py and plot_check_control.py, 344 insertions against 233 deletions in total.",
+    "done_when": "The brief's three measurement clauses were already answered at the reviewed base; this round's done-when is the prior review's findings, and the landed commits answer the blocking pair (the false 'every lane below 2.3e-9 by iterate 2' at :12 and the spliced driver vector at :16) plus the struck-through threshold label, each with a retained control log named in the record's Receipts list.",
+    "goal": "The repair round's goal is to make the record's prose agree with the receipts it quotes and to place every figure label clear of the plotted ladder; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:12 now states the 9/7 split at iterate 2 that lanes-paths.json paths.residual[lane][2] holds, and docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg now draws the threshold label at the right margin, which I confirmed by rendering it at 1714x882 and reading the image.",
+    "manifest": "Read the run manifest; it records status complete, the repair commits, and negative_control_note describing plot-control.log, plot-negative-control.log and the fragment_check pair, with both baseline_suite and after_suite left empty for a node that adds no test.",
+    "write_paths": "Read the run manifest's declared paths (scripts/prototypes/bank_solve_lanes, docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html, docs/figures/sub-millisecond-forward-path/bank-solve-lanes) and the diff of e2d9a3794..7ae6253f8; all five changed files lie inside them."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_solve_lanes/fragment_check.py compares the record against the receipt rather than against values it passed in, and plot_check_control.py shows the new text-over-data check refusing a deliberately placed label, but neither script is wired into any suite or launcher and fragment_check's own two runs are recorded only as prose in the record.",
+    "evidence": "I reproduced the 9/7 split from lanes-paths.json paths.residual[lane][2], found both quoted vectors in lanes-trace.log, and re-ran scripts/prototypes/bank_solve_lanes/fragment_check.py (EXIT=0 on the delivered fragment, EXIT=1 on negative-controls/fragment-before-repair.html), but two numeric claims at :19 and :64 still disagree with the receipt and no gate log exists for the fragment_check pair.",
+    "fit": "The two new scripts follow the sibling prototype idiom (argparse, printed REPORT lines, bare EXIT= at the end) and introduce no plan or run identifiers, but plot.py:23-24 still paints the slowest lane in the reserved limit red and the second slowest in the banned ochre family.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:12 and :16 now quote the two-step split and the driver step vector that lanes-paths.json and lanes-trace.log actually hold, and the rendered docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg carries no text over data.",
+    "reuse": "The added text-over-data check has no existing owner, but it is added to the fifth copy of save_checked (scripts/prototypes/bank_solve_lanes/plot.py:74) rather than a shared module, while the same helper already exists at scripts/prototypes/bank_solve_read/plot.py:33, scripts/prototypes/bank_solve_profile/plot.py:64 and scripts/prototypes/bank_solve_driver/plot.py:28.",
+    "scope_discipline": "All five changed paths sit inside the three declared write paths, and no product file, test file or plan was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The repair round's goal is to make the record's numbers agree with the receipts and to keep the figure's labels clear of the plotting region; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:12 now states the 9/7 split at iterate 2 that lanes-paths.json holds, and the rendered docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg carries no text over data.\nVERDICT done_when: The brief's three clauses were answered at the reviewed base; this round answers the prior review's two blocking findings and the struck-through threshold label, each recorded in the fragment's Receipts list at :76-78 with a retained log.\nVERDICT write_paths: Declared paths are scripts/prototypes/bank_solve_lanes, docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html and docs/figures/sub-millisecond-forward-path/bank-solve-lanes; all five files in the diff lie inside them.\nVERDICT manifest: Read; status complete, the repair commits named, and the control logs described, with baseline_suite and after_suite empty because the node adds no test.\nVERDICT diff: Read commit by commit against e2d9a3794: 6f18c4d08 corrects the record's numbers, a2dd12742 fixes the label placement, 256c9ced9 adds fragment_check.py, 072521991 drops an f-prefix, 7ae6253f8 adds the vector-provenance citations.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:12 and :16 now quote the split and the vector that lanes-paths.json and lanes-trace.log actually hold.\nSCORE evidence: 15\nJUSTIFICATION evidence: I reproduced the 9/7 split from lanes-paths.json paths.residual[lane][2] and re-ran scripts/prototypes/bank_solve_lanes/fragment_check.py (EXIT=0 delivered, EXIT=1 on negative-controls/fragment-before-repair.html), but two claims at :19 and :64 still disagree with the receipt and the fragment_check pair retains no log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff of e2d9a3794..7ae6253f8 lies inside the three declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: fragment_check.py compares the record against the receipt rather than against a value it passed in, and plot_check_control.py shows the new check refusing a deliberate overlap, but neither is wired into a suite or launcher.\nSCORE fit: 14\nJUSTIFICATION fit: the new scripts follow the sibling prototype idiom, but plot.py:23-24 still uses the reserved limit red and the banned ochre for the two headline series.\nSCORE reuse: 7\nJUSTIFICATION reuse: the text-over-data check is added to the fifth copy of save_checked at scripts/prototypes/bank_solve_lanes/plot.py:74 instead of the shared helper the four sibling prototypes already duplicate.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:64 non-blocking: \"3 for seven lanes and 4 for eight\" contradicts lanes-paths.json, which gives 3 for seven, 4 for seven and 5 for two, moving one lane outside the :65 \"5 to 6\" bound.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:19 non-blocking: \"(max 14, median 6)\" misstates the median, which is 6.5, and reads 6 as a step count while the parallel \"median 9.5\" is a step count and 6 is the median lane's index.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html:54 non-blocking: \"roughly 2.4 decades per step\" holds only for the first step; the second is 3.4 decades for nine lanes and 5.3 to 5.5 for the other seven.\nFINDING scripts/prototypes/bank_solve_lanes/plot.py:57 non-blocking: plotted_points applies axis.transData to every line, so the axes-fraction freeze-threshold axhline is projected as data x=0..1 and is checked only over a sliver at the wrong pixels.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093111196541-bank-solve-lanes/plot-control.log:1 non-blocking: the header names revision e2d9a3794 while the exercised plot_check_control.py is first committed at a2dd12742, so the control cannot be reproduced from the named revision.\nFINDING scripts/prototypes/bank_solve_lanes/fragment_check.py:45 non-blocking: the numeric claim is guarded by a literal prose match, and the retained negative control fails at that line, so the vector guard at :54 is never exercised by a recorded run.\nFINDING scripts/prototypes/bank_solve_lanes/plot.py:74 non-blocking: save_checked stays a fifth copy of a helper duplicated at bank_solve_read/plot.py:33, bank_solve_profile/plot.py:64 and bank_solve_driver/plot.py:28, and the new text-over-data check is added to the copy only.\nFINDING scripts/prototypes/bank_solve_lanes/plot.py:23 non-blocking: the regenerated figure still draws the slowest lane in the reserved limit red and the second slowest in the banned ochre family.",
+  "review_run_id": "r-20261105T114045243601-review-of-bank-solve-lanes-7ae6253f8d5e",
+  "reviewed_base_sha": "e2d9a3794d25b240ff5c950f63e8576e89d9a14f",
+  "reviewed_head_sha": "7ae6253f8d5ecb551d91c9d8462d0ac43c39145f",
+  "reviewed_run_id": "r-20261105T093111196541-bank-solve-lanes",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "reuse": 7,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T11:59:00+00:00",
+  "total": 87
+}

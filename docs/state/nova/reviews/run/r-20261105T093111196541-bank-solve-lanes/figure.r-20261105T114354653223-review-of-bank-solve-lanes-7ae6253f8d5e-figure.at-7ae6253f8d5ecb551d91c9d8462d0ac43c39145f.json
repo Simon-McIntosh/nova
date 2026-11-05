@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "figure review only; no suite was run and no test path is in this node's scope",
+  "blockers": "none",
+  "blocking_finding_count": 0,
+  "caption_verdict": "pass - the caption names the seed and revision (ce0b96226), the job (1306065), the three coloured lanes with their step counts and the identity of the dotted line, so it supplies information the picture cannot rather than repeating its title 'Fresh residual against iterate'.",
+  "completed_at": "2026-11-05T11:53:04Z",
+  "dispatched_at": "2026-11-05T11:46:54Z",
+  "figure_under_review": "docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "fee5bb72362",
+      "line": 24,
+      "severity": "non-blocking",
+      "summary": "The second-slowest lane is drawn in #d98a2b, which measures 2.76:1 against the white page, under the 3:1 floor for a graphical object that carries data. It is the stroke for lane 5 and for its legend swatch, and lane 5 is one of the two lanes the figure exists to compare. The 3.0 pt stroke still reads in the 1399 px render, so it does not stop a reader; it loses margin when the page scales to its ~900 px column, where the other marks keep theirs (slowest 5.12:1, median 6.91:1, population 3.11:1). A darker amber or the orange dropped in favour of the median blue's neighbour would clear the floor."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "fe2fae4ffd5",
+      "line": 149,
+      "severity": "non-blocking",
+      "summary": "The 'active set locked' marker is drawn once per coloured lane at its first sub-threshold iterate, but the median lane (7) and the slowest lane (10) both lock at iterate 2 with residuals 1.81e-9 and 1.92e-9 - about one pixel apart at this scale. All three markers carry the same zorder and the slowest lane is drawn last, so the blue ring of the median lane is completely occluded: measured on the render, the ring at x164-178 y461-475 is red throughout and no blue marker pixel exists anywhere in the plot area. A reader counting lock marks sees two, not three, and could read the median lane as never locking; the fragment text carries the fact, so nothing is misstated, but the mark the legend promises is missing for one lane."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "fec0d5822f9",
+      "line": 213,
+      "severity": "non-blocking",
+      "summary": "The 'active set locked' legend swatch is drawn with a dark grey edge (#333333) while the marks it stands for are drawn with the lane's own colour (red and orange rings in the render), so the key does not match what is on the plot. The open-circle shape is distinctive enough that the association survives and nothing is misread, so this is cosmetic rather than blocking."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "fddf575fffc",
+      "line": 177,
+      "severity": "non-blocking",
+      "summary": "The x-limit is set to the longest history plus nine iterates, so the axis runs to 36 while the last data point is at iterate 27: about 22 % of the plot width (x 940-1203 of the 1092 px axes) carries no data at all. The margin is what keeps the threshold annotation in clear space, but it also makes the axis look truncated, and a reader cannot tell whether lanes beyond iterate 27 are missing. Placing the annotation above the rule near the left, or trimming the limit to about 31, would return the width to the data."
+    }
+  ],
+  "judged_from": "the rendered PNG only; no SVG markup, dimension attribute or glyph coordinate was read or used",
+  "node": "review-of-bank-solve-lanes-7ae6253f8d5e-figure",
+  "node:reviewed": "bank-solve-lanes",
+  "outside_scope": "none",
+  "project": "nova",
+  "rendered_artifact": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T114354653223-review-of-bank-solve-lanes-7ae6253f8d5e-figure/image-0.png",
+  "rendered_size_px": [
+    1399,
+    720
+  ],
+  "review_run_id": "r-20261105T114354653223-review-of-bank-solve-lanes-7ae6253f8d5e-figure",
+  "reviewed_base_sha": "ce0b96226de61cd7eb8e782b46dc855d179beacc",
+  "reviewed_head_sha": "7ae6253f8d5ecb551d91c9d8462d0ac43c39145f",
+  "reviewed_run_id": "r-20261105T093111196541-bank-solve-lanes",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - all text clears its background: tick and annotation text #222222 against white is 15.91:1 and the spine/tick grey #52514e is about 8:1; the median blue (6.91:1), slowest red (5.12:1) and population grey #929292 (3.11:1) all clear the 3:1 graphical floor. The one mark below that floor is the orange second-slowest stroke at 2.76:1, recorded as a non-blocking finding.",
+    "data_ink": "pass - thirteen thin grey traces for the population and the three lanes under discussion thick in colour on top (zorder 5 over 2), one dotted threshold rule, one annotation. No gridlines (ax.grid(False)), no fill, no shading, no marker clutter; every mark either is data or keys data. The x-axis reserves about 22 % of the plot width past the last lane, recorded as a non-blocking finding.",
+    "decoration": "pass - no gradient, no background fill, no drop shadow, no theme styling; top and right spines absent and nothing on the page competes with the traces.",
+    "label_collision": "pass - no text is clipped (no ink reaches any canvas edge; rightmost ink x=1203 of 1399, bottom ink y=695 of 720) and no text overlaps another in the render. The 'freeze threshold, 1e-6' annotation sits above the dotted rule with 4 px clearance and its band (x990-1201, y336-352) contains zero coloured and zero grey data pixels, so the defect recorded against the earlier head is repaired. A data mark, not a label, is occluded where two lanes' lock circles coincide, recorded as a non-blocking finding.",
+    "legibility": "pass - sixteen lane histories read at a glance on one log axis: a two-decade Newton drop over iterates 0-2, then a two-level ladder that flips until acceptance, slowest lane in red out to iterate 27, median in blue stopping at 10. Legend, tick labels, axis labels and the threshold annotation are all readable at the 1399 px render; the defects found are recorded per item below rather than counted here.",
+    "table_form": "pass - the image carries a relation (per-lane residual paths over iterates and where each coloured lane stops), not a set of exact values; the per-lane numbers are in the fragment's table above the figure, not in the image."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T11:53:04+00:00",
+  "total": null
+}

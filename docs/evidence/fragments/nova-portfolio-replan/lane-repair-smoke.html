@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fast-lane test repairs</title>
+<meta name="plan" content="nova-portfolio-replan">
+<meta name="node" content="lane-repair-smoke">
+</head>
+<body>
+<main>
+<section id="lane-repair-smoke-measure">
+<h2>Analytic smoke, evolved transport and solve-path census</h2>
+<p>The assigned three files ran in place at base revision
+<code>1de330a8fbf781c2db6f9734efdaf53e47fe75b4</code>. The completed
+baseline reported <strong>5 failed, 5 errors, 5 passed, 2 skipped and 1 expected
+failure in 1302.91 s</strong>. Its ten failed or errored IDs are exactly the ten
+listed for these files by the fast-lane census. The baseline log is
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/baseline.log</code>.</p>
+<table>
+<thead><tr><th>Census failure IDs</th><th>Reproduced cause and classification</th><th>Disposition</th></tr></thead>
+<tbody>
+<tr><td><code>test_analytic_reference_is_a_vacuum_map</code>,
+<code>test_analytic_vacuum_flux_matches_the_reference</code>,
+<code>test_analytic_map_residual_is_reported</code>,
+<code>test_analytic_control_scaling_the_coil_current_fails_the_map_bound</code></td>
+<td>All four raise <code>LayerRegistryCredentialError: registry credentials rejected</code>;
+the registry response says <code>unauthorized: authentication required</code>.
+External registry access is the blocker. The fetcher's refusal is correct: a
+credential error must not be hidden as network unreachability.</td>
+<td>The four remain failed until the pinned registry layers can be fetched. A
+new smoke-level test injects the credential refusal and passes only when it
+reaches the caller.</td></tr>
+<tr><td><code>test_mapping_restores_the_negated_total_flux_gradient_sense</code>,
+<code>test_mapping_crosses_the_callable_source_boundary_with_si_primitives</code>,
+<code>test_mapped_source_converges_with_force_and_current_receipts</code></td>
+<td>Each baseline error is <code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code>.
+The two source-mapping checks unnecessarily requested the shared converged
+equilibrium fixture; the third check actually runs the expensive solve. These
+are stale fast-lane test selections, not observed source-map defects.</td>
+<td>The first two now build only a transport receipt and mapped source and pass.
+The equilibrium solve check is marked <code>slow</code> for a dedicated numerical
+gate; its owner remains <code>tests/test_transport_evolved_state.py</code>.</td></tr>
+<tr><td><code>test_solve_path_prefix_slices_do_not_feed_the_null_census</code></td>
+<td>The scanner found the one allowed read at line 2472, while its expectation
+still pinned line 2329. This was a stale test anchor.</td>
+<td>The check now matches the owner function and target and requires exactly one
+finding. It passes; a scratch copy with the old assertion fails again.</td></tr>
+<tr><td><code>test_terminal_polish_receipt_keeps_direct_samples[discriminator-row]</code>,
+<code>test_reduced_newton_acceptance_read_keeps_direct_samples[discriminator-row]</code></td>
+<td>Both setup errors are <code>ValueError: cell edges must have non-zero length</code>:
+the weak reactor's 110-cell carrier collapses an edge before either census
+assertion runs. This is a carrier-geometry defect in the builder and
+<code>nova/equilibrium/separatrix_clip.py:1950</code>, outside this node's write
+paths; the test's unsupported coarse carrier was stale.</td>
+<td>The tests now use the certificate's declared 500-cell reactor carrier.
+Both direct-sample checks pass on that carrier, while the original mesh defect
+is reported to its owner.</td></tr>
+</tbody>
+</table>
+<p>At committed head <code>235b89edaaeab79ab686863ab973557303f783e3</code>,
+the three-file fast selection reported <strong>11 passed, 4 failed, 4 deselected,
+0 errors in 65.39 s</strong>. The only remaining failures are the same four
+registry credential IDs present at base, so added failures are <strong>zero</strong>.
+The committed-head log is
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/final-head.log</code>.
+The scanner's negative control is
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/negative-control.log</code>
+and ends with <code>EXIT=1</code> and the scanner test as its failing ID.</p>
+</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-05T19:26:42.153Z",
+  "dispatched_at": "2026-11-05T19:17:33Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_breakpoint/report.py",
+      "id": "f0e36409390",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "precision() duplicates the paired precision-budget comparison that scripts/prototypes/bank_solve_cycle/report.py:18 already owns - the same four keys, unit denominators, first-lane oracle-boundary construction and limits (1e-8, 5e-4, 1e-4) - copied into a new file rather than imported or extended in the owner, so the two implementations will drift the next time a budget changes."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_breakpoint/cpu.sh",
+      "id": "fdf2f274b29",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "the provenance header runs `python -c` with cwd at the worktree, so '' at sys.path[0] shadows PYTHONPATH; with PYTHONPATH=/tmp/nonexistent-arm the same command still printed the worktree's nova, and every cpu-*.log header therefore names the worktree rather than the arm it measured - the arms themselves are established by the in-process PROVENANCE lines and by the base arm failing where head passes."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to restore full Newton steps near the root so every cycle-test lane converges within eight restart updates; commit bea3153ef makes primal booking and its tangent sample the same strip-interior conic limit at nova/equilibrium/current.py:68-140, and the unchanged cycle test at head converges all sixteen lanes in at most two restart updates with largest terminal fresh residual 9.303847e-11 (resumed/cpu-head-test_bank_solve_cycle.log, 3 passed).\nVERDICT done_when: the done-when requires the refusing construct named from per-scale fresh residuals on two slow lanes, every lane at most 1e-10 within eight updates with the test file unchanged, base and head sirius suites with no added failure, and one H200 allocation tabling per-lane updates, reads, jacobian, per-iterate and per-slice wall inside the precision budget with one rendered figure; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-breakpoint.html carries each, and the logs record base 1 failed/2 passed against head 3 passed, and base 1 failed/32 passed/5 skipped against head 33 passed/5 skipped with EXIT=1 and EXIT=0.\nVERDICT write_paths: the declared paths are nova/equilibrium/support_read.py, nova/equilibrium/solve.py, tests/test_bank_solve_driver.py, scripts/prototypes/bank_solve_breakpoint, the evidence fragment and figure directory, extended on resume with nova/equilibrium/current.py and tests/test_conic_endpoint_consistency.py; git diff --name-only bd3b868..bbf451783cb0 lists eleven files, every one inside those paths, and solve.py, support_read.py and tests/test_bank_solve_driver.py are unchanged at head.\nVERDICT manifest: read; it records status complete, eleven commits, the five-file sirius base and head suites with literal commands and EXIT lines, the negative control, H200 job 1306481 and the per-lane precision maxima; its after_suite revision bea3153ef carries byte-identical product and test content to the final head, since git diff bea3153ef bbf451783cb0 -- nova/ tests/ is empty.\nVERDICT diff: read all eleven commits against base bd3b868; the production change is twenty-one lines in nova/equilibrium/current.py:68-140 and :543-780 that delete the inward_endpoints flag and apply _inward_interval_points in both _conic_rings and _conic_ring_tangents, the rest being tests/test_conic_endpoint_consistency.py, five prototype scripts and their runners, the evidence fragment and one SVG figure; every commit carries a conventional subject with a body and no AI attribution, and no plan label or run id appears in any added name or comment.\nCALL_SITES: nova/equilibrium/support_read.py:414, nova/equilibrium/support_read.py:536, nova/equilibrium/support_read.py:560, nova/equilibrium/support_read.py:564, nova/equilibrium/support_read.py:1094, nova/equilibrium/support_read.py:1132\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:99-101 now evaluates primal rings on the same strip-interior interval rule as nova/equilibrium/current.py:137, and resumed/cpu-head-test_bank_solve_cycle.log shows all sixteen lanes converging in one or two restart updates at no more than 9.303847e-11, though the repair lands in current.py rather than the solve_batch and _damped_scale sites the brief named, which the resume advice explicitly granted.\nSCORE evidence: 16\nJUSTIFICATION evidence: every done-when element is recorded with its own log and terminal EXIT - resumed/base-suite.log EXIT=1, resumed/head-suite.log EXIT=0, resumed/device-base.log and resumed/device-head.log EXIT=0 with per-lane rows, resumed/negative-control.log EXIT=1 - but the runner header at scripts/prototypes/bank_solve_breakpoint/cpu.sh:19 prints the worktree's module path rather than the arm's, so the provenance the brief asked for rests on the in-process PROVENANCE lines instead (FINDING).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only bd3b868..bbf451783cb0 lists eleven paths, every one inside the declared write paths, and the contents of nova/equilibrium/solve.py and nova/equilibrium/support_read.py are unchanged at head.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_conic_endpoint_consistency.py:89 asserts the booking tangent matches a central difference of the primal to 1e-6 and is demonstrated red on the reverted exact-endpoint primal at resumed/negative-control.log with relative error 3.592169 and EXIT=1, while the unchanged convergence guard is tests/test_bank_solve_cycle.py:173; the new test exercises one circular-hole fixture only.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/current.py:68-72 replaces a keyword-only flag with one documented rule, and the new test follows the repository's established configure_dtypes() then `# ruff: noqa: E402` idiom seen at tests/test_bank_newton_step.py:1-8, with no plan, stage or ticket token in any added name or comment.\nSCORE reuse: 5\nJUSTIFICATION reuse: the production change extends the existing owner in place and the measurement scripts import the prototypes they were told to (scripts/prototypes/bank_solve_breakpoint/measure.py:8-9, diagnose.py:14, report.py:12), but scripts/prototypes/bank_solve_breakpoint/report.py:26 re-implements the paired precision check that scripts/prototypes/bank_solve_cycle/report.py:18 already owns (FINDING).\nFINDING scripts/prototypes/bank_solve_breakpoint/report.py:26 non-blocking: precision() duplicates the paired precision-budget comparison that scripts/prototypes/bank_solve_cycle/report.py:18 already owns - the same four keys, unit denominators, first-lane oracle-boundary construction and limits (1e-8, 5e-4, 1e-4) - copied into a new file rather than imported or extended in the owner, so the two implementations will drift the next time a budget changes.\nFINDING scripts/prototypes/bank_solve_breakpoint/cpu.sh:19 non-blocking: the provenance header runs `python -c` with cwd at the worktree, so '' at sys.path[0] shadows PYTHONPATH; with PYTHONPATH=/tmp/nonexistent-arm the same command still printed the worktree's nova, and every cpu-*.log header therefore names the worktree rather than the arm it measured - the arms themselves are established by the in-process PROVENANCE lines and by the base arm failing where head passes.",
+  "review_run_id": "r-20261105T191105273908-review-of-bank-solve-breakpoint-bbf451783cb0",
+  "reviewed_base_sha": "bd3b868dbcd2b60fe0b0840778324f8356861173",
+  "reviewed_head_sha": "bbf451783cb019e48e4565d9a9e8389c5c2de55b",
+  "reviewed_run_id": "r-20261105T174420294303-bank-solve-breakpoint",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T19:27:52.807370+00:00",
+  "total": 94
+}

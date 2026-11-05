@@ -20,7 +20,7 @@ command=("$python" -m pytest -p no:cacheprovider "--basetemp=$scratch/pytest" "$
 log="$run/negative-control.log"
 printf '# revision: %s with base current.py from %s tree: %s command: PYTHONPATH=%q' "$head" "$base" "$scratch/mutation" "$scratch/mutation" > "$log"
 printf ' %q' "${command[@]}" >> "$log"; printf '\n' >> "$log"
-PYTHONPATH="$scratch/mutation" "$python" -c 'import nova, nova.equilibrium.current as m; from pathlib import Path; print("nova",nova.__file__,"module",m.__file__,"cwd",Path.cwd().resolve())' >> "$log" 2>&1
+PYTHONPATH="$scratch/mutation" "$python" -P -c 'import nova, nova.equilibrium.current as m; from pathlib import Path; print("nova",nova.__file__,"module",m.__file__,"cwd",Path.cwd().resolve())' >> "$log" 2>&1
 PYTHONPATH="$scratch/mutation" "${command[@]}" >> "$log" 2>&1
 result=$?; echo "EXIT=$result" >> "$log"
 exit "$result"

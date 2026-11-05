@@ -17,7 +17,7 @@ AFTER="$RUN_DIR/titan-four.log"
 
 (
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$REVISION" "$ROOT" "$PWD" "$PY $CHECK $SVG"
-  "$PY" -c 'import nova; print("NOVA="+nova.__file__)'
+  "$PY" -P -c 'import nova; print("NOVA="+nova.__file__)'
   "$PY" "$ROOT/$PLOT" "$BASELINE" "$AFTER" --svg "$SVG" --png "$RUN_DIR/legend-head.png"
   code=$?
   if [ "$code" -eq 0 ]; then
@@ -37,7 +37,7 @@ git -C "$SCRATCH" apply --reverse "$SCRATCH/answer.patch" || exit $?
   cd "$SCRATCH" || exit 2
   printf 'REVISION=%s REVERTED=%s TREE=%s CWD=%s COMMAND=%s\n' "$REVISION" "$ANSWER" "$SCRATCH" "$PWD" "$PY $CHECK $SCRATCH/stage-wall.svg"
   printf 'PLOT_MODULE=%s\n' "$SCRATCH/$PLOT"
-  "$PY" -c 'import nova; print("NOVA="+nova.__file__)'
+  "$PY" -P -c 'import nova; print("NOVA="+nova.__file__)'
   "$PY" "$SCRATCH/$PLOT" "$BASELINE" "$AFTER" --svg "$SCRATCH/stage-wall.svg" --png "$RUN_DIR/legend-reverted.png"
   code=$?
   if [ "$code" -eq 0 ]; then

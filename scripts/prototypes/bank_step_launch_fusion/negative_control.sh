@@ -27,6 +27,6 @@ export PYTHONPATH="$SCRATCH"
 TARGET="$SCRATCH/tests/test_bank_step_launch_fusion.py::test_newton_step_traces_booking_through_assembly"
 printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$REVISION" "$SCRATCH" "$PWD" \
   "$PY -m pytest -p no:cacheprovider $TARGET --basetemp=$SCRATCH/basetemp -vv"
-"$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+"$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
 printf 'MUTATION=materialize booked raw current on host before dense assembly\n'
 "$PY" -m pytest -p no:cacheprovider "$TARGET" --basetemp="$SCRATCH/basetemp" -vv

@@ -27,7 +27,7 @@ for arm in "$@"; do
     command=("$python" -m pytest -p no:cacheprovider "--basetemp=$scratch/$arm-$name" "$tree/tests/$name.py" -m "slow or not slow" -vv -s)
     printf -v command_text '%q ' "${command[@]}"
     printf '# revision: %s tree: %s command: %s\n' "$revision" "$tree" "$command_text" > "$log"
-    PYTHONPATH="$tree" "$python" -c 'import nova, nova.equilibrium.support_read as m; from pathlib import Path; print("nova",nova.__file__,"module",m.__file__,"cwd",Path.cwd().resolve())' >> "$log" 2>&1
+    PYTHONPATH="$tree" "$python" -P -c 'import nova, nova.equilibrium.support_read as m; from pathlib import Path; print("nova",nova.__file__,"module",m.__file__,"cwd",Path.cwd().resolve())' >> "$log" 2>&1
     PYTHONPATH="$tree" "${command[@]}" >> "$log" 2>&1
     echo "EXIT=$?" >> "$log"
   done

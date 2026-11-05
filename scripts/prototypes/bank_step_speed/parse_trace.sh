@@ -17,7 +17,7 @@ TRACE_ROOT=${2:?trace directory required}
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
     "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$ROOT" \
     "$PY -m scripts.prototypes.bank_step_speed.parse_trace $TRACE"
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
   "$PY" -m scripts.prototypes.bank_step_speed.parse_trace "$TRACE"
   code=$?
   printf 'EXIT=%s\n' "$code"

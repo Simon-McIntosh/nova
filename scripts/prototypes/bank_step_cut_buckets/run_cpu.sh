@@ -14,7 +14,7 @@ run_gate() {
     (
         printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
             "$(git rev-parse HEAD)" "$ROOT" "$PWD" "$*"
-        "$PY" -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+        "$PY" -P -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
         "$@"
         code=$?
         printf 'EXIT=%s\n' "$code"

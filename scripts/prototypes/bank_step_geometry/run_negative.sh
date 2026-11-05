@@ -13,7 +13,7 @@ mkdir -p "$scratch/tree"
 git -C "$root" archive HEAD nova tests scripts pyproject.toml | tar -xf - -C "$scratch/tree"
 export PYTHONPATH="$scratch/tree"
 export BANK_NEGATIVE_TREE="$scratch/tree"
-/home/ITER/mcintos/Code/nova/.venv/bin/python - <<'PY'
+/home/ITER/mcintos/Code/nova/.venv/bin/python -P - <<'PY'
 import os
 from pathlib import Path
 
@@ -34,7 +34,7 @@ command="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprov
 {
     printf 'revision=%s tree=%s command=%s\n' "$(git -C "$root" rev-parse HEAD)" "$scratch/tree" "$command"
     printf 'measurement_cwd=%s\n' "$(realpath "$scratch/tree")"
-    /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova.equilibrium.support_read as module; print("module.__file__=" + module.__file__)'
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -P -c 'import nova.equilibrium.support_read as module; print("module.__file__=" + module.__file__)'
     printf 'mutation=perturb one active ring velocity by 1e-3 in a scratch copy\n'
     /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider "$target" --basetemp="$scratch/pytest" -vv
     result=$?

@@ -38,7 +38,7 @@ profile_arm() {
     export PYTHONPATH="$tree" BANK_STEP_TRACE_DIR="$trace_dir"
     printf '# revision: %s tree: %s cwd: %s command: %s -m scripts.prototypes.bank_step_speed.profile\n' \
       "$(git -C "$tree" rev-parse HEAD 2>/dev/null || echo unknown)" "$tree" "$PWD" "$PY"
-    "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("nova.__file__:", nova.__file__); print("module.__file__:", m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("nova.__file__:", nova.__file__); print("module.__file__:", m.__file__)'
     "$PY" -m scripts.prototypes.bank_step_speed.profile
     first=$?
     if [ "$first" -eq 0 ]; then
@@ -62,7 +62,7 @@ solve_arm() {
     export PYTHONPATH="$tree"
     printf '# revision: %s tree: %s cwd: %s command: %s -m scripts.prototypes.bank_step_booking.measure --arm fresh\n' \
       "$(git -C "$tree" rev-parse HEAD)" "$tree" "$PWD" "$PY"
-    "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("nova.__file__:", nova.__file__); print("module.__file__:", m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("nova.__file__:", nova.__file__); print("module.__file__:", m.__file__)'
     "$PY" -m scripts.prototypes.bank_step_booking.measure --arm fresh
     printf 'EXIT=%s\n' "$?"
   ) > "$log" 2>&1
@@ -76,7 +76,7 @@ count_arm() {
     export PYTHONPATH="$SOURCE"
     printf '# revision: %s tree: %s cwd: %s command: %s -m scripts.prototypes.bank_step_booking_h200.count_cut\n' \
       "$(git -C "$SOURCE" rev-parse HEAD)" "$SOURCE" "$PWD" "$PY"
-    "$PY" -c 'import nova; print("nova.__file__:", nova.__file__)'
+    "$PY" -P -c 'import nova; print("nova.__file__:", nova.__file__)'
     "$PY" -m scripts.prototypes.bank_step_booking_h200.count_cut
     printf 'EXIT=%s\n' "$?"
   ) > "$log" 2>&1
@@ -84,7 +84,7 @@ count_arm() {
 }
 
 printf '# device=%s base=%s head=%s\n' "$TAG" "$BASE" "$(git -C "$SOURCE" rev-parse HEAD)"
-"$PY" -c 'import nova; print("nova.__file__:", nova.__file__)'
+"$PY" -P -c 'import nova; print("nova.__file__:", nova.__file__)'
 count_arm
 profile_arm "$SCRATCH/base" base
 profile_arm "$SOURCE" head

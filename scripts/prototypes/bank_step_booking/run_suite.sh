@@ -31,7 +31,7 @@ for arm in base head; do
       {
         printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$REVISION" "$TREE" "$PWD" \
           "$PY -m pytest -p no:cacheprovider $TARGET --basetemp=$TEMP -vv"
-        "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+        "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
         "$PY" -m pytest -p no:cacheprovider "$TARGET" --basetemp="$TEMP" -vv
         code=$?
         printf 'EXIT=%s\n' "$code"

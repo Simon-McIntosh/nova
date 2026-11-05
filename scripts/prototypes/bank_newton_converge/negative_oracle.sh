@@ -24,7 +24,7 @@ PY
   printf 'MUTATION=direct Newton reference echoes the perturbed seeds\n'
   export PYTHONPATH=$BASE:$ROOT
   cd "$BASE" || exit 2
-  "$PY" -c 'import nova, scripts.prototypes.bank_newton_converge.fresh_solve as m, pytest, sys; print("NOVA="+nova.__file__+" MODULE="+m.__file__, flush=True); raise SystemExit(pytest.main(sys.argv[1:]))' -p no:cacheprovider "$ROOT/tests/test_bank_newton_converge.py" -k analytic_oracle_uses_direct_newton_without_read --basetemp="$BASE/pytest" -vv
+  "$PY" -P -c 'import nova, scripts.prototypes.bank_newton_converge.fresh_solve as m, pytest, sys; print("NOVA="+nova.__file__+" MODULE="+m.__file__, flush=True); raise SystemExit(pytest.main(sys.argv[1:]))' -p no:cacheprovider "$ROOT/tests/test_bank_newton_converge.py" -k analytic_oracle_uses_direct_newton_without_read --basetemp="$BASE/pytest" -vv
   code=$?
   cd "$ROOT" || exit 2
   rm -rv "$BASE"

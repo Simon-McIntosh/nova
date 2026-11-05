@@ -59,7 +59,7 @@ export EXPECTED_CURRENT_FILE="$scratch/nova/equilibrium/current.py"
 command_text="$python -m pytest -p guard_probe -p no:cacheprovider --rootdir=$scratch --basetemp=$scratch/basetemp-$arm $scratch/tests/test_bank_step_launch_fusion.py::test_geometry_tangent_uses_shared_boundary_integral -q"
 {
   printf '# revision: %s tree: %s command: %s\n' "$(git -C "$worktree" rev-parse HEAD)" "$(pwd -P)" "$command_text"
-  "$python" - <<'PY'
+  "$python" -P - <<'PY'
 from nova.jax.config import configure_dtypes
 configure_dtypes()
 import nova

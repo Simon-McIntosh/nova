@@ -9,7 +9,7 @@ LOG=${1:?log path required}
 STATE=${2:?state path required}
 {
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$ROOT" "$PY -m scripts.prototypes.bank_newton_converge.outer --output $STATE"
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
   "$PY" -m scripts.prototypes.bank_newton_converge.outer --output "$STATE"
   code=$?
   printf 'EXIT=%s\n' "$code"

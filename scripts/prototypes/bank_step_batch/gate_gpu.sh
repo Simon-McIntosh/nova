@@ -28,7 +28,7 @@ unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
   printf 'REVISION=%s TREE=%s CWD=%s MUTATION=%s COMMAND=%s\n' \
     "$(git rev-parse HEAD)" "$ROOT" "$PWD" "$MUTATION" \
     "$PY -m pytest -p no:cacheprovider -q tests/test_bank_step_batch.py"
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m, tests.test_bank_step_batch as t; print("NOVA="+nova.__file__+" MODULE="+m.__file__+" TEST="+t.__file__)'
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m, tests.test_bank_step_batch as t; print("NOVA="+nova.__file__+" MODULE="+m.__file__+" TEST="+t.__file__)'
   "$PY" -m pytest -p no:cacheprovider -q tests/test_bank_step_batch.py \
     --basetemp="$SCRATCH/bank-step-batch-$TAG"
   printf 'EXIT=%s\n' "$?"

@@ -7,7 +7,7 @@ SCRATCH=$(mktemp -d "$TMPDIR"/bank-solve-driver-XXXXXX)
 trap 'rm -rf "$SCRATCH"' EXIT
 COMMAND="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_bank_solve_driver.py -q -s --basetemp=$SCRATCH/pytest"
 printf 'REVISION=%s TREE=%s COMMAND=%s\n' "$(git -C "$ROOT" rev-parse HEAD)" "$ROOT" "$COMMAND"
-/home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova; from nova.equilibrium import support_read; print("NOVA=" + nova.__file__ + " MODULE=" + support_read.__file__)'
+/home/ITER/mcintos/Code/nova/.venv/bin/python -P -c 'import nova; from nova.equilibrium import support_read; print("NOVA=" + nova.__file__ + " MODULE=" + support_read.__file__)'
 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_bank_solve_driver.py -q -s --basetemp="$SCRATCH/pytest"
 result=$?
 printf 'EXIT=%s\n' "$result"

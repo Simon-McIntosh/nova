@@ -1,0 +1,34 @@
+<section id="bank-prototype-provenance-landing">
+<h2>One precision comparison, and provenance probes that read PYTHONPATH</h2>
+<p>The breakpoint report no longer carries its own copy of the precision budget
+comparison. <code>scripts/prototypes/bank_solve_breakpoint/report.py</code>
+imports <code>pair_gaps</code> from
+<code>scripts/prototypes/bank_solve_cycle/report.py</code>, which now owns the
+four paired keys and their denominators, both arms' oracle gaps, the first-lane
+oracle-boundary construction, and the limits 1e-8, 5e-4, 5e-4 and 1e-4. The
+owner's <code>compare</code> reduces the same per-lane gaps by their maximum, so
+both reports read one definition. Replayed on the existing breakpoint receipts,
+the report's <code>PRECISION</code> line is byte-identical to the recorded
+<code>resumed/report.log</code> and <code>precision.json</code> is unchanged.</p>
+<p>Every provenance probe under <code>scripts/prototypes/bank_*/</code> now runs
+its interpreter with <code>-P</code>, so the empty <code>sys.path[0]</code>
+entry that a <code>-c</code> invocation inserts no longer shadows
+<code>PYTHONPATH</code> with the working directory. Sixty-two shell files carry
+the flag; the table shows the two arms of the demonstration, run from the
+worktree with a base archive on <code>PYTHONPATH</code>.</p>
+<table id="bank-prototype-provenance-probe-arms">
+<thead><tr><th>Arm</th><th>Flag</th><th><code>PYTHONPATH</code></th>
+<th><code>nova.__file__</code></th><th>Exit</th></tr></thead>
+<tbody>
+<tr><td>archive</td><td><code>-P</code></td><td>base archive</td><td><code>…/base-archive/nova/__init__.py</code></td><td>0</td></tr>
+<tr><td>defect</td><td>none</td><td>base archive</td><td><code>…/s21-nova/bank-prototype-provenance/nova/__init__.py</code></td><td>0</td></tr>
+<tr><td>refused</td><td><code>-P -S</code></td><td><code>/tmp/nonexistent-arm</code></td><td><code>ModuleNotFoundError: No module named 'nova'</code></td><td>1</td></tr>
+</tbody>
+</table>
+<p>The refused arm carries <code>-S</code> because the shared environment holds
+an editable <code>nova</code>: with site-packages loaded,
+<code>PYTHONPATH=/tmp/nonexistent-arm</code> resolves to the main checkout
+rather than failing. <code>-S</code> removes that install, leaving
+<code>PYTHONPATH</code> as the only source, and the import is refused as the
+guard requires. No product source and no measured number changed.</p>
+</section>

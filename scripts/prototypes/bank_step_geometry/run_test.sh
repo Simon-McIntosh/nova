@@ -14,7 +14,7 @@ trap 'rm -rf "$scratch"' EXIT
 command="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider $target --basetemp=$scratch/pytest -vv"
 {
     printf 'revision=%s tree=%s command=%s\n' "$(git -C "$root" rev-parse HEAD)" "$root" "$command"
-    /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova; print("nova.__file__=" + nova.__file__)'
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -P -c 'import nova; print("nova.__file__=" + nova.__file__)'
     /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider "$target" --basetemp="$scratch/pytest" -vv
     result=$?
     echo "EXIT=$result"

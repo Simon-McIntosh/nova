@@ -20,7 +20,7 @@ cd "$ROOT" || exit 2
 LOG="$RUN_DIR/wave.log"
 {
   printf 'REVISION=%s TREE=%s CWD=%s\n' "$(git rev-parse HEAD)" "$ROOT" "$PWD"
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m, jax; print("NOVA="+nova.__file__+" MODULE="+m.__file__+" BACKEND="+jax.default_backend())'
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m, jax; print("NOVA="+nova.__file__+" MODULE="+m.__file__+" BACKEND="+jax.default_backend())'
 
   printf 'STAGE=publish BEGIN\n'
   "$PY" -m scripts.prototypes.bank_step_batch.measure --arm publish --run-dir "$RUN_DIR"

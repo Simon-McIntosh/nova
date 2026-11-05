@@ -20,7 +20,7 @@ run_case() {
     printf 'REVISION=%s SOURCE_REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
       "$(git -C "$ROOT" rev-parse HEAD)" "$source_revision" "$BASE" "$BASE" \
       "$PY -m pytest -p no:cacheprovider $BASE/tests/test_bank_step_speed.py::$target --basetemp=$basetemp -vv"
-    "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
     "$PY" -m pytest -p no:cacheprovider \
       "$BASE/tests/test_bank_step_speed.py::$target" --basetemp="$basetemp" -vv
     code=$?

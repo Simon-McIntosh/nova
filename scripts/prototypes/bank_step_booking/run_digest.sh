@@ -27,7 +27,7 @@ for arm in base head; do
     cd "$tree" || exit 2
     export PYTHONPATH="$tree"
     printf 'REVISION=%s TREE=%s CWD=%s COMMAND=digest read_and_book\n' "$revision" "$tree" "$PWD"
-    "$PY" - <<'PY'
+    "$PY" -P - <<'PY'
 from nova.jax.config import configure_dtypes
 configure_dtypes()
 import hashlib

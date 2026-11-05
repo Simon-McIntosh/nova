@@ -25,7 +25,7 @@ LOG="$RUN/negative-control-sirius.log"
         "$PY -m pytest -p no:cacheprovider tests/test_bank_step_cut_buckets.py::test_cell_vmap_has_no_per_cell_branch -q"
     printf 'SUBMITTING_REVISION=%s SOURCE_SHA256=%s\n' \
         "$(git -C "$ROOT" rev-parse HEAD)" "$(sha256sum "$BASE" | cut -d' ' -f1)"
-    "$PY" -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
     set +e
     "$PY" -m pytest -p no:cacheprovider \
         tests/test_bank_step_cut_buckets.py::test_cell_vmap_has_no_per_cell_branch \

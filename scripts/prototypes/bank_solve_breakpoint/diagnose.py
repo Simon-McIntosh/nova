@@ -19,15 +19,13 @@ original = sr._damped_scale
 
 
 def diagnostic(evaluate, state, step, current, auxiliary, **kwargs):
-    def report(scale, norm, valid, cut, normal, fragments, delta):
+    def report(scale, incumbent, norm, valid, cut, normal, fragments, delta):
         print(
             "TRIAL",
             json.dumps(
                 dict(
                     scale=float(scale),
-                    incumbent=np.asarray(current).tolist()
-                    if not isinstance(current, jax.core.Tracer)
-                    else [],
+                    incumbent=np.asarray(incumbent).tolist(),
                     residual=np.asarray(norm).tolist(),
                     valid=np.asarray(valid).tolist(),
                     cut_match=np.asarray(cut).tolist(),
@@ -49,6 +47,7 @@ def diagnostic(evaluate, state, step, current, auxiliary, **kwargs):
         jax.debug.callback(
             report,
             scale,
+            current,
             norm,
             valid,
             jnp.all(cut == next_cut, axis=-1),

@@ -335,6 +335,8 @@ class DisplayMapRecord:
     operand_digest: str | None = None
     operand_bytes: int | None = None
     operand_fields: tuple[str, ...] = ()
+    separatrix_source: str = "unknown"
+    separatrix_assembly: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -1699,6 +1701,9 @@ def _persist_frame_operands(
     display: DisplayFluxMap,
     response: np.ndarray,
     conductor_current: np.ndarray,
+    separatrix_closed: np.ndarray | None = None,
+    separatrix_source: str | None = None,
+    separatrix_assembly: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Write one frame's display operands and return the artifact's receipt.
 
@@ -1743,6 +1748,14 @@ def _persist_frame_operands(
     }
     for key, value in display.branches.items():
         payload[f"branch_{key}"] = np.asarray(value)
+    if separatrix_closed is not None:
+        payload["separatrix_closed_rz"] = np.asarray(
+            separatrix_closed, dtype=np.float64
+        ).reshape(-1, 2)
+    if separatrix_source is not None:
+        payload["separatrix_source"] = np.asarray(separatrix_source)
+    if separatrix_assembly is not None:
+        payload["separatrix_assembly"] = np.asarray(json.dumps(separatrix_assembly))
     domains = getattr(equilibrium, "domains", None)
     if domains is not None:
         payload["domain_label"] = np.asarray(domains.label, dtype=np.int64)
@@ -1839,7 +1852,7 @@ def rebuild_display_flux(
 
 
 def _display_map(
-    profile: ForwardProfile, equilibrium, machine, tag: str | None = None
+    profile: ForwardProfile, equilibrium, machine
 ) -> tuple[DisplayFluxMap, dict[str, Any]]:
     """Return the frame's fine display map and the rig it was drawn from."""
 
@@ -1871,33 +1884,95 @@ def _display_map(
         display.height, display_height
     ):
         raise RuntimeError("display map grid does not match the prefetched grid")
-    operands = None
-    if tag is not None:
-        operands = _persist_frame_operands(
-            tag=tag,
-            profile=profile,
-            equilibrium=equilibrium,
-            display=display,
-            response=_stored_conductor_response(record),
-            conductor_current=np.asarray(
-                profile.operator.external_current, dtype=np.float64
-            ),
+    return display, {"coupling": coupling, "conductor_response": record}
+
+
+def _branch_diagnostics(display) -> dict[str, Any]:
+    """Return the assembler's own account of why it did or did not close."""
+
+    branches = display.branches
+    keys = (
+        "well_formed",
+        "contour_well_formed",
+        "graph_well_formed",
+        "overflow",
+        "branch_overflow",
+        "open_slot_overflow",
+        "closed_candidate_count",
+        "cycle_component_count",
+        "axis_enclosing_component_count",
+        "open_branch_count",
+        "closed_segment_count",
+    )
+    diagnostics: dict[str, Any] = {}
+    for key in keys:
+        if key not in branches:
+            diagnostics[key] = None
+            continue
+        value = np.asarray(branches[key])
+        diagnostics[key] = value.item() if value.ndim == 0 else value.tolist()
+    return diagnostics
+
+
+def _saddle_level_polygon(display, axis_rz: np.ndarray) -> tuple[np.ndarray, str]:
+    """Trace the map's own closed flux surface at its admitted saddle level.
+
+    The spline branch assembler refuses the whole result when the contour graph
+    does not resolve to exactly one axis-enclosing cycle, which leaves a frame
+    whose field plainly has a closed separatrix reporting none. The field's own
+    level set at the polished saddle flux is that separatrix, so it is traced
+    directly here: the unique closed contour that encloses the magnetic axis is
+    returned, and anything else is reported as absent rather than guessed.
+    """
+
+    level = float(display.saddle_flux)
+    if not np.isfinite(level):
+        return np.zeros((0, 2)), "none_no_saddle"
+    values = np.asarray(display.flux, dtype=np.float64)
+    radius = np.asarray(display.radius, dtype=np.float64)
+    height = np.asarray(display.height, dtype=np.float64)
+    if not (np.nanmin(values) < level < np.nanmax(values)):
+        return np.zeros((0, 2)), "none_level_outside_range"
+    figure = plt.figure()
+    try:
+        contours = plt.contour(radius, height, values.T, levels=[level])
+        segments = [
+            np.asarray(segment, dtype=np.float64)
+            for segment in contours.allsegs[0]
+            if np.asarray(segment).shape[0] >= 4
+        ]
+    finally:
+        plt.close(figure)
+    closing = [
+        segment
+        for segment in segments
+        if np.allclose(segment[0], segment[-1], atol=1.0e-12)
+        and PolygonPath(segment).contains_point(np.asarray(axis_rz, dtype=float))
+    ]
+    if len(closing) != 1:
+        return np.zeros((0, 2)), (
+            "none_no_unique_axis_enclosing_contour"
+            if closing
+            else "none_no_axis_enclosing_contour"
         )
-    return display, {
-        "coupling": coupling,
-        "conductor_response": record,
-        "operands": operands,
-    }
+    return closing[0], "saddle_level_contour"
 
 
 def _display_separatrix(
-    display,
-) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
-    """Return the display map's own closed separatrix and its open legs."""
+    display, axis_rz: np.ndarray | None = None
+) -> tuple[np.ndarray, tuple[np.ndarray, ...], str, dict[str, Any]]:
+    """Return the map's closed separatrix, open legs, its source and diagnostics.
+
+    The spline branch assembly is used where it is well formed. Where it is not,
+    the field's own saddle-level level set supplies the separatrix, so a frame
+    reports no boundary only when its field genuinely has none, and either way
+    the assembler's diagnostics are carried into the record.
+    """
 
     branches = display.branches
+    diagnostics = _branch_diagnostics(display)
     if not branches:
-        return np.zeros((0, 2)), ()
+        return np.zeros((0, 2)), (), "none_no_branches", diagnostics
     closed = _sample_cubic_branch(
         branches["closed_controls_rz"], branches["closed_valid"]
     )
@@ -1907,7 +1982,14 @@ def _display_separatrix(
         )
         for index in np.flatnonzero(branches["open_branch_valid"])
     )
-    return closed, open_branches
+    if closed.shape[0] >= 4:
+        diagnostics["assembled_closed_points"] = int(closed.shape[0])
+        return closed, open_branches, "spline_branches", diagnostics
+    if axis_rz is None or not np.all(np.isfinite(np.asarray(axis_rz, dtype=float))):
+        return closed, open_branches, "none_no_axis", diagnostics
+    traced, source = _saddle_level_polygon(display, np.asarray(axis_rz, dtype=float))
+    diagnostics["saddle_level_points"] = int(traced.shape[0])
+    return traced, open_branches, source, diagnostics
 
 
 def _grid_axis_rz(
@@ -2434,15 +2516,34 @@ def solve_frame(
     )
     display = None
     try:
-        display, display_rig = _display_map(
-            profile,
-            equilibrium,
-            machine,
-            tag=f"{Path(row['_source_path']).name}-{frame}",
-        )
+        display, display_rig = _display_map(profile, equilibrium, machine)
         conductor_response = display_rig["conductor_response"]
         operands = display_rig["operands"]
-        display_closed, display_open = _display_separatrix(display)
+        display_closed, display_open, display_source, display_assembly = (
+            _display_separatrix(
+                display,
+                _grid_axis_rz(
+                    display.radius,
+                    display.height,
+                    display.flux,
+                    float(topology.axis_flux),
+                    float(topology.boundary_flux),
+                ),
+            )
+        )
+        operands = _persist_frame_operands(
+            tag=f"{Path(row['_source_path']).name}-{frame}",
+            profile=profile,
+            equilibrium=equilibrium,
+            display=display,
+            response=_stored_conductor_response(conductor_response),
+            conductor_current=np.asarray(
+                profile.operator.external_current, dtype=np.float64
+            ),
+            separatrix_closed=display_closed,
+            separatrix_source=display_source,
+            separatrix_assembly=display_assembly,
+        )
         display_comparison = compare_closed_boundaries(
             display_closed,
             labelled_closed_boundary,
@@ -2470,6 +2571,8 @@ def solve_frame(
             ),
             separatrix_saddle_to_label_x_m=display_comparison.x_point_distance_m,
             separatrix_closed_points=int(display_closed.shape[0]),
+            separatrix_source=display_source,
+            separatrix_assembly=display_assembly,
             max_node_mismatch_wb=float(display.max_node_mismatch_wb),
             reproduction_relative_error=float(display.reproduction_relative_error),
             build_seconds=float(display.build_seconds),

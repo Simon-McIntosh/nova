@@ -158,3 +158,57 @@ def test_persisted_bank_frame_rebuilds_to_one_em12():
     tolerance = 1.0e-12 * max(1.0, float(np.max(np.abs(reference))))
     assert np.allclose(conductor, operands["conductor_flux"], rtol=0.0, atol=tolerance)
     assert np.allclose(field, reference, rtol=0.0, atol=tolerance)
+
+
+def _refused_display(radius, height, flux, saddle_flux):
+    """Return a display whose spline assembler reported no closed cycle."""
+
+    from types import SimpleNamespace
+
+    zeros = np.zeros((2, 4, 2))
+    return SimpleNamespace(
+        flux=flux,
+        radius=radius,
+        height=height,
+        saddle_flux=saddle_flux,
+        saddle_rz=np.asarray([1.7, 0.0]),
+        branches={
+            "closed_controls_rz": zeros,
+            "closed_valid": np.zeros((2,), dtype=bool),
+            "open_controls_rz": np.zeros((1, 2, 4, 2)),
+            "open_valid": np.zeros((1, 2), dtype=bool),
+            "open_branch_valid": np.zeros((1,), dtype=bool),
+            "well_formed": np.asarray(False),
+            "closed_candidate_count": np.asarray(2),
+            "cycle_component_count": np.asarray(2),
+            "axis_enclosing_component_count": np.asarray(1),
+            "overflow": np.asarray(False),
+        },
+    )
+
+
+def test_separatrix_falls_back_to_the_saddle_level_contour():
+    """A refused assembly still yields the field's own closed separatrix.
+
+    The spline assembler invalidates the whole result when the contour graph
+    does not resolve to exactly one axis-enclosing cycle, and the frame then
+    reported no boundary at all. The field's level set at its admitted saddle
+    field value is that boundary, so the fallback must return it, name its
+    source, and carry the assembler's diagnostics.
+    """
+
+    radius = np.linspace(1.2, 2.2, 201)
+    height = np.linspace(-0.5, 0.5, 201)
+    radial, vertical = np.meshgrid(radius, height, indexing="ij")
+    flux = (radial - 1.7) ** 2 + vertical**2
+    display = _refused_display(radius, height, flux, 0.02)
+    axis = gate._grid_axis_rz(radius, height, flux, 0.0, 0.02)
+    assert np.allclose(axis, [1.7, 0.0])
+    closed, _open, source, diagnostics = gate._display_separatrix(display, axis)
+    assert source == "saddle_level_contour"
+    assert closed.shape[0] > 100
+    assert np.allclose(closed[0], closed[-1])
+    enclosed = np.hypot(closed[:, 0] - 1.7, closed[:, 1])
+    assert np.allclose(enclosed, 0.02**0.5, rtol=1.0e-3)
+    assert diagnostics["closed_candidate_count"] == 2
+    assert diagnostics["saddle_level_points"] == closed.shape[0]

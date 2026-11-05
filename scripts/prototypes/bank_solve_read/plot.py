@@ -62,14 +62,14 @@ def main():
     found = records(args.log)
     rows = [
         ("base · 1 slice", found[("base", "SINGLE")]["wall_ms"], "#929292"),
-        ("head · 1 slice", found[("head", "SINGLE")]["wall_ms"], "#286eae"),
+        ("tracked read · 1 slice", found[("head", "SINGLE")]["wall_ms"], "#286eae"),
         (
             "base · 16 slices, amortised per slice",
             found[("base", "BATCH")]["per_slice_ms"],
             "#929292",
         ),
         (
-            "head · 16 slices, amortised per slice",
+            "tracked read · 16 slices, amortised per slice",
             found[("head", "BATCH")]["per_slice_ms"],
             "#286eae",
         ),

@@ -30,9 +30,9 @@
     "coil_section_count": 938,
     "coupling": "none; cell geometry only, no Biot build",
     "cut_at_boundary_cells": 0,
-    "delivered_cells": 4286,
+    "delivered_cells": 12353,
     "display_map": {
-      "build_seconds": 255.34723811596632,
+      "build_seconds": 254.00591716356575,
       "max_node_mismatch_wb": 0.008254549375624087,
       "reproduction_relative_error": 1.7879186665292104e-16,
       "saddle_converged": true,
@@ -44,7 +44,7 @@
       "source": "nova.equilibrium.display_flux.build_display_flux_map from the state's stored conductor currents and cell moments",
       "spacing_m": 0.01
     },
-    "requested_cells": 4000,
+    "requested_cells": 12000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
     "vacuum_nulls": {
@@ -145,14 +145,14 @@
     "shot": 22086,
     "slice_index": 43
   },
-  "figure": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+  "figure": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
   "identity": "22086/43 mixed",
   "invocation": {
     "argv": [
       "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py",
       "cpu-lane",
-      "4000",
-      "vacuum-and-plasma-panels"
+      "12000",
+      "vacuum-and-plasma-panels-fine"
     ],
     "cwd": "."
   },

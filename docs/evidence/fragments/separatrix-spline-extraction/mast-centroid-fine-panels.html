@@ -47,6 +47,26 @@ root keyed by a digest of the geometry, the points and the shot. A panel is then
 a matrix-vector product with its currents, and so is every perturbed arm of the
 control.</p>
 
+<p id="mast-centroid-fine-panels-measured">Each panel is drawn from the state's
+own currents and cell moments against a prepared unit-current response, so the
+map is a pair of matrix products rather than a kernel evaluation per point. The
+record below is read from each lane's own receipt. The reproduction error is the
+largest deviation of the map's evaluation from the operator's raster image at
+the lattice nodes, and it is at machine precision on all three lanes. The node
+mismatch column is the largest deviation of the same evaluation from the
+<em>converged state</em> the panel claims to draw: it is
+<b>8.3e-3 Wb</b> on the cpu and titan lanes and <b>8.4e-3 Wb</b> on the
+full-axis lane, three orders of magnitude above the 1e-6 Wb this record treats
+as agreement. It is not explained away here: it says the operator's raster image
+is not the solve's fixed point, so a map that reproduces the raster exactly
+still differs from the state it is captioned against.</p>
+
+<table id="mast-centroid-fine-panels-measured-table">
+<caption>Drawn display map per lane, read from each lane's centroid-solve.json.</caption>
+<thead><tr><th>lane</th><th>spacing [mm]</th><th>shape</th><th>build [s]</th><th>reproduction error</th><th>node mismatch [Wb]</th><th>saddle offset [mm]</th><th>saddle converged</th></tr></thead>
+<tbody><tr><td>cpu-lane</td><td>10</td><td>401 x 195</td><td>254.0</td><td>1.79e-16</td><td><b>8.25e-03</b></td><td>13.2</td><td>yes</td></tr><tr><td>titan-lane</td><td>10</td><td>401 x 195</td><td>254.9</td><td>1.79e-16</td><td><b>8.25e-03</b></td><td>13.2</td><td>yes</td></tr><tr><td>full-axis-lane</td><td>10</td><td>401 x 195</td><td>255.2</td><td>2.67e-16</td><td><b>8.42e-03</b></td><td>9.9</td><td>yes</td></tr></tbody>
+</table>
+
 <p id="mast-centroid-fine-panels-floor">The floor is enforced by the builder itself, not by convention: asking it for 0.1 m
 raises <code>display spacing 0.1 m is coarser than the 0.01 m floor</code>, so a
 cheaper render cannot be had by drawing a coarser map and reading it as if it
@@ -58,6 +78,20 @@ panel is 78195 points of fixed, non-amortising compute and nothing cheaper
 counts as the map. The panels themselves are not drawn: the response build has
 not completed, so the redraw gate, the one-percent current control and the PNG
 inspection have not run and are not claimed here.</p>
+
+<p id="mast-centroid-fine-panels-limit">The separatrix is <em>not</em> drawn on
+these panels, and that is a known limit of the branch assembler at the 10 mm
+display spacing rather than a defect of the map. The assembler either returns
+one closed axis branch and its saddle-ended legs or it refuses the whole field
+and returns zero geometry; on the display map it refuses, so the boundary comes
+back empty, the plasma cells are not cut against it and no separatrix or
+open leg appears on the plasma panel. The refusal is reported, not worked
+around: no fallback contour is added in its place, because a contour of the
+display map would wander between nodes and would not be the curve the plasma
+mesh is meant to be cut against. __FLAGS__ Because the boundary is empty the
+plasma mesh is built and then draws nothing, which is why the right-hand panel
+shows no grey cells: the field and the plasma response behind it are drawn, the
+cut surface is not.</p>
 
 <p id="mast-centroid-fine-panels-gate">The redraw gate opens each state, rebuilds
 the map from its stored currents and moments, and asserts that the drawn

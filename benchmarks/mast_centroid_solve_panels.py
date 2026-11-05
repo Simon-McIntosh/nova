@@ -1401,13 +1401,21 @@ def panels(
         flush=True,
     )
     if receipt_path.exists():
+        from nova.database.filepath import relativize_worktree_paths
+
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         receipt["figure"] = str(figure_path)
         receipt["drawn_plasma_mesh"] = drawn
-        receipt_path.write_text(
-            json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
-            encoding="utf-8",
-        )
+        # The receipt is committed, so it may not name the worktree it was
+        # written in. The command is rewritten to repository-relative paths
+        # rather than left out, because the command is part of the record.
+        receipt["invocation"] = {
+            "argv": [str(value) for value in sys.argv],
+            "cwd": os.getcwd(),
+        }
+        text = json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+        text, _mapped = relativize_worktree_paths(text)
+        receipt_path.write_text(text, encoding="utf-8")
 
 
 def series(

@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-11-05T16:49:31.113Z",
   "dispatched_at": "2026-11-05T16:35:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-mast-centroid-fine-panels-d8de9ebfb947",
+      "recorded_at": "2026-11-05T17:53:06.999488+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_mast_centroid_panel_states.py",

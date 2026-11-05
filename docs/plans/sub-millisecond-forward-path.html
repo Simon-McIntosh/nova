@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="149">
+<meta name="plan-version" content="150">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -542,6 +542,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T133721949646-bank-step-jacobian-split" data-who="reckon-build" data-when="2026-11-05T14:31:22Z">
     <div class="r-comment-body"><p>Measured the production-mapped Jacobian at one and sixteen slices: 18.617/291.947 ms, with local booking dominant at 13.343/215.842 ms and worst scaling at 16.18x. The labelled outer-vmap comparison is 127.188/1597.625 ms. Both sampled inputs close within 15%; all largest-part omission controls refuse the gap. Every lane has 18 active channels in 162 padded slots. [Evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-step-jacobian-split.html#bank-step-jacobian-split-landing) and [paired-bar figure](/nova/figures/sub-millisecond-forward-path/bank-step-jacobian-split/paired-wall.svg).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T144345479503-review-of-bank-step-jacobian-split-4d4969f9b73f-figure" data-who="reckon-build" data-when="2026-11-05T14:53:03.737Z">
+    <div class="r-comment-body"><p>Figure review of r-20261105T133721949646-bank-step-jacobian-split at 4d4969f9 is parsed: all six rubric items pass and two non-blocking findings (sub-part nesting not visible in the image, mixed value precision) are exempted against the figcaption and the evidence table, so no redraw is needed.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,100 @@
+<section data-reckon="evidence" id="expose-promoted-mask">
+<h2>The reduced solve's terminal promoted mask reaches the result and the receipt</h2>
+
+<p id="expose-promoted-mask-summary">A promoted node is one the closing trip of
+a reduced solve keeps at the trial state instead of the map's image, so the
+flux there carries a piece of the iterate that no field of the cell currents
+reproduces. The set was computed inside the trip boundary and reported
+nowhere, so a producer holding a terminal state had no record of which nodes
+carry that piece. It is now returned on
+<code>ReducedNewtonResult.promoted_mask</code> from both the host-driven entry
+points and the compiled ones, and carried to
+<code>ForwardEquilibrium.promoted_mask</code> by
+<code>ForwardProfile.solve</code>. Every existing result field is unchanged;
+the new field defaults to <code>None</code> on routes that form no such
+mask, and to an all-false array on a solve that promotes nothing.</p>
+
+<table id="expose-promoted-mask-measure">
+<caption>Solov'ev machine fixture from <code>tests/test_reduced_newton.py</code>;
+mask length 286 nodes.</caption>
+<tr><th>state</th><th>promoted nodes</th><th>source</th></tr>
+<tr><td>seed, cold read</td><td>0</td><td><code>operator.residual_shadow_mask(seed)</code></td></tr>
+<tr><td>seed, diverted class</td><td>0</td><td><code>operator.residual_shadow_mask(seed, requested_class=1)</code></td></tr>
+<tr><td>host-route terminal, 12 trips to tolerance 1e-8</td><td>0</td><td>returned mask equals the closing trip's own read</td></tr>
+</table>
+
+<p id="expose-promoted-mask-wiring">The host route records the mask the closing
+trip computes and returns it in place of the seed's shadow, so a solve given no
+trip budget returns an all-false array rather than the seed mask. The compiled
+route already carried that set through its fixed-shape program as the terminal
+shadow; it is now surfaced from the same carry. Both compiled entry points and
+both host entry points set the field, and the constrained result inherits it.</p>
+
+<p id="expose-promoted-mask-promoting">The promoting case is the warm MAST coil-edit machine, which the
+non-convergence diagnosis already measured. A slow test prepares that machine
+through the coil-edit sweep's own preparation, replays the sweep's first
+twelve edits from the prepared seed through the host route, and asserts the
+terminal mask is non-empty and equals the mask recorded at the solve's closing
+read. On one H200 job the test passed beside the cheap all-false test
+(2 passed in 385&nbsp;s, mask length 1126 nodes), and the declared control on
+the same revision with the promoted-mask returns forced all-false failed at the
+promoted-node-count assertion (1 failed, 1 passed in 397&nbsp;s), so the
+mutation is discriminated here where the wall-limited fixture could not
+discriminate it.</p>
+
+<p id="expose-promoted-mask-unmet">The fast lane alone is not sufficient. The
+machine fixture is wall-limited: its operator read returns no private-flux
+component at the seed, at the diverted class, or at the converged terminal
+state, so the promoted-node count is zero everywhere and the declared negative
+control (an all-false mask in a scratch copy) is not discriminated from the
+unmutated result on this fixture. The equality assertion itself does hold: on
+the host route the returned mask is bit-identical to the mask the solve's last
+dispatched read produced.</p>
+
+<p id="expose-promoted-mask-unmet-scan">A manufactured quadrupole term
+<code>&gamma; R&sup2; Z&sup2;</code> added to the seed opens the private-flux
+region the mask needs, and the two conditions do not overlap on this operator.
+At <code>&gamma;</code> of 5, 20 and 50 the read promotes 4, 33 and 40 of 286
+nodes, and the solve refuses the state at entry with
+<code>NoQualifiedAxisError</code>: no qualified magnetic-axis candidate has a
+resolved component. At <code>&gamma;</code> of 2.5, 3.0, 0.5 steps to 4.5 the
+axis read succeeds and the promoted count is zero. A discriminating fixture
+therefore needs a diverted private-flux geometry that also carries a qualified
+axis, which this node's scope does not contain.</p>
+
+<p id="expose-promoted-mask-gate">The fast lane is green at the landed head: five
+tests pass and the slow one is deselected (5 passed, 1 deselected in
+549&nbsp;s on one H200 job, 8 cores and 128&nbsp;GB, per-test bound raised to
+1800&nbsp;s for the run because the repository's 300&nbsp;s expired on one test
+without an assertion failing). Those five assert the mask's dtype, its shape
+and its equality with the solve's own terminal promoted set on the host route,
+on the compiled route, across the two routes, on the profile receipt, and on a
+solve given no trip budget. None of them asserts a promoted-node count, because
+this fixture cannot promote a node; the count assertion lives only in the slow
+test. On the wall-limited fixture the all-false mutation is not discriminated,
+because the unmutated mask is all-false there too. The control that does
+discriminate is the one recorded above, on the warm coil-edit state.</p>
+
+<p id="expose-promoted-mask-slow">The slow test runs in the same job as its own
+arm and passes (1 passed, 5 deselected in 210&nbsp;s). It replays the sweep's
+first twelve edits through the host route and asserts the terminal mask is
+non-empty and equals the mask recorded at the solve's closing read, then
+replays the last of those edits through the compiled route and asserts that
+route's returned mask is non-empty and equals the single compiled trip's own
+terminal set, read against the shadow the warm seed carries. Both routes are
+therefore covered on a state that really promotes nodes.</p>
+
+<p id="expose-promoted-mask-unmeasured">Not measured: zero added failures for
+<code>tests/test_reduced_newton.py</code>. The file does not fit one
+allocation: in the same job as the two green arms, the base arm ran four tests
+in thirty-two minutes and was cancelled by the job's time limit before it
+finished (its log ends after <code>F...</code>, with no summary line), and the
+head arm never started. What those four tests do establish is the opposite of
+an added failure: the file's first test,
+<code>test_diverted_normalised_certificate_rung_retains_finite_fallback</code>,
+fails at the base revision as well, so the failure seen at head is not one this
+change introduced. The change is additive to that module's result types, and
+the tests over the trip boundary it touches pass; a whole-file base and head
+pair is still owed, and splitting that file into its own long-lived allocation
+is the node that owes it.</p>
+</section>

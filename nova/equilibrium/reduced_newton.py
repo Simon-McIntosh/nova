@@ -335,6 +335,15 @@ class ReducedNewtonResult:
     support_cells: int = 0
     off_support_leakage: float = 0.0
     steps: list[ReducedNewtonStep] = field(default_factory=list)
+    promoted_mask: jax.Array | None = None
+    """Terminal promoted-node mask the last trip closed on.
+
+    These are the nodes the closing trip kept at the trial state instead of
+    the map's image, so they carry a piece of the terminal iterate that no
+    field of the cell currents reproduces.  A solve whose trips all ran
+    without promoting a node, and a solve given no trip budget at all, both
+    return an all-false mask rather than the seed's shadow.
+    """
     program: "ReducedProgram | None" = field(default=None, compare=False)
 
     @property
@@ -1494,6 +1503,7 @@ def _drive_trips(
     converged = False
     terminal_residual = float("inf")
     leakage = 0.0
+    promoted_mask = jnp.zeros_like(shadow)
 
     for trip in range(active_set_steps):
         trip_started = time.perf_counter()
@@ -1556,6 +1566,7 @@ def _drive_trips(
                 flush=True,
             )
         shadow = promoted
+        promoted_mask = promoted
         if np.isfinite(observed) and observed <= tolerance and difference == 0:
             converged = True
             reason = FixedPointTerminationReason.CONVERGED
@@ -1598,6 +1609,7 @@ def _drive_trips(
     return {
         "state": state,
         "reduced": reduced,
+        "promoted_mask": promoted_mask,
         "terminal_residual": terminal_residual,
         "converged": converged,
         "reason": reason,
@@ -2115,6 +2127,7 @@ def solve_reduced_newton(
         support_cells=int(coordinates.cells.size),
         off_support_leakage=driven["off_support_leakage"],
         steps=driven["steps"],
+        promoted_mask=driven["promoted_mask"],
         program=program,
     )
 
@@ -3078,6 +3091,7 @@ def solve_constrained_reduced_newton(
         support_cells=int(coordinates.cells.size),
         off_support_leakage=driven["off_support_leakage"],
         steps=driven["steps"],
+        promoted_mask=driven["promoted_mask"],
         compensating_unknown=unknowns,
         constraints=records,
         prescribed_current=circuit_current,
@@ -3093,9 +3107,13 @@ def _compiled_output_fields(output):
     """Convert one compiled call's fixed-shape receipt arrays to host fields."""
     host = jax.device_get(output)
     iterations = int(host[7])
+    promoted_mask = jnp.asarray(host[2], dtype=bool)
+    if iterations == 0:
+        promoted_mask = jnp.zeros_like(promoted_mask)
     return {
         "state": jnp.asarray(host[0]),
         "reduced": jnp.asarray(host[1]),
+        "promoted_mask": promoted_mask,
         "terminal_residual": float(host[6]),
         "active_set_iterations": iterations,
         "converged": bool(host[4]),
@@ -3393,6 +3411,7 @@ def solve_reduced_newton_compiled(
         reduced_dimension=program.coordinates.size,
         support_cells=int(program.coordinates.cells.size),
         off_support_leakage=fields["off_support_leakage"],
+        promoted_mask=fields["promoted_mask"],
         program=program,
     )
 
@@ -3533,6 +3552,7 @@ def solve_constrained_reduced_newton_compiled(
         reduced_dimension=program.coordinates.size,
         support_cells=int(program.coordinates.cells.size),
         off_support_leakage=fields["off_support_leakage"],
+        promoted_mask=fields["promoted_mask"],
         compensating_unknown=unknowns,
         constraints=records,
         prescribed_current=circuit_current,

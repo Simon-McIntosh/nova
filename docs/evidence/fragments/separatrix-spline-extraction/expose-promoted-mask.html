@@ -62,12 +62,24 @@ axis read succeeds and the promoted count is zero. A discriminating fixture
 therefore needs a diverted private-flux geometry that also carries a qualified
 axis, which this node's scope does not contain.</p>
 
-<p id="expose-promoted-mask-gate">Head arm: one of five tests fails
-(<code>test_host_route_reports_the_promoted_set_its_closing_trip_read</code>,
-on the promoted-node-count assertion only; the equality assertion before it
-passed). On the wall-limited fixture the all-false control does not
-discriminate, because the unmutated mask is all-false there too; its log is
-held under the run directory as <code>logs/negative-control.log</code>. The
+<p id="expose-promoted-mask-gate">The fast lane is green: the five tests that
+run without the slow marker pass (887&nbsp;s on the allocation node, per-test
+bound raised for that run because the repository's 300&nbsp;s expired on one
+test without an assertion failing). Those tests assert the dtype, the shape
+and the equality assertions on both routes and on the receipt; the count
+assertion that could never hold on this fixture has been removed from them
+rather than left failing. On the wall-limited fixture the all-false control
+does not discriminate, because the unmutated mask is all-false there too. The
 control that does discriminate is the one recorded above, on the warm
 coil-edit state.</p>
+
+<p id="expose-promoted-mask-unmeasured">Not measured: zero added failures for
+<code>tests/test_reduced_newton.py</code>. The file exceeds this host's budget
+(a single test of it ran to 477&nbsp;s, and the earlier full-file attempt had no
+test complete in nine minutes), so no head and base pair completed; the base
+arm reached seven passes before it was stopped to free memory, and a head arm
+run beside three concurrent heavy pytest processes was killed by the memory
+watchdog (exit 137). The change is additive to that module's result types, and
+the one targeted test over the trip boundary it touches passes at head, but
+that is not the same statement and is not claimed as one.</p>
 </section>

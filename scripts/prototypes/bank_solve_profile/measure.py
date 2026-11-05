@@ -207,10 +207,10 @@ def profile_lanes(lanes, repeats):
         lanes,
         support_geometry,
         reading.field_coefficients,
-        reading.level,
+        reading.boundary_flux,
         reading.axis,
-        reading.normal_form,
-        reading.diverted,
+        reading.saddle_form,
+        reading.boundary_class == int(topology.TopologyClass.DIVERTED),
         repeats=repeats,
     )
 

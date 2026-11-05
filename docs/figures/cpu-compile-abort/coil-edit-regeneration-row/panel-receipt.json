@@ -1,17 +1,23 @@
 {
-  "caption": "the non-converged panel is drawn from the terminal currents and its caption gives the largest node mismatch",
+  "caption": "Both panels draw the terminal currents; the converged panel has a promoted node within two lattice cells of its polished X-point, so its near-X geometry is not certified by the current field.",
   "display_map": {
-    "moments_route": "operator.normalised_current_moments_and_observation of the state at the solve's target current",
+    "moments_route": "stored terminal moments at the solve's target current",
     "panels": {
       "converged": {
-        "max_node_mismatch_wb": 0.0045851015778254345,
-        "reproduction_relative_error": 6.768027025728893e-12,
+        "max_node_mismatch_wb": 0.02621237839847043,
+        "max_solved_node_mismatch_wb": 7.468330148752145e-09,
+        "nearest_promoted_to_xpoint_m": 0.05621806020455789,
+        "promoted_node_count": 46,
+        "reproduction_relative_error": 6.780338952939716e-12,
         "saddle_converged": true,
         "spacing_m": 0.01
       },
       "failed": {
-        "max_node_mismatch_wb": 0.05576618957558288,
-        "reproduction_relative_error": 7.184081771840037e-12,
+        "max_node_mismatch_wb": 0.013026675182779168,
+        "max_solved_node_mismatch_wb": 0.0006432119436612788,
+        "nearest_promoted_to_xpoint_m": 2.4511931712191113,
+        "promoted_node_count": 25,
+        "reproduction_relative_error": 7.1967014727409325e-12,
         "saddle_converged": true,
         "spacing_m": 0.01
       }
@@ -19,32 +25,46 @@
   },
   "figure": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
   "figure_vector": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.svg",
+  "near_x_geometry": {
+    "converged_current_field_certifies_near_x": false,
+    "converged_promoted_within_two_cells": true,
+    "non_converged_promoted_within_two_cells": false,
+    "two_cell_threshold_m": 0.12125000008381903
+  },
   "render": {
-    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz --panel-figure docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render2-ccr.json",
-    "cpus_per_task": "8",
+    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
+    "copied_from": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
     "device": "NVIDIA H200 NVL",
     "host": "98dci4-gpu-0003.iter.org",
-    "job_id": "1303961",
+    "job_id": "1306425",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.log",
     "partition": "betelgeuse",
     "platform": "gpu",
-    "read_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
-    "read_archive_md5": "d40d470fa0923e225b26e743457cd863",
-    "receipt": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render2-ccr.json",
-    "written_as": "converged-vs-nonconverged.png"
+    "published_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
+    "published_figure": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "read_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+    "read_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+    "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
+    "source_revision": "527d13178d887924d4855b4ebe6a0c068d6727c6"
   },
   "schema": "nova.coil-edit-panel-receipt",
-  "set": "cpu-compile-abort-regeneration-row",
+  "set": "cpu-compile-abort",
   "solve": {
-    "cancelled": null,
-    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr-raster.png --panel-data docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz --panel-figure docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
-    "exit_status": "2",
-    "exit_status_note": "2 is the benchmark's own non-converged verdict, not a crash",
-    "jax_platforms": "cuda,cpu",
-    "job_id": "1303883",
-    "log": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/ccr4.log",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200.json --figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200.png --raster-figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200-raster.png --panel-data /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/panel-states-h200.npz --panel-figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/converged-vs-nonconverged-h200.png --diagnostics /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/diagnostics-h200.json",
+    "device": "NVIDIA H200 NVL",
+    "exit_status": "1",
+    "exit_status_note": "The sweep and archive completed; the in-process render refused a full-state mask before the corrected render job.",
+    "job_id": "1306418",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200-shaped.log",
     "partition": "betelgeuse",
-    "source_revision": "48c5e92294d55d242f26704ff6c319faa2e3e1bd"
+    "source_revision": "344c20424ca5a260c81299df73686b1cf4f48bec",
+    "sweep_completed_edits": 20
   },
   "state_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
-  "state_archive_md5": "d40d470fa0923e225b26e743457cd863"
+  "state_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+  "visual_inspection": {
+    "clipped_labels": 0,
+    "inspected_render": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "overlapping_labels": 0
+  }
 }

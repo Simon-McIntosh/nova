@@ -1,0 +1,50 @@
+{
+  "caption": "the non-converged panel is drawn from the terminal currents and its caption gives the largest node mismatch",
+  "display_map": {
+    "moments_route": "operator.normalised_current_moments_and_observation of the state at the solve's target current",
+    "panels": {
+      "converged": {
+        "max_node_mismatch_wb": 0.0045851015778254345,
+        "reproduction_relative_error": 6.768027025728893e-12,
+        "saddle_converged": true,
+        "spacing_m": 0.01
+      },
+      "failed": {
+        "max_node_mismatch_wb": 0.05576618957558288,
+        "reproduction_relative_error": 7.184081771840037e-12,
+        "saddle_converged": true,
+        "spacing_m": 0.01
+      }
+    }
+  },
+  "figure": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+  "figure_vector": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.svg",
+  "render": {
+    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/mast-centroid-capability/panel-states.npz --panel-figure docs/figures/mast-centroid-capability/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render2-mc.json",
+    "cpus_per_task": "8",
+    "device": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "job_id": "1303960",
+    "partition": "betelgeuse",
+    "platform": "gpu",
+    "read_archive": "docs/figures/mast-centroid-capability/panel-states.npz",
+    "read_archive_md5": "d40d470fa0923e225b26e743457cd863",
+    "receipt": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render2-mc.json",
+    "written_as": "converged-vs-nonconverged.png"
+  },
+  "schema": "nova.coil-edit-panel-receipt",
+  "set": "mast-centroid-capability",
+  "solve": {
+    "cancelled": null,
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/mc.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/mc.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/mc-raster.png --panel-data docs/figures/mast-centroid-capability/panel-states.npz --panel-figure docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "exit_status": "2",
+    "exit_status_note": "2 is the benchmark's own non-converged verdict, not a crash",
+    "jax_platforms": "cuda,cpu",
+    "job_id": "1303872",
+    "log": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/mc2.log",
+    "partition": "betelgeuse",
+    "source_revision": "4fbb492f1fe4c32d3ad2b857004b41e94a77bbf0"
+  },
+  "state_archive": "docs/figures/mast-centroid-capability/panel-states.npz",
+  "state_archive_md5": "d40d470fa0923e225b26e743457cd863"
+}

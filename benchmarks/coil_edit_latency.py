@@ -26,7 +26,9 @@ import os
 from pathlib import Path
 import platform
 import socket
+import sys
 import subprocess
+import textwrap
 import threading
 import time
 from typing import Any
@@ -90,6 +92,11 @@ DEFAULT_PANEL_DATA = DIAGNOSTIC_ROOT / "panel-states.npz"
 DEFAULT_PANEL_FIGURE = DIAGNOSTIC_ROOT / "converged-vs-nonconverged.png"
 SHOT = 22086
 SLICE_INDEX = 43
+#: Characters per line the panel caption is wrapped to, so it stays on the canvas.
+CAPTION_WIDTH = 150
+
+#: Display spacing [m] of the panel map, the coarsest the builder admits.
+DEFAULT_DISPLAY_SPACING = 0.010
 SWEEP_FRACTIONS = np.arange(-0.20, 0.201, 0.02, dtype=np.float64)
 EDIT_FRACTIONS = SWEEP_FRACTIONS[1:]
 EDIT_COUNT = len(EDIT_FRACTIONS)
@@ -757,6 +764,7 @@ def _prepare_case(
         },
         "reference": case["reference"],
         "policy": policy,
+        "circuit_context": {"group": context["group"], "row": context["row"]},
     }
     return profile, prepared, carrier
 
@@ -1166,13 +1174,28 @@ def _write_diagnostics(
     *,
     prepared: dict[str, Any],
     rows: list[dict[str, Any]],
+    panel: dict[str, Any] | None = None,
 ) -> None:
-    """Persist the per-edit convergence forensics beside the latency receipt."""
+    """Persist the per-edit convergence forensics beside the latency receipt.
+
+    ``panel`` is the rendered panel's own report, present once the panel has
+    been drawn: it carries the display map's spacing and the agreement of that
+    map with the operator's raster, so a reader can tell what the contours were
+    evaluated on from the record rather than from the drawing.
+    """
     document = {
         "schema": "nova.coil-edit-nonconvergence",
         "source_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
+        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+        "scheduler": _scheduler(),
+        "runtime": {
+            "host": platform.node(),
+            "device": jax.devices()[0].device_kind,
+            "platform": jax.devices()[0].platform,
+            "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+        },
         "case": {
             "machine": "MAST",
             "shot": SHOT,
@@ -1198,6 +1221,8 @@ def _write_diagnostics(
         "summary": _group_nonconverged(rows),
         "edits": rows,
     }
+    if panel is not None:
+        document["display_map"] = panel["display_map"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(document, indent=2, sort_keys=True, allow_nan=False) + "\n",
@@ -1355,6 +1380,135 @@ def _refuse_inconsistent_persisted_pairs(data: Any) -> dict[int, float]:
     return residuals
 
 
+def _panel_display_coupling(
+    group: Any,
+    row: int,
+    lattice: Any,
+    current: Any,
+):
+    """Return the machine coupling a display map contracts at arbitrary points.
+
+    The plasma term is the same rectangular-cell flux response the solve's own
+    grid target is built from, evaluated at whatever points the display grid
+    asks for.  The external term is the fitted circuit set composed from the
+    stored sections and contracted with the state's own prescribed currents, so
+    both halves are the producer's own kernels rather than a second one.
+    """
+    from nova.equilibrium.display_flux import DisplayCoupling
+
+    geometry = (
+        parity.MachineGeometryRegistry.default().select(SHOT).configuration.geometry
+    )
+    _families, _drive, mapping = parity._circuit_drives(group, row, geometry, "fcoil_c")
+    radius = np.asarray(lattice.radius, dtype=float)
+    height = np.asarray(lattice.height, dtype=float)
+    dr = float(np.diff(radius).mean())
+    dz = float(np.diff(height).mean())
+    cells = np.asarray(lattice.coordinate, dtype=float)
+    node_count = cells.shape[0]
+    drive = np.asarray(current, dtype=float)
+
+    def plasma(points: np.ndarray):
+        """Return the uniform plasma moment columns at ``points``."""
+        uniform = parity._plasma_response(points, cells, dr, dz)
+        return (
+            uniform,
+            np.zeros((points.shape[0], node_count)),
+            np.zeros((points.shape[0], node_count)),
+        )
+
+    def external(points: np.ndarray) -> np.ndarray:
+        """Return the prescribed circuit flux at ``points`` [Wb]."""
+        circuits, _ = parity._stored_circuit_fields(
+            group, row, points, geometry, mapping
+        )
+        columns = np.column_stack(
+            [circuit["response_wb_per_a"] for circuit in circuits]
+        )
+        return columns @ drive
+
+    return DisplayCoupling(plasma=plasma, external=external)
+
+
+def _panel_display_map(
+    profile: Any,
+    circuit_context: dict[str, Any],
+    panel: dict[str, Any],
+    *,
+    spacing: float,
+    coupling: Any = None,
+    target_current: Any = None,
+):
+    """Return one stored panel state's field evaluated on the display grid.
+
+    ``coupling`` is the machine coupling the map contracts; it is built from
+    the fitted circuits when absent, and a caller may pass its own so the
+    moment and state assembly here can be measured against a machine it can
+    state exactly.
+
+    The moments are the solver's own. The fixed point is terminated on the
+    operator's target-current normalisation, so the panel asks the operator for
+    that same normalised moment triple rather than imaging the unnormalised
+    moments a producer would store or derive by another route; the panel then
+    draws the field the solve ended at. The moments are passed explicitly
+    because the builder's own normalised branch traces the clipped support of a
+    linear-moment operator, and this machine's operator carries point moments
+    with no moment geometry.
+    """
+    from nova.equilibrium.display_flux import build_display_flux_map
+
+    lattice = profile.lattice
+    if coupling is None:
+        coupling = _panel_display_coupling(
+            circuit_context["group"], circuit_context["row"], lattice, panel["current"]
+        )
+    if target_current is None:
+        raise ValueError("a panel display map requires the solve's target current")
+    state = jnp.asarray(np.asarray(panel["psi"], dtype=np.float64).T.ravel())
+    requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    moments = profile.operator.normalised_current_moments(
+        state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
+    )[0]
+    saddle_index = int(panel["saddle_index"])
+    xpoints = np.asarray(panel["xpoints"], dtype=np.float64).reshape(-1, 2)
+    seed = (
+        xpoints[saddle_index] if 0 <= saddle_index < xpoints.shape[0] else panel["axis"]
+    )
+    return build_display_flux_map(
+        profile,
+        state,
+        coupling=coupling,
+        moments=moments,
+        spacing=spacing,
+        current=jnp.zeros_like(profile.operator.external_current),
+        prescribed_current=jnp.asarray(panel["current"], dtype=np.float64),
+        target_current=jnp.asarray(target_current, dtype=jnp.float64),
+        requested_class=requested_class,
+        axis_rz=np.asarray(panel["axis"], dtype=np.float64),
+        xpoint_rz=np.asarray(seed, dtype=np.float64),
+    )
+
+
+def _panel_moments(
+    profile: Any, state: Any, requested_class: Any, target_current: Any
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the state's plasma current moments, so a panel can be re-drawn.
+
+    A display map contracts these three columns against the machine coupling at
+    whatever points it is asked for, so persisting them beside the lattice
+    field is what lets a panel be drawn from the state rather than from the
+    raster the solve happened to be carried on.  This operator carries a
+    point-cell current and no linear-moment columns, so the radial and vertical
+    moments are zero and the map contracts the uniform column alone.
+    """
+    cell_current = np.asarray(
+        profile.operator.cell_current(state, requested_class, target_current),
+        dtype=np.float64,
+    )
+    zeros = np.zeros_like(cell_current)
+    return cell_current, zeros, zeros
+
+
 def _write_panel_data(
     path: Path,
     *,
@@ -1430,6 +1584,11 @@ def _write_panel_data(
             continue
         field = _grid_field(state["psi"], state["shape"])
         payload[f"psi_{position}"] = field
+        payload[f"current_{position}"] = np.asarray(state["current"], dtype=float)
+        moments = state["moments"]
+        payload[f"cell_current_{position}"] = np.asarray(moments[0], dtype=float)
+        payload[f"radial_moment_{position}"] = np.asarray(moments[1], dtype=float)
+        payload[f"vertical_moment_{position}"] = np.asarray(moments[2], dtype=float)
         payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
         axis = np.asarray(state["nulls"]["axis"], dtype=float).reshape(2)
         payload[f"axis_{position}"] = axis
@@ -1790,6 +1949,14 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
             for key in ("psi", "separatrix", "axis", "xpoints"):
                 name = "%s_%d" % (key, position)
                 panel[key] = np.asarray(data[name], dtype=float)
+            if "current_%d" % position in data.files:
+                panel["current"] = np.asarray(
+                    data["current_%d" % position], dtype=float
+                )
+                panel["moments"] = tuple(
+                    np.asarray(data["%s_%d" % (key, position)], dtype=float)
+                    for key in ("cell_current", "radial_moment", "vertical_moment")
+                )
             panel["branches"] = _load_branches(data, "branches_%d_" % position)
             if panel["branches"] is None:
                 panel["branches"] = _assemble_raster_branches(
@@ -1919,14 +2086,29 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         levels,
         color="#9aa4b2",
     )
-    poloidal.draw_flux_contours(
-        axis,
-        radius,
-        height,
-        np.where(inside, panel["psi"], np.nan),
-        levels,
-        color="#cc7722",
-    )
+    display = panel.get("display")
+    if display is None:
+        poloidal.draw_flux_contours(
+            axis,
+            radius,
+            height,
+            np.where(inside, panel["psi"], np.nan),
+            levels,
+            color="#cc7722",
+        )
+    else:
+        poloidal.draw_flux_contours(
+            axis,
+            display.radius,
+            display.height,
+            np.where(
+                _wall_interior(display.radius, display.height, loaded["wall"]),
+                display.flux.T,
+                np.nan,
+            ),
+            levels,
+            color="#cc7722",
+        )
     poloidal.draw_wall(axis, units=loaded["wall"])
 
     loaded["reference_branches_drawn"] = _draw_branch_set(
@@ -2043,9 +2225,62 @@ def _constraint_note(centroid: dict[str, Any] | None) -> str:
     )
 
 
-def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
-    """Write the converged-versus-non-converged poloidal panel."""
+def _panel_display_note(loaded: dict[str, Any]) -> str:
+    """Return the caption clause a panel drawn from a display map carries.
+
+    The map images the operator's normalised-current observation of the state,
+    the route the solve terminates on, so the note names that and gives the
+    largest node mismatch between the drawn map and the state: the solver's own
+    residual on a converged state, and the distance it stopped short of a fixed
+    point on a non-converged one.
+    """
+    parts = []
+    for label, word in (("converged", "converged"), ("failed", "non-converged")):
+        display = loaded[label].get("display")
+        if display is None:
+            continue
+        parts.append(
+            "the %s panel draws the normalised plasma moments of its state on a "
+            "%.0f mm map, largest node mismatch %.3e Wb"
+            % (
+                word,
+                1.0e3 * display.spacing_m,
+                display.max_node_mismatch_wb,
+            )
+        )
+    if not parts:
+        return ""
+    return "  |  " + "; ".join(parts)
+
+
+def _render_panel(
+    data_path: Path,
+    figure_path: Path,
+    *,
+    profile: Any = None,
+    circuit_context: dict[str, Any] | None = None,
+    target_current: Any = None,
+) -> dict[str, Any]:
+    """Write the converged-versus-non-converged poloidal panel.
+
+    A re-solved state carries its conductor currents and plasma moments, so the
+    panel is drawn from the display map those currents produce rather than from
+    the lattice the solve was carried on.  A state file that carries no currents
+    keeps the lattice raster, so an old archive still renders.
+    """
     loaded = _panel_load(data_path)
+    if profile is not None and circuit_context is not None:
+        for label in ("converged", "failed"):
+            panel = loaded[label]
+            if "current" not in panel:
+                continue
+            panel["display"] = _panel_display_map(
+                profile,
+                circuit_context,
+                panel,
+                spacing=DEFAULT_DISPLAY_SPACING,
+                target_current=target_current,
+            )
     figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
 
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
@@ -2082,7 +2317,7 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         for label in ("converged", "failed")
     )
     constraint_note = _constraint_note(loaded.get("vertical_centroid"))
-    figure.suptitle(
+    caption = (
         "terminal poloidal flux on shared levels between the axis and boundary "
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
@@ -2106,7 +2341,13 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
             solved_orderings[0],
             solved_notes[1],
             solved_orderings[1],
-        ),
+        )
+    )
+    # The caption states every distinction the panel draws and is longer than
+    # one line of the canvas; wrapped, it stays inside the figure rather than
+    # being cut at both edges.
+    figure.suptitle(
+        textwrap.fill(caption + _panel_display_note(loaded), CAPTION_WIDTH),
         fontsize=9,
     )
     figure_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2128,6 +2369,28 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
+        "display_map": {
+            "moments_route": (
+                "operator.normalised_current_moments_and_observation of the state "
+                "at the solve's target current"
+            ),
+            "panels": {
+                label: {
+                    "spacing_m": float(loaded[label]["display"].spacing_m),
+                    "reproduction_relative_error": float(
+                        loaded[label]["display"].reproduction_relative_error
+                    ),
+                    "max_node_mismatch_wb": float(
+                        loaded[label]["display"].max_node_mismatch_wb
+                    ),
+                    "saddle_converged": bool(
+                        loaded[label]["display"].saddle_converged,
+                    ),
+                }
+                for label in ("converged", "failed")
+                if loaded[label].get("display") is not None
+            },
+        },
     }
 
 
@@ -2702,6 +2965,10 @@ def run(
                     ),
                     "nulls": _null_points(profile, result.state),
                     "branches": _branches_of(profile, result.state, raster_flux),
+                    "current": np.asarray(current, dtype=float),
+                    "moments": _panel_moments(
+                        profile, result.state, requested_class, target_current
+                    ),
                 }
             )
             rows.append(row)
@@ -2774,8 +3041,14 @@ def run(
         if equilibrium is not None and equilibrium.raster_flux is not None:
             _render_raster(equilibrium.raster_flux, raster_figure)
         try:
-            panel = _render_panel(panel_data, panel_figure)
+            panel = _render_panel(
+                panel_data,
+                panel_figure,
+                profile=profile,
+                circuit_context=prepared.get("circuit_context"),
+            )
             print("PANEL=" + json.dumps(panel, sort_keys=True), flush=True)
+            _write_diagnostics(diagnostics, prepared=prepared, rows=rows, panel=panel)
         except (RuntimeError, KeyError) as error:
             print(f"PANEL_SKIPPED reason={error}", flush=True)
         receipt = _receipt_document(
@@ -3127,6 +3400,20 @@ def main() -> None:
     panel_parser = subparsers.add_parser("panel")
     panel_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
     panel_parser.add_argument("--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE)
+    panel_parser.add_argument(
+        "--display-map",
+        action="store_true",
+        help="draw the panel from the display map, which needs the machine frame",
+    )
+    panel_parser.add_argument(
+        "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
+    )
+    panel_parser.add_argument(
+        "--receipt",
+        type=Path,
+        default=None,
+        help="write the render's host, command and map spacing beside the figure",
+    )
     check_parser = subparsers.add_parser("checkcase")
     check_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
@@ -3154,13 +3441,45 @@ def main() -> None:
             impose_vertical_centroid=not arguments.without_vertical_centroid,
         )
     elif arguments.command == "panel":
-        print(
-            json.dumps(
-                _render_panel(arguments.panel_data, arguments.panel_figure),
-                indent=2,
-                sort_keys=True,
-            )
+        profile = None
+        prepared = None
+        circuit_context = None
+        if arguments.display_map:
+            _require_measurement_host()
+            configure_dtypes()
+            profile, prepared, _carrier = _prepare_case(arguments.carrier)
+            circuit_context = prepared.get("circuit_context")
+        panel = _render_panel(
+            arguments.panel_data,
+            arguments.panel_figure,
+            profile=profile,
+            circuit_context=circuit_context,
+            target_current=(None if prepared is None else prepared["target_current"]),
         )
+        if arguments.receipt is not None:
+            arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
+            arguments.receipt.write_text(
+                json.dumps(
+                    {
+                        "schema": "nova.coil-edit-panel-render",
+                        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                        "scheduler": _scheduler(),
+                        "runtime": {
+                            "host": platform.node(),
+                            "device": jax.devices()[0].device_kind,
+                            "platform": jax.devices()[0].platform,
+                            "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+                        },
+                        "display_map": panel["display_map"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                    allow_nan=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        print(json.dumps(panel, indent=2, sort_keys=True))
     elif arguments.command == "checkcase":
         print(json.dumps(_check_case(arguments.carrier), indent=2, sort_keys=True))
     elif arguments.command == "probe":

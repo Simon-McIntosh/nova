@@ -812,50 +812,40 @@ PANEL_STATES = (
 )
 
 # The persisted states carry the terms their own solved field produces, read at
-# that field's admitted saddle.  Eleven of the twenty close: each draws exactly
+# that field's admitted saddle.  Fifteen of the twenty close: each draws exactly
 # one closed candidate, well formed, whose segment count is pinned below.  The
-# closing states span 71 to 77 closed segments and all but one carry two open
+# closing states span 71 to 77 closed segments and each carries two open
 # branches, so a change to the tracker or to the saddle bracket moves one of
-# these counts.  State 19 is the exception on both counts: its stored X-point
-# is not a stationary point of its own field, whose saddle sits about 60 mm
-# higher, so the level read there is a core surface about 2.7 mWb inside the
-# separatrix.  Its lobe therefore meets no open branch, and it stays closed
-# until the displacement crosses that saddle, so its control is 3e-3 Wb.
+# these counts.
 #
-# The other nine states are pinned by what they do produce instead.  The
-# contour traces a cycle that encloses the axis but admits no closed candidate
-# at all: no closed slot validates and the branch slots stay empty, so the
-# cycle is drawn as the lobe and the panel names it open.  That is one
-# mechanism, and it is the one eight of the nine share.  State 3 is the second:
-# no cycle is admitted either, so the state records no closed and no open
-# candidate.  Two mechanisms, told apart by the cycle count, and a reader who
-# sees a panel marked open needs to know which one it was.
+# The other five states are pinned by what they do produce instead.  Four trace
+# a cycle that encloses the axis but admits no closed candidate at all: no
+# closed slot validates and the branch slots stay empty, so the cycle is drawn
+# as the lobe and the panel names it open.  State 1 is the second mechanism: no
+# cycle is admitted either, so it records no closed and no open candidate.  The
+# two are told apart by the cycle count, and a reader who sees a panel marked
+# open needs to know which one it was.
 PERSISTED_STATE_TERMS = {
+    3: {"closes": True, "closed_segment_count": 77, "open_branch_count": 2},
+    4: {"closes": True, "closed_segment_count": 77, "open_branch_count": 2},
     5: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
     6: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
-    7: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
+    9: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
+    10: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
+    11: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
+    12: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
     13: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
     14: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
     15: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
-    16: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
+    16: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
     17: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
     18: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
-    4: {"closes": True, "closed_segment_count": 77, "open_branch_count": 2},
-    19: {
-        "closes": True,
-        "closed_segment_count": 72,
-        "open_branch_count": 0,
-        "control_displacement": 3.0e-3,
-    },
+    19: {"closes": True, "closed_segment_count": 73, "open_branch_count": 2},
     0: {"closes": False, "cycle_component_count": 1},
-    1: {"closes": False, "cycle_component_count": 1},
+    1: {"closes": False, "cycle_component_count": 0},
     2: {"closes": False, "cycle_component_count": 1},
-    3: {"closes": False, "cycle_component_count": 0},
+    7: {"closes": False, "cycle_component_count": 1},
     8: {"closes": False, "cycle_component_count": 1},
-    9: {"closes": False, "cycle_component_count": 1},
-    10: {"closes": False, "cycle_component_count": 1},
-    11: {"closes": False, "cycle_component_count": 1},
-    12: {"closes": False, "cycle_component_count": 1},
 }
 
 

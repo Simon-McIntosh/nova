@@ -1,0 +1,48 @@
+{
+  "caption": "the non-converged panel is drawn from the terminal currents and its caption gives the largest node mismatch",
+  "display_map": {
+    "converged": {
+      "max_node_mismatch_wb": 0.0024050743460610757,
+      "reproduction_relative_error": 6.780338952939714e-12,
+      "saddle_converged": true,
+      "spacing_m": 0.01
+    },
+    "failed": {
+      "max_node_mismatch_wb": 0.0343824430086318,
+      "reproduction_relative_error": 7.196701472740935e-12,
+      "saddle_converged": true,
+      "spacing_m": 0.01
+    }
+  },
+  "figure": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+  "figure_vector": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.svg",
+  "render": {
+    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/panel-states.npz --panel-figure docs/figures/single-grid-solver-cutover/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render-titan.json",
+    "cpus_per_task": "7",
+    "device": "Tesla P100-PCIE-16GB",
+    "host": "98dci4-gpu-0002.iter.org",
+    "job_id": "1303888",
+    "partition": "titan",
+    "platform": "gpu",
+    "read_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/panel-states.npz",
+    "read_archive_md5": "3a4465738a06a350bba67001a4dd3b9a",
+    "receipt": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render-titan.json",
+    "renamed_note": "the panel figure was written under the render's own file name and moved to the name this set's documents cite",
+    "written_as": "converged-vs-nonconverged.png"
+  },
+  "schema": "nova.coil-edit-panel-receipt",
+  "set": "single-grid-solver-cutover",
+  "solve": {
+    "cancelled": "slurmstepd: error: *** JOB 1303869 ON 98dci4-gpu-0002 CANCELLED AT 2026-11-03T03:36:35 DUE TO TIME LIMIT ***",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/sg.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/sg.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/sg-raster.png --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "exit_status": null,
+    "exit_status_note": null,
+    "jax_platforms": "cuda,cpu",
+    "job_id": "1303869",
+    "log": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/sg2.log",
+    "partition": "titan",
+    "source_revision": "4fbb492f1fe4c32d3ad2b857004b41e94a77bbf0"
+  },
+  "state_archive": "docs/figures/single-grid-solver-cutover/panel-states.npz",
+  "state_archive_md5": "3a4465738a06a350bba67001a4dd3b9a"
+}

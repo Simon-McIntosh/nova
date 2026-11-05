@@ -86,7 +86,7 @@ def render(
     )[1:-1]
 
     figure = plt.figure(figsize=(14, 7.2), dpi=100)
-    grid = figure.add_gridspec(1, 2, width_ratios=(1.45, 1.0), wspace=0.04)
+    grid = figure.add_gridspec(1, 2, width_ratios=(2.1, 1.0), wspace=0.04)
     axis = figure.add_subplot(grid[0, 0])
     zoom = figure.add_subplot(grid[0, 1])
     poloidal_axes(axis)
@@ -189,7 +189,7 @@ def render(
     # plane and its scale bar gives the reader the length without an axis.
     span = float(np.linalg.norm(image_saddle - state_saddle))
     centre = 0.5 * (state_saddle + image_saddle)
-    half = max(0.020, 3.0 * span)
+    half = max(1.5e-3, 3.0 * span)
     zoom.plot(state_polyline[:, 0], state_polyline[:, 1], color=STATE, ls="--", lw=1.8)
     zoom.plot(image_polyline[:, 0], image_polyline[:, 1], color=IMAGED, lw=2.6)
     zoom_axis_style = axis_style.variant(axis_markersize=16.0)
@@ -219,17 +219,17 @@ def render(
         arrowprops={"arrowstyle": "-", "color": POPULATION, "lw": 1.0},
         zorder=7,
     )
-    bar = 0.010
+    bar = 0.5e-3
     zoom.plot(
-        [centre[0] - 0.5 * half + 0.006, centre[0] - 0.5 * half + 0.006 + bar],
+        [centre[0] - 0.40 * half, centre[0] - 0.40 * half + bar],
         [centre[1] - 0.92 * half, centre[1] - 0.92 * half],
         color="#374151",
         lw=2.0,
     )
     zoom.text(
-        centre[0] - 0.5 * half + 0.006 + 0.5 * bar,
+        centre[0] - 0.40 * half + 0.5 * bar,
         centre[1] - 0.86 * half,
-        "10 mm",
+        "0.5 mm",
         ha="center",
         va="bottom",
         fontsize=14,
@@ -243,21 +243,27 @@ def render(
     figure.subplots_adjust(
         left=0.012, right=0.995, bottom=0.012, top=0.905, wspace=0.02
     )
-    figure.legend(
-        handles=[
-            plt.Line2D(
-                [],
-                [],
-                color=SUBJECT,
-                marker="D",
-                markersize=7,
-                markerfacecolor="none",
-                lw=0,
-                label=f"promoted node ({promoted.shape[0]})",
-            ),
+    handles = [
+        plt.Line2D(
+            [],
+            [],
+            color=SUBJECT,
+            marker="D",
+            markersize=7,
+            markerfacecolor="none",
+            lw=0,
+            label=f"promoted node ({promoted.shape[0]})",
+        ),
+        plt.Line2D([], [], color=STATE, lw=1.6, ls="--", label="converged state"),
+        plt.Line2D([], [], color=POPULATION, lw=1.2, label="converged state flux"),
+    ]
+    if image_polyline.shape[0]:
+        handles.insert(
+            1,
             plt.Line2D([], [], color=IMAGED, lw=2.4, label="field of the currents"),
-            plt.Line2D([], [], color=STATE, lw=1.6, ls="--", label="converged state"),
-            plt.Line2D([], [], color=POPULATION, lw=1.2, label="converged state flux"),
+        )
+    handles.extend(
+        [
             plt.Line2D(
                 [],
                 [],
@@ -276,16 +282,21 @@ def render(
                 lw=0,
                 label="saddle, field of the currents",
             ),
-            plt.Line2D(
-                [],
-                [],
-                color=STATE,
-                marker=DEFAULT_INK.axis_marker,
-                markersize=8,
-                lw=0,
-                label="magnetic axis",
-            ),
-        ],
+        ]
+    )
+    handles.append(
+        plt.Line2D(
+            [],
+            [],
+            color=STATE,
+            marker=DEFAULT_INK.axis_marker,
+            markersize=8,
+            lw=0,
+            label="magnetic axis",
+        )
+    )
+    figure.legend(
+        handles=handles,
         loc="upper center",
         ncol=4,
         frameon=False,

@@ -54,8 +54,21 @@ def compose(receipt: dict, figure_src: str) -> str:
     spacing_mm = 1.0e3 * receipt["lattice_spacing_m"]
     moves = x_point["displacement_mm"]
     cells = moves / spacing_mm if spacing_mm else float("nan")
+    assembled = bool(separatrix.get("image_well_formed"))
     legs = ", ".join(f"{value:.2f}" for value in separatrix["leg_direction_shifts_deg"])
     inside = moves < spacing_mm
+    if assembled:
+        shape_clause = (
+            f"turns the lobe direction {separatrix['lobe_direction_shift_deg']:.2f}&deg; "
+            f"and the legs {legs}&deg;"
+        )
+    else:
+        shape_clause = (
+            f"assembles on that field with {separatrix['image_closed_vertex_count']} "
+            f"vertices (<code>well_formed</code> {separatrix['image_well_formed']}), so the "
+            "lobe and leg angles are undefined rather than zero and no shape change is "
+            "claimed"
+        )
     verdict = (
         "The converged near-X-point geometry is therefore the complete field's own "
         f"to within {moves:.1f} mm"
@@ -64,15 +77,30 @@ def compose(receipt: dict, figure_src: str) -> str:
     )
     verdict += (
         f": re-polishing the saddle on the field of the complete currents moves it "
-        f"{moves:.1f} mm ({cells:.2f} lattice cells of {spacing_mm:.1f} mm), turns the "
-        f"lobe direction {separatrix['lobe_direction_shift_deg']:.2f}&deg; and the legs "
-        f"{legs}&deg;, and leaves {_sci(difference['solved_max_abs_wb'])} Wb on the nodes "
-        "the solve does claim, against "
+        f"{moves:.3f} mm ({cells:.3f} lattice cells of {spacing_mm:.1f} mm), and that "
+        f"field leaves {_sci(difference['solved_max_abs_wb'])} Wb on the nodes the solve "
+        "does claim, against "
         f"{_sci(difference['promoted_max_abs_wb'])} Wb on the promoted set"
         + (
             ", so the promotion, not the field, carries the gap."
             if inside
             else ", so the near-X-point reading is held by the promotion rather than solved."
+        )
+        + (f" The separatrix {shape_clause}." if not assembled else "")
+    )
+    shape_sentence = (
+        "The separatrix assembled on that field differs from the converged state's by "
+        f"<strong>{separatrix['lobe_direction_shift_deg']:.2f}&deg;</strong> in lobe "
+        f"direction and {legs}&deg; in the leg directions, with the lobe tip "
+        f"{separatrix['lobe_tip_shift_mm']:.1f} mm away."
+        if assembled
+        else (
+            "The separatrix does not assemble on that field: "
+            "<code>nova.equilibrium.display_flux._branches</code> returns no closed "
+            f"contour at the imaged level of {_sci(separatrix['image_level_wb'])} Wb, so "
+            "there are no lobe or leg directions to compare. The saddle itself still "
+            "polishes, and the panel draws the converged state's separatrix alone rather "
+            "than inventing a second contour."
         )
     )
     rule = (
@@ -109,7 +137,10 @@ promoted mask and the constrained row's compensating conductor current
 (<strong>{compensation["compensating_current_norm_a"]:.3f} A</strong>, carrying up to
 {_sci(compensation["max_abs_flux_on_physical_nodes_wb"])} Wb on the physical nodes), so the
 saddle, the separatrix and the node mismatch below are all read off one complete field. That
-build reports {complete["promoted_node_count"]} promoted lattice nodes, a reproduction error of
+build reports {complete["promoted_node_count"]} promoted lattice nodes of the
+{receipt["promoted_node_count"]} the solve promotes (the remaining
+{receipt["promoted_wall_node_count"]} are wall nodes the lattice does not carry), a
+reproduction error of
 {_sci(complete["reproduction_relative_error"])} against the operator's own raster, and a saddle
 offset of {complete["saddle_offset_mm"]:.1f} mm between the map and the lattice spline.</p>
 
@@ -117,13 +148,14 @@ offset of {complete["saddle_offset_mm"]:.1f} mm between the map and the lattice 
   <img src="{figure_src}" alt="Promoted nodes on the converged coil edit's poloidal field">
   <figcaption>The converged edit {receipt["edit_index"]} at
   {_sci(receipt["terminal_residual_wb"])} Wb. Grey contours: the converged state's poloidal flux.
-  Dashed near-black: the separatrix assembled on the converged state; solid blue: the separatrix
-  assembled on the complete field of the currents. Orange diamonds: the
+  Dashed near-black: the separatrix assembled on the converged state; the complete field of the
+  currents assembles no closed separatrix, so only one is drawn. Orange diamonds: the
   {receipt["promoted_node_count"]} promoted nodes. The solve's magnetic axis is the solid
   triangle; the two polished saddles are both drawn as X-point glyphs, the converged state's in
   near-black and the field of the currents' in blue. The right-hand window magnifies the
-  <strong>{moves:.1f} mm</strong> between those two saddles, which is under one pixel of the
-  whole-machine panel; its scale bar is 10 mm. Lattice spacing {spacing_mm:.1f} mm.</figcaption>
+  <strong>{moves:.3f} mm</strong> between those two saddles, which is under one pixel of the
+  whole-machine panel; its scale bar is 0.5 mm and the window spans 3 mm. Lattice spacing
+  {spacing_mm:.1f} mm.</figcaption>
 </figure>
 
 {_table(promoted)}
@@ -134,22 +166,27 @@ median <strong>{quantiles["q50"]:.1f} mm</strong>, upper quartile {quantiles["q7
 furthest <strong>{quantiles["q100"]:.1f} mm</strong>. The nearest sits
 {quantiles["q0"] / spacing_mm:.2f} lattice cells from the saddle.</p>
 
+<p>The constrained row's compensating conductor current is folded into the field the map is
+built on (<strong>{compensation["compensating_current_norm_a"]:.1f} A</strong>, carrying up to
+{_sci(compensation["max_abs_flux_on_physical_nodes_wb"])} Wb on the physical nodes). With that
+term present the image reproduces the converged state on every node the solve claims, to
+{_sci(difference["solved_max_abs_wb"])} Wb, which is the solve's own residual of
+{_sci(receipt["terminal_residual_wb"])} Wb: the field is complete, so the column below measures
+geometry rather than an instrument gap.</p>
+
 <p>On the complete field, image &minus; state is
 <strong>{_sci(difference["promoted_max_abs_wb"])} Wb</strong> at the worst promoted node, with an
 rms of {_sci(difference["promoted_rms_wb"])} Wb over that set. Over the nodes the solve does
 claim the same difference is {_sci(difference["solved_max_abs_wb"])} Wb, and over the whole
 lattice {_sci(difference["whole_lattice_max_abs_wb"])} Wb. The solve's own residual is
 {_sci(receipt["terminal_residual_wb"])} Wb, so the promoted set carries
-{difference["promoted_max_abs_wb"] / max(receipt["terminal_residual_wb"], 1e-30):.0f} times the
+{difference["promoted_max_abs_wb"] / max(receipt["terminal_residual_wb"], 1e-30):.1e} times the
 residual the field reproduces everywhere else.</p>
 
 <p>Re-polishing the X-point on that complete field moves the saddle
-<strong>{moves:.1f} mm</strong> (<var>R</var> {x_point["displacement_r_mm"]:+.1f} mm,
-<var>Z</var> {x_point["displacement_z_mm"]:+.1f} mm; <strong>{cells:.2f} lattice cells</strong>
-of {spacing_mm:.1f} mm). The separatrix assembled on that field differs from the converged
-state's by <strong>{separatrix["lobe_direction_shift_deg"]:.2f}&deg;</strong> in lobe direction and
-{legs}&deg; in the leg directions, with the lobe tip
-{separatrix["lobe_tip_shift_mm"]:.1f} mm away.</p>
+<strong>{moves:.3f} mm</strong> (<var>R</var> {x_point["displacement_r_mm"]:+.3f} mm,
+<var>Z</var> {x_point["displacement_z_mm"]:+.3f} mm;
+<strong>{cells:.3f} lattice cells</strong> of {spacing_mm:.1f} mm). {shape_sentence}</p>
 
 <p>{verdict}</p>
 

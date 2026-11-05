@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EFIT parity tare measurement and independent oracles</title>
+<meta name="plan" content="nova-portfolio-replan">
+<meta name="node" content="efit-parity-tare-and-oracles">
+</head>
+<body>
+<main>
+<article id="efit-parity-tare-and-oracles-landing" class="landing" data-node="efit-parity-tare-and-oracles" data-plan="nova-portfolio-replan">
+<h2>EFIT parity tare measurement and independent oracles</h2>
+<p>The tare module was measured on the GPU at both revisions and the parity assertions were moved off the benchmark's own arithmetic. Landed at <code>647f298cf</code> on base <code>0509bb27f</code>; five paths changed: the three parity benchmarks and the boundary-volume and inductance-partition test modules.</p>
+<table id="efit-parity-tare-and-oracles-changes">
+<thead><tr><th>Finding</th><th>Repair</th></tr></thead>
+<tbody>
+<tr><td>Three measurements computed cell support membership on three separate paths.</td><td><code>benchmarks.efit_parity_inductance_partition._cell_partition</code> owns it through <code>_cell_membership</code>; the field instrument reads both of its supports (stored LCFS and the open solved contour) from that function with <code>solved_branch=False</code>, which drops only the claims a stored region cannot make (core containment and the banked-current pins).</td></tr>
+<tr><td>The bank-agreement refusal could not fire: it was gated on a closed solved boundary, and the banked terminal state's unit contour is open.</td><td>Extracted as <code>_require_bank_agreement</code> and driven by a test on a closed contour: a mismatched core volume raises, a matched one returns true, and no closed boundary reports the comparison undecidable rather than refused.</td></tr>
+<tr><td>The 234-cell live core and the 95-cell banked support were pinned as an expected pair.</td><td>Both counts are reported with a <code>core_support_divergence</code> block and checked against the moment receipt's current table. Measured: the live core carries 933 023.8 A of the 933 034.9 A reconstructed total, the banked support 416 958.3 A of it, so the two supports differ in both cells and current. Neither pair is an asserted expectation.</td></tr>
+<tr><td>Test expectations repeated the benchmark expressions they were meant to check.</td><td>The polygon quadrature is checked against closed-form solids of revolution (a rectangle, <code>V = pi (R2^2 - R1^2)(Z2 - Z1)</code>, and a circle, <code>V = 2 pi^2 a^2 R</code>, both to 1e-9); the current assertions read the banked <code>current_supports</code> table instead of re-dividing the live values.</td></tr>
+</tbody>
+</table>
+<table id="efit-parity-tare-and-oracles-measures">
+<caption>Commands and their summaries. Both arms of every comparison run at the same revision pair: base <code>0509bb27f</code>, head <code>647f298cf</code>.</caption>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="efit-parity-tare-and-oracles-measure-inplace"><td>Base arm in place, boundary-volume + inductance-partition + field-instrument</td><td>19 passed in 215.46 s (<code>EXIT=0</code>), before any change.</td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-tare-gpu"><td>Tare module, base and head arms in one h200 job</td><td><span id="efit-parity-tare-and-oracles-tare-result">reported below</span></td></tr>
+<tr id="efit-parity-tare-and-oracles-measure-negative"><td>Negative control: the reconstructed total current multiplied by 1.001 in a scratch copy of the head tree</td><td>1 failed, 1 passed, <code>EXIT=1</code>. The independent-oracle assertion failed against the banked all-domain current; the recomputed assertion it replaced stayed green against the same mutated value.</td></tr>
+</tbody>
+</table>
+<p>The negative control's scratch tree imported <code>benchmarks/efit_parity_boundary_volume.py</code> from <code>/work/projects/imas_gpu/sophelio/scratch/r-20261105T132414718225-efit-parity-tare-and-oracles/arms/negcontrol</code>; its log is <code>logs/negative-control.log</code> in this node's run directory.</p>
+</article>
+</main>
+</body>
+</html>

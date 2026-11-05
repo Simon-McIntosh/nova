@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "prototype fixture duplication; the slow-lane trace is briefed to import bank_solve_read/measure.py, and no product code depends on these scripts",
       "recorded_at": "2026-11-05T10:00:32.253213+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "wrong justification clause only; the reviewer confirms the measured product code is identical between the two revisions",
+      "recorded_at": "2026-11-05T10:00:41.455658+00:00"
     }
   },
   "findings": [

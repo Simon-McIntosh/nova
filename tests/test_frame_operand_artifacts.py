@@ -224,9 +224,7 @@ def test_checkpointed_panels_rebuild_maps_and_keep_unavailable_frame():
     from dataclasses import replace
 
     first, _ = reconstructed[0]
-    corrupt = replace(
-        first, display_map=replace(first.display_map, operand_digest="0" * 64)
-    )
+    corrupt = replace(first, operand_digest="0" * 64)
     selected = gate.SelectedFrame(
         gate.DEFAULT_DATA / first.shot,
         first.frame,

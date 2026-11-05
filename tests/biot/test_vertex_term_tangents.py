@@ -471,24 +471,7 @@ def _near_corner_rows():
     r, z, corner_r, corner_z = (np.asarray(value) for value in primals[:4])
     # a target exactly level with the corner or on its radius sits on the
     # integral's |u| or |offset| kink, where no two-sided derivative exists
-    candidates = np.flatnonzero(
-        _near_corner(primals) & (corner_z != z) & (corner_r != r)
-    )
-    distance = corner_r[candidates] - r[candidates]
-    decades = np.floor(np.log10(np.abs(distance))).astype(int)
-    # One pair per side and decade preserves the singularity sweep without
-    # repeating thousands of 50-digit integrals in the fast lane.
-    index = np.asarray(
-        [
-            sample
-            for decade in np.unique(decades)
-            for sign in (-1, 1)
-            for sample in candidates[(decades == decade) & (np.sign(distance) == sign)][
-                :2
-            ]
-        ],
-        dtype=int,
-    )
+    index = np.flatnonzero(_near_corner(primals) & (corner_z != z) & (corner_r != r))
     value, reference = _radial_reference(primals, tangents, index)
     hand = np.asarray(got[1][1])[index]
     primal_jvp = np.asarray(expected[1][1])[index]
@@ -632,10 +615,8 @@ def test_composed_corner_signed_offsets(monkeypatch):
         monkeypatch.delenv("NOVA_CORNER_REFERENCE_CACHE", raising=False)
     reference, derivative = _radial_reference(p, t, np.arange(offsets.size))
     reference, derivative = np.asarray(reference, float), np.asarray(derivative, float)
-
     def primal(*args):
         return _primal_vertex(*args).arsinh_terms()[1]
-
     value, jvp = jax.jit(lambda p, t: jax.jvp(primal, p, t))(p, t)
     _, hand = jax.jit(
         lambda p, t: polygonanalytic._arsinh_terms_tangent(

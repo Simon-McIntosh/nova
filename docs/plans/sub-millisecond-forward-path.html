@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="124">
+<meta name="plan-version" content="125">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -467,6 +467,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261103T110743278997-review-of-bank-tangent-contract-93356a3ca2c6-figure" data-who="reckon-build" data-when="2026-11-03T11:16:51.745Z">
     <div class="r-comment-body"><p>Figure review of r-20261103T095720496569-bank-tangent-contract at head 93356a3ca: parsed, all six rubric items answered, no blocking finding; the single non-blocking finding is that the value labels reuse the series colours and so render at 3.11:1 (grey) and 4.25:1 (green) against white, below the 4.5:1 text threshold.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261103T095720496569-bank-tangent-contract" data-who="reckon-build" data-when="2026-11-03T11:53:25Z">
+    <div class="r-comment-body"><p>Completed negative-result investigation, not a completed contraction implementation: the retained base tangent still has channel-by-sample buffers. The measured candidate cut sixteen-lane tangent peak from 62.34 to 45.47 GB but added 10.16 ms tangent wall and 10.12 ms step wall, while the base already ran unchunked. Source matches the base; the experimental ceiling test was deleted; the evidence fragment, figure and prototype scripts remain.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,445 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "8ff5dae2a49a63fcfac9f3dd9dea53a9c8744626",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract/brief.txt",
+    "sha256": "0fc0367de9b98a60e56454e6340a2901bca424e4e8d91764008cac3f77209923"
+  },
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 43560832,
+      "cached_input_tokens_cumulative": 43560832,
+      "input_tokens": 43742400,
+      "input_tokens_cumulative": 43742400,
+      "output_tokens": 92512,
+      "output_tokens_cumulative": 92512,
+      "reasoning_output_tokens": 41467,
+      "reasoning_output_tokens_cumulative": 41467
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1764,
+    "files": 10,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "dd0eb355ca887fac721075c13e5cf5616afeeb7d",
+    "12db48f90898177eb2388e22351cb9f5f29ec319",
+    "1b1e3c1262c8682539e7b73f46dd59767bd9cf72",
+    "a162a4719d9a31d14e9a2d8abbb71a6dd6602043",
+    "9492da193982837abdd92e6dfa41c682515446c8",
+    "ee2c5f68e34dcc52662f349308d45787fd9ecb94",
+    "7f64818d76f33cd3ac918b5ffe42a0d5dffc2859",
+    "faff966d3b0781270f362930932d5dfc0b75881d",
+    "93356a3ca2c62dffe150d037744baddd0323250b",
+    "94985df66469914f5bf6cc82b02a62bf88380ef0"
+  ],
+  "completed_at": "2026-11-03T11:53:25Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-03T09:59:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "gate": "failed",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 0.30785763168164515,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-04T06:37:21Z, which is after this node's 3600s horizon ending 2026-11-03T10:57:48.935579+00:00",
+    "horizon_ends_at": "2026-11-03T10:57:48.935579+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-03T09:57:47Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-04T06:37:21Z",
+    "resets_at": "2026-11-04T06:37:21Z",
+    "seconds_until_reset": 74373,
+    "state": "quiet",
+    "utilisation_pct": 27.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-03T09:57:47Z",
+    "read_at": "2026-11-03T09:57:48Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 27.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-03T11:53:25Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-03T11:53:25Z",
+        "resets_at": 1793774241,
+        "used_percent": 34.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract/manifest.md",
+  "member": "disposable-r-20261103T095720496569-bank-tangent-contract",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_bank_tangent_contract.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "bank-tangent-contract",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov03/bank-tangent-contract.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract/brief.txt",
+    "brief_sha256": "0fc0367de9b98a60e56454e6340a2901bca424e4e8d91764008cac3f77209923",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2828,
+          "cached_input_tokens": 404354,
+          "input_tokens": 407184,
+          "output_tokens": 397,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 407581,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "book_tangent_channels matches the base within 1e-12 relative on sirius CPU; in one H200 allocation the one-slice tangent wall, whole-step wall and tangent peak device bytes, and the 16-lane vmapped tangent peak bytes, are tabled for base and head; the fresh-read solve meets residual 1e-10, axis and X-point within 5e-4 of the minor radius and boundary flux within 1e-4 of the flux span",
+    "estimated_hours": null,
+    "goal": "Contract the booking tangent quadrature so no buffer scales as cells by channels by samples",
+    "id": "bank-tangent-contract",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-03T09:57:47Z",
+      "read_at": "2026-11-03T09:57:48Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 27.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract/manifest.md",
+    "negative_control": "restore the materialised per-sample intermediate in a scratch copy; the peak-bytes assertion in the new test fails and the 16-lane tangent again exceeds device memory unchunked",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/current.py",
+      "nova/equilibrium/clip_quadrature.py",
+      "tests/test_bank_tangent_contract.py",
+      "scripts/prototypes/bank_tangent_contract",
+      "docs/evidence/fragments/sub-millisecond-forward-path/bank-tangent-contract.html",
+      "docs/figures/sub-millisecond-forward-path/bank-tangent-contract"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 0.30781745186883147,
+      "derived": 0.9648575745034723,
+      "drain_hours": 168.0,
+      "effective_limit": 0.9648575745034723,
+      "elapsed_fraction": 0.8771432495486111,
+      "elapsed_hours": 147.36006592416666,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-04T06:37:21+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1793686984-4a0250",
+        "pace_multiple": null,
+        "remaining_seconds": 74303.762673,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-03T09:58:57+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.73,
+      "remaining_windows": null,
+      "resets_at": "2026-11-04T06:37:21Z",
+      "state": "observed",
+      "utilisation": 0.27,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.17933400000000002,
+      "decided_by": "window",
+      "margin": 0.558166,
+      "name": "bank-tangent-contract",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.27
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.237327,
+        "observed_at": "2026-11-03T09:58:57+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-04T06:37:21Z",
+        "state": "observed",
+        "utilisation": 0.27,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1793686984-4a0250",
+    "member": "codex",
+    "node": "bank-tangent-contract",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-03T09:58:57.237327+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "codex lane lifted uncapped until 2026-11-04T06:37Z; XLA buffer and lowering work on the H200",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.641,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1243.164,
+      "context-estimate": 82.851,
+      "records": 568.762,
+      "verdict-inputs": 553.25
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "94985df66469914f5bf6cc82b02a62bf88380ef0",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261103T095720496569-bank-tangent-contract",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1a0da-8902-7380-82db-2c5ab3483dac",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 43064960,
+    "cumulative_input_tokens": 43245914,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 133979,
+    "generation_seconds": 6421.257,
+    "machine_seconds": 326.764,
+    "tokens_per_second": 20.86
+  },
+  "time_budget": "60m",
+  "tool_steps": 267.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 6821,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-03T11:53:29Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-03T11:47:29Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 57381367,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract/codex-home/cache"
+      },
+      {
+        "bytes": 28835209,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261103T095720496569-bank-tangent-contract",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 976,
+    "worker_pid": 1581543
+  },
+  "worker_seconds": 6748,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-03T11:53:25Z",
+    "session_id": "01a1a0da-8902-7380-82db-2c5ab3483dac",
+    "session_source": "pointer",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-tangent-contract"
+  }
+}

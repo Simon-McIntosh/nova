@@ -3,6 +3,7 @@
 import argparse
 from html import escape
 import json
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -75,13 +76,14 @@ def main():
     parser.add_argument("run", type=Path)
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
+    parser.add_argument("--pairs", nargs=2, default=["contract-one", "contract-two"])
     args = parser.parse_args()
     pairs = [
         (
             json.loads((args.run / f"{label}-base.json").read_text()),
             json.loads((args.run / f"{label}-head.json").read_text()),
         )
-        for label in ("pair-one", "pair-two")
+        for label in args.pairs
     ]
     gaps = [compare(*pair) for pair in pairs]
     (args.run / "precision.json").write_text(json.dumps(gaps, indent=2))
@@ -100,6 +102,8 @@ def main():
         left=0.09, right=0.98, bottom=0.11, top=0.86, hspace=0.30, wspace=0.12
     )
     color = InkStyle().flux_color
+    last_iterate = max(max(arm["rows"][-1]["steps"]) for pair in pairs for arm in pair)
+    upper_iterate = max(5, 5 * math.ceil(last_iterate / 5))
     for allocation, pair in enumerate(pairs):
         for arm, receipt in enumerate(pair):
             row = receipt["rows"][-1]
@@ -119,8 +123,8 @@ def main():
             ax.set_yscale("log")
             ax.set_ylim(1e-13, 1)
             ax.set_yticks([1e-12, 1e-9, 1e-6, 1e-3, 1])
-            ax.set_xlim(0, 30)
-            ax.set_xticks(np.arange(0, 31, 5))
+            ax.set_xlim(0, upper_iterate)
+            ax.set_xticks(np.arange(0, upper_iterate + 1, 5))
             arm_name = "base" if arm == 0 else "backtracking"
             ax.set_title(
                 f"Allocation {allocation + 1} · {arm_name}",
@@ -147,7 +151,7 @@ def main():
     tables = []
     provenance = []
     for allocation, pair in enumerate(pairs):
-        label = ("pair-one", "pair-two")[allocation]
+        label = args.pairs[allocation]
         provenance.append(
             f"Allocation {allocation + 1}: base {pair[0]['revision']}; "
             f"head {pair[1]['revision']}; logs {label}-base.log and {label}-head.log."
@@ -224,12 +228,15 @@ def main():
     for name in (
         "cycle-seed-base-test_bank_solve_cycle",
         "cpu-suite-head-test_bank_solve_cycle",
+        "contract-suite-head-test_bank_solve_cycle",
         "stall-base-test_bank_solve_cycle",
         "stall-head-test_bank_solve_cycle",
         "cpu-suite-base-test_bank_solve_driver",
         "cpu-suite-head-test_bank_solve_driver",
+        "contract-suite-head-test_bank_solve_driver",
         "cpu-suite-base-test_support_read",
         "cpu-suite-head-test_support_read",
+        "contract-suite-head-test_support_read",
     ):
         path = args.run / (name + ".log")
         lines = path.read_text().splitlines() if path.exists() else []
@@ -279,11 +286,12 @@ excluded from all timing claims.</p>
         + escape(" ".join(provenance))
         + "</p>"
         + """
-<p>The one-slice arm regresses in both allocations: its second-call wall is
-4250.59 ms against 344.81 ms in the first, and 1026.64 ms against 346.80 ms
-in the second. The sixteen-slice result is a batch-tail improvement, not a
-universal latency improvement. The slowest lane in the second allocation
-still needs nine Newton updates.</p>
+<p>The preliminary backtracking arm required a twofold decrease on each trial.
+It reduced the sixteen-slice tails from 18 to 7 and 29 to 9, but regressed the
+single-slice wall from 344.81 to 4250.59 ms and 346.80 to 1026.64 ms.
+Those receipts remain in pair-one and pair-two. The tables above use the
+revised rule: halve only when the fresh trial residual fails to decrease,
+while retaining the 0.5 contraction threshold for lock release and factor reuse.</p>
 <p>Each allocation ran both arms at one and sixteen slices, with two executable calls
 after explicit compilation. Call 1 includes first-execution device initialization; Call
 2 is the repeated converged wall used for the comparison. Both calls have identical lane

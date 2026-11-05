@@ -169,6 +169,11 @@ from nova.biot.elliptic import (
 from nova.biot.gradedresidual import (
     QUARTER,
     _graded_residual_tangent,
+    _grading_width,
+    _model_integral,
+    _model_integral_tangent,
+    _regularised,
+    _regularised_tangent,
     _rule,
     graded_residual,
 )
@@ -283,6 +288,168 @@ def _oscillatory_primitive(weight: list) -> list:
     ]
 
 
+def _weight_remainder(term, panel, x, y, xp):
+    """Evaluate a weight minus its endpoint without subtracting nearby values."""
+    bulk, near, far = term
+    cosine = y - x
+    previous, current = xp.ones_like(x), cosine
+    polynomial = 0.0
+    for order, coefficient in enumerate(bulk):
+        harmonic = previous if order == 0 else current
+        polynomial = polynomial + xp.asarray(coefficient)[..., None] * harmonic
+        if order:
+            previous, current = current, 2.0 * cosine * current - previous
+    near, far = xp.asarray(near), xp.asarray(far)
+    if panel:
+        return near, y * ((far - near)[..., None] + x * polynomial)
+    return far, x * ((near - far)[..., None] + y * polynomial)
+
+
+def _weighted_residual(panels, pieces, term, nodes, xp, *, differential=None):
+    """Integrate a polynomial-weighted arsinh with its endpoint log removed.
+
+    The endpoint coefficient multiplies the exact logarithmic model. The
+    remaining weight has a quadratic zero, so its derivative cannot amplify
+    the near-end pole cancellation of an integration-by-parts contraction.
+    Full-turn panel bounds are fixed; the grading is held just as in
+    ``graded_residual``. Optional differentials carry geometry and weight motion.
+    """
+    # Polynomial weights reach degree four and need more nodes than the residual.
+    node, quadrature = _rule(2 * nodes)
+    result = derivative = 0.0
+    for panel, (offset, end, scale, lower, upper) in enumerate(panels):
+        width = _grading_width(offset, end, scale, xp)
+        start = xp.arcsinh(lower / width)[:, None]
+        span = xp.arcsinh(upper / width)[:, None] - start
+        stretch = start + 0.5 * span * (node + 1.0)[None, :]
+        angle = width[:, None] * xp.sinh(stretch)
+        near = xp.sin(angle) ** 2
+        x, y = (1.0 - near, near) if panel else (near, 1.0 - near)
+        jacobian = 0.5 * span * width[:, None] * xp.cosh(stretch)
+        sign = xp.sign(end)
+        model = xp.sqrt(offset[:, None] ** 2 + (scale[:, None] * angle) ** 2)
+        if differential is None:
+            numerator, denominator = pieces(x, y)
+            bounded = _regularised(numerator, denominator, model, sign[:, None], xp)
+            model_value = _model_integral(offset, scale, lower, upper, xp)
+        else:
+            d_panels, d_term = differential
+            d_offset, _, d_scale, d_lower, d_upper = d_panels[panel]
+            (numerator, denominator), (d_numerator, d_denominator) = pieces(
+                x, xp.zeros_like(x), y, xp.zeros_like(y)
+            )
+            d_model = (
+                offset[:, None] * d_offset[:, None]
+                + scale[:, None] * d_scale[:, None] * angle**2
+            ) / model
+            bounded, d_bounded = _regularised_tangent(
+                numerator,
+                d_numerator,
+                denominator,
+                d_denominator,
+                model,
+                d_model,
+                sign[:, None],
+                xp,
+            )
+            model_value, d_model_value = _model_integral_tangent(
+                offset, d_offset, scale, d_scale, lower, d_lower, upper, d_upper, xp
+            )
+        endpoint, remainder = _weight_remainder(term, panel, x, y, xp)
+        quotient = numerator / denominator
+        integrand = xp.arcsinh(quotient)
+        result = (
+            result
+            + (jacobian * (endpoint[..., None] * bounded + remainder * integrand))
+            @ quadrature
+            - endpoint * sign * model_value
+        )
+        if differential is not None:
+            d_endpoint, d_remainder = _weight_remainder(d_term, panel, x, y, xp)
+            d_integrand = _quotient_tangent(
+                numerator, d_numerator, denominator, d_denominator
+            ) / xp.sqrt(1.0 + quotient**2)
+            derivative = (
+                derivative
+                + (
+                    jacobian
+                    * (
+                        d_endpoint[..., None] * bounded
+                        + endpoint[..., None] * d_bounded
+                        + d_remainder * integrand
+                        + remainder * d_integrand
+                    )
+                )
+                @ quadrature
+                - sign * (d_endpoint * model_value + endpoint * d_model_value)
+            )
+    return result if differential is None else (result, derivative)
+
+
+def _weighted_root(vertex, term, *, differential=None):
+    """Integrate the geometric root without cancelling divergent moments."""
+    xp = vertex.xp
+    node, quadrature = _rule(2 * vertex.nodes)
+    r, u, offset = vertex.radius, vertex.level, vertex.offset
+    radius = r + offset
+    span = vertex.span
+    width = _grading_width(xp.hypot(u, offset), 0.0 * r, span, xp)
+    value = derivative = 0.0
+    for panel, grading in enumerate((xp.ones_like(width), width)):
+        stretch = 0.5 * xp.arcsinh(QUARTER / grading)[:, None] * (node + 1.0)
+        angle = grading[:, None] * xp.sinh(stretch)
+        jacobian = (
+            0.5
+            * xp.arcsinh(QUARTER / grading)[:, None]
+            * grading[:, None]
+            * xp.cosh(stretch)
+        )
+        near = xp.sin(angle) ** 2
+        x, y = (1.0 - near, near) if panel else (near, 1.0 - near)
+        root = xp.sqrt(
+            u[:, None] ** 2
+            + offset[:, None] ** 2
+            + 4.0 * r[:, None] * radius[:, None] * y
+        )
+        normalised = root / span[:, None]
+        end, remainder = _weight_remainder(term, panel, x, y, xp)
+        weight = end[..., None] + remainder
+        value = value + (jacobian * weight * normalised) @ quadrature
+        if differential is not None:
+            d_vertex, d_term = differential
+            dr, du, doffset = (d_vertex[key] for key in ("radius", "level", "offset"))
+            d_root = (
+                u[:, None] * du[:, None]
+                + offset[:, None] * doffset[:, None]
+                + 2.0 * y * (dr * radius + r * (dr + doffset))[:, None]
+            ) / root
+            d_normalised = _quotient_tangent(
+                root, d_root, span[:, None], d_vertex["span"][:, None]
+            )
+            d_end, d_remainder = _weight_remainder(d_term, panel, x, y, xp)
+            derivative = (
+                derivative
+                + (
+                    jacobian
+                    * (
+                        (d_end[..., None] + d_remainder) * normalised
+                        + weight * d_normalised
+                    )
+                )
+                @ quadrature
+            )
+    return value if differential is None else (value, derivative)
+
+
+def _edge_residual_band(edge):
+    """Select a plane pole close enough to amplify differentiated contractions."""
+    xp = edge.xp
+    distance = xp.minimum(
+        xp.abs(edge.plane_offset), xp.abs(edge.plane_radius_value + edge.radius)
+    )
+    return distance < 1e-4 * edge.radius
+
+
 @lru_cache(maxsize=None)
 def _corner_remainder_rule(nodes):
     """Grade the quadratic endpoint zeros of the weighted arsinh remainder."""
@@ -296,7 +463,7 @@ def _corner_remainder_rule(nodes):
 
 def _corner_remainder_band(radius, level, offset, xp):
     """Select the joint corner layer while preserving the distant contraction."""
-    return (xp.abs(offset) <= 1e-3) & (xp.hypot(level, offset) < 2e-6 * radius)
+    return (xp.abs(offset) <= 1e-3) & (xp.hypot(level, offset) < 1e-4 * radius)
 
 
 def _corner_arsinh_remainder(radius, level, offset, nodes, xp):
@@ -505,9 +672,13 @@ class _Vertex:
         """Return the same contraction with retained fp64 residues."""
         return self.channel.plain_paired(term)
 
-    def against_root(self, term: tuple):
+    def against_root(self, term: tuple, *, stable=False):
         """Return ``integral term Delta da`` over the quarter range."""
-        return self.channel.against_root(term)
+        reduced = self.channel.against_root(term)
+        if stable:
+            near = _corner_remainder_band(self.radius, self.level, self.offset, self.xp)
+            return self.xp.where(near, _weighted_root(self, term), reduced)
+        return reduced
 
     def against_root_paired(self, term: tuple):
         """Return the radical contraction with retained fp64 residues."""
@@ -521,7 +692,7 @@ class _Vertex:
         """Return the denominator contraction with retained fp64 residues."""
         return self.channel.across_paired(numerator, split)
 
-    def _first_residual(self, nodes: int):
+    def _first_residual(self, nodes: int, *, weight=None):
         """Evaluate the ``arsinh beta1`` integral, over the ring denominator.
 
         Its boundary layers are set by ``u`` -- the target's offset from this
@@ -541,7 +712,16 @@ class _Vertex:
             )
 
         level_offset = xp.abs(self.level)
-        return graded_residual(
+        integrate = (
+            graded_residual
+            if weight is None
+            else (
+                lambda panels, pieces, nodes, xp: _weighted_residual(
+                    panels, pieces, weight, nodes, xp
+                )
+            )
+        )
+        return integrate(
             (
                 (level_offset, self.radius_sum, span, *self.panels[0]),
                 (level_offset, self.offset, span, *self.panels[1]),
@@ -597,6 +777,8 @@ class _Vertex:
         is integrated by parts; its antiderivative is ``sin(2a) P(cos(2a))`` and
         therefore vanishes at both ends.  The remaining derivative is rational
         over ``G^2 D`` and uses the corner's existing ring split and moment stack.
+        In the corner layer the endpoint-subtracted quadrature evaluates the
+        same weighted integral without cancelling divergent pole derivatives.
         """
         series = across_the_range(weight)
         mean = series[0]
@@ -606,9 +788,15 @@ class _Vertex:
             scaled(product(self.edge_radius, self.cosine), -self.radius),
         )
         core = product(sine_squared_times(primitive), derivative_numerator)
-        return mean * self.ring_residual + (
+        reduced = mean * self.ring_residual + (
             2.0 * self.radius / self.span
         ) * self.across(core, self.ring)
+
+        return self.xp.where(
+            _corner_remainder_band(self.radius, self.level, self.offset, self.xp),
+            self._first_residual(self.nodes, weight=weight),
+            reduced,
+        )
 
     def flux_moment_residuals(self, expansion_r: float, target_z_minus_expansion_z):
         """Return the corner-only first-arsinh parts of ``(G_R, G_Z)``.
@@ -666,7 +854,9 @@ class _Vertex:
         The three rows are antiderivatives in source radius of the filament-flux
         integrand weighted by ``1``, ``R' - expansion_r`` and
         ``Z' - expansion_z``.  They use only the corner's existing root moments
-        and first graded ``arsinh`` residual.
+        and first graded ``arsinh`` residual. Near a corner, the root and
+        weighted residual are integrated on graded panels to preserve their
+        finite derivatives.
         """
         one = self.one
         r = self.radius
@@ -677,9 +867,9 @@ class _Vertex:
         def constant(value):
             return range_function([], value * one, value * one)
 
-        base = 4.0 * a * self.against_root(outer) + 4.0 * self.against_first_arsinh(
-            product(outer, source_cosine)
-        )
+        base = 4.0 * a * self.against_root(
+            outer, stable=True
+        ) + 4.0 * self.against_first_arsinh(product(outer, source_cosine))
         radial_root_weight = product(
             outer,
             total(
@@ -696,7 +886,7 @@ class _Vertex:
             ),
         )
         radial = 4.0 * a * self.against_root(
-            radial_root_weight
+            radial_root_weight, stable=True
         ) + 4.0 * self.against_first_arsinh(radial_arsinh_weight)
         vertical = (self.level + target_z_minus_expansion_z) * base
         return base, radial, vertical
@@ -751,7 +941,7 @@ class _Edge:
         self.paired_edge_slope = _paired_range(self.edge_slope)
         self.paired_edge_slope_over_radius = _paired_range(self.edge_slope_over_radius)
 
-    def _second_residual(self, vertex: _Vertex, *, paired: bool = False):
+    def _second_residual(self, vertex: _Vertex, *, paired: bool = False, weight=None):
         """Evaluate the ``arsinh beta2`` integral, over the plane denominator.
 
         Its boundary layers are set by the target's offset from the edge's extended
@@ -797,7 +987,16 @@ class _Edge:
                 2.0 * self.axial_slope * held_radius,
             )
 
-        return graded_residual(
+        integrate = (
+            graded_residual
+            if weight is None
+            else (
+                lambda panels, pieces, nodes, xp, **kwargs: _weighted_residual(
+                    panels, pieces, weight, nodes, xp
+                )
+            )
+        )
+        return integrate(
             (
                 (
                     xp.abs(r1 + r),
@@ -1210,6 +1409,7 @@ class _Edge:
         companions against ``cos(phi)`` leaves only the shared root moments and
         second graded ``arsinh`` residual.
         """
+        xp = self.xp
         one = vertex.one
         r = self.radius
         b1 = self.slope
@@ -1234,11 +1434,17 @@ class _Edge:
             series = across_the_range(weight)
             primitive = _oscillatory_primitive(series)
             core = sine_squared_times(primitive)
-            return (
+            reduced = (
                 series[0] * plane_residual
                 + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
                 + (0.5 / (a0 * a))
                 * vertex.across(product(core, plane_derivative), plane)
+            )
+
+            return xp.where(
+                _edge_residual_band(self),
+                self._second_residual(vertex, weight=weight),
+                reduced,
             )
 
         j2_root = scaled(
@@ -1280,7 +1486,7 @@ class _Edge:
 
         def full_turn(root_weight, arsinh_weight):
             return 4.0 * a * vertex.against_root(
-                product(outer, root_weight)
+                product(outer, root_weight), stable=True
             ) + 4.0 * against_second_arsinh(product(outer, arsinh_weight))
 
         return (
@@ -3135,7 +3341,9 @@ def _vertex_tangent(
     return vertex, tangent
 
 
-def _first_residual_tangent(vertex: _Vertex, d_vertex: dict, nodes: int):
+def _first_residual_tangent(
+    vertex: _Vertex, d_vertex: dict, nodes: int, *, weight=None, d_weight=None
+):
     """Return the tangent of :meth:`_Vertex._first_residual`."""
     xp = vertex.xp
     radius, level, offset = vertex.radius, vertex.level, vertex.offset
@@ -3176,6 +3384,15 @@ def _first_residual_tangent(vertex: _Vertex, d_vertex: dict, nodes: int):
         d_denominator = (d_u * (2.0 * u) + d_cross) * (0.5 / denominator)
         return (o + twice * y, denominator), (d_numerator, d_denominator)
 
+    if weight is not None:
+        return _weighted_residual(
+            panels,
+            pieces_tangent,
+            weight,
+            nodes,
+            xp,
+            differential=(d_panels, _dense_range(weight, d_weight, xp)),
+        )
     _, d_residual = _graded_residual_tangent(
         panels, d_panels, pieces_tangent, nodes, xp
     )
@@ -3198,7 +3415,9 @@ def _vertex_across_tangent(vertex: _Vertex, d_vertex: dict, numerator, d_numerat
     )  # fmt: skip
 
 
-def _vertex_against_root_tangent(vertex: _Vertex, d_vertex: dict, term, d_term):
+def _vertex_against_root_tangent(
+    vertex: _Vertex, d_vertex: dict, term, d_term, *, stable=False
+):
     """Return :meth:`_Vertex.against_root` and its tangent."""
     series, d_series = _across_the_range_tangent(term, d_term)
     d_series = _series_list(series, d_series)
@@ -3209,7 +3428,15 @@ def _vertex_against_root_tangent(vertex: _Vertex, d_vertex: dict, term, d_term):
         d_total = d_total + _product_tangent(
             coefficient, d_series[order], moments[order], d_moments[order]
         )
-    return vertex.against_root(term), d_total
+    if stable:
+        _, direct = _weighted_root(
+            vertex, term, differential=(d_vertex, _dense_range(term, d_term, vertex.xp))
+        )
+        near = _corner_remainder_band(
+            vertex.radius, vertex.level, vertex.offset, vertex.xp
+        )
+        d_total = vertex.xp.where(near, direct, d_total)
+    return vertex.against_root(term, stable=stable), d_total
 
 
 def _series_list(series: list, d_series) -> list:
@@ -3291,9 +3518,15 @@ def _against_first_arsinh_tangent(vertex: _Vertex, d_vertex: dict, weight, d_wei
     core, d_core = _product_range_tangent(raised, d_raised, derivative, d_derivative)
     across, d_across = _vertex_across_tangent(vertex, d_vertex, core, d_core)
     ratio, d_ratio = _ring_ratio_tangent(vertex, d_vertex, 2.0)
-    return vertex.against_first_arsinh(weight), _product_tangent(
+    reduced = _product_tangent(
         series[0], d_series[0], vertex.ring_residual, d_vertex["ring_residual"]
     ) + _product_tangent(ratio, d_ratio, across, d_across)
+
+    _, stable = _first_residual_tangent(
+        vertex, d_vertex, vertex.nodes, weight=weight, d_weight=d_weight
+    )
+    near = _corner_remainder_band(vertex.radius, vertex.level, vertex.offset, xp)
+    return vertex.against_first_arsinh(weight), xp.where(near, stable, reduced)
 
 
 def _flux_moment_residuals_tangent(
@@ -3370,13 +3603,15 @@ def _horizontal_flux_line_moments_tangent(
 
     def rooted(root_weight, d_root_weight, arsinh_weight, d_arsinh_weight):
         _, d_root = _vertex_against_root_tangent(
-            vertex, d_vertex, root_weight, d_root_weight
+            vertex, d_vertex, root_weight, d_root_weight, stable=True
         )
         _, d_first = _against_first_arsinh_tangent(
             vertex, d_vertex, arsinh_weight, d_arsinh_weight
         )
         return (
-            _product_tangent(four_a, d_four_a, vertex.against_root(root_weight), d_root)
+            _product_tangent(
+                four_a, d_four_a, vertex.against_root(root_weight, stable=True), d_root
+            )
             + 4.0 * d_first
         )
 
@@ -3618,7 +3853,13 @@ def _edge_scaled(term, factor):
 
 
 def _second_residual_tangent(
-    edge: _Edge, d_edge: dict, vertex: _Vertex, d_vertex: dict
+    edge: _Edge,
+    d_edge: dict,
+    vertex: _Vertex,
+    d_vertex: dict,
+    *,
+    weight=None,
+    d_weight=None,
 ):
     """Differentiate both graded panels, their curvature and moving nodes."""
     xp = edge.xp
@@ -3677,6 +3918,15 @@ def _second_residual_tangent(
             denominator.tangent,
         )
 
+    if weight is not None:
+        return _weighted_residual(
+            tuple(values),
+            pieces,
+            weight,
+            edge.nodes,
+            xp,
+            differential=(tuple(tangents), _dense_range(weight, d_weight, xp)),
+        )
     _, tangent = _graded_residual_tangent(
         tuple(values), tuple(tangents), pieces, edge.nodes, xp
     )
@@ -3688,6 +3938,7 @@ class _EdgeReductionTangent:
 
     def __init__(self, edge, d_edge, vertex, d_vertex):
         self.edge, self.vertex, self.d_vertex = edge, vertex, d_vertex
+        self.d_edge = d_edge
         self.r = _EdgeScalar(edge.radius, d_edge["radius"])
         self.u = _EdgeScalar(vertex.level, d_vertex["level"])
         self.b = _EdgeScalar(edge.slope, d_edge["slope"])
@@ -3751,9 +4002,11 @@ class _EdgeReductionTangent:
             )
         )
 
-    def root(self, term):
+    def root(self, term, *, stable=False):
         return _EdgeScalar(
-            *_vertex_against_root_tangent(self.vertex, self.d_vertex, *term)
+            *_vertex_against_root_tangent(
+                self.vertex, self.d_vertex, *term, stable=stable
+            )
         )
 
     def across(self, term, split):
@@ -3773,7 +4026,7 @@ class _EdgeReductionTangent:
             )
         )
 
-    def second(self, term, *, padded=False):
+    def second(self, term, *, padded=False, stable=False):
         series, d_series = _across_the_range_tangent(*term)
         if padded:
             series = series + [0.0 * self.vertex.one] * 4
@@ -3797,12 +4050,28 @@ class _EdgeReductionTangent:
             )
             core = _sine_squared_times_tangent(primitive, d_primitive)
         mean = _EdgeScalar(series[0], _series_list(series, d_series)[0])
-        return (
+        reduced = (
             mean * self.residual
             + (2.0 * self.b * self.r / (self.axial * self.a)) * self.plain(core)
             + (0.5 / (self.axial * self.a))
             * self.across(_edge_product(core, self.derivative), self.plane)
         )
+
+        if stable:
+            weighted = _EdgeScalar(
+                *_second_residual_tangent(
+                    self.edge,
+                    self.d_edge,
+                    self.vertex,
+                    self.d_vertex,
+                    weight=term[0],
+                    d_weight=term[1],
+                )
+            )
+            return _edge_select(
+                _edge_residual_band(self.edge), weighted, reduced, self.edge.xp
+            )
+        return reduced
 
     def arctan(self, weighting):
         xp = self.edge.xp
@@ -3916,7 +4185,9 @@ def _edge_flux_line_moments_tangent(
     )
 
     def full_turn(root, arsinh):
-        return 4.0 * a * c.root(p(c.cosine, root)) + 4.0 * c.second(p(c.cosine, arsinh))
+        return 4.0 * a * c.root(p(c.cosine, root), stable=True) + 4.0 * c.second(
+            p(c.cosine, arsinh), stable=True
+        )
 
     rows = (
         full_turn(base_root, base_arsinh),

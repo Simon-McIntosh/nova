@@ -14,9 +14,8 @@
 # This run declares itself a pre-warm, so the cache guard records its misses and
 # leaves the budget unenforced: filling the cache is what the job is for.
 #
-# ONE job per pre-warm: the four certificate rows and the bank identity are
-# issued sequentially inside one allocation, each in its own process, because an
-# interpreter retains every executable it compiles.
+# ONE job per pre-warm: each distinct program runs in its own process because
+# an interpreter retains every executable it compiles.
 
 set -euo pipefail
 
@@ -46,13 +45,16 @@ run_payload() {
   readonly receipt_directory="${pinned_root}/receipts"
   readonly receipt="${receipt_directory}/prewarm-${actual_revision:0:12}-${SLURM_JOB_ID:-local}.jsonl"
   readonly pin="${pinned_root}/prewarm-latest.json"
-  readonly output_directory="/tmp/nova-prewarm-${SLURM_JOB_ID:-local}"
+  export TMPDIR=/tmp
+  output_directory="$(mktemp -d "${TMPDIR}/nova-prewarm-${SLURM_JOB_ID:-local}-XXXX")"
+  trap 'rm -rf -- "${output_directory}"' EXIT
 
   mkdir -p "${receipt_directory}" "${output_directory}"
 
   export NOVA_COMPILATION_CACHE_ROOT="${pinned_root}"
   export NOVA_CACHE_PREWARM_RUN=1
-  export TMPDIR=/tmp
+  export NOVA_ANALYTIC_ORACLE_CACHE="${output_directory}/oracle"
+  export XLA_PYTHON_CLIENT_PREALLOCATE=false
   export PYTHONPATH="${repository_root}:${LANE_DIRECTORY}"
   export JAX_PLATFORMS=cuda,cpu
   export JAX_ENABLE_COMPILATION_CACHE=1
@@ -107,27 +109,14 @@ run_payload() {
       "${extra[@]}" --receipt "${receipt}" -- "$@" || status=$?
   }
 
-  compile_row solve-weak-rotation-reactor-static \
-    "${repository_root}/benchmarks/solovev_certificate.py" \
-    --case weak-rotation-reactor-static --requested-cells -1000 \
-    --reposed-fixture-floor \
-    --output "${output_directory}/solve-weak-rotation-reactor-static.json"
-  compile_row solve-moderate-rotation-conventional-static \
-    "${repository_root}/benchmarks/solovev_certificate.py" \
-    --case moderate-rotation-conventional-static --requested-cells -1000 \
-    --reposed-fixture-floor \
-    --output "${output_directory}/solve-moderate-rotation-conventional-static.json"
-  compile_row solve-diverted-single-null-500 \
-    "${repository_root}/benchmarks/solovev_certificate.py" \
-    --case diverted-single-null --requested-cells -500 \
-    --reposed-fixture-floor \
-    --output "${output_directory}/solve-diverted-single-null-500.json"
-  compile_row solve-diverted-single-null-1000 \
-    "${repository_root}/benchmarks/solovev_certificate.py" \
-    --case diverted-single-null --requested-cells -1000 \
-    --reposed-fixture-floor \
-    --output "${output_directory}/solve-diverted-single-null-1000.json"
-  compile_row forward-compile-identity pytest \
+  # The fixture-floor command already loops over all four certificate cases.
+  # Passing --case to it does not select one row, so repeating it recompiles
+  # the same workload four times. Keep its figures and fixture store local.
+  compile_row solve-fixture-floor \
+    "${LANE_DIRECTORY}/prewarm_rows.py" fixture-floor "${output_directory}"
+  # A numerical assertion can fail after every executable has been persisted.
+  # Keep its command status in the receipt without withholding the cache pin.
+  compile_row forward-compile-identity --allow-pytest-failures pytest \
     "${repository_root}/tests/test_forward_compile_identity.py" \
     -p no:cacheprovider -p cache_guard
   # The lane's own target. A cache key carries the jitted function's abstract
@@ -138,9 +127,6 @@ run_payload() {
   compile_row forward-solve-lane --allow-pytest-failures pytest \
     "${repository_root}/tests/test_equilibrium_forward_solve.py" \
     -p no:cacheprovider -p cache_guard
-
-  "${PYTHON}" "${LANE_DIRECTORY}/publish_prewarm_pin.py" \
-    --receipt "${receipt}" --pin "${pin}" --revision "${actual_revision}" || status=$?
 
   # A pre-warm that exits 0 while persisting nothing is the failure this job
   # cannot report from its own rows alone: the receipts record compile cost
@@ -153,6 +139,13 @@ run_payload() {
   if [[ "${served_entries}" -eq 0 ]]; then
     printf 'PREWARM_UNPERSISTED_DIRECTORY=%s\n' "${served_directory}"
     status=1
+  fi
+
+  "${PYTHON}" "${LANE_DIRECTORY}/prewarm_rows.py" count-autotune \
+    "${served_directory}" || status=$?
+  if [[ "${status}" -eq 0 ]]; then
+    "${PYTHON}" "${LANE_DIRECTORY}/publish_prewarm_pin.py" \
+      --receipt "${receipt}" --pin "${pin}" --revision "${actual_revision}" || status=$?
   fi
 
   printf 'PREWARM_EXIT_STATUS=%s\n' "${status}"
@@ -205,7 +198,9 @@ if [[ -z "${log_path}" ]]; then
   exit 2
 fi
 
-readonly repository_root="$(git -C "${LANE_DIRECTORY}/../.." rev-parse --show-toplevel)"
+# Keep the compiled source revision selectable when the launcher resides in a
+# different worktree from the checkout whose revision the lane pins.
+readonly repository_root="$(realpath -e -- "${NOVA_PREWARM_SOURCE_ROOT:-$(git -C "${LANE_DIRECTORY}/../.." rev-parse --show-toplevel)}")"
 readonly source_revision="$(git -C "${repository_root}" rev-parse HEAD)"
 readonly script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
 readonly resolved_log="$(realpath -m -- "${log_path}")"
@@ -219,7 +214,7 @@ submission=(
   --reservation=gpu_0003_grpA
   --nodes=1
   --ntasks=1
-  --cpus-per-task=8
+  --cpus-per-task=4
   --gpus=h200:1
   --mem=128G
   --time=01:30:00

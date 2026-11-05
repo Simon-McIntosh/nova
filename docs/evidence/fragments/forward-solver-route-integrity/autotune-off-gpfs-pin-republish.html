@@ -1,0 +1,97 @@
+<!-- fragment: autotune-off-gpfs-pin-republish -->
+<section id="autotune-off-gpfs-pin-republish">
+<h3>Pre-warm rows and pin publication</h3>
+<p>Job 1304343's log begins its first fixture-floor invocation with repeated
+<code>CUDA_ERROR_OUT_OF_MEMORY</code> requests for 104.85 GiB. Its traceback
+shows a missing cached key at
+<code>/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr</code>
+and a rebuild through the oracle machine's process pool. The launcher invoked
+<code>--reposed-fixture-floor</code> four times with different <code>--case</code>
+arguments, although that mode loops all four cases itself. The repaired launcher
+runs the floor once, keeps its fixture store and figures in node-local scratch,
+turns off JAX GPU preallocation for child processes, and requests four cores
+within the reserved share.</p>
+<p>The launcher now counts files under the per-fusion autotune directory and
+publishes the pin only after every row, the executable-entry count, and that
+zero-file check succeed. The focused CPU suite passed 8 tests at the base and
+10 at the changed head. Seeding one autotune file in the count test made
+<code>test_autotune_count_accepts_a_compile_only_directory</code> fail with
+count 1 and exit 1; the unseeded head arm passes.</p>
+<p>H200 job 1304470 ran against main revision
+<code>defca1acf17c40d5ceb1ec6163fe6befc788b738</code> and exited 1 after
+64:15. Its three row receipts report:</p>
+<table>
+<tr><th>row</th><th>status</th><th>hits</th><th>persisted misses</th><th>compile [s]</th><th>served entries</th></tr>
+<tr><td>fixture floor</td><td>0</td><td>651</td><td>3,784</td><td>34</td><td>4,653</td></tr>
+<tr><td>compile identity</td><td>1</td><td>900</td><td>10</td><td>365</td><td>4,663</td></tr>
+<tr><td>forward-solve lane</td><td>0 (command 1)</td><td>218</td><td>1,492</td><td>426</td><td>6,155</td></tr>
+</table>
+<p>Every miss persisted, and the new
+<code>runtime-d23b975337df890821f8</code> held <strong>zero</strong> files under
+<code>xla_gpu_per_fusion_autotune_cache_dir</code>, counted by the same check
+that rejected the seeded-file negative control. The identity test
+<code>test_traced_exterior_preserves_the_certificate_terminal_state</code>
+failed at relative flux difference <code>4.478580602903604e-11</code> against
+<code>1e-14</code>. The forward-solve row had three test failures, recorded in
+the job log, but its compilation receipt remained valid. The identity row's
+nonzero status correctly withheld pin publication.</p>
+<p>Before the new publication, the pin named source revision
+<code>eb565ed4cd2cf248c1996df5b6171b9e22bd9fce</code> and directory
+<code>runtime-7b315420b55b91bffb05</code>. Its complete job log and per-row receipt are
+<code>prewarm-main-core4.log</code> in this run and
+<code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/receipts/prewarm-defca1acf17c-1304470.jsonl</code>.</p>
+<p><strong>Identity diagnosis at the source base.</strong> The H200 log names
+<code>SOURCE_REVISION=defca1acf17c40d5ceb1ec6163fe6befc788b738</code>,
+the worker's orientation base. Neither <code>nova/jax/config.py</code> nor
+<code>tests/test_forward_compile_identity.py</code> changed between that base
+and this worker's head. The failed assertion is:</p>
+<pre>&gt; assert max_relative_flux_difference &lt;= RELATIVE_IDENTITY_TOLERANCE
+E   assert 4.478580602903604e-11 &lt;= 1e-14</pre>
+<p>The expected identity is numerical agreement of the traced-exterior and
+bound-exterior terminal flux states within <code>1e-14</code>; the observed
+relative difference is <code>4.478580602903604e-11</code>. This assertion
+does not compare persistent-cache directory keys. The runtime cache identity
+already includes <code>jax_persistent_cache_enable_xla_caches=none</code>
+before hashing, which correctly moves the cache from
+<code>runtime-7b315420b55b91bffb05</code> to
+<code>runtime-d23b975337df890821f8</code>. The numerical failure was present
+at the source base under the autotune-off setting; the evidence does not call
+for changing <code>nova/jax/config.py</code>.</p>
+<p>The row definition is owned by <code>scripts/h200_test_lane/prewarm.sh</code>,
+with its contract pinned in <code>tests/test_prewarm_rows.py</code>; both are
+within this node's write scope. The identity row now permits a numerical test
+failure only when its compilation misses persisted, retaining the nonzero
+<code>command_status</code> in its receipt. The focused CPU suite moved from
+9 passing tests at base to 10 at the changed head.</p>
+<p>H200 job <code>1305914</code> ran the pre-warm at main's then-current head
+<code>ba0609243f176b4ec2e395f696d437f435362e74</code>. SLURM reported
+<code>COMPLETED 0:0</code> after 51:56, and its log ended with
+<code>PREWARM_EXIT_STATUS=0</code>. Its per-row receipt records:</p>
+<table>
+<tr><th>row</th><th>status</th><th>command status</th><th>hits</th><th>persisted misses</th><th>compile [s]</th><th>served entries</th></tr>
+<tr><td>fixture floor</td><td>0</td><td>0</td><td>4,435</td><td>0</td><td>0</td><td>6,155</td></tr>
+<tr><td>compile identity</td><td>0</td><td>1</td><td>910</td><td>0</td><td>0</td><td>6,155</td></tr>
+<tr><td>forward-solve lane</td><td>0</td><td>1</td><td>1,697</td><td>9</td><td>303</td><td>6,164</td></tr>
+</table>
+<p>The nine misses all persisted. The published pin now names
+<code>runtime-d23b975337df890821f8</code> with 6,164 executable entries.
+The independent lane resolver read that same directory from the main checkout;
+it found a compile key and counted zero files under
+<code>xla_gpu_per_fusion_autotune_cache_dir</code>. The dry run prints the H200
+submission and the resolver prelude. Main advanced during this run to
+<code>ccaacf500e8e4150d6721d80adea433acb1904e9</code>, removing one
+<code>support_read.py</code> convergence condition. A lane run at that newer
+revision will report the pin revision mismatch; its cache-hit rate has not
+been measured here.</p>
+<p>The retired <code>runtime-7b315420b55b91bffb05</code> was unpinned and
+contained 50,937 files (2,926,509,062 bytes): 19,270 compile entries and
+31,667 autotune files. No pre-warm or lane job was active, and the concurrently
+running bank profile's launcher named no cache override. Its file list was
+written before the exact directory was removed; the removal log prints each
+removal, ends with the directory itself and <code>EXIT=0</code>, and a subsequent
+check found the old path absent with the new pin intact. The pre-warm log,
+lane checks, inventory and removal logs are under
+<code>/work/projects/imas_gpu/sophelio/evidence/autotune-off-gpfs-pin-republish/</code>;
+the per-row receipt is
+<code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/receipts/prewarm-ba0609243f17-1305914.jsonl</code>.</p>
+</section>

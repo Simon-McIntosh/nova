@@ -1234,7 +1234,10 @@ def _assembler_flags(display, axis_rz) -> dict:
         }
     assembled = jax.device_get(
         assemble_separatrix_branches(
-            jnp.asarray(display.flux),
+            # The map is stored (radial, vertical); the assembler takes
+            # (vertical, radial), which is the orientation the builder itself
+            # hands it.
+            jnp.asarray(display.flux.T),
             jnp.asarray(display.radius),
             jnp.asarray(display.height),
             jnp.asarray(float(display.saddle_flux)),

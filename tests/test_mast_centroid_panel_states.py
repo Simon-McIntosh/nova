@@ -54,6 +54,24 @@ def _contour_paths(display) -> np.ndarray:
     )
 
 
+def _path_offset(one: np.ndarray, other: np.ndarray, stride: int = 8) -> float:
+    """Return the largest nearest-neighbour distance between two path sets.
+
+    A current edit moves the contours and can also change their topology, so
+    the two sets need not hold the same vertices: they are compared by how far
+    each set's vertices sit from the other set, not by position within an
+    array of matching shape.
+    """
+    left = one[::stride]
+    right = other[::stride]
+    distance = np.sqrt(
+        ((left[:, None, :] - right[None, :, :]) ** 2).sum(axis=2)
+    )
+    return float(
+        max(distance.min(axis=1).max(), distance.min(axis=0).max())
+    )
+
+
 def _perturbed_state(state_path: Path, target: Path) -> Path:
     """Write a copy of ``state_path`` with one conductor current moved 1 %."""
     with np.load(state_path, allow_pickle=False) as data:
@@ -146,6 +164,5 @@ def test_a_one_percent_current_edit_moves_the_drawn_contours(
     perturbed = _contour_paths(
         panel_renderer._panel_state_display(perturbed_path, SPACING)[2]
     )
-    assert original.shape == perturbed.shape
     scale = max(float(np.max(np.abs(original))), 1.0e-30)
-    assert float(np.max(np.abs(original - perturbed))) / scale > 1.0e-4
+    assert _path_offset(original, perturbed) / scale > 1.0e-4

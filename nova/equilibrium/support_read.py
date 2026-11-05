@@ -1682,23 +1682,43 @@ def solve_batch(
             jnp.where(active[:, None], value + change, value)
             for value, change in zip(state, correction.update, strict=True)
         )
-        next_read = read_batch(
-            operands,
-            cache,
-            candidate,
-            seeds,
-            previous,
-            convention,
-            policy,
-            axis_sign,
-            iterations=iterations,
-            tracking=TrackingState(
-                fresh.cells,
-                fresh.saddle_live,
-                fresh.reading,
-                fresh.rebuilds,
-                fresh.valid,
+        # The carried decision keeps its discrete cells but not their continuous
+# readings, so it is current only where the state has stopped moving. That is
+# the same regime the active-set freeze admits, and the batch takes one
+# decision for every lane.
+        steady = jnp.all(~active | (current_norm <= freeze_threshold))
+        next_read = jax.lax.cond(
+            steady,
+            lambda _: read_batch(
+                operands,
+                cache,
+                candidate,
+                seeds,
+                previous,
+                convention,
+                policy,
+                axis_sign,
+                iterations=iterations,
+                tracking=TrackingState(
+                    fresh.cells,
+                    fresh.saddle_live,
+                    fresh.reading,
+                    fresh.rebuilds,
+                    fresh.valid,
+                ),
             ),
+            lambda _: read_batch(
+                operands,
+                cache,
+                candidate,
+                seeds,
+                previous,
+                convention,
+                policy,
+                axis_sign,
+                iterations=iterations,
+            ),
+            None,
         )
         next_norm = magnitude(candidate, next_read)
         drift = lock & selection_changed(

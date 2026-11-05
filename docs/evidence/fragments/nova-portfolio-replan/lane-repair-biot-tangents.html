@@ -12,6 +12,7 @@
 <h2>Biot tangent test reproduction</h2>
 <p>At revision <code>1de330a8fbf781c2db6f9734efdaf53e47fe75b4</code>, a serial CPU run of both tangent files passed the first vertex identity on all 10,000 samples, then its Python process was killed while compiling the next case. The run emitted <code>EXIT=137</code> without a pytest summary. The isolated <code>test_tangent_matches_primal_jvp[arsinh_terms]</code> also ended with <code>EXIT=137</code>. A trial that compiled batches of 1,000 while retaining all 10,000 inputs was killed again with <code>EXIT=137</code>; the trial edits were removed.</p>
 <p>The failed case therefore reproduces as a resource failure in this allocation, before its tangent assertion can be read. The remaining census failures in these two files were not reached by the serial run and remain unclassified at this revision. No product or test change was landed.</p>
+<p>A separate <code>all_debug</code> measurement was submitted as job <code>1306019</code> with eight CPUs, 96 GB and a 59-minute limit. It runs the base and head revisions from separate trees, in one fresh pytest process per file and arm. Each arm writes a revision, imported module path, working directory, command, pytest output and final exit code under <code>/work/projects/imas_gpu/sophelio/evidence/lane-repair-biot-tangents/</code>. The submitted revisions differ only by this evidence fragment, so the four arms are a control for resource effects; their results are pending.</p>
 </section>
 </main>
 </body>

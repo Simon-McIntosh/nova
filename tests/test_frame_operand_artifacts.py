@@ -131,15 +131,28 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
         response=response,
         conductor_current=current,
     )
-    assert receipt["path"].endswith("frame-display-shot-3.npz")
+    assert receipt["path"].endswith(f"frame-display-shot-3-{receipt['digest']}.npz")
     assert receipt["bytes"] > 0
-    operands = gate.load_frame_operands(tmp_path / "frame-display-shot-3.npz")
+    operands = gate.load_frame_operands(Path(receipt["path"]))
     assert "state" in operands and "domain_core" in operands
     assert "promoted_mask" in operands and "compensation_current" in operands
     assert "branch_closed_controls_rz" in operands
     field, conductor = gate.rebuild_display_flux(operands, response)
     assert np.allclose(field, 7.0, rtol=0.0, atol=1.0e-12)
     assert np.allclose(conductor, display.flux.ravel() - operands["plasma_flux"])
+
+    original_bytes = Path(receipt["path"]).read_bytes()
+    display.flux = np.full(shape, 9.0)
+    alternate = gate._persist_frame_operands(
+        tag="shot-3",
+        profile=SimpleNamespace(lattice=lattice),
+        equilibrium=equilibrium,
+        display=display,
+        response=response,
+        conductor_current=current,
+    )
+    assert alternate["path"] != receipt["path"]
+    assert Path(receipt["path"]).read_bytes() == original_bytes
 
 
 def test_persisted_bank_frame_rebuilds_to_one_em12():
@@ -181,9 +194,7 @@ def test_checkpointed_panels_rebuild_maps_and_keep_unavailable_frame():
     assert len(records) >= 3
     assert records[2]["operand_path"] is None
     assert records[2]["operand_digest"] is None
-    assert records[2]["operand_unavailable_reason"].startswith(
-        "NoQualifiedAxisError:"
-    )
+    assert records[2]["operand_unavailable_reason"].startswith("NoQualifiedAxisError:")
     reconstructed = []
     for record in records[:3]:
         result = gate._frame_result_from_checkpoint(record)
@@ -254,6 +265,57 @@ def test_display_map_uses_terminal_mask_and_constraint_compensation(monkeypatch)
     assert np.isclose(float(np.asarray(seen["target_current"])), 7.0)
     assert np.allclose(rig["compensation_current"], [3.0, 6.0])
     assert np.allclose(seen["compensation"](points), 7.5)
+
+
+def test_compensated_frame_reproduces_solved_nodes(monkeypatch):
+    """Omitting a constrained conductor term makes the measured node check fail."""
+
+    from types import SimpleNamespace
+    from nova.equilibrium.display_flux import DisplayCoupling
+
+    gate.configure_dtypes()
+    radius = np.linspace(1.0, 1.02, 3)
+    height = np.linspace(-0.01, 0.01, 3)
+    points = np.stack(np.meshgrid(radius, height, indexing="ij"), axis=-1).reshape(
+        -1, 2
+    )
+    lattice = SimpleNamespace(
+        radius=radius, height=height, coordinate=points, node_count=9, shape=(3, 3)
+    )
+    moments = SimpleNamespace(
+        cell_current=np.zeros(1), radial_moment=np.zeros(1), vertical_moment=np.zeros(1)
+    )
+    operator = SimpleNamespace(
+        external_current=np.asarray([1.0, 2.0]),
+        normalised_current_moments=lambda *args: (moments, None),
+        raster_image=lambda *args, **kwargs: np.ones(9),
+        read=lambda *args: (None, SimpleNamespace(axis=None, x_point=None)),
+    )
+    profile = SimpleNamespace(lattice=lattice, operator=operator)
+    constraint = SimpleNamespace(
+        compensator_direction=np.asarray([[1.0], [2.0]]),
+        physical_unknown=np.asarray([3.0]),
+    )
+    equilibrium = SimpleNamespace(
+        flux=np.full(9, 8.5),
+        promoted_mask=np.zeros(9, dtype=bool),
+        constraints=(constraint,),
+    )
+    coupling = DisplayCoupling(
+        plasma=lambda p: (np.zeros((len(p), 1)),) * 3,
+        external=lambda p: np.ones(len(p)),
+    )
+    response = np.tile(np.asarray([0.5, 1.0]), (18, 1))
+    monkeypatch.setattr(
+        gate,
+        "_display_coupling",
+        lambda *args: (coupling, radius, height, {"shape": [18, 2]}),
+    )
+    monkeypatch.setattr(gate, "_stored_conductor_response", lambda record: response)
+    display, _ = gate._display_map(profile, equilibrium, object(), 7.0)
+    print(f"max_solved_node_mismatch_wb={display.max_solved_node_mismatch_wb}")
+    assert display.max_solved_node_mismatch_wb < 1.0e-12
+    assert np.allclose(display.flux, 8.5, rtol=0.0, atol=1.0e-12)
 
 
 def _refused_display():

@@ -22,6 +22,7 @@ import base64
 import concurrent.futures
 import gc
 import hashlib
+import io
 import json
 import math
 import multiprocessing
@@ -60,7 +61,7 @@ from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.database.filepath import operand_cache_root, portable_path
 from nova.database import content_store
-from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import (
@@ -1862,11 +1863,13 @@ def _persist_frame_operands(
         payload["constraint_compensator_authority"] = np.asarray(
             authority, dtype=np.float64
         )
-    path = _frame_operand_path(tag)
+    buffer = io.BytesIO()
+    np.savez_compressed(buffer, **payload)
+    content = buffer.getvalue()
+    digest = hashlib.sha256(content).hexdigest()
+    path = _frame_operand_path(f"{tag}-{digest}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(path, **payload)
-    with path.open("rb") as stream:
-        digest = hashlib.sha256(stream.read()).hexdigest()
+    path.write_bytes(content)
     return {
         "path": portable_path(path),
         "digest": digest,
@@ -3684,6 +3687,12 @@ def render_frame_comparison(
                 )
         axis.set_xlim(float(radius[0]), float(radius[-1]))
         axis.set_ylim(float(height[0]), float(height[-1]))
+    _save_frame_figure(figure, path)
+
+
+def _save_frame_figure(figure, path: Path) -> None:
+    """Refuse clipped or overlapping text before publishing a bank figure."""
+
     figure.canvas.draw()
     renderer = figure.canvas.get_renderer()
     texts = [
@@ -3700,7 +3709,7 @@ def render_frame_comparison(
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=100)
     plt.close(figure)
-    print(f"FRAME_FIGURE={path} TEXT_CHECK=passed", flush=True)
+    print(f"FIGURE={path} TEXT_CHECK=passed", flush=True)
 
 
 def _separatrix_metric(result: FrameResult, name: str) -> float:
@@ -3716,237 +3725,143 @@ def _separatrix_metric(result: FrameResult, name: str) -> float:
 def cohort_figure(
     results: list[FrameResult], fields: list[dict[str, Any]], path: Path
 ) -> None:
-    """Plot the four declared match categories over the complete cohort."""
+    """Compare terminal-state metrics and the fine-map boundary availability."""
 
+    figure, axes = plt.subplots(2, 3, figsize=(14, 7.2))
+    figure.subplots_adjust(
+        left=0.07, right=0.98, top=0.94, bottom=0.10, hspace=0.48, wspace=0.40
+    )
     index = np.arange(len(results))
-    labels = [f"{Path(item.shot).stem[-6:]}:{item.frame}" for item in results]
-    figure, axes = plt.subplots(2, 3, figsize=(16, 7), constrained_layout=True)
-    axes[0, 0].plot(
-        index, [item.metrics.interior_r_squared for item in results], "o-", label="R2"
+    metrics = (
+        ("Interior flux match", "R²", [r.metrics.interior_r_squared for r in results]),
+        (
+            "Solved-node mismatch",
+            "Wb",
+            [
+                np.nan
+                if r.display_map is None
+                else r.display_map.max_solved_node_mismatch_wb
+                for r in results
+            ],
+        ),
+        (
+            "Lattice-to-map saddle offset",
+            "mm",
+            [_separatrix_metric(r, "saddle_offset_mm") for r in results],
+        ),
+        (
+            "Magnetic-axis displacement",
+            "m",
+            [r.metrics.magnetic_axis_displacement_mm / 1000 for r in results],
+        ),
+        (
+            "Signed relative q95 error",
+            "fraction",
+            [r.metrics.signed_relative_q95_error for r in results],
+        ),
     )
+    for axis, (title, unit, values) in zip(axes.ravel(), metrics):
+        trace_axes(axis)
+        axis.plot(index, values, "o-", color=DEFAULT_INK.flux_color, linewidth=1.8)
+        axis.set_title(title, fontsize=11, pad=10)
+        axis.set_ylabel(unit, fontsize=10)
+        axis.set_xticks(index, [str(r.frame) for r in results], fontsize=9)
+        axis.set_xlabel("frame", fontsize=10)
     axes[0, 0].axhline(
-        REGISTERED_MEDIAN_INTERIOR_R2_BAR,
-        color="black",
-        linestyle="--",
-        label="registered median bar",
+        REGISTERED_MEDIAN_INTERIOR_R2_BAR, color="0.4", linestyle="--", linewidth=1.2
     )
-    twin = axes[0, 0].twinx()
-    twin.plot(
-        index,
-        [item.metrics.interior_fractional_rms for item in results],
-        "s:",
-        color="tab:orange",
-        label="fractional RMS",
+    limiter, _ = _physical_wall_ring(
+        DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
     )
-    axes[0, 0].set_title("Interior flux match")
-    axes[0, 0].legend(fontsize=8)
-    twin.set_ylabel("fractional RMS")
-    axes[0, 1].plot(
-        index,
-        [item.metrics.closed_boundary_symmetric_rms_distance_m for item in results],
-        "o-",
-        label="symmetric RMS",
-    )
-    axes[0, 1].plot(
-        index,
-        [item.metrics.closed_boundary_symmetric_sup_distance_m for item in results],
-        "s-",
-        label="symmetric sup",
-    )
-    axes[0, 1].plot(
-        index,
-        [item.metrics.polished_saddle_to_nearest_efit_x_m for item in results],
-        "^:",
-        label="saddle to EFIT X",
-    )
-    axes[0, 1].plot(
-        index,
-        [
-            _separatrix_metric(item, "separatrix_symmetric_rms_distance_m")
-            for item in results
-        ],
-        "o--",
-        color="tab:purple",
-        label="fine-map separatrix RMS",
-    )
-    axes[0, 1].plot(
-        index,
-        [
-            _separatrix_metric(item, "separatrix_symmetric_sup_distance_m")
-            for item in results
-        ],
-        "s--",
-        color="tab:purple",
-        label="fine-map separatrix sup",
-    )
-    axes[0, 1].set_title("Closed-boundary and X-point separation")
-    axes[0, 1].set_ylabel("m")
-    axes[0, 1].legend(fontsize=7)
-    axes[1, 0].plot(
-        index,
-        [item.metrics.magnetic_axis_displacement_mm for item in results],
-        "o-",
-    )
-    axes[1, 0].set_title("Magnetic-axis displacement")
-    axes[1, 0].set_ylabel("mm")
-    axes[1, 1].axhline(0.0, color="black", linewidth=0.7)
-    axes[1, 1].plot(
-        index,
-        [item.metrics.signed_relative_q95_error for item in results],
-        "o-",
-    )
-    axes[1, 1].set_title("Signed relative q95 error")
-    axes[0, 2].plot(
-        index,
-        [_separatrix_metric(item, "saddle_offset_mm") for item in results],
-        "o-",
-        label="lattice-to-map saddle offset",
-    )
-    axes[0, 2].plot(
-        index,
-        [
-            float("nan")
-            if item.display_map is None
-            else 1.0e3 * item.display_map.max_node_mismatch_wb
-            for item in results
-        ],
-        "s:",
-        color="tab:orange",
-        label="node mismatch [mWb]",
-    )
-    axes[0, 2].set_title("Fine-map interior consistency")
-    axes[0, 2].set_ylabel("mm or mWb")
-    axes[0, 2].legend(fontsize=7)
     overlay = axes[1, 2]
-    for item, frame in zip(results, fields, strict=True):
-        labelled = frame.get("labelled_closed_boundary")
-        if labelled is not None:
-            labelled = np.asarray(labelled, dtype=float)
-            overlay.plot(labelled[:, 0], labelled[:, 1], color="0.55", linewidth=0.8)
-        closed = frame.get("display_closed_boundary")
-        if closed is not None and len(closed):
-            closed = np.asarray(closed, dtype=float)
-            overlay.plot(closed[:, 0], closed[:, 1], color="tab:red", linewidth=1.0)
-    overlay.set_aspect("equal")
-    overlay.set_title("Cohort separatrix: label (grey) and fine map (red)")
-    overlay.set_xlabel("R [m]")
-    overlay.set_ylabel("Z [m]")
-    for axis in (axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1], axes[0, 2]):
-        axis.set_xticks(index, labels, rotation=45, ha="right", fontsize=7)
-    figure.savefig(path, dpi=180)
-    plt.close(figure)
+    poloidal_axes(overlay)
+    draw_wall(overlay, limiter[:, 0], limiter[:, 1])
+    for frame in fields:
+        labelled = np.asarray(frame["labelled_closed_boundary"])
+        overlay.plot(labelled[:, 0], labelled[:, 1], color="0.55", linewidth=0.8)
+        closed = np.asarray(frame["display_closed_boundary"])
+        if len(closed):
+            overlay.plot(
+                closed[:, 0],
+                closed[:, 1],
+                color=DEFAULT_INK.separatrix_color,
+                linewidth=1.3,
+            )
+    overlay.set_title("EFIT boundaries and DIII-D limiter", fontsize=11, pad=10)
+    if not any(len(frame["display_closed_boundary"]) for frame in fields):
+        position = overlay.get_position()
+        figure.text(
+            position.x0, 0.035, "Nova separatrices: assembly refused", fontsize=10
+        )
+    _save_frame_figure(figure, path)
 
 
 def displacement_figure(
     results: list[FrameResult], fields: list[dict[str, Any]], path: Path
 ) -> None:
-    """Plot EFIT and Nova landmarks for every declared gate frame."""
+    """Draw terminal landmarks against EFIT without stretching unavailable panels."""
 
-    figure, raw_axes = plt.subplots(
-        1,
-        len(results),
-        figsize=(3.7 * len(results), 4.2),
-        constrained_layout=True,
+    limiter, _ = _physical_wall_ring(
+        DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
     )
-    axes = np.atleast_1d(raw_axes)
-    landmark_styles = (
-        ("magnetic_axis", "axis", "tab:blue", "o"),
-        ("x_point", "X-point", "tab:orange", "X"),
-        ("terminal_boundary_centroid", "centroid", "tab:green", "s"),
+    figure, axes = plt.subplots(1, len(results), figsize=(14, 7.2))
+    figure.subplots_adjust(left=0.02, right=0.98, top=0.83, bottom=0.25, wspace=0.02)
+    styles = (
+        ("magnetic_axis", "axis", DEFAULT_INK.flux_color, "^"),
+        ("x_point", "X-point", DEFAULT_INK.xpoint_color, "X"),
+        ("terminal_boundary_centroid", "centroid", "#2e8b57", "s"),
     )
-    for panel, (axis, result, frame) in enumerate(
-        zip(axes, results, fields, strict=True)
-    ):
+    handles = [Line2D([], [], color="0.55", label="EFIT boundary")]
+    for _, label, colour, marker in styles:
+        for name, face in (("EFIT", "white"), ("Nova", colour)):
+            handles.append(
+                Line2D(
+                    [],
+                    [],
+                    marker=marker,
+                    color=colour,
+                    markerfacecolor=face,
+                    linestyle="none",
+                    label=f"{name} {label}",
+                )
+            )
+    figure.legend(
+        handles=handles, loc="upper center", ncol=4, frameon=False, fontsize=10
+    )
+    for axis, result, frame in zip(axes, results, fields, strict=True):
+        poloidal_axes(axis)
+        draw_wall(axis, limiter[:, 0], limiter[:, 1])
+        boundary = np.asarray(frame["labelled_closed_boundary"])
+        axis.plot(boundary[:, 0], boundary[:, 1], color="0.55", linewidth=1.3)
         displacement = result.displacement_decomposition
-        unavailable_reason = frame.get("plot_unavailable_reason")
+        label = f"{result.shot}\nframe {result.frame}"
         if displacement is None:
-            reason = unavailable_reason or "terminal geometry unavailable"
-            axis.text(
-                0.5,
-                0.5,
-                f"Unavailable: {reason}",
-                ha="center",
-                va="center",
-                transform=axis.transAxes,
+            label += "\nunavailable: no qualified axis"
+        else:
+            for attribute, _, colour, marker in styles:
+                landmark = getattr(displacement, attribute)
+                efit = np.asarray(landmark.efit_rz_m)
+                nova = np.asarray(landmark.nova_rz_m)
+                axis.plot(
+                    [efit[0], nova[0]], [efit[1], nova[1]], color=colour, linewidth=0.8
+                )
+                axis.plot(
+                    *efit,
+                    marker=marker,
+                    color=colour,
+                    markerfacecolor="white",
+                    linestyle="none",
+                )
+                axis.plot(*nova, marker=marker, color=colour, linestyle="none")
+            label += (
+                f"\n{displacement.classification.replace('_', ' ')}"
+                f"\naxis ΔR {displacement.magnetic_axis.radial_offset_m:+.3f} m"
+                f"\naxis ΔZ {displacement.magnetic_axis.vertical_offset_m:+.3f} m"
             )
-            axis.set_axis_off()
-            continue
-        labelled_boundary = frame.get("labelled_closed_boundary")
-        predicted_boundary = frame.get(
-            "predicted_terminal_boundary", frame.get("predicted_closed_boundary")
-        )
-        if labelled_boundary is not None:
-            labelled_boundary = np.asarray(labelled_boundary, dtype=float)
-            axis.plot(
-                labelled_boundary[:, 0],
-                labelled_boundary[:, 1],
-                color="0.25",
-                linewidth=1.0,
-                label="EFIT boundary" if panel == 0 else None,
-            )
-        if predicted_boundary is not None:
-            predicted_boundary = np.asarray(predicted_boundary, dtype=float)
-            axis.plot(
-                predicted_boundary[:, 0],
-                predicted_boundary[:, 1],
-                color="tab:red",
-                linestyle="--",
-                linewidth=1.0,
-                label="Nova boundary" if panel == 0 else None,
-            )
-        for attribute, label, colour, marker in landmark_styles:
-            landmark = getattr(displacement, attribute)
-            efit = np.asarray(landmark.efit_rz_m, dtype=float)
-            nova = np.asarray(landmark.nova_rz_m, dtype=float)
-            axis.plot(
-                [efit[0], nova[0]],
-                [efit[1], nova[1]],
-                color=colour,
-                linewidth=0.8,
-                alpha=0.8,
-            )
-            axis.scatter(
-                *efit,
-                marker=marker,
-                s=45,
-                facecolors="none",
-                edgecolors=colour,
-                linewidths=1.2,
-                label=f"EFIT {label}" if panel == 0 else None,
-                zorder=3,
-            )
-            axis.scatter(
-                *nova,
-                marker=marker,
-                s=45,
-                color=colour,
-                label=f"Nova {label}" if panel == 0 else None,
-                zorder=3,
-            )
-        axis.set_title(
-            f"{Path(result.shot).stem[-6:]}:{result.frame}\n"
-            f"{displacement.classification.replace('_', ' ')}",
-            fontsize=9,
-        )
-        axis.text(
-            0.02,
-            0.02,
-            "axis "
-            f"ΔR={displacement.magnetic_axis.radial_offset_m:+.3f} m\n"
-            f"ΔZ={displacement.magnetic_axis.vertical_offset_m:+.3f} m",
-            transform=axis.transAxes,
-            fontsize=7,
-            va="bottom",
-            bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"},
-        )
-        axis.set_aspect("equal")
-        axis.set_xlabel("R [m]")
-        axis.grid(alpha=0.2)
-    axes[0].set_ylabel("Z [m]")
-    axes[0].legend(loc="best", fontsize=6)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=180)
-    plt.close(figure)
+        axis.set_xlim(0.8, 2.5)
+        axis.set_ylim(-1.6, 1.8)
+        figure.text(axis.get_position().x0, 0.19, label, va="top", fontsize=8)
+    _save_frame_figure(figure, path)
 
 
 def _margin_penalty(class_margin: jax.Array) -> jax.Array:

@@ -2,11 +2,13 @@
 
 import argparse
 import json
+import math
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
 import matplotlib.pyplot as plt
 from matplotlib.text import Text
+from matplotlib.ticker import StrMethodFormatter
 
 ROOT = Path(__file__).resolve().parents[3]
 FIGURE = (
@@ -113,10 +115,14 @@ def main():
         ("16 slices", arm_sixteen, iterate_sixteen, 1),
         ("1 slice", arm_one, iterate_one, 0),
     ]
+    totals = [
+        sum(max(value, 0.0) for value in values.values()) for _, values, _, _ in rows
+    ]
+    top = max(max(totals), iterate_one, iterate_sixteen) * 1.12
     for label, values, iterate, y in rows:
         left = 0.0
-        for name, colour in STAGES:
-            width = values[name]
+        bars = [(name, colour, max(values[name], 0.0)) for name, colour in STAGES]
+        for name, colour, width in bars:
             ax.barh(
                 y,
                 width,
@@ -127,26 +133,15 @@ def main():
                 linewidth=0.8,
                 zorder=2,
             )
-            if width > 0.10 * iterate:
+            if width >= 0.05 * top:
                 ax.text(
                     left + width / 2.0,
                     y,
-                    f"{width:.0f}",
+                    f"{width:.1f}" if width < 100 else f"{width:.0f}",
                     ha="center",
                     va="center",
                     fontsize=14,
                     color="white" if name != "read geometry" else "#12324a",
-                    zorder=4,
-                )
-            else:
-                ax.text(
-                    left + width / 2.0,
-                    y + 0.27,
-                    f"{width:.0f}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=12,
-                    color="#333333",
                     zorder=4,
                 )
             left += width
@@ -162,8 +157,12 @@ def main():
         )
     ax.set_yticks([0, 1], [row[0] for row in rows])
     ax.set_ylim(-0.6, 1.55)
-    top = max(iterate_one, iterate_sixteen)
-    ax.set_xlim(0, top * 1.12)
+    ax.set_xlim(0, top)
+    step = 10 ** math.floor(math.log10(top / 5.0))
+    step = math.ceil(top / 5.0 / step) * step
+    ax.set_xticks([step * index for index in range(int(top / step) + 1)])
+    ax.xaxis.set_major_formatter(StrMethodFormatter("{x:.0f}"))
+    ax.set_autoscalex_on(False)
     ax.set_xlabel("Per-iterate wall by stage [ms]")
     ax.tick_params(axis="both", labelsize=14)
     ax.xaxis.label.set_size(16)
@@ -175,7 +174,7 @@ def main():
         [name for name, _ in STAGES],
         loc="lower center",
         bbox_to_anchor=(0.5, 1.0),
-        ncol=len(STAGES),
+        ncol=4,
         frameon=False,
         fontsize=14,
     )

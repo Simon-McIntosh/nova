@@ -67,6 +67,16 @@
       "note": "s9 now also waits on iron-core-magnetisation#s8 (cc22ac1a0), so it is released only once the limb-corrected iron exists.",
       "reason": "",
       "when": "2026-11-05T21:25:37.363049+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "s7 now waits on forward-solve-api#s1, where ForwardSolveRequest landed, instead of the unrelated s2 route migration (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-05T21:26:51.113204+00:00"
     }
   ],
   "responses": {
@@ -78,6 +88,15 @@
       "note": "s9 now also waits on iron-core-magnetisation#s8 (cc22ac1a0), so it is released only once the limb-corrected iron exists.",
       "reason": "",
       "when": "2026-11-05T21:25:37.363049+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "note": "s7 now waits on forward-solve-api#s1, where ForwardSolveRequest landed, instead of the unrelated s2 route migration (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-05T21:26:51.113204+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261105T210526990727-plan-review-of-iron-core-magnetisation.json",

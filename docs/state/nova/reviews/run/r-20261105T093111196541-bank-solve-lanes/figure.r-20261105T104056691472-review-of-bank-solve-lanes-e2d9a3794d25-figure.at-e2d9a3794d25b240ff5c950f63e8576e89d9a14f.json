@@ -9,6 +9,13 @@
   "dispatched_at": "2026-11-05T10:42:48Z",
   "evidence_inputs": "Figure judged from the rendered PNG only, at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T104056691472-review-of-bank-solve-lanes-e2d9a3794d25-figure/image-0.png (1399x720). Measured on that PNG's pixels: plot area x110-1204 y110-640; freeze-threshold dotted rule at y357 with its annotation text occupying x115-328 y336-351; axes 1e0 at y138 and 1e-12 at y595 (44.6 px per decade). Overlap measurements quoted in the findings are counts of exact-colour pixels inside text bounding boxes, all taken from the PNG. The figure is drawn by scripts/prototypes/bank_solve_lanes/plot.py (an anchor script, not product code) and cited from docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html. The reviewed run also modifies docs/figures/sub-millisecond-forward-path/bank-solve-profile/per-iterate-stage.svg, but no rendered PNG of it was attached to this review, so no verdict is offered on it.",
   "figure_under_review": "docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-solve-lanes-e2d9a3794d25",
+      "recorded_at": "2026-11-05T11:23:57.246778+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_solve_lanes/plot.py",

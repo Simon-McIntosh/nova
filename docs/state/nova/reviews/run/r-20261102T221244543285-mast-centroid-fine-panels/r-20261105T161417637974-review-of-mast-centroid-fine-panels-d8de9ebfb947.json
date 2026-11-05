@@ -1,0 +1,111 @@
+{
+  "added_failure_basis": "the reviewed run records baseline_suite and after_suite both null and test_logs 'none', so no arm delta could be derived; the zero records the absence of arms, not a measured clean delta. The reviewer's own re-run of the single named test failed at tests/test_mast_centroid_panel_states.py:84 (EXIT=1).",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/mast_centroid_solve_panels.py:2009",
+    "benchmarks/mast_centroid_solve_panels.py:1198",
+    "benchmarks/mast_centroid_solve_panels.py:879",
+    "nova/equilibrium/display_flux.py:204"
+  ],
+  "completed_at": "2026-11-05T16:49:31.113Z",
+  "dispatched_at": "2026-11-05T16:35:13Z",
+  "findings": [
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "id": "f358fae225d",
+      "line": 84,
+      "severity": "blocking",
+      "text": "the gate test reads committed[\"drawn_plasma_mesh\"][\"vacuum_nulls\"], but the delivered receipts no longer carry drawn_plasma_mesh (grep -c returns 0 in all three), so the node's own gate raises KeyError and fails before drawing anything; reproduced with EXIT=1."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html",
+      "id": "f662f64e566",
+      "line": 66,
+      "severity": "blocking",
+      "text": "the fragment asserts \"Each rendered SVG is converted to PNG and inspected; the labels check reports zero clipped and zero overlapping labels\", while its own landing at line 55 says no SVG was rendered and the PNG inspection \"has not run\"; the document claims a measurement that did not occur."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json",
+      "id": "fe6911c9db7",
+      "line": 118,
+      "severity": "blocking",
+      "text": "the receipt carries no invocation block, although plan section 6 requires the full command in the new receipt and the producer at that receipt's own source_revision (c09f65352) writes one; the titan and full-axis receipts are the same, so the three files are not the direct output of the producer they name."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json",
+      "id": "fb0562b8006",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "no map spacing is recorded in any receipt, though done_when (2) requires each re-solved receipt to record the map spacing of 10 mm or finer; the receipt schema has no spacing field at all."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f013219c5b9",
+      "line": 439,
+      "severity": "non-blocking",
+      "text": "_lattice_spline and _polish re-implement, on a scipy RectBivariateSpline, the stationary-point polish the repository already owns at nova/equilibrium/display_flux.py:143 via nova/equilibrium/flux_surface_connectivity.py:916 and nova.linalg.tensor_spline.fit_tensor_spline; the two splines need not agree on the saddle the display map reports."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f19d85203b4",
+      "line": 1128,
+      "severity": "non-blocking",
+      "text": "_PanelOperator.raster_image restates the moment contraction that nova/equilibrium/display_flux.py:125 (_flux) already owns instead of calling it."
+    },
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "id": "f1121e77d8a",
+      "line": 121,
+      "severity": "non-blocking",
+      "text": "assert np.any(offsets > 1.0e-6) is satisfied by a lattice-raster contour too, because contour vertices lie on cell edges between lattice rows, so the assertion does not exclude the raster it was added to exclude."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f5895317bad",
+      "line": 1240,
+      "severity": "non-blocking",
+      "text": "panels keeps boundary_flux from the state for the contour level array while the drawn separatrix branches now come from the display map at the map's own saddle flux, so the boundary is one of the drawn contours only when the two levels coincide, which the comment at line 1302 assumes and nothing asserts"
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "fcda222f368",
+      "line": 412,
+      "severity": "non-blocking",
+      "text": "the coupling returns zero radial and vertical plasma moment columns for every point set, which is exact only because the committed states carry exactly zero such moments, and it makes display.reproduction_relative_error a comparison of the map against a raster built from the same coupling, so that figure is near zero by construction and cannot detect a defect in the display evaluation"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all nine commits from 3ef818df to d8de9ebfb; the producer gains a cached per-lane response build, a scipy-spline saddle validation and a display-map redraw path, the three receipts lose their drawn_plasma_mesh block, and no figure asset is added or changed.",
+    "done_when": "the done_when's gate is tests/test_mast_centroid_panel_states.py, and it fails before any redraw at tests/test_mast_centroid_panel_states.py:84 with KeyError: 'drawn_plasma_mesh' against the delivered receipts (reproduced, EXIT=1); the receipts also record no map spacing, so the gate does not assert the done_when.",
+    "goal": "the node goal is \"The four MAST centroid panels re-solved and drawn from fine flux maps\"; the diff re-solves the three lane states into docs/figures/mast-centroid-capability/*/panel-fields.npz and adds a drawing path at benchmarks/mast_centroid_solve_panels.py:1198, but no panel figure was drawn and no figure asset changed, so the deliverable is not met.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/manifest.md; it reports status complete with test_logs \"none\", baseline_suite and after_suite both null, an empty negative_control_log, and a checkpoint recording 0 of 16 and 0 of 28 response slices written and the panels undrawn.",
+    "write_paths": "the manifest declares seven write paths and every one of the nine changed paths in the diff lies inside them (benchmarks/mast_centroid_solve_panels.py, tests/test_mast_centroid_panel_states.py, docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html, docs/figures/mast-centroid-capability/{cpu,titan,full-axis}-lane/{panel-fields.npz,centroid-solve.json})."
+  },
+  "justifications": {
+    "durability": "the gate test at tests/test_mast_centroid_panel_states.py:84 cannot run against the delivered receipts, and the lattice-row guard at tests/test_mast_centroid_panel_states.py:121 is passed by a raster contour too.",
+    "evidence": "the gate at tests/test_mast_centroid_panel_states.py:84 fails and no gate log was recorded (manifest test_logs 'none', baseline_suite and after_suite null), so the only artefacts are the receipts' converged and saddle block; the fragment at line 66 claims a PNG inspection that line 55 says did not run.",
+    "fit": "the module follows the surrounding benchmark idiom and introduces no forbidden name, but benchmarks/mast_centroid_solve_panels.py:453 hand-rolls a Newton polish rather than using the repository's own.",
+    "goal_fidelity": "benchmarks/mast_centroid_solve_panels.py:1198 adds the draw path and the states are re-solved, but docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:55 records that the panels themselves are not drawn.",
+    "reuse": "benchmarks/mast_centroid_solve_panels.py:439 duplicates the stationary-point polish owned by nova/equilibrium/display_flux.py:143 and nova/equilibrium/flux_surface_connectivity.py:916.",
+    "scope_discipline": "every changed path in the diff is inside the declared write paths, and nova/equilibrium/display_flux.py is unchanged."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"The four MAST centroid panels re-solved and drawn from fine flux maps\"; the diff re-solves the three lane states into docs/figures/mast-centroid-capability/*/panel-fields.npz and adds a drawing path at benchmarks/mast_centroid_solve_panels.py:1198, but no panel figure was drawn and no figure asset changed, so the deliverable is not met.\nVERDICT done_when: the done_when's gate is tests/test_mast_centroid_panel_states.py, and it fails before any redraw at tests/test_mast_centroid_panel_states.py:84 with KeyError: 'drawn_plasma_mesh' against the delivered receipts (reproduced, EXIT=1); the receipts also record no map spacing, so the gate does not assert the done_when.\nVERDICT write_paths: the manifest declares seven write paths and every one of the nine changed paths in the diff lies inside them (benchmarks/mast_centroid_solve_panels.py, tests/test_mast_centroid_panel_states.py, docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html, docs/figures/mast-centroid-capability/{cpu,titan,full-axis}-lane/{panel-fields.npz,centroid-solve.json}).\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/manifest.md; it reports status complete with test_logs \"none\", baseline_suite and after_suite both null, an empty negative_control_log, and a checkpoint recording 0 of 16 and 0 of 28 response slices written and the panels undrawn.\nVERDICT diff: read all nine commits from 3ef818df to d8de9ebfb; the producer gains a cached per-lane response build, a scipy-spline saddle validation and a display-map redraw path, the three receipts lose their drawn_plasma_mesh block, and no figure asset is added or changed.\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:2009, benchmarks/mast_centroid_solve_panels.py:1198, benchmarks/mast_centroid_solve_panels.py:879, nova/equilibrium/display_flux.py:204\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: benchmarks/mast_centroid_solve_panels.py:1198 adds the draw path and the states are re-solved, but docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:55 records that the panels themselves are not drawn.\nSCORE evidence: 4\nJUSTIFICATION evidence: the gate at tests/test_mast_centroid_panel_states.py:84 fails and no gate log was recorded (manifest test_logs 'none', baseline_suite and after_suite null), so the only artefacts are the receipts' converged and saddle block; the fragment at line 66 claims a PNG inspection that line 55 says did not run.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every changed path in the diff is inside the declared write paths, and nova/equilibrium/display_flux.py is unchanged.\nSCORE durability: 8\nJUSTIFICATION durability: the gate test at tests/test_mast_centroid_panel_states.py:84 cannot run against the delivered receipts, and the lattice-row guard at tests/test_mast_centroid_panel_states.py:121 is passed by a raster contour too.\nSCORE fit: 14\nJUSTIFICATION fit: the module follows the surrounding benchmark idiom and introduces no forbidden name, but benchmarks/mast_centroid_solve_panels.py:453 hand-rolls a Newton polish rather than using the repository's own.\nSCORE reuse: 4\nJUSTIFICATION reuse: benchmarks/mast_centroid_solve_panels.py:439 duplicates the stationary-point polish owned by nova/equilibrium/display_flux.py:143 and nova/equilibrium/flux_surface_connectivity.py:916.\nFINDING tests/test_mast_centroid_panel_states.py:84 blocking: the gate test reads committed[\"drawn_plasma_mesh\"][\"vacuum_nulls\"], but the delivered receipts no longer carry drawn_plasma_mesh (grep -c returns 0 in all three), so the node's own gate raises KeyError and fails before drawing anything; reproduced with EXIT=1.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:66 blocking: the fragment asserts \"Each rendered SVG is converted to PNG and inspected; the labels check reports zero clipped and zero overlapping labels\", while its own landing at line 55 says no SVG was rendered and the PNG inspection \"has not run\"; the document claims a measurement that did not occur.\nFINDING docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json:118 blocking: the receipt carries no invocation block, although plan section 6 requires the full command in the new receipt and the producer at that receipt's own source_revision (c09f65352) writes one; the titan and full-axis receipts are the same, so the three files are not the direct output of the producer they name.\nFINDING docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json:1 non-blocking: no map spacing is recorded in any receipt, though done_when (2) requires each re-solved receipt to record the map spacing of 10 mm or finer; the receipt schema has no spacing field at all.\nFINDING benchmarks/mast_centroid_solve_panels.py:439 non-blocking: _lattice_spline and _polish re-implement, on a scipy RectBivariateSpline, the stationary-point polish the repository already owns at nova/equilibrium/display_flux.py:143 via nova/equilibrium/flux_surface_connectivity.py:916 and nova.linalg.tensor_spline.fit_tensor_spline; the two splines need not agree on the saddle the display map reports.\nFINDING benchmarks/mast_centroid_solve_panels.py:1128 non-blocking: _PanelOperator.raster_image restates the moment contraction that nova/equilibrium/display_flux.py:125 (_flux) already owns instead of calling it.\nFINDING tests/test_mast_centroid_panel_states.py:121 non-blocking: assert np.any(offsets > 1.0e-6) is satisfied by a lattice-raster contour too, because contour vertices lie on cell edges between lattice rows, so the assertion does not exclude the raster it was added to exclude.\nFINDING benchmarks/mast_centroid_solve_panels.py:1240 non-blocking: panels keeps boundary_flux from the state for the contour level array while the drawn separatrix branches now come from the display map at the map's own saddle flux, so the boundary is one of the drawn contours only when the two levels coincide, which the comment at line 1302 assumes and nothing asserts\nFINDING benchmarks/mast_centroid_solve_panels.py:412 non-blocking: the coupling returns zero radial and vertical plasma moment columns for every point set, which is exact only because the committed states carry exactly zero such moments, and it makes display.reproduction_relative_error a comparison of the map against a raster built from the same coupling, so that figure is near zero by construction and cannot detect a defect in the display evaluation\n",
+  "review_run_id": "r-20261105T161417637974-review-of-mast-centroid-fine-panels-d8de9ebfb947",
+  "reviewed_base_sha": "3ef818dfaef2a36da8fd0d6e0c34272ec5259218",
+  "reviewed_head_sha": "d8de9ebfb9479358ace5e6645557fccda8358500",
+  "reviewed_run_id": "r-20261102T221244543285-mast-centroid-fine-panels",
+  "scores": {
+    "durability": 8,
+    "evidence": 4,
+    "fit": 14,
+    "goal_fidelity": 7,
+    "reuse": 4,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T16:54:55.233828+00:00",
+  "total": 54
+}

@@ -24,6 +24,25 @@ def run(command, tree, log, revision, **variables):
 
 def main(run_dir, revision):
     root = Path(__file__).resolve().parents[3]
+    base_revision = next(
+        line.split(":", 1)[1].strip()
+        for line in (run_dir / "manifest.md").read_text().splitlines()
+        if line.startswith("orientation_base_sha:")
+    )
+    for label, tree in (("base", Path(os.environ["TMPDIR"]) / "base"), ("head", root)):
+        command = [
+            sys.executable,
+            str(root / "scripts/prototypes/bank_step_booking_batch/step_profile.py"),
+            "--run",
+            str(run_dir),
+            "--arm",
+            label,
+            "--revision",
+            revision if label == "head" else base_revision,
+        ]
+        assert (
+            run(command, tree, run_dir / f"step-profile-{label}.log", command[-1]) == 0
+        )
     test = "tests/test_bank_step_booking_batch.py"
     command = [
         sys.executable,

@@ -8,6 +8,7 @@ configure_dtypes()
 import argparse
 import inspect
 import json
+import os
 from pathlib import Path
 import sys
 from unittest.mock import patch
@@ -171,7 +172,7 @@ def main():
             ),
         ):
             cycle.main()
-        if args.arm == "head":
+        if args.arm == "head" and not os.environ.get("BOOKING_SKIP_CONTROL"):
             from scripts.prototypes.bank_step_booking_batch.control import main
 
             main(args.run, args.revision)

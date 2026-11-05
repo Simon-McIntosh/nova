@@ -1,5 +1,17 @@
 {
-  "caption": "Both panels draw the terminal currents; the converged panel has a promoted node within two lattice cells of its polished X-point, so its near-X geometry is not certified by the current field.",
+  "assembly_drawn": {
+    "converged": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    },
+    "non_converged": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    }
+  },
+  "caption": "Both panels draw assembled solved separatrix lobes and legs through their polished X-points from the archived terminal currents; the converged panel has a promoted node within two lattice cells, so its near-X geometry remains uncertified.",
   "display_map": {
     "moments_route": "stored terminal moments at the solve's target current",
     "panels": {
@@ -32,12 +44,12 @@
     "two_cell_threshold_m": 0.12125000008381903
   },
   "render": {
-    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/redraw_and_gate.py",
     "copied_from": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
     "device": "NVIDIA H200 NVL",
     "host": "98dci4-gpu-0003.iter.org",
-    "job_id": "1306425",
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.log",
+    "job_id": "1306556",
+    "log": "/work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/lane-redraw-ad534aecb.log",
     "partition": "betelgeuse",
     "platform": "gpu",
     "published_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
@@ -45,7 +57,7 @@
     "read_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
     "read_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
     "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
-    "source_revision": "527d13178d887924d4855b4ebe6a0c068d6727c6"
+    "source_revision": "ad534aecbc9b2d34e90c8939c78be208f6763f91"
   },
   "schema": "nova.coil-edit-panel-receipt",
   "set": "cpu-compile-abort",
@@ -63,8 +75,9 @@
   "state_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/panel-states.npz",
   "state_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
   "visual_inspection": {
+    "assembled_lobe_and_legs_visible": true,
     "clipped_labels": 0,
-    "inspected_render": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "inspected_render": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
     "overlapping_labels": 0
   }
 }

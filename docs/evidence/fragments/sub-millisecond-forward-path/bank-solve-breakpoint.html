@@ -1,6 +1,6 @@
 <section id="bank-solve-breakpoint-landing">
 <h2>Fresh residual discontinuity with unchanged decisions</h2>
-<p><strong>Diagnosis only; the convergence repair is not delivered.</strong>
+<p><strong>Initial diagnosis before the interval-rule repair.</strong>
 At base <code>bd3b868dbcd2b60fe0b0840778324f8356861173</code>, the H200
 instrumented cycle fails its eight-update assertion. Every trial below is valid,
 and every cut set, normal set and selected-fragment set matches its incumbent.
@@ -55,7 +55,23 @@ The CPU probe is diagnostic, not a timing measurement. The duplicate fleet
 cycle diagnostic was stopped after its checkpoint; its EXIT=143 log is not a
 completed gate.</p>
 <p>The unchanged CPU cycle test on sirius completed: <code>1 failed, 2 passed in 1045.62s (0:17:25)</code>, EXIT=1. Lane 0 ends at 1.83669245e-10 after eight restart updates, reproducing the recorded defect. Its final four residuals are 3.18772091e-10, 2.78929661e-10, 1.39462706e-10 and 1.83669245e-10. The remaining baseline files were stopped after this reproduction when the scope blocker was established; no complete five-file paired suite is claimed.</p>
-<p>No product source or test has changed. There is no head convergence result,
-paired performance or precision result, restored-base negative control, or
-base/head residual figure. Those acceptance clauses remain open.</p>
+<p>At the initial checkpoint, product source and tests were unchanged, and the
+head convergence, paired performance, precision, mutation and figure gates were
+deferred until the booking owner entered the authorized scope.</p>
+<h3 id="bank-solve-breakpoint-repair">One interval rule for primal and tangent</h3>
+<p>Commit <code>bea3153ef1e330bfe98119ea4f60eb53796c1462</code> makes both
+conic rings and their velocities sample the strip-interior limit through
+<code>_inward_interval_points</code>, removing the independent endpoint flag.
+No line-search or solver-driver rule changes. A circular-hole fixture ends its
+cut strips at vertical tangencies and compares all three booked-moment tangents
+with central differences at 1e-5, 1e-6 and 1e-7. The exact-endpoint primal fails
+with relative error 3.592169; head's largest relative error is 2.487323e-8 against
+the unchanged 1e-6 limit. Restoring base <code>current.py</code> in a scratch
+archive reproduces the test failure: 1 failed in 25.62s, EXIT=1.</p>
+<p>The unchanged cycle file passes all three tests in 287.45s on sirius. Every
+physical lane accepts within two restart updates: fifteen take one update,
+and lane 10 takes two. The largest terminal fresh residual is 9.303847e-11.
+The restart uses three fresh batch reads: its initial read and one per update,
+with no rejected trial. The two existing sampled-conic kernel tests also pass.
+The remaining paired suite and device measurements are pending.</p>
 </section>

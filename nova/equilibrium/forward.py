@@ -351,6 +351,15 @@ class ForwardEquilibrium(NamedTuple):
     labelled_flux: ForwardLabelledFlux | None = None
     constraints: tuple[ConstraintRecord, ...] = ()
     constraint_outer: ConstraintOuterTrace | None = None
+    promoted_mask: jax.Array | None = None
+    """Terminal promoted-node mask of the reduced solve, when one produced it.
+
+    A promoted node is one the solve's last trip left at the trial state
+    instead of the map image, so the flux there is a piece of the iterate no
+    field of the cell currents reproduces. Routes other than the reduced
+    solve carry ``None``, which says the route has no such mask rather than
+    that nothing was promoted.
+    """
 
 
 class ForwardBranchReceipt(NamedTuple):
@@ -1744,6 +1753,7 @@ class ForwardProfile:
         prescribed_current=None,
         constraints: tuple[ConstraintRecord, ...] = (),
         constraint_outer: ConstraintOuterTrace | None = None,
+        promoted_mask: jax.Array | None = None,
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
         current_moments, support_integrals, masks, topology, amplitude = (
@@ -1792,6 +1802,7 @@ class ForwardProfile:
             labelled_flux=self._labelled_flux(flux, masks, topology),
             constraints=constraints,
             constraint_outer=constraint_outer,
+            promoted_mask=promoted_mask,
         )
 
     def _host_history(
@@ -2398,6 +2409,7 @@ class ForwardProfile:
                 else result.prescribed_current
             ),
             constraints=result.constraints,
+            promoted_mask=result.promoted_mask,
         )
 
     @staticmethod

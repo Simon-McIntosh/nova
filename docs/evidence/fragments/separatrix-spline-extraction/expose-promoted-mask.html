@@ -1,0 +1,48 @@
+<section data-reckon="evidence" id="expose-promoted-mask">
+<h2>The reduced solve's terminal promoted mask reaches the result and the receipt</h2>
+
+<p id="expose-promoted-mask-summary">A promoted node is one the closing trip of
+a reduced solve keeps at the trial state instead of the map's image, so the
+flux there carries a piece of the iterate that no field of the cell currents
+reproduces. The set was computed inside the trip boundary and reported
+nowhere, so a producer holding a terminal state had no record of which nodes
+carry that piece. It is now returned on
+<code>ReducedNewtonResult.promoted_mask</code> from both the host-driven entry
+points and the compiled ones, and carried to
+<code>ForwardEquilibrium.promoted_mask</code> by
+<code>ForwardProfile.solve</code>. Every existing result field is unchanged;
+the new field defaults to <code>None</code> on routes that form no such
+mask, and to an all-false array on a solve that promotes nothing.</p>
+
+<table id="expose-promoted-mask-measure">
+<caption>Solov'ev machine fixture from <code>tests/test_reduced_newton.py</code>;
+mask length 286 nodes.</caption>
+<tr><th>state</th><th>promoted nodes</th><th>source</th></tr>
+<tr><td>seed, cold read</td><td>0</td><td><code>operator.residual_shadow_mask(seed)</code></td></tr>
+<tr><td>seed, diverted class</td><td>0</td><td><code>operator.residual_shadow_mask(seed, requested_class=1)</code></td></tr>
+<tr><td>host-route terminal, 12 trips to tolerance 1e-8</td><td>0</td><td>returned mask equals the closing trip's own read</td></tr>
+</table>
+
+<p id="expose-promoted-mask-wiring">The host route records the mask the closing
+trip computes and returns it in place of the seed's shadow, so a solve given no
+trip budget returns an all-false array rather than the seed mask. The compiled
+route already carried that set through its fixed-shape program as the terminal
+shadow; it is now surfaced from the same carry. Both compiled entry points and
+both host entry points set the field, and the constrained result inherits it.</p>
+
+<p id="expose-promoted-mask-unmet">The measure's fixture clause is unmet. The
+machine fixture is wall-limited: its operator read returns no private-flux
+component at the seed, at the diverted class, or at the converged terminal
+state, so the promoted-node count is zero everywhere and the declared negative
+control (an all-false mask in a scratch copy) is not discriminated from the
+unmutated result on this fixture. The equality assertion itself does hold: on
+the host route the returned mask is bit-identical to the mask the solve's last
+dispatched read produced. A discriminating test needs a diverted
+private-flux geometry, which this node's scope does not contain.</p>
+
+<p id="expose-promoted-mask-gate">Head arm: one of five tests fails
+(<code>test_host_route_reports_the_promoted_set_its_closing_trip_read</code>,
+on the promoted-node-count assertion only; the equality assertion before it
+passed). Logs are held under the run directory at
+<code>logs/head-new-file.log</code> and <code>logs/negative-control.log</code>.</p>
+</section>

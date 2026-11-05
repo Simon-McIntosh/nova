@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-05T09:45:40.672Z",
+  "dispatched_at": "2026-11-05T09:38:19Z",
+  "figures": [
+    {
+      "caption_read_in": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-channels.html#bank-step-channels-wall-figure",
+      "drawn_by": "scripts/prototypes/bank_step_channels/plot.py",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-step-channels/wall.svg",
+      "png_dimensions": "1399x720",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T093443067901-review-of-bank-step-channels-2aa3ece1c47c-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_channels/plot.py",
+      "id": "f7f307936bf",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The value labels drawn beside the cached-wave rows are coloured with the series green #2e8b57, which measures 4.25:1 against the white background in the rendered PNG (sampled at #2e8b57 from the PNG itself). That clears the 3:1 floor for a graphical object but sits just under the 4.5:1 WCAG AA floor for 14 pt regular text, so the green numbers are the lowest-contrast text in the figure while the grey numbers beside them measure 5.7:1. A reader with low contrast sensitivity reads the green values slightly harder than the grey ones, on the rows carrying the result the figure exists to show. A darkened green for the text alone, keeping the series hue on the bars and markers, would restore 4.5:1 without changing what the colour means."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass with a note - axis and row labels measure 7.9:1 on white and the grey value text 5.7:1, both clear; the green value text measures 4.25:1, marginally under the 4.5:1 body-text floor, recorded as the one non-blocking finding below.",
+    "data_ink": "pass - eight bars and eight markers are the only marks carrying value; there is no second series, error band or fill, and the shared y row labels are printed once for both panels.",
+    "decoration": "pass - no gridlines, no background fill, no gradient or shading; the top and right spines are absent and only the two scale axes are drawn.",
+    "label_collision": "pass - every label lies inside the measured margins (64 px left, 40 px right, 35 px top, 56 px bottom); the right-most value label ends 31 px before its axis end, and no label overlaps another label, a bar or a marker.",
+    "legibility": "pass - two panels of four labelled rows read at a glance: converged wall 425.22, 309.73, 386.50 and 682.31 ms per slice on the left, Jacobian wall 132.61, 127.98, 101.30 and 99.22 ms per slice on the right, each printed beside its marker.",
+    "table_form": "pass - the figure compares two continuous per-slice walls across four conditions, which is a plotted relationship rather than a table; the exact values, including the rows the figure omits, sit in the table beneath it in the same document."
+  },
+  "notes": "Judged from the single named PNG render only. The plotted values reconcile exactly with the receipts table in the evidence fragment at the reviewed head (425.223, 309.727, 386.503, 682.308 ms converged per slice; 132.612, 127.982, 101.297, 99.224 ms Jacobian per slice), and the sixteen-slice rows carry the 'amortised per slice' wording the brief asks for. The caption under the figure is descriptive - it states the colour mapping, the per-slice normalisation and that the comparison exposes a convergence regression - and does not merely repeat the title 'Cached Newton bank channels', so it is not recorded as a finding. The figure shows the regression honestly: the cached sixteen-slice converged bar is 76.5% longer than base, which is the run's own headline caveat.",
+  "plan": "nova:sub-millisecond-forward-path \u00a73",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass - four labelled rows per panel, values printed at the markers, readable at 1399x720.\nRUBRIC data_ink: pass - eight bars and their markers carry the visual weight with no secondary encoding.\nRUBRIC decoration: pass - no gridlines, background fill, gradient or styling beyond the two scale axes.\nRUBRIC contrast: pass with a note - green value text measures 4.25:1 on white, marginally under the 4.5:1 floor for 14 pt text.\nRUBRIC table_form: pass - a two-quantity, four-condition wall comparison is a plotted relationship, not a table.\nRUBRIC label_collision: pass - no label is clipped, overlapping another label, or overlapping the data.\nFINDING scripts/prototypes/bank_step_channels/plot.py:60 non-blocking: green value labels measure 4.25:1 on white, just under the 4.5:1 floor for 14 pt text.\n",
+  "review_run_id": "r-20261105T093443067901-review-of-bank-step-channels-2aa3ece1c47c-figure",
+  "reviewed_base_sha": "1de330a8fbf781c2db6f9734efdaf53e47fe75b4",
+  "reviewed_head_sha": "2aa3ece1c47cb7261a7b60c40f04b83c5db3b217",
+  "reviewed_run_id": "r-20261105T083431973449-bank-step-channels",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: pass - four labelled rows per panel, values printed at the markers, readable at 1399x720.",
+    "RUBRIC data_ink: pass - eight bars and their markers carry the visual weight with no secondary encoding.",
+    "RUBRIC decoration: pass - no gridlines, background fill, gradient or styling beyond the two scale axes.",
+    "RUBRIC contrast: pass with a note - green value text measures 4.25:1 on white, marginally under the 4.5:1 floor for 14 pt text.",
+    "RUBRIC table_form: pass - a two-quantity, four-condition wall comparison is a plotted relationship, not a table.",
+    "RUBRIC label_collision: pass - no label is clipped, overlapping another label, or overlapping the data."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T09:46:54.858424+00:00",
+  "total": null
+}

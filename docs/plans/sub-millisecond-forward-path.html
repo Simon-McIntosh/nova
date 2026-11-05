@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="134">
+<meta name="plan-version" content="135">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -497,6 +497,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T092731995663-review-of-bank-step-channels-2aa3ece1c47c" data-who="reckon-build" data-when="2026-11-05T09:44:36.200Z">
     <div class="r-comment-body"><p>Reviewed 1de330a8f..2aa3ece1c as a second opinion: the cached-channels change is numerically exact (matrix parity 1.3541446305345831e-17 against 1e-12, all 17 H200 lanes within every precision budget) and inside its declared scope, with durability conditioned on a skip-gated base archive and an unexplained sixteen-slice step-count swing recorded as two non-blocking findings; recorded as parsed with scores goal_fidelity 16, evidence 16, scope_discipline 19, durability 15, fit 17, reuse 20 and added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T093443067901-review-of-bank-step-channels-2aa3ece1c47c-figure" data-who="reckon-build" data-when="2026-11-05T09:45:40.672Z">
+    <div class="r-comment-body"><p>Figure review of run r-20261105T083431973449-bank-step-channels at head 2aa3ece1c47cb7261a7b60c40f04b83c5db3b217 against base 1de330a8fbf781c2db6f9734efdaf53e47fe75b4: all six rubric items pass on the rendered PNG, with one non-blocking contrast finding on the green value labels (4.25:1, 14 pt) anchored at scripts/prototypes/bank_step_channels/plot.py:60; the figure prints all eight per-slice values at their markers, labels the sixteen-slice rows as amortised, and shows the 76.5% sixteen-slice converged-wall regression rather than hiding it.</p></div>
 </div>
 </section>
 </main>

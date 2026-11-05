@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "archived prototype runner with no active acceptance gate; both arm receipts read individually",
       "recorded_at": "2026-11-05T05:55:42.959022+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "archived experiment; no production route calls either runner",
+      "recorded_at": "2026-11-05T05:55:51.584433+00:00"
     }
   },
   "findings": [

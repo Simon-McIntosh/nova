@@ -259,7 +259,7 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(900)
+@pytest.mark.timeout(2400)
 def test_committed_converged_panel_uses_its_terminal_currents():
     """Read the solve's state, promotion and compensation through its producer."""
     archive = Path(

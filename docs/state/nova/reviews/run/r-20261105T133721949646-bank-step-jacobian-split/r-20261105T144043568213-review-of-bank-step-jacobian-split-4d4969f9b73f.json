@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-05T14:53:51.652Z",
   "dispatched_at": "2026-11-05T14:42:56Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-step-booking-batch",
+      "recorded_at": "2026-11-05T14:56:40.650835+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_step_jacobian_split/measure.py",

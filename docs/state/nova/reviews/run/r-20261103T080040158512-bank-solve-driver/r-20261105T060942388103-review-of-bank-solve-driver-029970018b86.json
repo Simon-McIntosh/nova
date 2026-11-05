@@ -22,6 +22,11 @@
       "kind": "folded",
       "node": "bank-solve-read",
       "recorded_at": "2026-11-05T06:30:56.675918+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the run directory and sacct record the sirius job; the log header omits the partition only",
+      "recorded_at": "2026-11-05T06:31:05.041800+00:00"
     }
   },
   "findings": [

@@ -8,7 +8,7 @@
 set -uo pipefail
 export TMPDIR=/tmp
 scratch=$(mktemp -d "$TMPDIR/jacobian-split-XXXXXX")
-trap 'rm -rvf "$scratch"' EXIT
+trap 'result=$?; rm -rvf "$scratch"; printf "EXIT=%s\n" "$result"' EXIT
 export TMPDIR="$scratch"
 export PYTHONPATH="$SLURM_SUBMIT_DIR"
 export JAX_PLATFORMS=cuda
@@ -24,6 +24,4 @@ printf ' %q' "${command[@]}"
 printf '\n'
 nvidia-smi --query-gpu=name,uuid --format=csv
 "${command[@]}"
-result=$?
-printf 'EXIT=%s\n' "$result"
-exit "$result"
+exit "$?"

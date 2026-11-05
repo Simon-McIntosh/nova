@@ -2,25 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>EFIT parity fast lane triage</title>
+<title>EFIT parity fast lane repair</title>
 <meta name="plan" content="nova-portfolio-replan">
 <meta name="node" content="lane-repair-efit-parity">
 </head>
 <body>
 <main>
 <article id="lane-repair-efit-parity-landing" class="landing" data-node="lane-repair-efit-parity" data-plan="nova-portfolio-replan">
-<h2>EFIT parity fast lane triage</h2>
-<p>At <code>1de330a8fbf781c2db6f9734efdaf53e47fe75b4</code>, a serial five-file gate stopped inside pytest's 300 s failure formatter before a summary (<code>EXIT=3</code>). Focused reruns identified two benchmark defects outside this node's write scope. No product or test file was changed.</p>
+<h2>EFIT parity fast lane repair</h2>
+<p>The complete six-file base arm at <code>1de330a8fbf781c2db6f9734efdaf53e47fe75b4</code> recorded 1 failed, 15 passed and 28 errors in 539.40 s. The 28 setup errors share the tare and boundary fixture failures. The fixed-boundary test passed serially in 272.16 s; the census failure was an xdist worker out-of-memory event.</p>
 <table>
-<thead><tr><th>Census group</th><th>In-place observation</th><th>Cause and owner</th></tr></thead>
+<thead><tr><th>Failure</th><th>Repair and measure</th></tr></thead>
 <tbody>
-<tr><td>Tared external field: ten setup errors</td><td>Representative test errored in 239.43 s, <code>EXIT=1</code>: <q>not enough values to unpack (expected 5, got 4)</q>.</td><td><code>benchmarks/efit_parity_tared_external_field.py:331</code> unpacks five results from <code>ForwardFluxOperator._support_partition</code>, whose current return at <code>nova/equilibrium/forward_operator.py:3333</code> has four. The benchmark owner is outside scope.</td></tr>
-<tr><td>Boundary volume, field instrument and inductance partition: eighteen setup errors</td><td>The boundary representative errored in 203.93 s, <code>EXIT=1</code>: <q>no closed unit-boundary branch encloses the solved axis</q>. The printed branch reaches the lattice edge at <code>z = ±2</code>.</td><td>The banked terminal-state reconstruction in <code>benchmarks/efit_parity_boundary_volume.py:162</code> passes open unit contours to the strict selector in <code>benchmarks/efit_parity_root_geometry.py:139</code>; both benchmark owners are outside scope.</td></tr>
-<tr><td>Fixed boundary seed: one xdist worker crash marked out of memory</td><td>The named test passed serially in 272.16 s, <code>EXIT=0</code>.</td><td>The census crash is a lane resource outcome; no test defect reproduced in the serial allocation.</td></tr>
-<tr><td>Native grid interpolation: one missing constant</td><td>The named constrained-arm test failed in 54.74 s, <code>EXIT=1</code>, on <code>REFERENCE_NATIVE_GRID_POINTS</code>. An explicit 95-point call to <code>_benchmark_spatial_grid</code> passed with a 95 by 95 bicubic map, <code>EXIT=0</code>.</td><td><code>tests/test_forward_parity_constrained_arm.py:143</code> still expects a constant removed when the grid count became an explicit argument. The test owner is outside scope.</td></tr>
+<tr><td>Tare benchmark expected five support values.</td><td>The analytic carrier now reads the operator's four-value <code>_support_partition</code> return. The base fixture reproduced <q>not enough values to unpack (expected 5, got 4)</q>.</td></tr>
+<tr><td>Native-grid test expected a removed constant.</td><td>The test supplies its 95-point intervention as an explicit argument. The 95 by 95 bicubic map passed a positive control; restoring the obsolete constant read in a scratch test failed the named test with <code>EXIT=1</code>.</td></tr>
+<tr><td>The banked terminal state's unit contour is open.</td><td>The strict closed-branch selector still refuses it. The receipt records the open endpoints and reason, with solved enclosed area, volume, current partition and dependent scores undefined. Stored-LCFS field measurements remain defined. The focused field, boundary and inductance tests passed 19 of 19. The live topology marks 234 core cells, while the banked receipt records 95; both are now reported separately rather than equated.</td></tr>
 </tbody>
 </table>
-<p>The focused logs are <code>tare-baseline.log</code>, <code>boundary-baseline.log</code>, <code>fixed-boundary-baseline.log</code>, <code>native-grid-baseline.log</code> and <code>native-grid-probe.log</code> in this node's run directory. The remaining census tests were not rerun after their shared fixture owner was found outside scope.</p>
+<p>The six-file head gate is running under the declared bound. Its final totals and any remaining failure IDs are carried by the run manifest and <code>six-file-head.log</code>. The base arm is <code>six-file-base.log</code>, and the red scratch mutation is <code>negative-control.log</code>, all in this node's run directory.</p>
 </article>
 </main>
 </body>

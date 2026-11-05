@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived with reckon.crew.review.gate_log_failure_ids over the twelve per-file arms in the reviewed run final-head directory: base 29 ids, head 0 ids (positive control: the base parse names tests/test_efit_parity_boundary_volume.py::test_both_contours_use_the_same_revolution_quadrature). The head tare arm exited 134 without a summary and reported no ids, so 0 is a floor over five completed head files, not a measured zero for tests/test_efit_parity_tared_external_field.py.",
+  "call_sites": [],
+  "completed_at": "2026-11-05T13:01:51.212Z",
+  "dispatched_at": "2026-11-05T12:53:41Z",
+  "findings": [
+    {
+      "file": "tests/test_efit_parity_tared_external_field.py",
+      "line": "26",
+      "severity": "blocking",
+      "text": "blocking: the head tare arm aborts in its fixture with EXIT=134 and no pytest summary, leaving ten listed census failures with no passing or named-owner verdict, so the done_when gate is unmet."
+    },
+    {
+      "file": "tests/test_efit_parity_boundary_volume.py",
+      "line": "91",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion recomputes the production expression live_core_current_a/live_total_current_a from the same receipt, so a defect in the live-current derivation moves both sides and the check stays green."
+    },
+    {
+      "file": "tests/test_efit_parity_inductance_partition.py",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion recomputes total - core_current, the exact expression at benchmarks/efit_parity_inductance_partition.py:369, rather than comparing to the independent EXPECTED_OUT_OF_CORE_CURRENT_A it already verifies for the banked row."
+    },
+    {
+      "file": "tests/test_efit_parity_boundary_volume.py",
+      "line": "60",
+      "severity": "non-blocking",
+      "text": "non-blocking: asserting reconstructed_core_matches_banked is False pins the live core (234 cells) diverging from the bank (95 cells) as the expected state, so repairing the reconstruction would redden the test."
+    },
+    {
+      "file": "benchmarks/efit_parity_boundary_volume.py",
+      "line": "179",
+      "severity": "non-blocking",
+      "text": "non-blocking: the bank-agreement guard now runs only when the solved contour is closed, and the only observed state is open, so the invariant it exists to enforce never fires on the live data path."
+    },
+    {
+      "file": "benchmarks/efit_parity_field_instrument.py",
+      "line": "126",
+      "severity": "non-blocking",
+      "text": "non-blocking: _support_receipt computes the solved inside mask with its own MplPath call and no longer uses _cell_partition, so the field-instrument and inductance receipts can disagree on support membership and the core-count guard is lost."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to repair the EFIT-parity failures the fast-lane census recorded; the diff repairs the unpacking, carrier-identity, receipt-field and native-grid-constant defects (benchmarks/efit_parity_tared_external_field.py:331, benchmarks/efit_forward_parity_slice.py:3542, benchmarks/efit_parity_tared_external_field.py:1147), and 19 of the 29 census failure ids now pass, but the ten tared-external-field failures carry no head result.\nVERDICT done_when: The done_when requires every listed failure reproduced, classified and either passing or carrying a named owner, with zero added failures against base; the head gate cannot assert this because the tare arm aborted at tests/test_efit_parity_tared_external_field.py:26 with EXIT=134 and no pytest summary.\nVERDICT write_paths: The original fence plus the recorded scope grant at resume-1-advice.txt:1 (five benchmarks/efit_parity_*.py and tests/test_forward_parity_constrained_arm.py) cover every path in the diff; all eleven changed files are inside them.\nVERDICT manifest: Read; it names eight commits, eleven changed paths, a 29-id base arm, five completed head files at 31 passes, the tare abort, and states under rubric.goal_fidelity that the final-head tare result is missing.\nVERDICT diff: Read commit by commit from 1de330a8 to fdbf954e: eight commits, eleven files, +558/-219, adding the open-boundary adjudication, the qualified-receipt read and the census repairs, all inside the granted scope.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: benchmarks/efit_parity_tared_external_field.py:1147 repairs a real nonexistent-attribute read, but the ten tare failures listed in the base arm remain unadjudicated because the head tare file never reached a summary.\nSCORE evidence: 8\nJUSTIFICATION evidence: tests/test_efit_parity_tared_external_field.py:26 aborts with EXIT=134 in the final head arm, so the done_when's zero-added verdict is unproven and the worker records it as unproven rather than claiming it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the base-to-head diff (benchmarks/efit_parity_boundary_volume.py, field_instrument, inductance_partition, root_geometry, tared_external_field, efit_forward_parity_slice, three test files and the fragment) is inside the fence granted by resume-1-advice.txt:1.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_efit_parity_boundary_volume.py:27 fails if an open unit contour is accepted as closed, but tests/test_efit_parity_boundary_volume.py:91 and tests/test_efit_parity_inductance_partition.py:57 recompute the production expression from the same receipt rather than comparing to an independent banked constant.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/efit_parity_root_geometry.py:160 extends the existing closed-branch selector in the file that owns it, and the new names describe the mechanism with no plan or ticket label.\nSCORE reuse: 11\nJUSTIFICATION reuse: benchmarks/efit_parity_field_instrument.py:126 re-implements the inside-mask computation owned by benchmarks/efit_parity_inductance_partition.py:108 instead of calling it, dropping that owner's core-count and disjointness guards on the closed-branch path.\nFINDING tests/test_efit_parity_tared_external_field.py:26 blocking: the head tare arm aborts in its fixture with EXIT=134 and no pytest summary, leaving ten listed census failures with no passing or named-owner verdict, so the done_when gate is unmet.\nFINDING tests/test_efit_parity_boundary_volume.py:91 non-blocking: the assertion recomputes the production expression live_core_current_a/live_total_current_a from the same receipt, so a defect in the live-current derivation moves both sides and the check stays green.\nFINDING tests/test_efit_parity_inductance_partition.py:57 non-blocking: the assertion recomputes total - core_current, the exact expression at benchmarks/efit_parity_inductance_partition.py:369, rather than comparing to the independent EXPECTED_OUT_OF_CORE_CURRENT_A it already verifies for the banked row.\nFINDING tests/test_efit_parity_boundary_volume.py:60 non-blocking: asserting reconstructed_core_matches_banked is False pins the live core (234 cells) diverging from the bank (95 cells) as the expected state, so repairing the reconstruction would redden the test.\nFINDING benchmarks/efit_parity_boundary_volume.py:179 non-blocking: the bank-agreement guard now runs only when the solved contour is closed, and the only observed state is open, so the invariant it exists to enforce never fires on the live data path.\nFINDING benchmarks/efit_parity_field_instrument.py:126 non-blocking: _support_receipt computes the solved inside mask with its own MplPath call and no longer uses _cell_partition, so the field-instrument and inductance receipts can disagree on support membership and the core-count guard is lost.",
+  "review_run_id": "r-20261105T125009205738-review-of-lane-repair-efit-parity-fdbf954e45ed",
+  "reviewed_base_sha": "1de330a8fbf781c2db6f9734efdaf53e47fe75b4",
+  "reviewed_commits": [
+    "1b6bf00be419edbe212a16b297afc6f0cd3218e7",
+    "3fb6f243f2c99688321daf51a14df70438e8dc0d",
+    "e1c9992ffdda1eb8b7c70daa98055c7459a0ebfd",
+    "bf2e4a5f1d7d030424f456a68aa48b6bd8e21971",
+    "fe2a80b466d3cc7feddf142c30dca3b0b67cdeda",
+    "76911f503c7192d0416118c1c5d918f332876630",
+    "8332477b690b94330b6c44f460db9ff7b8b5e7e9",
+    "fdbf954e45ed91f3c259b7e37364406c1416fa81"
+  ],
+  "reviewed_head_sha": "fdbf954e45ed91f3c259b7e37364406c1416fa81",
+  "reviewed_run_id": "r-20261105T083440201891-lane-repair-efit-parity",
+  "scores": {
+    "durability": 13,
+    "evidence": 8,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 11,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T13:00:01Z",
+  "total": 83
+}

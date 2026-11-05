@@ -110,9 +110,24 @@ flux difference is {max(r['flux'] for r in precision):.4e} of span; oracle axis,
 X-point and boundary ratios are {max(r['oracle_axis'] for r in precision):.4e},
 {max(r['oracle_saddle'] for r in precision):.4e} and
 {max(r['oracle_boundary'] for r in precision):.4e}, respectively.</p>
-<p id="{prefix}-cpu">Nine focused driver and cycle tests pass. The required
-four-file baseline and head CPU arms and the scratch counter mutation are scheduled
-on sirius; their results remain pending.</p>
+<p id="{prefix}-cpu">Both four-file CPU arms completed on sirius,
+with a fresh pytest process and separate temporary directory per file.
+Base: 30 passed, 2 skipped. Head:
+32 passed, 2 skipped. All eight logs have pytest summaries and end with
+<code>EXIT=0</code>; there are zero added failures. By file, cycle is 3 → 3,
+driver 8 → 10, support read 13 → 13, and cold/chord solve 6 → 6 passing tests.
+The two unchanged skips are saddle/X-point checks on the limited fixture,
+which has neither. The cycle test file and its assertions are unchanged;
+both physical restart arms finish within seven updates.</p>
+<p>The scratch mutation restores pending-lane read accounting. Its only failure
+is <code>test_reads_include_companion_lanes_after_two_halvings</code>:
+four observed reads are reported as [4, 2, 1], failing the required [4, 4, 4].
+The head arm passes with [4, 4, 4]. The mutation log has the expected pytest
+summary, <code>1 failed in 3.44s</code>, and ends with <code>EXIT=1</code>.
+Receipts are <code>base-suite.log</code>, <code>head-suite.log</code> and
+<code>suite-receipts.json</code>; the control is <code>negative-control.log</code>.
+The suite receipts retain the literal commands with one leading
+<code>PYTHONPATH</code> assignment.</p>
 <p>Raw receipts and logs: <code>{escape(str(args.run))}</code>;
 <code>{args.label}-base.log</code>, <code>{args.label}-head.log</code>, and
 <code>precision.json</code>. Each measurement log prints its revision, imported

@@ -376,14 +376,13 @@ def read_batch(
             )
         )(stack, moments, jets)
 
-    lanes = jnp.shape(stack.cells)[:1]
     if tracking is None:
         return jax.vmap(
             lambda stencil, reading: _verdict(
                 stencil,
                 reading,
-                jnp.ones(lanes, dtype=bool),
-                jnp.ones(lanes, dtype=jnp.int32),
+                jnp.asarray(True),
+                jnp.asarray(1, dtype=jnp.int32),
             )
         )(stack, whole_mesh())
 
@@ -1453,6 +1452,318 @@ def step_batch(
         for change in stepped.update
     )
     return BatchStep(stepped._replace(update=update), support)
+
+
+class SolveResult(NamedTuple):
+    """A capped bank solve certified by its terminal fresh read."""
+
+    moments: tuple[jax.Array, jax.Array, jax.Array]
+    support: SupportRead
+    residual: jax.Array
+    converged: jax.Array
+    steps: jax.Array
+    refactors: jax.Array
+    reads: jax.Array
+    freezes: jax.Array
+    unfreezes: jax.Array
+    residual_path: jax.Array
+    update_path: jax.Array
+
+
+def solve_batch(
+    operands,
+    cache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    policy,
+    profile,
+    density_gradient,
+    quadrature,
+    axis_sign=-1.0,
+    *,
+    max_steps: int = 60,
+    tolerance: float = 1e-10,
+    freeze_threshold: float = 1e-6,
+    reuse_factor: bool = False,
+    contraction_limit: float = 0.5,
+    freeze_active_set: bool = True,
+    iterations: int = 12,
+) -> SolveResult:
+    """Converge independent lanes in one staged loop with a batch refactor branch.
+
+    A fresh read certifies every accepted state. Once close to the root, the
+    booking keeps the cut-cell, normal-form and fragment decisions of the first
+    close read while every continuous reading remains current. A changed fresh
+    decision releases that lock and requires another Newton update. Factor reuse is
+    opt-in because extra iterations can cost more than the skipped refactors.
+    """
+    lanes, cells = moments[0].shape
+    support = read_batch(
+        operands,
+        cache,
+        moments,
+        seeds,
+        previous,
+        convention,
+        policy,
+        axis_sign,
+        iterations=iterations,
+    )
+
+    def magnitude(state, reading):
+        result = jax.vmap(
+            lambda one, one_read: step_residual(
+                operands, one, one, one_read, profile, quadrature
+            )
+        )(state, reading)
+        return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
+
+    def selection_changed(reading, cut_set, normal_set, fragments):
+        cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
+        return (
+            jnp.any(cut != cut_set, axis=-1)
+            | jnp.any(reading.normal_form_cells != normal_set, axis=-1)
+            | jnp.any(
+                (reading.fragment_selected != fragments).reshape(lanes, -1), axis=-1
+            )
+        )
+
+    norm = magnitude(moments, support)
+    accepted = support.valid & jnp.isfinite(norm) & (norm <= tolerance)
+    size = 3 * cells
+    dtype = moments[0].dtype
+    empty_factor = NewtonFactor(
+        jnp.zeros((lanes, size, size), dtype),
+        jnp.ones((lanes, size), dtype),
+        jnp.ones((lanes, size), dtype),
+        jnp.zeros((lanes, size, size), dtype),
+        jnp.zeros((lanes, size), jnp.int32),
+    )
+    empty_set = jnp.zeros_like(support.reading.normal_form_cells)
+    locked_fragments = support.reading.fragment_selected
+    initial = (
+        moments,
+        support,
+        norm,
+        accepted,
+        jnp.zeros(lanes, bool),
+        empty_set,
+        empty_set,
+        locked_fragments,
+        empty_factor,
+        jnp.asarray(False),
+        jnp.full((lanes,), jnp.inf, dtype),
+        jnp.zeros(lanes, jnp.int32),
+        jnp.zeros(lanes, jnp.int32),
+        jnp.ones(lanes, jnp.int32),
+        jnp.zeros(lanes, jnp.int32),
+        jnp.zeros(lanes, jnp.int32),
+        jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
+        jnp.full((lanes, max_steps), jnp.nan, dtype),
+    )
+
+    def keep_going(carried):
+        return jnp.any(~carried[3]) & (jnp.max(carried[11]) < max_steps)
+
+    def advance(carried):
+        (
+            state,
+            fresh,
+            current_norm,
+            done,
+            frozen,
+            cut_set,
+            normal_set,
+            locked_fragments,
+            factor,
+            have_factor,
+            previous_norm,
+            steps,
+            refactors,
+            reads,
+            freezes,
+            unfreezes,
+            residual_path,
+            update_path,
+        ) = carried
+        cut_now = (fresh.reading.membership > 0) & (
+            fresh.reading.membership < 1 - 1e-14
+        )
+        normal_now = fresh.reading.normal_form_cells
+        changed = frozen & selection_changed(
+            fresh.reading, cut_set, normal_set, locked_fragments
+        )
+        start_freeze = (
+            (~done)
+            & (~frozen)
+            & (~changed)
+            & fresh.valid
+            & (current_norm < freeze_threshold)
+        )
+        if not freeze_active_set:
+            start_freeze = jnp.zeros_like(start_freeze)
+        lock = (frozen & ~changed) | start_freeze
+        cut_set = jnp.where(start_freeze[:, None], cut_now, cut_set)
+        normal_set = jnp.where(start_freeze[:, None], normal_now, normal_set)
+        locked_fragments = jnp.where(
+            start_freeze.reshape(
+                (lanes,) + (1,) * (fresh.reading.fragment_selected.ndim - 1)
+            ),
+            fresh.reading.fragment_selected,
+            locked_fragments,
+        )
+        step_reading = fresh.reading._replace(
+            normal_form_cells=jnp.where(lock[:, None], normal_set, normal_now),
+            fragment_selected=jnp.where(
+                lock.reshape(
+                    (lanes,) + (1,) * (fresh.reading.fragment_selected.ndim - 1)
+                ),
+                locked_fragments,
+                fresh.reading.fragment_selected,
+            ),
+        )
+        step_support = fresh._replace(reading=step_reading)
+        ratio = current_norm / previous_norm
+        active = ~done
+        rebuild = ~have_factor | jnp.any(
+            active & (~jnp.isfinite(ratio) | (ratio > contraction_limit) | changed)
+        )
+        if not reuse_factor:
+            rebuild = jnp.asarray(True)
+
+        def one_with_factor(items):
+            one, one_read, prior = items
+            return newton_step(
+                operands,
+                one,
+                one_read,
+                profile,
+                density_gradient,
+                quadrature,
+                fresh_geometry=True,
+                condition_diagnostics=False,
+                factor_cache=prior,
+                contraction_ratio=jnp.asarray(0.0),
+            )
+
+        def one_fresh(items):
+            one, one_read = items
+            return newton_step(
+                operands,
+                one,
+                one_read,
+                profile,
+                density_gradient,
+                quadrature,
+                fresh_geometry=True,
+                condition_diagnostics=False,
+            )
+
+        correction = jax.lax.cond(
+            rebuild,
+            lambda _: jax.lax.map(one_fresh, (state, step_support)),
+            lambda _: jax.lax.map(one_with_factor, (state, step_support, factor)),
+            None,
+        )
+        candidate = tuple(
+            jnp.where(active[:, None], value + change, value)
+            for value, change in zip(state, correction.update, strict=True)
+        )
+        next_read = read_batch(
+            operands,
+            cache,
+            candidate,
+            seeds,
+            previous,
+            convention,
+            policy,
+            axis_sign,
+            iterations=iterations,
+        )
+        next_norm = magnitude(candidate, next_read)
+        drift = lock & selection_changed(
+            next_read.reading, cut_set, normal_set, locked_fragments
+        )
+        next_done = done | (
+            next_read.valid
+            & jnp.isfinite(next_norm)
+            & (next_norm <= tolerance)
+            & ~changed
+            & ~drift
+        )
+        slot = jnp.max(steps)
+        update_norm = jnp.max(
+            jnp.abs(jnp.concatenate(correction.update, axis=-1)), axis=-1
+        )
+        return (
+            candidate,
+            next_read,
+            next_norm,
+            next_done,
+            lock & ~drift,
+            cut_set,
+            normal_set,
+            locked_fragments,
+            correction.factor,
+            jnp.asarray(True),
+            current_norm,
+            steps + active.astype(jnp.int32),
+            refactors + (active & rebuild).astype(jnp.int32),
+            reads + active.astype(jnp.int32),
+            freezes + start_freeze.astype(jnp.int32),
+            unfreezes + (changed | drift).astype(jnp.int32),
+            residual_path.at[:, slot + 1].set(next_norm),
+            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0)),
+        )
+
+    final = jax.lax.while_loop(keep_going, advance, initial)
+    return SolveResult(
+        final[0],
+        final[1],
+        final[2],
+        final[3],
+        final[11],
+        final[12],
+        final[13],
+        final[14],
+        final[15],
+        final[16],
+        final[17],
+    )
+
+
+def solve(
+    operands,
+    cache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    policy,
+    profile,
+    density_gradient,
+    quadrature,
+    axis_sign=-1.0,
+    **kwargs,
+) -> SolveResult:
+    """Converge one seed using the same staged driver as independent lanes."""
+    batched = solve_batch(
+        operands,
+        cache,
+        jax.tree.map(lambda value: value[None], moments),
+        seeds[None],
+        previous[None],
+        convention,
+        policy,
+        profile,
+        density_gradient,
+        quadrature,
+        axis_sign,
+        **kwargs,
+    )
+    return jax.tree.map(lambda value: value[0], batched)
 
 
 def _bank_payload(operands: SupportOperands) -> bytes:

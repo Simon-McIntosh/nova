@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured from the reviewed run's own arms: baseline.log at 1de330a8 fails or errors the ten census IDs; after-suite.log at 235b89ed fails only the four analytic credential IDs, all of which are in the baseline set, so added failures are zero. Caveat recorded as a finding: the head arm carries -m 'not slow' and the base arm does not, so the difference excludes four deselected tests at head.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T09:23:25.112Z",
+  "dispatched_at": "2026-11-05T09:13:54Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/manifest.md",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "the manifest's rubric self-check ends at rubric.fit and carries no rubric.reuse line, so that dimension reads as no self-check at all rather than as a passing one; the work behind it is sound but the delivered record does not state it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/manifest.md",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "the two arms are not like-for-like: baseline_suite ran without the marker filter while after_suite ran -m 'not slow', so the zero-added-failure derivation silently excludes four tests at head and could hide a new failure in any slow-marked test; here both newly-slow tests were already failing at base, so the number survives, but the comparison shape is not reproducible as recorded."
+    },
+    {
+      "file": "tests/test_transport_evolved_state.py",
+      "line": 309,
+      "severity": "non-blocking",
+      "text": "adding @pytest.mark.slow to test_mapped_source_current_ledger_total_matches_the_core_moment moves an armed strict-xfail detector out of the default lane, whose own reason string says it is strict so that it turns red the day the clip is fixed and the marker removed; under the default -m 'not slow' selection it can no longer do that."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/lane-repair-smoke.html",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "the four analytic-smoke census IDs are classified as an external registry-access blocker, which is neither of the two classifications the done_when names (stale test or product defect) and names no owner file, so 'every listed failure passes or carries a named owner' is unmet for four of the ten IDs even though the node reports the condition honestly."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none: the diff changes only test modules and one evidence fragment, so no production module calls into the landed change; the tests exercise nova/transport/evolved_state.py:174 forward_source_from_receipt and walk nova/equilibrium/reduced_newton.py as their subject.",
+    "diff": "read the five commits against 1de330a8: tests/test_solve_path_census_inputs.py:142-144 keys the allowance by owner and target and requires exactly one finding, :163 uses the declared 500-cell reactor carrier for the discriminator row, tests/test_transport_evolved_state.py:142-155 adds a source-only mapping fixture with slow markers at :256 and :309, and tests/test_forward_profile_analytic_smoke.py:57-68 adds the credential-refusal guard.",
+    "done_when": "the done_when requires each listed failure reproduced in place and classified, with every listed failure passing or carrying a named owner; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/baseline.log records all ten IDs at revision 1de330a8 and after-suite.log records the head arm, and the four remaining analytic IDs are reported in blockers and outside_scope rather than fixed or owned by a file.",
+    "goal": "the node goal is to repair the analytic-smoke, transport evolved-state and solve-path census failures the fast-lane census recorded; the landed commits repair the census and transport groups (five of the ten census IDs now pass) while the four analytic-smoke IDs remain externally blocked on registry credentials (tests/test_forward_profile_analytic_smoke.py:53-68 guards that refusal but does not obtain the layers).",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/manifest.md; status complete, five commits, baseline_suite and after_suite both completed with EXIT=1 and their log paths, negative_control_log names a log ending EXIT=1 on the scanner test, and the rubric self-check stops at rubric.fit with no rubric.reuse line.",
+    "write_paths": "the manifest declares tests/test_forward_profile_analytic_smoke.py, tests/test_transport_evolved_state.py, tests/test_solve_path_census_inputs.py, docs/evidence/fragments/nova-portfolio-replan/lane-repair-smoke.html and docs/figures/nova-portfolio-replan/lane-repair-smoke; the diff changes the first three and the fragment, all inside that set."
+  },
+  "justifications": {
+    "durability": "tests/test_forward_profile_analytic_smoke.py:57-68 is a real guard: it injects a rejected credential and would fail (skip instead of raise) if _resolve widened its except from LayerRegistryUnreachable, and tests/test_solve_path_census_inputs.py:143-144 fails if a second qualification read appears; but tests/test_transport_evolved_state.py:309 moves the armed strict-xfail detector out of the default lane.",
+    "evidence": "the base arm is recorded at revision 1de330a8 with ten failing or erroring IDs and the head arm at 1de330a8's successor (after-suite.log, 4 failed 11 passed, EXIT=1), the difference yields zero added failures, and the negative control negative-control.log reddens the scanner test with EXIT=1; the two arms are not like-for-like because only the head arm carries -m 'not slow'.",
+    "fit": "the changes follow the surrounding idiom (module-scoped fixtures, pytest markers, np.testing assertions) and introduce no plan, issue or version label in names or comments; commit subjects carry conventional scopes and bodies.",
+    "goal_fidelity": "the goal is to repair the analytic-smoke, transport evolved-state and solve-path census failures; tests/test_solve_path_census_inputs.py:163 and tests/test_transport_evolved_state.py:142-155 repair five of the ten census IDs, one (tests/test_transport_evolved_state.py:256) is moved to the slow lane rather than repaired, and the four analytic-smoke IDs still fail on registry credentials at head.",
+    "reuse": "the added mapped_source fixture builds on nova/transport/evolved_state.py:174 forward_source_from_receipt rather than re-implementing the mapping, and a search of tests/ for an existing receipt-to-ForwardSource fixture found none to fork.",
+    "scope_discipline": "git diff 1de330a8fbf781c2db6f9734efdaf53e47fe75b4 f366c1bd30fad041e1d80c6ac4996a899b9bcf39 touches only the three declared test files and docs/evidence/fragments/nova-portfolio-replan/lane-repair-smoke.html, with no product source and no concurrent node's path."
+  },
+  "node": "review-of-lane-repair-smoke-f366c1bd30fa",
+  "node:reviewed": "lane-repair-smoke",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to repair the analytic-smoke, transport evolved-state and solve-path census failures the fast-lane census recorded; the landed commits repair the census and transport groups, with five of the ten census IDs passing at head, while the four analytic-smoke IDs still fail at tests/test_forward_profile_analytic_smoke.py:53 on registry credentials.\nVERDICT done_when: the done_when requires each listed failure reproduced in place and classified with every one passing or carrying a named owner; baseline.log records all ten IDs at revision 1de330a8 and after-suite.log records the head arm, and the four remaining analytic IDs sit in blockers and outside_scope rather than fixed or owned by a file.\nVERDICT write_paths: the manifest declares three test files, the evidence fragment and a figures directory; git diff 1de330a8fbf781c2db6f9734efdaf53e47fe75b4 f366c1bd30fad041e1d80c6ac4996a899b9bcf39 changes only the three test files and docs/evidence/fragments/nova-portfolio-replan/lane-repair-smoke.html, all inside them.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/manifest.md; status complete, five commits, baseline_suite and after_suite both completed with EXIT=1 and their log paths, negative_control_log names a log ending EXIT=1 on the scanner test, and the rubric self-check stops at rubric.fit with no rubric.reuse line.\nVERDICT diff: read the five commits against 1de330a8: tests/test_solve_path_census_inputs.py:142-144 keys the allowance by owner and target and requires exactly one finding, :163 uses the declared 500-cell reactor carrier for the discriminator row, tests/test_transport_evolved_state.py:142-155 adds a source-only mapping fixture with slow markers at :256 and :309, and tests/test_forward_profile_analytic_smoke.py:57-68 adds the credential-refusal guard.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/test_solve_path_census_inputs.py:163 and tests/test_transport_evolved_state.py:142-155 repair five of the ten census IDs, one at tests/test_transport_evolved_state.py:256 is moved to the slow lane rather than repaired, and the four analytic-smoke IDs still fail on registry credentials at head.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline.log at 1de330a8 lists the ten failing or erroring IDs and after-suite.log lists the four head failures with EXIT=1, giving zero added failures, but the head arm alone carries -m 'not slow' so the two arms are not like-for-like.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff 1de330a8fbf781c2db6f9734efdaf53e47fe75b4 f366c1bd30fad041e1d80c6ac4996a899b9bcf39 is inside the three declared test files and the permitted evidence fragment, with no product source touched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_forward_profile_analytic_smoke.py:57-68 fails (as a skip rather than a raise) if _resolve widens its except to LayerRegistryCredentialError, and tests/test_solve_path_census_inputs.py:143-144 fails on a second qualification read, but tests/test_transport_evolved_state.py:309 removes the strict-xfail detector from the default lane.\nSCORE fit: 18\nJUSTIFICATION fit: the fixture and marker changes follow the surrounding idiom of tests/test_transport_evolved_state.py:142-155 and introduce no plan, issue or version label in any name or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: the mapped_source fixture at tests/test_transport_evolved_state.py:142 calls nova/transport/evolved_state.py:174 forward_source_from_receipt instead of re-implementing the mapping, and no existing fixture in tests/ produces a receipt-mapped source.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/manifest.md:30 non-blocking: the rubric self-check ends at rubric.fit with no rubric.reuse line, so that dimension reads as no self-check at all.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T083644814825-lane-repair-smoke/manifest.md:19 non-blocking: baseline_suite ran unfiltered while after_suite ran -m 'not slow', so the zero-added-failure derivation is not like-for-like and the comparison cannot be reproduced as recorded.\nFINDING tests/test_transport_evolved_state.py:309 non-blocking: the added slow marker moves the strict-xfail detector out of the default lane, where its own reason says it should turn red when the clip is fixed.\nFINDING docs/evidence/fragments/nova-portfolio-replan/lane-repair-smoke.html:28 non-blocking: the four analytic-smoke IDs are classified as an external registry blocker, which is neither stale test nor product defect and names no owner file, so four of the ten listed failures carry no owner.\n",
+  "review_run_id": "r-20261105T090758945722-review-of-lane-repair-smoke-f366c1bd30fa",
+  "reviewed_base_sha": "1de330a8fbf781c2db6f9734efdaf53e47fe75b4",
+  "reviewed_head_sha": "f366c1bd30fad041e1d80c6ac4996a899b9bcf39",
+  "reviewed_run_id": "r-20261105T083644814825-lane-repair-smoke",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T09:20:40+00:00",
+  "total": 102
+}

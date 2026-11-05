@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "control.py is a prototype check; the closure finding it guards is stated as not met in the fragment, so a stronger control changes no conclusion",
       "recorded_at": "2026-11-05T09:31:26.081066+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "prototype scripts duplicate the fixture recipe; the next measurement node is briefed to import bank_solve_read/measure.py rather than copy it",
+      "recorded_at": "2026-11-05T09:31:34.872240+00:00"
     }
   },
   "findings": [

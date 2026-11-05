@@ -33,6 +33,11 @@
       "kind": "exempted",
       "reason": "non-blocking counting or style point in a measurement record; the mechanism (a period-2 cycle held by the frozen active set) stands, and the step counts are being measured directly by the cycle-fix node",
       "recorded_at": "2026-11-05T12:02:07.905164+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "non-blocking counting or style point in a measurement record; the mechanism (a period-2 cycle held by the frozen active set) stands, and the step counts are being measured directly by the cycle-fix node",
+      "recorded_at": "2026-11-05T12:02:15.276533+00:00"
     }
   },
   "findings": [

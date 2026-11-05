@@ -1592,8 +1592,11 @@ def solve_batch(
             fresh.reading.membership < 1 - 1e-14
         )
         normal_now = fresh.reading.normal_form_cells
-        changed = frozen & selection_changed(
-            fresh.reading, cut_set, normal_set, locked_fragments
+        ratio = current_norm / previous_norm
+        changed = frozen & (
+            selection_changed(fresh.reading, cut_set, normal_set, locked_fragments)
+            | ~jnp.isfinite(ratio)
+            | (ratio > contraction_limit)
         )
         start_freeze = (
             (~done)
@@ -1625,7 +1628,6 @@ def solve_batch(
             ),
         )
         step_support = fresh._replace(reading=step_reading)
-        ratio = current_norm / previous_norm
         active = ~done
         rebuild = ~have_factor | jnp.any(
             active & (~jnp.isfinite(ratio) | (ratio > contraction_limit) | changed)

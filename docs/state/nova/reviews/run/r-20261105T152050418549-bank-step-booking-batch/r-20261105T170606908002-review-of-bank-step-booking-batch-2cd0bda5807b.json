@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_bank_solve_cycle.py::test_diverted_lanes_leave_near_root_cycle"
+  ],
+  "completed_at": "2026-11-05T17:18:08.267Z",
+  "dispatched_at": "2026-11-05T17:08:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype provenance line only; the pytest child imports the declared tree, as the negative control's 15.7x mutation shows; the next prototype uses python -I or a script path",
+      "recorded_at": "2026-11-05T17:44:41.630438+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "current.py is outside every live node's scope; a shared live-ring helper is recorded for the next node that writes current.py rather than widening the breakpoint fix",
+      "recorded_at": "2026-11-05T17:44:45.851781+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the fragment's gate table already names the durable log rings-head-test_bank_solve_cycle.log in the run directory; the scratch path is a second citation of the same result",
+      "recorded_at": "2026-11-05T17:44:49.278893+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "bank-solve-breakpoint",
+      "recorded_at": "2026-11-05T17:44:35.018938+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "bank-solve-breakpoint",
+      "recorded_at": "2026-11-05T17:44:38.776040+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_step_booking_batch/cpu.sh",
+      "id": "f30345e5ba5",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "The provenance probe is `python -c`, which puts the process cwd (the worktree) ahead of PYTHONPATH, so every cpu-base-*.log and rings-head-*.log prints `nova <worktree>/nova/__init__.py` under a header declaring an archive tree. The pytest child does import the declared tree - paired/negative-control.log shows the mutated scratch tree taking effect at 15.716x - so the runs are sound, but the log's own evidence contradicts its header and a promotion guard reading the probe line cannot tell which is true."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "id": "fcccbedf008",
+      "line": 715,
+      "severity": "non-blocking",
+      "text": "The new live_rings closure re-implements the live-ring selection (nonzero, pad, bounded loop) that book.integrate_live_rings already owns at current.py:390; a third copy of one idiom now sits in the module, and the sibling book_tangent at current.py:531 still vmaps over padded rings. A shared helper would serve both and fix the third site."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-batch.html",
+      "id": "f6d1a5ea930",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "The added-failure citation is ../../../../../../../../tmp/booking-verify-9VDjGx/head/tests/test_bank_solve_cycle.py, a scratch path the run deleted with its allocation; the durable log is paired/rings-head-test_bank_solve_cycle.log in the run directory, and a later reader cannot follow the citation as written."
+    },
+    {
+      "file": "tests/test_bank_solve_cycle.py",
+      "id": "f2edcec0322",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The added CPU failure records a largest fresh residual of 1.837e-10 against the brief's 1e-10 budget for every lane; the H200 paired arms meet the budget at 9.818e-11, so the miss is arm-specific, and the worker attributed it to successor bank-solve-breakpoint on this head. It needs that disposition recorded, not folded silently into the promotion."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-step-booking-batch.html",
+      "id": "fef6678bbc4",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "The per-slice converged wall at 16 slices regressed from 692.879 to 739.054 ms and the whole solve from 11086.072 to 11824.859 ms even though step_jacobian fell from 289.489 to 31.804 ms, because the slowest lane took 12 updates against 10. The node's own step measure improved and the end-to-end measure it reports worsened; section 4 owns the end-to-end target but should not inherit this as a step cost."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261105T170606908002-review-of-bank-step-booking-batch-2cd0bda5807b",
+  "reviewed_base_sha": "221a7d483f5e9f3b717eced87e86e98c81b6cd7b",
+  "reviewed_head_sha": "2cd0bda5807b42c7630ef3d3cd41da61a4ab2c26",
+  "reviewed_run_id": "r-20261105T152050418549-bank-step-booking-batch",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T17:18:09.098319+00:00",
+  "total": 90
+}

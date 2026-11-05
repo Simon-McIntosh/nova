@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run recorded no baseline_suite or after_suite arm; its gate-test.log at EXIT=0 shows 5 passed in 4.23 s at d991beec1, and both red logs (negative-control-limit.log 1 failed/4 passed, negative-control-denominator.log 4 failed/1 passed) are deliberate mutations run in a scratch copy at EXIT=1, so no suite failure is attributable to the landed change",
+  "call_sites": [
+    "scripts/prototypes/bank_solve_cycle/report.py:66 compare",
+    "scripts/prototypes/bank_solve_linesearch/report.py:10",
+    "scripts/prototypes/bank_step_booking_batch/report.py:12",
+    "scripts/prototypes/bank_solve_breakpoint/report.py:12"
+  ],
+  "completed_at": "2026-11-05T22:11:08.797Z",
+  "dispatched_at": "2026-11-05T22:05:17Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_report_precision.py",
+      "line": "54",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert row[\"span\"] != row[\"minor_radius\"]` compares two test-file constants (SPAN and MINOR_RADIUS at lines 11-12) against each other, never against anything the owner returns, so no change to production code can make it fail and it contributes nothing to durability; the real guard against a swapped denominator is the pytest.approx assertion at line 78, which the denominator control confirms reddens."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 70192e11b: d991beec1 changes the receipt denominators, the four threshold assertions and both fragments (37 insertions, 23 deletions), and 1d3df17e changes one line of bank-report-equivalence.html.",
+    "done_when": "the measure asks that a changed limit and a changed denominator both fail the test; negative-control-limit.log (1 failed/4 passed) and negative-control-denominator.log (4 failed/1 passed) each show a distinct mutation reddening the suite at EXIT=1.",
+    "goal": "the goal is to repair the defects the prior review recorded against the bank-report node's precision test and fragments; tests/test_bank_report_precision.py:11-12 and both fragments carry that repair.",
+    "manifest": "read; status complete, gate-test.log EXIT=0 with 5 passed in 4.23 s, both negative controls at EXIT=1, and the 67/60/16/31 provenance receipt.",
+    "write_paths": "declared paths are tests/test_bank_report_precision.py and the two sub-millisecond-forward-path fragments; both commits touch exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "the swapped-denominator mutation reddens four of the five tests as negative-control-denominator.log shows, but tests/test_bank_report_precision.py:54 asserts a fixture constant against another fixture constant and cannot fail on any production change, so it adds no protection to the guard it sits beside.",
+    "evidence": "gate-test.log records 5 passed in 4.23 s at d991beec1 and bank-report-equivalence.html:19 now quotes that figure, negative-control-denominator.log records 4 failed/1 passed at EXIT=1, and `git grep -n -- '-P -c'` at 28cae2aa6 reproduces 67 invocations over 60 shell files while a per-prototype scan reproduces 16 non-bank prototype directories and 31 probe-bearing files.",
+    "fit": "tests/test_bank_report_precision.py:5 imports the prototype owner exactly as the surrounding tests do, the module-level SPAN and MINOR_RADIUS are named for what they measure, and no symbol, filename, comment or commit subject carries a plan, phase or run identifier.",
+    "goal_fidelity": "tests/test_bank_report_precision.py:11-12 gives the receipt a span (0.7) and minor radius (2.3) that differ, so the denominators half of the measure is now exercised, and bank-report-equivalence.html:19-25 records both negative controls.",
+    "reuse": "the change adds no production definition; it pins the existing owner at scripts/prototypes/bank_solve_cycle/report.py:21 and a search of scripts/prototypes found that owner already consumed by bank_solve_linesearch/report.py:10, bank_step_booking_batch/report.py:12 and bank_solve_breakpoint/report.py:12.",
+    "scope_discipline": "every path in the two commits (d991beec1, 1d3df17e) is one the source manifest declares in tests/test_bank_report_precision.py, bank-prototype-provenance.html and bank-report-equivalence.html, and no production source is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to repair the defects the prior review recorded against the bank-report node's precision test and fragments; tests/test_bank_report_precision.py:11-12 and both fragments carry that repair.\nVERDICT done_when: the measure asks that a changed limit and a changed denominator both fail the test; negative-control-limit.log (1 failed/4 passed) and negative-control-denominator.log (4 failed/1 passed) each show a distinct mutation reddening the suite at EXIT=1.\nVERDICT write_paths: declared paths are tests/test_bank_report_precision.py and the two sub-millisecond-forward-path fragments; both commits touch exactly those three files and nothing else.\nVERDICT manifest: read; status complete, gate-test.log EXIT=0 with 5 passed in 4.23 s, both negative controls at EXIT=1, and the 67/60/16/31 provenance receipt.\nVERDICT diff: read commit by commit against base 70192e11b: d991beec1 changes the receipt denominators, the four threshold assertions and both fragments (37 insertions, 23 deletions), and 1d3df17e changes one line of bank-report-equivalence.html.\nCALL_SITES: scripts/prototypes/bank_solve_cycle/report.py:66 compare, scripts/prototypes/bank_solve_linesearch/report.py:10, scripts/prototypes/bank_step_booking_batch/report.py:12, scripts/prototypes/bank_solve_breakpoint/report.py:12\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_bank_report_precision.py:11-12 gives the receipt a span (0.7) and minor radius (2.3) that differ, so the denominators half of the measure is now exercised, and bank-report-equivalence.html:19-25 records both negative controls.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-test.log records 5 passed in 4.23 s at d991beec1 and bank-report-equivalence.html:19 now quotes that figure, negative-control-denominator.log records 4 failed/1 passed at EXIT=1, and `git grep -n -- '-P -c'` at 28cae2aa6 reproduces 67 invocations over 60 shell files while a per-prototype scan reproduces 16 non-bank prototype directories and 31 probe-bearing files.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the two commits (d991beec1, 1d3df17e) is one the source manifest declares in tests/test_bank_report_precision.py, bank-prototype-provenance.html and bank-report-equivalence.html, and no production source is touched.\nSCORE durability: 17\nJUSTIFICATION durability: the swapped-denominator mutation reddens four of the five tests as negative-control-denominator.log shows, but tests/test_bank_report_precision.py:54 asserts a fixture constant against another fixture constant and cannot fail on any production change, so it adds no protection to the guard it sits beside.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_bank_report_precision.py:5 imports the prototype owner exactly as the surrounding tests do, the module-level SPAN and MINOR_RADIUS are named for what they measure, and no symbol, filename, comment or commit subject carries a plan, phase or run identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no production definition; it pins the existing owner at scripts/prototypes/bank_solve_cycle/report.py:21 and a search of scripts/prototypes found that owner already consumed by bank_solve_linesearch/report.py:10, bank_step_booking_batch/report.py:12 and bank_solve_breakpoint/report.py:12.\nFINDING tests/test_bank_report_precision.py:54 non-blocking: `assert row[\"span\"] != row[\"minor_radius\"]` compares two test-file constants (SPAN and MINOR_RADIUS at lines 11-12) against each other, never against anything the owner returns, so no change to production code can make it fail and it contributes nothing to durability; the real guard against a swapped denominator is the pytest.approx assertion at line 78, which the denominator control confirms reddens.",
+  "review_run_id": "r-20261105T215945359078-review-of-bank-report-equivalence-1d3df17e1e55",
+  "reviewed_base_sha": "70192e11bd923d859f5680be594330f4fe94c0f6",
+  "reviewed_head_sha": "1d3df17e1e559c0e16b8cc15be975f0745c39bed",
+  "reviewed_run_id": "r-20261105T205425913419-bank-report-equivalence",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T22:15:47.733862+00:00",
+  "total": 113
+}

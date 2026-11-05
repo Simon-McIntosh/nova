@@ -293,7 +293,19 @@ def test_committed_converged_panel_uses_its_terminal_currents():
     assert display.promoted_node_count == int(
         np.count_nonzero(panel["promoted_mask"][: profile.lattice.node_count])
     )
-    assert np.isfinite(display.nearest_promoted_to_xpoint_m)
+    assert display.saddle_converged
+    promoted_points = np.asarray(profile.lattice.coordinate)[
+        panel["promoted_mask"][: profile.lattice.node_count]
+    ]
+    polished_nearest = float(
+        np.min(np.linalg.norm(promoted_points - display.saddle_rz, axis=1))
+    )
+    seed = np.asarray(panel["xpoints"])[int(panel["saddle_index"])]
+    seed_nearest = float(np.min(np.linalg.norm(promoted_points - seed, axis=1)))
+    assert abs(polished_nearest - seed_nearest) > 1.0e-12
+    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+        polished_nearest, abs=1.0e-12
+    )
     reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
     assert (
         abs(

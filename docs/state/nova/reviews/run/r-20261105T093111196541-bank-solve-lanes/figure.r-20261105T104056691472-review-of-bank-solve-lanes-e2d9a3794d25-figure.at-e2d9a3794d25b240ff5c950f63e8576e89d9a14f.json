@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "figure review only; no suite was run and no test file is aware of this node.",
+  "blockers": "none",
+  "blocking_finding_count": 1,
+  "caption_verdict": "pass - the caption names the seed and revision, the job id, the three coloured lanes with their step counts and the identity of the dotted line, so it explains the figure rather than repeating its title.",
+  "completed_at": "2026-11-05T10:56:57.202Z",
+  "dispatched_at": "2026-11-05T10:42:48Z",
+  "evidence_inputs": "Figure judged from the rendered PNG only, at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T104056691472-review-of-bank-solve-lanes-e2d9a3794d25-figure/image-0.png (1399x720). Measured on that PNG's pixels: plot area x110-1204 y110-640; freeze-threshold dotted rule at y357 with its annotation text occupying x115-328 y336-351; axes 1e0 at y138 and 1e-12 at y595 (44.6 px per decade). Overlap measurements quoted in the findings are counts of exact-colour pixels inside text bounding boxes, all taken from the PNG. The figure is drawn by scripts/prototypes/bank_solve_lanes/plot.py (an anchor script, not product code) and cited from docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-lanes.html. The reviewed run also modifies docs/figures/sub-millisecond-forward-path/bank-solve-profile/per-iterate-stage.svg, but no rendered PNG of it was attached to this review, so no verdict is offered on it.",
+  "figure_under_review": "docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "a1c4f0b7e29",
+      "line": 124,
+      "severity": "blocking",
+      "summary": "The 'freeze threshold, 1e-6' annotation is drawn under the plotted data and is cut through by it: the red and orange series descend across the annotation's own row band and are drawn over the text, because the coloured lanes carry zorder 5 and the annotation zorder 4. In the render the text occupies x115-328, y336-351 and the two 4 px strokes sit at x151-154 (red) and x158-161 (orange) - they fall inside the word 'freeze', where the letter between the two 'e's has only a two-pixel fragment left between them, so the annotation reads as 'free' + two vertical bars + 'e threshold, 1e-6'. This is the figure's key reading aid: it is the line the mechanism in the accompanying text is measured against, and a reader cannot check a lane's plateau against a threshold label that has a hole in it. The script's own save_checked gate (lines 41-46) compares text boxes only against each other and against the canvas, so a label over data passes it - the check the repository's plot rules require is absent here."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "b7e2c58d104",
+      "line": 24,
+      "severity": "non-blocking",
+      "summary": "The second-slowest lane's colour #d98a2b measures 2.76:1 against the white page, under the 3:1 floor for a graphical object and well under 4.5:1 for its 14 pt text. It carries the second slowest lane's curve, its legend entry 'second slowest lane 5' and its direct label 'lane 5, 26 steps (second slowest)'. The other marks are clear (slowest #c0442b 5.12:1, median #1f5d92 6.91:1, population #929292 3.11:1, text #222222 15.91:1), so one of the two lanes the figure exists to compare is the faintest coloured ink on the page. Legible at the 1399 px render; it loses margin when the page scales to its ~900 px column."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "c3d9a61f87b",
+      "line": 111,
+      "severity": "non-blocking",
+      "summary": "The direct label 'lane 7, 10 steps (median)' is placed into a region the grey population still occupies, so two thin grey traces run through the text: measured on the render, grey pixels cross the label's row band (y521-534) at x445-452 and x470-478, inside the glyph area rather than in clear space. The blue text stays legible over them, so this does not hold the node, but the label sits on the data rather than beside it, against the plot rule that a direct label goes in clear space."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_lanes/plot.py",
+      "id": "d5a0e73b9c8",
+      "line": 162,
+      "severity": "non-blocking",
+      "summary": "The 'active set locked' legend swatch is drawn with a dark grey edge (#333333) while the marks it stands for are drawn with the lane's own colour (line 107), so the key does not match what is on the plot: a reader hunting for the dark hollow circle finds an orange ring at (x171,y389) and a red one at (x170,y465). The open-circle shape is distinctive enough that the association survives, so this is cosmetic rather than blocking, but the swatch should carry the same treatment as the marks it explains."
+    }
+  ],
+  "judged_from": "the rendered PNG only; no SVG markup, dimension attribute or glyph coordinate was read or used",
+  "node": "review-of-bank-solve-lanes-e2d9a3794d25-figure",
+  "node:reviewed": "bank-solve-lanes",
+  "outside_scope": "none",
+  "project": "nova",
+  "rendered_artifact": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T104056691472-review-of-bank-solve-lanes-e2d9a3794d25-figure/image-0.png",
+  "rendered_size_px": [
+    1399,
+    720
+  ],
+  "review_run_id": "r-20261105T104056691472-review-of-bank-solve-lanes-e2d9a3794d25-figure",
+  "reviewed_base_sha": "ce0b96226de61cd7eb8e782b46dc855d179beacc",
+  "reviewed_head_sha": "e2d9a3794d25b240ff5c950f63e8576e89d9a14f",
+  "reviewed_run_id": "r-20261105T093111196541-bank-solve-lanes",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "defect - the second-slowest lane's amber #d98a2b measures 2.76:1 on white, used for both its curve and its 14 pt legend and direct labels, under the 3:1 graphical floor and the 4.5:1 text threshold. Everything else clears: slowest 5.12:1, median 6.91:1, population grey 3.11:1, all text #222222 at 15.91:1.",
+    "data_ink": "pass - thirteen thin grey traces for the population, the three lanes under discussion in thick colour drawn on top, one dotted rule for the threshold and three direct labels. No gridlines, no fill, no shading; every mark on the canvas is data or keys data.",
+    "decoration": "pass - no gradient, no background fill, no drop shadow, no theme styling; top and right spines absent, grid off. Nothing on the page competes with the traces.",
+    "label_collision": "defect - the 'freeze threshold, 1e-6' annotation is overlapped by the data: the red and orange curves are drawn over the middle of the word 'freeze' and leave the user unable to read one letter. The four direct labels are unclipped and clear of each other, and no text leaves the 1399x720 canvas, but the threshold label sits on the plotted lines and one grey trace pair crosses the blue 'median' label.",
+    "legibility": "pass - sixteen lane histories on one log axis read at a glance: a two-decade Newton drop over iterates 0-2 and then a two-level plateau that flips, with the slowest lane in red reaching 28 steps, the median in blue stopping at 10. Axis labels, ticks, legend and the three direct labels are legible. The one legibility defect is the obscured threshold annotation, recorded under label_collision rather than counted twice.",
+    "table_form": "pass - the image carries a relation (per-lane residual paths over iterates, and where each coloured lane stops), not a set of exact values that belongs in a table; the per-lane numbers are in the fragment's table above it, not in the image."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T10:53:15+00:00",
+  "total": null
+}

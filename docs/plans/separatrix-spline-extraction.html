@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="177">
+<meta name="plan-version" content="178">
 <meta name="plan-modified" content="2026-11-05">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -676,7 +676,10 @@
     <div class="r-comment-body"><p>Review of run r-20261105T061636915302-expose-promoted-mask at head bac1660c2 (base 36fc135431): scores goal_fidelity 18, evidence 9, scope_discipline 18, durability 12, fit 18, reuse 19; two blocking findings (the promoting fixture asserts the compiled route nowhere, and the only complete gate ran at 7013763b5 with the zero-added-failures clause unmeasured) and three non-blocking.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261105T141530180268-review-of-expose-promoted-mask-0e21fbcc1b4a" data-who="reckon-build" data-when="2026-11-05T14:28:18.452Z">
-    <div class="r-comment-body"><p>Reviewed r-20261105T061636915302-expose-promoted-mask at head 0e21fbcc1b4af44de6463c93d0705708d51cbd0d against base 36fc135431c3dbfd82c86e20f61ed3d92abdd48d: scores goal_fidelity 19, evidence 10, scope_discipline 20, durability 14, fit 18, reuse 20; one blocking finding (the done_when&#x27;s zero-added-failures clause has no readable arm) and three non-blocking.</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261105T061636915302-expose-promoted-mask at head 0e21fbcc1b4af44de6463c93d0705708d51cbd0d against base 36fc135431c3dbfd82c86e20f61ed3d92abdd48d: scores goal_fidelity 19, evidence 10, scope_discipline 20, durability 14, fit 18, reuse 20; one blocking finding (the done_when's zero-added-failures clause has no readable arm) and three non-blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261105T061636915302-expose-promoted-mask" data-who="reckon-build" data-when="2026-11-05T09:16:58Z">
+    <div class="r-comment-body"><p>Exposed the reduced solve&#x27;s terminal promoted-node mask: ReducedNewtonResult.promoted_mask on both host and compiled entry points, carried to ForwardEquilibrium.promoted_mask by ForwardProfile.solve, with every existing result field unchanged. Six tests in tests/test_promoted_mask_result.py. The gate ran as one H200 job at the landed head 6971a7afd: the five fast-lane tests passed (548.99 s) and the slow warm coil-edit test passed (210.06 s), asserting the mask on the host route and on the compiled route over a state that really promotes nodes. The declared all-false control fails on that state, so the mutation is discriminated.</p></div>
 </div>
 <div class="r-comment" data-section="§2a" data-id="c-run-r-20260826T114311314474-sse-titan-route-verify" data-who="integration-verify" data-when="2026-08-26T12:05:23Z">
     <div class="r-comment-body"><p>Independently verified a non-interfering P100 Titan rehearsal route with float64 JAX execution, isolated GPU allocation, and a 45,907,712-byte peak.</p></div>

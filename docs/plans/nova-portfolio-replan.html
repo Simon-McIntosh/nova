@@ -17,8 +17,8 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="59">
-<meta name="plan-modified" content="2026-11-03">
+<meta name="plan-version" content="60">
+<meta name="plan-modified" content="2026-11-05">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -119,14 +119,8 @@ Done when: the report lists each coupling with files, line counts, refactor and 
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
-<div class="r-comment" data-section="s2" data-id="c-20261001T2300-thin" data-who="reckon-build" data-when="2026-10-01T23:00:00+02:00">
-    <div class="r-comment-body">gate review passed (18/18/20/19/19, no added failure); section closed at f24792a21; unowned refactors moved to §5.</div>
-</div>
-<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T191520414803-replan-thin-interfaces" data-who="reckon-build" data-when="2026-10-01T19:52:47.235Z">
-    <div class="r-comment-body"><p>replan-thin-interfaces — docs/evidence/replan-2026-09-24/thin-interfaces.md: 14 coupling rows across the five §2 areas (reckon crew and plan layer, local model lane, fleet and SLURM placement, imas-python access, hard-coded GPFS paths), each with per-file line counts from a stated bounded grep, the thin-interface refactor, a one-line done-when and its owning followup or unowned; the five handoff refactors cross-referenced with owners; landing fragment at docs/evidence/fragments/nova-portfolio-replan/replan-thin-interfaces.html</p></div>
-</div>
-<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T203907018114-review-of-replan-thin-interfaces" data-who="reckon-build" data-when="2026-10-01T21:04:16.248Z">
-    <div class="r-comment-body"><p>review of r-20261001T191520414803-replan-thin-interfaces (nova-portfolio-replan §2): parsed record total 94/100 (goal_fidelity 18, evidence 18, scope_discipline 20, durability 19, fit 19), reviewed_base_sha a71934910d2a0835dd9f6ab35576eef5c2f44754, reviewed_head_sha 71adc8e6821898b7b00a97616c13ae854c8e7cfa, added_failure_count 0</p></div>
+<div class="r-comment" data-section="_top" data-id="c-nova-fd-20261006-size-ceiling-in-shared-hook" data-who="nova-fd" data-when="2026-10-06T02:30:00Z">
+    <div class="r-comment-body"><p>2026-10-06, for f-replan-receipts-out-of-git: the size ceiling is not a second commit-time mechanism. artifacts-carry-no-worktree-paths §4 (S27) adds nova's one commit-time hook, <code>scripts/git-hooks/pre-commit</code>, a read-only shim enabled through <code>core.hooksPath</code>. The receipts migration adds the ceiling as a second check line in that hook, in its own migration commit, after the hook lands. Its negative control is a test file above the ceiling refused by that hook.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20261001T2305-depth-a" data-who="reckon-build" data-when="2026-10-01T23:05:00+02:00">
     <div class="r-comment-body">group A report landed at 3f67851e4 (review 19/16/20/6/18; durability sub-floor exempted as a dated audit); section stays open for group B and the status writes.</div>
@@ -148,6 +142,15 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261001T213722627131-review-of-replan-currency-depth-b" data-who="reckon-build" data-when="2026-10-01T22:25:28.806Z">
     <div class="r-comment-body"><p>independent review of run r-20261001T191426544316-replan-currency-depth-b at head 4f1bfbdda (base a71934910): parsed record stored with 5 dimensions scored and total 89; verifies the head commit's correction is sound and every citation resolves, and records one follow-on (the reviewed manifest cites an unresolvable third commit sha).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261001T2300-thin" data-who="reckon-build" data-when="2026-10-01T23:00:00+02:00">
+    <div class="r-comment-body">gate review passed (18/18/20/19/19, no added failure); section closed at f24792a21; unowned refactors moved to §5.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T191520414803-replan-thin-interfaces" data-who="reckon-build" data-when="2026-10-01T19:52:47.235Z">
+    <div class="r-comment-body"><p>replan-thin-interfaces — docs/evidence/replan-2026-09-24/thin-interfaces.md: 14 coupling rows across the five §2 areas (reckon crew and plan layer, local model lane, fleet and SLURM placement, imas-python access, hard-coded GPFS paths), each with per-file line counts from a stated bounded grep, the thin-interface refactor, a one-line done-when and its owning followup or unowned; the five handoff refactors cross-referenced with owners; landing fragment at docs/evidence/fragments/nova-portfolio-replan/replan-thin-interfaces.html</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261001T203907018114-review-of-replan-thin-interfaces" data-who="reckon-build" data-when="2026-10-01T21:04:16.248Z">
+    <div class="r-comment-body"><p>review of r-20261001T191520414803-replan-thin-interfaces (nova-portfolio-replan §2): parsed record total 94/100 (goal_fidelity 18, evidence 18, scope_discipline 20, durability 19, fit 19), reviewed_base_sha a71934910d2a0835dd9f6ab35576eef5c2f44754, reviewed_head_sha 71adc8e6821898b7b00a97616c13ae854c8e7cfa, added_failure_count 0</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261001T204040669316-review-of-replan-pytest-timeout-and-xdist" data-who="reckon-build" data-when="2026-10-01T21:03:10.573Z">
     <div class="r-comment-body"><p>review-of-replan-pytest-timeout-and-xdist -- read the landed change 56ee52a8d against its base a71934910 and stored the verdict; scores goal_fidelity 20, evidence 12, scope_discipline 20, durability 12, fit 16, total 80, with three findings (1 blocking, 2 follow-on).</p></div>
@@ -191,8 +194,8 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261103T063929675095-replan-constraint-algebra" data-who="reckon-build" data-when="2026-11-03T07:26:33Z">
     <div class="r-comment-body"><p>One shared scaled-residual implementation serves all seven constraint rows; the focused base/head arms each report 27 passed with zero added failures, and the field-observation mutation fails its pinned test.</p></div>
 </div>
-<div class="r-comment" data-section="_top" data-id="c-nova-fd-20261006-size-ceiling-in-shared-hook" data-who="nova-fd" data-when="2026-10-06T02:30:00Z">
-    <div class="r-comment-body"><p>2026-10-06, for f-replan-receipts-out-of-git: the size ceiling is not a second commit-time mechanism. artifacts-carry-no-worktree-paths §4 (S27) adds nova's one commit-time hook, <code>scripts/git-hooks/pre-commit</code>, a read-only shim enabled through <code>core.hooksPath</code>. The receipts migration adds the ceiling as a second check line in that hook, in its own migration commit, after the hook lands. Its negative control is a test file above the ceiling refused by that hook.</p></div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261103T064145514294-replan-fast-lane-census" data-who="reckon-build" data-when="2026-11-05T08:13:23Z">
+    <div class="r-comment-body"><p>Updated the census fragment with the main-head pytest totals, 174 module-owned failure/error causes, the two-outcome reconciliation discrepancy and the measured quick subset; pytest wall was 3,722.07 s.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-imas-hdf5-read-landed" data-who="reckon-build" data-when="2026-10-27T10:25:00Z">
     <div class="r-comment-body"><p><strong>replan-imas-hdf5-read landed at <code>117e41bd2</code></strong> (head <code>7084d3571</code>). <code>nova/imas/hdf5_read.py</code> is deleted. It read IMAS-written HDF5 through h5py and had no callers. No module under <code>nova/</code> imports h5py; the one search hit is a docstring in <code>validator_case.py</code>.</p><p>The 103 test modules that import nova.imas ran in base and head arms in one sirius job (1296790) and add no failure: 26 failing ids at base, 11 at head, all 11 already failing or erroring at base. The base arm's archive omitted <code>docs/</code>, so 8 tests errored at setup there. The review scored 20/15/20/13/18/20 with no blocking finding.</p><p>Still open in this section: replan-dbentry-constructor (delivered, review queued), replan-gpfs-data-root and replan-evidence-tooling-paths.</p></div>

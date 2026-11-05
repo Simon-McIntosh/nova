@@ -161,7 +161,7 @@ def analytic_carrier(request):
     case_name = request.param
     if case_name == "diverted-single-null":
         case_name = certificate.DIVERTED_CASE_NAME
-    requested_cells = -110
+    requested_cells = -110 if case_name == certificate.DIVERTED_CASE_NAME else -500
     carrier_case, source_case, exact = certificate._case(case_name)
     machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
     coordinates = np.vstack(

@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-05T09:44:36.200Z",
   "dispatched_at": "2026-11-05T09:34:22Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the product change is not landed: it saved 2-3% of the tangent assembly for a 90 MiB per-operand cache, so the node closes as a negative result and its test and figure do not enter main",
+      "recorded_at": "2026-11-05T09:49:30.422263+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_bank_step_channels.py",

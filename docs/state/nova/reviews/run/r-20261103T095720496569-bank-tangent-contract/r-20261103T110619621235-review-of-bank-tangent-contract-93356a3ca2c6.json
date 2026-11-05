@@ -12,6 +12,13 @@
     "nova/equilibrium/support_read.py:step_batch:1431"
   ],
   "completed_at": "2026-11-03T11:18:02Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "negative-result node: the contraction was measured and not kept; the landed content is evidence and prototype scripts only",
+      "recorded_at": "2026-11-05T05:56:10.638467+00:00"
+    }
+  },
   "dispatched_at": "2026-11-03T11:07:35Z",
   "finding_dispositions": {
     "0": {

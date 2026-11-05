@@ -40,6 +40,14 @@ def parse(path, prefixes):
     return header, found
 
 
+def revision(path):
+    for line in Path(path).read_text().splitlines():
+        for token in line.split():
+            if token.startswith("REVISION="):
+                return token.partition("=")[2][:9]
+    return "unknown"
+
+
 def stages_at(rows, lanes):
     medians = {row["name"]: row["median_ms"] for row in rows if row["lanes"] == lanes}
     return {
@@ -63,6 +71,8 @@ def main():
     header, stage = parse(args.stage_log, {"STAGE", "SOLVE", "SINGLE"})
     fused_header, fused = parse(args.fused_log, {"UNIT"})
     marginal_header, marginal = parse(args.marginal_log, {"MARGINAL"})
+    stage_rev = revision(args.stage_log)
+    marginal_rev = revision(args.marginal_log)
     solve_rows = {row["lanes"]: row for row in stage["SOLVE"]}
     single = stage["SINGLE"][0]
     units = {(row["lanes"], row["name"]): row["median_ms"] for row in fused["UNIT"]}
@@ -84,16 +94,15 @@ def main():
 
     arms = sorted(marginal["MARGINAL"], key=lambda row: row["ceiling"])
     first_arm = arms[0]["median_ms"]
-    marginal_ms = (arms[-1]["median_ms"] - arms[0]["median_ms"]) / (
-        arms[-1]["ceiling"] - arms[0]["ceiling"]
-    )
+    longest = max(arms, key=lambda row: row["steps"])
+    marginal_ms = (longest["median_ms"] - first_arm) / (longest["steps"] - 1)
     units_iterate = units[(1, "read")] + units[(1, "step")] + units[(1, "magnitude")]
     marginal_rows = ""
     for index, row in enumerate(arms):
-        if index == 0:
+        if index == 0 or row["steps"] == arms[index - 1]["steps"]:
             delta = "—"
         else:
-            span = row["ceiling"] - arms[index - 1]["ceiling"]
+            span = row["steps"] - arms[index - 1]["steps"]
             delta = f"{(row['median_ms'] - arms[index - 1]['median_ms']) / span:.1f}"
         marginal_rows += (
             f"<tr><td>{row['ceiling']}</td><td>{row['median_ms']:.1f}</td>"
@@ -170,7 +179,7 @@ reported below rather than absorbed into a remainder stage.</p>
 <h2>Per-iterate stage wall at one and sixteen slices</h2>
 <p>One H200 (job {args.stage_log.stem.rsplit("-", 1)[-1]}, partition
 <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, one card, two cores)
-at revision <code>{header["revision"]}</code>. Every stage is its own jitted call at
+at revision <code>{stage_rev}</code>. Every stage is its own jitted call at
 the solve's shapes — one or sixteen lanes of the diverted 550-cell bank, each lane a
 per-lane perturbation of the same seed — warmed, timed with
 <code>block_until_ready</code> and reported as the median of {header["repeats"]}
@@ -258,7 +267,9 @@ lane sits above the median rather than by anything inside an iterate.</p>
 iterate costs the same. Pinning the loop's step ceiling below and at convergence
 measures the cost of a step directly, as the difference between two arms run on the
 same seed (job {args.marginal_log.stem.rsplit("-", 1)[-1]}, one lane,
-{marginal_header["repeats"]} repeats, revision <code>{marginal_header["revision"]}</code>):</p>
+{marginal_header["repeats"]} repeats, revision <code>{marginal_rev}</code>). The
+receipts in this fragment ran at {stage_rev} and {marginal_rev}; every commit between
+them touches only <code>scripts/</code>, so the product code measured is identical.</p>
 <table id="bank-solve-profile-marginal-table"><thead><tr><th>Step ceiling</th>
 <th>Wall [ms]</th><th>Steps run</th><th>ms per added step</th></tr></thead><tbody>
 {marginal_rows}
@@ -271,6 +282,16 @@ same iterate's units cost as separate programs is {units_iterate / marginal_ms:.
 the steady state, which is the closure residual stated as a ratio rather than as a sum,
 and the first iterate's {first_arm:.1f} ms accounts for only
 {first_arm - marginal_ms:.1f} ms of it.</p>
+<p>Two caveats on this receipt, both visible in its table. These arms run the batch of one
+lane at its unperturbed seed, which converges in {longest["steps"]} steps, so a ceiling
+set above it converges in the same {longest["steps"]} steps: the last row is a repeat of
+its predecessor rather than a longer
+run, and the two walls agree to {abs(arms[-1]["median_ms"] - arms[-2]["median_ms"]):.1f} ms,
+which is a reproducibility check rather than a measurement. The stage receipt's one-lane
+batch is that seed scaled by 1 + 2e-5 and needs
+{solve_rows[1]["max_steps"]} steps, so the two receipts are not the same state; their
+per-step walls, {iterate_one:.1f} ms and {longest["median_ms"] / longest["steps"]:.1f} ms,
+agree to within a few per cent, which is how far the seed moves the cost of a step.</p>
 </section>
 
 <section id="bank-solve-profile-single">

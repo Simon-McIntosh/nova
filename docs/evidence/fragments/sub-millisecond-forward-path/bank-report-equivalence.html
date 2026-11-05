@@ -1,0 +1,24 @@
+<section id="bank-report-equivalence-landing">
+<h2>The shared precision comparison reproduces both dependent reports</h2>
+<p><code>scripts/prototypes/bank_solve_linesearch/report.py</code> and
+<code>scripts/prototypes/bank_step_booking_batch/report.py</code> import
+<code>compare</code> from <code>scripts/prototypes/bank_solve_cycle/report.py</code>.
+Both were replayed on scratch copies of their existing receipts after the
+comparison's clean-up. The linesearch <code>SUMMARY</code> line is 953 bytes and
+the booking <code>PRECISION</code> line is 304 bytes; each is byte-identical to
+the corresponding line in the recorded <code>report.log</code> and
+<code>report-corrected.log</code>, with no field changed.</p>
+<p><code>tests/test_bank_report_precision.py</code> pins the comparison on
+constructed two-lane receipts. One pair sits inside every limit and reports
+zero gaps. Four further pairs each exceed exactly one bound — flux over span
+2e-8 against 1e-8, axis over minor radius 6e-4 and X-point over minor radius
+6e-4 against 5e-4, and boundary flux over span 2e-4 against 1e-4 — and each
+raises the owner's own assertion. The pairs also assert each gap against its
+reported limit and denominator, so redefining a limit or a normalising unit
+fails the test rather than the report. The five tests pass in 7.3 s on the
+login node.</p>
+<p>A scratch copy of the owner with the flux limit moved from 1e-8 to 1e-7
+fails exactly one test, the flux pair, at 2e-8 reported against the widened
+1e-7 bound; the other four pass. The negative-control log ends
+<code>EXIT=1</code>.</p>
+</section>

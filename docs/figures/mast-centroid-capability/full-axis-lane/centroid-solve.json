@@ -19,6 +19,49 @@
     "wall_milliseconds": 99645.57427726686,
     "wall_seconds": 99.64557427726686
   },
+  "drawn_plasma_mesh": {
+    "boundary_branches_drawn": {
+      "closed_drawn": 0,
+      "open_drawn": 0
+    },
+    "boundary_clipped_cells": 0,
+    "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
+    "boundary_vertex_count": 0,
+    "coil_section_count": 938,
+    "coupling": "none; cell geometry only, no Biot build",
+    "cut_at_boundary_cells": 0,
+    "delivered_cells": 4286,
+    "display_map": {
+      "build_seconds": 255.1536231506616,
+      "max_node_mismatch_wb": 0.008423456975719931,
+      "reproduction_relative_error": 2.6729225456362353e-16,
+      "saddle_converged": true,
+      "saddle_offset_mm": 9.909916043586996,
+      "shape": [
+        195,
+        401
+      ],
+      "source": "nova.equilibrium.display_flux.build_display_flux_map from the state's stored conductor currents and cell moments",
+      "spacing_m": 0.01
+    },
+    "requested_cells": 4000,
+    "source": "nova.frame.firstwall.PlasmaGrid.insert",
+    "turn": "hex",
+    "vacuum_nulls": {
+      "o_points_inside_wall": 0,
+      "other_x_points_drawn": 1,
+      "strike_points_drawn": 0,
+      "x_points_drawn": 0,
+      "x_points_dropped_outside_wall": 0,
+      "x_points_inside_wall": 1
+    },
+    "vertex_count_range": [
+      4,
+      29
+    ],
+    "wall_clipped": true,
+    "wall_unit_count": 1
+  },
   "evidence_inputs": {
     "coil_mapping": {
       "family": "p4_upper",
@@ -102,7 +145,17 @@
     "shot": 22086,
     "slice_index": 43
   },
+  "figure": "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
   "identity": "22086/43 mixed",
+  "invocation": {
+    "argv": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py",
+      "full-axis-lane",
+      "4000",
+      "vacuum-and-plasma-panels"
+    ],
+    "cwd": "."
+  },
   "measurement_contract": {
     "active_set_steps": 16,
     "centroid_target_m": 0.03848034343369173,

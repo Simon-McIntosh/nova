@@ -75,9 +75,16 @@ were the fine one. A panel is either the 78195-point map or it is not the map.</
 <p id="mast-centroid-fine-panels-landing">landing: the render cost is measured and bounded, and the display-map
 builder's 10 mm floor is confirmed to be enforced rather than advisory, so the
 panel is 78195 points of fixed, non-amortising compute and nothing cheaper
-counts as the map. The panels themselves are not drawn: the response build has
-not completed, so the redraw gate, the one-percent current control and the PNG
-inspection have not run and are not claimed here.</p>
+counts as the map. All four panels are drawn from that map and inspected: the
+CPU lane at 4000 and at 12000 grid cells, the titan lane at 4000 and the
+full-axis lane at 4000. Each carries a smooth line-contour field, the magnetic
+axis, the admitted X-point, the wall and the coils, and each reports
+<code>LABEL_CHECK clipped=0 overlapping=0</code>. The redraw gate is partly
+verified: two of its three CPU-lane cases pass, including the one-percent
+current control, whose falsifying run exits nonzero; the third case fails inside
+the assembler-flag record on that receipt and its fix has not been re-run, so the
+gate is not claimed green. The panels are interim: a redraw on the
+solve-currents display map follows the assembler fix described below.</p>
 
 <p id="mast-centroid-fine-panels-limit">The separatrix is <em>not</em> drawn on
 these panels, and that is a known limit of the branch assembler at the 10 mm

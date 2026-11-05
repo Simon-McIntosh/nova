@@ -39,6 +39,7 @@ import jax  # noqa: E402
 import jax.numpy as jnp  # noqa: E402
 
 import benchmarks.coil_edit_latency as bench  # noqa: E402
+from nova.equilibrium import display_flux  # noqa: E402
 from nova.equilibrium.domain import PlasmaDomain  # noqa: E402
 from nova.equilibrium.flux_surface_connectivity import (  # noqa: E402
     polish_stationary_points,
@@ -262,14 +263,33 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     moments = operator.normalised_current_moments(
         state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
     )[0]
-    image = np.asarray(
+    # The raster carries the plasma grid only, so the wall nodes the shadow
+    # also spans are evaluated through the machine coupling the panel draws
+    # with, and the grid half is checked against the raster the solve itself
+    # uses: the two disagree only at the display's own reproduction error.
+    raster = np.asarray(
         operator.raster_image(
             moments,
             current=jnp.zeros_like(operator.external_current),
             prescribed_current=jnp.asarray(current),
         ),
         dtype=np.float64,
-    )[:node_count]
+    )
+    coupling = bench._panel_display_coupling(
+        prepared["circuit_context"]["group"],
+        prepared["circuit_context"]["row"],
+        lattice,
+        np.asarray(current),
+    )
+    nodewise = (
+        moments.cell_current,
+        moments.radial_moment,
+        moments.vertical_moment,
+    )
+    image = display_flux._flux(coupling, coordinates, nodewise, 4096)
+    scale = max(float(np.max(np.abs(raster))), 1.0e-30)
+    grid_error = float(np.max(np.abs(image[:grid_count] - raster[:grid_count])))
+    reproduction = grid_error / scale
     difference = image - state_nodes
 
     masks = operator.current_domain_masks(state, requested_class)
@@ -357,6 +377,7 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         "chain": chain,
         "terminal_residual_wb": float(np.asarray(terminal.terminal_residual)),
         "converged": bool(np.asarray(terminal.converged)),
+        "image_reproduction_relative_error": reproduction,
         "promoted_node_count": int(np.count_nonzero(mask)),
         "lattice_node_count": grid_count,
         "physical_node_count": node_count,

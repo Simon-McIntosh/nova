@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured as a suite arm: the reviewed manifest records no baseline_suite and no after_suite because the brief declares the node a measurement node with no tests, and its classification.json agrees (both null); the node's own gate is the three H200 receipts, whose measurement logs carry every STAGE/SOLVE/UNIT/MARGINAL line.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T08:59:49.850Z",
+  "dispatched_at": "2026-11-05T08:42:03Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_profile/run_h200.sh",
+      "id": "f712573d847",
+      "line": "15",
+      "text": "non-blocking: the primary evidence log h200-1305948.out ends `EXIT=2` from a bash parse error the log attributes to this file's line 16, but the committed script at the measured revision 7c4a746f7 has 15 lines and `bash -n` exits 0, so the wrapper that produced the log is not the committed artifact, the recorded failure cannot be reproduced from the landing, and a gate reader sees a red status with no committed cause."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_profile/control.py",
+      "id": "fd4b00d4076",
+      "line": "79",
+      "text": "non-blocking: `assert abs(shifts[biggest]) > 0.15` is arithmetic on the same `values` that form the closure ratio (shift is exactly -values[dropped]/iterate), so it holds for any parsed log and cannot fail for the defect it names - a closure check that never saw its stages - which makes it a tautology rather than a negative control."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_profile/measure.py",
+      "id": "f5ce1801894",
+      "line": "93",
+      "text": "non-blocking: the fixture, seed and lane-perturbation block is copied from scripts/prototypes/bank_solve_read/measure.py:95 rather than imported as the brief directed, and the same recipe appears a third and fourth time in fused.py:64 and marginal.py:50, so a later change to the perturbations has four places to miss."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the landed change is scripts and docs only, so no runtime code path reaches it.",
+    "diff": "read all eight commits from ccaacf5 to 1f6433f; they add six prototype scripts, one run wrapper, the evidence fragment and one SVG (1924 insertions, no deletions), and every measured number in the fragment reconciles with h200-1305948.out (decision 52.42-1.375=51.05, geometry 0.30+1.375=1.68, residual 2x4.89=9.78, whole 570.09/6=95.02, 17447.24/29=601.63).",
+    "done_when": "the brief's measure - each stage its own jitted call, warmed, block_until_ready, median of at least 10 repeats (12 ran), the whole solve timed, stage sum within 15 % or the residual reported - is what scripts/prototypes/bank_solve_profile/measure.py runs, and the closure miss is reported at +108 % and +212 % with its residual in the fragment's closure paragraph rather than absorbed.",
+    "goal": "the node's goal is to split the converged bank solve's per-iterate wall into stages at 1 and 16 slices and publish the stage table, the per-lane step table and one figure; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html carries all three and h200-1305948.out holds the seven STAGE medians and the SOLVE receipts behind them.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T075417112524-bank-solve-profile/manifest.md; status complete, eight commits, tests naming sbatch jobs 1305948/1305954/1305960 plus control.py, and baseline_suite/after_suite absent because the brief declares no test arms.",
+    "write_paths": "the manifest declares scripts/prototypes/bank_solve_profile, docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html and docs/figures/sub-millisecond-forward-path/bank-solve-profile; git diff --stat ccaacf5..1f6433f lists nine files and every one is under those three paths, with no product source."
+  },
+  "justifications": {
+    "durability": "the only added assertion is scripts/prototypes/bank_solve_profile/control.py:79, whose shift is by construction minus the dropped stage over the iterate, so it cannot redden on any measurement regression and no test fails if measure.py breaks.",
+    "evidence": "every fragment number reconciles with h200-1305948.out, but that gate log ends `EXIT=2` and the closure requirement is missed by 93 and 197 percentage points respectively, so the recorded result is complete and honest rather than green.",
+    "fit": "scripts/prototypes/bank_solve_profile/plot.py:1 follows the sibling prototype idiom (`plt.style.use(\"data-ink\")`, save then parse the SVG) and introduces no forbidden name, though commits typed `perf(equilibrium)` and `test(equilibrium)` misdescribe scripts under scripts/prototypes.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html lands work items 1-3 - stage table at both batch sizes, per-lane step table, and the rendered figure - and the only shortfall is closure, which the brief permits to be reported rather than met.",
+    "reuse": "the seed, lane perturbation and state builders at scripts/prototypes/bank_solve_profile/measure.py:93-99 are copied verbatim from the sibling scripts/prototypes/bank_solve_read/measure.py:95-99 the brief named for reuse and repeated again in fused.py:64-66 and marginal.py:50, with `emit`/`timed` also duplicated in three files.",
+    "scope_discipline": "git diff --stat ccaacf5..1f6433f touches only scripts/prototypes/bank_solve_profile/, the one evidence fragment and the one figure directory, and no product file or test is added."
+  },
+  "node": "review-of-bank-solve-profile-1f6433fb8677",
+  "node:reviewed": "bank-solve-profile",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to split the converged bank solve's per-iterate wall into stages at 1 and 16 slices and publish the stage table, the per-lane step table and one figure; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html carries all three and h200-1305948.out holds the seven STAGE medians and the SOLVE receipts behind them.\nVERDICT done_when: the brief's measure - each stage its own jitted call, warmed, block_until_ready, median of at least 10 repeats (12 ran), the whole solve timed, stage sum within 15 % or the residual reported - is what scripts/prototypes/bank_solve_profile/measure.py runs, and the closure miss is reported at +108 % and +212 % with its residual in the fragment's closure paragraph rather than absorbed.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_solve_profile, docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html and docs/figures/sub-millisecond-forward-path/bank-solve-profile; git diff --stat ccaacf5..1f6433f lists nine files and every one is under those three paths, with no product source.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T075417112524-bank-solve-profile/manifest.md; status complete, eight commits, tests naming sbatch jobs 1305948/1305954/1305960 plus control.py, and baseline_suite/after_suite absent because the brief declares no test arms.\nVERDICT diff: read all eight commits from ccaacf5 to 1f6433f; they add six prototype scripts, one run wrapper, the evidence fragment and one SVG (1924 insertions, no deletions), and every measured number in the fragment reconciles with h200-1305948.out (decision 52.42-1.375=51.05, geometry 0.30+1.375=1.68, residual 2x4.89=9.78, whole 570.09/6=95.02, 17447.24/29=601.63).\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html lands work items 1-3 - stage table at both batch sizes, per-lane step table, and the rendered figure - and the only shortfall is closure, which the brief permits to be reported rather than met.\nSCORE evidence: 15\nJUSTIFICATION evidence: every fragment number reconciles with h200-1305948.out, but that gate log ends `EXIT=2` and the closure requirement is missed by 93 and 197 percentage points respectively, so the recorded result is complete and honest rather than green.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat ccaacf5..1f6433f touches only scripts/prototypes/bank_solve_profile/, the one evidence fragment and the one figure directory, and no product file or test is added.\nSCORE durability: 7\nJUSTIFICATION durability: the only added assertion is scripts/prototypes/bank_solve_profile/control.py:79, whose shift is by construction minus the dropped stage over the iterate, so it cannot redden on any measurement regression and no test fails if measure.py breaks.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/bank_solve_profile/plot.py:1 follows the sibling prototype idiom (`plt.style.use(\"data-ink\")`, save then parse the SVG) and introduces no forbidden name, though commits typed `perf(equilibrium)` and `test(equilibrium)` misdescribe scripts under scripts/prototypes.\nSCORE reuse: 12\nJUSTIFICATION reuse: the seed, lane perturbation and state builders at scripts/prototypes/bank_solve_profile/measure.py:93-99 are copied verbatim from the sibling scripts/prototypes/bank_solve_read/measure.py:95-99 the brief named for reuse and repeated again in fused.py:64-66 and marginal.py:50, with `emit`/`timed` also duplicated in three files.\nFINDING scripts/prototypes/bank_solve_profile/run_h200.sh:15 non-blocking: the primary evidence log h200-1305948.out ends `EXIT=2` from a bash parse error the log attributes to this file's line 16, but the committed script at the measured revision 7c4a746f7 has 15 lines and `bash -n` exits 0, so the wrapper that produced the log is not the committed artifact, the recorded failure cannot be reproduced from the landing, and a gate reader sees a red status with no committed cause.\nFINDING scripts/prototypes/bank_solve_profile/control.py:79 non-blocking: `assert abs(shifts[biggest]) > 0.15` is arithmetic on the same `values` that form the closure ratio (shift is exactly -values[dropped]/iterate), so it holds for any parsed log and cannot fail for the defect it names - a closure check that never saw its stages - which makes it a tautology rather than a negative control.\nFINDING scripts/prototypes/bank_solve_profile/measure.py:93 non-blocking: the fixture, seed and lane-perturbation block is copied from scripts/prototypes/bank_solve_read/measure.py:95 rather than imported as the brief directed, and the same recipe appears a third and fourth time in fused.py:64 and marginal.py:50, so a later change to the perturbations has four places to miss.\n",
+  "review_run_id": "r-20261105T083232720315-review-of-bank-solve-profile-1f6433fb8677",
+  "reviewed_base_sha": "ccaacf500e8e4150d6721d80adea433acb1904e9",
+  "reviewed_head_sha": "1f6433fb8677dea2d32997933cb5e71a9ebecdf0",
+  "reviewed_run_id": "r-20261105T075417112524-bank-solve-profile",
+  "scores": {
+    "durability": 7,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T08:58:21+00:00",
+  "total": 87
+}

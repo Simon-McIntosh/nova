@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "figure review only; no suite was run and no test file is in this node's write scope.",
+  "blockers": "none",
+  "blocking_finding_count": 0,
+  "caption_verdict": "pass - the caption states the batch order, the unit, both walls, and the fact that the stage sum overruns the wall, so it explains the figure rather than repeating its title.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-05T08:52:13Z",
+  "evidence_inputs": "Figure judged from the rendered PNG at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T084239582222-review-of-bank-solve-profile-1f6433fb8677-figure/image-0.png (1399x720). Segment extents, glyph extents and contrast ratios were measured on that PNG's pixels: x-axis 0 at px 196 and 2000 at px 1281 (0.5425 px/ms); bar fills #1f5d92 census, #3f8ecb decision, #8fc0e4 geometry, #2e8b57 residual, #e07b39 assembly, #7d5ba6 factor, #a05195 back-solve; white-on-fill ratios 2.97 (assembly), 3.53 (decision), 4.25 (residual), 5.36 (factor). Figure is drawn by scripts/prototypes/bank_solve_profile/plot.py and cited from docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html.",
+  "figure_under_review": "docs/figures/sub-millisecond-forward-path/bank-solve-profile/per-iterate-stage.svg",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "the values are legible in the delivered render and every one is repeated exactly in the stage table beside the figure, so the reader is not blocked; recorded for the next figure pass over this style.",
+      "file": "scripts/prototypes/bank_solve_profile/plot.py",
+      "id": "f397c8e5d75",
+      "line": 141,
+      "severity": "non-blocking",
+      "summary": "Value labels are drawn white on every segment except read geometry, so the two numbers the figure exists to deliver are the faintest ink on the page: white on step assembly #e07b39 measures 2.97:1 and white on read decision #3f8ecb 3.53:1, both under the 4.5:1 normal-text threshold and the first under the 3:1 large-text floor. At the rendered 1399 px the numerals are readable; scaled into the ~900 px page column they lose the margin, while the unused factor (#7d5ba6, 5.36:1) and residual (#2e8b57, 4.25:1) fills would have carried white comfortably."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "both values are in the stage table immediately above the figure and neither stage changes the figure's conclusion; recorded so the next stage-split figure tests fit rather than a proportional cutoff.",
+      "file": "scripts/prototypes/bank_solve_profile/plot.py",
+      "id": "f5ba3ed9c72",
+      "line": 133,
+      "severity": "non-blocking",
+      "summary": "The label gate is `width >= 0.05 * top`, a fraction of the axis maximum rather than a test of whether the value fits its segment, so two segments wide enough to carry a number are drawn blank: at sixteen slices the factor segment is 104.9 ms and 56 px wide (the 105 would need about 27 px) and is unlabelled by 0.3 ms under the 5 percent cutoff, and at one slice the read-decision segment is 51.05 ms and 26 px wide and is unlabelled although '51' needs about 18 px. The brief asked for the value printed per stage where it fits. A reader must estimate both by position on the axis; factor is 5.6 percent of the sixteen-slice stage sum and is the third-largest stage."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "colour matching still resolves every stage and no reading of the figure is at stake; the stack and the key deliberately differ because the read stages are grouped by hue rather than by stack position.",
+      "file": "scripts/prototypes/bank_solve_profile/plot.py",
+      "id": "fee4c984bc1",
+      "line": 184,
+      "severity": "non-blocking",
+      "summary": "The legend is placed with ncol=4 over seven handles, so matplotlib fills it column-major and it reads left-to-right as read census, read geometry, step assembly, back-solve on the first row and read decision, step residual, factor on the second. That order is not the stack order of the bars (census, decision, geometry, residual, assembly, factor, back-solve), so a reader walking the bar with the legend has to hunt for each colour instead of tracking the key in sequence. The swatches themselves are unambiguous."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "the caption one line below the image states the relation explicitly, and the closure paragraph follows it; the figure is not read apart from them.",
+      "file": "scripts/prototypes/bank_solve_profile/plot.py",
+      "id": "fb75f3d6fe6",
+      "line": 157,
+      "severity": "non-blocking",
+      "summary": "The bar end (1879 ms at sixteen slices) and the dashed whole-solve mark (602 ms) are different quantities by a factor of 3.12, and the image carries no wording that says so: the label reads only 'whole solve, 602 ms per iterate' while the bar reaches 1879 ms. A reader who takes the bar as the iterate's wall leaves with a wall three times too high. The page caption does reconcile them ('the bar's end is an upper bound on the work and the mark is the measurement it is checked against'), so the figure is not misleading in place, but the image alone does not close the gap."
+    }
+  ],
+  "judged_from": "the rendered PNG only; no SVG markup, dimension attribute or glyph coordinate was read or used",
+  "node": "review-of-bank-solve-profile-1f6433fb8677-figure",
+  "node:reviewed": "bank-solve-profile",
+  "outside_scope": "none",
+  "project": "nova",
+  "rendered_artifact": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T084239582222-review-of-bank-solve-profile-1f6433fb8677-figure/image-0.png",
+  "rendered_size_px": [
+    1399,
+    720
+  ],
+  "review_run_id": "r-20261105T084239582222-review-of-bank-solve-profile-1f6433fb8677-figure",
+  "reviewed_base_sha": "ccaacf500e8e4150d6721d80adea433acb1904e9",
+  "reviewed_head_sha": "1f6433fb8677dea2d32997933cb5e71a9ebecdf0",
+  "reviewed_run_id": "r-20261105T075417112524-bank-solve-profile",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "defect - the printed numerals are white on the bar fills: on step assembly #e07b39 the ratio is 2.97:1 and on read decision #3f8ecb it is 3.53:1, so '1595' and '127' (the two numbers the figure exists to deliver) sit at 2.97:1, below the 3:1 large-text floor. Readable at the rendered 1399 px width; marginal once the page scales the image to a ~900 px column.",
+    "data_ink": "pass - solid stacked bars, one printed value per segment wide enough to hold one, a 1.4 pt dashed mark per row and a frameless legend. Every mark on the canvas is data or keys data; there is no decorative fill.",
+    "decoration": "pass - no grid, no background fill, no shading, no gradient, top and right spines absent, y-axis tick marks removed. Nothing competes with the bars.",
+    "label_collision": "pass - no label is clipped, overlapping another label, or overlapping data. '143' occupies x 221-253 inside its 199-275 segment; '1595' occupies x 710-754 inside 293-1172; '127' occupies x 250-282 inside 232-299; the two dashed whole-solve marks (x 248 and x 527) clear the nearest glyph by about 2 px and cross only the bottom 12 percent of their bar; every text artist lies inside the 1399x720 canvas, measured on the rendered pixels alone.",
+    "legibility": "pass - two stacked bars on one linear ms axis; the orange step-assembly block at sixteen slices dominates the row at a glance, the assembly value 1595 is printed inside it, and the whole-solve wall is marked below each bar. The one-slice row is 101 px of a 1090 px axis, so six of its seven stages are slivers and it carries one printed value; the figure still reads as 'sixteen slices costs much more per iterate, almost all of it in assembly' without consulting the table.",
+    "table_form": "pass - the image answers two visual relations, which stage carries the sixteen-slice iterate and how far the stage sum overruns the wall. The fourteen exact stage values are in the fragment's stage table immediately above it, not in the image, so the image is not a table rendered as bars."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T09:02:00+00:00",
+  "total": null
+}

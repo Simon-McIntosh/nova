@@ -1,10 +1,40 @@
 <section id="diiid-panels-on-solve-currents" aria-labelledby="diiid-panels-on-solve-currents-heading">
-  <h3 id="diiid-panels-on-solve-currents-heading">DIII-D terminal-current display maps: partial measurement</h3>
-  <p>The bank ran on the H200 at source revision <code>08b68062304328bb6de5ae03b5c6e8277e970c0c</code>. It completed three of the five declared frames before the job was stopped. The <a href="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_partial_receipt.json">committed frame checkpoint</a> carries the terminal state, promoted mask, constraint-current compensation, operand path, and operand digest for the first two frames. Both remain nonconverged scientific failures. This is a measurement of the current source, not a revision of the August gate.</p>
-  <table id="diiid-panels-on-solve-currents-frames"><thead><tr><th>Shot</th><th>Frame</th><th>Converged</th><th>Max solved-node mismatch [Wb]</th><th>Promoted nodes</th><th>Nearest promoted to X-point [m]</th><th>Display geometry</th></tr></thead><tbody>
-    <tr><td>d3d_shot_00000c4a7b.parquet</td><td>179</td><td>No; residual 0.418096</td><td>3.685017</td><td>0</td><td>Not applicable</td><td>One closed candidate, no admitted closed cycle</td></tr>
-    <tr><td>d3d_shot_0003ff34e7.parquet</td><td>44</td><td>No; residual 4.275696</td><td>11.167432</td><td>0</td><td>Not applicable</td><td>One closed candidate, no admitted closed cycle</td></tr>
-    <tr><td>d3d_shot_001554e054.parquet</td><td>144</td><td>No</td><td>Unavailable</td><td>Unavailable</td><td>Unavailable</td><td><code>NoQualifiedAxisError</code>: no qualified magnetic-axis candidate has a resolved component; no terminal state or operands</td></tr>
-  </tbody></table>
-  <p>The content-store response was published and the receipt-named matrix and persisted frame rebuilt to 1e-12 in the focused test. With the compensation argument removed from a scratch producer copy, the declared negative-control test failed with <code>KeyError: 'compensation'</code> and exit code 1. The CPU suite added no failures: 13 passed and one skipped at the base; 16 passed after the producer change. The comparison PNG was not produced or inspected because the five-frame bank did not reach rendering.</p>
+  <h3 id="diiid-panels-on-solve-currents-heading">DIII-D terminal-current display maps: completed bank</h3>
+  <p>The five-frame bank completed on the H200 in job <code>1306484</code> at source <code>38ed1755ca3209c3f084d705fff51e5f74d66022</code>, resuming three checkpointed records and completing the remaining two frames and the sensitivity pass in one job (40 min 6 s, payload exit 0). The <a href="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json">dated receipt</a> carries four terminal operand paths and verified SHA-256 digests. Frame 144 is unavailable: <code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; its operand path and digest are null with that reason. It did not stop the bank.</p>
+  <p>The four available panels draw the field of the terminal solve's normalized current moments, conductor currents and constraint compensation on a 10 mm display map, with the solve's promoted mask. All four states remain nonconverged; the strict forward-match verdict remains <code>passed=false</code>. This is a measurement of the stated source. The August receipt, figures and preregistration remain byte-identical.</p>
+  <figure id="diiid-panels-on-solve-currents-comparison">
+    <img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png" alt="Five DIII-D poloidal panels: four terminal-current flux fields against EFIT, and frame 144 explicitly unavailable because no qualified axis exists.">
+    <figcaption>Grey contours and hollow null markers are EFIT; blue contours and solid red null markers are Nova. Both fields use shared levels in Wb. Every panel shows the DIII-D limiter with axes off. Labels outside the panels report convergence, mismatch over solved nodes, promoted-node count and branch refusal. Frame 144 retains its reference geometry and is labelled “unavailable: no qualified axis”. No substitute boundary is drawn for a refused assembly.</figcaption>
+  </figure>
+  <table id="diiid-panels-on-solve-currents-frames">
+    <thead><tr><th>Shot suffix / frame</th><th>Result</th><th>Relative residual</th><th>Max solved-node mismatch [Wb]</th><th>Promoted nodes</th><th>Nearest promoted to X-point [m]</th></tr></thead>
+    <tbody>
+      <tr><td>00000c4a7b / 179</td><td>Nonconverged</td><td>0.418096</td><td>3.685017</td><td>0</td><td>Not applicable</td></tr>
+      <tr><td>0003ff34e7 / 44</td><td>Nonconverged</td><td>4.275696</td><td>11.167432</td><td>0</td><td>Not applicable</td></tr>
+      <tr><td>001554e054 / 144</td><td>Unavailable: no qualified axis</td><td>Unavailable</td><td>Unavailable</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>002495e835 / 146</td><td>Nonconverged</td><td>0.054962</td><td>7.020546</td><td>0</td><td>Not applicable</td></tr>
+      <tr><td>0040ca9bdc / 137</td><td>Nonconverged</td><td>0.062369</td><td>0.845550</td><td>0</td><td>Not applicable</td></tr>
+    </tbody>
+  </table>
+  <p>The absent separatrices are instrumented refusals. Replaying the saved maps through the assembler in H200 job <code>1306557</code> reproduced <code>branch_overflow=true</code> at the production <code>branch_capacity=256</code> on every available frame, with well-formed contours and graphs. A capacity of 1024 provides the positive control below. The replay's curves are diagnostic outputs only; the published measurement retains the original refusal and null boundary-separation metrics.</p>
+  <table id="diiid-panels-on-solve-currents-capacity">
+    <thead><tr><th>Frame</th><th>Capacity 256</th><th>Capacity 1024</th><th>Cause established</th></tr></thead>
+    <tbody>
+      <tr><td>179</td><td>Overflow; refused</td><td>627 closed segments; admitted</td><td>Branch capacity</td></tr>
+      <tr><td>44</td><td>Overflow; refused</td><td>465 closed segments; admitted</td><td>Branch capacity</td></tr>
+      <tr><td>146</td><td>Overflow; zero closed candidates</td><td>No overflow; still zero closed candidates</td><td>Capacity plus absence of an axis-enclosing closed candidate</td></tr>
+      <tr><td>137</td><td>Overflow; refused</td><td>537 closed segments; admitted</td><td>Branch capacity</td></tr>
+    </tbody>
+  </table>
+  <p>Frame 146 has one cycle component and one axis-enclosing component, but no component satisfies both predicates. No fallback curve is added. The complete replay terms and timings are stored in <code>branch_capacity_replay</code> in the receipt and in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/operand-repair.log</code>.</p>
+  <figure id="diiid-panels-on-solve-currents-cohort">
+    <img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png" alt="Cohort metrics show nonconvergence and large field and landmark differences, with an explicit separatrix assembly refusal.">
+    <figcaption>The dashed R² line is the unchanged registered median bar, 0.90155. The missing frame-144 values reflect its unavailable state. The boundary panel preserves the EFIT population and the limiter; the missing Nova boundaries are explicitly identified as refused assemblies.</figcaption>
+  </figure>
+  <figure id="diiid-panels-on-solve-currents-landmarks">
+    <img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png" alt="Five equally sized DIII-D landmark panels compare the terminal solve's axes, X-points and centroids with EFIT, keeping the unavailable row visible.">
+    <figcaption>Terminal solver landmarks are connected to their EFIT references. Hollow markers are EFIT and filled markers are Nova. The wall supplies the spatial scale; labels carry displacement in metres. These landmarks describe the terminal lattice state, while the flux comparison above describes the field of its currents.</figcaption>
+  </figure>
+  <p>Replay exposed a persistence defect before delivery: <code>RuntimeError: persisted frame operand digest changed</code>. The sensitivity pass had overwritten frame 179's baseline archive at the same frame tag, changing its mismatch from 3.685017 Wb to 3.697047 Wb. Operand filenames now include their content digest, and the repeated-frame test verifies that both variants survive. Job <code>1306557</code> re-solved the baseline at source <code>4055f7e96a1d334acbbbb6cdb00a016cecf94c02</code> and reproduced its original archive byte for byte: <code>f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc</code>. All four receipt-named archives now match their digests.</p>
+  <p>The final focused suite at <code>9a568b9eec4b9a108662d66c3101e450feb4314f</code> passed 18 tests, including the real committed-frame operand replay and the corrupted-digest refusal; the base arm passed 13 tests with one skip and no failures. Dropping the compensation argument at the producer call site in a scratch copy raises the measured solved-node mismatch from 0 to 7.5 Wb: <code>test_compensated_frame_reproduces_solved_nodes</code> fails its 1e-12 Wb check and exits 1. The conductor response uses the verified content store. All three 1400 × 720 PNGs passed the save-time text check and were visually inspected: zero clipped labels and zero overlapping labels.</p>
 </section>

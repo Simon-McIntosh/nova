@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-05T09:57:43.230Z",
   "dispatched_at": "2026-11-05T09:51:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking arithmetic in a measurement record: the median is 7.5 steps against a stated 8, which moves the straggler bound by a few per cent and changes no decision",
+      "recorded_at": "2026-11-05T10:00:13.277533+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html",

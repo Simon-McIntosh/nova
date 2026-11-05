@@ -1,0 +1,33 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-05T19:32:31.833Z",
+  "dispatched_at": "2026-11-05T19:23:30Z",
+  "drawing_script": "scripts/prototypes/bank_solve_breakpoint/report.py",
+  "figure": "docs/figures/sub-millisecond-forward-path/bank-solve-breakpoint/residual-history.svg",
+  "findings": [],
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass\nRUBRIC data_ink: pass\nRUBRIC decoration: pass\nRUBRIC contrast: pass\nRUBRIC table_form: pass\nRUBRIC label_collision: pass\n\nRead-only figure review of the residual-history figure for run r-20261105T174420294303-bank-solve-breakpoint, judged from the rendered PNG attached to this review (image-0.png, 1399x720). No SVG was opened.\n\nWhat the picture shows. Base (grey, dashed, circular markers) starts at 1.9e-7 at restart update 0, holds flat to update 1, decays to about 7e-8 by update 4, steps down at update 5 to 3e-10, then settles at 1.8e-10 by update 8 - still above the dotted acceptance limit at 1e-10. Head (blue, solid) starts at 1.6e-9 at update 0 and reaches 4.66e-11 at update 1, one decade below the limit. The figure makes the run's conclusion visible without reference to the text: the base arm fails to reach the acceptance limit in eight restarts and the head arm passes on its first.\n\nCaption. The fragment caption (bank-solve-breakpoint.html, figure bank-solve-breakpoint-history) is substantive rather than a title repeat: it names lane 0 of the unchanged sixteen-lane CPU cycle test on sirius, states that each arm restarts after its own two production updates, and quotes the two terminal values, 1.836692e-10 for base after eight updates and 4.662581e-11 for head after one. Both figures agree with the plotted points. No caption finding.\n\nAttachment integrity. The attached PNG is 1399x720 against 1400x720 for the producer's own render at resumed/residual-history.png; the two differ only by sub-pixel resampling along glyph and line edges (5098 of about 1.0 million pixels differ by more than 60 levels, dark-pixel count 8234 against 8785). This is an attachment artefact, not a figure defect, and is recorded so a later reader knows the verdict was formed on a resampled copy of the same drawing rather than on a different render.\n\nNo blocking or non-blocking findings: every rubric item was checked against the rendered image and passed.",
+  "review_run_id": "r-20261105T191802587183-review-of-bank-solve-breakpoint-bbf451783cb0-figure",
+  "reviewed_base_sha": "bd3b868dbcd2b60fe0b0840778324f8356861173",
+  "reviewed_head_sha": "bbf451783cb019e48e4565d9a9e8389c5c2de55b",
+  "reviewed_image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T191802587183-review-of-bank-solve-breakpoint-bbf451783cb0-figure/image-0.png",
+  "reviewed_run_id": "r-20261105T174420294303-bank-solve-breakpoint",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - near-black axis and tick text on white, head in a saturated blue, base in mid grey (#929292) that stays visible against the white without competing with the head series; the dotted acceptance limit reads as a threshold rather than as a third result.",
+    "data_ink": "pass - two data series (nine base points, two head points) and one threshold line carry the whole panel; no fills, no shading, no data-free furniture beyond axis ticks and a three-entry legend.",
+    "decoration": "pass - no gridlines, no gradient, no background fill; top and right spines are absent; the legend is frameless and sits above the panel in clear space.",
+    "label_collision": "pass - no text is clipped by the canvas edge and no two labels overlap: the legend's three entries are separated, axis labels sit in the outer margins, the y-axis label is rotated in the left margin, and no label is drawn over the data. The head arm's terminal marker at 4.66e-11 sits above the bottom spine with clearance.",
+    "legibility": "pass - logarithmic y-axis with decade ticks 1e-10 to 1e-7, 9 integer x ticks, both axis labels ('Restart update', 'Fresh residual') and every marker read at a glance; the base and head arms are distinguishable by colour, dash and marker, not by subtlety.",
+    "table_form": "pass - the content is a per-update convergence history (log-scale decay of two arms against a threshold), a relationship that is naturally a line plot and would lose its shape as a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T19:32:35.035515+00:00",
+  "total": null
+}

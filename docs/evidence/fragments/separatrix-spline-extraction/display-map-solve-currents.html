@@ -1,0 +1,75 @@
+<section data-reckon="evidence" id="display-map-solve-currents">
+<h2>The display map is judged on the nodes the solve claims</h2>
+
+<p id="display-map-solve-currents-summary">A reduced solve's closing trip keeps the
+trial state on the nodes it promotes instead of the map's image
+(<code>mapped = jnp.where(promoted, state, image)</code>), so those nodes carry a
+piece of the iterate that no field of currents reproduces. Judging a display map
+against the terminal state over the whole lattice therefore charges the display
+for a gap no display can close: on the converged coil-edit state the promoted
+paste is the largest part of the measured 2.4&nbsp;mWb gap, and no field of
+currents continues it. <code>build_display_flux_map</code> now takes the solve's
+own promoted mask and reports the node mismatch over the nodes the solve does
+not promote, beside the unmasked figure it has always reported. The mask is read
+from <code>ForwardEquilibrium.promoted_mask</code>; nothing recomputes it.</p>
+
+<p id="display-map-solve-currents-mechanism">The field the builder evaluates is
+the solve's own: its normalised moment triple through
+<code>ForwardFluxOperator.normalised_current_moments_and_observation</code>, its
+conductor currents, and the compensating conductor current a constrained route
+folds into its prescribed vector before imaging. That compensation enters
+through <code>compensation</code> as a conductor-current flux and is added to the
+same sum the external conductor flux is carried in, so
+<code>DisplayCoupling</code> stays the pair it was — no third callable, no second
+coupling.</p>
+
+<table id="display-map-solve-currents-fields">
+<caption>Receipt fields. <code>max_node_mismatch_wb</code> keeps its landed
+meaning: the largest deviation over all lattice nodes.</caption>
+<tr><th>field</th><th>population</th></tr>
+<tr><td><code>max_node_mismatch_wb</code></td><td>every lattice node (unchanged)</td></tr>
+<tr><td><code>max_solved_node_mismatch_wb</code></td><td>the non-promoted nodes only</td></tr>
+<tr><td><code>promoted_node_count</code></td><td>the solve's promoted set</td></tr>
+<tr><td><code>nearest_promoted_to_xpoint_m</code></td><td>distance from the nearest promoted node to the polished X-point</td></tr>
+</table>
+
+<table id="display-map-solve-currents-measure">
+<caption>Manufactured converged state of <code>tests/test_display_flux.py</code>:
+9&nbsp;&times;&nbsp;9 lattice, three promoted nodes pasted 50&nbsp;mWb off the map,
+fixed-point residual 5.684e-13&nbsp;Wb. Gate: 9 passed, EXIT=0.</caption>
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>fixed-point residual</td><td>5.684e-13&nbsp;Wb</td></tr>
+<tr><td><code>max_node_mismatch_wb</code></td><td>5.000e-2&nbsp;Wb</td></tr>
+<tr><td><code>max_solved_node_mismatch_wb</code></td><td>5.684e-13&nbsp;Wb</td></tr>
+<tr><td>solved-node figure over ten residuals</td><td>1.0&nbsp;&times; (the figure equals the residual)</td></tr>
+<tr><td><code>promoted_node_count</code></td><td>3</td></tr>
+<tr><td><code>reproduction_relative_error</code></td><td>0.0 (compensation excluded from the comparison)</td></tr>
+<tr><td>the same solved figure with the compensation withheld</td><td>8.000e-3&nbsp;Wb</td></tr>
+</table>
+
+<p id="display-map-solve-currents-control">The declared control drops the
+compensation term in a scratch copy of the module. The non-promoted mismatch
+test then fails at 8.000e-3&nbsp;Wb against ten residuals of 5.684e-12&nbsp;Wb
+(1 failed, EXIT=1), so the term is load-bearing in the field the map draws and
+not merely carried through it.</p>
+
+<figure id="display-map-solve-currents-figure">
+<img src="/nova/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg"
+     alt="Left: the 9 by 9 lattice with three promoted nodes marked and the X-point seed. Right: map-minus-state at every lattice node on a logarithmic axis, the solved nodes at the fixed-point residual and the promoted nodes at 5e-2 Wb, with hollow markers showing the same nodes when the compensating conductor flux the constrained route carries is withheld."/>
+<figcaption>The lattice with its promoted set, and the per-node deviation of the
+map from the converged state for the two populations. Promoted nodes carry a
+piece of the iterate no field of currents reproduces, so the unmasked figure is
+their paste; the nodes the solve claims sit at the residual. The hollow markers
+are the same nodes with the constrained rows' compensating conductor flux
+withheld, which is the quantity the constrained route images with.</figcaption>
+</figure>
+
+<p id="display-map-solve-currents-coil-edit">The real-machine arm of this
+section is carried by the coil-edit redraw, which owns that machine's
+<code>DisplayCoupling</code> and will consume this builder: on its converged
+panel it must show <code>max_solved_node_mismatch_wb</code> at most ten times
+that solve's residual. Building a coupling for a real machine at off-lattice
+points needs the machine's source geometry, which <code>ForwardProfile</code>
+does not carry; that construction belongs with the producer, not with this
+builder.</p>
+</section>

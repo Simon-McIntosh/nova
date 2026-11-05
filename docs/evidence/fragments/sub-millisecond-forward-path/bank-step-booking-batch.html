@@ -27,10 +27,10 @@ requires that refusal on the three-node seed.</p>
 against a limit of four. Measurements use the production fresh-correction lane
 mapper, with explicit synchronized calls through the shared timing instrument.</p>
 <table id="bank-step-booking-batch-walls"><thead><tr><th>Arm</th><th>Lanes</th>
-<th>Jacobian [ms/batch]</th><th>Converged solve / maximum updates [ms]</th>
-<th>Converged wall [ms/slice]</th><th>Maximum updates</th>
+<th>Jacobian [ms/batch]</th><th>Solve wall [ms]</th>
+<th>Per-iterate wall [ms]</th><th>Converged wall [ms/slice]</th><th>Maximum updates</th>
 <th>Largest fresh residual</th></tr></thead>
-<tbody><tr><td>base</td><td>1</td><td>18.963</td><td>129.514</td><td>647.572</td><td>5</td><td>7.9693e-11</td></tr><tr><td>base</td><td>16</td><td>289.489</td><td>1108.607</td><td>692.879</td><td>10</td><td>9.6036e-11</td></tr><tr><td>batched</td><td>1</td><td>9.395</td><td>107.710</td><td>323.131</td><td>3</td><td>1.3998e-11</td></tr><tr><td>batched</td><td>16</td><td>31.804</td><td>985.405</td><td>739.054</td><td>12</td><td>9.8183e-11</td></tr></tbody></table>
+<tbody><tr><td>base</td><td>1</td><td>18.963</td><td>129.514</td><td>25.903</td><td>647.572</td><td>5</td><td>7.9693e-11</td></tr><tr><td>base</td><td>16</td><td>289.489</td><td>1108.607</td><td>110.861</td><td>692.879</td><td>10</td><td>9.6036e-11</td></tr><tr><td>batched</td><td>1</td><td>9.395</td><td>107.710</td><td>35.903</td><td>323.131</td><td>3</td><td>1.3998e-11</td></tr><tr><td>batched</td><td>16</td><td>31.804</td><td>985.405</td><td>82.117</td><td>739.054</td><td>12</td><td>9.8183e-11</td></tr></tbody></table>
 <figure id="bank-step-booking-batch-figure"><img
 src="/nova/figures/sub-millisecond-forward-path/bank-step-booking-batch/jacobian-wall.svg"
 alt="Jacobian wall against one and sixteen lanes, base and batched, on linear

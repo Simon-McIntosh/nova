@@ -45,11 +45,15 @@ def test_stored_boundary_support_and_accuracy_floor_are_explicit(result):
     assert region["contour"] == "stored_lcfs"
     assert region["contour_point_count"] == 151
     assert region["authoritative_cell_count"] == 243
-    assert region["banked_solved_branch_cell_count"] == 234
-    assert region["overlap_cell_count"] == 231
-    assert region["symmetric_difference_cell_count"] == 15
-    assert region["stored_only_cell_count"] == 12
-    assert region["solved_only_cell_count"] == 3
+    assert region["solved_boundary_status"]["status"] == "open"
+    for name in (
+        "banked_solved_branch_cell_count",
+        "overlap_cell_count",
+        "symmetric_difference_cell_count",
+        "stored_only_cell_count",
+        "solved_only_cell_count",
+    ):
+        assert region[name] is None
     assert region["exact_poloidal_area_m2"] == BANKED_STORED_BOUNDARY_AREA
     assert region["exact_toroidal_volume_m3"] == BANKED_STORED_BOUNDARY_VOLUME
     assert region["cell_quadrature_poloidal_area_m2"] == pytest.approx(
@@ -109,21 +113,16 @@ def test_instrument_and_physics_ratios_close_multiplicatively(result):
     assert split["additive_closure_residual_t2_m3"] == pytest.approx(0.0, abs=2.0e-16)
 
 
-def test_support_rebaseline_is_visible_and_not_the_full_deficit(result):
+def test_open_branch_does_not_claim_a_support_rebaseline(result):
     receipt, _fields = result
     region = receipt["controlled_region"]
     assert region["banked_solved_field_energy_t2_m3"] == BANKED_SOLVED_FIELD_ENERGY
-    assert region["net_area_change_from_banked_support_m2"] == pytest.approx(
-        0.0682031250471482, rel=2.0e-15
-    )
-    assert region["net_area_change_fraction_of_banked_support"] == pytest.approx(
-        0.038461538461538464, rel=2.0e-15
-    )
-    assert region["support_shift_cannot_explain_prior_deficit"] is True
-    assert (
-        abs(region["signed_relative_field_energy_shift"])
-        < region["prior_published_deficit_magnitude"]
-    )
+    assert region["net_area_change_from_banked_support_m2"] is None
+    assert region["net_area_change_fraction_of_banked_support"] is None
+    assert region["rebaselined_over_banked"] is None
+    assert region["signed_relative_field_energy_shift"] is None
+    assert region["support_shift_cannot_explain_prior_deficit"] is None
+    assert region["prior_published_deficit_magnitude"] > 0.0
 
 
 def test_all_outcome_branches_are_declared_before_the_measured_verdict(result):

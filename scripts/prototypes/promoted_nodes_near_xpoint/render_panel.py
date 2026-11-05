@@ -210,7 +210,7 @@ def render(
         zorder=4,
     )
     zoom.annotate(
-        f"{1.0e3 * span:.1f} mm",
+        f"{1.0e3 * span:.2f} mm",
         xy=centre,
         xytext=(0.06, 0.16),
         textcoords="axes fraction",

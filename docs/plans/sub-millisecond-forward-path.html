@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="159">
+<meta name="plan-version" content="160">
 <meta name="plan-modified" content="2026-11-05">
 </head>
 <body>
@@ -572,6 +572,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T200301182214-review-of-bank-prototype-provenance-1cbb3e6d1c12" data-who="reckon-build" data-when="2026-11-05T20:12:54.486Z">
     <div class="r-comment-body"><p>independent review of bank-prototype-provenance at 1cbb3e6d1c12b1835da206046b77ecf969e1452f against base 5391e907f11951be379de55b4a587a6d4eeb7715 — scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 6, fit 18, reuse 20; both deliverables landed (pair_gaps imported by the breakpoint report with the copy deleted, 62 -P probe invocations across 59 bank_* shell files); three non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261105T193937880801-bank-prototype-provenance" data-who="reckon-build" data-when="2026-11-05T19:58:08.166Z">
+    <div class="r-comment-body"><p>bank-prototype-provenance — bank_solve_breakpoint/report.py imports pair_gaps from bank_solve_cycle/report.py with no copied budget left and reproduces the recorded PRECISION line byte-for-byte, and 62 bank_* shell files run their provenance probes with -P so PYTHONPATH, not the working directory, names the measured tree; no figure.</p></div>
 </div>
 </section>
 </main>

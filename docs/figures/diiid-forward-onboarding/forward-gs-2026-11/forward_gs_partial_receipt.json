@@ -1,9 +1,9 @@
 {
   "cohort_status": {
-    "attempted_frame_count": 2,
+    "attempted_frame_count": 3,
     "complete": false,
     "declared_frame_count": 5,
-    "unattempted_frame_count": 3,
+    "unattempted_frame_count": 2,
     "unattempted_row_policy": "rows not yet attempted are absent rather than fabricated"
   },
   "frame_records": [
@@ -1602,6 +1602,109 @@
       "solver_termination": "public branch selector found no convergence-qualified diverted root",
       "target_current_a": 1182769.0064013004,
       "time_ms": 1080.0
+    },
+    {
+      "achieved_current_a": null,
+      "achieved_topology_class": null,
+      "active_set_cycle_damping_activations": [],
+      "active_set_iterations": 0,
+      "active_set_mask_differences": [],
+      "active_set_residuals": [],
+      "banked_read": {
+        "nova_axis_flux_wb": null,
+        "nova_axis_rz_m": null,
+        "nova_x_point_rz_m": null,
+        "o_candidate_count": null,
+        "o_second_best_flux_margin_wb": null,
+        "read_exception_text": "no qualified magnetic-axis candidate has a resolved component",
+        "read_status": "NoQualifiedAxisError",
+        "reference_axis_rz_m": [
+          1.7594630718231201,
+          0.013277635909616947
+        ],
+        "reference_x_points_rz_m": [],
+        "x_candidate_count": null,
+        "x_second_best_flux_margin_wb": null
+      },
+      "branch_selection": {},
+      "conductor_current_receipt": {},
+      "converged": false,
+      "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-05 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
+      "displacement_decomposition": null,
+      "display_map": null,
+      "finite": false,
+      "fixed_point_relative_residual": null,
+      "frame": 144,
+      "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+      "iterations": 0,
+      "metrics": {
+        "additive_gauge_wb": null,
+        "boundary_comparison_failures": [
+          "solve_exception_before_geometry"
+        ],
+        "closed_boundary_symmetric_rms_distance_m": null,
+        "closed_boundary_symmetric_sup_distance_m": null,
+        "interior_fractional_rms": null,
+        "interior_r_squared": null,
+        "labelled_q95_nova": null,
+        "magnetic_axis_displacement_mm": null,
+        "polished_saddle_to_nearest_efit_x_m": null,
+        "predicted_q95_nova": null,
+        "signed_relative_q95_error": null,
+        "topology_class_agreement": null
+      },
+      "pseudo_wall_expansion": 0.02,
+      "pseudo_wall_statement": "solve failed before topology geometry was available",
+      "reliable_flux_surfaces": 0,
+      "residual_history": [],
+      "residual_tolerance": 1e-05,
+      "resolved_defaults": {
+        "clip_mode": "chord",
+        "compilation_cache_directory": null,
+        "deviations": {
+          "gmres_iterations": 24,
+          "newton_steps": 24,
+          "qualification_tolerance": 1e-05,
+          "warmup": 8
+        },
+        "nova_version": "0.11.0.post10061+g9829c310c",
+        "policy": {
+          "active_set_steps": 16,
+          "best_iterate_retention": true,
+          "cached_machine": true,
+          "compilation_cache": true,
+          "continuation": true,
+          "current_pin": true,
+          "exact_kernels": true,
+          "gmres_iterations": 24,
+          "kernel_tolerance": 1e-08,
+          "newton_steps": 24,
+          "own_mask_acceptance": true,
+          "qualification_tolerance": 1e-05,
+          "relaxation": 0.5,
+          "route": "newton_krylov",
+          "settled_exit": true,
+          "stagnation_stop": true,
+          "step_cap": 10.0,
+          "topology": {
+            "edge_tolerance": 1e-12,
+            "fragment_capacity": 2,
+            "hessian_tolerance": 1e-10,
+            "normal_form_pitch_floor": 1.5,
+            "normal_form_radius": 0.0,
+            "null_capacity": 16,
+            "polish_iterations": 12,
+            "position_tolerance": 1e-10
+          },
+          "warmup": 8
+        }
+      },
+      "seed_identity_detected": false,
+      "shot": "d3d_shot_001554e054.parquet",
+      "solve_exception_class": "NoQualifiedAxisError",
+      "solver_termination": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
+      "target_current_a": null,
+      "time_ms": 3240.0
     }
   ],
   "measurement": "circuit-driven current-pinned forward GS frame checkpoint",

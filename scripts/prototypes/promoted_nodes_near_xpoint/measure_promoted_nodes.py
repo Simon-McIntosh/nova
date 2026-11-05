@@ -507,6 +507,37 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     return receipt, fields
 
 
+def _print_headlines(receipt: dict) -> None:
+    """Write the headline numbers to the log before the receipt is written.
+
+    The receipt is a serialisation step after the measurement, and a failure
+    there once lost a complete solve. These lines are emitted first so the
+    numbers survive a writer defect and can be read straight out of the job log.
+    """
+    difference = receipt["image_minus_state"]
+    x_point = receipt["x_point"]
+    separatrix = receipt["separatrix"]
+    lines = [
+        ("solved_max_abs_wb", difference["solved_max_abs_wb"]),
+        ("solved_rms_wb", difference["solved_rms_wb"]),
+        ("promoted_max_abs_wb", difference["promoted_max_abs_wb"]),
+        ("promoted_rms_wb", difference["promoted_rms_wb"]),
+        ("whole_lattice_max_abs_wb", difference["whole_lattice_max_abs_wb"]),
+        ("x_point_displacement_mm", x_point["displacement_mm"]),
+        ("x_point_displacement_lattice_cells", x_point["displacement_lattice_cells"]),
+        ("x_point_displacement_r_mm", x_point["displacement_r_mm"]),
+        ("x_point_displacement_z_mm", x_point["displacement_z_mm"]),
+        ("lobe_direction_shift_deg", separatrix["lobe_direction_shift_deg"]),
+        ("lobe_tip_shift_mm", separatrix["lobe_tip_shift_mm"]),
+    ]
+    lines.extend(
+        (f"leg_direction_shift_{index}_deg", value)
+        for index, value in enumerate(separatrix["leg_direction_shifts_deg"])
+    )
+    for name, value in lines:
+        print(f"HEADLINE {name} {value}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--edit-index", type=int, default=12)
@@ -517,6 +548,7 @@ def main() -> None:
     parser.add_argument("--fields", type=Path, required=True)
     arguments = parser.parse_args()
     receipt, fields = measure(arguments.edit_index, arguments.carrier)
+    _print_headlines(receipt)
     arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
     arguments.receipt.write_text(
         json.dumps(

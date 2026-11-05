@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-05T08:59:49.850Z",
   "dispatched_at": "2026-11-05T08:42:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype wrapper's EXIT=2 on its closing echo came after every measurement line was written; the log records them and the manifest says so; no product effect",
+      "recorded_at": "2026-11-05T09:31:15.415638+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_solve_profile/run_h200.sh",

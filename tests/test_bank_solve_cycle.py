@@ -124,3 +124,40 @@ def test_diverted_lanes_leave_near_root_cycle():
     print("DIVERTED_CYCLE", np.asarray(result.steps), np.asarray(result.residual))
     assert bool(jnp.all(result.converged)), "cycle lanes exceed eight restart steps"
     assert float(jnp.max(result.residual)) <= 1e-10
+
+
+def test_unchanged_decision_unlocks_when_residual_stalls(monkeypatch):
+    """A constant residual must release a lock even with identical selections."""
+    from tests.test_bank_solve_driver import _toy_residual, _unit_update
+
+    def stationary_step(*args, **kwargs):
+        correction = _unit_update(*args, **kwargs)
+        return correction._replace(
+            update=tuple(jnp.zeros_like(v) for v in correction.update)
+        )
+
+    monkeypatch.setattr(support_read, "read_batch", _toy_read)
+    monkeypatch.setattr(support_read, "step_residual", _toy_residual)
+    monkeypatch.setattr(support_read, "newton_step", stationary_step)
+    states = tuple(jnp.full((1, 1), 1e-7) for _ in range(3))
+    points = jnp.zeros((1, 1, 2))
+    result = jax.jit(
+        lambda values: support_read.solve_batch(
+            None,
+            None,
+            values,
+            points,
+            points,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=4,
+        )
+    )(states)
+    jax.block_until_ready(result)
+    print("STALL_RELEASE", np.asarray(result.unfreezes), np.asarray(result.freezes))
+    assert not bool(result.converged[0])
+    assert int(result.unfreezes[0]) == 2
+    assert int(result.freezes[0]) == 2

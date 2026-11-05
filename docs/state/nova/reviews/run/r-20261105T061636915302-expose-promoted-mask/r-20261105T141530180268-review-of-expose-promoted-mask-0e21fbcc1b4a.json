@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-05T14:28:18.452Z",
   "dispatched_at": "2026-11-05T14:16:52Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "tests/test_reduced_newton.py cannot complete in one allocation (four tests in 32 min before the limit); its first test fails identically at base and head; this change only adds promoted_mask to the solve result and leaves every existing field unchanged, which the five focused tests and the H200 slow test assert",
+      "recorded_at": "2026-11-05T14:38:23.680556+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T061636915302-expose-promoted-mask/manifest.md",

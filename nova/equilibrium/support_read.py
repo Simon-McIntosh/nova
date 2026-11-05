@@ -1677,8 +1677,10 @@ def solve_batch(
 
         def choose(mask, trial, retained):
             return jax.tree.map(
-                lambda new, old: jnp.where(
-                    mask.reshape((lanes,) + (1,) * (new.ndim - 1)), new, old
+                lambda trial_leaf, retained_leaf: jnp.where(
+                    mask.reshape((lanes,) + (1,) * (trial_leaf.ndim - 1)),
+                    trial_leaf,
+                    retained_leaf,
                 ),
                 trial,
                 retained,

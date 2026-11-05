@@ -22,6 +22,11 @@
       "kind": "exempted",
       "reason": "log-header provenance slip in a prototype probe; the arms are distinguished by their measured outcomes (0 against 2 unfreezes), and no product code depends on it",
       "recorded_at": "2026-11-05T13:35:52.251944+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "bank-solve-linesearch",
+      "recorded_at": "2026-11-05T13:35:59.846206+00:00"
     }
   },
   "findings": [

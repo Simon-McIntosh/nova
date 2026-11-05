@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest carries no baseline_suite or after_suite arms, and this review round covers only a51678ba2..da576d4bd, so there is no base/head suite pair to take a set difference over and no added failure id can be derived. The landed change touches one benchmark module and three evidence files; nothing in tests/ imports it. The zero is a measured absence of a suite arm, not a green delta.",
+  "call_sites": [],
+  "completed_at": "2026-11-03T11:07:52.018Z",
+  "dispatched_at": "2026-11-03T11:00:05Z",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "manifest.md",
+      "id": "r1a4c9e70b2",
+      "line": 20,
+      "severity": "blocking",
+      "text": "The tests line is a template rather than the literal command: it carries <worktree>, <probe> and <scratch> unsubstituted plus trailing prose ('run twice: once from revision ...'), and the committed gate log carries no '# command:' header to fall back on, so promotion cannot fill a re-runnable receipt from it and refuses the line on shape."
+    },
+    {
+      "disposition": null,
+      "file": "benchmarks/forward_solve_memory_ledger.py",
+      "id": "s7b2f1d94c3",
+      "line": 142,
+      "severity": "non-blocking",
+      "text": "persist() writes its scratch file and replaces the target itself, duplicating the atomic JSON writer the repository already owns at nova/io/json.py:12 (write_atomic) and the sibling copy at benchmarks/compile_host_memory.py:56; the new copy extends neither and drops write_atomic's fsync of both the file and its directory, so the durability module a reader is told this follows is actually less durable than the owner it duplicates."
+    },
+    {
+      "disposition": null,
+      "file": "docs/research/forward-solve-memory-ledger/interrupted-run.log",
+      "id": "t3e8a0c15d7",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The banner records revision a51678ba2, but the code that produced this log is the repaired file (the log's LEDGER lines are printed only by persist(), which a51678ba2 at benchmarks/forward_solve_memory_ledger.py:424 does not have; its single write is the last statement of main()), so the evidence artifact names a revision that cannot produce it, and a reader checking out the named sha cannot reproduce the log."
+    },
+    {
+      "disposition": null,
+      "file": "docs/research/forward-solve-memory-ledger/README.md",
+      "id": "u9c5b6a21f4",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "The control's failing arm - the same command run from the pre-repair revision leaving its output directory empty - is asserted in prose only; no log, listing or exit record for that arm is committed, so the negative control rests on the worker's account for the half that has to fail rather than on an artifact a reader can inspect."
+    },
+    {
+      "disposition": null,
+      "file": "manifest.md",
+      "id": "v2d7f4b83a9",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "negative_control_log names two files joined by 'and' ('...interrupted-run.log and interrupted-run-ledger.json), not the single bare path the field contract requires, so a reader or check that opens the line as a path resolves nothing."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Searched nova/, tests/, scripts/, benchmarks/, docs/ and apps/ for references to forward_solve_memory_ledger; nothing imports the module and nothing references it outside its own file, so it has no production call site.",
+    "diff": "Read both commits against a51678ba2: a76a85190 adds persist() and census() plus a SIGTERM handler and calls them from begin(), end() and the three census sites, and removes the single end-of-main write; da576d4bd adds one paragraph to docs/research/forward-solve-memory-ledger.html:125 and the README and the two interrupted-run evidence files, with several unrelated ruff-format-only line reflows in the source file.",
+    "done_when": "The done_when for this round is that a run stopped before the end of main() still writes the ledger; the gate is the controlled interrupted run recorded in docs/research/forward-solve-memory-ledger/README.md:7-12 and manifest.md:20, and the committed ledger (interrupted-run-ledger.json) carries completed:false, stop_signal:SIGTERM, nine phases_completed and census_inflight:after-warm-execute, which is the measure the finding named; the failing arm of the control is asserted in prose only, with no committed log or listing for it.",
+    "goal": "The source goal (brief.md done-when 1) asks that the probe write its ledger under docs/research/forward-solve-memory-ledger/ and attribute the memory; the two commits gained since the prior review (a76a85190, da576d4bd) make benchmarks/forward_solve_memory_ledger.py persist that ledger at every phase boundary and on SIGTERM, and land the interrupted-run ledger and README under docs/research/forward-solve-memory-ledger/, so the persistence half of the goal is met and the round answers the prior review's one blocking finding.",
+    "manifest": "Read manifest.md; it records status complete, commits 942b8b99f..da576d4bd, the repair note for finding f03dff54d67, and the negative-control note, but its tests line at manifest.md:20 is a template carrying <worktree>, <probe> and <scratch> placeholders with trailing prose, and its negative_control_log at manifest.md:22 names two path-like phrases joined by 'and' rather than one bare path.",
+    "write_paths": "The declared write paths are benchmarks/forward_solve_memory_ledger.py, docs/research/forward-solve-memory-ledger.html and docs/research/forward-solve-memory-ledger; git diff --stat a51678ba2..da576d4bd reports exactly five paths, all inside that fence (forward_solve_memory_ledger.py, the .html, and README.md plus the two interrupted-run evidence files under the directory), with no product source touched."
+  },
+  "notes": {
+    "negative_control_reproduction": "The pre-existing defect was re-read rather than re-run: git show a51678ba2:benchmarks/forward_solve_memory_ledger.py:424 is the only ledger write and it is the last statement of main(), so a SIGTERM during any earlier phase writes nothing - the reproduction the committed interrupted run demonstrates at the repaired head.",
+    "no_negative_control_run": "No mutation was applied by this review; this is a reading review and the reading bound held.",
+    "reuse_search": "Searched benchmarks/ and nova/ for an atomic JSON receipt writer; nova/io/json.py:12 write_atomic is the owning mechanism, and benchmarks/compile_host_memory.py:56 _write_json is the older in-repo copy the reviewed docstring names. The new persist() extends neither.",
+    "review_scope": "Read the source brief and manifest, the prior review record at review-records/r-20261103T062144710604-forward-solve-memory-ledger.at-a51678ba2a013ad537d88f81b41d3071f1c75a7f.json, both commits a51678ba2..da576d4bd, the committed interrupted-run.log and interrupted-run-ledger.json, and the one owner read the reuse bound allows: nova/io/json.py:12-46 (write_atomic) alongside benchmarks/compile_host_memory.py:56-62, which the reviewed diff cites as its pattern."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261103T105724239612-review-of-forward-solve-memory-ledger-da576d4bde94",
+  "reviewed_base_sha": "a51678ba2a013ad537d88f81b41d3071f1c75a7f",
+  "reviewed_head_sha": "da576d4bde947f1d9bd728f1b63a4d4ea691ae04",
+  "reviewed_run_id": "r-20261103T062144710604-forward-solve-memory-ledger",
+  "rubric": "text",
+  "scores": {
+    "durability": 6,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-03T11:07:54.441473+00:00",
+  "total": 75
+}

@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <meta name="plan-title" content="Iron Core Magnetisation — magnetised iron in nova from Urankar thin-sheet kernels">
+  <meta name="plan-summary" content="Model WEST-type iron cores as magnetised cells whose edge sheets use Urankar Part II kernels, solve the B-H law by Newton, and correct for discrete limbs">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="43.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S24">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
+  <meta name="plan-after" content="kernel-compile-barrier">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s2&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;]}">
+  <title>Iron Core Magnetisation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-05">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">nova.biot &middot; machine description &middot; WEST first</p>
+      <h1>Iron core magnetisation</h1>
+      <p class="lead">
+        nova has no ferromagnetic material. For WEST that is not a small omission: a
+        prototype of the method this plan builds says the axisymmetric iron core leaves
+        less than a tenth of the air-core field beyond a metre outside the equatorial
+        coils, where imas-efit's own iron model leaves about two thirds. This plan turns
+        the prototype into a production kernel, a material solve and a validated source,
+        and then corrects the axisymmetric picture for the six discrete return limbs.
+      </p>
+    </header>
+
+    <h2 id="s0">Why this plan exists</h2>
+    <p>
+      The stray poloidal field outside WEST was computed in this session from nova's
+      Biot-Savart model (figure below, committed as
+      <code>docs/figures/west-stray-field/west-62751-stray-field-nova.svg</code>): coils from
+      the machine description, currents from pulse 62751, and the plasma current carried
+      on nova's hexagonal cells from the NICE flux map and flux functions. On the midplane
+      the field falls through 5&nbsp;mT 1.75&nbsp;m outside the Fh/Fb outer edge and through
+      1&nbsp;mT at 5.7&nbsp;m. That calculation is air-core. WEST carries an iron magnetic
+      circuit, and its outer return limb sits 0.3&nbsp;m outboard of the same coils.
+    </p>
+    <figure>
+      <img src="/nova/figures/west-stray-field/west-62751-stray-field-nova.svg"
+           alt="WEST 62751 flux contours, coils, wall and iron, with |B| against distance from the coil edge">
+      <figcaption>
+        WEST 62751 at t = 38.440&nbsp;s, air-core. Upper panel: flux contours at one
+        spacing, hex plasma cells clipped to the LCFS, |B| iso-lines at 1 to 20&nbsp;mT and
+        the iron outline (drawn, not modelled). Lower panel: |B| on the midplane and on the
+        two equatorial coil planes against distance from the Fh/Fb outer edge.
+      </figcaption>
+    </figure>
+    <p>
+      The machine description encodes the iron as six axisymmetric segments whose
+      thicknesses carry the toroidal fill factor: the horizontal yokes thin as 1/R and
+      the outer limb is 0.188&nbsp;m thick, so that the product of thickness and major
+      radius is 0.92&nbsp;m&sup2; along the whole circuit (about 0.96&nbsp;m&sup2; for each
+      of six arms). That smear preserves the flux density in the iron, so saturation and
+      the reluctance along each arm are right for the toroidally averaged field. It does
+      not represent the field between and behind the discrete limbs, which matters within
+      roughly 1 to 2&nbsp;m of the legs, exactly where the stray-field question begins.
+    </p>
+
+    <h2 id="s1">§1 — Prototype: edge sheets, two analytic controls, and WEST</h2>
+    <p>
+      <strong>Method.</strong> Each iron cell carries a uniform poloidal magnetisation
+      (M<sub>R</sub>, M<sub>Z</sub>). In axisymmetry the bound volume current of a uniform
+      cell vanishes, so its field is that of toroidal sheet currents on its edges,
+      K<sub>&phi;</sub> = M<sub>Z</sub>n<sub>R</sub> &minus; M<sub>R</sub>n<sub>Z</sub>.
+      Each edge is therefore a thin conic sheet, the element Urankar's Part II treats in
+      closed form. The prototype integrates each edge with 12-point Gauss&ndash;Legendre
+      quadrature over nova's exact ring Green's function
+      (<code>nova.biot.greens.greens_bz_br</code>), collocates at cell centroids, and
+      solves the material law <em>M</em> = c(|B|)&nbsp;B with
+      c = (&mu;<sub>r</sub> &minus; 1)/(&mu;<sub>0</sub>&mu;<sub>r</sub>) by damped Newton on the
+      differential permeability. Code:
+      <code>scripts/prototypes/iron_magnetisation/</code>; receipts under
+      <code>~/.cache/nova-iron-research/</code>.
+    </p>
+    <p>
+      <strong>Uniform-field sphere.</strong> A linear sphere in a uniform field has a
+      uniform exact magnetisation, which piecewise-constant cells represent exactly. The
+      interior field matches 3&mu;<sub>r</sub>/(&mu;<sub>r</sub>+2)B<sub>0</sub> to between
+      1e-11 and 4e-5 for &mu;<sub>r</sub> = 10 to 1000, and the exterior dipole to 1e-6 (the
+      256-gon approximation of the sphere). &mu;<sub>r</sub> = 1 returns B<sub>0</sub> exactly.
+      The error grows as cells shrink because the edge quadrature is near-singular for
+      sliver cells, which is the case for the closed-form sheet kernel of §2.
+    </p>
+    <p>
+      <strong>Closed shell around a dipole.</strong> This is the control that matters for
+      WEST, because the axisymmetric WEST iron is a closed high-&mu; box around every coil
+      and the plasma. A small loop inside a linear spherical shell (a = 0.9&nbsp;m,
+      b = 1&nbsp;m) has its exterior field reduced by the exact factor
+      S = ((2&mu;+1)(&mu;+2) &minus; 2(&mu;&minus;1)&sup2;(a/b)&sup3;)/(9&mu;).
+    </p>
+    <table>
+      <thead>
+        <tr><th>&mu;<sub>r</sub></th><th>exact S</th><th>4&nbsp;cm cells</th><th>2&nbsp;cm cells</th><th>1&nbsp;cm cells</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>10</td><td>1.488</td><td>0.14 %</td><td>0.06 %</td><td>0.04 %</td></tr>
+        <tr><td>100</td><td>6.902</td><td>1.2 %</td><td>0.49 %</td><td>0.22 %</td></tr>
+        <tr><td>1000</td><td>61.10</td><td>6.8 %</td><td>2.8 %</td><td>running</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/nova/figures/iron-magnetisation/shell-shielding-convergence.svg"
+           alt="Largest shielding-factor error against cell size for three permeabilities">
+      <figcaption>
+        Largest relative error of the measured shielding factor over three exterior probes,
+        against cell size. Convergence is first order and slows as &mu;<sub>r</sub> grows: a
+        thin high-&mu; shell is the known hard case for piecewise-constant magnetisation,
+        which §5 resolves.
+      </figcaption>
+    </figure>
+    <p>
+      <strong>WEST.</strong> With the six iron_core segments meshed at 8&nbsp;cm (1696 cells,
+      10.1&nbsp;m&sup2;), the CEA B-H table from the same IDS, and the coils and hex plasma of
+      the stray-field solve as sources (which reproduce the nova CoilSet field to
+      1.1e-3 beyond 0.3&nbsp;m), the Newton solve converges in four iterations with
+      &mu;<sub>r</sub> between 216 and 1667. Beyond about 1&nbsp;m from the coil edge the iron
+      leaves 8&nbsp;% of the air-core field; a linear &mu;<sub>r</sub> = 215 leaves 14&nbsp;%.
+      Inside the box, between the coils and the limb, the iron raises the field, as an
+      image current would.
+    </p>
+    <figure>
+      <img src="/nova/figures/iron-magnetisation/west-midplane-iron.svg"
+           alt="Midplane |B| against distance from the coil edge for five models">
+      <figcaption>
+        WEST 62751 midplane |B| against distance from the Fh/Fb outer edge. nova air core
+        (dashed), imas-efit reconstructions without and with its iron model (read at
+        zero-weight synthetic probes on the standard 65&times;65 grid), and the edge-sheet
+        prototype at linear &mu;<sub>r</sub> = 215 and with the CEA B-H table. The field inside
+        the limb is masked.
+      </figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/iron-magnetisation/west-iron-permeability.svg"
+           alt="Converged relative permeability of the WEST iron cells">
+      <figcaption>
+        Converged relative permeability of the WEST iron cells for pulse 62751. The lower
+        half of the central column and the lower yoke corner run near the peak of the
+        B-H curve; the outer limb stays near 400.
+      </figcaption>
+    </figure>
+    <p>
+      <strong>Disagreement with imas-efit.</strong> imas-efit's axisymmetric iron, which uses
+      the same geometry and B-H table, leaves about 65&nbsp;% of the air-core field. Coil
+      filaments (imas-efit) against exact sections (nova) explain a few per cent within
+      0.3&nbsp;m of a winding and nothing at a metre, where only the dipole moments
+      matter. The difference sits in the iron representation: imas-efit carries B-spline
+      boundary currents with the permeability sampled at its observation points. Neither
+      model is checked against measurement: in-vessel magnetics fit equally well with and
+      without iron (BPOL and BTNG residuals change by under 3&nbsp;%). §6 runs the closed-shell
+      control through imas-efit and §9 seeks a measurement that discriminates.
+    </p>
+    <p>
+      <strong>Defects found and fixed in the prototype.</strong> A fixed-permeability
+      update oscillates without converging, because the CEA curve rises from 215 at B = 0 to
+      1692 at 1&nbsp;T; Newton on the differential law converges. Square cells clipped to
+      the sloped yoke left slivers whose centroids sat on their own edges, which read
+      10.9&nbsp;T; merging slivers into a neighbour removed them. The PCHIP fit of the B-H
+      table extrapolated past 6&nbsp;T to a negative permeability; the law now holds its end
+      values.
+    </p>
+
+    <h2 id="s2">§2 — The thin conic sheet kernel (Urankar Part II)</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Implement the full-turn field and vector potential of a thin conic sheet, a straight
+      segment in the poloidal plane swept through 2&pi; and carrying a uniform azimuthal
+      sheet current, in <code>nova/biot/sheet.py</code>. Urankar Part II (IEEE Trans. Magn.
+      MAG-18(3), 911&ndash;917, 1982) gives it in eqs 22a and 23a: complete elliptic integrals
+      K, E and &Pi; of modulus k&sup2; = 4rr&prime;/a&sup2;, and one smooth integral
+      &#x1D524;(&pi;/2) = &int;<sub>0</sub><sup>&pi;/2</sup> sinh<sup>&minus;1</sup>&beta;<sub>1</sub>(&alpha;) d&alpha; that
+      Urankar evaluates numerically. Case n = 1 (slope &psi; &ge; &pi;/4) is derived; case
+      n = 2 follows from eqs 7, 16 and 23b, so every slope from the cylinder
+      (&psi; = &pi;/2) to the pancake (&psi; = 0) keeps the same accuracy. Reuse nova's
+      complete-integral routes (Bulirsch's cel on the complement, as the Part V reduction
+      in <code>nova/biot/polygonanalytic.py</code> does) and the same fixed-node rule the
+      Part V module uses for its arsinh remainders.
+    </p>
+    <p>
+      Done when (1) the kernel matches a converged Gauss&ndash;Legendre integral of
+      <code>greens_psi</code> and <code>greens_bz_br</code> along the segment to 1e-12 relative
+      for targets at least one segment length away, across slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and
+      &pi;/2; (2) at slope &pi;/2 and slope 0 it reproduces Snow's cylinder and pancake forms
+      (Part II eqs 24 to 27) to round-off, and a negative control with the sign of b<sub>1</sub>
+      flipped fails that comparison; (3) a Part V polygon strip of width &epsilon; carrying
+      K/&epsilon; converges to the sheet as &epsilon;&sup2;, measured over three decades of &epsilon;.
+    </p>
+
+    <h2 id="s3">§3 — Sheet tiles on the device</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Add a sheet tile to <code>nova/biot/tiledassembly.py</code> beside the polygon and arc
+      tiles, so the cell interaction matrix G (B<sub>R</sub>, B<sub>Z</sub> and &psi; at targets per
+      unit M<sub>R</sub> and M<sub>Z</sub>) is built through the existing tile plan, padding, device
+      placement and persistent compilation cache rather than a bespoke driver. A cell's
+      columns are signed sums of its edge sheets, so a shared edge between two cells appears
+      once with the net sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n.
+    </p>
+    <p>
+      Done when (1) the device tile and the §2 host kernel agree to 1e-12 in float64 over
+      the 1696-cell WEST mesh against its own centroids; (2) that 3392-square Gram builds on
+      one H200 with the compile time and the warm execute time each recorded, and a second
+      run hits the persistent cache; (3) the sheet program appears in the kernel-compile
+      census with its compile wall and memory, measured the same way as the polygon tile.
+      Heavy gates run on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one job.
+    </p>
+
+    <h2 id="s4">§4 — Iron frame and the material solve</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Read the iron from the machine description: each <code>iron_core</code> segment's
+      outline, its material and its B-H table. Mesh it without slivers (quality triangles or
+      merged quads; the prototype's merge rule is the floor), and fit the B-H relation as a
+      monotone law with dB/dH &gt; 0 that holds its end values outside the table. Solve
+      F(M) = M &minus; c(|B|)B = 0 with B = B<sub>ext</sub> + G&nbsp;M by Newton on the
+      differential permeability, written so that the state, operands and factor are runtime
+      variables of one compiled update (the rule in <code>nova/equilibrium/AGENTS.md</code>).
+    </p>
+    <p>
+      Done when (1) the uniform-field sphere and the closed shell, run through the production
+      path, match the §1 prototype numbers to within their reported precision; (2) WEST 62751
+      converges in at most ten Newton iterations with every &mu;<sub>r</sub> inside the table, and a
+      frozen-permeability Picard run on the same case is recorded as failing to converge (the
+      negative control for choosing Newton); (3) the receipt states the mesh, the iteration
+      record and the converged permeability range.
+    </p>
+
+    <h2 id="s5">§5 — Accuracy for thin high-permeability parts</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      Piecewise-constant magnetisation converges at first order and slowly for a thin
+      high-&mu; shell: 2.8&nbsp;% at &mu;<sub>r</sub> = 1000 with 2&nbsp;cm cells across a 10&nbsp;cm shell. The
+      WEST outer limb is 0.188&nbsp;m thick at &mu;<sub>r</sub> near 400 and the yokes reach 1600, so
+      the far-field shielding is exactly the quantity that converges slowest. Measure the
+      candidates on the shell and on WEST: graded refinement through thin parts, piecewise-linear
+      magnetisation, and a boundary formulation in the reduced scalar potential that keeps
+      unknowns on the iron surfaces only, using the same sheet kernels. Record the choice in the
+      formulation decision below.
+    </p>
+    <p>
+      Done when (1) the chosen route reaches 0.5&nbsp;% on the &mu;<sub>r</sub> = 1000 shell; (2) the WEST
+      midplane field at 1, 2 and 4&nbsp;m outside the coil edge changes by less than 1&nbsp;% under one
+      further refinement; (3) the comparison table of the candidates, with their cost on one H200,
+      is in the plan's evidence record.
+    </p>
+
+    <h2 id="s6">§6 — Iron as a field source, and the imas-efit control</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Let the solved magnetisation contribute &psi;, B<sub>R</sub> and B<sub>Z</sub> wherever a CoilSet
+      solves grid or point targets, so the stray-field figure, the forward map and any probe read
+      include the iron. Regenerate the WEST stray-field figure with iron beside the air-core curve.
+      Then run the closed-shell control through imas-efit's iron model, with its boundary geometry
+      set to the shell, and report the result to the imas-efit owners: that test says which of the
+      two WEST answers in §1 is the representation and which is the physics.
+    </p>
+    <p>
+      Done when (1) <code>docs/figures/west-stray-field/</code> carries a with-iron figure whose
+      curves come from the production path; (2) the imas-efit shell result is recorded with its
+      shielding factor against the exact value; (3) the iron contribution at the WEST in-vessel
+      probes and flux loops is tabulated beside imas-efit's.
+    </p>
+
+    <h2 id="s7">§7 — Iron inside the forward solve</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      The iron responds to the plasma and the plasma to the iron, so a forward equilibrium with
+      iron updates the magnetisation inside the Grad&ndash;Shafranov Newton step rather than once
+      before it. Enter through the public forward-solve seam, which this section waits on.
+    </p>
+    <p>
+      Done when (1) a WEST forward state with iron converges through the seam on the H200;
+      (2) the shift of the magnetic axis and of the boundary flux against the air-core forward
+      state is reported; (3) the iron Jacobian block is checked against finite differences.
+    </p>
+
+    <h2 id="s8">§8 — The six discrete limbs</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>
+      The axisymmetric smear is right for the toroidal average far from the legs and wrong near
+      them. Magnetise six limbs of their real section in the axisymmetric field and evaluate their
+      field with nova's 3D Biot-Savart route, giving |B| along a radial line behind a limb and
+      between two limbs. The n&nbsp;=&nbsp;6 departure from the average decays over roughly
+      R/6 &asymp; 0.8&nbsp;m, so the correction matters within about 2&nbsp;m of the legs.
+    </p>
+    <p>
+      Done when (1) &phi;-resolved midplane |B| is reported behind and between limbs from the coil
+      edge to 6&nbsp;m; (2) its toroidal average agrees with the axisymmetric §6 result beyond 2&nbsp;m
+      to within the stated tolerance; (3) the limb dimensions used are the ones recorded in the
+      limb-geometry decision.
+    </p>
+
+    <h2 id="s9">§9 — Validation against measurement</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Nothing yet checks any iron model against WEST data. The strongest available case is the
+      pre-magnetisation of pulse 57410, where the central solenoid carries 29&nbsp;kA per turn
+      (5.7&nbsp;MA-turns) with no plasma: the iron response is largest and no plasma current
+      confounds it. Predict the in-vessel BPOL and BTNG probes and the flux loops with and
+      without iron and compare with their measurements; then extend to any stray-field
+      measurement outside the machine that the lead can source.
+    </p>
+    <p>
+      Done when (1) the 57410 vacuum probe and flux-loop residuals are reported for air core,
+      axisymmetric iron and the limb-corrected iron; (2) the comparison names which model the
+      data prefer and by how much; (3) any external measurement used is cited by its source.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="formulation" data-choice="" data-by="" data-when="" data-sections="s6">
+    <p class="r-dec-q">Which magnetisation formulation goes to production for thin high-permeability parts?</p>
+    <p class="r-dec-ctx">Piecewise-constant cells converge slowly on the μ r = 1000 shell (2.8 % at 2 cm). §5 measures the candidates; decide after its table exists.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="graded-constant">Graded piecewise-constant cells</button>
+      <button class="r-opt" data-value="piecewise-linear">Piecewise-linear magnetisation</button>
+      <button class="r-opt" data-value="surface-scalar">Surface formulation in the reduced scalar potential</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="limb-geometry" data-choice="" data-by="" data-when="" data-sections="s8">
+    <p class="r-dec-q">What are the real dimensions of the six outer return limbs and of the horizontal arms?</p>
+    <p class="r-dec-ctx">The machine description carries only the smeared section, about 0.96 m² per arm. §8 needs each limb&#x27;s toroidal width and radial depth, and the arms&#x27; constant vertical thickness; their product with six must reproduce 5.8 m².</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="stray-field-measurement" data-section="s9" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-05" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Is there any measured stray field outside WEST (hall survey, Hall probes, commissioning maps) that §9 can compare against?</p>
+    </div>
+</section>
+
+    <section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="urankar-ii" data-type="paper" data-source="IEEE Trans. Magn. MAG-18(3) 911-917, 1982" data-added-by="Simon McIntosh" data-when="2026-11-05">
+    <span class="r-research-title">Urankar, Vector potential and magnetic field of current-carrying finite arc segment in analytical form, Part II: Thin sheet approximation</span></div>
+<div class="r-research" data-id="urankar-iii" data-type="paper" data-source="IEEE Trans. Magn." data-added-by="Simon McIntosh" data-when="2026-11-05">
+    <span class="r-research-title">Urankar, Part III: Exact computation for rectangular cross section (nova cylinder_greens)</span></div>
+<div class="r-research" data-id="urankar-v" data-type="paper" data-source="IEEE Trans. Magn. 26(3) 1171-1180, 1990" data-added-by="Simon McIntosh" data-when="2026-11-05">
+    <span class="r-research-title">Urankar, Part V: Polygon cross section (nova polygonanalytic)</span></div>
+<div class="r-research" data-id="tore-supra-iron" data-type="paper" data-source="" data-added-by="Simon McIntosh" data-when="2026-11-05" data-url="https://meilu.jpshuntong.com/url-68747470733a2f2f696e69732e696165612e6f7267/collection/NCLCollectionStore/_Public/36/008/36008549.pdf?r=1">
+    <span class="r-research-title"><a href="https://meilu.jpshuntong.com/url-68747470733a2f2f696e69732e696165612e6f7267/collection/NCLCollectionStore/_Public/36/008/36008549.pdf?r=1">Tore Supra iron circuit: central yoke, six vertical return arms and two sets of six horizontal arms</a></span></div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-icm-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="Simon McIntosh" data-written-at="2026-11-05" data-recommends-skill="/reckon-build iron-core-magnetisation §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the Urankar Part II conic sheet kernel</h4>
+    <div class="r-fu-body">The prototype is in place and both analytic controls exist; §2 is the first production node.</div>
+    <pre class="r-fu-prompt">/reckon-build iron-core-magnetisation §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

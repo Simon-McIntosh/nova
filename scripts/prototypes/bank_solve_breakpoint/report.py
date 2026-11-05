@@ -156,6 +156,9 @@ def main():
     fig.legend(loc="upper center", ncol=3, frameon=False)
     fig.subplots_adjust(left=0.12, right=0.97, bottom=0.14, top=0.86)
     save_checked(fig, args.figure)
+    args.figure.write_text(
+        "\n".join(line.rstrip() for line in args.figure.read_text().splitlines()) + "\n"
+    )
     fig.savefig(args.run / "residual-history.png", dpi=100)
     plt.close(fig)
     failed = [

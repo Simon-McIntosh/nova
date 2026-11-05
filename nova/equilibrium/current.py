@@ -66,7 +66,12 @@ _NORMAL_CUT_BATCH_WIDTH = 8
 
 
 def _inward_interval_points(x, left, right):
-    """Sample a cut interval from its strip interior at an event endpoint."""
+    """Use the strip-interior limit for both booking and its tangent.
+
+    At an event, root ordering can choose the adjoining interval on roundoff.
+    Sampling inside the owned strip keeps primal rings and their velocities
+    on the same branch. Polygon x coordinates still end on the event.
+    """
     distance = jnp.minimum(1e-12, 0.25 * (right - left))[:, None]
     slot = jnp.arange(x.shape[1])[None]
     return jnp.where(
@@ -82,10 +87,8 @@ def _conic_rings(
     coefficient,
     selected,
     segments,
-    *,
-    inward_endpoints=False,
 ):
-    """Trace the same cosine-spaced strips as support.geometry.read_polygons."""
+    """Trace cosine-spaced rings on each selected algebraic conic strip."""
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
         local, count, coefficient, selected.shape[0]
@@ -93,7 +96,7 @@ def _conic_rings(
     left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
-    interval_x = _inward_interval_points(x, left, right) if inward_endpoints else x
+    interval_x = _inward_interval_points(x, left, right)
     bottom, top, _ = topology._positive_vertical_intervals(
         local, count, coefficient, interval_x
     )
@@ -119,8 +122,6 @@ def _conic_ring_tangents(
     tangent,
     selected,
     segments,
-    *,
-    inward_endpoints=False,
 ):
     """Move each sampled conic ring vertex by the implicit root rule."""
     local = (vertices - centre) / pitch
@@ -134,7 +135,7 @@ def _conic_ring_tangents(
     left_speed, right_speed = break_speed[:-1], break_speed[1:]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
-    interval_x = _inward_interval_points(x, left, right) if inward_endpoints else x
+    interval_x = _inward_interval_points(x, left, right)
     x_speed = left_speed[:, None] + (right_speed - left_speed)[:, None] * parameter
     bottom, top, _ = topology._positive_vertical_intervals(
         local, count, coefficient, interval_x
@@ -548,7 +549,6 @@ def book_tangent(
                 signed[index],
                 read.fragment_selected[index],
                 quadrature.segments,
-                inward_endpoints=True,
             )
             interior = integrate(index, rings, counts)
             ring_velocity = _conic_ring_tangents(
@@ -560,7 +560,6 @@ def book_tangent(
                 signed_tangent[index],
                 read.fragment_selected[index],
                 quadrature.segments,
-                inward_endpoints=True,
             )
             boundary = jax.vmap(
                 lambda ring, velocity, number: moving_polygon_current_moment_tangent(
@@ -763,7 +762,6 @@ def book_tangent_channels(
                 signed[index],
                 read.fragment_selected[index],
                 quadrature.segments,
-                inward_endpoints=True,
             )
             velocity = jax.vmap(
                 lambda direction: _conic_ring_tangents(
@@ -775,7 +773,6 @@ def book_tangent_channels(
                     direction,
                     read.fragment_selected[index],
                     quadrature.segments,
-                    inward_endpoints=True,
                 )
             )(signed_rate[boundary_channels, index])
             with xla_metadata.set_xla_metadata(tangent_site="interior:conic"):

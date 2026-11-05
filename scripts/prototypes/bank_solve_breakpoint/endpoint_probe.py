@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import json
+import inspect
 from pathlib import Path
 import sys
 from unittest.mock import patch
@@ -49,7 +50,8 @@ def main():
     original = sr.current._conic_rings
 
     def interior(*args, **kwargs):
-        kwargs["inward_endpoints"] = True
+        if "inward_endpoints" in inspect.signature(original).parameters:
+            kwargs["inward_endpoints"] = True
         return original(*args, **kwargs)
 
     with patch.object(sr.current, "_conic_rings", interior):

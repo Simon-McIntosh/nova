@@ -65,9 +65,9 @@
   "dispatched_at": "2026-11-05T16:17:21Z",
   "finding_dispositions": {
     "0": {
-      "kind": "exempted",
-      "reason": "the registered boundary separation is undefined because no frame assembles a closed separatrix: 0 of 5 solves converge, which the receipt records rather than inventing a value; that is the measured outcome of the re-run",
-      "recorded_at": "2026-11-05T16:42:56.746054+00:00"
+      "kind": "folded",
+      "node": "diiid-panels-on-solve-currents",
+      "recorded_at": "2026-11-05T17:33:16.957552+00:00"
     }
   },
   "findings": [

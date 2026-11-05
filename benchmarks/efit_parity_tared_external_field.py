@@ -1144,7 +1144,7 @@ def _solve_row(runtime: dict[str, Any]) -> dict[str, Any]:
     equilibrium = branch.equilibrium
     terminal_current = float(np.sum(np.asarray(equilibrium.cell_current)))
     nonzero = bool(abs(terminal_current) >= 0.01 * target_current)
-    converged_plasma = bool(branch.converged and nonzero)
+    converged_plasma = bool(branch.qualified and nonzero)
     if converged_plasma:
         outcome = "converged_plasma_root"
     elif nonzero:
@@ -1176,7 +1176,7 @@ def _solve_row(runtime: dict[str, Any]) -> dict[str, Any]:
             "route": "newton_krylov",
             "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
             "outcome_class": outcome,
-            "converged": bool(branch.converged),
+            "converged": bool(branch.qualified),
             "converged_plasma_root": converged_plasma,
             "terminal_residual": branch_receipt["residual"],
             "iterations": branch_receipt["iterations"],
@@ -1354,7 +1354,7 @@ def _mesh_terminal_row(runtime: dict[str, Any]) -> dict[str, Any]:
             "warmup_sweeps": parity_slice.WARMUP_SWEEPS,
             "relaxation": parity_slice.RELAXATION,
             "step_cap": parity_slice.STEP_CAP,
-            "converged": bool(branch.converged),
+            "converged": bool(branch.qualified),
             "terminal_residual": branch_receipt["residual"],
             "iterations": branch_receipt["iterations"],
             "residual_trajectory": solve["residual_trajectory"],

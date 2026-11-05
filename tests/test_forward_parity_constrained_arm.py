@@ -87,11 +87,10 @@ def test_public_branch_solve_receives_the_declared_current() -> None:
         ),
         solve=solve,
     )
-    case = {"state": np.zeros(4)}
+    case = {"state": np.zeros(4), "reference": {"shot": 21978, "slice_index": 35}}
     context = {
         "group": {"plasma_current_c": np.asarray([801_493.25])},
         "row": 0,
-        "reference": {"shot": 21978, "slice_index": 35},
     }
 
     record, _trace, receipt = parity._passive_inclusive_solve(

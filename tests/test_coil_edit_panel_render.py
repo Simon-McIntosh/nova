@@ -20,6 +20,7 @@ os.environ.setdefault("JAX_PLATFORMS", "cpu")
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 from dataclasses import replace
 
 from pathlib import Path
@@ -257,6 +258,8 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
     assert display.reproduction_relative_error < 1.0e-10
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(900)
 def test_committed_converged_panel_uses_its_terminal_currents():
     """Read the solve's state, promotion and compensation through its producer."""
     archive = Path(

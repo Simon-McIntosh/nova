@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nova.media.ink import InkStyle
+from scripts.prototypes.bank_solve_cycle.report import pair_gaps
 from scripts.prototypes.bank_solve_read.plot import save_checked
 
 
@@ -22,41 +23,7 @@ def restart(log):
 
 
 def precision(before, after):
-    gaps = {}
-    for key, unit in (
-        ("flux", before["span"]),
-        ("axis", before["minor_radius"]),
-        ("saddle", before["minor_radius"]),
-        ("boundary_flux", before["span"]),
-    ):
-        difference = np.asarray(after[key]) - np.asarray(before[key])
-        if key in ("axis", "saddle"):
-            difference = np.linalg.norm(difference, axis=-1)
-        if key == "flux":
-            difference = np.max(np.abs(difference), axis=-1)
-        gaps[key] = (np.abs(difference) / unit).tolist()
-    for arm, row in [("base", before), ("head", after)]:
-        roots = np.asarray(row["oracle_roots"])
-        for key, point in [("axis", 0), ("saddle", 1)]:
-            gaps[f"{arm}_oracle_{key}"] = (
-                np.linalg.norm(np.asarray(row[key]) - roots[point], axis=-1)
-                / row["minor_radius"]
-            ).tolist()
-        # The first-lane absolute oracle error plus its companion difference
-        # bounds every lane without cancellation between signed errors.
-        gaps[f"{arm}_oracle_boundary"] = (
-            row["oracle"]["boundary_ratio"]
-            + np.abs(np.asarray(row["boundary_flux"]) - row["boundary_flux"][0])
-            / row["span"]
-        ).tolist()
-    limits = {"flux": 1e-8, "axis": 5e-4, "saddle": 5e-4, "boundary_flux": 1e-4}
-    limits.update(
-        {
-            key: 1e-4 if key.endswith("boundary") else 5e-4
-            for key in gaps
-            if "oracle" in key
-        }
-    )
+    gaps, limits = pair_gaps(before, after)
     passed = {
         key: bool(np.all(np.asarray(value) <= limits[key]))
         for key, value in gaps.items()

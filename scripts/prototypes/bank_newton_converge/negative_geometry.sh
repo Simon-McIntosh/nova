@@ -24,7 +24,7 @@ PY
   export JAX_PLATFORMS=cuda
   export PYTHONDONTWRITEBYTECODE=1
   cd "$BASE" || exit 2
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m, pytest, sys; print("NOVA="+nova.__file__+" MODULE="+m.__file__, flush=True); raise SystemExit(pytest.main(sys.argv[1:]))' -p no:cacheprovider "$ROOT/tests/test_bank_newton_converge.py" --basetemp="$BASE/pytest" -vv
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m, pytest, sys; print("NOVA="+nova.__file__+" MODULE="+m.__file__, flush=True); raise SystemExit(pytest.main(sys.argv[1:]))' -p no:cacheprovider "$ROOT/tests/test_bank_newton_converge.py" --basetemp="$BASE/pytest" -vv
   code=$?
   cd "$ROOT" || exit 2
   rm -rv "$BASE"

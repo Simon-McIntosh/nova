@@ -59,7 +59,7 @@ run_solve() {
     export PYTHONPATH="$tree"
     printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$BASE" "$tree" "$PWD" \
       "$PY -m $module ${args[*]}"
-    "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
     "$PY" -m "$module" "${args[@]}"
     code=$?
     printf 'EXIT=%s\n' "$code"
@@ -72,7 +72,7 @@ run_solve() {
 
 printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git rev-parse HEAD)" "$SOURCE" "$PWD" \
   "$SOURCE/scripts/prototypes/bank_step_launch_fusion/h200_compare.sh $RUN_DIR $BASE $MODE"
-"$PY" -c 'import nova; print("NOVA="+nova.__file__)'
+"$PY" -P -c 'import nova; print("NOVA="+nova.__file__)'
 git -C "$SCRATCH/base" rev-parse HEAD || exit 2
 if [ "$MODE" = all ]; then
   run_profile "$SCRATCH/base" base || exit $?

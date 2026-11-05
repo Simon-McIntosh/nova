@@ -35,7 +35,7 @@ for arm in base head; do
         {
             printf 'revision=%s tree=%s command=%s\n' "$revision" "$tree" "$command"
             printf 'measurement_cwd=%s\n' "$(realpath "$tree")"
-            /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import nova, nova.equilibrium.support_read as module; print("nova.__file__=" + nova.__file__); print("module.__file__=" + module.__file__)'
+            /home/ITER/mcintos/Code/nova/.venv/bin/python -P -c 'import nova, nova.equilibrium.support_read as module; print("nova.__file__=" + nova.__file__); print("module.__file__=" + module.__file__)'
             /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' "$target" --basetemp="$temp" -vv
             result=$?
             echo "EXIT=$result"

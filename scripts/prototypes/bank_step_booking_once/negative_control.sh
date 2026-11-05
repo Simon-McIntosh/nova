@@ -24,7 +24,7 @@ cd "$SCRATCH" || exit 1
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
     "$(git -C "$ROOT" rev-parse HEAD)" "$SCRATCH" "$SCRATCH" \
     "PYTHONPATH=$SCRATCH:$ROOT $PY -m pytest tests/test_bank_step_booking_once.py"
-  PYTHONPATH="$SCRATCH:$ROOT" "$PY" -c \
+  PYTHONPATH="$SCRATCH:$ROOT" "$PY" -P -c \
     'import nova.equilibrium.current as c; print("MUTATED=" + c.__file__)'
   PYTHONPATH="$SCRATCH:$ROOT" "$PY" -m pytest tests/test_bank_step_booking_once.py \
     -p no:cacheprovider -q

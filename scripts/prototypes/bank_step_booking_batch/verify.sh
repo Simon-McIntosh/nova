@@ -23,7 +23,7 @@ suite() {
     command=("$python" -m pytest -p no:cacheprovider "--basetemp=$scratch/$name" "$scratch/head/tests/$name.py" -m 'slow or not slow' -vv -s)
     printf '# revision: %s tree: %s command:' "$revision" "$scratch/head" > "$log"
     printf ' %q' "${command[@]}" >> "$log"; printf '\n' >> "$log"
-    PYTHONPATH="$scratch/head" "$python" -c 'import nova, nova.equilibrium.support_read as m; from pathlib import Path; print("nova",nova.__file__,"module",m.__file__,"cwd",Path.cwd().resolve())' >> "$log" 2>&1
+    PYTHONPATH="$scratch/head" "$python" -P -c 'import nova, nova.equilibrium.support_read as m; from pathlib import Path; print("nova",nova.__file__,"module",m.__file__,"cwd",Path.cwd().resolve())' >> "$log" 2>&1
     PYTHONPATH="$scratch/head" "${command[@]}" >> "$log" 2>&1
     echo "EXIT=$?" >> "$log"
   done

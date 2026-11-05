@@ -15,7 +15,7 @@ BASE_TEMP="$BASE/pytest"
   export PYTHONPATH="$BASE"
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$REVISION" "$BASE" "$BASE" \
     "$PY -m pytest -p no:cacheprovider $TARGET --basetemp=$BASE_TEMP -vv"
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
   "$PY" -m pytest -p no:cacheprovider "$TARGET" --basetemp="$BASE_TEMP" -vv
   code=$?
   printf 'EXIT=%s\n' "$code"

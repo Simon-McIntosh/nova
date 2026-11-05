@@ -23,7 +23,7 @@ for arm in base head; do
     cd "$TREE" || exit 1
     export PYTHONPATH="$TREE:$ROOT" JAX_PLATFORMS=cuda XLA_PYTHON_CLIENT_PREALLOCATE=false
     printf '# revision: %s tree: %s cwd: %s command: %s\n' "$REV" "$TREE" "$PWD" "$PY -m pytest -q -p no:cacheprovider $TREE/tests/test_bank_tangent_contract.py --basetemp=$SCRATCH/basetemp-$arm"
-    "$PY" -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
     "$PY" -m pytest -q -p no:cacheprovider "$TREE/tests/test_bank_tangent_contract.py" --basetemp="$SCRATCH/basetemp-$arm"
   ) > "$LOG" 2>&1
   code=$?

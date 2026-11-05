@@ -28,7 +28,7 @@ run_file() {
         printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
             "$(git -C "$ROOT" rev-parse HEAD)" "$tree" "$PWD" \
             "$PY -m pytest -p no:cacheprovider $file -q --basetemp=$temp"
-        "$PY" -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+        "$PY" -P -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
         "$PY" -m pytest -p no:cacheprovider "$file" -q --basetemp="$temp"
         code=$?
         printf 'EXIT=%s\n' "$code"

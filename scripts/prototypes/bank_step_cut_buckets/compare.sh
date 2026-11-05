@@ -31,7 +31,7 @@ run_arm() {
         printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
             "$(git -C "$ROOT" rev-parse HEAD)" "$tree" "$PWD" \
             "$PY -m scripts.prototypes.bank_step_speed.profile"
-        "$PY" -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+        "$PY" -P -c 'import nova, nova.equilibrium.current as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
         "$PY" -m scripts.prototypes.bank_step_speed.profile || exit 1
         trace_file=$(find "$trace" -name '*.trace.json.gz' -print -quit)
         "$PY" -m scripts.prototypes.bank_step_speed.parse_trace "$trace_file" || exit 1

@@ -16,7 +16,7 @@ for file in test_bank_step_speed.py test_bank_step_booking.py; do
   (
     printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git rev-parse HEAD)" "$ROOT" "$PWD" \
       "$PY -m pytest -p no:cacheprovider $target --basetemp=$basetemp -vv"
-    "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+    "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
     "$PY" -m pytest -p no:cacheprovider "$target" --basetemp="$basetemp" -vv
     code=$?
     printf 'EXIT=%s\n' "$code"

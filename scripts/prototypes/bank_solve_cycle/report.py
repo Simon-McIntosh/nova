@@ -14,52 +14,66 @@ from nova.media.ink import InkStyle
 from scripts.prototypes.bank_solve_profile.plot import save_checked
 
 
+PAIR_LIMITS = {"flux": 1e-8, "axis": 5e-4, "saddle": 5e-4, "boundary_flux": 1e-4}
+ORACLE_LIMIT = 1e-4
+
+
+def pair_gaps(before, after):
+    """Per-lane precision gaps between a paired base and head row, and their bounds.
+
+    Every value is normalised by the unit it is judged against, so a lane's gap
+    and its limit are directly comparable. Both arms' oracle gaps are reported
+    because a base arm outside the budget is as much a failure as a head arm.
+    """
+    gaps = {}
+    for key, unit in (
+        ("flux", before["span"]),
+        ("axis", before["minor_radius"]),
+        ("saddle", before["minor_radius"]),
+        ("boundary_flux", before["span"]),
+    ):
+        difference = np.asarray(after[key]) - np.asarray(before[key])
+        if key in ("axis", "saddle"):
+            difference = np.linalg.norm(difference, axis=-1)
+        if key == "flux":
+            difference = np.max(np.abs(difference), axis=-1)
+        gaps[key] = (np.abs(difference) / unit).tolist()
+    for arm, row in (("base", before), ("head", after)):
+        roots = np.asarray(row["oracle_roots"])
+        for key, point in (("axis", 0), ("saddle", 1)):
+            gaps[f"{arm}_oracle_{key}"] = (
+                np.linalg.norm(np.asarray(row[key]) - roots[point], axis=-1)
+                / row["minor_radius"]
+            ).tolist()
+        # The first-lane absolute oracle error plus its companion difference
+        # bounds every lane without cancellation between signed errors.
+        gaps[f"{arm}_oracle_boundary"] = (
+            row["oracle"]["boundary_ratio"]
+            + np.abs(np.asarray(row["boundary_flux"]) - row["boundary_flux"][0])
+            / row["span"]
+        ).tolist()
+    limits = dict(PAIR_LIMITS)
+    limits.update(
+        {
+            key: ORACLE_LIMIT if key.endswith("boundary") else 5e-4
+            for key in gaps
+            if "oracle" in key
+        }
+    )
+    return gaps, limits
+
+
 def compare(base, head):
     gaps = []
     for before, after in zip(base["rows"], head["rows"], strict=True):
         assert (before["lanes"], before["call"]) == (after["lanes"], after["call"])
+        values, _ = pair_gaps(before, after)
         row = dict(lanes=after["lanes"], call=after["call"])
-        for key, unit in [
-            ("flux", before["span"]),
-            ("axis", before["minor_radius"]),
-            ("saddle", before["minor_radius"]),
-            ("boundary_flux", before["span"]),
-        ]:
-            difference = np.asarray(after[key]) - np.asarray(before[key])
-            if key in ("axis", "saddle"):
-                difference = np.linalg.norm(difference, axis=-1)
-            row[key] = float(np.max(np.abs(difference))) / unit
+        for key in ("flux", "axis", "saddle", "boundary_flux"):
+            row[key] = float(np.max(values[key]))
         row["residual"] = max(after["residual"])
-        oracle_roots = np.asarray(after["oracle_roots"])
-        row["oracle_axis"] = (
-            float(
-                np.max(
-                    np.linalg.norm(np.asarray(after["axis"]) - oracle_roots[0], axis=-1)
-                )
-            )
-            / after["minor_radius"]
-        )
-        row["oracle_saddle"] = (
-            float(
-                np.max(
-                    np.linalg.norm(
-                        np.asarray(after["saddle"]) - oracle_roots[1], axis=-1
-                    )
-                )
-            )
-            / after["minor_radius"]
-        )
-        row["oracle_boundary"] = (
-            after["oracle"]["boundary_ratio"]
-            + float(
-                np.max(
-                    np.abs(
-                        np.asarray(after["boundary_flux"]) - after["boundary_flux"][0]
-                    )
-                )
-            )
-            / after["span"]
-        )
+        for key in ("axis", "saddle", "boundary"):
+            row[f"oracle_{key}"] = float(np.max(values[f"head_oracle_{key}"]))
         gaps.append(row)
         assert all(after["converged"]) and row["residual"] <= 1e-10
         assert row["flux"] <= 1e-8

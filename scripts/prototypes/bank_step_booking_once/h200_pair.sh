@@ -39,7 +39,7 @@ mirror() {
     (
       cd "$tree" || exit 1
       export PYTHONPATH="$tree:$ROOT" JAX_PLATFORMS=cuda BANK_STEP_TRACE_DIR="$trace"
-      "$PY" -c 'import nova, nova.equilibrium.current as c; print("NOVA="+nova.__file__+" CURRENT="+c.__file__)'
+      "$PY" -P -c 'import nova, nova.equilibrium.current as c; print("NOVA="+nova.__file__+" CURRENT="+c.__file__)'
       "$PY" -m scripts.prototypes.bank_step_speed.profile || { printf 'PROFILE_FAILED arm=%s\n' "$arm"; exit 1; }
       trace_file=$(find "$trace" -name '*.trace.json.gz' | head -1)
       "$PY" -m scripts.prototypes.bank_step_speed.parse_trace "$trace_file"

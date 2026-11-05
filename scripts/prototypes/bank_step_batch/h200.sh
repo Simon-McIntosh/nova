@@ -23,7 +23,7 @@ LOG="$RUN_DIR/h200-$ARM.log"
   printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' \
     "$(git rev-parse HEAD)" "$ROOT" "$PWD" \
     "$PY -m scripts.prototypes.bank_step_batch.measure --arm $ARM --run-dir $RUN_DIR"
-  "$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+  "$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
   "$PY" -m scripts.prototypes.bank_step_batch.measure --arm "$ARM" --run-dir "$RUN_DIR"
   printf 'EXIT=%s\n' "$?"
 } > "$LOG" 2>&1

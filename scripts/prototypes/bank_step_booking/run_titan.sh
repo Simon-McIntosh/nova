@@ -10,7 +10,7 @@ export BANK_STEP_TRACE_DIR="$RUN_DIR/titan-$TAG-stage-trace"
 
 printf 'REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$(git rev-parse HEAD)" "$ROOT" "$PWD" \
   "$PY -m scripts.prototypes.bank_step_speed.profile"
-"$PY" -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
+"$PY" -P -c 'import nova, nova.equilibrium.support_read as m; print("NOVA="+nova.__file__+" MODULE="+m.__file__)'
 "$PY" -m scripts.prototypes.bank_step_speed.profile
 code=$?
 if [ "$code" -eq 0 ]; then

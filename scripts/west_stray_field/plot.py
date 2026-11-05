@@ -82,8 +82,7 @@ in_plasma = shapely.contains_xy(inside, mesh[:, 0], mesh[:, 1]).reshape(psi.shap
 plasma_psi = psi[in_plasma]
 psi_axis = float(plasma_psi[np.argmax(np.abs(plasma_psi - psi_lcfs))])
 step = abs(psi_axis - psi_lcfs) / 12
-low, high = np.percentile(psi, [0.5, 99.5])
-low, high = min(low, psi_axis), max(high, psi_axis)  # reach the magnetic axis
+low, high = float(psi.min()), float(psi.max())
 levels = psi_lcfs + step * np.arange(
     np.floor((low - psi_lcfs) / step), np.ceil((high - psi_lcfs) / step) + 1
 )

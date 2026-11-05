@@ -70,7 +70,7 @@ def render(
     finite = np.isfinite(state_field)
     interior = state_field[finite]
     levels = np.linspace(
-        float(np.quantile(interior, 0.01)), float(np.quantile(interior, 0.60)), 11
+        float(np.quantile(interior, 0.02)), float(np.quantile(interior, 0.98)), 13
     )[1:-1]
 
     figure, axis = plt.subplots(figsize=(14, 7.2), dpi=100)
@@ -99,23 +99,15 @@ def render(
         zorder=3,
         label="separatrix assembled on the converged state",
     )
-    axis.plot(
-        image_polyline[:, 0],
-        image_polyline[:, 1],
-        color=IMAGED,
-        linewidth=3.0,
-        zorder=4,
-        label="separatrix assembled on the field of the currents",
-    )
     for controls_key, valid_key in (
         ("state_open_controls", "state_open_valid"),
-        ("image_open_controls", "image_open_valid"),
+
     ):
         controls = np.asarray(fields[controls_key], dtype=np.float64)
         valid = np.asarray(fields[valid_key], dtype=bool)
-        colour = STATE if controls_key.startswith("state") else IMAGED
-        style = "--" if controls_key.startswith("state") else "-"
-        width = 1.4 if controls_key.startswith("state") else 2.4
+        colour = STATE
+        style = "-"
+        width = 2.4
         for slot in range(valid.shape[0]):
             leg = _cubic_points(controls[slot], valid[slot])
             if leg.shape[0] > 1:
@@ -179,9 +171,6 @@ def render(
                 markerfacecolor="none",
                 lw=0,
                 label=f"promoted node ({promoted.shape[0]})",
-            ),
-            plt.Line2D(
-                [], [], color=IMAGED, lw=3.0, label="separatrix, field of the currents"
             ),
             plt.Line2D(
                 [],

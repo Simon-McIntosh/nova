@@ -1288,7 +1288,9 @@ def panels(
     from nova.media.sources.frame import inside_wall_units
 
     def interior_points(mask: np.ndarray) -> np.ndarray:
-        radial_index, vertical_index = np.where(mask)
+        # The mask is read off the transposed map, so its axes run (vertical,
+        # radial): the first index belongs to the height nodes.
+        vertical_index, radial_index = np.where(mask)
         points = np.column_stack((radius[radial_index], height[vertical_index]))
         return points[np.asarray(inside_wall_units(points, units), dtype=bool)]
 

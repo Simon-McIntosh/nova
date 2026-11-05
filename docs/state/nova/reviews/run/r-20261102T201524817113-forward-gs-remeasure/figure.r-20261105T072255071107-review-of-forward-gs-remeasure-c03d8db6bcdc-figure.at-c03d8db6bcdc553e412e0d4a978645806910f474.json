@@ -1,0 +1,124 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "cohort_match_summary.png (1400x720 RGBA)": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+    "displacement_decomposition.png (1400x460 RGBA)": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
+  },
+  "attachment_note": "The reviewed head is not an ancestor of this review worktree's HEAD, so both committed PNG blobs were extracted from c03d8db6bc with `git show <head>:<path>` into run scratch and opened with Read at their native sizes (1400x720 and 1400x460). Only rendered pixels were judged; no SVG was opened, listed or rendered. Both files are additions in the reviewed range (git diff --name-status 3ef818df..c03d8db6bc -- docs/figures/ lists exactly these two PNGs, plus three JSON receipts). frame_flux_comparison.png was withdrawn by the reviewed run and is not present at the head, so it is not reviewed.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-05T16:19:16Z",
+  "figure_checks": {
+    "canvas": "Both figures are 1400 px wide (14 in at 100 dpi), heights 720 and 460, matching the house canvas width.",
+    "clipping": "Measured on the delivered PNGs: non-white pixels in the outer 1 px, 2 px and 3 px frames are 0, 0 and 0 for both figures. Nothing is clipped at the canvas edge.",
+    "fidelity_to_receipt": "Each plotted value was checked against the reviewed head's committed receipt (docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json, read with `git show c03d8db6bc:<path>`), not against the worker's account. Every absent marker is an absence in the receipt rather than a plotting loss: frame 144 has no metrics object at all (NoQualifiedAxisError before geometry), frame 44 carries closed_boundary_symmetric_rms_distance_m = None, and frame 146 carries closed_boundary_symmetric_rms_distance_m, signed_relative_q95_error and saddle_rz_m = [null, null] as None. Recomputed saddle offsets from the receipt's display_map agree with the plotted points to within a pixel (frame 179: 231.0 mm computed, plotted near 231; frame 44: 141.3 mm; frame 137: 127.6 mm). Marker x positions match the five frame ticks, so frame 44 is genuinely frame 44 and not a truncated '144'.",
+    "measurement_method": "Pillow/NumPy over the delivered rasters: marker centroids by connected-component labelling of the blue mask, text colour by the darkest frequent colour in the caption band and the left-axis band, WCAG relative-luminance contrast computed from those RGB values."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "cohort_match_summary.png",
+      "figure": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "render_size": "1400x720",
+      "rubric": {
+        "contrast": "defect. Axis, tick and panel-title text renders at #6e6e6b, 5.1:1 on white, which clears. The three-line caption at the foot renders at #929292, measured 3.11:1 on white, which is below the 4.5:1 that small text needs; the caption carries the frame-number meaning, the registered bar and the reason frame 144 is empty, so it is the one block a reader most needs to decode and it is the faintest. Recorded as finding 1.",
+        "data_ink": "pass. Every mark is data: one blue marker per computed value per panel and a single grey dotted reference line in the first panel. No gridlines, no bands, no fills.",
+        "decoration": "pass. White background, left and bottom spines only, no top or right spine, no grid, no shading and no themed styling.",
+        "label_collision": "pass. Zero non-white pixels in the outer 1, 2 and 3 px frames of the 1400x720 render, so nothing is clipped. Panel titles sit above their own panels and the caption sits below the bottom row of tick labels with clear space between; no label overlaps another label or any marker.",
+        "legibility": "pass. A 2x3 grid of titled panels -- 'interior R squared', 'closed boundary, symmetric RMS', 'lattice-to-map saddle offset', 'node mismatch against the state', 'magnetic-axis displacement', 'signed relative q95 error' -- each with a frame-number x axis (179, 44, 144, 146, 137) and, except the first, a y axis labelled with its unit ('distance [m]', 'offset [mm]', 'mismatch [mWb]', 'displacement [mm]', 'relative error'). The first panel carries one dotted reference at the registered bar. Marker counts per panel are faithful to the receipt: four points in the R-squared, node-mismatch and displacement panels, two in the closed-boundary RMS panel, three in the saddle-offset and q95 panels. The quantities are read at a glance and the one missing frame (144) leaves a visibly empty column.",
+        "table_form": "defect. The figure carries 20 computed scalars (five frames by four-to-six quantities) whose magnitudes are what matter; a five-row table would deliver every value to its printed precision in the same space. What the panels add is the registered bar in panel 1 and the spread, which one panel plus the table would also carry. Recorded as finding 3."
+      }
+    },
+    {
+      "attachment": "displacement_decomposition.png",
+      "figure": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
+      "render_size": "1400x460",
+      "rubric": {
+        "contrast": "defect. The caption renders at #929292, 3.11:1 on white, below 3:1 for small text -- measured as 3.11:1, which clears the large-text threshold only and not the 4.5:1 small-text one. Axis, tick and legend text render #6e6e6b at 5.1:1 and clear. The data markers render #2e6f9e at 5.41:1 on white, well clear. Recorded as finding 2.",
+        "data_ink": "pass. Eight markers and one dotted zero line; each mark is identified by the legend, and the two series are separated by fill (solid against hollow) as well as by shape, so the single hue carries no ambiguous meaning.",
+        "decoration": "pass. White background, left and bottom spines only, no grid, no shading, frameless legend.",
+        "label_collision": "pass for text. Zero non-white pixels in the outer 1, 2 and 3 px frames of the 1400x460 render; the legend, tick labels, axis labels and caption occupy separate bands. The frame-44 radial circle and vertical square touch and merge into one composite glyph, which is a mark-against-mark collision rather than a label collision and is recorded separately as finding 4.",
+        "legibility": "pass. One panel, 'axis offset [mm]' against 'frame', with a frameless two-entry legend at top right (filled circle 'radial', hollow square 'vertical') and a dotted zero reference. Four frames are plotted, and the dominance of the vertical component at every frame is the pattern the panel exists to show. The caption states what the offset is measured from and that frame 144 is unavailable.",
+        "table_form": "pass. The panel shows a signed decomposition whose point is position against a zero reference: radial stays near zero while every vertical offset is negative and, at frame 146, large and positive. That relationship is read from the geometry more directly than from eight tabulated numbers, which is the test for whether a figure rather than a table is warranted."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "id": "f18fff5311d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The three caption lines render at #929292, measured 3.11:1 against the white background, below the 4.5:1 that small text needs. The caption is the only place the x axis is explained ('cohort frames, by frame number'), the only place the dotted reference in panel 1 is identified ('registered bar 0.90155'), and the only place the empty column is explained ('frame 144 unavailable: NoQualifiedAxisError before geometry'), so the faintest text in the figure carries its explanatory load. Every other text element clears at 5.1:1. It remains legible, so this does not block a reader."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
+      "id": "f1bad475c9e",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption renders at the same #929292, measured 3.11:1 on white, below 4.5:1 for small text. It is the only place the offset's reference is stated ('magnetic-axis offset from the labelled axis') and the only place the absent frame is named ('frame 144 is unavailable'), so the faintest text carries the definition. Axis, tick, legend and marker ink all clear their thresholds. Legible as it stands, so non-blocking."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "id": "f18fff5311d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption names only frame 144 as unavailable, but four further cells are empty for a different reason and go unmentioned: frame 44 has no closed-boundary RMS, and frame 146 has no closed-boundary RMS, no saddle offset and no q95 error. The reader therefore sees a panel with two markers, two panels with three, and three with four, and can only explain one of the three gaps. The receipt records each as an explicit None (frame 146's saddle_rz_m is [null, null]), so the values do not exist rather than being lost in plotting; a one-clause addition to the caption naming the per-quantity absences would remove the ambiguity. Recorded as non-blocking because every value that exists is visible and unclipped."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
+      "id": "f1bad475c9e",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "At frame 44 the filled 'radial' circle (+1.8 mm) lands directly on the hollow 'vertical' square (-90.9 mm): the two marks are about 9.5 px apart on a 2850 mm axis and merge into one connected glyph, measured as a single 195-pixel blue component where every other marker is 96 to 121 pixels. Both marks are still discernible -- the square's outline shows below the circle -- so the reader can recover two measurements, but the composite reads as a single unusual symbol and the circle covers the top of the square. Recorded as non-blocking; a small horizontal offset, or a per-frame label, would separate them."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "id": "f18fff5311d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure carries 20 computed scalars, five frames by four-to-six quantities, each as one dot on a strip panel. A five-row, six-column table would present every value to printed precision in comparable space, which is the repository's test for whether an image is warranted at all ('never an image of what is naturally a table'). What the plotted form genuinely adds is the registered bar in panel 1 and the visible spread across a cohort whose headline result is that no frame converges; the recommendation is to keep panel 1 as the comparison and fold the remaining five quantities into a table, not to delete the figure. Non-blocking: the current form is readable and nothing is hidden."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "id": "f18fff5311d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The node-mismatch panel's y axis is labelled 'mismatch [mWb]' with tick labels running 2000 to 10000, so every tick exceeds the house rule's 0.1-to-1000 band and the reader is asked to carry a milli-prefix across four-digit numbers. The same quantity expressed in webers would read about 1.6 to 11 Wb and would also make its relation to the receipt's watt-consistent flux figures immediate. Readable as it stands, so non-blocking."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "Neither caption repeats a title. The cohort figure has no figure title and its caption supplies the x-axis meaning, the registered bar's value and the missing-frame reason; the displacement figure has no title and its caption supplies the offset's reference and the missing frame. Both add information the panels do not carry.",
+    "finding_materiality": "Six non-blocking findings, no blocking finding. No text is clipped (outer-frame non-white pixel counts are zero at 1, 2 and 3 px), no text overlaps text or data, and every value the receipt holds is visible. The two defects a reader meets first -- the 3.11:1 caption contrast and the frame-44 marker merge -- impair but do not prevent reading, which is the line between the two severities.",
+    "rendered_artifact": "Both attached figures were opened with Read at native resolution (1400x720 and 1400x460) and inspected in panel crops at 2x for the cohort figure and at 5x around the frame-44 markers of the displacement figure. No SVG was opened, listed, searched or rendered, and no image other than the two named PNGs was read.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T072255071107-review-of-forward-gs-remeasure-c03d8db6bcdc-figure",
+  "reviewed_base_sha": "3ef818dfaef2a36da8fd0d6e0c34272ec5259218",
+  "reviewed_figures": [
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
+  ],
+  "reviewed_head_sha": "c03d8db6bcdc553e412e0d4a978645806910f474",
+  "reviewed_run_id": "r-20261102T201524817113-forward-gs-remeasure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "cohort_match_summary.png RUBRIC legibility: pass, six titled panels each carrying its quantity and unit, readable at a glance",
+    "cohort_match_summary.png RUBRIC data_ink: pass, markers and one dotted reference bar only",
+    "cohort_match_summary.png RUBRIC decoration: pass, no gradient, fill, gridline or themed background",
+    "cohort_match_summary.png RUBRIC contrast: defect, the three caption lines render #929292 at 3.11:1 on white, below 4.5:1 for small text; all axis and tick text clears at 5.1:1",
+    "cohort_match_summary.png RUBRIC table_form: defect, 20 scalar values across six strip panels are naturally a five-row table",
+    "cohort_match_summary.png RUBRIC label_collision: pass, zero non-white pixels in the outer 3 px frame and no text overlaps text or data",
+    "displacement_decomposition.png RUBRIC legibility: pass, one signed panel with a frameless two-entry legend, readable at a glance",
+    "displacement_decomposition.png RUBRIC data_ink: pass, markers and one dotted zero reference only",
+    "displacement_decomposition.png RUBRIC decoration: pass, no gradient, fill, gridline or themed background",
+    "displacement_decomposition.png RUBRIC contrast: defect, the caption renders #929292 at 3.11:1 on white, below 4.5:1 for small text; axis, tick and legend text clears",
+    "displacement_decomposition.png RUBRIC table_form: pass, the signed radial-versus-vertical decomposition against a zero reference is a positional relationship a table would not carry as directly",
+    "displacement_decomposition.png RUBRIC label_collision: pass for text, zero non-white pixels in the outer 3 px frame and no text overlaps text or data; the frame-44 marker overlap is recorded separately as a finding"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T16:32:32.379642+00:00",
+  "total": null
+}

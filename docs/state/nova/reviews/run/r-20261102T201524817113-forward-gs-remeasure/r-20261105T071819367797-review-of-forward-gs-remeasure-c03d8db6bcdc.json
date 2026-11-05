@@ -1,0 +1,180 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records no baseline_suite or after_suite JSON. Its readable head arm is tests-operands.log: summary line '13 passed, 1 skipped', EXIT=0, which ran to its summary so the head failure set is empty; added failures are therefore zero by set inclusion, not by absence of a measurement. No base arm was recorded, so no delta was computed, and the head arm does not exercise tests/test_current_normalisation_traced.py.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "The guard reverts to the admissibility-flag test, so a traced inadmissible operand reaches float() and raises ConcretizationTypeError instead of reporting a non-finite amplitude; negative-control.log records exactly that red on both parametrised cases.",
+      "file": "tests/test_current_normalisation_traced.py",
+      "line": 35
+    },
+    {
+      "condition_to_fail": "The admissible branch stops scaling by target/unscaled, so linearize returns something other than TARGET_CURRENT/2.0.",
+      "file": "tests/test_current_normalisation_traced.py",
+      "line": 40
+    },
+    {
+      "condition_to_fail": "A concrete inadmissible operand stops raising CurrentNormalisationError, either by clipping to a bound or by returning the non-finite amplitude the traced path takes.",
+      "file": "tests/test_current_normalisation_traced.py",
+      "line": 45
+    },
+    {
+      "condition_to_fail": "rebuild_display_flux contracts the wrong rows of the stored matrix. It does not fail if the rebuild simply returns operands['conductor_flux'], which is what leaves the matrix product unguarded.",
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": 58
+    },
+    {
+      "condition_to_fail": "The rebuilt field differs from the persisted flux, which happens if the conductor term is rebuilt from the wrong rows or the wrong currents; it does not fail if rebuild_display_flux returns operands['flux'] untouched, because plasma_flux is persisted as exactly flux minus conductor_flux.",
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": 59
+    },
+    {
+      "condition_to_fail": "The tag sanitisation or the artifact root changes, so the file lands under another name.",
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": 119
+    },
+    {
+      "condition_to_fail": "The payload drops the state vector or the promoted domain mask, so a later panel cannot be drawn from the artifact.",
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": 121
+    },
+    {
+      "condition_to_fail": "Nothing: the right-hand side is the expression the code under test wrote for plasma_flux, so it holds for any conductor term.",
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": 124
+    },
+    {
+      "condition_to_fail": "A real bank frame fails to rebuild from its own matrix; today the test skips at line 135 because no persisted frame exists.",
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": 157
+    }
+  ],
+  "base_log_revision": null,
+  "call_site_count": 6,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:solve_frame:2437",
+    "benchmarks/diiid_forward_gs_match.py:1858",
+    "nova/equilibrium/forward_operator.py:3487",
+    "nova/equilibrium/forward_operator.py:3661",
+    "nova/equilibrium/forward_operator.py:3682",
+    "nova/equilibrium/forward.py:1464"
+  ],
+  "completed_at": "2026-11-05T16:31:49.364Z",
+  "dispatched_at": "2026-11-05T16:17:21Z",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json",
+      "line": "255",
+      "severity": "blocking",
+      "text": "blocking: frames_with_separatrix is 0 and every symmetric RMS and sup boundary separation is null (lines 276+), because separatrix_closed_points is 0 on all four frames that drew a fine map, so the done_when's headline measure - boundary separation on the fine-map separatrix - was never produced and the node recorded a verdict without it."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json",
+      "line": "3726",
+      "severity": "non-blocking",
+      "text": "non-blocking: frame_flux_comparison.png is withdrawn rather than delivered, so the dated directory holds cohort_match_summary.png and displacement_decomposition.png and not the pair \u00a78 names; the withdrawal is a correct application of the binding plotting rules and is recorded, but the done_when's 'both figures' clause is unmet."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "3641",
+      "severity": "non-blocking",
+      "text": "non-blocking: the current-normalisation refusal is changed in product source outside the four declared write paths and is not named in the manifest's scope_extension_request, which covers only the two test files; the fix is correct and guarded, but the record understates the fence the run worked under."
+    },
+    {
+      "file": "tests/test_current_normalisation_traced.py",
+      "line": "30",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only guard for the forward_operator.py change is absent from the manifest's recorded gate command, which names three files and not this one, so re-running the recorded gate cannot redden on a regression of the product change."
+    },
+    {
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": "59",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rebuild assertion cannot distinguish a field rebuilt from the conductor matrix from one returned out of the artifact, because plasma_flux is persisted as flux minus conductor_flux and flux is persisted whole; a rebuild_display_flux that ignores its response argument passes, so the matrix-product capability the node adds is untested."
+    },
+    {
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": "135",
+      "severity": "non-blocking",
+      "text": "non-blocking: the real-data arm skips, so _persist_frame_operands has no executed coverage and the committed receipt carries operand_path null on all five frames; the manifest's claim that every artifact's path and digest is recorded in the receipt is not true of the record on disk."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1508",
+      "severity": "non-blocking",
+      "text": "non-blocking: _conductor_response_path and _stored_conductor_response at line 1663 duplicate nova/database/content_store.py's verified content-addressed store in a weaker form; the 'digest' recorded at line 1538 is an input cache key rather than a content hash, and the load at line 1666 checks shape only, so an altered matrix of the right shape is accepted silently."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1489",
+      "severity": "non-blocking",
+      "text": "non-blocking: _display_grid re-builds the display grid that nova/equilibrium/display_flux.py:260-262 already constructs and then guards the duplication with a runtime equality check at line 1869 instead of asking the owner for the grid it will use."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "3341",
+      "severity": "non-blocking",
+      "text": "non-blocking: frame_figure is dead code after run() stopped calling it, with no reference anywhere in the repository, leaving a figure the receipt has withdrawn still drawn by an unreachable function."
+    }
+  ],
+  "head_log_revision": "c03d8db6bcdc553e412e0d4a978645806910f474",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read all 17 commits from 3ef818dfaef2a36da8fd0d6e0c34272ec5259218 to c03d8db6bcdc553e412e0d4a978645806910f474: 11 files, 8113 insertions and 42 deletions, of which five are the dated receipt/preregistration/partial-receipt/two PNGs, six the producer and solver guard, and one the evidence fragment.",
+    "done_when": "Plan separatrix-spline-extraction \u00a78 requires the dated directory to hold a receipt and both figures from one run at a stated HEAD, the 2026-08-29 tree unchanged, and the receipt to report per-frame convergence and the boundary separation measured on the fine-map separatrix; the August tree is byte-unchanged (empty git diff) and convergence is reported 0 of 5, but receipt line 255 reads frames_with_separatrix 0 and lines 276+ report every symmetric RMS and sup separation as null, and frame_flux_comparison.png is withdrawn at line 3726 instead of delivered.",
+    "goal": "The dispatch goal is a five-frame DIII-D forward-gs bank re-measured at HEAD into a dated receipt drawn from fine flux maps; docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json records five frames at tree_stamp.git_head 5ab15e26d, four of them carrying a display_map built at 10 mm spacing, and docs/evidence/fragments/separatrix-spline-extraction/forward-gs-remeasure.html:3-11 states the verdict as a measurement of HEAD rather than a revision of the August gate.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201524817113-forward-gs-remeasure/manifest.md; it lists 13 commits, records tests-operands.log at 13 passed and 1 skipped with EXIT=0, states the gate is not passed at 0 of 5 converged and median interior R-squared -0.651, and carries no baseline_suite or after_suite JSON.",
+    "write_paths": "The dispatch fence granted docs/figures/diiid-forward-onboarding/forward-gs-2026-11, benchmarks/diiid_forward_gs_match.py, the forward-gs-remeasure evidence fragment and docs/figures/separatrix-spline-extraction/forward-gs-remeasure; the base-to-head diff also changes nova/equilibrium/forward_operator.py, tests/test_current_normalisation_traced.py, tests/test_diiid_forward_gs_match.py and tests/test_frame_operand_artifacts.py, and the manifest's scope_extension_request names only the last two."
+  },
+  "justifications": {
+    "durability": "tests/test_current_normalisation_traced.py:35 is a real guard, reddened by reverting the fix in negative-control.log, while tests/test_frame_operand_artifacts.py:59 passes an implementation of rebuild_display_flux that ignores its response argument.",
+    "evidence": "benchmarks/diiid_forward_gs_match.py:2437 feeds the receipt's fine_map block and forward_gs_receipt.json:255 states frames_with_separatrix 0, so the recorded gate reports the required separation as absent rather than measured, and the manifest's tests line takes three files that exclude tests/test_current_normalisation_traced.py.",
+    "fit": "benchmarks/diiid_forward_gs_match.py:1694 follows the module's dataclass-and-receipt idiom and its names describe behaviour, with only DISPLAY_SPACING at line 126 aliasing an imported constant for no reason.",
+    "goal_fidelity": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json re-measures five frames at a stated HEAD from fine display maps, but only four drew a map and none assembled a separatrix, so the fine-map measurement the goal exists to make is thin on every frame it reaches.",
+    "reuse": "benchmarks/diiid_forward_gs_match.py:1508 and :1663 re-implement the digest-addressed cached-artifact store that nova/database/content_store.py already owns, in a weaker form that verifies shape and never the recorded digest.",
+    "scope_discipline": "nova/equilibrium/forward_operator.py:3641 changes the current-normalisation refusal in product source outside the four fenced paths and outside the manifest's scope_extension_request, which names only the two test files."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The dispatch goal is a five-frame DIII-D forward-gs bank re-measured at HEAD into a dated receipt drawn from fine flux maps; docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json records five frames at tree_stamp.git_head 5ab15e26d, four of them carrying a display_map built at 10 mm spacing, and docs/evidence/fragments/separatrix-spline-extraction/forward-gs-remeasure.html:3-11 states the verdict as a measurement of HEAD rather than a revision of the August gate.\nVERDICT done_when: Plan separatrix-spline-extraction \u00a78 requires the dated directory to hold a receipt and both figures from one run at a stated HEAD, the 2026-08-29 tree unchanged, and the receipt to report per-frame convergence and the boundary separation measured on the fine-map separatrix; the August tree is byte-unchanged (empty git diff) and convergence is reported 0 of 5, but receipt line 255 reads frames_with_separatrix 0 and lines 276+ report every symmetric RMS and sup separation as null, and frame_flux_comparison.png is withdrawn at line 3726 instead of delivered.\nVERDICT write_paths: The dispatch fence granted docs/figures/diiid-forward-onboarding/forward-gs-2026-11, benchmarks/diiid_forward_gs_match.py, the forward-gs-remeasure evidence fragment and docs/figures/separatrix-spline-extraction/forward-gs-remeasure; the base-to-head diff also changes nova/equilibrium/forward_operator.py, tests/test_current_normalisation_traced.py, tests/test_diiid_forward_gs_match.py and tests/test_frame_operand_artifacts.py, and the manifest's scope_extension_request names only the last two.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201524817113-forward-gs-remeasure/manifest.md; it lists 13 commits, records tests-operands.log at 13 passed and 1 skipped with EXIT=0, states the gate is not passed at 0 of 5 converged and median interior R-squared -0.651, and carries no baseline_suite or after_suite JSON.\nVERDICT diff: Read all 17 commits from 3ef818dfaef2a36da8fd0d6e0c34272ec5259218 to c03d8db6bcdc553e412e0d4a978645806910f474: 11 files, 8113 insertions and 42 deletions, of which five are the dated receipt/preregistration/partial-receipt/two PNGs, six the producer and solver guard, and one the evidence fragment.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:solve_frame:2437, benchmarks/diiid_forward_gs_match.py:1858, nova/equilibrium/forward_operator.py:3487, nova/equilibrium/forward_operator.py:3661, nova/equilibrium/forward_operator.py:3682, nova/equilibrium/forward.py:1464\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json re-measures five frames at a stated HEAD from fine display maps, but only four drew a map and none assembled a separatrix, so the fine-map measurement the goal exists to make is thin on every frame it reaches.\nSCORE evidence: 9\nJUSTIFICATION evidence: benchmarks/diiid_forward_gs_match.py:2437 feeds the receipt's fine_map block and forward_gs_receipt.json:255 states frames_with_separatrix 0, so the recorded gate reports the required separation as absent rather than measured, and the manifest's tests line takes three files that exclude tests/test_current_normalisation_traced.py.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: nova/equilibrium/forward_operator.py:3641 changes the current-normalisation refusal in product source outside the four fenced paths and outside the manifest's scope_extension_request, which names only the two test files.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_current_normalisation_traced.py:35 is a real guard, reddened by reverting the fix in negative-control.log, while tests/test_frame_operand_artifacts.py:59 passes an implementation of rebuild_display_flux that ignores its response argument.\nSCORE fit: 16\nJUSTIFICATION fit: benchmarks/diiid_forward_gs_match.py:1694 follows the module's dataclass-and-receipt idiom and its names describe behaviour, with only DISPLAY_SPACING at line 126 aliasing an imported constant for no reason.\nSCORE reuse: 5\nJUSTIFICATION reuse: benchmarks/diiid_forward_gs_match.py:1508 and :1663 re-implement the digest-addressed cached-artifact store that nova/database/content_store.py already owns, in a weaker form that verifies shape and never the recorded digest.\nFINDING docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json:255 blocking: frames_with_separatrix is 0 and every symmetric RMS and sup boundary separation is null (lines 276+), because separatrix_closed_points is 0 on all four frames that drew a fine map, so the done_when's headline measure - boundary separation on the fine-map separatrix - was never produced and the node recorded a verdict without it.\nFINDING docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json:3726 non-blocking: frame_flux_comparison.png is withdrawn rather than delivered, so the dated directory holds cohort_match_summary.png and displacement_decomposition.png and not the pair \u00a78 names; the withdrawal is a correct application of the binding plotting rules and is recorded, but the done_when's 'both figures' clause is unmet.\nFINDING nova/equilibrium/forward_operator.py:3641 non-blocking: the current-normalisation refusal is changed in product source outside the four declared write paths and is not named in the manifest's scope_extension_request, which covers only the two test files; the fix is correct and guarded, but the record understates the fence the run worked under.\nFINDING tests/test_current_normalisation_traced.py:30 non-blocking: the only guard for the forward_operator.py change is absent from the manifest's recorded gate command, which names three files and not this one, so re-running the recorded gate cannot redden on a regression of the product change.\nFINDING tests/test_frame_operand_artifacts.py:59 non-blocking: the rebuild assertion cannot distinguish a field rebuilt from the conductor matrix from one returned out of the artifact, because plasma_flux is persisted as flux minus conductor_flux and flux is persisted whole; a rebuild_display_flux that ignores its response argument passes, so the matrix-product capability the node adds is untested.\nFINDING tests/test_frame_operand_artifacts.py:135 non-blocking: the real-data arm skips, so _persist_frame_operands has no executed coverage and the committed receipt carries operand_path null on all five frames; the manifest's claim that every artifact's path and digest is recorded in the receipt is not true of the record on disk.\nFINDING benchmarks/diiid_forward_gs_match.py:1508 non-blocking: _conductor_response_path and _stored_conductor_response at line 1663 duplicate nova/database/content_store.py's verified content-addressed store in a weaker form; the 'digest' recorded at line 1538 is an input cache key rather than a content hash, and the load at line 1666 checks shape only, so an altered matrix of the right shape is accepted silently.\nFINDING benchmarks/diiid_forward_gs_match.py:1489 non-blocking: _display_grid re-builds the display grid that nova/equilibrium/display_flux.py:260-262 already constructs and then guards the duplication with a runtime equality check at line 1869 instead of asking the owner for the grid it will use.\nFINDING benchmarks/diiid_forward_gs_match.py:3341 non-blocking: frame_figure is dead code after run() stopped calling it, with no reference anywhere in the repository, leaving a figure the receipt has withdrawn still drawn by an unreachable function.",
+  "review_run_id": "r-20261105T071819367797-review-of-forward-gs-remeasure-c03d8db6bcdc",
+  "reviewed_base_sha": "3ef818dfaef2a36da8fd0d6e0c34272ec5259218",
+  "reviewed_commits": [
+    "c03d8db6bcdc553e412e0d4a978645806910f474",
+    "6ad2f5eaecd84530859eb081aca75b4b1304a82b",
+    "79911ca4d96a66eaa9989c52880d50bbfa5fb250",
+    "5e2be81053fb16d429bac20b0f82fe8f308967b2",
+    "032d621bad2ffbcacb95cfc19fc4e09f58cc0f6a",
+    "5ab15e26d5abcbf9232677728e35ecb4a2e33f37",
+    "f7d88423193f45897893b369764e1aa990f1133b",
+    "8237caff34def7567acb36b3bf5771ef9e65ed3d",
+    "930ed39cc5a2d9ce0909169942ff9b791c747283",
+    "a9c016ead9e3c2b7315ecc7c2ba88b0d16631cf8",
+    "e68ee3d4fb78071b71a4f491e86f40344d0623f1",
+    "e3989504165692a7aa252bdd1fb496b35dfec517",
+    "d725fb27ea49199d2e3bb3e52d27ef64dc21a106",
+    "15695238d72f5ae2928b2e7e12f4116df351f431",
+    "2f5f30d18e334b06d04652acde8eca39e0eeeb79",
+    "e2fd571d529a2ab1785a377db03b1daff9477b6a",
+    "66122fad3e10ad21305c499be1b227cdfe52a20e"
+  ],
+  "reviewed_head_sha": "c03d8db6bcdc553e412e0d4a978645806910f474",
+  "reviewed_run_id": "r-20261102T201524817113-forward-gs-remeasure",
+  "scores": {
+    "durability": 12,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 5,
+    "scope_discipline": 10
+  },
+  "self_comparison_assertions": [
+    "tests/test_frame_operand_artifacts.py:124 compares the conductor term against display.flux.ravel() - operands['plasma_flux'], and plasma_flux is persisted as exactly flux.ravel() - conductor_flux, so the two sides are the same expression and the assertion holds whatever the code does.",
+    "tests/test_frame_operand_artifacts.py:33 builds conductor, and line 59 builds the expected field, from the same response array the test hands to rebuild_display_flux at line 60; the two sides share their only source, so an implementation that ignores the matrix still passes."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T16:30:00Z",
+  "total": 66
+}

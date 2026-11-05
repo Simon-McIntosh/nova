@@ -1,12 +1,24 @@
 {
-  "caption": "Both panels draw terminal currents; the converged panel has a promoted node within two lattice cells of its polished X-point, so its near-X geometry is not certified by the current field.",
+  "assembly_drawn": {
+    "converged": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    },
+    "non_converged": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    }
+  },
+  "caption": "Both panels draw assembled solved separatrix lobes and legs through their polished X-points from the archived terminal currents; the converged panel has a promoted node within two lattice cells, so its near-X geometry remains uncertified.",
   "display_map": {
     "moments_route": "stored terminal moments at the solve's target current",
     "panels": {
       "converged": {
         "max_node_mismatch_wb": 0.02621237839847028,
         "max_solved_node_mismatch_wb": 7.468330120996569e-09,
-        "nearest_promoted_to_xpoint_m": 0.05621806020455529,
+        "nearest_promoted_to_xpoint_m": 0.056218060204558884,
         "promoted_node_count": 46,
         "reproduction_relative_error": 6.780338952939714e-12,
         "saddle_converged": true,
@@ -15,7 +27,7 @@
       "failed": {
         "max_node_mismatch_wb": 0.01302667518277896,
         "max_solved_node_mismatch_wb": 0.0006432119436611677,
-        "nearest_promoted_to_xpoint_m": 2.451193171219106,
+        "nearest_promoted_to_xpoint_m": 2.4511931712191077,
         "promoted_node_count": 25,
         "reproduction_relative_error": 7.196701472740935e-12,
         "saddle_converged": true,
@@ -32,20 +44,20 @@
     "two_cell_threshold_m": 0.12125000008381903
   },
   "render": {
-    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-titan.json",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/redraw_and_gate.py",
     "copied_from": null,
-    "device": "Tesla P100-PCIE-16GB",
-    "host": "98dci4-gpu-0002.iter.org",
-    "job_id": "1306442",
-    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-titan.log",
-    "partition": "titan",
+    "device": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "job_id": "1306556",
+    "log": "/work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/lane-redraw-ad534aecb.log",
+    "partition": "betelgeuse",
     "platform": "gpu",
     "published_archive": "docs/figures/single-grid-solver-cutover/panel-states.npz",
     "published_figure": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
     "read_archive": "docs/figures/single-grid-solver-cutover/panel-states.npz",
     "read_archive_md5": "82a99c7036d06ca690faeda4552d7153",
     "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-titan.json",
-    "source_revision": "f7c890ee9655a412ecad8f44f437889c57cce4cc"
+    "source_revision": "ad534aecbc9b2d34e90c8939c78be208f6763f91"
   },
   "schema": "nova.coil-edit-panel-receipt",
   "set": "single-grid-solver-cutover",
@@ -64,9 +76,9 @@
   "state_archive": "docs/figures/single-grid-solver-cutover/panel-states.npz",
   "state_archive_md5": "82a99c7036d06ca690faeda4552d7153",
   "visual_inspection": {
+    "assembled_lobe_and_legs_visible": true,
     "clipped_labels": 0,
     "inspected_render": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
-    "overlapping_labels": 0,
-    "pixel_identical_to_inspected_h200_panel": true
+    "overlapping_labels": 0
   }
 }

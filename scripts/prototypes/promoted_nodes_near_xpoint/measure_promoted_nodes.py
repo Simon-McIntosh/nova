@@ -41,15 +41,9 @@ import jax.numpy as jnp  # noqa: E402
 import benchmarks.coil_edit_latency as bench  # noqa: E402
 from nova.equilibrium import display_flux  # noqa: E402
 from nova.equilibrium.domain import PlasmaDomain  # noqa: E402
-from nova.equilibrium.flux_surface_connectivity import (  # noqa: E402
-    polish_stationary_points,
-)
-from nova.equilibrium.separatrix_branches import (  # noqa: E402
-    assemble_separatrix_branches,
-)
 from nova.equilibrium.topology import TopologyClass  # noqa: E402
 from nova.jax.config import configure_dtypes  # noqa: E402
-from nova.linalg.tensor_spline import fit_tensor_spline  # noqa: E402
+from nova.media.poloidal import sample_cubic_controls  # noqa: E402
 
 DOMAIN_NAMES = {
     int(PlasmaDomain.CORE): "core",
@@ -57,73 +51,6 @@ DOMAIN_NAMES = {
     int(PlasmaDomain.COMMON_SOL): "open (common SOL)",
     int(PlasmaDomain.EXCLUDED_MATERIAL): "wall shadow (outside material)",
 }
-
-
-def _stationary_saddle(values, radius, height, seed):
-    """Polish the stationary point of ``values`` nearest the seed cell.
-
-    The polish runs on the field's own tensor spline, so the returned point is
-    a stationary point of that field and never a coordinate carried in from
-    another.  A polish that does not converge, or whose Hessian is not of
-    saddle type, is reported absent rather than as an extremum.
-    """
-    surface = fit_tensor_spline(
-        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
-    )
-    polished = polish_stationary_points(
-        surface, jnp.asarray(np.asarray(seed).reshape(2))[None, :], jnp.ones((1,), bool)
-    )
-    position = np.asarray(polished["position_rz"], dtype=np.float64).reshape(2)
-    value = float(np.asarray(polished["value"]).reshape(()))
-    converged = bool(np.asarray(polished["converged"]).reshape(()))
-    hessian_type = int(np.asarray(polished["hessian_type"]).reshape(()))
-    if converged and hessian_type < 0 and np.all(np.isfinite(position)):
-        return position, value, True
-    return np.full(2, np.nan), float("nan"), False
-
-
-def _branches(values, radius, height, level, axis):
-    """Assemble the field's own separatrix: one closed lobe and its legs."""
-    assembled = jax.device_get(
-        assemble_separatrix_branches(
-            jnp.asarray(values),
-            jnp.asarray(radius),
-            jnp.asarray(height),
-            jnp.asarray(level),
-            jnp.asarray(axis),
-        )
-    )
-    return {
-        "closed_controls_rz": np.asarray(assembled["closed_controls_rz"], float),
-        "closed_valid": np.asarray(assembled["closed_valid"], bool),
-        "open_controls_rz": np.asarray(assembled["open_controls_rz"], float),
-        "open_valid": np.asarray(assembled["open_valid"], bool),
-        "open_branch_valid": np.asarray(assembled["open_branch_valid"], bool),
-        "well_formed": bool(np.asarray(assembled["well_formed"])),
-        "boundary_flux": float(level),
-    }
-
-
-def _cubic_points(controls, valid, samples=8):
-    """Sample the valid cubic segments of one branch into an ordered polyline."""
-    points = []
-    for index in np.nonzero(np.asarray(valid, dtype=bool).reshape(-1))[0]:
-        control = np.asarray(controls[index], dtype=np.float64).reshape(4, 2)
-        parameter = np.linspace(0.0, 1.0, samples, endpoint=index == 0)
-        one_minus = 1.0 - parameter
-        weight = np.stack(
-            (
-                one_minus**3,
-                3 * one_minus**2 * parameter,
-                3 * one_minus * parameter**2,
-                parameter**3,
-            ),
-            axis=1,
-        )
-        points.append(weight @ control)
-    if not points:
-        return np.empty((0, 2))
-    return np.concatenate(points)
 
 
 def _segmented_distance(points, query):
@@ -167,7 +94,9 @@ def _landmarks(branches, saddle, axis):
     leaves the traced field.
     """
     landmark = {"lobe_direction": None, "leg_directions": [], "lobe_tip": None}
-    closed = _cubic_points(branches["closed_controls_rz"], branches["closed_valid"])
+    closed = sample_cubic_controls(
+        branches["closed_controls_rz"], branches["closed_valid"]
+    )
     if closed.shape[0] > 2 and np.all(np.isfinite(axis)):
         offsets = closed - np.asarray(axis, dtype=np.float64)
         radii = np.linalg.norm(offsets, axis=1)
@@ -177,7 +106,9 @@ def _landmarks(branches, saddle, axis):
     legs = []
     valid = branches["open_valid"]
     for slot in range(np.asarray(valid).shape[0]):
-        points = _cubic_points(branches["open_controls_rz"][slot], valid[slot])
+        points = sample_cubic_controls(
+            np.asarray(branches["open_controls_rz"])[slot], valid[slot]
+        )
         if points.shape[0] < 2 or not np.all(np.isfinite(saddle)):
             continue
         reach = np.linalg.norm(points - np.asarray(saddle, float), axis=1)
@@ -267,26 +198,44 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     # also spans are evaluated through the machine coupling the panel draws
     # with, and the grid half is checked against the raster the solve itself
     # uses: the two disagree only at the display's own reproduction error.
-    raster = np.asarray(
-        operator.raster_image(
-            moments,
-            current=jnp.zeros_like(operator.external_current),
-            prescribed_current=jnp.asarray(current),
-        ),
-        dtype=np.float64,
-    )
+    # The constrained row folds a compensating conductor current into the
+    # prescribed vector before imaging, and that current carries flux of its
+    # own.  The field of the currents is therefore drawn from the compensated
+    # vector, and the same vector is handed to the raster the reproduction
+    # check compares against.
+    compensating = np.asarray(terminal.compensating_current, dtype=np.float64)
+    compensated = np.asarray(current, dtype=np.float64) + compensating
     coupling = bench._panel_display_coupling(
         prepared["circuit_context"]["group"],
         prepared["circuit_context"]["row"],
         lattice,
         np.asarray(current),
     )
+    complete_coupling = bench._panel_display_coupling(
+        prepared["circuit_context"]["group"],
+        prepared["circuit_context"]["row"],
+        lattice,
+        compensated,
+    )
     nodewise = (
         moments.cell_current,
         moments.radial_moment,
         moments.vertical_moment,
     )
-    image = display_flux._flux(coupling, coordinates, nodewise, 4096)
+    image = display_flux._flux(complete_coupling, coordinates, nodewise, 4096)
+    image_withheld = display_flux._flux(coupling, coordinates, nodewise, 4096)
+    # The raster carries the plasma grid only, so the wall nodes the shadow
+    # also spans are evaluated through the machine coupling the panel draws
+    # with, and the grid half is checked against the raster the solve itself
+    # uses: the two disagree only at the display's own reproduction error.
+    raster = np.asarray(
+        operator.raster_image(
+            moments,
+            current=jnp.zeros_like(operator.external_current),
+            prescribed_current=jnp.asarray(compensated),
+        ),
+        dtype=np.float64,
+    )
     scale = max(float(np.max(np.abs(raster))), 1.0e-30)
     grid_error = float(np.max(np.abs(image[:grid_count] - raster[:grid_count])))
     reproduction = grid_error / scale
@@ -316,26 +265,47 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     height_nodes = np.asarray(lattice.height, dtype=np.float64)
     state_field = state_nodes[:grid_count].reshape(shape).T
     image_field = image[:grid_count].reshape(shape).T
+    spacing_m = 0.5 * (
+        float(radius_nodes[1] - radius_nodes[0])
+        + float(height_nodes[1] - height_nodes[0])
+    )
 
-    state_saddle, state_saddle_flux, state_saddle_ok = _stationary_saddle(
+    state_saddle, state_saddle_flux, state_saddle_ok = display_flux._stationary_saddle(
         state_field, radius_nodes, height_nodes, seed
     )
-    image_saddle, image_saddle_flux, image_saddle_ok = _stationary_saddle(
-        image_field, radius_nodes, height_nodes, seed
-    )
 
-    state_branches = _branches(
+    # The complete field's saddle and separatrix are read by the module's own
+    # builder on the fine display grid, with the solve's promoted mask and the
+    # compensated current vector, so no part of the polish or the branch
+    # assembly is restated here.
+    complete = display_flux.build_display_flux_map(
+        profile,
+        state,
+        coupling=complete_coupling,
+        moments=moments,
+        spacing=display_flux.DEFAULT_SPACING,
+        current=jnp.zeros_like(operator.external_current),
+        prescribed_current=jnp.asarray(compensated),
+        requested_class=requested_class,
+        axis_rz=axis,
+        xpoint_rz=seed,
+        promoted=mask[:grid_count],
+        chunk=4096,
+    )
+    image_saddle = np.asarray(complete.saddle_rz, dtype=np.float64).reshape(2)
+    image_saddle_flux = float(complete.saddle_flux)
+    image_saddle_ok = bool(complete.saddle_converged)
+    image_branches = complete.branches
+
+    state_branches = display_flux._branches(
         state_field, radius_nodes, height_nodes, boundary_flux, axis
     )
     image_level = image_saddle_flux if image_saddle_ok else boundary_flux
-    image_branches = _branches(
-        image_field, radius_nodes, height_nodes, image_level, axis
-    )
 
-    state_polyline = _cubic_points(
+    state_polyline = sample_cubic_controls(
         state_branches["closed_controls_rz"], state_branches["closed_valid"]
     )
-    image_polyline = _cubic_points(
+    image_polyline = sample_cubic_controls(
         image_branches["closed_controls_rz"], image_branches["closed_valid"]
     )
     state_landmarks = _landmarks(state_branches, state_saddle, axis)
@@ -378,6 +348,32 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         "terminal_residual_wb": float(np.asarray(terminal.terminal_residual)),
         "converged": bool(np.asarray(terminal.converged)),
         "image_reproduction_relative_error": reproduction,
+        "constraint_compensation": {
+            "compensating_current_a": float(
+                np.asarray(terminal.constraints[0].physical_unknown).reshape(-1)[0]
+            )
+            if getattr(terminal, "constraints", ())
+            else None,
+            "compensating_current_norm_a": float(np.linalg.norm(compensating)),
+            "compensating_current_wb_per_a_applied": True,
+            "max_abs_flux_on_physical_nodes_wb": float(
+                np.max(np.abs(image - image_withheld))
+            ),
+        },
+        "complete_field": {
+            "builder": "nova.equilibrium.display_flux.build_display_flux_map",
+            "promoted_node_count": int(complete.promoted_node_count),
+            "spacing_m": float(complete.spacing_m),
+            "reproduction_relative_error": float(complete.reproduction_relative_error),
+            "max_node_mismatch_wb": float(complete.max_node_mismatch_wb),
+            "max_solved_node_mismatch_wb": float(complete.max_solved_node_mismatch_wb),
+            "saddle_offset_mm": float(complete.saddle_offset_mm),
+            "nearest_promoted_to_x_point_mm": float(
+                1.0e3 * complete.nearest_promoted_to_xpoint_m
+            ),
+            "well_formed": bool(complete.well_formed),
+            "build_seconds": float(complete.build_seconds),
+        },
         "promoted_node_count": int(np.count_nonzero(mask)),
         "lattice_node_count": grid_count,
         "physical_node_count": node_count,
@@ -420,6 +416,9 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
             ),
             "displacement_r_mm": float(1.0e3 * (image_saddle[0] - state_saddle[0])),
             "displacement_z_mm": float(1.0e3 * (image_saddle[1] - state_saddle[1])),
+            "displacement_lattice_cells": float(
+                np.linalg.norm(image_saddle - state_saddle) / spacing_m
+            ),
         },
         "separatrix": {
             "state_boundary_flux_wb": boundary_flux,
@@ -453,13 +452,7 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
             "state_closed_vertex_count": int(state_polyline.shape[0]),
             "image_closed_vertex_count": int(image_polyline.shape[0]),
         },
-        "lattice_spacing_m": float(
-            0.5
-            * (
-                float(radius_nodes[1] - radius_nodes[0])
-                + float(height_nodes[1] - height_nodes[0])
-            )
-        ),
+        "lattice_spacing_m": spacing_m,
         "wall_units": [
             {
                 "radius": np.asarray(unit.r, dtype=float).tolist(),
@@ -498,6 +491,9 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         "image_open_valid": image_branches["open_valid"],
         "state_boundary_flux": np.asarray(boundary_flux),
         "image_level": np.asarray(image_level),
+        "display_radius": np.asarray(complete.radius, dtype=np.float64),
+        "display_height": np.asarray(complete.height, dtype=np.float64),
+        "display_flux": np.asarray(complete.flux, dtype=np.float64),
     }
     return receipt, fields
 

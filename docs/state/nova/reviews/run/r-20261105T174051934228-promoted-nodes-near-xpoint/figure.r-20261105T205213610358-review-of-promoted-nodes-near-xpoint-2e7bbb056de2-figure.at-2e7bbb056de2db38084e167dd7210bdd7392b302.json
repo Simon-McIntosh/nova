@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-05T21:00:02Z",
+  "figures_reviewed": [
+    "image-0.png, 1400x720 RGBA, the rendered panel attached to this review (a poloidal contour map at left and a magnified X-point window at right); judged from the rendered pixels only"
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "A read-only figure review cannot edit the drawing script, and this node's write paths do not include it; the repair belongs to a node that owns render_panel.py and should move the scale bar and its caption clear of the separatrix leg.",
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "f57cdb1f354",
+      "line": 229,
+      "severity": "blocking",
+      "summary": "The zoom's scale-bar caption is drawn straight through by the data. The '0.5 mm' text placed at render_panel.py:229-237 sits where the dashed converged-state separatrix leg passes, and in the rendered PNG the leg crosses the leading '0' of the label (label at about x 1075-1165, y 555-580; the leg at x 1055-1080). A reader cannot read the scale-bar label cleanly, and because the measurement annotation immediately above it reads '0.35 mm', the struck label is easy to mistake for part of that annotation. This is exactly the case the repository's save-time check exists to refuse, and it passes that check (see the next finding)."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "The guard belongs with the drawing script; a node that owns render_panel.py extends the save-time check to the plotted artist bounding boxes.",
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "ffa11863768",
+      "line": 37,
+      "severity": "non-blocking",
+      "summary": "_assert_text_inside, the only mechanical guard run before the figure is written, compares each text artist against the canvas edges (lines 50-56) and against the other text artists (lines 58-62) and never against plotted data, so the blocking collision above passes it. The zoom annotation at line 212 is placed in axes-fraction coordinates with nothing constraining it against the curves, and the scale-bar caption at line 229 is placed by data coordinates with the same gap. Every future figure drawn through this helper inherits a check that reports safety it does not provide for the case the plotting rules name explicitly."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "Layout work on the drawing script; goes to whichever node owns render_panel.py next.",
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "f3d92455bee",
+      "line": 238,
+      "severity": "non-blocking",
+      "summary": "The zoom panel is sized by the canvas grid rather than by its content. It is given 740x600 px of the 1400x720 canvas, but with equal aspect and a window of 2.1 mm its content bounding box is 406x238 px, occupying 21.8% of the panel at 1.6% ink, and only 22 px separates its glyph cluster from the map's right edge (map ends x 614, zoom ink begins x 985 leaves a 371 px blank gutter). The figure's headline measurement is therefore drawn at about 53 px per 0.35 mm while four fifths of the right half is empty; a compact inset placed in the map panel's own unused left column (x 0-320 is blank) would let the same measurement be drawn larger."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "Same drawing script; a locator rectangle on the map marks the zoom window.",
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "f74fd9fb4e3",
+      "line": 193,
+      "severity": "non-blocking",
+      "summary": "The zoom window is not located on the map. Nothing on the poloidal panel marks the region the right-hand window magnifies \u2014 no locator box, no connector, no label \u2014 so a reader has to infer from the separatrix geometry that the magnified point is the X-point. Because the zoom sits a full panel's width away on an axis-free canvas, the two panels read as two unrelated pictures rather than as one detail and its context."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "The zoom panel already shows both glyphs distinctly, so the figure does let the reader see the pair; a repair would be a drawing-script change this read-only review cannot make.",
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "ff28e2d6e03",
+      "line": 171,
+      "severity": "non-blocking",
+      "summary": "On the map the converged-state saddle glyph is completely hidden behind the field-of-the-currents glyph. The two saddles are 0.354 mm apart, which is about 0.1 px at the map's roughly 2.5 mm per pixel, and the blue glyph is drawn last at a markersize 1.5 pt larger (render_panel.py:167-173), so an 8x crop of the X-point region shows only the blue mark with no dark X-point glyph visible. The legend still offers 'saddle, converged state' as a dark entry, so it names a mark a reader cannot find on the main panel; only the zoom shows both, which is what keeps this from blocking."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "One more line in the drawing script: a scale bar on the map panel.",
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "f0cb4896c5e",
+      "line": 92,
+      "severity": "non-blocking",
+      "summary": "The poloidal panel carries no length scale. Axis off is correct under the plotting rules, but no scale bar replaces it, so the map gives the reader no way to convert the drawn geometry into millimetres: the promoted-to-X-point distances the fragment tables (nearest 56.5 mm, q50 614.3 mm, q100 3029.7 mm) cannot be checked against the picture, and the wall's own scale is unstated. The zoom on the same canvas does carry a 0.5 mm bar, which makes the omission read as an inconsistency rather than a house style."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 every text run is #374151 near-black on white at roughly 10:1, no text sits on a shaded or coloured background, and no text is rendered in the panel's silver grey. The grey contours at #929292 are data marks, not text",
+    "data_ink": "fail \u2014 the data do carry the ink that exists (there is no decoration to strip), but they are given far less room than the canvas allows: the zoom window is 740x600 px and its content bounding box 406x238 px occupies 21.8% of it at 1.6% ink, and the measured 0.354 mm separation renders as about 53 px beside a 77 px 0.5 mm scale bar in a 1400 px canvas. The flux contours are the faintest mark in the figure at 1.2 pt #929292 on white",
+    "decoration": "pass \u2014 no gradient, no background fill and no decorative styling anywhere in the PNG; the axis is off on both panels, the cross-hatch inside the two divertor clusters is overlapping hollow diamond markers (data), and the two thin grey lines in the zoom are the saddle connector and the measurement leader, both carrying information",
+    "label_collision": "fail \u2014 the zoom's scale-bar caption '0.5 mm' (render_panel.py:229) is struck through by the dashed converged-state separatrix leg, which crosses the figure at x about 1055-1080 through the leading '0' of the label at y 555-580. Text overlapping plotted data is a blocking defect under the rubric, and the two labels '0.35 mm' and '0.5 mm' sit close enough that the struck one is read as part of the measurement annotation",
+    "legibility": "fail \u2014 the map itself reads, but nothing gives it a length scale: the poloidal panel is drawn with the axis off (render_panel.py:92) and carries no scale bar, so the only length reference in the whole figure is the zoom's 0.5 mm bar, and a reader cannot judge the 56.5 mm nearest-promoted-node distance or the wall spacing from the map. The plotted content is also small for its canvas: the map occupies x 324-614 (291 px of 1400) and the zoom content x 985-1390 (406 px), and ink is 3.5% of the canvas below the legend, so at the ~0.64 scale of a 900 px reckon column the two zoom labels render at about 12 px",
+    "table_form": "pass \u2014 the image is a poloidal flux map with the wall, the separatrix and the promoted-node set placed in R-Z, which is a spatial relationship the fragment's table cannot carry; no tabular content is drawn as a picture, and the zoom is a geometric enlargement rather than a restatement of a table"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T205213610358-review-of-promoted-nodes-near-xpoint-2e7bbb056de2-figure",
+  "reviewed_base_sha": "bd3b868dbcd2b60fe0b0840778324f8356861173",
+  "reviewed_head_sha": "2e7bbb056de2db38084e167dd7210bdd7392b302",
+  "reviewed_run_id": "r-20261105T174051934228-promoted-nodes-near-xpoint",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T21:09:49.092243+00:00",
+  "total": null
+}

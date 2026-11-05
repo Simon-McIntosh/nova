@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-11-05T20:58:37.690Z",
+  "dispatched_at": "2026-11-05T20:47:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html",
+      "id": "f70f06e14a0",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "The image minus state column reads +0.0000 mWb on all 31 upper-half-plane promoted nodes (image_wb - state_wb about 1.9e-10 Wb) while the 29 lower-half-plane nodes read -4.6e-03 to -2.6e-02 Wb, and this sentence concludes that the column 'measures geometry rather than an instrument gap'; the reviewed run's own manifest records that same asymmetry as unresolved ('every upper-halfplane node reads 0.0000 mWb while the lower-halfplane nodes read -2 to -26 mWb ... the per-node column should be checked before it is used node by node'), so the fragment presents a column half of which is an unexplained null as a whole one."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",
+      "id": "f219e921806",
+      "line": 229,
+      "severity": "non-blocking",
+      "text": "The '0.5 mm' scale-bar label is drawn at centre[1] - 0.86*half under the dashed converged-state separatrix plotted across the zoom panel at line 193, and the PNG rendered from the committed fields shows the dashed line running through the text; _assert_text_inside at lines 44-62 tests text against text and the canvas only, so the rule that refuses a direct label sitting over plotted data is not enforced."
+    },
+    {
+      "file": "/work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint/measure-5d-gate.log",
+      "id": "f7cd6a6cf78",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "The gate the manifest names ran at SOURCE_REVISION cf3607fe3 and its render step logged a 73341-byte SVG and zoom_window_mm 40.0, while the committed panel is 72139 bytes with a 3.0 mm window and was produced by commits d09bc14d7 and 2e7bbb056 made after the gate ended, so the recorded gate does not cover the reviewed head; the committed SVG is nevertheless byte-identical to a fresh render from the gate's own measure-5-fields.npz and the fragment is exactly compose(measure-5.json), so the artifact is reproducible even though the gate did not produce it."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site: grep over nova/, benchmarks/, tests/ and scripts/ finds no importer of the prototype modules, and run_round.py invokes them only from inside scripts/prototypes/promoted_nodes_near_xpoint/.",
+    "diff": "Read all ten commits 62ee4e3eb..2e7bbb056: the null-slot renderer fix, the compensated complete field, the round runner, the numpy receipt serialiser, the headline log, the scheduler terminal probe, the undefined-separatrix handling, the fragment rewrite and the two-decimal label.",
+    "done_when": "The brief's three items (the promoted-node table, the image-minus-state control with a re-polished saddle, and the fragment plus one poloidal figure) are each produced, and run_round.py's lane gate records EXIT_STATUS=0 at cf3607fe3 in /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint/measure-5d-gate.log.",
+    "goal": "The reviewed goal is to determine whether the nodes the closing trip promotes beside the X-point move the converged near-X-point geometry; docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html and scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:349-483 deliver all three done-when items.",
+    "manifest": "Read; it states status complete, records the titan lane job 1306509 with ROUND-OK and EXIT_STATUS=0, and discloses the upper/lower half-plane asymmetry of the image-minus-state column as an unresolved caveat.",
+    "write_paths": "The manifest declares scripts/prototypes/promoted_nodes_near_xpoint/, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/; all seven changed paths lie inside them and neither nova/equilibrium/reduced_newton.py nor forward_operator.py is modified."
+  },
+  "justifications": {
+    "durability": "No test file is in the write paths and the diff adds none; the only guards are runtime checks in the producers at scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py:44-62 and run_round.py:60-77, which redden on a specific regression but no test exercises.",
+    "evidence": "measure-5d-gate.log:120 records EXIT_STATUS=0 with ROUND-OK and every fragment number reconciles with measure-5.json, but the gate ran at SOURCE_REVISION cf3607fe3, three commits before the reviewed head, and the per-node image-minus-state column carries an asymmetry the fragment does not disclose.",
+    "fit": "The scripts follow the surrounding prototype idiom and draw through nova.media painters, though render_panel.py:8-9 still says the panel carries the separatrix the field of the currents assembles, which this receipt leaves empty.",
+    "goal_fidelity": "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:349-483 emits the promoted table, the compensated image-minus-state control and the re-polished saddle, and docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html:70-72 reports the separatrix angles as undefined rather than inventing them.",
+    "reuse": "The diff removes the duplicated _stationary_saddle, _branches and _cubic_points and calls display_flux._stationary_saddle, display_flux._branches and nova.media.poloidal.sample_cubic_controls; the added _json_default at measure_promoted_nodes.py:53 restates a numpy-to-JSON idiom six other scripts inline with no shared owner, and _segmented_distance is a pre-existing duplicate left in place.",
+    "scope_discipline": "Every one of the seven paths changed in 62ee4e3eb..2e7bbb056 lies inside the manifest's declared paths scripts/prototypes/promoted_nodes_near_xpoint/, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed goal is to determine whether the nodes the closing trip promotes beside the X-point move the converged near-X-point geometry; docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html and scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:349-483 deliver all three done-when items.\nVERDICT done_when: The brief's three items (the promoted-node table, the image-minus-state control with a re-polished saddle, and the fragment plus one poloidal figure) are each produced, and run_round.py's lane gate records EXIT_STATUS=0 at cf3607fe3 in /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint/measure-5d-gate.log.\nVERDICT write_paths: The manifest declares scripts/prototypes/promoted_nodes_near_xpoint/, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/; all seven changed paths lie inside them and neither nova/equilibrium/reduced_newton.py nor forward_operator.py is modified.\nVERDICT manifest: Read; it states status complete, records the titan lane job 1306509 with ROUND-OK and EXIT_STATUS=0, and discloses the upper/lower half-plane asymmetry of the image-minus-state column as an unresolved caveat.\nVERDICT diff: Read all ten commits 62ee4e3eb..2e7bbb056: the null-slot renderer fix, the compensated complete field, the round runner, the numpy receipt serialiser, the headline log, the scheduler terminal probe, the undefined-separatrix handling, the fragment rewrite and the two-decimal label.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:349-483 emits the promoted table, the compensated image-minus-state control and the re-polished saddle, and docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html:70-72 reports the separatrix angles as undefined rather than inventing them.\nSCORE evidence: 15\nJUSTIFICATION evidence: measure-5d-gate.log:120 records EXIT_STATUS=0 with ROUND-OK and every fragment number reconciles with measure-5.json, but the gate ran at SOURCE_REVISION cf3607fe3, three commits before the reviewed head, and the per-node image-minus-state column carries an asymmetry the fragment does not disclose.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every one of the seven paths changed in 62ee4e3eb..2e7bbb056 lies inside the manifest's declared paths scripts/prototypes/promoted_nodes_near_xpoint/, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/.\nSCORE durability: 8\nJUSTIFICATION durability: No test file is in the write paths and the diff adds none; the only guards are runtime checks in the producers at scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py:44-62 and run_round.py:60-77, which redden on a specific regression but no test exercises.\nSCORE fit: 16\nJUSTIFICATION fit: The scripts follow the surrounding prototype idiom and draw through nova.media painters, though render_panel.py:8-9 still says the panel carries the separatrix the field of the currents assembles, which this receipt leaves empty.\nSCORE reuse: 17\nJUSTIFICATION reuse: The diff removes the duplicated _stationary_saddle, _branches and _cubic_points and calls display_flux._stationary_saddle, display_flux._branches and nova.media.poloidal.sample_cubic_controls; the added _json_default at measure_promoted_nodes.py:53 restates a numpy-to-JSON idiom six other scripts inline with no shared owner, and _segmented_distance is a pre-existing duplicate left in place.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html:62 non-blocking: The image minus state column reads +0.0000 mWb on all 31 upper-half-plane promoted nodes (image_wb - state_wb about 1.9e-10 Wb) while the 29 lower-half-plane nodes read -4.6e-03 to -2.6e-02 Wb, and this sentence concludes that the column 'measures geometry rather than an instrument gap'; the reviewed run's own manifest records that same asymmetry as unresolved ('every upper-halfplane node reads 0.0000 mWb while the lower-halfplane nodes read -2 to -26 mWb ... the per-node column should be checked before it is used node by node'), so the fragment presents a column half of which is an unexplained null as a whole one.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py:229 non-blocking: The '0.5 mm' scale-bar label is drawn at centre[1] - 0.86*half under the dashed converged-state separatrix plotted across the zoom panel at line 193, and the PNG rendered from the committed fields shows the dashed line running through the text; _assert_text_inside at lines 44-62 tests text against text and the canvas only, so the rule that refuses a direct label sitting over plotted data is not enforced.\nFINDING /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint/measure-5d-gate.log:5 non-blocking: The gate the manifest names ran at SOURCE_REVISION cf3607fe3 and its render step logged a 73341-byte SVG and zoom_window_mm 40.0, while the committed panel is 72139 bytes with a 3.0 mm window and was produced by commits d09bc14d7 and 2e7bbb056 made after the gate ended, so the recorded gate does not cover the reviewed head; the committed SVG is nevertheless byte-identical to a fresh render from the gate's own measure-5-fields.npz and the fragment is exactly compose(measure-5.json), so the artifact is reproducible even though the gate did not produce it.\n",
+  "review_run_id": "r-20261105T204321259553-review-of-promoted-nodes-near-xpoint-2e7bbb056de2",
+  "reviewed_base_sha": "62ee4e3ebdb96f84102102abe7a13d6697eda1bf",
+  "reviewed_head_sha": "2e7bbb056de2db38084e167dd7210bdd7392b302",
+  "reviewed_run_id": "r-20261105T174051934228-promoted-nodes-near-xpoint",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T21:08:57.818102+00:00",
+  "total": 94
+}

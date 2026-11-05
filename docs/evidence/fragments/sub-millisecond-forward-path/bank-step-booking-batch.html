@@ -1,14 +1,6 @@
 <section id="bank-step-booking-batch-landing">
 <h2>Batch populated booking buckets across Newton lanes</h2>
-<p><strong>CPU cycle gate fails at measured head d3ac7e1.</strong>
-Allocation 1306402 completed; its cycle suite reports
-<code>tests/test_bank_solve_cycle.py::test_diverted_lanes_leave_near_root_cycle</code>
-failed at <code>AssertionError: cycle lanes exceed eight restart steps</code>.
-The largest fresh
-residual is <code>1.8366924464213426e-10</code> after eight restart updates,
-above the <code>1e-10</code> budget. The base cycle suite passes. This unmet
-gate prevents completion; the full result is recorded in the after-suite
-receipt.</p>
+<p><strong>Added CPU suite failure:</strong> ../../../../../../../../tmp/booking-verify-9VDjGx/head/tests/test_bank_solve_cycle.py::test_diverted_lanes_leave_near_root_cycle - AssertionError: cycle lanes exceed eight restart steps. It is carried by the follow-on convergence work.</p>
 <p>The initial H200 reproduction (allocation 1306388) isolates the excess
 outer-vmap cost to local booking:
 13.387 ms mapped versus 121.856 ms vectorized at one lane. Whole Jacobian assembly is
@@ -27,19 +19,21 @@ requires that refusal on the three-node seed.</p>
 <p>Sixteen-lane Jacobian scaling is <strong>3.385 times one lane</strong>,
 against a limit of four. Measurements use the production fresh-correction lane
 mapper, with explicit synchronized calls through the shared timing instrument.</p>
+<p>At 16 slices, the per-slice converged wall went from 693 to 739 ms. step_jacobian fell from 289 to 32 ms, but the per-iterate wall fell only from about 1109 to 985 ms, and the slowest lane took 12 updates against 10. The remaining iterate cost is outside the matrix.</p>
 <table id="bank-step-booking-batch-walls"><thead><tr><th>Arm</th><th>Lanes</th>
-<th>Jacobian [ms/batch]</th><th>Solve wall [ms]</th>
-<th>Per-iterate wall [ms]</th><th>Converged wall [ms/slice]</th><th>Maximum updates</th>
+<th>Jacobian [ms/batch]</th><th>Whole solve wall [ms]</th>
+<th>Per-iterate wall [ms]</th><th>Converged wall [ms/slice]</th>
+<th>Maximum updates</th>
 <th>Largest fresh residual</th></tr></thead>
-<tbody><tr><td>base</td><td>1</td><td>18.963</td><td>129.514</td><td>25.903</td><td>647.572</td><td>5</td><td>7.9693e-11</td></tr><tr><td>base</td><td>16</td><td>289.489</td><td>1108.607</td><td>110.861</td><td>692.879</td><td>10</td><td>9.6036e-11</td></tr><tr><td>batched</td><td>1</td><td>9.395</td><td>107.710</td><td>35.903</td><td>323.131</td><td>3</td><td>1.3998e-11</td></tr><tr><td>batched</td><td>16</td><td>31.804</td><td>985.405</td><td>82.117</td><td>739.054</td><td>12</td><td>9.8183e-11</td></tr></tbody></table>
+<tbody><tr><td>base</td><td>1</td><td>18.963</td><td>647.572</td><td>129.514</td><td>647.572</td><td>5</td><td>7.9693e-11</td></tr><tr><td>base</td><td>16</td><td>289.489</td><td>11086.072</td><td>1108.607</td><td>692.879</td><td>10</td><td>9.6036e-11</td></tr><tr><td>batched</td><td>1</td><td>9.395</td><td>323.131</td><td>107.710</td><td>323.131</td><td>3</td><td>1.3998e-11</td></tr><tr><td>batched</td><td>16</td><td>31.804</td><td>11824.859</td><td>985.405</td><td>739.054</td><td>12</td><td>9.8183e-11</td></tr></tbody></table>
 <figure id="bank-step-booking-batch-figure"><img
 src="/nova/figures/sub-millisecond-forward-path/bank-step-booking-batch/jacobian-wall.svg"
 alt="Jacobian wall against one and sixteen lanes, base and batched, on linear
 axes with values at markers"><figcaption>One reserved H200 allocation,
 1306401.
-Jacobian values are medians of three synchronized warm calls; the solve wall
-is its second execution after explicit compilation. The per-iterate value
-divides that complete solve wall by its maximum lane update count, including
+Jacobian values are medians of three synchronized warm calls; the whole solve
+wall is its second execution after explicit compilation. The per-iterate value
+divides that whole solve wall by the slowest lane's update count, including
 reads and line search. The plot uses linear axes and prints milliseconds at
 every marker.</figcaption></figure>
 <p>The first bucket-only candidate scaled 9.45 times (15.624 to 147.719 ms) and

@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so 0 and [] are the neutral values the record shape requires and not a measurement. No base/head gate pair was read and no added-failure claim is made.",
+  "attachment_map": {
+    "promoted-node-mismatch.png": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg"
+  },
+  "attachment_note": "Two rendered PNGs were judged, both 1400x720: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160429085898-promoted-node-figure/promoted-node-mismatch.png (the head render the run inspected) and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160429085898-promoted-node-figure/before/promoted-node-mismatch.png (the base render the run reproduces). No SVG and no other image was opened, rendered or read. Every verdict below is about the pixels of those two PNGs, read at native resolution and in 2x-4x nearest-neighbour crops held under the node scratch directory.",
+  "completed_at": "2026-11-05T17:03:59.887Z",
+  "dispatched_at": "2026-11-05T16:55:52Z",
+  "figure_checks": {
+    "base_defect": "The base render before/promoted-node-mismatch.png shows the collision the run repaired, read directly from its pixels: the string 'promoted' is drawn across a red diamond and a grey marker, so the word renders as 'pro\u25c6noted' with a grey dot in its last letter (measured crop x 160-360, y 440-570); in the right panel 'with the compensation withheld' runs along the top of the hollow-marker row, its glyphs touching the row's circles; and 'solved nodes' is placed among the lattice markers at lower left. In the head render those four names are in a single frameless figure legend on blank canvas above both panels.",
+    "clipping": "Ink bounding box of the head render: x 89..1359, y 24..681 of 1400x720; outer-frame ink 0 pixels at a 4 px inset and 0 at 2 px. The legend spans x 392..1012 and rows 24..73, clear above both panels.",
+    "provenance": "reviewed_base_sha c9a473887 is confirmed an ancestor of reviewed_head_sha 436609c689: git merge-base --is-ancestor c9a473887d100bca02bad1a8395fa2940b39e2a2 436609c68961c7cdc3143cc6ecfcde37050aba54 exits 0. The drawing script read for anchors is the head's own blob at benchmarks/display_map_promoted_figure.py.",
+    "render": "Both verdicts were formed on the two PNGs held by the reviewed run: the head render promoted-node-mismatch.png and the base render before/promoted-node-mismatch.png, each 1400x720 RGBA. Regions were examined at native resolution and in 2x and 4x nearest-neighbour crops written under /tmp/reckon-crew-scratch/r-20261105T163445427993-review-of-promoted-node-figure-436609c68961-figure/crops. The reviewed figure's SVG was not opened, read, listed, searched or rendered.",
+    "scale": "The head render's right panel carries ticks at 0, 1e-9, 1e-6, 1e-3, 1 and 1e2; the entire filled solved population occupies the band between the 0 tick and 1e-9. The caption states the symlog convention, so the transition is documented even where it compresses the marks."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg",
+      "render": "promoted-node-mismatch.png (1400x720)",
+      "rubric": {
+        "contrast": "pass. Measured from the render: legend and tick text rgb(78,77,74) = 8.4:1, axis labels rgb(5,5,5) = 20.4:1, both against white; the grey population marks measure 3.1:1, which is the population layer and not text.",
+        "data_ink": "pass. No gridline and no fill; the population is mid-grey at rgb(147,147,147) so it reads as data and recedes, the three promoted marks take the one feature colour, and the only reference ink is the single dotted level that is itself data (ten residuals).",
+        "decoration": "pass. Nothing decorative is drawn: no gradient, no background span, no frame, no panel titles.",
+        "label_collision": "pass. Zero ink in the outer 4 px frame; legend clear of both panels; 'ten residuals' clear of the markers; no text touches another text artist or any plotted mark. This is also the defect the base render shows and the head removes (see figure_checks.base_defect).",
+        "legibility": "pass with finding 1. The population split the figure exists to show reads at a glance: 78 grey solved nodes sit within one decade just under 1e-9 mWb, three red promoted diamonds sit near 8 mWb of pasted trial-state mismatch, and the hollow withheld circles form their own band between 1 and 3 mWb. Both panels are labelled through one shared legend. Boundary: the spatial panel carries no scale reference of any kind (finding 1), and the solved population's own variation is compressed by the symlog linear interval (finding 2).",
+        "table_form": "pass. The figure is a spatial map plus a per-node distribution against a threshold; neither is naturally a table, and the figures the caption needs numerically are already in the fragment's table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "benchmarks/display_map_promoted_figure.py",
+      "id": "f6995eeba0e",
+      "line": 97,
+      "severity": "non-blocking",
+      "summary": "The left (spatial) panel is drawn through poloidal_axes with its ticks cleared at :98-99 and no vessel, limiter or coil geometry in the panel, so the picture carries no scale: the base render had 'radius [m]' and 'lattice height [m]' axes here and the head render has none, and neither the alt text nor the caption (docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html:58-59, which say only 'a 9 by 9 lattice') states the domain. A reader can see the arrangement of the three promoted diamonds, the X-point seed and the grey lattice but cannot read where they sit in metres, or what fraction of the plasma radius the lattice spans. Adding the radial and height extent to the caption, or drawing the wall that the axis-off rule assumes supplies scale, would restore it; the figure is otherwise readable."
+    },
+    {
+      "file": "benchmarks/display_map_promoted_figure.py",
+      "id": "fd1e9aea0ec",
+      "line": 180,
+      "severity": "non-blocking",
+      "summary": "The symlog scale (linthresh 1e-10 mWb, ylim -1e-10 .. 200 at :181, ticks set at :182) places the whole solved-node population -- 78 of the 81 marks and the figure's subject -- in the band between the 0 tick and 1e-9, where values below 1e-10 mWb are laid out linearly and the rest only just clear the threshold. On the render the population reads as a shallow wiggle a few pixels tall and its node-to-node variation cannot be read quantitatively, while the four decades between 1e-6 and 1e2 hold only the withheld band and the three promoted marks; the peak value the picture cannot show is carried by the caption's table instead. This is a deliberate, documented scale choice (caption: 'logarithmic above 1e-10 mWb and linear below it') and it does not stop the qualitative read, so it is recorded as a boundary rather than a repair."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption at docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html:59-71 does not merely repeat the title: it names the population counts, states what each mark means, gives the peak values and explains the symlog interval. The alt text at :58 carries the same population key. No caption finding.",
+    "finding_materiality": "Two non-blocking findings, no blocking finding. No label is clipped, none overlaps another label or the data, and all text measures at or above 8.4:1, so none of the blocking categories is met.",
+    "read_only": "This review altered nothing: no figure, caption, script, fragment or plan was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only files written are this record at its two declared paths and the node manifest.",
+    "rendered_artifact": "Judged from the two rendered PNGs alone; no verdict is taken from SVG markup, text elements or glyph coordinates.",
+    "rubric_coverage": "All six rubric items are answered for the one attached figure, with the verdicts above and the findings below."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and the record check is run over each before the manifest closes.",
+    "evidence": "Both PNGs are the reviewed run's own artifacts, named in its manifest records, and the base-to-head ancestry was confirmed with git merge-base --is-ancestor rather than assumed.",
+    "legibility": "Read from the 1400x720 head render and its crops; the compressed solved population was checked against the right panel's tick positions in the same render.",
+    "scope_discipline": "Read-only review: no write outside the two declared review-record paths and the manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T163445427993-review-of-promoted-node-figure-436609c68961-figure",
+  "reviewed_base_sha": "c9a473887d100bca02bad1a8395fa2940b39e2a2",
+  "reviewed_figures": [
+    "docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg"
+  ],
+  "reviewed_head_sha": "436609c68961c7cdc3143cc6ecfcde37050aba54",
+  "reviewed_run_id": "r-20261105T160429085898-promoted-node-figure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC promoted-node-mismatch.png legibility: pass, with finding 1 recorded. Two panels, one frameless figure-level legend of four entries above both of them, a named y quantity and unit ('absolute map \u2212 state [mWb]') and a named x ('lattice node'); the three promoted diamonds and the X-point seed resolve at a glance against the grey population. The left panel carries no scale at all (finding 1).",
+    "RUBRIC promoted-node-mismatch.png data_ink: pass. The only ink is the population marks (grey #939393 filled circles, 4 pt), the promoted diamonds (red, 8 pt), the X-point cross, the hollow withheld circles (7 pt, 1.2 pt edge), one dotted 'ten residuals' level and the text; no gridline, no fill, no non-data band.",
+    "RUBRIC promoted-node-mismatch.png decoration: pass. No gradient, background fill, shading, drop shadow or frame decoration; the top and right spines are absent on the right panel and the left panel's axes are off entirely.",
+    "RUBRIC promoted-node-mismatch.png contrast: pass. Text dark cores measured on the render are rgb(78,77,74) for legend entries, tick labels and the 'ten residuals' annotation (8.4:1 on white) and near-black rgb(5,5,5) for both axis labels (20.4:1); this agrees with the script's own CHECK line reporting text_contrast_min=7.937:1.",
+    "RUBRIC promoted-node-mismatch.png table_form: pass. A node lattice beside a per-node mismatch scatter with a threshold line is a spatial and distributional read; the one tabular value the picture cannot carry (the peak mismatch) is in the caption's table, not drawn as a table here.",
+    "RUBRIC promoted-node-mismatch.png label_collision: pass. Outer-frame ink measured on the 1400x720 render is 0 pixels in the 4 px frame and 0 in the 2 px frame; the legend occupies rows 24-73 and both panels begin below row 110; 'ten residuals' sits 6 pt above its dotted line and clear of every marker; no label overlaps another label or any data."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T17:04:04.405869+00:00",
+  "total": null
+}

@@ -107,6 +107,16 @@
       "note": "The 3 % claim now cites /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/magnetics-residuals.json (cc22ac1a0).",
       "reason": "",
       "when": "2026-11-05T21:28:02.550706+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Kept 0.8 m and stated why: R is the limb radius, 4.89 m, which sets the 2piR/6 = 5.1 m limb spacing; the plasma major radius does not enter (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-05T21:28:24.933392+00:00"
     }
   ],
   "responses": {
@@ -136,6 +146,15 @@
       "note": "Prototype and imas-efit receipts copied to /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/ and cited there; the mu_r 1000 / 1 cm cell reads 1.4 % (5756b61db, cc22ac1a0).",
       "reason": "",
       "when": "2026-11-05T21:27:40.257185+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit_basis": "edit",
+      "note": "Kept 0.8 m and stated why: R is the limb radius, 4.89 m, which sets the 2piR/6 = 5.1 m limb spacing; the plasma major radius does not enter (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-05T21:28:24.933392+00:00"
     },
     "wiring-1": {
       "action": "acted",

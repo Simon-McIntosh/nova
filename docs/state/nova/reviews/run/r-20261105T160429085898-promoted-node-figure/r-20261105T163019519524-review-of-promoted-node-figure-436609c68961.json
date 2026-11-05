@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-05T16:57:43.475Z",
+  "dispatched_at": "2026-11-05T16:47:40Z",
+  "findings": [
+    {
+      "file": "benchmarks/display_map_promoted_figure.py",
+      "id": "rc1f64a0d3e2",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion recomputes _flux(coupling, coordinate, moments, 128, compensation) with the same arguments handed to build_display_flux_map at :51-59 and compares the result with that builder's own reported maxima, so both sides move together and a regression inside _flux or in the moment triple changes both values identically while the assertion stays green; it guards the builder's masking and aggregation only, and the discriminating arms are the residual bound at :74 and the withheld arm at :75."
+    },
+    {
+      "file": "benchmarks/display_map_promoted_figure.py",
+      "id": "rc2b71e6a44c",
+      "line": "203",
+      "severity": "non-blocking",
+      "text": "non-blocking: nothing in the repository re-runs this script -- no test, CI entry or hook names benchmarks/display_map_promoted_figure.py -- and no check compares the committed SVG with a fresh render, so the figure can drift from the script that claims to produce it and nothing reddens; this review re-ran the comparison by hand and found only the dc:date line differs, but a hand comparison is not a durable guard."
+    },
+    {
+      "file": "benchmarks/display_map_promoted_figure.py",
+      "id": "rc3e02f1b7d5",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: line 16 imports _flux, an underscore-private evaluator that nova/equilibrium/display_flux.py:407 omits from __all__, so the node's central assertion is pinned to an internal symbol that a refactor may rename without notice; DisplayFluxMap at :91-107 exposes only aggregate maxima and no public per-node evaluator exists, so the private import is the only route to the per-node values the figure plots, and the gap is recorded rather than repaired here."
+    },
+    {
+      "file": "benchmarks/display_map_promoted_figure.py",
+      "id": "rc4c8d95b071",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the checked save function and the population grey are imported from scripts/prototypes/bank_solve_lanes/plot.py, a sibling study's prototype that also owns docs/figures/sub-millisecond-forward-path/bank-solve-lanes/residual-history.svg, so this figure's geometry gate is now shared with that study and a change made for that figure moves this one; nova/media owns no checked save (an empty grep for a save entry point over nova/media/*.py) and save_checked is itself duplicated across several scripts/prototypes owners, so the coupling is recorded rather than repaired in this node."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Searched the tree for importers of benchmarks/display_map_promoted_figure.py and for references to its module name at 436609c689; git grep finds only the two evidence fragments that cite it in prose, so the script is a leaf invoked by a person and reaches no runtime code.",
+    "diff": "Read the single commit against c9a473887d100bca02bad1a8395fa2940b39e2a2: benchmarks/display_map_promoted_figure.py is 237 added lines and new, promoted-node-figure.html is a new 32-line landing fragment, display-map-solve-currents.html changes 13 added against 7 deleted in its caption and alt text, and promoted-node-mismatch.svg is regenerated at 589 added against 1859 deleted.",
+    "done_when": "The done_when requires a rebuild through build_display_flux_map and the checked save with no text outside the canvas, no overlap and no label over data, both right-panel populations identified, at least 4.5:1 contrast, an inspected PNG and an updated caption; head-render.log ends 'CHECK text_contrast_min=7.937:1 clipped=0 text_overlap=0 text_over_data=0' with EXIT=0, head-negative-control.log ends \"ValueError: text over plotted data: 'promoted' covers 90 data point(s)\" with EXIT=1, and docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html:57-68 carries the rewritten caption and alt text.",
+    "goal": "The goal is to redraw the promoted-node mismatch figure from a committed script with no label over its data; benchmarks/display_map_promoted_figure.py:31-87 computes the mismatch from the shared fixture and :189-198 puts every population name in one figure legend clear of both panels, and I confirmed the rendered PNG at promoted-node-mismatch.png carries no label on any marker.",
+    "manifest": "The manifest records status complete, commit 436609c68961c7cdc3143cc6ecfcde37050aba54, a tests line whose text matches head-render.log's own command header, four test_logs each ending in a bare EXIT line, the MEASURE metrics, the reproduced base defect with its coordinates and 3.111:1 contrast, and empty baseline_suite/after_suite, which I read as a node that ran no suite rather than as a missing receipt.",
+    "write_paths": "The source brief fences benchmarks/display_map_promoted_figure.py, docs/figures/separatrix-spline-extraction/display-map-solve-currents, docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html, docs/evidence/fragments/separatrix-spline-extraction/promoted-node-figure.html and docs/figures/separatrix-spline-extraction/promoted-node-figure; git diff --numstat c9a473887..436609c689 lists exactly four changed paths and every one lies inside that fence, with no plan file and no product source touched."
+  },
+  "justifications": {
+    "durability": "Nothing in the repository re-runs benchmarks/display_map_promoted_figure.py, and the assertion at :64-69 compares the builder's reported maxima with a recomputation of the same _flux call on the same arguments, so a regression inside _flux leaves it green; only the contrast assertion at :212 and the imported checked save at scripts/prototypes/bank_solve_lanes/plot.py:82-99 fail independently, and the control log proves the latter does fire.",
+    "evidence": "head-render.log and head-negative-control.log both end in EXIT lines at revision 436609c689, and the control is a real refusal rather than a passing suite: the mutated label at the marker centroid is rejected by scripts/prototypes/bank_solve_lanes/plot.py:96 with 90 covered data points.",
+    "fit": "The script follows the benchmark idiom established at benchmarks/picard_shadow_crossing.py:27 for fixture loading and uses poloidal_axes from nova/media/ink.py:155, but line 16 imports the underscore-private _flux, which nova/equilibrium/display_flux.py:407 leaves out of __all__.",
+    "goal_fidelity": "benchmarks/display_map_promoted_figure.py:189-198 replaces the per-point annotations with one figure legend, and the committed docs/figures/separatrix-spline-extraction/display-map-solve-currents/promoted-node-mismatch.svg is byte-identical to the retained head rebuild apart from its dc:date line, a comparison this review ran itself.",
+    "reuse": "The addition imports build_display_flux_map from nova/equilibrium/display_flux.py:233 and the checked save from scripts/prototypes/bank_solve_lanes/plot.py:74 instead of restating either, so no capability is forked; the cross-study coupling at line 19 is the weakness, not duplication.",
+    "scope_discipline": "Every one of the four paths in git diff --numstat c9a473887..436609c689 is named in the brief's fence, and the new fragment's element ids at docs/evidence/fragments/separatrix-spline-extraction/promoted-node-figure.html:1,3,15,27 all begin with the node id."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261105T163019519524-review-of-promoted-node-figure-436609c68961",
+  "reviewed_base_sha": "c9a473887d100bca02bad1a8395fa2940b39e2a2",
+  "reviewed_head_sha": "436609c68961c7cdc3143cc6ecfcde37050aba54",
+  "reviewed_run_id": "r-20261105T160429085898-promoted-node-figure",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "suite_basis": "The reviewed manifest declares baseline_suite and after_suite empty and records no suite command; the node's gate is benchmarks/display_map_promoted_figure.py with its checked save, not a pytest suite. added_failure_count 0 and added_failure_ids [] therefore record that no suite arm exists to diff, not that a suite ran clean.",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T16:58:00Z",
+  "total": 104
+}

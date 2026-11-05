@@ -209,6 +209,9 @@ def _branches(
     axis_rz: np.ndarray,
 ) -> dict[str, np.ndarray]:
     """Assemble the field's own separatrix at its admitted-saddle level."""
+    # A fine contour can traverse both sides of each grid row and column.
+    # Round the resulting display-grid allowance up for a stable JIT shape.
+    branch_capacity = 1 << (2 * (radius.size + height.size) - 1).bit_length()
     assembled = jax.device_get(
         assemble_separatrix_branches(
             jnp.asarray(values),
@@ -216,6 +219,7 @@ def _branches(
             jnp.asarray(height),
             jnp.asarray(level),
             jnp.asarray(axis_rz),
+            branch_capacity=branch_capacity,
         )
     )
     return {key: np.asarray(assembled[key]) for key in BRANCH_KEYS}

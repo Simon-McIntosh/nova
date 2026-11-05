@@ -36,6 +36,7 @@ from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import DisplayCoupling
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import PrescribedCurrentField
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
@@ -259,7 +260,7 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(2400)
+@pytest.mark.timeout(3300)
 def test_committed_converged_panel_uses_its_terminal_currents():
     """Read the solve's state, promotion and compensation through its producer."""
     archive = Path(
@@ -306,6 +307,21 @@ def test_committed_converged_panel_uses_its_terminal_currents():
     assert display.nearest_promoted_to_xpoint_m == pytest.approx(
         polished_nearest, abs=1.0e-12
     )
+    assert display.radius.size == 195
+    assert display.height.size == 401
+    assert display.well_formed
+    assert int(np.asarray(display.branches["closed_segment_count"])) > 256
+    assert int(np.asarray(display.branches["open_branch_count"])) == 2
+    narrow = assemble_separatrix_branches(
+        jnp.asarray(display.flux.T),
+        jnp.asarray(display.radius),
+        jnp.asarray(display.height),
+        jnp.asarray(display.saddle_flux),
+        jnp.asarray(panel["axis"]),
+        branch_capacity=256,
+    )
+    assert bool(np.asarray(narrow["branch_overflow"]))
+    assert not bool(np.asarray(narrow["well_formed"]))
     reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
     assert (
         abs(

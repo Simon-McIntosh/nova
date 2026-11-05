@@ -62,6 +62,68 @@ def test_rebuild_reproduces_the_persisted_field_by_the_matrix_product(tmp_path):
     assert np.allclose(field, reference, rtol=0.0, atol=tolerance)
 
 
+def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
+    """The producer's own write is a whole frame: field, branches, mask, receipt."""
+
+    from types import SimpleNamespace
+
+    lattice = SimpleNamespace(
+        radius=np.linspace(1.5, 1.9, 5),
+        height=np.linspace(-0.2, 0.2, 5),
+    )
+    display_radius, display_height, points = gate._display_grid(lattice)
+    shape = (display_radius.size, display_height.size)
+    response = np.arange(points.shape[0] * 3, dtype=np.float64).reshape(
+        points.shape[0], 3
+    )
+    current = np.asarray([2.0, -1.0, 0.5])
+    display = SimpleNamespace(
+        flux=np.full(shape, 7.0),
+        radius=display_radius,
+        height=display_height,
+        spacing_m=0.1,
+        saddle_rz=np.asarray([1.7, 0.0]),
+        saddle_flux=1.25,
+        saddle_converged=True,
+        lattice_saddle_rz=np.asarray([1.71, 0.0]),
+        saddle_offset_mm=10.0,
+        max_node_mismatch_wb=1.0e-9,
+        reproduction_relative_error=3.0e-14,
+        branches={
+            "closed_controls_rz": np.zeros((3, 4, 2)),
+            "closed_valid": np.ones((3,), dtype=bool),
+        },
+    )
+    equilibrium = SimpleNamespace(
+        flux=np.linspace(-1.0, 1.0, 25),
+        domains=SimpleNamespace(
+            label=np.zeros(shape, dtype=np.int64),
+            psi_norm=np.zeros(shape),
+            core=np.ones(shape, dtype=bool),
+        ),
+        constraints=(),
+    )
+    monkeypatch.setattr(
+        gate, "_frame_operand_path", lambda tag: tmp_path / f"frame-display-{tag}.npz"
+    )
+    receipt = gate._persist_frame_operands(
+        tag="shot-3",
+        profile=SimpleNamespace(lattice=lattice),
+        equilibrium=equilibrium,
+        display=display,
+        response=response,
+        conductor_current=current,
+    )
+    assert receipt["path"].endswith("frame-display-shot-3.npz")
+    assert receipt["bytes"] > 0
+    operands = gate.load_frame_operands(tmp_path / "frame-display-shot-3.npz")
+    assert "state" in operands and "domain_core" in operands
+    assert "branch_closed_controls_rz" in operands
+    field, conductor = gate.rebuild_display_flux(operands, response)
+    assert np.allclose(field, 7.0, rtol=0.0, atol=1.0e-12)
+    assert np.allclose(conductor, display.flux.ravel() - operands["plasma_flux"])
+
+
 def test_persisted_bank_frame_rebuilds_to_one_em12():
     """The newest persisted bank frame rebuilds from its own matrix to 1e-12."""
 

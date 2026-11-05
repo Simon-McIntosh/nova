@@ -3789,9 +3789,13 @@ def cohort_figure(
             )
     overlay.set_title("EFIT boundaries and DIII-D limiter", fontsize=11, pad=10)
     if not any(len(frame["display_closed_boundary"]) for frame in fields):
-        position = overlay.get_position()
+        position = overlay.get_subplotspec().get_position(figure)
         figure.text(
-            position.x0, 0.035, "Nova separatrices: assembly refused", fontsize=10
+            (position.x0 + position.x1) / 2,
+            0.035,
+            "Nova separatrices: assembly refused",
+            ha="center",
+            fontsize=10,
         )
     _save_frame_figure(figure, path)
 
@@ -5954,11 +5958,19 @@ def run(
     cohort_figure(results, fields, output / COHORT_FIGURE_NAME)
     displacement_path = displacement_output / DISPLACEMENT_FIGURE_NAME
     displacement_figure(results, fields, displacement_path)
+    try:
+        displacement_publication = "/nova/figures/" + str(
+            displacement_path.resolve().relative_to(
+                (Path("docs") / "figures").resolve()
+            )
+        )
+    except ValueError:
+        displacement_publication = (
+            f"{DISPLACEMENT_PUBLICATION_DIRECTORY}/{DISPLACEMENT_FIGURE_NAME}"
+        )
     receipt["result"]["displacement_decomposition"]["figure"] = {
         "filesystem_path": str(displacement_path),
-        "publication_path": (
-            f"{DISPLACEMENT_PUBLICATION_DIRECTORY}/{DISPLACEMENT_FIGURE_NAME}"
-        ),
+        "publication_path": displacement_publication,
     }
     receipt_path = output / RECEIPT_NAME
     receipt_path.write_text(

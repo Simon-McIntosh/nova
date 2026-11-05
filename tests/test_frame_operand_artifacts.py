@@ -221,6 +221,21 @@ def test_checkpointed_panels_rebuild_maps_and_keep_unavailable_frame():
     assert fields["display"] is None
     assert "labelled" in fields
 
+    from dataclasses import replace
+
+    first, _ = reconstructed[0]
+    corrupt = replace(
+        first, display_map=replace(first.display_map, operand_digest="0" * 64)
+    )
+    selected = gate.SelectedFrame(
+        gate.DEFAULT_DATA / first.shot,
+        first.frame,
+        first.time_ms,
+        first.target_current_a,
+    )
+    with pytest.raises(RuntimeError, match="persisted frame operand digest changed"):
+        gate._restored_panel_fields(selected, corrupt)
+
 
 def test_display_map_uses_terminal_mask_and_constraint_compensation(monkeypatch):
     """The producer passes the solved domain and compensating current flux."""

@@ -12,6 +12,11 @@
       "kind": "exempted",
       "reason": "prototype scratch-mutation harness, not product code; noted for the next node that touches these scripts",
       "recorded_at": "2026-11-05T06:30:38.448919+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "last-digit rounding that overstates three gaps and changes no budget decision",
+      "recorded_at": "2026-11-05T06:30:47.820263+00:00"
     }
   },
   "findings": [

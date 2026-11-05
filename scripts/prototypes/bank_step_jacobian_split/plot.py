@@ -57,7 +57,9 @@ def main():
             )
     ax.set_yticks(range(len(parts)), [name for _, name in parts])
     ax.set_ylim(len(parts) - 0.4, -0.6)
-    ax.set_xlim(0, max(row["whole"] for row in rows.values()) * 1.2)
+    upper = max(row["whole"] for row in rows.values()) * 1.2
+    ax.set_xlim(0, upper)
+    ax.set_xticks(range(0, int(upper) + 1, 50))
     ax.set_xlabel("Wall per batch [ms]")
     ax.spines[["top", "right", "left"]].set_visible(False)
     ax.tick_params(axis="y", length=0)

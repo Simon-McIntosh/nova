@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="bank-step-jacobian-split">
+<meta name="plan-title" content="Bank step Jacobian split">
+<meta name="plan-summary" content="Local booking dominates the production-mapped Jacobian; the outer-vmap profile measures a different program form.">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-commits" content="9675ac04fb74536f9b501432ed0a8fecc8f18adf">
+<meta name="plan-artifacts" content="docs/figures/sub-millisecond-forward-path/bank-step-jacobian-split/paired-wall.svg">
+<meta name="plan-recorded-at" content="2026-11-05">
+<meta name="plan-verdict" content="passed">
+<meta name="plan-environment" content="H200 NVL, x64, one GPU, two CPUs, 48G, allocation 1306241">
+<title>Bank step Jacobian split | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-step-jacobian-split-landing">Local booking dominates the production Jacobian</h1>
+<p>At the first step input, <code>_local_booking_sensitivities</code> costs
+<strong>13.343 ms at one slice and 215.842 ms at sixteen</strong>, about 74% of the
+sixteen-slice whole Jacobian wall, 291.947 ms. It is also the worst-scaling part:
+16.18× from one to sixteen slices, against 12.66× for bank channels and their first
+einsum and 14.48× for fresh geometry. The second step input gives the same ranking:
+local booking grows 16.08× and costs 213.782 ms of a 291.470 ms whole call.</p>
+<p>The earlier profile's approximately 127 ms at one slice and 1594 ms at sixteen
+come from an <strong>outer <code>vmap</code> across slices</strong>. Production
+<code>solve_batch</code> uses <code>lax.map</code> at the Newton call site. At the
+same captured first-step inputs, this allocation measures 18.617 versus 127.188 ms
+at one slice and 291.947 versus 1597.625 ms at sixteen. The earlier partial run's
+18.491 ms production-form result is reproduced here to within 0.7%.
+These are standalone Jacobian walls, not the whole Newton step or converged solve.</p>
+
+<h2 id="bank-step-jacobian-split-method">Inputs, timing and mapping</h2>
+<p>All tabled timings below come from <strong>one H200 allocation, 1306241</strong>,
+partition <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, one H200 NVL,
+two CPUs and 48G. The measurement revision is <code>9675ac04fb74536f9b501432ed0a8fecc8f18adf</code>;
+product source is unchanged from base <code>4842c63b458f5218a4df0415903c8cc43a84c272</code>.
+Every part is an independently jitted call over the solve's 550-cell x64 shapes,
+warmed before the median of 12 repeats, each ending in <code>block_until_ready</code>.
+The bank is a runtime argument. The initial booking is supplied to the Jacobian,
+just as <code>newton_step</code> supplies <code>residual.booked</code>, and is excluded.</p>
+<p>The probe imports and invokes <code>scripts/prototypes/bank_solve_cycle/measure.py</code>
+for the seed, the per-lane perturbations from 2e-5 through 6e-5, and the solve.
+A callback in a diagnostic copy of <code>solve_batch</code> captures the state and
+actual <code>step_support</code> immediately before its correction call, at the
+first and second step inputs. Every lane was active at both captures.
+Callbacks are absent from all timed programs; instrumented solve walls are not
+used for performance claims. Capture can change floating-point ordering and the
+later trajectory, so these are states on that captured solve's path, not a claim
+that every uninstrumented run visits bit-identical states.</p>
+<table id="bank-step-jacobian-split-mapping"><thead><tr><th>Call site at the measured revision</th><th>Program form retained by this probe</th></tr></thead><tbody>
+<tr><td><code>support_read.py:1673–1674</code>, <code>solve_batch</code> correction branches</td><td><code>jax.lax.map(one_fresh, (state, step_support))</code> and <code>jax.lax.map(one_with_factor, ...)</code> across slices; this run has <code>reuse_factor=False</code>.</td></tr>
+<tr><td><code>support_read.py:1320</code>, <code>newton_step.rebuild</code></td><td>Calls <code>step_jacobian</code> with the booked residual; the solve's two Newton branches pass <code>fresh_geometry=True</code> at lines 1652 and 1667.</td></tr>
+<tr><td><code>support_read.py:1165</code>, <code>step_jacobian</code></td><td><code>jax.vmap(bank_channels)</code> over 1650 moment directions. This inner vmap is retained.</td></tr>
+<tr><td><code>support_read.py:1199</code>, <code>step_jacobian</code></td><td><code>jax.vmap</code> over nine saddle-neighbour locations, each returning three Bell-triangle node slots.</td></tr>
+<tr><td><code>support_read.py:1224</code>, <code>step_jacobian</code></td><td><code>jax.vmap(local_channel)</code> over 162 padded jet-channel slots, followed by the active-channel mask. This inner vmap is retained.</td></tr>
+<tr><td><code>bank_solve_profile/measure.py:151–152</code>, <code>assembly</code></td><td>Outer <code>jax.vmap</code> across slices. Only the labelled whole-call comparison below uses this form.</td></tr>
+</tbody></table>
+<p>The split extracts the existing expressions from <code>step_jacobian</code> rather
+than substituting alternate physics. Local booking includes its local normalization
+setup; the bank row includes its first einsum and reshape; fresh geometry includes
+the stencil, channel calls, mask, closing einsum and reshape. Matrix formation
+includes current normalization when enabled, identity minus response, and subtraction
+of the geometry response. For this fixture the target-current normalization is disabled.</p>
+
+<h2 id="bank-step-jacobian-split-first">First step input</h2>
+<table id="bank-step-jacobian-split-wall-0"><thead><tr><th>Part</th><th>1 slice [ms/batch]</th><th>16 slices [ms/batch]</th><th>16 / 1</th></tr></thead><tbody>
+<tr><td>Local booking sensitivities</td><td>13.343</td><td>215.842</td><td>16.18×</td></tr>
+<tr><td>Bank channels + first einsum</td><td>3.561</td><td>45.092</td><td>12.66×</td></tr>
+<tr><td>Fresh geometry, whole branch</td><td>2.677</td><td>38.759</td><td>14.48×</td></tr>
+<tr><td>↳ Stencil construction</td><td>0.285</td><td>0.840</td><td>2.95×</td></tr>
+<tr><td>↳ Vmapped geometry channel calls</td><td>2.642</td><td>37.429</td><td>14.17×</td></tr>
+<tr><td>↳ Closing einsum</td><td>0.303</td><td>1.398</td><td>4.61×</td></tr>
+<tr><td>Matrix formation</td><td>0.267</td><td>0.814</td><td>3.05×</td></tr>
+<tr><td>Whole Jacobian, production lax.map</td><td>18.617</td><td>291.947</td><td>15.68×</td></tr>
+</tbody></table>
+<figure id="bank-step-jacobian-split-figure"><img src="/nova/figures/sub-millisecond-forward-path/bank-step-jacobian-split/paired-wall.svg"
+alt="Paired horizontal bars compare production-form Jacobian parts at one and sixteen slices on a linear millisecond axis; local booking is the largest cost.">
+<figcaption>First step inputs from the diverted 550-cell solve, median of 12 warmed
+calls. Grey is one slice; blue is sixteen slices. Values are ms per batch, without
+amortizing the sixteen-slice bar. Fresh geometry is shown both as a whole and as
+three nested subparts: do not add its whole row to its subparts. Whole Jacobian is
+the comparison for closure, not an extra component. The shared checked-save helper
+verified text bounds and overlaps, and the 1400 × 720 PNG rendering was inspected.</figcaption></figure>
+<h2 id="bank-step-jacobian-split-second">Second step input</h2>
+<table id="bank-step-jacobian-split-wall-1"><thead><tr><th>Part</th><th>1 slice [ms/batch]</th><th>16 slices [ms/batch]</th><th>16 / 1</th></tr></thead><tbody>
+<tr><td>Local booking sensitivities</td><td>13.299</td><td>213.782</td><td>16.08×</td></tr>
+<tr><td>Bank channels + first einsum</td><td>3.623</td><td>44.933</td><td>12.40×</td></tr>
+<tr><td>Fresh geometry, whole branch</td><td>2.519</td><td>38.669</td><td>15.35×</td></tr>
+<tr><td>↳ Stencil construction</td><td>0.188</td><td>0.825</td><td>4.40×</td></tr>
+<tr><td>↳ Vmapped geometry channel calls</td><td>2.514</td><td>37.189</td><td>14.79×</td></tr>
+<tr><td>↳ Closing einsum</td><td>0.306</td><td>1.706</td><td>5.58×</td></tr>
+<tr><td>Matrix formation</td><td>0.274</td><td>0.790</td><td>2.88×</td></tr>
+<tr><td>Whole Jacobian, production lax.map</td><td>18.432</td><td>291.470</td><td>15.81×</td></tr>
+</tbody></table>
+<p>Local booking remains the largest cost and the worst-scaling part at both observed
+states. The matrix and stencil stages are small in absolute terms; their ratios
+are more sensitive to dispatch and synchronization costs than the large stages.</p>
+
+<h2 id="bank-step-jacobian-split-comparison">Labelled comparison: outer vmap, not production mapping</h2>
+<table><thead><tr><th>Step input</th><th>Slices</th><th>Production lax.map [ms/batch]</th><th>Comparison outer vmap [ms/batch]</th><th>vmap / map</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>18.617</td><td>127.188</td><td>6.83×</td></tr>
+<tr><td>1</td><td>16</td><td>291.947</td><td>1597.625</td><td>5.47×</td></tr>
+<tr><td>2</td><td>1</td><td>18.432</td><td>126.955</td><td>6.89×</td></tr>
+<tr><td>2</td><td>16</td><td>291.470</td><td>1597.383</td><td>5.48×</td></tr>
+</tbody></table>
+<p>The outer mapping changes the compiled program even at batch width one.
+The profile's 127 ms is therefore not the production Jacobian's one-slice wall.
+This measurement establishes the program-form difference, but does not isolate a
+compiler transformation as its cause. The internal vmaps named above belong to
+production and have not been replaced. The earlier
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html">bank solve profile</a>
+and <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-cycle.html">bank solve cycle</a>
+provide the context; no timings from their allocations are pooled into these tables.</p>
+
+<h2 id="bank-step-jacobian-split-closure">Closure and controls</h2>
+<table><thead><tr><th>Step input</th><th>Slices</th><th>Top-level sum [ms]</th><th>Detailed sum [ms]</th><th>Whole [ms]</th><th>Top-level gap</th><th>Detailed gap</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>19.847</td><td>20.400</td><td>18.617</td><td>+6.61%</td><td>+9.58%</td></tr>
+<tr><td>1</td><td>16</td><td>300.507</td><td>301.416</td><td>291.947</td><td>+2.93%</td><td>+3.24%</td></tr>
+<tr><td>2</td><td>1</td><td>19.716</td><td>20.204</td><td>18.432</td><td>+6.97%</td><td>+9.61%</td></tr>
+<tr><td>2</td><td>16</td><td>298.174</td><td>299.226</td><td>291.470</td><td>+2.30%</td><td>+2.66%</td></tr>
+</tbody></table>
+<p>The top-level sum adds local booking, bank channels, whole fresh geometry and
+matrix formation. The detailed sum replaces whole fresh geometry with its three
+subparts. <strong>Both sums close within 15% in every row.</strong>
+The reconstructed matrix and separately reconstructed geometry response have zero
+relative difference from their whole-call counterparts at all four inputs.</p>
+<table><thead><tr><th>Step input</th><th>Slices</th><th>Geometry sub-sum [ms]</th><th>Whole geometry [ms]</th><th>Gap</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>3.230</td><td>2.677</td><td>+20.66%</td></tr>
+<tr><td>1</td><td>16</td><td>39.667</td><td>38.759</td><td>+2.34%</td></tr>
+<tr><td>2</td><td>1</td><td>3.007</td><td>2.519</td><td>+19.36%</td></tr>
+<tr><td>2</td><td>16</td><td>39.720</td><td>38.669</td><td>+2.72%</td></tr>
+</tbody></table>
+<p>The geometry sub-sum alone exceeds its whole call by 20.66% and 19.36% at one
+slice: 0.553 and 0.488 ms respectively. Splitting one program into three introduces
+two additional host dispatch/synchronization boundaries and materializes the stencil
+and channel intermediates. The measurements include those costs and allow different
+compiler fusion and hoisting; they do not identify how much each contributes.
+At sixteen slices this gap is 2.34% and 2.72%. No residual is hidden in a synthetic
+remainder stage.</p>
+<p>The negative control selects the largest measured top-level part, local booking,
+and drops its timing from the sum. The unchanged 15% closure check reports and
+refuses the resulting gap in all four rows:</p>
+<table><thead><tr><th>Step input</th><th>Slices</th><th>Omitted part</th><th>Remaining sum [ms]</th><th>Gap to whole</th><th>Closure verdict</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>local</td><td>6.504</td><td>-65.06%</td><td>Refused</td></tr>
+<tr><td>1</td><td>16</td><td>local</td><td>84.665</td><td>-71.00%</td><td>Refused</td></tr>
+<tr><td>2</td><td>1</td><td>local</td><td>6.417</td><td>-65.19%</td><td>Refused</td></tr>
+<tr><td>2</td><td>16</td><td>local</td><td>84.392</td><td>-71.05%</td><td>Refused</td></tr>
+</tbody></table>
+
+<h2 id="bank-step-jacobian-split-channels">Active stencil channels and one tangent call</h2>
+<p>Every lane has three distinct stencil nodes, <code>[648, 681, 776]</code>, at both
+step inputs, so <strong>18 jet channels are active per lane</strong>.
+The nine sampled locations produce 27 node slots before deduplication, and the
+source vmaps six jet components over each slot: a padded width of <strong>162</strong>,
+not 54. The mask retains <code>6 × count = 18</code>. These are logical channel
+counts, not GPU kernel-launch counts. An independent host-side uniqueness count
+matches the runtime stencil count; four normal-form clipped cells are active in
+every lane, and the sampled single-channel response is finite and nonzero.</p>
+<table><thead><tr><th>Step input</th><th>Slices</th><th>Active channels, lane order</th><th>One tangent per lane [ms/batch]</th><th>Amortized [ms/call]</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>[18]</td><td>1.298</td><td>1.298</td></tr>
+<tr><td>1</td><td>16</td><td>[18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18]</td><td>16.526</td><td>1.033</td></tr>
+<tr><td>2</td><td>1</td><td>[18]</td><td>1.219</td><td>1.219</td></tr>
+<tr><td>2</td><td>16</td><td>[18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18]</td><td>16.292</td><td>1.018</td></tr>
+</tbody></table>
+<p>The one-slice row times one <code>_normal_geometry_booking_tangent</code> through
+<code>local_channel(0)</code>, including construction of its unit jet direction.
+The sixteen-slice row maps that same one-channel probe across the sixteen actual
+states. Its amortized value is a division of the batch wall, not sixteen independent
+timing experiments. The full channel block is vmapped jointly; multiplying a single
+call's wall by the padded channel count would not estimate its cost.</p>
+
+<h2 id="bank-step-jacobian-split-receipts">Receipts and retained failures</h2>
+<p>Complete evidence is under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T133721949646-bank-step-jacobian-split/measurement</code>:
+<code>timings.json</code> contains all four rows; <code>h200.log</code> contains all
+40 timing series with 12 samples each, source/module headers and a final
+<code>EXIT=0</code>; <code>inputs-*.npz</code> retain the captured moments;
+<code>solve.json</code> retains the diagnostic solve results; and
+<code>extracted.py</code> retains the exact split expressions.
+The producer is <code>scripts/prototypes/bank_step_jacobian_split/measure.py</code>,
+launched by <code>run.sh</code>. The figure producer is <code>plot.py</code>, which
+imports <code>save_checked</code> from <code>bank_solve_read/plot.py</code>.</p>
+<p>Two earlier incomplete allocations remain recorded in the parent run directory.
+Allocation 1306211 failed in the diagnostic callback because CUDA-only backend
+selection omitted its required CPU device. Allocation 1306213 measured only the
+first one-slice input before an assumed omission of geometry proved non-discriminating:
+its gap was −8.70%, inside the 15% tolerance. Resume authorization changed that
+control to omit the largest measured part. The complete tables use allocation
+1306241 alone. No product source or tests changed, and no full test suite was run
+for this measurement-only node.</p>
+</main></body></html>

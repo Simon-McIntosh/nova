@@ -9,6 +9,13 @@
   "dispatched_at": "2026-11-05T08:52:13Z",
   "evidence_inputs": "Figure judged from the rendered PNG at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T084239582222-review-of-bank-solve-profile-1f6433fb8677-figure/image-0.png (1399x720). Segment extents, glyph extents and contrast ratios were measured on that PNG's pixels: x-axis 0 at px 196 and 2000 at px 1281 (0.5425 px/ms); bar fills #1f5d92 census, #3f8ecb decision, #8fc0e4 geometry, #2e8b57 residual, #e07b39 assembly, #7d5ba6 factor, #a05195 back-solve; white-on-fill ratios 2.97 (assembly), 3.53 (decision), 4.25 (residual), 5.36 (factor). Figure is drawn by scripts/prototypes/bank_solve_profile/plot.py and cited from docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html.",
   "figure_under_review": "docs/figures/sub-millisecond-forward-path/bank-solve-profile/per-iterate-stage.svg",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking style defect in a one-off evidence figure; the caption states the bar is a stage-sum upper bound against the whole-solve mark, and the figure is not reused",
+      "recorded_at": "2026-11-05T09:31:56.470995+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "exempted",

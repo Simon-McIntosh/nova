@@ -7,7 +7,7 @@
     "image-0.png (1399x720 RGB, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-tangent-contract/tangent-wall-memory.svg"
   },
   "attachment_note": "The single attached PNG was opened with Read and judged as a picture, at its native 1399x720 and in upscaled crops of the lower-left, lower-right and upper-right regions of the panels. Per the review brief no SVG and no other image was opened, read, listed, searched or rendered; the drawing script was read only to anchor findings to a line of code. The attachment is mapped to the repository figure path by the reviewed run's own caption, which names the committed SVG, and by the run's changed_paths listing that figure.",
-  "completed_at": "",
+  "completed_at": "2026-11-03T11:16:51.745Z",
   "dispatched_at": "2026-11-03T11:10:55Z",
   "figure_checks": {
     "caption_independence": "The figcaption in the evidence fragment is not a restatement of a title: the figure carries no title, and the caption names the allocation and job number (1304372), states that the 'head' legend names a candidate that was later rejected, states that each wall is the median of three synchronized warm calls, and says what each panel shows (the left the 10.16 ms and 10.12 ms cost, the right the peak after one tangent call and one unchunked sixteen-lane call). It does not duplicate the axis labels or the printed values.",
@@ -71,6 +71,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-03T11:16:54.214030+00:00",
+  "timestamp": "2026-11-05T05:53:45.087479+00:00",
   "total": null
 }

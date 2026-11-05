@@ -1,9 +1,9 @@
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
 import numpy as np
-from matplotlib.path import Path as PolygonPath
 import pytest
 
 from nova.database.filepath import operand_cache_root
@@ -161,18 +161,18 @@ def test_persisted_bank_frame_rebuilds_to_one_em12():
     assert np.allclose(field, reference, rtol=0.0, atol=tolerance)
 
 
-def _refused_display(radius, height, flux, saddle_flux):
-    """Return a display whose spline assembler reported no closed cycle."""
+def _refused_display():
+    """Return a display whose spline assembler reported no closed cycle.
+
+    Two closed candidates were produced and neither resolved to a well-formed
+    axis-enclosing cycle, which is the refusal the assembler reports on a frame
+    whose field did not converge.
+    """
 
     from types import SimpleNamespace
 
     zeros = np.zeros((2, 4, 2))
     return SimpleNamespace(
-        flux=flux,
-        radius=radius,
-        height=height,
-        saddle_flux=saddle_flux,
-        saddle_rz=np.asarray([1.7, 0.0]),
         branches={
             "closed_controls_rz": zeros,
             "closed_valid": np.zeros((2,), dtype=bool),
@@ -180,61 +180,72 @@ def _refused_display(radius, height, flux, saddle_flux):
             "open_valid": np.zeros((1, 2), dtype=bool),
             "open_branch_valid": np.zeros((1,), dtype=bool),
             "well_formed": np.asarray(False),
+            "contour_well_formed": np.asarray(True),
+            "graph_well_formed": np.asarray(False),
+            "branch_overflow": np.asarray(False),
+            "open_slot_overflow": np.asarray(False),
             "closed_candidate_count": np.asarray(2),
             "cycle_component_count": np.asarray(2),
-            "axis_enclosing_component_count": np.asarray(1),
-            "overflow": np.asarray(False),
+            "axis_enclosing_component_count": np.asarray(0),
+            "open_branch_count": np.asarray(0),
+            "closed_segment_count": np.asarray(8),
         },
     )
 
 
-def test_separatrix_falls_back_to_the_saddle_level_contour():
-    """A refused assembly still yields the field's own closed separatrix.
+def test_refused_assembly_yields_no_boundary_and_carries_its_reason():
+    """A refused assembly yields no boundary, and the null carries its reason.
 
-    The spline assembler invalidates the whole result when the contour graph
-    does not resolve to exactly one axis-enclosing cycle, and the frame then
-    reported no boundary at all. The field's level set at its admitted saddle
-    field value is that boundary, so the fallback must return it, name its
-    source, and carry the assembler's diagnostics.
+    The branch assembler is the only source of a separatrix. A raw level set at
+    the saddle flux is a second boundary path, and these are the frames the
+    assembler rejected, so the frame reports zero closed points and its
+    separation stays null. The assembler's own account of the refusal travels
+    with that null, so no frame reports a missing boundary without saying why.
     """
 
-    radius = np.linspace(1.2, 2.2, 201)
-    height = np.linspace(-0.5, 0.5, 201)
-    radial, vertical = np.meshgrid(radius, height, indexing="ij")
-    flux = (radial - 1.7) ** 2 + vertical**2
-    display = _refused_display(radius, height, flux, 0.02)
-    axis = gate._grid_axis_rz(radius, height, flux, 0.0, 0.02)
-    assert np.allclose(axis, [1.7, 0.0])
-    closed, _open, source, diagnostics = gate._display_separatrix(display, axis)
-    assert source == "saddle_level_contour"
-    assert closed.shape[0] > 100
-    assert np.allclose(closed[0], closed[-1])
-    enclosed = np.hypot(closed[:, 0] - 1.7, closed[:, 1])
-    assert np.allclose(enclosed, 0.02**0.5, rtol=1.0e-3)
+    display = _refused_display()
+
+    closed, open_branches = gate._display_separatrix(display)
+
+    assert closed.shape == (0, 2)
+    assert open_branches == ()
+
+    diagnostics = gate._branch_diagnostics(display)
+    assert diagnostics["well_formed"] is False
+    assert diagnostics["contour_well_formed"] is True
+    assert diagnostics["graph_well_formed"] is False
     assert diagnostics["closed_candidate_count"] == 2
-    assert diagnostics["saddle_level_points"] == closed.shape[0]
+    assert diagnostics["cycle_component_count"] == 2
+    assert diagnostics["axis_enclosing_component_count"] == 0
+    assert diagnostics["closed_segment_count"] == 8
+    # A count is a count: it must not collapse to a truthiness flag.
+    assert isinstance(diagnostics["closed_segment_count"], int)
+    assert isinstance(diagnostics["closed_candidate_count"], int)
+    assert isinstance(diagnostics["well_formed"], bool)
+
+    # A key the assembler does not report is present as an explicit null,
+    # never absent, so a consumer cannot read it as zero.
+    assert "overflow" in diagnostics
+    assert diagnostics["overflow"] is None
+    assert diagnostics["branch_overflow"] is False
+    assert diagnostics["open_slot_overflow"] is False
+    json.dumps(diagnostics, allow_nan=False)
 
 
-def test_saddle_level_fallback_keeps_only_the_axis_enclosing_contour():
-    """A diverted level set yields the curve that encloses the axis, and no other.
+def test_assembly_diagnostics_survive_the_persisted_operand_round_trip(tmp_path):
+    """The refusal reason reaches the persisted artifact with its empty boundary."""
 
-    The field's level set at the admitted saddle flux is a closed curve around
-    the axis, and a curve that closes away from the axis is not the separatrix.
-    The fallback must return the axis-enclosing one, so an outer contour cannot
-    be measured against the labelled boundary in its place.
-    """
-
-    radius = np.linspace(1.2, 2.2, 401)
-    height = np.linspace(-0.5, 0.5, 401)
-    radial, vertical = np.meshgrid(radius, height, indexing="ij")
-    offset = radial - 1.7
-    flux = (offset**2 - 0.09) ** 2 / 4.0 + 0.09 * vertical**2
-    display = _refused_display(radius, height, flux, 2.5e-3)
-    closed, _open, source, diagnostics = gate._display_separatrix(
-        display, np.asarray([1.7, 0.0])
+    display = _refused_display()
+    closed, _open = gate._display_separatrix(display)
+    diagnostics = gate._branch_diagnostics(display)
+    artifact = tmp_path / "frame-display-synthetic.npz"
+    np.savez_compressed(
+        artifact,
+        separatrix_closed_rz=closed,
+        separatrix_assembly=np.asarray(json.dumps(diagnostics)),
     )
-    assert source == "saddle_level_contour"
-    assert closed.shape[0] >= 4
-    assert PolygonPath(closed).contains_point((1.7, 0.0))
-    assert not PolygonPath(closed).contains_point((1.2, 0.0))
-    assert diagnostics["saddle_level_points"] == closed.shape[0]
+
+    operands = gate.load_frame_operands(artifact)
+
+    assert operands["separatrix_closed_rz"].shape == (0, 2)
+    assert json.loads(str(operands["separatrix_assembly"])) == diagnostics

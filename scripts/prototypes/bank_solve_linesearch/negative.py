@@ -26,3 +26,16 @@ for before, after in replacements.items():
     source = source.replace(before, after)
 path.write_text(source)
 print("MUTATION count reads only for pending lanes", path)
+test = path.parents[2] / "tests/test_bank_solve_driver.py"
+source = test.read_text()
+anchor = (
+    '    """Every trial reads even the lanes accepted earlier or already at a root."""'
+)
+assert source.count(anchor) == 1
+source = source.replace(
+    anchor,
+    anchor + "\n    import nova\n    from pathlib import Path\n"
+    '    print("PROVENANCE", nova.__file__, support_read.__file__, '
+    'Path.cwd().resolve())',
+)
+test.write_text(source)

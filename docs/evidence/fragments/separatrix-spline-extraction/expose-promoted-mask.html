@@ -37,12 +37,25 @@ state, so the promoted-node count is zero everywhere and the declared negative
 control (an all-false mask in a scratch copy) is not discriminated from the
 unmutated result on this fixture. The equality assertion itself does hold: on
 the host route the returned mask is bit-identical to the mask the solve's last
-dispatched read produced. A discriminating test needs a diverted
-private-flux geometry, which this node's scope does not contain.</p>
+dispatched read produced.</p>
+
+<p id="expose-promoted-mask-unmet-scan">A manufactured quadrupole term
+<code>&gamma; R&sup2; Z&sup2;</code> added to the seed opens the private-flux
+region the mask needs, and the two conditions do not overlap on this operator.
+At <code>&gamma;</code> of 5, 20 and 50 the read promotes 4, 33 and 40 of 286
+nodes, and the solve refuses the state at entry with
+<code>NoQualifiedAxisError</code>: no qualified magnetic-axis candidate has a
+resolved component. At <code>&gamma;</code> of 2.5, 3.0, 0.5 steps to 4.5 the
+axis read succeeds and the promoted count is zero. A discriminating fixture
+therefore needs a diverted private-flux geometry that also carries a qualified
+axis, which this node's scope does not contain.</p>
 
 <p id="expose-promoted-mask-gate">Head arm: one of five tests fails
 (<code>test_host_route_reports_the_promoted_set_its_closing_trip_read</code>,
 on the promoted-node-count assertion only; the equality assertion before it
-passed). Logs are held under the run directory at
+passed). The declared negative control, an all-false mask in a scratch copy,
+does not discriminate: its equality assertion passes too, because the
+unmutated mask on this fixture is all-false, and it exits 1 only on the same
+promoted-node-count assertion. Logs are held under the run directory at
 <code>logs/head-new-file.log</code> and <code>logs/negative-control.log</code>.</p>
 </section>

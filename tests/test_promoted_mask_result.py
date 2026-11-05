@@ -10,9 +10,13 @@ all-false mask a solve that promotes nothing returns.
 
 The fast lane reads the bootstrapped Solov'ev free-boundary problem
 ``tests/test_reduced_newton.py`` builds, which carries no private-flux region
-and so promotes no node.  The promoting case is the warm MAST coil-edit
-machine the coil-edit sweep prepares: its converged edit state has a qualified
-saddle and a private-flux region, so its closing trip promotes nodes.
+and so promotes no node.  Those tests therefore pin what that fixture can show
+— the returned mask's dtype, shape and equality with the solve's own terminal
+promoted set, which is all-false there — and the requirement that the mask name
+at least one promoted node lives in the slow test.  The promoting case is the
+warm MAST coil-edit machine the coil-edit sweep prepares: its converged edit
+state has a qualified saddle and a private-flux region, so its closing trip
+promotes nodes.
 """
 
 from __future__ import annotations
@@ -80,8 +84,9 @@ def test_host_route_reports_the_promoted_set_its_closing_trip_read(machine):
 
     The result field is compared against the mask the operator's own read
     returned on the solve's final trip, recorded as the solve runs, so a
-    result that carried the seed's shadow, a stale trip's shadow or an
-    all-false array fails here.
+    result that carried the seed's shadow or an earlier trip's shadow fails
+    here.  This fixture promotes no node, so the compared set is all-false and
+    a mask that named nodes would fail too.
     """
     profile, seed = machine
     operator = profile.operator
@@ -110,8 +115,8 @@ def test_host_route_reports_the_promoted_set_its_closing_trip_read(machine):
     assert returned.dtype == bool
     assert returned.shape == np.shape(result.state)
     assert len(reads) >= 2, reads
+    assert returned.shape == np.shape(reads[-1])
     assert np.array_equal(returned, reads[-1])
-    assert returned.sum() > 0
 
 
 def test_compiled_route_reports_the_promoted_set_of_its_terminal_state(machine):
@@ -128,8 +133,8 @@ def test_compiled_route_reports_the_promoted_set_of_its_terminal_state(machine):
     expected = _promoted_set(operator, result.state, previous_shadow)
     returned = np.asarray(result.promoted_mask)
     assert returned.dtype == bool
+    assert returned.shape == np.shape(result.state)
     assert np.array_equal(returned, np.asarray(expected, dtype=bool))
-    assert returned.sum() > 0
 
 
 def test_both_routes_report_the_same_promoted_set_on_one_trip(machine):
@@ -193,8 +198,9 @@ def test_the_profile_solve_carries_the_promoted_mask(machine):
     expected = _promoted_set(
         profile.operator, equilibrium.flux, _seed_shadow(profile.operator, seed)
     )
+    assert returned.dtype == bool
+    assert returned.shape == np.shape(expected)
     assert np.array_equal(returned, np.asarray(expected, dtype=bool))
-    assert returned.sum() > 0
 
 
 @pytest.mark.slow

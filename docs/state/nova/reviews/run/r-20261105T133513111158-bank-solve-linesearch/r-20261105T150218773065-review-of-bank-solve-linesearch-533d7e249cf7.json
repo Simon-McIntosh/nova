@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-05T15:13:35.879Z",
   "dispatched_at": "2026-11-05T15:05:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the twice-halving test asserts the true read count; the fixture-level invariant is a looser companion check and holds on the current fixture",
+      "recorded_at": "2026-11-05T15:16:23.462358+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_bank_solve_driver.py",

@@ -30,7 +30,19 @@ route already carried that set through its fixed-shape program as the terminal
 shadow; it is now surfaced from the same carry. Both compiled entry points and
 both host entry points set the field, and the constrained result inherits it.</p>
 
-<p id="expose-promoted-mask-unmet">The measure's fixture clause is unmet. The
+<p id="expose-promoted-mask-promoting">The promoting case is the warm MAST coil-edit machine, which the
+non-convergence diagnosis already measured. A slow test prepares that machine
+through the coil-edit sweep's own preparation, replays the sweep's first
+twelve edits from the prepared seed through the host route, and asserts the
+terminal mask is non-empty and equals the mask recorded at the solve's closing
+read. On one H200 job the test passed beside the cheap all-false test
+(2 passed in 385&nbsp;s, mask length 1126 nodes), and the declared control on
+the same revision with the promoted-mask returns forced all-false failed at the
+promoted-node-count assertion (1 failed, 1 passed in 397&nbsp;s), so the
+mutation is discriminated here where the wall-limited fixture could not
+discriminate it.</p>
+
+<p id="expose-promoted-mask-unmet">The fast lane alone is not sufficient. The
 machine fixture is wall-limited: its operator read returns no private-flux
 component at the seed, at the diverted class, or at the converged terminal
 state, so the promoted-node count is zero everywhere and the declared negative
@@ -53,9 +65,9 @@ axis, which this node's scope does not contain.</p>
 <p id="expose-promoted-mask-gate">Head arm: one of five tests fails
 (<code>test_host_route_reports_the_promoted_set_its_closing_trip_read</code>,
 on the promoted-node-count assertion only; the equality assertion before it
-passed). The declared negative control, an all-false mask in a scratch copy,
-does not discriminate: its equality assertion passes too, because the
-unmutated mask on this fixture is all-false, and it exits 1 only on the same
-promoted-node-count assertion. Logs are held under the run directory at
-<code>logs/head-new-file.log</code> and <code>logs/negative-control.log</code>.</p>
+passed). On the wall-limited fixture the all-false control does not
+discriminate, because the unmutated mask is all-false there too; its log is
+held under the run directory as <code>logs/negative-control.log</code>. The
+control that does discriminate is the one recorded above, on the warm
+coil-edit state.</p>
 </section>

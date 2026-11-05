@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline arm (negative-control-diagnostics.log, producer at c03d8db6b): 2 failed, 2 passed, 1 skipped, EXIT=1, failure ids test_refused_assembly_yields_no_boundary_and_carries_its_reason and test_assembly_diagnostics_survive_the_persisted_operand_round_trip. head arm (tests-operands-round2.log): 15 passed, 1 skipped, EXIT=0 and I reproduced it (review-gate.log: 4 passed, 1 skipped, EXIT=0 on the touched module). No failure id present at head and absent at base.",
+  "assertion_analysis": [
+    {
+      "fails_when": "reinstating the saddle-level fallback in _display_separatrix (returning its four-tuple) makes the two-value unpack raise ValueError; confirmed red in negative-control-diagnostics.log",
+      "independent": true,
+      "line": 196,
+      "test": "tests/test_frame_operand_artifacts.py::test_refused_assembly_yields_no_boundary_and_carries_its_reason"
+    },
+    {
+      "fails_when": "only if load_frame_operands stops returning npz fields; it does not fail if _persist_frame_operands stops writing separatrix_assembly, because the artifact is built with np.savez_compressed in the test itself",
+      "independent": false,
+      "line": 240,
+      "test": "tests/test_frame_operand_artifacts.py::test_assembly_diagnostics_survive_the_persisted_operand_round_trip"
+    }
+  ],
+  "base_log_revision": "c03d8db6bcdc553e412e0d4a978645806910f474",
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:solve_frame",
+    "benchmarks/diiid_forward_gs_match.py:_solve_frame_retaining_failure",
+    "benchmarks/diiid_forward_gs_match.py:_solve_selected_frames",
+    "benchmarks/diiid_forward_gs_match.py:_persist_frame_operands"
+  ],
+  "completed_at": "2026-11-05T17:29:34.703Z",
+  "dispatched_at": "2026-11-05T17:21:17Z",
+  "findings": [
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "2465",
+      "severity": "blocking",
+      "text": "blocking: operands = display_rig['operands'] indexes a key _display_map no longer returns (its mapping at line 1883 is {'coupling', 'conductor_response'}), so every frame that reaches the display map raises KeyError; _solve_frame_retaining_failure (line 2688) catches only NoQualifiedAxisError and ConstraintViolationError, so the KeyError aborts the whole bank. The key was dropped by 7b8160924 and the read carried forward by 4d809c7ff, and no test drives solve_frame's display path, which is why the gate is green."
+    },
+    {
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": "240",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_assembly_diagnostics_survive_the_persisted_operand_round_trip writes the npz with np.savez_compressed instead of calling _persist_frame_operands, so it guards only load_frame_operands; the producer could stop writing separatrix_assembly and the test would still pass, while docs/evidence/fragments/separatrix-spline-extraction/forward-gs-remeasure.html:150 states the diagnostic record survives the persisted round trip."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1886",
+      "severity": "non-blocking",
+      "text": "non-blocking: the eleven-key tuple in _branch_diagnostics re-implements the branch vocabulary nova/equilibrium/display_flux.py:65 already publishes as BRANCH_KEYS and that benchmarks/coil_edit_latency.py:1117-1135 already extracts; the three copies have drifted (BRANCH_KEYS omits the seven assembler counts, this one omits open_segment_count), so a fourth caller must pick a list by guess rather than read one owner."
+    }
+  ],
+  "head_log_revision": "4d809c7ff472c1ef3c4a706830d185295550f274",
+  "item_aggregate": {
+    "call_sites": 1,
+    "findings": 3,
+    "justifications": 6,
+    "scores": 6,
+    "verdicts": 5
+  },
+  "item_verdicts": {
+    "diff": "read commit by commit against c03d8db6b: 7b8160924 adds the saddle-level fallback, 1ff6658cf pins its axis-enclosing choice, 4d809c7ff removes the fallback and keeps the diagnostics; four files changed, all inside the declared scope.",
+    "done_when": "the done_when asks for a dated receipt, both figures, and a boundary separation measured on the fine-map separatrix; the measured separation is null by design (0 of 5 frames converge, frames_with_separatrix 0) and this range's own measure is the focused gate named in manifest tests plus the negative control, which the manifest records with its log paths.",
+    "goal": "the node goal is the DIII-D five-frame forward-gs bank re-measured at HEAD into a dated receipt; the range under review is the boundary-handling repair on top of it, and benchmarks/diiid_forward_gs_match.py:1883-1911 does remove the second boundary path and record the assembler's diagnostics, but the repair leaves the producer unable to complete a frame that reaches the display map.",
+    "manifest": "read; it states 15 passed 1 skipped EXIT=0 on tests/test_frame_operand_artifacts.py, tests/test_diiid_forward_gs_match.py and tests/test_diiid_frame_checkpointing.py in tests-operands-round2.log, and a negative control of 2 failed EXIT=1 in negative-control-diagnostics.log.",
+    "write_paths": "read the manifest's declared paths and the run's scope_extension_request; the four files in this range (benchmarks/diiid_forward_gs_match.py, docs/evidence/fragments/separatrix-spline-extraction/forward-gs-remeasure.html, docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json, tests/test_frame_operand_artifacts.py) all lie inside them, with the test path covered by the recorded extension."
+  },
+  "justifications": {
+    "durability": "tests/test_frame_operand_artifacts.py:210 fails if the fallback is reinstated (proved by negative-control-diagnostics.log), while tests/test_frame_operand_artifacts.py:240-251 only exercises load_frame_operands over an artifact the test writes itself, so the producer's persist path and its wiring stay unguarded.",
+    "evidence": "the focused gate and its negative control are recorded in tests-operands-round2.log and negative-control-diagnostics.log and I reproduced the head arm (4 passed, 1 skipped, EXIT=0), but no test drives solve_frame's display path, which is where the blocking defect sits.",
+    "fit": "benchmarks/diiid_forward_gs_match.py:1886-1911 follows the module's dataclass-and-plain-dict idiom and introduces no forbidden name; separatrix_assembly and _branch_diagnostics are named by what they carry.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:2465 reads display_rig['operands'] from the two-key mapping _display_map returns at line 1883, so the producer raises KeyError before any frame reaches the separator comparison the node exists to measure.",
+    "reuse": "benchmarks/diiid_forward_gs_match.py:1886 restates a branch vocabulary nova/equilibrium/display_flux.py:65 (BRANCH_KEYS) already owns and that benchmarks/coil_edit_latency.py:1117-1135 already extracts, and the three lists have already drifted apart.",
+    "scope_discipline": "every path in the range is a declared write path or the recorded scope extension for tests/test_frame_operand_artifacts.py, and the range carries nothing the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is the DIII-D five-frame forward-gs bank re-measured at HEAD, and the range under review is the boundary-handling repair, which benchmarks/diiid_forward_gs_match.py:1883-1911 does implement but which leaves the producer unable to run.\nVERDICT done_when: the done_when asks for a dated receipt with the fine-map boundary separation; that separation is null by design and this range's own measure is the focused gate and negative control recorded in the manifest with their logs.\nVERDICT write_paths: read the manifest's declared paths and scope_extension_request; the four files in this range all lie inside them.\nVERDICT manifest: read; it records 15 passed 1 skipped EXIT=0 in tests-operands-round2.log and 2 failed EXIT=1 in negative-control-diagnostics.log, and I reproduced the head arm.\nVERDICT diff: read commit by commit against c03d8db6b; 7b8160924 adds the fallback, 1ff6658cf pins it, 4d809c7ff removes it and keeps the diagnostics, four files, all in scope.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:solve_frame, benchmarks/diiid_forward_gs_match.py:_solve_frame_retaining_failure, benchmarks/diiid_forward_gs_match.py:_solve_selected_frames, benchmarks/diiid_forward_gs_match.py:_persist_frame_operands\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:2465 reads display_rig['operands'] from the two-key mapping returned at line 1883, so the producer raises KeyError before any frame is measured.\nSCORE evidence: 12\nJUSTIFICATION evidence: the gate and its negative control are recorded in tests-operands-round2.log and negative-control-diagnostics.log, but no test drives solve_frame's display path where the defect sits.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the range is a declared write path or the recorded scope extension for tests/test_frame_operand_artifacts.py.\nSCORE durability: 10\nJUSTIFICATION durability: tests/test_frame_operand_artifacts.py:210 fails on a reinstated fallback, while line 240 only exercises load_frame_operands over an artifact the test builds itself.\nSCORE fit: 17\nJUSTIFICATION fit: benchmarks/diiid_forward_gs_match.py:1886-1911 follows the module's dataclass-and-plain-dict idiom and introduces no forbidden name.\nSCORE reuse: 8\nJUSTIFICATION reuse: benchmarks/diiid_forward_gs_match.py:1886 restates a vocabulary nova/equilibrium/display_flux.py:65 owns, already extracted at benchmarks/coil_edit_latency.py:1117-1135.\nFINDING benchmarks/diiid_forward_gs_match.py:2465 blocking: operands = display_rig['operands'] indexes a key _display_map no longer returns, so every frame that reaches the display map raises KeyError and aborts the bank.\nFINDING tests/test_frame_operand_artifacts.py:240 non-blocking: the round-trip test builds the npz itself instead of calling _persist_frame_operands, so the producer's write path is unguarded.\nFINDING benchmarks/diiid_forward_gs_match.py:1886 non-blocking: the diagnostics key list re-implements BRANCH_KEYS from nova/equilibrium/display_flux.py:65 and has already drifted from it and from benchmarks/coil_edit_latency.py:1117.\n",
+  "record_paths_note": "gate logs: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T201524817113-forward-gs-remeasure/tests-operands-round2.log and .../negative-control-diagnostics.log; reviewer re-run .../r-20261105T171842388381-review-of-forward-gs-remeasure-4d809c7ff472/review-gate.log",
+  "review_run_id": "r-20261105T171842388381-review-of-forward-gs-remeasure-4d809c7ff472",
+  "reviewed_base_sha": "c03d8db6bcdc553e412e0d4a978645806910f474",
+  "reviewed_commits": [
+    "7b81609242838fc580bf00f8276c49a155373b9f",
+    "1ff6658cff85137da72f9bf24a9fd4b725f2dfb4",
+    "4d809c7ff472c1ef3c4a706830d185295550f274"
+  ],
+  "reviewed_head_sha": "4d809c7ff472c1ef3c4a706830d185295550f274",
+  "reviewed_revision_note": "diff read as git diff c03d8db6bcdc553e412e0d4a978645806910f474..4d809c7ff472c1ef3c4a706830d185295550f274, the three commits gained since the prior review at c03d8db6b",
+  "reviewed_run_id": "r-20261102T201524817113-forward-gs-remeasure",
+  "scores": {
+    "durability": 10,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 10,
+    "reuse": 8,
+    "scope_discipline": 18
+  },
+  "self_comparison_assertions": [
+    "tests/test_frame_operand_artifacts.py:251 compares json.loads(operands['separatrix_assembly']) against the diagnostics the test itself serialised into the artifact at line 245, so both sides of the assertion are supplied by the test rather than by the code under test"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T17:40:00Z",
+  "total": 75
+}

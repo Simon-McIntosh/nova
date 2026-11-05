@@ -111,7 +111,7 @@ X-point and boundary ratios are {max(r['oracle_axis'] for r in precision):.4e},
 {max(r['oracle_saddle'] for r in precision):.4e} and
 {max(r['oracle_boundary'] for r in precision):.4e}, respectively.</p>
 <p id="{prefix}-cpu">Nine focused driver and cycle tests pass. The required
-four-file baseline and head CPU arms and the scratch counter mutation are queued
+four-file baseline and head CPU arms and the scratch counter mutation are scheduled
 on sirius; their results remain pending.</p>
 <p>Raw receipts and logs: <code>{escape(str(args.run))}</code>;
 <code>{args.label}-base.log</code>, <code>{args.label}-head.log</code>, and

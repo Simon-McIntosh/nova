@@ -15,10 +15,13 @@ zero gaps. Four further pairs each exceed exactly one bound — flux over span
 6e-4 against 5e-4, and boundary flux over span 2e-4 against 1e-4 — and each
 raises the owner's own assertion. The pairs also assert each gap against its
 reported limit and denominator, so redefining a limit or a normalising unit
-fails the test rather than the report. The five tests pass in 7.3 s on the
-login node.</p>
-<p>A scratch copy of the owner with the flux limit moved from 1e-8 to 1e-7
-fails exactly one test, the flux pair, at 2e-8 reported against the widened
-1e-7 bound; the other four pass. The negative-control log ends
-<code>EXIT=1</code>.</p>
+fails the test rather than the report. The receipt's span and minor radius are
+distinct (0.7 and 2.3) for exactly that reason. The five tests pass in 4.96 s
+on the login node.</p>
+<p>Two scratch copies of the owner show the test fails against both kinds of
+change. Moving the flux limit from 1e-8 to 1e-7 fails exactly one test, the
+flux pair, at 2e-8 reported against the widened 1e-7 bound; the other four
+pass. Exchanging the span and minor-radius denominators in <code>pair_gaps</code>
+fails all four limit pairs and leaves only the inside-limit pair passing. Both
+negative-control logs end <code>EXIT=1</code>.</p>
 </section>

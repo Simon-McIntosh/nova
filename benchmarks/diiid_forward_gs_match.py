@@ -1629,7 +1629,7 @@ def _publish_conductor_response(root: Path, key: str, source: Path) -> Path:
         {"name": "response.npy", "sha256": digest, "size": size}, sort_keys=True
     ).encode()
     return content_store.publish_files(
-        root, key, (declaration,), {"response.npy": source}, manifest
+        root, f"sha256:{key}", (declaration,), {"response.npy": source}, manifest
     )
 
 

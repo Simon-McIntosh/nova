@@ -5,6 +5,13 @@
   "call_sites_emission": "none",
   "completed_at": "2026-11-05T18:34:25.581Z",
   "dispatched_at": "2026-11-05T18:25:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-promoted-nodes-near-xpoint-62ee4e3ebdb9",
+      "recorded_at": "2026-11-05T20:36:36.161870+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py",

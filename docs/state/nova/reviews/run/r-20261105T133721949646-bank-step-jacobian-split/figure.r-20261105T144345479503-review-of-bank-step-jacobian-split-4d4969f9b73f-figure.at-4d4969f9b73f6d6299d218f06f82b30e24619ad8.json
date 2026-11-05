@@ -11,6 +11,11 @@
       "kind": "exempted",
       "reason": "label indentation lost in a one-off evidence figure; the fragment's table carries the nesting",
       "recorded_at": "2026-11-05T14:56:55.654801+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "annotation precision varies with magnitude; every value is printed and the table carries them all",
+      "recorded_at": "2026-11-05T14:57:05.250602+00:00"
     }
   },
   "findings": [

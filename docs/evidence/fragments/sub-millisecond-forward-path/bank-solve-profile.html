@@ -14,21 +14,21 @@
 <body><main class="plan-doc">
 <h1 id="bank-solve-profile-landing">Bank solve profile</h1>
 <p id="bank-solve-profile-summary">At sixteen slices one Newton step per iterate is
-almost the whole iterate: the tangent assembly inside it costs 1595 ms
+almost the whole iterate: the tangent assembly inside it costs 1594 ms
 of a 1879 ms per-iterate stage sum, 85 %,
 and it grows 12.6 times from one slice
 (127 ms) while the whole read grows only
 2.8 times.
 The stage sum does not close on the whole-solve wall: it overstates it by
-108 % at one slice and
-212 % at sixteen, and that residual is
+89 % at one slice and
+209 % at sixteen, and that residual is
 reported below rather than absorbed into a remainder stage.</p>
 
 <section id="bank-solve-profile-stage">
 <h2>Per-iterate stage wall at one and sixteen slices</h2>
-<p>One H200 (job 1305948, partition
+<p>One H200 (job 1306018, partition
 <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, one card, two cores)
-at revision <code>7c4a746f7</code>. Every stage is its own jitted call at
+at revision <code>2a21f478f</code>. Every stage is its own jitted call at
 the solve's shapes — one or sixteen lanes of the diverted 550-cell bank, each lane a
 per-lane perturbation of the same seed — warmed, timed with
 <code>block_until_ready</code> and reported as the median of 12
@@ -52,35 +52,35 @@ twice, once for the solve's own magnitude and once inside the Newton step.
 <th>1 slice [ms]</th><th>16 slices [ms]</th><th>Ratio 16 / 1</th>
 <th>Share at 16</th></tr></thead><tbody>
 <tr><td>read census</td><td>1.35</td><td>3.30</td><td>2.44</td><td>0.2%</td></tr>
-<tr><td>read decision</td><td>51.05</td><td>142.74</td><td>2.80</td><td>7.6%</td></tr>
-<tr><td>read geometry</td><td>1.68</td><td>5.90</td><td>3.51</td><td>0.3%</td></tr>
-<tr><td>step residual</td><td>9.78</td><td>22.51</td><td>2.30</td><td>1.2%</td></tr>
-<tr><td>step assembly</td><td>126.69</td><td>1594.87</td><td>12.59</td><td>84.9%</td></tr>
-<tr><td>factor</td><td>5.95</td><td>104.92</td><td>17.64</td><td>5.6%</td></tr>
-<tr><td>back-solve</td><td>0.69</td><td>4.53</td><td>6.61</td><td>0.2%</td></tr>
-<tr><td><b>stage sum</b></td><td><b>197.18</b></td><td><b>1878.77</b></td><td>—</td><td>100%</td></tr>
-<tr><td><b>whole solve, per iterate</b></td><td><b>95.02</b></td><td><b>601.63</b></td><td>—</td><td>—</td></tr>
-<tr><td><b>stage sum / whole</b></td><td><b>2.08</b></td><td><b>3.12</b></td><td>—</td><td>—</td></tr>
+<tr><td>read decision</td><td>51.62</td><td>142.67</td><td>2.76</td><td>7.6%</td></tr>
+<tr><td>read geometry</td><td>1.57</td><td>5.86</td><td>3.73</td><td>0.3%</td></tr>
+<tr><td>step residual</td><td>9.72</td><td>22.87</td><td>2.35</td><td>1.2%</td></tr>
+<tr><td>step assembly</td><td>126.58</td><td>1594.49</td><td>12.60</td><td>84.9%</td></tr>
+<tr><td>factor</td><td>6.02</td><td>104.93</td><td>17.43</td><td>5.6%</td></tr>
+<tr><td>back-solve</td><td>0.69</td><td>4.50</td><td>6.56</td><td>0.2%</td></tr>
+<tr><td><b>stage sum</b></td><td><b>197.55</b></td><td><b>1878.61</b></td><td>—</td><td>100%</td></tr>
+<tr><td><b>whole solve, per iterate</b></td><td><b>104.27</b></td><td><b>608.85</b></td><td>—</td><td>—</td></tr>
+<tr><td><b>stage sum / whole</b></td><td><b>1.89</b></td><td><b>3.09</b></td><td>—</td><td>—</td></tr>
 </tbody></table>
 <p>The whole solve is timed as the product runs it: <code>solve_batch</code> over the
 same states, 12 repeats, divided by the steps it took
-(6 at one slice, 29 at sixteen,
+(3 at one slice, 15 at sixteen,
 the slowest lane's count).</p>
 <figure>
 <img src="/nova/figures/sub-millisecond-forward-path/bank-solve-profile/per-iterate-stage.svg"
  alt="Horizontal stacked bars of the per-iterate wall by stage at sixteen slices and at one slice, with the whole-solve wall marked below each bar.">
 <figcaption>Per-iterate wall by stage, in ms, at sixteen slices (top) and one slice
 (bottom). Each bar is the stage sum; the dashed mark below it is the whole solve's
-own per-iterate wall, 95 ms at one slice and 602 ms at
+own per-iterate wall, 104 ms at one slice and 609 ms at
 sixteen. The stage sum overruns the wall in both rows, so the bar's end is an upper
 bound on the work and the mark is the measurement it is checked against.</figcaption>
 </figure>
 <p id="bank-solve-profile-closure">The stage sum does not close on the whole-solve
 wall, so the 15 % closure requirement is <b>not met</b>. At one slice the sum is
-197.18 ms against 95.02 ms per iterate, an overstatement of
-108 % or 102.16 ms;
-at sixteen it is 1878.77 ms against 601.63 ms, an overstatement
-of 212 % or 1277.14 ms.
+197.55 ms against 104.27 ms per iterate, an overstatement of
+89 % or 93.27 ms;
+at sixteen it is 1878.61 ms against 608.85 ms, an overstatement
+of 209 % or 1269.76 ms.
 The residual is not reported as a remainder stage, because it is not work the loop
 does: it is the difference between summing separate programs and running one fused
 program, and it has the sign that difference predicts.</p>
@@ -97,7 +97,7 @@ candidate's read and the magnitude.</p>
 <th>1 slice [ms]</th><th>16 slices [ms]</th><th>Ratio 16 / 1</th></tr></thead><tbody>
 <tr><td>read</td><td>53.63</td><td>151.19</td><td>2.82</td></tr><tr><td>step</td><td>137.80</td><td>1730.05</td><td>12.55</td></tr><tr><td>magnitude</td><td>5.05</td><td>11.41</td><td>2.26</td></tr><tr><td>body</td><td>251.15</td><td>2032.92</td><td>8.09</td></tr>
 </tbody></table>
-<p id="bank-solve-profile-fused-read">The fused read costs 53.63 ms against the 54.08 ms the census, decision and geometry stages sum to, and 151.19 ms against 151.93 ms — so the read's split is faithful to within 1 % at both batch sizes, and nothing is lost to the separation there. The fused step costs 137.80 ms against the residual, assembly, factor and back-solve stages' own 143.10 ms at one slice and 1730.05 ms against 1726.84 ms at sixteen, again within 1 %. The split is therefore not what overstates the iterate. <b>What the cross-check does not do is explain the residual.</b> One fused iterate body — a read, a step, the candidate's read and the magnitude — costs 251.15 ms, which is 1.00 times the sum of its parts: no fusion benefit at all inside that one program. Yet the loop's own iterate is 95.02 ms — 84.5 ms in its steady state, measured a step at a time — against the 196.49 ms its three units cost separately, so the loop is 2.33 times cheaper than its own parts. Two readings survive this node: one compiled <code>while_loop</code> body shares work between the read and the step that a chain of separate jitted calls re-derives and re-transfers, or <code>newton_step</code> inside the loop is not doing all the work the standalone call does. The step arms rule out a third reading — that the loop hides one very expensive first iterate — because the marginal step is cheap too. This node does not choose between the two that remain, and it does not claim the first.</p>
+<p id="bank-solve-profile-fused-read">The fused read costs 53.63 ms against the 54.54 ms the census, decision and geometry stages sum to, and 151.19 ms against 151.82 ms — so the read's split is faithful to within 1 % at both batch sizes, and nothing is lost to the separation there. The fused step costs 137.80 ms against the residual, assembly, factor and back-solve stages' own 143.00 ms at one slice and 1730.05 ms against 1726.79 ms at sixteen, again within 1 %. The split is therefore not what overstates the iterate. <b>What the cross-check does not do is explain the residual.</b> One fused iterate body — a read, a step, the candidate's read and the magnitude — costs 251.15 ms, which is 1.00 times the sum of its parts: no fusion benefit at all inside that one program. Yet the loop's own iterate is 104.27 ms — 84.5 ms in its steady state, measured a step at a time — against the 196.49 ms its three units cost separately, so the loop is 2.33 times cheaper than its own parts. Two readings survive this node: one compiled <code>while_loop</code> body shares work between the read and the step that a chain of separate jitted calls re-derives and re-transfers, or <code>newton_step</code> inside the loop is not doing all the work the standalone call does. The step arms rule out a third reading — that the loop hides one very expensive first iterate — because the marginal step is cheap too. This node does not choose between the two that remain, and it does not claim the first.</p>
 </section>
 
 <section id="bank-solve-profile-lanes">
@@ -105,16 +105,16 @@ candidate's read and the magnitude.</p>
 <p>The batch wall is the slowest lane's, because the loop's predicate is
 <code>jnp.any(~done)</code>: every lane runs every iteration the slowest lane needs.
 The lane counts below come from the same solved receipt: 16 lanes, a
-maximum of 29 steps and a median of 6.</p>
+maximum of 15 steps and a median of 8.</p>
 <table id="bank-solve-profile-lane-table"><thead><tr><th>Lane</th><th>Steps</th>
 <th>Reads</th><th>Converged</th><th>Fresh residual</th></tr></thead><tbody>
-<tr><td>1</td><td>13</td><td>14</td><td>True</td><td>2.89e-11</td></tr><tr><td>2</td><td>5</td><td>6</td><td>True</td><td>5.67e-11</td></tr><tr><td>3</td><td>5</td><td>6</td><td>True</td><td>6.88e-11</td></tr><tr><td>4</td><td>29</td><td>30</td><td>True</td><td>7.35e-11</td></tr><tr><td>5</td><td>12</td><td>13</td><td>True</td><td>9.66e-11</td></tr><tr><td>6</td><td>3</td><td>4</td><td>True</td><td>1.09e-11</td></tr><tr><td>7</td><td>15</td><td>16</td><td>True</td><td>8.10e-11</td></tr><tr><td>8</td><td>5</td><td>6</td><td>True</td><td>4.41e-11</td></tr><tr><td>9</td><td>9</td><td>10</td><td>True</td><td>2.94e-11</td></tr><tr><td>10</td><td>3</td><td>4</td><td>True</td><td>5.94e-12</td></tr><tr><td>11</td><td>7</td><td>8</td><td>True</td><td>8.06e-11</td></tr><tr><td>12</td><td>5</td><td>6</td><td>True</td><td>2.98e-12</td></tr><tr><td>13</td><td>5</td><td>6</td><td>True</td><td>5.33e-11</td></tr><tr><td>14</td><td>13</td><td>14</td><td>True</td><td>5.89e-11</td></tr><tr><td>15</td><td>4</td><td>5</td><td>True</td><td>3.28e-11</td></tr><tr><td>16</td><td>17</td><td>18</td><td>True</td><td>6.79e-12</td></tr>
+<tr><td>1</td><td>7</td><td>8</td><td>True</td><td>3.19e-11</td></tr><tr><td>2</td><td>8</td><td>9</td><td>True</td><td>8.33e-11</td></tr><tr><td>3</td><td>10</td><td>11</td><td>True</td><td>6.59e-11</td></tr><tr><td>4</td><td>3</td><td>4</td><td>True</td><td>8.56e-11</td></tr><tr><td>5</td><td>15</td><td>16</td><td>True</td><td>8.04e-11</td></tr><tr><td>6</td><td>4</td><td>5</td><td>True</td><td>5.76e-11</td></tr><tr><td>7</td><td>6</td><td>7</td><td>True</td><td>5.54e-11</td></tr><tr><td>8</td><td>10</td><td>11</td><td>True</td><td>6.72e-12</td></tr><tr><td>9</td><td>11</td><td>12</td><td>True</td><td>1.03e-11</td></tr><tr><td>10</td><td>12</td><td>13</td><td>True</td><td>3.56e-11</td></tr><tr><td>11</td><td>8</td><td>9</td><td>True</td><td>6.68e-11</td></tr><tr><td>12</td><td>5</td><td>6</td><td>True</td><td>7.98e-11</td></tr><tr><td>13</td><td>4</td><td>5</td><td>True</td><td>1.34e-11</td></tr><tr><td>14</td><td>6</td><td>7</td><td>True</td><td>6.27e-11</td></tr><tr><td>15</td><td>6</td><td>7</td><td>True</td><td>7.69e-11</td></tr><tr><td>16</td><td>13</td><td>14</td><td>True</td><td>5.14e-11</td></tr>
 </tbody></table>
-<p id="bank-solve-profile-lanes-wall">The batch wall is 17447 ms. Run for
-the median lane's 6 steps instead of the maximum
-29, the same per-iterate wall gives 3610 ms, a
-saving of 13837 ms or
-79 % of the batch. That is the most a
+<p id="bank-solve-profile-lanes-wall">The batch wall is 9133 ms. Run for
+the median lane's 8 steps instead of the maximum
+15, the same per-iterate wall gives 4566 ms, a
+saving of 4566 ms or
+50 % of the batch. That is the most a
 straggler fix could return from this seed, and it is bounded by how far the slowest
 lane sits above the median rather than by anything inside an iterate.</p>
 </section>
@@ -126,7 +126,7 @@ iterate costs the same. Pinning the loop's step ceiling below and at convergence
 measures the cost of a step directly, as the difference between two arms run on the
 same seed (job 1305960, one lane,
 12 repeats, revision <code>6889117f5</code>). The
-receipts in this fragment ran at 7c4a746f7 and 6889117f5; every commit between
+receipts in this fragment ran at 2a21f478f and 6889117f5; every commit between
 them touches only <code>scripts/</code>, so the product code measured is identical.</p>
 <table id="bank-solve-profile-marginal-table"><thead><tr><th>Step ceiling</th>
 <th>Wall [ms]</th><th>Steps run</th><th>ms per added step</th></tr></thead><tbody>
@@ -147,20 +147,20 @@ its predecessor rather than a longer
 run, and the two walls agree to 0.4 ms,
 which is a reproducibility check rather than a measurement. The stage receipt's one-lane
 batch is that seed scaled by 1 + 2e-5 and needs
-6 steps, so the two receipts are not the same state; their
-per-step walls, 95.0 ms and 99.5 ms,
+3 steps, so the two receipts are not the same state; their
+per-step walls, 104.3 ms and 99.5 ms,
 agree to within a few per cent, which is how far the seed moves the cost of a step.</p>
 </section>
 
 <section id="bank-solve-profile-single">
 <h2>Cross-check: the single-slice solve as the product runs it</h2>
-<p><code>support_read.solve</code> at the same seed converged in 4
-steps and 4 refactors with 5 reads,
-terminal fresh residual 2.190e-11, in
-401
-ms — 100
+<p><code>support_read.solve</code> at the same seed converged in 3
+steps and 3 refactors with 4 reads,
+terminal fresh residual 5.713e-12, in
+314
+ms — 105
 ms per step. The one-lane <code>solve_batch</code> arm above takes
-6 steps on the same seed, so the batched program is not a
+3 steps on the same seed, so the batched program is not a
 like-for-like substitute at one lane; both programs nevertheless spend about the same
 per step, and both spend it in roughly half the time the separate stages account for.</p>
 </section>

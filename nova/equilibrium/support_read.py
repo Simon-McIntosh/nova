@@ -1690,7 +1690,6 @@ def solve_batch(
             next_read.valid
             & jnp.isfinite(next_norm)
             & (next_norm <= tolerance)
-            & ~changed
             & ~drift
         )
         slot = jnp.max(steps)

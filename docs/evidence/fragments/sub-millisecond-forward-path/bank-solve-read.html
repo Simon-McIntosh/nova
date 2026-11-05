@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="partial">
+<title>Bank solve read | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="bank-solve-read-landing">Bank solve read</h1>
+<p id="bank-solve-read-summary">The staged bank solve cannot take the tracked read between Newton steps. A carried decision supplies the discrete cells exactly, but its continuous geometry belongs to the previous state, so the step solves a lagged equation. Measured on one H200 from the diverted 550-cell seed, the carried variant converged in 51 steps and 3.31 s at one slice against the base arm's 3 steps and 0.31 s, and at sixteen slices it left nine lanes uncertified with four at the step cap and their fresh residual stuck at 1.6e-7. The landed change is therefore the removal of the redundant acceptance conjunct only; the per-slice wall is unchanged because the read and step paths are unchanged.</p>
+<section id="bank-solve-read-wall">
+<h2>Per-slice converged wall, one H200</h2>
+<p>Both arms ran in one allocation (job 1305921, partition <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, one H200 card) from the same script, the base arm from a git archive of <code>af772d1b38aae5ee5770039c9bbc695b2a41e816</code> and the tracked arm from the worktree. Every lane of the sixteen-slice arm is a per-lane perturbation of the same seed. The sixteen-slice row is the batch wall divided by sixteen and is labelled as amortised.</p>
+<img id="bank-solve-read-figure" src="/nova/figures/sub-millisecond-forward-path/bank-solve-read/per-slice-wall.svg" alt="Per-slice converged solve wall for the base arm and the tracked-read arm at one and sixteen slices">
+<table id="bank-solve-read-wall-table"><thead><tr><th>Arm</th><th>Per-slice wall [s]</th><th>Steps</th><th>Reads</th><th>Tracked reads</th><th>Rebuild reads</th><th>Refactors</th><th>Certified lanes</th></tr></thead><tbody>
+<tr><td>Base, 1 slice</td><td>0.31</td><td>3</td><td>4</td><td>—</td><td>4</td><td>3</td><td>1 of 1</td></tr>
+<tr><td>Base, 16 slices, amortised</td><td>0.58</td><td>3–15 per lane</td><td>4–16 per lane</td><td>—</td><td>all</td><td>—</td><td>16 of 16</td></tr>
+<tr><td>Tracked read, 1 slice</td><td>3.31</td><td>51</td><td>52</td><td>22</td><td>30</td><td>51</td><td>1 of 1</td></tr>
+<tr><td>Tracked read, 16 slices, amortised</td><td>2.04</td><td>10–60 per lane</td><td>—</td><td>—</td><td>—</td><td>—</td><td>7 of 16</td></tr>
+</tbody></table>
+<p id="bank-solve-read-wall-read">The base arm's terminal fresh residual is <code>5.71e-12</code> at one slice and every one of the sixteen lanes is below <code>8.6e-11</code>. The tracked arm's one-slice residual is <code>8.71e-12</code>, so the carry does not cost precision — it costs convergence rate, ten times the steps and the wall for the same answer. At sixteen slices it does cost precision: nine lanes fail to certify, four hit the sixty-step cap, and seven report <code>1.6e-7</code>, which is the fresh residual of the state the first carry was taken at.</p>
+</section>
+<section id="bank-solve-read-mechanism">
+<h2>Why the carried read cannot feed the step</h2>
+<p><code>rebuild_needed</code> compares the tracked cells and the saddle's admitted ownership, so a carry is exact in the discrete decision it supplies. The continuous fields the Newton step books with — the clipped cells' edge intervals, the boundary flux and the fractional membership — are the previous state's, because <code>read_batch</code>'s carry branch returns <code>tracking.reading</code> whole. A step taken from that reading is a Newton step on the equation of the previous iterate.</p>
+<p>Three variants were measured and each fails differently. Carrying on every iterate that stayed inside the freeze threshold diverged outright: sixty steps, no freeze, a non-finite iterative residual, no certification. Rebuilding only for the acceptance read drove the batch to stall at <code>1.6e-7</code> — the level the carry began at — while the single-slice arm still converged in twelve steps. Rebuilding on the iterate after each carry recovered certification but at 51 steps at one slice and 7 of 16 lanes at sixteen slices. This is the same failure the section already records for a frozen-read Jacobian: the tracked residual falls while the fresh residual does not.</p>
+<p id="bank-solve-read-mechanism-conclusion">The read's tracked branch remains sound for the steady batch it was built for, where nothing moves between reads. It is not admissible as a Newton iterate's read, and the fresh acceptance read the plan requires cannot substitute for one.</p>
+</section>
+<section id="bank-solve-read-guard">
+<h2>Acceptance conjunct removed</h2>
+<p>The acceptance test carried <code>&amp; ~changed</code> beside <code>&amp; ~drift</code>. A lane whose fresh decision differs from the locked set has <code>lock</code> false at that iterate, so <code>drift</code> is false there and the two terms are not equivalent: the removed conjunct did suppress acceptance on the iterate the lock was released at, where the step had already been taken with the fresh decisions. Removing it changes no step count on the diverted seed (3 steps, one freeze, residual <code>5.71e-12</code>) and leaves the fragment-switch case at two steps and one unfreeze. The driver file's five fast tests pass at the base revision and at the head.</p>
+</section>
+</main></body></html>

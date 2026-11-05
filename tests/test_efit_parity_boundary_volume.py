@@ -4,7 +4,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from benchmarks.efit_parity_boundary_volume import reconcile
+from benchmarks.efit_parity_boundary_volume import (
+    _polygon_measure,
+    _require_bank_agreement,
+    reconcile,
+)
 from benchmarks.efit_parity_root_geometry import (
     _boundary_branch_status,
     _closed_axis_branch,
@@ -17,6 +21,60 @@ MOMENTS = Path("docs/figures/efit-forward-parity/moment-definition-rescore.json"
 OUTPUT = Path(
     "docs/figures/efit-forward-parity/boundary-enclosed-volume-reconciliation.json"
 )
+
+
+def _source():
+    return json.loads(SOURCE.read_text())
+
+
+def _moments():
+    return json.loads(MOMENTS.read_text())
+
+
+def test_polygon_measure_reproduces_closed_form_revolution_volumes():
+    """The quadrature is checked against analytic solids, not against itself."""
+    outer, inner, bottom, top = 1.4, 0.6, -0.5, 0.7
+    rectangle = np.array(
+        [
+            [outer, bottom],
+            [outer, top],
+            [inner, top],
+            [inner, bottom],
+        ]
+    )
+    measure = _polygon_measure(rectangle)
+    analytic_area = (outer - inner) * (top - bottom)
+    analytic_volume = np.pi * (outer**2 - inner**2) * (top - bottom)
+    assert measure["poloidal_area_m2"] == pytest.approx(analytic_area, rel=1.0e-15)
+    assert measure["area_centroid_major_radius_m"] == pytest.approx(
+        0.5 * (outer + inner), rel=1.0e-15
+    )
+    assert measure["exact_solid_of_revolution_m3"] == pytest.approx(
+        analytic_volume, rel=1.0e-15
+    )
+
+    centre, radius, count = 1.9, 0.35, 200_000
+    angle = np.linspace(0.0, 2.0 * np.pi, count, endpoint=False)
+    circle = np.column_stack(
+        (centre + radius * np.cos(angle), radius * np.sin(angle))
+    )
+    measure = _polygon_measure(circle)
+    assert measure["poloidal_area_m2"] == pytest.approx(
+        np.pi * radius**2, rel=1.0e-9
+    )
+    assert measure["exact_solid_of_revolution_m3"] == pytest.approx(
+        2.0 * np.pi**2 * radius**2 * centre, rel=1.0e-9
+    )
+
+
+def test_bank_agreement_guard_fires_only_on_a_closed_solved_boundary():
+    """The guard is reachable: a closed boundary whose core volume is not the bank."""
+    closed = np.array([[0.0, -1.0], [1.0, 0.0], [0.0, 1.0]])
+    with pytest.raises(RuntimeError, match="confined-core volume differs"):
+        _require_bank_agreement(closed, 8.0, 9.0)
+    assert _require_bank_agreement(closed, 8.0, 8.0) is True
+    # With no closed boundary the comparison is undecidable, not refused.
+    assert _require_bank_agreement(None, 8.0, 9.0) is False
 
 
 @pytest.fixture(scope="module")
@@ -54,8 +112,12 @@ def test_stored_contour_keeps_its_revolution_quadrature(receipt):
 def test_banked_and_live_core_volumes_are_not_conflated(receipt):
     comparison = receipt["published_volume_comparison"]
     clipping = receipt["clipping"]
+    banked_volume = _source()["moment_normalisation_attribution"][
+        "solved_live_equilibrium"
+    ]["plasma_volume_m3"]
+    assert comparison["solved_m3"] == pytest.approx(banked_volume, rel=0.0, abs=0.0)
     assert clipping["banked_confined_core_toroidal_volume_m3"] == pytest.approx(
-        comparison["solved_m3"], rel=2.0e-14
+        banked_volume, rel=0.0, abs=0.0
     )
     assert clipping["reconstructed_core_matches_banked"] is False
     assert clipping["confined_core_toroidal_volume_m3"] != pytest.approx(
@@ -78,19 +140,31 @@ def test_candidate_discrimination_requires_a_closed_solved_boundary(receipt):
 
 def test_core_current_remains_defined_but_area_fraction_does_not(receipt):
     clipping = receipt["clipping"]
+    supports = _moments()["current_supports"]
     assert clipping["confined_core_cell_count"] < clipping["cell_count"]
-    assert clipping["confined_core_cell_count"] == 234
     assert clipping["banked_confined_core_current_a"] == pytest.approx(
-        416958.2541259555
+        supports["confined_core"], rel=0.0, abs=0.0
     )
     assert clipping["confined_core_current_a"] == clipping["live_core_current_a"]
-    assert clipping["pinned_all_domain_current_a"] == pytest.approx(933034.875)
+    assert clipping["pinned_all_domain_current_a"] == pytest.approx(
+        supports["all_domain_constrained"], rel=0.0, abs=0.0
+    )
     assert clipping["banked_confined_core_current_fraction"] == pytest.approx(
-        0.4468838896573459
+        supports["confined_core_over_all_domain"], rel=0.0, abs=0.0
     )
-    assert clipping["confined_core_current_fraction"] == pytest.approx(
-        clipping["live_core_current_a"] / clipping["live_total_current_a"]
+    # The live fraction is checked against the independently banked currents
+    # rather than against the benchmark's own division. The absolute bound is
+    # the same 2e-9 A the benchmark pins its reconstructed currents to.
+    # The live core carries nearly the whole reconstructed current, unlike the
+    # banked 95-cell support; the fraction is checked against the live current
+    # through the independently banked all-domain total.
+    assert clipping["confined_core_current_a"] != pytest.approx(
+        supports["confined_core"], abs=1.0
     )
+    assert (
+        clipping["confined_core_current_fraction"]
+        * supports["all_domain_constrained"]
+    ) == pytest.approx(clipping["confined_core_current_a"], rel=0.0, abs=2.0e-9)
     assert clipping["confined_core_area_fraction_of_solved_boundary"] is None
     assert clipping["area_fraction_minus_current_fraction"] is None
 

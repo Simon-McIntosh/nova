@@ -42,6 +42,7 @@ OUTPUT_RECEIPT = OUTPUT_DIRECTORY / "boundary-enclosed-volume-reconciliation.jso
 OUTPUT_FIGURE = OUTPUT_DIRECTORY / "boundary-enclosed-volume-reconciliation.png"
 TARGET_SHOT = 22086
 CENTROID_CONVENTION_TOLERANCE = 0.01
+CORE_BANK_RTOL = 2.0e-14
 
 
 def _closed_polygon(points: np.ndarray) -> np.ndarray:
@@ -118,6 +119,23 @@ def _verify_protected_artifacts(source: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _require_bank_agreement(
+    solved: np.ndarray | None,
+    core_volume: float,
+    banked_volume: float,
+    rtol: float = CORE_BANK_RTOL,
+) -> bool:
+    """Refuse a closed solved boundary whose core volume is not the banked one.
+
+    The check is only decidable when a closed solved boundary exists, because
+    otherwise the confined-core volume has no boundary to be compared against.
+    """
+    matches = bool(np.isclose(core_volume, banked_volume, rtol=rtol))
+    if solved is not None and not matches:
+        raise RuntimeError("reconstructed confined-core volume differs from the bank")
+    return matches
+
+
 def _reconstruct_contours(
     source: dict[str, Any],
     store: Path,
@@ -175,9 +193,7 @@ def _reconstruct_contours(
     banked_volume = source["moment_normalisation_attribution"][
         "solved_live_equilibrium"
     ]["plasma_volume_m3"]
-    core_matches_banked = bool(np.isclose(core_volume, banked_volume, rtol=2.0e-14))
-    if solved is not None and not core_matches_banked:
-        raise RuntimeError("reconstructed confined-core volume differs from the bank")
+    core_matches_banked = _require_bank_agreement(solved, core_volume, banked_volume)
     return (
         {"solved": solved, "display": display, "stored": stored},
         {

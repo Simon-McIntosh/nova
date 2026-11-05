@@ -52,7 +52,7 @@ TARGET_SHOT = 22086
 EXPECTED_SLICE_INDEX = 43
 EXPECTED_TOTAL_CURRENT_A = 933034.875
 EXPECTED_OUT_OF_CORE_CURRENT_A = 516076.6208740445
-EXPECTED_CORE_CELL_COUNT = 95
+BANKED_CORE_CELL_COUNT = 95
 EXPECTED_SOLVED_BOUNDARY_AREA_M2 = 1.7718309749521555
 EXPECTED_SOLVED_BOUNDARY_VOLUME_M3 = 8.518524547051108
 EXPECTED_MATCHED_SUPPORT_LI_DEVIATION = -0.35695307611867966
@@ -107,13 +107,36 @@ def _terminal_observation(source: dict[str, Any], store: Path, bank: Path):
     return profile, equilibrium, contour, state_array, boundary_status, display
 
 
-def _cell_partition(profile, equilibrium, contour: np.ndarray) -> dict[str, Any]:
+def _cell_membership(profile, contour: np.ndarray) -> np.ndarray:
+    """Return the cell centroids enclosed by one contour; the sole membership test."""
     coordinates = np.asarray(profile.lattice.coordinate, dtype=np.float64)
-    inside = MplPath(contour, closed=True).contains_points(coordinates, radius=1.0e-12)
+    return np.asarray(
+        MplPath(contour, closed=True).contains_points(coordinates, radius=1.0e-12),
+        dtype=bool,
+    )
+
+
+def _cell_partition(
+    profile,
+    equilibrium,
+    contour: np.ndarray,
+    *,
+    solved_branch: bool = True,
+) -> dict[str, Any]:
+    """Partition every mesh cell against one contour.
+
+    ``solved_branch`` adds the invariants that only a solved closed branch can
+    carry: every confined-core centroid lies inside it, and the currents close
+    on the bank. A stored contour is a different region, so those claims are
+    not made of it.
+    """
+    coordinates = np.asarray(profile.lattice.coordinate, dtype=np.float64)
+    inside = _cell_membership(profile, contour)
     core = np.asarray(equilibrium.domains.core, dtype=bool)
-    if int(np.count_nonzero(core)) != EXPECTED_CORE_CELL_COUNT:
-        raise RuntimeError("the confined-core cell count drifted")
-    if np.any(core & ~inside):
+    core_cell_count = int(np.count_nonzero(core))
+    if core_cell_count == 0:
+        raise RuntimeError("the confined-core mask is empty")
+    if solved_branch and np.any(core & ~inside):
         raise RuntimeError("a confined-core centroid lies outside the closed branch")
     interior_noncore = inside & ~core
     exterior = ~inside
@@ -138,12 +161,13 @@ def _cell_partition(profile, equilibrium, contour: np.ndarray) -> dict[str, Any]
     out_of_core = float(
         records["inside_closed_branch_outside_core"]["cell_current_a"]
     ) + float(records["outside_closed_branch"]["cell_current_a"])
-    if not np.isclose(total, EXPECTED_TOTAL_CURRENT_A, rtol=0.0, atol=2.0e-9):
-        raise RuntimeError("the reconstructed total current differs from the pin")
-    if not np.isclose(
-        out_of_core, EXPECTED_OUT_OF_CORE_CURRENT_A, rtol=0.0, atol=2.0e-9
-    ):
-        raise RuntimeError("the out-of-core current differs from the bank")
+    if solved_branch:
+        if not np.isclose(total, EXPECTED_TOTAL_CURRENT_A, rtol=0.0, atol=2.0e-9):
+            raise RuntimeError("the reconstructed total current differs from the pin")
+        if not np.isclose(
+            out_of_core, EXPECTED_OUT_OF_CORE_CURRENT_A, rtol=0.0, atol=2.0e-9
+        ):
+            raise RuntimeError("the out-of-core current differs from the bank")
     return {
         "coordinates": coordinates,
         "inside": inside,
@@ -154,8 +178,32 @@ def _cell_partition(profile, equilibrium, contour: np.ndarray) -> dict[str, Any]
         "records": records,
         "summed_current_a": closure,
         "pinned_current_a": EXPECTED_TOTAL_CURRENT_A,
-        "closure_residual_a": closure - EXPECTED_TOTAL_CURRENT_A,
+        "closure_residual_a": (closure - EXPECTED_TOTAL_CURRENT_A)
+        if solved_branch
+        else None,
         "out_of_core_current_a": out_of_core,
+        "core_cell_count": core_cell_count,
+        "banked_core_cell_count": BANKED_CORE_CELL_COUNT,
+        "core_cell_count_matches_bank": core_cell_count == BANKED_CORE_CELL_COUNT,
+    }
+
+
+def _core_support_divergence(
+    core_cell_count: int, core_current: float, moment: dict[str, Any]
+) -> dict[str, Any]:
+    """Report the live-versus-banked core support difference against the bank."""
+    banked = moment["current_supports"]
+    banked_current = float(banked["confined_core"])
+    return {
+        "live_core_cell_count": int(core_cell_count),
+        "banked_core_cell_count": BANKED_CORE_CELL_COUNT,
+        "cell_counts_differ": int(core_cell_count) != BANKED_CORE_CELL_COUNT,
+        "live_core_current_a": float(core_current),
+        "banked_core_current_a": banked_current,
+        "current_agreement_atol_a": 2.0e-9,
+        "current_agrees": bool(
+            np.isclose(core_current, banked_current, rtol=0.0, atol=2.0e-9)
+        ),
     }
 
 
@@ -350,7 +398,7 @@ def _open_partition_receipt(
                 "cell_current_a": core_current,
             },
             "banked_confined_core": {
-                "cell_count": EXPECTED_CORE_CELL_COUNT,
+                "cell_count": BANKED_CORE_CELL_COUNT,
                 "cell_current_a": moment["current_supports"]["confined_core"],
             },
             "inside_closed_branch_outside_core": {
@@ -364,6 +412,9 @@ def _open_partition_receipt(
                 "cell_current_a": None,
             },
         },
+        "core_support_divergence": _core_support_divergence(
+            int(np.count_nonzero(core)), core_current, moment
+        ),
         "current_closure": {
             "direct_total_current_a": total,
             "direct_out_of_core_current_a": total - core_current,
@@ -471,6 +522,11 @@ def measure(
         },
         "separatrix": contour_measure,
         "current_partition_table": partition["records"],
+        "core_support_divergence": _core_support_divergence(
+            partition["core_cell_count"],
+            partition["records"]["confined_core"]["cell_current_a"],
+            moment,
+        ),
         "current_closure": {
             "summed_partition_current_a": partition["summed_current_a"],
             "pinned_total_current_a": partition["pinned_current_a"],

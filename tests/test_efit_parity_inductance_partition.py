@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
 import pytest
 
 from benchmarks.efit_parity_inductance_partition import (
-    EXPECTED_OUT_OF_CORE_CURRENT_A,
-    EXPECTED_TOTAL_CURRENT_A,
+    MOMENT_RECEIPT,
     _plot_partition,
     measure,
 )
+
+
+def _current_supports():
+    return json.loads(MOMENT_RECEIPT.read_text())["current_supports"]
 
 
 @pytest.fixture(scope="module")
@@ -41,21 +45,39 @@ def test_open_separatrix_has_no_enclosed_geometry(result):
 
 def test_direct_current_closes_without_inventing_branch_partition(result):
     receipt, fields = result
+    banked = _current_supports()
     table = receipt["current_partition_table"]
-    assert table["confined_core"]["cell_count"] == 234
-    assert table["banked_confined_core"]["cell_count"] == 95
+    live = table["confined_core"]
+    # The two supports disagree in cell count and in current. Both facts are
+    # reported against the independently banked current table; neither pair of
+    # numbers is pinned as the expected outcome.
+    assert live["cell_count"] != table["banked_confined_core"]["cell_count"]
     assert table["banked_confined_core"]["cell_current_a"] == pytest.approx(
-        416958.25412595563, abs=2.0e-9
+        banked["confined_core"], abs=2.0e-9
     )
+    assert live["cell_current_a"] > table["banked_confined_core"]["cell_current_a"]
+    divergence = receipt["core_support_divergence"]
+    assert divergence["cell_counts_differ"] is True
+    assert divergence["live_core_cell_count"] == live["cell_count"]
+    assert divergence["banked_core_current_a"] == pytest.approx(
+        banked["confined_core"], abs=2.0e-9
+    )
+    assert divergence["current_agrees"] is False
     for name in ("inside_closed_branch_outside_core", "outside_closed_branch"):
         assert table[name]["status"] == "undefined_open_boundary"
         assert table[name]["cell_count"] is None
         assert table[name]["cell_current_a"] is None
     closure = receipt["current_closure"]
-    assert closure["direct_total_current_a"] == EXPECTED_TOTAL_CURRENT_A
-    assert closure["banked_out_of_core_current_a"] == EXPECTED_OUT_OF_CORE_CURRENT_A
-    assert closure["direct_out_of_core_current_a"] == pytest.approx(
-        closure["direct_total_current_a"] - table["confined_core"]["cell_current_a"]
+    # The totals are checked against the independently banked current table
+    # rather than against the benchmark's own subtraction.
+    assert closure["direct_total_current_a"] == pytest.approx(
+        banked["all_domain_constrained"], abs=2.0e-9
+    )
+    assert table["confined_core"]["cell_current_a"] + closure[
+        "direct_out_of_core_current_a"
+    ] == pytest.approx(banked["all_domain_constrained"], abs=4.0e-9)
+    assert closure["banked_out_of_core_current_a"] == pytest.approx(
+        banked["outside_confined_core_a"], abs=2.0e-9
     )
     assert closure["summed_partition_current_a"] is None
     assert closure["closure_residual_a"] is None

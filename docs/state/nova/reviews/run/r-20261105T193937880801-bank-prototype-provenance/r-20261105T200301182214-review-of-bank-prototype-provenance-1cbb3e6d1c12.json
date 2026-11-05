@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run armed no baseline_suite and no after_suite (its manifest records no suite; the brief states no suite is needed), so no gate-log pair exists to difference; its own gate is the replay, recorded EXIT=0 at replay-report.log.",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/bank_solve_linesearch/report.py:10",
+    "scripts/prototypes/bank_step_booking_batch/report.py:12",
+    "scripts/prototypes/bank_solve_breakpoint/cpu.sh:24",
+    "scripts/prototypes/bank_solve_breakpoint/control.sh"
+  ],
+  "completed_at": "2026-11-05T20:12:54.486Z",
+  "dispatched_at": "2026-11-05T20:06:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html",
+      "id": "f5ac43089f5",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states 'Sixty-two shell files carry the flag', but 62 is the total number of files in the commit; grep over the head tree finds 62 '-P -c' probe invocations across 59 shell files plus two .py files and the fragment, so the record overstates the shell count it is describing."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html",
+      "id": "fee84e1bc65",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: the brief's refused arm is 'PYTHONPATH=/tmp/nonexistent-arm, it must fail to import'; the landed demonstration instead runs '-P -S', because with site-packages loaded the shared environment's editable nova satisfies the import at /home/ITER/mcintos/Code/nova. The substitution is disclosed and explained at lines 28-31, and it still shows PYTHONPATH as the only source, but the arm as specified was not the one run."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_breakpoint/report.py",
+      "id": "ffa62b88cd7",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "non-blocking: the refactored comparison has no test, and compare() from the same module is imported by scripts/prototypes/bank_solve_linesearch/report.py:10 and scripts/prototypes/bank_step_booking_batch/report.py:12, whose reports were not re-run; equivalence for those two rests on the reading above and on the breakpoint replay alone."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the single commit against base 5391e907f; the report.py refactor moves the four-key construction and both arms' oracle gaps into pair_gaps and reduces them identically in compare (verified by reading: max(a+x_i)=a+max(x_i) with scalar boundary_ratio, and per-lane normalisation is constant per row), and every shell hunk is a single '-P' insertion with no other change.",
+    "done_when": "the brief's measure is a replay of bank_solve_breakpoint/report.py whose precision output is identical to resumed/report.log apart from timestamps and paths, plus a probe demonstration; I diffed the recorded resumed/report.log PRECISION line against /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T193937880801-bank-prototype-provenance/replay-report.log and got IDENTICAL, and probe-pythonpath.log records the -P/archive arm (exit 0), the defect arm without -P (exit 0, worktree nova) and the refused arm (exit 1).",
+    "goal": "bank-prototype-provenance's goal is (1) make bank_solve_breakpoint/report.py import the precision comparison bank_solve_cycle/report.py owns and delete its copy, and (2) run every bank_* provenance probe with -P so PYTHONPATH names the measured tree; the landed commit 1cbb3e6d1 does both \u2014 scripts/prototypes/bank_solve_breakpoint/report.py:12 imports pair_gaps from scripts/prototypes/bank_solve_cycle/report.py:21 and the 41-line copy is gone, and every '-c' probe under scripts/prototypes/bank_*/ now carries -P (grep of the head tree returns 0 remaining probes without it, 62 probe invocations across 59 shell files).",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T193937880801-bank-prototype-provenance/manifest.md; status complete, one commit, its tests line names the literal replay command, test_logs names replay-report.log and probe-pythonpath.log, and it records no baseline_suite or after_suite because the brief armed no suite.",
+    "write_paths": "the manifest declares 15 scripts/prototypes/bank_* directories plus the evidence fragment and a figures directory; git show --stat 1cbb3e6d1 lists 62 files \u2014 59 shell files under scripts/prototypes/bank_*/, bank_solve_breakpoint/report.py, bank_solve_cycle/report.py and docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html \u2014 all inside the declared scope, with no nova/ and no tests/ file touched."
+  },
+  "justifications": {
+    "durability": "no test covers pair_gaps or compare (grep over tests/ returns nothing) and no test asserts the -P flag, so the only guard is the manual replay log, which will not redden on a regression.",
+    "evidence": "the replay PRECISION line at replay-report.log is byte-identical to the recorded resumed/report.log (independently diffed), and probe-pythonpath.log records all four probe arms with exit codes; the refused arm deviates by adding -S.",
+    "fit": "scripts/prototypes/bank_solve_cycle/report.py:17-18 adds module constants named for the limits and a mechanism docstring, matching the surrounding module style and carrying no plan or run label.",
+    "goal_fidelity": "scripts/prototypes/bank_solve_breakpoint/report.py:12 now imports pair_gaps and the copy it replaced is absent, satisfying both halves of the brief at the head tree.",
+    "reuse": "pair_gaps is defined once at scripts/prototypes/bank_solve_cycle/report.py:21 and extended for the base arm the breakpoint report needs; a grep for the four-key comparison across scripts/prototypes/bank_*/ finds no remaining copy.",
+    "scope_discipline": "git show --stat 1cbb3e6d1 lists only scripts/prototypes/bank_* files and the declared evidence fragment, with nothing under nova/, tests/ or the plan."
+  },
+  "node": "review-of-bank-prototype-provenance-1cbb3e6d1c12",
+  "node:reviewed": "bank-prototype-provenance",
+  "project": "nova",
+  "raw_text": "VERDICT goal: bank-prototype-provenance's goal is (1) make bank_solve_breakpoint/report.py import the precision comparison bank_solve_cycle/report.py owns and delete its copy, and (2) run every bank_* provenance probe with -P so PYTHONPATH names the measured tree; the landed commit 1cbb3e6d1 does both \u2014 scripts/prototypes/bank_solve_breakpoint/report.py:12 imports pair_gaps from scripts/prototypes/bank_solve_cycle/report.py:21 and the 41-line copy is gone, and every '-c' probe under scripts/prototypes/bank_*/ now carries -P (grep of the head tree returns 0 remaining probes without it, 62 probe invocations across 59 shell files).\nVERDICT done_when: the brief's measure is a replay of bank_solve_breakpoint/report.py whose precision output is identical to resumed/report.log apart from timestamps and paths, plus a probe demonstration; I diffed the recorded resumed/report.log PRECISION line against /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T193937880801-bank-prototype-provenance/replay-report.log and got IDENTICAL, and probe-pythonpath.log records the -P/archive arm (exit 0), the defect arm without -P (exit 0, worktree nova) and the refused arm (exit 1).\nVERDICT write_paths: the manifest declares 15 scripts/prototypes/bank_* directories plus the evidence fragment and a figures directory; git show --stat 1cbb3e6d1 lists 62 files \u2014 59 shell files under scripts/prototypes/bank_*/, bank_solve_breakpoint/report.py, bank_solve_cycle/report.py and docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html \u2014 all inside the declared scope, with no nova/ and no tests/ file touched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T193937880801-bank-prototype-provenance/manifest.md; status complete, one commit, its tests line names the literal replay command, test_logs names replay-report.log and probe-pythonpath.log, and it records no baseline_suite or after_suite because the brief armed no suite.\nVERDICT diff: read the single commit against base 5391e907f; the report.py refactor moves the four-key construction and both arms' oracle gaps into pair_gaps and reduces them identically in compare (verified by reading: max(a+x_i)=a+max(x_i) with scalar boundary_ratio, and per-lane normalisation is constant per row), and every shell hunk is a single '-P' insertion with no other change.\nCALL_SITES: scripts/prototypes/bank_solve_linesearch/report.py:10, scripts/prototypes/bank_step_booking_batch/report.py:12, scripts/prototypes/bank_solve_breakpoint/cpu.sh:24, scripts/prototypes/bank_solve_breakpoint/control.sh\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_solve_breakpoint/report.py:12 now imports pair_gaps and the copy it replaced is absent, satisfying both halves of the brief at the head tree.\nSCORE evidence: 16\nJUSTIFICATION evidence: the replay PRECISION line at replay-report.log is byte-identical to the recorded resumed/report.log (independently diffed), and probe-pythonpath.log records all four probe arms with exit codes; the refused arm deviates by adding -S.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 1cbb3e6d1 lists only scripts/prototypes/bank_* files and the declared evidence fragment, with nothing under nova/, tests/ or the plan.\nSCORE durability: 6\nJUSTIFICATION durability: no test covers pair_gaps or compare (grep over tests/ returns nothing) and no test asserts the -P flag, so the only guard is the manual replay log, which will not redden on a regression.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_solve_cycle/report.py:17-18 adds module constants named for the limits and a mechanism docstring, matching the surrounding module style and carrying no plan or run label.\nSCORE reuse: 20\nJUSTIFICATION reuse: pair_gaps is defined once at scripts/prototypes/bank_solve_cycle/report.py:21 and extended for the base arm the breakpoint report needs; a grep for the four-key comparison across scripts/prototypes/bank_*/ finds no remaining copy.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html:16 non-blocking: the fragment states 'Sixty-two shell files carry the flag', but 62 is the total number of files in the commit; grep over the head tree finds 62 '-P -c' probe invocations across 59 shell files plus two .py files and the fragment, so the record overstates the shell count it is describing.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html:25 non-blocking: the brief's refused arm is 'PYTHONPATH=/tmp/nonexistent-arm, it must fail to import'; the landed demonstration instead runs '-P -S', because with site-packages loaded the shared environment's editable nova satisfies the import at /home/ITER/mcintos/Code/nova. The substitution is disclosed and explained at lines 28-31, and it still shows PYTHONPATH as the only source, but the arm as specified was not the one run.\nFINDING scripts/prototypes/bank_solve_breakpoint/report.py:26 non-blocking: the refactored comparison has no test, and compare() from the same module is imported by scripts/prototypes/bank_solve_linesearch/report.py:10 and scripts/prototypes/bank_step_booking_batch/report.py:12, whose reports were not re-run; equivalence for those two rests on the reading above and on the breakpoint replay alone.",
+  "review_run_id": "r-20261105T200301182214-review-of-bank-prototype-provenance-1cbb3e6d1c12",
+  "reviewed_base_sha": "5391e907f11951be379de55b4a587a6d4eeb7715",
+  "reviewed_head_sha": "1cbb3e6d1c12b1835da206046b77ecf969e1452f",
+  "reviewed_run_id": "r-20261105T193937880801-bank-prototype-provenance",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T20:30:00+00:00",
+  "total": 99
+}

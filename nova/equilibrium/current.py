@@ -712,6 +712,43 @@ def book_tangent_channels(
                 geometry.vertex_count[index][None],
             )
 
+    def live_rings(index, rings, counts, velocity=None):
+        """Integrate selected rings in bounded groups, retaining every live ring."""
+        width = min(4, len(counts))
+        live = counts >= 3
+        count = jnp.sum(live, dtype=jnp.int32)
+        indices = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
+        indices = jnp.pad(indices, (0, (-len(counts)) % width))
+
+        def add(batch, total):
+            start = batch * width
+            selected = jax.lax.dynamic_slice(indices, (start,), (width,))
+            active = start + jnp.arange(width) < count
+            selected_counts = jnp.where(active, counts[selected], 0)
+            value = interior(index, rings[selected], selected_counts)
+            if velocity is not None:
+                moved = moving_polygon_current_moment_tangents(
+                    rings[selected],
+                    velocity[:, selected],
+                    selected_counts,
+                    geometry.centre[index],
+                    geometry.pitch[index],
+                    normalized[index],
+                    profile,
+                )
+                moving = jnp.stack(
+                    tuple(jnp.sum(component, axis=1) for component in moved), axis=-1
+                )
+                value = value.at[boundary_channels].add(moving)
+            return total + value
+
+        return jax.lax.fori_loop(
+            0,
+            (count + width - 1) // width,
+            add,
+            jnp.zeros((channels, 3), dtype=psi.dtype),
+        )
+
     def conic_cell(index):
         centre = geometry.centre[index]
         vertices = geometry.vertices[index]
@@ -728,9 +765,6 @@ def book_tangent_channels(
                 quadrature.segments,
                 inward_endpoints=True,
             )
-            with xla_metadata.set_xla_metadata(tangent_site="interior:conic"):
-                fixed = interior(index, rings, counts)
-
             velocity = jax.vmap(
                 lambda direction: _conic_ring_tangents(
                     vertices,
@@ -744,25 +778,9 @@ def book_tangent_channels(
                     inward_endpoints=True,
                 )
             )(signed_rate[boundary_channels, index])
-            moved = moving_polygon_current_moment_tangents(
-                rings,
-                velocity,
-                counts,
-                centre,
-                geometry.pitch[index],
-                normalized[index],
-                profile,
-            )
-            moving = jnp.stack(
-                tuple(jnp.sum(value, axis=1) for value in moved), axis=-1
-            )
-
-            moving = (
-                jnp.zeros((channels, 3), dtype=psi.dtype)
-                .at[boundary_channels]
-                .set(moving)
-            )
-            return jnp.where(valid, fixed + moving, jnp.nan)
+            with xla_metadata.set_xla_metadata(tangent_site="interior:conic"):
+                value = live_rings(index, rings, counts, velocity)
+            return jnp.where(valid, value, jnp.nan)
 
         return evaluate()
 
@@ -777,7 +795,7 @@ def book_tangent_channels(
             quadrature.segments,
         )
         with xla_metadata.set_xla_metadata(tangent_site="interior:normal"):
-            return interior(index, rings, counts)
+            return live_rings(index, rings, counts)
 
     full = read.membership >= 1 - 1e-14
     cut = (read.membership > 0) & ~full

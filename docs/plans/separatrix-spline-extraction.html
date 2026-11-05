@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="191">
+<meta name="plan-version" content="192">
 <meta name="plan-modified" content="2026-11-05">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -681,6 +681,9 @@
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261102T204241022825-coil-edit-fine-panels" data-who="reckon-build" data-when="2026-11-03T07:44:34Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/separatrix-spline-extraction/coil-edit-fine-panels.html#coil-edit-fine-panels</p></div>
 </div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261105T194439768860-review-of-coil-edit-panels-on-solve-currents-73edf130f61b" data-who="reckon-build" data-when="2026-11-05T20:09:09.809Z">
+    <div class="r-comment-body"><p>review stored for r-20261105T160605201635-coil-edit-panels-on-solve-currents at head 73edf130f: scores goal_fidelity 15, evidence 16, scope_discipline 17, durability 9, fit 18, reuse 19, one blocking finding (the polished-saddle nearest-distance change reddens tests/test_display_flux.py:325) and two non-blocking findings on assertion independence.</p></div>
+</div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261105T071819367797-review-of-forward-gs-remeasure-c03d8db6bcdc" data-who="reckon-build" data-when="2026-11-05T16:31:49.364Z">
     <div class="r-comment-body"><p>review parsed for r-20261102T201524817113-forward-gs-remeasure at 3ef818dfaef2a36da8fd0d6e0c34272ec5259218..c03d8db6bcdc553e412e0d4a978645806910f474 — scores goal_fidelity 14, evidence 9, scope_discipline 10, durability 12, fit 16, reuse 5 (total 66 of 120); 9 findings, the blocking one being that forward_gs_receipt.json:255 reports frames_with_separatrix 0 and every fine-map separatrix separation null on all five frames.</p></div>
 </div>
@@ -691,7 +694,7 @@
     <div class="r-comment-body"><p>4d809c7ff removes the saddle-level fallback so a refused assembly yields no boundary and the separation stays null, keeps the assembler diagnostics per frame in the receipt and the persisted operands, restores _display_separatrix to its (closed, open) pair, and replaces the fallback tests with tests pinning the diagnostics; 7b8160924 answers review finding f247b055cb4 by tracing the fine-map separatrix at the admitted saddle level when the spline assembler refuses, recording the source and diagnostics per frame; c03d8db6b and 6ad2f5eae persist each frame's display operands beside the conductor response and withdraw the non-compliant poloidal figure; 79911ca4d redraws cohort_match_summary.png and displacement_decomposition.png and updates their captions; 5e2be8105 records the gate in docs/evidence/fragments/separatrix-spline-extraction/forward-gs-remeasure.html</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261105T171842388381-review-of-forward-gs-remeasure-4d809c7ff472" data-who="reckon-build" data-when="2026-11-05T17:29:34.703Z">
-    <div class="r-comment-body"><p>review of run r-20261102T201524817113-forward-gs-remeasure over commits 7b8160924, 1ff6658cf, 4d809c7ff: scores goal_fidelity 10, evidence 12, scope_discipline 18, durability 10, fit 17, reuse 8; one blocking finding — the producer indexes display_rig[&quot;operands&quot;] after _display_map stopped returning that key, so every frame that reaches the display map raises KeyError and aborts the bank.</p></div>
+    <div class="r-comment-body"><p>review of run r-20261102T201524817113-forward-gs-remeasure over commits 7b8160924, 1ff6658cf, 4d809c7ff: scores goal_fidelity 10, evidence 12, scope_discipline 18, durability 10, fit 17, reuse 8; one blocking finding — the producer indexes display_rig["operands"] after _display_map stopped returning that key, so every frame that reaches the display map raises KeyError and aborts the bank.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261105T074315959480-review-of-expose-promoted-mask-6ad133e25486" data-who="reckon-build" data-when="2026-11-05T07:56:26.487Z">
     <div class="r-comment-body"><p>Review of run r-20261105T061636915302-expose-promoted-mask at head bac1660c2 (base 36fc135431): scores goal_fidelity 18, evidence 9, scope_discipline 18, durability 12, fit 18, reuse 19; two blocking findings (the promoting fixture asserts the compiled route nowhere, and the only complete gate ran at 7013763b5 with the zero-added-failures clause unmeasured) and three non-blocking.</p></div>

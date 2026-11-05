@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1477 _panel_display_map calls build_display_flux_map with the persisted promoted mask and compensation",
+    "benchmarks/display_map_promoted_figure.py:51 measure calls build_display_flux_map with a fixture promoted mask",
+    "benchmarks/diiid_forward_gs_match.py:1867 the display-map builder call redraws the DIII-D comparison without a promoted mask"
+  ],
+  "completed_at": "2026-11-05T20:09:09.809Z",
+  "dispatched_at": "2026-11-05T19:52:17Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "fc3921bb548",
+      "line": "381",
+      "severity": "blocking",
+      "text": "blocking: the nearest-promoted distance now uses the polished display saddle instead of the caller's xpoint_rz seed and silently yields NaN when that polish does not converge, which reddens tests/test_display_flux.py:325 that passes at the base revision (head arm at 73edf130f: 'assert nan == 0.30103986446980746'; base arm with e7df23944b98's display_flux.py: '1 passed in 63.95s'), and the node's gate ran only tests/test_coil_edit_panel_render.py so it did not see it."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "id": "ff86901af7d",
+      "line": "293",
+      "severity": "non-blocking",
+      "text": "non-blocking: display.promoted_node_count is compared with np.count_nonzero of the very mask the test handed to _panel_display_map, so both sides move together and the assertion reddens only on a truncation disagreement, never on a wrong promoted count; compare against the receipt's promoted_node_count at docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json instead."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "id": "f11fa477019",
+      "line": "296",
+      "severity": "non-blocking",
+      "text": "non-blocking: nearest_promoted_to_xpoint_m is asserted only to be finite, so the done_when's 'measured to the polished saddle, not the seed' claim has no guard: reverting display_flux.py:381-382 to the seed distance leaves this assertion green, which is why the regression above is invisible to the node's own gate."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/head-73edf130f.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/baseline-suite.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "three production call sites reach build_display_flux_map (benchmarks/coil_edit_latency.py:1477, benchmarks/display_map_promoted_figure.py:51, benchmarks/diiid_forward_gs_match.py:1867); the two untouched ones pass no promoted mask and no xpoint_rz, so the mask size change does not reach them, and the nearest-distance change is unread by both.",
+    "diff": "read all ten commits from e7df23944b98 to 73edf130f: 344c20424/315a77a8c carry the terminal state, promoted mask and compensation into the producer and the map, f7c890ee9/527d13178 persist them and drop undrawn payloads, 6b4fb53e1/e526168b9/5512bab01 redraw both lanes, 918ac0563/be5590479/73edf130f add the archive-rebuild test and its titan path.",
+    "done_when": "the gate ran tests/test_coil_edit_panel_render.py::test_committed_converged_panel_uses_its_terminal_currents at 73edf130f (head-73edf130f.log: 1 passed in 769.77s, EXIT=0) and the scratch compensation-drop control failed the same id (negative-control-73edf130f.log: 1 failed in 649.82s, EXIT=1), but no run asserts that nearest_promoted_to_xpoint_m is measured to the polished saddle rather than the seed.",
+    "goal": "the node redraws five coil-edit panels from the solve's own terminal currents and certifies near-X geometry: benchmarks/coil_edit_latency.py:3035-3055 persists state, promoted_mask and compensating_current, and docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:12 names the converged panel uncertified within two lattice cells (56.2 mm against a 121.25 mm two-cell threshold).",
+    "manifest": "the manifest records status complete, ten commits, both suite arms with complete pytest summaries and bare EXIT lines, the 1.30x residual solved-node mismatch, and the 0.01595 Wb control failure; its numbers reconcile with the five panel-receipt.json files, which differ from the H200 copies only in the last digits (0.05621806020455529 on titan against 0.05621806020455789 on H200).",
+    "write_paths": "all 24 changed paths sit inside the twelve declared write paths: three source files, five figure directories, and two evidence fragments; git diff --stat e7df23944b98..73edf130f lists no path outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:292 fails if the promoted mask or the compensation stops reaching the map (the recorded control lifts the mismatch to 0.01595 Wb), but :293-295 compares the display against the mask the test passed in and :296 asserts only finiteness, so neither guards the polished-saddle change.",
+    "evidence": "head-73edf130f.log and negative-control-73edf130f.log carry matching revision headers, complete pytest summaries and bare EXIT=0/EXIT=1 lines, and the 1e-12 receipt comparison at tests/test_coil_edit_panel_render.py:297-304 is against a committed file rather than a recomputation.",
+    "fit": "benchmarks/coil_edit_latency.py:1499-1509 loads the stored moments through CellCurrentMoments and reuses _panel_display_coupling, matching the surrounding producer idiom, and no added name carries a plan, stage or ticket label.",
+    "goal_fidelity": "benchmarks/coil_edit_latency.py:1508-1509 hands the solve's own promoted mask and compensation to build_display_flux_map, and docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:5-14 reports the promoted counts and near-X verdict per published set.",
+    "reuse": "the search over nova/equilibrium and nova/biot for an existing promoted-node-distance or display-map builder found display_flux.build_display_flux_map and _stationary_saddle as the owners, and the node extends them rather than adding a second implementation.",
+    "scope_discipline": "git diff --stat e7df23944b989ff71508e0eb83552305d94979a3 73edf130f61bb12101b1ab1990fe6e904b2101ee changes 24 files, every one inside the declared write paths, with no edit to tests/test_display_flux.py even though the landed behaviour change reddens it."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw the five coil-edit panels from the solve's own currents and certify near-X geometry; benchmarks/coil_edit_latency.py:3035-3055 persists state, promoted_mask and compensating_current and docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:12 records the near-X verdict.\nVERDICT done_when: the gate ran tests/test_coil_edit_panel_render.py::test_committed_converged_panel_uses_its_terminal_currents (1 passed in 769.77s) with a failing compensation-drop control, but nothing asserts the polished-saddle (not-seed) distance it names.\nVERDICT write_paths: all 24 changed paths are inside the twelve declared write paths; nothing outside was touched.\nVERDICT manifest: read; it records ten commits, both suite arms, the 0.01595 Wb control failure and the 1.30x-residual solved-node mismatch, and its figures reconcile with the five receipts.\nVERDICT diff: read commit by commit from e7df23944b98 to 73edf130f; the producer, display map, one test file, five figure directories and one evidence fragment changed inside scope.\nCALL_SITES: benchmarks/coil_edit_latency.py:1477, benchmarks/display_map_promoted_figure.py:51, benchmarks/diiid_forward_gs_match.py:1867\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:1508-1509 passes the solve's promoted mask and compensation into the map, though the certification path degrades to NaN when the saddle polish fails.\nSCORE evidence: 16\nJUSTIFICATION evidence: head-73edf130f.log records 1 passed in 769.77s and negative-control-73edf130f.log records the same id failing in 649.82s, both with bare EXIT lines.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in git diff e7df23944b98..73edf130f is inside the declared write paths, and tests/test_display_flux.py was left untouched while the change reddens it.\nSCORE durability: 9\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:292 guards the mask and compensation wiring, but :293-295 compares the display with the mask the test supplied and :296 guards only finiteness, leaving the polished-saddle change unasserted.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py:1499-1509 reuses CellCurrentMoments and _panel_display_coupling in the surrounding producer idiom and adds no plan or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the capability search over nova/equilibrium and nova/biot found build_display_flux_map and _stationary_saddle as the owners, and the change extends them rather than forking them.\nFINDING nova/equilibrium/display_flux.py:381 blocking: the nearest-promoted distance moved to the polished saddle and now returns NaN when that polish fails, reddening tests/test_display_flux.py:325 (head fails at 73edf130f, base passes on e7df23944b98).\nFINDING tests/test_coil_edit_panel_render.py:293 non-blocking: the promoted-count assertion compares against the mask the test itself passed in, so a wrong count stays green.\nFINDING tests/test_coil_edit_panel_render.py:296 non-blocking: the nearest-distance assertion is finiteness only, so nothing guards the polished-saddle requirement the done_when names.",
+  "review_run_id": "r-20261105T194439768860-review-of-coil-edit-panels-on-solve-currents-73edf130f61b",
+  "reviewed_base_sha": "e7df23944b989ff71508e0eb83552305d94979a3",
+  "reviewed_head_sha": "73edf130f61bb12101b1ab1990fe6e904b2101ee",
+  "reviewed_run_id": "r-20261105T160605201635-coil-edit-panels-on-solve-currents",
+  "scores": {
+    "durability": 9,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T20:13:05.258167+00:00",
+  "total": 94
+}

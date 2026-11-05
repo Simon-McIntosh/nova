@@ -1,0 +1,177 @@
+<section data-reckon="evidence" id="forward-gs-remeasure">
+<h2>DIII-D five-frame forward-gs bank re-measured at HEAD</h2>
+
+<p id="forward-gs-remeasure-summary">The five-frame bank was re-run at
+<code>f7d884231</code> in one job on the H200 rung (partition
+<code>betelgeuse</code>, node <code>98dci4-gpu-0003</code>, 12 cores, 128 GB,
+four-hour wall, SLURM job 1304227), writing to
+<code>docs/figures/diiid-forward-onboarding/forward-gs-2026-11/</code>. Every
+number below is an H200 measurement. The receipt's own tree stamp reads
+<code>5ab15e26d</code>, which differs from the run's source revision only by an
+evidence commit that adds the run's in-progress receipt file; no source changed
+between the two. This is a measurement of the tree at that commit, not a
+revision of the earlier gate: the receipt, figures and preregistration of the
+August run are byte-identical and the dated directory carries its own copy of
+the registered bar.</p>
+
+<h3>What changed in the producer</h3>
+
+<p id="forward-gs-remeasure-method">Each frame's forward panel is drawn from a
+fine display flux map built by
+<code>nova.equilibrium.display_flux.build_display_flux_map</code> from the
+state's own conductor and plasma currents, at the 10 mm floor, rather than from
+the solve lattice's linear in-cell interpolation. The builder is handed the
+coupling the solve already owns: the uniform plasma Green block at the frame's
+own cell step, and the exact conductor response at the display points,
+contracted against the complete 24-conductor current. The operator's two moment
+entry points are mutually exclusive, so the producer asks for the moments the
+operator carries and passes them to the map rather than letting the map guess.</p>
+
+<p id="forward-gs-remeasure-response">The conductor response depends on the coil
+geometry and the target points only, never on the frame, so it is built once for
+the fixed grid — the lattice bounding box at the 10 mm floor plus the lattice
+nodes — as an exact matrix product: each of ten worker processes evaluates the
+full column set for its own point block, with no coarse read and no spline
+anywhere. The matrix is written under the shared operand root, keyed by a digest
+of the coil source and the grid, and each frame contracts it with its own
+currents; the whole bank reused the stored matrix at digest
+<code>c8075ff7c3885c0d</code>, which is why the per-frame response build is 0 s.
+A stored matrix whose columns no longer match the operator's current vector is
+refused rather than reused. The worker processes are pinned to the CPU with the
+variable scoped around the spawn, because a spawned worker builds its JAX
+backend at import and an initializer runs too late to keep it off the card the
+solve holds.</p>
+
+<p id="forward-gs-remeasure-guard">The trace of the solve's telemetry map passes
+through <code>ForwardFluxOperator.current_normalisation_amplitude</code>, whose
+admissibility refusal used to test a flag that can reduce to a concrete value
+while an operand is still traced, and then call <code>float()</code> on that
+operand. The refusal is now decided from the operands themselves: a fully
+concrete inadmissible call raises <code>CurrentNormalisationError</code>, and a
+traced one returns the non-finite amplitude the solve already rejects. The
+earlier run of this bank died on frame 3 with
+<code>ConcretizationTypeError</code> and now records a verdict there like any
+other frame, which is the behaviour the guard was changed to reach.
+<code>tests/test_current_normalisation_traced.py</code> runs the function under
+<code>jax.linearize</code> on both inadmissible and admissible inputs and
+asserts the refusal; restoring the old flag test makes the inadmissible cases
+fail with <code>ConcretizationTypeError</code>.</p>
+
+<h3>Measure</h3>
+
+<table id="forward-gs-remeasure-measure">
+<caption>One job on the H200 rung of the fleet allocation, five declared
+frames, revision <code>f7d884231</code>. Boundary separation is the symmetric
+nearest-point distance between the fine-map closed separatrix and the labelled
+EFIT <code>efit_lcfs</code>.</caption>
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>frames converged under the registered criterion</td><td>0 of 5</td></tr>
+<tr><td>boundary separation on the fine-map separatrix, symmetric RMS</td><td>undefined: none of the four fine maps assembled a closed separatrix (<code>separatrix_closed_points</code> 0 on every frame)</td></tr>
+<tr><td>boundary separation on the fine-map separatrix, symmetric sup</td><td>undefined, for the same reason</td></tr>
+<tr><td>lattice spline saddle to fine-map saddle offset</td><td>127.6, 141.3 and 231.0 mm on the three frames whose saddle polish converged (median 141.3 mm); frame 146's polish found no saddle</td></tr>
+<tr><td>fine map at the lattice nodes against the operator's own raster image, relative, per frame</td><td>4.295e-14, 3.892e-14, none (frame 144 raised before geometry), 2.152e-14, 3.308e-14; maximum 4.295e-14 against a 1e-10 defect threshold</td></tr>
+<tr><td>conductor response matrix: shape, build seconds, processes</td><td>55980 × 24, 0.0 s per frame (reused from cache at digest <code>c8075ff7c3885c0d</code>), 10 processes; fine-map build 169.7 to 294.3 s per frame</td></tr>
+<tr><td>judged median interior R-squared against the registered bar 0.90155</td><td>-0.651, against the registered bar of 0.90155; per frame 0.448, -0.856, unavailable, -1.964, -0.446</td></tr>
+</table>
+
+<h3>Per-frame verdicts</h3>
+
+<table id="forward-gs-remeasure-frames">
+<caption>Every declared frame is recorded, none skipped. A non-converged frame is
+a verdict of the measurement, not a failure of the run.</caption>
+<tr><th>shot</th><th>frame</th><th>iterations</th><th>residual</th><th>converged</th><th>topology achieved</th><th>notes</th></tr>
+<tr><td><code>d3d_shot_00000c4a7b</code></td><td>179</td><td>2</td><td>4.181e-01</td><td>no</td><td>diverted, as labelled</td><td>branch selector found no convergence-qualified diverted root</td></tr>
+<tr><td><code>d3d_shot_0003ff34e7</code></td><td>44</td><td>2</td><td>4.276e+00</td><td>no</td><td>limited, disagreed with label</td><td>no predicted closed boundary</td></tr>
+<tr><td><code>d3d_shot_001554e054</code></td><td>144</td><td>0</td><td>not finite</td><td>no</td><td>none</td><td><code>NoQualifiedAxisError</code> before geometry; drawn as unavailable</td></tr>
+<tr><td><code>d3d_shot_002495e835</code></td><td>146</td><td>5</td><td>5.496e-02</td><td>no</td><td>limited, disagreed with label</td><td>saddle polish found no saddle</td></tr>
+<tr><td><code>d3d_shot_0040ca9bdc</code></td><td>137</td><td>5</td><td>6.237e-02</td><td>no</td><td>diverted, as labelled</td><td>saddle 29 mm from the labelled X-point</td></tr>
+</table>
+
+<div id="forward-gs-remeasure-poloidal-status">
+<p>The poloidal flux comparison is <strong>withdrawn</strong> and is
+regenerated after the display map is changed to draw the field of the solve's
+own currents, judged on non-promoted nodes
+(<code>separatrix-spline-extraction</code> §9). The withdrawn panel set carried
+overlapping text and was not drawn in the house style, and it could not be
+redrawn from the committed record because the fine-map field and the boundary
+polygons were never persisted. The producer now writes, per frame under the
+GPFS operand root beside the conductor response, the terminal state vector, the
+display grid and its field, the conductor term the response matrix produces and
+the plasma term that completes it, the assembled branch polygons, and the
+solve's promoted domain mask and constraint compensation; each artifact's path
+and digest is recorded in the receipt. A test rebuilds a persisted frame's
+display field from its own conductor matrix and asserts agreement to 1e-12, so
+the regenerated comparison is one matrix product rather than a re-solve.</p>
+<p>The measurement itself is unchanged by that withdrawal: <strong>0 of 5
+frames converge under the registered criterion, and the median interior
+R-squared is -0.651</strong> against the registered bar of 0.90155. Rendering
+the five frames is what showed that no frame assembled a closed fine-map
+separatrix, and that finding is recorded in the receipt on every frame rather
+than carried by the withdrawn figure.</p>
+</div>
+
+<figure id="forward-gs-remeasure-figure-cohort">
+<img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png"
+alt="Six scalar cohort panels: interior R-squared against the registered bar, closed-boundary RMS, saddle offset, node mismatch, axis displacement and q95 error">
+<figcaption>Six scalar cohorts, one mark per frame, drawn from the committed
+receipt: interior R-squared against the registered bar of 0.90155 (dotted),
+closed-boundary symmetric RMS, lattice-to-map saddle offset, node mismatch
+against the state, magnetic-axis displacement, and signed relative q95 error.
+Frame 144 carries no mark in any panel because its solve raised before any
+geometry existed. The earlier version's labelled-separatrix overlay panel is
+not redrawn: boundary polygons were never persisted, so there is no geometry to
+overlay.</figcaption>
+</figure>
+
+<figure id="forward-gs-remeasure-figure-displacement">
+<img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
+alt="Magnetic-axis radial and vertical offsets from the labelled axis for each frame">
+<figcaption>Magnetic-axis offset from the labelled axis for each frame, radial
+(filled) and vertical (open), in millimetres, against the dotted zero line.
+Frame 144 is absent because its solve raised before any geometry existed.</figcaption>
+</figure>
+
+<p id="forward-gs-remeasure-headline-measure">The headline measure of the
+registered gate — boundary separation between the fine-map separatrix and the
+labelled LCFS — was <strong>not produced</strong> by this bank, and the receipt
+says so in <code>fine_map_separatrix.measure_status</code> rather than leaving
+three nulls unexplained. The spline branch assembler returned no closed
+axis-enclosing cycle on any of the four frames that drew a fine map, so
+<code>separatrix_closed_points</code> is 0 everywhere and both symmetric
+separations are null. That null is the measured verdict: the map exists, the
+map's own field is what was asked for, and the assembler refused to close it.
+The branch assembler is the only source of a separatrix, so a refused assembly
+yields no boundary and the separation stays null; a raw level set at the saddle
+flux is a second boundary path, and a contour the assembler rejected must not
+stand as a boundary measure on a frame that did not converge. The producer
+records the assembler's own diagnostics — candidate and component counts,
+overflow flags — on every frame and persists them beside that frame's operands,
+so each null carries its reason and no frame reports a missing boundary without
+saying why. A unit test pins that: a refused assembly yields zero closed points,
+and the diagnostic record survives the persisted round trip. The separation
+number for this cohort is regenerated by the next bank run from the persisted
+frame fields, since the fine-map field of this one was never persisted and the
+bank is about two and a half hours on the H200; until then the gate's verdict rests on the measures
+that were produced, which do not depend on it: 0 of 5 frames converge, the
+median interior R-squared is −0.651, and the fine maps reproduce the operator's
+own raster image to at most 4.3e-14 relative error.</p>
+
+<h3>Verdict</h3>
+
+<p id="forward-gs-remeasure-verdict">The gate is not passed, and the measurement
+says the same thing the August run said: 0 of 5 frames converge under the
+registered criterion, and the median interior R-squared of -0.651 is far below
+the registered bar of 0.90155. The re-measure does not reproduce the August
+digits and is not expected to — the solver build moved from
+<code>0.11.0.post2424</code> to <code>0.11.0.post10061</code> and the registered
+qualification tolerance from 1e-6 to 1e-5 — but the substance is unchanged:
+three of the four frames that produced a map ended on a limited or wrongly
+diverted topology, and the fourth reached a diverted topology 2.3 m from the
+labelled X-point. Nothing here is an interpolation artefact: every map that was
+built reproduces the operator's own raster image to at most 4.3e-14 relative
+error, five orders of magnitude inside the 1e-10 defect threshold. The one
+producer-independent defect found on the way is fixed where it lived: the
+current-normalisation refusal under tracing now raises from the concrete host
+check and returns a non-finite amplitude otherwise, so a frame records a verdict
+instead of aborting the bank.</p>
+</section>

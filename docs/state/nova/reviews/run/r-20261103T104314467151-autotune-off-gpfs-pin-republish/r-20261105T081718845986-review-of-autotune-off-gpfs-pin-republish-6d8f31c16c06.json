@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's own arms are both readable: baseline_suite at c1febb39fa0260471cad5f88dacb2d47a582e54f completed with 9 passed and failure_count 0 (/work/projects/imas_gpu/sophelio/evidence/autotune-off-gpfs-pin-republish/baseline-focused.log, EXIT=0), and after_suite at 9ace0fb2d69d97aaa94120b3adcd229e82eec710 completed with 10 passed and failure_count 0 (after-focused-committed.log, EXIT=0). No failure id is new at the head.",
+  "call_sites": [
+    "scripts/h200_test_lane/prewarm.sh",
+    "scripts/h200_test_lane/prewarm_row.py:76",
+    "scripts/h200_test_lane/publish_prewarm_pin.py:33",
+    "scripts/h200_test_lane/cache_guard.py:220",
+    "benchmarks/solovev_certificate.py:3429"
+  ],
+  "completed_at": "2026-11-05T08:34:34.027Z",
+  "dispatched_at": "2026-11-05T08:26:09Z",
+  "findings": [
+    {
+      "file": "scripts/h200_test_lane/prewarm.sh",
+      "id": "fd1f288be1a",
+      "line": "145",
+      "severity": "non-blocking",
+      "text": "Nothing tests the publication gate the node added: the three focused tests exercise autotune_file_count and grep the launcher for one literal line, so deleting the count-autotune invocation or inverting the `if [[ \"${status}\" -eq 0 ]]` condition would publish a pin carrying autotune files while every test stays green. The head arm would have to run the payload and assert that no prewarm-latest.json is written."
+    },
+    {
+      "file": "scripts/h200_test_lane/prewarm_rows.py",
+      "id": "f3379c6f24d",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "autotune_file_count re-implements, more narrowly, the autotune-entry count that benchmarks/xla_autotune_cache_arms.py:104 inventory already owns via is_autotune_path:108; the lane could read inventory(served_directory)[\"autotune_entries\"] instead of forking the rule, so the two counters can drift on what counts as an autotune file."
+    },
+    {
+      "file": "tests/test_prewarm_rows.py",
+      "id": "f24eccbfe31",
+      "line": "39",
+      "severity": "non-blocking",
+      "text": "test_identity_row_allows_numerical_failure_after_cache_write asserts a literal substring of prewarm.sh, so it reddens on a pure reformat and says nothing about the behaviour it names; it also does not distinguish the identity row from the lane row, both of which carry the flag."
+    },
+    {
+      "file": "scripts/h200_test_lane/prewarm.sh",
+      "id": "f372c64117d",
+      "line": "150",
+      "severity": "non-blocking",
+      "text": "The republished pin names source_revision ba0609243f176b4ec2e395f696d437f435362e74 (pin document and lane-resolver-retry-20261105.log:2) while main moved to ccaacf500e8e4150d6721d80adea433acb1904e9 during the 52-minute job, so a lane run at current main prints PINNED_REVISION_MISMATCH and no cache-hit rate has been measured against the new pin; this belongs to the \u00a74 pin-measuring node."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the payload launcher scripts/h200_test_lane/prewarm.sh, its row wrapper scripts/h200_test_lane/prewarm_row.py, the pin writer scripts/h200_test_lane/publish_prewarm_pin.py:33, the entry counter scripts/h200_test_lane/cache_guard.py:220, and the fixture-floor owner benchmarks/solovev_certificate.py:3429 that prewarm_rows.fixture_floor drives.",
+    "diff": "Read all eight commits against base defca1acf17c40d5ceb1ec6163fe6befc788b738; they reduce four redundant --reposed-fixture-floor rows to one wrapper, keep fixture outputs node-local, allow a persisted identity row to publish, gate publication on a zero autotune count, and document the outcome.",
+    "done_when": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T104314467151-autotune-off-gpfs-pin-republish/prompt.txt:110 and the gate command recorded at manifest.md:20; tests/test_prewarm_rows.py and tests/test_cache_guard.py ran 9 passed at the base and 10 passed at the head with EXIT=0 in /work/projects/imas_gpu/sophelio/evidence/autotune-off-gpfs-pin-republish/{baseline-focused.log,after-focused-committed.log}, and the seeded-file negative control at negative-control-head.log ends EXIT=1 with 1 failed.",
+    "goal": "Read the source prompt at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T104314467151-autotune-off-gpfs-pin-republish/prompt.txt:38; the landed change republishes the pin to runtime-d23b975337df890821f8 under the autotune-off setting and the lane resolver reads that directory, but the pin names source revision ba0609243f176b4ec2e395f696d437f435362e74 while main had already advanced to ccaacf500e8e4150d6721d80adea433acb1904e9.",
+    "manifest": "Read manifest.md in full; it records eight commits, status complete, the 8/10-test focused gate, the seeded negative control, and the H200 job 1305914 receipt with PREWARM_SERVED_ENTRIES=6164 and PREWARM_AUTOTUNE_FILES=0.",
+    "write_paths": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T104314467151-autotune-off-gpfs-pin-republish/prompt.txt:77-83 and manifest.md:3; git diff defca1acf17c40d5ceb1ec6163fe6befc788b738..6d8f31c16c06cb74c68d0d73a42f5da0545d1b31 changes exactly scripts/h200_test_lane/prewarm.sh, the new scripts/h200_test_lane/prewarm_rows.py, the new tests/test_prewarm_rows.py and the new evidence fragment, all inside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/test_prewarm_rows.py:15-36 reddens if autotune_file_count is widened to any file or if the CLI stops reporting a nonzero count, but nothing tests the launcher's own publication gate, so deleting scripts/h200_test_lane/prewarm.sh:145-149 leaves all three tests green.",
+    "evidence": "The done-when's facts are each readable in a log: /work/projects/imas_gpu/sophelio/evidence/autotune-off-gpfs-pin-republish/prewarm-main-20261105.log:1,473-477 gives the served directory, 6164 entries, zero autotune files and PREWARM_EXIT_STATUS=0, and retired-runtime-inventory-20261105.log:4-9 plus the EXIT=0 tail of retired-runtime-removal-20261105.log cover the listing and removal.",
+    "fit": "scripts/h200_test_lane/prewarm_rows.py:1-37 follows the lane's existing helper idiom of argparse subcommands with a printed PREWARM_* marker, and no added name carries a plan label or tracker reference.",
+    "goal_fidelity": "scripts/h200_test_lane/prewarm.sh:145-150 publishes only after the autotune count and the served-entry check, and /work/projects/imas_gpu/sophelio/evidence/autotune-off-gpfs-pin-republish/lane-resolver-retry-20261105.log:3-6 shows the lane resolving runtime-d23b975337df890821f8 with 6164 entries, though PIN_SOURCE_REVISION there is ba0609243f176b4ec2e395f696d437f435362e74 against a main that had moved to ccaacf500e8e4150d6721d80adea433acb1904e9.",
+    "reuse": "The capability search over scripts/, nova/, tests/ and benchmarks/ for xla_gpu_per_fusion_autotune_cache_dir found the owner benchmarks/xla_autotune_cache_arms.py:96-120, whose inventory/is_autotune_path already count autotune entries under a cache root; scripts/h200_test_lane/prewarm_rows.py:9 re-implements a narrower form of that count rather than importing it.",
+    "scope_discipline": "git diff defca1acf17c40d5ceb1ec6163fe6befc788b738..6d8f31c16c06cb74c68d0d73a42f5da0545d1b31 touches four files and every one is named in manifest.md:3; the declared docs/figures directory was left unused rather than filled."
+  },
+  "node": "review-of-autotune-off-gpfs-pin-republish-6d8f31c16c06",
+  "node:reviewed": "autotune-off-gpfs-pin-republish",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T104314467151-autotune-off-gpfs-pin-republish/prompt.txt:38; the landed change republishes the pin to runtime-d23b975337df890821f8 under the autotune-off setting and the lane resolver reads that directory, but the pin names source revision ba0609243f176b4ec2e395f696d437f435362e74 while main had already advanced to ccaacf500e8e4150d6721d80adea433acb1904e9.\nVERDICT done_when: Read prompt.txt:110 and the gate command at manifest.md:20; tests/test_prewarm_rows.py and tests/test_cache_guard.py ran 9 passed at the base and 10 passed at the head with EXIT=0 in baseline-focused.log and after-focused-committed.log, and the seeded-file negative control at negative-control-head.log ends EXIT=1 with 1 failed.\nVERDICT write_paths: Read prompt.txt:77-83 and manifest.md:3; git diff defca1acf17c40d5ceb1ec6163fe6befc788b738..6d8f31c16c06cb74c68d0d73a42f5da0545d1b31 changes exactly scripts/h200_test_lane/prewarm.sh, the new scripts/h200_test_lane/prewarm_rows.py, the new tests/test_prewarm_rows.py and the new evidence fragment, all inside the declared scope.\nVERDICT manifest: Read manifest.md in full; it records eight commits, status complete, the 8/10-test focused gate, the seeded negative control, and the H200 job 1305914 receipt with PREWARM_SERVED_ENTRIES=6164 and PREWARM_AUTOTUNE_FILES=0.\nVERDICT diff: Read all eight commits against base defca1acf17c40d5ceb1ec6163fe6befc788b738; they reduce four redundant --reposed-fixture-floor rows to one wrapper, keep fixture outputs node-local, allow a persisted identity row to publish, gate publication on a zero autotune count, and document the outcome.\nCALL_SITES: scripts/h200_test_lane/prewarm.sh, scripts/h200_test_lane/prewarm_row.py:76, scripts/h200_test_lane/publish_prewarm_pin.py:33, scripts/h200_test_lane/cache_guard.py:220, benchmarks/solovev_certificate.py:3429\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/h200_test_lane/prewarm.sh:145-150 publishes only after the autotune count and the served-entry check, and lane-resolver-retry-20261105.log:3-6 shows the lane resolving runtime-d23b975337df890821f8 with 6164 entries, though its PIN_SOURCE_REVISION is stale against current main.\nSCORE evidence: 17\nJUSTIFICATION evidence: prewarm-main-20261105.log:1,473-477 gives the served directory, 6164 entries, zero autotune files and PREWARM_EXIT_STATUS=0, and retired-runtime-inventory-20261105.log:4-9 plus the EXIT=0 tail of retired-runtime-removal-20261105.log cover the listing and removal.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff defca1acf17c40d5ceb1ec6163fe6befc788b738..6d8f31c16c06cb74c68d0d73a42f5da0545d1b31 touches four files and every one is named in manifest.md:3.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_prewarm_rows.py:15-36 reddens if autotune_file_count is widened or the CLI stops reporting a nonzero count, but deleting scripts/h200_test_lane/prewarm.sh:145-149 leaves all three tests green.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/h200_test_lane/prewarm_rows.py:1-37 follows the lane's argparse-plus-PREWARM-marker idiom and carries no plan label or tracker reference.\nSCORE reuse: 12\nJUSTIFICATION reuse: benchmarks/xla_autotune_cache_arms.py:96-120 already owns counting autotune entries under a cache root, and scripts/h200_test_lane/prewarm_rows.py:9 re-implements a narrower form rather than importing it.\nFINDING scripts/h200_test_lane/prewarm.sh:145 non-blocking: nothing tests the publication gate, so deleting the count-autotune invocation or inverting the status condition would publish a pin carrying autotune files while every test stays green.\nFINDING scripts/h200_test_lane/prewarm_rows.py:9 non-blocking: autotune_file_count re-implements a narrower form of benchmarks/xla_autotune_cache_arms.py:104 inventory/is_autotune_path rather than importing the owner.\nFINDING tests/test_prewarm_rows.py:39 non-blocking: the identity-row test asserts a literal substring of prewarm.sh, so it reddens on reformatting and says nothing about behaviour.\nFINDING scripts/h200_test_lane/prewarm.sh:150 non-blocking: the republished pin names source_revision ba0609243f176b4ec2e395f696d437f435362e74 while main moved to ccaacf500e8e4150d6721d80adea433acb1904e9, so a lane at current main reports PINNED_REVISION_MISMATCH and no cache-hit rate is measured against the new pin.",
+  "review_run_id": "r-20261105T081718845986-review-of-autotune-off-gpfs-pin-republish-6d8f31c16c06",
+  "reviewed_base_sha": "defca1acf17c40d5ceb1ec6163fe6befc788b738",
+  "reviewed_head_sha": "6d8f31c16c06cb74c68d0d73a42f5da0545d1b31",
+  "reviewed_run_id": "r-20261103T104314467151-autotune-off-gpfs-pin-republish",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-05T09:08:34.689387+00:00",
+  "total": 96
+}

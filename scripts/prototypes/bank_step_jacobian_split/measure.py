@@ -138,7 +138,15 @@ def main():
         lanes = len(steps)
         index = int(np.max(steps))
         if index <= 1 and (lanes, index) not in snapshots:
-            snapshots[(lanes, index)] = (state, support)
+            snapshots[(lanes, index)] = jax.tree.map(
+                lambda value: np.array(value, copy=True), (state, support)
+            )
+            np.savez_compressed(
+                args.output.with_name(f"inputs-{lanes}-{index}.npz"),
+                moments=np.stack(tuple(np.asarray(value) for value in state)),
+                steps=np.asarray(steps),
+                active=np.asarray(active),
+            )
             emit("CAPTURE", lanes=lanes, step=index, active=active, steps=steps)
 
     source = inspect.getsource(sr.solve_batch)

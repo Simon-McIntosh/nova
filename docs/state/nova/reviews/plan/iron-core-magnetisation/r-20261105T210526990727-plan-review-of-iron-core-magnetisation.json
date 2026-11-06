@@ -137,6 +137,16 @@
       "note": "\u00a73 done-when (1) adds a negative control: reversing one cell's edge normals in the device build must break the agreement (fad7c7e5f)",
       "reason": "",
       "when": "2026-11-06T19:45:54.579232+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a73 tolerance is now the best attainable error \u00a72 records in the sheet-route decision (near 1e-11), not 1e-12 (fad7c7e5f)",
+      "reason": "",
+      "when": "2026-11-06T19:46:39.785996+00:00"
     }
   ],
   "responses": {
@@ -170,11 +180,11 @@
     "reasoning-1": {
       "action": "acted",
       "by": "",
-      "commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+      "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
       "commit_basis": "edit",
-      "note": "Kept 0.8 m and stated why: R is the limb radius, 4.89 m, which sets the 2piR/6 = 5.1 m limb spacing; the plasma major radius does not enter (cc22ac1a0).",
+      "note": "\u00a73 tolerance is now the best attainable error \u00a72 records in the sheet-route decision (near 1e-11), not 1e-12 (fad7c7e5f)",
       "reason": "",
-      "when": "2026-11-05T21:28:24.933392+00:00"
+      "when": "2026-11-06T19:46:39.785996+00:00"
     },
     "wiring-1": {
       "action": "acted",

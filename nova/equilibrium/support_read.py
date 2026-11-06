@@ -14,7 +14,6 @@ serves any state of the same layout.
 
 import json
 from dataclasses import dataclass, field, replace
-from math import factorial
 from typing import NamedTuple
 
 import jax
@@ -281,7 +280,12 @@ def read(
     def rebuild(_):
         field_jets = nodal_jets(operands, moments) if jets is None else jets
         field = fixed_points.field_from_jets(
-            field_jets, operands.sample_index, operands.mesh
+            field_jets,
+            operands.sample_index,
+            operands.mesh,
+            bank_rows=operands.rows,
+            bank_moments=jnp.stack(tuple(moments), axis=-1),
+            bank_exterior=operands.exterior,
         )
         return topology.read_at_stationary_points(
             field, operands.geometry, convention, policy, stencil.solved
@@ -315,7 +319,12 @@ def _rebuilt_reading(operands, stencil, moments, convention, policy, jets):
     """The connected-domain decision of one stencil, fitted over the whole mesh."""
     field_jets = nodal_jets(operands, moments) if jets is None else jets
     field = fixed_points.field_from_jets(
-        field_jets, operands.sample_index, operands.mesh
+        field_jets,
+        operands.sample_index,
+        operands.mesh,
+        bank_rows=operands.rows,
+        bank_moments=jnp.stack(tuple(moments), axis=-1),
+        bank_exterior=operands.exterior,
     )
     return topology.read_at_stationary_points(
         field, operands.geometry, convention, policy, stencil.solved
@@ -585,36 +594,7 @@ def step_jacobian_vector(
 
 
 def _bell_derivatives(field, point, orders):
-    """Evaluate physical Cartesian derivatives of a selected Bell polynomial."""
-    mesh = field.mesh
-    cell = fixed_points.nearest_cell(mesh, point)
-    local = (point - mesh.origins[cell]) / mesh.scales[cell, :, None]
-    bary = jnp.einsum("tij,tj->ti", mesh.inverse_edges[cell], local)
-    bary = jnp.concatenate((bary, 1 - jnp.sum(bary, axis=-1, keepdims=True)), -1)
-    triangle = jnp.argmax(jnp.min(bary, axis=-1))
-    scale = mesh.scales[cell, triangle]
-    xy = (point - mesh.origins[cell, triangle]) / scale
-    powers = np.asarray(fixed_points.POWERS)
-    exponents = powers[None] - np.asarray(orders)[:, None]
-    factors = np.asarray(
-        [
-            [
-                factorial(a) // factorial(a - dx) * factorial(b) // factorial(b - dy)
-                if a >= dx and b >= dy
-                else 0
-                for a, b in fixed_points.POWERS
-            ]
-            for dx, dy in orders
-        ]
-    )
-    basis = (
-        xy[0] ** jnp.asarray(np.maximum(exponents[..., 0], 0))
-        * xy[1] ** jnp.asarray(np.maximum(exponents[..., 1], 0))
-        * jnp.asarray(factors)
-    )
-    return jnp.einsum("kq,q->k", basis, field.coefficients[cell, triangle]) / (
-        scale ** jnp.asarray([sum(order) for order in orders])
-    )
+    return fixed_points.polynomial_derivatives(field, point, orders)
 
 
 def _tensor_orders(rank):
@@ -632,7 +612,7 @@ _FIFTH_ORDERS = _tensor_orders(5)
 
 
 def _curvature_rates(field, direction_field, point, point_rate, pitch):
-    """Use exact Bell derivatives, including the moving fourth-order term."""
+    """Use unrounded bank curvature and its matching linear polynomial rates."""
     del pitch
     orders = _HESSIAN_ORDERS + _THIRD_ORDERS + _FOURTH_ORDERS + _FIFTH_ORDERS
     primal = _bell_derivatives(field, point, orders)
@@ -941,7 +921,12 @@ def _normal_geometry_booking_tangent(
     def evaluate(_):
         total_jets = nodal_jets(operands, moments)
         field = fixed_points.field_from_jets(
-            total_jets, operands.sample_index, operands.mesh
+            total_jets,
+            operands.sample_index,
+            operands.mesh,
+            bank_rows=operands.rows,
+            bank_moments=jnp.stack(tuple(moments), axis=-1),
+            bank_exterior=operands.exterior,
         )
         direction_field = fixed_points.field_from_jets(
             jet_tangent, operands.sample_index, operands.mesh

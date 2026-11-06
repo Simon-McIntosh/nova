@@ -19,6 +19,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.biot.polygonanalytic import packed_analytic_moments
+from nova.biot import pairedfloat
 from nova.equilibrium import topology
 from nova.equilibrium.fixed_point import _select_backtracking_candidate
 from nova.equilibrium.solve_request import TopologyPolicy
@@ -133,6 +134,78 @@ class BellField:
     mesh: BellMesh
     jets: jax.Array
     sample_index: jax.Array
+    bank_rows: jax.Array | None = None
+    bank_moments: jax.Array | None = None
+    bank_exterior: jax.Array | None = None
+
+    def curvature_coefficients(self, cell, triangle):
+        """Contract before rounding, retaining residues through the Bell transform.
+
+        Only the selected triangle needs extended arithmetic. Rounding its
+        nodal flux before the transform would amplify that error by pitch**-4.
+        The low-order field and stationary-point solve retain their own jets.
+        """
+        slots = self.mesh.triangles[cell, triangle]
+        if self.bank_rows is None:
+            jets = pairedfloat.wrap(self.jets[slots])
+        else:
+            rows = self.bank_rows[slots].reshape(3, -1, 6)
+            moments = self.bank_moments.reshape(-1)
+            products = pairedfloat.multiply(
+                pairedfloat.wrap(rows), pairedfloat.wrap(moments[None, :, None])
+            )
+            jets = pairedfloat.add(
+                _paired_sum(products, 1), pairedfloat.wrap(self.bank_exterior[slots])
+            )
+        scale = pairedfloat.wrap(self.mesh.scales[cell, triangle])
+        square = pairedfloat.multiply(scale, scale)
+        factors = tuple(
+            jnp.stack(
+                (
+                    jnp.ones_like(scale[i]) if i == 0 else jnp.zeros_like(scale[i]),
+                    scale[i],
+                    scale[i],
+                    square[i],
+                    square[i],
+                    square[i],
+                )
+            )
+            for i in range(2)
+        )
+        scaled = pairedfloat.multiply(jets, factors)
+        anchor = tuple(v[0] for v in scaled)
+        x, y = (
+            pairedfloat.wrap(self.mesh.local_vertices[cell, triangle, :, i])
+            for i in range(2)
+        )
+        f, gx, gy, hxx, hxy, hyy = (tuple(v[i] for v in anchor) for i in range(6))
+        add, mul = pairedfloat.add, pairedfloat.multiply
+        taylor = (
+            add(
+                add(
+                    add(
+                        add(add(f, mul(gx, x)), mul(gy, y)),
+                        pairedfloat.scale(mul(hxx, mul(x, x)), 0.5),
+                    ),
+                    mul(hxy, mul(x, y)),
+                ),
+                pairedfloat.scale(mul(hyy, mul(y, y)), 0.5),
+            ),
+            add(add(gx, mul(hxx, x)), mul(hxy, y)),
+            add(add(gy, mul(hxy, x)), mul(hyy, y)),
+            hxx,
+            hxy,
+            hyy,
+        )
+        taylor = tuple(
+            jnp.stack(tuple(jnp.broadcast_to(v[i], (3,)) for v in taylor), axis=-1)
+            for i in range(2)
+        )
+        residual = tuple(v.reshape(18) for v in pairedfloat.subtract(scaled, taylor))
+        products = pairedfloat.multiply(
+            pairedfloat.wrap(self.mesh.transforms[cell, triangle]), residual
+        )
+        return pairedfloat.value(_paired_sum(products, 1))
 
     def local_value(self, cell, triangle, point):
         local = (point - self.mesh.origins[cell, triangle]) / self.mesh.scales[
@@ -173,7 +246,22 @@ class BellField:
         return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
 
 
-def field_from_jets(jets, sample_index, mesh):
+def _paired_sum(values, axis):
+    """Balanced contraction retaining product and addition residues."""
+    values = tuple(jnp.moveaxis(v, axis, 0) for v in values)
+    while values[0].shape[0] > 1:
+        count = values[0].shape[0]
+        if count % 2:
+            values = tuple(jnp.concatenate((v, jnp.zeros_like(v[:1]))) for v in values)
+        values = pairedfloat.add(
+            tuple(v[::2] for v in values), tuple(v[1::2] for v in values)
+        )
+    return tuple(v[0] for v in values)
+
+
+def field_from_jets(
+    jets, sample_index, mesh, *, bank_rows=None, bank_moments=None, bank_exterior=None
+):
     scale = mesh.scales
     factors = jnp.stack(
         (jnp.ones_like(scale), scale, scale, scale**2, scale**2, scale**2), axis=-1
@@ -200,7 +288,48 @@ def field_from_jets(jets, sample_index, mesh):
     coefficients = coefficients.at[..., :6].add(
         anchor * jnp.asarray((1.0, 1.0, 1.0, 0.5, 1.0, 0.5))
     )
-    return BellField(coefficients, mesh, jets, sample_index)
+    return BellField(
+        coefficients, mesh, jets, sample_index, bank_rows, bank_moments, bank_exterior
+    )
+
+
+def polynomial_derivatives(field, point, orders):
+    """Evaluate physical Cartesian derivatives of a selected Bell polynomial."""
+    mesh = field.mesh
+    cell = nearest_cell(mesh, point)
+    local = (point - mesh.origins[cell]) / mesh.scales[cell, :, None]
+    bary = jnp.einsum("tij,tj->ti", mesh.inverse_edges[cell], local)
+    bary = jnp.concatenate((bary, 1 - jnp.sum(bary, axis=-1, keepdims=True)), -1)
+    triangle = jnp.argmax(jnp.min(bary, axis=-1))
+    scale = mesh.scales[cell, triangle]
+    xy = (point - mesh.origins[cell, triangle]) / scale
+    powers = np.asarray(POWERS)
+    exponents = powers[None] - np.asarray(orders)[:, None]
+    factors = np.asarray(
+        [
+            [
+                factorial(a) // factorial(a - dx) * factorial(b) // factorial(b - dy)
+                if a >= dx and b >= dy
+                else 0
+                for a, b in POWERS
+            ]
+            for dx, dy in orders
+        ]
+    )
+    basis = (
+        xy[0] ** jnp.asarray(np.maximum(exponents[..., 0], 0))
+        * xy[1] ** jnp.asarray(np.maximum(exponents[..., 1], 0))
+        * jnp.asarray(factors)
+    )
+    value = jnp.einsum("kq,q->k", basis, field.coefficients[cell, triangle])
+    if any(sum(order) >= 3 for order in orders):
+        accurate = jnp.einsum(
+            "kq,q->k", basis, field.curvature_coefficients(cell, triangle)
+        )
+        value = jnp.where(
+            jnp.asarray([sum(order) >= 3 for order in orders]), accurate, value
+        )
+    return value / (scale ** jnp.asarray([sum(order) for order in orders]))
 
 
 def _source_jets(point, coupling):

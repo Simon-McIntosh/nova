@@ -3109,6 +3109,18 @@ def _curvature_derivatives(field, point, pitch):
     supply their higher curvature corrections; the stationary solve and its
     implicit tangent continue to use the analytic Hessian itself.
     """
+    from itertools import product
+
+    from nova.equilibrium.fixed_points import BellField, polynomial_derivatives
+
+    if isinstance(field, BellField) and field.bank_rows is not None:
+        orders = tuple(
+            (axes.count(0), axes.count(1))
+            for rank in (3, 4)
+            for axes in product(range(2), repeat=rank)
+        )
+        values = polynomial_derivatives(field, point, orders)
+        return values[:8].reshape(2, 2, 2), values[8:].reshape(2, 2, 2, 2)
     if not isinstance(field, TotalField):
         return (
             jax.jacfwd(lambda target: field.evaluate(target).hessian)(point),

@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:read -> field_from_jets (bank keywords at :286)",
+    "nova/equilibrium/fixed_points.py:curvature_coefficients (:141, dispatched at :315)",
+    "nova/equilibrium/topology.py:_curvature_derivatives (:3105, called at :3306)",
+    "nova/biot/momentchannel.py:341+347+351+418+519+532+685+696+712+735",
+    "nova/biot/rangefunction.py:857"
+  ],
+  "completed_at": "2026-11-06T23:11:57.509Z",
+  "dispatched_at": "2026-11-06T23:00:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The assertion guards the compensated arithmetic, which is the property that sets the noise floor. The order of the balanced reduction is a hardening point, not the floor's cause; the floor instrument would catch a regression.",
+      "recorded_at": "2026-11-06T23:13:45.135249+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_saddle_derivatives.py",
+      "line": "143",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added cancellation assertion holds identically under a linear sequential paired reduction and the balanced pairwise one (probed at the reviewed head, counts 3 and 4 both yield 1.0 for both orders), so it guards the compensated arithmetic but not the balanced association order; no committed test fails if curvature_coefficients reverts to the deleted inline idiom, because the two are bit-identical per the 0 base-to-head parity."
+    }
+  ],
+  "item_aggregate": {
+    "items_absent": 0,
+    "items_present": 5
+  },
+  "item_verdicts": {
+    "diff": "all five commits read against f6208aec84e3; product and test blobs at the reviewed head are identical to the measured commit e68064d0953e, and the later commits add only the evidence fragment and receipt-header fixes.",
+    "done_when": "each of the four measures has a recorded gate - head-test_saddle_derivatives.log '8 passed', derivatives-head.log 'absolute_error=0 limit=1e-15', suite-base.json and suite-head.json zero failures, device-job.log 'FLOOR maximum_median=4.8245851758110803e-12 limit=1e-11'.",
+    "goal": "read the brief's goal against the landed diff; the production wiring is carried at nova/equilibrium/support_read.py:286 and reached by tests/test_saddle_derivatives.py:153 through support_read.read, while nova/equilibrium/fixed_points.py:155 and :203 call the pairedfloat owners and the local _paired_sum is gone.",
+    "manifest": "status complete, five commits, baseline_suite and after_suite both exit 0 with completed true and empty failure_ids, and negative_control_log names negative-test_saddle_derivatives.log ending '2 failed, 6 deselected' and 'EXIT=1'.",
+    "write_paths": "the diffstat names exactly the declared eight paths and nova/equilibrium/support_read.py is byte-identical at base and head."
+  },
+  "justifications": {
+    "durability": "tests/test_saddle_derivatives.py:153 genuinely reddens on the restored defect (2 failed, largest fourth-derivative error 1.2570500196318335e-12) while the same mutation left the base suite green, but the added assertion at :143 cannot distinguish the balanced association order from a linear sequential one.",
+    "evidence": "derivatives-head.log prints absolute_error=0 for all six arrays against a 1e-15 bound while parity-controls.log shows all six 1e-12 controls refused, and device-job.log reports the 4.8245851758110803e-12 maximum lane median against the 1e-11 limit.",
+    "fit": "the axis and xp parameters added at nova/biot/pairedfloat.py:106 and :120 are keyword-only with defaults, so the existing positional callers in nova/biot/momentchannel.py keep working unchanged.",
+    "goal_fidelity": "nova/equilibrium/fixed_points.py:155 and :203 route the bank and Bell contractions through pairedfloat while nova/equilibrium/support_read.py:286 keeps the three keywords the new guard observes, which is exactly what the brief asked and no more.",
+    "reuse": "every added definition extends the owner of its capability - the array contraction lands inside nova/biot/pairedfloat.py:120 contract_paired - and the search over nova/ found only nova/biot/rangefunction.py:308 _paired_sum, a linear running sum over an outsider-tuple iterable, a different mechanism.",
+    "scope_discipline": "the diffstat of f6208aec84e3..670796a49b22 lists only the declared eight paths, and nova/equilibrium/support_read.py shows no diff at all."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the brief's goal against the landed diff; the production wiring is still carried at nova/equilibrium/support_read.py:286 and is now reached by tests/test_saddle_derivatives.py:153 through support_read.read, while nova/equilibrium/fixed_points.py:155 and :203 call the pairedfloat owners and the local _paired_sum is gone.\nVERDICT done_when: the done_when's four measures each have a recorded gate - head-test_saddle_derivatives.log \"8 passed\", derivatives-head.log \"PARITY ... absolute_error=0 limit=1e-15\", suite-base.json and suite-head.json both zero failures, device-job.log \"FLOOR maximum_median=4.8245851758110803e-12 limit=1e-11\".\nVERDICT write_paths: read the declared set of two product files, one test file, scripts/prototypes/bank_saddle_guards and the evidence fragment; the diffstat names exactly those eight paths and nova/equilibrium/support_read.py is byte-identical at base and head.\nVERDICT manifest: read in full; status complete, five commits listed, baseline_suite and after_suite both exit_status 0 with completed true and empty failure_ids, and negative_control_log names negative-test_saddle_derivatives.log which ends \"2 failed, 6 deselected in 41.51s\" and \"EXIT=1\".\nVERDICT diff: read all five commits against f6208aec84e3, and the product and test blobs at the reviewed head 670796a49b22 are identical to the measured commit e68064d0953e (\"SAME\" for nova/biot/pairedfloat.py, nova/equilibrium/fixed_points.py and tests/test_saddle_derivatives.py); the later three commits add only the evidence fragment and receipt-header fixes.\nCALL_SITES: nova/equilibrium/support_read.py:read -> field_from_jets (bank_rows/bank_moments/bank_exterior at :286), nova/equilibrium/fixed_points.py:curvature_coefficients (:141, dispatched from the Bell derivative evaluation at :315), nova/equilibrium/topology.py:_curvature_derivatives (:3105, called at :3306), nova/biot/momentchannel.py:341+347+351+418+519+532+685+696+712+735, nova/biot/rangefunction.py:857\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_points.py:155 and :203 route the bank and Bell contractions through pairedfloat while nova/equilibrium/support_read.py:286 keeps the three keywords the new guard observes, which is exactly what the brief asked and no more.\nSCORE evidence: 19\nJUSTIFICATION evidence: the density of independent receipts is the strength here - derivatives-head.log prints absolute_error=0 for all six arrays against a 1e-15 bound while parity-controls.log shows six 1e-12 controls refused, and device-job.log reports the 4.8245851758110803e-12 maximum lane median against the 1e-11 limit.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diffstat of f6208aec84e3..670796a49b22 lists only the declared eight paths, and nova/equilibrium/support_read.py - the file the brief forbade editing beyond a scratch control - shows no diff at all.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_saddle_derivatives.py:153 genuinely reddens on the restored defect (negative-test_saddle_derivatives.log, 2 failed, largest fourth-derivative error 1.2570500196318335e-12) while the same mutation left the base suite green (reproduction-test_saddle_derivatives.log, \"2 passed\"), but the added cancellation assertion at :143 cannot distinguish the balanced association order from a linear sequential one, so nothing in the committed suite fails if the contraction refactor of nova/equilibrium/fixed_points.py:155 is reverted to the deleted inline idiom.\nSCORE fit: 18\nJUSTIFICATION fit: the axis and xp parameters added at nova/biot/pairedfloat.py:106 and :120 are keyword-only with defaults, so the existing positional callers in nova/biot/momentchannel.py keep working unchanged, and the docstrings match the surrounding module style.\nSCORE reuse: 20\nJUSTIFICATION reuse: every added definition extends the owner of its capability - the array contraction lands inside nova/biot/pairedfloat.py:120 contract_paired rather than beside it - and the search over nova/ for a competing balanced pairing owner found only nova/biot/rangefunction.py:308 _paired_sum, which is a linear running sum over an iterable with no axis, a different mechanism.\nFINDING tests/test_saddle_derivatives.py:143 non-blocking: the added cancellation assertion holds identically under a linear sequential paired reduction and the balanced pairwise one - probed at the reviewed head, counts 3 and 4 both yield 1.0 for both orders - so it guards the compensated arithmetic but not the balanced association order the refactor preserves, and no committed test fails if curvature_coefficients reverts to the deleted inline idiom, because the two are bit-identical per the 0 base-to-head parity.",
+  "review_run_id": "r-20261106T225846204189-review-of-bank-saddle-guards-670796a49b22",
+  "reviewed_base_sha": "f6208aec84e35a0c91dce481dec479814ad3f452",
+  "reviewed_head_sha": "670796a49b22d33cd9dfca4655f5a5735c2d2b61",
+  "reviewed_run_id": "r-20261106T222958991931-bank-saddle-guards",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:17:29.583760+00:00",
+  "total": 113
+}

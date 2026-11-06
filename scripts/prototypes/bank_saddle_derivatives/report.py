@@ -85,6 +85,8 @@ def main():
         arm: json.loads((run / f"floor-{arm}" / "gpu.json").read_text())
         for arm in ("base", "head")
     }
+    decisions = json.loads((run / "decisions.json").read_text())
+    assert decisions["control"] and decisions["changes"] == [[0, 0, 0], [0, 0, 0]]
     statistics = {}
     floor_rows = []
     for arm, data in floors.items():
@@ -148,6 +150,7 @@ def main():
     certificate, status = read_log(run / "cpu-certificate-test_saddle_derivatives.log")
     assert status == 0 and "2 passed" in certificate
     summary = dict(
+        decisions=decisions["changes"],
         floors=statistics,
         precision=precision,
         suites=suite,
@@ -259,6 +262,10 @@ source and exterior contributions. Restoring Bell-derived third and fourth
 derivatives in a scratch copy fails {len(failed)} test cases; the head passes.
 The reference establishes arithmetic accuracy for this discrete polynomial,
 not an exact analytic-kernel derivative.</p>
+<p>At identical sixteen-lane trial and saved converged states, substituting the
+base curvature function changes zero cut, normal or fragment decisions. Flipping
+a saved mask bit changes its signature, establishing that the comparison detects
+a known difference. The separate decision receipt records both full populations.</p>
 <figure id="{prefix}-floor"><img
 src="/nova/figures/sub-millisecond-forward-path/bank-saddle-derivatives/floor.svg"
 alt="Median fresh residual for sixteen lanes, base and accurate curvature">

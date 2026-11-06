@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="194">
+<meta name="plan-version" content="195">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -677,6 +677,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T151851519466-bank-booking-primal-buckets" data-who="reckon-build" data-when="2026-11-06T17:10:05Z">
     <div class="r-comment-body"><p>[Primal booking buckets](/nova/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html#bank-booking-primal-buckets-landing): shared buckets and four-ring groups retain &lt;=1.71e-16 moment error; restoring the primal tile to 32 cells removes doubled conic propagation. In three-arm H200 job 1307085, candidate versus base residual device/call is 2.291–2.293 versus 2.860–2.862 ms at one slice and 8.029–8.038 versus 9.111–9.126 ms at sixteen; launches/call fall to 1080.14 versus 1400.57 and 1549.62 versus 1798.81. Wall/read improves 9.28% and 2.01%. The retained job 1307054 gain was predominantly fewer updates/read, not cheaper booking. Candidate retained; coordinator judges landing. Final CPU contract: one shared fixed scalar tile, a failing tile=16 control, measured Broadwell repins, fleet booking 5 passed and Sirius three-file head 12 passed/3 optional skips; no new timing job.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T172411041060-bank-jacobian-launches" data-who="reckon-build" data-when="2026-11-06T18:25:34Z">
+    <div class="r-comment-body"><p>[Jacobian launch measurements](/nova/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches.html#bank-jacobian-launches-landing): default tangent tiles of 32 cells and groups of two rings reduce sixteen-slice Jacobian launches from 2787 to 1778 (36.2%) and device time from 26.524-26.549 to 25.040-25.048 ms/call. All four 550-cell Jacobians meet 1e-12, six paired CPU files add no failure, the omission control fails, and all solve precision budgets pass. Whole-solve wall is higher with eight reads versus six; wall/read falls about 4.9%.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T06:55:16Z",
+  "figures_reviewed": [
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+    "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+    "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+      "id": "f2addeb3325",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered fine panel is byte-identical to its plain sibling: both files hash to md5 919f077c3ff70d09c2abfb2303793031 and are 340760 bytes, so the two attached images a reader sees are the same picture. Plan section 6 asks for the cpu lane drawn twice, the -fine view at the 12000 cells its receipt records and the plain panel at the producer default 4000, and a reader comparing the two cannot see that the second is a finer map at all, because every contour lands on the same path. The figure itself is readable; what fails is that the fine map's claim is not distinguishable in the artifact."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+      "id": "f28af046d95",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Thin contour strokes render at about #b8b8b8: the dominant non-white colour in the rendered PNG is (184,184,184) at 29063 pixels, and a scan across the contour field at rows 500 and 600 finds single-pixel strokes whose darkest samples sit at 155 to 185 grey. That is roughly 1.9:1 against white, below the ~3:1 (#929292) the repository plot-style rule asks of a data population and at the level already rejected as too faint. The contours are visible at full size but the sparse outer runs, and the machine structure drawn in the same grey, fade at page size. Recorded, not acted on, because the picture is still readable."
+    }
+  ],
+  "notes": "Read-only figure review. All four figures were judged only from the rendered PNGs named in the dispatch, opened with the Read tool; no SVG was opened, read or rendered, and no file was edited, moved or reformatted. The four repository PNGs and the four attached image-*.png copies were the only images opened. The two attached copies of the cpu lane (image-1.png, image-3.png) hash identically to each other, which is the same fact as finding 1 observed on the review run's own copies. A figure record carries no scores and no suite-delta measurement: no suite was run for this review, hence added_failure_count 0 over an empty id list.",
+  "project": "nova",
+  "review_run_id": "r-20261106T065314250851-review-of-mast-centroid-fine-panels-c2e4fd2117b5-figure",
+  "reviewed_base_sha": "3ef818dfaef2a36da8fd0d6e0c34272ec5259218",
+  "reviewed_head_sha": "c2e4fd2117b550565c1fbeef4f091c2528f8b70c",
+  "reviewed_run_id": "r-20261102T221244543285-mast-centroid-fine-panels",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass on the text: both panel titles are solid black on white and clear the contrast requirement. The thin contour strokes are a separate matter, recorded as a non-blocking finding below.",
+    "data_ink": "pass: the flux contours carry the visual weight in both panels and nothing else competes with them; the faint machine structure outside the wall is geometry the panel is about, not decoration.",
+    "decoration": "pass: no gradient, no background fill, no shading band, no gridlines, no frames; white ground throughout, axes off as the repository plotting rule requires.",
+    "label_collision": "pass: the only text artists are the two panel titles, one per panel, each fully inside the canvas and separated from the data and from each other. No label is clipped; no label overlaps another or the plotted data. Colliders drawn by the null vocabulary are markers, not labels, and none obscures a contour run a reader needs.",
+    "legibility": "pass on all four rendered PNGs (1295x1061 each): a two-panel poloidal layout, panel titles set large above each panel, thin flux contours legible across the full vessel, wall outline and coil sections drawn in black, red null markers clearly distinguishable. Nothing in the picture needs a reader to zoom.",
+    "table_form": "pass: the figures show a spatial field on machine geometry, which a table cannot carry."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:03:48.653960+00:00",
+  "total": null
+}

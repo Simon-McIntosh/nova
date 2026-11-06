@@ -1,0 +1,74 @@
+{
+  "added_failure_basis": "the reviewed run records baseline_suite and after_suite both null (confirmed in its classification.json manifest block), so no arm delta can be derived; the zero records the absence of arms, not a measured clean delta. The recorded gate job 1306646 passed 3 of 3 cpu-lane cases (EXIT=0, log /home/ITER/mcintos/.cache/nova-mast-centroid-fine-panels/verify-cpu-lane-d.log) and its falsifying control exited 1 (logs/negative-control.log).",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/mast_centroid_solve_panels.py:2077",
+    "benchmarks/mast_centroid_solve_panels.py:1255"
+  ],
+  "completed_at": "2026-11-06T07:03:45.757Z",
+  "dispatched_at": "2026-11-06T06:52:49Z",
+  "findings": [
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "id": "ff0bf981d49",
+      "line": 117,
+      "severity": "non-blocking",
+      "text": "nothing asserts the boundary_assembler block that c2e4fd211 adds to every receipt; test_committed_panel_state_renders calls panels() and would stay green if _assembler_flags returned any flags, or if its transposed axis order (the defect repaired twice in d1a77a61f) were reverted, so the node's newest deliverable has no durability guard."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f0d974e3ede",
+      "line": 1214,
+      "severity": "non-blocking",
+      "text": "_assembler_flags re-derives the branch-assembly call that nova/equilibrium/display_flux.py:204 _branches already owns on the same field, and the map already publishes well_formed in BRANCH_KEYS; adding 'overflow' to BRANCH_KEYS and reading display.branches would have reused the owner instead of restating its transpose, radius/height/saddle/axis argument order, which is exactly the composition the axis-order defect came from."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json",
+      "id": "f8b53edefe2",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the invocation block records argv[0] as /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py, a run-local wrapper outside the repository, rather than the producer command the brief specifies, so a reader cannot replay the receipt from the repository alone; the titan and full-axis receipts are the same."
+    },
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "id": "f47378d9a0e",
+      "line": 106,
+      "severity": "non-blocking",
+      "text": "the recorded gate and its control both ran at 16a6df508, while c2e4fd211 rewrote the three receipts and four SVGs afterwards; no gate run is recorded at the reviewed head. The edit is data-only and preserves the fields the test asserts, so the gate would still pass, but the evidence is not at the revision being promoted."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all fourteen commits from d8de9ebfb to c2e4fd211: the producer gains _panel_response_key, an axis-order fix in interior_points, a one-block chunk, _assembler_flags and an invocation write; the test replaces the shape-equality comparison with _path_offset and adds receipt guards; the receipts gain display_map.spacing_m, boundary_assembler and invocation; the SVGs change only their dc:date and regenerated clip-path ids.",
+    "done_when": "the done_when names tests/test_mast_centroid_panel_states.py and each of its clauses is recorded: the manifest test_logs carry job 1306646 (3 passed, 7 deselected, 1008 s, STEP_EXIT=0), logs/negative-control.log shows the one-percent edit falsified at EXIT=1, and the four receipts carry converged, spacing and saddle offset; the run recorded no baseline_suite or after_suite arm.",
+    "goal": "the goal is 'The four MAST centroid panels re-solved and drawn from fine flux maps'; at c2e4fd211 all four panels exist (cpu-lane at 4000 and at 12000 cells, titan, full-axis) and each lane receipt records cold_solve.converged true, drawn_plasma_mesh.display_map.spacing_m 0.01 and saddle_offset_mm 13.2/13.2/9.9, so the panels are drawn from the 10 mm map; the right-hand plasma mesh still draws no cells because the branch assembler refuses, which the fragment at docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:92 states explicitly.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/manifest.md; it reports status complete, names the gate command and its log, records the gate and the red falsifying control, records boundary_assembler well_formed false / overflow true on all three lanes, and records LABEL_CHECK clipped=0 overlapping=0 for all four redraws.",
+    "write_paths": "the manifest declares seven write paths and all fourteen changed paths in d8de9ebfb..c2e4fd211 (the producer, the test, the fragment, three receipts and seven figure files) lie inside them; nova/equilibrium/display_flux.py is untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_centroid_panel_states.py:117 calls panels() but asserts nothing about the boundary_assembler block, so reverting _assembler_flags or its axis transpose would leave the gate green; the contour-movement control at line 167 and the receipt guard at line 126 do fail if their changes regress.",
+    "evidence": "the gate named by the manifest ran at 16a6df508 (job 1306646, 3 passed, EXIT=0) with a falsifying control at EXIT=1 (logs/negative-control.log), which measures the done_when, but the receipts and SVGs were rewritten afterwards in c2e4fd211 with no gate recorded at the head.",
+    "fit": "the added helpers _panel_response_key, _assembler_flags and _path_offset follow the module's dataclass-free, docstring-on-mechanism idiom and introduce no forbidden or plan-labelled name.",
+    "goal_fidelity": "benchmarks/mast_centroid_solve_panels.py:1447 records the assembler verdict and every lane receipt carries a drawn display_map, but the solved panel shows no plasma cells (docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:92) and no separatrix.",
+    "reuse": "benchmarks/mast_centroid_solve_panels.py:1214 restates the transposed branch-assembly call owned by nova/equilibrium/display_flux.py:204 _branches instead of publishing overflow through BRANCH_KEYS, though it does call the owner's assemble_separatrix_branches rather than reimplement it.",
+    "scope_discipline": "every one of the fourteen changed paths in d8de9ebfb..c2e4fd211 is inside the manifest's declared write paths and nova/equilibrium/display_flux.py is unchanged."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is 'The four MAST centroid panels re-solved and drawn from fine flux maps'; at c2e4fd211 all four panels exist (cpu-lane at 4000 and at 12000 cells, titan, full-axis) and each lane receipt records cold_solve.converged true, drawn_plasma_mesh.display_map.spacing_m 0.01 and saddle_offset_mm 13.2/13.2/9.9, so the panels are drawn from the 10 mm map; the right-hand plasma mesh still draws no cells because the branch assembler refuses, which the fragment at docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:92 states explicitly.\nVERDICT done_when: the done_when names tests/test_mast_centroid_panel_states.py and each of its clauses is recorded: the manifest test_logs carry job 1306646 (3 passed, 7 deselected, 1008 s, STEP_EXIT=0), logs/negative-control.log shows the one-percent edit falsified at EXIT=1, and the four receipts carry converged, spacing and saddle offset; the run recorded no baseline_suite or after_suite arm.\nVERDICT write_paths: the manifest declares seven write paths and all fourteen changed paths in d8de9ebfb..c2e4fd211 (the producer, the test, the fragment, three receipts and seven figure files) lie inside them; nova/equilibrium/display_flux.py is untouched.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/manifest.md; it reports status complete, names the gate command and its log, records the gate and the red falsifying control, records boundary_assembler well_formed false / overflow true on all three lanes, and records LABEL_CHECK clipped=0 overlapping=0 for all four redraws.\nVERDICT diff: read all fourteen commits from d8de9ebfb to c2e4fd211: the producer gains _panel_response_key, an axis-order fix in interior_points, a one-block chunk, _assembler_flags and an invocation write; the test replaces the shape-equality comparison with _path_offset and adds receipt guards; the receipts gain display_map.spacing_m, boundary_assembler and invocation; the SVGs change only their dc:date and regenerated clip-path ids.\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:2077, benchmarks/mast_centroid_solve_panels.py:1255\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: benchmarks/mast_centroid_solve_panels.py:1447 records the assembler verdict and every lane receipt carries a drawn display_map, but the solved panel shows no plasma cells (docs/evidence/fragments/separatrix-spline-extraction/mast-centroid-fine-panels.html:92) and no separatrix.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate named by the manifest ran at 16a6df508 (job 1306646, 3 passed, EXIT=0) with a falsifying control at EXIT=1 (logs/negative-control.log), which measures the done_when, but the receipts and SVGs were rewritten afterwards in c2e4fd211 with no gate recorded at the head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every one of the fourteen changed paths in d8de9ebfb..c2e4fd211 is inside the manifest's declared write paths and nova/equilibrium/display_flux.py is unchanged.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_mast_centroid_panel_states.py:117 calls panels() but asserts nothing about the boundary_assembler block, so reverting _assembler_flags or its axis transpose would leave the gate green; the contour-movement control at line 167 and the receipt guard at line 126 do fail if their changes regress.\nSCORE fit: 17\nJUSTIFICATION fit: the added helpers _panel_response_key, _assembler_flags and _path_offset follow the module's docstring-on-mechanism idiom and introduce no forbidden or plan-labelled name.\nSCORE reuse: 13\nJUSTIFICATION reuse: benchmarks/mast_centroid_solve_panels.py:1214 restates the transposed branch-assembly call owned by nova/equilibrium/display_flux.py:204 _branches instead of publishing overflow through BRANCH_KEYS, though it does call the owner's assemble_separatrix_branches rather than reimplement it.\nFINDING tests/test_mast_centroid_panel_states.py:117 non-blocking: nothing asserts the boundary_assembler block that c2e4fd211 adds to every receipt; test_committed_panel_state_renders calls panels() and would stay green if _assembler_flags returned any flags, or if its transposed axis order (the defect repaired twice in d1a77a61f) were reverted, so the node's newest deliverable has no durability guard.\nFINDING benchmarks/mast_centroid_solve_panels.py:1214 non-blocking: _assembler_flags re-derives the branch-assembly call that nova/equilibrium/display_flux.py:204 _branches already owns on the same field, and the map already publishes well_formed in BRANCH_KEYS; adding 'overflow' to BRANCH_KEYS and reading display.branches would have reused the owner instead of restating its transpose, radius/height/saddle/axis argument order, which is exactly the composition the axis-order defect came from.\nFINDING docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json:1 non-blocking: the invocation block records argv[0] as /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py, a run-local wrapper outside the repository, rather than the producer command the brief specifies, so a reader cannot replay the receipt from the repository alone; the titan and full-axis receipts are the same.\nFINDING tests/test_mast_centroid_panel_states.py:106 non-blocking: the recorded gate and its control both ran at 16a6df508, while c2e4fd211 rewrote the three receipts and four SVGs afterwards; no gate run is recorded at the reviewed head. The edit is data-only and preserves the fields the test asserts, so the gate would still pass, but the evidence is not at the revision being promoted.\n",
+  "review_run_id": "r-20261106T064853500028-review-of-mast-centroid-fine-panels-c2e4fd2117b5",
+  "reviewed_base_sha": "d8de9ebfb9479358ace5e6645557fccda8358500",
+  "reviewed_head_sha": "c2e4fd2117b550565c1fbeef4f091c2528f8b70c",
+  "reviewed_run_id": "r-20261102T221244543285-mast-centroid-fine-panels",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:08:43.618944+00:00",
+  "total": 91
+}

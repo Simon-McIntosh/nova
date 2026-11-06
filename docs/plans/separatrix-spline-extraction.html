@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="197">
+<meta name="plan-version" content="198">
 <meta name="plan-modified" content="2026-11-06">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -671,6 +671,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261105T161417637974-review-of-mast-centroid-fine-panels-d8de9ebfb947" data-who="reckon-build" data-when="2026-11-05T16:49:31.113Z">
     <div class="r-comment-body"><p>reviewed d8de9ebfb against base 3ef818df; the landed producer re-solves the three lane states and adds a fine-map draw path, but no panel figure was drawn, the node's gate test fails at tests/test_mast_centroid_panel_states.py:84 with KeyError 'drawn_plasma_mesh' (reproduced, EXIT=1), the receipts record no map spacing and no invocation, and the evidence fragment claims a PNG inspection its own landing line says did not run.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261106T064853500028-review-of-mast-centroid-fine-panels-c2e4fd2117b5" data-who="reckon-build" data-when="2026-11-06T07:03:45.757Z">
+    <div class="r-comment-body"><p>reviewed r-20261102T221244543285-mast-centroid-fine-panels over d8de9ebfb..c2e4fd211: the four panels are drawn from the 10 mm display map and every receipt records converged, spacing and saddle offset, the gate passed 3 of 3 cpu-lane cases with a falsifying control at EXIT=1, and four non-blocking findings stand (no assertion on the new boundary_assembler block, its branch assembly duplicating the display-map owner, the invocation naming a run-local wrapper, and the gate not re-run at the final head).</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261103T051008024703-review-of-coil-edit-fine-panels-1f1391bd0a62" data-who="reckon-build" data-when="2026-11-03T05:28:23.860Z">
     <div class="r-comment-body"><p>review record stored at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T204241022825-coil-edit-fine-panels/review-records/r-20261102T204241022825-coil-edit-fine-panels.at-1f1391bd0a62944a9db45b84afaf6fc8f3442c2a.json</p></div>

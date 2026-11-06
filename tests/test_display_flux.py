@@ -384,6 +384,18 @@ def test_the_promoted_mask_tail_must_be_the_non_lattice_rows():
         chunk=128,
     )
     assert display.promoted_node_count == 3
+    prefix = np.zeros(node, dtype=bool)
+    prefix[[10, 11]] = True
+    narrow = build_display_flux_map(
+        profile,
+        np.concatenate([state, np.zeros(wall_rows)]),
+        coupling=_coupling(profile),
+        moments=_moment_law(state, node),
+        promoted=prefix,
+        xpoint_rz=np.asarray([1.0, 0.0]),
+        chunk=128,
+    )
+    assert narrow.promoted_node_count == 2
     unexplained = np.zeros(node + wall_rows + 3, dtype=bool)
     with pytest.raises(ValueError, match="discards .* state rows past the"):
         build_display_flux_map(

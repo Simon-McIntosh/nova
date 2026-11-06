@@ -225,20 +225,18 @@ def _branches(
     return {key: np.asarray(assembled[key]) for key in BRANCH_KEYS}
 
 
-def _non_lattice_rows(operator, node_count: int, state_size: int) -> int:
-    """Return the rows the operator's state carries after its lattice nodes.
+def _wall_rows(operator) -> int | None:
+    """Return the operator's wall row count, or None when it exposes none.
 
     A solve keeps its wall rows after the plasma lattice in one state vector,
-    so the promoted mask it returns spans the lattice and those rows.  Only
-    the lattice prefix names nodes the map counts, and the discarded tail is
-    legitimate exactly when its length is the operator's wall row count.
+    so a promoted mask over the whole state is longer than the lattice by
+    exactly that wall.  Only the lattice prefix names nodes the map counts, and
+    a discarded tail is legitimate exactly when its length is this figure.
     """
-    if state_size == node_count:
-        return 0
     wall = getattr(operator, "wall", None)
     coordinate = getattr(getattr(wall, "null", None), "coordinate", None)
     if coordinate is None:
-        return state_size - node_count
+        return None
     return int(np.asarray(coordinate).shape[0])
 
 
@@ -324,14 +322,22 @@ def build_display_flux_map(
                 f"the lattice carries {node_count} and the state {state_size}"
             )
         discarded = promoted_nodes[node_count:]
-        if discarded.size != _non_lattice_rows(operator, node_count, state_size):
-            raise ValueError(
-                f"the promoted mask discards {discarded.size} state rows past the "
-                f"{node_count}-node lattice, but the operator's state carries "
-                f"{_non_lattice_rows(operator, node_count, state_size)} non-lattice "
-                "rows: the discarded tail is not the non-lattice rows, so a "
-                "lattice node may be dropped from the promoted count"
-            )
+        if discarded.size:
+            wall_rows = _wall_rows(operator)
+            if wall_rows is None:
+                raise ValueError(
+                    f"the promoted mask discards {discarded.size} state rows past "
+                    f"the {node_count}-node lattice, but the operator exposes no "
+                    "wall coordinate to show those rows are not lattice nodes"
+                )
+            if discarded.size != wall_rows:
+                raise ValueError(
+                    f"the promoted mask discards {discarded.size} state rows past "
+                    f"the {node_count}-node lattice, but the operator's wall "
+                    f"carries {wall_rows}: the discarded tail is not the "
+                    "non-lattice rows, so a lattice node may be dropped from the "
+                    "promoted count"
+                )
         promoted_nodes = promoted_nodes[:node_count]
 
     radius_nodes = np.asarray(lattice.radius, dtype=np.float64)

@@ -17,7 +17,7 @@ from scripts.prototypes.bank_wall_events.suite import archive, run_file
 FILES = ("test_candidate_inspection_batched", "test_support_read", "test_tracked_read")
 
 
-def force_full(root, revision, run, scratch, label):
+def forced_full_tree(root, revision, run, scratch, label):
     tree = scratch / label
     archive(root, revision, tree)
     path = tree / "nova/equilibrium/topology.py"
@@ -36,8 +36,12 @@ def force_full(root, revision, run, scratch, label):
             )
         )
     )
+    return tree
+
+
+def force_full(root, revision, run, scratch, label):
     return run_file(
-        tree,
+        forced_full_tree(root, revision, run, scratch, label),
         revision + "+forced-full",
         FILES[0],
         label,
@@ -49,7 +53,9 @@ def force_full(root, revision, run, scratch, label):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("reproduce", "cpu", "physical"))
+    parser.add_argument(
+        "mode", choices=("reproduce", "cpu", "physical", "physical-full")
+    )
     parser.add_argument("root", type=Path)
     parser.add_argument("run", type=Path)
     parser.add_argument("base")
@@ -101,9 +107,14 @@ def main():
                 bool(added) or negative != 1 or suites["head"]["exit_status"] != 0
             )
         else:
+            tree = args.root
+            revision = head
+            if args.mode == "physical-full":
+                tree = forced_full_tree(args.root, head, args.run, scratch, args.mode)
+                revision += "+forced-full"
             environment = dict(
                 os.environ,
-                PYTHONPATH=str(args.root),
+                PYTHONPATH=str(tree),
                 TMPDIR=str(scratch),
                 JAX_PLATFORMS="cuda",
                 XLA_PYTHON_CLIENT_PREALLOCATE="false",
@@ -125,13 +136,15 @@ def main():
                 "-p",
                 "no:cacheprovider",
                 "--basetemp=" + str(scratch / "physical"),
-                str(args.root / "tests/test_candidate_inspection_batched.py"),
+                str(tree / "tests/test_candidate_inspection_batched.py"),
                 "-m",
                 "slow",
                 "-vv",
                 "-s",
             ]
-            execute(args.root, head, command, args.run / "physical.log", environment)
+            execute(
+                tree, revision, command, args.run / (args.mode + ".log"), environment
+            )
             status = 0
         print("Removing scratch", scratch, flush=True)
     return status

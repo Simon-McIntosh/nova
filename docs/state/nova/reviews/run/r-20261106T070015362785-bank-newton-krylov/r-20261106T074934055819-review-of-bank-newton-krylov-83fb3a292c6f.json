@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-11-06T08:08:41.185Z",
+  "dispatched_at": "2026-11-06T07:51:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The independent guard is the float64 reference comparison on line 452, which the negative control reddens. The two self-reported asserts are kept as diagnostics, not as evidence.",
+      "recorded_at": "2026-11-06T08:11:51.854578+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The cycle test's toy double never reaches _block_gmres, so it is inert today. The next node that touches tests/test_bank_solve_cycle.py should re-type it to NewtonFactor's block-inverse fields; this run does not write that file.",
+      "recorded_at": "2026-11-06T08:11:56.844805+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-newton-krylov",
+      "recorded_at": "2026-11-06T08:11:59.554844+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f1968dda574",
+      "line": 454,
+      "severity": "non-blocking",
+      "text": "assert float(step.krylov_condition * step.krylov_residual) <= 1e-8 compares two values the code itself reports, and the assert bool(step.converged) on line 453 reads the code's own flag, so neither is independent of the value under test; the independent guard is the float64 reference comparison at line 452, which is what the negative control actually reddens."
+    },
+    {
+      "file": "tests/test_bank_solve_cycle.py",
+      "id": "fb1bad44f17",
+      "line": 42,
+      "severity": "non-blocking",
+      "text": "the toy step double still constructs support_read.NewtonFactor with the LU-era positional layout, so its (size, size) identity matrix lands in block_inverse and its int32 zeros land in indices; inert today because the double never reaches _block_gmres, but shapes disagree with the field's new contract and would fault the first consumer that does."
+    },
+    {
+      "file": "tests/test_bank_step_booking.py",
+      "id": "fba8516cbb5",
+      "line": 125,
+      "severity": "non-blocking",
+      "text": "this file is the only test that exercises newton_step's carried-factor reuse with a real rebuild and a real GMRES solve, and it appears in neither the baseline nor the head suite arm, so the reuse path the diff re-typed is not covered by the recorded gate."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against base 50b66f2b: 14f017e lands the Krylov solve and the tests, 9ac772a pins the carried index dtype, 83fb3a2 lands the prototype report and the evidence fragment.",
+    "done_when": "the brief's measures are asserted: tests/test_bank_newton_step.py:391-454 checks the physical update against an independent float64 solve at both trial and converged 550-cell states, tests/test_bank_solve_cycle.py:92,173 (unchanged) keep every lane at fresh residual at most 1e-10, and the evidence table records per-lane updates, fresh reads, linear device ms and the whole-solve and per-slice walls.",
+    "goal": "support_read.py:1404-1487 now solves the equilibrated system with a twice-applied-Gram-Schmidt restarted Arnoldi and a per-cell 3x3 block inverse, stops on the preconditioned condition estimate times the relative residual at 1e-8, and NewtonFactor carries block_inverse and indices instead of lu and pivots; no lu_factor or lu_solve remains on the step path.",
+    "manifest": "the manifest records three commits, the suite receipts with completed true, the negative-control log path and the measured revision pair; it reads status blocked with blockers none while its checkpoint says every deliverable is committed, which is a record inconsistency rather than missing evidence.",
+    "write_paths": "the manifest declares nova/equilibrium/support_read.py, tests/test_bank_newton_step.py, scripts/prototypes/bank_newton_krylov and the bank-newton-krylov evidence fragment, and every one of the eight files in the diff sits inside that set; nova/equilibrium/topology.py is untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: support_read.py:1404-1487 at head 83fb3a29 replaces the equilibrated LU step with a block-preconditioned restarted Arnoldi whose stop is the preconditioned condition estimate times the relative residual at 1e-8, and NewtonFactor carries block_inverse and indices instead of lu and pivots.\nVERDICT done_when: the brief's measures are asserted, tests/test_bank_newton_step.py:391-454 checking the physical update against an independent float64 solve at trial and converged states and the unchanged tests/test_bank_solve_cycle.py:92,173 keeping every lane at fresh residual at most 1e-10, with the H200 table recording per-lane updates, reads, linear device ms and both walls.\nVERDICT write_paths: the manifest declares the production file, the assigned test file, scripts/prototypes/bank_newton_krylov and the evidence fragment, and all eight files in the diff are inside that set with topology.py untouched.\nVERDICT manifest: it records three commits, six suite logs with completed true and two baseline failures against zero head failures, the negative-control log and its note, and the measured revision pair; it reads status blocked with blockers none while the checkpoint says the deliverables are complete.\nVERDICT diff: read commit by commit against base 50b66f2b, 14f017e adds the Krylov step and its tests, 9ac772a fixes the carried index dtype, and 83fb3a2 adds the prototype report and the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1461-1487 runs the block-preconditioned solve and sets the converged flag from condition times residual, which is the rule the brief names.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate logs at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015362785-bank-newton-krylov/verified/head-test_bank_newton_step.log end EXIT=0 with 16 passed and the receipts at verified/device-head/receipt.json carry revision 9ac772a.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff from 50b66f2b to 83fb3a29 lies inside the write paths listed at the head of the reviewed manifest.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_bank_newton_step.py:452 fails at 6.5e-3 and 7.4e-3 under the recorded unpreconditioned control, so the guard reddens on the regression it names, while the self-reporting asserts at :453-454 add no independent power.\nSCORE fit: 17\nJUSTIFICATION fit: the new helpers at nova/equilibrium/support_read.py:1304-1398 follow the file's private-helper style and carry no plan label, though the three defaulted NewtonStep fields at :1072-1074 extend a NamedTuple the codebase otherwise fills positionally.\nSCORE reuse: 14\nJUSTIFICATION reuse: nova/equilibrium/fixed_point.py:2227 _krylov_machine already owns a restarted Gram-Schmidt GMRES for the outer Newton-Krylov route, but it is a private per-member request stream for a fused batch rather than a dense linear solve, so support_read's Arnoldi at :1332 does not wrap it; the brief directed a local Arnoldi or the public jax.scipy.sparse.linalg.gmres, and no public owner of a block-preconditioned dense solve was found.\nFINDING tests/test_bank_newton_step.py:454 non-blocking: assert float(step.krylov_condition * step.krylov_residual) <= 1e-8 and the converged assert on line 453 compare values the code itself reports, so they hold whatever the solve does; the independent guard is the float64 reference at line 452.\nFINDING tests/test_bank_solve_cycle.py:42 non-blocking: the toy NewtonFactor still passes the LU-era positional layout, filling block_inverse with a (size, size) identity and indices are zeros, so the double is inert but shape-inconsistent with the re-typed field.\nFINDING tests/test_bank_step_booking.py:125 non-blocking: the only test exercising newton_step carried-factor reuse with a real solve is in neither suite arm, so the reuse path the diff re-typed is not covered by the recorded gate.",
+  "review_run_id": "r-20261106T074934055819-review-of-bank-newton-krylov-83fb3a292c6f",
+  "reviewed_base_sha": "50b66f2b7662c9fff3842f3f4e8cab2547386651",
+  "reviewed_head_sha": "83fb3a292c6fdcb0640c65c8faf7b92d7cff44a5",
+  "reviewed_run_id": "r-20261106T070015362785-bank-newton-krylov",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T08:08:50.306266+00:00",
+  "total": 100
+}

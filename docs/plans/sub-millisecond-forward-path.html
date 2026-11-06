@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="170">
+<meta name="plan-version" content="171">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -604,7 +604,10 @@
     <div class="r-comment-body"><p>figure review of r-20261106T054125594099-bank-solve-trace at head 1e446dd29abeb7c0e7844dbfff9d307fa9e09f44 — six of six rubric items pass on the rendered PNG, marker positions reconcile with the record's device table at every one of the seventeen groups, and one non-blocking finding records that the shared 0-450 ms linear axis compresses the sub-6 ms groups to within 27 px of the origin.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T070015362785-bank-newton-krylov" data-who="reckon-build" data-when="2026-11-06T08:24:02Z">
-    <div class="r-comment-body"><p>&lt;a href=&quot;/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-krylov.html#bank-newton-krylov-landing&quot;&gt;Block-GMRES evidence&lt;/a&gt;: bank Newton steps use equilibrated 3x3-block GMRES with measured preconditioned condition/residual bounds. Sixteen-slice linear device time falls 643.001 to 67.142 ms and whole solve 2318.207 to 1594.793 ms; every lane meets fresh and paired/oracle precision. Seven-file Sirius head 53 passed, 5 skipped, one shared failure versus base 48 passed, 5 skipped, three failures; no added failure and carried-factor reuse/rebuild passes both arms; both unpreconditioned physical-update controls fail.</p></div>
+    <div class="r-comment-body"><p>&lt;a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-krylov.html#bank-newton-krylov-landing"&gt;Block-GMRES evidence&lt;/a&gt;: bank Newton steps use equilibrated 3x3-block GMRES with measured preconditioned condition/residual bounds. Sixteen-slice linear device time falls 643.001 to 67.142 ms and whole solve 2318.207 to 1594.793 ms; every lane meets fresh and paired/oracle precision. Seven-file Sirius head 53 passed, 5 skipped, one shared failure versus base 48 passed, 5 skipped, three failures; no added failure and carried-factor reuse/rebuild passes both arms; both unpreconditioned physical-update controls fail.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T074934055819-review-of-bank-newton-krylov-83fb3a292c6f" data-who="reckon-build" data-when="2026-11-06T08:08:41.185Z">
+    <div class="r-comment-body"><p>Review of bank-newton-krylov at 83fb3a29: block-preconditioned Krylov step lands with an independent float64 physical-update guard and a reddened unpreconditioned control; scores 18/17/18/16/17/14 and three non-blocking findings.</p></div>
 </div>
 </section>
 </main>

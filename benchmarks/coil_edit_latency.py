@@ -28,7 +28,6 @@ import platform
 import socket
 import sys
 import subprocess
-import textwrap
 import threading
 import time
 from typing import Any
@@ -92,8 +91,6 @@ DEFAULT_PANEL_DATA = DIAGNOSTIC_ROOT / "panel-states.npz"
 DEFAULT_PANEL_FIGURE = DIAGNOSTIC_ROOT / "converged-vs-nonconverged.png"
 SHOT = 22086
 SLICE_INDEX = 43
-#: Characters per line the panel caption is wrapped to, so it stays on the canvas.
-CAPTION_WIDTH = 150
 
 #: Display spacing [m] of the panel map, the coarsest the builder admits.
 DEFAULT_DISPLAY_SPACING = 0.010
@@ -2340,20 +2337,21 @@ def _render_panel(
                     panel["display"].max_solved_node_mismatch_wb
                     <= 10 * panel["residual"]
                 ), "converged panel's solved-node mismatch exceeds ten residuals"
-    figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
+    figure, axes = plt.subplots(1, 2, figsize=(14, 7.2), constrained_layout=True)
 
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
         panel = loaded[label]
         _paint_panel(axis, loaded, panel)
         axis.set_title(
-            "edit %d  %+d%%  residual %.3e  converged %s  trips %d"
+            "edit %d  %+d%%  %s\nresidual %.3e Wb  %d trips"
             % (
                 panel["edit_index"],
                 round(100.0 * panel["fraction"]),
+                "converged" if panel["converged"] else "not converged",
                 panel["residual"],
-                "yes" if panel["converged"] else "no",
                 panel["trips"],
-            )
+            ),
+            fontsize=20,
         )
 
     reference_note = _saddle_note(
@@ -2402,15 +2400,11 @@ def _render_panel(
             solved_orderings[1],
         )
     )
-    # The caption states every distinction the panel draws and is longer than
-    # one line of the canvas; wrapped, it stays inside the figure rather than
-    # being cut at both edges.
-    figure.suptitle(
-        textwrap.fill(caption + _panel_display_note(loaded), CAPTION_WIDTH),
-        fontsize=9,
-    )
+    # Detailed measurements belong in the page caption, where the reader sees
+    # them at body size instead of shrinking them with the image.
+    caption += _panel_display_note(loaded)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(figure_path, dpi=140)
+    figure.savefig(figure_path, dpi=100)
     vector_path = figure_path.with_suffix(".svg")
     figure.savefig(vector_path)
     plt.close(figure)
@@ -2418,6 +2412,7 @@ def _render_panel(
     return {
         "figure": str(figure_path),
         "figure_vector": str(vector_path),
+        "caption": caption,
         "levels": [float(value) for value in loaded["levels"]],
         "level_band": {
             "axis_flux": loaded["reference_axis_flux"],

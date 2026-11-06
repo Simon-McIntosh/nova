@@ -24,11 +24,13 @@ import pytest
 from dataclasses import replace
 
 from pathlib import Path
+from PIL import Image
 
 from benchmarks.coil_edit_latency import (
     DEFAULT_DISPLAY_SPACING,
     _panel_display_map,
     _panel_load,
+    _render_panel,
     _prepare_case,
 )
 from nova.biot.greens import hybrid_greens
@@ -48,6 +50,20 @@ assert jax.config.jax_enable_x64 is True, (
     "the map is compared against the operator's own raster, so the test process "
     "must resolve the same working precision the operator was built in"
 )
+
+
+def test_panel_explanation_is_available_at_page_text_size(tmp_path: Path):
+    archive = Path(
+        "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+    )
+    figure = tmp_path / "panel.png"
+    panel = _render_panel(archive, figure)
+
+    with Image.open(figure) as image:
+        assert image.size == (1400, 720)
+    assert "terminal poloidal flux" in panel["caption"]
+    assert "terminal poloidal flux" not in figure.with_suffix(".svg").read_text()
+
 
 #: The re-solved state's conductor sections [m] and the current it carries.
 CONDUCTOR_RADIUS = np.asarray([0.75, 1.25])

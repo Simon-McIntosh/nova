@@ -6183,8 +6183,9 @@ def redraw_persisted_bank(output: Path) -> dict[str, Any]:
     partial_path = output / PARTIAL_RECEIPT_NAME
     if partial_path.exists():
         partial = json.loads(partial_path.read_text())
-        partial["result"]["fine_map_separatrix"] = summary
-        partial["result"]["frame_records"] = records
+        section = partial.setdefault("result", {})
+        section["fine_map_separatrix"] = summary
+        section["frame_records"] = records
         partial_path.write_text(json.dumps(partial, indent=2, sort_keys=True))
     return {
         "frames_with_separatrix": summary["frames_with_separatrix"],

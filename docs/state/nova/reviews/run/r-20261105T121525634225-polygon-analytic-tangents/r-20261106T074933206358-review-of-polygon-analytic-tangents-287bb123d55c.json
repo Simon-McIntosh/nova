@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: baseline_suite at revision e12121cec (completed, 3 failure ids) against after_suite at revision ffcbcb5353 (completed, 0 failure ids); head minus base is empty, so zero added failures.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "Any of the four endpoint tangent families drifts from the unreduced 50-digit integral by more than SCAN_TOLERANCE; restoring the base _against_first_arsinh_tangent reddens it.",
+      "file": "tests/biot/test_vertex_term_tangents.py",
+      "line": 842
+    },
+    {
+      "condition_to_fail": "Any endpoint primal drifts from the unreduced 50-digit integral by more than 1e-10.",
+      "file": "tests/biot/test_vertex_term_tangents.py",
+      "line": 846
+    },
+    {
+      "condition_to_fail": "The edge flux-line tangent or primal drifts from the 50-digit integral beyond its bound; reverting _flux_line_weights reddens the captured steep rows 2730 and 3730.",
+      "file": "tests/biot/test_edge_term_tangents.py",
+      "line": 482
+    },
+    {
+      "condition_to_fail": "test_near_corner_reference_is_the_exact_integral requires samples > 0 and every selected near-corner row within its primal allowance.",
+      "file": "tests/biot/test_vertex_term_tangents.py",
+      "line": 500
+    }
+  ],
+  "base_log_revision": "e12121cec6e92ecba81d8419a387f74be4a3d898",
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/biot/polygonanalytic.py:2146 polygon_analytic_flux_moments",
+    "nova/biot/polygonanalytic.py:2643 _packed_analytic_moments_primal",
+    "nova/biot/polygonanalytic.py:2290 _central_field_moments_direct",
+    "nova/biot/polygonanalytic.py:2442 polygon_analytic_field_moments",
+    "nova/biot/polysection.py:241 flux assembly",
+    "nova/equilibrium/extraction_lattice.py:201 lattice flux moments"
+  ],
+  "completed_at": "2026-11-06T08:09:33.582Z",
+  "dispatched_at": "2026-11-06T07:51:59Z",
+  "findings": [
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "831",
+      "severity": "non-blocking",
+      "text": "non-blocking: against_root(..., stable=True) evaluates _weighted_root over the whole target array before xp.where selects the near band, and the weighted residual call at line 952 does the same for against_first_arsinh, so every target in the production flux-moment path pays the extra graded quadrature; with the corner band widened fiftyfold at line 614 the widened selection is also more often taken, and the manifest records no throughput measure for either."
+    },
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "308",
+      "severity": "non-blocking",
+      "text": "non-blocking: _weighted_residual copies the graded panel loop (width, stretch, panel map, jacobian, regularised piece, model subtraction) that nova/biot/gradedresidual.py:178 graded_residual already owns, rather than adding a weight argument there; it does reuse that module's primitives, but a later correction to the owner's grading or endpoint model will not reach this variant."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/polygon-analytic-tangents.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment calls the _against_first_arsinh_tangent restoration the declared negative control and places it in a scratch copy of the committed head, but negative-control.log records revision 3a147537a rather than the head, and the manifest declares horizontal-negative-control.log at revision 404c001f6 as its negative control, so a promotion reader comparing the two records sees two different declared controls."
+    }
+  ],
+  "head_log_revision": "ffcbcb5353d56a66e1cb5830fba729e3a088b94b",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Reviewed commit by commit from acc972e71a3 to 287bb123d5: three fix commits regularise the endpoint tangents, add the small-corner paired-angle branches and factor the steep-edge flux weights, with doc commits between them; the four landed files carry 855 insertions and 108 deletions and every addition sits inside the declared scope.",
+    "done_when": "The evidence fence requires five tangents agreeing with independent 50-digit references and with JVP at 1e-9, the near-corner rows reached, and one sbatch job on sirius with zero added failures; branch-repair/head-vertex.log and head-edge.log record 4/3/3/6/5 EXACT_INTEGRAL rows all under 1e-9, NEAR_CORNER samples=28 passing, and the suite arms move from 3 failed, 26 passed to 29 passed with no head failure id.",
+    "goal": "The node goal in prompt.txt is to repair the tangent mismatches in nova/biot/polygonanalytic.py that the biot tangent tests isolate; the landed diff changes the five named tangent families in that file and both tangent files move from 3 failed, 26 passed to 29 passed.",
+    "manifest": "manifest.md records status complete, nine commits, four changed paths, a completed baseline_suite of 3 failures and an after_suite of 0, and negative_control_log horizontal-negative-control.log whose restored tangent fails at 1.817591739624177e-5 with EXIT=1.",
+    "write_paths": "The four declared write paths in manifest.md:3 are nova/biot/polygonanalytic.py, the two biot tangent tests and the evidence fragment; git diff --stat acc972e71a3 to 287bb123d5 touches exactly those four and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_vertex_term_tangents.py:690-855 adds an mpmath 50-digit probe that differentiates the raw geometry independently of the code under test, and horizontal-negative-control.log shows the restored base tangent failing that same test at 1.817591739624177e-5 with EXIT=1 while the head passes it.",
+    "evidence": "The gate is one sbatch job, and its four receipts (branch-repair/base-edge.log, base-vertex.log, head-edge.log, head-vertex.log) each carry revision, literal command, imported module, resolved cwd, a pytest summary and a final EXIT line, with manifest.md recording base 3 failures against head 0.",
+    "fit": "nova/biot/polygonanalytic.py:530-604 names the new helpers by what they compute, follows the surrounding _Vertex/_Edge reduction idiom, and ruff check reports no findings over the three changed source and test files.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:308-604 adds the endpoint-subtracted weighted residual, the geometric-root integral, the small-corner paired-angle branches and the factored steep-edge weights, and the head suite reports 29 passed against 3 failed at base.",
+    "reuse": "nova/biot/polygonanalytic.py:308 re-implements the graded panel loop owned by nova/biot/gradedresidual.py:178 graded_residual with a weight added, instead of parameterising that owner, though it does reuse the owner's _rule, _grading_width, _model_integral(_tangent) and _regularised(_tangent) primitives.",
+    "scope_discipline": "git diff --stat acc972e71a3 to 287bb123d5 reports four files, all inside the four paths declared at manifest.md:3, and the docs-only commits after ffcbcb5353 change nothing but the fragment."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal in prompt.txt is to repair the tangent mismatches the biot tangent tests isolate; nova/biot/polygonanalytic.py:308-604 changes exactly the five named tangent families and both tangent files move from 3 failed, 26 passed to 29 passed.\nVERDICT done_when: the evidence fence requires 50-digit and JVP agreement at 1e-9, the near-corner rows reached, and one sbatch job on sirius with zero added failures; branch-repair/head-vertex.log and head-edge.log record every reference row under bound, NEAR_CORNER samples=28 passes, and the suite arms move from 3 failed, 26 passed to 29 passed with no head failure id.\nVERDICT write_paths: the four paths declared at manifest.md:3 are exactly the four files git diff --stat acc972e71a3 to 287bb123d5 reports, and the docs-only commits after ffcbcb5353 touch only the fragment.\nVERDICT manifest: manifest.md records complete status, nine commits, four changed paths, a 3-failure base arm against a 0-failure head arm, and negative_control_log horizontal-negative-control.log, whose restored tangent fails at 1.817591739624177e-5 with EXIT=1.\nVERDICT diff: read commit by commit from acc972e71a3 to 287bb123d5; three fix commits add the endpoint-subtracted weighted residual, the small-corner paired-angle branches and the factored steep-edge flux weights, with evidence commits between them, 855 insertions and 108 deletions across four files.\nCALL_SITES: nova/biot/polygonanalytic.py:2146 polygon_analytic_flux_moments, nova/biot/polygonanalytic.py:2643 _packed_analytic_moments_primal, nova/biot/polygonanalytic.py:2290 _central_field_moments_direct, nova/biot/polygonanalytic.py:2442 polygon_analytic_field_moments, nova/biot/polysection.py:241, nova/equilibrium/extraction_lattice.py:201\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:308-604 adds the weighted residual, the geometric-root integral, the small-corner branches and the factored steep-edge weights, and the head suite reports 29 passed against 3 failed at base.\nSCORE evidence: 18\nJUSTIFICATION evidence: branch-repair/base-edge.log, base-vertex.log, head-edge.log and head-vertex.log each carry revision, literal command, imported module, resolved cwd, a pytest summary and a final EXIT line, and manifest.md records the 3 against 0 failure arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat acc972e71a3 to 287bb123d5 reports four files, all inside the four paths declared at manifest.md:3.\nSCORE durability: 18\nJUSTIFICATION durability: tests/biot/test_vertex_term_tangents.py:690-855 adds an independent mpmath 50-digit probe, and horizontal-negative-control.log shows the restored base tangent failing that test at 1.817591739624177e-5 while the head passes it.\nSCORE fit: 19\nJUSTIFICATION fit: nova/biot/polygonanalytic.py:530-604 names the helpers by what they compute, follows the surrounding reduction idiom, and ruff check reports no findings over the changed source and tests.\nSCORE reuse: 12\nJUSTIFICATION reuse: nova/biot/polygonanalytic.py:308 re-implements the graded panel loop owned by nova/biot/gradedresidual.py:178 graded_residual with a weight added rather than parameterising the owner, though it reuses that module's _rule, _grading_width, _model_integral and _regularised primitives.\nFINDING nova/biot/polygonanalytic.py:831 non-blocking: against_root(..., stable=True) evaluates _weighted_root over the whole target array before xp.where selects the near band, and the weighted residual call at line 952 does the same for against_first_arsinh, so every target in the production flux-moment path pays the extra graded quadrature, with the corner band widened fiftyfold at line 614 and no throughput measure recorded.\nFINDING nova/biot/polygonanalytic.py:308 non-blocking: _weighted_residual copies the graded panel loop nova/biot/gradedresidual.py:178 graded_residual owns instead of taking a weight argument there, so a later fix to the owner will not reach this variant.\nFINDING docs/evidence/fragments/nova-portfolio-replan/polygon-analytic-tangents.html:19 non-blocking: the fragment labels the _against_first_arsinh_tangent restoration as the declared negative control in a scratch copy of the committed head, while negative-control.log records revision 3a147537a and the manifest declares horizontal-negative-control.log at revision 404c001f6 as the negative control.\n",
+  "review_run_id": "r-20261106T074933206358-review-of-polygon-analytic-tangents-287bb123d55c",
+  "reviewed_base_sha": "acc972e71a3ed305704cc6151dd880af11091204",
+  "reviewed_commits": [
+    "3a147537adfda27f8552c97fc9e6e0fd65b0c7c0",
+    "004b19e3efc0c513b28e349a9b5dcf399ac6a64c",
+    "e12121cec6e92ecba81d8419a387f74be4a3d898",
+    "404c001f66509517643208effa97e6b59e5bd039",
+    "0ac52db086d0fb0816010c0be36032a418c9321c",
+    "ffcbcb5353d56a66e1cb5830fba729e3a088b94b",
+    "d84c4e947b28d374923a9a2622f37a0d321133c9",
+    "510c1179497e664081d48a69741172b512acbdc3",
+    "287bb123d55cdc99f753adf48259cb2ab2bca7e7"
+  ],
+  "reviewed_head_sha": "287bb123d55cdc99f753adf48259cb2ab2bca7e7",
+  "reviewed_run_id": "r-20261105T121525634225-polygon-analytic-tangents",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T08:22:00Z",
+  "total": 106
+}

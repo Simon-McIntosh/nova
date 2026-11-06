@@ -1,0 +1,131 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1493",
+    "benchmarks/diiid_forward_gs_match.py:1952",
+    "benchmarks/display_map_promoted_figure.py:51",
+    "benchmarks/mast_centroid_solve_panels.py:1197",
+    "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:290"
+  ],
+  "completed_at": "2026-11-06T13:11:32.233Z",
+  "dispatched_at": "2026-11-06T13:02:02Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:16.659287+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:19.531069+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:23.011738+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:27.217406+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:29.395918+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:31.858273+00:00"
+    },
+    "6": {
+      "kind": "exempted",
+      "reason": "non-blocking test-strength and record findings after three review rounds that fixed the blocking regression and the timeout; the convergence-branch skip and the triplicated label-defect counter are carried to the coordinator's follow-up list",
+      "recorded_at": "2026-11-06T13:17:35.652237+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "117",
+      "severity": "non-blocking",
+      "text": "the promoted-count assertion compares two committed artefacts, the receipt's number and the archive's mask, so a regression that counts the whole mask in nova/equilibrium/display_flux.py leaves it green until the receipt is regenerated; the earlier review recorded the same gap and it is unchanged."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "159",
+      "severity": "non-blocking",
+      "text": "the nearest-promoted bound fits the archive's own spline and never constructs a display map or reads a display_flux field, so no display_flux regression can redden it and the 0.2 bound is stated with no justification for its size."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "line": "373",
+      "severity": "non-blocking",
+      "text": "the repaired polished-saddle check sits inside `if display.saddle_converged:`, so a build that stops converging skips the assertion entirely and the test still passes; making convergence a precondition rather than a branch would let the check fail on that regression too."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "the brief asks a red control per new check and only the mask-tail, saddle-offset and caption controls are recorded; the polished-saddle distance and the promoted count carry none, and the fragment itself concedes the promoted-count row's red is the mask-tail test failing rather than a red on that assertion."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "2325",
+      "severity": "non-blocking",
+      "text": "`_label_defects` is a third implementation of a figure label-defect count that benchmarks/mast_centroid_solve_panels.py:1395 and benchmarks/diiid_forward_gs_match.py:3695 already carry; no owner module exists to extend, so the three copies will drift independently."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "428",
+      "severity": "non-blocking",
+      "text": "the slow committed-panel test this node edits is recorded in the fragment as hitting its 3300 s ceiling and failing, so the repairs made inside it carry no green run; the same capabilities are covered by the fast tests, but the edits in that test are unverified."
+    },
+    {
+      "file": "manifest.md",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "the commits field lists 7 shas for a range holding 8, omitting 122de5110 whose addition f9debe44f then replaced, so a reader reconciling the manifest against the diff finds one unexplained commit."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read 70d362432..0c29f3e83 commit by commit; a0143e703 narrows the truncation to _wall_rows with a count refusal, f9debe44f replaces 122de5110's machine-building test with two archive-only checks, dcf3dd751 makes the offset a distance between two independently polished saddles, and 0c29f3e83 is docs-only.",
+    "done_when": "done_when item 1 names the polished-saddle distance, the saddle offset, the promoted count and the mask-tail refusal, and item 3 names the base and head gate; tests/test_display_flux.py:657 measures the offset from two fields the test polishes itself with a recorded red, tests/test_display_flux.py:383 pins the count and the tail with a recorded red, and both arms are in base-gate.log and head-gate.log.",
+    "goal": "the node goal is to make the coil-edit panel tests and renderer able to fail on real defects; the delta replaces the three self-referential comparisons with values derived from the published field and the solve's own mask, and nova/equilibrium/display_flux.py:324 now refuses a discarded mask tail that is not the operator's wall rows.",
+    "manifest": "read; it records status complete, both arms at 11 and 17 passed with EXIT=0 and their logs, and the offset control at EXIT=1; it lists 7 of the 8 commits in the reviewed range, omitting 122de5110, and its after_suite revision is dcf3dd751 rather than the reviewed head 0c29f3e83.",
+    "write_paths": "the diff touches exactly benchmarks/coil_edit_latency.py, docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html, nova/equilibrium/display_flux.py, tests/test_coil_edit_panel_render.py and tests/test_display_flux.py, the five paths the manifest declares, and nothing else."
+  },
+  "justifications": {
+    "durability": "the offset check reddens at offset-control.log EXIT=1 with `assert 0.0 == 12.529964086141677`, but tests/test_coil_edit_panel_render.py:117 compares two committed artefacts and tests/test_coil_edit_panel_render.py:159 never reaches nova/equilibrium/display_flux.py.",
+    "evidence": "head-gate.log ends `17 passed, 43 deselected in 303.54s` with EXIT=0 and base-gate.log ends `11 passed, 43 deselected in 237.70s` with EXIT=0, both naming revision, tree, command, cwd and the imported display_flux.py in their headers.",
+    "fit": "benchmarks/coil_edit_latency.py:2325 `_label_defects` and nova/equilibrium/display_flux.py:228 `_wall_rows` follow the surrounding private-helper and refusal idiom, and no added name carries a plan, sprint or ticket label.",
+    "goal_fidelity": "nova/equilibrium/display_flux.py:324 refuses a discarded tail that differs from the operator's wall rows, and tests/test_display_flux.py:657 re-derives both saddles, so the two comparisons the earlier review found self-referential now have an independent side.",
+    "reuse": "no owner module for a figure label check exists -- a search of nova/media and the tree for get_window_extent and overlaps() found only per-script copies -- but benchmarks/mast_centroid_solve_panels.py:1395 and benchmarks/diiid_forward_gs_match.py:3695 already count exactly these two quantities, so the addition is a third fork.",
+    "scope_discipline": "`git diff --stat 70d362432..0c29f3e83` names only the five declared write paths and no unrelated edit rides along."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the coil-edit panel tests and renderer able to fail on real defects; the delta replaces the three self-referential comparisons with values derived from the published field and the solve's own mask, and nova/equilibrium/display_flux.py:324 now refuses a discarded mask tail that is not the operator's wall rows.\nVERDICT done_when: done_when item 1 names the polished-saddle distance, the saddle offset, the promoted count and the mask-tail refusal, and item 3 names the base and head gate; tests/test_display_flux.py:657 measures the offset from two fields the test polishes itself with a recorded red, tests/test_display_flux.py:383 pins the count and the tail with a recorded red, and both arms are in base-gate.log and head-gate.log.\nVERDICT write_paths: the diff touches exactly benchmarks/coil_edit_latency.py, docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html, nova/equilibrium/display_flux.py, tests/test_coil_edit_panel_render.py and tests/test_display_flux.py, the five paths the manifest declares, and nothing else.\nVERDICT manifest: read; it records status complete, both arms at 11 and 17 passed with EXIT=0 and their logs, and the offset control at EXIT=1; it lists 7 of the 8 commits in the reviewed range, omitting 122de5110, and its after_suite revision is dcf3dd751 rather than the reviewed head 0c29f3e83.\nVERDICT diff: read 70d362432..0c29f3e83 commit by commit; a0143e703 narrows the truncation to _wall_rows with a count refusal, f9debe44f replaces 122de5110's machine-building test with two archive-only checks, dcf3dd751 makes the offset a distance between two independently polished saddles, and 0c29f3e83 is docs-only.\nCALL_SITES: benchmarks/coil_edit_latency.py:1493, benchmarks/diiid_forward_gs_match.py:1952, benchmarks/display_map_promoted_figure.py:51, benchmarks/mast_centroid_solve_panels.py:1197, scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:290\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/display_flux.py:324 refuses a discarded tail that differs from the operator's wall rows, and tests/test_display_flux.py:657 re-derives both saddles, so the two comparisons the earlier review found self-referential now have an independent side.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-gate.log ends `17 passed, 43 deselected in 303.54s` with EXIT=0 and base-gate.log ends `11 passed, 43 deselected in 237.70s` with EXIT=0, both naming revision, tree, command, cwd and the imported display_flux.py in their headers.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat 70d362432..0c29f3e83` names only the five declared write paths and no unrelated edit rides along.\nSCORE durability: 15\nJUSTIFICATION durability: the offset check reddens at offset-control.log EXIT=1 with `assert 0.0 == 12.529964086141677`, but tests/test_coil_edit_panel_render.py:117 compares two committed artefacts and tests/test_coil_edit_panel_render.py:159 never reaches nova/equilibrium/display_flux.py.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py:2325 `_label_defects` and nova/equilibrium/display_flux.py:228 `_wall_rows` follow the surrounding private-helper and refusal idiom, and no added name carries a plan, sprint or ticket label.\nSCORE reuse: 12\nJUSTIFICATION reuse: no owner module for a figure label check exists -- a search of nova/media and the tree for get_window_extent and overlaps() found only per-script copies -- but benchmarks/mast_centroid_solve_panels.py:1395 and benchmarks/diiid_forward_gs_match.py:3695 already count exactly these two quantities, so the addition is a third fork.\nFINDING tests/test_coil_edit_panel_render.py:117 non-blocking: the promoted-count assertion compares two committed artefacts, the receipt's number and the archive's mask, so a regression that counts the whole mask in nova/equilibrium/display_flux.py leaves it green until the receipt is regenerated; the earlier review recorded the same gap and it is unchanged.\nFINDING tests/test_coil_edit_panel_render.py:159 non-blocking: the nearest-promoted bound fits the archive's own spline and never constructs a display map or reads a display_flux field, so no display_flux regression can redden it and the 0.2 bound is stated with no justification for its size.\nFINDING tests/test_display_flux.py:373 non-blocking: the repaired polished-saddle check sits inside `if display.saddle_converged:`, so a build that stops converging skips the assertion entirely and the test still passes; making convergence a precondition rather than a branch would let the check fail on that regression too.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html:18 non-blocking: the brief asks a red control per new check and only the mask-tail, saddle-offset and caption controls are recorded; the polished-saddle distance and the promoted count carry none, and the fragment itself concedes the promoted-count row's red is the mask-tail test failing rather than a red on that assertion.\nFINDING benchmarks/coil_edit_latency.py:2325 non-blocking: `_label_defects` is a third implementation of a figure label-defect count that benchmarks/mast_centroid_solve_panels.py:1395 and benchmarks/diiid_forward_gs_match.py:3695 already carry; no owner module exists to extend, so the three copies will drift independently.\nFINDING tests/test_coil_edit_panel_render.py:428 non-blocking: the slow committed-panel test this node edits is recorded in the fragment as hitting its 3300 s ceiling and failing, so the repairs made inside it carry no green run; the same capabilities are covered by the fast tests, but the edits in that test are unverified.\nFINDING manifest.md:9 non-blocking: the commits field lists 7 shas for a range holding 8, omitting 122de5110 whose addition f9debe44f then replaced, so a reader reconciling the manifest against the diff finds one unexplained commit.\n",
+  "review_run_id": "r-20261106T130049946163-review-of-coil-edit-panel-guards-0c29f3e83618",
+  "reviewed_base_sha": "70d36243277ca53b2fdd94cb96910e4bda20c0bd",
+  "reviewed_head_sha": "0c29f3e8361801accde42e33e67d2c7d2bcd0034",
+  "reviewed_run_id": "r-20261106T074800034935-coil-edit-panel-guards",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T13:18:45.634358+00:00",
+  "total": 100
+}

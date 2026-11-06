@@ -3,6 +3,11 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-06T20:39:14.572Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-forward-convergence",
+      "recorded_at": "2026-11-06T20:44:27.556251+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "diiid-forward-convergence",

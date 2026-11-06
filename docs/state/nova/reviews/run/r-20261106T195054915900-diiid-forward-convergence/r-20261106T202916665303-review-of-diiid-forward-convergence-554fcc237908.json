@@ -20,6 +20,18 @@
     }
   },
   "dispatched_at": "2026-11-06T20:30:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-forward-convergence",
+      "recorded_at": "2026-11-06T20:44:46.558598+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-forward-convergence",
+      "recorded_at": "2026-11-06T20:44:49.829969+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_forward_convergence/build_receipt.py",

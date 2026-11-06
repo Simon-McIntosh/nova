@@ -10,6 +10,13 @@
     "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
     "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-forward-convergence",
+      "recorded_at": "2026-11-06T10:57:34.543895+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: nova:separatrix-spline-extraction s8",

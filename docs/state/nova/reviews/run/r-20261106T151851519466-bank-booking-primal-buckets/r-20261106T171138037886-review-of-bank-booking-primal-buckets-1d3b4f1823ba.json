@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:414",
+    "nova/equilibrium/support_read.py:536",
+    "nova/equilibrium/support_read.py:560",
+    "nova/equilibrium/support_read.py:564",
+    "nova/equilibrium/support_read.py:1097",
+    "nova/equilibrium/support_read.py:1135"
+  ],
+  "call_sites_emission": "sites",
+  "completed_at": "2026-11-06T17:18:38.377Z",
+  "dispatched_at": "2026-11-06T17:12:39Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Duplicated loader in a prototype measurement script; not product code.",
+      "recorded_at": "2026-11-06T17:20:32.632443+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Reverting book to the 16-cell tile changes the booked bytes, and the byte pins on both measured CPU families catch it. The constant test pins the intended value. A compiled-structure guard is not worth another round.",
+      "recorded_at": "2026-11-06T17:20:35.329715+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_booking_primal_buckets/tradeoff.py",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "read_processes re-implements the per-process receipt loader that scripts/prototypes/bank_booking_primal_buckets/report.py:42-88 already owns inline, reading the same capture.json and attribution.json pair and repeating the same compilation-cache-hit assertion, so a change to the receipt layout must now be made in both files; the owner should be extracted and called rather than duplicated."
+    },
+    {
+      "file": "tests/test_book_primal_buckets.py",
+      "line": 37,
+      "severity": "non-blocking",
+      "text": "the added guard asserts only that the module constant equals 32 and never asserts that book uses it, so reinstating the original formulation at nova/equilibrium/current.py:481 (batch_width = min(quadrature.cut_batch_width, cells), default 16) leaves _SCALAR_CUT_BATCH_WIDTH at 32 and this test green; only the host byte pins would redden, and only on the two pinned CPU families."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call sites in nova/equilibrium/support_read.py (414, 536, 560, 564, 1097, 1135); no production caller of current.book or current.book_tangent_channels exists outside that module.",
+    "diff": "read all 13 commits against 9ab6ba60 commit by commit; e79d54fd restores the 32-cell primal tile and adds the prior timing arm to scripts/prototypes/bank_booking_primal_buckets/device.py:13-40, 523346cd factors _SCALAR_CUT_BATCH_WIDTH at nova/equilibrium/current.py:69 and adds cpu_contract.py/.sh and the tile guard, e38cf69c re-pins the Broadwell tuple at tests/test_bank_step_booking.py:24-30, 1d3b4f182 touches only the evidence fragment, and the tradeoff.py commits assemble the attribution and three-arm tables.",
+    "done_when": "the measure is per-field moment parity at 1e-14, an unchanged-or-repinned pin with its difference table, paired suites with no added failures, and one H200 allocation tabling residual device ms and launches, per-process reads, whole-solve wall and wall per read against the pair_gaps precision budgets; the fragment records 1.708597e-16 relative on the five moment references, a three-field pin table backed by cpu-contract/broadwell-pins.log, baseline-suite.log 1 failure to cpu-contract/sirius-suite.log 0 failures, and the three-arm 1/16-slice tables with every precision maximum under its limit.",
+    "goal": "the node goal is to give current.book the same separate-population, shared-helper structure as book_tangent_channels without a vmap conditional and without the booking regression; nova/equilibrium/current.py:479-487 buckets the conic and normal populations and :481 now takes the shared 32-cell tile at :69, so the delta removes the 16-cell regression the prior review blocked on and keeps the shared structure.",
+    "manifest": "read manifest.md; status is complete at the reviewed head 1d3b4f1823bab8dce60eb12a589128a9d96d473d, its commits list ends at that sha, and its baseline_suite and after_suite receipts point at logs on disk whose last lines are EXIT=1 and EXIT=0 with the matching SUMMARY records.",
+    "write_paths": "read the manifest's declared paths (nova/equilibrium/current.py, tests/test_book_primal_buckets.py, tests/test_bank_step_booking.py, scripts/prototypes/bank_booking_primal_buckets, and the evidence fragment); git diff --name-status 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad 1d3b4f1823bab8dce60eb12a589128a9d96d473d lists 9 files and every one is inside them."
+  },
+  "justifications": {
+    "durability": "the added guard tests/test_book_primal_buckets.py:37 reddens under the recorded tile mutation (cpu-contract/negative-tile-test_book_primal_buckets.log, EXIT=1, assert 16 == 32) but it pins the constant rather than its use, so the original formulation at nova/equilibrium/current.py:481 could return with the guard still green.",
+    "evidence": "the done_when columns are tabled in docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html from receipts that exist on disk, but the manifest's recorded after_suite is the three-file Sirius arm at e38cf69c while the brief asked for six paired files, and the six-file head result survives only as a narrative artifact line rather than as a recorded suite receipt.",
+    "fit": "nova/equilibrium/current.py:69-70 places the fixed scalar tile beside the existing normal-form width, the docstring at :46-50 states which knob each function reads, and the added prototype scripts follow the run_file, archive, table and pair_gaps idiom they import.",
+    "goal_fidelity": "nova/equilibrium/current.py:479-487 keeps the separate conic and normal buckets and :481 takes the shared 32-cell tile, and the retained three-arm receipt restructure/comparison.json shows residual device per call 2.291-2.293 against base 2.860-2.862 ms and launches per call 1080.14 against 1400.57 at one slice, so the node's cost goal is met rather than reversed.",
+    "reuse": "scripts/prototypes/bank_booking_primal_buckets/tradeoff.py:17 re-implements the per-process receipt loader that scripts/prototypes/bank_booking_primal_buckets/report.py:42-88 already owns inline, although its analysis layer does reuse pair_gaps and table rather than forking them.",
+    "scope_discipline": "every path in the reviewed diff is inside the manifest's declared write paths, and the device.py and tradeoff.py changes are the evidence production the brief's attribution requirement implies rather than product code outside the goal."
+  },
+  "manifest_observation": "The reviewed run's manifest is complete at exactly the reviewed head 1d3b4f1823bab8dce60eb12a589128a9d96d473d, its commits list ends there, and the prior review's blocking finding on the 16-cell primal tile is closed by e79d54fd8614e359f4cfa581b3374d608ca4082e and 523346cda75cb083b8ecc24bcfe21e9bf409b09e within this range.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to give current.book the same separate-population, shared-helper structure as book_tangent_channels without a vmap conditional and without the booking regression; nova/equilibrium/current.py:479-487 buckets the conic and normal populations and :481 now takes the shared 32-cell tile at :69, so the delta removes the 16-cell regression the prior review blocked on and keeps the shared structure.\nVERDICT done_when: the measure is per-field moment parity at 1e-14, an unchanged-or-repinned pin with its difference table, paired suites with no added failures, and one H200 allocation tabling residual device ms and launches, per-process reads, whole-solve wall and wall per read against the pair_gaps precision budgets; the fragment records 1.708597e-16 relative on the five moment references, a three-field pin table backed by cpu-contract/broadwell-pins.log, baseline-suite.log 1 failure to cpu-contract/sirius-suite.log 0 failures, and the three-arm 1/16-slice tables with every precision maximum under its limit.\nVERDICT write_paths: read the manifest's declared paths (nova/equilibrium/current.py, tests/test_book_primal_buckets.py, tests/test_bank_step_booking.py, scripts/prototypes/bank_booking_primal_buckets, and the evidence fragment); git diff --name-status 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad 1d3b4f1823bab8dce60eb12a589128a9d96d473d lists 9 files and every one is inside them.\nVERDICT manifest: read manifest.md; status is complete at the reviewed head 1d3b4f1823bab8dce60eb12a589128a9d96d473d, its commits list ends at that sha, and its baseline_suite and after_suite receipts point at logs on disk whose last lines are EXIT=1 and EXIT=0 with the matching SUMMARY records.\nVERDICT diff: read all 13 commits against 9ab6ba60 commit by commit; e79d54fd restores the 32-cell primal tile and adds the prior timing arm to scripts/prototypes/bank_booking_primal_buckets/device.py:13-40, 523346cd factors _SCALAR_CUT_BATCH_WIDTH at nova/equilibrium/current.py:69 and adds cpu_contract.py/.sh and the tile guard, e38cf69c re-pins the Broadwell tuple at tests/test_bank_step_booking.py:24-30, 1d3b4f182 touches only the evidence fragment, and the tradeoff.py commits assemble the attribution and three-arm tables.\nCALL_SITES: nova/equilibrium/support_read.py:414, nova/equilibrium/support_read.py:536, nova/equilibrium/support_read.py:560, nova/equilibrium/support_read.py:564, nova/equilibrium/support_read.py:1097, nova/equilibrium/support_read.py:1135\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:479-487 keeps the separate conic and normal buckets and :481 takes the shared 32-cell tile, and the retained three-arm receipt restructure/comparison.json shows residual device per call 2.291-2.293 against base 2.860-2.862 ms and launches per call 1080.14 against 1400.57 at one slice, so the node's cost goal is met rather than reversed.\nSCORE evidence: 17\nJUSTIFICATION evidence: the done_when columns are tabled in docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html from receipts that exist on disk, but the manifest's recorded after_suite is the three-file Sirius arm at e38cf69c while the brief asked for six paired files, and the six-file head result survives only as a narrative artifact line rather than as a recorded suite receipt.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the reviewed diff is inside the manifest's declared write paths, and the device.py and tradeoff.py changes are the evidence production the brief's attribution requirement implies rather than product code outside the goal.\nSCORE durability: 16\nJUSTIFICATION durability: the added guard tests/test_book_primal_buckets.py:37 reddens under the recorded tile mutation (cpu-contract/negative-tile-test_book_primal_buckets.log, EXIT=1, assert 16 == 32) but it pins the constant rather than its use, so the original formulation at nova/equilibrium/current.py:481 could return with the guard still green.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/current.py:69-70 places the fixed scalar tile beside the existing normal-form width, the docstring at :46-50 states which knob each function reads, and the added prototype scripts follow the run_file, archive, table and pair_gaps idiom they import.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_booking_primal_buckets/tradeoff.py:17 re-implements the per-process receipt loader that scripts/prototypes/bank_booking_primal_buckets/report.py:42-88 already owns inline, although its analysis layer does reuse pair_gaps and table rather than forking them.\nFINDING scripts/prototypes/bank_booking_primal_buckets/tradeoff.py:17 non-blocking: read_processes re-implements the per-process receipt loader that report.py:42-88 already owns inline, reading the same capture.json and attribution.json pair and repeating the same compilation-cache-hit assertion, so a change to the receipt layout must now be made in both files; the owner should be extracted and called rather than duplicated.\nFINDING tests/test_book_primal_buckets.py:37 non-blocking: the added guard asserts only that the module constant equals 32 and never asserts that book uses it, so reinstating the original formulation at nova/equilibrium/current.py:481 (batch_width = min(quadrature.cut_batch_width, cells), default 16) leaves _SCALAR_CUT_BATCH_WIDTH at 32 and this test green; only the host byte pins would redden, and only on the two pinned CPU families.\n",
+  "review_run_id": "r-20261106T171138037886-review-of-bank-booking-primal-buckets-1d3b4f1823ba",
+  "reviewed_base_sha": "9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad",
+  "reviewed_head_sha": "1d3b4f1823bab8dce60eb12a589128a9d96d473d",
+  "reviewed_run_id": "r-20261106T151851519466-bank-booking-primal-buckets",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T17:26:52.301177+00:00",
+  "total": 94
+}

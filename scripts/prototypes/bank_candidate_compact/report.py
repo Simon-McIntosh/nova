@@ -108,7 +108,8 @@ def main():
             for arm in ("base", "head")
         }
         summaries.append(
-            f"At {lanes} slices, mean wall per batch read falls "
+            f"At {lanes} {'slice' if lanes == 1 else 'slices'}, "
+            "mean wall per batch read falls "
             f"{100 * (1 - per_read['head'] / per_read['base']):.2f}% "
             f"({per_read['base']:.3f} to {per_read['head']:.3f} ms)."
         )

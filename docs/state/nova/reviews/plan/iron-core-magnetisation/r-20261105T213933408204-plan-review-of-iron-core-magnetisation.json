@@ -49,7 +49,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 1,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "59bf1a7d31d54a8dbedb9966c98d332e90841869",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "\u00a78 now evaluates the limbs through nova/biot/toroidalaverage.py (toroidal_points, frame_magnetic_field, average_toroidal_field) and writes no new 3D or averaging code (59bf1a7d3).",
+      "reason": "",
+      "when": "2026-11-06T05:42:25.684150+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "59bf1a7d31d54a8dbedb9966c98d332e90841869",
+      "commit_basis": "edit",
+      "note": "\u00a78 now evaluates the limbs through nova/biot/toroidalaverage.py (toroidal_points, frame_magnetic_field, average_toroidal_field) and writes no new 3D or averaging code (59bf1a7d3).",
+      "reason": "",
+      "when": "2026-11-06T05:42:25.684150+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261105T213933408204-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261105T213933408204-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "d3099489ed61fa6a521b2b54a94b95bb9c4ec5a9",
   "rubric": "design",

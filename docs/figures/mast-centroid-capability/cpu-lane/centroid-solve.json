@@ -13,24 +13,43 @@
   },
   "cold_solve": {
     "converged": true,
-    "terminal_residual": 1.3083284455817205e-14,
+    "terminal_residual": 1.3173490076568004e-14,
     "termination": "converged",
     "trip_count": 1,
-    "wall_milliseconds": 141765.18486067653,
-    "wall_seconds": 141.76518486067653
+    "wall_milliseconds": 50416.348631028086,
+    "wall_seconds": 50.416348631028086
   },
   "drawn_plasma_mesh": {
-    "boundary_branches_drawn": {
-      "closed_drawn": 1,
-      "open_drawn": 2
+    "boundary_assembler": {
+      "available": true,
+      "overflow": true,
+      "requested": true,
+      "well_formed": false
     },
-    "boundary_clipped_cells": 4254,
+    "boundary_branches_drawn": {
+      "closed_drawn": 0,
+      "open_drawn": 0
+    },
+    "boundary_clipped_cells": 0,
     "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
-    "boundary_vertex_count": 901,
+    "boundary_vertex_count": 0,
     "coil_section_count": 938,
     "coupling": "none; cell geometry only, no Biot build",
-    "cut_at_boundary_cells": 434,
+    "cut_at_boundary_cells": 0,
     "delivered_cells": 12353,
+    "display_map": {
+      "build_seconds": 254.79515860415995,
+      "max_node_mismatch_wb": 0.008254549375624087,
+      "reproduction_relative_error": 1.7879186665292104e-16,
+      "saddle_converged": true,
+      "saddle_offset_mm": 13.186108002581266,
+      "shape": [
+        195,
+        401
+      ],
+      "source": "nova.equilibrium.display_flux.build_display_flux_map from the state's stored conductor currents and cell moments",
+      "spacing_m": 0.01
+    },
     "requested_cells": 12000,
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
@@ -127,16 +146,25 @@
       "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
       "size_bytes": 645864,
       "stored_circuit_count": 101,
-      "warm_load_seconds": 0.021034798584878445
+      "warm_load_seconds": 0.02359044598415494
     },
     "shot": 22086,
     "slice_index": 43
   },
   "figure": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
   "identity": "22086/43 mixed",
+  "invocation": {
+    "argv": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py",
+      "cpu-lane",
+      "12000",
+      "vacuum-and-plasma-panels-fine"
+    ],
+    "cwd": "."
+  },
   "measurement_contract": {
     "active_set_steps": 16,
-    "centroid_target_m": 0.031679780923043355,
+    "centroid_target_m": 0.03167978092304388,
     "centroid_tolerance_m": 1e-06,
     "cold_definition": "no program in hand: the wall carries tracing and compilation alongside one execution",
     "constraint": "one vertical current-centroid row targeted on the frame's own reference centre height",
@@ -147,104 +175,104 @@
     "warm_definition": "the same fixed-shape program re-entered on a moved current vector, so the timed solve does real trips"
   },
   "runtime": {
-    "cpu_provenance_marker": "reservation gpu_0003_grpA admits no job at all: sbatch --test-only refuses a one-task request with no cpu, memory or gres ask while the node holds 43 idle cores, 792 GB free and cards IDX 1-3 idle; panel schema regenerated on CPU for continuity with the original sirius lane",
+    "cpu_provenance_marker": "fleet allocation job 1291586 on 98dci4-clu-2068, CPU lane",
     "device_kind": "cpu",
     "devices": [
       "cpu:0"
     ],
-    "host": "98dci4-clu-5081.iter.org",
+    "host": "98dci4-clu-2068.iter.org",
     "jax": "0.11.0",
     "jax_platforms": "cpu",
     "platform": "cpu",
     "python": "3.14.2",
     "scheduler": {
-      "cpus_per_task": "8",
-      "job_id": "1295093",
-      "memory": "131072",
-      "node": "98dci4-clu-5081",
-      "partition": "sirius",
+      "cpus_per_task": "26",
+      "job_id": "1291586",
+      "memory": "98304",
+      "node": "98dci4-clu-2068",
+      "partition": "rigel",
       "reservation": null
     },
-    "tmpdir": "/tmp"
+    "tmpdir": "/tmp",
+    "x64": true
   },
-  "source_revision": "48d7adda68b5e86d26f5c896c8a47e2ead865be8",
+  "source_revision": "c09f65352be9a6fd196298f346c0793ef9ee13d9",
   "summary": {
-    "cold_wall_milliseconds": 141765.18486067653,
+    "cold_wall_milliseconds": 50416.348631028086,
     "core_cell_count": 234,
-    "elapsed_seconds": 834.6518448805436,
+    "elapsed_seconds": 1229.8424513670616,
     "warm_converged_count": 2,
     "warm_point_count": 3,
-    "warm_wall_milliseconds_maximum": 160738.8633210212,
-    "warm_wall_milliseconds_median": 85032.56649337709,
-    "warm_wall_milliseconds_minimum": 77090.30328132212
+    "warm_wall_milliseconds_maximum": 348906.46505588666,
+    "warm_wall_milliseconds_median": 183140.79682016745,
+    "warm_wall_milliseconds_minimum": 176346.9626251608
   },
   "vacuum_saddle_validation": {
     "in_wall_grid_count": 684,
+    "lattice_saddle_offset_m": 0.14913479461280382,
     "marker": {
       "coordinate_m": [
-        1.8181249998742715,
-        0.0
+        0.6494076617893283,
+        1.3650123421306921
       ],
-      "gradient_norm_wb_per_m": 0.010637405235374146,
-      "hessian_determinant": -5.469013277342389,
+      "gradient_norm_wb_per_m": 5.828161023818155e-16,
+      "hessian_determinant": -20.932517570073475,
       "hessian_eigenvalues": [
-        -2.34715484251611,
-        2.3300607093649184
+        -13.337822839797695,
+        1.5694103769030847
       ]
     },
-    "marker_gradient_to_median": 0.012872407078661384,
-    "median_contour_level_spacing_wb": 0.09131310981319096,
-    "median_in_wall_gradient_wb_per_m": 0.8263726566733425,
+    "marker_gradient_to_median": 6.897937054036299e-16,
+    "median_in_wall_gradient_wb_per_m": 0.8449136282575718,
     "method": "scipy.interpolate.RectBivariateSpline(kx=3, ky=3, s=0), analytic-gradient Newton polish",
-    "nearest_drawn_contour_delta_wb": 0.040843117150665575,
     "polish_converged": true,
-    "polish_distance_m": 0.004544097418991104,
+    "polish_distance_m": 0.0,
     "polished": {
       "coordinate_m": [
-        1.8135817990841143,
-        9.026590495437594e-05
+        0.6494076617893283,
+        1.3650123421306921
       ],
-      "gradient_norm_wb_per_m": 1.4061863363159105e-16,
-      "hessian_determinant": -5.600561065436418,
+      "gradient_norm_wb_per_m": 5.828161023818155e-16,
+      "hessian_determinant": -20.932517570073475,
       "hessian_eigenvalues": [
-        -2.3814063960999516,
-        2.351787193739171
+        -13.337822839797695,
+        1.5694103769030847
       ]
     },
-    "polished_gradient_to_median": 1.7016370580031947e-16,
+    "polished_gradient_to_median": 6.897937054036299e-16,
     "polished_inside_wall": true,
     "relative_gradient_maximum": 1e-06,
-    "saddle_flux_wb": -1.2615756394635096,
-    "state_sha256": "3bbca84944b859fdf26edec96464ecae7110c99e2904f98d3ba702c114a9fcae",
+    "saddle_flux_wb": -0.8448496942393096,
+    "state_sha256": "fb3ba5760d3162c6b43bdd18d114040ca6386ca1e77d307eb60c81e6fcadbede",
     "verdict": "confirmed_smooth_saddle"
   },
   "warm_solves": [
     {
       "converged": false,
       "edit_fraction": 0.02,
-      "terminal_residual": 0.00034918956953837254,
+      "terminal_residual": 0.00034918956953837937,
       "termination": "active_set_settled",
       "trip_count": 2,
-      "wall_milliseconds": 77090.30328132212,
-      "wall_seconds": 77.09030328132212
+      "wall_milliseconds": 176346.9626251608,
+      "wall_seconds": 176.3469626251608
     },
     {
       "converged": true,
       "edit_fraction": 0.04,
-      "terminal_residual": 2.088194627281231e-09,
+      "terminal_residual": 2.0881943658290934e-09,
       "termination": "converged",
       "trip_count": 2,
-      "wall_milliseconds": 85032.56649337709,
-      "wall_seconds": 85.03256649337709
+      "wall_milliseconds": 183140.79682016745,
+      "wall_seconds": 183.14079682016745
     },
     {
       "converged": true,
       "edit_fraction": 0.06,
-      "terminal_residual": 5.664796979486524e-09,
+      "terminal_residual": 5.664796808002958e-09,
       "termination": "converged",
       "trip_count": 3,
-      "wall_milliseconds": 160738.8633210212,
-      "wall_seconds": 160.7388633210212
+      "wall_milliseconds": 348906.46505588666,
+      "wall_seconds": 348.90646505588666
     }
   ]
 }

@@ -1,0 +1,124 @@
+<section data-reckon="evidence" id="mast-centroid-fine-panels">
+<h2>MAST centroid panels on the fine display map</h2>
+
+<p id="mast-centroid-fine-panels-summary">The three committed centroid states
+are re-solved with the producer and drawn from the display map rather than from
+the 33 by 33 and 65 by 65 lattice raster. Each <code>panel-fields.npz</code> now
+carries the conductor currents and the plasma cell moments, so the panel pair is
+redrawn without a solve: the producer contracts those sources against the shot
+store's coupling through <code>build_display_flux_map</code> at the 10 mm
+spacing floor, and the separatrix, its saddle and the boundary the plasma mesh is
+cut against all come off the map's own spline.</p>
+
+<p id="mast-centroid-fine-panels-cost">The panel render was measured before it was trusted. On the cpu lane the
+coupling build costs 0.23 s, but the conductor kernel costs 0.083 s per display
+point and the rectangular-cell kernel a further 0.022 s per point; the 10 mm map
+carries 78195 points, so one panel would spend about 6470 s in the conductor
+kernel and 1760 s in the plasma kernel if it were evaluated point by point. That
+is the whole reason a render did not finish in 27 minutes, and it is a defect in
+the render's inner loop, not a budget shortfall: both kernels depend only on the
+geometry and the target points, never on the state.</p>
+
+<table id="mast-centroid-fine-panels-cost-table">
+<caption>Measured cost of one panel's display build, cpu lane, 64-point sample.</caption>
+<thead><tr><th>stage</th><th>seconds</th><th>projected over 78195 points</th></tr></thead>
+<tbody>
+<tr><td>coupling build (shot store, 938 section trace)</td><td>0.23</td><td>0.23</td></tr>
+<tr><td>conductor kernel, per point</td><td>0.0827</td><td>6470</td></tr>
+<tr><td>rectangular-cell kernel, per point</td><td>0.0225</td><td>1760</td></tr>
+<tr><td>moment contraction, per point</td><td>under 0.001</td><td>under 1</td></tr>
+</tbody>
+</table>
+
+<p id="mast-centroid-fine-panels-cost-block">The cost is real compute rather than per-call launch overhead, so a bigger
+block cannot buy it back. Feeding the same kernel 64, 256 and 1024 display
+points costs 6.08 s, 18.70 s and 82.99 s: 0.095, 0.073 and 0.081 s per point,
+flat within a fifth of the mean. Nothing amortises, because each point
+contributes its own pair of sums over the 938 stored conductor sections and the
+1089 rectangular plasma cells. The 78195-point map is therefore about 6300 s of
+single-core work however it is bundled, and only parallelism or a device placed
+across the point axis reduces it.
+
+<p id="mast-centroid-fine-panels-fix">The producer therefore builds each
+coupling once per lane, exactly and with no interpolation, over the fixed
+display grid and the lattice nodes, splitting the work across ten spawned
+worker processes that never touch JAX, and caches the pair under the operand
+root keyed by a digest of the geometry, the points and the shot. A panel is then
+a matrix-vector product with its currents, and so is every perturbed arm of the
+control.</p>
+
+<p id="mast-centroid-fine-panels-measured">Each panel is drawn from the state's
+own currents and cell moments against a prepared unit-current response, so the
+map is a pair of matrix products rather than a kernel evaluation per point. The
+record below is read from each lane's own receipt. The reproduction error is the
+largest deviation of the map's evaluation from the operator's raster image at
+the lattice nodes, and it is at machine precision on all three lanes. The node
+mismatch column is the largest deviation of the same evaluation from the
+<em>converged state</em> the panel claims to draw: it is
+<b>8.3e-3 Wb</b> on the cpu and titan lanes and <b>8.4e-3 Wb</b> on the
+full-axis lane, three orders of magnitude above the 1e-6 Wb this record treats
+as agreement. It is not explained away here: it says the operator's raster image
+is not the solve's fixed point, so a map that reproduces the raster exactly
+still differs from the state it is captioned against.</p>
+
+<table id="mast-centroid-fine-panels-measured-table">
+<caption>Drawn display map per lane, read from each lane's centroid-solve.json.</caption>
+<thead><tr><th>lane</th><th>spacing [mm]</th><th>shape</th><th>build [s]</th><th>reproduction error</th><th>node mismatch [Wb]</th><th>saddle offset [mm]</th><th>saddle converged</th></tr></thead>
+<tbody><tr><td>cpu-lane</td><td>10</td><td>401 x 195</td><td>254.0</td><td>1.79e-16</td><td><b>8.25e-03</b></td><td>13.2</td><td>yes</td></tr><tr><td>titan-lane</td><td>10</td><td>401 x 195</td><td>254.9</td><td>1.79e-16</td><td><b>8.25e-03</b></td><td>13.2</td><td>yes</td></tr><tr><td>full-axis-lane</td><td>10</td><td>401 x 195</td><td>255.2</td><td>2.67e-16</td><td><b>8.42e-03</b></td><td>9.9</td><td>yes</td></tr></tbody>
+</table>
+
+<p id="mast-centroid-fine-panels-floor">The floor is enforced by the builder itself, not by convention: asking it for 0.1 m
+raises <code>display spacing 0.1 m is coarser than the 0.01 m floor</code>, so a
+cheaper render cannot be had by drawing a coarser map and reading it as if it
+were the fine one. A panel is either the 78195-point map or it is not the map.</p>
+
+<p id="mast-centroid-fine-panels-landing">landing: the render cost is measured and bounded, and the display-map
+builder's 10 mm floor is confirmed to be enforced rather than advisory, so the
+panel is 78195 points of fixed, non-amortising compute and nothing cheaper
+counts as the map. All four panels are drawn from that map and inspected: the
+CPU lane at 4000 and at 12000 grid cells, the titan lane at 4000 and the
+full-axis lane at 4000. Each carries a smooth line-contour field, the magnetic
+axis, the admitted X-point, the wall and the coils, and each reports
+<code>LABEL_CHECK clipped=0 overlapping=0</code>. The redraw gate is partly
+verified: two of its three CPU-lane cases pass, including the one-percent
+current control, whose falsifying run exits nonzero; all three pass at the revision
+these figures were drawn from, and the control's falsifying run still exits
+nonzero. The panels are interim: a redraw on the
+solve-currents display map follows the assembler fix described below.</p>
+
+<p id="mast-centroid-fine-panels-limit">The separatrix is <em>not</em> drawn on
+these panels, and that is a known limit of the branch assembler at the 10 mm
+display spacing rather than a defect of the map. The assembler either returns
+one closed axis branch and its saddle-ended legs or it refuses the whole field
+and returns zero geometry; on the display map it refuses, so the boundary comes
+back empty, the plasma cells are not cut against it and no separatrix or
+open leg appears on the plasma panel. The refusal is reported, not worked
+around: no fallback contour is added in its place, because a contour of the
+display map would wander between nodes and would not be the curve the plasma
+mesh is meant to be cut against. The assembler's own verdict is asked for the
+same field and the panel receipt records the assembler's own answer as
+<code>boundary_assembler</code>: <code>well_formed</code> is <em>false</em> and
+<code>overflow</code> is <em>true</em> on all three lanes. That pair is the
+mechanism, not a symptom of it: a branch capacity overflow sets
+<code>overflow</code>, and a field that has overflowed is by construction not
+<code>well_formed</code>, so the assembler returns zero geometry rather than a
+partial boundary. The capacity is what a separate change raises; until it lands
+this map is refused, which is why <code>boundary_vertex_count</code> is 0 here. Because the boundary is empty the
+plasma mesh is built and then draws nothing, which is why the right-hand panel
+shows no grey cells: the field and the plasma response behind it are drawn, the
+cut surface is not.</p>
+
+<p id="mast-centroid-fine-panels-gate">The redraw gate opens each state, rebuilds
+the map from its stored currents and moments, and asserts that the drawn
+contour vertices leave the lattice rows. Its negative control moves one stored
+conductor current by one percent: the contour paths move, so a redraw that
+ignored the stored currents would not pass.</p>
+
+<p id="mast-centroid-fine-panels-labels">The producer does not rely on a reader to notice a bad label. Before it saves,
+it measures the window extent of every text artist against the figure box and
+raises when any label is clipped or when two overlap, printing
+<code>LABEL_CHECK clipped=&lt;n&gt; overlapping=&lt;n&gt;</code> on the way. A panel
+is delivered only after its SVG is converted to PNG and looked at, and that
+inspection is reported with the panel it belongs to rather than asserted ahead of
+it.</p>
+</section>

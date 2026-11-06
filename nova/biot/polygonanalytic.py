@@ -441,6 +441,92 @@ def _weighted_root(vertex, term, *, differential=None):
     return value if differential is None else (value, derivative)
 
 
+def _small_corner_band(vertex):
+    """Select radial primitives inside the smooth half-radius."""
+    return vertex.radius + vertex.offset < 0.5 * vertex.xp.hypot(
+        vertex.radius, vertex.level
+    )
+
+
+def _small_corner_geometry(vertex, differential=None):
+    """Carry explicit geometry derivatives into the paired-angle formulas."""
+    differential = {} if differential is None else differential
+    r = _EdgeScalar(vertex.radius, differential.get("radius"))
+    u = _EdgeScalar(vertex.level, differential.get("level"))
+    corner = r + _EdgeScalar(vertex.offset, differential.get("offset"))
+    # Bound the unselected branch as well, so its traced operations stay finite.
+    corner = _edge_select(
+        _small_corner_band(vertex),
+        corner,
+        0.25 * (r * r + u * u).root(vertex.xp),
+        vertex.xp,
+    )
+    return r, u, corner
+
+
+def _small_corner_arsinh(vertex, differential=None):
+    """Pair opposite angles before forming the small even arsinh integral."""
+    xp = vertex.xp
+    node, weights = _rule(64)
+    cosine = xp.cos(QUARTER * (node + 1.0))
+    r, u, cr = (v.column() for v in _small_corner_geometry(vertex, differential))
+    minus = (u * u + (r - cr) ** 2 + 2 * r * cr * (1 - cosine)).root(xp)
+    plus = (u * u + (r + cr) ** 2 - 2 * r * cr * (1 - cosine)).root(xp)
+    quotient = 2 * cr / (minus + plus)
+    # asinh((cr-rc)/G) + asinh((cr+rc)/G) = 2 atanh(2cr/(D- + D+)).
+    paired = 2 * xp.arctanh(quotient.value)
+    rule = 0.5 * QUARTER * weights
+    value = ((paired * cosine**2) @ rule, paired @ rule)
+    if differential is None:
+        return value
+    d_paired = 2 * quotient.tangent / (1 - quotient.value**2)
+    return value, ((d_paired * cosine**2) @ rule, d_paired @ rule)
+
+
+def _small_corner_horizontal(vertex, expansion_r, height, differential=None):
+    """Integrate the paired filament kernel from the axis to a small corner.
+
+    Opposite angles give c(1/Dminus-1/Dplus) =
+    4 r s c²/(Dminus Dplus (Dminus+Dplus)). This preserves the cubic
+    radial primitive without subtracting root and arsinh antiderivatives.
+    The radial moment's axis constant is 2 pi r |u|; at u=0 its symmetric
+    derivative is zero, as in the unreduced even integrand.
+    """
+    xp = vertex.xp
+    node, weights = _rule(64)
+    fraction = 0.5 * (node + 1.0)[None, :, None]
+    cosine = xp.cos(QUARTER * (node + 1.0))[None, None, :]
+    rule = 0.25 * QUARTER * weights[:, None] * weights[None, :]
+    d_vertex, d_centre, d_height = (
+        (None, None, None) if differential is None else differential
+    )
+    radius, level, corner = _small_corner_geometry(vertex, d_vertex)
+    r, u, cr = (v.column().column() for v in (radius, level, corner))
+    centre = _EdgeScalar(expansion_r, d_centre).column().column()
+    source = cr * fraction
+    minus = (u * u + (r - source) ** 2 + 2 * r * source * (1 - cosine)).root(xp)
+    plus = (u * u + (r + source) ** 2 - 2 * r * source * (1 - cosine)).root(xp)
+    kernel = 16 * r * source**2 * cosine**2 / (minus * plus * (minus + plus))
+
+    def integrate(term):
+        return _EdgeScalar(
+            xp.sum(term.value * rule, axis=(1, 2)),
+            None if differential is None else xp.sum(term.tangent * rule, axis=(1, 2)),
+        )
+
+    base = integrate(cr * kernel)
+    absolute = _edge_select(level.value == 0.0, 0.0, level.absolute(xp), xp)
+    radial = 2 * np.pi * radius * absolute + integrate(cr * (source - centre) * kernel)
+    vertical = (level + _EdgeScalar(height, d_height)) * base
+    terms = (base, radial, vertical)
+    value = tuple(term.value for term in terms)
+    return (
+        value
+        if differential is None
+        else (value, tuple(term.tangent for term in terms))
+    )
+
+
 def _edge_residual_band(edge):
     """Select a plane pole close enough to amplify differentiated contractions."""
     xp = edge.xp
@@ -768,7 +854,11 @@ class _Vertex:
         near = _corner_remainder_band(r, u, self.offset, self.xp)
         remainder = _corner_arsinh_remainder(r, u, self.offset, self.nodes, self.xp)
         first = self.xp.where(near, self.ring_residual - 4.0 * remainder, first)
-        return 4.0 * u * r * first, 4.0 * r * first, 4.0 * u * self.ring_residual
+        small_first, small_residual = _small_corner_arsinh(self)
+        small = _small_corner_band(self)
+        first = self.xp.where(small, small_first, first)
+        residual = self.xp.where(small, small_residual, self.ring_residual)
+        return 4.0 * u * r * first, 4.0 * r * first, 4.0 * u * residual
 
     def against_first_arsinh(self, weight: tuple):
         """Return ``integral weight arsinh(beta1) da`` over the quarter range.
@@ -889,7 +979,11 @@ class _Vertex:
             radial_root_weight, stable=True
         ) + 4.0 * self.against_first_arsinh(radial_arsinh_weight)
         vertical = (self.level + target_z_minus_expansion_z) * base
-        return base, radial, vertical
+        direct = _small_corner_horizontal(self, expansion_r, target_z_minus_expansion_z)
+        return tuple(
+            self.xp.where(_small_corner_band(self), d, v)
+            for d, v in zip(direct, (base, radial, vertical), strict=True)
+        )
 
 
 class _Edge:
@@ -3490,6 +3584,14 @@ def _arsinh_terms_tangent(vertex: _Vertex, d_vertex: dict):
     d_remainder = _corner_arsinh_remainder_tangent(vertex, d_vertex)
     first = vertex.xp.where(near, residual - 4.0 * remainder, first)
     d_first = vertex.xp.where(near, d_residual - 4.0 * d_remainder, d_first)
+    (small_first, small_residual), (d_small_first, d_small_residual) = (
+        _small_corner_arsinh(vertex, d_vertex)
+    )
+    small = _small_corner_band(vertex)
+    first = vertex.xp.where(small, small_first, first)
+    d_first = vertex.xp.where(small, d_small_first, d_first)
+    residual = vertex.xp.where(small, small_residual, residual)
+    d_residual = vertex.xp.where(small, d_small_residual, d_residual)
     four_u = 4.0 * u
     d_four_u = 4.0 * d_u
     four_ur = four_u * r
@@ -3655,10 +3757,20 @@ def _horizontal_flux_line_moments_tangent(
     )
     lever = vertex.level + target_z_minus_expansion_z
     d_lever = d_vertex["level"] + d_target_z_minus_expansion_z
-    return primal, (
+    reduced = (
         d_base,
         d_radial,
         _product_tangent(lever, d_lever, primal[0], d_base),
+    )
+    _, direct = _small_corner_horizontal(
+        vertex,
+        expansion_r,
+        target_z_minus_expansion_z,
+        differential=(d_vertex, d_expansion_r, d_target_z_minus_expansion_z),
+    )
+    return primal, tuple(
+        vertex.xp.where(_small_corner_band(vertex), d, v)
+        for d, v in zip(direct, reduced, strict=True)
     )
 
 
@@ -3735,7 +3847,7 @@ def _edge_tangent(r, z, edge, d_r, d_z, d_edge, nodes, *, xp=np):
 class _EdgeScalar:
     """A value/tangent pair composing the shared scalar derivative algebra.
 
-    Only the explicit edge formulas below use this notation. Primal methods
+    The explicit endpoint formulas use this notation. Primal methods
     receive ordinary arrays; no primal program is traced or transformed here.
     ``None`` retains a structural zero through the shared range helpers.
     """

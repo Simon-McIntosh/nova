@@ -820,7 +820,13 @@ def _term_reference(name, primals, tangents, indices):
 )
 def test_endpoint_terms_match_exact_integrals(name):
     """Audit smooth and cancelling corner terms against unreduced integrals."""
-    indices = np.asarray([5, 3363, 9000])
+    indices = np.asarray(
+        [5, 3363, 9000]
+        + {
+            "arsinh_terms": [7794],
+            "horizontal_flux_line_moments": [4312, 4786, 8067],
+        }.get(name, [])
+    )
     _, _, primals, tangents = CASES[name]
     p, t = (
         jax.tree.map(lambda v: np.asarray(v)[indices], tree)

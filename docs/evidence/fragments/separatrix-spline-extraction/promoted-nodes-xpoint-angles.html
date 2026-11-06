@@ -1,0 +1,129 @@
+<h2>Separatrix lobe and leg angles at the promoted coil-edit X-point</h2>
+<p>Re-runs the converged MAST 22086/43 boundary-coil edit
+(fraction +6.000e-02 on circuit 8, target
+933034.8750 A) on the assembler as it stands after the display-field
+capacity repair, so the separatrix this fragment measures is the one
+<code>nova.equilibrium.display_flux._branches</code> actually assembles rather than the
+truncated one the earlier record had to report unassembled. The solve closes at
+5.730e-09 Wb with <code>converged</code> reading <code>True</code>, and promotes
+<strong>60</strong> of 1089 lattice nodes plus 14 of them on the
+wall, out of
+1126 physical nodes of which 37 are wall coordinates.</p>
+
+<p>The separatrix is assembled twice on the same display grid (0.0100 m), once
+from the
+converged state and once from the field of the currents, and both are well formed:
+<code>True</code> and <code>True</code>. Each carries
+585 and 5417 closed vertices, so neither is at a branch
+capacity.
+The X-point is polished on both fields: the state's saddle sits at
+(0.578763, 1.204704) m at -1.307e-01 Wb and the field's at
+(0.578421, 1.204795) m at -1.306e-01 Wb, a displacement of
+<strong>0.3545 mm</strong> (-0.3426 mm in R,
++0.0909 mm in Z, 0.004 lattice cells at
+0.0928 m).</p>
+
+<table>
+  <caption>Separatrix directions at the X-point, converged state against the field of
+the
+  currents. Bearings are degrees from +R toward +Z.</caption>
+  <tr><th>landmark</th><th>state</th><th>field of the currents</th><th>change</th></tr>
+  <tr><td>lobe</td><td>+105.0°</td><td>+105.0°</td>
+      <td>+0.01°</td></tr>
+  <tr><td>legs found</td><td>2</td><td>2</td><td></td></tr>
+<tr><td>leg 0</td><td>-82.3</td><td>-82.3</td><td>+0.00</td><td>0.228</td></tr>
+<tr><td>leg 1</td><td>+61.1</td><td>+61.1</td><td>+0.01</td><td>0.232</td></tr>
+</table>
+
+<p>Each leg direction is the chord from the polished saddle to the furthest sampled
+point
+of that open branch, so it describes the branch's extent rather than its local tangent
+at the
+null; both fields assemble two such branches. The lobe direction moves
++0.01°
+and the two chords move by +0.00°, +0.01° respectively. The lobe tip moves 0.354 mm.
+With
+2 leg directions paired by far-end proximity, the worst
+far-end separation is 0.232 mm, so the legs are the same two structures in both
+fields rather than a re-paired set.</p>
+
+<h3>Why the halves differ</h3>
+<p>The promoted set is the union of two independent selections, which
+<code>ForwardFluxOperator.residual_shadow_mask</code> (nova/equilibrium/forward_operator.py:3699) composes from the
+interior flood of the solve's own topology read and the private-wall node mask, both
+readable apart through <code>residual_shadow_components</code> (nova/equilibrium/forward_operator.py:3712).
+Grouping
+the promoted nodes by half and by that source, with the operator's own raster column
+beside
+the reconstructed one:</p>
+
+<table>
+  <caption>Promoted nodes by half and selection source. <code>image - state</code> is
+the field
+  reconstructed here; <code>operator</code> is the solve's own raster of the same
+difference.</caption>
+  <tr><th>half</th><th>selection source</th><th>nodes</th><th>image - state [Wb]</th>
+      <th>operator [Wb]</th></tr>
+<tr><td>upper</td><td>interior flood (private flux)</td><td>24</td><td>1.058e-09</td><td>1.061e-09</td></tr>
+<tr><td>upper</td><td>private-wall band</td><td>7</td><td>2.003e-03</td><td>not reported</td></tr>
+<tr><td>lower</td><td>interior flood (private flux)</td><td>22</td><td>2.621e-02</td><td>2.621e-02</td></tr>
+<tr><td>lower</td><td>private-wall band</td><td>7</td><td>1.219e-02</td><td>not reported</td></tr>
+</table>
+
+<p>Across the whole promoted set the reconstructed difference reaches
+2.621e-02 Wb against 7.468e-09 Wb on the solved nodes, and
+2.621e-02 Wb over the whole lattice. The half aggregates are
+2.003e-03 Wb and 2.621e-02 Wb, and split by selection source they
+resolve as the table does rather than as the halves do. The mechanism is the paste at
+<code>nova/equilibrium/reduced_newton.py:985</code>, <code>mapped = jnp.where(promoted, state, image)</code>,
+inside
+<code>_reduced_kernels.trip_boundary</code>: on a closing trip the state carried into
+the next
+trip is the map, so at a promoted node the terminal state is the <em>pre-paste</em>
+state and
+<code>image - state</code> there is exactly the residual the shadow rule exists to
+hide. A
+node therefore reads near zero in that column for one of two different reasons, and
+the two
+are distinguishable only by the selection source and the operator's own column.</p>
+
+<p>The worst near-zero group is the upper-half interior flood (private flux) nodes (24 of them), at 1.058e-09 Wb. The operator's own column reads 1.061e-09 Wb on the same nodes, so the state and the field of the currents genuinely agree there and the near-zero column is a true agreement rather than an artifact: the flood selected nodes whose residual is already at the solve floor, so the paste changes nothing at them. The reported upper-half column is nevertheless not uniformly zero: the 7 private-wall band nodes in the same half read up to 2.003e-03 Wb, and the operator's raster carries no wall coordinate to check them against. So the half's aggregate column is an artifact of averaging two selections in one figure, and the corrected column is this per-source split, not the half total.</p>
+
+<figure>
+  <img src="/nova/figures/separatrix-spline-extraction/promoted-nodes-xpoint-angles/promoted-nodes-xpoint-angles.svg" alt="Promoted nodes and the X-point on the converged coil edit's
+poloidal field">
+  <figcaption>The converged edit 12 at 5.730e-09 Wb.
+  Grey contours: the field of the currents. Darker contours: the converged state, on
+the same
+  level array, so a contour that separates is a real difference. Dashed near-black:
+the state's
+  separatrix; dashed blue: the field's. Grey circles: promoted nodes; red diamonds:
+those whose
+  <code>image - state</code> exceeds 1 mWb. Triangles mark the magnetic axis at
+  (0.8957, 0.0221) m, the filled cross the state's X-point and the hollow cross
+the field's.
+  The left panel carries the locator for the 6.0 mm magnification on the right,
+which draws the lobe ray and the first two open-branch chords from the polished saddle.
+A chord runs from the saddle to that branch's furthest sampled point, which lies far
+outside the window, so it is not the branch's local curvature at the null.
+  The nearest promoted node is 56.495 mm from the X-point; the quartiles are
+  359.817, 614.324 and 2727.009 mm.</figcaption>
+</figure>
+
+<h3>Does the promotion move the geometry by an amount that matters?</h3>
+<p>The saddle moves 0.3545 mm, and the direction that changes most is the
+lobe at +0.01° — a fraction of the lobe's own width. A change of that size is
+well under one lattice cell. The rule a repair would change is the paste itself: the
+exclude-shadow
+branch of <code>ForwardFluxOperator.residual_shadow_mask</code> in
+<code>nova/equilibrium/forward_operator.py</code> decides which nodes keep their
+pre-paste state,
+and <code>_reduced_kernels.trip_boundary</code> in
+<code>nova/equilibrium/reduced_newton.py</code> is where that decision is applied.
+Narrowing it so a
+node is kept only where the residual the paste would hide is large enough to matter,
+rather than wherever the flood or the wall band reaches, would shrink the excluded set
+without changing the field it exists to protect. Nothing in this node's evidence says
+the
+change is
+needed; it says the mechanism by which a widened set would show up.</p>

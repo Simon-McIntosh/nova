@@ -209,17 +209,6 @@ def render(receipt, fields, destination):
             zorder=11,
         )
     )
-    labelled.append(
-        main.text(
-            saddle[0] + 0.8 * ZOOM_M,
-            saddle[1] + 0.8 * ZOOM_M,
-            "detail, right",
-            color=IMAGE_COLOR,
-            fontsize=11,
-            zorder=14,
-        )
-    )
-
     half = 0.5 * ZOOM_M
     zoom.set_xlim(saddle[0] - half, saddle[0] + half)
     zoom.set_ylim(saddle[1] - half, saddle[1] + half)
@@ -244,7 +233,7 @@ def render(receipt, fields, destination):
                 pair["state_bearing_deg"],
                 0.55 * half,
                 STATE_COLOR,
-                "leg %d %.1f%s" % (index, pair["state_bearing_deg"], DEG),
+                "leg %d chord %.1f%s" % (index, pair["state_bearing_deg"], DEG),
                 -0.07 * half,
                 width=1.0,
                 head=False,

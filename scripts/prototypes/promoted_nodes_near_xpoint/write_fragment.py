@@ -123,9 +123,10 @@ def verdict(groups):
         reading = (
             "The operator's own column reads %s Wb on the same nodes, so the state"
             " and the field of the currents genuinely agree there and the near-zero"
-            " column is a true agreement rather than an artifact. Those nodes are"
-            " promoted by the coordinate predicates, not by a residual that the"
-            " paste then hides." % exponent(group["max_abs_operator"])
+            " column is a true agreement rather than an artifact: the flood"
+            " selected nodes whose residual is already at the solve floor, so the"
+            " paste changes nothing at them."
+            % exponent(group["max_abs_operator"])
         )
     else:
         reading = (
@@ -136,15 +137,32 @@ def verdict(groups):
             " operator's, and its values are those in the last table column."
             % (exponent(group["max_abs_operator"]), "%.1f" % ratio)
         )
+    wall = [
+        (key, entry)
+        for key, entry in groups.items()
+        if key[0] == half and "wall" in key[1] and key != (half, source)
+    ]
+    contamination = ""
+    if wall:
+        key, entry = max(wall, key=lambda item: item[1]["count"])
+        contamination = (
+            " The reported %s-half column is nevertheless not uniformly zero: the"
+            " %d %s nodes in the same half read up to %s Wb, and the operator's raster"
+            " carries no wall coordinate to check them against. So the half's aggregate"
+            " column is an artifact of averaging two selections in one figure, and the"
+            " corrected column is this per-source split, not the half total."
+            % (half, entry["count"], key[1], exponent(entry["max_abs_difference"]))
+        )
     return (
         "The worst near-zero group is the %s-half %s nodes (%d of them), at %s Wb."
-        " %s"
+        " %s%s"
         % (
             half,
             source,
             group["count"],
             exponent(group["max_abs_difference"]),
             reading,
+            contamination,
         )
     )
 
@@ -193,8 +211,14 @@ the
 {legs}
 </table>
 
-<p>The lobe direction moves {lobe_change:+.2f}{deg} and the leg directions move by
-{leg_shifts} respectively. The lobe tip moves {tip:.3f} mm. With
+<p>Each leg direction is the chord from the polished saddle to the furthest sampled
+point
+of that open branch, so it describes the branch's extent rather than its local tangent
+at the
+null; both fields assemble two such branches. The lobe direction moves
+{lobe_change:+.2f}{deg}
+and the two chords move by {leg_shifts} respectively. The lobe tip moves {tip:.3f} mm.
+With
 {leg_rows} leg direction{leg_plural} paired by far-end proximity, the worst
 far-end separation is {far_end:.3f} mm, so the legs are the same two structures in both
 fields rather than a re-paired set.</p>
@@ -221,9 +245,9 @@ difference.</caption>
 
 <p>Across the whole promoted set the reconstructed difference reaches
 {worst} Wb against {solved_max} Wb on the solved nodes, and
-{whole} Wb over the whole lattice. The upper half's
-{half_upper_max} Wb and the lower half's
-{half_lower_max} Wb are what the review saw. The mechanism is the paste at
+{whole} Wb over the whole lattice. The half aggregates are
+{half_upper_max} Wb and {half_lower_max} Wb, and split by selection source they
+resolve as the table does rather than as the halves do. The mechanism is the paste at
 <code>{trip_line}</code>, <code>mapped = jnp.where(promoted, state, image)</code>,
 inside
 <code>_reduced_kernels.trip_boundary</code>: on a closing trip the state carried into
@@ -252,8 +276,9 @@ those whose
   ({ax:.4f}, {az:.4f}) m, the filled cross the state's X-point and the hollow cross
 the field's.
   The left panel carries the locator for the {zoom:.1f} mm magnification on the right,
-where the
-  lobe and the first two leg directions are drawn as rays from the polished saddle.
+which draws the lobe ray and the first two open-branch chords from the polished saddle.
+A chord runs from the saddle to that branch's furthest sampled point, which lies far
+outside the window, so it is not the branch's local curvature at the null.
   The nearest promoted node is {nearest:.3f} mm from the X-point; the quartiles are
   {q25:.3f}, {q50:.3f} and {q75:.3f} mm.</figcaption>
 </figure>
@@ -268,12 +293,11 @@ branch of <code>ForwardFluxOperator.residual_shadow_mask</code> in
 pre-paste state,
 and <code>_reduced_kernels.trip_boundary</code> in
 <code>nova/equilibrium/reduced_newton.py</code> is where that decision is applied.
-Narrowing the
-selection to the residual predicate alone — dropping the coordinate predicates that
-promote nodes
-whose residual is already at the solve floor — would stop the excluded set from
-widening without
-changing the field it is meant to protect. Nothing in this node's evidence says the
+Narrowing it so a
+node is kept only where the residual the paste would hide is large enough to matter,
+rather than wherever the flood or the wall band reaches, would shrink the excluded set
+without changing the field it exists to protect. Nothing in this node's evidence says
+the
 change is
 needed; it says the mechanism by which a widened set would show up.</p>
 """.format(

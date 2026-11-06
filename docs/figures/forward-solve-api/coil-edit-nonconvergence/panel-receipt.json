@@ -1,17 +1,35 @@
 {
-  "caption": "the non-converged panel is drawn from the terminal currents and its caption gives the largest node mismatch",
+  "assembly_drawn": {
+    "converged": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    },
+    "non_converged": {
+      "closed_drawn": 1,
+      "open_drawn": 2,
+      "unassembled": 0
+    }
+  },
+  "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3416 to -0.1224 Wb)  |  every solved state imposes the vertical current-centre row at 0.031680 m (the reference's own centre, tolerance 1e-06 m)  |  reference is the unedited equilibrium, its admitted saddle above its axis (blue set: lobe solid, legs dashed, admitted saddle (0.585, +1.231) m)  |  solved sets orange: lobe solid, legs dashed, admitted saddle (0.583, +1.209) m above its axis in the converged panel and saddle (0.596, +1.170) m above its axis in the failed panel  |  other qualified nulls hollow  |  wall drawn  |  the converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 2.621e-02 Wb, solved-node mismatch 7.468e-09 Wb, 46 promoted nodes, nearest promoted node 0.056 m from its polished X-point; the non-converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.303e-02 Wb, solved-node mismatch 6.432e-04 Wb, 25 promoted nodes, nearest promoted node 2.451 m from its polished X-point",
   "display_map": {
-    "moments_route": "operator.normalised_current_moments_and_observation of the state at the solve's target current",
+    "moments_route": "stored terminal moments at the solve's target current",
     "panels": {
       "converged": {
-        "max_node_mismatch_wb": 0.0045851015778254345,
-        "reproduction_relative_error": 6.768027025728893e-12,
+        "max_node_mismatch_wb": 0.02621237839847043,
+        "max_solved_node_mismatch_wb": 7.468330148752145e-09,
+        "nearest_promoted_to_xpoint_m": 0.05621806020455789,
+        "promoted_node_count": 46,
+        "reproduction_relative_error": 6.780338952939716e-12,
         "saddle_converged": true,
         "spacing_m": 0.01
       },
       "failed": {
-        "max_node_mismatch_wb": 0.05576618957558288,
-        "reproduction_relative_error": 7.184081771840037e-12,
+        "max_node_mismatch_wb": 0.013026675182779168,
+        "max_solved_node_mismatch_wb": 0.0006432119436612788,
+        "nearest_promoted_to_xpoint_m": 2.4511931712191113,
+        "promoted_node_count": 25,
+        "reproduction_relative_error": 7.1967014727409325e-12,
         "saddle_converged": true,
         "spacing_m": 0.01
       }
@@ -19,32 +37,48 @@
   },
   "figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
   "figure_vector": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.svg",
+  "near_x_geometry": {
+    "converged_current_field_certifies_near_x": false,
+    "converged_promoted_within_two_cells": true,
+    "non_converged_promoted_within_two_cells": false,
+    "two_cell_threshold_m": 0.12125000008381903
+  },
   "render": {
-    "command": "benchmarks/coil_edit_latency.py panel --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --display-map --receipt /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render2-fsa.json",
-    "cpus_per_task": "8",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography_redraw.py",
+    "copied_from": null,
     "device": "NVIDIA H200 NVL",
     "host": "98dci4-gpu-0003.iter.org",
-    "job_id": "1303942",
+    "job_id": "1306658",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-redraw.log",
     "partition": "betelgeuse",
     "platform": "gpu",
+    "published_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+    "published_figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
     "read_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
-    "read_archive_md5": "d40d470fa0923e225b26e743457cd863",
-    "receipt": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/panel-render2-fsa.json",
-    "written_as": "converged-vs-nonconverged.png"
+    "read_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+    "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
+    "source_revision": "5fb1848fd91ce376ebca8ab25139793cb65ecc4f"
   },
   "schema": "nova.coil-edit-panel-receipt",
   "set": "forward-solve-api",
   "solve": {
-    "cancelled": null,
-    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/fsa.json --figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/fsa.png --raster-figure /home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/fsa-raster.png --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
-    "exit_status": "2",
-    "exit_status_note": "2 is the benchmark's own non-converged verdict, not a crash",
-    "jax_platforms": "cuda,cpu",
-    "job_id": "1303871",
-    "log": "/home/ITER/mcintos/.cache/nova-coil-edit-fine-panels/fsa2.log",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py run --output /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200.json --figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200.png --raster-figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200-raster.png --panel-data /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/panel-states-h200.npz --panel-figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/converged-vs-nonconverged-h200.png --diagnostics /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/diagnostics-h200.json",
+    "device": "NVIDIA H200 NVL",
+    "exit_status": "1",
+    "exit_status_note": "The sweep and archive completed; the in-process render refused a full-state mask before the corrected render job.",
+    "job_id": "1306418",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/solve-h200-shaped.log",
     "partition": "betelgeuse",
-    "source_revision": "4fbb492f1fe4c32d3ad2b857004b41e94a77bbf0"
+    "source_revision": "344c20424ca5a260c81299df73686b1cf4f48bec",
+    "sweep_completed_edits": 20
   },
   "state_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
-  "state_archive_md5": "d40d470fa0923e225b26e743457cd863"
+  "state_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+  "visual_inspection": {
+    "assembled_lobe_and_legs_visible": true,
+    "clipped_labels": 0,
+    "inspected_render": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "overlapping_labels": 0,
+    "page_width_px": 900
+  }
 }

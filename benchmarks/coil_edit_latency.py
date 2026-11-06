@@ -28,7 +28,6 @@ import platform
 import socket
 import sys
 import subprocess
-import textwrap
 import threading
 import time
 from typing import Any
@@ -92,8 +91,6 @@ DEFAULT_PANEL_DATA = DIAGNOSTIC_ROOT / "panel-states.npz"
 DEFAULT_PANEL_FIGURE = DIAGNOSTIC_ROOT / "converged-vs-nonconverged.png"
 SHOT = 22086
 SLICE_INDEX = 43
-#: Characters per line the panel caption is wrapped to, so it stays on the canvas.
-CAPTION_WIDTH = 150
 
 #: Display spacing [m] of the panel map, the coarsest the builder admits.
 DEFAULT_DISPLAY_SPACING = 0.010
@@ -970,6 +967,7 @@ def _equilibrium_receipt(
         target_current,
         None,
         prescribed_current,
+        promoted_mask=result.promoted_mask,
     )
 
 
@@ -1438,6 +1436,7 @@ def _panel_display_map(
     spacing: float,
     coupling: Any = None,
     target_current: Any = None,
+    compensation: Any = None,
 ):
     """Return one stored panel state's field evaluated on the display grid.
 
@@ -1446,14 +1445,11 @@ def _panel_display_map(
     moment and state assembly here can be measured against a machine it can
     state exactly.
 
-    The moments are the solver's own. The fixed point is terminated on the
-    operator's target-current normalisation, so the panel asks the operator for
-    that same normalised moment triple rather than imaging the unnormalised
-    moments a producer would store or derive by another route; the panel then
-    draws the field the solve ended at. The moments are passed explicitly
-    because the builder's own normalised branch traces the clipped support of a
-    linear-moment operator, and this machine's operator carries point moments
-    with no moment geometry.
+    The archive's moments are the solve's target-current-normalised triple;
+    they are contracted directly so a redraw cannot derive a different triple
+    from the lattice image. The terminal state and promoted mask judge the
+    drawing on the nodes the solve claims, while the constrained rows' current
+    is evaluated through the same circuit response as the main drive.
     """
     from nova.equilibrium.display_flux import build_display_flux_map
 
@@ -1464,11 +1460,31 @@ def _panel_display_map(
         )
     if target_current is None:
         raise ValueError("a panel display map requires the solve's target current")
-    state = jnp.asarray(np.asarray(panel["psi"], dtype=np.float64).T.ravel())
+    state = jnp.asarray(
+        panel.get("state", np.asarray(panel["psi"], dtype=np.float64).T.ravel()),
+        dtype=jnp.float64,
+    )
     requested_class = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
-    moments = profile.operator.normalised_current_moments(
-        state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
-    )[0]
+    if "moments" in panel:
+        from nova.equilibrium.stencil_mesh import CellCurrentMoments
+
+        moments = CellCurrentMoments(
+            *(jnp.asarray(value) for value in panel["moments"])
+        )
+    else:
+        moments = profile.operator.normalised_current_moments(
+            state, jnp.asarray(target_current, dtype=jnp.float64), requested_class
+        )[0]
+    compensating_current = np.asarray(
+        panel.get("compensating_current", np.zeros_like(panel["current"])), dtype=float
+    )
+    if compensation is None and np.any(compensating_current):
+        compensation = _panel_display_coupling(
+            circuit_context["group"],
+            circuit_context["row"],
+            lattice,
+            compensating_current,
+        ).external
     saddle_index = int(panel["saddle_index"])
     xpoints = np.asarray(panel["xpoints"], dtype=np.float64).reshape(-1, 2)
     seed = (
@@ -1486,6 +1502,8 @@ def _panel_display_map(
         requested_class=requested_class,
         axis_rz=np.asarray(panel["axis"], dtype=np.float64),
         xpoint_rz=np.asarray(seed, dtype=np.float64),
+        promoted=panel.get("promoted_mask"),
+        compensation=compensation,
     )
 
 
@@ -1577,6 +1595,10 @@ def _write_panel_data(
     payload["achieved_class"] = np.asarray(
         [state["class"] for state in panel_states], dtype=str
     )
+    try:
+        drawn_positions = set(_panel_edits(payload))
+    except RuntimeError:
+        drawn_positions = set(range(len(panel_states)))
     wall = _wall_units(profile.operator)
     inside = _wall_interior(payload["radius"], payload["height"], wall)
     for position, state in enumerate(panel_states):
@@ -1584,12 +1606,20 @@ def _write_panel_data(
             continue
         field = _grid_field(state["psi"], state["shape"])
         payload[f"psi_{position}"] = field
-        payload[f"current_{position}"] = np.asarray(state["current"], dtype=float)
-        moments = state["moments"]
-        payload[f"cell_current_{position}"] = np.asarray(moments[0], dtype=float)
-        payload[f"radial_moment_{position}"] = np.asarray(moments[1], dtype=float)
-        payload[f"vertical_moment_{position}"] = np.asarray(moments[2], dtype=float)
-        payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
+        if position in drawn_positions:
+            for key in ("current", "state", "promoted_mask", "compensating_current"):
+                if key in state:
+                    payload[f"{key}_{position}"] = np.asarray(state[key])
+            if "moments" in state:
+                for name, moment in zip(
+                    ("cell_current", "radial_moment", "vertical_moment"),
+                    state["moments"],
+                    strict=True,
+                ):
+                    payload[f"{name}_{position}"] = np.asarray(moment, dtype=float)
+            payload[f"separatrix_{position}"] = np.asarray(
+                state["separatrix"], dtype=float
+            )
         axis = np.asarray(state["nulls"]["axis"], dtype=float).reshape(2)
         payload[f"axis_{position}"] = axis
         x_points = np.asarray(state["nulls"]["x_points"], dtype=float).reshape(-1, 2)
@@ -1629,19 +1659,20 @@ def _write_panel_data(
         payload[f"xpoints_{position}"] = x_points
         payload[f"xpoint_flux_{position}"] = flux
         payload[f"saddle_index_{position}"] = np.asarray(saddle_index, dtype=int)
-        _persist_branches(
-            payload,
-            f"branches_{position}_",
-            _assemble_raster_branches(
-                payload["radius"],
-                payload["height"],
-                field,
-                axis,
-                x_points,
-                saddle_index,
-                inside,
-            ),
-        )
+        if position in drawn_positions:
+            _persist_branches(
+                payload,
+                f"branches_{position}_",
+                _assemble_raster_branches(
+                    payload["radius"],
+                    payload["height"],
+                    field,
+                    axis,
+                    x_points,
+                    saddle_index,
+                    inside,
+                ),
+            )
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **payload)
     # The guard measures the archive on disk rather than the arrays that were
@@ -1957,6 +1988,10 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
                     np.asarray(data["%s_%d" % (key, position)], dtype=float)
                     for key in ("cell_current", "radial_moment", "vertical_moment")
                 )
+                for key in ("state", "promoted_mask", "compensating_current"):
+                    name = "%s_%d" % (key, position)
+                    if name in data.files:
+                        panel[key] = np.asarray(data[name])
             panel["branches"] = _load_branches(data, "branches_%d_" % position)
             if panel["branches"] is None:
                 panel["branches"] = _assemble_raster_branches(
@@ -2115,7 +2150,10 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         axis, loaded["reference_branches"], "#3366cc", loaded["reference_separatrix"]
     )
     panel["branches_drawn"] = _draw_branch_set(
-        axis, panel["branches"], "#cc7722", panel["separatrix"]
+        axis,
+        display.branches if display is not None else panel["branches"],
+        "#cc7722",
+        panel["separatrix"],
     )
 
     _draw_null_set(
@@ -2126,11 +2164,19 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         "#3366cc",
         loaded["wall"],
     )
+    drawn_xpoints = np.asarray(panel["xpoints"], dtype=float).reshape(-1, 2).copy()
+    saddle_index = panel["saddle_index"]
+    if (
+        display is not None
+        and display.saddle_converged
+        and 0 <= saddle_index < len(drawn_xpoints)
+    ):
+        drawn_xpoints[saddle_index] = display.saddle_rz
     _draw_null_set(
         axis,
         panel["axis"],
-        panel["xpoints"],
-        panel["saddle_index"],
+        drawn_xpoints,
+        saddle_index,
         "#cc7722",
         loaded["wall"],
     )
@@ -2240,12 +2286,17 @@ def _panel_display_note(loaded: dict[str, Any]) -> str:
         if display is None:
             continue
         parts.append(
-            "the %s panel draws the normalised plasma moments of its state on a "
-            "%.0f mm map, largest node mismatch %.3e Wb"
+            "the %s panel draws the field of its terminal currents on a "
+            "%.0f mm map, largest node mismatch %.3e Wb, solved-node "
+            "mismatch %.3e Wb, %d promoted nodes, nearest promoted node "
+            "%.3f m from its polished X-point"
             % (
                 word,
                 1.0e3 * display.spacing_m,
                 display.max_node_mismatch_wb,
+                display.max_solved_node_mismatch_wb,
+                display.promoted_node_count,
+                display.nearest_promoted_to_xpoint_m,
             )
         )
     if not parts:
@@ -2281,20 +2332,26 @@ def _render_panel(
                 spacing=DEFAULT_DISPLAY_SPACING,
                 target_current=target_current,
             )
-    figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
+            if panel["converged"] and "state" in panel:
+                assert (
+                    panel["display"].max_solved_node_mismatch_wb
+                    <= 10 * panel["residual"]
+                ), "converged panel's solved-node mismatch exceeds ten residuals"
+    figure, axes = plt.subplots(1, 2, figsize=(14, 7.2), constrained_layout=True)
 
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
         panel = loaded[label]
         _paint_panel(axis, loaded, panel)
         axis.set_title(
-            "edit %d  %+d%%  residual %.3e  converged %s  trips %d"
+            "edit %d  %+d%%  %s\nresidual %.3e Wb  %d trips"
             % (
                 panel["edit_index"],
                 round(100.0 * panel["fraction"]),
+                "converged" if panel["converged"] else "not converged",
                 panel["residual"],
-                "yes" if panel["converged"] else "no",
                 panel["trips"],
-            )
+            ),
+            fontsize=20,
         )
 
     reference_note = _saddle_note(
@@ -2343,15 +2400,11 @@ def _render_panel(
             solved_orderings[1],
         )
     )
-    # The caption states every distinction the panel draws and is longer than
-    # one line of the canvas; wrapped, it stays inside the figure rather than
-    # being cut at both edges.
-    figure.suptitle(
-        textwrap.fill(caption + _panel_display_note(loaded), CAPTION_WIDTH),
-        fontsize=9,
-    )
+    # Detailed measurements belong in the page caption, where the reader sees
+    # them at body size instead of shrinking them with the image.
+    caption += _panel_display_note(loaded)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(figure_path, dpi=140)
+    figure.savefig(figure_path, dpi=100)
     vector_path = figure_path.with_suffix(".svg")
     figure.savefig(vector_path)
     plt.close(figure)
@@ -2359,6 +2412,7 @@ def _render_panel(
     return {
         "figure": str(figure_path),
         "figure_vector": str(vector_path),
+        "caption": caption,
         "levels": [float(value) for value in loaded["levels"]],
         "level_band": {
             "axis_flux": loaded["reference_axis_flux"],
@@ -2370,10 +2424,7 @@ def _render_panel(
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
         "display_map": {
-            "moments_route": (
-                "operator.normalised_current_moments_and_observation of the state "
-                "at the solve's target current"
-            ),
+            "moments_route": ("stored terminal moments at the solve's target current"),
             "panels": {
                 label: {
                     "spacing_m": float(loaded[label]["display"].spacing_m),
@@ -2382,6 +2433,19 @@ def _render_panel(
                     ),
                     "max_node_mismatch_wb": float(
                         loaded[label]["display"].max_node_mismatch_wb
+                    ),
+                    "max_solved_node_mismatch_wb": float(
+                        loaded[label]["display"].max_solved_node_mismatch_wb
+                    ),
+                    "promoted_node_count": int(
+                        loaded[label]["display"].promoted_node_count
+                    ),
+                    "nearest_promoted_to_xpoint_m": (
+                        float(loaded[label]["display"].nearest_promoted_to_xpoint_m)
+                        if np.isfinite(
+                            loaded[label]["display"].nearest_promoted_to_xpoint_m
+                        )
+                        else None
                     ),
                     "saddle_converged": bool(
                         loaded[label]["display"].saddle_converged,
@@ -2966,6 +3030,19 @@ def run(
                     "nulls": _null_points(profile, result.state),
                     "branches": _branches_of(profile, result.state, raster_flux),
                     "current": np.asarray(current, dtype=float),
+                    "state": np.asarray(result.state, dtype=float),
+                    "promoted_mask": np.asarray(
+                        equilibrium.promoted_mask
+                        if equilibrium is not None
+                        else result.promoted_mask,
+                        dtype=bool,
+                    ),
+                    "compensating_current": np.asarray(
+                        result.compensating_current
+                        if result.compensating_current is not None
+                        else np.zeros_like(current),
+                        dtype=float,
+                    ),
                     "moments": _panel_moments(
                         profile, result.state, requested_class, target_current
                     ),
@@ -3046,6 +3123,7 @@ def run(
                 panel_figure,
                 profile=profile,
                 circuit_context=prepared.get("circuit_context"),
+                target_current=target_current,
             )
             print("PANEL=" + json.dumps(panel, sort_keys=True), flush=True)
             _write_diagnostics(diagnostics, prepared=prepared, rows=rows, panel=panel)

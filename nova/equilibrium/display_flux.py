@@ -209,6 +209,9 @@ def _branches(
     axis_rz: np.ndarray,
 ) -> dict[str, np.ndarray]:
     """Assemble the field's own separatrix at its admitted-saddle level."""
+    # A fine contour can traverse both sides of each grid row and column.
+    # Round the resulting display-grid allowance up for a stable JIT shape.
+    branch_capacity = 1 << (2 * (radius.size + height.size) - 1).bit_length()
     assembled = jax.device_get(
         assemble_separatrix_branches(
             jnp.asarray(values),
@@ -216,6 +219,7 @@ def _branches(
             jnp.asarray(height),
             jnp.asarray(level),
             jnp.asarray(axis_rz),
+            branch_capacity=branch_capacity,
         )
     )
     return {key: np.asarray(assembled[key]) for key in BRANCH_KEYS}
@@ -292,11 +296,13 @@ def build_display_flux_map(
         promoted_nodes = np.zeros(node_count, dtype=bool)
     else:
         promoted_nodes = np.asarray(promoted, dtype=bool).reshape(-1)
-        if promoted_nodes.size != node_count:
+        state_size = np.asarray(state).size
+        if promoted_nodes.size not in (node_count, state_size):
             raise ValueError(
                 f"the promoted mask names {promoted_nodes.size} nodes, "
-                f"the lattice carries {node_count}"
+                f"the lattice carries {node_count} and the state {state_size}"
             )
+        promoted_nodes = promoted_nodes[:node_count]
 
     radius_nodes = np.asarray(lattice.radius, dtype=np.float64)
     height_nodes = np.asarray(lattice.height, dtype=np.float64)
@@ -376,13 +382,8 @@ def build_display_flux_map(
     offset = float(1.0e3 * np.linalg.norm(saddle_rz - lattice_saddle_rz))
     nearest_promoted = float("nan")
     if promoted_nodes.any():
-        reference = (
-            None
-            if xpoint_rz is None
-            else np.asarray(xpoint_rz, dtype=np.float64).reshape(-1)[:2]
-        )
-        if reference is not None and np.all(np.isfinite(reference)):
-            offsets = node_coordinate[promoted_nodes] - reference
+        if saddle_converged and np.all(np.isfinite(saddle_rz)):
+            offsets = node_coordinate[promoted_nodes] - saddle_rz
             nearest_promoted = float(np.min(np.linalg.norm(offsets, axis=1)))
     return DisplayFluxMap(
         radius=radius,

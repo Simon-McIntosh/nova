@@ -12,6 +12,7 @@ the operator never saw.
 from __future__ import annotations
 
 import os
+import json
 from typing import Any
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
@@ -19,24 +20,50 @@ os.environ.setdefault("JAX_PLATFORMS", "cpu")
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 from dataclasses import replace
 
-from benchmarks.coil_edit_latency import DEFAULT_DISPLAY_SPACING, _panel_display_map
+from pathlib import Path
+from PIL import Image
+
+from benchmarks.coil_edit_latency import (
+    DEFAULT_DISPLAY_SPACING,
+    _panel_display_map,
+    _panel_load,
+    _render_panel,
+    _prepare_case,
+)
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import DisplayCoupling
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import PrescribedCurrentField
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 from nova.linalg.interpolant import Linear
+from benchmarks import mast_response_carrier_warm as response_carrier
 
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True, (
     "the map is compared against the operator's own raster, so the test process "
     "must resolve the same working precision the operator was built in"
 )
+
+
+def test_panel_explanation_is_available_at_page_text_size(tmp_path: Path):
+    archive = Path(
+        "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+    )
+    figure = tmp_path / "panel.png"
+    panel = _render_panel(archive, figure)
+
+    with Image.open(figure) as image:
+        assert image.size == (1400, 720)
+    assert "terminal poloidal flux" in panel["caption"]
+    assert "terminal poloidal flux" not in figure.with_suffix(".svg").read_text()
+
 
 #: The re-solved state's conductor sections [m] and the current it carries.
 CONDUCTOR_RADIUS = np.asarray([0.75, 1.25])
@@ -246,3 +273,77 @@ def test_the_panel_map_reproduces_the_operator_raster_image():
         target_current=1.0e6,
     )
     assert display.reproduction_relative_error < 1.0e-10
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3300)
+def test_committed_converged_panel_uses_its_terminal_currents():
+    """Read the solve's state, promotion and compensation through its producer."""
+    archive = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_ARCHIVE",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        )
+    )
+    receipt = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_RECEIPT",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+        )
+    )
+    loaded = _panel_load(archive)
+    assert archive.stat().st_size <= 300_000
+    panel = loaded["converged"]
+    assert panel["converged"]
+    assert panel["residual"] <= 1.0e-8
+    assert np.any(panel["promoted_mask"])
+    assert np.any(panel["compensating_current"])
+    profile, prepared, _carrier = _prepare_case(response_carrier.DEFAULT_CARRIER)
+    display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        panel,
+        spacing=DEFAULT_DISPLAY_SPACING,
+        target_current=prepared["target_current"],
+    )
+    assert display.max_solved_node_mismatch_wb <= 10 * panel["residual"]
+    assert display.promoted_node_count == int(
+        np.count_nonzero(panel["promoted_mask"][: profile.lattice.node_count])
+    )
+    assert display.saddle_converged
+    promoted_points = np.asarray(profile.lattice.coordinate)[
+        panel["promoted_mask"][: profile.lattice.node_count]
+    ]
+    polished_nearest = float(
+        np.min(np.linalg.norm(promoted_points - display.saddle_rz, axis=1))
+    )
+    seed = np.asarray(panel["xpoints"])[int(panel["saddle_index"])]
+    seed_nearest = float(np.min(np.linalg.norm(promoted_points - seed, axis=1)))
+    assert abs(polished_nearest - seed_nearest) > 1.0e-12
+    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+        polished_nearest, abs=1.0e-12
+    )
+    assert display.radius.size == 195
+    assert display.height.size == 401
+    assert display.well_formed
+    assert int(np.asarray(display.branches["closed_segment_count"])) > 256
+    assert int(np.asarray(display.branches["open_branch_count"])) == 2
+    narrow = assemble_separatrix_branches(
+        jnp.asarray(display.flux.T),
+        jnp.asarray(display.radius),
+        jnp.asarray(display.height),
+        jnp.asarray(display.saddle_flux),
+        jnp.asarray(panel["axis"]),
+        branch_capacity=256,
+    )
+    assert bool(np.asarray(narrow["branch_overflow"]))
+    assert not bool(np.asarray(narrow["well_formed"]))
+    print("fine-grid control: branch_capacity=256, overflow=True, well_formed=False")
+    reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
+    assert (
+        abs(
+            display.max_solved_node_mismatch_wb
+            - reported["max_solved_node_mismatch_wb"]
+        )
+        <= 1.0e-12
+    )

@@ -321,10 +321,14 @@ def test_promoted_nodes_are_excluded_from_the_solved_mismatch():
     assert display.max_solved_node_mismatch_wb == pytest.approx(
         residual, rel=1.0e-6, abs=1.0e-15
     )
-    offset = np.asarray(lattice.coordinate)[promoted] - xpoint
-    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
-        float(np.min(np.linalg.norm(offset, axis=1))), rel=1.0e-12
+    assert np.isnan(display.nearest_promoted_to_xpoint_m) == (
+        not display.saddle_converged
     )
+    if display.saddle_converged:
+        offset = np.asarray(lattice.coordinate)[promoted] - display.saddle_rz
+        assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+            float(np.min(np.linalg.norm(offset, axis=1))), rel=1.0e-12
+        )
     assert display.reproduction_relative_error < 1.0e-10
 
 

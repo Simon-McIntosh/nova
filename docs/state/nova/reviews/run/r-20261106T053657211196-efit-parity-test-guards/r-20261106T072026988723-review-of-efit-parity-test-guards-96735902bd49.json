@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T07:31:26.622Z",
+  "dispatched_at": "2026-11-06T07:21:36Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the defect at issue, double counting across the core and exterior supports, is fixed by construction and guarded by the outside-contour core-centroid test, whose control reddens; a fully independent out-of-core reference needs a second mask construction, and that cost exceeds what the check would add",
+      "recorded_at": "2026-11-06T07:40:41.976707+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the defect at issue, double counting across the core and exterior supports, is fixed by construction and guarded by the outside-contour core-centroid test, whose control reddens; a fully independent out-of-core reference needs a second mask construction, and that cost exceeds what the check would add",
+      "recorded_at": "2026-11-06T07:40:45.518174+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_efit_parity_inductance_partition.py",
+      "id": "f9c1a2e4d70",
+      "line": 73,
+      "severity": "non-blocking",
+      "text": "The assertion compares closure[\"direct_out_of_core_current_a\"] with banked[\"all_domain_constrained\"] minus live[\"cell_current_a\"], but benchmarks/efit_parity_inductance_partition.py:418 defines that field as total - core_current and :396 exposes core_current as live[\"cell_current_a\"], so given the total check at :67 the assertion is implied and can fail only if the field's own derivation changes; it measures no property of the out-of-core support."
+    },
+    {
+      "file": "tests/test_efit_parity_inductance_partition.py",
+      "id": "fb2e7c59a13",
+      "line": 81,
+      "severity": "non-blocking",
+      "text": "The cellwise sum at :77-79 is taken over ~fields[\"core\"] while the right-hand side subtracts live[\"cell_current_a\"], which is the sum over the same mask at benchmarks/efit_parity_inductance_partition.py:366 and :396, so a defect misclassifying one cell in the core mask shifts both sides by that cell's current and leaves the assertion green; the recorded control mutates the test's own support mask, which is why it reddens, and the check therefore guards a mismatch between the exposed arrays and the receipt rather than the partition itself."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits against 1bb0efbd84e0c7626e37575b80b73c46616ce385: a7ca122486c05afe703c728b6ce6cccf6bbb5999 replaces the tautological out-of-core check with the banked-total-minus-live-core comparison at tests/test_efit_parity_inductance_partition.py:70-83 and adds the record-sum invariant at :121-127, and 96735902bd49e1ef4c5bfb6e2cd4abcbdc80bd31 corrects only docs/evidence/fragments/nova-portfolio-replan/efit-parity-test-guards.html:13,18,24,27-31.",
+    "done_when": "The done_when asks for zero added failures at base and head plus a red negative control on the two focused files; the manifest's baseline_suite (12 passed, EXIT=0, base-gate.log) and after_suite (13 passed, EXIT=0, head-gate-out-of-core.log at a7ca12248) yield added_failure_count 0 over empty failure_ids, and negative-control-out-of-core-support.log:58-65 shows test_direct_current_closes_without_inventing_branch_partition failing at 6.661697717388484 A versus 11.058514284319244 A with EXIT=1.",
+    "goal": "The reviewed node's goal was three EFIT partition test-guard repairs, and the two commits gained since the prior review (1bb0efbd84e0..96735902bd49) carry the first item that review left weak: tests/test_efit_parity_inductance_partition.py:76-83 sums the exposed cell currents outside the core mask and compares that sum against banked[\"all_domain_constrained\"] minus live[\"cell_current_a\"] instead of against the benchmark's own subtraction, and :121-127 checks the partitioned out-of-core records against the same support.",
+    "manifest": "Read the reviewed run's manifest.md at head 96735902bd49; its baseline_suite and after_suite blocks report completed true, exit_status 0 and empty failure_ids against logs that exist on disk, and its negative_control_log and negative_control_note reconcile with negative-control-out-of-core-support.log:58-65.",
+    "write_paths": "The reviewed run declares tests/test_efit_parity_inductance_partition.py, benchmarks/efit_parity_inductance_partition.py and the evidence fragment, and git diff --stat 1bb0efbd84e0c7626e37575b80b73c46616ce385 96735902bd49e1ef4c5bfb6e2cd4abcbdc80bd31 changes exactly tests/test_efit_parity_inductance_partition.py and docs/evidence/fragments/nova-portfolio-replan/efit-parity-test-guards.html, 23 insertions and 8 deletions, with nothing outside."
+  },
+  "justifications": {
+    "durability": "tests/test_efit_parity_inductance_partition.py:81 reddens under the recorded support-drop control, but at :76-83 both sides derive from the same core mask exposed at benchmarks/efit_parity_inductance_partition.py:366 and :396, so a core-mask partition defect moves them together and stays green.",
+    "evidence": "base-gate.log and head-gate-out-of-core.log each name their revision, tree and command and end in a bare EXIT= line (12 and 13 passed), so added_failure_count 0 is derived from the logs, and the fragment's 416 958.3 A and 933 023.8 A reconcile with docs/figures/efit-forward-parity/moment-definition-rescore.json and EXPECTED_TOTAL_CURRENT_A at benchmarks/efit_parity_inductance_partition.py:53.",
+    "fit": "the added assertions use the module's pytest.approx-and-numpy idiom, and the misleading comment the prior review flagged at tests/test_efit_parity_inductance_partition.py:67-68 was replaced by the accurate line at :80.",
+    "goal_fidelity": "tests/test_efit_parity_inductance_partition.py:81-83 now compares a cellwise support sum against a banked total, satisfying the brief's out-of-core repair, though the companion assertion at :73-75 restates the total check rather than measuring the out-of-core support.",
+    "reuse": "the change adds no definition and reuses the existing _current_supports fixture at tests/test_efit_parity_inductance_partition.py:19 and the single partition owner at benchmarks/efit_parity_inductance_partition.py:119.",
+    "scope_discipline": "git diff --stat 1bb0efbd84e0 96735902bd49 lists only tests/test_efit_parity_inductance_partition.py and docs/evidence/fragments/nova-portfolio-replan/efit-parity-test-guards.html, both declared write paths of the reviewed run."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed node's goal was three EFIT partition test-guard repairs, and the two commits gained since the prior review (1bb0efbd84e0..96735902bd49) carry the first item that review left weak: tests/test_efit_parity_inductance_partition.py:76-83 sums the exposed cell currents outside the core mask and compares that sum against banked[\"all_domain_constrained\"] minus live[\"cell_current_a\"] instead of against the benchmark's own subtraction, and :121-127 checks the partitioned out-of-core records against the same support.\nVERDICT done_when: The done_when asks for zero added failures at base and head plus a red negative control on the two focused files; the manifest's baseline_suite (12 passed, EXIT=0, base-gate.log) and after_suite (13 passed, EXIT=0, head-gate-out-of-core.log at a7ca12248) yield added_failure_count 0 over empty failure_ids, and negative-control-out-of-core-support.log:58-65 shows test_direct_current_closes_without_inventing_branch_partition failing at 6.661697717388484 A versus 11.058514284319244 A with EXIT=1.\nVERDICT write_paths: The reviewed run declares tests/test_efit_parity_inductance_partition.py, benchmarks/efit_parity_inductance_partition.py and the evidence fragment, and git diff --stat 1bb0efbd84e0c7626e37575b80b73c46616ce385 96735902bd49e1ef4c5bfb6e2cd4abcbdc80bd31 changes exactly tests/test_efit_parity_inductance_partition.py and docs/evidence/fragments/nova-portfolio-replan/efit-parity-test-guards.html, 23 insertions and 8 deletions, with nothing outside.\nVERDICT manifest: Read the reviewed run's manifest.md at head 96735902bd49; its baseline_suite and after_suite blocks report completed true, exit_status 0 and empty failure_ids against logs that exist on disk, and its negative_control_log and negative_control_note reconcile with negative-control-out-of-core-support.log:58-65.\nVERDICT diff: Read both commits against 1bb0efbd84e0c7626e37575b80b73c46616ce385: a7ca122486c05afe703c728b6ce6cccf6bbb5999 replaces the tautological out-of-core check with the banked-total-minus-live-core comparison at tests/test_efit_parity_inductance_partition.py:70-83 and adds the record-sum invariant at :121-127, and 96735902bd49e1ef4c5bfb6e2cd4abcbdc80bd31 corrects only docs/evidence/fragments/nova-portfolio-replan/efit-parity-test-guards.html:13,18,24,27-31.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_efit_parity_inductance_partition.py:81-83 now compares a cellwise support sum against a banked total, satisfying the brief's out-of-core repair, though the companion assertion at :73-75 restates the total check rather than measuring the out-of-core support.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-gate.log and head-gate-out-of-core.log each name their revision, tree and command and end in a bare EXIT= line (12 and 13 passed), so added_failure_count 0 is derived from the logs, and the fragment's 416 958.3 A and 933 023.8 A reconcile with docs/figures/efit-forward-parity/moment-definition-rescore.json and EXPECTED_TOTAL_CURRENT_A at benchmarks/efit_parity_inductance_partition.py:53.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 1bb0efbd84e0 96735902bd49 lists only tests/test_efit_parity_inductance_partition.py and docs/evidence/fragments/nova-portfolio-replan/efit-parity-test-guards.html, both declared write paths of the reviewed run.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_efit_parity_inductance_partition.py:81 reddens under the recorded support-drop control, but at :76-83 both sides derive from the same core mask exposed at benchmarks/efit_parity_inductance_partition.py:366 and :396, so a core-mask partition defect moves them together and stays green.\nSCORE fit: 19\nJUSTIFICATION fit: the added assertions use the module's pytest.approx-and-numpy idiom, and the misleading comment the prior review flagged at tests/test_efit_parity_inductance_partition.py:67-68 was replaced by the accurate line at :80.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition and reuses the existing _current_supports fixture at tests/test_efit_parity_inductance_partition.py:19 and the single partition owner at benchmarks/efit_parity_inductance_partition.py:119.\nFINDING tests/test_efit_parity_inductance_partition.py:73 non-blocking: The assertion compares closure[\"direct_out_of_core_current_a\"] with banked[\"all_domain_constrained\"] minus live[\"cell_current_a\"], but benchmarks/efit_parity_inductance_partition.py:418 defines that field as total - core_current and :396 exposes core_current as live[\"cell_current_a\"], so given the total check at :67 the assertion is implied and can fail only if the field's own derivation changes; it measures no property of the out-of-core support.\nFINDING tests/test_efit_parity_inductance_partition.py:81 non-blocking: The cellwise sum at :77-79 is taken over ~fields[\"core\"] while the right-hand side subtracts live[\"cell_current_a\"], which is the sum over the same mask at benchmarks/efit_parity_inductance_partition.py:366 and :396, so a defect misclassifying one cell in the core mask shifts both sides by that cell's current and leaves the assertion green; the recorded control mutates the test's own support mask, which is why it reddens, and the check therefore guards a mismatch between the exposed arrays and the receipt rather than the partition itself.\n",
+  "review_run_id": "r-20261106T072026988723-review-of-efit-parity-test-guards-96735902bd49",
+  "reviewed_base_sha": "1bb0efbd84e0c7626e37575b80b73c46616ce385",
+  "reviewed_head_sha": "96735902bd49e1ef4c5bfb6e2cd4abcbdc80bd31",
+  "reviewed_run_id": "r-20261106T053657211196-efit-parity-test-guards",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:52:00.000000+00:00",
+  "total": 112
+}

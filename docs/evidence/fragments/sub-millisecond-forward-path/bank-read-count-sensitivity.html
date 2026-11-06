@@ -1,0 +1,525 @@
+<section id="bank-read-count-sensitivity-landing">
+<h2>Read-count sensitivity to numerical perturbations</h2>
+<p><strong>The first discrete split is a tolerance crossing, at update 3 in
+zero-based lane 2.</strong> Both revisions accept the full Newton step. Base's
+fresh residual is 7.645439836778678e-11; head's is 1.6002843494788976e-10,
+a difference of 8.357403658010298e-11. Base stops that lane and head continues.
+There is no cut-set, normal-set or fragment-selection difference, and no
+accepted-versus-rejected trial difference through that update. Lanes 4, 6, 7,
+8, 10, 11 and 13 also disagree on the tolerance decision at update 3;
+lane 2 is the first in lane order.</p>
+<p>The two fresh measured processes per revision reproduce <strong>7 reads
+per lane at base and 17 at head</strong>, with 5 and 6 batch updates. This
+reproduces read-count sensitivity, but not the earlier pair's exact 6/8 counts.
+The <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches.html">Jacobian launch record</a>
+used another cold compilation before warming its caches. A warmed executable
+is repeatable within this measurement; its read count is not a property of
+the source revision alone.</p>
+<h3 id="bank-read-count-sensitivity-method">Measurement and observer validation</h3>
+<p>Base is <code>559c012a0c62c0d504522a15b4ecf592be272f3f</code> and head is
+<code>1383a2bea684af17fa62f946edce2d26616652b9</code>. Their only product
+difference is the channel-tangent cell tile and ring group in
+<code>nova/equilibrium/current.py</code>; <code>solve_batch</code> and
+<code>_damped_scale</code> are identical. Both run the existing
+<code>bank_solve_profile.fixture.build(16)</code>, with the same 550-cell
+diverted geometry, lane perturbation recipe, 60-update ceiling,
+<code>reuse_factor=False</code>, contraction limit 0.5 and fresh-residual
+tolerance 1e-10.</p>
+<p>H200 allocation 1307293 completed in 15 min 4 s on
+<code>98dci4-gpu-0003</code>, requesting two CPU cores, one GPU and 48 GB
+under <code>gpu_0003_grpA</code>. Each revision has its own cache; process 0
+warms it and processes 1 and 2 are fresh interpreters. All four measured
+logs report cache hits for both <code>jit_solve</code> and
+<code>jit_observed</code>, with XLA_FLAGS unset. Double precision is enabled
+before fixture construction and asserted in every process. Every header
+names the revision, imported module and scratch cwd; every process and the
+allocation end with EXIT=0.</p>
+<p>The observer imports <code>bank_solve_cycle.observe.observe_updates</code>
+and adds callbacks around the actual production loop, search and evaluator.
+It does not reproduce their arithmetic. In <strong>all six processes</strong>,
+observed and unobserved residual histories, per-lane reads and terminal
+moments are exactly equal. Observed events and unobserved histories are also
+identical across the three processes of each revision. Wall values below
+are medians of three synchronized <em>unobserved</em> calls after one
+in-process warm-up. Wall/read normalizes total solve work; it is not isolated
+read latency, since the number of Jacobian updates per read differs.</p>
+<p>The initial decision population is 117 cut cells, 8 normal-form cells and
+338 selected fragments per lane, identical across revisions. No accepted or
+rejected trial changes any of those decisions in either measured trajectory.
+For every recorded mask, flipping one bit in a host copy changes its
+signature. The report parser rejects an identical-path comparison with
+<code>No differing decision observed</code>, and identifies an injected
+done-bit flip at exactly update 1, lane 0. These controls establish that
+the reported absence of decision changes comes from a working instrument.</p>
+<h3 id="bank-read-count-sensitivity-processes">All process walls and read counts</h3>
+<table><thead><tr><th>Arm</th><th>Process</th><th>Reads in lane order</th><th>Observed reads</th><th>Median solve [ms]</th><th>Wall/read [ms]</th><th>Identical observed path</th></tr></thead><tbody><tr><td>base</td><td>warm-up</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>519.231332</td><td>74.175905</td><td>True</td></tr>
+<tr><td>base</td><td>1</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>524.141205</td><td>74.877315</td><td>True</td></tr>
+<tr><td>base</td><td>2</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>523.976328</td><td>74.853761</td><td>True</td></tr>
+<tr><td>head</td><td>warm-up</td><td>[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]</td><td>[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]</td><td>933.709769</td><td>54.924104</td><td>True</td></tr>
+<tr><td>head</td><td>1</td><td>[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]</td><td>[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]</td><td>939.379856</td><td>55.257639</td><td>True</td></tr>
+<tr><td>head</td><td>2</td><td>[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]</td><td>[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]</td><td>939.206423</td><td>55.247437</td><td>True</td></tr>
+</tbody></table>
+
+<h3 id="bank-read-count-sensitivity-first-lane">First differing lane</h3>
+<p>Update 0 is the initial fresh read. “Accepted” in a trial entry means that
+the search stops that lane; “rejected” means that it keeps halving. The selected
+scale is the best valid trial retained by the production search, including
+when all eight trials are rejected. “Decision changes” compares the accepted
+reading with its incumbent. Every trial entry also reports its own selection
+changes. The factor is physically rebuilt for the batch on every update;
+“Active refactor” is the product's per-lane counter, which stops incrementing
+once that lane is done. Lock releases without selection changes come from
+the contraction test.</p>
+<table><thead><tr><th>Arm/process</th><th>Lane</th><th>Update</th><th>Fresh before</th><th>Fresh after</th><th>Selected scale</th><th>Pending trials: scale, fresh norm, decision</th><th>Active refactor</th><th>Decision changes</th><th>Lock releases</th><th>Done</th><th>Cumulative reads</th></tr></thead><tbody><tr><td>base/1</td><td>2</td><td>1</td><td>1.1525447403134592e-01</td><td>3.8296089478251361e-04</td><td>1.0</td><td>1: 3.8296089478251361e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>2</td><td>2</td><td>3.8296089478251361e-04</td><td>1.7227819171239389e-09</td><td>1.0</td><td>1: 1.7227819171239389e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>2</td><td>3</td><td>1.7227819171239389e-09</td><td>7.6454398367786780e-11</td><td>1.0</td><td>1: 7.6454398367786780e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>2</td><td>4</td><td>7.6454398367786780e-11</td><td>7.6454398367786780e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>2</td><td>5</td><td>7.6454398367786780e-11</td><td>7.6454398367786780e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>head/1</td><td>2</td><td>1</td><td>1.1525447428184066e-01</td><td>3.8296118627556552e-04</td><td>1.0</td><td>1: 3.8296118627556552e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>2</td><td>2</td><td>3.8296118627556552e-04</td><td>1.6896848364922334e-09</td><td>1.0</td><td>1: 1.6896848364922334e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>2</td><td>3</td><td>1.6896848364922334e-09</td><td>1.6002843494788976e-10</td><td>1.0</td><td>1: 1.6002843494788976e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>2</td><td>4</td><td>1.6002843494788976e-10</td><td>1.2917666936118621e-10</td><td>1.0</td><td>1: 1.2917666936118621e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/1</td><td>2</td><td>5</td><td>1.2917666936118621e-10</td><td>5.7667648434289731e-11</td><td>1.0</td><td>1: 5.7667648434289731e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>2</td><td>6</td><td>5.7667648434289731e-11</td><td>5.7667648434289731e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+</tbody></table>
+
+<figure id="bank-read-count-sensitivity-history"><img src="/nova/figures/sub-millisecond-forward-path/bank-read-count-sensitivity/residual-history.svg" alt="Fresh residual against update for both revisions in lane 2, with a magnified view of the tolerance crossing"><figcaption>Zero-based lane 2. Left: complete history. Right: the same history near the unchanged 1e-10 tolerance, showing the different crossing updates. Both vertical axes are logarithmic. Both fresh processes per revision have identical histories. Values after convergence include companion reads. The shared saver passed text bounds and overlap checks; the producer inspected the 1400 × 720 PNG rendering. Only the SVG is committed.</figcaption></figure>
+<h3 id="bank-read-count-sensitivity-numerics">The numerical difference precedes the first decision split</h3>
+<p>The fixture's starting moments are repeatable within each revision, but
+are not byte-identical across them. The initial-moment fingerprint is recorded
+in every process; process 2 also retains the arrays. Adding that host-side
+export did not change either solve's cache key or path. The following gaps
+are maximum absolute differences divided by the maximum absolute base value
+in that channel, across all sixteen lanes and cells.</p>
+<table><thead><tr><th>Moment channel</th><th>Initial relative gap</th><th>Terminal relative gap</th></tr></thead><tbody>
+<tr><td>Cell current</td><td>3.654974274415384e-14</td><td>4.413131980406748e-13</td></tr>
+<tr><td>Radial moment</td><td>8.084647949207993e-14</td><td>6.160567562324110e-13</td></tr>
+<tr><td>Vertical moment</td><td>7.083863236264178e-14</td><td>8.127281001496087e-13</td></tr>
+</tbody></table>
+<p>The maximum initial fresh-residual difference is already
+3.929869762941962e-10. In lane 2 it is 2.504947360648657e-10 at the initial
+read, before any Newton update, while the residual itself is about 0.115.
+Thus the first <em>numerical</em> difference is earlier than the first
+<em>discrete</em> decision difference. The trajectory comparison includes
+each revision's independently compiled fixture and read; it does not isolate
+the Jacobian tile as the sole upstream source of perturbation. A follow-on
+causal comparison must supply byte-identical initial moments to both arms.</p>
+<p>Both terminal states meet the unchanged fresh-residual requirement:
+the maxima are 9.622169727663277e-11 at base and 9.437428616365651e-11 at
+head. The terminal moment gaps above quantify answer agreement; this node
+does not remeasure the analytic-oracle geometry budgets.</p>
+<h3 id="bank-read-count-sensitivity-tail">How the first split becomes ten extra batch reads</h3>
+<table><thead><tr><th>Arm</th><th>Trial reads at successive batch updates</th><th>Total with initial read</th><th>Last active lane</th></tr></thead><tbody>
+<tr><td>base</td><td>1, 1, 1, 2, 1</td><td>7</td><td>15, finishing at update 5</td></tr>
+<tr><td>head</td><td>1, 1, 1, 8, 3, 2</td><td>17</td><td>9, finishing at update 6</td></tr>
+</tbody></table>
+<p>At head update 4, lane 11 starts at 1.2011014405288734e-10. Its full
+trial is 1.4075851595407585e-10, an increase of 2.064837190118851e-11.
+All eight dyadic trials fail the strict reduction test and remain above
+tolerance. The search then retains that same full trial because it is the
+smallest valid norm among the eight. The last four batch trials exist solely
+for lane 11 and never change its selected state. This is a later search tail,
+not the first path split.</p>
+<p>Base update 4 needs a half trial for lanes 4, 9 and 12. Head update 5
+needs three trials because of lane 6; update 6 needs two because of lane 9.
+The batch termination predicate is “any lane unfinished,” and every evaluator
+call increments every lane's read count. For example, head lane 0 finishes at
+update 3 after four reads and still pays thirteen companion reads. Base lane 2
+finishes at update 3 and pays three companion reads; head lane 2 finishes at
+update 5 and pays two. None of these companion evaluations moves a completed
+lane's state.</p>
+<h3 id="bank-read-count-sensitivity-hypothesis">Hypothesis for a later product experiment</h3>
+<p><strong>A fixed near-root polishing schedule could stabilize the common
+batch read count while keeping the final certificate unchanged.</strong>
+After all lanes enter a declared near-root band, test a fixed number of
+full-step fresh evaluations, retaining each lane's lowest valid residual
+state. Certify the selected state with the existing 1e-10 fresh-read limit;
+only an uncertified batch enters the adaptive fallback. The schedule makes
+cost insensitive to which side of the tolerance a tiny perturbation lands
+on, provided the fixed schedule certifies all lanes. It does not promise a
+fixed fallback cost or bit-identical terminal moments. The candidate must
+preserve the locked oracle precision budgets as well as the residual limit.</p>
+<p>A residual-based acceptance margin is a narrower hypothesis for the search
+tail: permit a full trial inside a measured residual uncertainty band while
+leaving the final 1e-10 certificate strict. At the recorded lane-11 state,
+a margin exceeding 2.06484e-11 would accept the state that eight trials
+eventually select anyway. A margin sized at 1e-16 in residual units would not
+address this tail, and an acceptance margin alone would not remove the earlier
+tolerance split. These are hypotheses only: no product rule, tolerance or
+test is changed here.</p>
+<p>The next experiment should use common saved seed arrays, deliberate
+perturbations at the measured 1e-14 relative moment scale and independent
+cold compilations. It should test both read-count stability and unchanged
+certification/answer budgets. The present measurement identifies the sensitive
+comparisons; it does not establish that either proposed rule succeeds.</p>
+<h3 id="bank-read-count-sensitivity-provenance">Receipts and checks</h3>
+<p>All receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T183119731936-bank-read-count-sensitivity</code>:
+<code>base-0.json</code> through <code>base-2.json</code>, corresponding
+<code>head-*.json</code> and process logs; <code>device.log</code>;
+<code>summary.json</code>; <code>report-control.json</code>;
+<code>report.log</code> and <code>residual-history.png</code>. Large moment
+arrays and decision signatures remain there rather than in git. The initial
+capture driver is committed at <code>41c57690629b9fbaf6e2387fdc88b0ba2ae76bfa</code>;
+the host-side array export is <code>86ec2f74b1b5e13ffcabeea023c78c40609e32ca</code>.
+The report checks fresh-process equality, both cache hits, observer identity,
+nonempty decision populations and every terminal residual before rendering.
+No product source or test file is changed; paired test suites are not part of
+this measurement-only gate.</p>
+<details id="bank-read-count-sensitivity-all-lanes"><summary>All lanes and updates, both fresh processes</summary>
+<table><thead><tr><th>Arm/process</th><th>Lane</th><th>Update</th><th>Fresh before</th><th>Fresh after</th><th>Selected scale</th><th>Pending trials: scale, fresh norm, decision</th><th>Active refactor</th><th>Decision changes</th><th>Lock releases</th><th>Done</th><th>Cumulative reads</th></tr></thead><tbody><tr><td>base/1</td><td>0</td><td>1</td><td>1.1196354860656754e-01</td><td>3.7229162406049454e-04</td><td>1.0</td><td>1: 3.7229162406049454e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>0</td><td>2</td><td>3.7229162406049454e-04</td><td>1.7385985984219587e-09</td><td>1.0</td><td>1: 1.7385985984219587e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>0</td><td>3</td><td>1.7385985984219587e-09</td><td>1.6569856597925536e-11</td><td>1.0</td><td>1: 1.6569856597925536e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>0</td><td>4</td><td>1.6569856597925536e-11</td><td>1.6569856597925536e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>0</td><td>5</td><td>1.6569856597925536e-11</td><td>1.6569856597925536e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>1</td><td>1</td><td>1.1360895641097102e-01</td><td>3.7768020894191068e-04</td><td>1.0</td><td>1: 3.7768020894191068e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>1</td><td>2</td><td>3.7768020894191068e-04</td><td>1.5841834510865738e-09</td><td>1.0</td><td>1: 1.5841834510865738e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>1</td><td>3</td><td>1.5841834510865738e-09</td><td>1.2840928320656531e-10</td><td>1.0</td><td>1: 1.2840928320656531e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>1</td><td>4</td><td>1.2840928320656531e-10</td><td>7.9666051533422433e-11</td><td>1.0</td><td>1: 7.9666051533422433e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>1</td><td>5</td><td>7.9666051533422433e-11</td><td>7.9666051533422433e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>2</td><td>1</td><td>1.1525447403134592e-01</td><td>3.8296089478251361e-04</td><td>1.0</td><td>1: 3.8296089478251361e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>2</td><td>2</td><td>3.8296089478251361e-04</td><td>1.7227819171239389e-09</td><td>1.0</td><td>1: 1.7227819171239389e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>2</td><td>3</td><td>1.7227819171239389e-09</td><td>7.6454398367786780e-11</td><td>1.0</td><td>1: 7.6454398367786780e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>2</td><td>4</td><td>7.6454398367786780e-11</td><td>7.6454398367786780e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>2</td><td>5</td><td>7.6454398367786780e-11</td><td>7.6454398367786780e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>3</td><td>1</td><td>1.1690009927310996e-01</td><td>3.8813142984395199e-04</td><td>1.0</td><td>1: 3.8813142984395199e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>3</td><td>2</td><td>3.8813142984395199e-04</td><td>1.7952572761714691e-09</td><td>1.0</td><td>1: 1.7952572761714691e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>3</td><td>3</td><td>1.7952572761714691e-09</td><td>3.1647573450754862e-11</td><td>1.0</td><td>1: 3.1647573450754862e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>3</td><td>4</td><td>3.1647573450754862e-11</td><td>3.1647573450754862e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>3</td><td>5</td><td>3.1647573450754862e-11</td><td>3.1647573450754862e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>4</td><td>1</td><td>1.1854583364299742e-01</td><td>3.9319314961971941e-04</td><td>1.0</td><td>1: 3.9319314961971941e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>4</td><td>2</td><td>3.9319314961971941e-04</td><td>1.8727774886428961e-09</td><td>1.0</td><td>1: 1.8727774886428961e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>4</td><td>3</td><td>1.8727774886428961e-09</td><td>1.0066969480249099e-10</td><td>1.0</td><td>1: 1.0066969480249099e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>4</td><td>4</td><td>1.0066969480249099e-10</td><td>3.8397729440475814e-11</td><td>0.5</td><td>1: 1.5535306374658830e-10 (rejected; sets: unchanged); 0.5: 3.8397729440475814e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>4</td><td>5</td><td>3.8397729440475814e-11</td><td>3.8397729440475814e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>5</td><td>1</td><td>1.2019167691214250e-01</td><td>3.9814594337883591e-04</td><td>1.0</td><td>1: 3.9814594337883591e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>5</td><td>2</td><td>3.9814594337883591e-04</td><td>1.8481216557120206e-09</td><td>1.0</td><td>1: 1.8481216557120206e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>5</td><td>3</td><td>1.8481216557120206e-09</td><td>1.2548184713523369e-11</td><td>1.0</td><td>1: 1.2548184713523369e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>5</td><td>4</td><td>1.2548184713523369e-11</td><td>1.2548184713523369e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>5</td><td>5</td><td>1.2548184713523369e-11</td><td>1.2548184713523369e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>6</td><td>1</td><td>1.2183762876824744e-01</td><td>4.0298922725412467e-04</td><td>1.0</td><td>1: 4.0298922725412467e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>6</td><td>2</td><td>4.0298922725412467e-04</td><td>1.9545751683835988e-09</td><td>1.0</td><td>1: 1.9545751683835988e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>6</td><td>3</td><td>1.9545751683835988e-09</td><td>9.2214236246945802e-11</td><td>1.0</td><td>1: 9.2214236246945802e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>6</td><td>4</td><td>9.2214236246945802e-11</td><td>9.2214236246945802e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>6</td><td>5</td><td>9.2214236246945802e-11</td><td>9.2214236246945802e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>7</td><td>1</td><td>1.2348368910750196e-01</td><td>4.0772270639877206e-04</td><td>1.0</td><td>1: 4.0772270639877206e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>7</td><td>2</td><td>4.0772270639877206e-04</td><td>2.0760921870532911e-09</td><td>1.0</td><td>1: 2.0760921870532911e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>7</td><td>3</td><td>2.0760921870532911e-09</td><td>1.7976731214730535e-11</td><td>1.0</td><td>1: 1.7976731214730535e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>7</td><td>4</td><td>1.7976731214730535e-11</td><td>1.7976731214730535e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>7</td><td>5</td><td>1.7976731214730535e-11</td><td>1.7976731214730535e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>8</td><td>1</td><td>1.2512985830821322e-01</td><td>4.1234701893699821e-04</td><td>1.0</td><td>1: 4.1234701893699821e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>8</td><td>2</td><td>4.1234701893699821e-04</td><td>1.9953318997067981e-09</td><td>1.0</td><td>1: 1.9953318997067981e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>8</td><td>3</td><td>1.9953318997067981e-09</td><td>1.4486545296676923e-10</td><td>1.0</td><td>1: 1.4486545296676923e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>8</td><td>4</td><td>1.4486545296676923e-10</td><td>1.9241497284383513e-11</td><td>1.0</td><td>1: 1.9241497284383513e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>8</td><td>5</td><td>1.9241497284383513e-11</td><td>1.9241497284383513e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>9</td><td>1</td><td>1.2677613629860218e-01</td><td>4.1686182574096620e-04</td><td>1.0</td><td>1: 4.1686182574096620e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>9</td><td>2</td><td>4.1686182574096620e-04</td><td>2.0792469968000660e-09</td><td>1.0</td><td>1: 2.0792469968000660e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>9</td><td>3</td><td>2.0792469968000660e-09</td><td>1.0224709967587842e-10</td><td>1.0</td><td>1: 1.0224709967587842e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>9</td><td>4</td><td>1.0224709967587842e-10</td><td>4.0145664570445661e-11</td><td>0.5</td><td>1: 1.1458212156867376e-10 (rejected; sets: unchanged); 0.5: 4.0145664570445661e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>9</td><td>5</td><td>4.0145664570445661e-11</td><td>4.0145664570445661e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>10</td><td>1</td><td>1.2842252307524404e-01</td><td>4.2126729563563003e-04</td><td>1.0</td><td>1: 4.2126729563563003e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>10</td><td>2</td><td>4.2126729563563003e-04</td><td>1.9390427041798830e-09</td><td>1.0</td><td>1: 1.9390427041798830e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>10</td><td>3</td><td>1.9390427041798830e-09</td><td>9.6221697276632767e-11</td><td>1.0</td><td>1: 9.6221697276632767e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>10</td><td>4</td><td>9.6221697276632767e-11</td><td>9.6221697276632767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>10</td><td>5</td><td>9.6221697276632767e-11</td><td>9.6221697276632767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>11</td><td>1</td><td>1.3006901829776041e-01</td><td>4.2556221546874440e-04</td><td>1.0</td><td>1: 4.2556221546874440e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>11</td><td>2</td><td>4.2556221546874440e-04</td><td>2.0679067347373348e-09</td><td>1.0</td><td>1: 2.0679067347373348e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>11</td><td>3</td><td>2.0679067347373348e-09</td><td>1.4878764886816498e-11</td><td>1.0</td><td>1: 1.4878764886816498e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/1</td><td>11</td><td>4</td><td>1.4878764886816498e-11</td><td>1.4878764886816498e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>11</td><td>5</td><td>1.4878764886816498e-11</td><td>1.4878764886816498e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>12</td><td>1</td><td>1.3171562360314226e-01</td><td>4.2974887581692656e-04</td><td>1.0</td><td>1: 4.2974887581692656e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>12</td><td>2</td><td>4.2974887581692656e-04</td><td>2.3480168920286815e-09</td><td>1.0</td><td>1: 2.3480168920286815e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>12</td><td>3</td><td>2.3480168920286815e-09</td><td>1.1588952020247234e-10</td><td>1.0</td><td>1: 1.1588952020247234e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>12</td><td>4</td><td>1.1588952020247234e-10</td><td>1.7166712495964020e-11</td><td>0.5</td><td>1: 1.5054979485285003e-10 (rejected; sets: unchanged); 0.5: 1.7166712495964020e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>12</td><td>5</td><td>1.7166712495964020e-11</td><td>1.7166712495964020e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>13</td><td>1</td><td>1.3336233610621662e-01</td><td>4.3382430413885231e-04</td><td>1.0</td><td>1: 4.3382430413885231e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>13</td><td>2</td><td>4.3382430413885231e-04</td><td>2.2488961803901475e-09</td><td>1.0</td><td>1: 2.2488961803901475e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>13</td><td>3</td><td>2.2488961803901475e-09</td><td>1.0811618267325684e-10</td><td>1.0</td><td>1: 1.0811618267325684e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>13</td><td>4</td><td>1.0811618267325684e-10</td><td>8.2778228716051672e-11</td><td>1.0</td><td>1: 8.2778228716051672e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>13</td><td>5</td><td>8.2778228716051672e-11</td><td>8.2778228716051672e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>14</td><td>1</td><td>1.3500915840729988e-01</td><td>4.3779075450345317e-04</td><td>1.0</td><td>1: 4.3779075450345317e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>14</td><td>2</td><td>4.3779075450345317e-04</td><td>2.1177299913688330e-09</td><td>1.0</td><td>1: 2.1177299913688330e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>14</td><td>3</td><td>2.1177299913688330e-09</td><td>1.2451550901459996e-10</td><td>1.0</td><td>1: 1.2451550901459996e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>14</td><td>4</td><td>1.2451550901459996e-10</td><td>1.0487610779819079e-11</td><td>1.0</td><td>1: 1.0487610779819079e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/1</td><td>14</td><td>5</td><td>1.0487610779819079e-11</td><td>1.0487610779819079e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/1</td><td>15</td><td>1</td><td>1.3665608906566717e-01</td><td>4.4164623551523619e-04</td><td>1.0</td><td>1: 4.4164623551523619e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/1</td><td>15</td><td>2</td><td>4.4164623551523619e-04</td><td>2.6766571181724430e-09</td><td>1.0</td><td>1: 2.6766571181724430e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/1</td><td>15</td><td>3</td><td>2.6766571181724430e-09</td><td>1.9120705019304296e-10</td><td>1.0</td><td>1: 1.9120705019304296e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/1</td><td>15</td><td>4</td><td>1.9120705019304296e-10</td><td>1.5799628272361588e-10</td><td>1.0</td><td>1: 1.5799628272361588e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>6</td></tr>
+<tr><td>base/1</td><td>15</td><td>5</td><td>1.5799628272361588e-10</td><td>1.4168222151056398e-11</td><td>1.0</td><td>1: 1.4168222151056398e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>0</td><td>1</td><td>1.1196354860656754e-01</td><td>3.7229162406049454e-04</td><td>1.0</td><td>1: 3.7229162406049454e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>0</td><td>2</td><td>3.7229162406049454e-04</td><td>1.7385985984219587e-09</td><td>1.0</td><td>1: 1.7385985984219587e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>0</td><td>3</td><td>1.7385985984219587e-09</td><td>1.6569856597925536e-11</td><td>1.0</td><td>1: 1.6569856597925536e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>0</td><td>4</td><td>1.6569856597925536e-11</td><td>1.6569856597925536e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>0</td><td>5</td><td>1.6569856597925536e-11</td><td>1.6569856597925536e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>1</td><td>1</td><td>1.1360895641097102e-01</td><td>3.7768020894191068e-04</td><td>1.0</td><td>1: 3.7768020894191068e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>1</td><td>2</td><td>3.7768020894191068e-04</td><td>1.5841834510865738e-09</td><td>1.0</td><td>1: 1.5841834510865738e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>1</td><td>3</td><td>1.5841834510865738e-09</td><td>1.2840928320656531e-10</td><td>1.0</td><td>1: 1.2840928320656531e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>1</td><td>4</td><td>1.2840928320656531e-10</td><td>7.9666051533422433e-11</td><td>1.0</td><td>1: 7.9666051533422433e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>1</td><td>5</td><td>7.9666051533422433e-11</td><td>7.9666051533422433e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>2</td><td>1</td><td>1.1525447403134592e-01</td><td>3.8296089478251361e-04</td><td>1.0</td><td>1: 3.8296089478251361e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>2</td><td>2</td><td>3.8296089478251361e-04</td><td>1.7227819171239389e-09</td><td>1.0</td><td>1: 1.7227819171239389e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>2</td><td>3</td><td>1.7227819171239389e-09</td><td>7.6454398367786780e-11</td><td>1.0</td><td>1: 7.6454398367786780e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>2</td><td>4</td><td>7.6454398367786780e-11</td><td>7.6454398367786780e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>2</td><td>5</td><td>7.6454398367786780e-11</td><td>7.6454398367786780e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>3</td><td>1</td><td>1.1690009927310996e-01</td><td>3.8813142984395199e-04</td><td>1.0</td><td>1: 3.8813142984395199e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>3</td><td>2</td><td>3.8813142984395199e-04</td><td>1.7952572761714691e-09</td><td>1.0</td><td>1: 1.7952572761714691e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>3</td><td>3</td><td>1.7952572761714691e-09</td><td>3.1647573450754862e-11</td><td>1.0</td><td>1: 3.1647573450754862e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>3</td><td>4</td><td>3.1647573450754862e-11</td><td>3.1647573450754862e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>3</td><td>5</td><td>3.1647573450754862e-11</td><td>3.1647573450754862e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>4</td><td>1</td><td>1.1854583364299742e-01</td><td>3.9319314961971941e-04</td><td>1.0</td><td>1: 3.9319314961971941e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>4</td><td>2</td><td>3.9319314961971941e-04</td><td>1.8727774886428961e-09</td><td>1.0</td><td>1: 1.8727774886428961e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>4</td><td>3</td><td>1.8727774886428961e-09</td><td>1.0066969480249099e-10</td><td>1.0</td><td>1: 1.0066969480249099e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>4</td><td>4</td><td>1.0066969480249099e-10</td><td>3.8397729440475814e-11</td><td>0.5</td><td>1: 1.5535306374658830e-10 (rejected; sets: unchanged); 0.5: 3.8397729440475814e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>4</td><td>5</td><td>3.8397729440475814e-11</td><td>3.8397729440475814e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>5</td><td>1</td><td>1.2019167691214250e-01</td><td>3.9814594337883591e-04</td><td>1.0</td><td>1: 3.9814594337883591e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>5</td><td>2</td><td>3.9814594337883591e-04</td><td>1.8481216557120206e-09</td><td>1.0</td><td>1: 1.8481216557120206e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>5</td><td>3</td><td>1.8481216557120206e-09</td><td>1.2548184713523369e-11</td><td>1.0</td><td>1: 1.2548184713523369e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>5</td><td>4</td><td>1.2548184713523369e-11</td><td>1.2548184713523369e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>5</td><td>5</td><td>1.2548184713523369e-11</td><td>1.2548184713523369e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>6</td><td>1</td><td>1.2183762876824744e-01</td><td>4.0298922725412467e-04</td><td>1.0</td><td>1: 4.0298922725412467e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>6</td><td>2</td><td>4.0298922725412467e-04</td><td>1.9545751683835988e-09</td><td>1.0</td><td>1: 1.9545751683835988e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>6</td><td>3</td><td>1.9545751683835988e-09</td><td>9.2214236246945802e-11</td><td>1.0</td><td>1: 9.2214236246945802e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>6</td><td>4</td><td>9.2214236246945802e-11</td><td>9.2214236246945802e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>6</td><td>5</td><td>9.2214236246945802e-11</td><td>9.2214236246945802e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>7</td><td>1</td><td>1.2348368910750196e-01</td><td>4.0772270639877206e-04</td><td>1.0</td><td>1: 4.0772270639877206e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>7</td><td>2</td><td>4.0772270639877206e-04</td><td>2.0760921870532911e-09</td><td>1.0</td><td>1: 2.0760921870532911e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>7</td><td>3</td><td>2.0760921870532911e-09</td><td>1.7976731214730535e-11</td><td>1.0</td><td>1: 1.7976731214730535e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>7</td><td>4</td><td>1.7976731214730535e-11</td><td>1.7976731214730535e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>7</td><td>5</td><td>1.7976731214730535e-11</td><td>1.7976731214730535e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>8</td><td>1</td><td>1.2512985830821322e-01</td><td>4.1234701893699821e-04</td><td>1.0</td><td>1: 4.1234701893699821e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>8</td><td>2</td><td>4.1234701893699821e-04</td><td>1.9953318997067981e-09</td><td>1.0</td><td>1: 1.9953318997067981e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>8</td><td>3</td><td>1.9953318997067981e-09</td><td>1.4486545296676923e-10</td><td>1.0</td><td>1: 1.4486545296676923e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>8</td><td>4</td><td>1.4486545296676923e-10</td><td>1.9241497284383513e-11</td><td>1.0</td><td>1: 1.9241497284383513e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>8</td><td>5</td><td>1.9241497284383513e-11</td><td>1.9241497284383513e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>9</td><td>1</td><td>1.2677613629860218e-01</td><td>4.1686182574096620e-04</td><td>1.0</td><td>1: 4.1686182574096620e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>9</td><td>2</td><td>4.1686182574096620e-04</td><td>2.0792469968000660e-09</td><td>1.0</td><td>1: 2.0792469968000660e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>9</td><td>3</td><td>2.0792469968000660e-09</td><td>1.0224709967587842e-10</td><td>1.0</td><td>1: 1.0224709967587842e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>9</td><td>4</td><td>1.0224709967587842e-10</td><td>4.0145664570445661e-11</td><td>0.5</td><td>1: 1.1458212156867376e-10 (rejected; sets: unchanged); 0.5: 4.0145664570445661e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>9</td><td>5</td><td>4.0145664570445661e-11</td><td>4.0145664570445661e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>10</td><td>1</td><td>1.2842252307524404e-01</td><td>4.2126729563563003e-04</td><td>1.0</td><td>1: 4.2126729563563003e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>10</td><td>2</td><td>4.2126729563563003e-04</td><td>1.9390427041798830e-09</td><td>1.0</td><td>1: 1.9390427041798830e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>10</td><td>3</td><td>1.9390427041798830e-09</td><td>9.6221697276632767e-11</td><td>1.0</td><td>1: 9.6221697276632767e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>10</td><td>4</td><td>9.6221697276632767e-11</td><td>9.6221697276632767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>10</td><td>5</td><td>9.6221697276632767e-11</td><td>9.6221697276632767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>11</td><td>1</td><td>1.3006901829776041e-01</td><td>4.2556221546874440e-04</td><td>1.0</td><td>1: 4.2556221546874440e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>11</td><td>2</td><td>4.2556221546874440e-04</td><td>2.0679067347373348e-09</td><td>1.0</td><td>1: 2.0679067347373348e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>11</td><td>3</td><td>2.0679067347373348e-09</td><td>1.4878764886816498e-11</td><td>1.0</td><td>1: 1.4878764886816498e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>base/2</td><td>11</td><td>4</td><td>1.4878764886816498e-11</td><td>1.4878764886816498e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>11</td><td>5</td><td>1.4878764886816498e-11</td><td>1.4878764886816498e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>12</td><td>1</td><td>1.3171562360314226e-01</td><td>4.2974887581692656e-04</td><td>1.0</td><td>1: 4.2974887581692656e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>12</td><td>2</td><td>4.2974887581692656e-04</td><td>2.3480168920286815e-09</td><td>1.0</td><td>1: 2.3480168920286815e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>12</td><td>3</td><td>2.3480168920286815e-09</td><td>1.1588952020247234e-10</td><td>1.0</td><td>1: 1.1588952020247234e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>12</td><td>4</td><td>1.1588952020247234e-10</td><td>1.7166712495964020e-11</td><td>0.5</td><td>1: 1.5054979485285003e-10 (rejected; sets: unchanged); 0.5: 1.7166712495964020e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>12</td><td>5</td><td>1.7166712495964020e-11</td><td>1.7166712495964020e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>13</td><td>1</td><td>1.3336233610621662e-01</td><td>4.3382430413885231e-04</td><td>1.0</td><td>1: 4.3382430413885231e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>13</td><td>2</td><td>4.3382430413885231e-04</td><td>2.2488961803901475e-09</td><td>1.0</td><td>1: 2.2488961803901475e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>13</td><td>3</td><td>2.2488961803901475e-09</td><td>1.0811618267325684e-10</td><td>1.0</td><td>1: 1.0811618267325684e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>13</td><td>4</td><td>1.0811618267325684e-10</td><td>8.2778228716051672e-11</td><td>1.0</td><td>1: 8.2778228716051672e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>13</td><td>5</td><td>8.2778228716051672e-11</td><td>8.2778228716051672e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>14</td><td>1</td><td>1.3500915840729988e-01</td><td>4.3779075450345317e-04</td><td>1.0</td><td>1: 4.3779075450345317e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>14</td><td>2</td><td>4.3779075450345317e-04</td><td>2.1177299913688330e-09</td><td>1.0</td><td>1: 2.1177299913688330e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>14</td><td>3</td><td>2.1177299913688330e-09</td><td>1.2451550901459996e-10</td><td>1.0</td><td>1: 1.2451550901459996e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>14</td><td>4</td><td>1.2451550901459996e-10</td><td>1.0487610779819079e-11</td><td>1.0</td><td>1: 1.0487610779819079e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>6</td></tr>
+<tr><td>base/2</td><td>14</td><td>5</td><td>1.0487610779819079e-11</td><td>1.0487610779819079e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>7</td></tr>
+<tr><td>base/2</td><td>15</td><td>1</td><td>1.3665608906566717e-01</td><td>4.4164623551523619e-04</td><td>1.0</td><td>1: 4.4164623551523619e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>base/2</td><td>15</td><td>2</td><td>4.4164623551523619e-04</td><td>2.6766571181724430e-09</td><td>1.0</td><td>1: 2.6766571181724430e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>base/2</td><td>15</td><td>3</td><td>2.6766571181724430e-09</td><td>1.9120705019304296e-10</td><td>1.0</td><td>1: 1.9120705019304296e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>base/2</td><td>15</td><td>4</td><td>1.9120705019304296e-10</td><td>1.5799628272361588e-10</td><td>1.0</td><td>1: 1.5799628272361588e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>6</td></tr>
+<tr><td>base/2</td><td>15</td><td>5</td><td>1.5799628272361588e-10</td><td>1.4168222151056398e-11</td><td>1.0</td><td>1: 1.4168222151056398e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>7</td></tr>
+<tr><td>head/1</td><td>0</td><td>1</td><td>1.1196354853932178e-01</td><td>3.7229171786634652e-04</td><td>1.0</td><td>1: 3.7229171786634652e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>0</td><td>2</td><td>3.7229171786634652e-04</td><td>1.5882761772445519e-09</td><td>1.0</td><td>1: 1.5882761772445519e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>0</td><td>3</td><td>1.5882761772445519e-09</td><td>3.8198777474462986e-11</td><td>1.0</td><td>1: 3.8198777474462986e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/1</td><td>0</td><td>4</td><td>3.8198777474462986e-11</td><td>3.8198777474462986e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>0</td><td>5</td><td>3.8198777474462986e-11</td><td>3.8198777474462986e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>0</td><td>6</td><td>3.8198777474462986e-11</td><td>3.8198777474462986e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>1</td><td>1</td><td>1.1360895635776558e-01</td><td>3.7768017183736902e-04</td><td>1.0</td><td>1: 3.7768017183736902e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>1</td><td>2</td><td>3.7768017183736902e-04</td><td>1.7161454479719396e-09</td><td>1.0</td><td>1: 1.7161454479719396e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>1</td><td>3</td><td>1.7161454479719396e-09</td><td>1.0066969480249099e-10</td><td>1.0</td><td>1: 1.0066969480249099e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>1</td><td>4</td><td>1.0066969480249099e-10</td><td>3.7459813029272482e-11</td><td>1.0</td><td>1: 3.7459813029272482e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>1</td><td>5</td><td>3.7459813029272482e-11</td><td>3.7459813029272482e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>1</td><td>6</td><td>3.7459813029272482e-11</td><td>3.7459813029272482e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>2</td><td>1</td><td>1.1525447428184066e-01</td><td>3.8296118627556552e-04</td><td>1.0</td><td>1: 3.8296118627556552e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>2</td><td>2</td><td>3.8296118627556552e-04</td><td>1.6896848364922334e-09</td><td>1.0</td><td>1: 1.6896848364922334e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>2</td><td>3</td><td>1.6896848364922334e-09</td><td>1.6002843494788976e-10</td><td>1.0</td><td>1: 1.6002843494788976e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>2</td><td>4</td><td>1.6002843494788976e-10</td><td>1.2917666936118621e-10</td><td>1.0</td><td>1: 1.2917666936118621e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/1</td><td>2</td><td>5</td><td>1.2917666936118621e-10</td><td>5.7667648434289731e-11</td><td>1.0</td><td>1: 5.7667648434289731e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>2</td><td>6</td><td>5.7667648434289731e-11</td><td>5.7667648434289731e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>3</td><td>1</td><td>1.1690009921689182e-01</td><td>3.8813129644665878e-04</td><td>1.0</td><td>1: 3.8813129644665878e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>3</td><td>2</td><td>3.8813129644665878e-04</td><td>1.9170158793713199e-09</td><td>1.0</td><td>1: 1.9170158793713199e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>3</td><td>3</td><td>1.9170158793713199e-09</td><td>1.5432988220709376e-11</td><td>1.0</td><td>1: 1.5432988220709376e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/1</td><td>3</td><td>4</td><td>1.5432988220709376e-11</td><td>1.5432988220709376e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>3</td><td>5</td><td>1.5432988220709376e-11</td><td>1.5432988220709376e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>3</td><td>6</td><td>1.5432988220709376e-11</td><td>1.5432988220709376e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>4</td><td>1</td><td>1.1854583366900329e-01</td><td>3.9319319549235843e-04</td><td>1.0</td><td>1: 3.9319319549235843e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>4</td><td>2</td><td>3.9319319549235843e-04</td><td>1.8701769022300141e-09</td><td>1.0</td><td>1: 1.8701769022300141e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>4</td><td>3</td><td>1.8701769022300141e-09</td><td>8.8235196926689241e-11</td><td>1.0</td><td>1: 8.8235196926689241e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/1</td><td>4</td><td>4</td><td>8.8235196926689241e-11</td><td>8.8235196926689241e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>4</td><td>5</td><td>8.8235196926689241e-11</td><td>8.8235196926689241e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>4</td><td>6</td><td>8.8235196926689241e-11</td><td>8.8235196926689241e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>5</td><td>1</td><td>1.2019167690118593e-01</td><td>3.9814589202080697e-04</td><td>1.0</td><td>1: 3.9814589202080697e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>5</td><td>2</td><td>3.9814589202080697e-04</td><td>1.8262227285958943e-09</td><td>1.0</td><td>1: 1.8262227285958943e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>5</td><td>3</td><td>1.8262227285958943e-09</td><td>7.7676531873294152e-11</td><td>1.0</td><td>1: 7.7676531873294152e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/1</td><td>5</td><td>4</td><td>7.7676531873294152e-11</td><td>7.7676531873294152e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>5</td><td>5</td><td>7.7676531873294152e-11</td><td>7.7676531873294152e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>5</td><td>6</td><td>7.7676531873294152e-11</td><td>7.7676531873294152e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>6</td><td>1</td><td>1.2183762873775095e-01</td><td>4.0298918480630164e-04</td><td>1.0</td><td>1: 4.0298918480630164e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>6</td><td>2</td><td>4.0298918480630164e-04</td><td>1.8036416804534383e-09</td><td>1.0</td><td>1: 1.8036416804534383e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>6</td><td>3</td><td>1.8036416804534383e-09</td><td>1.8900436771218665e-10</td><td>1.0</td><td>1: 1.8900436771218665e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>6</td><td>4</td><td>1.8900436771218665e-10</td><td>1.3956480415799888e-10</td><td>0.5</td><td>1: 1.9306867216073442e-10 (rejected; sets: unchanged); 0.5: 1.3956480415799888e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/1</td><td>6</td><td>5</td><td>1.3956480415799888e-10</td><td>1.4850343177386094e-11</td><td>0.25</td><td>1: 1.8115997590939514e-10 (rejected; sets: unchanged); 0.5: 1.5791101759532467e-10 (rejected; sets: unchanged); 0.25: 1.4850343177386094e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>6</td><td>6</td><td>1.4850343177386094e-11</td><td>1.4850343177386094e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>7</td><td>1</td><td>1.2348368912422814e-01</td><td>4.0772269694855368e-04</td><td>1.0</td><td>1: 4.0772269694855368e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>7</td><td>2</td><td>4.0772269694855368e-04</td><td>2.0232135966580245e-09</td><td>1.0</td><td>1: 2.0232135966580245e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>7</td><td>3</td><td>2.0232135966580245e-09</td><td>1.4401280168385711e-10</td><td>1.0</td><td>1: 1.4401280168385711e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>7</td><td>4</td><td>1.4401280168385711e-10</td><td>1.0544454198679887e-10</td><td>0.5</td><td>1: 1.6247270195890451e-10 (rejected; sets: unchanged); 0.5: 1.0544454198679887e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/1</td><td>7</td><td>5</td><td>1.0544454198679887e-10</td><td>2.5437429940211587e-11</td><td>1.0</td><td>1: 2.5437429940211587e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>7</td><td>6</td><td>2.5437429940211587e-11</td><td>2.5437429940211587e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>8</td><td>1</td><td>1.2512985827977730e-01</td><td>4.1234692318425914e-04</td><td>1.0</td><td>1: 4.1234692318425914e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>8</td><td>2</td><td>4.1234692318425914e-04</td><td>2.1037749320385046e-09</td><td>1.0</td><td>1: 2.1037749320385046e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>8</td><td>3</td><td>2.1037749320385046e-09</td><td>9.4374286163656507e-11</td><td>1.0</td><td>1: 9.4374286163656507e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/1</td><td>8</td><td>4</td><td>9.4374286163656507e-11</td><td>9.4374286163656507e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>8</td><td>5</td><td>9.4374286163656507e-11</td><td>9.4374286163656507e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>8</td><td>6</td><td>9.4374286163656507e-11</td><td>9.4374286163656507e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>9</td><td>1</td><td>1.2677613624207140e-01</td><td>4.1686187390155283e-04</td><td>1.0</td><td>1: 4.1686187390155283e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>9</td><td>2</td><td>4.1686187390155283e-04</td><td>1.9466313005978009e-09</td><td>1.0</td><td>1: 1.9466313005978009e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>9</td><td>3</td><td>1.9466313005978009e-09</td><td>1.7742252111929702e-10</td><td>1.0</td><td>1: 1.7742252111929702e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>9</td><td>4</td><td>1.7742252111929702e-10</td><td>1.6595436136412900e-10</td><td>1.0</td><td>1: 1.6595436136412900e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/1</td><td>9</td><td>5</td><td>1.6595436136412900e-10</td><td>1.1215206541237421e-10</td><td>1.0</td><td>1: 1.1215206541237421e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>False</td><td>15</td></tr>
+<tr><td>head/1</td><td>9</td><td>6</td><td>1.1215206541237421e-10</td><td>1.9142021301377099e-11</td><td>0.5</td><td>1: 1.6049739315349143e-10 (rejected; sets: unchanged); 0.5: 1.9142021301377099e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>10</td><td>1</td><td>1.2842252319622105e-01</td><td>4.2126746478743371e-04</td><td>1.0</td><td>1: 4.2126746478743371e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>10</td><td>2</td><td>4.2126746478743371e-04</td><td>1.9851711385854287e-09</td><td>1.0</td><td>1: 1.9851711385854287e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>10</td><td>3</td><td>1.9851711385854287e-09</td><td>1.4523493518936448e-10</td><td>1.0</td><td>1: 1.4523493518936448e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>10</td><td>4</td><td>1.4523493518936448e-10</td><td>6.2826188695908058e-11</td><td>0.125</td><td>1: 1.7487877812527586e-10 (rejected; sets: unchanged); 0.5: 1.5877787973295199e-10 (rejected; sets: unchanged); 0.25: 2.0175150439172285e-10 (rejected; sets: unchanged); 0.125: 6.2826188695908058e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>10</td><td>5</td><td>6.2826188695908058e-11</td><td>6.2826188695908058e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>10</td><td>6</td><td>6.2826188695908058e-11</td><td>6.2826188695908058e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>11</td><td>1</td><td>1.3006901836340035e-01</td><td>4.2556226995316138e-04</td><td>1.0</td><td>1: 4.2556226995316138e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>11</td><td>2</td><td>4.2556226995316138e-04</td><td>2.0141186496402952e-09</td><td>1.0</td><td>1: 2.0141186496402952e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>11</td><td>3</td><td>2.0141186496402952e-09</td><td>1.2011014405288734e-10</td><td>1.0</td><td>1: 1.2011014405288734e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>11</td><td>4</td><td>1.2011014405288734e-10</td><td>1.4075851595407585e-10</td><td>1.0</td><td>1: 1.4075851595407585e-10 (rejected; sets: unchanged); 0.5: 1.9967671960330335e-10 (rejected; sets: unchanged); 0.25: 2.7191049412067514e-10 (rejected; sets: unchanged); 0.125: 2.9712055038544349e-10 (rejected; sets: unchanged); 0.0625: 3.0772184800298419e-10 (rejected; sets: unchanged); 0.03125: 2.4910207230277592e-10 (rejected; sets: unchanged); 0.015625: 2.0570212200254900e-10 (rejected; sets: unchanged); 0.0078125: 1.8141577129426878e-10 (rejected; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/1</td><td>11</td><td>5</td><td>1.4075851595407585e-10</td><td>4.3755221668106969e-11</td><td>1.0</td><td>1: 4.3755221668106969e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>11</td><td>6</td><td>4.3755221668106969e-11</td><td>4.3755221668106969e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>12</td><td>1</td><td>1.3171562321015529e-01</td><td>4.2974859840683166e-04</td><td>1.0</td><td>1: 4.2974859840683166e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>12</td><td>2</td><td>4.2974859840683166e-04</td><td>2.1455832666106289e-09</td><td>1.0</td><td>1: 2.1455832666106289e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>12</td><td>3</td><td>2.1455832666106289e-09</td><td>1.3291412415128434e-10</td><td>1.0</td><td>1: 1.3291412415128434e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>12</td><td>4</td><td>1.3291412415128434e-10</td><td>6.5654148784233257e-12</td><td>1.0</td><td>1: 6.5654148784233257e-12 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>12</td><td>5</td><td>6.5654148784233257e-12</td><td>6.5654148784233257e-12</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>12</td><td>6</td><td>6.5654148784233257e-12</td><td>6.5654148784233257e-12</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>13</td><td>1</td><td>1.3336233624795568e-01</td><td>4.3382425285187765e-04</td><td>1.0</td><td>1: 4.3382425285187765e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>13</td><td>2</td><td>4.3382425285187765e-04</td><td>2.4878801241356996e-09</td><td>1.0</td><td>1: 2.4878801241356996e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>13</td><td>3</td><td>2.4878801241356996e-09</td><td>5.6786575441947207e-11</td><td>1.0</td><td>1: 5.6786575441947207e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/1</td><td>13</td><td>4</td><td>5.6786575441947207e-11</td><td>5.6786575441947207e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>13</td><td>5</td><td>5.6786575441947207e-11</td><td>5.6786575441947207e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>13</td><td>6</td><td>5.6786575441947207e-11</td><td>5.6786575441947207e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>14</td><td>1</td><td>1.3500915850448791e-01</td><td>4.3779093434181959e-04</td><td>1.0</td><td>1: 4.3779093434181959e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>14</td><td>2</td><td>4.3779093434181959e-04</td><td>2.0999237904106849e-09</td><td>1.0</td><td>1: 2.0999237904106849e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>14</td><td>3</td><td>2.0999237904106849e-09</td><td>1.1566214652702911e-10</td><td>1.0</td><td>1: 1.1566214652702911e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>14</td><td>4</td><td>1.1566214652702911e-10</td><td>6.6222582972841337e-11</td><td>1.0</td><td>1: 6.6222582972841337e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>14</td><td>5</td><td>6.6222582972841337e-11</td><td>6.6222582972841337e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>14</td><td>6</td><td>6.6222582972841337e-11</td><td>6.6222582972841337e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/1</td><td>15</td><td>1</td><td>1.3665608897844095e-01</td><td>4.4164601384011348e-04</td><td>1.0</td><td>1: 4.4164601384011348e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/1</td><td>15</td><td>2</td><td>4.4164601384011348e-04</td><td>2.8932447548868367e-09</td><td>1.0</td><td>1: 2.8932447548868367e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/1</td><td>15</td><td>3</td><td>2.8932447548868367e-09</td><td>1.2393286397127667e-10</td><td>1.0</td><td>1: 1.2393286397127667e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/1</td><td>15</td><td>4</td><td>1.2393286397127667e-10</td><td>7.9197093327820767e-11</td><td>0.5</td><td>1: 1.5535306374658830e-10 (rejected; sets: unchanged); 0.5: 7.9197093327820767e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/1</td><td>15</td><td>5</td><td>7.9197093327820767e-11</td><td>7.9197093327820767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/1</td><td>15</td><td>6</td><td>7.9197093327820767e-11</td><td>7.9197093327820767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>0</td><td>1</td><td>1.1196354853932178e-01</td><td>3.7229171786634652e-04</td><td>1.0</td><td>1: 3.7229171786634652e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>0</td><td>2</td><td>3.7229171786634652e-04</td><td>1.5882761772445519e-09</td><td>1.0</td><td>1: 1.5882761772445519e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>0</td><td>3</td><td>1.5882761772445519e-09</td><td>3.8198777474462986e-11</td><td>1.0</td><td>1: 3.8198777474462986e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/2</td><td>0</td><td>4</td><td>3.8198777474462986e-11</td><td>3.8198777474462986e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>0</td><td>5</td><td>3.8198777474462986e-11</td><td>3.8198777474462986e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>0</td><td>6</td><td>3.8198777474462986e-11</td><td>3.8198777474462986e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>1</td><td>1</td><td>1.1360895635776558e-01</td><td>3.7768017183736902e-04</td><td>1.0</td><td>1: 3.7768017183736902e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>1</td><td>2</td><td>3.7768017183736902e-04</td><td>1.7161454479719396e-09</td><td>1.0</td><td>1: 1.7161454479719396e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>1</td><td>3</td><td>1.7161454479719396e-09</td><td>1.0066969480249099e-10</td><td>1.0</td><td>1: 1.0066969480249099e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>1</td><td>4</td><td>1.0066969480249099e-10</td><td>3.7459813029272482e-11</td><td>1.0</td><td>1: 3.7459813029272482e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>1</td><td>5</td><td>3.7459813029272482e-11</td><td>3.7459813029272482e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>1</td><td>6</td><td>3.7459813029272482e-11</td><td>3.7459813029272482e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>2</td><td>1</td><td>1.1525447428184066e-01</td><td>3.8296118627556552e-04</td><td>1.0</td><td>1: 3.8296118627556552e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>2</td><td>2</td><td>3.8296118627556552e-04</td><td>1.6896848364922334e-09</td><td>1.0</td><td>1: 1.6896848364922334e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>2</td><td>3</td><td>1.6896848364922334e-09</td><td>1.6002843494788976e-10</td><td>1.0</td><td>1: 1.6002843494788976e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>2</td><td>4</td><td>1.6002843494788976e-10</td><td>1.2917666936118621e-10</td><td>1.0</td><td>1: 1.2917666936118621e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/2</td><td>2</td><td>5</td><td>1.2917666936118621e-10</td><td>5.7667648434289731e-11</td><td>1.0</td><td>1: 5.7667648434289731e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>2</td><td>6</td><td>5.7667648434289731e-11</td><td>5.7667648434289731e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>3</td><td>1</td><td>1.1690009921689182e-01</td><td>3.8813129644665878e-04</td><td>1.0</td><td>1: 3.8813129644665878e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>3</td><td>2</td><td>3.8813129644665878e-04</td><td>1.9170158793713199e-09</td><td>1.0</td><td>1: 1.9170158793713199e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>3</td><td>3</td><td>1.9170158793713199e-09</td><td>1.5432988220709376e-11</td><td>1.0</td><td>1: 1.5432988220709376e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/2</td><td>3</td><td>4</td><td>1.5432988220709376e-11</td><td>1.5432988220709376e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>3</td><td>5</td><td>1.5432988220709376e-11</td><td>1.5432988220709376e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>3</td><td>6</td><td>1.5432988220709376e-11</td><td>1.5432988220709376e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>4</td><td>1</td><td>1.1854583366900329e-01</td><td>3.9319319549235843e-04</td><td>1.0</td><td>1: 3.9319319549235843e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>4</td><td>2</td><td>3.9319319549235843e-04</td><td>1.8701769022300141e-09</td><td>1.0</td><td>1: 1.8701769022300141e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>4</td><td>3</td><td>1.8701769022300141e-09</td><td>8.8235196926689241e-11</td><td>1.0</td><td>1: 8.8235196926689241e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/2</td><td>4</td><td>4</td><td>8.8235196926689241e-11</td><td>8.8235196926689241e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>4</td><td>5</td><td>8.8235196926689241e-11</td><td>8.8235196926689241e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>4</td><td>6</td><td>8.8235196926689241e-11</td><td>8.8235196926689241e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>5</td><td>1</td><td>1.2019167690118593e-01</td><td>3.9814589202080697e-04</td><td>1.0</td><td>1: 3.9814589202080697e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>5</td><td>2</td><td>3.9814589202080697e-04</td><td>1.8262227285958943e-09</td><td>1.0</td><td>1: 1.8262227285958943e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>5</td><td>3</td><td>1.8262227285958943e-09</td><td>7.7676531873294152e-11</td><td>1.0</td><td>1: 7.7676531873294152e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/2</td><td>5</td><td>4</td><td>7.7676531873294152e-11</td><td>7.7676531873294152e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>5</td><td>5</td><td>7.7676531873294152e-11</td><td>7.7676531873294152e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>5</td><td>6</td><td>7.7676531873294152e-11</td><td>7.7676531873294152e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>6</td><td>1</td><td>1.2183762873775095e-01</td><td>4.0298918480630164e-04</td><td>1.0</td><td>1: 4.0298918480630164e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>6</td><td>2</td><td>4.0298918480630164e-04</td><td>1.8036416804534383e-09</td><td>1.0</td><td>1: 1.8036416804534383e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>6</td><td>3</td><td>1.8036416804534383e-09</td><td>1.8900436771218665e-10</td><td>1.0</td><td>1: 1.8900436771218665e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>6</td><td>4</td><td>1.8900436771218665e-10</td><td>1.3956480415799888e-10</td><td>0.5</td><td>1: 1.9306867216073442e-10 (rejected; sets: unchanged); 0.5: 1.3956480415799888e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/2</td><td>6</td><td>5</td><td>1.3956480415799888e-10</td><td>1.4850343177386094e-11</td><td>0.25</td><td>1: 1.8115997590939514e-10 (rejected; sets: unchanged); 0.5: 1.5791101759532467e-10 (rejected; sets: unchanged); 0.25: 1.4850343177386094e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>6</td><td>6</td><td>1.4850343177386094e-11</td><td>1.4850343177386094e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>7</td><td>1</td><td>1.2348368912422814e-01</td><td>4.0772269694855368e-04</td><td>1.0</td><td>1: 4.0772269694855368e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>7</td><td>2</td><td>4.0772269694855368e-04</td><td>2.0232135966580245e-09</td><td>1.0</td><td>1: 2.0232135966580245e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>7</td><td>3</td><td>2.0232135966580245e-09</td><td>1.4401280168385711e-10</td><td>1.0</td><td>1: 1.4401280168385711e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>7</td><td>4</td><td>1.4401280168385711e-10</td><td>1.0544454198679887e-10</td><td>0.5</td><td>1: 1.6247270195890451e-10 (rejected; sets: unchanged); 0.5: 1.0544454198679887e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/2</td><td>7</td><td>5</td><td>1.0544454198679887e-10</td><td>2.5437429940211587e-11</td><td>1.0</td><td>1: 2.5437429940211587e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>7</td><td>6</td><td>2.5437429940211587e-11</td><td>2.5437429940211587e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>8</td><td>1</td><td>1.2512985827977730e-01</td><td>4.1234692318425914e-04</td><td>1.0</td><td>1: 4.1234692318425914e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>8</td><td>2</td><td>4.1234692318425914e-04</td><td>2.1037749320385046e-09</td><td>1.0</td><td>1: 2.1037749320385046e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>8</td><td>3</td><td>2.1037749320385046e-09</td><td>9.4374286163656507e-11</td><td>1.0</td><td>1: 9.4374286163656507e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/2</td><td>8</td><td>4</td><td>9.4374286163656507e-11</td><td>9.4374286163656507e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>8</td><td>5</td><td>9.4374286163656507e-11</td><td>9.4374286163656507e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>8</td><td>6</td><td>9.4374286163656507e-11</td><td>9.4374286163656507e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>9</td><td>1</td><td>1.2677613624207140e-01</td><td>4.1686187390155283e-04</td><td>1.0</td><td>1: 4.1686187390155283e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>9</td><td>2</td><td>4.1686187390155283e-04</td><td>1.9466313005978009e-09</td><td>1.0</td><td>1: 1.9466313005978009e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>9</td><td>3</td><td>1.9466313005978009e-09</td><td>1.7742252111929702e-10</td><td>1.0</td><td>1: 1.7742252111929702e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>9</td><td>4</td><td>1.7742252111929702e-10</td><td>1.6595436136412900e-10</td><td>1.0</td><td>1: 1.6595436136412900e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/2</td><td>9</td><td>5</td><td>1.6595436136412900e-10</td><td>1.1215206541237421e-10</td><td>1.0</td><td>1: 1.1215206541237421e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>False</td><td>15</td></tr>
+<tr><td>head/2</td><td>9</td><td>6</td><td>1.1215206541237421e-10</td><td>1.9142021301377099e-11</td><td>0.5</td><td>1: 1.6049739315349143e-10 (rejected; sets: unchanged); 0.5: 1.9142021301377099e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>10</td><td>1</td><td>1.2842252319622105e-01</td><td>4.2126746478743371e-04</td><td>1.0</td><td>1: 4.2126746478743371e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>10</td><td>2</td><td>4.2126746478743371e-04</td><td>1.9851711385854287e-09</td><td>1.0</td><td>1: 1.9851711385854287e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>10</td><td>3</td><td>1.9851711385854287e-09</td><td>1.4523493518936448e-10</td><td>1.0</td><td>1: 1.4523493518936448e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>10</td><td>4</td><td>1.4523493518936448e-10</td><td>6.2826188695908058e-11</td><td>0.125</td><td>1: 1.7487877812527586e-10 (rejected; sets: unchanged); 0.5: 1.5877787973295199e-10 (rejected; sets: unchanged); 0.25: 2.0175150439172285e-10 (rejected; sets: unchanged); 0.125: 6.2826188695908058e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>10</td><td>5</td><td>6.2826188695908058e-11</td><td>6.2826188695908058e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>10</td><td>6</td><td>6.2826188695908058e-11</td><td>6.2826188695908058e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>11</td><td>1</td><td>1.3006901836340035e-01</td><td>4.2556226995316138e-04</td><td>1.0</td><td>1: 4.2556226995316138e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>11</td><td>2</td><td>4.2556226995316138e-04</td><td>2.0141186496402952e-09</td><td>1.0</td><td>1: 2.0141186496402952e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>11</td><td>3</td><td>2.0141186496402952e-09</td><td>1.2011014405288734e-10</td><td>1.0</td><td>1: 1.2011014405288734e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>11</td><td>4</td><td>1.2011014405288734e-10</td><td>1.4075851595407585e-10</td><td>1.0</td><td>1: 1.4075851595407585e-10 (rejected; sets: unchanged); 0.5: 1.9967671960330335e-10 (rejected; sets: unchanged); 0.25: 2.7191049412067514e-10 (rejected; sets: unchanged); 0.125: 2.9712055038544349e-10 (rejected; sets: unchanged); 0.0625: 3.0772184800298419e-10 (rejected; sets: unchanged); 0.03125: 2.4910207230277592e-10 (rejected; sets: unchanged); 0.015625: 2.0570212200254900e-10 (rejected; sets: unchanged); 0.0078125: 1.8141577129426878e-10 (rejected; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>12</td></tr>
+<tr><td>head/2</td><td>11</td><td>5</td><td>1.4075851595407585e-10</td><td>4.3755221668106969e-11</td><td>1.0</td><td>1: 4.3755221668106969e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>1</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>11</td><td>6</td><td>4.3755221668106969e-11</td><td>4.3755221668106969e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>12</td><td>1</td><td>1.3171562321015529e-01</td><td>4.2974859840683166e-04</td><td>1.0</td><td>1: 4.2974859840683166e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>12</td><td>2</td><td>4.2974859840683166e-04</td><td>2.1455832666106289e-09</td><td>1.0</td><td>1: 2.1455832666106289e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>12</td><td>3</td><td>2.1455832666106289e-09</td><td>1.3291412415128434e-10</td><td>1.0</td><td>1: 1.3291412415128434e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>12</td><td>4</td><td>1.3291412415128434e-10</td><td>6.5654148784233257e-12</td><td>1.0</td><td>1: 6.5654148784233257e-12 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>12</td><td>5</td><td>6.5654148784233257e-12</td><td>6.5654148784233257e-12</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>12</td><td>6</td><td>6.5654148784233257e-12</td><td>6.5654148784233257e-12</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>13</td><td>1</td><td>1.3336233624795568e-01</td><td>4.3382425285187765e-04</td><td>1.0</td><td>1: 4.3382425285187765e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>13</td><td>2</td><td>4.3382425285187765e-04</td><td>2.4878801241356996e-09</td><td>1.0</td><td>1: 2.4878801241356996e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>13</td><td>3</td><td>2.4878801241356996e-09</td><td>5.6786575441947207e-11</td><td>1.0</td><td>1: 5.6786575441947207e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>4</td></tr>
+<tr><td>head/2</td><td>13</td><td>4</td><td>5.6786575441947207e-11</td><td>5.6786575441947207e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>13</td><td>5</td><td>5.6786575441947207e-11</td><td>5.6786575441947207e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>13</td><td>6</td><td>5.6786575441947207e-11</td><td>5.6786575441947207e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>14</td><td>1</td><td>1.3500915850448791e-01</td><td>4.3779093434181959e-04</td><td>1.0</td><td>1: 4.3779093434181959e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>14</td><td>2</td><td>4.3779093434181959e-04</td><td>2.0999237904106849e-09</td><td>1.0</td><td>1: 2.0999237904106849e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>14</td><td>3</td><td>2.0999237904106849e-09</td><td>1.1566214652702911e-10</td><td>1.0</td><td>1: 1.1566214652702911e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>14</td><td>4</td><td>1.1566214652702911e-10</td><td>6.6222582972841337e-11</td><td>1.0</td><td>1: 6.6222582972841337e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>14</td><td>5</td><td>6.6222582972841337e-11</td><td>6.6222582972841337e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>14</td><td>6</td><td>6.6222582972841337e-11</td><td>6.6222582972841337e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+<tr><td>head/2</td><td>15</td><td>1</td><td>1.3665608897844095e-01</td><td>4.4164601384011348e-04</td><td>1.0</td><td>1: 4.4164601384011348e-04 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>2</td></tr>
+<tr><td>head/2</td><td>15</td><td>2</td><td>4.4164601384011348e-04</td><td>2.8932447548868367e-09</td><td>1.0</td><td>1: 2.8932447548868367e-09 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>3</td></tr>
+<tr><td>head/2</td><td>15</td><td>3</td><td>2.8932447548868367e-09</td><td>1.2393286397127667e-10</td><td>1.0</td><td>1: 1.2393286397127667e-10 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>False</td><td>4</td></tr>
+<tr><td>head/2</td><td>15</td><td>4</td><td>1.2393286397127667e-10</td><td>7.9197093327820767e-11</td><td>0.5</td><td>1: 1.5535306374658830e-10 (rejected; sets: unchanged); 0.5: 7.9197093327820767e-11 (accepted; sets: unchanged)</td><td>1</td><td>none</td><td>0</td><td>True</td><td>12</td></tr>
+<tr><td>head/2</td><td>15</td><td>5</td><td>7.9197093327820767e-11</td><td>7.9197093327820767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>15</td></tr>
+<tr><td>head/2</td><td>15</td><td>6</td><td>7.9197093327820767e-11</td><td>7.9197093327820767e-11</td><td>0.0</td><td>companion only</td><td>0</td><td>none</td><td>0</td><td>True</td><td>17</td></tr>
+</tbody></table>
+
+</details>
+</section>

@@ -242,7 +242,11 @@
       second program. The mesh is an input: §3 measures on the §1 prototype mesh
       (<code>mesh</code> in <code>scripts/prototypes/iron_magnetisation/magnetisation.py</code>,
       1696 cells for WEST), and §4 and §5 rebuild G on their production meshes through this
-      program without changing it.
+      program without changing it. The tile plan pads every kernel call to one
+      (block, nodes) shape and scans over blocks, so the sheet tile compiles once per build at a
+      size set by the block rather than by the cell count; that is why one compile bound holds at
+      both counts. The ledger's 300 to 2500-cell rows that miss 60&nbsp;s are whole-closure
+      programs whose size grows with the cell count, the form the tile route avoids.
     </p>
     <p>
       Done when (1) the device build and the §2 host route agree in float64 over the

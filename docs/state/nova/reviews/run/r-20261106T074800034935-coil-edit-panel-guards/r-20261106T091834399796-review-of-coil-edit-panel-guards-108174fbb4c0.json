@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 8,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1493",
+    "benchmarks/diiid_forward_gs_match.py:1952",
+    "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:296",
+    "benchmarks/display_map_promoted_figure.py:51",
+    "benchmarks/mast_centroid_solve_panels.py:1197",
+    "benchmarks/coil_edit_latency.py:2311",
+    "benchmarks/coil_edit_latency.py:2457",
+    "benchmarks/coil_edit_latency.py:3608"
+  ],
+  "completed_at": "2026-11-06T09:34:47.248Z",
+  "dispatched_at": "2026-11-06T09:21:09Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "line": "326",
+      "severity": "blocking",
+      "text": "the tail check runs even when the mask is already lattice-length, where discarded.size is 0 and _non_lattice_rows returns the wall row count, so a legitimate prefix mask handed a state-wide state now raises; scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:296 passes exactly that shape and worked at the base revision."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "279",
+      "severity": "blocking",
+      "text": "the only test carrying the repaired promoted-count, polished-saddle-distance and saddle-offset assertions timed out at 3300 s in both arms, so the node's headline repair has no recorded green state."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "line": "239",
+      "severity": "non-blocking",
+      "text": "_non_lattice_rows falls back to state_size - node_count when the operator's wall exposes no null coordinate, making the refusal a tautology on that path and silently restoring the unguarded truncation."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "the fragment states that a mask ordered differently is refused, but the guard compares only the tail's length, so a same-length mask ordered differently is accepted."
+    },
+    {
+      "file": "head-gate.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the head arm's first line names revision bea2717c5 while line 2 admits the measured tree was uncommitted and the launch-time rev-parse read 70d362432, so the log's revision is reconstructed rather than read."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read both commits, bea2717c5 (code and tests) and 108174fbb (evidence fragment); no path outside the declared scope, no plan or ticket identifier in a symbol or comment.",
+    "done_when": "the done_when names the three test files with zero added failures; base-gate.log records 1 failed and 53 passed, head-gate.log records 1 failed and 56 passed, both carrying the same id, so the added count is zero -- but the single failing id is the test that carries two of the three repaired assertions, and it timed out rather than executing them.",
+    "goal": "the goal is to make the coil-edit panel guards able to fail, and the landed checks do assert against independent sources -- tests/test_display_flux.py:34-52 re-polishes the map's own flux with polish_stationary_points, tests/test_display_flux.py:383 refuses an unexplained mask tail, and benchmarks/coil_edit_latency.py:2325-2357 measures label defects on the drawn figure.",
+    "manifest": "read; it states status complete, records both arms with their logs, both red controls, the timeout attribution, and the self-check lines, but reports after_suite revision bea2717c5 while head-gate.log:1-2 admits the tree it measured was the pre-commit working tree.",
+    "write_paths": "the manifest declares five paths; the diff of 70d362432..108174fbb changes exactly those five files, 260 insertions and 18 deletions, and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_display_flux.py:383-386 reddens on the whole-mask count (negative-control.log shows assert 4 == 3), but the render test's independent-polish assertions at tests/test_coil_edit_panel_render.py:381-392 have no green run.",
+    "evidence": "head-gate.log:75-136 shows tests/test_coil_edit_panel_render.py::test_committed_converged_panel_uses_its_terminal_currents failing at its own 3300 s timeout in both arms, so the three assertions this node rewrote in that test were never executed at the head.",
+    "fit": "benchmarks/coil_edit_latency.py:2325 _label_defects follows the surrounding save-path idiom and adds no forbidden name, but nova/equilibrium/display_flux.py:240-242 makes a documented refusal vacuous on its fallback branch.",
+    "goal_fidelity": "nova/equilibrium/display_flux.py:326-334 refuses a mask that carries no tail at all, so the new guard rejects a shape the builder accepted before and the goal's \"refuse the mask otherwise\" overshoots into a false refusal.",
+    "reuse": "no owner for a save-time label check exists -- a search of nova/, benchmarks/ and scripts/ for get_window_extent finds only per-script inline copies, the nearest at benchmarks/mast_centroid_solve_panels.py:1393-1410, so this adds a second copy rather than extending an owner.",
+    "scope_discipline": "every path in git diff 70d362432..108174fbb is one of the five the manifest declares, and the fragment carries no unrelated edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the coil-edit panel guards able to fail, and the landed checks do assert against independent sources -- tests/test_display_flux.py:34-52 re-polishes the map's own flux with polish_stationary_points, tests/test_display_flux.py:383 refuses an unexplained mask tail, and benchmarks/coil_edit_latency.py:2325-2357 measures label defects on the drawn figure.\nVERDICT done_when: the done_when names tests/test_coil_edit_panel_render.py, tests/test_display_flux.py and tests/test_flux_surface_connectivity.py with zero added failures; base-gate.log records 1 failed and 53 passed, head-gate.log records 1 failed and 56 passed, both carrying the same id, so the added count is zero -- but the single failing id is the test that carries two of the three repaired assertions, and it timed out rather than executing them.\nVERDICT write_paths: the manifest declares five paths; the diff of 70d362432..108174fbb changes exactly those five files, 260 insertions and 18 deletions, and nothing outside them.\nVERDICT manifest: read; it states status complete, records both arms with their logs, both red controls, the timeout attribution, and the self-check lines, but reports after_suite revision bea2717c5 while head-gate.log:1-2 admits the tree it measured was the pre-commit working tree.\nVERDICT diff: read both commits, bea2717c5 (code and tests) and 108174fbb (evidence fragment); no path outside the declared scope, no plan or ticket identifier in a symbol or comment.\nCALL_SITES: benchmarks/coil_edit_latency.py:1493 (_panel_display_map passes the panel's state-wide mask), benchmarks/diiid_forward_gs_match.py:1952 (passes equilibrium.promoted_mask), scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:296 (passes mask[:grid_count], a lattice-length prefix mask over a state-wide state), benchmarks/display_map_promoted_figure.py:51 (lattice-length mask over a lattice-length state), benchmarks/mast_centroid_solve_panels.py:1197 (passes no mask), benchmarks/coil_edit_latency.py:2311 _render_panel, 2457 caption/_label_defects call, 3608 panel --receipt\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/display_flux.py:326-334 refuses a mask that carries no tail at all, so the new guard rejects a shape the builder accepted before and the goal's \"refuse the mask otherwise\" overshoots into a false refusal.\nSCORE evidence: 8\nJUSTIFICATION evidence: head-gate.log:75-136 shows tests/test_coil_edit_panel_render.py::test_committed_converged_panel_uses_its_terminal_currents failing at its own 3300 s timeout in both arms, so the three assertions this node rewrote in that test were never executed at the head.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff 70d362432..108174fbb is one of the five the manifest declares, and the fragment carries no unrelated edit.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_display_flux.py:383-386 reddens on the whole-mask count (negative-control.log shows assert 4 == 3), but the render test's independent-polish assertions at tests/test_coil_edit_panel_render.py:381-392 have no green run.\nSCORE fit: 14\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py:2325 _label_defects follows the surrounding save-path idiom and adds no forbidden name, but nova/equilibrium/display_flux.py:240-242 makes a documented refusal vacuous on its fallback branch.\nSCORE reuse: 15\nJUSTIFICATION reuse: no owner for a save-time label check exists -- a search of nova/, benchmarks/ and scripts/ for get_window_extent finds only per-script inline copies, the nearest at benchmarks/mast_centroid_solve_panels.py:1393-1410, so this adds a second copy rather than extending an owner.\nFINDING nova/equilibrium/display_flux.py:326 blocking: the tail check runs even when the mask is already lattice-length, where discarded.size is 0 and _non_lattice_rows returns the wall row count, so a legitimate prefix mask handed a state-wide state now raises; scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:296 passes exactly that shape (promoted=mask[:grid_count] with a state sized by the state-wide mask) and worked at the base revision.\nFINDING tests/test_coil_edit_panel_render.py:279 blocking: the only test carrying the repaired promoted-count, polished-saddle-distance and saddle-offset assertions timed out at 3300 s in both arms, so the node's headline repair has no recorded green state; the three new tests that did pass do not exercise those assertions.\nFINDING nova/equilibrium/display_flux.py:239 non-blocking: _non_lattice_rows falls back to state_size - node_count when the operator's wall exposes no null coordinate, which makes the refusal a tautology on that path and silently restores the unguarded truncation the node was chartered to refuse.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html:3 non-blocking: the fragment states that a mask ordered differently is refused, but the guard compares only the tail's length, so a same-length mask ordered differently is accepted and the claim overstates what landed.\nFINDING logs head-gate.log:1 non-blocking: the head arm's first line names revision bea2717c5 while line 2 admits the launch-time rev-parse read 70d362432 and the measured tree was uncommitted, so the log's revision is reconstructed rather than read.\n",
+  "review_run_id": "r-20261106T091834399796-review-of-coil-edit-panel-guards-108174fbb4c0",
+  "reviewed_base_sha": "70d36243277ca53b2fdd94cb96910e4bda20c0bd",
+  "reviewed_head_sha": "108174fbb4c0005772844581cbc749242d41495a",
+  "reviewed_run_id": "r-20261106T074800034935-coil-edit-panel-guards",
+  "scores": {
+    "durability": 12,
+    "evidence": 8,
+    "fit": 14,
+    "goal_fidelity": 12,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:40:18.533328+00:00",
+  "total": 79
+}

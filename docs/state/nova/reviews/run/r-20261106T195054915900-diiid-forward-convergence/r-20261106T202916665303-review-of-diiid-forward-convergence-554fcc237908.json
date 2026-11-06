@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T20:39:14.572Z",
+  "dispatched_at": "2026-11-06T20:30:51Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/build_receipt.py",
+      "line": 43,
+      "severity": "blocking",
+      "text": "The period-2 cycle test at build_receipt.py:43-53 compares tail[2] against tail[0] and tail[3] against tail[1] but never requires the two levels to differ, so a four-point flat plateau classifies as 'period-2 cycle' instead of 'contraction stall'; reproduced by calling _classify([0.5,0.5,0.5,0.5],[0,0,0,0],0.5) which returns period-2 cycle. The same defect is in measure_branches.py:classify_terminal, whose cycle test guards on tail[2] > PROMOTION_TOLERANCE without requiring tail[2] != tail[3]. No banked frame has a four-trip flat tail so the five recorded verdicts stand, but the classifier is the instrument the node's headline negative claim ('no frame shows a period-2 cycle') rests on, and it would have reported the opposite mechanism for exactly the frozen-mask stall this node says dominates."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/build_receipt.py",
+      "line": 121,
+      "severity": "blocking",
+      "text": "The done-when requires the per-promotion relative residual on BOTH branches from the bank seed; build_receipt.py:113-123 empties the limited branch's residuals, masks, damping and trips, and convergence-receipt.json carries promotion_trajectory [] with terminal_class 'not measured: the bank returns the diverted receipt' for the limited branch of all five frames. The manifest states the both-branch descent was not measured, yet status is 'complete'. The gate that ran (build_receipt.py) re-derives only what the bank already holds and asserts nothing about the missing half, so the recorded evidence does not measure what the done-who asserts."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/build_receipt.py",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "Two independent terminal classifiers landed in the same change: build_receipt.py:_classify (line 30 onward) and measure_branches.py:classify_terminal (line 50 onward). They disagree on the cycle threshold (bit-exact 1e-12 relative here against 1e-3 in measure_branches) and on divergence handling, so the same trajectory can receive two different terminal classes depending on which script a reader runs. The repository owns no receipt-level classifier of a fixed-point descent (nova/equilibrium/fixed_point.py reconcile computes cycle_detected/stagnated/settled live, benchmarks/label_seed_residual_field.py:400 uses a different taxonomy), so the duplication is internal to this node rather than against an existing owner."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "The per-frame table's frame 44 diverted row reports branch 'diverted' and terminal class 'contraction stall' without the achieved topology, but convergence-receipt.json records topology_consistent false and achieved_class 'limited' for that branch (frame 146's diverted row has the same crossing). The Verdict at line 64 reasons entirely from topology consistency, so a reader checking the table cannot see that the state the bank returns on frame 44 is itself a limited-topology terminal at residual 4.28, against a discarded diverted-topology terminal at 0.197."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/build_receipt.py",
+      "line": 172,
+      "severity": "non-blocking",
+      "text": "The receipt's own 'measurement' string states 'per-promotion forward descent on both topology branches from the bank's cold seed', which is what the record does not contain: the limited branch carries no trajectory on any frame. A record whose self-description overstates its contents is read by a later reviewer as a measurement that was made."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "line": 218,
+      "severity": "non-blocking",
+      "text": "The figure-level legend names 'Nova solved flux' and 'solved separatrix' unconditionally, so frame 144's panel carries legend entries for two series it does not draw; the data-ink rule that a series the text does not use is dropped applies to the legend as well as to the ink."
+    },
+    {
+      "file": "docs/figures/diiid-forward-convergence/convergence-receipt.json",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The manifest's negative_control_log names logs/gate-receipt-build.log, whose last line is EXIT=0 and which contains no failing assertion; it is a green gate, not a negative control, so the record names a log that shows no refusal was ever demonstrated."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The brief required the solve to run through scripts/nova_lane/run.sh with --rungs h200,titan,cpu; logs/probe-179.log shows it was launched with --rungs cpu only, in place, and killed at a 900 s timeout, so the H200 rung the compute hierarchy makes the default was never attempted. The deviation is disclosed in the manifest's retry_failures, which satisfies the report-the-deviation rule, but it is why the done-when measurement is absent."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261106T202916665303-review-of-diiid-forward-convergence-554fcc237908",
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_head_sha": "554fcc237908745e87adeafcaff82d5f901f671d",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "scores": {
+    "durability": 6,
+    "evidence": 8,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 9,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:42:42.636655+00:00",
+  "total": 72
+}

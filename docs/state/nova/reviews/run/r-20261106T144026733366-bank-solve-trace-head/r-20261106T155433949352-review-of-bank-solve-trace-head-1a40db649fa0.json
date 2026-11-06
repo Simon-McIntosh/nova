@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run is a measurement node whose own brief states it changes no product code and no tests, and its manifest records baseline_suite and after_suite as empty because no suite was requested or run. With no base arm and no head arm there are no failure ids to difference, so added_failure_count is 0 derived from zero recorded arms, not from a green suite; the node's gate is the H200 measurement, whose device.log and report-complete.log both end EXIT=0.",
+  "call_sites": [],
+  "completed_at": "2026-11-06T16:07:08.663Z",
+  "dispatched_at": "2026-11-06T15:56:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "This is a prototype report. A JAX log rewording aborts it loudly instead of reporting a wrong cache state, which fails closed.",
+      "recorded_at": "2026-11-06T16:10:03.895366+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The measurement ran once into a fresh run root; reruns into the same root are not part of this record.",
+      "recorded_at": "2026-11-06T16:10:05.811604+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_trace_head/report.py",
+      "id": "fa6455d924a",
+      "line": 111,
+      "severity": "non-blocking",
+      "summary": "assert log.count(\"Persistent compilation cache hit for 'jit_solve'\") == 2 makes regenerating the evidence depend on the exact wording of a JAX log line nobody in this repository owns; a JAX upgrade that rewords it aborts the report with AssertionError rather than reporting the cache state, so the committed artefact becomes unreproducible for a reason unrelated to the measurement. The check itself is the right one (it is what proves the two measured processes ran warm), only its coupling to the message text is fragile."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_trace_head/device.py",
+      "id": "f849dee7396",
+      "line": 28,
+      "severity": "non-blocking",
+      "summary": "destination.mkdir(exist_ok=True) reuses process-0..2 under the run directory and never clears them, so a rerun into the same run root can pair a fresh capture.json with an attribution.json left by an earlier attempt; report.py reads both from process-1 and process-2 with no age, revision or completeness check. execute() asserts each subprocess exit, which is why this has not bitten, but a killed job between the two writes leaves the mixed pair readable."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits against the base; 0fd8c3763 adds only the 64-line device.py orchestration and the 19-line sbatch driver, and 1a40db649 adds the 362-line offline report, the 95-line fragment and the checked SVG, 1485 insertions and no deletions, with no product or test source touched.",
+    "done_when": "the done_when asks for per-group device ms, launches and share at 1 and 16 slices from two fresh processes on one warm cache with closure against the profiled wall, the morning figures beside each group, the three dominant groups with batching shape, and a per-update/per-read split; the fragment carries all of these and the two processes agree on 8 reads per lane, 6 batch updates and 66215 launches, which I re-read from process-{1,2}/capture.json and attribution.json and from summary.json rather than taking from the prose.",
+    "goal": "the goal is to attribute the converged batched solve wall on one H200 at current main; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html:2-3 tables device ms, launches and share per group at 1 and 16 slices for two fresh processes beside the morning column, and states the three dominant sixteen-slice groups with their batching shape, so the goal is met.",
+    "manifest": "read; it records status complete, two commits (0fd8c37633cd435bc9ff6278218f0b2412ee932b and 1a40db649fa005e3e1c60783067c19148152c50d), the sbatch gate command with its log paths, measurement_module and measurement_cwd, the negative-control log path, empty baseline_suite and after_suite with the reason, and all six rubric lines answered.",
+    "write_paths": "the manifest declares scripts/prototypes/bank_solve_trace_head, the fragment and the figures directory; git diff d102ff6f103775ced8fe3b573122a235bec9da22..1a40db649fa005e3e1c60783067c19148152c50d touches exactly five files, all inside those three paths."
+  },
+  "justifications": {
+    "durability": "report.py:111,117,118,167,183 and 301 are real guards that abort the evidence on a cold cache, disagreeing processes, non-convergence or an unreconciled residual split, and omitted-group.log shows the inherited accounting guard firing as AssertionError with EXIT=1, but none is a committed test and no CI or suite runs them, so a regressed claim about the solve would be caught only when someone reruns the report by hand.",
+    "evidence": "the gate is the one H200 job 1307034 whose device.log and report-complete.log both end EXIT=0, and I re-derived the tabled walls (643.051/642.945 ms), device totals (606.646/606.921 ms), per-group costs and launch counts from process-{1,2}/capture.json, attribution.json and invocations-*.json, matching the fragment to the printed precision.",
+    "fit": "scripts/prototypes/bank_solve_trace_head/report.py:13 imports the same bank_solve_profile.plot.save_checked the sibling scripts/prototypes/bank_solve_trace/plot.py uses, the module follows the surrounding one-docstring, main()-guard prototype style, and the added names (device.py, report.py, table, groups, invocations) carry no plan, version, ticket or run label.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html:2 reports Jacobian 160.240-160.331 ms, residual 127.717-127.861 ms and candidate support 104.287-104.411 ms at sixteen slices, which are the three largest groups in process-1/attribution.json and process-2/attribution.json, and the fragment separates the 47.087 ms per batch update from the 36.730 ms read-plus-certification cost as the brief asked.",
+    "reuse": "the runner imports the existing instrument unchanged (bank_solve_trace.capture and .analyse, .groups, .provenance, bank_wall_events.device.execute and the bank_booking_determinism measurement.sh recipe) and extends no capability of its own; the only local definition with a sibling is report.py:19 table(), which I matched against every scripts/prototypes report and scripts/prototypes/support/report.py and found no shared owner for, so it follows the established per-prototype idiom rather than forking an owner.",
+    "scope_discipline": "every path in git diff d102ff6f103775ced8fe3b573122a235bec9da22..1a40db649fa005e3e1c60783067c19148152c50d lies under scripts/prototypes/bank_solve_trace_head, the one fragment and the one figure directory, and the diff adds no product code, no test and no plan edit."
+  },
+  "node": "review-of-bank-solve-trace-head-1a40db649fa0",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: d102ff6f103775ced8fe3b573122a235bec9da22\nreviewed_head_sha: 1a40db649fa005e3e1c60783067c19148152c50d\nVERDICT goal: the goal is to attribute the converged batched solve wall on one H200 at current main; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html:2-3 tables device ms, launches and share per group at 1 and 16 slices for two fresh processes beside the morning column, and states the three dominant sixteen-slice groups with their batching shape, so the goal is met.\nVERDICT done_when: the done_when asks for per-group device ms, launches and share at 1 and 16 slices from two fresh processes on one warm cache with closure against the profiled wall, the morning figures beside each group, the three dominant groups with batching shape, and a per-update/per-read split; the fragment carries all of these and the two processes agree on 8 reads per lane, 6 batch updates and 66215 launches, which I re-read from process-{1,2}/capture.json and attribution.json and from summary.json rather than taking from the prose.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_solve_trace_head, the fragment and the figures directory; git diff d102ff6f103775ced8fe3b573122a235bec9da22..1a40db649fa005e3e1c60783067c19148152c50d touches exactly five files, all inside those three paths.\nVERDICT manifest: read; it records status complete, two commits (0fd8c37633cd435bc9ff6278218f0b2412ee932b and 1a40db649fa005e3e1c60783067c19148152c50d), the sbatch gate command with its log paths, measurement_module and measurement_cwd, the negative-control log path, empty baseline_suite and after_suite with the reason, and all six rubric lines answered.\nVERDICT diff: read both commits against the base; 0fd8c3763 adds only the 64-line device.py orchestration and the 19-line sbatch driver, and 1a40db649 adds the 362-line offline report, the 95-line fragment and the checked SVG, 1485 insertions and no deletions, with no product or test source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html:2 reports Jacobian 160.240-160.331 ms, residual 127.717-127.861 ms and candidate support 104.287-104.411 ms at sixteen slices, which are the three largest groups in process-1/attribution.json and process-2/attribution.json, and the fragment separates the 47.087 ms per batch update from the 36.730 ms read-plus-certification cost as the brief asked.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is the one H200 job 1307034 whose device.log and report-complete.log both end EXIT=0, and I re-derived the tabled walls (643.051/642.945 ms), device totals (606.646/606.921 ms), per-group costs and launch counts from process-{1,2}/capture.json, attribution.json and invocations-*.json, matching the fragment to the printed precision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff d102ff6f103775ced8fe3b573122a235bec9da22..1a40db649fa005e3e1c60783067c19148152c50d lies under scripts/prototypes/bank_solve_trace_head, the one fragment and the one figure directory, and the diff adds no product code, no test and no plan edit.\nSCORE durability: 12\nJUSTIFICATION durability: report.py:111,117,118,167,183 and 301 are real guards that abort the evidence on a cold cache, disagreeing processes, non-convergence or an unreconciled residual split, and omitted-group.log shows the inherited accounting guard firing as AssertionError with EXIT=1, but none is a committed test and no CI or suite runs them, so a regressed claim about the solve would be caught only when someone reruns the report by hand.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_solve_trace_head/report.py:13 imports the same bank_solve_profile.plot.save_checked the sibling scripts/prototypes/bank_solve_trace/plot.py uses, the module follows the surrounding one-docstring, main()-guard prototype style, and the added names (device.py, report.py, table, groups, invocations) carry no plan, version, ticket or run label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the runner imports the existing instrument unchanged (bank_solve_trace.capture and .analyse, .groups, .provenance, bank_wall_events.device.execute and the bank_booking_determinism measurement.sh recipe) and extends no capability of its own; the only local definition with a sibling is report.py:19 table(), which I matched against every scripts/prototypes report and scripts/prototypes/support/report.py and found no shared owner for, so it follows the established per-prototype idiom rather than forking an owner.\nFINDING scripts/prototypes/bank_solve_trace_head/report.py:111 non-blocking: the cache-hit assertion is exact equality on a JAX log string the repository does not own, so a JAX rewording turns a valid warm-cache measurement into an AssertionError and makes the committed evidence unreproducible for a reason unrelated to the measurement.\nFINDING scripts/prototypes/bank_solve_trace_head/device.py:28 non-blocking: process directories are reused with exist_ok=True and never cleared, so a rerun into the same run root can pair a fresh capture.json with an attribution.json left by an earlier attempt, and report.py reads the pair with no age, revision or completeness check.\n",
+  "review_run_id": "r-20261106T155433949352-review-of-bank-solve-trace-head-1a40db649fa0",
+  "reviewed_base_sha": "d102ff6f103775ced8fe3b573122a235bec9da22",
+  "reviewed_commit": "1a40db649fa005e3e1c60783067c19148152c50d",
+  "reviewed_head_sha": "1a40db649fa005e3e1c60783067c19148152c50d",
+  "reviewed_run_id": "r-20261106T144026733366-bank-solve-trace-head",
+  "rubric_lines": 12,
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T16:07:15.554673+00:00",
+  "total": 106
+}

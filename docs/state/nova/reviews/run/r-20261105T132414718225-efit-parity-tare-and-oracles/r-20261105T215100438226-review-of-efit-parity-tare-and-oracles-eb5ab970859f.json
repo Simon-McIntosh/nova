@@ -24,6 +24,11 @@
       "kind": "folded",
       "node": "efit-parity-test-guards",
       "recorded_at": "2026-11-06T05:38:59.793538+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "manifest record of the gate command only; the gate logs carry the literal per-arm commands, and the follow-on node's brief requires the literal command and revision in each log header",
+      "recorded_at": "2026-11-06T05:39:24.652870+00:00"
     }
   },
   "findings": [

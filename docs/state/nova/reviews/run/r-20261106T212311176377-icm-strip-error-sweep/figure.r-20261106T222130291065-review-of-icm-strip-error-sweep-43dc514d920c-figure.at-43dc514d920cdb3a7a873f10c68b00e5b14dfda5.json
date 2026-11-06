@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; the zero is the neutral value the record shape requires, not a measurement.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/edge-sheet/strip-error-vs-width.svg"
+  },
+  "attachment_note": "One rendered image was handed to this node and was opened directly with the read tool at its native 1400x720 pixels before any verdict was formed. No SVG and no other image was opened, listed, searched, rendered or shown; the only numerical measurements below were taken from the pixels of that handed-in PNG.",
+  "completed_at": "2026-11-06T22:32:39.513Z",
+  "dispatched_at": "2026-11-06T22:24:43Z",
+  "figure_checks": {
+    "caption": "The caption at docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html:107-115 does not repeat a title (the figure carries no title). It names the quantity, the twelve-target set, the width's unit, what the markers and the grey dotted line are, and the fact that every curve turns over inside the sweep and every minimum lies one to two decades above the line. That is substantive. No caption finding.",
+    "clipping": "Outer 2, 4 and 8 px frames of the 1400x720 render each contain 0 ink pixels; the ink bounding box is x 35..1365, y 86..690, so the nearest content is 35 px from the left and right edges and the lowest ink (the x axis label's descenders) reaches y=690 of 720. No tick label, axis label, legend entry or direct label is cut off.",
+    "contrast": "Text: black tick and axis labels (sampled rgb 0,0,0) and the threshold annotation in rgb 107,107,107, which measures 5.33:1 against the pure-white canvas (corner sampled rgb 255,255,255). Every text artist clears the contrast floor. The plotted lines are a separate matter: the two lightest stop colours measure 2.61:1 and 1.93:1, both below the 3:1 a plotted line is required to hold, and that is finding 1.",
+    "ink": "Ink is 3.67 % of the canvas. Six series of five curve strokes plus one dotted threshold line, the marker discs at each curve's minimum, the tick labels, two axis labels, five legend entries and one direct label. No band, no fill, no panel background.",
+    "provenance": "reviewed_base_sha ef00960ce4 is an ancestor of reviewed_head_sha 43dc514d9 (git merge-base --is-ancestor in the worktree), and docs/figures/edge-sheet/strip-error-vs-width.svg resolves at the reviewed head. The run's own manifest names that path as its artifact and the run's commit adds it.",
+    "render": "The one attachment was opened at native resolution; every verdict below is about those pixels. Dimensions 1400x720 RGB. No cropping, scaling or re-rendering was performed, and this review is read-only."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/edge-sheet/strip-error-vs-width.svg",
+      "render": "image-0.png (1400x720)",
+      "rubric": {
+        "contrast": "pass on text. Every text artist is black or rgb 107,107,107 on a pure white canvas, at 21:1 and 5.33:1 respectively. The finding about line contrast is carried under legibility rather than here, because the item names text against its background and no text is affected.",
+        "data_ink": "pass. Five curves and one threshold line carry the figure; no gridline, no fill, no shading and no frame beyond the left and bottom axes. Ink measured at 3.67 % of the canvas, all of it labels, curves and markers.",
+        "decoration": "pass. White canvas (corner pixel rgb 255,255,255), no gradient, no band, no background fill, top and right spines absent. The one grey dotted horizontal line is data, not decoration: it is the 1e-10 tolerance the route must reach, and it is labelled.",
+        "label_collision": "pass. Zero ink in the outer 8 px frame; ink bbox x 35..1365, y 86..690. The legend sits above the axes in a single frameless row of five entries and no entry touches another. The direct label '1e-10' sits at the left end of the threshold line, in clear space below the lowest data (about 1e-8), touching neither the curve nor the tick labels. No label overlaps the data.",
+        "legibility": "pass, with the weakness recorded as finding 1. A reader gets the shape at a glance: every slope's worst error falls to a minimum between 3e-5 and 1e-4 and then rises steeply together, one to two decades above the grey 1e-10 line. Axis names and decade ticks are legible. The slopes are separated by both a lightness ramp and a per-curve dash pattern, which holds in the left half; in the right half all five coincide because they genuinely share the rounding branch, and the trace a reader sees there is drawn in the palest stop colour.",
+        "table_form": "pass. Thirteen widths on a log axis against a continuous error, five slopes plus a threshold: the relationship between width and error is the subject, and a table of 65 numbers would not show the turnover or the crossover. A chart instead of a table is the right form."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/edge_sheet/figure.py",
+      "id": "f84a8fdde04",
+      "line": 25,
+      "severity": "non-blocking",
+      "summary": "The five curves are ordered by a single hue ramp and the two lightest stops fall below the contrast a plotted line is required to hold against white: rgb 148,192,227 (slope pi/2) measures 1.93:1 and rgb 106,166,214 (slope 3pi/8) 2.61:1, against the 3:1 the style rule sets and against 4.04:1 for the next stop up. In the rendered PNG this is visible: the pale dotted pi/2 trace is the faintest thing on the page, and it is also the curve drawn on top, so above about 2e-4 - where all five slopes coincide on the shared rounding branch - the one trace a reader sees is the palest of the five (466 pure pale pixels in the right third of the plot against 125 for the darkest, because the order covers the darker strokes). Nothing is unreadable and no label is affected, so this does not hold the node; a reader can still follow every curve in the left half where the ordering is visible. Recorded so a later restyle of docs/figures/edge-sheet can lift the two lightest stops to at least 3:1 and keep the dash distinction."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption at docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html:107-115 is substantive: it names the target set, the units, the marker and threshold conventions and the two limiting branches. It does not restate a title, and the figure carries none.",
+    "finding_materiality": "One non-blocking finding, no blocking finding. No label is clipped or overlapping, no text is unreadable, and the data the figure exists to show - the smallest attainable error and the width that attains it, per slope and combined - are all visible. None of the blocking categories is met.",
+    "rendered_artifact": "The single attached PNG was opened and measured at its native 1400x720; the verdict is about the picture, not about the generating script or the SVG source."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "Every number above was taken from the pixels of the one handed-in PNG (size, frame ink, ink bbox, colour histogram, per-third series ink, contrast ratios computed from the sampled colours) or from the run's own commit; the revision pair was confirmed with git merge-base --is-ancestor and the figure path was confirmed to resolve at the reviewed head.",
+    "legibility": "Read from the 1400x720 render opened at native resolution.",
+    "scope_discipline": "This review is read-only. No figure, caption, script, fragment or plan was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure",
+  "reviewed_base_sha": "ef00960ce48677f2eb922a389b8759a23284aa40",
+  "reviewed_figures": [
+    "docs/figures/edge-sheet/strip-error-vs-width.svg"
+  ],
+  "reviewed_head_sha": "43dc514d920cdb3a7a873f10c68b00e5b14dfda5",
+  "reviewed_run_id": "r-20261106T212311176377-icm-strip-error-sweep",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass with a recorded weakness. The turnover at 3e-5 to 1e-4 and the rise to one to two decades above the 1e-10 threshold are readable at a glance, axis names and decade ticks are legible, and the five slopes are separated by lightness and dash in the left half; above 2e-4 they coincide by data and the visible trace is the palest stop, which is finding 1.",
+    "RUBRIC data_ink: pass. Five curve families and one labelled threshold line, 3.67 % of canvas ink, no gridline, no fill, no shading, no decoration.",
+    "RUBRIC decoration: pass. Pure white canvas, no gradient, no band, no panel background, top and right spines absent; the only grey line is the 1e-10 tolerance the route must reach.",
+    "RUBRIC contrast: pass for text. Black labels and a 5.33:1 grey annotation on white; every text artist clears its floor. Line contrast is redrawn as a recorded weakness under legibility, not a text defect.",
+    "RUBRIC table_form: pass. Thirteen log-spaced widths against a continuous error for five slopes is a relationship a table of 65 numbers would not show; the chart is the right form.",
+    "RUBRIC label_collision: pass. Zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row above the axes with no touching entries, and the 1e-10 direct label in clear space below the lowest data."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T22:34:00+00:00",
+  "total": null
+}

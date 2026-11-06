@@ -3692,7 +3692,10 @@ def render_frame_comparison(
         zip(axes, results, fields, strict=True)
     ):
         poloidal_axes(axis)
-        label = f"{result.shot}\nframe {result.frame} · converged={result.converged}"
+        label = (
+            f"{Path(result.shot).stem}\nframe {result.frame} · "
+            f"converged={result.converged}"
+        )
         if result.display_map is not None:
             display = result.display_map
             distance = (
@@ -3702,8 +3705,8 @@ def render_frame_comparison(
                 else f"{display.nearest_promoted_to_xpoint_m:.3g} m"
             )
             label += (
-                f"\nsolved-node mismatch {display.max_solved_node_mismatch_wb:.3g} Wb"
-                f"\npromoted {display.promoted_node_count}; nearest X {distance}"
+                f"\nsolved-node {display.max_solved_node_mismatch_wb:.2g} Wb"
+                f"\npromoted {display.promoted_node_count}; X {distance}"
             )
             if display.separatrix_closed_points == 0:
                 reason = display.separatrix_assembly or {}
@@ -6163,10 +6166,10 @@ def redraw_persisted_bank(output: Path) -> dict[str, Any]:
         }
         for frame, (rms, sup) in sorted(distances.items())
     }
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True))
     render_frame_comparison(results, fields, output / FRAME_FIGURE_NAME)
     cohort_figure(results, fields, output / COHORT_FIGURE_NAME)
     displacement_figure(results, fields, output / DISPLACEMENT_FIGURE_NAME)
-    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True))
     partial_path = output / PARTIAL_RECEIPT_NAME
     if partial_path.exists():
         partial = json.loads(partial_path.read_text())

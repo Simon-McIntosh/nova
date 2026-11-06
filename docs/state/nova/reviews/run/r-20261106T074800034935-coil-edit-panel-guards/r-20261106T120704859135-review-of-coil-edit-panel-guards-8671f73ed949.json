@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-06T12:17:54.738Z",
   "dispatched_at": "2026-11-06T12:08:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-coil-edit-panel-guards-8671f73ed949",
+      "recorded_at": "2026-11-06T12:56:53.611234+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_display_flux.py",

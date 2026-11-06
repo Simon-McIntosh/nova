@@ -27,14 +27,19 @@ def candidate_program():
     module = ast.parse(inspect.getsource(topology._read_at_nulls))
     function = module.body[0]
     end = next(
-        i
-        for i, node in enumerate(function.body)
-        if isinstance(node, ast.Assign)
-        and any(
-            isinstance(target, ast.Name) and target.id == "saddle_index"
-            for target in node.targets
-        )
+        (
+            i
+            for i, node in enumerate(function.body)
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "saddle_index"
+                for target in node.targets
+            )
+        ),
+        None,
     )
+    if end is None:
+        raise ValueError("_read_at_nulls: expected top-level saddle_index assignment")
     function.body = function.body[: end + 1] + [
         ast.parse("return candidates_admitted, forms, saddle_index").body[0]
     ]
@@ -120,6 +125,11 @@ def compare(field, geometry, convention, policy, solved):
     arguments = (field, geometry, convention, policy, solved)
     actual = jax.jit(stationary_adapter(candidate_program()))(*arguments)
     expected = jax.jit(stationary_adapter(slotwise))(*arguments)
+    assert_candidates_equal(actual, expected)
+    return actual
+
+
+def assert_candidates_equal(actual, expected):
     np.testing.assert_array_equal(actual[0], expected[0])
     np.testing.assert_array_equal(actual[2], expected[2])
     errors = []
@@ -144,7 +154,15 @@ def compare(field, geometry, convention, policy, solved):
         max(errors),
         flush=True,
     )
-    return actual
+
+
+def test_candidate_program_names_missing_statement(monkeypatch):
+    source = inspect.getsource(topology._read_at_nulls)
+    monkeypatch.setattr(
+        inspect, "getsource", lambda _: source.replace("saddle_index", "selected_index")
+    )
+    with pytest.raises(ValueError, match="expected top-level saddle_index assignment"):
+        candidate_program()
 
 
 @jax.tree_util.register_dataclass
@@ -193,7 +211,22 @@ def test_candidate_slots_match_individual_evaluation():
     assert int(actual[2]) == 1
 
 
-def test_candidate_slots_share_one_program():
+def nested_equations(program):
+    for equation in program.eqns:
+        yield equation
+        for value in equation.params.values():
+            for child in value if isinstance(value, (tuple, list)) else (value,):
+                child = getattr(child, "jaxpr", child)
+                if hasattr(child, "eqns"):
+                    yield from nested_equations(child)
+
+
+def test_candidate_slots_share_one_program(monkeypatch):
+    monkeypatch.setattr(
+        topology,
+        "_support_at_level",
+        jax.named_call(topology._support_at_level, name="candidate_support"),
+    )
     args = small_case()
     program = jax.make_jaxpr(stationary_adapter(candidate_program()))(*args).jaxpr
     scans = [
@@ -203,6 +236,44 @@ def test_candidate_slots_share_one_program():
         and equation.params["length"] == args[3].null_capacity
     ]
     assert len(scans) == 0, "candidate slots are evaluated by a sequential scan"
+    supports = [
+        equation
+        for equation in nested_equations(program)
+        if equation.primitive.name == "while"
+        and "candidate_support" in str(equation.source_info.name_stack)
+    ]
+    # The connectivity flood is one while per support evaluation: one per branch.
+    assert len(supports) == 2, f"expected two support programs, got {len(supports)}"
+
+
+def test_candidate_overflow_matches_full_evaluation():
+    field, geometry, convention, policy, solved = small_case()
+    # Four live saddle slots exceed the compact width even without slot 0.
+    solved = jax.tree.map(lambda leaf: leaf[jnp.array([0, 1, 1, 1, 1])], solved)
+    sparse = solved._replace(valid=jnp.array([True, False, False, False, True]))
+    batch = jax.tree.map(lambda left, right: jnp.stack((left, right)), sparse, solved)
+
+    def mapped(function):
+        return jax.vmap(
+            lambda lane: stationary_adapter(function)(
+                field, geometry, convention, policy, lane
+            )
+        )
+
+    actual = jax.jit(mapped(candidate_program()))(batch)
+    expected = jax.jit(mapped(slotwise))(batch)
+    for lane in range(2):
+        assert_candidates_equal(
+            jax.tree.map(lambda leaf: leaf[lane], actual),
+            jax.tree.map(lambda leaf: leaf[lane], expected),
+        )
+    assert bool(actual[0][0, 4]) and int(actual[2][0]) == 4
+    assert np.all(np.asarray(actual[0][1, 1:5]))
+    program = jax.make_jaxpr(mapped(candidate_program()))(batch).jaxpr
+    # A lane-varying cond becomes selects under vmap; the overflow cond must survive.
+    choices = [eq for eq in program.eqns if eq.primitive.name == "cond"]
+    assert len(choices) == 1
+    assert choices[0].invars[0].aval.shape == ()
 
 
 @pytest.fixture(scope="module", params=["limited", "diverted"])
@@ -228,3 +299,12 @@ def test_certificate_candidates_match_slotwise(physical_case, state):
     )
     print("CERTIFICATE", case["kind"], state, flush=True)
     compare(field, case["geometry"], case["convention"], case["policy"], stencil.solved)
+    eigenvalues = np.linalg.eigvalsh(
+        case["convention"].sigma * stencil.solved.jet.hessian
+    )
+    saddles = (
+        np.asarray(stencil.solved.valid)
+        & (eigenvalues[:, 0] < 0)
+        & (eigenvalues[:, 1] > 0)
+    )
+    print("SADDLE_COUNT", int(np.sum(saddles)), flush=True)

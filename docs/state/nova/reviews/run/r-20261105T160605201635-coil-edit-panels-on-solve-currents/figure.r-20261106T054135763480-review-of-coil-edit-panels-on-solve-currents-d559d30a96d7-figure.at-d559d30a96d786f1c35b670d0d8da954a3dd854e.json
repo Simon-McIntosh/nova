@@ -11,6 +11,13 @@
     "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
     "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "fixed at 5fb1848fd: the numbers moved out of the 9 pt suptitle into a body-sized figcaption with short panel titles; the re-review at 0c9e5609e no longer raises it",
+      "recorded_at": "2026-11-06T07:22:43.119319+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/coil_edit_latency.py",

@@ -6,6 +6,13 @@
   "figures_reviewed": [
     "image-0.png, 1400x720 RGBA, the rendered panel attached to this review (a poloidal contour map at left and a magnified X-point window at right); judged from the rendered pixels only"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "fixed at b29d9b939: the scale-bar label sits clear of the separatrix leg in the head render, inspected by the coordinator",
+      "recorded_at": "2026-11-06T06:16:02.185791+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "exempted",

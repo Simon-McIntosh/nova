@@ -79,6 +79,16 @@
       "note": "\u00a76 enters through one seam: the edge sheets are one passive CoilSet frame whose currents the material solve writes, so no solve path changes. \u00a78 names toroidalaverage.py. \u00a77 already names nova/equilibrium/solve_request.py (59bf1a7d3).",
       "reason": "",
       "when": "2026-11-06T05:43:04.977391+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "59bf1a7d31d54a8dbedb9966c98d332e90841869",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "(a) \u00a72 now measures a thin Part V strip first and builds Part II only if the strip misses 1e-10, recorded in a new sheet-route decision; \u00a73 then reuses _fill_tile. (b) \u00a72 cites complete_kind, complete_pole, constants.py and incomplete_pole. (c) \u00a74 follows reduced_newton.py. (d) the reader extends machine.py. (e) \u00a78 reuses toroidalaverage.py (59bf1a7d3).",
+      "reason": "",
+      "when": "2026-11-06T05:43:29.689146+00:00"
     }
   ],
   "responses": {
@@ -99,6 +109,15 @@
       "note": "\u00a76 enters through one seam: the edge sheets are one passive CoilSet frame whose currents the material solve writes, so no solve path changes. \u00a78 names toroidalaverage.py. \u00a77 already names nova/equilibrium/solve_request.py (59bf1a7d3).",
       "reason": "",
       "when": "2026-11-06T05:43:04.977391+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "59bf1a7d31d54a8dbedb9966c98d332e90841869",
+      "commit_basis": "edit",
+      "note": "(a) \u00a72 now measures a thin Part V strip first and builds Part II only if the strip misses 1e-10, recorded in a new sheet-route decision; \u00a73 then reuses _fill_tile. (b) \u00a72 cites complete_kind, complete_pole, constants.py and incomplete_pole. (c) \u00a74 follows reduced_newton.py. (d) the reader extends machine.py. (e) \u00a78 reuses toroidalaverage.py (59bf1a7d3).",
+      "reason": "",
+      "when": "2026-11-06T05:43:29.689146+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

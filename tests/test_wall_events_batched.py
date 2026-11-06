@@ -134,6 +134,7 @@ def physical_case(request):
     return case, bank
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("state", ["trial", "converged"])
 def test_certificate_wall_events_match_edgewise(physical_case, state):
     case, bank = physical_case

@@ -1,6 +1,7 @@
 """Table saved perturbation receipts and draw their stage sensitivity."""
 
 import argparse
+from decimal import Decimal, localcontext
 from html import escape
 import json
 from pathlib import Path
@@ -76,21 +77,65 @@ def main():
             rows,
         )
     )
-    arrays = np.load(args.run / "gpu-residuals.npz")
     rows, chart = [], []
-    for name, row in receipts["gpu"]["stages"].items():
-        spread = np.max(np.ptp(arrays[name], axis=0), axis=-1)
-        delta = np.max(np.abs(arrays[name] - arrays["baseline"]), axis=-1)
-        summary = dict(
-            median_change=float(np.median(delta)),
-            maximum_change=float(delta.max()),
-            median_spread=float(np.median(spread)),
-            maximum_spread=float(spread.max()),
-        )
-        summaries[name] = summary
-        rows.append([name.replace("_", " "), *[f"{summary[k]:.4e}" for k in summary]])
-        if spread.max() > 0:
-            chart.append((name.replace("_", " "), np.median(spread), spread.max()))
+    core = {
+        "field_coefficients",
+        "nodal_jets",
+        "stationary_fluxes",
+        "whole_cells",
+        "conic_cells",
+        "normal_cells",
+        "normalization",
+        "subtraction",
+    }
+    for directory, receipt_name, arrays_name in (
+        (args.run, "gpu.json", "gpu-residuals.npz"),
+        (args.run, "geometry.json", "geometry-residuals.npz"),
+        (args.run / "field", "geometry.json", "geometry-residuals.npz"),
+    ):
+        receipt = json.loads((directory / receipt_name).read_text())
+        arrays = np.load(directory / arrays_name)
+        for name in receipt["stages"]:
+            spread = np.max(np.ptp(arrays[name], axis=0), axis=-1)
+            delta = np.max(np.abs(arrays[name] - arrays["baseline"]), axis=-1)
+            summary = dict(
+                median_change=float(np.median(delta)),
+                maximum_change=float(delta.max()),
+                median_spread=float(np.median(spread)),
+                maximum_spread=float(spread.max()),
+            )
+            summaries[name] = summary
+            rows.append(
+                [name.replace("_", " "), *[f"{summary[k]:.4e}" for k in summary]]
+            )
+            if spread.max() > 0 and (name in core or directory.name == "field"):
+                chart.append((name.replace("_", " "), np.median(spread), spread.max()))
+    captured = np.load(args.run / "propagation.npz")
+    transform, residual = captured["field_0_transform"], captured["field_0_residual"]
+    coefficients = captured["field_0_coefficients"]
+    conditioning = []
+    with localcontext() as context:
+        context.prec = 80
+        for index in range(6, len(coefficients)):
+            products = [
+                Decimal.from_float(float(a)) * Decimal.from_float(float(b))
+                for a, b in zip(transform[index], residual)
+            ]
+            total = sum(products)
+            conditioning.append(
+                dict(
+                    coefficient=index,
+                    reference=str(total),
+                    absolute_error=float(
+                        abs(total - Decimal.from_float(float(coefficients[index])))
+                    ),
+                    cancellation=float(sum(abs(v) for v in products) / abs(total))
+                    if total
+                    else 0.0,
+                )
+            )
+    summaries["conditioning"] = conditioning
+    summaries["inverse_scale_fourth"] = float(captured["field_0_scale"] ** -4)
     (args.run / "stage-table.html").write_text(
         table(
             [
@@ -107,9 +152,10 @@ def main():
     plt.style.use("data-ink")
     fig, ax = plt.subplots(figsize=(14, 7.2), dpi=100)
     for y, (name, median, maximum) in enumerate(chart):
-        ax.hlines(y, median, maximum, linewidth=2.6, color="#929292", zorder=2)
+        if median > 0:
+            ax.hlines(y, median, maximum, linewidth=2.6, color="#929292", zorder=2)
         ax.plot(
-            median,
+            median if median > 0 else np.nan,
             y,
             "o",
             color="#929292",

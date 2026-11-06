@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no suite; no test was executed and no failure count was measured",
+  "blocking_finding_count": 0,
+  "completed_at": "2026-11-06T06:48:25.432Z",
+  "dispatched_at": "2026-11-06T06:39:02Z",
+  "evidence_judged": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T063501162242-review-of-bank-linear-solve-9f2e51ff050f-figure/image-0.png"
+  ],
+  "figures_reviewed": [
+    "docs/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg"
+  ],
+  "findings": [
+    {
+      "disposition": "exempted: the caption states 'red marks an arm that misses its stated precision criterion' and the marker shape independently encodes the lane count, so a fourth swatch would change the legend without changing what a reader can decode; no redraw is made in a read-only review",
+      "file": "scripts/prototypes/bank_linear_solve/report.py",
+      "id": "fefcbf536ee",
+      "line": 145,
+      "severity": "non-blocking",
+      "summary": "The legend's third entry draws 'Precision miss' as a filled square only, but the render uses red rings on the one-lane rows: the red marks measured at x = 567 and x = 700 on the trial panel, and at x = 1070 and x = 1202 on the converged panel, are 13x13 rings of 58-62 red px, while the two sixteen-lane misses at x = 838/1341 and x = 744/1247 are 169 px filled squares. A reader decoding the legend by shape alone sees a swatch that also means '16 lanes' and has to infer that colour, not shape, carries the precision state. The reading is recoverable, because shape already separates the lane counts and the caption states the colour rule, so this does not hold the node."
+    },
+    {
+      "disposition": "exempted: the reader-facing sentences are complete and correct, and trimming process notes from a published caption is an editorial change outside a read-only figure review",
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html",
+      "id": "ff31f3888e5",
+      "line": 135,
+      "severity": "non-blocking",
+      "summary": "The caption is substantive and is not a restatement of a title: it names the state, explains the open-circle and square forms, states the red rule, identifies the dotted line as one millisecond per batch, and explains why the strict GMRES arm is flagged. Its closing sentences, however, are producer-process commentary rather than anything a reader needs in order to read the picture ('the shared bank_solve_profile.plot.save_checked accepted text bounds and overlaps. The producer inspected the 1400 x 720 PNG rendering; only the SVG is committed'). They give the reader no information about the data and sit where a reader looks for the figure's caveats."
+    }
+  ],
+  "method": "The verdict is assembled only from the rendered attachment image-0.png (1399x720 px) at native size, never from the SVG or its markup: axis spines, tick positions, marker centroids and text bounding boxes were measured on the PNG pixels, and each marker's pixel x was decoded through that panel's decade width and checked against the wall table in the evidence fragment before a pass was recorded. Cropped regions of that same PNG were inspected at 2x to judge marker form and label spacing. Marker-to-table reconciliation: sixteen-lane squares 6.49/10.5 ms against 6.439/10.495 for block GMRES, 107/106.6 against 105.735/105.945 for double LU, 402/398 against 396.274/396.200 for single LU without refinement, and 403/403 against 403.029/402.819 for one refinement; single-lane circles 6.1 against 6.083, 5.28/5.30 against 5.239/5.261, 6.49 against 6.439, and 44.6/44.0 against 44.053/43.806 for the strict GMRES arm.",
+  "node": "review-of-bank-linear-solve-9f2e51ff050f-figure",
+  "non_blocking_finding_count": 2,
+  "project": "nova",
+  "review_run_id": "r-20261106T063501162242-review-of-bank-linear-solve-9f2e51ff050f-figure",
+  "reviewed_base_sha": "474dc8570f6f10c156dbf00423f8a9e1126e0515",
+  "reviewed_head_sha": "9f2e51ff050f8a23030e9808f7a308cbbd3304fc",
+  "reviewed_run_id": "r-20261106T054124433158-bank-linear-solve",
+  "reviewer": "review-of-bank-linear-solve-9f2e51ff050f-figure",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg": {
+      "contrast": "passes: axis labels measure #0b0b0b (19.7:1 on white), y tick labels and x tick numerals #525150 (7.9:1), legend text #0b0b0b. The grey population #929292 reads as data rather than text, and the red #c43c39 separates from it by both hue and lightness",
+      "data_ink": "passes: 32 markers, one dotted one-millisecond threshold and one three-entry legend carry all the ink; no connecting lines, no gradient, no area fill",
+      "decoration": "passes: top and right spines removed on both panels, no gridlines, no background fill. The dotted #929292 vertical line at x = 1 is the stated one-millisecond batch target and is drawn in the neutral grey a limit takes, not as decoration",
+      "label_collision": "passes: nothing is clipped (ink spans x 102-1371 and y 46-678 in a 1399x720 canvas) and no label sits on data. The tightest gap is the 5 px between the right edge of the longest arm label, 'Single LU + 1 refinement' at x = 414, and the left spine at x = 419; adjacent, not overlapping. The legend sits in clear space above both panels and the right panel correctly carries no repeated row labels",
+      "legibility": "passes: two panels of eight arm rows at 62 px spacing, log x ticks 1/10/100 labelled in both panels, and all 32 marks resolve at native size. One-lane circles sit 7.5 px above and sixteen-lane squares 7.5 px below each row centre in both panels, so a lane pair never collides with its neighbours. Every marker's x position reconciles with the fragment's wall table to within one percent: the sixteen-lane block-GMRES square reads 6.49 ms on the trial panel against 6.439 and 10.5 ms on the converged panel against 10.495, and the fastest single-lane circle reads 6.1 ms against 6.083",
+      "table_form": "passes: the figure exists to show where 32 batch walls sit relative to each other and to the one-millisecond target, which the shared log position carries and a column of numbers would not; the same values are already tabulated above the figure, so the figure adds the comparison rather than restating the table"
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T06:48:28.918035+00:00",
+  "total": null
+}

@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T12:05:10.982Z",
+  "dispatched_at": "2026-11-06T11:50:29Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md",
+      "id": "f9d13a5df2b",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "the `tests` line and both suite `command` fields (manifest.md:21, :22) carry an unsubstituted `<worktree>` / `<scratch checkout of the orientation base>` placeholder, so the gate command promotion fills its receipt from cannot be re-run as recorded even though the logs' own headers do carry the literal command."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md",
+      "id": "f350cfd51dc",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "negative_control_log names lower-pocket.json, a measurement receipt whose own fields are the control, not a red log; the log this field is read for (a non-zero EXIT line and a failing test id) is guard-collision-check.log, so a gate reading the field finds no exit status at all."
+    },
+    {
+      "file": "/work/projects/imas_gpu/sophelio/evidence/promoted-nodes-xpoint-angles/angles-pocket-rerun.log",
+      "id": "fa63034bf02",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the log names SOURCE_REVISION=c5c53edf0, whose private_flux_pocket.wall_distance still measures to wall vertices and whose angles_at_null.pair_blocks still reports the smallest-angle shift, so the c5c53edf0 code cannot have produced the 21.918 mm wall minimum in lower-pocket.json or the paired shifts in angles-at-null.json; the receipts correspond to the uncommitted tree that landed at e97c2249f, and the record's revision claim is wrong although the numbers reproduce from head."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py",
+      "id": "fa295adde13",
+      "line": "120",
+      "severity": "non-blocking",
+      "text": "`tip = int(np.argmax(radii))` with radii measured from the magnetic axis selects the X-point, so the receipt's state_lobe_tip_rz is the polished null and lobe_bearing_deg is the axis-to-saddle bearing; the fragment no longer prints it after the previous review, but _print_headlines (measure_promoted_nodes.py:562) still emits it and the receipt still names it a lobe, so the withdrawn reading can be re-adopted from the archive alone."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/write_fragment.py",
+      "id": "f4a863e0b81",
+      "line": "110",
+      "severity": "non-blocking",
+      "text": "the branch table pairs the two fields' arms by ARM_NAMES, i.e. by the trace's own slot label, while the prose at promoted-nodes-xpoint-angles.html:93 attributes the pairing to each branch's reach; the two pairings coincide on this data (reaches 2.4286/2.8272/4.6619/0.9102 m) but a closed loop whose split point swaps between fields would pair lobe-out against lobe-back with no error raised."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/private_flux_pocket.py",
+      "id": "f5864adb08f",
+      "line": "126",
+      "severity": "non-blocking",
+      "text": "this receipt splits the promoted set at the X-point height (`height_m > x_point_z`) while measure_promoted_nodes.py:434 splits it at zero (`heights > 0.0`), the definition the brief's 31/29 count uses; both give 31/29 here only because no promoted node lies between Z=0 and the X-point, so the two halves are one partition under two rules and would diverge silently on another state."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.md's goal is to measure the separatrix's lobe and leg directions at the promoted MAST coil-edit X-point for the converged state and for the field of the currents, explain the upper/lower asymmetry, and deliver the fragment; docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-xpoint-angles.html:82 carries the four branch chords for both fields with their degree differences and :127 names the mechanism, so all three parts are delivered.\nVERDICT done_when: the three done-when items each have a delivered artefact -- the asymptote table at promoted-nodes-xpoint-angles.html:64 and the branch table at :82, the mechanism at :99 and :127, the figure at :197 -- and _segmented_distance is deleted while _point_to_segment_distances is used at measure_promoted_nodes.py:379 and private_flux_pocket.py:106; what the gate asserts is narrower than that, since manifest.md:15 names only tests/test_artifacts_carry_no_worktree_paths.py.\nVERDICT write_paths: manifest.md:3 declares scripts/prototypes/promoted_nodes_near_xpoint, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-xpoint-angles; `git diff --name-only 2fd5d5b58 e97c2249f` returns eight paths and every one is inside those three trees, with no nova/ file touched.\nVERDICT manifest: read; it records status complete, the head gate EXIT=0 and both suite arms green, and `reckon crew check --manifest` returns ok with no findings, but tests:15 and both suite command fields carry `<worktree>` placeholders and negative_control_log:19 names a JSON receipt that carries no exit line.\nVERDICT diff: read all eight commits from 2fd5d5b58 to e97c2249f; they add the measurement, the null-direction analysis, the pocket locator, the renderer, the composer, the fragment and one SVG, and every number I re-derived from measure-8.json, angles-at-null.json and lower-pocket.json matches the fragment digit for digit, e.g. the upper flood row 1.058e-09/1.061e-09 at promoted-nodes-xpoint-angles.html:114 and the wall range 21.918-191.267 mm at :167.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-xpoint-angles.html:82 reports lobe-out, lobe-back and both legs for each field with their differences, and :219 answers the closing question, while measure_promoted_nodes.py:120 still computes and prints a withdrawn axis-to-saddle \"lobe tip\" under a lobe name.\nSCORE evidence: 13\nJUSTIFICATION evidence: every figure in the fragment reconciles with its receipt (angles-at-null.json lattice displacement 1.7348e-06 mm against promoted-nodes-xpoint-angles.html:41), but the receipt-producing runs are logged at a revision that cannot reproduce them (angles-pocket-rerun.log:1) and the gate line at manifest.md:15 is a placeholder command that cannot be re-run.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: `git diff --name-only 2fd5d5b58 e97c2249f` lists eight paths, all inside the three granted trees named at manifest.md:3, and neither the solver nor any producer source is in the diff.\nSCORE durability: 5\nJUSTIFICATION durability: the diff adds no test, and reinstating the vertex wall distance or the name-paired branch shift would redden nothing; the only guards are the x64 assertions at angles_at_null.py:231 and private_flux_pocket.py:206 and render_angles.py:371, which was shown firing only by a hand-run script outside the suite.\nSCORE fit: 15\nJUSTIFICATION fit: render_angles.py:196-230 draws through nova.media.poloidal draw_flux_contours/draw_nulls/draw_wall with the axis off, matching the plotting rules, but render_angles.py:106 defines a `_ray` helper nothing calls and angles_at_null.py:63 states a comment's half-angle formula reversed against the ratio the code actually uses.\nSCORE reuse: 17\nJUSTIFICATION reuse: private_flux_pocket.py:106 now delegates every point-to-curve distance to nova/equilibrium/boundary_comparison.py:81 and the spline/polish work extends nova.linalg.tensor_spline.fit_tensor_spline and nova.equilibrium.flux_surface_connectivity.polish_stationary_points, while render_angles.py:64 adds a label-legibility guard no production module owns (searched nova/media, nova/graphics and tests, where only tests/test_contour_tree_explanatory_figure.py:176 holds a local copy of the same check) and bearing wrappers are duplicated between angles_at_null.py:36 and measure_promoted_nodes.py:85.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md:15 non-blocking: the `tests` line and both suite `command` fields (manifest.md:21, :22) carry an unsubstituted `<worktree>` / `<scratch checkout of the orientation base>` placeholder, so the gate command promotion fills its receipt from cannot be re-run as recorded even though the logs' own headers do carry the literal command.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md:19 non-blocking: negative_control_log names lower-pocket.json, a measurement receipt whose own fields are the control, not a red log; the log this field is read for (a non-zero EXIT line and a failing test id) is guard-collision-check.log, so a gate reading the field finds no exit status at all.\nFINDING /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-xpoint-angles/angles-pocket-rerun.log:1 non-blocking: the log names SOURCE_REVISION=c5c53edf0, whose private_flux_pocket.wall_distance still measures to wall vertices and whose angles_at_null.pair_blocks still reports the smallest-angle shift, so the c5c53edf0 code cannot have produced the 21.918 mm wall minimum in lower-pocket.json or the paired shifts in angles-at-null.json; the receipts correspond to the uncommitted tree that landed at e97c2249f, and the record's revision claim is wrong although the numbers reproduce from head.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:120 non-blocking: `tip = int(np.argmax(radii))` with radii measured from the magnetic axis selects the X-point, so the receipt's state_lobe_tip_rz is the polished null and lobe_bearing_deg is the axis-to-saddle bearing; the fragment no longer prints it after the previous review, but _print_headlines (measure_promoted_nodes.py:562) still emits it and the receipt still names it a lobe, so the withdrawn reading can be re-adopted from the archive alone.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/write_fragment.py:110 non-blocking: the branch table pairs the two fields' arms by ARM_NAMES, i.e. by the trace's own slot label, while the prose at promoted-nodes-xpoint-angles.html:93 attributes the pairing to each branch's reach; the two pairings coincide on this data (reaches 2.4286/2.8272/4.6619/0.9102 m) but a closed loop whose split point swaps between fields would pair lobe-out against lobe-back with no error raised.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/private_flux_pocket.py:126 non-blocking: this receipt splits the promoted set at the X-point height (`height_m > x_point_z`) while measure_promoted_nodes.py:434 splits it at zero (`heights > 0.0`), the definition the brief's 31/29 count uses; both give 31/29 here only because no promoted node lies between Z=0 and the X-point, so the two halves are one partition under two rules and would diverge silently on another state.\n",
+  "review_run_id": "r-20261106T114859208735-review-of-promoted-nodes-xpoint-angles-e97c2249ff5d",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "e97c2249ff5de99bedb4ff72546de0c194663f03",
+  "reviewed_run_id": "r-20261106T074026367538-promoted-nodes-xpoint-angles",
+  "scores": {
+    "durability": 5,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T12:08:23.502963+00:00",
+  "total": 85
+}

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="165">
+<meta name="plan-version" content="166">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -590,6 +590,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T054125594099-bank-solve-trace" data-who="reckon-build" data-when="2026-11-06T06:30:27Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html#bank-solve-trace-landing — one H200 allocation captures both widths; at sixteen slices factor/candidate/wall device times are 416.363/364.799/288.587 ms, 204152 kernels, and device minus overlap plus idle gaps closes on 1526.538 ms profiled wall within 0.007 ms. Unprofiled median is 1398.163 ms/batch (87.385 ms/slice), all lanes converge in 3–4 updates and 5 reads. Explicit shared/unbound metadata limits remain inventoried. Figure: docs/figures/sub-millisecond-forward-path/bank-solve-trace/device-time.svg.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T062729675644-review-of-bank-linear-solve-9f2e51ff050f" data-who="reckon-build" data-when="2026-11-06T06:44:24.049Z">
+    <div class="r-comment-body"><p>Bank linear solve review scored 19/17/20/11/18/17 across the six dimensions at 9f2e51ff; three non-blocking findings, none blocking; 0 added failures (the reviewed node ran no suite arm).</p></div>
 </div>
 </section>
 </main>

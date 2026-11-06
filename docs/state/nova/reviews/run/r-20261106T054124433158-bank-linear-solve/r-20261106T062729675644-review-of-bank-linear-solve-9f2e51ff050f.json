@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records baseline_suite: null and after_suite: null, and its brief declares a measurement node that changes no product code and no tests, so no suite arm exists to diff. Zero added failures is derived from that absent pair rather than from a green suite; the node's own gate is the H200 measure run named in its tests line.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T06:44:24.049Z",
+  "dispatched_at": "2026-11-06T06:34:20Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_linear_solve/measure.py",
+      "line": 320,
+      "severity": "non-blocking",
+      "text": "For the Block GMRES rows the `bound <= 1e-8` half of `passed` is the same quantity the solver's own exit condition tests at measure.py:77 (`error(state[0]) > 1e-8`), so it can only fail when the 20-cycle cap is exhausted and cannot fail for a converged but inaccurate solution; the independent evidence for that arm is the `errors <= 1e-8` half and the audit's physical check, and the fragment's PASS column should not be read as two independent confirmations."
+    },
+    {
+      "file": "scripts/prototypes/bank_linear_solve/measure.py",
+      "line": 106,
+      "severity": "non-blocking",
+      "text": "The adopted arm is stopped on the equilibrated bound alone (`physical_bound=name == \"gmres-strict\"`), so its PASS reads section 3's 'estimated condition number times relative residual' as kappa(B) times the balanced residual, which bounds the error in the equilibrated unknown y rather than in the physical update x; under the literal kappa(A) reading no arm passes, which is exactly what the gmres-strict rows show. The fragment states this and requires the physical check at integration, but a reader taking the precision table alone would over-read the PASS."
+    },
+    {
+      "file": "scripts/prototypes/bank_linear_solve/measure.py",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "The instrument imports `jax._src.scipy.sparse.linalg`, a private module; a jax upgrade that moves `_kth_arnoldi_iteration` or `_lstsq` breaks the measurement at import with no version guard, and the comparison receipt carries no note of the jax commit the numbers were taken on beyond the version string in each log header."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site exists: grep over the reviewed worktree finds nothing outside scripts/prototypes/bank_linear_solve that imports the new module, and the diff touches no module under nova/.",
+    "diff": "Read commit by commit: 43781a58 adds measure.py, 5574f5956 adds report.py and the figure path, 6c7110bc splits the scaled bound from the original-coordinate diagnostic and adds the --systems path, a7448ca83 writes the fragment, 9f2e51ff strips trailing whitespace from the saved SVG without changing XML.",
+    "done_when": "The measure is the tolerance rule that the estimated condition number times the relative linear residual is at most 1e-8; measure.py:77 and :319-324 apply that product as `bound`, evaluate every arm at both states and both widths, and the trial-state bound for the adopted arm is 8.435076e-9 in comparison/receipt.json, inside the limit.",
+    "goal": "The goal is to establish which linear-solve route can reach about 1 ms per sixteen-lane Newton update at the precision section 3 demands, before newton_step is changed; docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html#bank-linear-solve-recommendation names equilibrated block GMRES at 6.439/10.495 ms and states that no arm reaches 1 ms.",
+    "manifest": "The manifest records status complete, five commits, the four changed paths, the measure command and four logs; comparison.log, render.log and audit.log each end in EXIT=0, and its measurement_module and measurement_cwd name the reviewed worktree.",
+    "write_paths": "The brief declares scripts/prototypes/bank_linear_solve, docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html and docs/figures/sub-millisecond-forward-path/bank-linear-solve; git diff --stat 474dc857 9f2e51ff lists only measure.py, report.py, the fragment and wall.svg, all inside those three."
+  },
+  "justifications": {
+    "durability": "measure.py:152 asserts a non-empty device trace and measure.py:255 asserts x64 on GPU, but the control that distinguishes a working instrument (four float32 arms must MISS, four GMRES arms must PASS) lives only in the uncommitted run-root audit.py, so nothing in the repository reddens if the accuracy measurement regresses.",
+    "evidence": "scripts/prototypes/bank_linear_solve/measure.py:279-344 times every arm at 1 and 16 lanes with 12 synchronized repeats and an independent jnp.linalg.solve reference, and the run's comparison.log records SUMMARY arms=32 precision_passes=24 fastest_batch_ms=6.43851887434721 with a closing EXIT=0 line.",
+    "fit": "scripts/prototypes/bank_linear_solve mirrors the sibling scripts/prototypes/bank_solve_profile layout and reuses its save_checked, the figure at docs/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg renders at 1400x720 with no clipped or overlapping label, and no file, symbol or comment carries a plan or version label.",
+    "goal_fidelity": "The brief asks which linear route reaches about 1 ms per 16-lane update at 1e-8 precision; docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html:2 states plainly that no arm reaches it and names block GMRES at 6.439 ms as the route to adopt with a rebuild-every-update rule.",
+    "reuse": "measure.py:23 and report.py:12 import the sibling prototype's fixture and save_checked as the brief required, and measure.py:184 and :91 reuse support_read._equilibrate and _krylov_condition_estimate; the only new mechanism is counted_gmres, which reuses jax's _kth_arnoldi_iteration and _lstsq rather than restating Arnoldi.",
+    "scope_discipline": "The five commits 43781a58..9f2e51ff touch exactly four files (measure.py, report.py, the evidence fragment and wall.svg), every one inside the brief's three declared write paths; no product module, test or plan file is modified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to determine which dense Newton linear-solve route can approach about 1 ms per sixteen-lane update at the 1e-8 precision section 3 requires before newton_step changes; docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html states that no arm reaches 1 ms and names equilibrated block GMRES at 6.439/10.495 ms as the route to adopt.\nVERDICT done_when: the measure is the Krylov tolerance rule that the estimated condition number times the relative linear residual is at most 1e-8; measure.py:319-324 computes that product per arm and the adopted arm's worst trial value is 8.435076e-9 against the 1e-8 limit in comparison/receipt.json.\nVERDICT write_paths: the brief declares scripts/prototypes/bank_linear_solve, the evidence fragment and docs/figures/sub-millisecond-forward-path/bank-linear-solve; the four files in git diff --stat 474dc857 9f2e51ff all sit inside those paths.\nVERDICT manifest: the manifest records five commits, four changed paths, the measure command and four logs ending in EXIT=0, and its status is complete; comparison.log carries SUMMARY arms=32 precision_passes=24 fastest_batch_ms=6.43851887434721.\nVERDICT diff: read commit by commit against 474dc857, the change is a 356-line measurement script, a 182-line report script, a 220-line evidence fragment and one data-ink SVG, and no product module or test is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the fragment sharpens the brief's questions into a recommendation with a named rebuild-every-update rule and states plainly that the 1 ms target is unmet.\nSCORE evidence: 17\nJUSTIFICATION evidence: measure.py:279-344 times both widths with twelve synchronized repeats and an independent jnp.linalg.solve reference, but the adopted arm's bound half is self-referential.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the four changed paths lies inside the brief's declared write paths and nothing outside them is modified.\nSCORE durability: 11\nJUSTIFICATION durability: the float32-must-miss control is asserted only in the uncommitted run-root audit.py, so no repository file fails if the accuracy instrument regresses.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_linear_solve mirrors scripts/prototypes/bank_solve_profile and the rendered wall.svg carries no clipped or overlapping label.\nSCORE reuse: 17\nJUSTIFICATION reuse: measure.py:23 and report.py:12 import the sibling fixture and save_checked, and counted_gmres reuses jax's own Arnoldi primitives rather than restating them.\nFINDING scripts/prototypes/bank_linear_solve/measure.py:320 non-blocking: the GMRES bound check repeats the solver's own exit condition and adds no independent evidence.\nFINDING scripts/prototypes/bank_linear_solve/measure.py:106 non-blocking: the adopted arm meets section 3 only under the equilibrated reading, and the literal reading passes no arm.\nFINDING scripts/prototypes/bank_linear_solve/measure.py:18 non-blocking: the measurement imports a private jax module with no version guard.",
+  "review_run_id": "r-20261106T062729675644-review-of-bank-linear-solve-9f2e51ff050f",
+  "reviewed_base_sha": "474dc8570f6f10c156dbf00423f8a9e1126e0515",
+  "reviewed_base_sha_evidence": "474dc8570f6f10c156dbf00423f8a9e1126e0515 is the reviewed manifest's orientation_base_sha and resolves as the parent of 43781a58 via git log 474dc857..9f2e51ff.",
+  "reviewed_head_sha": "9f2e51ff050f8a23030e9808f7a308cbbd3304fc",
+  "reviewed_run_id": "r-20261106T054124433158-bank-linear-solve",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-linear-solve",
+  "rubric": "landed-node",
+  "scores": {
+    "durability": 11,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:01:14.438070+00:00",
+  "total": 102
+}

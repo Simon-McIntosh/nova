@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T23:20:40.063Z",
+  "dispatched_at": "2026-11-06T23:03:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Prototype duplication or receipt-header provenance in a measurement record. The reviewer re-ran the committed reporter at the reviewed head and confirmed the numbers. No product code involved.",
+      "recorded_at": "2026-11-06T23:26:11.642443+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Prototype duplication or receipt-header provenance in a measurement record. The reviewer re-ran the committed reporter at the reviewed head and confirmed the numbers. No product code involved.",
+      "recorded_at": "2026-11-06T23:26:13.762804+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Prototype duplication or receipt-header provenance in a measurement record. The reviewer re-ran the committed reporter at the reviewed head and confirmed the numbers. No product code involved.",
+      "recorded_at": "2026-11-06T23:26:15.530545+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_trace_four_read/report.py",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "residual_split duplicates bank_solve_trace_head/report.py:45 invocations almost verbatim, and the reason the manifest gives for the fork reproduces only at one width - I called the owner at width 16 on this run's own captures and it returned {'read': 31.947157, 'update': 24.344575}, identical to the copy, while at width 1 it raises at bank_solve_trace_head/report.py:89 assert counts_by_symbol; the real defect is that width-specific strip inventory, which belongs to the owner module this node was fenced out of, so the repair is to make that block conditional there rather than to carry a second copy of the scope split that will drift."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_trace_four_read/device.sh",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the launcher is a second copy of bank_solve_trace_head/device.sh differing in three lines only - --cpus-per-task 2 to 4, the module name, and PYTHONDONTWRITEBYTECODE - so the same sbatch recipe, the same header printf and the same EXIT sentinel now exist twice and a change to either will not reach the other."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_trace_four_read/report.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the receipts that validate the reporter - report-complete.log, omitted-group.log - record '# revision: 276a3cab1ecfb043d33e4971ff09558865708b50', the commit that does not contain report.py, because the header prints git HEAD while the file was still untracked, so a reader following the recorded revision finds no reporter; I closed the gap by re-running the committed file at 7d4813b, but the recorded provenance still points one commit early."
+    }
+  ],
+  "item_aggregate": {
+    "items_absent": 0,
+    "items_present": 5
+  },
+  "item_verdicts": {
+    "diff": "read both commits against 360c086 - 276a3cab adds capture.py, device.py and device.sh (96 lines, wrapping bank_solve_trace_head.device and bank_solve_trace.capture by import) and 7d4813b adds report.py (401 lines), the evidence fragment (242 lines) and the SVG; no product code or test appears in either commit.",
+    "done_when": "every clause of the measure is present and reproducible - the fragment carries 75 table rows that match the run's tables.html exactly, and I re-ran the committed reporter at 7d4813b against the run's captures and got EXIT=0, an identical summary.json, an identical tables.html and an SVG differing only in its timestamp and random marker ids.",
+    "goal": "the goal is to attribute the four-read batched solve wall on one H200 at current main, and docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-four-read.html:10-36 gives device ms, launches and share for every source group at 1 and 16 slices, splits per-read from per-update cost, and states the four-read floor as 277.365 ms per batch (17.335 ms per slice) against the 16 ms sixteen-slice target.",
+    "manifest": "read in full; status complete, two commits listed, six changed paths, reads 4 and updates 3 at both widths, walls 303.291 and 303.659 ms, floor 277.267 and 277.463 ms, no suite armed with the reason that product and tests are unchanged, which the empty nova//tests/ diff confirms.",
+    "write_paths": "both commits touch six paths and every one sits inside the three declared grants - scripts/prototypes/bank_solve_trace_four_read, the fragment under docs/evidence/fragments/sub-millisecond-forward-path, and docs/figures/sub-millisecond-forward-path/bank-solve-trace-four-read - while git diff 360c086..7d4813b over nova/ and tests/ is empty."
+  },
+  "justifications": {
+    "durability": "report.py:220 asserts reads == 4 and :218 asserts convergence and residual <= 1e-10, so a regression to five reads or a stalled solve reddens the reporter, and I measured the accounting control firing at report.py:385 through omitted-group.log EXIT=1, but nothing in the committed suite runs these scripts, so the guard fires only when an H200 capture is re-taken and re-reported by hand.",
+    "evidence": "the gate is the recorded H200 job - sacct shows job 1307440 betelgeuse gres/gpu=1 mem=48G COMPLETED 00:06:31 on 98dci4-gpu-0003, matching bank-solve-trace-four-read.html:59-61 - and capture-1.log:858 and capture-2.log:858 both report reads [4,...,4] with residual 4.135358722123783e-12, but the receipts that validate report.py name revision 276a3cab, which does not contain it.",
+    "fit": "capture.py:1-6 and device.py:1-6 follow the E402-after-configure_dtypes and monkeypatched-owner idiom of their neighbours, and no added symbol or comment carries a plan label or ticket number, though report.py:100-140 embeds the figure layout and renaming inline where the surrounding prototypes keep plotting helpers in a module.",
+    "goal_fidelity": "bank-solve-trace-four-read.html:24-29 carries the four-read floor, the three dominant groups and their launch scaling, which is the whole of what the goal asked for and nothing beyond it.",
+    "reuse": "report.py:37 residual_split re-implements scripts/prototypes/bank_solve_trace_head/report.py:45 invocations line for line - the same wall-loop count, the same assert sum == reads at :49, the same newton_step versus .magnitude scope split, the same enclosing[-1] fallback and the same invocations receipt write - and at width 16 the owner returns exactly the split the copy returns, so the addition duplicates an owned capability instead of extending it.",
+    "scope_discipline": "the diffstat of 360c086..7d4813b lists exactly the six declared paths and no file under nova/ or tests/, so nothing outside the grants and nothing the goal does not imply was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to attribute the four-read batched solve wall on one H200 at current main, and docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-four-read.html:10-36 gives device ms, launches and share for every source group at 1 and 16 slices, splits per-read from per-update cost, and states the four-read floor as 277.365 ms per batch (17.335 ms per slice) against the 16 ms sixteen-slice target.\nVERDICT done_when: every clause of the measure is present and reproducible - the fragment carries 75 table rows that match the run's tables.html exactly, and I re-ran the committed reporter at 7d4813b against the run's captures and got EXIT=0, an identical summary.json, an identical tables.html and an SVG differing only in its timestamp and random marker ids.\nVERDICT write_paths: both commits touch six paths and every one sits inside the three declared grants - scripts/prototypes/bank_solve_trace_four_read, the fragment under docs/evidence/fragments/sub-millisecond-forward-path, and docs/figures/sub-millisecond-forward-path/bank-solve-trace-four-read - while git diff 360c086..7d4813b over nova/ and tests/ is empty.\nVERDICT manifest: read in full; status complete, two commits listed, six changed paths, reads 4 and updates 3 at both widths, walls 303.291 and 303.659 ms, floor 277.267 and 277.463 ms, no suite armed with the reason that product and tests are unchanged, which the empty nova//tests/ diff confirms.\nVERDICT diff: read both commits against 360c086 - 276a3cab adds capture.py, device.py and device.sh (96 lines, wrapping bank_solve_trace_head.device and bank_solve_trace.capture by import) and 7d4813b adds report.py (401 lines), the evidence fragment (242 lines) and the SVG; no product code or test appears in either commit.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: bank-solve-trace-four-read.html:24-29 carries the four-read floor, the three dominant groups and their launch scaling, which is the whole of what the goal asked for and nothing beyond it.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate is the recorded H200 job - sacct shows job 1307440 betelgeuse gres/gpu=1 mem=48G COMPLETED 00:06:31 on 98dci4-gpu-0003, matching bank-solve-trace-four-read.html:59-61 - and capture-1.log:858 and capture-2.log:858 both report reads [4,...,4] with residual 4.135358722123783e-12, but the receipts that validate report.py name revision 276a3cab, which does not contain it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diffstat of 360c086..7d4813b lists exactly the six declared paths and no file under nova/ or tests/, so nothing outside the grants and nothing the goal does not imply was touched.\nSCORE durability: 13\nJUSTIFICATION durability: report.py:220 asserts reads == 4 and :218 asserts convergence and residual <= 1e-10, so a regression to five reads or a stalled solve reddens the reporter, and I measured the accounting control firing at report.py:385 through omitted-group.log EXIT=1, but nothing in the committed suite runs these scripts, so the guard fires only when an H200 capture is re-taken and re-reported by hand.\nSCORE fit: 16\nJUSTIFICATION fit: capture.py:1-6 and device.py:1-6 follow the E402-after-configure_dtypes and monkeypatched-owner idiom of their neighbours, and no added symbol or comment carries a plan label or ticket number, though report.py:100-140 embeds the figure layout and renaming inline where the surrounding prototypes keep plotting helpers in a module.\nSCORE reuse: 5\nJUSTIFICATION reuse: report.py:37 residual_split re-implements scripts/prototypes/bank_solve_trace_head/report.py:45 invocations line for line - the same wall-loop count, the same assert sum == reads at :49, the same newton_step versus .magnitude scope split, the same enclosing[-1] fallback and the same invocations receipt write - and at width 16 the owner returns exactly the split the copy returns, so the addition duplicates an owned capability instead of extending it.\nFINDING scripts/prototypes/bank_solve_trace_four_read/report.py:37 non-blocking: residual_split duplicates bank_solve_trace_head/report.py:45 invocations almost verbatim, and the reason the manifest gives for the fork reproduces only at one width - I called the owner at width 16 on this run's own captures and it returned {'read': 31.947157, 'update': 24.344575}, identical to the copy, while at width 1 it raises at bank_solve_trace_head/report.py:89 assert counts_by_symbol; the real defect is that width-specific strip inventory, which belongs to the owner module this node was fenced out of, so the repair is to make that block conditional there rather than to carry a second copy of the scope split that will drift.\nFINDING scripts/prototypes/bank_solve_trace_four_read/device.sh:1 non-blocking: the launcher is a second copy of bank_solve_trace_head/device.sh differing in three lines only - --cpus-per-task 2 to 4, the module name, and PYTHONDONTWRITEBYTECODE - so the same sbatch recipe, the same header printf and the same EXIT sentinel now exist twice and a change to either will not reach the other.\nFINDING scripts/prototypes/bank_solve_trace_four_read/report.py:1 non-blocking: the receipts that validate the reporter - report-complete.log, omitted-group.log - record '# revision: 276a3cab1ecfb043d33e4971ff09558865708b50', the commit that does not contain report.py, because the header prints git HEAD while the file was still untracked, so a reader following the recorded revision finds no reporter; I closed the gap by re-running the committed file at 7d4813b, but the recorded provenance still points one commit early.",
+  "review_run_id": "r-20261106T230055221718-review-of-bank-solve-trace-four-read-7d4813b89fb6",
+  "reviewed_base_sha": "360c086b605d46d2ed2d867010e0b14ff1bc3796",
+  "reviewed_head_sha": "7d4813b89fb6a89ac98c6bbb50b672cfb892407b",
+  "reviewed_run_id": "r-20261106T223228922016-bank-solve-trace-four-read",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:17:05.572966+00:00",
+  "total": 91
+}

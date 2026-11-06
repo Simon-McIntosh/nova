@@ -1,0 +1,51 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T23:05:53Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_solve_trace_four_read/report.py",
+      "id": "f0dfda25832",
+      "line": 108,
+      "severity": "non-blocking",
+      "summary": "The \u00b10.16 row offsets draw a grey square and a blue circle on every row, and blue sits left of grey in all eighteen rows, so the rendered picture reads as a per-group speedup from 'previous trace' to 'four reads'. The two series are different decompositions of the step (eight reads and six batch updates against four reads and three) measured at different revisions with independently built seeds, and the caption says so; but the paired-mark grammar states a like-for-like comparison that the caption then withdraws, and a reader who takes the figure at a glance takes the faster reading."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-solve-trace-four-read/device-time.svg",
+      "id": "f89f2bcd0d0",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two panels are styled identically but span different x ranges (left roughly 0\u2013160 ms, right 0\u201315 ms). 'equilibration' at about 15 ms renders at the same right-hand position as 'step jacobian' at about 155 ms, so a reader moving between panels can overstate a small group's cost; only the axis ticks and the caption disclose the difference."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-four-read.html",
+      "id": "f3a32c04434",
+      "line": 51,
+      "severity": "non-blocking",
+      "summary": "The caption's closing sentences narrate the drawing tool's own checks ('The data-ink saver passed text-bound and overlap checks. The producer inspected the 1400 \u00d7 720 PNG: labels, marks and both scales are legible without clipping') and where the files are kept. That is provenance for a reviewer, not content for a reader of the figure, and it will read as stale the moment the figure is redrawn; the sentences before it already carry what the marks mean, how they were measured and what may not be concluded."
+    }
+  ],
+  "images": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T230355898188-review-of-bank-solve-trace-four-read-7d4813b89fb6-figure/image-0.png"
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 row labels render at #52514e on white (about 8.4:1), axis titles at near-black (11,11,11), tick labels in the same warm grey; the grey marks (#929292, about 3:1) are shape-coded squares so their lower contrast never has to carry identification alone.",
+    "data_ink": "pass \u2014 every row is exactly two marks (one grey square, one blue circle) on white, with no gridlines, no bars, no enclosures and no redundant furniture; the ink is the measurement.",
+    "decoration": "pass \u2014 white ground, one bottom spine per panel, no fill, no gradient, no shading and no background banding; the only non-data ink is the surviving axis scale.",
+    "label_collision": "pass \u2014 no text is clipped and no label touches a mark: the rendered ink spans x 83 to 1374 and y 17 to 678 on the 1399 x 720 canvas, and the measured minimum gap between the right end of a row label and its nearest mark is 9 px (right panel, bottom row). Rows sit 57 px apart at 14 pt, so labels do not meet each other either.",
+    "legibility": "pass \u2014 one rendered PNG carries both panels and all eighteen source groups; each row is named in 14 pt type and read off a single x-axis titled 'Device time per solve [ms]', with a shared frameless legend above the panels. Groups, marks and both scales are separable at a glance.",
+    "table_form": "pass \u2014 thirty-six values with a natural row identity are shown as position along a labelled scale, which is the encoding that suits them; nothing is drawn as a table's picture."
+  },
+  "project": "nova",
+  "raw_text": "Figure review of docs/figures/sub-millisecond-forward-path/bank-solve-trace-four-read/device-time.svg at head 7d4813b89 (base 360c086b6), read only, from the single attached rendered PNG.\nVERDICT legibility: pass \u2014 both panels and all eighteen source groups read at a glance.\nVERDICT data_ink: pass \u2014 two marks per row on white, no gridlines or fill.\nVERDICT decoration: pass \u2014 one bottom spine per panel, white ground.\nVERDICT contrast: pass \u2014 labels #52514e on white about 8.4:1.\nVERDICT table_form: pass \u2014 position along a labelled scale suits thirty-six row values.\nVERDICT label_collision: pass \u2014 minimum label-to-mark gap 9 px, ink inside the canvas.\nThree non-blocking findings: the paired-mark grammar implies a per-group speedup the caption disclaims; the two panels differ in scale while sharing styling; the caption closes with tooling QA narration. No blocking defect; no file under review was edited.",
+  "review_run_id": "r-20261106T230355898188-review-of-bank-solve-trace-four-read-7d4813b89fb6-figure",
+  "reviewed_base_sha": "360c086b605d46d2ed2d867010e0b14ff1bc3796",
+  "reviewed_head_sha": "7d4813b89fb6a89ac98c6bbb50b672cfb892407b",
+  "reviewed_run_id": "r-20261106T223228922016-bank-solve-trace-four-read",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:14:16.706170+00:00",
+  "total": null
+}

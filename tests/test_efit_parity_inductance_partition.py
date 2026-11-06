@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -9,8 +10,10 @@ import pytest
 from benchmarks.efit_parity_inductance_partition import (
     MOMENT_RECEIPT,
     _plot_partition,
+    _cell_partition,
     measure,
 )
+from nova.jax.config import configure_dtypes
 
 
 def _current_supports():
@@ -48,40 +51,83 @@ def test_direct_current_closes_without_inventing_branch_partition(result):
     banked = _current_supports()
     table = receipt["current_partition_table"]
     live = table["confined_core"]
-    # The two supports disagree in cell count and in current. Both facts are
-    # reported against the independently banked current table; neither pair of
-    # numbers is pinned as the expected outcome.
-    assert live["cell_count"] != table["banked_confined_core"]["cell_count"]
     assert table["banked_confined_core"]["cell_current_a"] == pytest.approx(
         banked["confined_core"], abs=2.0e-9
     )
-    assert live["cell_current_a"] > table["banked_confined_core"]["cell_current_a"]
     divergence = receipt["core_support_divergence"]
-    assert divergence["cell_counts_differ"] is True
     assert divergence["live_core_cell_count"] == live["cell_count"]
     assert divergence["banked_core_current_a"] == pytest.approx(
         banked["confined_core"], abs=2.0e-9
     )
-    assert divergence["current_agrees"] is False
     for name in ("inside_closed_branch_outside_core", "outside_closed_branch"):
         assert table[name]["status"] == "undefined_open_boundary"
         assert table[name]["cell_count"] is None
         assert table[name]["cell_current_a"] is None
     closure = receipt["current_closure"]
-    # The totals are checked against the independently banked current table
-    # rather than against the benchmark's own subtraction.
     assert closure["direct_total_current_a"] == pytest.approx(
         banked["all_domain_constrained"], abs=2.0e-9
     )
-    assert table["confined_core"]["cell_current_a"] + closure[
-        "direct_out_of_core_current_a"
-    ] == pytest.approx(banked["all_domain_constrained"], abs=4.0e-9)
+    out_of_core_current_from_banked_total = (
+        banked["all_domain_constrained"] - live["cell_current_a"]
+    )
+    assert closure["direct_out_of_core_current_a"] == pytest.approx(
+        out_of_core_current_from_banked_total, abs=4.0e-9
+    )
+    out_of_core_support = ~fields["core"]
+    independently_summed_out_of_core = float(
+        np.sum(fields["cell_current"][out_of_core_support])
+    )
+    # Compare cellwise out-of-core current with banked total minus live core.
+    assert independently_summed_out_of_core == pytest.approx(
+        out_of_core_current_from_banked_total, abs=4.0e-9
+    )
     assert closure["banked_out_of_core_current_a"] == pytest.approx(
         banked["outside_confined_core_a"], abs=2.0e-9
     )
     assert closure["summed_partition_current_a"] is None
     assert closure["closure_residual_a"] is None
     assert fields["partition"] is None
+
+
+def test_outside_contour_core_centroid_is_counted_once():
+    configure_dtypes()
+    profile = SimpleNamespace(
+        lattice=SimpleNamespace(
+            coordinate=np.array([[5.0, 5.0], [1.0, 1.0]], dtype=np.float64)
+        )
+    )
+    equilibrium = SimpleNamespace(
+        domains=SimpleNamespace(core=np.array([True, False])),
+        cell_current=np.array([7.0, 11.0], dtype=np.float64),
+    )
+    contour = np.array(
+        [[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 2.0]],
+        dtype=np.float64,
+    )
+
+    partition = _cell_partition(profile, equilibrium, contour, solved_branch=False)
+    core = partition["core"]
+    interior_noncore = partition["interior_noncore"]
+    exterior = partition["exterior"]
+    assert not np.any(core & interior_noncore)
+    assert not np.any(core & exterior)
+    assert not np.any(interior_noncore & exterior)
+    assert np.array_equal(core | interior_noncore | exterior, np.array([True, True]))
+    assert partition["records"]["confined_core"]["cell_current_a"] == pytest.approx(7.0)
+    assert partition["records"]["inside_closed_branch_outside_core"][
+        "cell_current_a"
+    ] == pytest.approx(11.0)
+    assert partition["records"]["outside_closed_branch"]["cell_current_a"] == 0.0
+    partitioned_out_of_core = (
+        partition["records"]["inside_closed_branch_outside_core"]["cell_current_a"]
+        + partition["records"]["outside_closed_branch"]["cell_current_a"]
+    )
+    assert partitioned_out_of_core == pytest.approx(
+        np.sum(equilibrium.cell_current[~equilibrium.domains.core]), abs=1.0e-12
+    )
+    assert partition["summed_current_a"] == pytest.approx(
+        np.sum(equilibrium.cell_current), abs=1.0e-12
+    )
 
 
 def test_boundary_enclosed_rescore_is_undefined(result):

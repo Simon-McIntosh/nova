@@ -78,7 +78,8 @@ def run_file(tree, revision, name, label, run, scratch, selection=None):
                 "-P",
                 "-c",
                 "import nova, nova.equilibrium.topology as m; "
-                "from pathlib import Path; print('nova',nova.__file__,'module',m.__file__,"
+                "from pathlib import Path; print('nova',nova.__file__,"
+                "'module',m.__file__,"
                 "'cwd',Path.cwd().resolve(),flush=True)",
             ],
             cwd=tree,

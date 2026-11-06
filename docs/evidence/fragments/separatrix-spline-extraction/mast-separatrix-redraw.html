@@ -102,25 +102,46 @@ claim is made from it here. The check with teeth on these panels is
 <code>max_node_mismatch_wb</code>, which compares the map against the stored
 state itself rather than against a copy of its own arithmetic.</p>
 
-<p id="mast-separatrix-redraw-gate-result">The redraw gate ran once at the head,
-as one job, on the reserved H200: slurm job <code>1306726</code> at revision
+<p id="mast-separatrix-redraw-gate-result">The redraw gate ran as one job through
+the lane launcher: slurm job <code>1306726</code> at revision
 <code>5f91ff873</code>, exit status 0, <b>11 passed in 2178.98 s</b>. The base
 arm ran the same command at revision <code>2fd5d5b58</code> in slurm job
 <code>1306717</code>, exit status 0, <b>10 passed in 2899.39 s</b>. The head
 carries one test id the base does not, and neither arm carries a failing id, so
-the gate shows <b>zero added failures</b> against the base.</p>
+the gate shows <b>zero added failures</b> against the base. Both arms ran on the
+reserved H200.</p>
+
+<p id="mast-separatrix-redraw-gate-placement">The gate was then re-run at the
+final head <code>8e6ea80b2</code>, because the revision the evidence was written
+against had moved. Both the gate and its control were submitted at once and both
+landed on the <b>titan</b> rung after the H200 reservation refused them at that
+moment. That placement cannot serve the full-axis lane: the P100 holds 16 GB and
+the lane's JAX program asks for 2.46 GiB beyond it, so all three full-axis ids
+failed on <code>RESOURCE_EXHAUSTED</code> rather than on any assertion about the
+separatrix, and the gate ended <b>3 failed, 8 passed, exit status 1</b> in job
+<code>1306786</code>. That is a placement defect, not a regression: the same
+tree re-submitted to the reserved H200 alone is job <code>1306805</code>, and the
+revision is only reported as gated once that job's summary is read. The lesson is
+worth recording rather than smoothing over — a lane launcher that falls back from
+H200 to titan falls back onto a device this lane does not fit, which is the
+opposite of what the rung list is for.</p>
 
 <p id="mast-separatrix-redraw-control">The control for the new guard lives in
 the test module itself and is re-runnable from the tree:
 <code>NOVA_PANEL_256_SLOT_CONTROL=1</code> makes it pin the display assembler
 back to 256 branch slots on the one call <code>display_flux._branches</code>
 makes, so the <code>well_formed</code> guard the panels now depend on must
-fail. It goes red exactly where it must:
+fail. Run at the same head as the gate, it goes red exactly where it must:
 <b>5 failed, 6 passed, exit status 1</b>, with
-<code>test_committed_panel_state_renders[cpu-lane]</code>,
-<code>[titan-lane]</code> and <code>[full-axis-lane]</code> failing on
-<code>assert assembler["well_formed"]</code> and reporting
-<code>closed_segment_count: 0</code> — the overflow refusing the whole field,
-which is the state these panels shipped in. The same three ids pass at the head,
-so the guard is what separates the two runs rather than an incidental failure.</p>
+<code>test_committed_panel_state_renders[cpu-lane]</code> and
+<code>[titan-lane]</code> failing on <code>assert assembler["well_formed"]</code>
+and reporting <code>closed_segment_count: 0</code> — the overflow refusing the
+whole field, which is the state these panels shipped in. Those two ids pass in
+the gate run at that head, so the guard is what separates the two runs rather
+than an incidental failure. The remaining three failures in the control run are
+the full-axis lane's device-memory failures described above, which that
+placement carries in the gate run too and which are therefore not what the
+control is measuring; the earlier H200 control run
+(<code>logs/negative-control-final.log</code>) reddened all three render ids on
+the same assertion, which is the complete form of the control.</p>
 </section>

@@ -233,8 +233,39 @@ def render(receipt, fields, destination, angles=None):
             ZOOM_M,
             fill=False,
             edgecolor=IMAGE_COLOR,
-            linewidth=1.0,
-            zorder=11,
+            linewidth=2.0,
+            zorder=16,
+        )
+    )
+    # A six-millimetre window is a tenth of a pixel at served width, so the
+    # locator is carried by a leader into clear space above the panel rather
+    # than by the rectangle alone.
+    main.annotate(
+        "",
+        xy=saddle,
+        xycoords="data",
+        xytext=(0.5, 1.015),
+        textcoords="axes fraction",
+        arrowprops={
+            "arrowstyle": "-",
+            "color": IMAGE_COLOR,
+            "linewidth": 1.2,
+            "shrinkA": 0.0,
+            "shrinkB": 0.0,
+        },
+        zorder=16,
+    )
+    labelled.append(
+        main.text(
+            0.5,
+            1.015,
+            "zoom, %.0f mm across" % (1.0e3 * ZOOM_M),
+            transform=main.transAxes,
+            ha="center",
+            va="bottom",
+            color=IMAGE_COLOR,
+            fontsize=11,
+            zorder=17,
         )
     )
     half = 0.5 * ZOOM_M
@@ -245,8 +276,10 @@ def render(receipt, fields, destination, angles=None):
         for entry in angles["state"]["asymptotic"]["directions"]:
             direction = np.asarray(entry["unit"], float)
             both = np.concatenate(
-                [saddle[None, :] - 1.6 * half * direction[None, :],
-                 saddle[None, :] + 1.6 * half * direction[None, :]]
+                [
+                    saddle[None, :] - 1.6 * half * direction[None, :],
+                    saddle[None, :] + 1.6 * half * direction[None, :],
+                ]
             )
             zoom.plot(
                 both[:, 0],

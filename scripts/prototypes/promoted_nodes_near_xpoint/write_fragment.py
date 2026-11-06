@@ -16,6 +16,14 @@ from pathlib import Path
 TRIP_BOUNDARY_LINE = "nova/equilibrium/reduced_newton.py:985"
 SHADOW_MASK_LINE = "nova/equilibrium/forward_operator.py:3699"
 COMPONENTS_LINE = "nova/equilibrium/forward_operator.py:3712"
+COMPONENTS_RETURN_LINE = "nova/equilibrium/forward_operator.py:3758"
+DOMAIN_CLASSIFY_LINE = "nova/equilibrium/domain.py:213"
+DOMAIN_FLOOD_LINE = "nova/equilibrium/domain.py:185"
+DOMAIN_PRIVATE_LINE = "nova/equilibrium/domain.py:117"
+DOMAIN_PROFILE_LINE = "nova/equilibrium/domain.py:128"
+FLOOD_SOURCE = "interior flood (private flux)"
+POCKET_SOURCE = ("lower", FLOOD_SOURCE)
+NEAR_FLOOD_SOURCE = ("upper", FLOOD_SOURCE)
 DEG = "\N{DEGREE SIGN}"
 ARM_NAMES = {
     "closed out": "lobe out",
@@ -208,8 +216,10 @@ def verdict(groups):
             " The reported %s-half column is nevertheless not uniformly zero: the"
             " %d %s nodes in the same half read up to %s Wb, and the operator's raster"
             " carries no wall coordinate to check them against. So the half's aggregate"
-            " column is an artifact of averaging two selections in one figure, and the"
-            " corrected column is this per-source split, not the half total."
+            " column averages two selections and is not a single quantity; the split by"
+            " source is the first reading that separates them. It is not the last: the"
+            " lower half's flood group carries the residual in its own right, and the"
+            " next section is what that group is."
             % (half, entry["count"], key[1], exponent(entry["max_abs_difference"]))
         )
     return (
@@ -226,7 +236,63 @@ def verdict(groups):
     )
 
 
-def compose(receipt, groups, angles):
+def pocket_values(pocket, groups):
+    """Read the lower pocket's own figures from its receipt."""
+    levels = pocket["levels"]
+    nodes = pocket["pocket"]["nodes"]
+    span = levels["boundary_wb"] - levels["axis_wb"]
+    saddle = levels["lower_state"]
+    image = levels["lower_image"]
+    psi_norm = (saddle["flux_wb"] - levels["axis_wb"]) / span
+    worst = max(nodes, key=lambda row: abs(row["image_minus_state_wb"]))
+    nearest = min(nodes, key=lambda row: row["distance_to_separatrix_mm"])
+    lower = pocket["groups"]["lower / %s" % FLOOD_SOURCE]
+    upper = pocket["groups"]["upper / %s" % FLOOD_SOURCE]
+    orders = math.log10(
+        max(lower["max_abs_wb"], 1.0e-300) / max(upper["max_abs_wb"], 1.0e-300)
+    )
+    return {
+        "pocket_count": pocket["pocket"]["count"],
+        "saddle_rz": "(%+.5f, %+.5f) m" % tuple(saddle["position_rz"]),
+        "saddle_flux": exponent(saddle["flux_wb"]),
+        "saddle_psi_norm": psi_norm,
+        "saddle_beyond_boundary": abs(psi_norm - 1.0),
+        "image_saddle_rz": "(%+.5f, %+.5f) m" % tuple(image["position_rz"]),
+        "image_saddle_flux": exponent(image["flux_wb"]),
+        "axis_flux": "%.6f" % levels["axis_wb"],
+        "boundary_flux": "%.6f" % levels["boundary_wb"],
+        "pocket_psi_min": min(row["psi_norm"] for row in nodes),
+        "pocket_psi_max": max(row["psi_norm"] for row in nodes),
+        "pocket_above_min": min(row["flux_above_lower_saddle_wb"] for row in nodes),
+        "pocket_above_max": max(row["flux_above_lower_saddle_wb"] for row in nodes),
+        "pocket_below_min": min(row["below_lower_saddle_mm"] for row in nodes),
+        "pocket_below_max": max(row["below_lower_saddle_mm"] for row in nodes),
+        "pocket_saddle_min": min(row["distance_to_lower_saddle_mm"] for row in nodes),
+        "pocket_saddle_max": max(row["distance_to_lower_saddle_mm"] for row in nodes),
+        "pocket_wall_min": min(row["distance_to_wall_mm"] for row in nodes),
+        "pocket_wall_max": max(row["distance_to_wall_mm"] for row in nodes),
+        "pocket_sep_min": nearest["distance_to_separatrix_mm"],
+        "pocket_sep_max": max(row["distance_to_separatrix_mm"] for row in nodes),
+        "pocket_nearest_node": nearest["node"],
+        "pocket_worst_node": worst["node"],
+        "pocket_worst_rz": "(%+.4f, %+.4f) m" % (worst["radius_m"], worst["height_m"]),
+        "pocket_worst_state": exponent(worst["state_wb"]),
+        "pocket_worst_image": exponent(worst["image_wb"]),
+        "pocket_worst_difference": exponent(worst["image_minus_state_wb"]),
+        "pocket_worst_operator": exponent(worst["operator_image_minus_state_wb"]),
+        "pocket_orders": orders,
+        "flood_upper_max": exponent(upper["max_abs_wb"]),
+        "flood_lower_max": exponent(lower["max_abs_wb"]),
+        "flood_upper_count": upper["count"],
+        "flood_lower_count": lower["count"],
+        "flood_upper_sep_min": upper["distance_to_separatrix_mm_min"],
+        "flood_upper_sep_max": upper["distance_to_separatrix_mm_max"],
+        "flood_upper_psi_min": upper["psi_norm_min"],
+        "flood_upper_psi_max": upper["psi_norm_max"],
+    }
+
+
+def compose(receipt, groups, angles, pocket):
     separatrix = receipt["separatrix"]
     x_point = receipt["x_point"]
     halves = receipt["promoted_halves"]
@@ -250,6 +316,14 @@ def compose(receipt, groups, angles):
     )
     grid_ratio = float(angles["lattice_spacing_m"]) / float(complete["spacing_m"])
     state_asymptotic_field = angles["state"]["asymptotic"]
+    pocket_figure = pocket_values(pocket, groups)
+    pocket_figure["flood_orders"] = pocket_figure.pop("pocket_orders")
+    pocket_figure["seed_r"], pocket_figure["seed_z"] = pocket["lower_seed_rz"]
+    pocket_figure["domain_classify_line"] = DOMAIN_CLASSIFY_LINE
+    pocket_figure["domain_flood_line"] = DOMAIN_FLOOD_LINE
+    pocket_figure["domain_private_line"] = DOMAIN_PRIVATE_LINE
+    pocket_figure["domain_profile_line"] = DOMAIN_PROFILE_LINE
+    pocket_figure["components_return_line"] = COMPONENTS_RETURN_LINE
 
     return """<h2>Separatrix directions at the promoted coil-edit X-point</h2>
 <p>Re-runs the converged MAST {shot}/{slice_index} boundary-coil edit
@@ -364,21 +438,74 @@ difference.</caption>
 <p>Across the whole promoted set the reconstructed difference reaches
 {worst} Wb against {solved_max} Wb on the solved nodes, and
 {whole} Wb over the whole lattice. The half aggregates are
-{half_upper_max} Wb and {half_lower_max} Wb, and split by selection source they
-resolve as the table does rather than as the halves do. The mechanism is the paste at
-<code>{trip_line}</code>, <code>mapped = jnp.where(promoted, state, image)</code>,
-inside
+{half_upper_max} Wb and {half_lower_max} Wb, and the source split does
+<em>not</em> dissolve that asymmetry: inside the interior flood alone the upper group
+reads {flood_upper_max} Wb over {flood_upper_count} nodes and the lower group
+{flood_lower_max} Wb over {flood_lower_count}, a factor of {flood_orders:.1f} in
+the exponent. The mechanism is the paste at <code>{trip_line}</code>,
+<code>mapped = jnp.where(promoted, state, image)</code>, inside
 <code>_reduced_kernels.trip_boundary</code>: on a closing trip the state carried into
-the next
-trip is the map, so at a promoted node the terminal state is the <em>pre-paste</em>
-state and
-<code>image - state</code> there is exactly the residual the shadow rule exists to
-hide. A
-node therefore reads near zero in that column for one of two different reasons, and
-the two
-are distinguishable only by the selection source and the operator's own column.</p>
+the next trip is the map, so at a promoted node the terminal state is the
+<em>pre-paste</em> state and <code>image - state</code> there is exactly the residual
+the shadow rule exists to hide. The source tells a reader which mask selected a node;
+it does not tell a reader which region of the flux map the node sits in, and that is
+what decides the size of the hidden residual.</p>
 
 <p>{verdict}</p>
+
+<h3>The lower interior-flood pocket</h3>
+<p>The two interior-flood groups are the same rule applied to two very different
+places. The upper group sits in the upper private-flux wedge, {flood_upper_sep_min:.1f}
+to {flood_upper_sep_max:.1f} mm from the separatrix, its normalised flux running
+{flood_upper_psi_min:.3f} to {flood_upper_psi_max:.3f}, and there the field of the
+currents already reproduces the frozen state to {flood_upper_max} Wb. The lower group
+sits in a pocket the solve never resolves, and its frozen state is
+{flood_lower_max} Wb from the field of the currents.</p>
+
+<p>That pocket lies below a second saddle that the solve did not admit. Polishing the
+same lattice spline from a seed at ({seed_r:.2f}, {seed_z:.2f}) m converges to a saddle
+at {saddle_rz} with flux {saddle_flux} Wb, and the field of the currents puts its
+counterpart at {image_saddle_rz} at {image_saddle_flux} Wb. With the axis at
+{axis_flux} Wb and the admitted boundary flux at {boundary_flux} Wb, the lower saddle's
+normalised flux is {saddle_psi_norm:.4f} — it lies {saddle_beyond_boundary:.4f}
+<em>outside</em> the boundary level, and the receipt's admitted set carries the single
+upper X-point and not this one. The {pocket_count} lower interior-flood nodes sit
+beneath it:
+every one is at least {pocket_below_min:.1f} mm below it in height (up to
+{pocket_below_max:.1f} mm) and {pocket_saddle_min:.1f} to {pocket_saddle_max:.1f} mm
+from it in the plane, their flux is {pocket_above_min:.4f} to {pocket_above_max:.4f} Wb
+<em>above</em> its flux, and their normalised flux runs {pocket_psi_min:.3f} to
+{pocket_psi_max:.3f} — entirely on the plasma side of the boundary value. They are
+{pocket_wall_min:.1f} to {pocket_wall_max:.1f} mm from the wall.</p>
+
+<p>So the pocket is a closed-flux lobe below an unadmitted saddle, bounded on one side
+by the wall and cut off from the axis on the other by the narrow band around that
+saddle where the flux falls below the boundary level. The flood labels exactly those
+cells: <code>classify_domains</code> assigns <code>PRIVATE_FLUX</code> to every cell
+that is <code>closed</code> but not in the axis-connected component
+(<code>{domain_classify_line}</code>), and <code>connected</code> is the saddle-aware
+flood grown from the magnetic axis in <code>axis_connected_component</code>
+(<code>{domain_flood_line}</code>). The mask surfaces as
+<code>DomainMasks.private_flux</code> (<code>{domain_private_line}</code>) and is
+returned as the first shadow component by
+<code>ForwardFluxOperator.residual_shadow_components</code>
+(<code>{components_line}</code>, returned at <code>{components_return_line}</code>).
+Nothing in the pocket carries plasma current: profile participation is the complement
+of the private-flux and material masks (<code>{domain_profile_line}</code>), and the
+same cells are removed from the residual. No equation therefore constrains the flux
+there, and the paste is what holds it at whatever value the iterate carried in — which
+is why the field of the currents does not reproduce it.</p>
+
+<p>The worked example is node {pocket_worst_node} at {pocket_worst_rz}, the worst of the
+group: its frozen state is {pocket_worst_state} Wb, the field of the currents gives
+{pocket_worst_image} Wb, and the difference of {pocket_worst_difference} Wb is
+confirmed by the operator's own raster at {pocket_worst_operator} Wb. The held region
+changes no boundary geometry. Its nearest node is {pocket_nearest_node}, at
+<strong>{pocket_sep_min:.2f} mm</strong> from the state's assembled separatrix, and the
+farthest is {pocket_sep_max:.2f} mm away; the pocket touches the trace at no point, and
+every boundary reading in this fragment is taken at the admitted upper X-point, which
+the pocket never approaches. The held lower region is a defect in the flux map, not in
+the boundary.</p>
 
 <figure>
   <img src="{figure}" alt="Promoted nodes and the X-point on the converged coil edit's
@@ -394,8 +521,9 @@ those whose
   ({ax:.4f}, {az:.4f}) m, the filled cross the state's X-point and the hollow cross
 the field's.
   The left panel carries the locator for the {zoom:.1f} mm magnification on the right,
-which draws all four branches leaving the null in both fields: the closed lobe out and
-back, and both open legs. Dotted grey lines are the four separatrix
+drawn as a labelled leader because a {zoom:.1f} mm window is a fraction of a pixel at
+served width; the right panel draws all four branches leaving the null in both fields:
+the closed lobe out and back, and both open legs. Dotted grey lines are the four
 asymptotes, the directions d with d'Hd = 0 at the state's polished saddle, so a
 branch that runs away from its asymptote within the window is visible as such.
   The nearest promoted node is {nearest:.3f} mm from the X-point; the quartiles are
@@ -404,27 +532,32 @@ branch that runs away from its asymptote within the window is visible as such.
 
 <h3>Does the promotion move the near-X-point geometry?</h3>
 <p>Every local reading at the null says no more than the grid it was taken on. On the
-solve's lattice the two polished nulls coincide to {lattice_displacement:.2e} mm and the
-four arms agree to {asymptotic_max_shift:.6f}{deg}; on the display map the nulls sit
-{display_displacement:.4f} mm apart, the arms differ by
-{display_shift:.3f}{deg} and the traced chords by at most {branch_max_shift:.3f}{deg}.
-The promotion therefore perturbs nothing that the solve resolves, and the whole of the
-residual difference is the coarser interpolant the display map carries. The rule a
-repair would change is the paste itself: the
-exclude-shadow
+solve's lattice, where each field is polished on a spline of its <em>own</em> values,
+the two nulls coincide to {lattice_displacement:.2e} mm and the four arms agree to
+{asymptotic_max_shift:.6f}{deg}. The {display_displacement:.4f} mm the display grid
+carries is not a displacement of the solve's null: that comparison is between two
+different interpolants sampled on the same finer grid — the state's lattice tensor
+spline evaluated at the display coordinates (<code>display_state_flux</code>, built from
+the 0.0928 m lattice nodes) against the reconstructed display map itself
+(<code>display_flux</code>, from <code>build_display_flux_map</code> at 0.0100 m). The
+0.35 mm is the difference between those two interpolants, carried by the lattice spline
+being evaluated off its own nodes; the display map is the finer grid, not the coarser
+one. On that grid the arms differ by {display_shift:.3f}{deg} and the traced chords by
+at most {branch_max_shift:.3f}{deg}. The promotion therefore perturbs nothing that the
+solve resolves. The rule a repair would change is the paste itself: the exclude-shadow
 branch of <code>ForwardFluxOperator.residual_shadow_mask</code> in
 <code>nova/equilibrium/forward_operator.py</code> decides which nodes keep their
-pre-paste state,
-and <code>_reduced_kernels.trip_boundary</code> in
+pre-paste state, and <code>_reduced_kernels.trip_boundary</code> in
 <code>nova/equilibrium/reduced_newton.py</code> is where that decision is applied.
-Narrowing it so a
-node is kept only where the residual the paste would hide is large enough to matter,
-rather than wherever the flood or the wall band reaches, would shrink the excluded set
-without changing the field it exists to protect. Nothing in this node's evidence says
-the
-change is
-needed; it says the mechanism by which a widened set would show up.</p>
+Narrowing it so a node is kept only where the residual the paste would hide is large
+enough to matter, rather than wherever the flood or the wall band reaches, would shrink
+the excluded set without changing the closing field it exists to protect — and would
+remove the {pocket_count}-node lower pocket, whose held residual is
+{flood_lower_max} Wb and whose nearest node is {pocket_sep_min:.1f} mm from any boundary
+the solve assembles. Nothing in this node's evidence says the change is needed; it says
+the mechanism by which the widened set shows up.</p>
 """.format(
+        **pocket_figure,
         shot=receipt["shot"],
         slice_index=receipt["slice_index"],
         fraction=receipt["edit_fraction"],
@@ -508,13 +641,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--angles", type=Path, required=True)
+    parser.add_argument("--pocket", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
     receipt = json.loads(arguments.receipt.read_text(encoding="utf-8"))
     angles = json.loads(arguments.angles.read_text(encoding="utf-8"))
+    pocket = json.loads(arguments.pocket.read_text(encoding="utf-8"))
     groups = group_rows(receipt)
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
-    arguments.output.write_text(compose(receipt, groups, angles), encoding="utf-8")
+    arguments.output.write_text(
+        compose(receipt, groups, angles, pocket), encoding="utf-8"
+    )
     print("FRAGMENT %s" % arguments.output)
     print(json.dumps({"%s/%s" % key: value for key, value in groups.items()}, indent=2))
 

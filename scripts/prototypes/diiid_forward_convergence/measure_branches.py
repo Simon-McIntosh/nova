@@ -275,7 +275,84 @@ def _record_receipt(receipt, wall_seconds, prepared, topology_class) -> dict[str
     return record
 
 
-def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
+def _harvest(node, path: str, arrays: dict[str, np.ndarray]) -> None:
+    """Move every flux grid out of ``node`` into ``arrays``, wherever it sits.
+
+    A staged arm nests one record per promotion, and each of those carries its
+    own grid, so a single-level pop leaves arrays behind and the JSON write then
+    fails on the first one it meets.  This walks to any depth and names each
+    harvested grid by the path it came from.
+    """
+
+    if isinstance(node, dict):
+        for key in list(node):
+            value = node[key]
+            if key == "_flux_grid":
+                arrays[f"{path}._flux_grid"] = np.asarray(
+                    node.pop(key), dtype=float
+                )
+            else:
+                _harvest(value, f"{path}.{key}", arrays)
+    elif isinstance(node, list | tuple):
+        for index, value in enumerate(node):
+            _harvest(value, f"{path}[{index}]", arrays)
+
+
+def _assert_json_clean(node, path: str = "$") -> None:
+    """Raise naming the key path if any array survived the harvest."""
+
+    if isinstance(node, dict):
+        for key, value in node.items():
+            _assert_json_clean(value, f"{path}.{key}")
+    elif isinstance(node, list | tuple):
+        for index, value in enumerate(node):
+            _assert_json_clean(value, f"{path}[{index}]")
+    elif isinstance(node, np.ndarray):
+        raise TypeError(f"ndarray reached the receipt at {path}")
+
+
+def _self_check() -> None:
+    """Prove the harvest walks nested records and the guard still fires."""
+
+    clean = {"a": {"staged": {"1": {"_flux_grid": np.zeros((2, 2))}}}}
+    arrays: dict[str, np.ndarray] = {}
+    _harvest(clean, "record", arrays)
+    harvested = sorted(arrays)
+    _assert_json_clean(clean)
+    positive = harvested == ["record.a.staged.1._flux_grid"] and not clean["a"][
+        "staged"
+    ]["1"]
+    leaked = {"a": {"staged": {"1": {"_flux_grid": np.zeros(3)}}}}
+    try:
+        _assert_json_clean(leaked)
+    except TypeError as error:
+        negative = "a.staged.1._flux_grid" in str(error)
+        negative_message = str(error)
+    else:
+        negative = False
+        negative_message = "the guard did not fire"
+    print(
+        json.dumps(
+            {
+                "harvest_keys": harvested,
+                "harvested_nested": bool(positive),
+                "negative_control_fired": bool(negative),
+                "negative_control_message": negative_message,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    if not positive:
+        raise SystemExit("FAIL: the harvest did not reach the staged record")
+    if not negative:
+        raise SystemExit("FAIL: a leaked ndarray was not refused")
+    print("PASS: nested grids are harvested; a leak is refused by key path")
+
+
+def _branch_record(
+    prepared, topology_class, expansion, persist, staged_steps
+) -> dict[str, Any]:
     profile = prepared["profile"]
     cold = prepared["cold"]
     seed = np.asarray(cold.branches.flux[int(topology_class)], dtype=float)
@@ -309,6 +386,7 @@ def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
     default = _record_receipt(receipt, seconds, prepared, topology_class)
     record["arms"]["default"] = default
     record["status"] = "solved"
+    persist("default", default)
     trips = max(1, min(int(default["active_set_iterations"]), STAGED_TRIP_LIMIT))
     try:
         receipt, seconds = _solve(
@@ -319,6 +397,7 @@ def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
         record["arms"]["continued"] = _record_receipt(
             receipt, seconds, prepared, topology_class
         )
+        persist("continued", record["arms"]["continued"])
     except Exception as error:
         record["arms"]["continued"] = {
             "status": "refused",
@@ -326,7 +405,8 @@ def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
             "refusal_message": str(error),
         }
     record["arms"]["staged"] = {}
-    for steps in range(1, trips + 1):
+    for steps in sorted({1, int(staged_steps) if staged_steps else trips}):
+        steps = min(steps, trips)
         try:
             receipt, seconds = _solve(
                 profile, seed, prepared["current"], prepared["target_current_a"],
@@ -335,6 +415,7 @@ def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
             record["arms"]["staged"][str(steps)] = _record_receipt(
                 receipt, seconds, prepared, topology_class
             )
+            persist(f"staged.{steps}", record["arms"]["staged"][str(steps)])
         except Exception as error:
             record["arms"]["staged"][str(steps)] = {
                 "status": "refused",
@@ -344,10 +425,25 @@ def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
     return record
 
 
-def run_frame(frame: int, expansion: float, artifact_dir: Path) -> dict[str, Any]:
+def run_frame(
+    frame: int,
+    expansion: float,
+    artifact_dir: Path,
+    receipt: dict[str, Any],
+    output: Path,
+    staged_steps: int,
+) -> dict[str, Any]:
     started = time.perf_counter()
     prepared = _prepare_frame(frame, expansion)
     profile = prepared["profile"]
+    base_arrays = {
+        "wall": prepared["wall"],
+        "label": prepared["label"],
+        "radius": np.asarray(profile.lattice.radius),
+        "height": np.asarray(profile.lattice.height),
+        "label_boundary": prepared["contour"],
+    }
+    artifact_dir.mkdir(parents=True, exist_ok=True)
     frame_record: dict[str, Any] = {
         "frame": frame,
         "shot": Path(prepared["row"]["_source_path"]).name,
@@ -361,42 +457,82 @@ def run_frame(frame: int, expansion: float, artifact_dir: Path) -> dict[str, Any
         "lattice_shape": list(profile.lattice.shape),
         "branches": {},
     }
+    receipt["frames"][str(frame)] = frame_record
+
     for topology_class in (TopologyClass.LIMITED, TopologyClass.DIVERTED):
-        frame_record["branches"][topology_class.name.lower()] = _branch_record(
-            prepared, topology_class, expansion
+        branch_name = topology_class.name.lower()
+
+        def persist(arm_name, arm_record, _branch=branch_name):
+            """Write the receipt and this arm's grids the moment the arm lands."""
+
+            arrays = dict(base_arrays)
+            _harvest(
+                arm_record,
+                f"frames.{frame}.branches.{_branch}.arms.{arm_name}",
+                arrays,
+            )
+            _assert_json_clean(frame_record, f"frames.{frame}")
+            artifact = artifact_dir / f"frame-{frame}-{_branch}-{arm_name}.npz"
+            np.savez_compressed(artifact, **arrays)
+            arm_record["artifact"] = str(artifact)
+            _assert_json_clean(receipt)
+            output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+            print(
+                json.dumps(
+                    {
+                        "persisted": str(output),
+                        "frame": frame,
+                        "branch": _branch,
+                        "arm": arm_name,
+                        "artifact": str(artifact),
+                        "seconds": round(time.perf_counter() - started, 1),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+
+        frame_record["branches"][branch_name] = _branch_record(
+            prepared, topology_class, expansion, persist, staged_steps
         )
-    arrays: dict[str, np.ndarray] = {}
-    for name, branch in frame_record["branches"].items():
-        for arm_name, arm in (branch.get("arms") or {}).items():
-            if not isinstance(arm, dict):
-                continue
-            grid = arm.pop("_flux_grid", None)
-            if grid is None:
-                continue
-            arrays[f"{name}_{arm_name}_flux"] = grid
-    arrays["wall"] = prepared["wall"]
-    arrays["label"] = prepared["label"]
-    arrays["radius"] = np.asarray(profile.lattice.radius)
-    arrays["height"] = np.asarray(profile.lattice.height)
-    arrays["label_boundary"] = prepared["contour"]
-    artifact_dir.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(artifact_dir / f"frame-{frame}-states.npz", **arrays)
-    frame_record["artifact"] = str(artifact_dir / f"frame-{frame}-states.npz")
+
+    # Nothing should remain, but harvesting here makes the guarantee local to the
+    # write rather than dependent on every arm having persisted.
+    leftovers: dict[str, np.ndarray] = {}
+    _harvest(frame_record, f"frames.{frame}", leftovers)
+    frame_record["leftover_array_keys"] = sorted(leftovers)
+    _assert_json_clean(frame_record, f"frames.{frame}")
+    output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     frame_record["frame_seconds"] = time.perf_counter() - started
     return frame_record
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--frames", type=int, nargs="+", required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--artifact-dir", type=Path, required=True)
+    parser.add_argument("--frames", type=int, nargs="+")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--artifact-dir", type=Path)
+    parser.add_argument("--self-check", action="store_true")
+    parser.add_argument(
+        "--staged-steps",
+        type=int,
+        default=1,
+        help=(
+            "the extra active-set trip count to stage beyond the terminal one; "
+            "each distinct value costs a fresh compilation of the loop"
+        ),
+    )
     parser.add_argument(
         "--expansion",
         type=float,
         default=float(bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION),
     )
     arguments = parser.parse_args()
+    if arguments.self_check:
+        _self_check()
+        return
+    if not arguments.frames or arguments.output is None:
+        parser.error("--frames and --output are required unless --self-check is given")
     configure_dtypes()
     output = arguments.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -411,7 +547,14 @@ def main() -> None:
     }
     for frame in arguments.frames:
         started = time.perf_counter()
-        record = run_frame(frame, arguments.expansion, arguments.artifact_dir.resolve())
+        record = run_frame(
+            frame,
+            arguments.expansion,
+            arguments.artifact_dir.resolve(),
+            receipt,
+            output,
+            arguments.staged_steps,
+        )
         receipt["frames"][str(frame)] = record
         output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
         print(

@@ -106,7 +106,6 @@ def _damped_scale(
     max_steps=BACKTRACKING_STEPS,
     tolerance=0.0,
     keep_incumbent=True,
-    backtrack=True,
 ):
     """Search dyadic updates with one validity flag and mask per lane.
 
@@ -117,8 +116,6 @@ def _damped_scale(
     With ``keep_incumbent=False`` the smallest-residual valid trial is retained
     instead, allowing escape from a non-smooth residual's local plateau.
     ``evaluations`` counts whole-batch calls, including companion lanes.
-    With ``backtrack=False`` return the full trial and its read even if invalid;
-    the caller owns validity and certification of that evaluation.
     """
     dtype = current.dtype
     active = jnp.broadcast_to(jnp.asarray(active, bool), current.shape)
@@ -150,9 +147,10 @@ def _damped_scale(
         trial = choose(pending, proposed, best)
         norm, valid, trial_aux = evaluate(trial)
         valid = valid & jnp.isfinite(norm)
-        better = pending & (
-            ~jnp.asarray(backtrack)
-            | (valid & ((norm < best_norm) | (~tried & ~jnp.asarray(keep_incumbent))))
+        better = (
+            pending
+            & valid
+            & ((norm < best_norm) | (~tried & ~jnp.asarray(keep_incumbent)))
         )
         return (
             choose(better, trial, best),
@@ -161,7 +159,7 @@ def _damped_scale(
             jnp.where(better, scale, best_scale),
             scale * jnp.asarray(0.5, dtype),
             calls + 1,
-            pending & backtrack & (~valid | ((norm >= current) & (norm > tolerance))),
+            pending & (~valid | ((norm >= current) & (norm > tolerance))),
             tried | (pending & valid),
         )
 

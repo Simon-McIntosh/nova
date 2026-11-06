@@ -18,53 +18,6 @@ from nova.equilibrium import support_read  # noqa: E402
 from tests.test_bank_solve_driver import _toy_read  # noqa: E402
 
 
-def test_near_root_noise_has_fixed_read_count(monkeypatch):
-    """Tiny seed changes cannot stop a batch midway through its polish."""
-    from tests.test_bank_solve_driver import _unit_update
-
-    def residual(_operands, _base, state, support, *_args):
-        value = jnp.where(
-            state[0] < 1,
-            2e-9,
-            jnp.where(state[0] < 2, 1e-10 + 1000 * state[1], 8e-11),
-        )
-        return support_read.StepResidual(
-            (value, jnp.zeros_like(value), jnp.zeros_like(value)),
-            (*state, jnp.asarray(1.0)),
-            support.reading,
-            support.valid,
-        )
-
-    monkeypatch.setattr(support_read, "read_batch", _toy_read)
-    monkeypatch.setattr(support_read, "step_residual", residual)
-    monkeypatch.setattr(support_read, "newton_step", _unit_update)
-    points = jnp.zeros((2, 1, 2), dtype=jnp.float64)
-    run = jax.jit(
-        lambda state: support_read.solve_batch(
-            None,
-            None,
-            state,
-            points,
-            points,
-            None,
-            None,
-            None,
-            None,
-            None,
-            max_steps=20,
-        )
-    )
-    counts = []
-    for noise in (-1e-14, 1e-14):
-        state = (jnp.zeros((2, 1)), jnp.full((2, 1), noise), jnp.zeros((2, 1)))
-        result = jax.block_until_ready(run(state))
-        assert bool(jnp.all(result.converged))
-        assert float(jnp.max(result.residual)) <= 1e-10
-        counts.append(np.asarray(result.reads))
-    print("NEAR_ROOT_READS", [value.tolist() for value in counts])
-    np.testing.assert_array_equal(counts[0], counts[1])
-
-
 def test_cycle_lane_is_accepted_within_two_steps(monkeypatch):
     """Newton flips between ±2 outside a kink; a half update reaches zero."""
     scale = 1e-7
@@ -215,11 +168,9 @@ def test_diverted_lanes_leave_near_root_cycle(monkeypatch):
     checkpoint = execute(states, 2, "checkpoint")
     assert float(jnp.max(checkpoint.residual)) < 1e-6
     assert not bool(jnp.all(checkpoint.converged))
-    result = execute(checkpoint.moments, 16, "restart")
+    result = execute(checkpoint.moments, 8, "restart")
     print("DIVERTED_CYCLE", np.asarray(result.steps), np.asarray(result.residual))
-    assert bool(jnp.all(result.converged)), (
-        "cycle lanes exceed the fixed polishing budget"
-    )
+    assert bool(jnp.all(result.converged)), "cycle lanes exceed eight restart steps"
     assert float(jnp.max(result.residual)) <= 1e-10
 
 

@@ -5,7 +5,9 @@ differentiates is checked three ways: against ``jax.jvp`` of the base revision's
 own function on ten thousand inputs spanning the edge domain; with its product
 or quotient rule truncated by one term, which must fail that bound; and by a
 cold compile in a fresh, cache-disabled process against the primal.  The primal
-half each tangent returns is asserted bit-identical to the base revision's.
+half each tangent returns is asserted bit-identical to that primal. Flux-line
+moments use the current regularised primal and an independent 50-digit integral;
+the remaining terms retain their pinned base functions.
 
 ``NOVA_TANGENT_TRUNCATION=1`` applies the truncation to the identity rows
 themselves, which is the declared mutation those rows must fail against.
@@ -40,7 +42,7 @@ from tangent_identity import (  # noqa: E402
     worst,
     finite_fraction,
 )
-from test_vertex_term_tangents import _normwise  # noqa: E402
+from test_vertex_term_tangents import _normwise, _term_reference  # noqa: E402
 
 BASE_REVISION = "716d859f0b501797e28849ec8878f0243de80cb1"
 BASE = load_base_module("nova/biot/polygonanalytic.py", BASE_REVISION)
@@ -183,6 +185,10 @@ def _cases():
             if name == "edge_integrands":
                 return edge.terms(vertex)
             if name == "flux_line_moments":
+                vertex = polygonanalytic._Vertex(
+                    *p[:2], *p[2][:2], NODES, residual=True, xp=jnp
+                )
+                edge = polygonanalytic._Edge(*p[:3], NODES, xp=jnp)
                 return edge.flux_line_moments(vertex, p[3], p[4])
             if name == "flux_and_moment_terms":
                 return edge.flux_and_moment_terms(vertex, p[3], p[4])
@@ -452,3 +458,31 @@ def test_near_edge_reference_is_the_exact_integral():
 def test_near_edge_tangent_meets_reference():
     _, hand, _, _, _ = _near_edge_reference_rows()
     assert hand.max() <= SCAN_TOLERANCE
+
+
+def test_flux_line_tangent_matches_exact_integral():
+    """Differentiate the elementary height primitives before angle integration."""
+    indices = np.asarray([2730, 3730, 6000, 6500, 8000])
+    primals, tangents = CASES["flux_line_moments"][-2:]
+    p, t = (
+        jax.tree.map(lambda v: np.asarray(v)[indices], tree)
+        for tree in (primals, tangents)
+    )
+    edge, d_edge = polygonanalytic._edge_tangent(*p[:3], *t[:3], NODES, xp=np)
+    vertex, d_vertex = polygonanalytic._vertex_tangent(
+        *p[:2], *p[2][:2], *t[:2], *t[2][:2], NODES, residual=True, xp=np
+    )
+    value, tangent = polygonanalytic._edge_flux_line_moments_tangent(
+        edge, d_edge, vertex, d_vertex, p[3], t[3], p[4], t[4]
+    )
+    reference = _term_reference("flux_line_moments", p, t, np.arange(indices.size))
+    value = np.stack(value, axis=1)
+    tangent = np.stack(tangent, axis=1)
+    value_error = np.max(np.abs(value - reference[:, 0]) / np.abs(reference[:, 0]))
+    tangent_error = np.max(np.abs(tangent - reference[:, 1]) / np.abs(reference[:, 1]))
+    print(
+        f"EXACT_INTEGRAL flux_line_moments samples={indices.size} digits=50 "
+        f"value_relative_max={value_error:.3e} tangent_relative_max={tangent_error:.3e}"
+    )
+    assert value_error <= 1e-10
+    assert tangent_error <= SCAN_TOLERANCE

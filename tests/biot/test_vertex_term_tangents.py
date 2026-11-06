@@ -320,16 +320,19 @@ def _truncated_product(left, d_left, right, d_right):
 @contextmanager
 def _truncated():
     original = polygonanalytic._product_tangent
+    _identity.cache_clear()
     polygonanalytic._product_tangent = _truncated_product
     try:
         yield
     finally:
         polygonanalytic._product_tangent = original
+        _identity.cache_clear()
 
 
+@lru_cache(maxsize=len(CASES))
 def _identity(name):
     tangent, primal, primals, tangents = CASES[name]
-    # a fresh jit per call, so a truncation applied since is traced afresh
+    # Truncation contexts clear the cache before and after changing the rule.
     got = jax.jit(lambda p, t: tangent(p, t))(primals, tangents)
     expected = jax.jit(lambda p, t: jax.jvp(primal, p, t))(primals, tangents)
     return got, expected
@@ -472,15 +475,37 @@ def _near_corner_rows():
     # a target exactly level with the corner or on its radius sits on the
     # integral's |u| or |offset| kink, where no two-sided derivative exists
     index = np.flatnonzero(_near_corner(primals) & (corner_z != z) & (corner_r != r))
+    # Audit each offset-sign pair and joint-distance decade while keeping all domain
+    # points in the JVP identity. Choose the largest hand/JVP disagreement per
+    # occupied bin so the exact-integral workload follows numerical risk.
+    radial_decade = np.floor(np.log10(np.abs((corner_r[index] - r[index]) / r[index])))
+    vertical_decade = np.floor(
+        np.log10(np.abs((corner_z[index] - z[index]) / r[index]))
+    )
+    groups = np.stack(
+        (
+            np.sign(corner_r[index] - r[index]),
+            np.sign(corner_z[index] - z[index]),
+            np.maximum(radial_decade, vertical_decade),
+        ),
+        axis=1,
+    )
+    disagreement = relative_error(np.asarray(got[1][1]), np.asarray(expected[1][1]))
+    index = np.asarray(
+        [
+            members[np.argmax(disagreement[members])]
+            for group in np.unique(groups, axis=0)
+            for members in [index[np.all(groups == group, axis=1)]]
+        ]
+    )
     value, reference = _radial_reference(primals, tangents, index)
     hand = np.asarray(got[1][1])[index]
     primal_jvp = np.asarray(expected[1][1])[index]
     primal = np.asarray(expected[0][1])[index]
     old, _, program_difference = _program_floor(
         lambda *p: BASE._Vertex(*p[:4], NODES, residual=True, xp=jnp).arsinh_terms()[1],
-        primals,
-        tangents,
-        select=lambda value: value[index],
+        tuple(value[index] for value in primals),
+        tuple(value[index] for value in tangents),
     )
     decades, program_floor = _decade_floor(
         corner_r[index] - r[index], program_difference
@@ -564,7 +589,7 @@ def _near_corner_rows():
 
 def test_near_corner_reference_is_the_exact_integral():
     rows = _near_corner_rows()
-    # the independent integral checks the repaired primal near the corner
+    # the independent integral checks the regularised primal near the corner
     assert rows["samples"] > 0
     assert rows["primal"] <= 1e-10
     assert rows["less_accurate"] == 0
@@ -602,7 +627,7 @@ def test_tangent_compiles_within_three_primals(name):
 
 
 def test_composed_corner_signed_offsets(monkeypatch):
-    """Check the repaired primal and its own hand/JVP tangents through the band."""
+    """Check the regularised primal and its hand/JVP tangents through the band."""
     offsets = np.asarray([0.0] + [s * 10.0**e for e in range(-12, -1) for s in (-1, 1)])
     r = jnp.full(offsets.size, 1.2)
     z = jnp.zeros_like(r)
@@ -615,8 +640,10 @@ def test_composed_corner_signed_offsets(monkeypatch):
         monkeypatch.delenv("NOVA_CORNER_REFERENCE_CACHE", raising=False)
     reference, derivative = _radial_reference(p, t, np.arange(offsets.size))
     reference, derivative = np.asarray(reference, float), np.asarray(derivative, float)
+
     def primal(*args):
         return _primal_vertex(*args).arsinh_terms()[1]
+
     value, jvp = jax.jit(lambda p, t: jax.jvp(primal, p, t))(p, t)
     _, hand = jax.jit(
         lambda p, t: polygonanalytic._arsinh_terms_tangent(
@@ -645,3 +672,186 @@ def test_composed_corner_signed_offsets(monkeypatch):
     inside = np.abs(offsets) <= 1e-3
     assert np.all(value_error[inside] <= base_error[inside] + 1e-13)
     assert relative_error(np.asarray(value)[~inside], base[~inside]).max() <= 1e-13
+
+
+_TERM_REFERENCE_PROBE = r"""
+import json, sys
+import mpmath as mp
+
+mp.mp.dps = 50
+record = json.load(sys.stdin)
+name = record["name"]
+
+
+def convert(value):
+    return [convert(v) for v in value] if isinstance(value, list) else mp.mpf(value)
+
+
+def moving(p, t, e):
+    return [moving(v, d, e) for v, d in zip(p, t)] if isinstance(p, list) else p + e * t
+
+
+answers = []
+for row in record["rows"]:
+    p, t = convert(row[0]), convert(row[1])
+
+    def integrand(a, e):
+        q = moving(p, t, e)
+        r, z = q[:2]
+        x, y = mp.sin(a) ** 2, mp.cos(a) ** 2
+        c = x - y
+        if name == "flux_line_moments":
+            ra, za, rb, zb = q[2]
+            expansion, height = q[3:]
+            b = (rb - ra) / (zb - za)
+            u, offset = za - z, ra - r
+            r1 = ra - b * u
+            plane = r1 - r * c
+            squared = plane**2 + (1 + b * b) * 4 * r * r * x * y
+            gamma = u + b * (offset + 2 * r * y)
+            axial = mp.sqrt(1 + b * b)
+            root = mp.sqrt(u * u + (offset + 2 * r * y) ** 2 + 4 * r * r * x * y)
+            residual = mp.asinh(gamma / mp.sqrt(squared))
+            constant = residual / axial
+            linear = root / axial**2 - b * plane * residual / axial**3
+            quadratic = (
+                root * (gamma / 2 - 2 * b * plane) / axial**4
+                + (b * b * plane * plane - squared / 2) * residual / axial**5
+            )
+            base = r1 * constant + b * linear
+            radial = (
+                (r1 - expansion) * r1 * constant
+                + b * (2 * r1 - expansion) * linear
+                + b * b * quadratic
+            )
+            vertical = height * base + r1 * linear + b * quadratic
+            return [4 * c * v for v in (base, radial, vertical)]
+        cr, cz, expansion, height = q[2:6]
+        u, offset = cz - z, cr - r
+        squared = u * u + 4 * r * r * x * y
+        source = r * c
+        edge = offset + 2 * r * y
+        root = mp.sqrt(edge * edge + squared)
+        residual = mp.asinh(edge / mp.sqrt(squared))
+        if name == "arsinh_terms":
+            return [
+                4 * u * r * c * c * residual,
+                4 * r * c * c * residual,
+                4 * u * residual,
+            ]
+        if name == "against_first_arsinh":
+            bulk, near, far = q[6]
+            weight = (
+                near * x
+                + far * y
+                + x * y * sum(v * mp.cos(2 * k * a) for k, v in enumerate(bulk))
+            )
+            return [weight * residual]
+        if name == "flux_moment_residuals":
+            radial = u * (source * (source - expansion) - 2 * r * r * x * y) - u**3 / 6
+            vertical = source * squared / 2
+            return [
+                4 * c * radial * residual,
+                4 * c * vertical * residual + height * 4 * u * r * c * c * residual,
+            ]
+        base = 4 * c * (root + source * residual)
+        radial = (
+            4
+            * c
+            * (
+                (edge / 2 + 2 * source - expansion) * root
+                + (source * (source - expansion) - squared / 2) * residual
+            )
+        )
+        return [base, radial, (u + height) * base]
+
+    r, z = p[:2]
+    cr, cz = p[2][:2] if name == "flux_line_moments" else p[2:4]
+    scales = [abs(cz - z), abs(cr - r)]
+    if name == "flux_line_moments":
+        ra, za, rb, zb = p[2]
+        scales.append(abs(ra - (rb - ra) / (zb - za) * (za - z) - r))
+    scale = max(min(v for v in scales if v), mp.mpf("1e-30")) / (2 * r)
+    points = (
+        [mp.mpf(0)]
+        + [scale * 10**k for k in range(40) if scale * 10**k < mp.pi / 4]
+        + [mp.pi / 4]
+    )
+    points += [mp.pi / 2 - a for a in reversed(points[:-1])]
+    count = len(integrand(mp.pi / 4, 0))
+    values = [mp.quad(lambda a: integrand(a, 0)[k], points) for k in range(count)]
+    derivatives = [
+        mp.quad(lambda a: mp.diff(lambda e: integrand(a, e)[k], 0), points)
+        for k in range(count)
+    ]
+    answers.append(
+        [[mp.nstr(v, 50) for v in values], [mp.nstr(v, 50) for v in derivatives]]
+    )
+print(json.dumps(answers))
+"""
+
+
+def _term_reference(name, primals, tangents, indices):
+    rows = [
+        [
+            jax.tree.map(lambda v: np.asarray(v)[i].tolist(), tree)
+            for tree in (primals, tangents)
+        ]
+        for i in indices
+    ]
+    result = subprocess.run(
+        [sys.executable, "-I", "-c", _TERM_REFERENCE_PROBE],
+        input=json.dumps({"name": name, "rows": rows}),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return np.asarray(json.loads(result.stdout), dtype=float)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "arsinh_terms",
+        "against_first_arsinh",
+        "flux_moment_residuals",
+        "horizontal_flux_line_moments",
+    ],
+)
+def test_endpoint_terms_match_exact_integrals(name):
+    """Audit smooth and cancelling corner terms against unreduced integrals."""
+    indices = np.asarray(
+        [5, 3363, 9000]
+        + {
+            "arsinh_terms": [7794],
+            "horizontal_flux_line_moments": [4312, 4786, 8067],
+        }.get(name, [])
+    )
+    _, _, primals, tangents = CASES[name]
+    p, t = (
+        jax.tree.map(lambda v: np.asarray(v)[indices], tree)
+        for tree in (primals, tangents)
+    )
+    vertex, d_vertex = polygonanalytic._vertex_tangent(
+        *p[:4], *t[:4], NODES, residual=True, xp=np
+    )
+    if name == "arsinh_terms":
+        value, tangent = polygonanalytic._arsinh_terms_tangent(vertex, d_vertex)
+    elif name == "against_first_arsinh":
+        value, tangent = polygonanalytic._against_first_arsinh_tangent(
+            vertex, d_vertex, p[6], t[6]
+        )
+    else:
+        function = getattr(polygonanalytic, "_" + name + "_tangent")
+        value, tangent = function(vertex, d_vertex, p[4], t[4], p[5], t[5])
+    reference = _term_reference(name, p, t, np.arange(indices.size))
+    value = np.stack(jax.tree.leaves(value), axis=1)
+    tangent = np.stack(jax.tree.leaves(tangent), axis=1)
+    value_error = relative_error(value, reference[:, 0]).max()
+    tangent_error = relative_error(tangent, reference[:, 1]).max()
+    print(
+        f"EXACT_INTEGRAL {name} samples={indices.size} digits=50 "
+        f"value_relative_max={value_error:.3e} tangent_relative_max={tangent_error:.3e}"
+    )
+    assert value_error <= 1e-10
+    assert tangent_error <= SCAN_TOLERANCE

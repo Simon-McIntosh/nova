@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "nova/equilibrium/support_read.py:solve, nova/equilibrium/support_read.py:step_batch, nova/equilibrium/support_read.py:solve_batch",
+  "completed_at": "2026-11-06T09:11:00.931Z",
+  "dispatched_at": "2026-11-06T08:56:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-krylov-cleanup",
+      "recorded_at": "2026-11-06T09:16:44.167117+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The float64 reference comparison on line 452 is the independent guard, and the unpreconditioned control reddens it at 6.5e-3 and 7.4e-3. The self-reported asserts are diagnostics.",
+      "recorded_at": "2026-11-06T09:16:48.817604+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-krylov-cleanup",
+      "recorded_at": "2026-11-06T09:16:53.574709+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "id": "f0820adb20a",
+      "line": 1362,
+      "severity": "non-blocking",
+      "text": "hessenberg is initialised with jnp.eye(width + 1, width) instead of zeros, so any column no Arnoldi step writes keeps a unit diagonal entry; a cycle that exits below width (breakdown at line 1373, or an iteration cap that is not a multiple of the restart width) feeds those junk columns through the QR at lines 1387-1392 and adds a spurious component along a real Krylov vector to the update. Production runs width 20 with max_iterations 400, an exact multiple, so only breakdown reaches it, and test_bank_gmres_zero_right_and_iteration_exhaustion asserts the step count and residual but never the corrupted update."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "feb7d1f54dd",
+      "line": 454,
+      "severity": "non-blocking",
+      "text": "assert float(step.krylov_condition * step.krylov_residual) <= 1e-8 and the bool(step.converged) assert at line 453 both read values the code itself reports, so they hold whatever the solve actually did; the independent guard is the float64 reference comparison at line 452, and that is the assertion the recorded unpreconditioned control reddens (0.00651 and 0.00744 against 1e-8)."
+    },
+    {
+      "file": "tests/test_bank_solve_cycle.py",
+      "id": "faf073a3060",
+      "line": 42,
+      "severity": "non-blocking",
+      "text": "the toy NewtonFactor double still fills the re-typed factor with a dense jnp.eye(size) block_inverse and jnp.zeros(size, jnp.int32) gather indices, which are only shape-correct for a one-cell-per-component toy and are semantically wrong beyond it; it is inert today because step() replaces newton_step and the factor never reaches _block_gmres, but the double no longer carries what the field contract now means."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 50b66f2b to 2ad68aa7: 14f017e lands the block-preconditioned Arnoldi solve, the factor re-typing and the physical checks; 9ac772a pins the carried gather dtype to int32; 83fb3a2 lands the measurement drivers, the report and the evidence fragment; d9a0b337e adds the booking file to the paired suite; 2ad68aa7 extends the report and records the seven-file pairing.",
+    "done_when": "the brief's measures are asserted in code and receipts: tests/test_bank_newton_step.py:452 compares the trial and converged 550-cell updates with a float64 reference at 1e-8, tests/test_bank_solve_cycle.py (untouched) keeps every lane's terminal fresh residual at or below 1e-10, and scripts/prototypes/bank_newton_krylov/report.py:61-70 asserts pair_gaps limits, lane residual 1e-10 and krylov condition times residual 1e-8 against the paired receipts before emitting the table.",
+    "goal": "nova/equilibrium/support_read.py:1403-1490 at head 2ad68aa7 solves the equilibrated step with a restarted Arnoldi whose matvec is the per-cell 3x3 block inverse, stops on _krylov_condition_estimate of that preconditioned operator times its relative residual at 1e-8, removes lu_factor and lu_solve from the step path, and re-types NewtonFactor to block_inverse and indices.",
+    "manifest": "read; it lists five commits beyond base 50b66f2b, the seven-file baseline and after suite receipts with completed true, the negative-control log and note, the device receipts, and status blocked with blockers naming only the coordinator's hold; its revision_note claims the six earlier files ran at 9ac772a8 and that the diff to 83fb3a29 is empty for product and tests, which I re-ran and confirmed.",
+    "write_paths": "the reviewed manifest declares nova/equilibrium/support_read.py, tests/test_bank_newton_step.py, scripts/prototypes/bank_newton_krylov, the bank-newton-krylov evidence fragment and the unused figures directory; all eight files in the diff sit inside that set and nova/equilibrium/topology.py is untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: nova/equilibrium/support_read.py:1403-1490 at head 2ad68aa7 replaces the equilibrated LU step with a block-preconditioned restarted Arnoldi whose stop is the preconditioned condition estimate times the relative residual at 1e-8, removes lu_factor and lu_solve from the step path, and re-types NewtonFactor to block_inverse and indices.\nVERDICT done_when: tests/test_bank_newton_step.py:452 checks the physical update against an independent float64 solve at trial and converged 550-cell states, the untouched tests/test_bank_solve_cycle.py keeps every lane at fresh residual at most 1e-10 (max terminal 8.883e-11 in verified/head-test_bank_solve_cycle.log), and scripts/prototypes/bank_newton_krylov/report.py:61-70 asserts the pair_gaps limits and the per-lane bounds before writing the table.\nVERDICT write_paths: the manifest declares the production file, the assigned test file, scripts/prototypes/bank_newton_krylov and the evidence fragment, and every one of the eight files in the diff is inside that set with topology.py untouched.\nVERDICT manifest: it records five commits, seven-file baseline and after suite receipts with completed true and 3 against 1 failures, the negative-control log, the paired device receipts and the revision note; status reads blocked with blockers naming only the coordinator's hold.\nVERDICT diff: read all five commits against base 50b66f2b: 14f017e lands the Krylov solve and tests, 9ac772a pins the carried gather dtype, 83fb3a2 lands the measurement drivers, report and evidence fragment, d9a0b337e adds the booking file to the paired suite, and 2ad68aa7 extends the report and records the seven-file pairing.\nCALL_SITES: nova/equilibrium/support_read.py:solve, nova/equilibrium/support_read.py:step_batch, nova/equilibrium/support_read.py:solve_batch\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1462-1487 runs the block-preconditioned solve and sets converged from the preconditioned condition estimate times the residual, which is the rule the brief names, at the cost of the early-termination defect at line 1362.\nSCORE evidence: 19\nJUSTIFICATION evidence: carried-factor/baseline-suite.log and after-suite.log both end with a SUITE completed=true line and 3 against 1 failure ids, none added, and the receipts in verified/device-{base,head}/receipt.json reproduce the 643.001 to 67.142 ms and 2318.207 to 1594.793 ms figures in the evidence table.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff from 50b66f2b to 2ad68aa7 lies inside the write paths listed at the head of the reviewed manifest, and the concurrent-node file nova/equilibrium/topology.py is untouched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_bank_newton_step.py:452 reddens at 6.5e-3 and 7.4e-3 under the recorded unpreconditioned control, but no committed assertion pins that the step path stays LU-free and nothing exercises the early-termination path at nova/equilibrium/support_read.py:1362.\nSCORE fit: 18\nJUSTIFICATION fit: both changed files pass the repository ruff config unchanged, and nova/equilibrium/support_read.py:1304-1397 follows the file's private-helper style with no plan label, version suffix or ticket reference in any added name or comment.\nSCORE reuse: 16\nJUSTIFICATION reuse: the change reuses the existing _krylov_condition_estimate at nova/equilibrium/support_read.py:1271 and the prototype tooling (pair_gaps, fixture, analyse, analytic_oracle); searching nova/ for precondition, gmres and arnoldi found only the fused private stream machine at nova/equilibrium/fixed_point.py:2227 with its _gmres_* helpers, which owns no reusable dense-solve interface to extend and which the brief's local-Arnoldi option leaves in place.\nFINDING nova/equilibrium/support_read.py:1362 non-blocking: the Hessenberg is initialised with jnp.eye(width + 1, width) rather than zeros, so columns no Arnoldi step wrote keep a unit diagonal and a cycle that exits below width (breakdown at line 1373, or an iteration cap that is not a multiple of the restart width) feeds junk through the QR at lines 1387-1392 into the update; production uses width 20 and max_iterations 400 so only breakdown reaches it, and no test asserts the update on that path.\nFINDING tests/test_bank_newton_step.py:454 non-blocking: assert float(step.krylov_condition * step.krylov_residual) <= 1e-8 and the converged assert at line 453 both read values the code itself reports, so they hold whatever the solve did; the independent guard is the float64 reference at line 452.\nFINDING tests/test_bank_solve_cycle.py:42 non-blocking: the toy NewtonFactor double still passes a dense identity as block_inverse and zeros as gather indices, which match the re-typed field only for a one-cell-per-component toy; inert today because the double replaces newton_step, but it no longer carries the field's meaning.",
+  "review_run_id": "r-20261106T084922015844-review-of-bank-newton-krylov-2ad68aa7fad3",
+  "reviewed_base_sha": "50b66f2b7662c9fff3842f3f4e8cab2547386651",
+  "reviewed_head_sha": "2ad68aa7fad3d9101c3931e2f4859c4d44c9e9bf",
+  "reviewed_run_id": "r-20261106T070015362785-bank-newton-krylov",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:11:09.504672+00:00",
+  "total": 106
+}

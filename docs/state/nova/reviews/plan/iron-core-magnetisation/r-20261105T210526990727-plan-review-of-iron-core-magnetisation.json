@@ -147,6 +147,16 @@
       "note": "\u00a73 tolerance is now the best attainable error \u00a72 records in the sheet-route decision (near 1e-11), not 1e-12 (fad7c7e5f)",
       "reason": "",
       "when": "2026-11-06T19:46:39.785996+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "s9 now waits on s6 and s8 in plan-section-depends-on, so the limb-corrected model exists before validation (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-06T19:50:11.941762+00:00"
     }
   ],
   "responses": {
@@ -191,9 +201,9 @@
       "by": "",
       "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
       "commit_basis": "edit",
-      "note": "s4 now waits on s2 and s3 in plan-section-depends-on (fad7c7e5f); the solve runs against the device-built G",
+      "note": "s9 now waits on s6 and s8 in plan-section-depends-on, so the limb-corrected model exists before validation (cc22ac1a0).",
       "reason": "",
-      "when": "2026-11-06T19:45:11.854031+00:00"
+      "when": "2026-11-06T19:50:11.941762+00:00"
     },
     "wiring-2": {
       "action": "acted",

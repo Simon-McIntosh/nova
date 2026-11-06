@@ -22,27 +22,31 @@
   "drawn_plasma_mesh": {
     "boundary_assembler": {
       "available": true,
-      "overflow": true,
-      "requested": true,
-      "well_formed": false
+      "closed_segment_count": 677,
+      "closed_valid": true,
+      "open_branch_count": 2,
+      "open_segment_count": 657,
+      "open_slot_count": 2,
+      "source": "nova.equilibrium.display_flux.DisplayFluxMap.branches",
+      "well_formed": true
     },
     "boundary_branches_drawn": {
-      "closed_drawn": 0,
-      "open_drawn": 0
+      "closed_drawn": 1,
+      "open_drawn": 2
     },
-    "boundary_clipped_cells": 0,
+    "boundary_clipped_cells": 4250,
     "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
-    "boundary_vertex_count": 0,
+    "boundary_vertex_count": 8125,
     "coil_section_count": 938,
     "coupling": "none; cell geometry only, no Biot build",
-    "cut_at_boundary_cells": 0,
+    "cut_at_boundary_cells": 474,
     "delivered_cells": 12353,
     "display_map": {
-      "build_seconds": 254.79515860415995,
+      "build_seconds": 1938.2418728237972,
       "max_node_mismatch_wb": 0.008254549375624087,
-      "reproduction_relative_error": 1.7879186665292104e-16,
+      "reproduction_relative_error": 0.0,
       "saddle_converged": true,
-      "saddle_offset_mm": 13.186108002581266,
+      "saddle_offset_mm": 13.186108002583568,
       "shape": [
         195,
         401
@@ -155,10 +159,16 @@
   "identity": "22086/43 mixed",
   "invocation": {
     "argv": [
-      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py",
-      "cpu-lane",
-      "12000",
-      "vacuum-and-plasma-panels-fine"
+      "benchmarks/mast_centroid_solve_panels.py",
+      "panels",
+      "--state",
+      "docs/figures/mast-centroid-capability/cpu-lane/panel-fields.npz",
+      "--receipt",
+      "docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json",
+      "--figure",
+      "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+      "--hex-cells",
+      "12000"
     ],
     "cwd": "."
   },

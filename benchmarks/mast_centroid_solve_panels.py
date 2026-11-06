@@ -74,8 +74,12 @@ WARM_EDIT_FRACTIONS = (0.02, 0.04, 0.06)
 LEVEL_COUNT = 24
 #: Translucent enough that the contours read through the filled cells.
 CELL_ALPHA = 0.55
+#: The contour population sits at the darkest neutral a data population may
+#: take; the ink style's 0.35 pt stroke renders near #b8b8b8 at this figure
+#: size, which reads as background rather than data.
+CONTOUR_INK = {"color": "#929292", "linewidth": 0.6}
 #: The boundary is drawn in the contour ink, only heavier.
-BOUNDARY_LINEWIDTH = 2.6 * 0.35
+BOUNDARY_LINEWIDTH = 2.6 * 1.0
 BOUNDARY_SAMPLES = 12
 #: Coils are context, not subject: a faint outline the contours read through.
 COIL_EDGE_COLOR = "#b8b8b8"
@@ -218,12 +222,8 @@ RESPONSE_CHUNK = 2048
 
 def _display_points(radius: np.ndarray, height: np.ndarray, spacing: float):
     """Return the display grid the flux-map builder forms from these nodes."""
-    radial = np.arange(
-        float(radius[0]), float(radius[-1]) + 0.5 * spacing, spacing
-    )
-    vertical = np.arange(
-        float(height[0]), float(height[-1]) + 0.5 * spacing, spacing
-    )
+    radial = np.arange(float(radius[0]), float(radius[-1]) + 0.5 * spacing, spacing)
+    vertical = np.arange(float(height[0]), float(height[-1]) + 0.5 * spacing, spacing)
     grid_radius, grid_height = np.meshgrid(radial, vertical, indexing="ij")
     return np.c_[grid_radius.ravel(), grid_height.ravel()]
 
@@ -242,12 +242,10 @@ def _panel_response_chunk(payload):
     from nova.catalog.mast_geometry import MachineGeometryRegistry
     import nova.imas.mast_solve_inputs as solve_inputs
 
-    group = zarr.open_group(
-        str(solve_inputs.SHOT_STORE / f"{shot}.zarr"), mode="r"
-    )["efm"]
-    geometry = (
-        MachineGeometryRegistry.default().select(shot).configuration.geometry
-    )
+    group = zarr.open_group(str(solve_inputs.SHOT_STORE / f"{shot}.zarr"), mode="r")[
+        "efm"
+    ]
+    geometry = MachineGeometryRegistry.default().select(shot).configuration.geometry
     _families, _drives, active_mapping = parity._circuit_drives(
         group, slice_index, geometry, "fcoil_c"
     )
@@ -279,9 +277,7 @@ def _panel_response_key(points: np.ndarray, cells: np.ndarray) -> tuple:
     return (points.shape, points.tobytes(), cells.tobytes())
 
 
-def _panel_response(
-    lattice: Any, points: np.ndarray, workers: int = RESPONSE_WORKERS
-):
+def _panel_response(lattice: Any, points: np.ndarray, workers: int = RESPONSE_WORKERS):
     """Build or load the unit-current responses for one fixed point set."""
     import hashlib
     from concurrent.futures import ProcessPoolExecutor
@@ -384,9 +380,7 @@ def prepare_response(state_path: Path, spacing: float = DEFAULT_SPACING) -> None
     del plasma
 
 
-def _machine_coupling(
-    lattice: Any, conductor_current: np.ndarray
-) -> DisplayCoupling:
+def _machine_coupling(lattice: Any, conductor_current: np.ndarray) -> DisplayCoupling:
     """Return the shot store's coupling at arbitrary display points.
 
     The conductors are the fitted circuits the solve reads, composed from their
@@ -466,8 +460,10 @@ def _polish(spline, seed: np.ndarray) -> dict[str, Any]:
     point = np.asarray(seed, dtype=float).reshape(2).copy()
     for _ in range(80):
         gradient = np.asarray(
-            [spline.ev(point[0], point[1], dx=1, dy=0),
-             spline.ev(point[0], point[1], dx=0, dy=1)],
+            [
+                spline.ev(point[0], point[1], dx=1, dy=0),
+                spline.ev(point[0], point[1], dx=0, dy=1),
+            ],
             dtype=float,
         )
         hessian = np.asarray(
@@ -491,8 +487,10 @@ def _polish(spline, seed: np.ndarray) -> dict[str, Any]:
         if float(np.max(np.abs(step))) < 1.0e-12:
             break
     gradient = np.asarray(
-        [spline.ev(point[0], point[1], dx=1, dy=0),
-         spline.ev(point[0], point[1], dx=0, dy=1)],
+        [
+            spline.ev(point[0], point[1], dx=1, dy=0),
+            spline.ev(point[0], point[1], dx=0, dy=1),
+        ],
         dtype=float,
     )
     hessian = np.asarray(
@@ -543,9 +541,7 @@ def _saddle_validation(state_path: Path, receipt_path: Path) -> dict[str, Any]:
 
     grid_radius, grid_height = np.meshgrid(radius, height, indexing="ij")
     grid_points = np.column_stack((grid_radius.ravel(), grid_height.ravel()))
-    inside = np.asarray(
-        inside_wall_units(grid_points, units), dtype=bool
-    )
+    inside = np.asarray(inside_wall_units(grid_points, units), dtype=bool)
     gradient = np.hypot(
         spline.ev(grid_radius.ravel(), grid_height.ravel(), dx=1, dy=0),
         spline.ev(grid_radius.ravel(), grid_height.ravel(), dx=0, dy=1),
@@ -594,8 +590,7 @@ def _saddle_validation(state_path: Path, receipt_path: Path) -> dict[str, Any]:
     }
     validation["verdict"] = (
         "confirmed_smooth_saddle"
-        if marker["hessian_determinant"] < 0.0
-        and polished["hessian_determinant"] < 0.0
+        if marker["hessian_determinant"] < 0.0 and polished["hessian_determinant"] < 0.0
         else "no_saddle_at_marker"
     )
     receipt["vacuum_saddle_validation"] = validation
@@ -1211,44 +1206,32 @@ def _panel_state_display(state_path: Path, spacing: float):
     return data, coupling, display, shape, radius, height, solved
 
 
-def _assembler_flags(display, axis_rz) -> dict:
-    """Return the branch assembler's own verdict on this display map.
+def _assembler_verdict(display) -> dict:
+    """Return the display map's own verdict on its separatrix assembly.
 
-    A panel that draws no separatrix must say why, and the two flags that
-    decide it are ``well_formed`` and ``overflow``. The map publishes the first
-    with its branches but not the second, so the assembler is asked once more
-    on the same field. It reports a refusal rather than a fallback contour, and
-    the call is already compiled for this shape by the map build.
+    The map assembles the branches on its own polished-saddle level and
+    publishes the verdict with them, so the panel reads that verdict rather
+    than asking the assembler a second time with a hand-composed argument
+    order.
     """
-    import jax
-    import jax.numpy as jnp
-
-    from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
-
     if not display.branches or not np.all(np.isfinite(display.saddle_rz)):
         return {
-            "requested": True,
+            "source": "nova.equilibrium.display_flux.DisplayFluxMap",
             "available": False,
             "well_formed": None,
-            "overflow": None,
         }
-    assembled = jax.device_get(
-        assemble_separatrix_branches(
-            # The map is stored (radial, vertical); the assembler takes
-            # (vertical, radial), which is the orientation the builder itself
-            # hands it.
-            jnp.asarray(display.flux.T),
-            jnp.asarray(display.radius),
-            jnp.asarray(display.height),
-            jnp.asarray(float(display.saddle_flux)),
-            jnp.asarray(np.asarray(axis_rz, dtype=np.float64).reshape(2)),
-        )
-    )
+    branches = display.branches
     return {
-        "requested": True,
+        "source": "nova.equilibrium.display_flux.DisplayFluxMap.branches",
         "available": True,
-        "well_formed": bool(np.asarray(assembled["well_formed"])),
-        "overflow": bool(np.asarray(assembled["overflow"])),
+        "well_formed": bool(display.well_formed),
+        "closed_segment_count": int(
+            np.sum(np.asarray(branches["closed_segment_count"]))
+        ),
+        "open_segment_count": int(np.sum(np.asarray(branches["open_segment_count"]))),
+        "open_slot_count": int(np.sum(np.asarray(branches["open_branch_valid"]))),
+        "open_branch_count": int(np.sum(np.asarray(branches["open_branch_count"]))),
+        "closed_valid": bool(np.any(np.asarray(branches["closed_valid"]))),
     }
 
 
@@ -1287,9 +1270,7 @@ def panels(
     solved = display.flux
     grid_radius, grid_height = np.meshgrid(radius, height, indexing="ij")
     vacuum = np.asarray(
-        coupling.external(
-            np.column_stack((grid_radius.ravel(), grid_height.ravel()))
-        ),
+        coupling.external(np.column_stack((grid_radius.ravel(), grid_height.ravel()))),
         dtype=float,
     ).reshape(radius.size, height.size)
     units = _restore_units(data)
@@ -1333,7 +1314,9 @@ def panels(
         )
         poloidal.draw_wall(panel, units=units)
 
-    poloidal.draw_flux_contours(axes[0], radius, height, vacuum.T, levels)
+    poloidal.draw_flux_contours(
+        axes[0], radius, height, vacuum.T, levels, **CONTOUR_INK
+    )
     # The vacuum panel has its own stationary points; solved-state landmarks
     # describe a different field and cannot stand in for them.
     o_mask, x_mask = FieldNull.categorize_2d(vacuum.T)
@@ -1357,7 +1340,9 @@ def panels(
     axes[0].set_title("conductors only, no plasma", fontsize=9)
 
     poloidal.draw_plasma_cells(axes[1], clipped, alpha=CELL_ALPHA)
-    poloidal.draw_flux_contours(axes[1], radius, height, solved.T, levels)
+    poloidal.draw_flux_contours(
+        axes[1], radius, height, solved.T, levels, **CONTOUR_INK
+    )
     # The boundary is one of the drawn contours, not a separate red curve: same
     # ink, slightly heavier, so it reads as the surface the level array already
     # contains rather than as an overlay from somewhere else.
@@ -1425,9 +1410,7 @@ def panels(
             "saddle_offset_mm": float(display.saddle_offset_mm),
             "saddle_converged": bool(display.saddle_converged),
             "max_node_mismatch_wb": float(display.max_node_mismatch_wb),
-            "reproduction_relative_error": float(
-                display.reproduction_relative_error
-            ),
+            "reproduction_relative_error": float(display.reproduction_relative_error),
             "build_seconds": float(display.build_seconds),
         },
         "boundary_source": (
@@ -1444,7 +1427,7 @@ def panels(
             "x_points_inside_wall": int(len(vacuum_saddles)),
             **vacuum_tally,
         },
-        "boundary_assembler": _assembler_flags(display, magnetic_axis),
+        "boundary_assembler": _assembler_verdict(display),
     }
     print(
         "FIGURE=%s hex_delivered=%d boundary_cells=%d cut=%d coils=%d "

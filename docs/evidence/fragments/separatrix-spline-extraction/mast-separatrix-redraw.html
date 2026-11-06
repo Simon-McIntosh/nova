@@ -1,0 +1,147 @@
+<section data-reckon="evidence" id="mast-separatrix-redraw">
+<h2>The MAST centroid panels draw the assembled separatrix</h2>
+
+<p id="mast-separatrix-redraw-summary">Every MAST centroid panel now draws the
+separatrix it was computing and not showing. The three committed states are
+redrawn from their stored conductor currents and cell moments, and the
+right-hand panel of each lane carries the closed lobe around the magnetic axis
+and both open legs through the admitted X-point, with the hexagonal plasma mesh
+cut against that lobe and filled inside it. The boundary is the display map's
+own branch assembly: the panel reads <code>branches</code> and its
+<code>well_formed</code> verdict from
+<code>nova.equilibrium.display_flux</code> rather than asking the assembler a
+second time with a hand-composed argument order.</p>
+
+<p id="mast-separatrix-redraw-reproduced">The defect was reproduced before it
+was repaired. On the receipts committed at
+<code>c2e4fd211</code> every lane recorded
+<code>boundary_assembler: {available: true, overflow: true, well_formed:
+false}</code> with <code>boundary_branches_drawn: {closed_drawn: 0, open_drawn:
+0}</code> and <code>boundary_vertex_count: 0</code>, so the panels drew the
+field and the coil set but no boundary, and the plasma mesh was built and then
+had nothing to be cut against. The mechanism was the assembler's fixed 256
+branch slots: a 10 mm display map needs 677 segments on the cpu and titan lanes
+and 675 on the full-axis lane, so the assembly overflowed and, by construction,
+refused the whole field rather than returning a partial boundary.</p>
+
+<p id="mast-separatrix-redraw-measured">The redraw is read from each lane's own
+receipt. Segment counts are the map's assembled branches, the vertex count is
+the boundary the plasma mesh is cut against, and the saddle offset is the
+polished saddle's distance from the lattice saddle the seed came from.</p>
+
+<table id="mast-separatrix-redraw-table">
+<caption>Assembled separatrix, delivered mesh and saddle offset, one row per
+lane, read from <code>drawn_plasma_mesh</code> in each
+<code>centroid-solve.json</code>.</caption>
+<thead><tr><th>lane</th><th>closed segments</th><th>open segments</th><th>open legs drawn</th><th>boundary vertices</th><th>mesh cells delivered</th><th>cells clipped</th><th>saddle offset [mm]</th></tr></thead>
+<tbody>
+<tr><td>cpu-lane (12000 requested)</td><td>677</td><td>657</td><td>2</td><td>8125</td><td>12353</td><td>4250</td><td>13.19</td></tr>
+<tr><td>cpu-lane (4000 requested)</td><td>677</td><td>657</td><td>2</td><td>8125</td><td>4286</td><td>1453</td><td>13.19</td></tr>
+<tr><td>titan-lane</td><td>677</td><td>657</td><td>2</td><td>8125</td><td>4286</td><td>1453</td><td>13.19</td></tr>
+<tr><td>full-axis-lane</td><td>675</td><td>653</td><td>2</td><td>8101</td><td>4286</td><td>1449</td><td>9.91</td></tr>
+</tbody>
+</table>
+
+<figure id="mast-separatrix-redraw-figure">
+<img src="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png" alt="Two poloidal panels of the MAST centroid state at 12000 mesh cells. The left panel draws the conductors-only field with a red X marking its own saddle. The right panel draws the solved field with a thick closed separatrix lobe around the right-hand magnetic axis, two dashed legs leaving through the red X at the top, and the hexagonal plasma mesh filling the lobe.">
+<figcaption>cpu-lane at 12000 requested cells (12353 delivered). Left: the
+conductors-only field with its own saddle. Right: the solved field, the
+assembled separatrix as a closed lobe and two legs through the admitted
+X-point, and the plasma mesh cut against it. The two open legs run from the
+saddle out to the top and bottom of the map and are drawn dashed, because a leg
+is not a loop.</figcaption>
+</figure>
+
+<p id="mast-separatrix-redraw-fine-plain">The cpu lane is drawn twice, and the
+two files are different pictures rather than the same one twice: the plain
+panel is drawn at the producer's 4000-cell default, delivering 4286 cells
+(md5 <code>a9f168eef415757c8f8f521dd96a6466</code>), and the
+<code>-fine</code> panel at the 12000 cells its receipt records, delivering
+12353 (md5 <code>0f1f60461833579beb5f21679d0ad08e</code>). The finer map reads
+as a finer mesh at full size, and its clipped-cell count rises from 1453 to
+4250 with it. A test compares the two committed files' digests, so a redraw
+that collapsed them to one picture fails rather than passing silently.</p>
+
+<p id="mast-separatrix-redraw-contours">The contour population is drawn at
+<code>#929292</code> with a 0.6 pt stroke. At the ink style's 0.35 pt default
+the strokes antialiased to about <code>#b8b8b8</code>, roughly 1.9:1 against
+white, which is below the ~3:1 a data population is asked to hold and is the
+level the earlier review rejected as too faint. The separatrix is drawn in the
+same ink and heavier, so the boundary reads as one of the drawn contours rather
+than as a second overlay in another colour.</p>
+
+<p id="mast-separatrix-redraw-invocation">Each receipt's <code>invocation</code>
+now names the repository producer,
+<code>benchmarks/mast_centroid_solve_panels.py panels</code>, so a reader can
+replay the receipt from the repository alone. The previous receipts named a
+run-local wrapper outside the repository, which no reader could open. A test
+asserts the receipt's <code>argv[0]</code> is the producer.</p>
+
+<p id="mast-separatrix-redraw-looked-at">Every PNG was rendered and looked at at
+full size. The separatrix runs through the red X-point marker and encloses the
+axis marker in all three lanes; the legs leave the saddle and exit the map
+rather than closing across the private flux region. The producer measures its
+own labels before saving and prints
+<code>LABEL_CHECK clipped=0 overlapping=0</code> on every lane.</p>
+
+<p id="mast-separatrix-redraw-reproduction-error">The cpu-lane receipt
+records <code>display_map.reproduction_relative_error</code> as exactly
+<code>0.0</code>, where the same lane read <code>1.79e-16</code> before and the
+other lanes read about <code>2e-16</code>. That exact zero is not agreement;
+it is the comparison reading one array twice, and it is a property of this
+producer's stand-in operator rather than of the display map. The map compares
+its evaluation at the lattice nodes against <code>operator.raster_image</code>,
+and this panel builds its operator as <code>_PanelOperator</code> onto the same
+<code>DisplayCoupling</code> the map is drawn through, so both operands are the
+same contraction of the same prepared response and the difference cancels bit
+for bit when both evaluations take the cached block. The non-zero readings on
+the other lanes are that same identity evaluated along a path that reassociates
+the sum, not a real disagreement. The figure therefore carries no information
+either way about whether the map reproduces the solve's own raster, and no
+claim is made from it here. The check with teeth on these panels is
+<code>max_node_mismatch_wb</code>, which compares the map against the stored
+state itself rather than against a copy of its own arithmetic.</p>
+
+<p id="mast-separatrix-redraw-gate-result">The redraw gate ran as one job through
+the lane launcher, at the revision this evidence ships with: slurm job
+<code>1306805</code> on the reserved H200 at revision <code>8e6ea80b2</code>,
+exit status 0, <b>11 passed in 2186.84 s</b>. The base arm ran the same command
+at revision <code>2fd5d5b58</code> in slurm job <code>1306717</code>, exit
+status 0, <b>10 passed in 2899.39 s</b>. The head carries one test id the base
+does not, and neither arm carries a failing id, so the gate shows <b>zero added
+failures</b> against the base. Both arms ran on the reserved H200.</p>
+
+<p id="mast-separatrix-redraw-gate-placement">The first attempt at that head
+went to the wrong device and is kept here rather than dropped. The gate and its
+control were submitted together and both fell to the <b>titan</b> rung when the
+H200 reservation refused them at that moment. That rung cannot serve the
+full-axis lane: a P100 holds 16 GB and the lane's JAX program asks for 2.46 GiB
+beyond it, so all three full-axis ids failed on
+<code>RESOURCE_EXHAUSTED</code> rather than on any assertion about the
+separatrix, and the gate ended 3 failed, 8 passed in job <code>1306786</code>.
+Had that figure been reported as the gate result it would have read as a
+regression in a change that has none. Re-submitted to the reserved H200 alone
+the same tree passed every id, which is what the paragraph above records, and
+which also measures how the two rungs differ: a lane launcher whose rung list
+falls back from H200 to titan falls back onto a device this lane does not fit,
+so a device-memory failure on the fallback rung is not evidence about the code.</p>
+
+<p id="mast-separatrix-redraw-control">The control for the new guard lives in
+the test module itself and is re-runnable from the tree:
+<code>NOVA_PANEL_256_SLOT_CONTROL=1</code> makes it pin the display assembler
+back to 256 branch slots on the one call <code>display_flux._branches</code>
+makes, so the <code>well_formed</code> guard the panels now depend on must
+fail. Run at the same head as the gate, it goes red exactly where it must:
+<b>5 failed, 6 passed, exit status 1</b>, with
+<code>test_committed_panel_state_renders[cpu-lane]</code> and
+<code>[titan-lane]</code> failing on <code>assert assembler["well_formed"]</code>
+and reporting <code>closed_segment_count: 0</code> — the overflow refusing the
+whole field, which is the state these panels shipped in. Those two ids pass in
+the gate run at that head, so the guard is what separates the two runs rather
+than an incidental failure. The remaining three failures in the control run are
+the full-axis lane's device-memory failures described above, which that
+placement carries in the gate run too and which are therefore not what the
+control is measuring; the earlier H200 control run
+(<code>logs/negative-control-final.log</code>) reddened all three render ids on
+the same assertion, which is the complete form of the control.</p>
+</section>

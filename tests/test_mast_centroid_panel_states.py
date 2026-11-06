@@ -23,6 +23,20 @@ CURRENT_PERTURBATION = 1.01
 SPACING = panel_renderer.DEFAULT_SPACING
 #: Levels the contour-path comparison is taken at.
 LEVEL_FRACTIONS = (0.2, 0.4, 0.6, 0.8)
+#: The declared control's switch: pin the assembler to the 256 slots the fine
+#: display grid overflowed, so the well_formed guard must fail.
+SLOT_CONTROL_ENV = "NOVA_PANEL_256_SLOT_CONTROL"
+
+if os.environ.get(SLOT_CONTROL_ENV) == "1":
+    import nova.equilibrium.display_flux as _display_flux
+
+    _assemble = _display_flux.assemble_separatrix_branches
+
+    def _forced_slots(*args, **kwargs):
+        kwargs["branch_capacity"] = 256
+        return _assemble(*args, **kwargs)
+
+    _display_flux.assemble_separatrix_branches = _forced_slots
 
 
 def test_committed_panel_states_are_present():
@@ -46,11 +60,7 @@ def _contour_paths(display) -> np.ndarray:
     )
     # contourpy takes one level per call; every level's paths are compared.
     return np.concatenate(
-        [
-            np.asarray(line)
-            for level in levels
-            for line in generator.lines(float(level))
-        ]
+        [np.asarray(line) for level in levels for line in generator.lines(float(level))]
     )
 
 
@@ -64,12 +74,8 @@ def _path_offset(one: np.ndarray, other: np.ndarray, stride: int = 8) -> float:
     """
     left = one[::stride]
     right = other[::stride]
-    distance = np.sqrt(
-        ((left[:, None, :] - right[None, :, :]) ** 2).sum(axis=2)
-    )
-    return float(
-        max(distance.min(axis=1).max(), distance.min(axis=0).max())
-    )
+    distance = np.sqrt(((left[:, None, :] - right[None, :, :]) ** 2).sum(axis=2))
+    return float(max(distance.min(axis=1).max(), distance.min(axis=0).max()))
 
 
 def _perturbed_state(state_path: Path, target: Path) -> Path:
@@ -91,9 +97,7 @@ _DISPLAYS: dict[Path, object] = {}
 def _display(state_path: Path):
     """Return the state's fine display map, built once per session."""
     if state_path not in _DISPLAYS:
-        _DISPLAYS[state_path] = panel_renderer._panel_state_display(
-            state_path, SPACING
-        )
+        _DISPLAYS[state_path] = panel_renderer._panel_state_display(state_path, SPACING)
     return _DISPLAYS[state_path]
 
 
@@ -117,6 +121,11 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
     assert confirmation["polished_gradient_to_median"] <= 1e-6
     assert confirmation["marker"]["hessian_determinant"] < 0
     assert confirmation["polished"]["hessian_determinant"] < 0
+    # The receipt must name the repository producer, so a reader can replay it
+    # from the repository alone rather than from a run-local wrapper.
+    assert committed["invocation"]["argv"][0].endswith(
+        "benchmarks/mast_centroid_solve_panels.py"
+    ), committed["invocation"]
     figure_path = tmp_path / "vacuum-and-plasma-panels.png"
     panel_renderer.panels(state_path, figure_path, receipt_path, hex_cells=200)
 
@@ -141,6 +150,38 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
     display = drawn["display_map"]
     assert display["spacing_m"] <= 0.010
     assert display["saddle_converged"]
+    # The map's own branch assembly is the drawn boundary: a lane whose
+    # assembler overflowed reports well_formed false and draws no lobe, which
+    # is exactly the state the fine display grid used to produce.
+    assembler = drawn["boundary_assembler"]
+    assert assembler["available"], f"{state_path.parent.name}: no branch assembly"
+    assert assembler["well_formed"], (
+        f"{state_path.parent.name}: the display map's separatrix assembly is not "
+        f"well formed ({assembler}); the panel draws no lobe"
+    )
+    assert assembler["closed_segment_count"] > 0
+    branches = drawn["boundary_branches_drawn"]
+    assert branches["closed_drawn"] == 1, (
+        f"{state_path.parent.name}: the closed lobe was not drawn ({branches})"
+    )
+    assert branches["open_drawn"] >= 1, (
+        f"{state_path.parent.name}: no open leg was drawn through the saddle "
+        f"({branches})"
+    )
+
+
+def test_cpu_lane_plain_and_fine_panels_are_different_pictures():
+    lane = panel_renderer.FIGURE_ROOT / "cpu-lane"
+    plain = lane / "vacuum-and-plasma-panels.png"
+    fine = lane / "vacuum-and-plasma-panels-fine.png"
+    assert plain.is_file() and fine.is_file()
+    assert (
+        hashlib.md5(plain.read_bytes()).hexdigest()
+        != hashlib.md5(fine.read_bytes()).hexdigest()
+    ), (
+        "the 12000-cell panel and the 4000-cell panel render identical bytes, "
+        "so a reader cannot see that one is the finer map"
+    )
 
 
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
@@ -149,9 +190,7 @@ def test_redrawn_contours_leave_the_lattice_rows(state_path: Path, tmp_path: Pat
     lattice_height = np.asarray(data["height"])
     paths = _contour_paths(display)
     assert paths.shape[0] > 0
-    offsets = np.abs(
-        paths[:, 1][:, None] - lattice_height[None, :]
-    ).min(axis=1)
+    offsets = np.abs(paths[:, 1][:, None] - lattice_height[None, :]).min(axis=1)
     assert np.any(offsets > 1.0e-6)
 
 

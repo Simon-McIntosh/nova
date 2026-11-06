@@ -22,23 +22,27 @@
   "drawn_plasma_mesh": {
     "boundary_assembler": {
       "available": true,
-      "overflow": true,
-      "requested": true,
-      "well_formed": false
+      "closed_segment_count": 675,
+      "closed_valid": true,
+      "open_branch_count": 2,
+      "open_segment_count": 653,
+      "open_slot_count": 2,
+      "source": "nova.equilibrium.display_flux.DisplayFluxMap.branches",
+      "well_formed": true
     },
     "boundary_branches_drawn": {
-      "closed_drawn": 0,
-      "open_drawn": 0
+      "closed_drawn": 1,
+      "open_drawn": 2
     },
-    "boundary_clipped_cells": 0,
+    "boundary_clipped_cells": 1449,
     "boundary_source": "assemble_separatrix_branches on the solved lattice spline, split at the admitted saddle",
-    "boundary_vertex_count": 0,
+    "boundary_vertex_count": 8101,
     "coil_section_count": 938,
     "coupling": "none; cell geometry only, no Biot build",
-    "cut_at_boundary_cells": 0,
+    "cut_at_boundary_cells": 273,
     "delivered_cells": 4286,
     "display_map": {
-      "build_seconds": 255.651844156906,
+      "build_seconds": 255.60055794380605,
       "max_node_mismatch_wb": 0.008423456975719931,
       "reproduction_relative_error": 2.6729225456362353e-16,
       "saddle_converged": true,
@@ -155,10 +159,16 @@
   "identity": "22086/43 mixed",
   "invocation": {
     "argv": [
-      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T221244543285-mast-centroid-fine-panels/logs/draw-panel.py",
-      "full-axis-lane",
-      "4000",
-      "vacuum-and-plasma-panels"
+      "benchmarks/mast_centroid_solve_panels.py",
+      "panels",
+      "--state",
+      "docs/figures/mast-centroid-capability/full-axis-lane/panel-fields.npz",
+      "--receipt",
+      "docs/figures/mast-centroid-capability/full-axis-lane/centroid-solve.json",
+      "--figure",
+      "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+      "--hex-cells",
+      "4000"
     ],
     "cwd": "."
   },

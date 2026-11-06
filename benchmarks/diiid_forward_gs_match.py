@@ -22,6 +22,7 @@ import base64
 import concurrent.futures
 import gc
 import hashlib
+import io
 import json
 import math
 import multiprocessing
@@ -34,12 +35,15 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, NamedTuple
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path as PolygonPath
+from matplotlib.lines import Line2D
+from matplotlib.text import Text
 from scipy.constants import mu_0
 from scipy.interpolate import RectBivariateSpline
 from scipy.spatial import cKDTree
@@ -56,6 +60,9 @@ from benchmarks.diiid_corpus_conventions import (
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.database.filepath import operand_cache_root, portable_path
+from nova.database import content_store
+from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
+from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import (
     DEFAULT_SPACING as DISPLAY_DEFAULT_SPACING,
@@ -323,6 +330,9 @@ class DisplayMapRecord:
     separatrix_saddle_to_label_x_m: float | None
     separatrix_closed_points: int
     max_node_mismatch_wb: float
+    max_solved_node_mismatch_wb: float
+    promoted_node_count: int
+    nearest_promoted_to_xpoint_m: float
     reproduction_relative_error: float
     build_seconds: float
     conductor_response_path: str
@@ -393,6 +403,9 @@ class FrameResult:
     displacement_decomposition: DisplacementDecomposition | None = None
     banked_read: dict[str, Any] = field(default_factory=dict)
     display_map: DisplayMapRecord | None = None
+    operand_path: str | None = None
+    operand_digest: str | None = None
+    operand_unavailable_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -1542,13 +1555,20 @@ def _build_conductor_response(
         "points": int(points.shape[0]),
         "processes": DISPLAY_RESPONSE_PROCESSES,
     }
-    if path.exists():
-        response = np.load(path)
+    store_root = path.parent / "conductor-response-store"
+    object_root = content_store.verified_object_root(store_root, create=True)
+    stored = content_store.verified_destination(object_root, key)
+    if stored is not None or path.exists():
+        source = stored / "response.npy" if stored is not None else path
+        response = np.load(source)
         if response.shape != (points.shape[0], columns):
             raise RuntimeError(
                 f"cached conductor response has shape {response.shape}, "
                 f"expected {(points.shape[0], columns)}"
             )
+        if stored is None:
+            stored = _publish_conductor_response(store_root, key, source)
+        record["path"] = portable_path(stored / "response.npy")
         record["build_seconds"] = 0.0
         record["loaded_from_cache"] = True
         record["shape"] = list(response.shape)
@@ -1591,15 +1611,31 @@ def _build_conductor_response(
             f"conductor response has shape {response.shape}, "
             f"expected {(points.shape[0], columns)}"
         )
-    path.parent.mkdir(parents=True, exist_ok=True)
     staged = path.with_name(path.name + ".partial")
     with staged.open("wb") as handle:
         np.save(handle, response)
-    staged.replace(path)
+    stored = _publish_conductor_response(store_root, key, staged)
+    staged.unlink()
+    record["path"] = portable_path(stored / "response.npy")
     record["build_seconds"] = seconds
     record["loaded_from_cache"] = False
     record["shape"] = list(response.shape)
     return response, record
+
+
+def _publish_conductor_response(root: Path, key: str, source: Path) -> Path:
+    """Publish and verify one conductor matrix through the content store."""
+
+    digest, size = content_store.file_content_identity(source)
+    declaration = type(
+        "ConductorFile", (), {"name": "response.npy", "sha256": digest, "size": size}
+    )()
+    manifest = json.dumps(
+        {"name": "response.npy", "sha256": digest, "size": size}, sort_keys=True
+    ).encode()
+    return content_store.publish_files(
+        root, f"sha256:{key}", (declaration,), {"response.npy": source}, manifest
+    )
 
 
 def _display_coupling(
@@ -1700,6 +1736,7 @@ def _persist_frame_operands(
     display: DisplayFluxMap,
     response: np.ndarray,
     conductor_current: np.ndarray,
+    compensation_current: np.ndarray | None = None,
     separatrix_closed: np.ndarray | None = None,
     separatrix_assembly: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -1719,7 +1756,14 @@ def _persist_frame_operands(
     _radius, _height, points = _display_grid(lattice)
     rows = np.arange(points.shape[0], dtype=np.intp)
     conductor_current = np.asarray(conductor_current, dtype=np.float64)
-    conductor_flux = np.asarray(response[rows] @ conductor_current, dtype=np.float64)
+    compensation_current = (
+        np.zeros_like(conductor_current)
+        if compensation_current is None
+        else np.asarray(compensation_current, dtype=np.float64)
+    )
+    conductor_flux = np.asarray(
+        response[rows] @ (conductor_current + compensation_current), dtype=np.float64
+    )
     flux = np.asarray(display.flux, dtype=np.float64)
     payload: dict[str, np.ndarray] = {
         "state": np.asarray(equilibrium.flux, dtype=np.float64),
@@ -1730,6 +1774,18 @@ def _persist_frame_operands(
         "conductor_flux": conductor_flux,
         "plasma_flux": flux.ravel() - conductor_flux,
         "conductor_current": conductor_current,
+        "compensation_current": compensation_current,
+        "promoted_mask": np.asarray(
+            equilibrium.promoted_mask
+            if equilibrium.promoted_mask is not None
+            else np.zeros(lattice.node_count, dtype=bool),
+            dtype=bool,
+        ),
+        "max_solved_node_mismatch_wb": np.asarray(display.max_solved_node_mismatch_wb),
+        "promoted_node_count": np.asarray(display.promoted_node_count),
+        "nearest_promoted_to_xpoint_m": np.asarray(
+            display.nearest_promoted_to_xpoint_m
+        ),
         "response_row_index": rows,
         "spacing_m": np.asarray(display.spacing_m, dtype=np.float64),
         "saddle_rz": np.asarray(display.saddle_rz, dtype=np.float64),
@@ -1807,11 +1863,13 @@ def _persist_frame_operands(
         payload["constraint_compensator_authority"] = np.asarray(
             authority, dtype=np.float64
         )
-    path = _frame_operand_path(tag)
+    buffer = io.BytesIO()
+    np.savez_compressed(buffer, **payload)
+    content = buffer.getvalue()
+    digest = hashlib.sha256(content).hexdigest()
+    path = _frame_operand_path(f"{tag}-{digest}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(path, **payload)
-    with path.open("rb") as stream:
-        digest = hashlib.sha256(stream.read()).hexdigest()
+    path.write_bytes(content)
     return {
         "path": portable_path(path),
         "digest": digest,
@@ -1840,7 +1898,8 @@ def rebuild_display_flux(
     """
 
     conductor = np.asarray(
-        response[operands["response_row_index"]] @ operands["conductor_current"],
+        response[operands["response_row_index"]]
+        @ (operands["conductor_current"] + operands.get("compensation_current", 0)),
         dtype=np.float64,
     )
     plasma = np.asarray(operands["plasma_flux"], dtype=np.float64)
@@ -1848,7 +1907,7 @@ def rebuild_display_flux(
 
 
 def _display_map(
-    profile: ForwardProfile, equilibrium, machine
+    profile: ForwardProfile, equilibrium, machine, target_current_a: float
 ) -> tuple[DisplayFluxMap, dict[str, Any]]:
     """Return the frame's fine display map and the rig it was drawn from."""
 
@@ -1859,16 +1918,46 @@ def _display_map(
     # refuses the construction the other serves. Ask for the moments this
     # operator carries and hand them to the map, so it never has to guess.
     operator = profile.operator
-    moments = (
-        None
-        if operator.use_linear_moments
-        else operator.read_with_current_moments(jnp.asarray(equilibrium.flux), None)[2]
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    moments = operator.normalised_current_moments(
+        jnp.asarray(equilibrium.flux), jnp.asarray(target_current_a), requested
+    )[0]
+    compensation_current = np.zeros_like(
+        np.asarray(operator.external_current, dtype=float)
     )
+    for constraint in equilibrium.constraints:
+        direction = constraint.compensator_direction
+        if direction is not None:
+            compensation_current += np.asarray(
+                direction @ constraint.physical_unknown, dtype=float
+            )
+    response = _stored_conductor_response(record)
+    targets = np.concatenate(
+        (
+            np.stack(
+                np.meshgrid(display_radius, display_height, indexing="ij"), axis=-1
+            ).reshape(-1, 2),
+            np.asarray(profile.lattice.coordinate, dtype=float),
+        )
+    )
+    row_lookup = {point.tobytes(): index for index, point in enumerate(targets)}
+
+    def compensation(points: np.ndarray) -> np.ndarray:
+        rows = [
+            row_lookup[point.tobytes()]
+            for point in np.ascontiguousarray(points, dtype=float)
+        ]
+        return response[rows] @ compensation_current
+
     display = build_display_flux_map(
         profile,
         np.asarray(equilibrium.flux, dtype=float),
         coupling=coupling,
         moments=moments,
+        target_current=jnp.asarray(target_current_a),
+        requested_class=requested,
+        promoted=equilibrium.promoted_mask,
+        compensation=compensation,
         spacing=DISPLAY_SPACING,
         chunk=DISPLAY_CHUNK,
     )
@@ -1880,7 +1969,11 @@ def _display_map(
         display.height, display_height
     ):
         raise RuntimeError("display map grid does not match the prefetched grid")
-    return display, {"coupling": coupling, "conductor_response": record}
+    return display, {
+        "coupling": coupling,
+        "conductor_response": record,
+        "compensation_current": compensation_current,
+    }
 
 
 def _branch_diagnostics(display) -> dict[str, Any]:
@@ -2460,9 +2553,10 @@ def solve_frame(
     )
     display = None
     try:
-        display, display_rig = _display_map(profile, equilibrium, machine)
+        display, display_rig = _display_map(
+            profile, equilibrium, machine, target_current_a
+        )
         conductor_response = display_rig["conductor_response"]
-        operands = display_rig["operands"]
         display_closed, display_open = _display_separatrix(display)
         display_assembly = _branch_diagnostics(display)
         operands = _persist_frame_operands(
@@ -2474,6 +2568,7 @@ def solve_frame(
             conductor_current=np.asarray(
                 profile.operator.external_current, dtype=np.float64
             ),
+            compensation_current=display_rig["compensation_current"],
             separatrix_closed=display_closed,
             separatrix_assembly=display_assembly,
         )
@@ -2506,6 +2601,9 @@ def solve_frame(
             separatrix_closed_points=int(display_closed.shape[0]),
             separatrix_assembly=display_assembly,
             max_node_mismatch_wb=float(display.max_node_mismatch_wb),
+            max_solved_node_mismatch_wb=float(display.max_solved_node_mismatch_wb),
+            promoted_node_count=int(display.promoted_node_count),
+            nearest_promoted_to_xpoint_m=float(display.nearest_promoted_to_xpoint_m),
             reproduction_relative_error=float(display.reproduction_relative_error),
             build_seconds=float(display.build_seconds),
             conductor_response_path=conductor_response["path"],
@@ -2581,6 +2679,10 @@ def solve_frame(
         displacement_decomposition=displacement_decomposition,
         banked_read=banked_read,
         display_map=display_record,
+        operand_path=None if display_record is None else display_record.operand_path,
+        operand_digest=None
+        if display_record is None
+        else display_record.operand_digest,
     )
     fields = {
         "radius": np.asarray(radius),
@@ -2602,6 +2704,8 @@ def solve_frame(
             None if display is None else np.asarray(display.saddle_rz, dtype=float)
         ),
         "pseudo_wall": wall,
+        "labelled_axis_rz": labelled_axis,
+        "labelled_x_rz": labelled_x_point,
     }
     return result, fields
 
@@ -2672,6 +2776,7 @@ def _retained_solve_failure(
         ),
         resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy).to_dict(),
         solve_exception_class=exception_class,
+        operand_unavailable_reason=f"{exception_class}: {error}",
         banked_read=banked_failed_read_summary(
             axis_rz_m=None,
             x_point_rz_m=None,
@@ -2696,6 +2801,71 @@ def _solve_frame_retaining_failure(
         return _retained_solve_failure(row, frame, expansion, error)
 
 
+def _restored_panel_fields(
+    selected: SelectedFrame, result: FrameResult
+) -> dict[str, Any]:
+    """Rebuild one checkpointed panel from its label and persisted operands."""
+
+    row = _read(selected.path, _LABEL_COLUMNS + _GEOMETRY_COLUMNS)
+    radius_full, height_full = canonical_axes(row)
+    radius = radius_full[::REGISTERED_GRID_STRIDE]
+    height = height_full[::REGISTERED_GRID_STRIDE]
+    label = corpus_flux_to_nova_total(
+        np.asarray(row["efit_psirz"][selected.frame], dtype=float)
+    ).T[::REGISTERED_GRID_STRIDE, ::REGISTERED_GRID_STRIDE]
+    count = int(row["efit_lcfs_n"][selected.frame])
+    boundary = np.c_[
+        np.asarray(row["efit_lcfs_r"][selected.frame][:count], dtype=float),
+        np.asarray(row["efit_lcfs_z"][selected.frame][:count], dtype=float),
+    ]
+    efit_x = boundary_gradient_minimum(
+        radius_full,
+        height_full,
+        np.asarray(row["efit_psirz"][selected.frame], dtype=float),
+        boundary,
+    )
+    fields: dict[str, Any] = {
+        "radius": radius,
+        "height": height,
+        "labelled": label,
+        "labelled_closed_boundary": boundary,
+        "labelled_axis_rz": _frame_reference_axis(row, selected.frame),
+        "labelled_x_rz": efit_x,
+        "pseudo_wall": pseudo_wall(
+            radius_full, height_full, result.pseudo_wall_expansion
+        ),
+        "display": None,
+        "display_closed_boundary": np.zeros((0, 2)),
+        "display_axis_rz": None,
+        "display_saddle_rz": None,
+    }
+    record = result.display_map
+    if record is None:
+        fields["plot_unavailable_reason"] = result.operand_unavailable_reason
+        return fields
+    if not result.operand_path or not result.operand_digest:
+        raise RuntimeError("a restored display frame has no persisted operand identity")
+    artifact = Path(result.operand_path).expanduser()
+    if hashlib.sha256(artifact.read_bytes()).hexdigest() != result.operand_digest:
+        raise RuntimeError(f"persisted frame operand digest changed: {artifact}")
+    operands = load_frame_operands(artifact)
+    response = np.load(Path(record.conductor_response_path).expanduser())
+    flux, _conductor = rebuild_display_flux(operands, response)
+    shape = (operands["display_radius"].size, operands["display_height"].size)
+    flux = flux.reshape(shape)
+    if not np.allclose(flux, operands["flux"], rtol=0.0, atol=1.0e-12):
+        raise RuntimeError(f"persisted frame field does not rebuild: {artifact}")
+    fields["display"] = SimpleNamespace(
+        radius=operands["display_radius"],
+        height=operands["display_height"],
+        flux=flux,
+    )
+    fields["display_closed_boundary"] = operands["separatrix_closed_rz"]
+    fields["display_axis_rz"] = result.banked_read.get("nova_axis_rz_m")
+    fields["display_saddle_rz"] = np.asarray(record.saddle_rz_m)
+    return fields
+
+
 def _solve_selected_frames(
     selected,
     baseline_expansion: float,
@@ -2709,8 +2879,8 @@ def _solve_selected_frames(
     if len(results) > len(selected):
         raise ValueError("restored frame prefix is longer than the declared cohort")
     fields: list[dict[str, Any]] = [
-        {"plot_unavailable_reason": "restored from frame checkpoint"}
-        for _result in results
+        _restored_panel_fields(selected_frame, result)
+        for selected_frame, result in zip(selected, results, strict=False)
     ]
     for number, selected_frame in enumerate(
         selected[len(results) :], start=len(results) + 1
@@ -2833,6 +3003,19 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
     """Rebuild one typed result from an atomically published frame checkpoint."""
 
     restored = dict(record)
+    if "operand_path" not in restored:
+        display = restored.get("display_map")
+        restored["operand_path"] = (
+            None if display is None else display.get("operand_path")
+        )
+        restored["operand_digest"] = (
+            None if display is None else display.get("operand_digest")
+        )
+        restored["operand_unavailable_reason"] = (
+            restored.get("solver_termination")
+            if restored.get("solve_exception_class") is not None
+            else None
+        )
     metric_values = dict(restored.pop("metrics"))
     for name in (
         "interior_r_squared",
@@ -2900,6 +3083,8 @@ def _frame_result_from_checkpoint(record: dict[str, Any]) -> FrameResult:
             "saddle_offset_mm",
             "saddle_flux_wb",
             "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
             "reproduction_relative_error",
             "build_seconds",
             "conductor_response_build_seconds",
@@ -3061,16 +3246,11 @@ def _active_set_receipt(result: object) -> dict[str, Any]:
 
 
 def _publication_artifact_records(output: Path) -> dict[str, dict[str, str]]:
-    """Separate rendered destinations from stable project publication identities.
-
-    The poloidal comparison is not registered here: its panels are drawn from
-    each frame's persisted display operands, so it is regenerated outside the
-    bank from those artifacts rather than from a solve that would have to be
-    repeated to redraw it.
-    """
+    """Separate rendered destinations from stable project publication identities."""
 
     filenames = {
         "cohort_match_summary": COHORT_FIGURE_NAME,
+        "poloidal_frame_comparison": FRAME_FIGURE_NAME,
         "strict_forward_match_receipt": RECEIPT_NAME,
     }
     try:
@@ -3233,6 +3413,9 @@ def summarize(
             {
                 "shot": item.shot,
                 "frame": item.frame,
+                "operand_path": item.operand_path,
+                "operand_digest": item.operand_digest,
+                "operand_unavailable_reason": item.operand_unavailable_reason,
                 "interior_r_squared": item.metrics.interior_r_squared,
                 "iterations": item.iterations,
                 "active_set_iterations": item.active_set_iterations,
@@ -3373,142 +3556,160 @@ def summarize(
     }
 
 
-def frame_figure(
+def render_frame_comparison(
     results: list[FrameResult], fields: list[dict[str, Any]], path: Path
 ) -> None:
-    """Plot labelled, predicted, and difference maps for every scored frame."""
+    """Draw the five labelled and terminal-current fields in poloidal R–Z panels."""
 
-    figure, axes = plt.subplots(
-        len(results), 3, figsize=(11, 2.5 * len(results)), constrained_layout=True
+    limiter, _limiter_receipt = _physical_wall_ring(
+        DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
     )
-    for row_axes, result, frame in zip(axes, results, fields, strict=True):
-        unavailable_reason = frame.get("plot_unavailable_reason")
-        if unavailable_reason is not None:
-            for axis, title in zip(
-                row_axes,
-                ("Labelled psi", "Forward psi", "Forward - label"),
-                strict=True,
-            ):
-                axis.text(
-                    0.5,
-                    0.5,
-                    f"Unavailable: {unavailable_reason}",
-                    ha="center",
-                    va="center",
-                    transform=axis.transAxes,
-                )
-                axis.set_title(title)
-                axis.set_axis_off()
-            row_axes[0].text(
-                0.01,
-                0.99,
-                f"{result.shot} frame {result.frame}\nconverged=False",
-                transform=row_axes[0].transAxes,
-                va="top",
-                fontsize=7,
+    figure, axes = plt.subplots(1, len(results), figsize=(14, 7.2))
+    figure.subplots_adjust(left=0.02, right=0.98, top=0.84, bottom=0.25, wspace=0.02)
+    figure.legend(
+        handles=(
+            Line2D([], [], color="0.55", label="EFIT ψ [Wb]"),
+            Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.flux_color,
+                label="Nova terminal-current ψ [Wb]",
+            ),
+            Line2D([], [], color="0.2", linewidth=1.3, label="EFIT boundary"),
+            Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.separatrix_color,
+                linewidth=1.3,
+                label="Nova separatrix",
+            ),
+            Line2D(
+                [], [], marker="^", color="0.2", linestyle="none", label="EFIT axis"
+            ),
+            Line2D(
+                [], [], marker="X", color="0.2", linestyle="none", label="EFIT X-point"
+            ),
+            Line2D(
+                [],
+                [],
+                marker="^",
+                color=DEFAULT_INK.axis_color,
+                linestyle="none",
+                label="Nova axis",
+            ),
+            Line2D(
+                [],
+                [],
+                marker="X",
+                color=DEFAULT_INK.xpoint_color,
+                linestyle="none",
+                label="Nova X-point",
+            ),
+        ),
+        loc="upper center",
+        ncol=4,
+        frameon=False,
+        fontsize=10,
+    )
+    for index, (axis, result, frame) in enumerate(
+        zip(axes, results, fields, strict=True)
+    ):
+        poloidal_axes(axis)
+        label = f"{result.shot}\nframe {result.frame} · converged={result.converged}"
+        if result.display_map is not None:
+            display = result.display_map
+            distance = (
+                "—"
+                if display.promoted_node_count == 0
+                or not np.isfinite(display.nearest_promoted_to_xpoint_m)
+                else f"{display.nearest_promoted_to_xpoint_m:.3g} m"
             )
+            label += (
+                f"\nsolved-node mismatch {display.max_solved_node_mismatch_wb:.3g} Wb"
+                f"\npromoted {display.promoted_node_count}; nearest X {distance}"
+            )
+            if display.separatrix_closed_points == 0:
+                reason = display.separatrix_assembly or {}
+                count = reason.get("closed_candidate_count")
+                label += f"\nno closed branch; {count} candidate(s)"
+        elif result.solve_exception_class == "NoQualifiedAxisError":
+            label += "\nunavailable: no qualified axis"
+        else:
+            label += f"\n{frame.get('plot_unavailable_reason', 'display unavailable')}"
+        position = axis.get_position()
+        figure.text(position.x0, 0.19, label, va="top", fontsize=8)
+        if "labelled" not in frame:
             continue
         radius, height = frame["radius"], frame["height"]
+        reference = np.asarray(frame["labelled"], dtype=float)
         display = frame.get("display")
-        label_min = float(np.nanmin(frame["labelled"]))
-        label_max = float(np.nanmax(frame["labelled"]))
-        levels = np.linspace(label_min, label_max, 21)
-        for axis, name in zip(row_axes[:2], ("labelled", "display"), strict=True):
-            if name == "display" and display is not None:
-                axis.contour(
-                    np.asarray(display.radius),
-                    np.asarray(display.height),
-                    np.asarray(display.flux).T,
-                    levels=levels,
-                    colors="tab:blue",
-                    linewidths=0.5,
-                )
-            else:
-                axis.contour(
-                    radius,
-                    height,
-                    frame["labelled"].T,
-                    levels=levels,
-                    colors="0.35",
-                    linewidths=0.5,
-                )
-            axis.plot(
-                frame["labelled_closed_boundary"][:, 0],
-                frame["labelled_closed_boundary"][:, 1],
-                color="black",
-                linewidth=0.9,
-                label="label LCFS",
+        levels = np.linspace(
+            float(np.nanmin(reference)), float(np.nanmax(reference)), 17
+        )
+        draw_flux_contours(axis, radius, height, reference.T, levels, color="0.55")
+        if display is not None:
+            draw_flux_contours(
+                axis,
+                display.radius,
+                display.height,
+                np.asarray(display.flux).T,
+                levels,
+                color=DEFAULT_INK.flux_color,
             )
-            if len(frame["display_closed_boundary"]):
-                axis.plot(
-                    frame["display_closed_boundary"][:, 0],
-                    frame["display_closed_boundary"][:, 1],
-                    color="tab:red",
-                    linewidth=1.1,
-                    label="fine-map separatrix",
-                )
-            for branch in frame["display_open_branches"]:
-                axis.plot(
-                    branch[:, 0],
-                    branch[:, 1],
-                    color="tab:red",
-                    linestyle=":",
-                    linewidth=0.8,
-                    label="fine-map open leg",
-                )
-            axis_rz = frame["display_axis_rz"]
-            if axis_rz is not None and np.all(np.isfinite(axis_rz)):
-                axis.plot(
-                    float(axis_rz[0]),
-                    float(axis_rz[1]),
-                    marker="^",
-                    color="black",
-                    markersize=5,
-                    linestyle="none",
-                    label="magnetic axis",
-                )
-            saddle_rz = frame["display_saddle_rz"]
-            if saddle_rz is not None and np.all(np.isfinite(saddle_rz)):
-                axis.plot(
-                    float(saddle_rz[0]),
-                    float(saddle_rz[1]),
-                    marker="P",
-                    color="tab:red",
-                    markersize=6,
-                    linestyle="none",
-                    label="admitted X-point",
-                )
-            axis.set_aspect("equal")
-            axis.set_xlabel("R [m]")
-            axis.set_ylabel("Z [m]")
-            axis.set_title("Labelled psi" if name == "labelled" else "Forward psi")
-        span = label_max - label_min
-        contour = row_axes[2].contour(
-            radius,
-            height,
-            frame["difference"].T,
-            levels=np.linspace(-0.1 * span, 0.1 * span, 21),
-            colors="0.2",
-            linewidths=0.5,
+        draw_wall(axis, limiter[:, 0], limiter[:, 1])
+        boundary = np.asarray(frame["labelled_closed_boundary"], dtype=float)
+        axis.plot(boundary[:, 0], boundary[:, 1], color="0.2", linewidth=1.3)
+        closed = np.asarray(frame["display_closed_boundary"], dtype=float)
+        if len(closed):
+            axis.plot(
+                closed[:, 0],
+                closed[:, 1],
+                color=DEFAULT_INK.separatrix_color,
+                linewidth=1.3,
+            )
+        draw_nulls(
+            axis,
+            magnetic_axis=frame["display_axis_rz"],
+            x_points=None
+            if frame["display_saddle_rz"] is None
+            else np.asarray(frame["display_saddle_rz"])[None, :],
         )
-        row_axes[2].set_aspect("equal")
-        row_axes[2].set_xlabel("R [m]")
-        row_axes[2].set_ylabel("Z [m]")
-        row_axes[2].set_title("Forward - label")
-        figure.colorbar(contour, ax=row_axes[2], label="flux difference [Wb]")
-        row_axes[0].text(
-            0.01,
-            0.99,
-            f"{result.shot} frame {result.frame}\n"
-            f"R2={result.metrics.interior_r_squared:.3f}; "
-            f"converged={result.converged}",
-            transform=row_axes[0].transAxes,
-            va="top",
-            fontsize=7,
-        )
-    axes[0, 0].legend(loc="lower left", fontsize=7)
-    figure.savefig(path, dpi=180)
+        for name, marker in (("labelled_axis_rz", "^"), ("labelled_x_rz", "X")):
+            point = np.asarray(frame[name], dtype=float)
+            if np.all(np.isfinite(point)):
+                axis.plot(
+                    point[0],
+                    point[1],
+                    marker=marker,
+                    color="0.2",
+                    markerfacecolor="white",
+                    linestyle="none",
+                )
+        axis.set_xlim(float(radius[0]), float(radius[-1]))
+        axis.set_ylim(float(height[0]), float(height[-1]))
+    _save_frame_figure(figure, path)
+
+
+def _save_frame_figure(figure, path: Path) -> None:
+    """Refuse clipped or overlapping text before publishing a bank figure."""
+
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    texts = [
+        item for item in figure.findobj(Text) if item.get_visible() and item.get_text()
+    ]
+    boxes = [(item.get_text(), item.get_window_extent(renderer)) for item in texts]
+    for name, box in boxes:
+        if not all(figure.bbox.contains(*corner) for corner in box.get_points()):
+            raise ValueError(f"text outside canvas: {name}")
+    for index, (left, left_box) in enumerate(boxes):
+        for right, right_box in boxes[index + 1 :]:
+            if left_box.overlaps(right_box):
+                raise ValueError(f"text overlap: {left} / {right}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=100)
     plt.close(figure)
+    print(f"FIGURE={path} TEXT_CHECK=passed", flush=True)
 
 
 def _separatrix_metric(result: FrameResult, name: str) -> float:
@@ -3524,237 +3725,147 @@ def _separatrix_metric(result: FrameResult, name: str) -> float:
 def cohort_figure(
     results: list[FrameResult], fields: list[dict[str, Any]], path: Path
 ) -> None:
-    """Plot the four declared match categories over the complete cohort."""
+    """Compare terminal-state metrics and the fine-map boundary availability."""
 
+    figure, axes = plt.subplots(2, 3, figsize=(14, 7.2))
+    figure.subplots_adjust(
+        left=0.07, right=0.98, top=0.94, bottom=0.10, hspace=0.48, wspace=0.40
+    )
     index = np.arange(len(results))
-    labels = [f"{Path(item.shot).stem[-6:]}:{item.frame}" for item in results]
-    figure, axes = plt.subplots(2, 3, figsize=(16, 7), constrained_layout=True)
-    axes[0, 0].plot(
-        index, [item.metrics.interior_r_squared for item in results], "o-", label="R2"
+    metrics = (
+        ("Interior flux match", "R²", [r.metrics.interior_r_squared for r in results]),
+        (
+            "Solved-node mismatch",
+            "Wb",
+            [
+                np.nan
+                if r.display_map is None
+                else r.display_map.max_solved_node_mismatch_wb
+                for r in results
+            ],
+        ),
+        (
+            "Lattice-to-map saddle offset",
+            "mm",
+            [_separatrix_metric(r, "saddle_offset_mm") for r in results],
+        ),
+        (
+            "Magnetic-axis displacement",
+            "m",
+            [r.metrics.magnetic_axis_displacement_mm / 1000 for r in results],
+        ),
+        (
+            "Signed relative q95 error",
+            "fraction",
+            [r.metrics.signed_relative_q95_error for r in results],
+        ),
     )
+    for axis, (title, unit, values) in zip(axes.ravel(), metrics):
+        trace_axes(axis)
+        axis.plot(index, values, "o-", color=DEFAULT_INK.flux_color, linewidth=1.8)
+        axis.set_title(title, fontsize=11, pad=10)
+        axis.set_ylabel(unit, fontsize=10)
+        axis.set_xticks(index, [str(r.frame) for r in results], fontsize=9)
+        axis.set_xlabel("frame", fontsize=10)
     axes[0, 0].axhline(
-        REGISTERED_MEDIAN_INTERIOR_R2_BAR,
-        color="black",
-        linestyle="--",
-        label="registered median bar",
+        REGISTERED_MEDIAN_INTERIOR_R2_BAR, color="0.4", linestyle="--", linewidth=1.2
     )
-    twin = axes[0, 0].twinx()
-    twin.plot(
-        index,
-        [item.metrics.interior_fractional_rms for item in results],
-        "s:",
-        color="tab:orange",
-        label="fractional RMS",
+    limiter, _ = _physical_wall_ring(
+        DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
     )
-    axes[0, 0].set_title("Interior flux match")
-    axes[0, 0].legend(fontsize=8)
-    twin.set_ylabel("fractional RMS")
-    axes[0, 1].plot(
-        index,
-        [item.metrics.closed_boundary_symmetric_rms_distance_m for item in results],
-        "o-",
-        label="symmetric RMS",
-    )
-    axes[0, 1].plot(
-        index,
-        [item.metrics.closed_boundary_symmetric_sup_distance_m for item in results],
-        "s-",
-        label="symmetric sup",
-    )
-    axes[0, 1].plot(
-        index,
-        [item.metrics.polished_saddle_to_nearest_efit_x_m for item in results],
-        "^:",
-        label="saddle to EFIT X",
-    )
-    axes[0, 1].plot(
-        index,
-        [
-            _separatrix_metric(item, "separatrix_symmetric_rms_distance_m")
-            for item in results
-        ],
-        "o--",
-        color="tab:purple",
-        label="fine-map separatrix RMS",
-    )
-    axes[0, 1].plot(
-        index,
-        [
-            _separatrix_metric(item, "separatrix_symmetric_sup_distance_m")
-            for item in results
-        ],
-        "s--",
-        color="tab:purple",
-        label="fine-map separatrix sup",
-    )
-    axes[0, 1].set_title("Closed-boundary and X-point separation")
-    axes[0, 1].set_ylabel("m")
-    axes[0, 1].legend(fontsize=7)
-    axes[1, 0].plot(
-        index,
-        [item.metrics.magnetic_axis_displacement_mm for item in results],
-        "o-",
-    )
-    axes[1, 0].set_title("Magnetic-axis displacement")
-    axes[1, 0].set_ylabel("mm")
-    axes[1, 1].axhline(0.0, color="black", linewidth=0.7)
-    axes[1, 1].plot(
-        index,
-        [item.metrics.signed_relative_q95_error for item in results],
-        "o-",
-    )
-    axes[1, 1].set_title("Signed relative q95 error")
-    axes[0, 2].plot(
-        index,
-        [_separatrix_metric(item, "saddle_offset_mm") for item in results],
-        "o-",
-        label="lattice-to-map saddle offset",
-    )
-    axes[0, 2].plot(
-        index,
-        [
-            float("nan")
-            if item.display_map is None
-            else 1.0e3 * item.display_map.max_node_mismatch_wb
-            for item in results
-        ],
-        "s:",
-        color="tab:orange",
-        label="node mismatch [mWb]",
-    )
-    axes[0, 2].set_title("Fine-map interior consistency")
-    axes[0, 2].set_ylabel("mm or mWb")
-    axes[0, 2].legend(fontsize=7)
     overlay = axes[1, 2]
-    for item, frame in zip(results, fields, strict=True):
-        labelled = frame.get("labelled_closed_boundary")
-        if labelled is not None:
-            labelled = np.asarray(labelled, dtype=float)
-            overlay.plot(labelled[:, 0], labelled[:, 1], color="0.55", linewidth=0.8)
-        closed = frame.get("display_closed_boundary")
-        if closed is not None and len(closed):
-            closed = np.asarray(closed, dtype=float)
-            overlay.plot(closed[:, 0], closed[:, 1], color="tab:red", linewidth=1.0)
-    overlay.set_aspect("equal")
-    overlay.set_title("Cohort separatrix: label (grey) and fine map (red)")
-    overlay.set_xlabel("R [m]")
-    overlay.set_ylabel("Z [m]")
-    for axis in (axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1], axes[0, 2]):
-        axis.set_xticks(index, labels, rotation=45, ha="right", fontsize=7)
-    figure.savefig(path, dpi=180)
-    plt.close(figure)
+    poloidal_axes(overlay)
+    draw_wall(overlay, limiter[:, 0], limiter[:, 1])
+    for frame in fields:
+        labelled = np.asarray(frame["labelled_closed_boundary"])
+        overlay.plot(labelled[:, 0], labelled[:, 1], color="0.55", linewidth=0.8)
+        closed = np.asarray(frame["display_closed_boundary"])
+        if len(closed):
+            overlay.plot(
+                closed[:, 0],
+                closed[:, 1],
+                color=DEFAULT_INK.separatrix_color,
+                linewidth=1.3,
+            )
+    overlay.set_title("EFIT boundaries and DIII-D limiter", fontsize=11, pad=10)
+    if not any(len(frame["display_closed_boundary"]) for frame in fields):
+        position = overlay.get_subplotspec().get_position(figure)
+        figure.text(
+            (position.x0 + position.x1) / 2,
+            0.035,
+            "Nova separatrices: assembly refused",
+            ha="center",
+            fontsize=10,
+        )
+    _save_frame_figure(figure, path)
 
 
 def displacement_figure(
     results: list[FrameResult], fields: list[dict[str, Any]], path: Path
 ) -> None:
-    """Plot EFIT and Nova landmarks for every declared gate frame."""
+    """Draw terminal landmarks against EFIT without stretching unavailable panels."""
 
-    figure, raw_axes = plt.subplots(
-        1,
-        len(results),
-        figsize=(3.7 * len(results), 4.2),
-        constrained_layout=True,
+    limiter, _ = _physical_wall_ring(
+        DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
     )
-    axes = np.atleast_1d(raw_axes)
-    landmark_styles = (
-        ("magnetic_axis", "axis", "tab:blue", "o"),
-        ("x_point", "X-point", "tab:orange", "X"),
-        ("terminal_boundary_centroid", "centroid", "tab:green", "s"),
+    figure, axes = plt.subplots(1, len(results), figsize=(14, 7.2))
+    figure.subplots_adjust(left=0.02, right=0.98, top=0.83, bottom=0.25, wspace=0.02)
+    styles = (
+        ("magnetic_axis", "axis", DEFAULT_INK.flux_color, "^"),
+        ("x_point", "X-point", DEFAULT_INK.xpoint_color, "X"),
+        ("terminal_boundary_centroid", "centroid", "#2e8b57", "s"),
     )
-    for panel, (axis, result, frame) in enumerate(
-        zip(axes, results, fields, strict=True)
-    ):
+    handles = [Line2D([], [], color="0.55", label="EFIT boundary")]
+    for _, label, colour, marker in styles:
+        for name, face in (("EFIT", "white"), ("Nova", colour)):
+            handles.append(
+                Line2D(
+                    [],
+                    [],
+                    marker=marker,
+                    color=colour,
+                    markerfacecolor=face,
+                    linestyle="none",
+                    label=f"{name} {label}",
+                )
+            )
+    figure.legend(
+        handles=handles, loc="upper center", ncol=4, frameon=False, fontsize=10
+    )
+    for axis, result, frame in zip(axes, results, fields, strict=True):
+        poloidal_axes(axis)
+        draw_wall(axis, limiter[:, 0], limiter[:, 1])
+        boundary = np.asarray(frame["labelled_closed_boundary"])
+        axis.plot(boundary[:, 0], boundary[:, 1], color="0.55", linewidth=1.3)
         displacement = result.displacement_decomposition
-        unavailable_reason = frame.get("plot_unavailable_reason")
+        label = f"{result.shot}\nframe {result.frame}"
         if displacement is None:
-            reason = unavailable_reason or "terminal geometry unavailable"
-            axis.text(
-                0.5,
-                0.5,
-                f"Unavailable: {reason}",
-                ha="center",
-                va="center",
-                transform=axis.transAxes,
+            label += "\nunavailable: no qualified axis"
+        else:
+            for attribute, _, colour, marker in styles:
+                landmark = getattr(displacement, attribute)
+                efit = np.asarray(landmark.efit_rz_m)
+                nova = np.asarray(landmark.nova_rz_m)
+                axis.plot(
+                    [efit[0], nova[0]], [efit[1], nova[1]], color=colour, linewidth=0.8
+                )
+                axis.plot(
+                    *efit,
+                    marker=marker,
+                    color=colour,
+                    markerfacecolor="white",
+                    linestyle="none",
+                )
+                axis.plot(*nova, marker=marker, color=colour, linestyle="none")
+            label += (
+                f"\n{displacement.classification.replace('_', ' ')}"
+                f"\naxis ΔR {displacement.magnetic_axis.radial_offset_m:+.3f} m"
+                f"\naxis ΔZ {displacement.magnetic_axis.vertical_offset_m:+.3f} m"
             )
-            axis.set_axis_off()
-            continue
-        labelled_boundary = frame.get("labelled_closed_boundary")
-        predicted_boundary = frame.get(
-            "predicted_terminal_boundary", frame.get("predicted_closed_boundary")
-        )
-        if labelled_boundary is not None:
-            labelled_boundary = np.asarray(labelled_boundary, dtype=float)
-            axis.plot(
-                labelled_boundary[:, 0],
-                labelled_boundary[:, 1],
-                color="0.25",
-                linewidth=1.0,
-                label="EFIT boundary" if panel == 0 else None,
-            )
-        if predicted_boundary is not None:
-            predicted_boundary = np.asarray(predicted_boundary, dtype=float)
-            axis.plot(
-                predicted_boundary[:, 0],
-                predicted_boundary[:, 1],
-                color="tab:red",
-                linestyle="--",
-                linewidth=1.0,
-                label="Nova boundary" if panel == 0 else None,
-            )
-        for attribute, label, colour, marker in landmark_styles:
-            landmark = getattr(displacement, attribute)
-            efit = np.asarray(landmark.efit_rz_m, dtype=float)
-            nova = np.asarray(landmark.nova_rz_m, dtype=float)
-            axis.plot(
-                [efit[0], nova[0]],
-                [efit[1], nova[1]],
-                color=colour,
-                linewidth=0.8,
-                alpha=0.8,
-            )
-            axis.scatter(
-                *efit,
-                marker=marker,
-                s=45,
-                facecolors="none",
-                edgecolors=colour,
-                linewidths=1.2,
-                label=f"EFIT {label}" if panel == 0 else None,
-                zorder=3,
-            )
-            axis.scatter(
-                *nova,
-                marker=marker,
-                s=45,
-                color=colour,
-                label=f"Nova {label}" if panel == 0 else None,
-                zorder=3,
-            )
-        axis.set_title(
-            f"{Path(result.shot).stem[-6:]}:{result.frame}\n"
-            f"{displacement.classification.replace('_', ' ')}",
-            fontsize=9,
-        )
-        axis.text(
-            0.02,
-            0.02,
-            "axis "
-            f"ΔR={displacement.magnetic_axis.radial_offset_m:+.3f} m\n"
-            f"ΔZ={displacement.magnetic_axis.vertical_offset_m:+.3f} m",
-            transform=axis.transAxes,
-            fontsize=7,
-            va="bottom",
-            bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"},
-        )
-        axis.set_aspect("equal")
-        axis.set_xlabel("R [m]")
-        axis.grid(alpha=0.2)
-    axes[0].set_ylabel("Z [m]")
-    axes[0].legend(loc="best", fontsize=6)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=180)
-    plt.close(figure)
+        axis.set_xlim(0.8, 2.5)
+        axis.set_ylim(-1.6, 1.8)
+        figure.text(axis.get_position().x0, 0.19, label, va="top", fontsize=8)
+    _save_frame_figure(figure, path)
 
 
 def _margin_penalty(class_margin: jax.Array) -> jax.Array:
@@ -5716,6 +5827,8 @@ def run(
     output: Path,
     frames: int = EXECUTION_FRAME_COUNT,
     displacement_output: Path = DEFAULT_DISPLACEMENT_OUTPUT,
+    *,
+    fresh: bool = False,
 ) -> dict[str, Any]:
     """Read the immutable bar, execute the expanded cohort, and publish evidence."""
 
@@ -5736,8 +5849,12 @@ def run(
     selected = select_frames(paths, frames, affected)
     baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
     partial_receipt_path = output / PARTIAL_RECEIPT_NAME
-    restored_results = _restore_frame_checkpoint(
-        partial_receipt_path, selected, preregistration_hash
+    restored_results = (
+        []
+        if fresh
+        else _restore_frame_checkpoint(
+            partial_receipt_path, selected, preregistration_hash
+        )
     )
     results, fields = _solve_selected_frames(
         selected,
@@ -5837,14 +5954,23 @@ def run(
         }
     )
     _record_publication_artifacts(receipt, output)
+    render_frame_comparison(results, fields, output / FRAME_FIGURE_NAME)
     cohort_figure(results, fields, output / COHORT_FIGURE_NAME)
     displacement_path = displacement_output / DISPLACEMENT_FIGURE_NAME
     displacement_figure(results, fields, displacement_path)
+    try:
+        displacement_publication = "/nova/figures/" + str(
+            displacement_path.resolve().relative_to(
+                (Path("docs") / "figures").resolve()
+            )
+        )
+    except ValueError:
+        displacement_publication = (
+            f"{DISPLACEMENT_PUBLICATION_DIRECTORY}/{DISPLACEMENT_FIGURE_NAME}"
+        )
     receipt["result"]["displacement_decomposition"]["figure"] = {
         "filesystem_path": str(displacement_path),
-        "publication_path": (
-            f"{DISPLACEMENT_PUBLICATION_DIRECTORY}/{DISPLACEMENT_FIGURE_NAME}"
-        ),
+        "publication_path": displacement_publication,
     }
     receipt_path = output / RECEIPT_NAME
     receipt_path.write_text(
@@ -5861,6 +5987,7 @@ def main() -> None:
         "--displacement-output", type=Path, default=DEFAULT_DISPLACEMENT_OUTPUT
     )
     parser.add_argument("--frames", type=int, default=EXECUTION_FRAME_COUNT)
+    parser.add_argument("--fresh", action="store_true")
     parser.add_argument("--preregister-only", action="store_true")
     parser.add_argument("--wall-topology-surface", action="store_true")
     parser.add_argument("--margin-frame-remeasure", action="store_true")
@@ -5984,6 +6111,7 @@ def main() -> None:
         arguments.output,
         arguments.frames,
         arguments.displacement_output,
+        fresh=arguments.fresh,
     )
     headline = dict(receipt["result"])
     headline.pop("frame_records", None)

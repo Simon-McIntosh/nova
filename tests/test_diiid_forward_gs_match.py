@@ -46,6 +46,13 @@ def test_publication_artifact_records_are_stable_and_strict(tmp_path):
                 "cohort_match_summary.png"
             ),
         },
+        "poloidal_frame_comparison": {
+            "filesystem_path": str(tmp_path / "frame_flux_comparison.png"),
+            "publication_path": (
+                "/nova/figures/diiid-forward-onboarding/forward-gs/"
+                "frame_flux_comparison.png"
+            ),
+        },
         "strict_forward_match_receipt": {
             "filesystem_path": str(tmp_path / "forward_gs_receipt.json"),
             "publication_path": (

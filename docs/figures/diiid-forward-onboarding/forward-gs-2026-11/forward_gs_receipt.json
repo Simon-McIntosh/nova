@@ -1,4 +1,156 @@
 {
+  "artifact_repair": {
+    "baseline_mismatch_reproduced_wb": 3.6850168015254323,
+    "cause": "sensitivity solve overwrote the baseline archive at the same frame tag",
+    "expected_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+    "immutable_operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+    "job_id": "1306557",
+    "observed_digest": "a173cc65293f52c296fd51a4428006214afd518bf7f2ae870a2c21ba2c84ec72",
+    "original_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179.npz",
+    "source_revision": "4055f7e96a1d334acbbbb6cdb00a016cecf94c02"
+  },
+  "bank_run": {
+    "completed_frame_records": 5,
+    "elapsed_seconds": 2406,
+    "job_id": "1306484",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/bank-continuation.log",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "restored_frame_records": 3,
+    "rung": "h200",
+    "source_revision": "38ed1755ca3209c3f084d705fff51e5f74d66022"
+  },
+  "branch_capacity_replay": {
+    "job_id": "1306557",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/operand-repair.log",
+    "map_spacing_m": 0.01,
+    "probe_branch_capacity": 1024,
+    "probe_geometry_published": false,
+    "production_branch_capacity": 256,
+    "rows": [
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": true,
+        "capacity": 256,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 0,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 179,
+        "graph_well_formed": true,
+        "open_branch_count": 0,
+        "open_slot_overflow": false,
+        "seconds": 122.45287234708667,
+        "well_formed": false
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": false,
+        "capacity": 1024,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 627,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 179,
+        "graph_well_formed": true,
+        "open_branch_count": 2,
+        "open_slot_overflow": false,
+        "seconds": 122.28909315541387,
+        "well_formed": true
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": true,
+        "capacity": 256,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 0,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 44,
+        "graph_well_formed": true,
+        "open_branch_count": 0,
+        "open_slot_overflow": false,
+        "seconds": 118.62446847558022,
+        "well_formed": false
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": false,
+        "capacity": 1024,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 465,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 44,
+        "graph_well_formed": true,
+        "open_branch_count": 2,
+        "open_slot_overflow": false,
+        "seconds": 118.43807591497898,
+        "well_formed": true
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": true,
+        "capacity": 256,
+        "closed_candidate_count": 0,
+        "closed_segment_count": 0,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 146,
+        "graph_well_formed": true,
+        "open_branch_count": 0,
+        "open_slot_overflow": false,
+        "seconds": 118.43393255770206,
+        "well_formed": false
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": false,
+        "capacity": 1024,
+        "closed_candidate_count": 0,
+        "closed_segment_count": 0,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 146,
+        "graph_well_formed": true,
+        "open_branch_count": 0,
+        "open_slot_overflow": false,
+        "seconds": 118.51568326354027,
+        "well_formed": false
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": true,
+        "capacity": 256,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 0,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 137,
+        "graph_well_formed": true,
+        "open_branch_count": 0,
+        "open_slot_overflow": false,
+        "seconds": 118.68676690943539,
+        "well_formed": false
+      },
+      {
+        "axis_enclosing_component_count": 1,
+        "branch_overflow": false,
+        "capacity": 1024,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 537,
+        "contour_well_formed": true,
+        "cycle_component_count": 1,
+        "frame": 137,
+        "graph_well_formed": true,
+        "open_branch_count": 2,
+        "open_slot_overflow": false,
+        "seconds": 118.70550996437669,
+        "well_formed": true
+      }
+    ],
+    "source_revision": "4055f7e96a1d334acbbbb6cdb00a016cecf94c02"
+  },
   "execution_authority": {
     "basin_entry": "ForwardProfile.cold_seed_portfolio plus select_forward_branch",
     "cohort_expansion": "five frames replace the historical three-frame minimum without loosening the score bar",
@@ -120,10 +272,28 @@
       "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png"
     },
+    "poloidal_frame_comparison": {
+      "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+      "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png"
+    },
     "strict_forward_match_receipt": {
       "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json",
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json"
     }
+  },
+  "rendering": {
+    "benchmark_sha256": "794bb4e1401e220c4a1295ca547f1cb04d4c2fe9c0da1386db461f2376062be6",
+    "clipped_labels": 0,
+    "from_verified_persisted_operands": true,
+    "inspected_pngs": 3,
+    "overlapping_labels": 0,
+    "pngs": {
+      "cohort_match_summary.png": "a9c7f3dd2864c5fa3bad187a8ee55abc94142a6f6ea3656b0db8be1a4c8337f1",
+      "displacement_decomposition.png": "7c04a650606473dc2832d73813c14728c507930424910ff2184fd357436c78a2",
+      "frame_flux_comparison.png": "b4be9988efa2656d0256ec1ac3be75883f04b70e0aee90173ea60c8c0dda5657"
+    },
+    "source_revision": "9a568b9eec4b9a108662d66c3101e450feb4314f",
+    "text_check": "passed"
   },
   "result": {
     "coefficients_fitted": 0,
@@ -172,15 +342,15 @@
         },
         {
           "frame": 146,
-          "radial_offset_m": -0.4844868039224499,
+          "radial_offset_m": -0.4844868043568362,
           "shot": "d3d_shot_002495e835.parquet",
-          "vertical_offset_m": 1.564364070911931
+          "vertical_offset_m": 1.5643640717392766
         },
         {
           "frame": 137,
-          "radial_offset_m": -0.06783213550724021,
+          "radial_offset_m": -0.06783213550723999,
           "shot": "d3d_shot_0040ca9bdc.parquet",
-          "vertical_offset_m": -0.4441554404553695
+          "vertical_offset_m": -0.4441554404553724
         }
       ],
       "boundary_centroid_definition": "area centroid of the closed terminal-boundary polygon in the R,Z plane",
@@ -200,7 +370,7 @@
       "dominantly_vertical_rule": "a frame is axis-dominantly vertical when absolute vertical axis offset exceeds absolute radial axis offset; the cohort verdict requires every declared frame to be available and axis-dominantly vertical",
       "figure": {
         "filesystem_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
-        "publication_path": "/nova/figures/diiid-vertical-force-balance/displacement/displacement_decomposition.png"
+        "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
       },
       "sign_convention": "offset = Nova post-solve position minus EFIT label position; positive radial is outward and positive vertical is upward"
     },
@@ -210,7 +380,7 @@
           "build_seconds": 0.0,
           "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "processes": 10,
           "shape": [
             55980,
@@ -221,7 +391,7 @@
           "build_seconds": 0.0,
           "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "processes": 10,
           "shape": [
             55980,
@@ -232,7 +402,7 @@
           "build_seconds": 0.0,
           "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "processes": 10,
           "shape": [
             55980,
@@ -243,7 +413,7 @@
           "build_seconds": 0.0,
           "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "processes": 10,
           "shape": [
             55980,
@@ -253,28 +423,23 @@
       ],
       "frames_drawn": 4,
       "frames_with_separatrix": 0,
-    "measure_status": {
-      "produced": false,
-      "reason": "the spline branch assembler returned no closed axis-enclosing cycle on any of the four frames that drew a fine map, so separatrix_closed_points is 0 and both symmetric separations are null; that null is the measured verdict, not an unrecorded value",
-      "repair": "the branch assembler is the only source of a separatrix, so a refused assembly yields no boundary and the separation stays null rather than being filled by a raw level set, which is a second boundary path; the assembler's own diagnostics (candidate and component counts, overflow flags) are recorded on every frame and persisted beside the frame's operands, so each null carries its reason; the separation for this cohort is regenerated by the next bank run from the persisted frame fields, which this repair cannot contain because the bank is about 2 h 38 on the H200"
-    },
       "max_node_mismatch_wb": {
-        "maximum": 11.279233268930605,
-        "mean": 5.909521237399516,
-        "median": 5.344871798559337,
-        "minimum": 1.6691080835487813
+        "maximum": 11.167432179393675,
+        "mean": 5.679636265488114,
+        "median": 5.352781397665694,
+        "minimum": 0.8455500872273891
       },
       "reproduction_relative_error": {
-        "maximum": 4.295185399094362e-14,
-        "mean": 3.4119710313481124e-14,
-        "median": 3.6002314731365514e-14,
-        "minimum": 2.152235780024985e-14
+        "maximum": 4.702771970109923e-14,
+        "mean": 3.7304005658846664e-14,
+        "median": 3.8427739571634704e-14,
+        "minimum": 2.533282379101802e-14
       },
       "saddle_offset_mm": {
-        "maximum": 230.9760608703288,
-        "mean": 166.62106097837525,
-        "median": 141.3247973101995,
-        "minimum": 127.5623247545975
+        "maximum": 514.3032347692298,
+        "mean": 257.76756920850124,
+        "median": 238.2224217883185,
+        "minimum": 40.32219848813813
       },
       "separation_definition": "symmetric nearest-point sup and RMS distance between the fine-map closed separatrix and the labelled EFIT LCFS",
       "source": "nova.equilibrium.display_flux.build_display_flux_map on the state's own currents, separatrix assembled at the map's own polished saddle value",
@@ -918,11 +1083,11 @@
           }
         },
         "display_map": {
-          "build_seconds": 267.82705777511,
+          "build_seconds": 207.77923438325524,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
@@ -932,18 +1097,84 @@
             1.4231192697567516,
             -1.0952213561144473
           ],
-          "max_node_mismatch_wb": 3.7985307511201514,
-          "radial_points": 171,
-          "reproduction_relative_error": 4.295185399094362e-14,
-          "saddle_converged": true,
-          "saddle_flux_wb": -1.7577667566400845,
-          "saddle_offset_mm": 230.9760608703288,
-          "saddle_rz_m": [
-            1.214658609604622,
-            -1.1946904159477045
+          "max_node_mismatch_wb": 3.6850168015254323,
+          "max_solved_node_mismatch_wb": 3.6850168015254323,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1507140,
+          "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
           ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+          "promoted_node_count": 0,
+          "radial_points": 171,
+          "reproduction_relative_error": 4.702771970109923e-14,
+          "saddle_converged": true,
+          "saddle_flux_wb": -1.4530754717846848,
+          "saddle_offset_mm": 314.8718058621365,
+          "saddle_rz_m": [
+            1.2377603494471048,
+            -1.3497529352721718
+          ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 2.2941339586406637,
+          "separatrix_saddle_to_label_x_m": 2.448598179178082,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
@@ -968,6 +1199,9 @@
           "signed_relative_q95_error": 1.7350749764348985,
           "topology_class_agreement": true
         },
+        "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+        "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
@@ -1649,11 +1883,11 @@
           }
         },
         "display_map": {
-          "build_seconds": 294.3307984042913,
+          "build_seconds": 207.00828145444393,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
@@ -1663,18 +1897,84 @@
             1.5752974999992693,
             -1.1513129555353323
           ],
-          "max_node_mismatch_wb": 11.279233268930605,
-          "radial_points": 171,
-          "reproduction_relative_error": 3.892138900678155e-14,
-          "saddle_converged": true,
-          "saddle_flux_wb": 0.4814642734586967,
-          "saddle_offset_mm": 141.3247973101995,
-          "saddle_rz_m": [
-            1.435178367309388,
-            -1.132892125233621
+          "max_node_mismatch_wb": 11.167432179393675,
+          "max_solved_node_mismatch_wb": 11.167432179393675,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1513736,
+          "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
           ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+          "promoted_node_count": 0,
+          "radial_points": 171,
+          "reproduction_relative_error": 3.5701118020966594e-14,
+          "saddle_converged": true,
+          "saddle_flux_wb": 0.29524895514506183,
+          "saddle_offset_mm": 161.57303771450054,
+          "saddle_rz_m": [
+            1.4219928230844485,
+            -1.1002882306234443
+          ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 2.275615062701944,
+          "separatrix_saddle_to_label_x_m": 2.2422884473456057,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
@@ -1701,6 +2001,9 @@
           "signed_relative_q95_error": 0.32023935303099504,
           "topology_class_agreement": false
         },
+        "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+        "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
@@ -1806,6 +2109,9 @@
           "signed_relative_q95_error": null,
           "topology_class_agreement": null
         },
+        "operand_digest": null,
+        "operand_path": null,
+        "operand_unavailable_reason": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "solve failed before topology geometry was available",
         "reliable_flux_surfaces": 0,
@@ -1878,24 +2184,24 @@
           0
         ],
         "active_set_residuals": [
-          0.12818170822460362,
-          0.22201860588491118,
-          0.0651490272848196,
-          0.054961955947777905,
-          0.054961955947777905
+          0.12818170822460778,
+          0.22201860587138092,
+          0.0651490274069113,
+          0.054961955890201634,
+          0.054961955890201634
         ],
         "banked_read": {
-          "nova_axis_flux_wb": 6.467856847453836,
+          "nova_axis_flux_wb": 6.467856850112755,
           "nova_axis_rz_m": [
-            1.2335368538763172,
-            1.563036885253193
+            1.2335368534419309,
+            1.5630368860805386
           ],
           "nova_x_point_rz_m": [
-            0.9659008782288813,
-            -0.21651800670046134
+            0.9659008781467892,
+            -0.21651800644067484
           ],
           "o_candidate_count": 5,
-          "o_second_best_flux_margin_wb": 6.691748809337224,
+          "o_second_best_flux_margin_wb": 6.691748812109509,
           "read_exception_text": null,
           "read_status": "qualified_axis",
           "reference_axis_rz_m": [
@@ -1909,7 +2215,7 @@
             ]
           ],
           "x_candidate_count": 2,
-          "x_second_best_flux_margin_wb": 1.6335646642298516
+          "x_second_best_flux_margin_wb": 1.6335646656249212
         },
         "branch_selection": {
           "branches": {
@@ -1919,7 +2225,7 @@
               "finite": true,
               "iterations": 5,
               "requested_class": "diverted",
-              "residual": 0.054961955947777905,
+              "residual": 0.054961955890201634,
               "topology_consistent": false
             },
             "limited": {
@@ -1951,7 +2257,7 @@
           },
           "reason": "direct diverted receipt is not qualification-valid",
           "residuals": {
-            "diverted": 0.054961955947777905,
+            "diverted": 0.054961955890201634,
             "limited": 0.06349959302492349
           },
           "selected_class": null
@@ -2462,11 +2768,11 @@
               -0.001327185658738017
             ],
             "nova_rz_m": [
-              1.2335368538763172,
-              1.563036885253193
+              1.2335368534419309,
+              1.5630368860805386
             ],
-            "radial_offset_m": -0.4844868039224499,
-            "vertical_offset_m": 1.564364070911931
+            "radial_offset_m": -0.4844868043568362,
+            "vertical_offset_m": 1.5643640717392766
           },
           "terminal_boundary_centroid": {
             "efit_rz_m": [
@@ -2474,11 +2780,11 @@
               -0.03797591200860915
             ],
             "nova_rz_m": [
-              1.2477531615216366,
-              1.5153827127684503
+              1.2477531697945408,
+              1.5153827043285486
             ],
-            "radial_offset_m": -0.36888681724056904,
-            "vertical_offset_m": 1.5533586247770594
+            "radial_offset_m": -0.3688868089676649,
+            "vertical_offset_m": 1.5533586163371578
           },
           "x_point": {
             "efit_rz_m": [
@@ -2486,72 +2792,141 @@
               -1.1911089420318604
             ],
             "nova_rz_m": [
-              0.9659008782288813,
-              -0.21651800670046134
+              0.9659008781467892,
+              -0.21651800644067484
             ],
-            "radial_offset_m": -0.32709445544268856,
-            "vertical_offset_m": 0.9745909353313991
+            "radial_offset_m": -0.32709445552478067,
+            "vertical_offset_m": 0.9745909355911855
           }
         },
         "display_map": {
-          "build_seconds": 169.69526754692197,
+          "build_seconds": 206.87864548526704,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
             24
           ],
           "lattice_saddle_rz_m": [
-            0.9659008782288813,
-            -0.21651800670046134
+            0.9659008781467892,
+            -0.21651800644067484
           ],
-          "max_node_mismatch_wb": 6.891212845998524,
+          "max_node_mismatch_wb": 7.020545993805956,
+          "max_solved_node_mismatch_wb": 7.020545993805956,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1509918,
+          "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
+          ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+          "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 2.152235780024985e-14,
-          "saddle_converged": false,
-          "saddle_flux_wb": null,
-          "saddle_offset_mm": null,
+          "reproduction_relative_error": 2.533282379101802e-14,
+          "saddle_converged": true,
+          "saddle_flux_wb": -1.914254388757502,
+          "saddle_offset_mm": 514.3032347692298,
           "saddle_rz_m": [
-            null,
-            null
+            1.0058727405738537,
+            0.2962295606020224
           ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 0,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": null,
+          "separatrix_saddle_to_label_x_m": 1.5147987341176243,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "finite": true,
-        "fixed_point_relative_residual": 0.054961955947777905,
+        "fixed_point_relative_residual": 0.054961955890201634,
         "frame": 146,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 5,
         "metrics": {
-          "additive_gauge_wb": 3.1163674937601997,
+          "additive_gauge_wb": 3.1163674950347175,
           "boundary_comparison_failures": [
             "missing_predicted_closed_boundary"
           ],
           "closed_boundary_symmetric_rms_distance_m": null,
           "closed_boundary_symmetric_sup_distance_m": null,
-          "interior_fractional_rms": 1.7216287692002175,
-          "interior_r_squared": -1.9640056189378554,
+          "interior_fractional_rms": 1.721628768783898,
+          "interior_r_squared": -1.9640056175043603,
           "labelled_q95_nova": -3.4771714210510254,
-          "magnetic_axis_displacement_mm": 1637.6698109005797,
-          "polished_saddle_to_nearest_efit_x_m": 1.028016670103885,
+          "magnetic_axis_displacement_mm": 1637.6698118193995,
+          "polished_saddle_to_nearest_efit_x_m": 1.0280166703762907,
           "predicted_q95_nova": null,
           "signed_relative_q95_error": null,
           "topology_class_agreement": false
         },
+        "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+        "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.054961955947777905,
-          1.1542857644147935
+          0.05496195589020165,
+          1.1542857662368544
         ],
         "residual_tolerance": 1e-05,
         "resolved_defaults": {
@@ -2621,24 +2996,24 @@
           0
         ],
         "active_set_residuals": [
-          0.1298578928369817,
-          0.11139650269735624,
-          0.0670052295871077,
-          0.06236882877710909,
-          0.06236882877710909
+          0.12985789283698176,
+          0.1113965026973562,
+          0.06700522958710774,
+          0.06236882877710906,
+          0.06236882877710906
         ],
         "banked_read": {
-          "nova_axis_flux_wb": 2.4925045479447134,
+          "nova_axis_flux_wb": 2.49250454794471,
           "nova_axis_rz_m": [
-            1.6552979714187241,
-            -0.4424648528444318
+            1.6552979714187244,
+            -0.44246485284443476
           ],
           "nova_x_point_rz_m": [
-            1.2651583546996064,
-            -1.3362867934446658
+            1.2651583546996057,
+            -1.3362867934446665
           ],
           "o_candidate_count": 5,
-          "o_second_best_flux_margin_wb": 1.8641972520459356,
+          "o_second_best_flux_margin_wb": 1.8641972520459318,
           "read_exception_text": null,
           "read_status": "qualified_axis",
           "reference_axis_rz_m": [
@@ -2652,7 +3027,7 @@
             ]
           ],
           "x_candidate_count": 2,
-          "x_second_best_flux_margin_wb": 1.192392910158843
+          "x_second_best_flux_margin_wb": 1.1923929101588442
         },
         "branch_selection": {
           "branches": {
@@ -2662,7 +3037,7 @@
               "finite": true,
               "iterations": 5,
               "requested_class": "diverted",
-              "residual": 0.06236882877710909,
+              "residual": 0.06236882877710906,
               "topology_consistent": true
             },
             "limited": {
@@ -2694,7 +3069,7 @@
           },
           "reason": "direct diverted receipt is not qualification-valid",
           "residuals": {
-            "diverted": 0.06236882877710909,
+            "diverted": 0.06236882877710906,
             "limited": 0.05683004764453356
           },
           "selected_class": null
@@ -3205,11 +3580,11 @@
               0.001690587610937655
             ],
             "nova_rz_m": [
-              1.6552979714187241,
-              -0.4424648528444318
+              1.6552979714187244,
+              -0.44246485284443476
             ],
-            "radial_offset_m": -0.06783213550724021,
-            "vertical_offset_m": -0.4441554404553695
+            "radial_offset_m": -0.06783213550723999,
+            "vertical_offset_m": -0.4441554404553724
           },
           "terminal_boundary_centroid": {
             "efit_rz_m": [
@@ -3217,11 +3592,11 @@
               -0.03388594494120285
             ],
             "nova_rz_m": [
-              1.577989744413382,
-              -0.5267289507342374
+              1.5779897444133861,
+              -0.526728950734223
             ],
-            "radial_offset_m": -0.03687574843742558,
-            "vertical_offset_m": -0.4928430057930346
+            "radial_offset_m": -0.03687574843742136,
+            "vertical_offset_m": -0.49284300579302015
           },
           "x_point": {
             "efit_rz_m": [
@@ -3229,74 +3604,143 @@
               -1.1884135007858276
             ],
             "nova_rz_m": [
-              1.2651583546996064,
-              -1.3362867934446658
+              1.2651583546996057,
+              -1.3362867934446665
             ],
-            "radial_offset_m": -0.024632752478128017,
-            "vertical_offset_m": -0.1478732926588382
+            "radial_offset_m": -0.024632752478128683,
+            "vertical_offset_m": -0.14787329265883886
           }
         },
         "display_map": {
-          "build_seconds": 292.92778008431196,
+          "build_seconds": 207.4288696590811,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.2651583546996064,
-            -1.3362867934446658
+            1.2651583546996057,
+            -1.3362867934446665
           ],
-          "max_node_mismatch_wb": 1.6691080835487813,
+          "max_node_mismatch_wb": 0.8455500872273891,
+          "max_solved_node_mismatch_wb": 0.8455500872273891,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1516550,
+          "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
+          ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+          "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 3.3083240455949486e-14,
+          "reproduction_relative_error": 4.1154361122302815e-14,
           "saddle_converged": true,
-          "saddle_flux_wb": 0.15418895531932442,
-          "saddle_offset_mm": 127.5623247545975,
+          "saddle_flux_wb": 0.7464005477516623,
+          "saddle_offset_mm": 40.32219848813813,
           "saddle_rz_m": [
-            1.3024656199709357,
-            -1.2143018982536133
+            1.293778368421335,
+            -1.3646905696986231
           ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 0.02882451036869624,
+          "separatrix_saddle_to_label_x_m": 0.17632215764534862,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "finite": true,
-        "fixed_point_relative_residual": 0.06236882877710909,
+        "fixed_point_relative_residual": 0.06236882877710906,
         "frame": 137,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 5,
         "metrics": {
-          "additive_gauge_wb": 0.12278649559352056,
+          "additive_gauge_wb": 0.12278649559352099,
           "boundary_comparison_failures": [],
           "closed_boundary_symmetric_rms_distance_m": 0.2393249424423598,
-          "closed_boundary_symmetric_sup_distance_m": 0.6135435266045283,
-          "interior_fractional_rms": 1.202462271375446,
-          "interior_r_squared": -0.44591551408139685,
+          "closed_boundary_symmetric_sup_distance_m": 0.6135435266045284,
+          "interior_fractional_rms": 1.2024622713754458,
+          "interior_r_squared": -0.4459155140813966,
           "labelled_q95_nova": -3.5147154331207275,
-          "magnetic_axis_displacement_mm": 449.3053014305261,
-          "polished_saddle_to_nearest_efit_x_m": 0.14991091746905938,
-          "predicted_q95_nova": -2.41653575726101,
-          "signed_relative_q95_error": 0.3124519457567124,
+          "magnetic_axis_displacement_mm": 449.30530143052886,
+          "polished_saddle_to_nearest_efit_x_m": 0.14991091746906016,
+          "predicted_q95_nova": -2.416535757261011,
+          "signed_relative_q95_error": 0.31245194575671215,
           "topology_class_agreement": true
         },
+        "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+        "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.06236882877710913,
-          0.06459431851433775,
-          0.5605864890508275,
-          0.2937631082744609,
-          0.3244772877096675,
-          0.10004390422435812
+          0.06236882877710906,
+          0.06459431851433813,
+          0.5605864890508286,
+          0.29376310827446445,
+          0.3244772877096619,
+          0.10004390422435598
         ],
         "residual_tolerance": 1e-05,
         "resolved_defaults": {
@@ -3364,37 +3808,37 @@
         "maximum": 0.693844098416828,
         "mean": 0.6536938125106782,
         "median": 0.6536938125106782,
-        "minimum": 0.6135435266045283
+        "minimum": 0.6135435266045284
       },
       "interior_fractional_rms": {
-        "maximum": 1.7216287692002175,
-        "mean": 1.2573824206290662,
+        "maximum": 1.721628768783898,
+        "mean": 1.2573824205249862,
         "median": 1.2823094086387026,
         "minimum": 0.7432820960386425
       },
       "interior_r_squared": {
         "maximum": 0.4475317257084024,
-        "mean": -0.7044649657136014,
-        "median": -0.6506929848124764,
-        "minimum": -1.9640056189378554
+        "mean": -0.7044649653552275,
+        "median": -0.6506929848124763,
+        "minimum": -1.9640056175043603
       },
       "magnetic_axis_displacement_mm": {
-        "maximum": 1637.6698109005797,
-        "mean": 602.8495305313014,
-        "median": 341.41161399938557,
+        "maximum": 1637.6698118193995,
+        "mean": 602.849530761007,
+        "median": 341.411613999387,
         "minimum": 90.90508322585454
       },
       "polished_saddle_to_nearest_efit_x_m": {
         "maximum": 2.306808605542188,
-        "mean": 1.4207172943549933,
-        "median": 1.6130748272043625,
-        "minimum": 0.14991091746905938
+        "mean": 1.4207172944230948,
+        "median": 1.6130748273405655,
+        "minimum": 0.14991091746906016
       },
       "signed_relative_q95_error": {
         "maximum": 1.7350749764348985,
         "mean": 0.789255425074202,
         "median": 0.32023935303099504,
-        "minimum": 0.3124519457567124
+        "minimum": 0.31245194575671215
       }
     },
     "passed": false,
@@ -3417,11 +3861,11 @@
         "boundary_comparison_failures": [],
         "converged": false,
         "fine_map": {
-          "build_seconds": 267.82705777511,
+          "build_seconds": 207.77923438325524,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
@@ -3431,18 +3875,84 @@
             1.4231192697567516,
             -1.0952213561144473
           ],
-          "max_node_mismatch_wb": 3.7985307511201514,
-          "radial_points": 171,
-          "reproduction_relative_error": 4.295185399094362e-14,
-          "saddle_converged": true,
-          "saddle_flux_wb": -1.7577667566400845,
-          "saddle_offset_mm": 230.9760608703288,
-          "saddle_rz_m": [
-            1.214658609604622,
-            -1.1946904159477045
+          "max_node_mismatch_wb": 3.6850168015254323,
+          "max_solved_node_mismatch_wb": 3.6850168015254323,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1507140,
+          "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
           ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+          "promoted_node_count": 0,
+          "radial_points": 171,
+          "reproduction_relative_error": 4.702771970109923e-14,
+          "saddle_converged": true,
+          "saddle_flux_wb": -1.4530754717846848,
+          "saddle_offset_mm": 314.8718058621365,
+          "saddle_rz_m": [
+            1.2377603494471048,
+            -1.3497529352721718
+          ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 2.2941339586406637,
+          "separatrix_saddle_to_label_x_m": 2.448598179178082,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
@@ -3451,6 +3961,9 @@
         "frame": 179,
         "interior_r_squared": 0.4475317257084024,
         "iterations": 2,
+        "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+        "operand_unavailable_reason": null,
         "shot": "d3d_shot_00000c4a7b.parquet",
         "solve_exception_class": null,
         "solver_termination": "public branch selector found no convergence-qualified diverted root",
@@ -3477,11 +3990,11 @@
         ],
         "converged": false,
         "fine_map": {
-          "build_seconds": 294.3307984042913,
+          "build_seconds": 207.00828145444393,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
@@ -3491,18 +4004,84 @@
             1.5752974999992693,
             -1.1513129555353323
           ],
-          "max_node_mismatch_wb": 11.279233268930605,
-          "radial_points": 171,
-          "reproduction_relative_error": 3.892138900678155e-14,
-          "saddle_converged": true,
-          "saddle_flux_wb": 0.4814642734586967,
-          "saddle_offset_mm": 141.3247973101995,
-          "saddle_rz_m": [
-            1.435178367309388,
-            -1.132892125233621
+          "max_node_mismatch_wb": 11.167432179393675,
+          "max_solved_node_mismatch_wb": 11.167432179393675,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1513736,
+          "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
           ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+          "promoted_node_count": 0,
+          "radial_points": 171,
+          "reproduction_relative_error": 3.5701118020966594e-14,
+          "saddle_converged": true,
+          "saddle_flux_wb": 0.29524895514506183,
+          "saddle_offset_mm": 161.57303771450054,
+          "saddle_rz_m": [
+            1.4219928230844485,
+            -1.1002882306234443
+          ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 2.275615062701944,
+          "separatrix_saddle_to_label_x_m": 2.2422884473456057,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
@@ -3511,6 +4090,9 @@
         "frame": 44,
         "interior_r_squared": -0.8554704555435559,
         "iterations": 2,
+        "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+        "operand_unavailable_reason": null,
         "shot": "d3d_shot_0003ff34e7.parquet",
         "solve_exception_class": null,
         "solver_termination": "public branch selector found no convergence-qualified diverted root",
@@ -3531,6 +4113,9 @@
         "frame": 144,
         "interior_r_squared": null,
         "iterations": 0,
+        "operand_digest": null,
+        "operand_path": null,
+        "operand_unavailable_reason": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
         "shot": "d3d_shot_001554e054.parquet",
         "solve_exception_class": "NoQualifiedAxisError",
         "solver_termination": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
@@ -3555,51 +4140,120 @@
           0
         ],
         "active_set_residuals": [
-          0.12818170822460362,
-          0.22201860588491118,
-          0.0651490272848196,
-          0.054961955947777905,
-          0.054961955947777905
+          0.12818170822460778,
+          0.22201860587138092,
+          0.0651490274069113,
+          0.054961955890201634,
+          0.054961955890201634
         ],
         "boundary_comparison_failures": [
           "missing_predicted_closed_boundary"
         ],
         "converged": false,
         "fine_map": {
-          "build_seconds": 169.69526754692197,
+          "build_seconds": 206.87864548526704,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
             24
           ],
           "lattice_saddle_rz_m": [
-            0.9659008782288813,
-            -0.21651800670046134
+            0.9659008781467892,
+            -0.21651800644067484
           ],
-          "max_node_mismatch_wb": 6.891212845998524,
+          "max_node_mismatch_wb": 7.020545993805956,
+          "max_solved_node_mismatch_wb": 7.020545993805956,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1509918,
+          "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
+          ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+          "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 2.152235780024985e-14,
-          "saddle_converged": false,
-          "saddle_flux_wb": null,
-          "saddle_offset_mm": null,
+          "reproduction_relative_error": 2.533282379101802e-14,
+          "saddle_converged": true,
+          "saddle_flux_wb": -1.914254388757502,
+          "saddle_offset_mm": 514.3032347692298,
           "saddle_rz_m": [
-            null,
-            null
+            1.0058727405738537,
+            0.2962295606020224
           ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 0,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": null,
+          "separatrix_saddle_to_label_x_m": 1.5147987341176243,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "frame": 146,
-        "interior_r_squared": -1.9640056189378554,
+        "interior_r_squared": -1.9640056175043603,
         "iterations": 5,
+        "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+        "operand_unavailable_reason": null,
         "shot": "d3d_shot_002495e835.parquet",
         "solve_exception_class": null,
         "solver_termination": "public branch selector found no convergence-qualified diverted root",
@@ -3624,49 +4278,118 @@
           0
         ],
         "active_set_residuals": [
-          0.1298578928369817,
-          0.11139650269735624,
-          0.0670052295871077,
-          0.06236882877710909,
-          0.06236882877710909
+          0.12985789283698176,
+          0.1113965026973562,
+          0.06700522958710774,
+          0.06236882877710906,
+          0.06236882877710906
         ],
         "boundary_comparison_failures": [],
         "converged": false,
         "fine_map": {
-          "build_seconds": 292.92778008431196,
+          "build_seconds": 207.4288696590811,
           "conductor_response_build_seconds": 0.0,
           "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/display-conductor-response-c8075ff7c3885c0d.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
             55980,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.2651583546996064,
-            -1.3362867934446658
+            1.2651583546996057,
+            -1.3362867934446665
           ],
-          "max_node_mismatch_wb": 1.6691080835487813,
+          "max_node_mismatch_wb": 0.8455500872273891,
+          "max_solved_node_mismatch_wb": 0.8455500872273891,
+          "nearest_promoted_to_xpoint_m": null,
+          "operand_bytes": 1516550,
+          "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
+          "operand_fields": [
+            "branch_closed_candidate_count",
+            "branch_closed_controls_rz",
+            "branch_closed_segment_count",
+            "branch_closed_valid",
+            "branch_open_branch_count",
+            "branch_open_branch_valid",
+            "branch_open_controls_rz",
+            "branch_open_segment_count",
+            "branch_open_valid",
+            "branch_well_formed",
+            "compensation_current",
+            "conductor_current",
+            "conductor_flux",
+            "constraint_compensator_authority",
+            "constraint_compensator_direction",
+            "constraint_compensator_lengths",
+            "constraint_observed",
+            "constraint_physical_residual",
+            "constraint_physical_unknown",
+            "constraint_qualified",
+            "constraint_target",
+            "display_height",
+            "display_points",
+            "display_radius",
+            "domain_core",
+            "domain_label",
+            "domain_psi_norm",
+            "flux",
+            "lattice_saddle_rz",
+            "max_node_mismatch_wb",
+            "max_solved_node_mismatch_wb",
+            "nearest_promoted_to_xpoint_m",
+            "plasma_flux",
+            "promoted_mask",
+            "promoted_node_count",
+            "reproduction_relative_error",
+            "response_row_index",
+            "saddle_converged",
+            "saddle_flux",
+            "saddle_offset_mm",
+            "saddle_rz",
+            "separatrix_assembly",
+            "separatrix_closed_rz",
+            "spacing_m",
+            "state"
+          ],
+          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+          "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 3.3083240455949486e-14,
+          "reproduction_relative_error": 4.1154361122302815e-14,
           "saddle_converged": true,
-          "saddle_flux_wb": 0.15418895531932442,
-          "saddle_offset_mm": 127.5623247545975,
+          "saddle_flux_wb": 0.7464005477516623,
+          "saddle_offset_mm": 40.32219848813813,
           "saddle_rz_m": [
-            1.3024656199709357,
-            -1.2143018982536133
+            1.293778368421335,
+            -1.3646905696986231
           ],
+          "separatrix_assembly": {
+            "axis_enclosing_component_count": null,
+            "branch_overflow": null,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 0,
+            "contour_well_formed": null,
+            "cycle_component_count": null,
+            "graph_well_formed": null,
+            "open_branch_count": 0,
+            "open_slot_overflow": null,
+            "overflow": null,
+            "well_formed": false
+          },
           "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 0.02882451036869624,
+          "separatrix_saddle_to_label_x_m": 0.17632215764534862,
           "separatrix_symmetric_rms_distance_m": null,
           "separatrix_symmetric_sup_distance_m": null,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "frame": 137,
-        "interior_r_squared": -0.44591551408139685,
+        "interior_r_squared": -0.4459155140813966,
         "iterations": 5,
+        "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
+        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+        "operand_unavailable_reason": null,
         "shot": "d3d_shot_0040ca9bdc.parquet",
         "solve_exception_class": null,
         "solver_termination": "public branch selector found no convergence-qualified diverted root",
@@ -3726,15 +4449,9 @@
     },
     "registered_median_interior_r_squared_bar": 0.90155
   },
-  "withdrawn_artifacts": {
-    "poloidal_frame_comparison": {
-      "withdrawn_path": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
-      "reason": "withdrawn under the plotting review: the panels carried overlapping text and were not drawn in the house style. The poloidal comparison is regenerated after the display map draws the field of the solve's own currents, from each frame's persisted display operands (frame-display-*.npz beside the conductor response), so no re-splice or re-solve is needed."
-    }
-  },
   "tree_stamp": {
-    "benchmark_sha256": "5ee17c95b1450db7c70318d0b0259e246eb898b4e03fccfa0dac211a15087779",
-    "git_head": "5ab15e26d5abcbf9232677728e35ecb4a2e33f37",
+    "benchmark_sha256": "9c3214a108e0cd8c2d0055491633f9b6d516a581bc7b4f4b6c19221db18a98ad",
+    "git_head": "38ed1755ca3209c3f084d705fff51e5f74d66022",
     "worktree_status": []
   }
 }

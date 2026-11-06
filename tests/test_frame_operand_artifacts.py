@@ -6,9 +6,6 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from nova.database.filepath import operand_cache_root
-
-
 MODULE_PATH = Path(__file__).parents[1] / "benchmarks" / "diiid_forward_gs_match.py"
 SPEC = importlib.util.spec_from_file_location(
     "diiid_forward_gs_match_operands", MODULE_PATH
@@ -25,13 +22,14 @@ def _synthetic_pair(root: Path, rows: int = 12, columns: int = 4):
     rng = np.random.default_rng(20261105)
     response = rng.normal(size=(rows, columns))
     current = rng.normal(size=columns)
+    compensation = rng.normal(size=columns)
     radius = np.linspace(1.0, 2.0, 4)
     height = np.linspace(-0.5, 0.5, 3)
     points = np.stack(np.meshgrid(radius, height, indexing="ij"), axis=-1).reshape(
         -1, 2
     )
     index = np.arange(points.shape[0], dtype=np.intp)
-    conductor = response[index] @ current
+    conductor = response[index] @ (current + compensation)
     plasma = rng.normal(size=points.shape[0])
     artifact = root / "frame-display-synthetic.npz"
     np.savez_compressed(
@@ -44,6 +42,7 @@ def _synthetic_pair(root: Path, rows: int = 12, columns: int = 4):
         conductor_flux=conductor,
         plasma_flux=plasma,
         conductor_current=current,
+        compensation_current=compensation,
         response_row_index=index,
     )
     matrix = root / "display-conductor-response-synthetic.npy"
@@ -63,6 +62,18 @@ def test_rebuild_reproduces_the_persisted_field_by_the_matrix_product(tmp_path):
     assert np.allclose(field, reference, rtol=0.0, atol=tolerance)
 
 
+def test_conductor_response_uses_verified_content_store(tmp_path):
+    """The cache identity is admitted and its matrix survives publication."""
+
+    response = np.asarray([[1.0, 2.0], [3.0, 4.0]])
+    source = tmp_path / "response.npy"
+    np.save(source, response)
+    key = "a" * 64
+    stored = gate._publish_conductor_response(tmp_path / "store", key, source)
+    assert stored.name == key
+    assert np.array_equal(np.load(stored / "response.npy"), response)
+
+
 def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
     """The producer's own write is a whole frame: field, branches, mask, receipt."""
 
@@ -71,6 +82,7 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
     lattice = SimpleNamespace(
         radius=np.linspace(1.5, 1.9, 5),
         height=np.linspace(-0.2, 0.2, 5),
+        node_count=25,
     )
     display_radius, display_height, points = gate._display_grid(lattice)
     shape = (display_radius.size, display_height.size)
@@ -89,6 +101,9 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
         lattice_saddle_rz=np.asarray([1.71, 0.0]),
         saddle_offset_mm=10.0,
         max_node_mismatch_wb=1.0e-9,
+        max_solved_node_mismatch_wb=1.0e-9,
+        promoted_node_count=0,
+        nearest_promoted_to_xpoint_m=np.nan,
         reproduction_relative_error=3.0e-14,
         branches={
             "closed_controls_rz": np.zeros((3, 4, 2)),
@@ -103,6 +118,7 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
             core=np.ones(shape, dtype=bool),
         ),
         constraints=(),
+        promoted_mask=np.zeros(25, dtype=bool),
     )
     monkeypatch.setattr(
         gate, "_frame_operand_path", lambda tag: tmp_path / f"frame-display-{tag}.npz"
@@ -115,50 +131,204 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
         response=response,
         conductor_current=current,
     )
-    assert receipt["path"].endswith("frame-display-shot-3.npz")
+    assert receipt["path"].endswith(f"frame-display-shot-3-{receipt['digest']}.npz")
     assert receipt["bytes"] > 0
-    operands = gate.load_frame_operands(tmp_path / "frame-display-shot-3.npz")
+    operands = gate.load_frame_operands(Path(receipt["path"]))
     assert "state" in operands and "domain_core" in operands
+    assert "promoted_mask" in operands and "compensation_current" in operands
     assert "branch_closed_controls_rz" in operands
     field, conductor = gate.rebuild_display_flux(operands, response)
     assert np.allclose(field, 7.0, rtol=0.0, atol=1.0e-12)
     assert np.allclose(conductor, display.flux.ravel() - operands["plasma_flux"])
 
+    original_bytes = Path(receipt["path"]).read_bytes()
+    display.flux = np.full(shape, 9.0)
+    alternate = gate._persist_frame_operands(
+        tag="shot-3",
+        profile=SimpleNamespace(lattice=lattice),
+        equilibrium=equilibrium,
+        display=display,
+        response=response,
+        conductor_current=current,
+    )
+    assert alternate["path"] != receipt["path"]
+    assert Path(receipt["path"]).read_bytes() == original_bytes
+
 
 def test_persisted_bank_frame_rebuilds_to_one_em12():
-    """The newest persisted bank frame rebuilds from its own matrix to 1e-12."""
+    """A committed bank row names the exact operand and response pair to read."""
 
-    root = operand_cache_root() / "diiid-forward-gs"
-    artifacts = sorted(
-        root.glob("frame-display-*.npz"), key=lambda path: path.stat().st_mtime
+    receipt_path = (
+        Path(__file__).parents[1]
+        / "docs/figures/diiid-forward-onboarding/forward-gs-2026-11"
+        / "forward_gs_partial_receipt.json"
     )
-    if not artifacts:
-        pytest.skip(
-            "no persisted frame artifact yet: the bank predates the persistence"
-        )
-    artifact = artifacts[-1]
+    receipt = json.loads(receipt_path.read_text())
+    frames = receipt["frame_records"]
+    record = next(item["display_map"] for item in frames if item["display_map"])
+    assert record["operand_path"] and record["operand_digest"]
+    artifact = Path(record["operand_path"])
+    assert artifact.is_file()
     operands = gate.load_frame_operands(artifact)
-    candidates = sorted(
-        root.glob("display-conductor-response-*.npy"),
-        key=lambda path: path.stat().st_mtime,
-    )
-    target = int(operands["response_row_index"].ravel()[-1]) + 1
-    matrix = None
-    for candidate in candidates:
-        loaded = np.load(candidate)
-        if (
-            loaded.shape[1] == operands["conductor_current"].size
-            and loaded.shape[0] >= target
-        ):
-            matrix = loaded
-            break
-    if matrix is None:
-        pytest.skip("no response matrix covers this frame's display points")
+    matrix = np.load(record["conductor_response_path"])
     field, conductor = gate.rebuild_display_flux(operands, matrix)
     reference = operands["flux"].ravel()
     tolerance = 1.0e-12 * max(1.0, float(np.max(np.abs(reference))))
     assert np.allclose(conductor, operands["conductor_flux"], rtol=0.0, atol=tolerance)
     assert np.allclose(field, reference, rtol=0.0, atol=tolerance)
+    assert float(operands["max_solved_node_mismatch_wb"]) == pytest.approx(
+        record["max_solved_node_mismatch_wb"], abs=1.0e-12
+    )
+    assert int(operands["promoted_node_count"]) == record["promoted_node_count"]
+
+
+def test_checkpointed_panels_rebuild_maps_and_keep_unavailable_frame():
+    """A resumed bank can render its saved maps and qualify an absent solve."""
+
+    receipt_path = (
+        Path(__file__).parents[1]
+        / "docs/figures/diiid-forward-onboarding/forward-gs-2026-11"
+        / "forward_gs_partial_receipt.json"
+    )
+    records = json.loads(receipt_path.read_text())["frame_records"]
+    assert len(records) >= 3
+    assert records[2]["operand_path"] is None
+    assert records[2]["operand_digest"] is None
+    assert records[2]["operand_unavailable_reason"].startswith("NoQualifiedAxisError:")
+    reconstructed = []
+    for record in records[:3]:
+        result = gate._frame_result_from_checkpoint(record)
+        selected = gate.SelectedFrame(
+            gate.DEFAULT_DATA / result.shot,
+            result.frame,
+            result.time_ms,
+            result.target_current_a,
+        )
+        reconstructed.append((result, gate._restored_panel_fields(selected, result)))
+    for result, fields in reconstructed[:2]:
+        assert result.operand_path and result.operand_digest
+        assert fields["display"] is not None
+        assert fields["display"].flux.shape == (
+            fields["display"].radius.size,
+            fields["display"].height.size,
+        )
+        assert "labelled" in fields and "labelled_closed_boundary" in fields
+    unavailable, fields = reconstructed[2]
+    assert unavailable.solve_exception_class == "NoQualifiedAxisError"
+    assert unavailable.operand_path is None
+    assert unavailable.operand_digest is None
+    assert unavailable.operand_unavailable_reason.startswith("NoQualifiedAxisError:")
+    assert fields["display"] is None
+    assert "labelled" in fields
+
+    from dataclasses import replace
+
+    first, _ = reconstructed[0]
+    corrupt = replace(first, operand_digest="0" * 64)
+    selected = gate.SelectedFrame(
+        gate.DEFAULT_DATA / first.shot,
+        first.frame,
+        first.time_ms,
+        first.target_current_a,
+    )
+    with pytest.raises(RuntimeError, match="persisted frame operand digest changed"):
+        gate._restored_panel_fields(selected, corrupt)
+
+
+def test_display_map_uses_terminal_mask_and_constraint_compensation(monkeypatch):
+    """The producer passes the solved domain and compensating current flux."""
+
+    from types import SimpleNamespace
+
+    radius = np.linspace(1.0, 1.02, 3)
+    height = np.linspace(-0.01, 0.01, 3)
+    points = np.stack(np.meshgrid(radius, height, indexing="ij"), axis=-1).reshape(
+        -1, 2
+    )
+    lattice = SimpleNamespace(radius=radius, height=height, coordinate=points)
+    operator = SimpleNamespace(
+        external_current=np.asarray([1.0, 2.0]),
+        normalised_current_moments=lambda *args: (object(), None),
+    )
+    profile = SimpleNamespace(lattice=lattice, operator=operator)
+    constraint = SimpleNamespace(
+        compensator_direction=np.asarray([[1.0], [2.0]]),
+        physical_unknown=np.asarray([3.0]),
+    )
+    promoted = np.asarray([True] + [False] * 8)
+    equilibrium = SimpleNamespace(
+        flux=np.zeros(9), promoted_mask=promoted, constraints=(constraint,)
+    )
+    response = np.tile(np.asarray([0.5, 1.0]), (18, 1))
+    monkeypatch.setattr(
+        gate,
+        "_display_coupling",
+        lambda *args: (object(), radius, height, {"shape": [18, 2]}),
+    )
+    monkeypatch.setattr(gate, "_stored_conductor_response", lambda record: response)
+    seen = {}
+
+    def capture(*args, **kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(radius=radius, height=height)
+
+    monkeypatch.setattr(gate, "build_display_flux_map", capture)
+    _display, rig = gate._display_map(profile, equilibrium, object(), 7.0)
+    assert np.array_equal(seen["promoted"], promoted)
+    assert np.isclose(float(np.asarray(seen["target_current"])), 7.0)
+    assert np.allclose(rig["compensation_current"], [3.0, 6.0])
+    assert np.allclose(seen["compensation"](points), 7.5)
+
+
+def test_compensated_frame_reproduces_solved_nodes(monkeypatch):
+    """Omitting a constrained conductor term makes the measured node check fail."""
+
+    from types import SimpleNamespace
+    from nova.equilibrium.display_flux import DisplayCoupling
+
+    gate.configure_dtypes()
+    radius = np.linspace(1.0, 1.02, 3)
+    height = np.linspace(-0.01, 0.01, 3)
+    points = np.stack(np.meshgrid(radius, height, indexing="ij"), axis=-1).reshape(
+        -1, 2
+    )
+    lattice = SimpleNamespace(
+        radius=radius, height=height, coordinate=points, node_count=9, shape=(3, 3)
+    )
+    moments = SimpleNamespace(
+        cell_current=np.zeros(1), radial_moment=np.zeros(1), vertical_moment=np.zeros(1)
+    )
+    operator = SimpleNamespace(
+        external_current=np.asarray([1.0, 2.0]),
+        normalised_current_moments=lambda *args: (moments, None),
+        raster_image=lambda *args, **kwargs: np.ones(9),
+        read=lambda *args: (None, SimpleNamespace(axis=None, x_point=None)),
+    )
+    profile = SimpleNamespace(lattice=lattice, operator=operator)
+    constraint = SimpleNamespace(
+        compensator_direction=np.asarray([[1.0], [2.0]]),
+        physical_unknown=np.asarray([3.0]),
+    )
+    equilibrium = SimpleNamespace(
+        flux=np.full(9, 8.5),
+        promoted_mask=np.zeros(9, dtype=bool),
+        constraints=(constraint,),
+    )
+    coupling = DisplayCoupling(
+        plasma=lambda p: (np.zeros((len(p), 1)),) * 3,
+        external=lambda p: np.ones(len(p)),
+    )
+    response = np.tile(np.asarray([0.5, 1.0]), (18, 1))
+    monkeypatch.setattr(
+        gate,
+        "_display_coupling",
+        lambda *args: (coupling, radius, height, {"shape": [18, 2]}),
+    )
+    monkeypatch.setattr(gate, "_stored_conductor_response", lambda record: response)
+    display, _ = gate._display_map(profile, equilibrium, object(), 7.0)
+    print(f"max_solved_node_mismatch_wb={display.max_solved_node_mismatch_wb}")
+    assert display.max_solved_node_mismatch_wb < 1.0e-12
+    assert np.allclose(display.flux, 8.5, rtol=0.0, atol=1.0e-12)
 
 
 def _refused_display():

@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -202,8 +202,11 @@
       (slope &psi; &ge; &pi;/4) is derived; case n = 2 follows from eqs 7, 16 and 23b.
     </p>
     <p>
-      Done when (1) the Part V strip's error against a converged Gauss&ndash;Legendre integral of
-      <code>greens_psi</code> and <code>greens_bz_br</code> along the segment is reported over three
+      The reference is a Gauss&ndash;Legendre integral of <code>greens_psi</code> and
+      <code>greens_bz_br</code> along the segment, refined by panel bisection until two successive
+      refinements agree to 1e-13 relative at that target; a target that does not reach this is
+      reported and left out, never compared against.
+      Done when (1) the Part V strip's error against that reference is reported over three
       decades of &epsilon;, at slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and &pi;/2, for targets from half a cell width
       to ten segment lengths away, with the best attainable error at each slope; (2) the chosen
       route meets 1e-10 relative against that integral over the same targets, and at slopes
@@ -225,8 +228,11 @@
       sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n.
     </p>
     <p>
-      Done when (1) the device build and the §2 host route agree to 1e-12 in float64 over
-      the 1696-cell WEST mesh against its own centroids; (2) that 3392-square Gram builds on
+      Done when (1) the device build and the §2 host route agree in float64 over the
+      1696-cell WEST mesh against its own centroids to within the best attainable error §2
+      records in the sheet-route decision (the strip's cancellation floor, near 1e-11 relative,
+      not a tighter figure neither route can hold), and a negative control that reverses one
+      cell's edge normals in the device build breaks that agreement; (2) that 3392-square Gram builds on
       one H200 with the compile time and the warm execute time each recorded, and a second
       run hits the persistent cache; (3) the program appears in the kernel-compile
       census with its compile wall and memory, measured the same way as the polygon tile.

@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured as a suite delta: the reviewed manifest records no baseline_suite and no after_suite, because the node is a measurement node whose gate is the offline analysis at scripts/prototypes/bank_solve_trace/analyse.py, not a test suite. Zero is recorded with this note rather than as a measured absence of added failures.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T06:50:58.936Z",
+  "dispatched_at": "2026-11-06T06:44:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-wall-events",
+      "recorded_at": "2026-11-06T06:56:35.733886+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "A command-buffer owner collision could only misplace attribution between groups. The follow-on nodes, wall events and Newton Krylov, are judged on a paired base-against-head whole-solve wall, which does not depend on this attribution.",
+      "recorded_at": "2026-11-06T06:56:38.982394+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html",
+      "line": "89",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment never states how much of the attributed device time rests on the enclosing-HLO-loop fallback rather than the kernel's own op metadata \u2014 at sixteen slices 835.955 of 1376.862 kernel ms (60.7%) comes from that inference, including 353.419 of the candidate group's 364.799 ms and 288.571 of the wall group's 288.587 ms, so the two read costs the record tells the reader to attack next are inferred from CUDA-graph nesting; naming that share beside the method would keep the headline decision from reading as per-kernel source bindings."
+    },
+    {
+      "file": "scripts/prototypes/bank_solve_trace/analyse.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: contexts() keys owners by command-buffer name, so a command buffer appearing in two different host scopes keeps only the last scope's owner list, and the later enclosing-loop resolution at analyse.py:113 would then charge those kernels to whichever scope happened to be walked last; the record's own attribution_methods show 1039 of 2070 sixteen-lane kernels resolved this way, so a collision would be silent rather than counted."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from 474dc8570 to 1e446dd29 \u2014 trace capture and HLO export, profiler option reduction with per-shape export, the provenance decoder and reconciliation, then the fragment, figure and group-name repair; the analysis re-run at head reproduces the recorded numbers exactly.",
+    "done_when": "the done-when requires device time plus observed gaps to close on the independently measured solve wall within 10% and to report any residual; analyse.py:218 and analyse.py:220 assert completeness and closure, and the recorded run closes at 0.0072 ms of a 423.154 ms wall (1 lane) and 0.0065 ms of 1526.538 ms (16 lanes), residual reported and never folded into a remainder.",
+    "goal": "the source goal is a device-kernel attribution of the compiled bank solve at one and sixteen slices; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html carries the per-group device/launch/share table, the host-gap and copy tables, the per-lane counters and the batching classification, produced by scripts/prototypes/bank_solve_trace/analyse.py against captured traces.",
+    "manifest": "read; it reports status complete at 1e446dd29, four commits, nine changed paths, the head analysis gate exit 0, an omission control exit 1, and the profiler-overhead and failed-first-capture caveats.",
+    "write_paths": "the manifest declares scripts/prototypes/bank_solve_trace, the fragment and the figure directory; the diff against base 474dc8570 touches exactly nine paths, all inside those three scopes, with no product or test file changed."
+  },
+  "justifications": {
+    "durability": "analyse.py:218 refuses incomplete device attribution and omitted-factor.log shows that assertion raising AssertionError with EXIT=1 when a measured group is removed, though the closure assertion at analyse.py:220 and the positive control at analyse.py:230 are shown green but never falsified.",
+    "evidence": "report.log and head-analysis.log both print POSITIVE_CONTROL 2097152 1 and SUMMARY lines whose closure residual and group totals I recomputed from retry/attribution.json and matched to three decimals against the fragment table.",
+    "fit": "capture.py and plot.py follow the neighbouring scripts/prototypes/bank_solve_profile idiom, the figure uses the shared save_checked saver and the data-ink sheet, and no symbol or filename carries a version or plan label.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html:3 answers all three work items, but the attribution at sixteen slices rests more on enclosing-loop inference than the brief's HLO-op-metadata route (see finding).",
+    "reuse": "capture.py imports bank_solve_profile.fixture and plot.py imports bank_solve_profile.plot.save_checked rather than copying them, and a search of nova/ and scripts/ for an existing serialized-HLO source-stack decoder found only two measure scripts that set enable_hlo_proto = False.",
+    "scope_discipline": "git diff --stat against 474dc8570 shows nine files, all under scripts/prototypes/bank_solve_trace, docs/evidence/fragments/sub-millisecond-forward-path and docs/figures/sub-millisecond-forward-path, with no change to nova/equilibrium/support_read.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is a device-kernel attribution of the compiled bank solve at one and sixteen slices; docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html carries the per-group device/launch/share table, the host-gap and copy tables, the per-lane counters and the batching classification, produced by scripts/prototypes/bank_solve_trace/analyse.py against captured traces.\nVERDICT done_when: the done-when requires device time plus observed gaps to close on the independently measured solve wall within 10% and to report any residual; analyse.py:218 and analyse.py:220 assert completeness and closure, and the recorded run closes at 0.0072 ms of a 423.154 ms wall (1 lane) and 0.0065 ms of 1526.538 ms (16 lanes), residual reported and never folded into a remainder.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_solve_trace, the fragment and the figure directory; the diff against base 474dc8570 touches exactly nine paths, all inside those three scopes, with no product or test file changed.\nVERDICT manifest: read; it reports status complete at 1e446dd29, four commits, nine changed paths, the head analysis gate exit 0, an omission control exit 1, and the profiler-overhead and failed-first-capture caveats.\nVERDICT diff: read commit by commit from 474dc8570 to 1e446dd29 \u2014 trace capture and HLO export, profiler option reduction with per-shape export, the provenance decoder and reconciliation, then the fragment, figure and group-name repair; the analysis re-run at head reproduces the recorded numbers exactly.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html:3 answers all three work items, but the attribution at sixteen slices rests more on enclosing-loop inference than the brief's HLO-op-metadata route (see finding).\nSCORE evidence: 17\nJUSTIFICATION evidence: report.log and head-analysis.log both print POSITIVE_CONTROL 2097152 1 and SUMMARY lines whose closure residual and group totals I recomputed from retry/attribution.json and matched to three decimals against the fragment table.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat against 474dc8570 shows nine files, all under scripts/prototypes/bank_solve_trace, docs/evidence/fragments/sub-millisecond-forward-path and docs/figures/sub-millisecond-forward-path, with no change to nova/equilibrium/support_read.py.\nSCORE durability: 15\nJUSTIFICATION durability: analyse.py:218 refuses incomplete device attribution and omitted-factor.log shows that assertion raising AssertionError with EXIT=1 when a measured group is removed, though the closure assertion at analyse.py:220 and the positive control at analyse.py:230 are shown green but never falsified.\nSCORE fit: 16\nJUSTIFICATION fit: capture.py and plot.py follow the neighbouring scripts/prototypes/bank_solve_profile idiom, the figure uses the shared save_checked saver and the data-ink sheet, and no symbol or filename carries a version or plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: capture.py imports bank_solve_profile.fixture and plot.py imports bank_solve_profile.plot.save_checked rather than copying them, and a search of nova/ and scripts/ for an existing serialized-HLO source-stack decoder found only two measure scripts that set enable_hlo_proto = False.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html:89 non-blocking: the fragment never states how much of the attributed device time rests on the enclosing-HLO-loop fallback rather than the kernel's own op metadata \u2014 at sixteen slices 835.955 of 1376.862 kernel ms (60.7%) comes from that inference, including 353.419 of the candidate group's 364.799 ms and 288.571 of the wall group's 288.587 ms, so the two read costs the record tells the reader to attack next are inferred from CUDA-graph nesting; naming that share beside the method would keep the headline decision from reading as per-kernel source bindings.\nFINDING scripts/prototypes/bank_solve_trace/analyse.py:50 non-blocking: contexts() keys owners by command-buffer name, so a command buffer appearing in two different host scopes keeps only the last scope's owner list, and the later enclosing-loop resolution at analyse.py:113 would then charge those kernels to whichever scope happened to be walked last; the record's own attribution_methods show 1039 of 2070 sixteen-lane kernels resolved this way, so a collision would be silent rather than counted.",
+  "review_run_id": "r-20261106T063930441677-review-of-bank-solve-trace-1e446dd29abe",
+  "reviewed_base_sha": "474dc8570f6f10c156dbf00423f8a9e1126e0515",
+  "reviewed_head_sha": "1e446dd29abeb7c0e7844dbfff9d307fa9e09f44",
+  "reviewed_run_id": "r-20261106T054125594099-bank-solve-trace",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:08:20.353067+00:00",
+  "total": 102
+}

@@ -3879,9 +3879,10 @@ def cohort_figure(
     axes[0, 0].annotate(
         "registered median bar",
         (index[-1], REGISTERED_MEDIAN_INTERIOR_R2_BAR),
-        xytext=(0, 4),
+        xytext=(0, -6),
         textcoords="offset points",
         ha="center",
+        va="top",
         fontsize=14,
         color="0.35",
     )
@@ -3902,13 +3903,13 @@ def cohort_figure(
                 color=DEFAULT_INK.separatrix_color,
                 linewidth=1.3,
             )
-    overlay.set_title("EFIT boundaries and DIII-D limiter", fontsize=16, pad=10)
+    overlay.set_title("EFIT boundary and limiter", fontsize=16, pad=10)
     if not any(len(frame["display_closed_boundary"]) for frame in fields):
         position = overlay.get_subplotspec().get_position(figure)
         figure.text(
             (position.x0 + position.x1) / 2,
             0.035,
-            "Nova separatrices: assembly refused",
+            "separatrix assembly refused",
             ha="center",
             fontsize=14,
         )

@@ -10,7 +10,6 @@ import shlex
 import shutil
 import subprocess
 import tempfile
-import time
 
 FILES = (
     "test_bank_step_booking_batch",
@@ -27,6 +26,7 @@ def main():
     parser.add_argument("tree", type=Path)
     parser.add_argument("run", type=Path)
     parser.add_argument("base")
+    parser.add_argument("--completed-dir", type=Path)
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="booking-suite-") as temporary:
         scratch = Path(temporary)
@@ -53,6 +53,24 @@ def main():
 
         def run_arm(arm, tree, revision):
             def run_file(name):
+                if args.completed_dir is not None:
+                    previous = args.completed_dir / f"{arm}-{name}.log"
+                    text = previous.read_text() if previous.exists() else ""
+                    lines = text.splitlines()
+                    if (
+                        lines
+                        and lines[0].startswith(f"# revision: {revision} ")
+                        and lines[-1].startswith("EXIT=")
+                        and re.search(r"^=+ .* in .* =+$", text, re.MULTILINE)
+                    ):
+                        ids = re.findall(r"^FAILED\s+(\S+::\S+)", text, re.MULTILINE)
+                        return dict(
+                            command=lines[0].split(" command: ", 1)[1],
+                            log_path=str(previous),
+                            exit_status=int(lines[-1].split("=", 1)[1]),
+                            completed=True,
+                            failure_ids=sorted({i[i.index("tests/") :] for i in ids}),
+                        )
                 command = [
                     PYTHON,
                     "-P",
@@ -155,14 +173,6 @@ def main():
             print("SUITE", arm, json.dumps(receipt), flush=True)
 
         run_arm("base", base, args.base)
-        for _ in range(180):
-            if (args.run / "head-ready").exists():
-                break
-            if (args.run / "stop-device").exists():
-                return
-            time.sleep(10)
-        head = (args.run / "head-ready").read_text().strip()
-        run_arm("head", args.tree, head)
         print("REMOVING_SCRATCH", scratch, flush=True)
     print("EXIT=0", flush=True)
 

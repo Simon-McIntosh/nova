@@ -8,6 +8,8 @@ configure_dtypes()
 import argparse
 import hashlib
 import json
+import logging
+import os
 from pathlib import Path
 import sys
 import time
@@ -35,12 +37,44 @@ def fingerprint(value):
     )
 
 
+class CacheEvents(logging.Handler):
+    """Collect the compiler's actual persistent-cache lookup decisions."""
+
+    def __init__(self):
+        super().__init__()
+        self.rows = []
+
+    def emit(self, record):
+        message = record.getMessage()
+        if message.startswith("Persistent compilation cache hit"):
+            outcome = "hit"
+        elif message.startswith("PERSISTENT COMPILATION CACHE MISS"):
+            outcome = "miss"
+        else:
+            return
+        row = dict(outcome=outcome, module=record.args[0], key=record.args[1])
+        self.rows.append(row)
+        emit("CACHE_LOOKUP", **row)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--booking-only", action="store_true")
     args = parser.parse_args()
+    cache_events = CacheEvents()
+    compiler_logger = logging.getLogger("jax._src.compiler")
+    compiler_logger.addHandler(cache_events)
+    compiler_logger.setLevel(logging.DEBUG)
+    compiler_logger.propagate = False
+    environment = dict(
+        xla_flags=os.environ.get("XLA_FLAGS"),
+        cache_root=jax.config.jax_compilation_cache_dir,
+        cache_enabled=jax.config.jax_enable_compilation_cache,
+        cache_min_compile_seconds=jax.config.jax_persistent_cache_min_compile_time_secs,
+        cache_min_entry_bytes=jax.config.jax_persistent_cache_min_entry_size_bytes,
+    )
     emit(
         "HEADER",
         revision=args.revision,
@@ -49,6 +83,7 @@ def main():
         cwd=str(Path.cwd().resolve()),
         device=jax.devices()[0].device_kind,
         x64=jax.config.jax_enable_x64,
+        **environment,
     )
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"
     arrays, stages, seen, arguments = {}, [], {}, {}
@@ -102,10 +137,13 @@ def main():
         cwd=str(Path.cwd().resolve()),
         stages=stages,
         initial=fingerprint(initial),
+        axis_flux=float(seen["read"].axis_flux),
+        environment=environment,
         calls=[],
     )
 
     def persist():
+        record["cache_lookups"] = cache_events.rows
         args.output.with_suffix(".json").write_text(json.dumps(record, indent=2))
         np.savez_compressed(args.output.with_suffix(".npz"), **arrays)
 
@@ -138,11 +176,19 @@ def main():
             contraction_limit=0.5,
         )
 
+    cache_start = len(cache_events.rows)
     start = time.perf_counter()
     program = jax.jit(solve).lower(*inputs).compile()
-    emit("COMPILE", seconds=time.perf_counter() - start)
+    record["solve_compile_seconds"] = time.perf_counter() - start
+    record["solve_cache_lookups"] = cache_events.rows[cache_start:]
+    assert any(row["module"] == "jit_solve" for row in record["solve_cache_lookups"])
+    emit(
+        "COMPILE",
+        seconds=record["solve_compile_seconds"],
+        cache=record["solve_cache_lookups"],
+    )
     jax.block_until_ready(program(*inputs))
-    for call in range(2):
+    for call in range(3):
         start = time.perf_counter()
         result = jax.block_until_ready(program(*inputs))
         row = dict(call=call, wall_ms=1000 * (time.perf_counter() - start))
@@ -173,6 +219,9 @@ def main():
         minor_radius=oracle["minor_radius"],
         oracle=oracle,
         oracle_roots=np.asarray(roots).tolist(),
+    )
+    record["median_wall_ms"] = float(
+        np.median([row["wall_ms"] for row in record["calls"]])
     )
     persist()
     emit("COMPLETE", output=str(args.output))

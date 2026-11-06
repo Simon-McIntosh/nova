@@ -1,0 +1,87 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_map": {
+    "image-1.png": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+    "image-3.png": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+    "image-5.png": "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+    "image-7.png": "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png"
+  },
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T09:33:49Z",
+  "figures_reviewed": [
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png",
+    "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
+    "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",
+      "id": "f2addeb3325",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The digest recorded for this delivered figure no longer matches the file. The evidence fragment and the run's own manifest both quote md5 811b454b88529baf45421790ce7b863e for the fine panel, but the committed file hashes to 0f1f60461833579beb5f21679d0ad08e: commit 9d0626331 ('refresh the cpu-lane fine panel from a redraw') rewrote the panel and its receipt after the digest was written, and only the plain sibling's digest (a9f168eef415757c8f8f521dd96a6466) still matches. The picture itself is correct and readable, and the two cpu-lane panels do differ as required, but a reader who verifies the artifact against the number the record gives them gets a mismatch."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f2adcfd500a",
+      "line": 1342,
+      "severity": "non-blocking",
+      "summary": "The plasma cell wash costs contrast on the data it sits under. The rendered fill is (233,222,247), so the same #929292 contour strokes that hold 3.11:1 against white fall to about 2.0:1 inside the lobe, and the interior contours are visibly softer than the same contours outside the plasma. They remain followable at full size, which is why this does not hold the node, but the wash is drawn over the data with alpha=CELL_ALPHA and a lighter fill, or contours re-inked inside the lobe, would keep the interior at the 3:1 the population is asked to hold."
+    }
+  ],
+  "notes": "Read-only figure review. Every verdict above was formed from the rendered PNGs named in the dispatch, opened with the Read tool: the four committed panels under docs/figures/mast-centroid-capability/ and the four image-*.png copies attached to the review run. No SVG was opened, read, listed or rendered, and no file was edited, created, moved, deleted or reformatted outside this record. The attached copies are the same pictures at 1400x1146 against the committed 1295x1061, so each pair was judged together. All four lanes' receipts record boundary_assembler.well_formed true with closed_segment_count 677/677/675 and open_branch_count 2, and all four rendered panels show exactly that. The contrast figures in the verdicts come from pixel sampling of the rendered PNGs, not from the source. A figure record carries no scores and no suite-delta measurement: no suite was run for this review, so added_failure_count is 0 over an empty id list.",
+  "per_figure_rubric": {
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png": {
+      "contrast": "pass: titles 21:1, contours 3.11:1 on white",
+      "data_ink": "pass: contours and boundary dominate",
+      "decoration": "pass: no decorative fill or gradient; the cell wash is data",
+      "label_collision": "pass: two titles only, both clear",
+      "legibility": "pass: the lobe, both legs through the red X-point and the dense dot mesh all read at full size",
+      "table_form": "pass: a spatial field, not a table"
+    },
+    "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass: titles 21:1, contours 3.11:1 on white",
+      "data_ink": "pass",
+      "decoration": "pass",
+      "label_collision": "pass",
+      "legibility": "pass: the same picture at the coarser hexagon mesh; the lobe and legs read identically",
+      "table_form": "pass"
+    },
+    "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass",
+      "data_ink": "pass",
+      "decoration": "pass",
+      "label_collision": "pass",
+      "legibility": "pass: the lobe and legs are drawn and read; its saddle sits higher and the lobe is correspondingly lower than the other lanes",
+      "table_form": "pass"
+    },
+    "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png": {
+      "contrast": "pass",
+      "data_ink": "pass",
+      "decoration": "pass",
+      "label_collision": "pass",
+      "legibility": "pass: the lobe and legs are drawn and read",
+      "table_form": "pass"
+    }
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T093228830418-review-of-mast-separatrix-redraw-d93cf32932ea-figure",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "d93cf32932ea263c1a1be83b7a59fabcde419bef",
+  "reviewed_run_id": "r-20261106T074026366625-mast-separatrix-redraw",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass for the text: both panel titles are solid black on white, measured 21:1. The contour population now renders at 3.11:1 against white, clearing the ~3:1 the style asks of a data population: the rendered PNGs contain large runs at exactly (146,146,146), that is #929292, so the earlier faint-stroke defect is fixed and verified in the picture rather than in the source. The same strokes inside the plasma wash drop to about 2.0:1 against the (233,222,247) fill, recorded as a non-blocking finding below.",
+    "data_ink": "pass. The flux contour population and the separatrix carry the visual weight; the machine wall and coil sections are drawn as context in grey and black and do not compete. The translucent cell wash is the largest uniform area in the right panel, but it encodes the plasma cell population the panel exists to show, and the contours remain visible through it.",
+    "decoration": "pass. No gradient, no background fill, no shading band, no gridlines and no frames: white ground throughout, both axes switched off, as the repository plotting rule requires. The only fill is the plasma cell wash, whose extent is itself data.",
+    "label_collision": "pass. The only text artists are the two panel titles, one above each panel, each fully inside the canvas and clear of the other panel and of the plotted data; nothing is clipped and no label overlaps anything. The red X, the red triangle and the hollow red cross are markers from the null vocabulary, not labels, and none obscures a contour run a reader needs.",
+    "legibility": "pass on all four rendered PNGs. Each is one two-panel poloidal view: the left panel titled 'conductors only, no plasma', the right titled 'solved, with plasma'. Every right panel carries a thick grey closed lobe around the red triangular axis marker and two dashed grey legs leaving the filled red X-point, with the plasma cell mesh filling the lobe; the lobe runs through the X-point and closes, and the legs leave the saddle and exit the map. The boundary is followable at full size without zooming. The fine and plain cpu-lane panels are visibly different maps: the fine panel fills 12353 cells with a dense dot mesh and the plain one 4286 cells with large hexagons.",
+    "table_form": "pass. The figure shows a spatial field on machine geometry, which a table cannot carry; the per-lane counts live in the evidence fragment's HTML table, not in the image."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:47:31.141212+00:00",
+  "total": null
+}

@@ -1,0 +1,81 @@
+{
+  "added_failure_basis": "derived from the reviewed run's own arms: baseline_suite at 2fd5d5b58 records completed true, exit_status 0, failure_count 0, failure_ids [] (logs/base-arm-final.log, slurm 1306717, '10 passed in 2899.39s'); after_suite at 5f91ff873 records completed true, exit_status 0, failure_count 0, failure_ids [] (logs/gate-head.log, slurm 1306726, '11 passed in 2178.98s'). Neither arm carries a failing id, so the added set is empty. The after arm predates the final head by 9d0626331 (cpu-lane fine figure, its SVG and the cpu-lane receipt); the test's only reads of committed artefacts are unchanged at that commit and the plain/fine md5 inequality still holds, so the delta transfers.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/mast_centroid_solve_panels.py:1430",
+    "benchmarks/mast_centroid_solve_panels.py:2103"
+  ],
+  "completed_at": "2026-11-06T09:44:04.350Z",
+  "dispatched_at": "2026-11-06T09:32:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/mast-separatrix-redraw.html",
+      "id": "ff6e3aaf6a3",
+      "line": 60,
+      "severity": "blocking",
+      "text": "blocking: the fragment records the cpu-lane -fine panel's md5 as 811b454b88529baf45421790ce7b863e, but the file committed at the reviewed head d93cf3293 hashes to 0f1f60461833579beb5f21679d0ad08e (811b454b was the digest at 5f91ff873, before 9d0626331 re-rendered it). Done-when 2 requires recording both md5 sums, and a reader checking the evidence against the artefact finds a mismatch, so the deliverable's own verification pointer is wrong; the manifest's artifacts line carries the same stale digest."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/mast-separatrix-redraw.html",
+      "id": "f36c8d9df81",
+      "line": 87,
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate and its control ran at 5f91ff873, not at the final head d93cf3293 as done-when 3 asks; commit 9d0626331 afterwards changed the cpu-lane -fine PNG and SVG and the cpu-lane receipt (build_seconds, reproduction_relative_error 1.7879186665292104e-16 -> 0.0, saddle_offset_mm last digits), so the manifest's evidence_inputs claim that the head differs from the gate revision 'by the evidence fragment only (a docs file, no code, test or figure)' is false. The conclusion still transfers: the test reads only committed['invocation']['argv'] and committed['drawn_plasma_mesh']['vacuum_nulls'] off the receipt, both unchanged at 9d0626331, and the plain/fine md5 inequality holds at head (a9f168eef415757c8f8f521dd96a6466 vs 0f1f60461833579beb5f21679d0ad08e), so zero added failures is still a true claim - but the record states a reason that a reader can check and find untrue."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/cpu-lane/centroid-solve.json",
+      "id": "f6eff736175",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "non-blocking: the re-rendered cpu-lane receipt records display_map.reproduction_relative_error as exactly 0.0 where the same lane recorded 1.7879186665292104e-16 at 5f91ff873 and the titan and full-axis lanes record 1.7879186665292096e-16 and 2.6729225456362353e-16. An exact zero from the same state, the same code and the same spacing is an implausible value delivered without comment, and it is the kind of measurement that should be read as a claim about the instrument before it is cited."
+    },
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "id": "f9a412358ec",
+      "line": 159,
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative control that reddens the new well_formed guard lives only at <run>/negative-control/force256_slots.py and is loaded with -p force256_slots off PYTHONPATH; it is not in the repository, so no later reader can re-run the control from the tree, and the guard's falsification is reproducible only while the run directory survives. Done-when 1 asks only that the control be logged with its test id, which it is."
+    },
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f0d87b34f50",
+      "line": 225,
+      "severity": "non-blocking",
+      "text": "non-blocking: commit 1eec7692f folds roughly sixty lines of pure formatting churn (numpy arange/meshgrid calls, spline.ev lists, _panel_response signatures) into the commit that changes the assembler verdict, in this file and in tests/test_mast_centroid_panel_states.py, so the intended delta is harder to review than the change justifies. The churn is inside the node's own declared paths and changes no behaviour."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 2fd5d5b58: 1eec7692f replaces _assembler_flags with _assembler_verdict reading display.branches and display.well_formed, 5f91ff873 redraws the four panels with CONTOUR_INK #929292 at 0.6 pt and BOUNDARY_LINEWIDTH 2.6*1.0, 9d0626331 re-renders the cpu -fine panel, and c02f8053b/d93cf3293 add and then extend the evidence fragment.",
+    "done_when": "The done_when's three clauses map onto tests/test_mast_centroid_panel_states.py:138-156 (well_formed plus closed_drawn/open_drawn per lane), :159 (plain and fine digests differ) and :113 (receipt argv[0] is the repository producer), and onto logs/gate-head.log; the gate asserts the measure, but it ran at 5f91ff873 rather than the final head and the fragment's recorded fine-panel md5 (line 60) does not match the delivered file.",
+    "goal": "The goal is that the three MAST centroid lanes draw the assembled separatrix (a closed lobe and its legs through the admitted X-point), with the verdict read from the display map's own branches; at d93cf3293 every lane receipt records boundary_assembler.source nova.equilibrium.display_flux.DisplayFluxMap.branches, well_formed true, closed_segment_count 677/677/675 and boundary_branches_drawn {closed_drawn: 1, open_drawn: 2}, so the lobe and legs are drawn.",
+    "manifest": "Read; it reports status complete, the five commits, the gate at 5f91ff873 and base at 2fd5d5b58 both exit 0, and a negative_control_note of 5 failed / 6 passed that the log confirms at three lanes on the well_formed assertion (logs/negative-control-final.log:97,239 and a third), while its evidence_inputs sentence that the head differs from the gate revision by the evidence fragment only is contradicted by 9d0626331.",
+    "write_paths": "The declared paths are benchmarks/mast_centroid_solve_panels.py, tests/test_mast_centroid_panel_states.py, the three docs/figures/mast-centroid-capability lane directories and docs/evidence/fragments/separatrix-spline-extraction/mast-separatrix-redraw.html; all fourteen files in the diff 2fd5d5b58..d93cf3293 fall inside them and nova/equilibrium/display_flux.py is untouched."
+  },
+  "justifications": {
+    "durability": "The well_formed guard at tests/test_mast_centroid_panel_states.py:144 is falsified by the 256-slot control, which reddens the three lane ids with closed_segment_count 0 (logs/negative-control-final.log:97), but the plain/fine digest guard at :159 reads only committed bytes and fires only when a redraw is re-committed.",
+    "evidence": "logs/gate-head.log ends '11 passed in 2178.98s' and 'EXIT=0' at revision 5f91ff873 while the head is d93cf3293, and the fragment at line 60 records an md5 the delivered -fine PNG no longer has.",
+    "fit": "The new helper follows the module's own receipt-dict idiom and reports the map's published fields under a source key, matching how benchmarks/coil_edit_latency.py:1121 reports branch verdicts beside it.",
+    "goal_fidelity": "benchmarks/mast_centroid_solve_panels.py:1430 hands the drawn receipt the map's own verdict, and every lane receipt at d93cf3293 records well_formed true with a closed lobe and two drawn legs.",
+    "reuse": "The node removes the duplicated assemble_separatrix_branches call rather than adding one and reads nova/equilibrium/display_flux.py:117 DisplayFluxMap.well_formed and :101 branches; the only other branch-verdict summariser, benchmarks/coil_edit_latency.py:1100, assembles from solver state and is a different capability, not an owner of this one.",
+    "scope_discipline": "Every one of the fourteen changed paths sits inside the five declared write paths, although benchmarks/mast_centroid_solve_panels.py:225 carries unrelated reformatting from the same commit."
+  },
+  "project": "nova",
+  "raw_text": "",
+  "review_run_id": "r-20261106T092941020904-review-of-mast-separatrix-redraw-d93cf32932ea",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "d93cf32932ea263c1a1be83b7a59fabcde419bef",
+  "reviewed_run_id": "r-20261106T074026366625-mast-separatrix-redraw",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:49:06.337107+00:00",
+  "total": 100
+}

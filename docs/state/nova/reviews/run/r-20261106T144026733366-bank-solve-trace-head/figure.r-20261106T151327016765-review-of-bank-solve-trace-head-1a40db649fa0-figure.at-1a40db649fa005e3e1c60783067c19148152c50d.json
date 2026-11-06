@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the empty list are the neutral values the record shape requires, not a measurement, and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-solve-trace-head (delivered as device-time.svg; the inspected raster is the run's device-time.png render)"
+  },
+  "attachment_note": "The attached image-0.png was opened and judged directly at its native 1399x720 and in upscaled crops (2x and 8x, nearest and Lanczos) of both panels, the legend, the left canvas margin, the right edge and the near-zero rows of the right panel. Share a judgement only from the render: no vector source was read, listed, searched, rendered or shown. The reviewed head 1a40db64 was confirmed to be the head of the reviewed run's worktree, and the drawing script scripts/prototypes/bank_solve_trace_head/report.py at that head was read for line anchors.",
+  "completed_at": "2026-11-06T15:23:06.255Z",
+  "dispatched_at": "2026-11-06T15:15:13Z",
+  "figure_checks": {
+    "caption_independence": "The caption is not a restatement of a title. The figure carries no title (identity is in the path and the caption), and the caption states the quantity and its normalisation ('Device milliseconds per complete sixteen-slice solve'), the series encoding (grey squares the morning trace, blue circles the mean of the two current traces), the differing read and update counts behind the two traces (five reads and four updates against eight and six), why the panels have separate ranges, and that shared-source groups are combined only in the figure. It is independent and accurate about the drawing it describes.",
+    "clipping": "Dark text pixel bounding box is x 61..1372, y 18..677 on a 1399x720 canvas. Counts of text pixels within 3 px of the left, right, top and bottom edges are 0, 0, 0 and 0. Nothing is clipped.",
+    "label_geometry": "Left panel y labels are right-aligned ending at x about 329 with the plot's left limit at about 336, so the leftmost glyph start varies with the label (the longest, 'GMRES / update (LU before)', begins near x 61). Right panel labels are right-aligned ending at x 1070 to 1071 with the plot's left limit near 1073. The nearest marker to a label is the blue circle for 'shared fused operations' at x 1081, a 10 px gap; the paired grey square in that row sits at x 1086, y 577 against the circle at x 1085, y 594, 17 px apart.",
+    "marker_geometry": "Both panels place the morning square 0.16 rows above the row centre and the current circle 0.16 rows below it. Marker size is 7 pt (about 9.7 px at 100 dpi), so the vertical separation of 16 to 17 px leaves roughly 5 px of clear space between the two marks of a pair, and no pair anywhere on the canvas touches.",
+    "render_provenance": "The attached image-0.png was opened with Read and judged as a picture; it is 1399x720 RGBA. The drawing script report.py at the reviewed head writes figsize (14, 7.2) at dpi 100 and saves device-time.png from the same figure object, so the attachment is the figure's own render.",
+    "scale_geometry": "Axes occupy x 0.24..0.50 and 0.77..0.98 of the canvas width. Left panel x limits run from a small negative margin to about 430 ms; right panel from a small negative margin to about 23 ms. Tick sets are filtered to the displayed limits, so no tick label sits beyond its own axis."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-solve-trace-head",
+      "rubric": {
+        "contrast": "pass. Text 7.9:1, grey marker 3.11:1, blue marker 6.91:1 against the white ground.",
+        "data_ink": "pass. Only markers, one baseline per panel, ticks and axis titles are drawn; nothing else occupies the canvas.",
+        "decoration": "pass. No gridlines, no fills, no bands, no frames around the legend.",
+        "label_collision": "pass. Zero clipped text, zero label-label overlap, 10 px minimum label-to-marker gap, and no touching markers. Labels are tight against the plot's left limit on the four smallest right-panel rows but remain clearly separated from the marks.",
+        "legibility": "pass. Read at a glance as two ranked dot-plot columns. The left panel (0 to about 430 ms) carries the eight largest groups, led by equilibration / LU with the morning square near 416 ms and the current circle near 20 ms; the right panel (0 to about 22 ms) carries the remaining ten, led by read census at about 13.5 ms morning and 23 ms current. Group names are legible, the two series are distinguished by both shape and colour, and the legend names them once for the whole figure.",
+        "table_form": "pass. The 18-category paired comparison is a scan-and-compare task and the numeric table already exists on the page beside it."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "attached image-0.png: left panel ticks 0, 100, 200, 300, 400 under identical title text at 0.24..0.50 of the width, right panel ticks 0, 5, 10, 15, 20 at 0.77..0.98; report.py line 350 sets the one xlabel inside the loop over subsets, line 348 sets each subset's own x limit.",
+      "file": "scripts/prototypes/bank_solve_trace_head/report.py",
+      "id": "fe68d3aeb10",
+      "line": 350,
+      "severity": "non-blocking",
+      "summary": "The two panels are drawn from one loop with the identical axis title 'Device time per solve [ms]', but their x ranges differ by about twenty times (left to about 430 ms, right to about 22 ms), and nothing inside the panels states that. Only the tick numbers tell a reader the scales are not shared, so a reader scanning across the gap can compare a left-panel position with a right-panel position as if both sat on one axis, and the visual separation of the two columns (x 0.24..0.50 and 0.77..0.98) does not signal a scale break. The caption does state that the panels use separate linear ranges, and every row carries its own tick scale immediately beneath it, so the figure remains readable and the misreading is avoidable by a careful reader; it is recorded rather than blocking."
+    },
+    {
+      "evidence": "attached image-0.png axis titles under both panels; the run's fragment caption at docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html gives 'Device milliseconds per complete sixteen-slice solve'; plan section 3/4 states the per-slice bound.",
+      "file": "docs/figures/sub-millisecond-forward-path/bank-solve-trace-head",
+      "id": "f71b8c0d917",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The axis title reads 'Device time per solve [ms]' without saying that each plotted solve is the sixteen-slice batch total, while the plan this figure informs states its target per slice (sub-millisecond per slice). A reader carrying that target could take the 606 ms batch figure as a per-slice cost, a sixteen-fold misreading of the very quantity the figure exists to report. The caption beneath the figure does say 'Device milliseconds per complete sixteen-slice solve', so the information is on the page; the defect is that the axis that carries the numbers does not carry the normalisation."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is substantive and accurate rather than a repeat of a title, and it supplies the comparison's normalisation (sixteen-slice batch) and the differing read and update counts behind the two traces.",
+    "finding_materiality": "Two non-blocking findings, no blocking finding. No label is clipped (zero text pixels in the outer 3 px frame), no label overlaps another label or a marker (10 px minimum gap), no text is unreadable (7.9:1), and the figure is not an image of a table.",
+    "rendered_artifact": "The single attached figure was opened with the Read tool and inspected at its native 1399x720 and in upscaled crops of the legend, both panels, the left canvas margin, the right edge and the near-zero rows of the right panel.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "Clipping, label gaps, marker separations and colour values are measured on the attached PNG's pixels. The drawing script at the reviewed head was read for line anchors and to confirm the figure is the one that produced this render.",
+    "legibility": "Read from the attached render at native size and in zoomed crops; magnitudes are quoted from the marker positions on each panel's own scale, not from any vector source.",
+    "scope_discipline": "This review is read-only and reports its findings only in this record."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T151327016765-review-of-bank-solve-trace-head-1a40db649fa0-figure",
+  "reviewed_base_sha": "d102ff6f103775ced8fe3b573122a235bec9da22",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-solve-trace-head"
+  ],
+  "reviewed_head_sha": "1a40db649fa005e3e1c60783067c19148152c50d",
+  "reviewed_run_id": "r-20261106T144026733366-bank-solve-trace-head",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Two panels of a labelled dot plot. Eighteen source groups carry right-aligned 14 pt names on the y axis, each row showing a grey square (morning trace) and a blue circle (current, the mean of two processes), with one frameless two-entry legend centred above the panels. Tick and axis text is clearly readable at the delivered 1399x720.",
+    "RUBRIC data_ink: pass. The ink is 36 markers (18 per panel series, plus two legend glyphs), one baseline per panel, their tick labels and two axis titles. No connecting lines, no fills, no grid.",
+    "RUBRIC decoration: pass. No gradient, no background fill, no shaded band, no drop shadow; top, right and left spines are removed and the y tick marks have zero length, so each panel carries only its bottom scale.",
+    "RUBRIC contrast: pass. Axis and tick text measures 7.9:1 against white (median glyph pixel 82,81,78). The grey square series is #929292 at 3.11:1, above the 3:1 floor for a non-text data mark, and the blue circle series is #1f5d92 at 6.91:1. No text or mark is lost to lightness.",
+    "RUBRIC table_form: pass. The image carries a paired magnitude comparison across 18 categories sorted by size, which is a comparison a reader scans rather than looks up; the exact per-group milliseconds and shares are already supplied as an HTML table in the fragment, so the figure is not an image of that table.",
+    "RUBRIC label_collision: pass. No text is clipped: all dark text pixels lie within x 61..1372 and y 18..677 of the 1399x720 canvas, and zero dark pixels fall in the outer 3 px frame on any edge. No label overlaps another label; the closest label-to-marker approach is 10 px (right panel, the rows at or below about 1 ms, where the marker sits just inside the plot's left limit), and paired markers in one row are 16 to 17 px apart centre to centre with about 10 px glyph height, so no two marks touch."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T15:47:16.093026+00:00",
+  "total": null
+}

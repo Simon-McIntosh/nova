@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="188">
+<meta name="plan-version" content="189">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -256,7 +256,7 @@
     <div class="r-comment-body"><p>none — this node is a review; its deliverable is the stored record under the reviewed run's review-records/, not a plan-section landing. Verdict on r-20261106T121451239466-bank-candidate-loop at cf045cc472e1 from b471be60: 18/17/19/15/17/19 (105/120), 0 added failures, 3 non-blocking findings, no blocker.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T142406265869-review-of-bank-candidate-compact-95d2c102e2db" data-who="reckon-build" data-when="2026-11-06T14:35:24.473Z">
-    <div class="r-comment-body"><p>none — this node is a review; its deliverable is the stored record under the reviewed run&#x27;s review-records/, not a plan-section landing. Verdict on r-20261106T133240496670-bank-candidate-compact at 95d2c102e2db from d21a11e6c: 19/18/19/16/17/5 (94/120), 0 added failures, 4 non-blocking findings, no blocker; the compact candidate inspection at K=3 with one batch-uniform overflow fallback matches the full evaluation exactly at all four 550-cell states and both controls fire.</p></div>
+    <div class="r-comment-body"><p>none — this node is a review; its deliverable is the stored record under the reviewed run's review-records/, not a plan-section landing. Verdict on r-20261106T133240496670-bank-candidate-compact at 95d2c102e2db from d21a11e6c: 19/18/19/16/17/5 (94/120), 0 added failures, 4 non-blocking findings, no blocker; the compact candidate inspection at K=3 with one batch-uniform overflow fallback matches the full evaluation exactly at all four 550-cell states and both controls fire.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>
@@ -659,6 +659,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T105556943473-review-of-bank-booking-determinism-f91d9586d406" data-who="reckon-build" data-when="2026-11-06T11:13:20.446Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism covering the one commit gained since the review at 684031cc1 — f91d9586d against base cb42f656 — records a parsed rubric (goal_fidelity 12, evidence 13, scope_discipline 20, durability 8, fit 16, reuse 15), added_failure_count 0, and four non-blocking findings: the wrapper cannot run two of the tabled flag arms, the shared-cache attribution is inferred across experiments rather than isolated, the allocation-record regex can silently drop its paragraph, and after_suite repeats baseline_suite. The prior review's two blocking findings are answered: the global XLA flag prescription is removed and the predicate is renamed and scoped.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T151327016765-review-of-bank-solve-trace-head-1a40db649fa0-figure" data-who="reckon-build" data-when="2026-11-06T15:23:06.255Z">
+    <div class="r-comment-body"><p>Figure review of run r-20261106T144026733366-bank-solve-trace-head at head 1a40db649fa005e3e1c60783067c19148152c50d: parsed, read-only, six rubric items recorded, no blocking finding, two non-blocking findings (the two panels share one axis title across a twenty-fold scale difference, and the axis title does not state that each plotted solve is the sixteen-slice batch total); the render is clean on clipping (zero text pixels in the outer 3 px frame), label collisions (10 px minimum label-to-marker gap), and contrast (text 7.9:1, grey series 3.11:1, blue series 6.91:1).</p></div>
 </div>
 </section>
 </main>

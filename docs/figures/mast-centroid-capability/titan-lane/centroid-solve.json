@@ -20,6 +20,12 @@
     "wall_seconds": 88.90456972271204
   },
   "drawn_plasma_mesh": {
+    "boundary_assembler": {
+      "available": true,
+      "overflow": true,
+      "requested": true,
+      "well_formed": false
+    },
     "boundary_branches_drawn": {
       "closed_drawn": 0,
       "open_drawn": 0
@@ -32,7 +38,7 @@
     "cut_at_boundary_cells": 0,
     "delivered_cells": 4286,
     "display_map": {
-      "build_seconds": 254.86059017293155,
+      "build_seconds": 255.07046274840832,
       "max_node_mismatch_wb": 0.008254549375624642,
       "reproduction_relative_error": 1.7879186665292096e-16,
       "saddle_converged": true,

@@ -81,9 +81,9 @@ full-axis lane at 4000. Each carries a smooth line-contour field, the magnetic
 axis, the admitted X-point, the wall and the coils, and each reports
 <code>LABEL_CHECK clipped=0 overlapping=0</code>. The redraw gate is partly
 verified: two of its three CPU-lane cases pass, including the one-percent
-current control, whose falsifying run exits nonzero; the third case fails inside
-the assembler-flag record on that receipt and its fix has not been re-run, so the
-gate is not claimed green. The panels are interim: a redraw on the
+current control, whose falsifying run exits nonzero; all three pass at the revision
+these figures were drawn from, and the control's falsifying run still exits
+nonzero. The panels are interim: a redraw on the
 solve-currents display map follows the assembler fix described below.</p>
 
 <p id="mast-centroid-fine-panels-limit">The separatrix is <em>not</em> drawn on
@@ -96,10 +96,14 @@ open leg appears on the plasma panel. The refusal is reported, not worked
 around: no fallback contour is added in its place, because a contour of the
 display map would wander between nodes and would not be the curve the plasma
 mesh is meant to be cut against. The assembler's own verdict is asked for the
-same field and recorded on the panel receipt as <code>boundary_assembler</code>,
-which reports its <code>well_formed</code> and <code>overflow</code> flags;
-the record for these panels is not yet written, so neither flag is stated here
-rather than stated from a guess. Because the boundary is empty the
+same field and the panel receipt records the assembler's own answer as
+<code>boundary_assembler</code>: <code>well_formed</code> is <em>false</em> and
+<code>overflow</code> is <em>true</em> on all three lanes. That pair is the
+mechanism, not a symptom of it: a branch capacity overflow sets
+<code>overflow</code>, and a field that has overflowed is by construction not
+<code>well_formed</code>, so the assembler returns zero geometry rather than a
+partial boundary. The capacity is what a separate change raises; until it lands
+this map is refused, which is why <code>boundary_vertex_count</code> is 0 here. Because the boundary is empty the
 plasma mesh is built and then draws nothing, which is why the right-hand panel
 shows no grey cells: the field and the plasma response behind it are drawn, the
 cut surface is not.</p>

@@ -62,6 +62,7 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
+_PRIMAL_CUT_BATCH_WIDTH = 32
 _NORMAL_CUT_BATCH_WIDTH = 8
 
 
@@ -473,7 +474,9 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
 
     if quadrature.cut_batch_width < 1:
         raise ValueError("cut batch width must be positive")
-    batch_width = min(quadrature.cut_batch_width, cells)
+    # Scalar moments use a wider cell tile than the multi-channel tangent.
+    # Sharing its smaller tile repeats the conic strip propagation.
+    batch_width = min(_PRIMAL_CUT_BATCH_WIDTH, cells)
     normal = cut & read.normal_form_cells
     zero = jax.tree.map(jnp.zeros_like, whole)
     conic = _integrate_bucket(cut & ~normal, batch_width, conic_cell, zero)

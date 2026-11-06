@@ -13,6 +13,7 @@ from scripts.prototypes.bank_wall_events.suite import archive
 def main():
     root, run = map(Path, sys.argv[1:3])
     base_revision = sys.argv[3]
+    prior_revision = sys.argv[4] if len(sys.argv) > 4 else None
     head_revision = subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip()
@@ -22,11 +23,14 @@ def main():
         scratch = Path(temporary)
         base = scratch / "base"
         archive(root, base_revision, base)
+        arms = [("base", base, base_revision)]
+        if prior_revision:
+            prior = scratch / "prior"
+            archive(root, prior_revision, prior)
+            arms.append(("prior", prior, prior_revision))
+        arms.append(("head", root, head_revision))
         for process in range(3):
-            for arm, tree, revision in (
-                ("base", base, base_revision),
-                ("head", root, head_revision),
-            ):
+            for arm, tree, revision in arms:
                 destination = run / f"{arm}-{process}"
                 destination.mkdir(exist_ok=True)
                 environment = dict(

@@ -10,11 +10,12 @@ set -u
 repo=$1
 run=$2
 base=$3
+prior=${4:-}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp PYTHONPATH=$repo PYTHONDONTWRITEBYTECODE=1
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
-printf '# revision: %s tree: %s command: %s -P -m scripts.prototypes.bank_booking_primal_buckets.device %s %s %s\n' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$python" "$repo" "$run" "$base"
-"$python" -P -m scripts.prototypes.bank_booking_primal_buckets.device "$repo" "$run" "$base"
+printf '# revision: %s tree: %s command: %s -P -m scripts.prototypes.bank_booking_primal_buckets.device %s %s %s %s\n' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$python" "$repo" "$run" "$base" "$prior"
+"$python" -P -m scripts.prototypes.bank_booking_primal_buckets.device "$repo" "$run" "$base" "$prior"
 result=$?
 printf 'EXIT=%s\n' "$result"
 exit "$result"

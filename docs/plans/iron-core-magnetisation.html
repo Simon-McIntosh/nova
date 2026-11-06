@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="iron-core-magnetisation">
   <meta name="plan-title" content="Iron Core Magnetisation — magnetised iron in nova from Urankar thin-sheet kernels">
-  <meta name="plan-summary" content="Model WEST-type iron cores as magnetised cells whose edge sheets use Urankar Part II kernels, solve the B-H law by Newton, and correct for discrete limbs">
+  <meta name="plan-summary" content="Model WEST-type iron cores as magnetised cells whose edge sheets use Urankar kernels (a thin Part V strip or the Part II closed form), solve the B-H law by Newton, and correct for discrete limbs">
   <meta name="plan-status" content="draft">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="43.0">
@@ -179,47 +179,56 @@
       values.
     </p>
 
-    <h2 id="s2">§2 — The thin conic sheet kernel (Urankar Part II)</h2>
+    <h2 id="s2">§2 — The edge sheet: a thin Part V strip, or the Part II closed form</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Implement the full-turn field and vector potential of a thin conic sheet, a straight
-      segment in the poloidal plane swept through 2&pi; and carrying a uniform azimuthal
-      sheet current, in <code>nova/biot/sheet.py</code>. Urankar Part II (IEEE Trans. Magn.
-      MAG-18(3), 911&ndash;917, 1982) gives it in eqs 22a and 23a: complete elliptic integrals
-      K, E and &Pi; of modulus k&sup2; = 4rr&prime;/a&sup2;, and one smooth integral
-      &#x1D524;(&pi;/2) = &int;<sub>0</sub><sup>&pi;/2</sup> sinh<sup>&minus;1</sup>&beta;<sub>1</sub>(&alpha;) d&alpha; that
-      Urankar evaluates numerically. Case n = 1 (slope &psi; &ge; &pi;/4) is derived; case
-      n = 2 follows from eqs 7, 16 and 23b, so every slope from the cylinder
-      (&psi; = &pi;/2) to the pancake (&psi; = 0) keeps the same accuracy. Reuse nova's
-      complete-integral routes (Bulirsch's cel on the complement, as the Part V reduction
-      in <code>nova/biot/polygonanalytic.py</code> does) and the same fixed-node rule the
-      Part V module uses for its arsinh remainders.
+      A magnetised cell's edge carries a thin conic sheet: a straight segment in the poloidal
+      plane swept through 2&pi; with a uniform azimuthal sheet current. nova already owns an exact
+      route that may deliver it: a polygon strip of width &epsilon; carrying K/&epsilon; through the
+      Urankar Part V closed form in <code>nova/biot/polygonanalytic.py</code>, which the production
+      <code>PolySection</code> route already runs on the device (<code>nova/biot/AGENTS.md</code>). Its
+      model error falls as &epsilon;&sup2; while the cancellation between the strip's two near-coincident
+      long edges grows as the rounding error over &epsilon;, so measure first where the two cross.
+      If the strip reaches 1e-10 relative at every target at least half a cell width from the
+      segment, the sheet ships as a Part V strip and no new kernel module or tile is written.
+      Otherwise implement Urankar Part II (IEEE Trans. Magn. MAG-18(3), 911&ndash;917, 1982) eqs 22a
+      and 23a in <code>nova/biot/sheet.py</code>: K, E and &Pi; of modulus k&sup2; = 4rr&prime;/a&sup2; through
+      the existing owners <code>complete_kind</code> and <code>complete_pole</code> in
+      <code>nova/biot/completeelliptic.py</code> (with the cached constants in
+      <code>nova/biot/constants.py</code>) and <code>incomplete_pole</code> in
+      <code>nova/biot/incompleteelliptic.py</code>, plus the smooth integral
+      &#x1D524;(&pi;/2) = &int;<sub>0</sub><sup>&pi;/2</sup> sinh<sup>&minus;1</sup>&beta;<sub>1</sub>(&alpha;) d&alpha; on the
+      fixed-node rule the Part V module uses for its arsinh remainders. Case n = 1
+      (slope &psi; &ge; &pi;/4) is derived; case n = 2 follows from eqs 7, 16 and 23b.
     </p>
     <p>
-      Done when (1) the kernel matches a converged Gauss&ndash;Legendre integral of
-      <code>greens_psi</code> and <code>greens_bz_br</code> along the segment to 1e-12 relative
-      for targets at least one segment length away, across slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and
-      &pi;/2; (2) at slope &pi;/2 and slope 0 it reproduces Snow's cylinder and pancake forms
-      (Part II eqs 24 to 27) to round-off, and a negative control with the sign of b<sub>1</sub>
-      flipped fails that comparison; (3) a Part V polygon strip of width &epsilon; carrying
-      K/&epsilon; converges to the sheet as &epsilon;&sup2;, measured over three decades of &epsilon;.
+      Done when (1) the Part V strip's error against a converged Gauss&ndash;Legendre integral of
+      <code>greens_psi</code> and <code>greens_bz_br</code> along the segment is reported over three
+      decades of &epsilon;, at slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and &pi;/2, for targets from half a cell width
+      to ten segment lengths away, with the best attainable error at each slope; (2) the chosen
+      route meets 1e-10 relative against that integral over the same targets, and at slopes
+      &pi;/2 and 0 reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27), while a
+      negative control with the sheet current's sign flipped on one edge fails that comparison;
+      (3) the choice and the measurement behind it are recorded in the sheet-route decision.
     </p>
 
-    <h2 id="s3">§3 — Sheet tiles on the device</h2>
+    <h2 id="s3">§3 — The cell interaction matrix on the device</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Add a sheet tile to <code>nova/biot/tiledassembly.py</code> beside the polygon and arc
-      tiles, so the cell interaction matrix G (B<sub>R</sub>, B<sub>Z</sub> and &psi; at targets per
-      unit M<sub>R</sub> and M<sub>Z</sub>) is built through the existing tile plan, padding, device
-      placement and persistent compilation cache rather than a bespoke driver. A cell's
-      columns are signed sums of its edge sheets, so a shared edge between two cells appears
-      once with the net sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n.
+      Build the cell interaction matrix G (B<sub>R</sub>, B<sub>Z</sub> and &psi; at targets per unit
+      M<sub>R</sub> and M<sub>Z</sub>) through the existing tile plan, padding, device placement and
+      persistent compilation cache in <code>nova/biot/tiledassembly.py</code>, never a bespoke
+      driver. If §2 chose the Part V strip, the edge sheets are polygon sources and G is built by
+      the existing polygon tile (<code>_fill_tile</code>) with no new tile kind; only if §2 chose
+      Part II is a sheet tile added beside the polygon, moment and arc tiles. A cell's columns are
+      signed sums of its edge sheets, so a shared edge between two cells appears once with the net
+      sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n.
     </p>
     <p>
-      Done when (1) the device tile and the §2 host kernel agree to 1e-12 in float64 over
+      Done when (1) the device build and the §2 host route agree to 1e-12 in float64 over
       the 1696-cell WEST mesh against its own centroids; (2) that 3392-square Gram builds on
       one H200 with the compile time and the warm execute time each recorded, and a second
-      run hits the persistent cache; (3) the sheet program appears in the kernel-compile
+      run hits the persistent cache; (3) the program appears in the kernel-compile
       census with its compile wall and memory, measured the same way as the polygon tile.
       Heavy gates run on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one job.
     </p>
@@ -228,12 +237,22 @@
 <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Read the iron from the machine description: each <code>iron_core</code> segment's
-      outline, its material and its B-H table. Mesh it without slivers (quality triangles or
+      outline, its material and its B-H table. The read extends the machine-description owner,
+      <code>nova/imas/machine.py</code> (<code>ImasGeometryReader</code> and
+      <code>StaticMachineDescription</code>), and the two script readers in
+      <code>scripts/prototypes/iron_magnetisation/west.py</code> and
+      <code>scripts/west_stray_field/solve.py</code> are moved onto it rather than joined by a
+      third. The mesh, the material law and the solve live in one module,
+      <code>nova/biot/magnetisation.py</code>, whose public surface is the solved magnetisation of
+      a meshed iron region for a given external field; nothing else in the package sees the mesh
+      or the law. Mesh it without slivers (quality triangles or
       merged quads; the prototype's merge rule is the floor), and fit the B-H relation as a
       monotone law with dB/dH &gt; 0 that holds its end values outside the table. Solve
       F(M) = M &minus; c(|B|)B = 0 with B = B<sub>ext</sub> + G&nbsp;M by Newton on the
       differential permeability, written so that the state, operands and factor are runtime
-      variables of one compiled update (the rule in <code>nova/equilibrium/AGENTS.md</code>).
+      variables of one compiled update (the rule in <code>nova/equilibrium/AGENTS.md</code>), on the
+      pattern of <code>nova/equilibrium/reduced_newton.py</code>: an external field plus a fixed
+      response matrix, a dense <code>jax.jacfwd</code> Jacobian and backtracking grades.
     </p>
     <p>
       Hysteresis is out of scope (lead, 2026-11-05). The law is anhysteretic and single-valued,
@@ -275,9 +294,11 @@
     <h2 id="s6">§6 — Iron as a field source, and the imas-efit control</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Let the solved magnetisation contribute &psi;, B<sub>R</sub> and B<sub>Z</sub> wherever a CoilSet
-      solves grid or point targets, so the stray-field figure, the forward map and any probe read
-      include the iron. Regenerate the WEST stray-field figure with iron beside the air-core curve.
+      Let the solved magnetisation contribute &psi;, B<sub>R</sub> and B<sub>Z</sub> through one seam: the
+      edge sheets are inserted into the CoilSet as one passive frame whose currents the material
+      solve writes, so every existing grid and point solve, the stray-field figure, the forward map
+      and any probe read include the iron with no change to a solve path. With the Part V strip
+      route these are ordinary polygon coils; with Part II the frame carries the sheet section. Regenerate the WEST stray-field figure with iron beside the air-core curve.
       Then run the closed-shell control through imas-efit's iron model, with its boundary geometry
       set to the shell, and report the result to the imas-efit owners: that test says which of the
       two WEST answers in §1 is the representation and which is the physics.
@@ -309,8 +330,10 @@
     <p>
       The axisymmetric smear is right for the toroidal average far from the legs and wrong near
       them. Magnetise six limbs of their real section in the axisymmetric field and evaluate their
-      field with nova's 3D Biot-Savart route, giving |B| along a radial line behind a limb and
-      between two limbs. The limbs sit at R &asymp; 4.89&nbsp;m (their own radius, not the plasma major
+      field with nova's existing 3D route and its toroidal average in
+      <code>nova/biot/toroidalaverage.py</code> (<code>toroidal_points</code>,
+      <code>frame_magnetic_field</code> and <code>average_toroidal_field</code>), giving |B| along a
+      radial line behind a limb and between two limbs; no new 3D or averaging code is written. The limbs sit at R &asymp; 4.89&nbsp;m (their own radius, not the plasma major
       radius), so their toroidal spacing is 2&pi;R/6 &asymp; 5.1&nbsp;m and the n&nbsp;=&nbsp;6 departure from the
       average decays over roughly R/6 &asymp; 0.8&nbsp;m; the correction matters within about 2&nbsp;m of the legs.
     </p>
@@ -349,6 +372,15 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="sheet-route" data-choice="" data-by="" data-when="" data-sections="s2,s3">
+    <p class="r-dec-q">Does a thin Part V polygon strip deliver the edge sheet, or does it need the Part II closed form?</p>
+    <p class="r-dec-ctx">The strip reuses the production polygon route and adds no module or tile; Part II adds nova/biot/sheet.py and a sheet tile. §2 measures the strip's best attainable error and decides on a 1e-10 relative threshold.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="part-v-strip">Thin Part V polygon strip</button>
+      <button class="r-opt" data-value="part-ii-sheet">Urankar Part II closed form</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 <div class="r-dec" data-key="limb-geometry" data-choice="" data-by="" data-when="" data-sections="s8">
     <p class="r-dec-q">What are the real dimensions of the six outer return limbs and of the horizontal arms?</p>
     <p class="r-dec-ctx">The machine description carries only the smeared section, about 0.96 m² per arm. §8 needs each limb&#x27;s toroidal width and radial depth, and the arms&#x27; constant vertical thickness; their product with six must reproduce 5.8 m².</p>
@@ -378,7 +410,7 @@
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-icm-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="Simon McIntosh" data-written-at="2026-11-05" data-recommends-skill="/reckon-build iron-core-magnetisation §2" data-resolved-at="" data-resolved-by="">
-    <h4 class="r-fu-title">Build the Urankar Part II conic sheet kernel</h4>
+    <h4 class="r-fu-title">Measure the Part V strip and build the edge sheet route</h4>
     <div class="r-fu-body">The prototype is in place and both analytic controls exist; §2 is the first production node.</div>
     <pre class="r-fu-prompt">/reckon-build iron-core-magnetisation §2</pre>
     </article>

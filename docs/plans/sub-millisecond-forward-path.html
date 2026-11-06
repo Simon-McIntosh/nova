@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="163">
-<meta name="plan-modified" content="2026-11-05">
+<meta name="plan-version" content="164">
+<meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
   <main class="plan-doc">
@@ -583,7 +583,10 @@
     <div class="r-comment-body"><p>bank-report-equivalence at 1d3df17e1 — an independent review of the two commits since 70192e11b scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 20, adds no blocking finding and one non-blocking finding at tests/test_bank_report_precision.py:54 (a fixture constant compared against another fixture constant); the prior blocking finding is resolved, since span 0.7 and minor radius 2.3 are now distinct and the swapped-denominator control reddens four of the five tests at EXIT=1.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261105T205425913419-bank-report-equivalence" data-who="reckon-build" data-when="2026-11-05T21:52:29Z">
-    <div class="r-comment-body"><p>bank-report-equivalence — the cycle report&#x27;s paired comparison now has a CPU unit test that accepts one inside-limit pair and refuses each of flux/span, axis/minor radius, X-point/minor radius and boundary flux/span, on a receipt whose span (0.7) and minor radius (2.3) are distinct so a swapped denominator fails; the linesearch SUMMARY line (953 B) and booking PRECISION line (304 B) re-run byte-identically on their existing receipts; the provenance fragment corrects the probe count to 67 `-P -c` invocations across 60 shell files at base 28cae2aa6 and lists sixteen non-bank prototypes (31 files) whose probes still lack `-P`. Measure: 5 tests pass in 4.23 s, negative controls 1 failed and 4 failed at EXIT=1.</p></div>
+    <div class="r-comment-body"><p>bank-report-equivalence — the cycle report's paired comparison now has a CPU unit test that accepts one inside-limit pair and refuses each of flux/span, axis/minor radius, X-point/minor radius and boundary flux/span, on a receipt whose span (0.7) and minor radius (2.3) are distinct so a swapped denominator fails; the linesearch SUMMARY line (953 B) and booking PRECISION line (304 B) re-run byte-identically on their existing receipts; the provenance fragment corrects the probe count to 67 `-P -c` invocations across 60 shell files at base 28cae2aa6 and lists sixteen non-bank prototypes (31 files) whose probes still lack `-P`. Measure: 5 tests pass in 4.23 s, negative controls 1 failed and 4 failed at EXIT=1.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T054124433158-bank-linear-solve" data-who="reckon-build" data-when="2026-11-06T06:05:41Z">
+    <div class="r-comment-body"><p>[Linear-route evidence](docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html#bank-linear-solve-landing) records 32 H200 comparisons: equilibrated block GMRES meets 1e-8 physical update precision at 6.439 ms trial and 10.495 ms converged for sixteen lanes versus about 106 ms LU; no arm reaches about 1 ms per batch. [Wall figure](/nova/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg) retains every precision miss. Recommend fresh matrix, block inverse and condition estimate for the initial implementation; no reuse speedup is claimed.</p></div>
 </div>
 </section>
 </main>

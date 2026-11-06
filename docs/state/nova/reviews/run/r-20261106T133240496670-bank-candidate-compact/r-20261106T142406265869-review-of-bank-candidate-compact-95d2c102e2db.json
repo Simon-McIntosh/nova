@@ -1,0 +1,96 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T14:35:24.473Z",
+  "dispatched_at": "2026-11-06T14:26:03Z",
+  "evidence_inputs": [
+    "Baseline suite d21a11e6c: 2 passed, 4 deselected on the candidate file, 32 passed and 2 skipped across the five named files, failure_count 0, EXIT=0 (base-suite.log).",
+    "Head suite 95d2c102e: 4 passed, 4 deselected on the candidate file, 34 passed and 2 skipped across the five named files, failure_count 0, EXIT=0 (head-suite.log); added_failure_count 0.",
+    "Certificate equivalence at head: physical.log, 4 passed over limited/diverted trial/converged, live saddle counts 0, 0, 1, 1, admitted slots none/none/1/1, selected slot 0/0/1/1, FORM_MAX_ABSOLUTE 0.0, devices cuda:0.",
+    "Negative control for the fallback: overflow-mutation.diff replaces the overflow predicate with jnp.asarray(False); overflow-test_candidate_inspection_batched.log reaches FAILED test_candidate_overflow_matches_full_evaluation and EXIT=1, while the head arm passes that test.",
+    "Negative control for the unrolled loop: unrolled-mutation.diff replaces jax.vmap(inspect)(indices) with a Python list comprehension over policy.null_capacity; unrolled-test_candidate_inspection_batched.log reaches 'expected two support programs, got 17' and EXIT=1.",
+    "Two earlier review findings are answered in place: candidate_program() now defaults its AST search to None and raises ValueError naming the saddle_index statement (test at tests/test_candidate_inspection_batched.py:159), and the structural guard counts _support_at_level-derived while programs instead of a scan length.",
+    "Paired H200 walls per batch read at sixteen slices: base 128.199 and 128.033 ms, head 83.453 and 83.284 ms over two fresh processes per arm, with per-lane read counts 7 (base) and 5 (head); candidate device 416.725 to 65.273 ms.",
+    "Precision: precision-pairs.json carries 8 base-head process pairs, 16 lanes each at sixteen slices, largest gaps flux 3.791e-14 (budget 1e-8), axis 2.188e-14 (5e-4), saddle 1.034e-14 (5e-4), boundary_flux 3.274e-15 (1e-4), largest fresh residual 9.943e-11 (1e-10).",
+    "One H200 allocation: gpu-job.log runs every device process for both arms under the single betelgeuse submission, with per-revision cache directories base-cache and head-cache; the paired CPU suites ran in a separate sirius job (cpu-job.log).",
+    "Reachability: no nova/ production module calls module-level topology.read or support_read.read yet, so the measured gain is banked ahead of the route that wires the tracked read in."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-compact-followups",
+      "recorded_at": "2026-11-06T14:39:40.521520+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "bank-compact-followups",
+      "recorded_at": "2026-11-06T14:39:43.818627+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-compact-followups",
+      "recorded_at": "2026-11-06T14:39:46.059395+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "bank-compact-followups",
+      "recorded_at": "2026-11-06T14:39:48.822235+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_candidate_inspection_batched.py",
+      "id": "f578e3e2b0e",
+      "line": 214,
+      "severity": "non-blocking",
+      "text": "nested_equations re-implements the nested-jaxpr descent that tests/jaxpr_scans.py:17 subjaxprs already owns, down to the same 'getattr(value, \"jaxpr\", value)' and tuple/list unwrapping, in a helper module whose docstring states that it 'owns that descent once' so that every structural guard does not write it again; the new guard could compose subjaxprs in three lines instead of being a second descent that will drift from the first."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "id": "ff2dcfa77f8",
+      "line": 3359,
+      "severity": "non-blocking",
+      "text": "the post-conditional form mask restates '(saddles | (indices == 0))' instead of reusing the 'retained' mask computed at :3321, so the invariant that slot 0 is always evaluated now lives in two expressions that can drift apart unnoticed."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "id": "f787ed64413",
+      "line": 3322,
+      "severity": "non-blocking",
+      "text": "the compact width is the bare literal 3 in 'compact_capacity = min(3, policy.null_capacity)', with no in-code statement of where 3 comes from; the derivation (measured certificate saddle counts 0, 0, 1, 1, leaving room for a second saddle) exists only in the evidence fragment, so a later reader cannot judge whether the width still fits the states the route admits."
+    },
+    {
+      "file": "tests/test_candidate_inspection_batched.py",
+      "id": "f96d665e1f4",
+      "line": 275,
+      "severity": "non-blocking",
+      "text": "the overflow test asserts that exactly one conditional survives and that its predicate is an unbatched scalar, but no assertion evaluates that predicate on a non-overflow state, so nothing fails if the compaction stops being taken: an always-full predicate (or a retained count taken on the wrong axis) keeps every equivalence test green and moves only the timing table."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to evaluate candidate support only for saddle slots with a batch-uniform overflow fallback; nova/equilibrium/topology.py:3321-3353 does exactly that, retaining slot 0 and every saddle at a static width K = min(3, null_capacity) and taking one lax.cond on an any-lane overflow predicate whose reduced, unbatched value keeps the branch outside the map over read lanes.\nVERDICT done_when: the done_when asks for slot-0-plus-saddle compaction at a stated K with one batch-uniform fallback, full-evaluation equivalence at the four 550-cell states on the H200, a light forced-overflow CPU case, a falling scratch-copy control with the fallback dropped, the two review guard fixes, paired sirius suites with no added failure, and one H200 base-against-head allocation tabled with every lane inside the precision budget; each clause is recorded - physical.log 4 passed on cuda:0 with FORM_MAX_ABSOLUTE 0.0 and SADDLE_COUNT 0/0/1/1, overflow-test_candidate_inspection_batched.log EXIT=1 on test_candidate_overflow_matches_full_evaluation, unrolled-test_candidate_inspection_batched.log EXIT=1 on 'expected two support programs, got 17', base-suite.log 32 passed and head-suite.log 34 passed with failure_count 0, and docs/evidence/fragments/sub-millisecond-forward-path/bank-candidate-compact.html tables device ms, per-process reads, wall per read and the paired precision gaps.\nVERDICT write_paths: the manifest declares nova/equilibrium/topology.py, tests/test_candidate_inspection_batched.py, scripts/prototypes/bank_candidate_compact, the evidence fragment and a figures directory; all eight paths in the diff fall inside that set and the figures directory is correctly left unused.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T133240496670-bank-candidate-compact/manifest.md; it reports status complete, four commits beyond base, baseline_suite and after_suite both completed with failure_count 0 and empty failure_ids, and names overflow-test_candidate_inspection_batched.log as its negative control.\nVERDICT diff: read commit by commit against d21a11e6c; b0556f5ef is the only commit touching production source or tests (topology.py candidate block plus the two guard fixes and the overflow case), and b1d79de5a..95d2c102e are the paired measurement drivers and the evidence fragment, with no production file touched after b0556f5ef.\nCALL_SITES: nova/equilibrium/topology.py:3205, nova/equilibrium/topology.py:3253, nova/equilibrium/support_read.py:286, nova/equilibrium/support_read.py:320\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:3321 computes 'retained = saddles | (indices == 0)' and :3353 drives the single lax.cond from 'jnp.sum(retained) > compact_capacity', so only slot 0 and live saddles are inspected in the steady branch while admission and the slot-0 fallback are untouched at :3355-3361.\nSCORE evidence: 18\nJUSTIFICATION evidence: physical.log records 4 passed over the limited/diverted trial and converged states on a cuda:0 device with FORM_MAX_ABSOLUTE 0.0, base-suite.log and head-suite.log both end EXIT=0 at failure_count 0, and the fragment's timing table reconciles with report.log PAIRED_COMPLETE (416.725 to 65.273 candidate device ms at sixteen slices).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the only production hunk is nova/equilibrium/topology.py:3319-3356 and every other changed path lies under tests/, scripts/prototypes/bank_candidate_compact or the declared evidence fragment.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_candidate_inspection_batched.py:159 and :224 answer the two earlier review findings with genuine controls - the unrolled mutation reddens the two-support-program guard at :246 with 'got 17' and the overflow mutation reddens :249 with slots 3 and 4 dropped - but no assertion evaluates the overflow predicate as false, so the compaction itself is guarded only by the timing table.\nSCORE fit: 17\nJUSTIFICATION fit: the added block at nova/equilibrium/topology.py:3324 uses the same jax.custom_batching.custom_vmap plus def_vmap idiom already carried by nova/equilibrium/fixed_point.py:2664, and its names (retained, compact_capacity, full_candidates, compact_candidates) state the mechanism with no plan or run identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: the prototype drivers do extend their owners (scripts/prototypes/bank_candidate_compact/suite.py imports archive, run_file and BASE_FILES from the wall-events suite and assemble from bank_solve_cycle.receipts, and gpu.sh reuses bank_candidate_loop.device and bank_booking_determinism/measurement.sh), but tests/test_candidate_inspection_batched.py:214 duplicates the descent owned by tests/jaxpr_scans.py:17, which caps this dimension.\nFINDING tests/test_candidate_inspection_batched.py:214 non-blocking: nested_equations re-implements the nested-jaxpr descent that tests/jaxpr_scans.py:17 subjaxprs owns once for every structural guard, so the same descent now exists twice and will drift.\nFINDING nova/equilibrium/topology.py:3359 non-blocking: the post-conditional form mask restates '(saddles | (indices == 0))' rather than reusing 'retained' from :3321, putting the slot-0-always-evaluated invariant in two expressions that can drift.\nFINDING nova/equilibrium/topology.py:3322 non-blocking: the compact width is the bare literal 3 with no in-code derivation, so the reason it fits the admitted states lives only in the evidence fragment.\nFINDING tests/test_candidate_inspection_batched.py:275 non-blocking: no assertion evaluates the overflow predicate on a non-overflow state, so a change that stops taking the compact branch keeps every equivalence test green and moves only the timing table.\n",
+  "review_run_id": "r-20261106T142406265869-review-of-bank-candidate-compact-95d2c102e2db",
+  "reviewed_base_sha": "d21a11e6ce50c3f5b9eb65019f76b101ed66c576",
+  "reviewed_head_sha": "95d2c102e2db59a36bbf2fdc99e6c6207be7b3b0",
+  "reviewed_run_id": "r-20261106T133240496670-bank-candidate-compact",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T14:33:00+00:00",
+  "total": 94,
+  "verdicts": {
+    "call_sites": "the change is reached from nova/equilibrium/topology.py:3205 (read -> _read_at_nulls) and nova/equilibrium/topology.py:3253 (read_at_stationary_points -> _read_at_nulls); both of those are called only from nova/equilibrium/support_read.py:286 and :320, and no forward-solve module reaches them yet, so the gain is banked for the step that wires support_read.read into the route.",
+    "diff": "read commit by commit against d21a11e6c; b0556f5ef is the only commit touching production source or tests (topology.py candidate block plus the two guard fixes and the overflow case), and b1d79de5a..95d2c102e are the paired measurement drivers and the evidence fragment, with no production file touched after b0556f5ef.",
+    "done_when": "the done_when asks for slot-0-plus-saddle compaction at a stated K with one batch-uniform fallback, full-evaluation equivalence at the four 550-cell states on the H200, a light forced-overflow CPU case, a falling scratch-copy control with the fallback dropped, the two review guard fixes, paired sirius suites with no added failure, and one H200 base-against-head allocation tabled with every lane inside the precision budget; each clause is recorded - physical.log 4 passed on cuda:0 with FORM_MAX_ABSOLUTE 0.0 and SADDLE_COUNT 0/0/1/1, overflow-test_candidate_inspection_batched.log EXIT=1 on test_candidate_overflow_matches_full_evaluation, unrolled-test_candidate_inspection_batched.log EXIT=1 on 'expected two support programs, got 17', base-suite.log 32 passed and head-suite.log 34 passed with failure_count 0, and docs/evidence/fragments/sub-millisecond-forward-path/bank-candidate-compact.html tables device ms, per-process reads, wall per read and the paired precision gaps.",
+    "goal": "the goal is to evaluate candidate support only for saddle slots with a batch-uniform overflow fallback; nova/equilibrium/topology.py:3321-3353 does exactly that, retaining slot 0 and every saddle at a static width K = min(3, null_capacity) and taking one lax.cond on an any-lane overflow predicate whose reduced, unbatched value keeps the branch outside the map over read lanes.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T133240496670-bank-candidate-compact/manifest.md; it reports status complete, four commits beyond base, baseline_suite and after_suite both completed with failure_count 0 and empty failure_ids, and names overflow-test_candidate_inspection_batched.log as its negative control.",
+    "write_paths": "the manifest declares nova/equilibrium/topology.py, tests/test_candidate_inspection_batched.py, scripts/prototypes/bank_candidate_compact, the evidence fragment and a figures directory; all eight paths in the diff fall inside that set and the figures directory is correctly left unused."
+  }
+}

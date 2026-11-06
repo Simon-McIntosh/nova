@@ -240,6 +240,40 @@ def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
     )
     monkeypatch.setattr(current, "book", book)
     monkeypatch.setattr(current, "book_tangent", book_tangent)
+
+    def book_channels(
+        psi,
+        directions,
+        read,
+        fields,
+        axes,
+        boundaries,
+        geometry,
+        profile,
+        gradient,
+        quadrature,
+        booked,
+        edge_indices,
+    ):
+        del edge_indices
+        response = jax.vmap(
+            lambda direction, field, axis, boundary: book_tangent(
+                psi,
+                direction,
+                read,
+                field,
+                axis,
+                boundary,
+                geometry,
+                profile,
+                gradient,
+                quadrature,
+                booked,
+            )
+        )(directions, fields, axes, boundaries)
+        return jnp.stack(tuple(response), axis=1).transpose(2, 1, 0)
+
+    monkeypatch.setattr(current, "book_tangent_channels", book_channels)
     rows = jnp.zeros((1, 1, 3, 6)).at[0, 0, 0, 0].set(2.0)
     operands = SimpleNamespace(
         rows=rows,
@@ -362,15 +396,17 @@ def test_diverted_physical_update_matches_double_reference(
 
     batch, states = diverted_linear_states
     moments = tuple(value[0] for value in states[state])
-    support = jax.jit(support_read.read)(
-        batch.operands,
-        batch.cache,
-        moments,
-        batch.seeds,
-        batch.roots,
-        batch.convention,
-        batch.policy,
-    )
+    support = jax.jit(
+        lambda bank, cache, values: support_read.read(
+            bank,
+            cache,
+            values,
+            batch.seeds,
+            batch.roots,
+            batch.convention,
+            batch.policy,
+        )
+    )(batch.operands, batch.cache, moments)
 
     @jax.jit
     def update(bank, values, reading):

@@ -1304,7 +1304,10 @@ def _krylov_condition_estimate(matvec, size: int, width: int = 8):
 def _block_preconditioner(matrix):
     """Invert each cell's three moment components, stored in component blocks."""
     cells = matrix.shape[0] // 3
-    indices = jnp.arange(cells)[:, None] + cells * jnp.arange(3)[None, :]
+    indices = (
+        jnp.arange(cells, dtype=jnp.int32)[:, None]
+        + cells * jnp.arange(3, dtype=jnp.int32)[None, :]
+    )
     blocks = matrix[indices[:, :, None], indices[:, None, :]]
     cofactors = jnp.stack(
         (

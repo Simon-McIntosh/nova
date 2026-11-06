@@ -40,12 +40,18 @@ run_arm() {
     done
     return "$outcome"
 }
-run_arm base "$base" &
-base_pid=$!
+base_pid=
+if [ "${5:-both}" = both ]; then
+    run_arm base "$base" &
+    base_pid=$!
+fi
 run_arm head "$head" &
 head_pid=$!
-wait "$base_pid"
-base_code=$?
+base_code=0
+if [ -n "$base_pid" ]; then
+    wait "$base_pid"
+    base_code=$?
+fi
 wait "$head_pid"
 head_code=$?
 exit "$((base_code || head_code))"

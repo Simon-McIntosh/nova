@@ -169,6 +169,18 @@ def main():
         "remains available to bound memory. No product profiling "
         "annotations were added.</p>\n"
     )
+    base_wall = np.mean([metrics["base", p, 16]["wall"] for p in (1, 2)])
+    head_wall = np.mean([metrics["head", p, 16]["wall"] for p in (1, 2)])
+    base_reads = max(captures["base", 1]["16"]["reads"])
+    head_reads = max(captures["head", 1]["16"]["reads"])
+    text += (
+        f"<p>At sixteen slices the measured programs take {base_reads} reads "
+        f"at base and {head_reads} at head. Their mean whole-solve walls are "
+        f"{base_wall:.3f} and {head_wall:.3f} ms. The head's longer trajectory "
+        "raises whole-solve wall despite lower cost per Jacobian call and "
+        "per read. These results establish a per-call improvement; they do "
+        "not establish a whole-solve latency improvement at sixteen slices.</p>\n"
+    )
     text += (
         f"<p>Base <code>{base_revision}</code>; measured head "
         f"<code>{head_revision}</code>. The initial base trace reproduced "
@@ -186,8 +198,8 @@ def main():
         "retained in the breakdown below.</p>\n"
     )
     text += (
-        "<h3>Paired process measurements</h3><p>One reserved H200 "
-        "allocation, two CPUs and 96 GB host memory. Each revision has its"
+        "<h3>Paired process measurements</h3><p>Timings share one reserved "
+        "H200 allocation, two CPUs and 96 GB host memory. Each revision has its"
         " own compilation cache; process 0 warms it, and processes 1 and 2"
         " are fresh processes with confirmed solve cache hits and "
         "XLA_FLAGS unset. Each wall is the median of five synchronized "
@@ -317,6 +329,19 @@ def main():
         "that allocation. Added failures: 0.</p>\n"
     )
     text += table(["Arm", "File", "Pytest summary", "Exit"], suite_rows)
+    certificate_revision = tests.splitlines()[0].split(" tree:", 1)[0]
+    text += (
+        "<p>The certificate-only H200 gate ran separately after the timing "
+        "captures: <code>" + escape(certificate_revision) + "</code>. "
+        "The earlier timing drivers had already loaded a marker selector "
+        "that excluded slow tests; their one-case logs are retained as "
+        "filtered receipts. The Jacobian table requires the corrected gate's "
+        "five passing comparisons. CPU suite revision: <code>"
+        + escape(suites["head"]["revision"])
+        + "</code>. Product and test "
+        "source are identical across these verification revisions; later "
+        "commits only change measurement drivers and this report.</p>\n"
+    )
     text += (
         (
             "<p>The scratch mutation sets the first boundary channel "

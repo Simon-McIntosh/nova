@@ -288,7 +288,7 @@ A failed certificate resumes adaptive search once; the update cap remains bindin
 <p>The band is above the measured 1.6e-9 to 2.9e-9 residuals at update 2 and below
 the preceding
 3.7e-4 to 4.4e-4 residuals. The recorded adaptive near-root tail needed up to four
-further updates;
+further updates.
 An eight-step measurement still missed seed 5, lane 10: its best residual was
 1.3227463568910025e-10. Sixteen steps double that measured insufficient budget.
 The certificate, validity check and best-state selection decide success; this margin
@@ -304,8 +304,8 @@ fails
 with EXIT=1. Invalid full trials are separately shown unable to replace a valid
 state.</p>
 <p>H200 allocation 1307321 uses one card, two CPU cores and 48 GB under the reservation.
-The base process builds and saves all six seed sets once; both revisions load the
-same arrays.
+The seed archive was built once at base in allocation 1307314 and reused byte for
+byte in this final allocation; both revisions load the same arrays.
 Five perturbations add a deterministic bounded random change of 1e-14 relative to
 each moment
 channel's maximum absolute value. Seeds and lane root positions are identical. Every
@@ -344,9 +344,9 @@ certificate</summary>
 {table(["Arm", "Process", "Seed", "Lane", "Fresh residual", "Converged"], cert_rows)}
 </details>
 <p id="bank-near-root-polish-receipts">Raw arrays, per-process receipts,
-negative-control.log,
-reproduction.log, and all paired suite logs are under
-<code>{escape(str(args.run))}</code>.
+negative-control.log and all paired suite logs are under
+<code>{escape(str(args.run))}</code>. The original reproduction and eight-step
+receipts remain in <code>{escape(str(args.run.parent))}</code>.
 The paired sirius allocation is 1307322. Each file has its own fresh interpreter
 and basetemp. There are {len(added_failures)} added failure ids.</p>
 <h3 id="bank-near-root-polish-suites">Complete paired CPU suites</h3>

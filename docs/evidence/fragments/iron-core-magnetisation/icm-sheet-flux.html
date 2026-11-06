@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Cylindrical sheet flux in closed form, and where the conic form stops | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-sheet-flux-summary">§2 — The cylindrical limit lands; the conic form does not</h2>
+    <p>Node <code>icm-sheet-flux</code> was to give the flux of a conic toroidal
+    sheet by Urankar Part II eq (22a). The <em>straight-cylinder</em> limit,
+    eq (24), is implemented in <code>nova/biot/sheet.py</code> and reproduces the
+    section's 1e-13 ring-integral reference (<code>scripts/edge_sheet/reference.py</code>)
+    with a worst relative error of <code>5.9e-15</code> over the five targets
+    measured. The sloped case, eq (22a), is <strong>not</strong> implemented:
+    <code>SheetFlux</code> raises <code>NotImplementedError</code> for a segment
+    that is not parallel to the axis, so no caller can be handed a wrong number.
+    The flat pancake, eq (26), raises for the same reason.</p>
+
+    <h2 id="icm-sheet-flux-antiderivative">What the paper's expressions are, established by measurement</h2>
+    <p>Part II's final expressions are <em>antiderivatives</em> in the source
+    coordinate, not definite values. The finite segment enters as the difference
+    between the two ends. This was not assumed: the eq (24) expression evaluated
+    at one end alone misses the reference by <code>75</code> per cent, and the
+    difference of the two ends reproduces it to <code>3e-16</code> relative.
+    The same comparison fixes the normalisation, <code>psi = mu0 r [F(gamma2) - F(gamma1)]</code>
+    with <code>F</code> the eq (24) right-hand side, and the third-kind
+    convention, <code>complete_pole(1 - n3^2, k'^2)</code> with
+    <code>n3^2 = 4 r r' / (r' + r)^2</code>.</p>
+    <p>The antiderivative itself was re-derived independently and checked against
+    the paper's eq (8): with the line parameterised <code>r' = b1 z' + c1</code>
+    the segment integral is</p>
+    <pre>a1^3 f(phi) = a1 b1 D + (r1 + b1^2 r cos phi) arsinh(beta1)</pre>
+    <p>where <code>r1 = c1 + b1 z</code> (the segment's supporting line at the
+    target height, the same at both ends), <code>beta1 = Gamma1 / B1</code>,
+    <code>Gamma1 = a1^2 gamma + b1 (r1 - r cos phi)</code> and the squared
+    denominator is <code>B1^2 = r1^2 - 2 r r1 cos phi + r^2 (1 + b1^2 sin^2 phi)</code>.
+    That <code>B1^2</code> is derived, not transcribed: the printed page's second
+    term reads as <code>Gamma1^2</code>, which is negative for the geometry
+    measured here and produced <code>nan</code> on the first attempt.</p>
+    <p>With that antiderivative in place the flux as a one-dimensional azimuthal
+    integral, <code>psi = (mu0 a1 r / 2) integral cos(phi) [F(end2) - F(end1)] dphi</code>,
+    agrees with the ring reference at every slope tried — <code>7.5e-15</code>
+    at slope <code>3 pi/8</code>, and the same at <code>pi/8</code> and
+    <code>pi/2</code>. So the geometry, the normalisation and the endpoint rule
+    are settled; what is missing is the closed-form reduction of that azimuthal
+    integral.</p>
+
+    <h2 id="icm-sheet-flux-blocker">Why eq (22a) is not implemented</h2>
+    <p>Eqs (22a) and (24) to (27) are commercially printed scans. The coefficient
+    block that feeds eq (22a) — eqs (13a) and (18a): <code>S(k)</code>,
+    <code>M(k)</code>, <code>N(k)</code>, <code>P_phi(n_p)</code> and the
+    denominator of <code>P_phi</code> — could not be resolved to the print's own
+    precision from the scan, and the assembled expression does not reproduce the
+    azimuthal quadrature: at slope <code>3 pi/8</code> the elliptic combination
+    comes out at <code>-3.68</code> where the quadrature requires
+    <code>+0.226</code>, a gap far too large to be a rounding difference. Every
+    plausible reading of the <code>(2r)</code> factor and of the
+    <code>P_phi</code> denominator was tried and none closes it. Shipping a
+    formula whose error is unknown is worse than shipping a narrow one that is
+    exact, so the cylinder limit is what landed.</p>
+
+    <h2 id="icm-sheet-flux-measure">Measured</h2>
+    <table>
+      <thead><tr><th>target r [m]</th><th>target z [m]</th><th>psi [Wb per A/m]</th><th>relative error</th></tr></thead>
+      <tbody>
+        <tr><td>0.60</td><td>0.00</td><td>5.872563966300e-07</td><td>1.3e-15</td></tr>
+        <tr><td>1.05</td><td>0.00</td><td>2.124339647526e-06</td><td>1.2e-15</td></tr>
+        <tr><td>1.35</td><td>0.25</td><td>2.432174687962e-06</td><td>5.9e-15</td></tr>
+        <tr><td>0.30</td><td>0.40</td><td>1.227267838048e-07</td><td>1.7e-15</td></tr>
+        <tr><td>2.00</td><td>0.70</td><td>1.244068907157e-06</td><td>1.9e-15</td></tr>
+      </tbody>
+    </table>
+    <p>Sheet: radius <code>1.2 m</code>, <code>z</code> from <code>-0.5</code> to
+    <code>+0.5 m</code>, unit azimuthal surface current. Reference panels
+    converged at every target. The negative control flips the sign of the
+    third-kind term in the closed form and fails all five comparisons
+    (<code>5 failed, 8 passed</code>, exit 1).</p>
+  </main>
+</body>
+</html>

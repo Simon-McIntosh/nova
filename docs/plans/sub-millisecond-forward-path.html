@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="200">
+<meta name="plan-version" content="201">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -694,7 +694,10 @@
     <div class="r-comment-body"><p>Independent review of r-20261106T151851519466-bank-booking-primal-buckets at head 94fd0a54effb (base 9ab6ba60e1f5): scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 13, fit 16, reuse 18, added_failure_count 0; the delta's ten commits restore a 32-cell primal conic tile and record a three-arm H200 comparison that beats base on residual device time and launches per call at one and sixteen slices, with three non-blocking findings (cut_batch_width validated then ignored for the primal path, no test guarding the tile width against the regression the previous review blocked, and a duplicate bare 32 in book_tangent); both review records stored with status parsed.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T182726581317-review-of-bank-jacobian-launches-573273954cc9" data-who="reckon-build" data-when="2026-11-06T18:35:45.173Z">
-    <div class="r-comment-body"><p>[Independent review of the Jacobian launch reduction](/nova/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches#bank-jacobian-launches-landing): scores goal 18, evidence 18, scope 20, durability 15, fit 19, reuse 18 for r-20261106T172411041060-bank-jacobian-launches at head 573273954cc, with two non-blocking findings on the certificate comparison&#x27;s positional reference seam and its global-norm bound.</p></div>
+    <div class="r-comment-body"><p>[Independent review of the Jacobian launch reduction](/nova/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches#bank-jacobian-launches-landing): scores goal 18, evidence 18, scope 20, durability 15, fit 19, reuse 18 for r-20261106T172411041060-bank-jacobian-launches at head 573273954cc, with two non-blocking findings on the certificate comparison's positional reference seam and its global-norm bound.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T183119731936-bank-read-count-sensitivity" data-who="reckon-build" data-when="2026-11-06T19:01:14Z">
+    <div class="r-comment-body"><p>[Read-count sensitivity](/nova/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html#bank-read-count-sensitivity-landing): two fresh H200 processes per warm cache reproduce 7 versus 17 reads; the first discrete split is update 3 lane 2 crossing 1e-10 at 7.64544e-11 versus 1.60028e-10 (gap 8.35740e-11). Initial moments differ by at most 8.08465e-14 relative; every discrete selection stays fixed. Per-lane trials and the reviewed residual-history figure explain the search and companion-read tail; product rules remain unchanged.</p></div>
 </div>
 </section>
 </main>

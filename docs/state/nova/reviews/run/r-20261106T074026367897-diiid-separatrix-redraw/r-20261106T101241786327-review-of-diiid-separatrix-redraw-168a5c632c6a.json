@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-06T10:28:56.817Z",
   "dispatched_at": "2026-11-06T10:16:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-forward-convergence",
+      "recorded_at": "2026-11-06T10:56:11.197104+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_diiid_forward_gs_match.py",

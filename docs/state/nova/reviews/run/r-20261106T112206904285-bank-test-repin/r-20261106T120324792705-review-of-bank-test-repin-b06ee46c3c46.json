@@ -17,6 +17,13 @@
   "completed_at": "2026-11-06T12:17:14.235Z",
   "dispatched_at": "2026-11-06T12:05:41Z",
   "evidence_inputs": "Independent verification done inside this review: (a) the reviewed head's booking pin reproduces on the fleet node family -- git archive of b06ee46c3 run on 98dci4-clu-2068 (Xeon E5-2680 v4) gives 1 passed in 58.56s, EXIT=0, so the 'Broadwell' tuple is not a transcription of the sirius values; (b) the sirius tuple is confirmed by the base arm's own failure output on 98dci4-clu-5013, which printed that tuple as actual; (c) the applied block inverse of the capped-cycle test matrix is exactly the 24x24 identity at head, so the permutation assertion's weaker form holds today. Provenance caveat for the coordinator: the fleet-host movement row in the evidence table (max_abs 7.844e-13 / 4.200e-14 / 1.218e-10, max_rel 1.544e-11 / 1.972e-11) is real -- it matches a COMPARE the worker ran on 98dci4-clu-2068 -- but that log lives only in a /tmp scratch tree and was never copied into the run directory, so the committed table's fleet row has no retained source. The run directory's measure_summary.log holds the sirius arm only.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-repin-followups",
+      "recorded_at": "2026-11-06T12:26:15.262574+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html",

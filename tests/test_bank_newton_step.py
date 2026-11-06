@@ -573,17 +573,15 @@ def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
     width = _restart_width(size)
     cap = max(1, width // 4)
     # The reference below applies the raw matrix; it agrees with the
-    # preconditioned run only because this matrix's block inverse is an
-    # orthogonal permutation rather than a general inverse.
+    # preconditioned run only because this matrix's applied block inverse
+    # is exactly the identity, leaving both the matrix and right side unchanged.
     applied = np.stack(
         [
             np.asarray(support_read._apply_block_inverse(inverse, indices, vector))
             for vector in jnp.eye(size, dtype=jnp.float64)
         ]
     )
-    assert np.array_equal(np.unique(applied), np.array([0.0, 1.0]))
-    assert np.array_equal(applied.sum(axis=1), np.ones(size))
-    assert np.array_equal(applied.sum(axis=0), np.ones(size))
+    np.testing.assert_array_equal(applied, np.eye(size))
     solution, condition, residual, steps = support_read._block_gmres(
         matrix, right, inverse, indices, max_iterations=cap
     )

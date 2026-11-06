@@ -22,5 +22,7 @@ PYTHONPATH="$WORK/base" "$PY" "$WORK/base/scripts/prototypes/bank_test_repin/mea
 echo "# head arm"
 PYTHONPATH="$HEAD_TREE" "$PY" "$HEAD_TREE/scripts/prototypes/bank_test_repin/measure.py" \
   --out "$WORK/head.npz"
-"$PY" "$HEAD_TREE/scripts/prototypes/bank_test_repin/compare.py" "$WORK/base.npz" "$WORK/head.npz"
-echo EXIT=$?
+PYTHONPATH="$HEAD_TREE" "$PY" -P "$HEAD_TREE/scripts/prototypes/bank_test_repin/compare.py" "$WORK/base.npz" "$WORK/head.npz"
+status=$?
+echo "EXIT=$status"
+exit "$status"

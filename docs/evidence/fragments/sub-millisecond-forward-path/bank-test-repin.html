@@ -39,8 +39,17 @@ Every moved cell lies in the conic mask on both hosts; no other cell moved.</p>
 the table's counts show. The vertical moment's
 relative change sits high because the quantity nearly cancels there: its
 absolute change is 1.2e-10 against values of order 1e-4. The
-<code>compare.py</code> check requires every moved cell to be in the mask and
-reported no violation on either host.</p>
+<code>compare.py</code> check refuses relative movement above 1e-12 outside
+the conic mask. The original Sirius comparison reported no violation and
+<code>EXIT=0</code>; the earlier fleet comparator reported three violations with
+empty outside-conic lists and <code>EXIT=1</code>. The corrected comparator now
+reports no violation and <code>EXIT=0</code> for each host, after detecting a
+one-ULP perturbation of <code>cell_current</code> (absolute difference
+1.3877787807814457e-17) in each run. Sirius uses the retained arrays. The fleet
+scratch arrays had been removed, so both fleet receipts were regenerated at
+the same revisions; all six field digests in each arm match the retained
+original <code>BOOK_REPORT</code> exactly. The corrected results retain the
+movement counts and maxima in the table above.</p>
 <p>Host identification is measured, not assumed. At
 <code>c57423e74</code> the fleet node reproduces the stored first pin
 (<code>73db87c3…</code>) byte for byte and the sirius node reproduces the
@@ -56,10 +65,11 @@ now reads the restart width from <code>_block_gmres</code>'s own
 <code>width = min(20, right.size)</code> rather than restated: it parses the
 assignment from the function's source and fails loudly if the form changes, then
 caps the cycle at a quarter of that width. It also asserts that
-<code>_apply_block_inverse</code> of its matrix is an orthogonal permutation —
-entries in {0, 1} with every row and column summing to one — which is why the
-raw-matrix Arnoldi reference agrees with the preconditioned run.</p>
-<p><strong>Negative control.</strong> A scratch copy sets the matrix's
+<code>_apply_block_inverse</code> of its matrix is exactly the identity, which
+leaves the raw matrix and right side unchanged. The initial check required only
+entries in {0, 1} with every row and column summing to one; that admits a
+non-identity permutation and was weaker than this reference requires.</p>
+<p><strong>Original negative control.</strong> A scratch copy sets the matrix's
 <code>[0, 0]</code> entry to 4.0, so the first cell block inverts to 0.25 and the
 applied block inverse is not a permutation. The new assertion fails with
 <code>array([0., 0.25, 1.])</code> against <code>array([0., 1.])</code> and the
@@ -85,4 +95,59 @@ is the stale booking pin.</p>
 the pin this node moves. The suite logs end in a bare <code>EXIT=</code> line per
 file, and the two per-arm summary logs quote each file's own pytest summary
 line.</p>
+
+<h3 id="bank-repin-followups-landing">Failure controls and fresh paired suites</h3>
+<p><strong>The suite wrapper now returns the combined status of its arms,
+the comparator proves it can see one ULP before reporting equality, and the
+raw-matrix reference requires an exact identity block inverse.</strong>
+The implementation is <code>867ea92b5</code>; <code>14f049f25</code> also passes
+the head tree to the measurement wrapper's comparator import and preserves
+its exit status. No product source changed.</p>
+<p>The original suite wrapper's unchanged final commands, evaluated over the
+retained failing base logs, printed three <code>EXIT=0</code> results and one
+<code>EXIT=1</code>, then returned <code>EXIT=0</code>. The committed
+<code>suite_summary.py</code> now reads only the requested logs and treats a
+missing terminal status as failure. A fresh Sirius run at the historical
+<code>78820952c</code> revision reports <strong>1 failed, 4 passed</strong>:
+<code>test_book_primal_keeps_exact_diverted_moments</code> fails, and both the
+runner's final line and its shell status are 1. The paired run below returns 0.</p>
+<p>The permutation control changes the test matrix's entries
+<code>[0,0]</code> and <code>[8,8]</code> to zero and <code>[0,8]</code> and
+<code>[8,0]</code> to one. Its applied block inverse swaps those two components
+and leaves the others fixed. The isolated original permutation assertions
+accept it; the identity assertion fails with four mismatched entries out of
+576. The full mutated test reports <strong>1 failed</strong> at
+<code>test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update</code>
+and <code>EXIT=1</code>. The unmutated focused test passes.</p>
+<p>The comparator imports <code>difference</code> and <code>fingerprint</code>
+from the booking-determinism comparator. Both host comparisons detect the
+1.3877787807814457e-17 control and return <code>violations: []</code>,
+<code>EXIT=0</code>. Forcing the shared difference function to report equality
+fails the control before a clean verdict. Adding 0.001 to a current outside
+the conic mask also returns <code>EXIT=1</code>. The measurement wrapper's
+comparator tail preserves those red and green shell statuses.</p>
+<table id="bank-repin-followups-suites">
+<thead><tr><th>File</th><th>Base 589dd8e8d</th><th>Head 867ea92b5</th></tr></thead>
+<tbody>
+<tr><td>tests/test_bank_newton_step.py</td><td>18 passed</td><td>18 passed</td></tr>
+<tr><td>tests/test_bank_step_booking.py</td><td>5 passed</td><td>5 passed</td></tr>
+<tr><td>Total</td><td>23 passed, 0 failed</td><td>23 passed, 0 failed</td></tr>
+</tbody></table>
+<p>Sirius job <code>1306963</code> on <code>98dci4-clu-5013</code> runs one
+fresh pytest process per file with a distinct <code>--basetemp</code>;
+files within each arm run sequentially, with the two arms concurrent.
+Every per-file log identifies its revision, imported module, resolved working
+directory and literal command, and ends with its exit status. The historical
+stale-pin arm runs after the pair. These are correctness checks, with no timing
+comparison or solver-performance claim.</p>
+<p>The durable logs and recovered fleet arrays are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups</code>:
+<code>paired/suite_summary_base.log</code>, <code>paired/suite_summary_head.log</code>,
+<code>stale-gate.log</code>, <code>negative-control.log</code>,
+<code>weak-guard-reproduction.log</code>, <code>identity-control.log</code>,
+<code>compare-fleet.log</code>, <code>compare-sirius.log</code>,
+<code>fleet-recovery.log</code>, <code>dead-comparator-control.log</code> and
+<code>outside-mask-control.log</code>. The fleet recovery log checks twelve
+original field digests against the reconstructed receipts; the Sirius arrays
+remain in the predecessor run's <code>measure-work</code> directory.</p>
 </section>

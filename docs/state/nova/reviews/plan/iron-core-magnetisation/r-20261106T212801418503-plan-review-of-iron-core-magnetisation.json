@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T21:43:04.158Z",
+  "dispatched_at": "2026-11-06T21:37:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261106T212801418503-plan-review-of-iron-core-magnetisation/plan.html:249",
+      "id": "reasoning-1",
+      "reason": "\u00a72's measured curve is the summed error (\u03b5\u00b2 model error plus rounding-over-\u03b5), sampled at each slope's own optimal \u03b5, so the rounding term at the production width is neither recorded nor separable from it, and the \u00a73 worker has no number for the clause and must either guess a tolerance or fail the node.",
+      "text": "done-when (1) is measured to within \"the largest per-slope rounding term \u00a72 records at the production strip width\", but \u00a72 (line 215-219) records only the best attainable error and its \u03b5 per slope, and the single production fraction, never a rounding term at that width",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261106T212801418503-plan-review-of-iron-core-magnetisation/plan.html:254",
+      "id": "done_when-1",
+      "reason": "read literally, the first run writes no cache entry and the second run misses, so the clause is unsatisfiable by the two runs it names; it needs one line saying the first run populates the cache (or that \"disabled\" means cleared, not off) for the worker to satisfy clause (2) at all.",
+      "text": "done-when (2) fixes the cost measurement to \"fresh process and persistent cache disabled\" and then requires \"a second run hitting the persistent cache\" in the same clause, which describes a cache that the first run was told not to write",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+  "plan_fingerprint": "ac100440eb5f16dc07566b4a90fd5144aca5b0bbc000f2b1570873180231a17b",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 2,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261106T212801418503-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "2dbbf7ce1ef78222d5b3c5bd8e9e37f7c1ffe233",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/biot/tiledassembly.py` (`_fill_tile`), `nova/biot/polygonanalytic.py`, `complete_kind`/`complete_pole` in `nova/biot/completeelliptic.py`, `incomplete_pole` in `nova/biot/incompleteelliptic.py`, the prototype mesh in `scripts/prototypes/iron_magnetisation/magnetisation.py`, the `sheet-route` decision, the `docs/research/compile-cost-evidence.html` rows (program, scale, compile wall, executable bytes, peak host memory) and the 60 s / 50 MB / 64 GB bounds `kernel-compile-barrier` states all resolve as cited.",
+    "done_when": "a finding \u2014 \u00a73 done-when (2) requires a cold compile measured with the persistent cache disabled and, in the same clause, a second run hitting that cache, which two runs cannot satisfy as written.",
+    "evidence_paths": "pass \u2014 the cost evidence lands as program rows of the tracked `docs/research/compile-cost-evidence.html`, and the plan's GPFS evidence root stated in \u00a71 is where the remaining gates write.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number enters a symbol, file or comment \u00a73 declares.",
+    "reasoning": "a finding \u2014 done-when (1) sets its tolerance to \"the largest per-slope rounding term \u00a72 records at the production strip width\", and \u00a72's done-when records instead the per-slope best attainable error with the \u03b5 that gives it, plus the one production fraction, so the quantity \u00a73 cites is not recorded anywhere in the plan.",
+    "single_goal": "pass \u2014 the node carries one deliverable: the device build of `G` with its cost bound and its ledger rows, all three clauses measuring that same build.",
+    "wiring": "pass \u2014 `s3` declares `depends-on: [iron-core-magnetisation#s2]`, which is exactly the route decision it consumes, and `s4` and `s6` both declare `s3`, so the matrix it builds is ordered before its consumers."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "a426bd469bd95da577b4f4e93cedcdcbd82c9e3bdbe027af0d71a6c574cbd4a3",
+    "s3": "356cf64bbd142cec6d3e0a522e4b49b3ac09baebe7a1d060e57500ae46dbd3d2",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T21:58:46.949818+00:00",
+  "total": null
+}

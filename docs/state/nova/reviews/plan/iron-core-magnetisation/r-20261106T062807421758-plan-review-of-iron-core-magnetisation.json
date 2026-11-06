@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T06:39:28.489Z",
+  "dispatched_at": "2026-11-06T06:30:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-core-magnetisation.html:24",
+      "id": "wiring-1",
+      "reason": "running \u00a74 first either blocks on an unlanded \u00a73 or forces \u00a74 to duplicate \u00a73's assembly, so the dependency that makes \u00a73 the owner of G has to be declared.",
+      "text": "`s4` declares `depends-on: [iron-core-magnetisation#s2]`, but \u00a74's mechanism solves F(M) = M \u2212 c(|B|)B with B = B_ext + G\u00b7M, and G is the cell interaction matrix \u00a73 builds (the 3392-square matrix of \u00a73's done-when (2)); the graph lets \u00a74 be dispatched before the matrix it solves against exists",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-core-magnetisation.html:228",
+      "id": "done_when-1",
+      "reason": "without a control, \u00a73's only accuracy evidence is an agreement no wrong kernel would break; a control (a perturbed sheet sign or normal that must break the agreement) is what makes the measure able to fail.",
+      "text": "\u00a73's done-when (1) compares the device build with \"the \u00a72 host route\" but declares no negative control, and on the Part V strip branch both sides are the same polygon kernel (`_fill_tile` on the device, the \u00a72 strip on the host), so the check passes vacuously for a wrong kernel",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-core-magnetisation.html:205",
+      "id": "done_when-2",
+      "reason": "if the reference is only good to 1e-8 at half a cell width the node cannot distinguish a 1e-10 route from a failing one, so the criterion for the reference (refinement to a stated stability, or a second independent route) has to be named before the threshold means anything.",
+      "text": "\u00a72 certifies 1e-10 against \"a converged Gauss\u2013Legendre integral\" with no convergence criterion and no independent control, while the plan's own \u00a71 evidence (lines 98\u2013101) reports that this quadrature is near-singular for sliver cells and reads 4e-5 for the sphere's thin cells \u2014 the reference may be less accurate than the tolerance it is used to certify",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-core-magnetisation.html:191",
+      "id": "reasoning-1",
+      "reason": "the two changed sections now differ by 30\u00d7 on the accuracy the chosen route can hold, and a worker that satisfies \u00a72 will fail \u00a73 on measurement noise; \u00a73's tolerance has to come from \u00a72's measured floor (or the comparison be taken at targets where the floor is lower).",
+      "text": "\u00a72 states the strip's model error falls as \u03b5\u00b2 and the cancellation of its two long edges grows as the rounding error over \u03b5, which puts the best attainable error at the crossing near \u03b5 \u2248 6 \u00b5m and ~3e-11 relative; \u00a73's done-when (1) then demands the device build and the \u00a72 host route agree to 1e-12 in float64, below that same roundoff floor, so the preferred Part V branch cannot meet \u00a73 even when both sides are correct",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d7031398dfb140075421956286de55a6b573ebe9",
+  "plan_fingerprint": "681ddb2033fef7370852e7e0751e35febd1cf8403afeb7513dcedacea529c992",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261106T062807421758-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "23c5f46b47dd8026dba91828a1276d684ceccd0d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every symbol the two changed sections cite resolves: `nova/biot/polygonanalytic.py` (Part V, `_corner_remainder_rule` fixed nodes), `complete_kind`/`complete_pole` in `nova/biot/completeelliptic.py`, `incomplete_pole` in `nova/biot/incompleteelliptic.py`, `greens_psi`/`greens_bz_br` in `nova/biot/greens.py`, `_fill_tile`/`_fill_moment_tile`/`_fill_arc_tile` in `nova/biot/tiledassembly.py`, `PolySection` and the device claim in `nova/biot/AGENTS.md`, and the kernel-compile census at `scripts/prototypes/kernel_compile_census/report.py`.",
+    "done_when": "a finding \u2014 \u00a73's done-when (1) names no negative control, and on the preferred Part V branch both compared sides run the same polygon kernel; \u00a72's 1e-10 claim rests on a reference integral whose convergence is asserted rather than measured (line 205).",
+    "evidence_paths": "pass \u2014 \u00a72 and \u00a73 write no log to a session scratchpad or node-local temporary path, and the plan's receipts sit on the GPFS evidence root stated at line 92, whose prototype and imas-efit subdirectories exist.",
+    "naming": "pass \u2014 the changed text carries no plan labels, stage names, ticket numbers or changelog prose; \"Part V\" and \"Part II\" are the cited paper's own part names.",
+    "reasoning": "a finding \u2014 \u00a72's own scalings put the Part V strip's best attainable error near 3e-11 relative, while \u00a73 requires the device and host builds to agree to 1e-12, a tolerance below the roundoff floor the same cancellation sets.",
+    "single_goal": "pass \u2014 \u00a72's one deliverable is the edge-sheet route at 1e-10 with its measured basis, and its two implementation branches are alternatives under one verdict; \u00a73's one line changed from \"the sheet program\" to \"the program\" and remains the device build of G alone.",
+    "wiring": "a finding \u2014 `s4` solves the material law against the cell interaction matrix G that `s3` builds, yet declares `depends-on: [iron-core-magnetisation#s2]` only (line 24)."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "b52ab36786bec5a52399cf63fcc39b86c9f0f97f49ae6176bd1daba899c3a341",
+    "s3": "be3e682657ba190990a3b6145a043c07f0f95f8a214230e5adb75614bbdfaa59",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T06:48:55.157918+00:00",
+  "total": null
+}

@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T23:08:10.572Z",
+  "dispatched_at": "2026-11-06T23:00:59Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261106T225933044073-plan-review-of-iron-core-magnetisation/plan.html:260",
+      "id": "reasoning-1",
+      "reason": "a dispatched \u00a73 burns an H200 job to fail on a gate no cited evidence supports, and the plan must either name the mechanism (and dependency) that brings this matrix program to 60 s or set the bound from the ledger it cites.",
+      "text": "done-when (2) requires the G build, from a cache the job empties for itself (so genuinely cold), to compile in at most 60 s with an executable of at most 50 MB at 1696 cells and at roughly four times that cell count, and requires a second fresh process to hit the cache entry the first wrote; the ledger \u00a73 done-when (3) points at records 337.367 s and a 210,159,751-byte executable for \"mesh arrays as traced arguments\" at 300 cells, and 535 s / 462 MB, 548 s, and 711 s at 300, 1000 and 2500 cells for the whole-cell closure, with serialization refused above 2 GiB at 1000 cells \u2014 so the bound is missed by 5.6x to 12x at a tenth of the cell count, and kernel-compile-barrier's own summary records its 60 s clause currently missed by 10x (628-640 s). Nothing in this plan reduces a dense interaction-matrix program's compile cost, \u00a73 declares no dependency that does (it depends on s2 alone), and the borrowed bounds were declared for the topology read and the point batch, not for a 2N\u00d72N matrix tile at 1696-6800 cells",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0aa2122b196cedd4aa504fef3da1009f4a915bd3",
+  "plan_fingerprint": "3820c3d29b2ad776922e423d9640cd16ba3c10e83de00295ef5d2c1f397dfd9a",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 6,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e7a154a29cfc4b8cfd4ca089fc439b67bd9c9c16",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a73 prose now states the mechanism: tiledassembly pads every call to one (block, nodes) shape and scans over blocks, so the sheet tile compiles once per build at a block-set size, independent of the cell count; the cited ledger rows are whole-closure programs that grow with the mesh. Done-when unchanged (see commit after 0aa2122b1).",
+      "reason": "",
+      "when": "2026-11-06T23:07:20.962887+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e7a154a29cfc4b8cfd4ca089fc439b67bd9c9c16",
+      "commit_basis": "edit",
+      "note": "\u00a73 prose now states the mechanism: tiledassembly pads every call to one (block, nodes) shape and scans over blocks, so the sheet tile compiles once per build at a block-set size, independent of the cell count; the cited ledger rows are whole-closure programs that grow with the mesh. Done-when unchanged (see commit after 0aa2122b1).",
+      "reason": "",
+      "when": "2026-11-06T23:07:20.962887+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v6.json",
+  "review_run_id": "r-20261106T225933044073-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "b73d65152167d3abf1fc21db4026e79dcfdb8448",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified against the tree: nova/biot/tiledassembly.py defines _fill_tile:381, _fill_moment_tile:410 and _fill_arc_tile:436; scripts/prototypes/iron_magnetisation/magnetisation.py defines mesh:48 so \u00a73's \"mesh in ...\" resolves; docs/research/compile-cost-evidence.html carries exactly the columns \u00a73 lists (Program, Cells, Platform and host, Compile wall, StableHLO or HLO instructions, Executable bytes, Persistent-cache result, Job, Source) and a memory table keyed by Program and Scale carrying CPU/GPU peak GiB; kernel-compile-barrier.html:47 confirms it owns the 60 s / 50 MB / 64 GB bounds; nova/jax/config.py:100 shows NOVA_COMPILATION_CACHE_ROOT is the variable default_persistent_compilation_cache_root reads; and the attempt-1 receipt supports the _document claim (segment_length_m 1.0, five slopes with per-slope best_error 8.383e-09, 3.104e-08, 8.207e-09, 7.269e-09, 2.325e-09, reference_failures [], admitting_fractions []), whose worst per-slope best is the 3.1e-8 the rationale states. docs/figures/edge-sheet/strip-error-vs-width.svg cited by the new s2 comment exists. nova/biot/sheet.py does not exist yet, which is what \u00a73 says (it is added by this work), not a broken anchor.",
+    "done_when": "pass \u2014 each of \u00a73's three clauses is a measurable assertion (float64 entry-by-entry agreement at 1e-13, a compile wall/executable/host-memory triple with a cross-process cache hit, and named ledger rows), and clause (1) carries a declared negative control: reversing one cell's edge normals in the device build must break the agreement. Clause (2)'s achievability is a separate matter, filed under reasoning.",
+    "evidence_paths": "pass \u2014 \u00a73 lands its measurements as rows of the tracked docs/research/compile-cost-evidence.html, and the _document change cites the GPFS evidence root (/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/strip-sweep-attempt-1/strip-error-sweep.json, 283835 bytes, present) rather than a cache or a node-local path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol, file name or comment introduced by these units; \"kernel-compile-barrier\" appears only in the plan prose where a plan name belongs.",
+    "reasoning": "a finding \u2014 \u00a73 done-when (2) demands a cold compile of the dense 2N\u00d72N matrix program in at most 60 s and 50 MB at 1696 cells and again at about four times that count, citing \"the bounds kernel-compile-barrier owns\", while the ledger that \u00a73's own done-when (3) makes authoritative records every comparable cold compile an order of magnitude over that bound at 300 cells.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, the sheet tile and the cell interaction matrix it assembles, with the cost gate and the ledger rows as measures on that same deliverable rather than a second one.",
+    "wiring": "pass \u2014 s3 declares depends-on [iron-core-magnetisation#s2] and s4 now declares [#s2, #s3], so G exists before the solve that takes it as an operand; the sheet-route decision is bound to data-sections=\"s3\" and to the section whose 1e-10 rule made the choice."
+  },
+  "section_digests": {
+    "_document": "9eb52f0301784517a11c98457f1f79b257088686b62176a015e7fa43ef1a6af2",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "62bb0b22879ada89052ccd19cfd4ec3fb75bec53262f165883412f5228f83a6a",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:07:09.975787+00:00",
+  "total": null
+}

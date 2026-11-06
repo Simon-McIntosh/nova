@@ -4,6 +4,13 @@
   "added_failure_note": "The reviewed run records neither baseline_suite nor after_suite: it is an investigation node with no suite arm, so no failure id is added and none could be derived from an absent gate log.",
   "call_sites": "none - the added modules are prototype scripts under scripts/prototypes/ that no production module imports; the change binds to nova.equilibrium.display_flux.build_display_flux_map, nova.equilibrium.forward_operator.ForwardFluxOperator.residual_shadow_mask and nova.equilibrium.reduced_newton._trip_boundary.trip_boundary",
   "completed_at": "2026-11-06T05:48:35.924Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "promoted-nodes-xpoint-angles",
+      "recorded_at": "2026-11-06T06:12:55.226234+00:00"
+    }
+  },
   "dispatched_at": "2026-11-06T05:36:43Z",
   "findings": [
     {

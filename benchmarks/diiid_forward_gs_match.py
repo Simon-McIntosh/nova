@@ -32,7 +32,7 @@ import sys
 import tempfile
 import time
 from collections.abc import Callable
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, NamedTuple
 from types import SimpleNamespace
@@ -64,6 +64,7 @@ from nova.database import content_store
 from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium import display_flux as display_flux_module
 from nova.equilibrium.display_flux import (
     DEFAULT_SPACING as DISPLAY_DEFAULT_SPACING,
     DisplayCoupling,
@@ -1500,23 +1501,16 @@ def _conductor_columns(task) -> np.ndarray:
     return np.stack(columns)
 
 
-def _display_grid(
-    lattice, spacing: float = DISPLAY_SPACING
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return the display radius, height and points of ``lattice``."""
+def _display_points(display: DisplayFluxMap) -> np.ndarray:
+    """Return the display map's own grid as ``(n, 2)`` target points.
 
-    radius = np.asarray(lattice.radius, dtype=float)
-    height = np.asarray(lattice.height, dtype=float)
-    display_radius = np.arange(radius[0], radius[-1] + 0.5 * spacing, spacing)
-    display_height = np.arange(height[0], height[-1] + 0.5 * spacing, spacing)
-    radius_grid, height_grid = np.meshgrid(
-        display_radius, display_height, indexing="ij"
-    )
-    return (
-        display_radius,
-        display_height,
-        np.c_[radius_grid.ravel(), height_grid.ravel()],
-    )
+    The grid belongs to :mod:`nova.equilibrium.display_flux`, so it is read
+    back off the map rather than reconstructed here.
+    """
+
+    return np.stack(
+        np.meshgrid(display.radius, display.height, indexing="ij"), axis=-1
+    ).reshape(-1, 2)
 
 
 def _conductor_response_path(points: np.ndarray) -> tuple[Path, str]:
@@ -1638,34 +1632,115 @@ def _publish_conductor_response(root: Path, key: str, source: Path) -> Path:
     )
 
 
+class _ConductorTargets:
+    """Conductor response columns for whatever points the display map asks about.
+
+    The display grid belongs to :mod:`nova.equilibrium.display_flux`, so this
+    object learns its target points from the map's own evaluation rather than
+    from a locally constructed grid.  Each new block extends the response
+    matrix by the exact per-ampere columns of the points it had not yet seen,
+    and every point keeps the row it landed in, so a redraw can rebuild the
+    field as one matrix product from the persisted grid and its row indices.
+    """
+
+    def __init__(self, machine, current: np.ndarray) -> None:
+        self._machine = machine
+        self._current = np.asarray(current, dtype=float)
+        self._index: dict[bytes, int] = {}
+        self._matrix = np.zeros((0, self._current.size), dtype=float)
+        self._flux: dict[tuple[bytes, bytes], np.ndarray] = {}
+        self.records: list[dict[str, Any]] = []
+
+    @property
+    def matrix(self) -> np.ndarray:
+        """Return the accumulated response matrix over every point seen."""
+        return self._matrix
+
+    def rows(self, points: np.ndarray) -> np.ndarray:
+        """Return the response-matrix row of every point, extending as needed."""
+        block = np.ascontiguousarray(points, dtype=float)
+        keys = [point.tobytes() for point in block]
+        missing = np.fromiter(
+            (key not in self._index for key in keys), dtype=bool, count=len(keys)
+        )
+        if missing.any():
+            fresh = block[missing]
+            response, record = _build_conductor_response(self._machine, fresh)
+            if response.shape[1] != self._current.size:
+                raise RuntimeError(
+                    "display coupling does not match the operator's conductor response"
+                )
+            start = self._matrix.shape[0]
+            self._matrix = np.concatenate((self._matrix, response), axis=0)
+            for offset, point in enumerate(fresh):
+                self._index[point.tobytes()] = start + offset
+            self.records.append(record)
+        return np.fromiter(
+            (self._index[key] for key in keys), dtype=np.intp, count=len(keys)
+        )
+
+    def flux(self, points: np.ndarray, current: np.ndarray | None = None) -> np.ndarray:
+        """Return the conductor flux [Wb] at ``points`` for one current vector."""
+        block = np.ascontiguousarray(points, dtype=float)
+        carry = self._current if current is None else np.asarray(current, dtype=float)
+        key = (block.tobytes(), carry.tobytes())
+        cached = self._flux.get(key)
+        if cached is None:
+            cached = self._matrix[self.rows(block)] @ carry
+            self._flux[key] = cached
+        return cached
+
+
+def _publish_accumulated_response(targets: _ConductorTargets) -> dict[str, Any]:
+    """Write the accumulated response matrix and return its receipt."""
+
+    matrix = np.ascontiguousarray(targets.matrix, dtype=np.float64)
+    key = hashlib.sha256(matrix.tobytes()).hexdigest()
+    root = operand_cache_root() / "diiid-forward-gs"
+    store_root = root / "conductor-response-store"
+    object_root = content_store.verified_object_root(store_root, create=True)
+    stored = content_store.verified_destination(object_root, key)
+    if stored is None:
+        path = root / f"display-conductor-response-accumulated-{key[:16]}.npy"
+        staged = path.with_name(path.name + ".partial")
+        with staged.open("wb") as handle:
+            np.save(handle, matrix)
+        stored = _publish_conductor_response(store_root, key, staged)
+        staged.unlink()
+    return {
+        "path": portable_path(stored / "response.npy"),
+        "digest": key,
+        "shape": list(matrix.shape),
+        "processes": DISPLAY_RESPONSE_PROCESSES,
+        "build_seconds": float(
+            sum(record["build_seconds"] for record in targets.records)
+        ),
+        "loaded_from_cache": all(
+            record["loaded_from_cache"] for record in targets.records
+        ),
+    }
+
+
 def _display_coupling(
-    profile: ForwardProfile, machine, chunk: int = DISPLAY_CHUNK
-) -> tuple[DisplayCoupling, np.ndarray, np.ndarray, dict[str, Any]]:
+    profile: ForwardProfile, machine
+) -> tuple[DisplayCoupling, _ConductorTargets]:
     """Return the target-point coupling the frame's own solve was built from.
 
     The plasma columns are the same uniform ``hybrid_greens`` block the solve
     lattice consumes, evaluated at whatever points the panel asks for; the
     operator carries no radial or vertical plasma moment matrices here, so
     those columns are zero exactly as the solve's own raster image is.  The
-    conductor flux is the response matrix read once for the display grid and
-    the lattice nodes together, contracted with the operator's own current
-    vector.
+    conductor flux is the response matrix contracted with the operator's own
+    current vector, and its targets are the points the display map evaluates
+    on, so the map's grid is the grid the response is built for.
     """
 
     lattice = profile.lattice
     cells = np.asarray(lattice.coordinate, dtype=float)
     width = float(np.diff(np.asarray(lattice.radius, dtype=float)).mean())
     vertical_extent = float(np.diff(np.asarray(lattice.height, dtype=float)).mean())
-    display_radius, display_height, points = _display_grid(lattice)
-    targets = np.concatenate((points, cells))
-    response, record = _build_conductor_response(machine, targets)
     complete = np.asarray(profile.operator.external_current, dtype=float)
-    if complete.size != response.shape[1]:
-        raise RuntimeError(
-            "display coupling does not match the operator's conductor response"
-        )
-    rows = {point.tobytes(): index for index, point in enumerate(targets)}
-    served: dict[bytes, np.ndarray] = {}
+    targets = _ConductorTargets(machine, complete)
 
     def plasma(points: np.ndarray):
         """Return the uniform, radial and vertical plasma columns."""
@@ -1676,25 +1751,9 @@ def _display_coupling(
 
     def external(points: np.ndarray) -> np.ndarray:
         """Return the conductor-only flux [Wb] at ``points``."""
-        block = np.ascontiguousarray(points, dtype=float)
-        key = block.tobytes()
-        cached = served.get(key)
-        if cached is None:
-            indices = np.fromiter(
-                (rows[point.tobytes()] for point in block),
-                dtype=np.intp,
-                count=block.shape[0],
-            )
-            cached = response[indices] @ complete
-            served[key] = cached
-        return cached
+        return targets.flux(points)
 
-    return (
-        DisplayCoupling(plasma=plasma, external=external),
-        display_radius,
-        display_height,
-        record,
-    )
+    return DisplayCoupling(plasma=plasma, external=external), targets
 
 
 def _stored_conductor_response(record: dict[str, Any]) -> np.ndarray:
@@ -1739,6 +1798,8 @@ def _persist_frame_operands(
     compensation_current: np.ndarray | None = None,
     separatrix_closed: np.ndarray | None = None,
     separatrix_assembly: dict[str, Any] | None = None,
+    points: np.ndarray | None = None,
+    row_index: np.ndarray | None = None,
 ) -> dict[str, Any]:
     """Write one frame's display operands and return the artifact's receipt.
 
@@ -1747,14 +1808,18 @@ def _persist_frame_operands(
     than a re-solve: the terminal state vector, the display grid and its field,
     the conductor term the matrix produces and the plasma term that completes
     it, the assembled branch polygons, and the solve's own promoted domain mask
-    and constraint compensation where it exposes them.  The display points
-    occupy the leading block of the response matrix's target set, so their row
-    indices are the leading range and are recorded rather than assumed.
+    and constraint compensation where it exposes them.  The display points are
+    the map's own grid, and the row each occupies in the response matrix is
+    recorded rather than assumed.
     """
 
     lattice = profile.lattice
-    _radius, _height, points = _display_grid(lattice)
-    rows = np.arange(points.shape[0], dtype=np.intp)
+    points = _display_points(display) if points is None else np.asarray(points, dtype=float)
+    rows = (
+        np.arange(points.shape[0], dtype=np.intp)
+        if row_index is None
+        else np.asarray(row_index, dtype=np.intp)
+    )
     conductor_current = np.asarray(conductor_current, dtype=np.float64)
     compensation_current = (
         np.zeros_like(conductor_current)
@@ -1906,14 +1971,41 @@ def rebuild_display_flux(
     return conductor + plasma, conductor
 
 
+def rebuild_frame_separatrix(
+    operands: dict[str, np.ndarray], response: np.ndarray, axis_rz
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    """Assemble one persisted frame's separatrix from its own display field.
+
+    The persisted field is the map the panel draws, so the contour assembled
+    here is that frame's own separatrix at its own polished saddle value rather
+    than a second boundary path.  A frame whose saddle did not converge, or
+    whose axis is unavailable, returns an empty boundary and no branches.
+    """
+
+    if axis_rz is None or not bool(np.asarray(operands["saddle_converged"])):
+        return np.zeros((0, 2)), {}
+    radius = np.asarray(operands["display_radius"], dtype=float)
+    height = np.asarray(operands["display_height"], dtype=float)
+    flux, _conductor = rebuild_display_flux(operands, response)
+    branches = display_flux_module._branches(
+        flux.reshape(radius.size, height.size).T,
+        radius,
+        height,
+        float(np.asarray(operands["saddle_flux"])),
+        np.asarray(axis_rz, dtype=float).reshape(2),
+    )
+    closed, _open_branches = _display_separatrix(
+        SimpleNamespace(branches=branches)
+    )
+    return closed, branches
+
+
 def _display_map(
     profile: ForwardProfile, equilibrium, machine, target_current_a: float
 ) -> tuple[DisplayFluxMap, dict[str, Any]]:
     """Return the frame's fine display map and the rig it was drawn from."""
 
-    coupling, display_radius, display_height, record = _display_coupling(
-        profile, machine
-    )
+    coupling, targets = _display_coupling(profile, machine)
     # The operator forms current moments one of two ways, and each entry point
     # refuses the construction the other serves. Ask for the moments this
     # operator carries and hand them to the map, so it never has to guess.
@@ -1931,23 +2023,9 @@ def _display_map(
             compensation_current += np.asarray(
                 direction @ constraint.physical_unknown, dtype=float
             )
-    response = _stored_conductor_response(record)
-    targets = np.concatenate(
-        (
-            np.stack(
-                np.meshgrid(display_radius, display_height, indexing="ij"), axis=-1
-            ).reshape(-1, 2),
-            np.asarray(profile.lattice.coordinate, dtype=float),
-        )
-    )
-    row_lookup = {point.tobytes(): index for index, point in enumerate(targets)}
-
     def compensation(points: np.ndarray) -> np.ndarray:
-        rows = [
-            row_lookup[point.tobytes()]
-            for point in np.ascontiguousarray(points, dtype=float)
-        ]
-        return response[rows] @ compensation_current
+        """Return the compensating conductor flux [Wb] at ``points``."""
+        return targets.flux(points, compensation_current)
 
     display = build_display_flux_map(
         profile,
@@ -1961,18 +2039,14 @@ def _display_map(
         spacing=DISPLAY_SPACING,
         chunk=DISPLAY_CHUNK,
     )
-    if display.radius.shape != display_radius.shape or not np.allclose(
-        display.radius, display_radius
-    ):
-        raise RuntimeError("display map grid does not match the prefetched grid")
-    if display.height.shape != display_height.shape or not np.allclose(
-        display.height, display_height
-    ):
-        raise RuntimeError("display map grid does not match the prefetched grid")
+    points = _display_points(display)
+    row_index = targets.rows(points)
     return display, {
         "coupling": coupling,
-        "conductor_response": record,
+        "conductor_response": _publish_accumulated_response(targets),
         "compensation_current": compensation_current,
+        "points": points,
+        "row_index": row_index,
     }
 
 
@@ -2571,6 +2645,8 @@ def solve_frame(
             compensation_current=display_rig["compensation_current"],
             separatrix_closed=display_closed,
             separatrix_assembly=display_assembly,
+            points=display_rig["points"],
+            row_index=display_rig["row_index"],
         )
         display_comparison = compare_closed_boundaries(
             display_closed,
@@ -3564,28 +3640,30 @@ def render_frame_comparison(
     limiter, _limiter_receipt = _physical_wall_ring(
         DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
     )
+    limiter_path = PolygonPath(limiter)
     figure, axes = plt.subplots(1, len(results), figsize=(14, 7.2))
-    figure.subplots_adjust(left=0.02, right=0.98, top=0.84, bottom=0.25, wspace=0.02)
-    figure.legend(
-        handles=(
-            Line2D([], [], color="0.55", label="EFIT ψ [Wb]"),
-            Line2D(
-                [],
-                [],
-                color=DEFAULT_INK.flux_color,
-                label="Nova terminal-current ψ [Wb]",
-            ),
-            Line2D([], [], color="0.2", linewidth=1.3, label="EFIT boundary"),
+    figure.subplots_adjust(left=0.02, right=0.98, top=0.84, bottom=0.30, wspace=0.02)
+    drawn = any(len(np.asarray(frame["display_closed_boundary"])) for frame in fields)
+    handles = [
+        Line2D([], [], color="0.55", label="EFIT ψ [Wb]"),
+        Line2D(
+            [], [], color=DEFAULT_INK.flux_color, label="Nova terminal-current ψ [Wb]"
+        ),
+        Line2D([], [], color="0.2", linewidth=1.3, label="EFIT boundary"),
+    ]
+    if drawn:
+        handles.append(
             Line2D(
                 [],
                 [],
                 color=DEFAULT_INK.separatrix_color,
                 linewidth=1.3,
                 label="Nova separatrix",
-            ),
-            Line2D(
-                [], [], marker="^", color="0.2", linestyle="none", label="EFIT axis"
-            ),
+            )
+        )
+    handles.extend(
+        (
+            Line2D([], [], marker="^", color="0.2", linestyle="none", label="EFIT axis"),
             Line2D(
                 [], [], marker="X", color="0.2", linestyle="none", label="EFIT X-point"
             ),
@@ -3600,16 +3678,15 @@ def render_frame_comparison(
             Line2D(
                 [],
                 [],
-                marker="X",
+                marker="P",
                 color=DEFAULT_INK.xpoint_color,
                 linestyle="none",
                 label="Nova X-point",
             ),
-        ),
-        loc="upper center",
-        ncol=4,
-        frameon=False,
-        fontsize=10,
+        )
+    )
+    figure.legend(
+        handles=handles, loc="upper center", ncol=4, frameon=False, fontsize=14
     )
     for index, (axis, result, frame) in enumerate(
         zip(axes, results, fields, strict=True)
@@ -3637,7 +3714,7 @@ def render_frame_comparison(
         else:
             label += f"\n{frame.get('plot_unavailable_reason', 'display unavailable')}"
         position = axis.get_position()
-        figure.text(position.x0, 0.19, label, va="top", fontsize=8)
+        figure.text(position.x0, 0.24, label, va="top", fontsize=14)
         if "labelled" not in frame:
             continue
         radius, height = frame["radius"], frame["height"]
@@ -3648,11 +3725,15 @@ def render_frame_comparison(
         )
         draw_flux_contours(axis, radius, height, reference.T, levels, color="0.55")
         if display is not None:
+            grid = np.stack(
+                np.meshgrid(display.radius, display.height, indexing="ij"), axis=-1
+            ).reshape(-1, 2)
+            inside = limiter_path.contains_points(grid).reshape(display.flux.shape)
             draw_flux_contours(
                 axis,
                 display.radius,
                 display.height,
-                np.asarray(display.flux).T,
+                np.where(inside, np.asarray(display.flux), np.nan).T,
                 levels,
                 color=DEFAULT_INK.flux_color,
             )
@@ -3673,6 +3754,7 @@ def render_frame_comparison(
             x_points=None
             if frame["display_saddle_rz"] is None
             else np.asarray(frame["display_saddle_rz"])[None, :],
+            style=replace(DEFAULT_INK, xpoint_marker="P"),
         )
         for name, marker in (("labelled_axis_rz", "^"), ("labelled_x_rz", "X")):
             point = np.asarray(frame[name], dtype=float)
@@ -3762,13 +3844,39 @@ def cohort_figure(
     )
     for axis, (title, unit, values) in zip(axes.ravel(), metrics):
         trace_axes(axis)
-        axis.plot(index, values, "o-", color=DEFAULT_INK.flux_color, linewidth=1.8)
-        axis.set_title(title, fontsize=11, pad=10)
-        axis.set_ylabel(unit, fontsize=10)
-        axis.set_xticks(index, [str(r.frame) for r in results], fontsize=9)
-        axis.set_xlabel("frame", fontsize=10)
+        drawn = np.isfinite(np.asarray(values, dtype=float))
+        axis.plot(
+            index[drawn],
+            np.asarray(values, dtype=float)[drawn],
+            "o",
+            color=DEFAULT_INK.flux_color,
+            markersize=8,
+            linestyle="none",
+        )
+        for empty in np.flatnonzero(~drawn):
+            axis.annotate(
+                "unavailable",
+                (index[empty], 0.5),
+                xycoords=("data", "axes fraction"),
+                ha="center",
+                fontsize=14,
+                color="0.35",
+            )
+        axis.set_title(title, fontsize=16, pad=10)
+        axis.set_ylabel(unit, fontsize=16)
+        axis.set_xticks(index, [str(r.frame) for r in results], fontsize=14)
+        axis.set_xlabel("frame", fontsize=16)
     axes[0, 0].axhline(
         REGISTERED_MEDIAN_INTERIOR_R2_BAR, color="0.4", linestyle="--", linewidth=1.2
+    )
+    axes[0, 0].annotate(
+        "registered median bar",
+        (index[-1], REGISTERED_MEDIAN_INTERIOR_R2_BAR),
+        xytext=(0, 4),
+        textcoords="offset points",
+        ha="center",
+        fontsize=14,
+        color="0.35",
     )
     limiter, _ = _physical_wall_ring(
         DEFAULT_MACHINE_ARTIFACT_CACHE, DEFAULT_MACHINE_ARTIFACT_DIGEST
@@ -3787,7 +3895,7 @@ def cohort_figure(
                 color=DEFAULT_INK.separatrix_color,
                 linewidth=1.3,
             )
-    overlay.set_title("EFIT boundaries and DIII-D limiter", fontsize=11, pad=10)
+    overlay.set_title("EFIT boundaries and DIII-D limiter", fontsize=16, pad=10)
     if not any(len(frame["display_closed_boundary"]) for frame in fields):
         position = overlay.get_subplotspec().get_position(figure)
         figure.text(
@@ -3795,7 +3903,7 @@ def cohort_figure(
             0.035,
             "Nova separatrices: assembly refused",
             ha="center",
-            fontsize=10,
+            fontsize=14,
         )
     _save_frame_figure(figure, path)
 
@@ -3830,7 +3938,7 @@ def displacement_figure(
                 )
             )
     figure.legend(
-        handles=handles, loc="upper center", ncol=4, frameon=False, fontsize=10
+        handles=handles, loc="upper center", ncol=4, frameon=False, fontsize=14
     )
     for axis, result, frame in zip(axes, results, fields, strict=True):
         poloidal_axes(axis)
@@ -3864,7 +3972,7 @@ def displacement_figure(
             )
         axis.set_xlim(0.8, 2.5)
         axis.set_ylim(-1.6, 1.8)
-        figure.text(axis.get_position().x0, 0.19, label, va="top", fontsize=8)
+        figure.text(axis.get_position().x0, 0.24, label, va="top", fontsize=14)
     _save_frame_figure(figure, path)
 
 
@@ -5979,6 +6087,98 @@ def run(
     return receipt
 
 
+def redraw_persisted_bank(output: Path) -> dict[str, Any]:
+    """Rebuild every persisted frame's separatrix and redraw the bank figures.
+
+    Each frame's display field, its polished saddle and its EFIT label are all
+    already on disk, so the separatrix is assembled from the frame's own field
+    and the boundary distances are measured against that frame's labelled LCFS.
+    Nothing here re-solves: the redraw is the assembler and the panels only.
+    """
+
+    receipt_path = output / RECEIPT_NAME
+    receipt = json.loads(receipt_path.read_text())
+    records = receipt["result"]["frame_records"]
+    results: list[FrameResult] = []
+    fields: list[dict[str, Any]] = []
+    distances: dict[int, tuple[float | None, float | None]] = {}
+    for record in records:
+        result = _frame_result_from_checkpoint(record)
+        selected = SelectedFrame(
+            DEFAULT_DATA / result.shot,
+            result.frame,
+            result.time_ms,
+            result.target_current_a,
+        )
+        panel = _restored_panel_fields(selected, result)
+        stencil = record.get("display_map")
+        if result.operand_path and stencil is not None:
+            operands = load_frame_operands(Path(result.operand_path))
+            response = np.load(Path(stencil["conductor_response_path"]))
+            closed, branches = rebuild_frame_separatrix(
+                operands, response, panel["display_axis_rz"]
+            )
+            panel["display_closed_boundary"] = closed
+            rms_m: float | None = None
+            sup_m: float | None = None
+            if len(closed):
+                rms_mm, sup_mm = contour_separation(
+                    closed, np.asarray(panel["labelled_closed_boundary"], dtype=float)
+                )
+                if np.isfinite(rms_mm) and np.isfinite(sup_mm):
+                    rms_m, sup_m = float(rms_mm) / 1000.0, float(sup_mm) / 1000.0
+            stencil["separatrix_closed_points"] = int(len(closed))
+            stencil["separatrix_symmetric_rms_distance_m"] = rms_m
+            stencil["separatrix_symmetric_sup_distance_m"] = sup_m
+            stencil["separatrix_assembly"] = _branch_diagnostics(
+                SimpleNamespace(branches=branches)
+            )
+            record["display_map"] = stencil
+            distances[result.frame] = (rms_m, sup_m)
+            result = replace(
+                result,
+                display_map=replace(
+                    result.display_map,
+                    separatrix_closed_points=int(len(closed)),
+                    separatrix_symmetric_rms_distance_m=rms_m,
+                    separatrix_symmetric_sup_distance_m=sup_m,
+                ),
+            )
+        results.append(result)
+        fields.append(panel)
+    summary = receipt["result"]["fine_map_separatrix"]
+    summary["frames_with_separatrix"] = sum(
+        1 for rms, _sup in distances.values() if rms is not None
+    )
+    summary["symmetric_rms_distance_m"] = _optional_distribution(
+        [rms for rms, _sup in distances.values()]
+    )
+    summary["symmetric_sup_distance_m"] = _optional_distribution(
+        [sup for _rms, sup in distances.values()]
+    )
+    summary["per_frame"] = {
+        str(frame): {
+            "symmetric_rms_distance_m": rms,
+            "symmetric_sup_distance_m": sup,
+        }
+        for frame, (rms, sup) in sorted(distances.items())
+    }
+    render_frame_comparison(results, fields, output / FRAME_FIGURE_NAME)
+    cohort_figure(results, fields, output / COHORT_FIGURE_NAME)
+    displacement_figure(results, fields, output / DISPLACEMENT_FIGURE_NAME)
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True))
+    partial_path = output / PARTIAL_RECEIPT_NAME
+    if partial_path.exists():
+        partial = json.loads(partial_path.read_text())
+        partial["result"]["fine_map_separatrix"] = summary
+        partial["result"]["frame_records"] = records
+        partial_path.write_text(json.dumps(partial, indent=2, sort_keys=True))
+    return {
+        "frames_with_separatrix": summary["frames_with_separatrix"],
+        "per_frame": summary["per_frame"],
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
@@ -5998,6 +6198,7 @@ def main() -> None:
         type=Path,
         default=DEFAULT_SINGLE_SHOT_GATE_OUTPUT,
     )
+    parser.add_argument("--redraw", action="store_true")
     parser.add_argument(
         "--machine-artifact-cache",
         type=Path,
@@ -6008,6 +6209,13 @@ def main() -> None:
         default=DEFAULT_MACHINE_ARTIFACT_DIGEST,
     )
     arguments = parser.parse_args()
+    if arguments.redraw:
+        print(
+            json.dumps(
+                redraw_persisted_bank(arguments.output), indent=2, sort_keys=True
+            )
+        )
+        return
     if arguments.single_shot_gate:
         if (
             arguments.preregister_only

@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T22:47:57.449Z",
+  "dispatched_at": "2026-11-06T22:40:02Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261106T223815982991-plan-review-of-iron-core-magnetisation/plan.html:250",
+      "id": "reasoning-1",
+      "reason": "the strip branch is now decided against, so its tolerance clause and the body sentence name a production parameter that does not exist; a worker on \u00a73 has to infer that the 1e-13 floor is the whole tolerance, and the dead strip text is exactly the kind of surviving branch that sends a node looking for a width to implement.",
+      "text": "\u00a73 done-when (1) measures the device-versus-host agreement \"to within the largest per-slope rounding term \u00a72 records at the production strip width (the worst slope, since the mesh mixes them)\", and the \u00a73 body states \"The strip width is the edge-length fraction the sheet-route decision records\" (line 242), but the `sheet-route` decision recorded at line 418 in this same change sets `data-choice=\"part-ii-sheet\"` on the measured finding that \"no single edge-length fraction meets 1e-10\", so the decision records no edge-length fraction and \u00a72 records no rounding term at a production width; the only clause that resolves the tolerance is the trailing \"On the Part II branch there is no strip cancellation and the tolerance is the floor\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261106T223815982991-plan-review-of-iron-core-magnetisation/plan.html:425",
+      "id": "anchors_resolve-1",
+      "reason": "the decision rests on the 6.7e-8 worst case that the cited fragment does carry, so naming the attempt-1 path would strengthen the record without altering the choice.",
+      "text": "the `sheet-route` rationale states \"An independent attempt on a 1.0 m segment floors at 3.1e-8\" under a citation to `052fa853c` and fragment `icm-strip-error-sweep`, but that fragment contains no 3.1e-8 value and the commit's added files carry only the final sweep; the attempt-1 numbers live at `/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/strip-sweep-attempt-1/strip-error-sweep.json` (worst per-slope best 3.104e-8 on a `segment_length_m: 1.0` geometry) and are cited nowhere in the plan",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "0b624a23a1b7dad1be6586237f120e0ac0f12b58",
+  "plan_fingerprint": "05fdeb6d9f76f772633ed96afc44ed91685b2a70c6d28cab94a3e4346aa32133",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 4,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0aa2122b196cedd4aa504fef3da1009f4a915bd3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a73 drops its strip branch: it adds a sheet tile over nova/biot/sheet.py, and its tolerance is 1e-13 relative to the absolute sum of edge contributions, with no strip width to read (0aa2122b1).",
+      "reason": "",
+      "when": "2026-11-06T22:54:30.923632+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0aa2122b196cedd4aa504fef3da1009f4a915bd3",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The sheet-route rationale now cites the attempt-1 receipt at /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/strip-sweep-attempt-1/strip-error-sweep.json (0aa2122b1).",
+      "reason": "",
+      "when": "2026-11-06T22:54:41.883756+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0aa2122b196cedd4aa504fef3da1009f4a915bd3",
+      "commit_basis": "edit",
+      "note": "The sheet-route rationale now cites the attempt-1 receipt at /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/strip-sweep-attempt-1/strip-error-sweep.json (0aa2122b1).",
+      "reason": "",
+      "when": "2026-11-06T22:54:41.883756+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0aa2122b196cedd4aa504fef3da1009f4a915bd3",
+      "commit_basis": "edit",
+      "note": "\u00a73 drops its strip branch: it adds a sheet tile over nova/biot/sheet.py, and its tolerance is 1e-13 relative to the absolute sum of edge contributions, with no strip width to read (0aa2122b1).",
+      "reason": "",
+      "when": "2026-11-06T22:54:30.923632+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v4.json",
+  "review_run_id": "r-20261106T223815982991-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "3d694e326857d3d4f87f348bbbd24251c1c3f318",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the `sheet-route` rationale's \"independent attempt on a 1.0 m segment floors at 3.1e-8\" is cited to `052fa853c` and fragment `icm-strip-error-sweep`, and neither carries it.",
+    "done_when": "pass \u2014 each \u00a73 clause can fail: (1) carries a negative control that reverses one cell's edge normals in the device build, (2) bounds the compile at 60 s / 50 MB / 64 GB and requires a second fresh process to hit the cache entry the first wrote, and (3) requires named columns in a named ledger rather than \"recorded\".",
+    "evidence_paths": "pass \u2014 done-when (3) lands in `docs/research/compile-cost-evidence.html`, a tracked repository path; the `NOVA_COMPILATION_CACHE_ROOT` directory in done-when (2) is a runtime cache, not the evidence record.",
+    "naming": "pass \u2014 the changed text names mechanisms (Part V strip, Part II closed form, `_fill_tile`, sheet tile) and introduces no plan labels, stage names, ticket numbers or version tags.",
+    "reasoning": "a finding \u2014 \u00a73's done-when (1) states its tolerance as \"the largest per-slope rounding term \u00a72 records at the production strip width\", but the same change's `sheet-route` decision selects `part-ii-sheet`, under which no production strip width exists for \u00a72 to record a term at.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, the device cell interaction matrix G, and its three clauses measure that one artifact's correctness, cost and ledger entry.",
+    "wiring": "pass \u2014 `s3` declares `depends-on: [iron-core-magnetisation#s2]`, the node that builds the sheet kernel \u00a73 consumes, and the `sheet-route` decision that unblocks \u00a73 resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "f9b5589159975b8098aeabe5463a3b144487bcd7642abba137c65e685672927d",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "a3de35bced98bfcb95fb1fa21051ac59681c870fa018644be8a5c560ffa84159",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T22:49:59.862843+00:00",
+  "total": null
+}

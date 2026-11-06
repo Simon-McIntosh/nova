@@ -3860,13 +3860,14 @@ def cohort_figure(
             markersize=8,
             linestyle="none",
         )
-        for empty in np.flatnonzero(~drawn):
+        empty = [results[i].frame for i in np.flatnonzero(~drawn)]
+        if empty:
             axis.annotate(
-                "unavailable",
-                (index[empty], 0.5),
-                xycoords=("data", "axes fraction"),
+                "unavailable: " + ", ".join(str(frame) for frame in empty),
+                (0.5, 0.10),
+                xycoords="axes fraction",
                 ha="center",
-                fontsize=14,
+                fontsize=12,
                 color="0.35",
             )
         axis.set_title(title, fontsize=16, pad=10)
@@ -3878,10 +3879,10 @@ def cohort_figure(
     )
     axes[0, 0].annotate(
         "registered median bar",
-        (index[-1], REGISTERED_MEDIAN_INTERIOR_R2_BAR),
-        xytext=(0, -6),
+        (index[0], REGISTERED_MEDIAN_INTERIOR_R2_BAR),
+        xytext=(6, -4),
         textcoords="offset points",
-        ha="center",
+        ha="left",
         va="top",
         fontsize=14,
         color="0.35",

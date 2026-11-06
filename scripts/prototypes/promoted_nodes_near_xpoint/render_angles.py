@@ -4,7 +4,8 @@ The left panel is the whole machine: unfilled line contours of the converged
 state and of the field of the currents on one shared level array, the wall, the
 promoted nodes, both null sets, and a locator for the magnification.  The right
 panel is that magnification, carrying all four branches leaving the null in
-each field beside the asymptotic directions of the state's polished saddle.
+each field beside the separatrix asymptotes of the state's polished saddle,
+the directions d with d'Hd = 0.
 Every number the figure writes into a figure is read from the receipt.
 """
 
@@ -253,7 +254,7 @@ def render(receipt, fields, destination, angles=None):
                 color=ASYMPTOTE,
                 linewidth=0.9,
                 linestyle=(0, (1, 2)),
-                zorder=7,
+                zorder=13,
             )
 
     figure.legend(

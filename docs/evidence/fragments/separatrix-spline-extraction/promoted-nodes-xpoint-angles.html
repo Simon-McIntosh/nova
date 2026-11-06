@@ -35,41 +35,64 @@ it is a real property of the reconstructed field at that resolution, not of the 
 lattice. The state's null on the lattice is
 (0.578763, 1.204704) m at -1.307e-01 Wb.</p>
 
+<p>The Hessian at the null has eigenvalues -1.384875 and
++1.403806 Wb/m^2, a ratio of 1.013669, and its trace is
++1.893e-02 Wb/m^2. The eigenvectors are the principal axes at +101.84°
+and -168.16°; they are orthogonal by construction and are <em>not</em> the
+separatrix asymptotes, which are the directions <code>d</code> with
+<code>d'Hd = 0</code>. In the eigenbasis that is
+<code>l1 cos^2 t + l2 sin^2 t = 0</code>, so each asymptote lies
+<strong>45.1945°</strong> from the major axis — 45° only when the two
+eigenvalues are equal and opposite — and the two asymptote lines open
+<strong>90.3889°</strong> at the null.</p>
+
+<p>The trace fixes the local toroidal current density. With
+<code>Delta* psi = psi_RR - psi_R/R + psi_ZZ</code> and <code>psi_R = 0</code> at a
+null, <code>Delta* psi</code> there is the trace itself, and <code>mu0 J_phi = -Delta*
+psi</code> gives <strong>-1.506e+04 A/m^2</strong>. A traceless Hessian would mean no
+local toroidal current and asymptotes at exactly 90°; this one is not traceless, so
+the asymptotes open slightly wider than a right angle and the four arms are not evenly
+spaced.</p>
+
 <table>
-  <caption>The four asymptotic directions at the null, from the eigenvectors of the
+  <caption>The four separatrix asymptotes at the null, from the eigenvalue ratio of the
   poloidal-flux Hessian at each field's polished saddle, taken on the solve's lattice.
   Bearings are degrees from +R toward +Z.</caption>
-  <tr><th>direction</th><th>converged state</th><th>field of the currents</th>
+  <tr><th>asymptote</th><th>converged state</th><th>field of the currents</th>
       <th>difference</th></tr>
-<tr><td>arm 1</td><td>-168.16</td><td>-168.16</td><td>0.000001</td></tr>
-<tr><td>arm 2</td><td>-78.16</td><td>-78.16</td><td>0.000001</td></tr>
-<tr><td>arm 3</td><td>+11.84</td><td>+11.84</td><td>0.000001</td></tr>
-<tr><td>arm 4</td><td>+101.84</td><td>+101.84</td><td>0.000001</td></tr>
+<tr><td>arm 1</td><td>-123.35</td><td>-123.35</td><td>0.000001</td></tr>
+<tr><td>arm 2</td><td>-32.97</td><td>-32.97</td><td>0.000001</td></tr>
+<tr><td>arm 3</td><td>+56.65</td><td>+56.65</td><td>0.000001</td></tr>
+<tr><td>arm 4</td><td>+147.03</td><td>+147.03</td><td>0.000001</td></tr>
 </table>
 
-<p>The asymptotic directions are the four half-lines the separatrix approaches at the
-null, and they agree between the two fields to 0.000001° over
-4 directions: the promotion does not rotate the X.</p>
+<p>The four asymptotes agree between the two fields to
+0.000001° over 4 directions: the promotion does
+not rotate the X.</p>
 
 <table>
   <caption>The direction each assembled branch actually takes over its first one to two
   display cells, read as the chord of that branch between 10 and 20 mm of arc length
-  from the saddle, on each field's own trace. <code>reach</code> is how far each branch
-  runs from the null.</caption>
+  from the saddle, on each field's own trace. The last two columns give each
+  chord's angle to the nearest of the four asymptotes above, and
+  <code>reach</code> is how far each branch runs from the null.</caption>
   <tr><th>branch</th><th>converged state</th><th>field of the currents</th>
-      <th>difference</th><th>reach [m]</th></tr>
-<tr><td>lobe out</td><td>-123.23</td><td>-123.01</td><td>0.221</td><td>2.4286</td></tr>
-<tr><td>lobe back</td><td>-33.51</td><td>-32.95</td><td>0.562</td><td>2.8223</td></tr>
-<tr><td>leg 0</td><td>+147.62</td><td>+146.73</td><td>0.895</td><td>4.6619</td></tr>
-<tr><td>leg 1</td><td>+56.57</td><td>+57.30</td><td>0.735</td><td>0.9102</td></tr>
+      <th>state vs field</th><th>state vs asymptote</th><th>field vs asymptote</th>
+      <th>reach [m]</th></tr>
+<tr><td>lobe out</td><td>-123.23</td><td>-123.01</td><td>0.221</td><td>0.12</td><td>0.34</td><td>2.4286</td></tr>
+<tr><td>lobe back</td><td>-33.51</td><td>-32.95</td><td>0.562</td><td>0.54</td><td>0.02</td><td>2.8223</td></tr>
+<tr><td>leg 0</td><td>+147.62</td><td>+146.73</td><td>0.895</td><td>0.59</td><td>0.31</td><td>4.6619</td></tr>
+<tr><td>leg 1</td><td>+56.57</td><td>+57.30</td><td>0.735</td><td>0.08</td><td>0.66</td><td>0.9102</td></tr>
 </table>
 
-<p>Over 4 branches the traced directions agree to
-0.895°. At 10 to 20 mm from a null the traced curve is still
-visibly rotated away from the asymptotic lines, which is why both measures are given:
-the asymptote is where the separatrix is going, and the chord is where the tracer has
-it. Each branch is identified across the two fields by its own reach, and the reaches
-agree to 4.975 mm, so the pairing is of the same four structures.</p>
+<p>Over 4 branches the traced chords agree between the two fields to
+0.895°, and each chord lies within 0.66°
+of the asymptote it belongs to. The traced curve therefore reaches the asymptotic
+direction within the first 10 to 20 mm and holds it: the two measures are consistent
+readings of the same four arms, taken once from the Hessian at the null and once from
+the assembled trace. Each branch is identified across the two fields by its own reach,
+and the reaches agree to 4.975 mm, so the pairing is of the same four
+structures.</p>
 
 <h3>Why the halves differ</h3>
 <p>The promoted set is the union of two independent selections, which
@@ -128,9 +151,9 @@ those whose
 the field's.
   The left panel carries the locator for the 6.0 mm magnification on the right,
 which draws all four branches leaving the null in both fields: the closed lobe out and
-back, and both open legs. Dotted grey lines are the four asymptotic directions from the
-Hessian at the state's polished saddle, so a branch that runs away from its asymptote
-within the window is visible as such.
+back, and both open legs. Dotted grey lines are the four separatrix
+asymptotes, the directions d with d'Hd = 0 at the state's polished saddle, so a
+branch that runs away from its asymptote within the window is visible as such.
   The nearest promoted node is 56.495 mm from the X-point; the quartiles are
   359.817, 614.324 and 2727.009 mm.</figcaption>
 </figure>
@@ -140,7 +163,7 @@ within the window is visible as such.
 solve's lattice the two polished nulls coincide to 1.73e-06 mm and the
 four arms agree to 0.000001°; on the display map the nulls sit
 0.3545 mm apart, the arms differ by
-0.290° and the traced chords by at most 0.895°.
+0.606° and the traced chords by at most 0.895°.
 The promotion therefore perturbs nothing that the solve resolves, and the whole of the
 residual difference is the coarser interpolant the display map carries. The rule a
 repair would change is the paste itself: the

@@ -35,11 +35,11 @@ import jax.numpy as jnp  # noqa: E402
 from nova.equilibrium.flux_surface_connectivity import (  # noqa: E402
     polish_stationary_points,
 )
-from nova.equilibrium import display_flux  # noqa: E402
 from nova.jax.config import configure_dtypes  # noqa: E402
 from nova.linalg.tensor_spline import fit_tensor_spline  # noqa: E402
 from nova.media.poloidal import sample_cubic_controls  # noqa: E402
 
+MU0 = 4.0e-7 * np.pi
 NEAR_M = 0.010
 FAR_M = 0.020
 DEG = "\N{DEGREE SIGN}"
@@ -62,7 +62,14 @@ def hessian_name(value):
 
 
 def asymptotic(values, radius, height, seed):
-    """Return the polished saddle, its Hessian directions."""
+    """Return the polished saddle, its principal axes and its asymptotes.
+
+    The Hessian's eigenvectors are the principal axes, which are orthogonal by
+    construction and are not the separatrix asymptotes.  The asymptotes are the
+    directions d with d'Hd = 0: in the eigenbasis, l1 cos^2(t) + l2 sin^2(t) = 0,
+    so the half angle from the major axis is atan(sqrt(-l1/l2)) and is 45
+    degrees only when the two eigenvalues are equal and opposite.
+    """
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
     )
@@ -75,26 +82,50 @@ def asymptotic(values, radius, height, seed):
     hessian = np.asarray(polished["hessian"], dtype=float).reshape(2, 2)
     kind = int(np.asarray(polished["hessian_type"]).reshape(()))
     eigenvalues, eigenvectors = np.linalg.eigh(hessian)
+    major = eigenvectors[:, 1]
+    minor = eigenvectors[:, 0]
+    trace = float(eigenvalues[0] + eigenvalues[1])
+    ratio = (
+        float(-eigenvalues[1] / eigenvalues[0]) if eigenvalues[1] > 0 else float("nan")
+    )
+    half_angle = (
+        float(np.degrees(np.arctan(np.sqrt(ratio)))) if ratio >= 0 else float("nan")
+    )
     directions = []
-    for column in range(2):
-        axis = eigenvectors[:, column]
-        for sign in (1.0, -1.0):
-            direction = sign * axis
-            directions.append(
-                {
-                    "bearing_deg": bearing(direction),
-                    "unit": [float(value) for value in direction],
-                    "eigenvalue_wb_per_m2": float(eigenvalues[column]),
-                }
-            )
+    if np.isfinite(half_angle):
+        cosine = np.cos(np.radians(half_angle))
+        sine = np.sin(np.radians(half_angle))
+        for first in (cosine * major + sine * minor, cosine * major - sine * minor):
+            for direction in (first, -first):
+                directions.append(
+                    {
+                        "bearing_deg": bearing(direction),
+                        "unit": [float(value) for value in direction],
+                    }
+                )
     directions.sort(key=lambda entry: entry["bearing_deg"])
+    axes = []
+    for column in (1, 0):
+        axes.append(
+            {
+                "bearing_deg": bearing(eigenvectors[:, column]),
+                "unit": [float(value) for value in eigenvectors[:, column]],
+                "eigenvalue_wb_per_m2": float(eigenvalues[column]),
+            }
+        )
     return {
         "position_rz": [float(value) for value in position],
         "hessian": [[float(value) for value in row] for row in hessian],
         "eigenvalues": [float(value) for value in eigenvalues],
+        "eigenvalue_ratio": ratio,
+        "asymptote_half_angle_deg": half_angle,
+        "asymptote_separation_deg": 2.0 * half_angle,
+        "hessian_trace_wb_per_m2": trace,
+        "toroidal_current_density_a_per_m2": -trace / MU0,
         "hessian_type": hessian_name(kind),
         "admitted": bool(kind < 0 and np.all(np.isfinite(position))),
         "directions": directions,
+        "axes": axes,
     }
 
 
@@ -267,23 +298,9 @@ def main():
             ],
         }
 
-    # The archived polylines come from two different grids: the state's from the
-    # solve's own lattice, the image's from the 10 mm display map.  Assembling
-    # the state on the display map as well puts both continua on one grid,
-    # which is what a branch direction over one or two display cells needs, and
-    # what makes the two closed-branch vertex counts comparable at all.
-    display_level = float(receipt["separatrix"]["state_boundary_flux_wb"])
-    state_display = display_flux._branches(
-        np.asarray(archive["display_state_flux"], float).T,
-        np.asarray(archive["display_radius"], float),
-        np.asarray(archive["display_height"], float),
-        display_level,
-        np.asarray(receipt["nulls"]["axis_rz"], float),
-    )
-    state_display_closed = sample_cubic_controls(
-        state_display["closed_controls_rz"], state_display["closed_valid"]
-    )
-
+    # Each field's branches stay on the grid its own separatrix was assembled
+    # on: the state's from the solve's lattice, the image's from the display
+    # map.  Both traces are reported with the grid and sampling they carry.
     blocks = {}
     sampled = {}
     for name, values, seed, closed, controls, valid in (
@@ -291,9 +308,9 @@ def main():
             "state",
             archive["state_field"],
             receipt["x_point"]["state_rz"],
-            state_display_closed,
-            state_display["open_controls_rz"],
-            state_display["open_valid"],
+            archive["state_closed_polyline"],
+            archive["state_open_controls"],
+            archive["state_open_valid"],
         ),
         (
             "image",

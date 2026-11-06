@@ -87,8 +87,17 @@ def angle_rows(angles):
         ARM_NAMES.get(entry["arm"], entry["arm"]): entry
         for entry in angles["image"]["branches"]
     }
+    bearings = [entry["bearing_deg"] for entry in state_asymptotic]
+
+    def nearest_asymptote(value):
+        return min(
+            (abs((value - other + 180.0) % 360.0 - 180.0) for other in bearings),
+            default=float("nan"),
+        )
+
     branch_rows = []
     branch_shifts = []
+    chord_deviations = []
     for entry in angles["state"]["branches"]:
         partner = image_branches.get(ARM_NAMES.get(entry["arm"], entry["arm"]))
         if partner is None:
@@ -96,14 +105,20 @@ def angle_rows(angles):
         shift = abs(
             (entry["bearing_deg"] - partner["bearing_deg"] + 180.0) % 360.0 - 180.0
         )
+        state_deviation = nearest_asymptote(entry["bearing_deg"])
+        image_deviation = nearest_asymptote(partner["bearing_deg"])
+        chord_deviations.extend((state_deviation, image_deviation))
         branch_shifts.append(shift)
         branch_rows.append(
-            "<tr><td>%s</td><td>%+.2f</td><td>%+.2f</td><td>%.3f</td><td>%.4f</td></tr>"
+            "<tr><td>%s</td><td>%+.2f</td><td>%+.2f</td><td>%.3f</td>"
+            "<td>%.2f</td><td>%.2f</td><td>%.4f</td></tr>"
             % (
                 ARM_NAMES.get(entry["arm"], entry["arm"]),
                 entry["bearing_deg"],
                 partner["bearing_deg"],
                 shift,
+                state_deviation,
+                image_deviation,
                 entry["reach_m"],
             )
         )
@@ -114,6 +129,9 @@ def angle_rows(angles):
         if asymptotic_shifts
         else float("nan"),
         "branch_max_shift": max(branch_shifts) if branch_shifts else float("nan"),
+        "chord_max_deviation": max(chord_deviations)
+        if chord_deviations
+        else float("nan"),
         "asymptotic_count": len(asymptotic_rows),
         "branch_count": len(branch_rows),
         "state_asymptotic": state_asymptotic,
@@ -231,6 +249,7 @@ def compose(receipt, groups, angles):
         default=float("nan"),
     )
     grid_ratio = float(angles["lattice_spacing_m"]) / float(complete["spacing_m"])
+    state_asymptotic_field = angles["state"]["asymptotic"]
 
     return """<h2>Separatrix directions at the promoted coil-edit X-point</h2>
 <p>Re-runs the converged MAST {shot}/{slice_index} boundary-coil edit
@@ -269,35 +288,58 @@ it is a real property of the reconstructed field at that resolution, not of the 
 lattice. The state's null on the lattice is
 ({sx:.6f}, {sz:.6f}) m at {state_flux} Wb.</p>
 
+<p>The Hessian at the null has eigenvalues {eigenvalue_minor:+.6f} and
+{eigenvalue_major:+.6f} Wb/m^2, a ratio of {eigenvalue_ratio:.6f}, and its trace is
+{trace:+.3e} Wb/m^2. The eigenvectors are the principal axes at {axis_major:+.2f}{deg}
+and {axis_minor:+.2f}{deg}; they are orthogonal by construction and are <em>not</em> the
+separatrix asymptotes, which are the directions <code>d</code> with
+<code>d'Hd = 0</code>. In the eigenbasis that is
+<code>l1 cos^2 t + l2 sin^2 t = 0</code>, so each asymptote lies
+<strong>{half_angle:.4f}{deg}</strong> from the major axis — 45{deg} only when the two
+eigenvalues are equal and opposite — and the two asymptote lines open
+<strong>{separation:.4f}{deg}</strong> at the null.</p>
+
+<p>The trace fixes the local toroidal current density. With
+<code>Delta* psi = psi_RR - psi_R/R + psi_ZZ</code> and <code>psi_R = 0</code> at a
+null, <code>Delta* psi</code> there is the trace itself, and <code>mu0 J_phi = -Delta*
+psi</code> gives <strong>{current:.3e} A/m^2</strong>. A traceless Hessian would mean no
+local toroidal current and asymptotes at exactly 90{deg}; this one is not traceless, so
+the asymptotes open slightly wider than a right angle and the four arms are not evenly
+spaced.</p>
+
 <table>
-  <caption>The four asymptotic directions at the null, from the eigenvectors of the
+  <caption>The four separatrix asymptotes at the null, from the eigenvalue ratio of the
   poloidal-flux Hessian at each field's polished saddle, taken on the solve's lattice.
   Bearings are degrees from +R toward +Z.</caption>
-  <tr><th>direction</th><th>converged state</th><th>field of the currents</th>
+  <tr><th>asymptote</th><th>converged state</th><th>field of the currents</th>
       <th>difference</th></tr>
 {asymptotic_rows}
 </table>
 
-<p>The asymptotic directions are the four half-lines the separatrix approaches at the
-null, and they agree between the two fields to {asymptotic_max_shift:.6f}{deg} over
-{asymptotic_count} directions: the promotion does not rotate the X.</p>
+<p>The four asymptotes agree between the two fields to
+{asymptotic_max_shift:.6f}{deg} over {asymptotic_count} directions: the promotion does
+not rotate the X.</p>
 
 <table>
   <caption>The direction each assembled branch actually takes over its first one to two
   display cells, read as the chord of that branch between 10 and 20 mm of arc length
-  from the saddle, on each field's own trace. <code>reach</code> is how far each branch
-  runs from the null.</caption>
+  from the saddle, on each field's own trace. The last two columns give each
+  chord's angle to the nearest of the four asymptotes above, and
+  <code>reach</code> is how far each branch runs from the null.</caption>
   <tr><th>branch</th><th>converged state</th><th>field of the currents</th>
-      <th>difference</th><th>reach [m]</th></tr>
+      <th>state vs field</th><th>state vs asymptote</th><th>field vs asymptote</th>
+      <th>reach [m]</th></tr>
 {branch_rows}
 </table>
 
-<p>Over {branch_count} branches the traced directions agree to
-{branch_max_shift:.3f}{deg}. At 10 to 20 mm from a null the traced curve is still
-visibly rotated away from the asymptotic lines, which is why both measures are given:
-the asymptote is where the separatrix is going, and the chord is where the tracer has
-it. Each branch is identified across the two fields by its own reach, and the reaches
-agree to {reach_gap_mm:.3f} mm, so the pairing is of the same four structures.</p>
+<p>Over {branch_count} branches the traced chords agree between the two fields to
+{branch_max_shift:.3f}{deg}, and each chord lies within {chord_max_deviation:.2f}{deg}
+of the asymptote it belongs to. The traced curve therefore reaches the asymptotic
+direction within the first 10 to 20 mm and holds it: the two measures are consistent
+readings of the same four arms, taken once from the Hessian at the null and once from
+the assembled trace. Each branch is identified across the two fields by its own reach,
+and the reaches agree to {reach_gap_mm:.3f} mm, so the pairing is of the same four
+structures.</p>
 
 <h3>Why the halves differ</h3>
 <p>The promoted set is the union of two independent selections, which
@@ -353,9 +395,9 @@ those whose
 the field's.
   The left panel carries the locator for the {zoom:.1f} mm magnification on the right,
 which draws all four branches leaving the null in both fields: the closed lobe out and
-back, and both open legs. Dotted grey lines are the four asymptotic directions from the
-Hessian at the state's polished saddle, so a branch that runs away from its asymptote
-within the window is visible as such.
+back, and both open legs. Dotted grey lines are the four separatrix
+asymptotes, the directions d with d'Hd = 0 at the state's polished saddle, so a
+branch that runs away from its asymptote within the window is visible as such.
   The nearest promoted node is {nearest:.3f} mm from the X-point; the quartiles are
   {q25:.3f}, {q50:.3f} and {q75:.3f} mm.</figcaption>
 </figure>
@@ -445,6 +487,16 @@ needed; it says the mechanism by which a widened set would show up.</p>
         q50=receipt["promoted_distance_quantiles_mm"]["q50"],
         q75=receipt["promoted_distance_quantiles_mm"]["q75"],
         display_shift=max(display["bearing_shifts_deg"]),
+        eigenvalue_minor=state_asymptotic_field["eigenvalues"][0],
+        eigenvalue_major=state_asymptotic_field["eigenvalues"][1],
+        eigenvalue_ratio=state_asymptotic_field["eigenvalue_ratio"],
+        trace=state_asymptotic_field["hessian_trace_wb_per_m2"],
+        current=state_asymptotic_field["toroidal_current_density_a_per_m2"],
+        half_angle=state_asymptotic_field["asymptote_half_angle_deg"],
+        separation=state_asymptotic_field["asymptote_separation_deg"],
+        axis_major=state_asymptotic_field["axes"][0]["bearing_deg"],
+        axis_minor=state_asymptotic_field["axes"][1]["bearing_deg"],
+        chord_max_deviation=tables["chord_max_deviation"],
     )
 
 

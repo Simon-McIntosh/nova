@@ -59,6 +59,50 @@ def test_dry_run_prints_a_submission_line_for_every_rung(tmp_path: Path) -> None
     assert "--gres" not in cpu
 
 
+def test_dry_run_requests_four_cores_on_the_gpu_rungs(tmp_path: Path) -> None:
+    """A GPU rung is bound by its device, so it asks for fewer cores.
+
+    The H200 reservation holds 30 cores shared with the worker model's
+    server, so a GPU job that takes seven of them lets three concurrent jobs
+    fill it and compete with the serve.
+    """
+    result = _launch(
+        "--dry-run",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+    assert result.returncode == 0, result.stderr
+    lines = result.stdout.splitlines()
+    h200 = next(line for line in lines if line.startswith("RUNG=h200 "))
+    titan = next(line for line in lines if line.startswith("RUNG=titan "))
+    cpu = next(line for line in lines if line.startswith("RUNG=cpu "))
+
+    assert "--cpus-per-task=4" in h200
+    assert "--cpus-per-task=4" in titan
+    assert "--cpus-per-task=7" in cpu
+
+
+def test_dry_run_explicit_cores_override_every_rung(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--cores",
+        "2",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+    assert result.returncode == 0, result.stderr
+    lines = result.stdout.splitlines()
+    for rung in ("h200", "titan", "cpu"):
+        line = next(line for line in lines if line.startswith(f"RUNG={rung} "))
+        assert "--cpus-per-task=2" in line
+        assert "--cpus-per-task=4" not in line
+        assert "--cpus-per-task=7" not in line
+
+
 def _h200_submission_line(result: subprocess.CompletedProcess[str]) -> str:
     return next(
         line for line in result.stdout.splitlines() if line.startswith("RUNG=h200 ")

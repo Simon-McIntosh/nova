@@ -475,7 +475,9 @@ is 30 cores and no cards, so every submission states an explicit `--mem` (never
 `--mem=0`, which SLURM reads as the whole 1.5 TB and leaves the job pending on
 `Resources` while blocking the queue behind it) and sizes `--cpus-per-task`
 against the cores the serving jobs already hold
-(`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`). The **QoS** is what carries the
+(`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`); the GPU rungs of
+`scripts/nova_lane/run.sh` request 4 cores unless the brief names more. The
+**QoS** is what carries the
 cards and the memory, and it is the one that refuses:
 `sacctmgr show qos gpu_0003_grpa` reads `cpu=30,gres/gpu=4,mem=650G` with
 `DenyOnLimit`.

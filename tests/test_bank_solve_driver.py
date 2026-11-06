@@ -678,7 +678,7 @@ def test_uncertified_polish_resumes_adaptive_search(monkeypatch, invalid_trial):
             None,
             None,
             None,
-            max_steps=12,
+            max_steps=20,
         )
     )(state)
     jax.block_until_ready(result)
@@ -698,6 +698,6 @@ def test_uncertified_polish_resumes_adaptive_search(monkeypatch, invalid_trial):
         assert bool(result.converged[0])
         assert float(result.residual[0]) <= 1e-10
         np.testing.assert_array_equal(result.moments[0], [[1.5]])
-        np.testing.assert_array_equal(result.steps, [9])
-        np.testing.assert_array_equal(result.reads, [12])
+        np.testing.assert_array_equal(result.steps, [17])
+        np.testing.assert_array_equal(result.reads, [20])
     assert len(observed) == int(result.reads[0])

@@ -1631,14 +1631,14 @@ def solve_batch(
     at a non-smooth residual plateau above tolerance. Factor reuse is opt-in
     because extra iterations can cost more than skipped refactors.
 
-    Once every active lane has a valid residual at most 1e-8, eight full Newton
+    Once every active lane has a valid residual at most 1e-8, sixteen full Newton
     steps replace backtracking. Each lane retains its best valid state across
     those steps, then a separate fresh read certifies the retained states at
     ``tolerance``. Failed certificates resume adaptive search without repeating
     the polish. The update cap includes polishing; a short remaining budget
     stays adaptive. Certification reads count but do not consume an update.
     """
-    polish_steps = 8
+    polish_steps = 16
     near_root_band = 1e-8
     lanes, cells = moments[0].shape
     support = read_batch(

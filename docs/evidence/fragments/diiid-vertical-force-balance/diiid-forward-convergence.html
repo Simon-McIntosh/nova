@@ -1,0 +1,140 @@
+<section id="diiid-forward-convergence">
+<h2>DIII-D forward convergence: what stops each gate frame</h2>
+
+<p class="lede">All five DIII-D gate frames fail the registered <code>1e-5</code> fixed-point criterion, at
+relative residuals from <code>0.0273</code> to <code>4.28</code>. The banked receipts localise the failure
+to one mechanism on four frames and to a refusal upstream of the fixed point on the fifth. It is
+<b>not</b> an alternating-mask switch: the active set has stopped changing (mask difference zero) at the
+terminal promotion of every branch, and the relative residual is <i>bit-identical</i> across the last two
+promotions. The inner Newton&ndash;Krylov solve accepts no further promotion at that frozen mask, and the
+outer active-set loop then terminates on mask stability rather than on the residual criterion.</p>
+
+<h3>Per-frame mechanism</h3>
+
+<p>Trajectories below are the executed active-set trips recorded by the bank
+(<code>docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_partial_receipt.json</code>),
+quoted per promotion in the order they ran. The <i>discriminating measurement</i> column is the one
+number that separates the mechanism from the alternatives.</p>
+
+<table>
+<thead><tr>
+<th>frame</th><th>branch</th><th>seed</th><th>per-promotion relative residual</th><th>mask difference</th><th>terminal class</th><th>discriminating measurement</th>
+</tr></thead>
+<tbody>
+<tr><td>179</td><td>diverted</td><td>bank cold portfolio</td><td>0.418096 &rarr; 0.418096</td><td>13 &rarr; 0</td><td>contraction stall (active-set stagnation at a frozen mask)</td><td>residual change over the terminal promotion is exactly <code>0.0</code> while the mask difference is <code>0</code>; the mask-switch hypothesis predicts a repeating non-zero mask difference and is falsified</td></tr>
+<tr><td>179</td><td>limited</td><td>bank cold portfolio</td><td>not banked (the bank returns only the diverted receipt)</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.027262</code>, 15.3&times; below the diverted terminal</td></tr>
+<tr><td>44</td><td>diverted</td><td>bank cold portfolio</td><td>4.275696 &rarr; 4.275696</td><td>75 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>residual change <code>0.0</code> at mask difference <code>0</code>, from the largest seed mask disagreement of the cohort</td></tr>
+<tr><td>44</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.197003</code>, 21.7&times; below the diverted terminal</td></tr>
+<tr><td>144</td><td>both</td><td>bank cold portfolio</td><td>&mdash; (no promotion ran)</td><td>&mdash;</td><td>refusal</td><td><code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; the failure precedes any fixed-point promotion</td></tr>
+<tr><td>146</td><td>diverted</td><td>bank cold portfolio</td><td>0.128182 &rarr; 0.222019 &rarr; 0.065149 &rarr; 0.054962 &rarr; 0.054962</td><td>27 &rarr; 40 &rarr; 1 &rarr; 0 &rarr; 0</td><td>contraction stall (frozen-mask stagnation after the mask settles)</td><td>the mask settles (difference <code>1 &rarr; 0</code>) and the residual stops to <code>1e-17</code> of its previous value</td></tr>
+<tr><td>146</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.063500</code>, and the seed achieved the <i>diverted</i> topology</td></tr>
+<tr><td>137</td><td>diverted</td><td>bank cold portfolio</td><td>0.129858 &rarr; 0.111397 &rarr; 0.067005 &rarr; 0.062369 &rarr; 0.062369</td><td>24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>the mask difference falls to <code>0</code> and the residual repeats bit-identically; cycle damping was never activated (0 at every trip)</td></tr>
+<tr><td>137</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.056830</code>, also achieving the diverted topology</td></tr>
+</tbody>
+</table>
+
+<p>No frame shows a period-2 cycle or a divergence. Cycle damping is <code>0</code> at every trip of every
+branch, so the descent is neither being damped nor rescued by damping. The residuals are strictly above
+tolerance at every terminal and none of the five satisfies the registered criterion.</p>
+
+<h3>The branch decision on frames 179 and 44</h3>
+
+<p>Both frames run two seeds from the bank's own cold portfolio and record both terminal residuals. The
+lower-residual terminal is discarded, and the rule that discards it is in the benchmark itself, not in a
+policy document:</p>
+
+<ul>
+<li><code>benchmarks/diiid_forward_gs_match.py:2381</code> binds
+<code>diverted = receipts[TopologyClass.DIVERTED]</code> &mdash; the limited receipt is built and then
+never returned.</li>
+<li><code>benchmarks/diiid_forward_gs_match.py:2406</code> accepts a branch only when
+<code>branches["diverted"]["converged"] and branches["diverted"]["topology_consistent"]</code>.</li>
+<li><code>benchmarks/diiid_forward_gs_match.py:2437</code> returns <code>diverted.equilibrium</code>
+unconditionally, so the limited seed's equilibrium cannot reach the gate however low its residual.</li>
+</ul>
+
+<table>
+<thead><tr><th>frame</th><th>diverted terminal</th><th>limited terminal</th><th>ratio</th><th>limited achieved topology</th><th>does the limited terminal touch the wall?</th><th>was the limited residual still falling?</th></tr></thead>
+<tbody>
+<tr><td>179</td><td>0.418096</td><td>0.027262</td><td>15.3&times;</td><td>diverted (topology-inconsistent with its seed)</td><td>No. The terminal read is diverted, so the boundary closes on an X-point rather than on the limiter.</td><td>Not measured: the bank executes the limited seed for two trips and persists only its terminal. Its residual is below the diverted one at the same trip count.</td></tr>
+<tr><td>44</td><td>4.275696</td><td>0.197003</td><td>21.7&times;</td><td>diverted (topology-inconsistent with its seed)</td><td>No, on the same topology read.</td><td>Not measured, on the same record.</td></tr>
+</tbody>
+</table>
+
+<p><b>Verdict.</b> The limited state is <i>not</i> a distinct limited root the bank should have preferred:
+on both frames the limited seed's own terminal topology is <i>diverted</i>. What the bank discards is a
+lower-residual <i>diverted</i> terminal reached from the limited seed, at 15.3&times; and 21.7&times; below the
+terminal it keeps. It is a lower stall of the same topology, not a root of the other branch, and it is
+itself above the <code>1e-5</code> criterion on both frames. Preferring it would improve the residual
+without converging anything; the mechanism above is what has to be fixed.</p>
+
+<h3>Panels</h3>
+
+<p>Each panel draws the bank's terminal diverted field as line contours and the EFIT label field at the
+same gauge-aligned levels, with both null sets (solid triangle: solved axis; filled cross: solved saddle;
+hollow markers: the label's own nulls) and the governed first wall. The caption carries the terminal
+residual and the converged flag.</p>
+
+<figure>
+<img src="/nova/figures/diiid-forward-convergence/frame-179-flux-contours.svg" alt="frame 179 terminal diverted flux contours against the EFIT label, residual 4.18e-1">
+<figcaption>Frame 179. The solved column is displaced and flattened against the label; diverted terminal residual <code>4.181e-01</code>, converged false.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-forward-convergence/frame-44-flux-contours.svg" alt="frame 44 terminal diverted flux contours against the EFIT label, residual 4.28e+0">
+<figcaption>Frame 44. The solved surfaces are shifted inward and the separatrix closes far short of the label boundary; diverted terminal residual <code>4.276e+00</code>, converged false.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-forward-convergence/frame-144-flux-contours.svg" alt="frame 144 EFIT label contours only, the solve refused before a topology read">
+<figcaption>Frame 144. No solved field exists to draw: the solve refuses at axis identification, so the panel carries the label contours, the label's nulls and the wall only.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-forward-convergence/frame-146-flux-contours.svg" alt="frame 146 terminal diverted flux contours against the EFIT label, residual 5.50e-2">
+<figcaption>Frame 146. A contracted but displaced column; diverted terminal residual <code>5.496e-02</code>, converged false, and the diverted seed itself achieved the limited topology.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-forward-convergence/frame-137-flux-contours.svg" alt="frame 137 terminal diverted flux contours against the EFIT label, residual 6.24e-2">
+<figcaption>Frame 137. The closest of the cohort and still two decades above tolerance; diverted terminal residual <code>6.237e-02</code>, converged false.</figcaption>
+</figure>
+
+<h3>Recommended fix</h3>
+
+<p><b>Module:</b> <code>nova/equilibrium/fixed_point.py</code>, the active-set loop in
+<code>_active_set_newton_krylov</code> and its <code>reconcile</code> reduction.</p>
+
+<p><b>Change:</b> make the outer loop's terminal condition <i>fail closed</i> on the residual. Today
+<code>settled</code> and <code>stagnated</code> (the two conditions that stop the loop at a stable mask) are
+reachable while <code>selected_residual &gt; convergence_tolerance</code>, because both require only
+<code>selected_difference == 0</code> and zero accepted promotions. Two edits, in this order:</p>
+
+<ol>
+<li><b>Carry the inner step-acceptance receipt.</b> Publish
+<code>attempted_newton_promotions</code> and <code>accepted_newton_promotions</code> per trip on
+<code>FixedPointResult</code> and through <code>ForwardSolveReceipt</code>. The banked receipts do not
+record them, so the reason the frozen-mask step is refused is currently invisible; this node could not
+measure it.</li>
+<li><b>Distinguish a refused step from a converged mask.</b> When a trip ends with
+<code>mask difference == 0</code>, zero accepted promotions and a residual above tolerance, return a
+distinct termination reason (<code>ACTIVE_SET_STEP_REFUSED</code>) and keep the loop alive to its trip
+budget rather than declaring settlement. A branch that exhausts the budget at a frozen mask must report
+the residual it stalled at, which is what the gate already reads.</li>
+</ol>
+
+<p><b>Frames it should converge:</b> 137 and 179 first &mdash; they are already diverted-consistent and the
+smallest residuals of the cohort (<code>6.24e-2</code> and &mdash; on its limited seed &mdash;
+<code>2.73e-2</code>) &mdash; then 44 and 146. Frame 144 is a separate defect upstream of the fixed point:
+its axis identification returns no qualified candidate, and no change to the active-set loop can help it.</p>
+
+<p><b>Carried review findings.</b> Four findings from the separatrix-redraw review ride with this fix and
+are not addressed here (this node is read-only on the benchmark): the <code>cohort_match_summary.png</code>
+overlay draws its three series with no legend or direct label
+(<code>benchmarks/diiid_forward_gs_match.py:3907</code>); <code>displacement_decomposition.png</code>
+draws landmark displacement segments that its legend does not name, and draws frame 144 with no EFIT
+landmarks at all (<code>benchmarks/diiid_forward_gs_match.py:3961</code>,
+<code>benchmarks/diiid_forward_gs_match.py:3968</code>); and <code>rebuild_frame_separatrix</code> calls the
+private <code>display_flux._branches</code> (<code>benchmarks/diiid_forward_gs_match.py:1992</code>), which
+should be given a public assembly entry point.</p>
+</section>

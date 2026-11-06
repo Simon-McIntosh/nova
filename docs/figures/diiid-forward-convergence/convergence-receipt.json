@@ -1,0 +1,404 @@
+{
+  "diverted_branch_rule": {
+    "sites": [
+      "benchmarks/diiid_forward_gs_match.py:2381",
+      "benchmarks/diiid_forward_gs_match.py:2406",
+      "benchmarks/diiid_forward_gs_match.py:2437"
+    ],
+    "statement": "line 2381 binds `diverted = receipts[TopologyClass.DIVERTED]`; line 2406 accepts a branch only when `branches['diverted']['converged'] and branches['diverted']['topology_consistent']`; line 2437 returns `diverted.equilibrium` unconditionally. The limited seed's receipt is built and discarded, so no limited root can be selected however low its residual."
+  },
+  "frames": {
+    "137": {
+      "achieved_current_a": 1629095.3674316406,
+      "branches": {
+        "diverted": {
+          "achieved_class": "diverted",
+          "active_set_trips": 5,
+          "converged": false,
+          "cycle_damping_activations": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "finite": true,
+          "iterations": 5,
+          "mask_differences": [
+            24,
+            20,
+            9,
+            9,
+            0
+          ],
+          "promotion_trajectory": [
+            0.12985789283698176,
+            0.1113965026973562,
+            0.06700522958710774,
+            0.06236882877710906,
+            0.06236882877710906
+          ],
+          "requested_class": "diverted",
+          "residual": 0.06236882877710906,
+          "terminal": {
+            "evidence": {
+              "mask_difference_at_terminal_promotion": 0,
+              "note": "the active set stops changing (mask difference 0) while the relative residual does not move at all, so the loop ends on mask stability rather than on the residual criterion",
+              "residual_change_over_last_promotion": 0.0,
+              "terminal_residual": 0.06236882877710906
+            },
+            "subtype": "active-set stagnation at a frozen mask",
+            "terminal_class": "contraction stall"
+          },
+          "topology_consistent": true
+        },
+        "limited": {
+          "achieved_class": "diverted",
+          "active_set_trips": 2,
+          "converged": false,
+          "cycle_damping_activations": [],
+          "finite": true,
+          "iterations": 2,
+          "mask_differences": [],
+          "promotion_trajectory": [],
+          "requested_class": "limited",
+          "residual": 0.05683004764453356,
+          "terminal": {
+            "evidence": {
+              "achieved_class": "diverted",
+              "terminal_residual": 0.05683004764453356
+            },
+            "terminal_class": "not measured: the bank returns the diverted receipt"
+          },
+          "topology_consistent": false
+        }
+      },
+      "cold_seed": {
+        "centroid_rz_m": [
+          1.7231301069259644,
+          0.001690587610937655
+        ],
+        "diverted_saddle_rz_m": [
+          1.2897911071777344,
+          -1.1884135007858276
+        ],
+        "entry_point": "ForwardProfile.cold_seed_portfolio",
+        "label_seed_identity": false,
+        "stored_flux_samples_used": false
+      },
+      "converged": false,
+      "finite": true,
+      "frame": 137,
+      "pseudo_wall_expansion": 0.02,
+      "residual_tolerance": 1e-05,
+      "selected_class": null,
+      "selection_reason": "direct diverted receipt is not qualification-valid",
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "solve_exception_class": null,
+      "solver_termination": "public branch selector found no convergence-qualified diverted root",
+      "target_current_a": 1629095.3674316406,
+      "time_ms": 3000.0
+    },
+    "144": {
+      "achieved_current_a": null,
+      "branches": {
+        "diverted": {
+          "active_set_trips": 0,
+          "cycle_damping_activations": [],
+          "mask_differences": [],
+          "promotion_trajectory": [],
+          "terminal": {
+            "evidence": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
+            "terminal_class": "refusal"
+          }
+        },
+        "limited": {
+          "active_set_trips": null,
+          "cycle_damping_activations": [],
+          "mask_differences": [],
+          "promotion_trajectory": [],
+          "terminal": {
+            "evidence": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
+            "terminal_class": "refusal"
+          }
+        }
+      },
+      "cold_seed": null,
+      "converged": false,
+      "finite": false,
+      "frame": 144,
+      "pseudo_wall_expansion": 0.02,
+      "residual_tolerance": 1e-05,
+      "selected_class": null,
+      "selection_reason": null,
+      "shot": "d3d_shot_001554e054.parquet",
+      "solve_exception_class": "NoQualifiedAxisError",
+      "solver_termination": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component",
+      "target_current_a": null,
+      "time_ms": 3240.0
+    },
+    "146": {
+      "achieved_current_a": 1623563.1957054138,
+      "branches": {
+        "diverted": {
+          "achieved_class": "limited",
+          "active_set_trips": 5,
+          "converged": false,
+          "cycle_damping_activations": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "finite": true,
+          "iterations": 5,
+          "mask_differences": [
+            27,
+            40,
+            1,
+            0,
+            0
+          ],
+          "promotion_trajectory": [
+            0.12818170822460778,
+            0.22201860587138092,
+            0.0651490274069113,
+            0.054961955890201634,
+            0.054961955890201634
+          ],
+          "requested_class": "diverted",
+          "residual": 0.054961955890201634,
+          "terminal": {
+            "evidence": {
+              "mask_difference_at_terminal_promotion": 0,
+              "note": "the active set stops changing (mask difference 0) while the relative residual does not move at all, so the loop ends on mask stability rather than on the residual criterion",
+              "residual_change_over_last_promotion": 0.0,
+              "terminal_residual": 0.054961955890201634
+            },
+            "subtype": "active-set stagnation at a frozen mask",
+            "terminal_class": "contraction stall"
+          },
+          "topology_consistent": false
+        },
+        "limited": {
+          "achieved_class": "diverted",
+          "active_set_trips": 2,
+          "converged": false,
+          "cycle_damping_activations": [],
+          "finite": true,
+          "iterations": 2,
+          "mask_differences": [],
+          "promotion_trajectory": [],
+          "requested_class": "limited",
+          "residual": 0.06349959302492349,
+          "terminal": {
+            "evidence": {
+              "achieved_class": "diverted",
+              "terminal_residual": 0.06349959302492349
+            },
+            "terminal_class": "not measured: the bank returns the diverted receipt"
+          },
+          "topology_consistent": false
+        }
+      },
+      "cold_seed": {
+        "centroid_rz_m": [
+          1.718023657798767,
+          -0.001327185658738017
+        ],
+        "diverted_saddle_rz_m": [
+          1.2929953336715698,
+          -1.1911089420318604
+        ],
+        "entry_point": "ForwardProfile.cold_seed_portfolio",
+        "label_seed_identity": false,
+        "stored_flux_samples_used": false
+      },
+      "converged": false,
+      "finite": true,
+      "frame": 146,
+      "pseudo_wall_expansion": 0.02,
+      "residual_tolerance": 1e-05,
+      "selected_class": null,
+      "selection_reason": "direct diverted receipt is not qualification-valid",
+      "shot": "d3d_shot_002495e835.parquet",
+      "solve_exception_class": null,
+      "solver_termination": "public branch selector found no convergence-qualified diverted root",
+      "target_current_a": 1623563.1957054138,
+      "time_ms": 3180.0
+    },
+    "179": {
+      "achieved_current_a": 1279650.1007080078,
+      "branches": {
+        "diverted": {
+          "achieved_class": "diverted",
+          "active_set_trips": 2,
+          "converged": false,
+          "cycle_damping_activations": [
+            0,
+            0
+          ],
+          "finite": true,
+          "iterations": 2,
+          "mask_differences": [
+            13,
+            0
+          ],
+          "promotion_trajectory": [
+            0.41809606346245703,
+            0.41809606346245703
+          ],
+          "requested_class": "diverted",
+          "residual": 0.41809606346245703,
+          "terminal": {
+            "evidence": {
+              "mask_difference_at_terminal_promotion": 0,
+              "note": "the active set stops changing (mask difference 0) while the relative residual does not move at all, so the loop ends on mask stability rather than on the residual criterion",
+              "residual_change_over_last_promotion": 0.0,
+              "terminal_residual": 0.41809606346245703
+            },
+            "subtype": "active-set stagnation at a frozen mask",
+            "terminal_class": "contraction stall"
+          },
+          "topology_consistent": true
+        },
+        "limited": {
+          "achieved_class": "diverted",
+          "active_set_trips": 2,
+          "converged": false,
+          "cycle_damping_activations": [],
+          "finite": true,
+          "iterations": 2,
+          "mask_differences": [],
+          "promotion_trajectory": [],
+          "requested_class": "limited",
+          "residual": 0.02726176083303048,
+          "terminal": {
+            "evidence": {
+              "achieved_class": "diverted",
+              "terminal_residual": 0.02726176083303048
+            },
+            "terminal_class": "not measured: the bank returns the diverted receipt"
+          },
+          "topology_consistent": false
+        }
+      },
+      "cold_seed": {
+        "centroid_rz_m": [
+          1.7736438512802124,
+          -0.030925704166293144
+        ],
+        "diverted_saddle_rz_m": [
+          1.5306249856948853,
+          -0.9479644298553467
+        ],
+        "entry_point": "ForwardProfile.cold_seed_portfolio",
+        "label_seed_identity": false,
+        "stored_flux_samples_used": false
+      },
+      "converged": false,
+      "finite": true,
+      "frame": 179,
+      "pseudo_wall_expansion": 0.02,
+      "residual_tolerance": 1e-05,
+      "selected_class": null,
+      "selection_reason": "direct diverted receipt is not qualification-valid",
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "solve_exception_class": null,
+      "solver_termination": "public branch selector found no convergence-qualified diverted root",
+      "target_current_a": 1279650.1007080078,
+      "time_ms": 3740.0
+    },
+    "44": {
+      "achieved_current_a": 1182769.0064013004,
+      "branches": {
+        "diverted": {
+          "achieved_class": "limited",
+          "active_set_trips": 2,
+          "converged": false,
+          "cycle_damping_activations": [
+            0,
+            0
+          ],
+          "finite": true,
+          "iterations": 2,
+          "mask_differences": [
+            75,
+            0
+          ],
+          "promotion_trajectory": [
+            4.275695785485873,
+            4.275695785485873
+          ],
+          "requested_class": "diverted",
+          "residual": 4.275695785485873,
+          "terminal": {
+            "evidence": {
+              "mask_difference_at_terminal_promotion": 0,
+              "note": "the active set stops changing (mask difference 0) while the relative residual does not move at all, so the loop ends on mask stability rather than on the residual criterion",
+              "residual_change_over_last_promotion": 0.0,
+              "terminal_residual": 4.275695785485873
+            },
+            "subtype": "active-set stagnation at a frozen mask",
+            "terminal_class": "contraction stall"
+          },
+          "topology_consistent": false
+        },
+        "limited": {
+          "achieved_class": "diverted",
+          "active_set_trips": 2,
+          "converged": false,
+          "cycle_damping_activations": [],
+          "finite": true,
+          "iterations": 2,
+          "mask_differences": [],
+          "promotion_trajectory": [],
+          "requested_class": "limited",
+          "residual": 0.19700278756964593,
+          "terminal": {
+            "evidence": {
+              "achieved_class": "diverted",
+              "terminal_residual": 0.19700278756964593
+            },
+            "terminal_class": "not measured: the bank returns the diverted receipt"
+          },
+          "topology_consistent": false
+        }
+      },
+      "cold_seed": {
+        "centroid_rz_m": [
+          1.7179585695266724,
+          -0.050308577716350555
+        ],
+        "diverted_saddle_rz_m": [
+          1.5306249856948853,
+          -1.0527421236038208
+        ],
+        "entry_point": "ForwardProfile.cold_seed_portfolio",
+        "label_seed_identity": false,
+        "stored_flux_samples_used": false
+      },
+      "converged": false,
+      "finite": true,
+      "frame": 44,
+      "pseudo_wall_expansion": 0.02,
+      "residual_tolerance": 1e-05,
+      "selected_class": null,
+      "selection_reason": "direct diverted receipt is not qualification-valid",
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "solve_exception_class": null,
+      "solver_termination": "public branch selector found no convergence-qualified diverted root",
+      "target_current_a": 1182769.0064013004,
+      "time_ms": 1080.0
+    }
+  },
+  "measurement": "per-promotion forward descent on both topology branches from the bank's cold seed, with the branch rule that keeps the diverted state",
+  "sources": {
+    "bank_run_elapsed_seconds": 2406,
+    "measurement": null,
+    "partial_receipt": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_partial_receipt.json",
+    "receipt": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json"
+  },
+  "tolerance": 1e-05
+}

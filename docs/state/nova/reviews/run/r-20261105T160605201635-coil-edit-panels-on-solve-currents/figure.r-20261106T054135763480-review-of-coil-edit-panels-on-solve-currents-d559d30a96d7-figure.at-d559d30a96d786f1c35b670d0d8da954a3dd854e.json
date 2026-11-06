@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "attachment_note": "The five attachment paths image-1.png, image-3.png, image-5.png, image-7.png and image-9.png are byte-identical to one another (md5 8e886777ab82df0c34cf88dfdfe69f55, 1400x608) and render the same picture as the five repository PNGs named above; those five are themselves byte-identical to one another (md5 3aced6c991929100c3f2ba87a8a66598, 1484x644). Every attached file was opened. The visual verdict therefore covers one rendered artifact, published at five repository paths.",
-  "completed_at": "",
+  "completed_at": "2026-11-06T05:58:49.866Z",
   "dispatched_at": "2026-11-06T05:46:45Z",
   "figures_reviewed": [
     "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
@@ -61,6 +61,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-06T05:58:53.975267+00:00",
+  "timestamp": "2026-11-06T06:20:50.946056+00:00",
   "total": null
 }

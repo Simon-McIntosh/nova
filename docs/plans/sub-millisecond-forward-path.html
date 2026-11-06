@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="169">
+<meta name="plan-version" content="170">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -601,7 +601,10 @@
     <div class="r-comment-body"><p>Figure review of r-20261106T054124433158-bank-linear-solve at head 9f2e51ff050f8a23030e9808f7a308cbbd3304fc records a parsed read-only rubric record for docs/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg: all six items pass and no finding blocks. The two non-blocking findings are the legend's filled-square swatch for "Precision miss" while one-lane misses render as red rings, and the caption's closing producer-process sentences. Every marker's rendered x was decoded from the PNG and reconciles with the fragment's wall table to within one percent.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T064850727420-review-of-bank-solve-trace-1e446dd29abe-figure" data-who="reckon-build" data-when="2026-11-06T07:01:47.481Z">
-    <div class="r-comment-body"><p>figure review of r-20261106T054125594099-bank-solve-trace at head 1e446dd29abeb7c0e7844dbfff9d307fa9e09f44 — six of six rubric items pass on the rendered PNG, marker positions reconcile with the record&#x27;s device table at every one of the seventeen groups, and one non-blocking finding records that the shared 0-450 ms linear axis compresses the sub-6 ms groups to within 27 px of the origin.</p></div>
+    <div class="r-comment-body"><p>figure review of r-20261106T054125594099-bank-solve-trace at head 1e446dd29abeb7c0e7844dbfff9d307fa9e09f44 — six of six rubric items pass on the rendered PNG, marker positions reconcile with the record's device table at every one of the seventeen groups, and one non-blocking finding records that the shared 0-450 ms linear axis compresses the sub-6 ms groups to within 27 px of the origin.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T070015362785-bank-newton-krylov" data-who="reckon-build" data-when="2026-11-06T08:24:02Z">
+    <div class="r-comment-body"><p>&lt;a href=&quot;/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-krylov.html#bank-newton-krylov-landing&quot;&gt;Block-GMRES evidence&lt;/a&gt;: bank Newton steps use equilibrated 3x3-block GMRES with measured preconditioned condition/residual bounds. Sixteen-slice linear device time falls 643.001 to 67.142 ms and whole solve 2318.207 to 1594.793 ms; every lane meets fresh and paired/oracle precision. Seven-file Sirius head 53 passed, 5 skipped, one shared failure versus base 48 passed, 5 skipped, three failures; no added failure and carried-factor reuse/rebuild passes both arms; both unpreconditioned physical-update controls fail.</p></div>
 </div>
 </section>
 </main>

@@ -4,6 +4,7 @@ import argparse
 from html import escape
 import itertools
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -52,6 +53,23 @@ def main():
         ("limited", "diverted"), ("trial", "converged")
     ):
         assert f"CERTIFICATE {kind} {state}" in physical
+    physical_rows = re.findall(
+        r"CERTIFICATE (limited|diverted) (trial|converged)\n"
+        r"CANDIDATES (\[[^\n]+\]) SELECTED (\d+) FORM_MAX_ABSOLUTE ([^\n]+)",
+        physical,
+    )
+    assert len(physical_rows) == 4
+    physical_table = [
+        [
+            kind,
+            state,
+            ", ".join(str(i) for i, flag in enumerate(json.loads(flags)) if flag)
+            or "none",
+            int(selected),
+            f"{float(error):.6g}",
+        ]
+        for kind, state, flags, selected, error in physical_rows
+    ]
     cache_keys = {}
     for arm, process in captures:
         log = (args.run / f"device-{arm}-{process}.log").read_text()
@@ -110,7 +128,8 @@ def main():
         }
         reduction = 100 * (1 - np.mean(per_read["head"]) / np.mean(per_read["base"]))
         summaries.append(
-            f"At {lanes} slices, mean wall per batch read falls {reduction:.2f}%: "
+            f"At {lanes} {'slice' if lanes == 1 else 'slices'}, "
+            f"mean wall per batch read falls {reduction:.2f}%: "
             f"base {min(per_read['base']):.2f}–{max(per_read['base']):.2f} ms, "
             f"head {min(per_read['head']):.2f}–{max(per_read['head']):.2f} ms."
         )
@@ -213,6 +232,16 @@ def main():
         "in a scratch archive fails that fixture with EXIT=1. The "
         "structural regression reproduces at base: "
         "“candidate slots are evaluated by a sequential scan”; the head passes.</p>\n"
+        + table(
+            [
+                "Geometry",
+                "State",
+                "Admitted slots",
+                "Selected slot",
+                "Max form absolute gap",
+            ],
+            physical_table,
+        )
         + table(
             ["Suite arm", "Failure count", "Added failures", "Complete"],
             [

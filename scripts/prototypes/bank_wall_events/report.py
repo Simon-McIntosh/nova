@@ -4,6 +4,7 @@ import argparse
 from html import escape
 import json
 from pathlib import Path
+import re
 
 import numpy as np
 
@@ -41,14 +42,28 @@ def main():
     assert negative.rstrip().endswith("EXIT=1")
     assert (
         "FAILED tests/test_wall_events_batched.py::"
-        "test_seed_brackets_and_candidate_order"
-        in negative
+        "test_seed_brackets_and_candidate_order" in negative
     )
     assert (
         "tests/test_wall_events_batched.py::test_seed_brackets_and_candidate_order"
         not in suites["head"]["failure_ids"]
     )
     (args.run / "suites.json").write_text(json.dumps(suites, indent=2))
+    physical_log = (args.run / "head-test_wall_events_batched.log").read_text()
+    physical = {
+        (kind, state): json.loads(errors)
+        for kind, state, errors in re.findall(
+            r"WALL_RELATIVE (limited|diverted) (trial|converged) (\[[^\]]+\])",
+            physical_log,
+        )
+    }
+    assert set(physical) == {
+        (kind, state)
+        for kind in ("limited", "diverted")
+        for state in ("trial", "converged")
+    }, physical
+    physical_error = np.max(list(physical.values()), axis=0)
+    assert np.all(physical_error <= 1e-13), physical
     rows, measurements = [], []
     for index, lanes in enumerate((1, 16)):
         before, after = (captures[arm][str(lanes)] for arm in ("base", "head"))
@@ -94,12 +109,20 @@ def main():
         measurements.append(row)
         print("PAIRED", json.dumps(row), flush=True)
     (args.run / "paired.json").write_text(json.dumps(measurements, indent=2))
-    deltas = " ".join(
-        f"At {row['lanes']} slices, direct whole-solve saving is "
-        f"{row['whole_solve_saved_ms']:.3f} ms and attributed wall-event saving is "
-        f"{row['attributed_saved_ms']:.3f} ms."
-        for row in measurements
-    )
+    deltas = []
+    for row in measurements:
+        saved = row["whole_solve_saved_ms"]
+        outcome = "decreases" if saved >= 0 else "increases"
+        deltas.append(
+            f"At {row['lanes']} slices the direct whole-solve wall {outcome} by "
+            f"{abs(saved):.3f} ms; attributed wall-event saving is "
+            f"{row['attributed_saved_ms']:.3f} ms."
+        )
+        if saved < 0:
+            deltas.append(
+                "This pair demonstrates no whole-solve speedup at that width."
+            )
+    deltas = " ".join(deltas)
     base_revision = captures["base"]["1"]["revision"]
     head_revision = captures["head"]["1"]["revision"]
     args.fragment.write_text(
@@ -138,7 +161,9 @@ def main():
         '<p id="bank-wall-events-tests">The limited and diverted 550-cell trial and '
         "converged states match an independent edge-by-edge polish within 1e-13 "
         "relative for points and finite values, with identical nonfinite masks and "
-        "candidate ordering. The controlled quadratic case matches exactly; removing "
+        f"candidate ordering. Maximum relative point error is {physical_error[0]:.3g} "
+        f"and value error is {physical_error[1]:.3g}. "
+        "The controlled quadratic case matches exactly; removing "
         "the first edge’s bracket clip in a scratch archive fails "
         "<code>test_seed_brackets_and_candidate_order</code> with point error 0.675 "
         "(negative log EXIT=1). The structural check fails at base with "
@@ -150,6 +175,10 @@ def main():
         "<code>test_support_read</code>, <code>test_tracked_read</code>, "
         "<code>test_bank_solve_driver</code> and "
         "<code>test_bank_solve_cycle</code>.</p>\n"
+        "<p>The initial 64 GiB CPU allocation interrupted two processes without "
+        "test summaries. Their logs are retained beside a serial 192 GiB recovery "
+        "of incomplete files; already completed file results are retained. "
+        "The paired suite receipts refer only to completed per-file runs.</p>\n"
         "<p>Raw receipts, traces, compiler provenance, kernel ledgers and logs: "
         f"<code>{escape(str(args.run))}</code>.</p>\n</section>\n"
     )

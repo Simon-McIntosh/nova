@@ -102,7 +102,7 @@ def run_file(tree, revision, name, label, run, scratch, selection=None):
         result = subprocess.run(
             command, cwd=tree, env=environment, stdout=log, stderr=subprocess.STDOUT
         )
-        log.write(f"EXIT={result.returncode}\n")
+        log.write(f"\nEXIT={result.returncode}\n")
     print("FILE_COMPLETE", label, name, result.returncode, flush=True)
     return result.returncode
 

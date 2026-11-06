@@ -5,10 +5,12 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+import inspect
 import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+import re
 import sys
 from typing import NamedTuple
 from types import SimpleNamespace
@@ -534,13 +536,29 @@ def _arnoldi_least_squares_reference(matrix, right, columns):
     return basis[:, :columns] @ coefficients
 
 
-def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
-    """A cap that is not a multiple of the restart width must stop at the cap.
+def _restart_width(size):
+    """The Arnoldi restart width ``_block_gmres`` sets for a system of ``size``.
 
-    The cap stops a width-20 cycle after five columns, so the fifteen
-    unwritten columns must stay out of the least-squares. The update is
-    compared with an independent float64 Arnoldi cycle over those five
-    written columns.
+    The production function caps one cycle at ``min(20, right.size)``. Reading
+    that literal from its own source keeps this test tracking the module
+    rather than duplicating the number, and fails loudly if the form changes.
+    """
+    pattern = re.compile(r"width = min\((\d+), right\.size\)")
+    match = pattern.search(inspect.getsource(support_read._block_gmres))
+    assert match is not None, (
+        "the restart width is no longer a literal min(<int>, right.size) in "
+        "_block_gmres; update this derivation before trusting the cap"
+    )
+    return min(int(match.group(1)), size)
+
+
+def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
+    """A cap that cuts a cycle part-way must stop at the cap.
+
+    One cycle writes the restart width, so a cap at a quarter of that width
+    leaves most of the columns unwritten and those must stay out of the
+    least-squares. The update is compared with an independent float64 Arnoldi
+    cycle over the written columns.
     """
     size = 24
     matrix = jnp.eye(size, dtype=jnp.float64)
@@ -552,13 +570,31 @@ def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
         (pattern, jnp.full(size - pattern.size, 0.4, dtype=jnp.float64))
     )
     inverse, indices = support_read._block_preconditioner(matrix)
-    solution, condition, residual, steps = support_read._block_gmres(
-        matrix, right, inverse, indices, max_iterations=5
+    width = _restart_width(size)
+    cap = max(1, width // 4)
+    # The reference below applies the raw matrix; it agrees with the
+    # preconditioned run only because this matrix's block inverse is an
+    # orthogonal permutation rather than a general inverse.
+    applied = np.stack(
+        [
+            np.asarray(support_read._apply_block_inverse(inverse, indices, vector))
+            for vector in jnp.eye(size, dtype=jnp.float64)
+        ]
     )
-    reference = _arnoldi_least_squares_reference(matrix, right, 5)
+    assert np.array_equal(np.unique(applied), np.array([0.0, 1.0]))
+    assert np.array_equal(applied.sum(axis=1), np.ones(size))
+    assert np.array_equal(applied.sum(axis=0), np.ones(size))
+    solution, condition, residual, steps = support_read._block_gmres(
+        matrix, right, inverse, indices, max_iterations=cap
+    )
+    reference = _arnoldi_least_squares_reference(matrix, right, cap)
     error = float(jnp.linalg.norm(solution - reference) / jnp.linalg.norm(reference))
     print(
         "CAP_UPDATE",
+        "width",
+        width,
+        "cap",
+        cap,
         "steps",
         int(steps),
         "error",
@@ -567,7 +603,7 @@ def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
         float(residual),
         flush=True,
     )
-    assert int(steps) == 5 and int(steps) % min(20, size) != 0
+    assert int(steps) == cap and cap % width != 0
     assert error <= 1e-10
 
 

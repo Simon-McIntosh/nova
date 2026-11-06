@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="185">
+<meta name="plan-version" content="186">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -650,6 +650,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d" data-who="reckon-build" data-when="2026-11-06T10:57:00.863Z">
     <div class="r-comment-body"><p>review of bank-krylov-cleanup at 9c5a105b5..3aa79b52c scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 19, reuse 17, adds no failure over the base arm, and files four non-blocking findings; the Arnoldi column fix is correct and its capped-cycle guard reddens at 5.642e-3 under the recorded negative control.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T105556943473-review-of-bank-booking-determinism-f91d9586d406" data-who="reckon-build" data-when="2026-11-06T11:13:20.446Z">
+    <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism covering the one commit gained since the review at 684031cc1 — f91d9586d against base cb42f656 — records a parsed rubric (goal_fidelity 12, evidence 13, scope_discipline 20, durability 8, fit 16, reuse 15), added_failure_count 0, and four non-blocking findings: the wrapper cannot run two of the tabled flag arms, the shared-cache attribution is inferred across experiments rather than isolated, the allocation-record regex can silently drop its paragraph, and after_suite repeats baseline_suite. The prior review&#x27;s two blocking findings are answered: the global XLA flag prescription is removed and the predicate is renamed and scoped.</p></div>
 </div>
 </section>
 </main>

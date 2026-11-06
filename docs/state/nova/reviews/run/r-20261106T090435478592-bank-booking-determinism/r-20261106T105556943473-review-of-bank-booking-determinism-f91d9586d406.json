@@ -1,0 +1,94 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T11:13:20.446Z",
+  "dispatched_at": "2026-11-06T11:00:11Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-06T11:21:48.072099+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-06T11:21:48.165220+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-06T11:21:50.840832+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-06T11:21:56.067989+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_booking_determinism/measurement.sh",
+      "id": "f9327b68b8b",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "unset XLA_FLAGS makes the wrapper unable to run the deterministic and autotune-disabled arms the fragment tables, yet docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:9-11 tells a reader to use this wrapper for the warm-up and each measured process; a reader reproducing those rows silently measures the unset condition and labels it with the flag they passed."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html",
+      "id": "fbd8569d29f",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "\"That difference disappears with a shared cache\" asserts a causal attribution the experiment does not isolate: no arm of this allocation ran without the shared cache, so the claim rests on comparing this run with the earlier two-process run, and the limitation paragraph beside it covers only separate cold compilations."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_determinism/report.py",
+      "id": "f57a3204915",
+      "line": 89,
+      "severity": "non-blocking",
+      "text": "the allocation_record regex harvests a paragraph from the existing fragment and inserts it into the regenerated text, so rewording or losing that sentence silently drops the H200 allocation record from the report with no assertion firing."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T090435478592-bank-booking-determinism/manifest.md",
+      "id": "ffe7843763c",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "after_suite repeats baseline_suite's revision cb42f656 and log_path, so added_failure_count 0 is the baseline compared with itself; it is defensible because product source and tests are unchanged at head, but the record cannot detect a head regression and should say that the head arm was not run rather than presenting a paired result."
+    }
+  ],
+  "incremental_from_sha": "684031cc1900c3031abaf7ca738b8f12a08e89e4",
+  "item_verdicts": {
+    "diff": "read commit f91d9586d against the prior review's head 684031cc1 commit by commit; it changes three files (98 insertions, 47 deletions), removing the --xla_gpu_deterministic_ops=true recommendation from scripts/prototypes/bank_booking_determinism/measurement.sh:11, renaming the qualifying predicate to stable_within_setting and adding measurement_protocol in report.py:26-68, and rewriting the fragment's opening to scope the warm-cache condition.",
+    "done_when": "the node's quantitative measure requires byte-identical initial moments and identical per-lane reads in all five fresh processes at head, a paired suite with no added failures, and the changed operation's device ms and whole-solve wall tabled base against head; the gate that ran records byte identity and identical reads for fifteen processes over three compiler settings in environments/report.log, but there is no changed operation and no head arm, and environments/base-suite.log is reused as both baseline and head, so two of the clauses are unmet.",
+    "goal": "the node goal was to fingerprint the initial booked moments across five fresh H200 processes, name the first differing operation and make it deterministic in nova/equilibrium/current.py, or stop and name the file and line if it lives elsewhere; scripts/prototypes/bank_booking_determinism/report.py:44-60 now states that the first difference is upstream of booking in the compiled read at nova/equilibrium/topology.py:3287 and that the original scatter-add hypothesis was falsified, so no product change is landed and the difference is documented as a measurement-environment condition instead.",
+    "manifest": "read the manifest at status complete for the reviewed run; it records ten commits, the report.py regeneration as its gate with review-report.log ending EXIT=0, one known base failure at tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments, and after_suite carrying the same revision cb42f656 and log_path as baseline_suite.",
+    "write_paths": "the declared write paths are nova/equilibrium/current.py, scripts/prototypes/bank_booking_determinism, docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html and docs/figures/sub-millisecond-forward-path/bank-booking-determinism; the commit I read touches exactly scripts/prototypes/bank_booking_determinism/measurement.sh, scripts/prototypes/bank_booking_determinism/report.py and the evidence fragment, all inside the grant, with current.py and the figures directory untouched."
+  },
+  "justifications": {
+    "durability": "report.py:26 stable_within_setting has no test in tests/ and no negative control, so nothing reddens if it returns True unconditionally; the brief forbade test edits, and the only guard is the one-shot regeneration whose structural asserts at report.py:96-108 check receipt shape, not the predicate's judgement.",
+    "evidence": "I regenerated the fragment from the committed report.py (sha256 1484cab2db5f904c1e8658d91d61a8b6e482816e3953ea92fab7b446721e977b, matching environments/review-report.log's recorded source sha) against the recorded receipts and reproduced the committed fragment byte for byte apart from the two run-directory paths, and environments/report.log records EXIT=0 with byte_identical true for all three settings.",
+    "fit": "report.py:26-68 follows the surrounding small-function and escape()-then-table idiom of the file and introduces no plan, sprint, ticket or version identifier, though the allocation_record regex at report.py:89 reaches into the fragment's prose to preserve a paragraph the generator does not emit.",
+    "goal_fidelity": "scripts/prototypes/bank_booking_determinism/report.py:44-60 now states the falsification and the upstream location, but no product code is changed and the brief's instruction to set status blocked when the operation lies outside current.py was answered by a complete status instead, so the prescribed remedy is not delivered.",
+    "reuse": "I searched scripts/ and nova/ for an existing cross-process stability predicate and found none - the byte_identical_* fields in scripts/device_kernel_port/measure.py measure GPU-versus-CPU parity, a different capability - so stable_within_setting owns a new capability, while report.py:33 measurement_protocol extends the in-file HTML-emission style that already duplicates scripts/prototypes/fixed_points/production_report.py:13.",
+    "scope_discipline": "git diff 684031cc1 f91d9586d changes only scripts/prototypes/bank_booking_determinism/measurement.sh, scripts/prototypes/bank_booking_determinism/report.py and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html, every one inside the declared write paths and none under nova/ or tests/."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal was to fingerprint the initial booked moments across five fresh H200 processes, name the first differing operation and make it deterministic in nova/equilibrium/current.py, or stop and name the file and line if it lives elsewhere; scripts/prototypes/bank_booking_determinism/report.py:44-60 now states that the first difference is upstream of booking in the compiled read at nova/equilibrium/topology.py:3287 and that the original scatter-add hypothesis was falsified, so no product change is landed and the difference is documented as a measurement-environment condition instead.\nVERDICT done_when: the node's quantitative measure requires byte-identical initial moments and identical per-lane reads in all five fresh processes at head, a paired suite with no added failures, and the changed operation's device ms and whole-solve wall tabled base against head; the gate that ran records byte identity and identical reads for fifteen processes over three compiler settings in environments/report.log, but there is no changed operation and no head arm, and environments/base-suite.log is reused as both baseline and head, so two of the clauses are unmet.\nVERDICT write_paths: the declared write paths are nova/equilibrium/current.py, scripts/prototypes/bank_booking_determinism, docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html and docs/figures/sub-millisecond-forward-path/bank-booking-determinism; the commit I read touches exactly scripts/prototypes/bank_booking_determinism/measurement.sh, scripts/prototypes/bank_booking_determinism/report.py and the evidence fragment, all inside the grant, with current.py and the figures directory untouched.\nVERDICT manifest: read the manifest at status complete for the reviewed run; it records ten commits, the report.py regeneration as its gate with review-report.log ending EXIT=0, one known base failure at tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments, and after_suite carrying the same revision cb42f656 and log_path as baseline_suite.\nVERDICT diff: read commit f91d9586d against the prior review's head 684031cc1 commit by commit; it changes three files (98 insertions, 47 deletions), removing the --xla_gpu_deterministic_ops=true recommendation from scripts/prototypes/bank_booking_determinism/measurement.sh:11, renaming the qualifying predicate to stable_within_setting and adding measurement_protocol in report.py:26-68, and rewriting the fragment's opening to scope the warm-cache condition.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_booking_determinism/report.py:44-60 now states the falsification and the upstream location, but no product code is changed and the brief's instruction to set status blocked when the operation lies outside current.py was answered by a complete status instead, so the prescribed remedy is not delivered.\nSCORE evidence: 13\nJUSTIFICATION evidence: I regenerated the fragment from the committed report.py (sha256 1484cab2db5f904c1e8658d91d61a8b6e482816e3953ea92fab7b446721e977b, matching environments/review-report.log's recorded source sha) against the recorded receipts and reproduced the committed fragment byte for byte apart from the two run-directory paths, and environments/report.log records EXIT=0 with byte_identical true for all three settings.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 684031cc1 f91d9586d changes only scripts/prototypes/bank_booking_determinism/measurement.sh, scripts/prototypes/bank_booking_determinism/report.py and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html, every one inside the declared write paths and none under nova/ or tests/.\nSCORE durability: 8\nJUSTIFICATION durability: report.py:26 stable_within_setting has no test in tests/ and no negative control, so nothing reddens if it returns True unconditionally; the brief forbade test edits, and the only guard is the one-shot regeneration whose structural asserts at report.py:96-108 check receipt shape, not the predicate's judgement.\nSCORE fit: 16\nJUSTIFICATION fit: report.py:26-68 follows the surrounding small-function and escape()-then-table idiom of the file and introduces no plan, sprint, ticket or version identifier, though the allocation_record regex at report.py:89 reaches into the fragment's prose to preserve a paragraph the generator does not emit.\nSCORE reuse: 15\nJUSTIFICATION reuse: I searched scripts/ and nova/ for an existing cross-process stability predicate and found none - the byte_identical_* fields in scripts/device_kernel_port/measure.py measure GPU-versus-CPU parity, a different capability - so stable_within_setting owns a new capability, while report.py:33 measurement_protocol extends the in-file HTML-emission style that already duplicates scripts/prototypes/fixed_points/production_report.py:13.\nFINDING scripts/prototypes/bank_booking_determinism/measurement.sh:11 non-blocking: unset XLA_FLAGS makes the wrapper unable to run the deterministic and autotune-disabled arms the fragment tables, yet docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:9-11 tells a reader to use this wrapper for the warm-up and each measured process; a reader reproducing those rows silently measures the unset condition and labels it with the flag they passed.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:20 non-blocking: \"That difference disappears with a shared cache\" asserts a causal attribution the experiment does not isolate: no arm of this allocation ran without the shared cache, so the claim rests on comparing this run with the earlier two-process run, and the limitation paragraph beside it covers only separate cold compilations.\nFINDING scripts/prototypes/bank_booking_determinism/report.py:89 non-blocking: the allocation_record regex harvests a paragraph from the existing fragment and inserts it into the regenerated text, so rewording or losing that sentence silently drops the H200 allocation record from the report with no assertion firing.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T090435478592-bank-booking-determinism/manifest.md:12 non-blocking: after_suite repeats baseline_suite's revision cb42f656 and log_path, so added_failure_count 0 is the baseline compared with itself; it is defensible because product source and tests are unchanged at head, but the record cannot detect a head regression and should say that the head arm was not run rather than presenting a paired result.\n",
+  "review_run_id": "r-20261106T105556943473-review-of-bank-booking-determinism-f91d9586d406",
+  "reviewed_base_sha": "cb42f656f76a7d7e56da8a53d4754c22d131bdc0",
+  "reviewed_head_sha": "f91d9586d406c432b41593381cadc34b369076fa",
+  "reviewed_run_id": "r-20261106T090435478592-bank-booking-determinism",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 12,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T11:13:24.405020+00:00",
+  "total": 84
+}

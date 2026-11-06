@@ -39,12 +39,13 @@ def test_cycle_lane_is_accepted_within_two_steps(monkeypatch):
         update = (-equation / slope, jnp.zeros_like(value), jnp.zeros_like(value))
         size = sum(item.size for item in state)
         eye = jnp.eye(size, dtype=jnp.float64)
+        inverse, indices = support_read._block_preconditioner(eye)
         factor = support_read.NewtonFactor(
             eye,
             jnp.ones(size, dtype=jnp.float64),
             jnp.ones(size, dtype=jnp.float64),
-            eye,
-            jnp.zeros(size, jnp.int32),
+            inverse,
+            indices,
         )
         return support_read.NewtonStep(
             update,

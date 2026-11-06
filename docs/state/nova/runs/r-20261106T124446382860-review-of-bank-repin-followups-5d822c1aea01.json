@@ -877,6 +877,44 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "589dd8e8daf4b12bddf8105bd9e2b45497fac086",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 13605,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261106T124446382860-review-of-bank-repin-followups-5d822c1aea01",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 13605,
+        "path": "/tmp/reckon-crew-scratch/r-20261106T124446382860-review-of-bank-repin-followups-5d822c1aea01"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-repin-followups-5d822c1aea01",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T09:29:37.227Z",
+  "dispatched_at": "2026-11-06T09:12:30Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py",
+      "id": "f3d70458d19",
+      "line": "120",
+      "severity": "blocking",
+      "text": "argmax of the distance from the magnetic axis selects the X-point as the \"lobe tip\" -- the receipt's state_lobe_tip_rz equals state_rz to 1e-16 and image_lobe_tip_rz equals image_rz to 1e-16, so the reported lobe bearing 105.0 degrees is the axis-to-saddle bearing and lobe_tip_shift_mm equals the 0.3545 mm saddle displacement by construction; the fragment prints that coincidence as an independent lobe measurement at promoted-nodes-xpoint-angles.html:44, and the closing paragraph's \"the direction that changes most is the lobe at +0.01 degrees\" is the same displacement re-expressed."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-xpoint-angles.html",
+      "id": "fa0e16f2bae",
+      "line": "77",
+      "severity": "non-blocking",
+      "text": "the sentence \"split by selection source they resolve as the table does rather than as the halves do\" is contradicted by the table it introduces, whose interior-flood rows read 1.058e-09 Wb upper against 2.621e-02 Wb lower, so the half asymmetry survives inside a single selection source and the mechanism paragraph leaves that seven-order difference unexplained."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md",
+      "id": "f288a8bef07",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "baseline_suite and after_suite are free prose rather than the required JSON (revision, command, exit_status, log_path, completed, failure_count, failure_ids), and the named pytest log artifacts-path-gate.log carries no revision or tree header, so the suite delta cannot be read from the record as filed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md",
+      "id": "f2e3ca527a1",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "the lane gate ran at f77fe72e4 and the delivered head is dc8e1a67a, contrary to the brief's \"Gate. Run the lane gate at the final head, not at an earlier commit\"; the measured sources are byte-identical across that gap so the numbers stand, but the gate log names no delivered revision."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py",
+      "id": "fdd0c4b83fa",
+      "line": "202",
+      "severity": "non-blocking",
+      "text": "the zoom locator is a 6 mm rectangle on a whole-machine panel, a few pixels at served width and drawn beneath the X-point markers, so the caption's claim that the left panel \"carries the locator\" shows a reader a blue speck rather than a locator."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is brief.md's three done-when items -- the lobe and both leg directions on main's assembler, the half asymmetry's mechanism with named function and line, and a fragment carrying one contour figure; all three are delivered at dc8e1a67a, but the delivered \"lobe\" row is the magnetic-axis-to-X-point bearing rather than a lobe measurement (FINDING below).\nVERDICT done_when: the done_when asks for lobe and leg directions in degrees with their differences, the asymmetry traced to a named function and line, and a fragment whose every number comes from the receipt; the manifest's tests line records lane job 1306715 exiting 0 and measure-8.json carries the x_point, separatrix and legs blocks the fragment prints.\nVERDICT write_paths: the brief's Constraints and the manifest's orientation_write_paths name scripts/prototypes/promoted_nodes_near_xpoint/, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-xpoint-angles/; every path in `git diff --stat 2fd5d5b5 dc8e1a67a` is inside one of them.\nVERDICT manifest: read the delivered manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md; it reports the measurement gate EXIT_STATUS=0 at 830.3 s and a 1-passed artifact-path suite, but its baseline_suite and after_suite fields are prose rather than the required JSON and its pytest log names no revision.\nVERDICT diff: four commits from 2fd5d5b5 to dc8e1a67a change six files (measure_promoted_nodes.py, run_angles.py, render_angles.py, write_fragment.py, the fragment, the SVG), and the contents match the messages except that 14daffebb also carries render_angles.py, which the manifest discloses.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:120 selects the closed branch's furthest point from the axis as the lobe tip, which in this separatrix is the X-point itself.\nSCORE evidence: 12\nJUSTIFICATION evidence: /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-xpoint-angles/measure-8-gate-receipt.log:5 records SOURCE_REVISION=f77fe72e4, one commit before the delivered head, and the fragment records no trace of why image - state differs seven orders between the two interior-flood groups.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path in the diff is inside the brief's three granted trees, and no solver or producer source under nova/ is touched.\nSCORE durability: 6\nJUSTIFICATION durability: no test file is in the diff or in the granted write paths, so the only guard the change carries is tests/test_artifacts_carry_no_worktree_paths.py, which reddens if a worktree path reaches the new fragment or SVG and says nothing about the measurement.\nSCORE fit: 14\nJUSTIFICATION fit: scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py:198-199 sets equal aspect and axis-off inline and hardcodes hex colours, where the sibling prototype scripts/prototypes/fast_read/render_contours.py:29 uses nova.media.ink.poloidal_axes and DEFAULT_INK.\nSCORE reuse: 15\nJUSTIFICATION reuse: the required point-to-curve owner nova.equilibrium.boundary_comparison._point_to_segment_distances is called rather than copied and the prototype's _segmented_distance is deleted, but the poloidal-axes setup owned by nova/media/ink.py:155 is re-implemented inline.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:120 blocking: argmax of the distance from the magnetic axis selects the X-point as the \"lobe tip\" -- the receipt's state_lobe_tip_rz equals state_rz to 1e-16 and image_lobe_tip_rz equals image_rz to 1e-16, so the reported lobe bearing 105.0 degrees is the axis-to-saddle bearing and lobe_tip_shift_mm equals the 0.3545 mm saddle displacement by construction; the fragment prints that coincidence as an independent lobe measurement at promoted-nodes-xpoint-angles.html:44, and the closing paragraph's \"the direction that changes most is the lobe at +0.01 degrees\" is the same displacement re-expressed.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-xpoint-angles.html:77 non-blocking: the sentence \"split by selection source they resolve as the table does rather than as the halves do\" is contradicted by the table it introduces, whose interior-flood rows read 1.058e-09 Wb upper against 2.621e-02 Wb lower, so the half asymmetry survives inside a single selection source and the mechanism paragraph leaves that seven-order difference unexplained.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md:22 non-blocking: baseline_suite and after_suite are free prose rather than the required JSON (revision, command, exit_status, log_path, completed, failure_count, failure_ids), and the named pytest log artifacts-path-gate.log carries no revision or tree header, so the suite delta cannot be read from the record as filed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md:15 non-blocking: the lane gate ran at f77fe72e4 and the delivered head is dc8e1a67a, contrary to the brief's \"Gate. Run the lane gate at the final head, not at an earlier commit\"; the measured sources are byte-identical across that gap so the numbers stand, but the gate log names no delivered revision.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py:202 non-blocking: the zoom locator is a 6 mm rectangle on a whole-machine panel, a few pixels at served width and drawn beneath the X-point markers, so the caption's claim that the left panel \"carries the locator\" shows a reader a blue speck rather than a locator.\n",
+  "review_run_id": "r-20261106T091014917384-review-of-promoted-nodes-xpoint-angles-dc8e1a67ad68",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "dc8e1a67ad68a1065ee9cf8b4a7b6c3814fb7d26",
+  "reviewed_run_id": "r-20261106T074026367538-promoted-nodes-xpoint-angles",
+  "scores": {
+    "durability": 6,
+    "evidence": 12,
+    "fit": 14,
+    "goal_fidelity": 13,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:36:15.817411+00:00",
+  "total": 78
+}

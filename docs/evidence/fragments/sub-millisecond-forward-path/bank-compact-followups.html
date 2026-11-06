@@ -1,0 +1,35 @@
+<section id="bank-compact-followups-landing">
+<h2>Compact candidate branch guard</h2>
+<p>The four review findings are addressed without changing candidate behavior. The form mask reuses <code>retained</code>; <code>_COMPACT_CANDIDATE_CAPACITY = 3</code> records the 550-cell saddle counts 0, 0, 1, 1 and leaves room for slot 0 plus a second saddle; and the structural test composes <code>tests.jaxpr_scans.subjaxprs</code>. The new test evaluates the actual batch-uniform conditional predicate, rather than reconstructing its expression: a two-lane batch with zero and two saddles selects compact evaluation, while the existing overflow batch selects full evaluation.</p>
+<p>Base: <code>d102ff6f103775ced8fe3b573122a235bec9da22</code>. Measured product and test head: <code>fd246929c8965b1f29eb1fa1677ecfe770ca8d2a</code>. The later prototype change only extends the physical control; product source and tests are unchanged.</p>
+
+<h3>Reproduction and negative control</h3>
+<p>Before the repair, the scratch mutation <code>any_lane_overflow(jnp.sum(retained) &gt; compact_capacity)</code> → <code>any_lane_overflow(jnp.asarray(True))</code> passes all four light tests: <code>4 passed, 4 deselected in 46.90s</code>, <code>EXIT=0</code>. This reproduces the missing branch-selection guard. The source also still carries the literal width, duplicate retained expression and duplicate nested-jaxpr descent reported by review.</p>
+<p>At head, the same mutation fails only <code>tests/test_candidate_inspection_batched.py::test_candidate_nonoverflow_selects_compact_branch</code>, with <code>assert 1 == 0</code>: <code>1 failed, 4 passed, 4 deselected in 50.96s</code>, <code>EXIT=1</code>. Both light equivalence tests remain green. The unmutated head prints <code>NONOVERFLOW_BRANCH 0</code> and passes the guard. The overflow case remains a positive control: it requires the other branch index, 1.</p>
+
+<h3>Paired CPU suites</h3>
+<table>
+<thead><tr><th>File</th><th>Base passed / skipped</th><th>Head passed / skipped</th><th>Added failures</th></tr></thead>
+<tbody>
+<tr><td>test_candidate_inspection_batched.py, light cases</td><td>4 / 0</td><td>5 / 0</td><td>0</td></tr>
+<tr><td>test_support_read.py</td><td>13 / 2</td><td>13 / 2</td><td>0</td></tr>
+<tr><td>test_tracked_read.py</td><td>4 / 0</td><td>4 / 0</td><td>0</td></tr>
+<tr><td>Total</td><td>21 / 2</td><td>22 / 2</td><td>0</td></tr>
+</tbody>
+</table>
+<p>Both arms ran in one Sirius allocation, with one fresh pytest process and a distinct basetemp per file, CPU explicitly selected, and no suite timeout wrapper. Both receipts report <code>completed=true failure_count=0</code> and <code>EXIT=0</code>. The two unchanged skips concern a saddle and an X-point absent from the limited fixture; their diverted counterparts pass.</p>
+
+<h3>550-cell H200 equivalence at head</h3>
+<table>
+<thead><tr><th>Geometry</th><th>State</th><th>Live saddles</th><th>Selected slot</th><th>Maximum form absolute difference</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>trial</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>converged</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>trial</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>diverted</td><td>converged</td><td>1</td><td>1</td><td>1.6653345369377348e-16</td></tr>
+</tbody>
+</table>
+<p>All four cases pass against independent slot evaluation. Candidate admission and selection agree exactly, finite masks agree, and forms satisfy the unchanged <code>rtol=1e-12</code> and <code>atol=1e-13</code>. The receipt reports <code>4 passed, 5 deselected in 1039.80s</code>, <code>EXIT=0</code>, and <code>CudaDevice(id=0)</code>. The allocation requests two CPU cores, one GPU and 96 GB on betelgeuse under the H200 reservation. These are correctness checks; they make no solve-performance claim.</p>
+
+<p>Receipts and exact commands are retained under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T144026633550-bank-compact-followups</code>: <code>base-suite.log</code>, <code>head-suite.log</code>, <code>reproduction-test_candidate_inspection_batched.log</code>, <code>negative-test_candidate_inspection_batched.log</code>, <code>negative-mutation.diff</code> and <code>physical.log</code>. Each per-file log records its revision, imported module, working directory, command and terminal exit status.</p>
+</section>

@@ -71,8 +71,13 @@
     (<code>1 &lt;&lt; (2 * (radius.size + height.size) - 1).bit_length()</code>).
     At the legacy 256-slot capacity every frame empties: the candidate branches
     overflow before a closed cycle is formed, which is why the panels carried no
-    separatrix at all. The negative control pins the capacity back to 256 and
-    the persisted-frame test fails there, naming itself.</p>
+    separatrix at all. The negative control pins the capacity back to 256
+    through a <code>sitecustomize</code> on <code>PYTHONPATH</code>, leaving the
+    worktree untouched, and
+    <code>test_a_persisted_frame_assembles_its_separatrix_from_its_own_field</code>
+    then fails at <code>assert drawn</code> — no frame assembles a separatrix
+    from its own field — in 436.5 s with EXIT=1
+    (<code>negative-control-256.log</code>).</p>
 
     <h2 id="dsr-gates">Gates</h2>
     <p><code>tests/test_diiid_forward_gs_match.py</code> and

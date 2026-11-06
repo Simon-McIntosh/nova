@@ -83,4 +83,24 @@ axis marker in all three lanes; the legs leave the saddle and exit the map
 rather than closing across the private flux region. The producer measures its
 own labels before saving and prints
 <code>LABEL_CHECK clipped=0 overlapping=0</code> on every lane.</p>
+
+<p id="mast-separatrix-redraw-gate-result">The redraw gate ran once at the head,
+as one job, on the reserved H200: slurm job <code>1306726</code> at revision
+<code>5f91ff873</code>, exit status 0, <b>11 passed in 2178.98 s</b>. The base
+arm ran the same command at revision <code>2fd5d5b58</code> in slurm job
+<code>1306717</code>, exit status 0, <b>10 passed in 2899.39 s</b>. The head
+carries one test id the base does not, and neither arm carries a failing id, so
+the gate shows <b>zero added failures</b> against the base.</p>
+
+<p id="mast-separatrix-redraw-control">The control for the new guard forces the
+display assembler back to 256 branch slots, loaded as a pytest plugin that pins
+<code>branch_capacity</code> on the one call
+<code>display_flux._branches</code> makes. It goes red exactly where it must:
+<b>5 failed, 6 passed, exit status 1</b>, with
+<code>test_committed_panel_state_renders[cpu-lane]</code>,
+<code>[titan-lane]</code> and <code>[full-axis-lane]</code> failing on
+<code>assert assembler["well_formed"]</code> and reporting
+<code>closed_segment_count: 0</code> — the overflow refusing the whole field,
+which is the state these panels shipped in. The same three ids pass at the head,
+so the guard is what separates the two runs rather than an incidental failure.</p>
 </section>

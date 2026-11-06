@@ -220,6 +220,8 @@ def main():
         jax.effects_barrier()
     receipt.update(
         events=events,
+        initial_moments=[np.asarray(value).tolist() for value in batch.states],
+        terminal_moments=[np.asarray(value).tolist() for value in plain.moments],
         observed={name: np.asarray(getattr(result, name)).tolist() for name in fields},
         same_reads=bool(np.array_equal(result.reads, plain.reads)),
         same_path=bool(

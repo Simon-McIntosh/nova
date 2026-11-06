@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="164">
+<meta name="plan-version" content="165">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -587,6 +587,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T054124433158-bank-linear-solve" data-who="reckon-build" data-when="2026-11-06T06:05:41Z">
     <div class="r-comment-body"><p>[Linear-route evidence](docs/evidence/fragments/sub-millisecond-forward-path/bank-linear-solve.html#bank-linear-solve-landing) records 32 H200 comparisons: equilibrated block GMRES meets 1e-8 physical update precision at 6.439 ms trial and 10.495 ms converged for sixteen lanes versus about 106 ms LU; no arm reaches about 1 ms per batch. [Wall figure](/nova/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg) retains every precision miss. Recommend fresh matrix, block inverse and condition estimate for the initial implementation; no reuse speedup is claimed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T054125594099-bank-solve-trace" data-who="reckon-build" data-when="2026-11-06T06:30:27Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html#bank-solve-trace-landing — one H200 allocation captures both widths; at sixteen slices factor/candidate/wall device times are 416.363/364.799/288.587 ms, 204152 kernels, and device minus overlap plus idle gaps closes on 1526.538 ms profiled wall within 0.007 ms. Unprofiled median is 1398.163 ms/batch (87.385 ms/slice), all lanes converge in 3–4 updates and 5 reads. Explicit shared/unbound metadata limits remain inventoried. Figure: docs/figures/sub-millisecond-forward-path/bank-solve-trace/device-time.svg.</p></div>
 </div>
 </section>
 </main>

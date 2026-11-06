@@ -1,0 +1,127 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T21:09:24.483Z",
+  "dispatched_at": "2026-11-06T21:03:13Z",
+  "findings": [
+    {
+      "anchor": "plan.html:256",
+      "id": "done_when-1",
+      "reason": "the plan's own plan-after is kernel-compile-barrier, whose \u00a70 sets explicit bounds (compile wall at most 60 s on the H200 with the warm cache excluded, executable at most 50 MB, at most 64 GB resident during a cold compile), so s3's 13568-square build at half cell size would be accepted at any cost the node happens to measure and the census row it writes carries no verdict.",
+      "text": "s3 done-when (2) requires only that \"the compile time and the warm execute time each recorded at 1696 cells and on the prototype mesh at half its cell size\", and done-when (3) that the program \"appears in the kernel-compile census\", so neither clause can fail on cost: the only falsifiable part of (2) is the cache hit, and every scale and duration passes",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:250",
+      "id": "reasoning-1",
+      "reason": "a node held to a threshold that omits the cell-sum term either fails a correct device build or is forced to widen the tolerance after the fact; \u00a72 also records the term per slope (line 215, \"the best attainable error and the \u03b5 that gives it recorded per slope\") while the 1696-cell mesh mixes slopes, so the clause names no single number a worker can apply.",
+      "text": "the tolerance is \"the rounding term of \u00a72's measured error curve at the production strip width\", described as \"the cancellation between a strip's two long edges inside one Part V evaluation\", and the clause then asserts \"the order in which a cell's edge sheets are added does not touch it\"; but G's columns are signed sums of a cell's four edge sheets, which near-cancel at a distant target (that is why a uniformly magnetised cell's far field is a dipole and why a shared edge appears once with the net sheet (M1 \u2212 M2)\u00d7n), so the sum carries a cancellation amplification the single-strip term does not contain, and it is header-blind to whether device and host add in the same order",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:260",
+      "id": "anchors_resolve-1",
+      "reason": "the clause's stated purpose is \"so a production mesh's cost is read from the census rather than re-measured\", and with no polygon-tile row a worker must invent the measurement shape and the census stops being the single ledger it is cited as.",
+      "text": "done-when (3) requires the program to be \"measured the same way as the polygon tile\", but docs/research/compile-cost-evidence.html carries no polygon-tile measurement: its program rows are harmonic_multiply, harmonic_moments, harmonic_pole_moments, packed_analytic_moments, point_jet, production_point_batch, prototype_point_batch, topology_read and certificate_map, and the strings tile_evaluator, tile_coupling and _fill_tile appear nowhere in the document",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "84c5b968a6e95bcdb79b7ae6a3b4cc1a408bc97d",
+  "plan_fingerprint": "b362505d0a58000eacb67c38823c38f76313a1ae54698200da821eaf3531bdaf",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 2,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a73 done-when (2) now requires the build to meet kernel-compile-barrier's bounds (\u226460 s compile, \u226450 MB executable, \u226464 GB host memory on the H200, cache disabled) at both cell counts (646d7daec).",
+      "reason": "",
+      "when": "2026-11-06T21:14:48.925872+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a73 tolerance is now the worst per-slope rounding term \u00a72 records at the production strip width, floored at 1e-13, measured relative to the sum of absolute edge-sheet contributions per entry, which carries the four-edge cancellation; the unsupported ordering sentence is gone (646d7daec).",
+      "reason": "",
+      "when": "2026-11-06T21:15:07.300488+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a73 done-when (3) no longer cites a polygon-tile row; both builds are entered as program rows of docs/research/compile-cost-evidence.html with its existing fields plus cell count (646d7daec).",
+      "reason": "",
+      "when": "2026-11-06T21:15:17.426539+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+      "commit_basis": "edit",
+      "note": "\u00a73 done-when (3) no longer cites a polygon-tile row; both builds are entered as program rows of docs/research/compile-cost-evidence.html with its existing fields plus cell count (646d7daec).",
+      "reason": "",
+      "when": "2026-11-06T21:15:17.426539+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+      "commit_basis": "edit",
+      "note": "\u00a73 done-when (2) now requires the build to meet kernel-compile-barrier's bounds (\u226460 s compile, \u226450 MB executable, \u226464 GB host memory on the H200, cache disabled) at both cell counts (646d7daec).",
+      "reason": "",
+      "when": "2026-11-06T21:14:48.925872+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "646d7daec63b686a24d83962479d73de5f9cb549",
+      "commit_basis": "edit",
+      "note": "\u00a73 tolerance is now the worst per-slope rounding term \u00a72 records at the production strip width, floored at 1e-13, measured relative to the sum of absolute edge-sheet contributions per entry, which carries the four-edge cancellation; the unsupported ordering sentence is gone (646d7daec).",
+      "reason": "",
+      "when": "2026-11-06T21:15:07.300488+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v2.json",
+  "review_run_id": "r-20261106T210214912399-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "12ee5c2934b35cd37d043fa193f82ef873346df9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \"measured the same way as the polygon tile\" cites a census row that does not exist in docs/research/compile-cost-evidence.html, which carries no tile_evaluator, tile_coupling or _fill_tile program.",
+    "done_when": "a finding \u2014 s3 done-when (2) and (3) only require the compile wall and memory to be recorded, so a build that takes an hour and 100 GB passes them unchanged.",
+    "evidence_paths": "pass \u2014 done-when (3) lands the row in the in-repo census document docs/research/compile-cost-evidence.html, and the heavy gates run on betelgeuse under gpu_0003_grpA as one job; no session or node-local path is named.",
+    "naming": "pass \u2014 s3 introduces no plan labels, stage names, ticket numbers or version tags; \u00a72 and \u00a73 are cross-references to plan sections, not symbols a later reader needs a tracker to resolve.",
+    "reasoning": "a finding \u2014 the device-versus-host tolerance is set to a single strip's rounding term while G is a signed sum of four edge sheets per cell, and the sentence asserting that the addition order does not touch the tolerance is unsupported.",
+    "single_goal": "pass \u2014 one deliverable, the device build of G through the existing tile plan; the three clauses measure its accuracy, its cost and its cache behaviour.",
+    "wiring": "pass \u2014 s3 declares depends-on iron-core-magnetisation#s2, which is where the sheet route and the strip width it consumes are decided, and s4 and s6 both declare s3; the mesh it measures on is the \u00a71 prototype mesh, and \u00a71 is done."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "a426bd469bd95da577b4f4e93cedcdcbd82c9e3bdbe027af0d71a6c574cbd4a3",
+    "s3": "6ebf6d0757f5fe6fa2aca623f0bb8072c9872fbbe32fcf191d77d81b12347e05",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T21:14:43.430073+00:00",
+  "total": null
+}

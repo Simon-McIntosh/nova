@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T11:21:55.061Z",
+  "dispatched_at": "2026-11-06T11:08:22Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/private_flux_pocket.py",
+      "id": "f64b233b3b2",
+      "line": "83",
+      "severity": "blocking",
+      "text": "wall_distance measures each promoted node's distance to the nearest wall VERTEX with np.linalg.norm, not to the wall polyline, and so bypasses nova.equilibrium.boundary_comparison._point_to_segment_distances, which brief.md's done-when item 1 requires 'for every point-to-curve distance'. The device wall here is one unit of 37 vertices (measure-8.json wall_units), so the substitution is not cosmetic: recomputing the 22 lower-pocket nodes with the owner gives 21.9 to 191.3 mm against the receipt's 22.3 to 191.3 mm, and 15 of the 22 nodes are overstated, by up to 100.8 mm (node 136 reads 123.3 mm from the wall in lower-pocket.json and is 22.5 mm from it). The fragment prints that field to argue the pocket is wall-bounded at promoted-nodes-xpoint-angles.html:158."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py",
+      "id": "f9c89dac845",
+      "line": "359",
+      "severity": "non-blocking",
+      "text": "assert_inside is called with `labelled`, and `labelled` receives exactly one text artist (the zoom leader's share of the legend and the tick text are never registered), so the pairwise-overlap clause at render_angles.py:80-85 compares one box against nothing and can never fire; the manifest's claim that the legibility guard refuses labels that overlap is true of the mechanism and not of the call site, and the guard would pass a figure whose branch labels collided."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/angles_at_null.py",
+      "id": "f9b2a7d7049",
+      "line": "442",
+      "severity": "non-blocking",
+      "text": "pair_blocks selects a branch's partner by |reach_m - reach_m| but reports shift_deg as min() of the angular differences over every image branch (angles_at_null.py:438-450), so the printed shift need not belong to the image bearing printed beside it; the four rows of the fragment's branch table coincide by luck on this data and the table is not self-consistent by construction."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md",
+      "id": "f7675ad00f0",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "baseline_suite is filed as not run with completed:false and a stated reason that a base worktree cannot be created under the fence, but /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-xpoint-angles/baseline-gate-2fd5d5b58.log (written 11:37, after the manifest) records a detached base checkout at 2fd5d5b58 running the same pytest and ending EXIT=0 with one passed; the record's reason is contradicted by a log it does not cite, so the delta is readable but the field is wrong."
+    },
+    {
+      "file": "/work/projects/imas_gpu/sophelio/evidence/promoted-nodes-xpoint-angles/angles-at-null.json",
+      "id": "fb3e5bb152f",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "no log exists for the run that produced this receipt (10:56), and it is the receipt behind every asymptote, chord and arc length in the fragment; the other measurements carry measure-8-gate-receipt.log and pocket-gate.log, and brief.md's job constraint asks for the run's log on disk, so the primary angle table's provenance is a file mtime rather than a recorded exit status."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is 'measure the separatrix lobe and leg angles that promotion moves at the MAST coil-edit X-point' (prompt.txt:38); the delivered fragment measures four asymptotes from each field, four traced branch chords with their differences, and the asymmetry's mechanism, so the goal is met on the lattice and on the display grid, minus one supporting distance (private_flux_pocket.py:83) taken with a local vertex helper.\nVERDICT done_when: brief.md's three done-when items are all present -- the angle tables (promoted-nodes-xpoint-angles.html:74 and :95), the mechanism with named function and line (reduced_newton.py:985, forward_operator.py:3699/3712/3758, domain.py:213/117/128) and a stated correction, and the fragment with figure, but the `tests` line records only tests/test_artifacts_carry_no_worktree_paths.py, which asserts none of the three, and done-when item 1's 'every point-to-curve distance through _point_to_segment_distances' is broken by private_flux_pocket.py:83.\nVERDICT write_paths: brief.md's Constraints and the manifest's orientation_write_paths name scripts/prototypes/promoted_nodes_near_xpoint, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-xpoint-angles/; `git diff --name-only 2fd5d5b5 c5c53edf0` lists eight paths and every one is inside those trees, with no nova/ file touched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md; it reports the gate EXIT=0 at c5c53edf0 and the pocket lane job 1306800 at NOVA_LANE_EXIT_STATUS=0, and both logs confirm that, but its baseline_suite field is filed as not-run although baseline-gate-2fd5d5b58.log shows a green base arm.\nVERDICT diff: read all seven commits from 2fd5d5b5 to c5c53edf0; they add the prototype measurement, the composer, the renderer and the pocket locator, plus the fragment and one SVG, and the contents match their messages and the receipts, with the withdrawn axis-to-null 'lobe bearing' absent from the delivered fragment (grep for 105.0 and lobe_bearing finds nothing).\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/prototypes/promoted_nodes_near_xpoint/angles_at_null.py:64 derives the four asymptotes from d'Hd = 0 and reports both fields' bearings and shifts, delivering brief.md's item 1, while private_flux_pocket.py:83 answers one point-to-curve distance with a substitute the brief forbids.\nSCORE evidence: 13\nJUSTIFICATION evidence: the receipts measure what the done-when asks and reconcile digit for digit with the fragment (lower-pocket.json lower flood max_abs_wb 2.6212e-02 against the table at promoted-nodes-xpoint-angles.html:134), but the manifest's `tests` line names only the artifact-path pytest and no log survives for the angles_at_null run behind angles-at-null.json.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: `git diff --name-only 2fd5d5b5 c5c53edf0` returns eight paths, all inside the three granted trees, and no solver or producer file is in the diff.\nSCORE durability: 6\nJUSTIFICATION durability: the diff adds no test, and its only assertions are the x64 guards at angles_at_null.py:231 and private_flux_pocket.py:203 plus render_angles.py:359, which inspects a single registered label; reinstating the vertex-distance defect or the withdrawn lobe bearing would redden nothing, and only tests/test_artifacts_carry_no_worktree_paths.py guards the change at all.\nSCORE fit: 15\nJUSTIFICATION fit: render_angles.py:33 now draws through nova.media.poloidal draw_flux_contours/draw_nulls/draw_wall and sets axis off at render_angles.py:227, matching the plotting rules, while render_angles.py:41-48 still hardcodes a hex palette instead of the repository ink roles and render_angles.py:91 defines a `_ray` helper nothing calls.\nSCORE reuse: 5\nJUSTIFICATION reuse: the composer and renderer extend existing owners (nova.media.poloidal, nova.equilibrium.flux_surface_connectivity.polish_stationary_points, nova.linalg.tensor_spline.fit_tensor_spline), but private_flux_pocket.py:83 re-implements the point-to-curve distance capability owned by nova/equilibrium/boundary_comparison.py:81 rather than extending it.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/private_flux_pocket.py:83 blocking: wall_distance measures each promoted node's distance to the nearest wall VERTEX with np.linalg.norm, not to the wall polyline, and so bypasses nova.equilibrium.boundary_comparison._point_to_segment_distances, which brief.md's done-when item 1 requires 'for every point-to-curve distance'. The device wall here is one unit of 37 vertices (measure-8.json wall_units), so the substitution is not cosmetic: recomputing the 22 lower-pocket nodes with the owner gives 21.9 to 191.3 mm against the receipt's 22.3 to 191.3 mm, and 15 of the 22 nodes are overstated, by up to 100.8 mm (node 136 reads 123.3 mm from the wall in lower-pocket.json and is 22.5 mm from it). The fragment prints that field to argue the pocket is wall-bounded at promoted-nodes-xpoint-angles.html:158.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py:359 non-blocking: assert_inside is called with `labelled`, and `labelled` receives exactly one text artist (the zoom leader), so the pairwise-overlap clause at render_angles.py:80-85 compares one box against nothing and can never fire; the manifest's claim that the legibility guard refuses labels that overlap is true of the mechanism and not of the call site, and the guard would pass a figure whose branch labels collided.\nFINDING scripts/prototypes/promoted_nodes_near_xpoint/angles_at_null.py:442 non-blocking: pair_blocks selects a branch's partner by reach but reports shift_deg as min() of the angular differences over every image branch (angles_at_null.py:438-450), so the printed shift need not belong to the image bearing printed beside it; the four rows of the fragment's branch table coincide by luck on this data and the table is not self-consistent by construction.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367538-promoted-nodes-xpoint-angles/manifest.md:19 non-blocking: baseline_suite is filed as not run with completed:false and a stated reason that a base worktree cannot be created under the fence, but baseline-gate-2fd5d5b58.log (written 11:37, after the manifest) records a detached base checkout at 2fd5d5b58 running the same pytest and ending EXIT=0 with one passed, so the delta is readable but the field is wrong.\nFINDING /work/projects/imas_gpu/sophelio/evidence/promoted-nodes-xpoint-angles/angles-at-null.json:1 non-blocking: no log exists for the run that produced this receipt (10:56), and it is the receipt behind every asymptote, chord and arc length in the fragment; the other measurements carry measure-8-gate-receipt.log and pocket-gate.log, so the primary angle table's provenance is a file mtime rather than a recorded exit status.\n",
+  "review_run_id": "r-20261106T110643029189-review-of-promoted-nodes-xpoint-angles-c5c53edf0c21",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "c5c53edf0c2115d32f212ca3a48b6cb541223c9c",
+  "reviewed_run_id": "r-20261106T074026367538-promoted-nodes-xpoint-angles",
+  "scores": {
+    "durability": 6,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T11:29:27.741024+00:00",
+  "total": 72
+}

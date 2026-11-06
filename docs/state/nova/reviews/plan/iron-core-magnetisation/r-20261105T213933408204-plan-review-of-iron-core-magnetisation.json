@@ -59,9 +59,28 @@
       "note": "\u00a78 now evaluates the limbs through nova/biot/toroidalaverage.py (toroidal_points, frame_magnetic_field, average_toroidal_field) and writes no new 3D or averaging code (59bf1a7d3).",
       "reason": "",
       "when": "2026-11-06T05:42:25.684150+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "59bf1a7d31d54a8dbedb9966c98d332e90841869",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "\u00a74 names its homes: the iron_core read extends nova/imas/machine.py (ImasGeometryReader, StaticMachineDescription) and retires both script readers; mesh, law and Newton solve live in nova/biot/magnetisation.py behind one public surface (59bf1a7d3).",
+      "reason": "",
+      "when": "2026-11-06T05:42:45.259771+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "59bf1a7d31d54a8dbedb9966c98d332e90841869",
+      "commit_basis": "edit",
+      "note": "\u00a74 names its homes: the iron_core read extends nova/imas/machine.py (ImasGeometryReader, StaticMachineDescription) and retires both script readers; mesh, law and Newton solve live in nova/biot/magnetisation.py behind one public surface (59bf1a7d3).",
+      "reason": "",
+      "when": "2026-11-06T05:42:45.259771+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",

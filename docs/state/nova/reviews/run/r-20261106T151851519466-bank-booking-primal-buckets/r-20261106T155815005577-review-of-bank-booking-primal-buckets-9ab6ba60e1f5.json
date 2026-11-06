@@ -13,6 +13,13 @@
   "call_sites_emission": "sites",
   "completed_at": "2026-11-06T16:11:36.584Z",
   "dispatched_at": "2026-11-06T15:59:42Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-booking-primal-buckets",
+      "recorded_at": "2026-11-06T16:20:55.591561+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/current.py",

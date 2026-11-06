@@ -334,6 +334,49 @@ def _normal_rings(vertices, count, centre, form, selected, intervals, segments):
     )
 
 
+def _integrate_live_rings(rings, counts, evaluate, zero):
+    """Integrate compact live rings in groups of four without a capacity cutoff."""
+    width = min(4, len(counts))
+    live = counts >= 3
+    count = jnp.sum(live, dtype=jnp.int32)
+    indices = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
+    indices = jnp.pad(indices, (0, (-len(counts)) % width))
+
+    def add(batch, total):
+        start = batch * width
+        selected = jax.lax.dynamic_slice(indices, (start,), (width,))
+        active = start + jnp.arange(width) < count
+        selected_counts = jnp.where(active, counts[selected], 0)
+        value = evaluate(rings[selected], selected_counts, selected)
+        return jax.tree.map(lambda prior, addition: prior + addition, total, value)
+
+    return jax.lax.fori_loop(0, (count + width - 1) // width, add, zero)
+
+
+def _integrate_bucket(mask, width, evaluate, zero):
+    """Evaluate one geometry population, skipping its empty padded buckets."""
+    cells = len(mask)
+    count = jnp.sum(mask, dtype=jnp.int32)
+    indices = jnp.nonzero(mask, size=cells, fill_value=0)[0]
+    indices = jnp.pad(indices, (0, (-cells) % width))
+
+    def add_batch(batch, carried):
+        start = batch * width
+        selected = jax.lax.dynamic_slice(indices, (start,), (width,))
+        active = start + jnp.arange(width) < count
+        response = jax.vmap(evaluate)(selected)
+
+        def scatter(total, value):
+            shape = (width,) + (1,) * (value.ndim - 1)
+            return total.at[selected].add(jnp.where(active.reshape(shape), value, 0.0))
+
+        return jax.tree.map(scatter, carried, response)
+
+    # A conditional under vmap evaluates both branches. The population bounds
+    # this loop so an empty geometry bucket never integrates.
+    return jax.lax.fori_loop(0, (count + width - 1) // width, add_batch, zero)
+
+
 def book(psi, read, geometry, profile, quadrature=Quadrature()):
     """Integrate every selected fragment and normalize its current once.
 
@@ -388,49 +431,39 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         counts = geometry.vertex_count[index][None]
         return integrate(index, rings, counts)
 
-    def integrate_live_rings(index, rings, counts):
-        live = counts >= 3
-        live_count = jnp.sum(live, dtype=jnp.int32)
-        ring_index = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
+    def live_rings(index, rings, counts):
         zero = ClippedCurrentMoments(*(jnp.zeros((), rings.dtype) for _ in range(3)))
+        return _integrate_live_rings(
+            rings,
+            counts,
+            lambda selected, sizes, _: integrate(index, selected, sizes),
+            zero,
+        )
 
-        def add_ring(slot, total):
-            ring = ring_index[slot]
-            value = integrate(index, rings[ring][None], counts[ring][None])
-            return jax.tree.map(lambda prior, addition: prior + addition, total, value)
+    def conic_cell(index):
+        rings, counts, valid = _conic_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            geometry.pitch[index],
+            signed[index],
+            read.fragment_selected[index],
+            quadrature.segments,
+        )
+        moments = live_rings(index, rings, counts)
+        return jax.tree.map(lambda value: jnp.where(valid, value, jnp.nan), moments)
 
-        return jax.lax.fori_loop(0, live_count, add_ring, zero)
-
-    def cut_cell(index):
-        centre = geometry.centre[index]
-        vertices, count = geometry.vertices[index], geometry.vertex_count[index]
-
-        def conic(_):
-            rings, counts, valid = _conic_rings(
-                vertices,
-                count,
-                centre,
-                geometry.pitch[index],
-                signed[index],
-                read.fragment_selected[index],
-                quadrature.segments,
-            )
-            moments = integrate_live_rings(index, rings, counts)
-            return jax.tree.map(lambda value: jnp.where(valid, value, jnp.nan), moments)
-
-        def normal(_):
-            rings, counts = _normal_rings(
-                vertices,
-                count,
-                centre,
-                read.saddle_form,
-                read.fragment_selected[index],
-                read.edge_interval[index],
-                quadrature.segments,
-            )
-            return integrate_live_rings(index, rings, counts)
-
-        return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
+    def normal_cell(index):
+        rings, counts = _normal_rings(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            geometry.centre[index],
+            read.saddle_form,
+            read.fragment_selected[index],
+            read.edge_interval[index],
+            quadrature.segments,
+        )
+        return live_rings(index, rings, counts)
 
     cells = len(geometry.centre)
     full = read.membership >= 1 - 1e-14
@@ -438,28 +471,16 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
 
-    # Only the compact cut batch carries sampled rings. The number of batches
-    # varies with the read, while the compiled batch width bounds device memory.
-    batch_width = 32
-    cut_count = jnp.sum(cut, dtype=jnp.int32)
-    cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
-    cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))
-
-    def add_batch(batch, carried):
-        start = batch * batch_width
-        indices = jax.lax.dynamic_slice(cut_index, (start,), (batch_width,))
-        active = start + jnp.arange(batch_width) < cut_count
-        values = jax.vmap(cut_cell)(indices)
-
-        def scatter(total, value):
-            return total.at[indices].add(jnp.where(active, value, 0.0))
-
-        return jax.tree.map(scatter, carried, values)
-
-    cuts = jax.tree.map(jnp.zeros_like, whole)
-    cuts = jax.lax.fori_loop(
-        0, (cut_count + batch_width - 1) // batch_width, add_batch, cuts
+    if quadrature.cut_batch_width < 1:
+        raise ValueError("cut batch width must be positive")
+    batch_width = min(quadrature.cut_batch_width, cells)
+    normal = cut & read.normal_form_cells
+    zero = jax.tree.map(jnp.zeros_like, whole)
+    conic = _integrate_bucket(cut & ~normal, batch_width, conic_cell, zero)
+    normal = _integrate_bucket(
+        normal, min(_NORMAL_CUT_BATCH_WIDTH, cells), normal_cell, zero
     )
+    cuts = jax.tree.map(lambda left, right: left + right, conic, normal)
     moments = jax.tree.map(
         lambda full_value, cut_value: full_value + cut_value, whole, cuts
     )
@@ -712,22 +733,11 @@ def book_tangent_channels(
             )
 
     def live_rings(index, rings, counts, velocity=None):
-        """Integrate selected rings in bounded groups, retaining every live ring."""
-        width = min(4, len(counts))
-        live = counts >= 3
-        count = jnp.sum(live, dtype=jnp.int32)
-        indices = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
-        indices = jnp.pad(indices, (0, (-len(counts)) % width))
-
-        def add(batch, total):
-            start = batch * width
-            selected = jax.lax.dynamic_slice(indices, (start,), (width,))
-            active = start + jnp.arange(width) < count
-            selected_counts = jnp.where(active, counts[selected], 0)
-            value = interior(index, rings[selected], selected_counts)
+        def evaluate(selected_rings, selected_counts, selected):
+            value = interior(index, selected_rings, selected_counts)
             if velocity is not None:
                 moved = moving_polygon_current_moment_tangents(
-                    rings[selected],
+                    selected_rings,
                     velocity[:, selected],
                     selected_counts,
                     geometry.centre[index],
@@ -739,13 +749,10 @@ def book_tangent_channels(
                     tuple(jnp.sum(component, axis=1) for component in moved), axis=-1
                 )
                 value = value.at[boundary_channels].add(moving)
-            return total + value
+            return value
 
-        return jax.lax.fori_loop(
-            0,
-            (count + width - 1) // width,
-            add,
-            jnp.zeros((channels, 3), dtype=psi.dtype),
+        return _integrate_live_rings(
+            rings, counts, evaluate, jnp.zeros((channels, 3), dtype=psi.dtype)
         )
 
     def conic_cell(index):
@@ -802,29 +809,12 @@ def book_tangent_channels(
         raise ValueError("cut batch width must be positive")
     batch_width = min(quadrature.cut_batch_width, cells)
 
-    def integrate_bucket(mask, width, evaluate):
-        count = jnp.sum(mask, dtype=jnp.int32)
-        indices = jnp.nonzero(mask, size=cells, fill_value=0)[0]
-        indices = jnp.pad(indices, (0, (-cells) % width))
-
-        def add_batch(batch, carried):
-            start = batch * width
-            selected = jax.lax.dynamic_slice(indices, (start,), (width,))
-            active = start + jnp.arange(width) < count
-            response = jax.vmap(evaluate)(selected)
-            return carried.at[selected].add(
-                jnp.where(active[:, None, None], response, 0.0)
-            )
-
-        # A batched conditional evaluates both branches. Bound the loop by
-        # the selected population so empty padded buckets never integrate.
-        return jax.lax.fori_loop(
-            0, (count + width - 1) // width, add_batch, jnp.zeros_like(whole)
-        )
-
     normal = cut & read.normal_form_cells
-    cuts = integrate_bucket(cut & ~normal, batch_width, conic_cell)
-    cuts += integrate_bucket(normal, min(_NORMAL_CUT_BATCH_WIDTH, cells), normal_cell)
+    zero = jnp.zeros_like(whole)
+    cuts = _integrate_bucket(cut & ~normal, batch_width, conic_cell, zero)
+    cuts += _integrate_bucket(
+        normal, min(_NORMAL_CUT_BATCH_WIDTH, cells), normal_cell, zero
+    )
     raw = whole + cuts
     total_rate = jnp.sum(raw[:, :, 0], axis=0)
     scale_rate = (

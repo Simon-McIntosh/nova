@@ -6,6 +6,7 @@ import json
 import difflib
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import sys
@@ -65,8 +66,18 @@ def run_file(tree, revision, name, label, run, scratch, selection=None):
         JAX_PLATFORMS="cpu",
         OPENBLAS_NUM_THREADS="1",
         OMP_NUM_THREADS="2",
+        TMPDIR=str(scratch),
     )
     path = run / f"{label}-{name}.log"
+    if os.environ.get("NOVA_WALL_SUITE_RETRY") and path.exists():
+        previous = path.read_text()
+        if re.search(r"^=+ .* in .* =+$", previous, re.MULTILINE):
+            print("RETAIN_COMPLETE", path, flush=True)
+            return int(previous.splitlines()[-1].split("=", 1)[1])
+        retained = path.with_suffix(".interrupted.log")
+        assert not retained.exists(), retained
+        path.rename(retained)
+        print("RETAIN_INTERRUPTED", retained, flush=True)
     with path.open("w") as log:
         log.write(
             f"# revision: {revision} tree: {tree} command: {shlex.join(command)}\n"
@@ -150,7 +161,8 @@ def main():
                 for name in names
             ]
 
-        with ThreadPoolExecutor(max_workers=2) as pool:
+        workers = 1 if os.environ.get("NOVA_WALL_SUITE_RETRY") else 2
+        with ThreadPoolExecutor(max_workers=workers) as pool:
             before = pool.submit(arm, "base", base, args.base, BASE_FILES)
             after = pool.submit(
                 arm, "head", args.root, head, ("test_wall_events_batched", *BASE_FILES)

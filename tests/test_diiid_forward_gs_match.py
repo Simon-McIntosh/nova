@@ -412,7 +412,7 @@ def test_single_shot_gate_rejects_a_row_without_the_banked_read_block():
         gate._require_banked_reads(rows)
 
 
-@pytest.mark.timeout(900)
+@pytest.mark.timeout(600)
 def test_a_persisted_frame_assembles_its_separatrix_from_its_own_field():
     """At least one banked frame closes its own separatrix and measures its gap.
 
@@ -436,24 +436,25 @@ def test_a_persisted_frame_assembles_its_separatrix_from_its_own_field():
     ]
     assert available, "no persisted frame is available to rebuild"
     for record in available[:1]:
-        if not record.get("operand_path") or record.get("display_map") is None:
-            continue
         result = gate._frame_result_from_checkpoint(record)
-        selected = gate.SelectedFrame(
+        axis_rz = result.banked_read.get("nova_axis_rz_m")
+        assert axis_rz is not None, f"frame {result.frame} has no persisted axis"
+        row = gate._read(
             gate.DEFAULT_DATA / result.shot,
-            result.frame,
-            result.time_ms,
-            result.target_current_a,
+            ("efit_lcfs_n", "efit_lcfs_r", "efit_lcfs_z"),
         )
-        fields = gate._restored_panel_fields(selected, result)
+        count = int(row["efit_lcfs_n"][result.frame])
+        labelled = np.c_[
+            np.asarray(row["efit_lcfs_r"][result.frame][:count], dtype=float),
+            np.asarray(row["efit_lcfs_z"][result.frame][:count], dtype=float),
+        ]
         operands = gate.load_frame_operands(Path(record["operand_path"]))
         response = np.load(Path(record["display_map"]["conductor_response_path"]))
         closed, _branches = gate.rebuild_frame_separatrix(
-            operands, response, fields["display_axis_rz"]
+            operands, response, axis_rz
         )
         if len(closed) == 0:
             continue
-        labelled = np.asarray(fields["labelled_closed_boundary"], dtype=float)
         rms_mm, sup_mm = gate.contour_separation(closed, labelled)
         assert np.isfinite(rms_mm), f"frame {result.frame} has no finite rms distance"
         assert np.isfinite(sup_mm), f"frame {result.frame} has no finite sup distance"

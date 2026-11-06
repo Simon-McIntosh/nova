@@ -3693,8 +3693,8 @@ def render_frame_comparison(
     ):
         poloidal_axes(axis)
         label = (
-            f"{Path(result.shot).stem}\nframe {result.frame} · "
-            f"converged={result.converged}"
+            f"shot {Path(result.shot).stem.split('_')[-1][-8:]}\n"
+            f"frame {result.frame} · conv={result.converged}"
         )
         if result.display_map is not None:
             display = result.display_map
@@ -3717,7 +3717,7 @@ def render_frame_comparison(
         else:
             label += f"\n{frame.get('plot_unavailable_reason', 'display unavailable')}"
         position = axis.get_position()
-        figure.text(position.x0, 0.24, label, va="top", fontsize=14)
+        figure.text(position.x0, 0.26, label, va="top", fontsize=14)
         if "labelled" not in frame:
             continue
         radius, height = frame["radius"], frame["height"]
@@ -3949,7 +3949,10 @@ def displacement_figure(
         boundary = np.asarray(frame["labelled_closed_boundary"])
         axis.plot(boundary[:, 0], boundary[:, 1], color="0.55", linewidth=1.3)
         displacement = result.displacement_decomposition
-        label = f"{result.shot}\nframe {result.frame}"
+        label = (
+            f"shot {Path(result.shot).stem.split('_')[-1][-8:]}\n"
+            f"frame {result.frame}"
+        )
         if displacement is None:
             label += "\nunavailable: no qualified axis"
         else:

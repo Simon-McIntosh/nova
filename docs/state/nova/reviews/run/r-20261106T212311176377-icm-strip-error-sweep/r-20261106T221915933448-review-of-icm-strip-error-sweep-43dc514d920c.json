@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "unmeasured: the reviewed manifest records no baseline_suite and no after_suite arm (its gate is a measurement script, not a suite), so there is no baseline/after pair to difference; the zero is the neutral value the record shape requires, not a measurement. I re-ran the named gate at the head it read and it exited 0.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T22:38:48.643Z",
+  "dispatched_at": "2026-11-06T22:21:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html",
+      "line": 113,
+      "severity": "non-blocking",
+      "text": "the caption places the eps-squared model branch \"on the left\" and the rounding branch \"on the right\", but the plotted axis runs 1e-8 (left) to 1e-2 (right), so the model branch is the right-hand one and the rounding branch the left, and the same sentence's \"one to two decades above the line\" understates the measured 2.1 to 2.8 decades; a reader following the caption looks at the wrong branch of the only figure the decision carries."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html",
+      "line": 125,
+      "severity": "non-blocking",
+      "text": "the fragment says \"the kernel's own arithmetic is exact to double-double\", but no double-double arithmetic exists anywhere in nova (grep for double-double, longdouble and float128 over nova/ returns nothing and nova/biot/polygonanalytic.py works in float64), so the sentence attributes the measured rounding branch to a mechanism that is not there, though the conclusion is unaffected because plain double rounding is at least as large."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html",
+      "line": 37,
+      "severity": "non-blocking",
+      "text": "the fragment cites an \"independent 80-node Gauss-Legendre quadrature\" as the control that caught the swapped target/source argument order, but no such control is in the landed tree (scripts/edge_sheet holds only reference, sweep, verify and figure), so a reader cannot re-run the check the reference's validity rests on."
+    },
+    {
+      "file": "scripts/edge_sheet/verify.py",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "the gate iterates whatever slopes and targets the receipt happens to hold and asserts neither the fixed five slopes, twelve targets and thirteen widths that the done_when fixes nor that a non-converging target was reported rather than dropped, so a receipt that lost a slope or a target still prints EXIT=0."
+    },
+    {
+      "file": "scripts/edge_sheet/figure.py",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "save_checked re-implements a helper the repository already carries at scripts/prototypes/bank_solve_profile/plot.py:45 and scripts/prototypes/bank_solve_driver/plot.py:28, and the prototype also declares the 31.1x16 cm canvas this copy omits, so a third copy means the next restyle fixes none of them together."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read the single commit 43dc514d9 against its parent ef00960ce: six files, 2331 insertions, no deletions, a two-part message with no AI trailer and no worktree path, adding the reference, the sweep, the gate, the figure script, the SVG and the evidence fragment.",
+    "done_when": "\u00a72's measure fixes five slopes, twelve targets and thirteen widths, a strict interior turnover, and per-slope best/eps/rounding; scripts/edge_sheet/verify.py:27-83 asserts reference convergence and the interior turnover and prints \"targets 60 combined best 6.748e-08 at eps/L 1.00e-04 fractions meeting 1e-10: none\" with EXIT=0, but it never asserts the 5x12x13 coverage the done_when fixes.",
+    "goal": "the node's goal is to measure the Part V strip's relative error against a Gauss-Legendre ring-integral reference over the fixed target set and widths and record, per slope, the best attainable error, the eps that gives it, the rounding term and whether any one edge-length fraction meets 1e-10; scripts/edge_sheet/sweep.py:80-168 computes exactly those four quantities over the geometry it fixes at sweep.py:36-52.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T212311176377-icm-strip-error-sweep/manifest.md; status complete, commit 43dc514d9, a rerunnable tests line ending EXIT=0 over 60 targets, two retry failures each with a scaffolding attribution, and a figure it records as rendered and inspected.",
+    "write_paths": "the manifest declares scripts/edge_sheet, docs/figures/edge-sheet, the fragment html and a docs/figures/iron-core-magnetisation path; git show --stat 43dc514d9 changes scripts/edge_sheet/{reference,sweep,verify,figure}.py, docs/figures/edge-sheet/strip-error-vs-width.svg and docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html, all inside them."
+  },
+  "justifications": {
+    "durability": "no test file is added and scripts/edge_sheet/verify.py:22-23 reads a stored JSON receipt from outside the repository, so a regression in scripts/edge_sheet/reference.py cannot redden the gate unless someone regenerates the receipt and re-runs it.",
+    "evidence": "scripts/edge_sheet/verify.py:82 prints EXIT=0 over 60 targets and I reproduced slope 0 at the reviewed head bit-identically against the receipt (max relative difference 0.0 over 12 targets x 13 widths) with an independent scipy.integrate.quad control agreeing to 1e-15 at eight targets, but the gate asserts only convergence and turnover and the 80-node control the fragment cites at line 37 is not in the tree.",
+    "fit": "scripts/edge_sheet/reference.py:46-57 follows the repository's frozen-dataclass and typed-module idiom and the names describe capability, with two small deviations, a dead Target.degenerate field at reference.py:82 and an SVG canvas declared in pt rather than the 31.1x16 cm the figure rule sets.",
+    "goal_fidelity": "scripts/edge_sheet/sweep.py:138-168 records per-slope best error, best fraction, the fitted model and rounding terms and the combined fractions-meeting list, and scripts/edge_sheet/reference.py:189 is importable for the next node, which is what the goal asks for.",
+    "reuse": "the reference and sweep are new capability (a search over nova/biot and scripts found leggauss users but no segment line-integral reference), while scripts/edge_sheet/figure.py:48 adds a third copy of the checked-save helper already carried at scripts/prototypes/bank_solve_profile/plot.py:45 and scripts/prototypes/bank_solve_driver/plot.py:28 instead of promoting one owner.",
+    "scope_discipline": "git show --stat 43dc514d9 lists six files, every one inside the manifest's declared write paths, with no plan edit, no tests and no product source touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure the Part V strip's relative error against a Gauss-Legendre ring-integral reference over the fixed target set and widths and record, per slope, the best attainable error, the eps that gives it, the rounding term and whether any one edge-length fraction meets 1e-10; scripts/edge_sheet/sweep.py:80-168 computes exactly those four quantities over the geometry it fixes at sweep.py:36-52.\nVERDICT done_when: \u00a72's measure fixes five slopes, twelve targets and thirteen widths, a strict interior turnover, and per-slope best/eps/rounding; scripts/edge_sheet/verify.py:27-83 asserts reference convergence and the interior turnover and prints \"targets 60 combined best 6.748e-08 at eps/L 1.00e-04 fractions meeting 1e-10: none\" with EXIT=0, but it never asserts the 5x12x13 coverage the done_when fixes.\nVERDICT write_paths: the manifest declares scripts/edge_sheet, docs/figures/edge-sheet, the fragment html and a docs/figures/iron-core-magnetisation path; git show --stat 43dc514d9 changes scripts/edge_sheet/{reference,sweep,verify,figure}.py, docs/figures/edge-sheet/strip-error-vs-width.svg and docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html, all inside them.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T212311176377-icm-strip-error-sweep/manifest.md; status complete, commit 43dc514d9, a rerunnable tests line ending EXIT=0 over 60 targets, two retry failures each with a scaffolding attribution, and a figure it records as rendered and inspected.\nVERDICT diff: read the single commit 43dc514d9 against its parent ef00960ce: six files, 2331 insertions, no deletions, a two-part message with no AI trailer and no worktree path, adding the reference, the sweep, the gate, the figure script, the SVG and the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/edge_sheet/sweep.py:138-168 records per-slope best error, best fraction, the fitted model and rounding terms and the combined fractions-meeting list, and scripts/edge_sheet/reference.py:189 is importable for the next node, which is what the goal asks for.\nSCORE evidence: 16\nJUSTIFICATION evidence: scripts/edge_sheet/verify.py:82 prints EXIT=0 over 60 targets and I reproduced slope 0 at the reviewed head bit-identically against the receipt (max relative difference 0.0 over 12 targets x 13 widths) with an independent scipy.integrate.quad control agreeing to 1e-15 at eight targets, but the gate asserts only convergence and turnover and the 80-node control the fragment cites at line 37 is not in the tree.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 43dc514d9 lists six files, every one inside the manifest's declared write paths, with no plan edit, no tests and no product source touched.\nSCORE durability: 7\nJUSTIFICATION durability: no test file is added and scripts/edge_sheet/verify.py:22-23 reads a stored JSON receipt from outside the repository, so a regression in scripts/edge_sheet/reference.py cannot redden the gate unless someone regenerates the receipt and re-runs it.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/edge_sheet/reference.py:46-57 follows the repository's frozen-dataclass and typed-module idiom and the names describe capability, with two small deviations, a dead Target.degenerate field at reference.py:82 and an SVG canvas declared in pt rather than the 31.1x16 cm the figure rule sets.\nSCORE reuse: 11\nJUSTIFICATION reuse: the reference and sweep are new capability (a search over nova/biot and scripts found leggauss users but no segment line-integral reference), while scripts/edge_sheet/figure.py:48 adds a third copy of the checked-save helper already carried at scripts/prototypes/bank_solve_profile/plot.py:45 and scripts/prototypes/bank_solve_driver/plot.py:28 instead of promoting one owner.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html:113 non-blocking: the caption places the eps-squared model branch \"on the left\" and the rounding branch \"on the right\", but the plotted axis runs 1e-8 (left) to 1e-2 (right), so the model branch is the right-hand one and the rounding branch the left, and the same sentence's \"one to two decades above the line\" understates the measured 2.1 to 2.8 decades; a reader following the caption looks at the wrong branch of the only figure the decision carries.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html:125 non-blocking: the fragment says \"the kernel's own arithmetic is exact to double-double\", but no double-double arithmetic exists anywhere in nova (grep for double-double, longdouble and float128 over nova/ returns nothing and nova/biot/polygonanalytic.py works in float64), so the sentence attributes the measured rounding branch to a mechanism that is not there, though the conclusion is unaffected because plain double rounding is at least as large.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-strip-error-sweep.html:37 non-blocking: the fragment cites an \"independent 80-node Gauss-Legendre quadrature\" as the control that caught the swapped target/source argument order, but no such control is in the landed tree (scripts/edge_sheet holds only reference, sweep, verify and figure), so a reader cannot re-run the check the reference's validity rests on.\nFINDING scripts/edge_sheet/verify.py:27 non-blocking: the gate iterates whatever slopes and targets the receipt happens to hold and asserts neither the fixed five slopes, twelve targets and thirteen widths that the done_when fixes nor that a non-converging target was reported rather than dropped, so a receipt that lost a slope or a target still prints EXIT=0.\nFINDING scripts/edge_sheet/figure.py:48 non-blocking: save_checked re-implements a helper the repository already carries at scripts/prototypes/bank_solve_profile/plot.py:45 and scripts/prototypes/bank_solve_driver/plot.py:28, and the prototype also declares the 31.1x16 cm canvas this copy omits, so a third copy means the next restyle fixes none of them together.",
+  "review_run_id": "r-20261106T221915933448-review-of-icm-strip-error-sweep-43dc514d920c",
+  "reviewed_base_sha": "ef00960ce48677f2eb922a389b8759a23284aa40",
+  "reviewed_head_sha": "43dc514d920cdb3a7a873f10c68b00e5b14dfda5",
+  "reviewed_run_id": "r-20261106T212311176377-icm-strip-error-sweep",
+  "scores": {
+    "durability": 7,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 11,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:12:00+00:00",
+  "total": 88
+}

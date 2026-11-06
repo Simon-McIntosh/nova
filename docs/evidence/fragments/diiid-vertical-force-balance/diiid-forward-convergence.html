@@ -18,24 +18,54 @@ number that separates the mechanism from the alternatives.</p>
 
 <table>
 <thead><tr>
-<th>frame</th><th>branch</th><th>seed</th><th>per-promotion relative residual</th><th>mask difference</th><th>terminal class</th><th>discriminating measurement</th>
+<th>frame</th><th>branch</th><th>seed</th><th>per-promotion relative residual</th><th>mask difference</th><th>terminal class</th><th>achieved topology</th><th>discriminating measurement</th>
 </tr></thead>
 <tbody>
-<tr><td>179</td><td>diverted</td><td>bank cold portfolio</td><td>0.418096 &rarr; 0.418096</td><td>13 &rarr; 0</td><td>contraction stall (active-set stagnation at a frozen mask)</td><td>residual change over the terminal promotion is exactly <code>0.0</code> while the mask difference is <code>0</code>; the mask-switch hypothesis predicts a repeating non-zero mask difference and is falsified</td></tr>
-<tr><td>179</td><td>limited</td><td>bank cold portfolio</td><td>not banked (the bank returns only the diverted receipt)</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.027262</code>, 15.3&times; below the diverted terminal</td></tr>
-<tr><td>44</td><td>diverted</td><td>bank cold portfolio</td><td>4.275696 &rarr; 4.275696</td><td>75 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>residual change <code>0.0</code> at mask difference <code>0</code>, from the largest seed mask disagreement of the cohort</td></tr>
-<tr><td>44</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.197003</code>, 21.7&times; below the diverted terminal</td></tr>
-<tr><td>144</td><td>both</td><td>bank cold portfolio</td><td>&mdash; (no promotion ran)</td><td>&mdash;</td><td>refusal</td><td><code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; the failure precedes any fixed-point promotion</td></tr>
-<tr><td>146</td><td>diverted</td><td>bank cold portfolio</td><td>0.128182 &rarr; 0.222019 &rarr; 0.065149 &rarr; 0.054962 &rarr; 0.054962</td><td>27 &rarr; 40 &rarr; 1 &rarr; 0 &rarr; 0</td><td>contraction stall (frozen-mask stagnation after the mask settles)</td><td>the mask settles (difference <code>1 &rarr; 0</code>) and the residual stops to <code>1e-17</code> of its previous value</td></tr>
-<tr><td>146</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.063500</code>, and the seed achieved the <i>diverted</i> topology</td></tr>
-<tr><td>137</td><td>diverted</td><td>bank cold portfolio</td><td>0.129858 &rarr; 0.111397 &rarr; 0.067005 &rarr; 0.062369 &rarr; 0.062369</td><td>24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>the mask difference falls to <code>0</code> and the residual repeats bit-identically; cycle damping was never activated (0 at every trip)</td></tr>
-<tr><td>137</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>terminal <code>0.056830</code>, also achieving the diverted topology</td></tr>
+<tr><td>179</td><td>diverted</td><td>bank cold portfolio</td><td>0.418096 &rarr; 0.418096</td><td>13 &rarr; 0</td><td>contraction stall (active-set stagnation at a frozen mask)</td><td>diverted, consistent with its seed</td><td>residual change over the terminal promotion is exactly <code>0.0</code> while the mask difference is <code>0</code>; the mask-switch hypothesis predicts a repeating non-zero mask difference and is falsified</td></tr>
+<tr><td>179</td><td>limited</td><td>bank cold portfolio</td><td>not banked (the bank returns only the diverted receipt)</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.027262</code>, 15.3&times; below the diverted terminal</td></tr>
+<tr><td>44</td><td>diverted</td><td>bank cold portfolio</td><td>4.275696 &rarr; 4.275696</td><td>75 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td><b>limited, inconsistent with its diverted seed</b></td><td>residual change <code>0.0</code> at mask difference <code>0</code>, from the largest seed mask disagreement of the cohort</td></tr>
+<tr><td>44</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.197003</code>, 21.7&times; below the diverted terminal</td></tr>
+<tr><td>144</td><td>both</td><td>bank cold portfolio</td><td>&mdash; (no promotion ran)</td><td>&mdash;</td><td>refusal</td><td>none: refused before a topology read</td><td><code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; the failure precedes any fixed-point promotion</td></tr>
+<tr><td>146</td><td>diverted</td><td>bank cold portfolio</td><td>0.128182 &rarr; 0.222019 &rarr; 0.065149 &rarr; 0.054962 &rarr; 0.054962</td><td>27 &rarr; 40 &rarr; 1 &rarr; 0 &rarr; 0</td><td>contraction stall (frozen-mask stagnation after the mask settles)</td><td><b>limited, inconsistent with its diverted seed</b></td><td>the mask settles (difference <code>1 &rarr; 0</code>) and the residual stops at <code>1e-17</code> of its previous value</td></tr>
+<tr><td>146</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.063500</code></td></tr>
+<tr><td>137</td><td>diverted</td><td>bank cold portfolio</td><td>0.129858 &rarr; 0.111397 &rarr; 0.067005 &rarr; 0.062369 &rarr; 0.062369</td><td>24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>diverted, consistent with its seed</td><td>the mask difference falls to <code>0</code> and the residual repeats bit-identically; cycle damping was never activated (0 at every trip)</td></tr>
+<tr><td>137</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.056830</code></td></tr>
 </tbody>
 </table>
 
 <p>No frame shows a period-2 cycle or a divergence. Cycle damping is <code>0</code> at every trip of every
 branch, so the descent is neither being damped nor rescued by damping. The residuals are strictly above
 tolerance at every terminal and none of the five satisfies the registered criterion.</p>
+
+
+<h3>Is the stall the mechanism, or the consequence of a plasma that left the vessel?</h3>
+
+<p>The frozen-mask terminal is established for four frames. Whether it is the <i>cause</i> of the
+non-convergence or the <i>symptom</i> of a plasma that has lost its position or its current is a separate
+question, and the banked record answers it only partly:</p>
+
+<ul>
+<li>Frame 146's kept terminal places its magnetic axis at <code>Z = +1.56 m</code>, above a vessel whose
+top is near <code>+0.6 m</code>, and its solved saddle outside the wall as well: the terminal state is not a
+confined plasma, and the residual it stalls at (<code>5.50e-2</code>) is the mismatch of a plasma that has
+left the machine rather than of a converged one.</li>
+<li>Frame 44's kept terminal achieves the <i>limited</i> topology at residual <code>4.28</code> — the largest
+of the cohort by two orders of magnitude — while its seed requested diverted. A terminal that changes
+topology and misses its current by that much is a lost plasma, not a slow contraction.</li>
+<li>Frames 179 and 137 terminate with the topology their seed asked for and residuals of
+<code>4.18e-1</code> and <code>6.24e-2</code>; 179's solved axis sits inside the wall but low and inboard of
+the label's, which is the displacement the vertical-force-balance plan already documents.</li>
+</ul>
+
+<p><b>Pending measurement.</b> The both-branch probe records, per promotion and per branch, the axis
+position and its wall containment, the area of the plasma support, and the toroidal current the profile
+carries inside its confined core against the frame's target. It also runs a continued arm with the
+mask-stability exits disabled, so a loop that would otherwise declare settlement has to spend its whole
+trip budget at the frozen mask. Those are the numbers that separate a stall which is the mechanism from a
+stall that is what is left after the plasma leaves. The probe is running as one job
+(<code>sched/1307367</code>, H200) over all five frames; its receipt is
+<code>convergence-receipt.json</code>'s <code>measured_branches</code> block, and until it lands the
+mechanism below is stated as the terminal symptom, not as an established cause.</p>
 
 <h3>The branch decision on frames 179 and 44</h3>
 
@@ -56,8 +86,15 @@ unconditionally, so the limited seed's equilibrium cannot reach the gate however
 <table>
 <thead><tr><th>frame</th><th>diverted terminal</th><th>limited terminal</th><th>ratio</th><th>limited achieved topology</th><th>does the limited terminal touch the wall?</th><th>was the limited residual still falling?</th></tr></thead>
 <tbody>
-<tr><td>179</td><td>0.418096</td><td>0.027262</td><td>15.3&times;</td><td>diverted (topology-inconsistent with its seed)</td><td>No. The terminal read is diverted, so the boundary closes on an X-point rather than on the limiter.</td><td>Not measured: the bank executes the limited seed for two trips and persists only its terminal. Its residual is below the diverted one at the same trip count.</td></tr>
-<tr><td>44</td><td>4.275696</td><td>0.197003</td><td>21.7&times;</td><td>diverted (topology-inconsistent with its seed)</td><td>No, on the same topology read.</td><td>Not measured, on the same record.</td></tr>
+<tr><td>179</td><td>diverted</td><td>bank cold portfolio</td><td>0.418096 &rarr; 0.418096</td><td>13 &rarr; 0</td><td>contraction stall (active-set stagnation at a frozen mask)</td><td>diverted, consistent with its seed</td><td>residual change over the terminal promotion is exactly <code>0.0</code> while the mask difference is <code>0</code>; the mask-switch hypothesis predicts a repeating non-zero mask difference and is falsified</td></tr>
+<tr><td>179</td><td>limited</td><td>bank cold portfolio</td><td>not banked (the bank returns only the diverted receipt)</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.027262</code>, 15.3&times; below the diverted terminal</td></tr>
+<tr><td>44</td><td>diverted</td><td>bank cold portfolio</td><td>4.275696 &rarr; 4.275696</td><td>75 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td><b>limited, inconsistent with its diverted seed</b></td><td>residual change <code>0.0</code> at mask difference <code>0</code>, from the largest seed mask disagreement of the cohort</td></tr>
+<tr><td>44</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.197003</code>, 21.7&times; below the diverted terminal</td></tr>
+<tr><td>144</td><td>both</td><td>bank cold portfolio</td><td>&mdash; (no promotion ran)</td><td>&mdash;</td><td>refusal</td><td>none: refused before a topology read</td><td><code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; the failure precedes any fixed-point promotion</td></tr>
+<tr><td>146</td><td>diverted</td><td>bank cold portfolio</td><td>0.128182 &rarr; 0.222019 &rarr; 0.065149 &rarr; 0.054962 &rarr; 0.054962</td><td>27 &rarr; 40 &rarr; 1 &rarr; 0 &rarr; 0</td><td>contraction stall (frozen-mask stagnation after the mask settles)</td><td><b>limited, inconsistent with its diverted seed</b></td><td>the mask settles (difference <code>1 &rarr; 0</code>) and the residual stops at <code>1e-17</code> of its previous value</td></tr>
+<tr><td>146</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.063500</code></td></tr>
+<tr><td>137</td><td>diverted</td><td>bank cold portfolio</td><td>0.129858 &rarr; 0.111397 &rarr; 0.067005 &rarr; 0.062369 &rarr; 0.062369</td><td>24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>diverted, consistent with its seed</td><td>the mask difference falls to <code>0</code> and the residual repeats bit-identically; cycle damping was never activated (0 at every trip)</td></tr>
+<tr><td>137</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.056830</code></td></tr>
 </tbody>
 </table>
 
@@ -77,12 +114,12 @@ residual and the converged flag.</p>
 
 <figure>
 <img src="/nova/figures/diiid-forward-convergence/frame-179-flux-contours.svg" alt="frame 179 terminal diverted flux contours against the EFIT label, residual 4.18e-1">
-<figcaption>Frame 179. The solved column is displaced and flattened against the label; diverted terminal residual <code>4.181e-01</code>, converged false.</figcaption>
+<figcaption>Frame 179. The solved field (blue) is displaced inboard and its closed surfaces have left the column while the label field (grey) fills the vessel; diverted terminal residual <code>4.181e-01</code>, converged false.</figcaption>
 </figure>
 
 <figure>
 <img src="/nova/figures/diiid-forward-convergence/frame-44-flux-contours.svg" alt="frame 44 terminal diverted flux contours against the EFIT label, residual 4.28e+0">
-<figcaption>Frame 44. The solved surfaces are shifted inward and the separatrix closes far short of the label boundary; diverted terminal residual <code>4.276e+00</code>, converged false.</figcaption>
+<figcaption>Frame 44. The solved surfaces are shifted inward and the separatrix closes far short of the label boundary; diverted terminal residual <code>4.276e+00</code>, converged false, and the kept terminal achieved the <i>limited</i> topology, inconsistent with its diverted seed.</figcaption>
 </figure>
 
 <figure>
@@ -92,7 +129,7 @@ residual and the converged flag.</p>
 
 <figure>
 <img src="/nova/figures/diiid-forward-convergence/frame-146-flux-contours.svg" alt="frame 146 terminal diverted flux contours against the EFIT label, residual 5.50e-2">
-<figcaption>Frame 146. A contracted but displaced column; diverted terminal residual <code>5.496e-02</code>, converged false, and the diverted seed itself achieved the limited topology.</figcaption>
+<figcaption>Frame 146. Diverted terminal residual <code>5.496e-02</code>, converged false. Both the solved axis and the solved saddle lie outside the wall: the markers are hollow because they are outside the containment polygon, and the state they mark is not a confined plasma.</figcaption>
 </figure>
 
 <figure>

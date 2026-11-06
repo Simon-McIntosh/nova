@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "attachment_note": "All ten paths named in the dispatch were opened. The five attachment paths image-1.png, image-3.png, image-5.png, image-7.png and image-9.png are byte-identical to one another (md5 bcff66ac8dad285f35c1cffb4c8f218b, 1400x720, 220404 bytes), and the five repository PNGs are byte-identical to one another (md5 e9dd14eb3214d13a641d638d15b5d942, 1400x720). Attachment versus repository file is not byte-identical (4.63% of pixels differ by more than 10/255) but is the same rendering: the two-line titles occupy the same rows 7-71 with column spans within 4 px of each other (176-519/861-1240 and 174-521/858-1242), and the plotted data occupies exactly the same columns (197-489 and 900-1192) and rows. The verdict below therefore covers one rendered artifact published at five repository paths. The run's own evidence fragment records that the two lane state archives differ (268,798 and 268,758 bytes) while the two lane PNGs are pixel identical, and that every published copy was checked against the inspected H200 image; the identity of the five files is therefore documented rather than a duplicated publish.",
-  "completed_at": "",
+  "completed_at": "2026-11-06T07:22:35.816Z",
   "dispatched_at": "2026-11-06T07:07:08Z",
   "figures_reviewed": [
     "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
@@ -79,6 +79,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-06T07:22:38.553712+00:00",
+  "timestamp": "2026-11-06T07:27:15.943455+00:00",
   "total": null
 }

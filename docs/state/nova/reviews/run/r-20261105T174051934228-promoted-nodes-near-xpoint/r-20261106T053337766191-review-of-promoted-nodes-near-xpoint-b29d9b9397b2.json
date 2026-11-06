@@ -12,6 +12,13 @@
     }
   },
   "dispatched_at": "2026-11-06T05:36:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "promoted-nodes-xpoint-angles",
+      "recorded_at": "2026-11-06T06:13:03.074743+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py",

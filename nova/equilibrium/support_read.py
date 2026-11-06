@@ -1055,8 +1055,8 @@ class NewtonFactor(NamedTuple):
     matrix: jax.Array
     row: jax.Array
     column: jax.Array
-    lu: jax.Array
-    pivots: jax.Array
+    block_inverse: jax.Array
+    indices: jax.Array
 
 
 class NewtonStep(NamedTuple):
@@ -1069,6 +1069,9 @@ class NewtonStep(NamedTuple):
     converged: jax.Array
     factor: NewtonFactor
     refactored: jax.Array
+    krylov_condition: jax.Array = 1.0
+    krylov_residual: jax.Array = 0.0
+    krylov_iterations: jax.Array = 0
 
 
 def _local_booking_sensitivities(
@@ -1298,6 +1301,102 @@ def _krylov_condition_estimate(matvec, size: int, width: int = 8):
     return jnp.maximum(largest / smallest, 1.0)
 
 
+def _block_preconditioner(matrix):
+    """Invert each cell's three moment components, stored in component blocks."""
+    cells = matrix.shape[0] // 3
+    indices = jnp.arange(cells)[:, None] + cells * jnp.arange(3)[None, :]
+    blocks = matrix[indices[:, :, None], indices[:, None, :]]
+    cofactors = jnp.stack(
+        (
+            jnp.cross(blocks[:, 1], blocks[:, 2]),
+            jnp.cross(blocks[:, 2], blocks[:, 0]),
+            jnp.cross(blocks[:, 0], blocks[:, 1]),
+        ),
+        axis=1,
+    )
+    determinant = jnp.sum(blocks[:, 0] * cofactors[:, 0], axis=-1)
+    inverse = jnp.swapaxes(cofactors, -1, -2) / determinant[:, None, None]
+    return inverse.reshape(-1, 3), indices.reshape(-1)
+
+
+def _apply_block_inverse(inverse, indices, vector):
+    values = jnp.einsum(
+        "cij,cj->ci", inverse.reshape(-1, 3, 3), vector[indices].reshape(-1, 3)
+    )
+    return values.T.reshape(-1)
+
+
+def _block_gmres(matrix, right, inverse, indices, *, max_iterations=400):
+    """Restarted Arnoldi solve with a measured preconditioned residual bound.
+
+    Twice-applied classical Gram-Schmidt keeps the basis orthogonal without
+    a kernel per earlier vector. QR solves the small least-squares problem;
+    the true residual, rather than its Hessenberg estimate, decides each restart.
+    """
+    from jax.scipy.linalg import solve_triangular
+
+    def precondition(value):
+        return _apply_block_inverse(inverse, indices, value)
+
+    def matvec(value):
+        return precondition(matrix @ value)
+
+    condition = _krylov_condition_estimate(matvec, right.size)
+    target = precondition(right)
+    target_norm = jnp.linalg.norm(target)
+    denominator = jnp.where(target_norm > 0, target_norm, 1.0)
+    width = min(20, right.size)
+
+    def relative(solution):
+        return jnp.linalg.norm(precondition(right - matrix @ solution)) / denominator
+
+    def cycle(carried):
+        solution, steps, _ = carried
+        residual = precondition(right - matrix @ solution)
+        norm = jnp.linalg.norm(residual)
+        vectors = jnp.zeros((right.size, width + 1), right.dtype)
+        vectors = vectors.at[:, 0].set(residual / jnp.where(norm > 0, norm, 1.0))
+        hessenberg = jnp.eye(width + 1, width, dtype=right.dtype)
+
+        def advance(state):
+            basis, h, count, _ = state
+            candidate = matvec(basis[:, count])
+            scale = jnp.linalg.norm(candidate)
+            projection = basis.T @ candidate
+            candidate = candidate - basis @ projection
+            correction = basis.T @ candidate
+            candidate = candidate - basis @ correction
+            length = jnp.linalg.norm(candidate)
+            breakdown = length <= jnp.finfo(right.dtype).eps * scale
+            basis = basis.at[:, count + 1].set(
+                jnp.where(
+                    breakdown, 0.0, candidate / jnp.where(length > 0, length, 1.0)
+                )
+            )
+            h = h.at[:, count].set(projection + correction)
+            h = h.at[count + 1, count].set(length)
+            return basis, h, count + 1, breakdown
+
+        vectors, hessenberg, count, _ = jax.lax.while_loop(
+            lambda state: (
+                (state[2] < width) & (steps + state[2] < max_iterations) & ~state[3]
+            ),
+            advance,
+            (vectors, hessenberg, jnp.asarray(0), jnp.asarray(False)),
+        )
+        orthogonal, triangular = jnp.linalg.qr(hessenberg, mode="reduced")
+        coefficients = solve_triangular(triangular, norm * orthogonal[0])
+        solution = solution + vectors[:, :width] @ coefficients
+        return solution, steps + count, relative(solution)
+
+    solution, steps, residual = jax.lax.while_loop(
+        lambda state: (state[1] < max_iterations) & (condition * state[2] > 1e-8),
+        cycle,
+        (jnp.zeros_like(right), jnp.asarray(0), relative(jnp.zeros_like(right))),
+    )
+    return solution, condition, residual, steps
+
+
 def newton_step(
     operands,
     moments,
@@ -1314,8 +1413,10 @@ def newton_step(
     """Solve the bank-backed linear system at one fixed support decision.
 
     Local analytic booking sensitivities compose with the bank into a dense
-    matrix. Physical moment scales and diagonal equilibration precede LU.
-    A carried factor skips assembly while the fresh residual contracts by at
+    matrix. Physical moment scales and diagonal equilibration precede block
+    GMRES. Its condition estimate and residual both describe the equilibrated,
+    left-preconditioned operator; their product must be at most 1e-8.
+    A carried block inverse skips assembly while the fresh residual contracts by at
     least half. Its linear residual certifies the carried matrix solve; the
     caller must check convergence against a fresh read of the new state.
     Exact condition estimates are automatic only for a single-cell diagnostic
@@ -1327,7 +1428,6 @@ def newton_step(
         condition_diagnostics = cells == 1
     boundaries = (cells, 2 * cells)
     right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
-    from jax.scipy import linalg
 
     def rebuild(_):
         matrix = step_jacobian(
@@ -1341,8 +1441,8 @@ def newton_step(
             fresh_geometry=fresh_geometry,
         )
         balanced, row, column = _equilibrate(matrix, moments, residual.booked)
-        lu, pivots = linalg.lu_factor(balanced)
-        return NewtonFactor(matrix, row, column, lu, pivots)
+        inverse, indices = _block_preconditioner(balanced)
+        return NewtonFactor(matrix, row, column, inverse, indices)
 
     if factor_cache is None:
         factor = rebuild(None)
@@ -1355,15 +1455,17 @@ def newton_step(
         reuse = jnp.isfinite(contraction_ratio) & (contraction_ratio <= 0.5)
         factor = jax.lax.cond(reuse, lambda _: factor_cache, rebuild, None)
         refactored = ~reuse
-    solution = factor.column * linalg.lu_solve(
-        (factor.lu, factor.pivots), right / factor.row
+    balanced = factor.matrix * factor.column[None, :] / factor.row[:, None]
+    solution, condition, krylov_residual, iterations = _block_gmres(
+        balanced, right / factor.row, factor.block_inverse, factor.indices
     )
-    linear_residual = jnp.linalg.norm(
-        factor.matrix @ solution - right
-    ) / jnp.linalg.norm(right)
+    solution = factor.column * solution
+    right_norm = jnp.linalg.norm(right)
+    linear_residual = jnp.linalg.norm(factor.matrix @ solution - right) / jnp.where(
+        right_norm > 0, right_norm, 1.0
+    )
     if condition_diagnostics:
         condition_before = jnp.linalg.cond(factor.matrix)
-        balanced = factor.matrix * factor.column[None, :] / factor.row[:, None]
         condition_after = jnp.linalg.cond(balanced)
     else:
         condition_before = jnp.asarray(jnp.nan, dtype=factor.matrix.dtype)
@@ -1373,9 +1475,12 @@ def newton_step(
         condition_before,
         condition_after,
         linear_residual,
-        linear_residual <= 1e-8,
+        jnp.isfinite(krylov_residual) & (condition * krylov_residual <= 1e-8),
         factor,
         refactored,
+        condition,
+        krylov_residual,
+        iterations,
     )
 
 
@@ -1558,7 +1663,7 @@ def solve_batch(
         jnp.zeros((lanes, size, size), dtype),
         jnp.ones((lanes, size), dtype),
         jnp.ones((lanes, size), dtype),
-        jnp.zeros((lanes, size, size), dtype),
+        jnp.zeros((lanes, size, 3), dtype),
         jnp.zeros((lanes, size), jnp.int32),
     )
     empty_set = jnp.zeros_like(support.reading.normal_form_cells)

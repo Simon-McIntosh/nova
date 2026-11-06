@@ -295,7 +295,7 @@ def test_diagonal_equilibration_reduces_scale_disparity():
 
 
 def test_dense_newton_step_solves_scaled_residual(monkeypatch):
-    """The delivered step applies the scaled LU update to all moment blocks."""
+    """The equilibrated Krylov update solves all physical moment blocks."""
     matrix = jnp.asarray([[1e-6, 2e-7, 0.0], [0.0, 1.0, 0.2], [0.0, 0.0, 1e6]])
     moments = tuple(jnp.asarray([1.0]) for _ in range(3))
     residual = tuple(jnp.asarray([value]) for value in (1e-6, 1.0, 1e6))
@@ -305,7 +305,7 @@ def test_dense_newton_step_solves_scaled_residual(monkeypatch):
         "step_residual",
         lambda *args: support_read.StepResidual(residual, booked, None, True),
     )
-    monkeypatch.setattr(support_read, "step_jacobian", lambda *args: matrix)
+    monkeypatch.setattr(support_read, "step_jacobian", lambda *args, **kwargs: matrix)
     step = support_read.newton_step(None, moments, None, None, None, None)
     actual = jnp.concatenate(step.update)
     expected = np.linalg.solve(np.asarray(matrix), -np.asarray([1e-6, 1.0, 1e6]))
@@ -313,6 +313,130 @@ def test_dense_newton_step_solves_scaled_residual(monkeypatch):
     assert float(step.linear_residual) < 1e-12
     assert float(step.condition_after) < float(step.condition_before)
     assert bool(step.converged)
+
+
+@pytest.fixture(scope="module")
+def diverted_linear_states():
+    from scripts.prototypes.bank_solve_profile import fixture
+
+    batch = fixture.build(1)
+    assert batch.states[0].shape == (1, 550)
+
+    @jax.jit
+    def converge(bank, cache, states, seeds, previous):
+        return support_read.solve_batch(
+            bank,
+            cache,
+            states,
+            seeds,
+            previous,
+            batch.convention,
+            batch.policy,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+        )
+
+    result = jax.block_until_ready(
+        converge(
+            batch.operands,
+            batch.cache,
+            batch.states,
+            batch.seeds_batch,
+            batch.previous_batch,
+        )
+    )
+    assert bool(jnp.all(result.converged))
+    assert float(jnp.max(result.residual)) <= 1e-10
+    return batch, {"trial": batch.states, "converged": result.moments}
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(5400)
+@pytest.mark.parametrize("state", ["trial", "converged"])
+def test_diverted_physical_update_matches_double_reference(
+    diverted_linear_states, state
+):
+    """The Krylov coordinate bound must also preserve the physical update."""
+    from scripts.prototypes.bank_solve_profile import fixture
+
+    batch, states = diverted_linear_states
+    moments = tuple(value[0] for value in states[state])
+    support = jax.jit(support_read.read)(
+        batch.operands,
+        batch.cache,
+        moments,
+        batch.seeds,
+        batch.roots,
+        batch.convention,
+        batch.policy,
+    )
+
+    @jax.jit
+    def update(bank, values, reading):
+        return support_read.newton_step(
+            bank,
+            values,
+            reading,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+            fresh_geometry=True,
+        )
+
+    step = jax.block_until_ready(update(batch.operands, moments, support))
+    residual = support_read.step_residual(
+        batch.operands,
+        moments,
+        moments,
+        support,
+        batch.profile,
+        batch.quadrature,
+    )
+    right = -jnp.concatenate(residual.residual)
+    reference = jnp.linalg.solve(step.factor.matrix, right)
+    assert reference.dtype == jnp.float64 and jax.config.jax_enable_x64
+    error = float(
+        jnp.linalg.norm(jnp.concatenate(step.update) - reference)
+        / jnp.linalg.norm(reference)
+    )
+    print(
+        "PHYSICAL_UPDATE",
+        state,
+        "error",
+        error,
+        "condition",
+        float(step.krylov_condition),
+        "iterations",
+        int(step.krylov_iterations),
+        "relative_residual",
+        float(step.krylov_residual),
+        flush=True,
+    )
+    assert error <= 1e-8
+    assert bool(step.converged)
+    assert float(step.krylov_condition * step.krylov_residual) <= 1e-8
+
+
+def test_block_gmres_zero_right_and_iteration_exhaustion():
+    matrix = jnp.asarray([[2.0, 0.3, 0.1], [0.2, 3.0, 0.1], [0.0, 0.1, 4.0]])
+    inverse, indices = support_read._block_preconditioner(matrix)
+    solution, condition, residual, steps = support_read._block_gmres(
+        matrix,
+        jnp.zeros(3),
+        inverse,
+        indices,
+    )
+    np.testing.assert_array_equal(solution, 0.0)
+    assert float(residual) == 0 and int(steps) == 0 and np.isfinite(condition)
+    _, condition, residual, steps = support_read._block_gmres(
+        matrix,
+        jnp.ones(3),
+        jnp.eye(3),
+        jnp.arange(3),
+        max_iterations=1,
+    )
+    assert int(steps) == 1 and float(condition * residual) > 1e-8
 
 
 def test_terminal_verdict_requires_fresh_read():

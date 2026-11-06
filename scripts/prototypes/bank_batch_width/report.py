@@ -1,6 +1,7 @@
 """Validate width receipts and draw the converged wall per slice."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -63,6 +64,11 @@ def main():
                 f"<td>{row['memory']['peak_bytes_in_use'] / 2**30:.3f}</td></tr>"
             )
     assert len(digests) == 1
+    common = args.run / "common-seeds.npz"
+    assert hashlib.sha256(common.read_bytes()).hexdigest() == next(iter(digests))
+    with np.load(common) as saved:
+        assert len(np.unique(saved["scales"])) == 256
+        assert len(np.unique(saved["state_0"], axis=0)) == 256
     (args.run / "summary.json").write_text(json.dumps(rows, indent=2))
     (args.run / "table.html").write_text("\n".join(cells))
     plt.style.use("data-ink")

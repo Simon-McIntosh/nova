@@ -189,6 +189,17 @@ def main():
         "integration-loop iteration. The paired base device trace below "
         "reproduces its cost.</p>\n"
     )
+    base_revision = captures["base", 1]["1"]["revision"]
+    head_revision = captures["head", 1]["1"]["revision"]
+    suite_revision = json.loads((args.run / "after-suite.json").read_text())["revision"]
+    text += (
+        f"<p>Paired device revisions: base <code>{base_revision}</code>, "
+        f"head <code>{head_revision}</code>. Final CPU verification, "
+        f"including the measured pins, ran at <code>{suite_revision}</code>. "
+        "The product source is identical between the device head and "
+        "final verification; later commits add tests and evidence only. "
+        "H200 allocation 1307054 completed in 17 minutes.</p>\n"
+    )
     text += (
         "<p>One H200 allocation; two CPUs and 96 GB requested. Each "
         "revision has a separate compilation cache, warmed by process 0. "

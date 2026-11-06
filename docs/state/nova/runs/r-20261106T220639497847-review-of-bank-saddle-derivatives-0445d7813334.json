@@ -877,6 +877,44 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "ccfd51e8ac05a6a6cee416d426b00911343d84ed",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 277899,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261106T220639497847-review-of-bank-saddle-derivatives-0445d7813334",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 277899,
+        "path": "/tmp/reckon-crew-scratch/r-20261106T220639497847-review-of-bank-saddle-derivatives-0445d7813334"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-saddle-derivatives-0445d7813334",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

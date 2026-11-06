@@ -1,0 +1,1830 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "78820952c16e00c5a5aff91ffa0b34d782c619e6",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/brief.txt",
+    "sha256": "36d39a662c3ff26d247cd01e3233fc9231a3e240a980fc8d9daf50016cb29ea6"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 13869299,
+      "input_tokens_cumulative": 13869299,
+      "output_tokens": 69247,
+      "output_tokens_cumulative": 69247,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 356,
+    "files": 7,
+    "removed": 16
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_curved_level_boundary_integral_matches_area_derivative",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 31,
+        "name": "test_level_set_boundary_integral_matches_area_derivative",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 42
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_level_set_boundary_integral_matches_area_derivative",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 57,
+        "name": "test_curved_level_boundary_integral_matches_area_derivative",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 68
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "booking_tangent",
+        "path": "tests/test_bank_newton_converge.py"
+      },
+      "run_function": {
+        "line": 209,
+        "name": "book_tangent",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 213
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_condition_diagnostics_do_not_change_update",
+        "path": "tests/test_bank_step_speed.py"
+      },
+      "run_function": {
+        "line": 333,
+        "name": "test_dense_newton_step_solves_scaled_residual",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 43,
+        "name": "test_multicell_step_omits_condition_estimates_by_default",
+        "path": "tests/test_bank_step_speed.py"
+      },
+      "run_function": {
+        "line": 333,
+        "name": "test_dense_newton_step_solves_scaled_residual",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 480,
+        "name": "test_block_gmres_breakdown_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 506
+    },
+    {
+      "existing_function": {
+        "line": 480,
+        "name": "test_block_gmres_breakdown_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 555,
+        "name": "test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 26
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 26
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 26
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 26
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 26
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 25
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_normal_cut_count_over_batch_capacity",
+        "path": "tests/test_bank_step_cut_buckets.py"
+      },
+      "run_function": {
+        "line": 62,
+        "name": "reference",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "window_line": 80
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "df494beea7178a3f45b2924bc2000f5faf21d4c4",
+    "093969d4f110f087b0c33d32fc8344a3b72535b0",
+    "b06ee46c3c46cd16fd95fde7fdcedd3a83348193"
+  ],
+  "completed_at": "2026-11-06T12:00:07.231Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-06T11:24:51Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "ARMS=head PARALLEL=1 bash scripts/prototypes/bank_test_repin/sirius_suites.sh /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-test-repin 78820952c /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/head-suite-work /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/head-suite-logs ; ARMS=base bash scripts/prototypes/bank_test_repin/sirius_suites.sh /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-test-repin 78820952c /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/base-suite-work /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/base-suite-logs",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/suite_summary_head.log"
+  },
+  "impl_move": {
+    "at_complete": 0.25773195876288657,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "the admission landing pass advances the run's plan section in its landing beat, after this merge; the impl has not moved at the moment of completion",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-06T12:22:38.369328+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-06T11:22:38Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 8,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 5,
+    "mean_context": 97143,
+    "observed_at": "2026-11-06T11:22:39Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 8,
+      "aggregate_tokens_per_second": 365.923,
+      "detail": "",
+      "mean_tokens_per_second": 59.02,
+      "observed_at": "2026-11-06T11:22:39Z",
+      "runs": 6.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-06T12:00:07.231Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/manifest.md",
+  "member": "disposable-r-20261106T112206904285-bank-test-repin",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "../../../../../../../../tmp/reckon-crew-scratch/r-20261106T112206904285-bank-test-repin/negctl/test_bank_newton_step.py::test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "../../../../../../../../tmp/reckon-crew-scratch/r-20261106T112206904285-bank-test-repin/negctl/test_bank_newton_step.py::test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update"
+    ],
+    "declaration": "give the reference test matrix a block preconditioner that is not the identity permutation in a scratch copy; the new assertion in tests/test_bank_newton_step.py must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/negative-control.log",
+    "test_paths": [
+      "tests/test_bank_newton_step.py",
+      "tests/test_bank_step_booking.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "bank-test-repin",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov06/bank-test-repin.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/brief.txt",
+    "brief_sha256": "36d39a662c3ff26d247cd01e3233fc9231a3e240a980fc8d9daf50016cb29ea6",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 371,
+          "cached_input_tokens": 434687,
+          "input_tokens": 435062,
+          "output_tokens": 77,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 435139,
+          "uncached_input_tokens": 4
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "a table of per-field moment differences between 13909837d^ and base confines the change to conic-cut cells and test_book_primal_keeps_exact_diverted_moments carries the base hashes for both hosts; tests/test_bank_newton_step.py derives the restart width from support_read and asserts the identity block preconditioner its reference relies on, failing in a scratch copy with a non-identity preconditioner; paired sirius suites over the four named files show no head failure, recorded in docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html",
+    "estimated_hours": null,
+    "goal": "Re-pin the stale booking byte test and harden two Newton step tests",
+    "id": "bank-test-repin",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-06T11:22:38Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 8,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 5,
+      "mean_context": 97143,
+      "observed_at": "2026-11-06T11:22:39Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 8,
+        "aggregate_tokens_per_second": 365.923,
+        "detail": "",
+        "mean_tokens_per_second": 59.02,
+        "observed_at": "2026-11-06T11:22:39Z",
+        "runs": 6.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T112206904285-bank-test-repin/manifest.md",
+    "negative_control": "give the reference test matrix a block preconditioner that is not the identity permutation in a scratch copy; the new assertion in tests/test_bank_newton_step.py must fail",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_bank_step_booking.py",
+      "tests/test_bank_newton_step.py",
+      "scripts/prototypes/bank_test_repin",
+      "docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html",
+      "docs/figures/sub-millisecond-forward-path/bank-test-repin"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1179760.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "bank-test-repin",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-06T11:24:20.771306+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.498,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 930.865,
+      "context-estimate": 75.896,
+      "records": 995.086,
+      "verdict-inputs": 1652.077
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b06ee46c3c46cd16fd95fde7fdcedd3a83348193",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "78820952c16e00c5a5aff91ffa0b34d782c619e6",
+    "reviewed_head_sha": "b06ee46c3c46cd16fd95fde7fdcedd3a83348193",
+    "scores": {
+      "durability": 16,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 12,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 97
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261106T112206904285-bank-test-repin",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "ee1d097c-08bf-46e1-bb03-b761840c1db2",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 13869299,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2089.711,
+    "generated_tokens": 69247,
+    "generation_seconds": 1155.042,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 79.0,
+    "machine_seconds": 934.669,
+    "peak_input_tokens": 181871,
+    "tokens_per_second": 59.95,
+    "wall_tokens_per_second": 33.14
+  },
+  "time_budget": "60m",
+  "tool_steps": 128.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 679,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 4279,
+        "exit_record": {
+          "attempt": 3,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T10:19:29Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-06T10:13:02Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 62531081,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/codex-home/cache"
+            },
+            {
+              "bytes": 28835802,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261106T070015356749-bank-wall-events",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1205,
+          "worker_pid": 1589064
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T10:19:29Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 3809,
+        "log_fresh": false,
+        "manifest_commits": [
+          "dcd05d88c490c0f313f703b5cbc32ce9c5140045",
+          "24039264591dffca244e867790fde4b7b2fa9504",
+          "fd9fa7dfd52de875752ef30a02fe9b04e41ad31c",
+          "85b8c62dcfd852789e881ebe122aa5bce831e98c",
+          "f33beae65d62710f4ed23085b19f71717ee77b0a",
+          "e048bb9b02bb943dabf5b93e8546f6575605cf0a",
+          "c3a3426ae0838529e0708d70943137bb80395153",
+          "6c68c6bf596ddcea7718b16216aabc4f923b24bb",
+          "52954858ea7f083ce5e52e950db534076a71a65f",
+          "5048feac4f28110ca2ea4bcded80db4fd548521c",
+          "ddedfda4758a3213484ca1f52b94ee003ad7ddde",
+          "a6dee513d31b0f1b3e6e0e2f7ebba811f0e8c751",
+          "be050629697cd4b8b30d19ea98562a3ace4f1911",
+          "4d35865804a0228c2d896897c43da66ba6aed3f9",
+          "5c998eea61f97c087eda08bab93c54d316d81b4a"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "d1b573c376d1c62db487563955377ca49d09ee8400bf1643cbe2c3e3b7ad1c9d",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "astra",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261106T070015356749-bank-wall-events --gate <verdict> --commit dcd05d88c490c0f313f703b5cbc32ce9c5140045 --commit 24039264591dffca244e867790fde4b7b2fa9504 --commit fd9fa7dfd52de875752ef30a02fe9b04e41ad31c --commit 85b8c62dcfd852789e881ebe122aa5bce831e98c --commit f33beae65d62710f4ed23085b19f71717ee77b0a --commit e048bb9b02bb943dabf5b93e8546f6575605cf0a --commit c3a3426ae0838529e0708d70943137bb80395153 --commit 6c68c6bf596ddcea7718b16216aabc4f923b24bb --commit 52954858ea7f083ce5e52e950db534076a71a65f --commit 5048feac4f28110ca2ea4bcded80db4fd548521c --commit ddedfda4758a3213484ca1f52b94ee003ad7ddde --commit a6dee513d31b0f1b3e6e0e2f7ebba811f0e8c751 --commit be050629697cd4b8b30d19ea98562a3ace4f1911 --commit 4d35865804a0228c2d896897c43da66ba6aed3f9 --commit 5c998eea61f97c087eda08bab93c54d316d81b4a",
+        "node": "bank-wall-events",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": "parsed",
+        "run_id": "r-20261106T070015356749-bank-wall-events",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3818,
+        "terminal_at": "2026-11-06T10:19:15Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-wall-events"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1983,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T070015356749-bank-wall-events.at-4d35865804a0228c2d896897c43da66ba6aed3f9.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T094755687649-review-of-bank-wall-events-4d35865804a0/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 5583,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T10:04:42Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-06T09:50:13Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261106T094755687649-review-of-bank-wall-events-4d35865804a0",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7388,
+          "worker_pid": 1468364
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T10:04:42Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4692,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "acefdc7fa0e38309075f612e5f7d11e0d20ad25432065cd98ae30f310c068ed3",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T094755687649-review-of-bank-wall-events-4d35865804a0/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T070015356749-bank-wall-events.at-4d35865804a0228c2d896897c43da66ba6aed3f9.json",
+        "node": "review-of-bank-wall-events-4d35865804a0",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261106T094755687649-review-of-bank-wall-events-4d35865804a0",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 4717,
+        "terminal_at": "2026-11-06T10:04:16Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-wall-events-4d35865804a0"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 286,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T090435478592-bank-booking-determinism.at-684031cc1900c3031abaf7ca738b8f12a08e89e4.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3886,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T10:31:03Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-06T10:18:36Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 3938,
+          "worker_pid": 1610727
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T10:31:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 3112,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "9c0b9aaf47875dd898b72196e59f8b6ed66042802a9f25d22f249c41cba03e27",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T090435478592-bank-booking-determinism.at-684031cc1900c3031abaf7ca738b8f12a08e89e4.json",
+        "node": "review-of-bank-booking-determinism-684031cc1900",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3318,
+        "terminal_at": "2026-11-06T10:27:35Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-booking-determinism-684031cc1900"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T070015356749-bank-wall-events.at-5c998eea61f97c087eda08bab93c54d316d81b4a.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3436,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [
+            1659456,
+            1692102,
+            1708241,
+            1659648,
+            1659809
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T10:35:34Z",
+          "last_record_type": "system",
+          "launched_at": "2026-11-06T10:26:07Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1920,
+          "worker_pid": 1658800
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T10:35:34Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2842,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "8aff24f304a6925ae27feffcd3b51ec307cedd682cc2d55b2a5caaabac08cdaa",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T070015356749-bank-wall-events.at-5c998eea61f97c087eda08bab93c54d316d81b4a.json",
+        "node": "review-of-bank-wall-events-5c998eea61f9",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3143,
+        "terminal_at": "2026-11-06T10:30:30Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-wall-events-5c998eea61f9"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T092400411415-bank-krylov-cleanup.at-3aa79b52c45dd7fbb06da8fb8c3d20faa30dabc7.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2262,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T10:57:01Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-06T10:46:10Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5011,
+          "worker_pid": 1752377
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T10:57:01Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1553,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — a review record is data",
+          "written under the run directory outside the worktree; the worktree is clean at c7a00659b and no commit was made from it."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "5aadf22e0a178c308bc8d406c3e92d82e36da41e0522e46fdf666f0b970e615b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T092400411415-bank-krylov-cleanup.at-3aa79b52c45dd7fbb06da8fb8c3d20faa30dabc7.json",
+        "node": "review-of-bank-krylov-cleanup-3aa79b52c45d",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1589,
+        "terminal_at": "2026-11-06T10:56:24Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-krylov-cleanup-3aa79b52c45d"
+      }
+    ]
+  },
+  "wall_seconds": 2116,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-06T12:00:11Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-06T11:25:02Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261106T112206904285-bank-test-repin",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 12324,
+    "worker_pid": 2025755
+  },
+  "worker_seconds": 2044,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="175">
+<meta name="plan-version" content="176">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -620,6 +620,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T090435478592-bank-booking-determinism" data-who="reckon-build" data-when="2026-11-06T10:54:17Z">
     <div class="r-comment-body"><p>Original booking hypothesis falsified: first difference was upstream in the compiled read at topology.py:3287 and disappears with a shared cache. Paired timings require each revision to use its own cache warmed once and at least two fresh processes per arm, with XLA_FLAGS unset. stable_within_setting measures self-agreement across processes, not separate-cold-compile determinism. Existing unset receipts remain byte-identical across five processes with seven reads per lane. Evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html#bank-booking-determinism-environments</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T112206904285-bank-test-repin" data-who="reckon-build" data-when="2026-11-06T12:00:07.231Z">
+    <div class="r-comment-body"><p>repinned both host byte digests of the diverted booking receipt to the base revision and derived the Krylov restart width in the capped-cycle test, which now asserts the identity permutation its raw-matrix reference relies on; the measured movement is confined to conic-cut cells (max relative 1.54e-11 on cell_current, 1.97e-11 on radial_moment, 8.97e-07 on vertical_moment, on both hosts)</p></div>
 </div>
 </section>
 </main>

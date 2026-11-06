@@ -27,7 +27,7 @@ run_arm() {
     revision=$2
     tree="$scratch/$arm"
     outcome=0
-    for name in test_bank_newton_step test_bank_solve_cycle test_bank_solve_driver test_support_read test_bank_step_booking_batch test_equilibrium_solve; do
+    for name in ${TEST_FILES:-test_bank_newton_step test_bank_solve_cycle test_bank_solve_driver test_support_read test_bank_step_booking test_bank_step_booking_batch test_equilibrium_solve}; do
         log="$run/$arm-$name.log"
         command=("$python" -P -m pytest -p no:cacheprovider "--basetemp=$scratch/temp-$arm-$name" "$tree/tests/$name.py" -m "slow or not slow" -vv -s)
         printf -v command_text '%q ' "${command[@]}"

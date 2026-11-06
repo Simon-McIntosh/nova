@@ -1,0 +1,205 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_check": "The five captions in docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html each state a distinct finding about that frame (displaced and flattened column, surfaces shifted inward, refusal at axis identification, contracted but displaced column, closest of the cohort and still two decades above tolerance) rather than restating a title. No caption-only-repeats-the-title finding.",
+  "completed_at": "2026-11-06T20:42:53.724Z",
+  "dispatched_at": "2026-11-06T20:31:48Z",
+  "evidence_inputs": [
+    "Rendered PNGs judged: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T203110794101-review-of-diiid-forward-convergence-554fcc237908-figure/image-{0,1,2,3,4}.png",
+    "Panel-to-attachment mapping corroborated by the burnt-in caption values matching the figure captions in docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html at 554fcc237.",
+    "Drawing script read at 554fcc237: scripts/prototypes/diiid_forward_convergence/render_panels.py (figsize 14x7.2 at line 110; legend handles at 218-240; hardcoded fontsize 12 at 216 and 239; savefig with bbox_inches='tight' at 242-245).",
+    "Colour roles read from nova/media/ink.py: flux #3366cc, label contour #999999, separatrix #cc0000, wall #000000."
+  ],
+  "figures": [
+    {
+      "attachment": "image-0.png",
+      "attachment_pixels": [
+        1400,
+        994
+      ],
+      "attachment_sha256": "511f7c448b5206d196ad3dd9c05d736ece850dc43d5582e814d392cbdf8e07b6",
+      "caption_read_from_png": "frame 137  d3d_shot_0040ca9bdc.parquet  |  diverted terminal residual 6.237e-02  |  converged false  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass \u2014 legend and caption text render near-black on white; the grey label contours are the faintest mark on the page and remain visible.",
+        "data_ink": "pass \u2014 unfilled line contours only; no fills, bands or shading; the field contours carry the visual weight.",
+        "decoration": "pass \u2014 white background, frameless legend, no gradient, no panel frame, no gridlines.",
+        "label_collision": "pass \u2014 the legend strip across the top and the caption along the bottom sit clear of the data and of each other; no text is clipped at any canvas edge.",
+        "legibility": "pass \u2014 the black wall, the blue solved contours, the grey label contours and the red separatrix separate clearly, and the terminal residual and converged flag read at a glance in the caption.",
+        "table_form": "pass \u2014 a poloidal flux map is a spatial relationship; nothing in this panel is naturally a table."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "attachment_pixels": [
+        1400,
+        1088
+      ],
+      "attachment_sha256": "75d0843485bd1eb457131941a72e28eeecfcbfbaaaa574e9b625f5e2e18dc1cf",
+      "caption_read_from_png": "frame 144  d3d_shot_001554e054.parquet  |  refused: no qualified magnetic axis, no solved field drawn",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass \u2014 caption and legend text are near-black on white; the grey label contours remain visible.",
+        "data_ink": "pass \u2014 line contours and one marker only; no fills or shading.",
+        "decoration": "pass \u2014 white background, frameless legend, no gradient, no frame or gridlines.",
+        "label_collision": "pass \u2014 no text overlap and no clipping; the legend sits well above the vessel.",
+        "legibility": "pass \u2014 the grey label contours, the hollow label-axis triangle and the wall read clearly, and the caption states the refusal in words.",
+        "table_form": "pass \u2014 a poloidal map, not tabular information."
+      }
+    },
+    {
+      "attachment": "image-2.png",
+      "attachment_pixels": [
+        1400,
+        991
+      ],
+      "attachment_sha256": "de7951d3a01d164cd2dc8dc3b43bf70d613f4837cd6c916b57f654773188d528",
+      "caption_read_from_png": "frame 146  d3d_shot_002495e835.parquet  |  diverted terminal residual 5.496e-02  |  converged false  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass \u2014 text is near-black on white; the faintest marks are the grey contours, which stay visible.",
+        "data_ink": "pass \u2014 unfilled contours only; the wall and the contours share the ink and nothing decorative competes.",
+        "decoration": "pass \u2014 no gradient, background fill or styling.",
+        "label_collision": "pass \u2014 no text is clipped or overlapping; the legend and caption are clear of the data.",
+        "legibility": "pass \u2014 the blue solved band, the grey label column and the red separatrix chords are distinguishable, and the caption carries the residual and converged flag.",
+        "table_form": "pass \u2014 a spatial poloidal comparison."
+      }
+    },
+    {
+      "attachment": "image-3.png",
+      "attachment_pixels": [
+        1400,
+        992
+      ],
+      "attachment_sha256": "43d1ef4c819fe7962b0e6a86d44bd20ef568b955d64beb7b6c111162e1048118",
+      "caption_read_from_png": "frame 179  d3d_shot_00000c4a7b.parquet  |  diverted terminal residual 4.181e-01  |  converged false  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass \u2014 text is near-black on white; the compressed grey bundle is faint but not hidden by the background.",
+        "data_ink": "pass \u2014 unfilled lines only; no fills or bands.",
+        "decoration": "pass \u2014 no gradient, background fill or decorative styling.",
+        "label_collision": "pass \u2014 no text is clipped or overlapping; the markers sit on data by design and carry no text.",
+        "legibility": "pass with one limit named \u2014 the solved band, the fragmented red separatrix and the wall read at a glance, but the grey label contours collapse into a corner bundle whose individual levels merge into a smear (recorded as a non-blocking finding); the panel's actual evidence, that the label field is displaced far from the solved band, is visible.",
+        "table_form": "pass \u2014 a spatial comparison of two fields.",
+        "verdict_note": "The red 'solved separatrix' renders as a few straight chords crossing near the left wall rather than as a closed contour. That is the terminal level set of a non-converged field and the caption says converged false, so it is read as evidence, not as a drawing fault."
+      }
+    },
+    {
+      "attachment": "image-4.png",
+      "attachment_pixels": [
+        1400,
+        1003
+      ],
+      "attachment_sha256": "688d9e250da9e7c43f9736370175a972c6d662f04dd3f738b41c6c39c2e58414",
+      "caption_read_from_png": "frame 44  d3d_shot_0003ff34e7.parquet  |  diverted terminal residual 4.276e+00  |  converged false  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass \u2014 caption and legend text are near-black on white; the grey contours remain visible as data.",
+        "data_ink": "pass \u2014 unfilled contours only; the plot carries the ink.",
+        "decoration": "pass \u2014 white background, no gradient, no frame or gridlines.",
+        "label_collision": "pass \u2014 no text is clipped or overlapping. The solid solved-axis triangle and the hollow label-axis triangle sit about 20 px apart near the plasma centre: close, but they do not overlap and neither is ambiguous.",
+        "legibility": "pass \u2014 the nested solved contours, the grey label contours, the red separatrix and the wall are clearly separable, and the caption carries a residual three decades above tolerance.",
+        "table_form": "pass \u2014 a spatial poloidal comparison."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "f7f79c3a956",
+      "line": 218,
+      "severity": "non-blocking",
+      "summary": "The legend names the four line series but no null marker, so the solid triangle (solved magnetic axis), the hollow triangle (label magnetic axis), the solid cross (solved X-point) and the hollow cross (label X-point) appear in every one of the five panels with no key and no caption sentence saying which set is which. These panels exist to compare the solved state against the label state, and the axis comparison is exactly what the two triangles carry; a reader who cannot tell which is which reads the solved axis as the label's or the reverse. One extra legend entry per marker style, or one clause in the caption, closes it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "f2b653f3ee0",
+      "line": 243,
+      "severity": "non-blocking",
+      "summary": "The five rendered panels are 1400x994, 1400x1088, 1400x991, 1400x992 and 1400x1003 px (aspect 1.287-1.413), so none sits on the declared 14x7.2 in slide canvas (1.94:1) and no two panels of one evidence set are the same size; saving with bbox_inches='tight' recomputes the canvas per panel instead of holding the declared one. The panels are still readable, but they cannot be dropped onto a slide at the declared size and they do not read as one set."
+    },
+    {
+      "file": "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+      "id": "f0fd362fe2d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Frame 144's legend advertises 'Nova solved flux' and 'solved separatrix' with their swatches, but this panel draws neither: it carries only the grey label contours, the label axis and the wall. The caption does say the solve refused, so a reader is not left hunting for a blue line forever, but a legend that names two absent series sends them looking first. Suppressing the two solved entries when no solved field was drawn would make the key match the panel."
+    },
+    {
+      "file": "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+      "id": "ffa1ee3b648",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "A red X-point marker is drawn to the left of the first-wall outline at roughly three-quarters vessel height, in white space outside the vessel, while a second X marker sits inside the lower vessel. A stationary point rendered outside the wall reads to a reader as a solved null in vacuum, which is either a genuine finding about the solve or an artefact of where the null was taken; the panel does not let a reader tell which, and no caption text addresses it."
+    },
+    {
+      "file": "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg",
+      "id": "f4c21ddc388",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "A short blue solved-flux contour arc is visible at the bottom left of the vessel, below the first-wall polyline's bottom edge as that edge is drawn, while the panel's other contours stop at the wall. If it lies genuinely outside the vessel it is field the wall mask should have blanked, and it invites a reader to read solved flux outside the wall; if it is inside a divertor pocket, the drawn wall edge is what misleads. Worth a look at the panel before the next render."
+    },
+    {
+      "file": "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+      "id": "f5cfa92b9af",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The grey label level set shares the solved level array gauge-aligned, and in this frame the label field is compressed enough that its nine contours pack into a narrow bundle at the upper left, overlapping one another into a grey smear: a reader can see that the label field is displaced from the solved band, but cannot resolve the individual levels or the label field's shape. The compression is faithful to the data, so this records a limit on what the panel can show rather than a plotting error."
+    }
+  ],
+  "method": "Each of the five attached rendered PNGs was opened and judged visually; no SVG markup and no other image was read, listed, searched or rendered. The PNGs self-identify their frame, shot, terminal residual and converged flag in the burnt-in caption, and each caption value matches the corresponding figure caption in docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html, which fixes the attachment-to-artifact mapping without opening another image. Findings in the drawing code are anchored to scripts/prototypes/diiid_forward_convergence/render_panels.py at the reviewed head; findings in a rendered panel are anchored to the figure's repository path with no line, never to a line of SVG markup.",
+  "project": "nova",
+  "review_node": "review-of-diiid-forward-convergence-554fcc237908-figure",
+  "review_run_id": "r-20261106T203110794101-review-of-diiid-forward-convergence-554fcc237908-figure",
+  "reviewed_artifacts": [
+    "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg",
+    "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+    "scripts/prototypes/diiid_forward_convergence/render_panels.py"
+  ],
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_head_sha": "554fcc237908745e87adeafcaff82d5f901f671d",
+  "reviewed_node": "diiid-forward-convergence",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC frame-137  legibility: pass \u2014 wall, solved contours, label contours and separatrix separate clearly; residual and converged flag read at a glance.",
+    "RUBRIC frame-137  data_ink: pass \u2014 unfilled line contours only; the data carry the weight.",
+    "RUBRIC frame-137  decoration: pass \u2014 white background, frameless legend, no gradient or gridlines.",
+    "RUBRIC frame-137  contrast: pass \u2014 near-black text on white; the grey label contours stay visible.",
+    "RUBRIC frame-137  table_form: pass \u2014 a spatial poloidal map, not a table.",
+    "RUBRIC frame-137  label_collision: pass \u2014 nothing clipped or overlapping.",
+    "RUBRIC frame-144  legibility: pass \u2014 label contours, label axis and wall read clearly; the refusal is stated in the caption.",
+    "RUBRIC frame-144  data_ink: pass \u2014 line contours and one marker only.",
+    "RUBRIC frame-144  decoration: pass \u2014 no gradient, fill or frame.",
+    "RUBRIC frame-144  contrast: pass \u2014 near-black text on white.",
+    "RUBRIC frame-144  table_form: pass \u2014 a spatial poloidal map.",
+    "RUBRIC frame-144  label_collision: pass \u2014 no overlap, no clipping.",
+    "RUBRIC frame-146  legibility: pass \u2014 solved band, label column and separatrix chords are distinguishable.",
+    "RUBRIC frame-146  data_ink: pass \u2014 unfilled contours only.",
+    "RUBRIC frame-146  decoration: pass \u2014 no gradient or decorative styling.",
+    "RUBRIC frame-146  contrast: pass \u2014 near-black text on white; grey contours visible.",
+    "RUBRIC frame-146  table_form: pass \u2014 a spatial comparison.",
+    "RUBRIC frame-146  label_collision: pass \u2014 no text clipped or overlapping.",
+    "RUBRIC frame-179  legibility: pass with one limit named \u2014 the solved band and displacement read at a glance, but the grey label levels merge into a smear in the corner bundle.",
+    "RUBRIC frame-179  data_ink: pass \u2014 unfilled lines only.",
+    "RUBRIC frame-179  decoration: pass \u2014 no gradient, fill or styling.",
+    "RUBRIC frame-179  contrast: pass \u2014 near-black text on white.",
+    "RUBRIC frame-179  table_form: pass \u2014 a spatial comparison of two fields.",
+    "RUBRIC frame-179  label_collision: pass \u2014 no text clipped or overlapping.",
+    "RUBRIC frame-44  legibility: pass \u2014 solved contours, label contours, separatrix and wall are separable at a glance.",
+    "RUBRIC frame-44  data_ink: pass \u2014 unfilled contours only.",
+    "RUBRIC frame-44  decoration: pass \u2014 no gradient, fill or frame.",
+    "RUBRIC frame-44  contrast: pass \u2014 near-black text on white.",
+    "RUBRIC frame-44  table_form: pass \u2014 a spatial poloidal comparison.",
+    "RUBRIC frame-44  label_collision: pass \u2014 no clipping; the two axis triangles sit about 20 px apart without overlapping."
+  ],
+  "scope_note": "Read-only review: no figure, caption, plan, script or record other than the two declared review-record paths was created, edited, moved, deleted, redrawn, relabelled or reformatted.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:46:09.808544+00:00",
+  "total": null
+}

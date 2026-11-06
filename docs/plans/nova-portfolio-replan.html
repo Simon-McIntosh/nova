@@ -17,7 +17,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-modified" content="2026-11-06">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
@@ -222,7 +222,10 @@ Done when: the report lists each coupling with files, line counts, refactor and 
     <div class="r-comment-body"><p>head eb5ab970859f55b36ecaedf140be0bf930dba76a reviewed on base 0509bb27fe044ba00d94115883465a67b6193715; parsed review with six scores written to the two declared review-records paths; no plan edit.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261106T074933206358-review-of-polygon-analytic-tangents-287bb123d55c" data-who="reckon-build" data-when="2026-11-06T08:09:33.582Z">
-    <div class="r-comment-body"><p>Reviewed r-20261105T121525634225-polygon-analytic-tangents at base acc972e71a3ed305704cc6151dd880af11091204 and head 287bb123d55cdc99f753adf48259cb2ab2bca7e7; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 12 (total 106), added_failure_count 0 derived from the run&#x27;s own 3-failure base arm against its 0-failure head arm, three non-blocking findings and no blocking finding.</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261105T121525634225-polygon-analytic-tangents at base acc972e71a3ed305704cc6151dd880af11091204 and head 287bb123d55cdc99f753adf48259cb2ab2bca7e7; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 12 (total 106), added_failure_count 0 derived from the run's own 3-failure base arm against its 0-failure head arm, three non-blocking findings and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261105T121525634225-polygon-analytic-tangents" data-who="reckon-build" data-when="2026-11-06T07:47:59Z">
+    <div class="r-comment-body"><p>All five 10000-sample tangent identities pass at 1e-9 (largest head error 6.632e-10); complete Sirius comparison moves 3 failed/26 passed to 29 passed with zero added failure IDs. All five 50-digit references and both 28-row near-corner checks pass; restored horizontal tangent fails its reference test. Evidence committed at 287bb123d55cdc99f753adf48259cb2ab2bca7e7: docs/evidence/fragments/nova-portfolio-replan/polygon-analytic-tangents.html#polygon-analytic-tangents-final-gate.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261027-imas-hdf5-read-landed" data-who="reckon-build" data-when="2026-10-27T10:25:00Z">
     <div class="r-comment-body"><p><strong>replan-imas-hdf5-read landed at <code>117e41bd2</code></strong> (head <code>7084d3571</code>). <code>nova/imas/hdf5_read.py</code> is deleted. It read IMAS-written HDF5 through h5py and had no callers. No module under <code>nova/</code> imports h5py; the one search hit is a docstring in <code>validator_case.py</code>.</p><p>The 103 test modules that import nova.imas ran in base and head arms in one sirius job (1296790) and add no failure: 26 failing ids at base, 11 at head, all 11 already failing or erroring at base. The base arm's archive omitted <code>docs/</code>, so 8 tests errored at setup there. The review scored 20/15/20/13/18/20 with no blocking finding.</p><p>Still open in this section: replan-dbentry-constructor (delivered, review queued), replan-gpfs-data-root and replan-evidence-tooling-paths.</p></div>

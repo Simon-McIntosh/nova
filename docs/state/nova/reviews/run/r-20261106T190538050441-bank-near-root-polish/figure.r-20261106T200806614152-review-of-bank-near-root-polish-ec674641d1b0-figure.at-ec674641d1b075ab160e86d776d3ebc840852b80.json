@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The zero count and the empty list are the neutral values the record shape requires, not a measurement, and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg (the inspected raster is the run's batch-reads.png render, written by report.py from the same figure object that save_checked publishes as the SVG)"
+  },
+  "attachment_note": "The single attached image-0.png was opened with Read and judged as a picture at its native 1399x720 and in 2x crops of the legend strip, the x tick-label band, the y axis and the right edge of the canvas. No vector source was opened, read, listed, searched, rendered or shown. The drawing script scripts/prototypes/bank_near_root_polish/report.py at the reviewed head ec674641 was read only for line anchors and to confirm which figure produced this raster; the caption was read from the run's evidence fragment at that head.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T20:09:18Z",
+  "figure_checks": {
+    "caption_independence": "The caption is not a restatement of a title, because the figure carries no title; identity comes from the path and the caption. It states the sixteen-lane normalisation, the 1e-14 relative perturbation scale, the series encoding ('grey dashed is base; blue solid is the rejected fixed polish'), and that repeats appear only where counts differ. It is accurate about the drawing, with one nominal detail: it says the inspected rendering is '1400 by 720' while the delivered raster is 1399x720, a one-pixel difference in the canvas size that changes nothing a reader sees. The caption also correctly reports that only the SVG is committed.",
+    "clipping": "Dark text pixel bounding box is x 74..1369, y 18..659 on a 1399x720 canvas. Dark pixels within 4 px of the left, right, top and bottom edges number 0, 0, 0 and 0. Nothing is clipped; the closest margin is 29 px at the right, where 'perturbation 5' ends at x 1370.",
+    "data_fidelity": "Reading the marker centres against that calibration gives base 8.0, 8.0, 7.0, 15.0, 9.0, 8.0 and head 20.0 on all six seed sets, which matches the run's measured reads ([8,8,7,15,9,8] and [20,20,20,20,20,20] in its manifest). The plotted data are the measured data, not a smoothed or rescaled version of them. No second process series is drawn because the two measured processes agreed on every seed set, which is what the drawing code does when the repeat counts are equal (report.py:206-217).",
+    "label_geometry": "X tick-label boxes are x 154..235 ('common'), 348..484, 570..705, 791..927, 1012..1149 and 1234..1370; consecutive separations are 113, 86, 86, 85 and 85 px, so no two labels can touch. The y tick label nearest the axis ('0') ends at x 124, 15 px left of the axis line at x 139-140. The legend occupies two entries centred at the top of the canvas (glyph boxes near x 601 and 733, y 19..31), clear of the plot area, whose top lies at y about 100.",
+    "render_provenance": "The attached image-0.png is 1399x720 RGBA and was opened as a picture. report.py at the reviewed head draws one figure at figsize (14, 7.2), dpi 100 with plt.style.use('data-ink'), saves it through the shared save_checked helper to the figure path and writes batch-reads.png from the same figure object (report.py:192-242), so the attachment is the render of the reviewed figure rather than a comparison to it.",
+    "scale_geometry": "The y axis is 0-22 with ticks at 0, 5, 10, 15 and 20 on rows 604, 489.5, 375, 260.5 and 146; the blue line at 20 sits 46 px below the top of the axes, so the constant series is a data value and not an axis ceiling or a clip at the top of the scale. The six category centres are at x 195, 416, 637.5, 859, 1080.5 and 1301.5."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg",
+      "rubric": {
+        "contrast": "pass. Text 7.94:1, grey mark 3.11:1, blue mark 5.37:1 against white.",
+        "data_ink": "pass. Two polylines and twelve markers are the only plot ink; ticks, tick labels, two axis titles and a frameless legend are the only furniture.",
+        "decoration": "pass. No grid, no fill, no band, no frame around the legend, no gradient; top and right spines removed.",
+        "label_collision": "pass. Zero clipped text (no dark pixel within 4 px of any edge), 85 px minimum gap between neighbouring x tick labels, no label over the data. The x axis title sits on its own line beneath the tick labels.",
+        "legibility": "pass. Read at a glance as one comparison: the blue line is flat at 20 on every seed set and the grey line steps between 7 and 15. Both series are continuous with visible round markers, the legend names them once above the panel, and both axis titles are legible.",
+        "table_form": "pass. The figure exists for the flat-versus-varying contrast, which a table of the same twelve reads does not make visible; the numeric table is already on the page."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "The run is closed as negative evidence with product and tests restored to base, this review is read-only, and the figure is retained as the record of that measurement; redrawing it would not change the measured claim, and the caption names each seed set and its perturbation scale.",
+      "evidence": "attached image-0.png: grey polyline running through all six category positions with markers at x 195..1301.5; report.py:195-205 calls ax.plot(range(6), counts[arm][1], ...) for both arms with no marker-only branch.",
+      "file": "scripts/prototypes/bank_near_root_polish/report.py",
+      "id": "fa15d21b4af",
+      "line": 197,
+      "severity": "non-blocking",
+      "summary": "The six seed sets are nominal categories plotted as a continuous line, so the render joins 'common' and 'perturbation 1' to 'perturbation 5' with straight segments and the grey series draws a hump (7 at perturbation 2, 15 at perturbation 3, 9 at perturbation 4) that exists only because an order was assigned to labels. The seed sets are independent random perturbations of the initial moments at 1e-14 relative, with no ordering, so the connecting segments imply an interpolation and a trend the data do not have, and a reader can take the 15 at perturbation 3 as a dose-response rather than one independent sample. The figure's actual claim is unaffected, because the flat blue line at 20 against the grey spread of 7 to 15 reads the same without the segments, and each category is individually labelled."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "The caption directly above the figure supplies the normalisation, the comparative claim is unaffected, and the run is closed negative evidence that this read-only review cannot redraw.",
+      "evidence": "attached image-0.png y axis title at x about 85, and the plotted values 20 against 8,8,7,15,9,8 read from the marker centres; the fragment caption and the run manifest both describe a shared sixteen-lane batch read.",
+      "file": "docs/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg",
+      "id": "fd57c55e131",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The y axis title reads 'Fresh batch reads' without saying that each read is one full-batch evaluation shared by all sixteen lanes, so a reader can take the head value of 20 as a per-lane count or as a count of individual read calls, when it is the number of whole-batch evaluations the slowest lane forced every lane to pay. The run's evidence fragment states 'Sixteen lanes share every batch read' in the caption, so the page carries the normalisation, but the axis that carries the numbers does not, and the figure read on its own (a slide, a screenshot) loses the distinction that makes the 20-against-7..15 comparison mean anything."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is substantive and accurate rather than a repeat of a title: it supplies the sixteen-lane normalisation, the perturbation scale, the series encoding and the repeat rule, with a one-pixel overstatement of the canvas width that affects nothing a reader sees.",
+    "finding_materiality": "Two non-blocking findings, no blocking finding. No label is clipped (zero dark pixels in the outer 4 px frame), no label overlaps another label or a marker (85 px minimum gap on the x axis), all text clears 7.94:1 and the grey data mark clears the 3:1 floor, and the plotted values reproduce the run's measured reads.",
+    "rendered_artifact": "The single attached figure was opened with Read and judged as a picture at its native 1399x720 and in 2x crops of the legend, the x tick-label band, the y axis and the right edge, and its marker positions were read off the pixel grid against the axis tick rows.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; no SVG was opened, read, listed, searched, rendered or shown. The only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "Clipping, label gaps, marker separations and colour values are measured on the attached PNG's pixels; the drawing script and the evidence fragment at the reviewed head were read for line anchors and caption text.",
+    "legibility": "Read from the attached raster at native size and in zoomed crops; the magnitudes quoted are the marker positions on the panel's own calibrated scale, not values taken from any vector source.",
+    "scope_discipline": "This review is read-only and reports its findings only in this record."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T200806614152-review-of-bank-near-root-polish-ec674641d1b0-figure",
+  "reviewed_base_sha": "73864287c5db07bac083e61dca1f160859452351",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg"
+  ],
+  "reviewed_head_sha": "ec674641d1b075ab160e86d776d3ebc840852b80",
+  "reviewed_run_id": "r-20261106T190538050441-bank-near-root-polish",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. One 14 x 7.2 in panel of a two-series line chart: six nominal seed sets across the x axis ('common', 'perturbation 1' to 'perturbation 5'), fresh batch reads on a 0-20 y scale. The blue series is a flat line at 20 across all six, the grey series runs 8, 8, 7, 15, 9, 8. Axis titles, tick labels and both legend entries are readable at the delivered size.",
+    "RUBRIC data_ink: pass. The canvas carries two polylines, twelve round markers, five y ticks with labels, six x tick labels, two axis titles and a two-entry legend. No gridlines, no baseline band, no fills, no annotations.",
+    "RUBRIC decoration: pass. White ground throughout, no gradient, no background fill, no shaded band, no drop shadow, no theme styling; only the left and bottom spines are drawn and the top and right are absent.",
+    "RUBRIC contrast: pass. Axis and tick text is #52514e (82,81,78) at 7.94:1 on white; the base grey #929292 measures 3.11:1, at the 3:1 floor this style sets for a non-text data mark; the head blue #3366cc measures 5.37:1. No text or mark is lost to lightness.",
+    "RUBRIC table_form: pass. Six seed sets against two arms is a small number of values, but the figure's job is the shape the table cannot show: the blue series is constant at 20 while the grey series varies 7 to 15. That flat-against-varying contrast is a plotted relationship rather than a lookup, and the run's evidence fragment carries the full numeric table beside the figure.",
+    "RUBRIC label_collision: pass. No text touches a canvas edge: dark text pixels span x 74..1369 of 1399 and y 18..659 of 720, with zero dark pixels in the outer 4 px frame on any side. Adjacent x tick-label boxes are separated by at least 85 px, the y tick labels sit clear of the axis line, and no marker or line passes through a label."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:18:17.309395+00:00",
+  "total": null
+}

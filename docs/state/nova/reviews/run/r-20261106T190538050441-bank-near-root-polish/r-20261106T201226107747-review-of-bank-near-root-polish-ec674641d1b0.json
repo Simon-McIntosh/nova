@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite failure_ids [] at 73864287c5db07bac083e61dca1f160859452351 (3+10+13+18+6 passed, 2 skipped, EXIT=0 in fixed-polish/base-suite.log) and after_suite failure_ids [] at 42039a936366f4b71a04c3573c46d90213fb5ec6 (4+12+13+18+6 passed, 2 skipped, EXIT=0 in fixed-polish/head-suite.log); both completed true, so added_failure_count is 0.",
+  "assertion_analysis": [],
+  "base_log_revision": "73864287c5db07bac083e61dca1f160859452351",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/solve.py:210",
+    "nova/equilibrium/support_read.py:1823",
+    "nova/equilibrium/support_read.py:1913"
+  ],
+  "completed_at": "2026-11-06T20:22:08.270Z",
+  "dispatched_at": "2026-11-06T20:14:41Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The delivered head is byte-identical to base in nova/ and tests/, so the base suite is the honest record of the landed tree. The withdrawn experiment's after arm is kept as part of the negative evidence.",
+      "recorded_at": "2026-11-06T20:26:09.386226+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The eight-step arm's read counts [12,12,12,12,12,16] are now recorded in the coordinator's disposition. The arm failed certification on one seed, which the fragment states with its residual.",
+      "recorded_at": "2026-11-06T20:26:12.310335+00:00"
+    }
+  },
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "The restoration is byte-exact and independently verified (git diff 73864287..ec674641 -- nova tests empty; nova and tests trees identical), so a rerun at head would execute the same code the base arm already ran green.",
+      "file": "manifest.md",
+      "line": 22,
+      "severity": "non-blocking",
+      "summary": "after_suite names revision 42039a936366f4b71a04c3573c46d90213fb5ec6, the withdrawn experiment, not the delivered head ec674641d1b075ab160e86d776d3ebc840852b80, so the recorded after arm does not measure the revision being promoted; added_failure_count 0 for the delivered head rests on the byte-identical nova/ and tests/ trees plus the base suite rather than on a run at head. The manifest discloses this in the purpose field."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "The measurement exists and matches the recorded checkpoint; a later evidence-consolidation node should carry the eight-step arm's per-seed reads into the fragment table.",
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html",
+      "line": 23,
+      "severity": "non-blocking",
+      "summary": "The new sentence 'That seed needed adaptive fallback and 16 reads, while the other five took 12' is the only place the eight-step arm's read counts appear in the delivered record; no table, log or receipt in the fragment or summary.json carries the [12,12,12,12,12,16] measurement, which survives only in the worker's checkpoint line in the run stream."
+    }
+  ],
+  "head_log_revision": "42039a936366f4b71a04c3573c46d90213fb5ec6",
+  "item_verdicts": {
+    "diff": "Read both commits against 1046a4cd: 104 insertions and 290 deletions. 511d789cb restores solve.py, support_read.py and the two test files; git diff 73864287..ec674641 -- nova tests is empty and a direct tree comparison of nova/ and tests/ is empty, so the restoration is byte-exact. ec674641d rewrites the docs fragment and report.py template to a negative result.",
+    "done_when": "The node's quantitative clauses (declared band and P, paired H200 gate over six seed sets, precision budgets, one figure) are recorded in docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html:45-130 and in fixed-polish/summary.json; the reversal itself is guarded by the manifest's tests gate 'git diff --exit-code 73864287c5db07bac083e61dca1f160859452351 HEAD -- nova tests', which I re-ran and which exits 0.",
+    "goal": "The node's stated goal was a fixed near-root polishing schedule that makes batch read count insensitive to near-tolerance noise; the two commits gained since the prior review at 1046a4cd withdraw that schedule (nova/equilibrium/solve.py:98 and nova/equilibrium/support_read.py:1602 restore the baseline implementation) and record it as a negative result in docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html, so no product change lands and the delivered outcome is the measurement, not the schedule.",
+    "manifest": "Read manifest.md:1-33; it names nine commits, seven changed paths, both suite arms completed with failure_count 0, the negative-control log at fixed-polish/negative-control.log, and a landing line that states the 20-reads-versus-7-15 spread against the 1684.921-1688.424 ms versus 525.585-983.463 ms latency regression.",
+    "write_paths": "The reviewed brief grants seven paths; the delta touches exactly six files - docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html, nova/equilibrium/solve.py, nova/equilibrium/support_read.py, scripts/prototypes/bank_near_root_polish/report.py, tests/test_bank_solve_cycle.py, tests/test_bank_solve_driver.py - and every one is inside the grant."
+  },
+  "justifications": {
+    "durability": "The manifest's own gate 'git diff --exit-code 73864287c5db07bac083e61dca1f160859452351 HEAD -- nova tests' is a re-runnable assertion that reddens if the withdrawn product change returns; I reproduced exit 0, though nothing inside the repository asserts the restoration.",
+    "evidence": "fixed-polish/base-suite.log and fixed-polish/head-suite.log each open with their revision and end EXIT=0 with 0 FAILED lines, and fixed-polish/summary.json measured_costs reproduces the 20-reads, 1684.921-1688.424 ms and 84.246-84.421 ms wall-per-read figures the fragment quotes.",
+    "fit": "scripts/prototypes/bank_near_root_polish/report.py:298-310 reads base_per_read and head_per_read from measured_costs in the same f-string style as the adjacent wall formatting, and neither the diff nor its commit messages carry a plan or ticket identifier.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1630-1830 carries no polishing band or P after the revert, so the goal's product change is withdrawn; the delivered artefact is the measured negative result at docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html:1-30.",
+    "reuse": "The delta adds no capability; it removes the choose() helper at nova/equilibrium/support_read.py:1674 that the prior review flagged as a copy of the masked pytree selection at nova/equilibrium/solve.py:126.",
+    "scope_discipline": "Every path in the 1046a4cd..ec674641 diffstat sits inside the seven paths granted at brief.txt:97-104; no plan file is edited and the figure docs/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg is untouched by this delta."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the two commits gained since the prior review at 1046a4cd withdraw the fixed near-root polish (nova/equilibrium/solve.py:98 and nova/equilibrium/support_read.py:1602 restore the baseline) and record a negative result, so the node lands no product change and the delivered outcome is the measurement.\nVERDICT done_when: the quantitative clauses are recorded in docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html:45-130 and fixed-polish/summary.json, and the reversal is guarded by the manifest's tests gate 'git diff --exit-code 73864287c5db07bac083e61dca1f160859452351 HEAD -- nova tests', which I re-ran at exit 0.\nVERDICT write_paths: the delta touches exactly six files, every one inside the seven paths granted at brief.txt:97-104.\nVERDICT manifest: read manifest.md:1-33; it names nine commits, seven changed paths, both suite arms completed with failure_count 0, the negative-control log, and a landing line stating the read spread and the latency regression.\nVERDICT diff: read both commits against 1046a4cd; the restoration is byte-exact (git diff base head -- nova tests empty, nova and tests trees identical) and the docs and report changes reword the record as a negative result.\nCALL_SITES: nova/equilibrium/solve.py:210, nova/equilibrium/support_read.py:1823, nova/equilibrium/support_read.py:1913\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1630-1830 carries no polishing band or P after the revert; the delivered artefact is the measured negative result.\nSCORE evidence: 16\nJUSTIFICATION evidence: fixed-polish/base-suite.log and fixed-polish/head-suite.log end EXIT=0 with 0 FAILED lines, and fixed-polish/summary.json reproduces the figures the fragment quotes.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the 1046a4cd..ec674641 diffstat sits inside the paths granted at brief.txt:97-104.\nSCORE durability: 17\nJUSTIFICATION durability: the manifest's tests gate is a re-runnable assertion that reddens if the withdrawn product change returns, and I reproduced its exit 0.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/bank_near_root_polish/report.py:298-310 follows the adjacent wall formatting in the same f-string style and introduces no banned identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no capability and removes the choose() duplicate at nova/equilibrium/support_read.py:1674.\nFINDING manifest.md:22 non-blocking: after_suite names the withdrawn experiment 42039a93 rather than the delivered head, so the after arm does not measure the promoted revision.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html:23 non-blocking: the eight-step arm's read counts appear only in this sentence, with no table, log or receipt in the delivered record.",
+  "review_run_id": "r-20261106T201226107747-review-of-bank-near-root-polish-ec674641d1b0",
+  "reviewed_base_sha": "1046a4cd11d71b4f5344efe06595bb1543c0f057",
+  "reviewed_commits": [
+    "511d789cbfbe4e95e11a9da96b0dd06879a3d280",
+    "ec674641d1b075ab160e86d776d3ebc840852b80"
+  ],
+  "reviewed_head_sha": "ec674641d1b075ab160e86d776d3ebc840852b80",
+  "reviewed_run_id": "r-20261106T190538050441-bank-near-root-polish",
+  "rubric": "independent review of a landed node, six dimensions, delta since prior review",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:20:56Z",
+  "total": 108
+}

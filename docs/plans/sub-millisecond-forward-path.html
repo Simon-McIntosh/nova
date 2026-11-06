@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="202">
+<meta name="plan-version" content="203">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -701,6 +701,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T195625284162-review-of-bank-near-root-polish-1046a4cd11d7" data-who="reckon-build" data-when="2026-11-06T20:11:29.838Z">
     <div class="r-comment-body"><p>Reviewed r-20261106T190538050441-bank-near-root-polish at 1046a4cd11d71b4f5344efe06595bb1543c0f057 from base 73864287c5db07bac083e61dca1f160859452351: the fixed near-root polish does what its goal states (head 20 reads per lane on all six seed sets versus base 7–15, every lane freshly certified, zero added suite failures), but it duplicates the masked-select helper already at nova/equilibrium/solve.py:126 and raises the converged wall from 525–983 ms to 1685–1689 ms on five of six seed sets; scores goal 17, evidence 18, scope 20, durability 16, fit 18, reuse 5 (total 94), two non-blocking findings, no blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T201226107747-review-of-bank-near-root-polish-ec674641d1b0" data-who="reckon-build" data-when="2026-11-06T20:22:08.270Z">
+    <div class="r-comment-body"><p>[Independent review of bank-near-root-polish](/nova/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html#bank-near-root-polish-landing): scored 16/16/20/17/19/20 across goal_fidelity, evidence, scope_discipline, durability, fit and reuse over delta 1046a4cd..ec674641. The withdrawal is byte-exact against base 73864287 (git diff base head -- nova tests empty; nova and tests trees identical), added_failure_count 0 with both suite arms completed and EXIT=0, and the negative result is recorded with its latency regression. Two non-blocking findings: after_suite names the withdrawn experiment 42039a93 rather than the delivered head, and the eight-step arm&#x27;s read counts appear in the fragment with no committed receipt.</p></div>
 </div>
 </section>
 </main>

@@ -1,4 +1,4 @@
-"""Expose the truncation diagnostic and measure candidate support programs."""
+"""Probe full-slot candidate source supplied by an archive on PYTHONPATH."""
 
 import inspect
 from unittest.mock import patch

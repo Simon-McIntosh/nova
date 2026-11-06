@@ -37,7 +37,7 @@ def main():
         assert len(solves) == 2 and all(event["outcome"] == "hit" for event in solves)
         keys[arm, process] = [event["key"] for event in solves]
     assert all(keys[arm, 1] == keys[arm, 2] for arm in ("base", "head"))
-    walls, devices, precision, retained = [], [], [], []
+    walls, devices, precision, retained, summaries = [], [], [], [], []
     for lanes in (1, 16):
         for (arm, process), capture in captures.items():
             row = capture[str(lanes)]
@@ -62,7 +62,18 @@ def main():
             row = next(row for row in trace["solves"] if row["lanes"] == lanes)
             group = row["groups"]["read candidate loop"]
             assert group["launches"] > 0 and group["device_ms"] > 0
-            devices.append([lanes, arm, f"{group['device_ms']:.3f}", group["launches"]])
+            reads = max(captures[arm, 1][str(lanes)]["reads"])
+            devices.append(
+                [
+                    lanes,
+                    arm,
+                    f"{group['device_ms']:.3f}",
+                    group["launches"],
+                    reads,
+                    f"{group['device_ms'] / reads:.3f}",
+                    group["launches"] / reads,
+                ]
+            )
         maxima = {key: 0.0 for key in PAIR_LIMITS}
         for left, right in product((1, 2), repeat=2):
             gaps, _ = pair_gaps(
@@ -86,11 +97,43 @@ def main():
             [lanes, key, f"{value:.9g}", PAIR_LIMITS[key]]
             for key, value in maxima.items()
         )
+        per_read = {
+            arm: np.mean(
+                [
+                    np.median(captures[arm, process][str(lanes)]["unprofiled_ms"])
+                    / max(captures[arm, process][str(lanes)]["reads"])
+                    for process in (1, 2)
+                ]
+            )
+            for arm in ("base", "head")
+        }
+        summaries.append(
+            f"At {lanes} slices, mean wall per batch read falls "
+            f"{100 * (1 - per_read['head'] / per_read['base']):.2f}% "
+            f"({per_read['base']:.3f} to {per_read['head']:.3f} ms)."
+        )
     (args.run / "precision-pairs.json").write_text(json.dumps(retained, indent=2))
     suites = json.loads((args.run / "suites.json").read_text())
     assert all(arm["completed"] for arm in suites.values())
     added = set(suites["head"]["failure_ids"]) - set(suites["base"]["failure_ids"])
     assert not added, added
+    suite_rows = []
+    for arm, receipt in suites.items():
+        text = Path(receipt["log_path"]).read_text()
+        counts = {
+            name: sum(map(int, re.findall(r"(\d+) " + name, text)))
+            for name in ("passed", "skipped")
+        }
+        suite_rows.append(
+            [
+                arm,
+                counts["passed"],
+                counts["skipped"],
+                receipt["failure_count"],
+                len(added),
+                receipt["completed"],
+            ]
+        )
     controls = []
     for label, identity in (
         ("overflow", "test_candidate_overflow_matches_full_evaluation"),
@@ -162,6 +205,9 @@ def main():
         "and XLA_FLAGS unset. Each warms once and measures five blocked calls at "
         "each width. The bank_solve_profile fixture supplies sixteen diverted "
         "550-cell slices; width 1 takes its first lane.</p>\n"
+        + "<p>"
+        + " ".join(summaries)
+        + "</p>\n"
         + table(
             [
                 "Slices",
@@ -179,7 +225,16 @@ def main():
         "lane read count. It includes all solver work. Equal-read processes or this "
         "normalisation support timing comparisons across compilation outcomes.</p>\n"
         + table(
-            ["Slices", "Arm (process 1)", "Candidate device [ms]", "Launches"], devices
+            [
+                "Slices",
+                "Arm (process 1)",
+                "Candidate device [ms]",
+                "Launches",
+                "Batch reads",
+                "Device per read [ms]",
+                "Launches per read",
+            ],
+            devices,
         )
         + "<p>The unchanged bank_solve_trace/groups.py classifier attributes "
         "candidate support by the inspect source frame; curvature, normal form "
@@ -196,11 +251,8 @@ def main():
         "boundary use base flux span; axis and saddle use base minor radius. "
         "Every terminal fresh residual is at most 1e-10.</p>\n"
         + table(
-            ["Suite", "Failures", "Added failures", "Complete"],
-            [
-                [arm, receipt["failure_count"], len(added), receipt["completed"]]
-                for arm, receipt in suites.items()
-            ],
+            ["Suite", "Passed", "Skipped", "Failures", "Added failures", "Complete"],
+            suite_rows,
         )
         + "<p>Both Sirius arms run all five named files, with only the light "
         "candidate cases selected on CPU. Every file has a fresh pytest process "

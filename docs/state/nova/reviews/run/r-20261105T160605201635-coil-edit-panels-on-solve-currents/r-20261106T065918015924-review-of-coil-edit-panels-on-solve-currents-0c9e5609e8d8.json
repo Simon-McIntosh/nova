@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:3121 run command persists the panel dict through _write_diagnostics",
+    "benchmarks/coil_edit_latency.py:3530 panel command prints the panel dict and writes a receipt from display_map only"
+  ],
+  "completed_at": "2026-11-06T07:16:00.377Z",
+  "dispatched_at": "2026-11-06T07:02:53Z",
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "id": "f485f5bf924",
+      "line": "65",
+      "severity": "non-blocking",
+      "text": "the recorded negative control (typography-revert-control.log) reddens on the size assertion at :63 and never reaches the two caption assertions at :64-65, so the guard that the explanation is out of the image has no on-record red state even though it is falsifiable; restoring the suptitle at 14x7.2 in would redden :65 because matplotlib emits titles as XML comments (the committed SVG carries '<!-- edit 12 +6% converged -->')."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "id": "f03d6368a33",
+      "line": "82",
+      "severity": "non-blocking",
+      "text": "clipped_labels and overlapping_labels are recorded as 0 after both render drivers reset visual_inspection to {'pending': True}, and verify_typography.py asserts them by reading that same receipt field, so no measurement recorded at 0c9e5609e could have contradicted a clipped or overlapping label; the 0/0 values were re-entered by hand after the render."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f0eae4be248",
+      "line": "3551",
+      "severity": "non-blocking",
+      "text": "the panel subcommand builds its --receipt document from panel['display_map'] alone, so the caption returned at :2415 is printed but never persisted on that path, unlike the run command which writes the whole panel dict; a receipt written by 'panel --receipt' therefore cannot carry the page explanation that is now the only place the measurements are recorded."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/head-capacity-ad534aecb.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/baseline-suite.log",
+    "typography_final": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-final.log",
+    "typography_head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-head.log",
+    "typography_negative_controls": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-revert-control.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-image-control.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-titan-control.log"
+    ]
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites reach _render_panel: benchmarks/coil_edit_latency.py:3121 (the run command, which persists the whole panel dict including the caption through _write_diagnostics) and benchmarks/coil_edit_latency.py:3530 (the panel command, which prints the dict but writes its receipt from display_map alone).",
+    "diff": "read commit by commit from d559d30a96d7 to 0c9e5609e: 5fb1848fd replaces the 10.6x4.6 inch canvas and the 9 pt wrapped suptitle with a 14x7.2 inch canvas at 100 dpi, a two-line 20 pt title and a returned caption, and adds the page-scale test; 54ee0d850 republishes three H200 figures, their receipts and the fragment figcaption; 0c9e5609e republishes the two titan-archive figures and receipts from a separate driver that also asserts the caption.",
+    "done_when": "the legibility clause ('every rendered PNG is inspected and shows zero clipped and zero overlapping labels') is backed by typography-final.log (five PASS rows at 0c9e5609e, EXIT=0) and by the new focused test recorded 1 passed at 5fb1848fd in typography-head.log; the manifest's registered after_suite stops at ad534aecb and does not contain the added test, and the clipping counts are read back from the receipts rather than measured. Added failures against the baseline arm are 0 (baseline-suite.log and head-capacity-ad534aecb.log both end EXIT=0 with no failures).",
+    "goal": "the node goal is to redraw the coil-edit panels on the display map of the solve's own currents and certify the near-X geometry, and these commits keep those measurements while moving them to body-size page text; benchmarks/coil_edit_latency.py:2411-2415 appends _panel_display_note to the returned caption, and the fragment figcaption at docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:6 states the promoted count, nearest distance and near-X verdict per panel.",
+    "manifest": "read; status complete with the last commit 0c9e5609e, baseline_suite at e7df2394 and after_suite at ad534aecb both failure_count 0 with completed true and bare EXIT lines, repair_typography_gate 1 passed at 5fb1848fd, and three red controls ending EXIT=1; the five panel-receipt.json files at head carry the shared caption and the per-archive display_map numbers the fragment table repeats.",
+    "write_paths": "all 18 changed paths in git diff d559d30a96d7..0c9e5609e are inside the declared write paths: benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py, the forward-solve-api/coil-edit-nonconvergence, mast-centroid-capability, single-grid-solver-cutover and cpu-compile-abort/coil-edit-regeneration-row figure directories, and the evidence fragment."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:63 reddens when the canvas returns to 1484x644 (recorded in typography-revert-control.log) and :65 would redden if the suptitle returned, since matplotlib writes titles as XML comments, but the recorded control fails at :63 and never exercises :64-65.",
+    "evidence": "typography-final.log passes all five figures at 0c9e5609e with EXIT=0 and typography-head.log passes the focused test at 5fb1848fd with EXIT=0, but the manifest's registered after_suite sits at ad534aecb before the added test exists and docs/figures/single-grid-solver-cutover/panel-receipt.json:78 records 0/0 clipping that the gate reads back from the receipt rather than measuring.",
+    "fit": "benchmarks/coil_edit_latency.py:2349 uses the 14x7.2 inch 100 dpi house canvas, the three subjects carry no plan or ticket label, and 5fb1848fd removes the now-unused textwrap import and CAPTION_WIDTH constant.",
+    "goal_fidelity": "benchmarks/coil_edit_latency.py:2411-2415 returns the full display note as a caption for the page while the panels keep one closed lobe and two legs and both null sets, so the near-X measurements survive the typography change.",
+    "reuse": "the diff adds no definition of its own; tests/test_coil_edit_panel_render.py:55 drives the existing _render_panel owner, and a capability search over nova/media for a figure-save validator found no owner to extend or duplicate.",
+    "scope_discipline": "every path across git diff --stat d559d30a96d7..0c9e5609e lies in benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py or one of the four declared figure directories, and no dependency or shared module was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw the coil-edit panels on the display map of the solve's own currents and certify the near-X-point geometry, and \u00a77's done-when additionally requires every rendered PNG to be inspected with zero clipped and zero overlapping labels; these three commits keep the measurements and move them to body-size page text, benchmarks/coil_edit_latency.py:2411 appends _panel_display_note to the returned caption instead of wrapping it into a suptitle.\nVERDICT done_when: the done-when's legibility clause is measured by the new tests/test_coil_benchmark_render guard at tests/test_coil_edit_panel_render.py:63-65 (1400x720 canvas, caption returned, caption absent from the SVG), recorded 1 passed at 5fb1848fd in typography-head.log, plus the artifact gate over all five figures at 0c9e5609e in typography-final.log (EXIT=0); both are recorded, though the manifest's registered after_suite stops at ad534aecb and so does not contain the added test.\nVERDICT write_paths: all 18 paths across 5fb1848fd, 54ee0d850 and 0c9e5609e are inside the source node's declared write paths (benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py, the forward-solve-api, mast-centroid-capability, single-grid-solver-cutover and cpu-compile-abort figure directories, and the coil-edit-panels-on-solve-currents evidence fragment); no path outside them was touched and no dependency changed.\nVERDICT manifest: read; status complete, commits list ends at 0c9e5609e, baseline_suite (e7df2394) and after_suite (ad534aecb) both record failure_count 0 with complete summaries and bare EXIT lines, and it records repair_typography_gate 1 passed at 5fb1848fd plus three red controls ending EXIT=1; the five receipts at head carry the shared caption and per-family display_map numbers that the fragment table repeats to its displayed precision.\nVERDICT diff: read commit by commit from d559d30a96d7 to 0c9e5609e; 5fb1848fd swaps the 10.6x4.6 inch canvas and 9 pt wrapped suptitle for a 14x7.2 inch canvas at 100 dpi with a two-line 20 pt title and a returned caption and adds the page-scale test, 54ee0d850 republishes the three H200 figures, receipts and the fragment figcaption, and 0c9e5609e republishes the two titan-archive figures and their receipts from a separate driver.\nCALL_SITES: benchmarks/coil_edit_latency.py:3121 (run command persists the panel dict through _write_diagnostics), benchmarks/coil_edit_latency.py:3530 (panel command prints the panel dict and writes a receipt from display_map only)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:2411-2415 returns the full display note as a caption for the page while the panels keep one closed lobe and two legs, so the near-X measurements survive the typography change.\nSCORE evidence: 15\nJUSTIFICATION evidence: typography-final.log passes all five figures at 0c9e5609e and typography-head.log passes the focused test at 5fb1848fd, but the registered after_suite at ad534aecb predates that test and the 0/0 clipping figures in docs/figures/single-grid-solver-cutover/panel-receipt.json:78 are read back from the receipt rather than measured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path across the three commits (git diff --stat d559d30a96d7..0c9e5609e) lies in benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py or one of the four declared figure directories.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:63 reddens when the canvas returns to 1484x644 (recorded) and :65 can redden when a suptitle is restored, since matplotlib writes titles as XML comments, but the recorded control fails at :63 and never exercises :64-65.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py:2349 uses the 14x7.2 inch 100 dpi house canvas and the three commit subjects carry no plan or ticket label and 5fb1848fd removes the now-unused textwrap import and CAPTION_WIDTH constant.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff adds no definition of its own; tests/test_coil_edit_panel_render.py:55 drives the existing _render_panel owner, and a capability search over nova/media for a figure-save validator found none to extend.\nFINDING tests/test_coil_edit_panel_render.py:65 non-blocking: the recorded negative control (typography-revert-control.log) reddens on the size assertion at :63 and never reaches the two caption assertions at :64-65, so the guard that the explanation is out of the image has no on-record red state even though it is falsifiable.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:82 non-blocking: clipped_labels and overlapping_labels are recorded as 0 after both drivers reset visual_inspection to pending, and verify_typography.py asserts them by reading that same field, so no measurement at 0c9e5609e could have contradicted a clipped or overlapping label.\n",
+  "review_run_id": "r-20261106T065918015924-review-of-coil-edit-panels-on-solve-currents-0c9e5609e8d8",
+  "reviewed_base_sha": "d559d30a96d786f1c35b670d0d8da954a3dd854e",
+  "reviewed_head_sha": "0c9e5609e8d899234d146b4c078939c1be3a5352",
+  "reviewed_run_id": "r-20261105T160605201635-coil-edit-panels-on-solve-currents",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:24:30.035325+00:00",
+  "total": 105
+}

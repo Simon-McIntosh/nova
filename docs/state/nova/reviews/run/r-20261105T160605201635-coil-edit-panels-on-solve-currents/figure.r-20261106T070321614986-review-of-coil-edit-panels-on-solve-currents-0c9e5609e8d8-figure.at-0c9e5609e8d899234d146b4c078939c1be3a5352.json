@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_note": "All ten paths named in the dispatch were opened. The five attachment paths image-1.png, image-3.png, image-5.png, image-7.png and image-9.png are byte-identical to one another (md5 bcff66ac8dad285f35c1cffb4c8f218b, 1400x720, 220404 bytes), and the five repository PNGs are byte-identical to one another (md5 e9dd14eb3214d13a641d638d15b5d942, 1400x720). Attachment versus repository file is not byte-identical (4.63% of pixels differ by more than 10/255) but is the same rendering: the two-line titles occupy the same rows 7-71 with column spans within 4 px of each other (176-519/861-1240 and 174-521/858-1242), and the plotted data occupies exactly the same columns (197-489 and 900-1192) and rows. The verdict below therefore covers one rendered artifact published at five repository paths. The run's own evidence fragment records that the two lane state archives differ (268,798 and 268,758 bytes) while the two lane PNGs are pixel identical, and that every published copy was checked against the inspected H200 image; the identity of the five files is therefore documented rather than a duplicated publish.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T07:07:08Z",
+  "figures_reviewed": [
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png"
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T07:23:19.350723+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T07:23:23.134049+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T07:23:25.918486+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T07:23:28.290706+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html",
+      "id": "f1b6d0eb881",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the caption on this figure's own page describes the previous rendition, not the picture above it. It names left 'edit 2 (minus 14%)' at terminal residual 4.129e-09 Wb with two trips and right 'edit 7 (minus 4%)' at 6.514e-03 Wb with sixteen trips, while the rendered PNG's own titles read 'edit 12  +6%  converged / residual 5.730e-09 Wb  3 trips' and 'edit 9  +0%  not converged / residual 6.612e-03 Wb  3 trips'. It also says the reference contours are drawn in grey where the published set's reference boundary is blue. Every edit identity, residual and trip count a reader is given contradicts the image."
+    },
+    {
+      "file": "docs/evidence/archive/forward-solve-api-landed.html",
+      "id": "ffb3c469d23",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the archive page embeds the same PNG path under three separate figure blocks whose captions name yet other states (edit 7 converged at 5.0e-09 beside edit 6 non-converged at 4.4e-03), and docs/evidence/archive/single-grid-solver-cutover-landed.html does the same for the titan path (4.13e-09 and 6.51e-03 after sixteen trips). Because the path is reused across redraws, each archive now shows a picture its own text does not describe; the current run's live evidence fragment caption is consistent with the image, so this is confined to the archived pages a reader may still open."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f74967c8f0c",
+      "line": 2346,
+      "severity": "non-blocking",
+      "summary": "each panel title carries '+6%' / '+0%' and '3 trips' with nothing in the image to define either: the percentage's base is never named and a reader cannot tell that 'trips' counts active-set iterations. The explanatory caption that does define them is now returned in the panel receipt rather than drawn (line 2403-2405), which was the right fix for text size, but it leaves the standalone PNG carrying two undefined terms."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f21b5f1e72d",
+      "line": 2175,
+      "severity": "non-blocking",
+      "summary": "the solved null set is painted after the reference set at the same default z-order, so where the two coincide the filled orange marker covers the blue one: at the magnetic axis the filled orange triangle leaves only a thin blue sliver on its right edge, and at the upper X-point the filled orange cross covers the reference cross except for its left and upper arms. A reader comparing the two null sets cannot see the reference marker's centre, which is the point the comparison is about."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261106T070321614986-review-of-coil-edit-panels-on-solve-currents-0c9e5609e8d8-figure",
+  "reviewed_base_sha": "e7df23944b989ff71508e0eb83552305d94979a3",
+  "reviewed_head_sha": "0c9e5609e8d899234d146b4c078939c1be3a5352",
+  "reviewed_run_id": "r-20261105T160605201635-coil-edit-panels-on-solve-currents",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "text is pure black on white (21:1). Measured data hues clear the 3:1 floor: solved separatrix #cc7722 is 3.4:1 and reference separatrix #3366cc is 5.4:1 against white. The hairline interior contour families are drawn recessive at about 2.4-2.5:1 (#9aa4b2 reference, alpha-blended solved), which is the comparison series receding rather than a legibility failure.",
+    "data_ink": "line work is essentially all of the ink: 73368 non-white pixels of 1008000 (7.3%) carry the flux contours, the wall, the coil outlines and the two separatrix sets, and the title block spends rows 7-71 (9% of canvas height) on two text lines. No legend box and no furniture compete with the data.",
+    "decoration": "no gradient, no background fill, no shading and no frame: the ground is pure white (255,255,255 at every corner), the axes are off entirely and there are no gridlines.",
+    "label_collision": "nothing is clipped and no text overlaps text or data. Zero non-white pixels sit on rows 0 and 719 or columns 0 and 1399, so no ink reaches the canvas edge. The left title spans columns 140-557 and the right 843-1260, a 286 px gutter with no contact; each title is centred on its panel within 5 px (left title centre 348 against panel centre 343, right 1051 against 1046). The topmost data ink is the separatrix leg at rows 70-81, x 342-347, which sits 8 px below the nearest glyph bottom and at a column the second title line does not occupy, so the leg approaches the label but does not touch it.",
+    "legibility": "the picture reads at a glance: each panel shows the vessel wall, a blue reference boundary and an orange solved boundary on one poloidal plane, and the non-converged panel's outward-shifted orange lobe and diverging lower leg separate from the blue at first sight. Panel titles are 27 px cap height on a 1400x720 canvas, about 17 px (roughly 13 pt) when scaled into a 900 px column, so the numbers are readable without zooming.",
+    "table_form": "the image is a two-panel poloidal comparison of a converged against a non-converged edit; nothing in it is naturally a table, and the scalar numbers are carried in the panel titles as identity rather than as the subject."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:22:38.553712+00:00",
+  "total": null
+}

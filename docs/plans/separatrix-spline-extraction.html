@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
   <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="200">
+<meta name="plan-version" content="201">
 <meta name="plan-modified" content="2026-11-06">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -679,7 +679,7 @@
     <div class="r-comment-body"><p>figure review of r-20261102T221244543285-mast-centroid-fine-panels at c2e4fd2117b5 against base 3ef818df: parsed, all six rubric items answered on all four attached rendered PNGs, zero blocking findings, two non-blocking findings (the cpu-lane -fine PNG is byte-identical to its plain sibling; contour strokes render near 1.9:1 grey).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261102T221244543285-mast-centroid-fine-panels" data-who="reckon-build" data-when="2026-11-06T06:30:06Z">
-    <div class="r-comment-body"><p>the fragment records the four drawn and inspected panels with their measured cost and convergence, the flagged node mismatch, and the assembler&#x27;s measured refusal on the 10 mm map: well_formed false and overflow true on all three lanes, no separatrix drawn and no fallback contour added.</p></div>
+    <div class="r-comment-body"><p>the fragment records the four drawn and inspected panels with their measured cost and convergence, the flagged node mismatch, and the assembler's measured refusal on the 10 mm map: well_formed false and overflow true on all three lanes, no separatrix drawn and no fallback contour added.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261103T051008024703-review-of-coil-edit-fine-panels-1f1391bd0a62" data-who="reckon-build" data-when="2026-11-03T05:28:23.860Z">
     <div class="r-comment-body"><p>review record stored at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T204241022825-coil-edit-fine-panels/review-records/r-20261102T204241022825-coil-edit-fine-panels.at-1f1391bd0a62944a9db45b84afaf6fc8f3442c2a.json</p></div>
@@ -698,6 +698,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261106T054135763480-review-of-coil-edit-panels-on-solve-currents-d559d30a96d7-figure" data-who="reckon-build" data-when="2026-11-06T05:58:49.866Z">
     <div class="r-comment-body"><p>figure review of r-20261105T160605201635-coil-edit-panels-on-solve-currents at d559d30a96d7 records 6 rubric verdicts and 3 findings (1 blocking, 2 non-blocking) against base e7df23944b98, from the rendered PNGs only; no file was changed.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261106T065918015924-review-of-coil-edit-panels-on-solve-currents-0c9e5609e8d8" data-who="reckon-build" data-when="2026-11-06T07:16:00.377Z">
+    <div class="r-comment-body"><p>review of r-20261105T160605201635-coil-edit-panels-on-solve-currents at d559d30a96d7..0c9e5609e scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 16, fit 18, reuse 19 with 0 added failures; three non-blocking findings on unproven caption negative control, self-reported clipping counts, and the panel subcommand not persisting the returned caption.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261105T071819367797-review-of-forward-gs-remeasure-c03d8db6bcdc" data-who="reckon-build" data-when="2026-11-05T16:31:49.364Z">
     <div class="r-comment-body"><p>review parsed for r-20261102T201524817113-forward-gs-remeasure at 3ef818dfaef2a36da8fd0d6e0c34272ec5259218..c03d8db6bcdc553e412e0d4a978645806910f474 — scores goal_fidelity 14, evidence 9, scope_discipline 10, durability 12, fit 16, reuse 5 (total 66 of 120); 9 findings, the blocking one being that forward_gs_receipt.json:255 reports frames_with_separatrix 0 and every fine-map separatrix separation null on all five frames.</p></div>

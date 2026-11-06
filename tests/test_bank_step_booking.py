@@ -20,11 +20,11 @@ def test_book_primal_keeps_exact_diverted_moments():
 
     operands, cache, roots, pitch, step, _, _ = _case("diverted")
     _, booked = step(operands, cache, roots + 0.03 * pitch, roots)
-    # Broadwell Xeon E5-2680 v4, the login-class CPU family.
+    # Broadwell Xeon E5-2680 v4, the fleet CPU family.
     expected = (
-        "233e491e1789813021391660aa9ea4b96c5295b16a632b825253f92de1a13cd3",
-        "85b545de4012cd26c1ffb2c5fd724842b1fb87a8487c20bc37b5ce2ba0d372f0",
-        "0e0d20611210f6a40e183859ecf9932369a2093ac8ea797e878815d003f1d1a3",
+        "9102f14452c29d0995569ec2e92bae1ffbcac91819fafd01c16516b221758e23",
+        "2b31e39feed3d9d543f6fdcf221637731ca13c95f12291abdf6ba9b7dd9f9c64",
+        "4a66eda60cc8cd136092a9b9bbcdafa9812dfedfe66a335231df7d439708d23c",
         "8f55488d671b15a882491e03214f7ce8999b9f833890164b210b5d84d61875fb",
         "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
         "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",

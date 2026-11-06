@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="195">
+<meta name="plan-version" content="196">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -260,6 +260,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T144026633550-bank-compact-followups" data-who="reckon-build" data-when="2026-11-06T15:26:05Z">
     <div class="r-comment-body"><p>[Compact branch evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-compact-followups.html#bank-compact-followups-landing): retained mask and named capacity reused, shared subjaxpr descent composed, actual compact predicate guarded. Paired Sirius suites add zero failures (21 to 22 passed, 2 skipped); four head H200 cases match with maximum form gap 1.6653345369377348e-16. Forced-full mutation fails only the new guard while all six equivalence cases stay green.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261106T155355049142-review-of-bank-compact-followups-a663fcd2e239" data-who="reckon-build" data-when="2026-11-06T16:02:26.518Z">
+    <div class="r-comment-body"><p>Review of the compact-candidate follow-up node stored at both declared record paths: scores 20/18/19/16/18/20 with added_failure_count 0, one non-blocking finding at tests/test_candidate_inspection_batched.py:300 (the new guard binds to the cond predicate, not to which branch the cond runs, so swapping the operands at nova/equilibrium/topology.py:3357-3358 would lose the compaction with no red test. The four follow-up findings themselves are answered in place and behaviour is unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

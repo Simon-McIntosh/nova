@@ -410,3 +410,53 @@ def test_single_shot_gate_rejects_a_row_without_the_banked_read_block():
 
     with pytest.raises(RuntimeError, match="synthetic row"):
         gate._require_banked_reads(rows)
+
+
+@pytest.mark.timeout(600)
+def test_a_persisted_frame_assembles_its_separatrix_from_its_own_field():
+    """At least one banked frame closes its own separatrix and measures its gap.
+
+    The separatrix is assembled from the frame's persisted display field at
+    that field's own polished saddle value, so the test exercises the same
+    assembler the producer draws with.  Forcing the assembler back to 256
+    branch slots empties every frame and this assertion fails.
+    """
+
+    receipt_path = (
+        Path(__file__).parents[1]
+        / "docs/figures/diiid-forward-onboarding/forward-gs-2026-11"
+        / "forward_gs_receipt.json"
+    )
+    receipt = json.loads(receipt_path.read_text())
+    drawn = []
+    available = [
+        record
+        for record in receipt["result"]["frame_records"]
+        if record.get("operand_path") and record.get("display_map") is not None
+    ]
+    assert available, "no persisted frame is available to rebuild"
+    for record in available[:1]:
+        result = gate._frame_result_from_checkpoint(record)
+        axis_rz = result.banked_read.get("nova_axis_rz_m")
+        assert axis_rz is not None, f"frame {result.frame} has no persisted axis"
+        row = gate._read(
+            gate.DEFAULT_DATA / result.shot,
+            ("efit_lcfs_n", "efit_lcfs_r", "efit_lcfs_z"),
+        )
+        count = int(row["efit_lcfs_n"][result.frame])
+        labelled = np.c_[
+            np.asarray(row["efit_lcfs_r"][result.frame][:count], dtype=float),
+            np.asarray(row["efit_lcfs_z"][result.frame][:count], dtype=float),
+        ]
+        operands = gate.load_frame_operands(Path(record["operand_path"]))
+        response = np.load(Path(record["display_map"]["conductor_response_path"]))
+        closed, _branches = gate.rebuild_frame_separatrix(
+            operands, response, axis_rz
+        )
+        if len(closed) == 0:
+            continue
+        rms_mm, sup_mm = gate.contour_separation(closed, labelled)
+        assert np.isfinite(rms_mm), f"frame {result.frame} has no finite rms distance"
+        assert np.isfinite(sup_mm), f"frame {result.frame} has no finite sup distance"
+        drawn.append((result.frame, rms_mm, sup_mm))
+    assert drawn, "no frame assembled a separatrix from its own display field"

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="separatrix-spline-extraction">
+  <title>DIII-D frames carry their predicted separatrix and its boundary distance | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="dsr-summary">§8 — The predicted separatrix on the DIII-D frames</h2>
+    <p>The forward bank's three polished, divertor-class frames now draw the
+    separatrix assembled from their own display field, and each one reports its
+    symmetric distance to the EFIT boundary. The fourth frame is marked
+    unavailable rather than drawn from a substitute. Every frame is solved at
+    its own terminal current and its own polished saddle value; nothing here
+    re-solves a frame, and no other frame's field is borrowed.</p>
+
+    <h2 id="dsr-grid">The display grid is the display map's own</h2>
+    <p>The conductor response is accumulated over the points the display map
+    itself carries, taken from <code>DisplayFluxMap.radius</code> and
+    <code>.height</code>, so the assembler and the panel read one grid. The
+    producer no longer keeps a local grid: the operand store now holds a
+    55980-point response (<code>response.npy</code>,
+    <code>c8075ff7…</code>) built once and reused by every frame, which is what
+    lets a frame's separatrix be reconstructed from its persisted operands
+    without touching the solver.</p>
+
+    <h2 id="dsr-frames">Per-frame boundary distance</h2>
+    <p>Distances are symmetric nearest-contour deviations between the assembled
+    separatrix and the frame's labelled EFIT LCFS, in metres.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>frame</th>
+          <th>solve converged</th>
+          <th>saddle converged</th>
+          <th>separatrix points</th>
+          <th>symmetric rms [m]</th>
+          <th>symmetric sup [m]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>137</td><td>no</td><td>yes</td><td>4297</td><td>0.1599</td><td>0.6794</td></tr>
+        <tr><td>146</td><td>no</td><td>yes</td><td>0</td><td>—</td><td>—</td></tr>
+        <tr><td>179</td><td>no</td><td>yes</td><td>5017</td><td>0.1599</td><td>0.5922</td></tr>
+        <tr><td>44</td><td>no</td><td>yes</td><td>3721</td><td>0.1725</td><td>0.8169</td></tr>
+        <tr><td>144</td><td>no</td><td>unavailable</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p><code>frames_with_separatrix</code> is 3 of the 4 drawn frames. Across
+    them the symmetric rms distance is 0.160–0.173 m (median 0.160 m) and the
+    symmetric sup distance 0.592–0.817 m (median 0.679 m). Frame 146's saddle
+    converges and its field admits no closed branch
+    (<code>closed_candidate_count</code> 0), so it is drawn without a separatrix
+    and captioned as such; frame 144 has no persisted display map and is marked
+    unavailable in the panel.</p>
+    <p>No frame reports a converged forward solve. That is the bank's own
+    terminal state, not a redraw artefact: the separatrix is assembled at the
+    polished saddle of each frame's terminal field, and the caption carries the
+    convergence flag beside the boundary so the reader sees which state the
+    contour came from.</p>
+
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png"
+           alt="Five-panel DIII-D comparison: EFIT contours, Nova terminal-current contours clipped to the limiter, the EFIT boundary, the Nova separatrix and both null sets">
+    </figure>
+    <p>The three figures are rendered through <code>nova.media</code> and each
+    is checked by the producer's own text guard before it is written: no text
+    leaves the canvas and no two text artists overlap. The cohort summary is a
+    dot plot against frame with the registered median labelled on its line and
+    one unavailability note per panel; the displacement panel draws each
+    frame's landmarks against its EFIT boundary. All three were rendered and
+    inspected after the run that published them.</p>
+
+    <h2 id="dsr-assembler">Branch capacity</h2>
+    <p>The assembler sizes its branch slots from the grid it is given
+    (<code>1 &lt;&lt; (2 * (radius.size + height.size) - 1).bit_length()</code>).
+    At the legacy 256-slot capacity every frame empties: the candidate branches
+    overflow before a closed cycle is formed, which is why the panels carried no
+    separatrix at all. The negative control pins the capacity back to 256
+    through a <code>sitecustomize</code> on <code>PYTHONPATH</code>, leaving the
+    worktree untouched, and
+    <code>test_a_persisted_frame_assembles_its_separatrix_from_its_own_field</code>
+    then fails at <code>assert drawn</code> — no frame assembles a separatrix
+    from its own field — in 436.5 s with EXIT=1
+    (<code>negative-control-256.log</code>).</p>
+
+    <h2 id="dsr-gates">Gates</h2>
+    <p><code>tests/test_diiid_forward_gs_match.py</code> and
+    <code>tests/test_frame_operand_artifacts.py</code> are run at the base
+    revision and at the node head, on the CPU lane with
+    <code>JAX_PLATFORMS=cpu</code>, one process, whole files. The base arm is
+    18 passed (EXIT=0, 28.4 s) at <code>2fd5d5b58</code>; the head arm is 19
+    passed (EXIT=0, 460.9 s) at <code>e67ba8f0</code>, the extra test being the
+    persisted-frame assembler below. No failure is added at the head. The
+    negative control, its test id and its exit status are in
+    <code>negative-control-256.log</code>; the gate logs are
+    <code>base-gate.log</code> and <code>head-gate.log</code> in the run
+    directory.</p>
+    <p><code>test_a_persisted_frame_assembles_its_separatrix_from_its_own_field</code>
+    loads one banked frame's persisted operands and conductor response,
+    reassembles its separatrix at the persisted axis, and requires a finite rms
+    and sup distance to that frame's labelled LCFS. It reads only the labelled
+    LCFS columns, so it costs seconds rather than a solve.</p>
+  </main>
+</body>
+</html>

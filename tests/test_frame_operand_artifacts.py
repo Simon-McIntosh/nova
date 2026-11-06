@@ -16,6 +16,28 @@ sys.modules[SPEC.name] = gate
 SPEC.loader.exec_module(gate)
 
 
+class _FakeTargets:
+    """Stand-in for the coupling's conductor response accumulator."""
+
+    def __init__(self, response, current, points):
+        self._response = np.asarray(response, dtype=float)
+        self._current = np.asarray(current, dtype=float)
+        self._points = np.asarray(points, dtype=float)
+        self.matrix = self._response
+        self.records = ()
+        self.rows_seen = []
+
+    def rows(self, points):
+        block = np.asarray(points, dtype=float)
+        self.rows_seen.append(block)
+        return np.arange(block.shape[0], dtype=np.intp)
+
+    def flux(self, points, current=None):
+        block = np.asarray(points, dtype=float)
+        carry = self._current if current is None else np.asarray(current, dtype=float)
+        return self._response[: block.shape[0]] @ carry
+
+
 def _synthetic_pair(root: Path, rows: int = 12, columns: int = 4):
     """Write one frame artifact beside a response matrix, in the frame layout."""
 
@@ -84,8 +106,12 @@ def test_persist_writes_one_artifact_and_its_receipt(tmp_path, monkeypatch):
         height=np.linspace(-0.2, 0.2, 5),
         node_count=25,
     )
-    display_radius, display_height, points = gate._display_grid(lattice)
+    display_radius = np.arange(1.5, 1.95, 0.1)
+    display_height = np.arange(-0.2, 0.25, 0.1)
     shape = (display_radius.size, display_height.size)
+    points = gate._display_points(
+        SimpleNamespace(radius=display_radius, height=display_height)
+    )
     response = np.arange(points.shape[0] * 3, dtype=np.float64).reshape(
         points.shape[0], 3
     )
@@ -260,12 +286,13 @@ def test_display_map_uses_terminal_mask_and_constraint_compensation(monkeypatch)
         flux=np.zeros(9), promoted_mask=promoted, constraints=(constraint,)
     )
     response = np.tile(np.asarray([0.5, 1.0]), (18, 1))
+    targets = _FakeTargets(response, np.asarray([1.0, 2.0]), points)
     monkeypatch.setattr(
-        gate,
-        "_display_coupling",
-        lambda *args: (object(), radius, height, {"shape": [18, 2]}),
+        gate, "_display_coupling", lambda *args: (object(), targets)
     )
-    monkeypatch.setattr(gate, "_stored_conductor_response", lambda record: response)
+    monkeypatch.setattr(
+        gate, "_publish_accumulated_response", lambda value: {"shape": [18, 2]}
+    )
     seen = {}
 
     def capture(*args, **kwargs):
@@ -319,12 +346,13 @@ def test_compensated_frame_reproduces_solved_nodes(monkeypatch):
         external=lambda p: np.ones(len(p)),
     )
     response = np.tile(np.asarray([0.5, 1.0]), (18, 1))
+    targets = _FakeTargets(response, np.asarray([1.0, 2.0]), points)
     monkeypatch.setattr(
-        gate,
-        "_display_coupling",
-        lambda *args: (coupling, radius, height, {"shape": [18, 2]}),
+        gate, "_display_coupling", lambda *args: (coupling, targets)
     )
-    monkeypatch.setattr(gate, "_stored_conductor_response", lambda record: response)
+    monkeypatch.setattr(
+        gate, "_publish_accumulated_response", lambda value: {"shape": [18, 2]}
+    )
     display, _ = gate._display_map(profile, equilibrium, object(), 7.0)
     print(f"max_solved_node_mismatch_wb={display.max_solved_node_mismatch_wb}")
     assert display.max_solved_node_mismatch_wb < 1.0e-12

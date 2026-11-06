@@ -66,8 +66,8 @@
           "requested_class": "limited",
           "residual": 0.05683004764453356,
           "terminal": {
-            "class": "refusal",
-            "evidence": "no finite promotion recorded"
+            "class": "not measured",
+            "evidence": "the bank executes the limited seed and returns only the diverted receipt, so this branch has a terminal residual and no trips"
           },
           "topology_consistent": false
         }
@@ -175,8 +175,8 @@
           "requested_class": "limited",
           "residual": 0.06349959302492349,
           "terminal": {
-            "class": "refusal",
-            "evidence": "no finite promotion recorded"
+            "class": "not measured",
+            "evidence": "the bank executes the limited seed and returns only the diverted receipt, so this branch has a terminal residual and no trips"
           },
           "topology_consistent": false
         }
@@ -238,8 +238,8 @@
           "requested_class": "limited",
           "residual": 0.02726176083303048,
           "terminal": {
-            "class": "refusal",
-            "evidence": "no finite promotion recorded"
+            "class": "not measured",
+            "evidence": "the bank executes the limited seed and returns only the diverted receipt, so this branch has a terminal residual and no trips"
           },
           "topology_consistent": false
         }
@@ -301,8 +301,8 @@
           "requested_class": "limited",
           "residual": 0.19700278756964593,
           "terminal": {
-            "class": "refusal",
-            "evidence": "no finite promotion recorded"
+            "class": "not measured",
+            "evidence": "the bank executes the limited seed and returns only the diverted receipt, so this branch has a terminal residual and no trips"
           },
           "topology_consistent": false
         }

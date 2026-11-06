@@ -70,9 +70,18 @@ def _banked_branch(record: dict[str, Any], name: str) -> dict[str, Any]:
     branch["promotion_trajectory"] = residuals
     branch["mask_differences"] = masks
     branch["cycle_damping_activations"] = damping
-    branch["terminal"] = classify_terminal(
-        residuals, branch.get("residual"), DEFAULT_TOLERANCE
-    )
+    if residuals or branch.get("residual") is None:
+        branch["terminal"] = classify_terminal(
+            residuals, branch.get("residual"), DEFAULT_TOLERANCE
+        )
+    else:
+        branch["terminal"] = {
+            "class": "not measured",
+            "evidence": (
+                "the bank executes the limited seed and returns only the diverted "
+                "receipt, so this branch has a terminal residual and no trips"
+            ),
+        }
     return branch
 
 

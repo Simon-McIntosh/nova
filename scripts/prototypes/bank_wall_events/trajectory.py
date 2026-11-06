@@ -142,6 +142,7 @@ def main():
 
     emit("COMPILE", mode="unaltered")
     program = jax.jit(solve).lower(*inputs).compile()
+    args.output.with_suffix(".hlo").write_text(program.as_text())
     jax.block_until_ready(program(*inputs))
     for call in range(2):
         start = time.perf_counter()
@@ -204,6 +205,7 @@ def main():
     topology._wall_events = observed_wall
     emit("COMPILE", mode="observed")
     traced = jax.jit(lambda *values: solve(*values)).lower(*inputs).compile()
+    args.output.with_suffix(".observed.hlo").write_text(traced.as_text())
     observed_result = jax.block_until_ready(traced(*inputs))
     jax.effects_barrier()
     topology._wall_events = original

@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-11-06T05:49:10.320Z",
   "dispatched_at": "2026-11-06T05:37:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-separatrix-redraw",
+      "recorded_at": "2026-11-06T06:11:06.402539+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/diiid_forward_gs_match.py",

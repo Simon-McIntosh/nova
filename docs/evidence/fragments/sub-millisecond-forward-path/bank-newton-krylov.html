@@ -1,0 +1,67 @@
+<section id="bank-newton-krylov-landing">
+<h2>Equilibrated block GMRES in the bank Newton step</h2>
+<p>The step uses restarted Arnoldi with twice-applied Gram–Schmidt, QR on the
+small Hessenberg system, and explicit cell-local 3 × 3 inverses. No dense LU
+factor or LU solve remains on the step path. A contracting step can reuse the
+matrix, scales and block inverses; every acceptance still uses a fresh read.</p>
+<p>The estimated condition number is that of the equilibrated,
+block-preconditioned operator the Krylov solve actually iterates on. The solver
+stops when that estimate times the true relative residual of that system is at
+most 1e-8. This estimate is distinct from the balanced-matrix estimate near 39
+in the earlier linear-route measurement. The physical-update test independently
+compares the trial and converged 550-cell updates with a float64 reference at
+1e-8 relative, and every converged lane must have fresh residual at most 1e-10.
+Interpreting the condition estimate in unbalanced coordinates (about 1.8e8)
+would demand a residual below machine epsilon; the earlier strict GMRES rows
+show that interpretation cannot be met.</p>
+<p>The table records one complete paired H200 allocation. Timing is the median
+of five synchronized unprofiled calls after compile and warm-up. Linear device
+time is attributed inside the whole solve using the existing source-stack
+classifier: its two exclusive equilibration/factor and solve/update groups
+include the block setup, condition estimate and Krylov loop at head. Kernel
+source attribution is not an isolated linear-kernel benchmark. The profiler's
+positive control saw the expected 2,097,152-byte host-to-device copy and device
+kernels. Each lane is listed, with its trial/converged condition estimate and
+Arnoldi count; lane numbers start at zero.</p>
+<table><thead><tr><th>Arm</th><th>Slices</th><th>Linear device [ms/solve]</th>
+<th>Whole solve [ms]</th><th>Per slice [ms]</th><th>Lane</th><th>Updates</th>
+<th>Fresh reads</th><th>Fresh residual</th><th>Trial κ / iterations</th>
+<th>Converged κ / iterations</th></tr></thead><tbody><tr><td rowspan="1">base</td><td rowspan="1">1</td><td rowspan="1">16.438</td><td rowspan="1">307.844</td><td rowspan="1">307.844</td><td>0</td><td>3</td><td>4</td><td>5.301e-11</td><td>—</td><td>—</td></tr>
+<tr><td rowspan="1">head</td><td rowspan="1">1</td><td rowspan="1">8.758</td><td rowspan="1">305.930</td><td rowspan="1">305.930</td><td>0</td><td>3</td><td>4</td><td>9.365e-12</td><td>1995.070 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td rowspan="16">base</td><td rowspan="16">16</td><td rowspan="16">643.001</td><td rowspan="16">2318.207</td><td rowspan="16">144.888</td><td>0</td><td>6</td><td>9</td><td>4.867e-11</td><td>—</td><td>—</td></tr>
+<tr><td>1</td><td>4</td><td>9</td><td>3.658e-11</td><td>—</td><td>—</td></tr>
+<tr><td>2</td><td>4</td><td>9</td><td>6.567e-11</td><td>—</td><td>—</td></tr>
+<tr><td>3</td><td>3</td><td>9</td><td>7.859e-11</td><td>—</td><td>—</td></tr>
+<tr><td>4</td><td>4</td><td>9</td><td>8.382e-11</td><td>—</td><td>—</td></tr>
+<tr><td>5</td><td>5</td><td>9</td><td>5.085e-11</td><td>—</td><td>—</td></tr>
+<tr><td>6</td><td>4</td><td>9</td><td>7.319e-11</td><td>—</td><td>—</td></tr>
+<tr><td>7</td><td>3</td><td>9</td><td>9.116e-11</td><td>—</td><td>—</td></tr>
+<tr><td>8</td><td>3</td><td>9</td><td>3.755e-11</td><td>—</td><td>—</td></tr>
+<tr><td>9</td><td>3</td><td>9</td><td>2.035e-11</td><td>—</td><td>—</td></tr>
+<tr><td>10</td><td>5</td><td>9</td><td>6.365e-11</td><td>—</td><td>—</td></tr>
+<tr><td>11</td><td>5</td><td>9</td><td>8.291e-11</td><td>—</td><td>—</td></tr>
+<tr><td>12</td><td>3</td><td>9</td><td>5.669e-11</td><td>—</td><td>—</td></tr>
+<tr><td>13</td><td>3</td><td>9</td><td>2.693e-11</td><td>—</td><td>—</td></tr>
+<tr><td>14</td><td>5</td><td>9</td><td>4.691e-11</td><td>—</td><td>—</td></tr>
+<tr><td>15</td><td>3</td><td>9</td><td>6.511e-11</td><td>—</td><td>—</td></tr>
+<tr><td rowspan="16">head</td><td rowspan="16">16</td><td rowspan="16">67.142</td><td rowspan="16">1594.793</td><td rowspan="16">99.675</td><td>0</td><td>4</td><td>8</td><td>5.916e-11</td><td>1995.070 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>1</td><td>3</td><td>8</td><td>1.886e-11</td><td>1997.027 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>2</td><td>3</td><td>8</td><td>5.056e-11</td><td>1998.987 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>3</td><td>4</td><td>8</td><td>6.295e-12</td><td>2000.950 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>4</td><td>6</td><td>8</td><td>7.537e-11</td><td>2002.916 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>5</td><td>3</td><td>8</td><td>1.531e-11</td><td>2004.885 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>6</td><td>3</td><td>8</td><td>6.592e-11</td><td>2006.856 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>7</td><td>4</td><td>8</td><td>5.950e-11</td><td>2008.831 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>8</td><td>3</td><td>8</td><td>8.265e-11</td><td>2010.808 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>9</td><td>3</td><td>8</td><td>1.977e-11</td><td>2012.789 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>10</td><td>3</td><td>8</td><td>7.684e-11</td><td>2014.772 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>11</td><td>3</td><td>8</td><td>9.119e-11</td><td>2016.759 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>12</td><td>4</td><td>8</td><td>6.837e-11</td><td>2018.748 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>13</td><td>3</td><td>8</td><td>7.176e-12</td><td>2020.740 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>14</td><td>5</td><td>8</td><td>9.129e-11</td><td>2022.736 / 40</td><td>1892.185 / 40</td></tr>
+<tr><td>15</td><td>3</td><td>8</td><td>4.772e-11</td><td>2024.734 / 40</td><td>1892.185 / 40</td></tr></tbody></table>
+<p>At sixteen slices, linear device time falls from 643.001 to 67.142 ms (9.58 times faster), while whole-solve wall falls from 2318.207 to 1594.793 ms (31.2 percent). The head remains 99.675 ms per slice, above the sub-millisecond target. The base/head update ceilings are 6/6, and whole-batch fresh reads are 9/8. The individual lane trajectories differ, so the whole-solve change includes that trajectory difference. Only the paired measurements in this table are used for the speed ratio.</p>
+<p>Paired flux/span maximum: 3.327e-14; paired axis/minor-radius: 2.256e-14; paired X-point/minor-radius: 8.955e-15; paired boundary-flux/span: 3.690e-15. The limits are 1e-8, 5e-4, 5e-4 and 1e-4, respectively. Across both arms the independent analytic oracle has axis/minor-radius at most 1.048e-05, X-point/minor-radius at most 9.255e-06, and boundary-flux/span at most 2.591e-05. The checks use <code>pair_gaps</code> and retain every lane in <code>precision.json</code>.</p>
+<p>The 7-file Sirius comparison has 48 passed, 5 skipped and 3 failed at base, and 53 passed, 5 skipped and 1 failed at head, with no added failure. Baseline's two stale synthetic booking/step doubles are corrected in the assigned test file. Both arms retain five skips: two limited-state cases without an X-point, two optional archived-matrix comparisons and one GPU timing case. The added <code>test_bank_step_booking.py</code> ran on Sirius in one fresh pytest process per arm with separate basetemps: base 4 passed/1 failed, head 4 passed/1 failed. The real carried-factor reuse/rebuild and missing-contraction checks pass in both arms. The shared failure is <code>test_book_primal_keeps_exact_diverted_moments</code>: base and head produce identical observed hashes, differing from the stored expectations. No product code or tests changed for this additional gate. The paired logs and fingerprint comparison are under <code>carried-factor/</code> in the parent run directory. The unchanged cycle test accepts every lane below 1e-10. The H200 physical-update checks pass with trial/converged relative errors [(&#x27;trial&#x27;, &#x27;5.639257676986195e-14&#x27;), (&#x27;converged&#x27;, &#x27;1.1715065335762512e-13&#x27;)]. Removing the cell-block preconditioner while capping GMRES at the preconditioned iteration count fails both physical-update tests with errors [(&#x27;trial&#x27;, &#x27;0.006506707976503897&#x27;), (&#x27;converged&#x27;, &#x27;0.007444894743040184&#x27;)]; <code>negative.log</code> ends with EXIT=1.</p>
+<p>H200 allocation 1306685 on betelgeuse under gpu_0003_grpA: two CPU cores, one GPU, 48 GB. Revisions: base 50b66f2b7662c9fff3842f3f4e8cab2547386651; head 9ac772a8fb5ed6848167e2c1670673792059620f. Receipts, traces and complete logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015362785-bank-newton-krylov/verified</code>.</p>
+</section>

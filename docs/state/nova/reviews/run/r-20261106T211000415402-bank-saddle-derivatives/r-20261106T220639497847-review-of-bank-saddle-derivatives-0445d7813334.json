@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-06T22:18:33.036Z",
   "dispatched_at": "2026-11-06T22:08:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-saddle-guards",
+      "recorded_at": "2026-11-06T22:25:24.087586+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_saddle_derivatives.py",

@@ -15,6 +15,13 @@
     "benchmarks/coil_edit_latency.py:3608"
   ],
   "completed_at": "2026-11-06T09:34:47.248Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T09:42:17.500039+00:00"
+    }
+  },
   "dispatched_at": "2026-11-06T09:21:09Z",
   "finding_dispositions": {
     "0": {

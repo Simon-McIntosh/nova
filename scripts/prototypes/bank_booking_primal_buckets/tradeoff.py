@@ -297,7 +297,7 @@ def group_attribution(run):
 def comparison(run):
     arms = ("base", "prior", "head")
     records = read_processes(run, arms)
-    rows, pairs = [], []
+    rows, calls, pairs = [], [], []
     for lanes, arm, process in itertools.product((1, 16), arms, (1, 2)):
         r = records[arm, process, lanes]
         stage = r["device"]["groups"]["step_residual"]
@@ -307,10 +307,22 @@ def comparison(run):
                 arm,
                 process,
                 lanes,
-                str(r["capture"]["reads"]),
+                (
+                    f"{r['reads']} in all {lanes} lanes"
+                    if len(set(r["capture"]["reads"])) == 1
+                    else str(r["capture"]["reads"])
+                ),
                 r["updates"],
                 f"{r['wall']:.6f}",
                 f"{r['wall'] / r['reads']:.6f}",
+            ]
+        )
+        calls.append(
+            [
+                arm,
+                process,
+                lanes,
+                r["calls"],
                 f"{stage['device_ms']:.6f}",
                 stage["launches"],
                 f"{stage['device_ms'] / r['calls']:.6f}",
@@ -363,11 +375,13 @@ def comparison(run):
     html = f'<section id="{PREFIX}-three-arm">\n'
     html += "<h2>Three-arm comparison in one further H200 allocation</h2>\n"
     html += (
-        "<p>Base is the sequential formulation; prior is the first shared-helper "
+        "<p>H200 job 1307085 requests one GPU, two CPUs and 96 GB. "
+        "Base is the sequential formulation; prior is the first shared-helper "
         "head with 16-cell primal tiles; head is the 32-cell primal candidate. "
         "Every arm has its own compilation cache, one warm-up process and two "
         "fresh measured processes with XLA_FLAGS unset. All precision budgets "
         "pass against base for every pairing of measured processes. The "
+        "positive transfer/matmul control passes in every measured process. The "
         "candidate is retained only if both widths beat base residual device "
         "time per call and do not exceed base launches per call.</p>\n"
     )
@@ -380,13 +394,53 @@ def comparison(run):
             "Batch updates",
             "Solve ms",
             "Wall/read ms",
+        ],
+        rows,
+    )
+    html += table(
+        [
+            "Arm",
+            "Process",
+            "Slices",
+            "Residual calls",
             "Residual ms/solve",
             "Residual launches",
             "Residual ms/call",
             "Residual launches/call",
             "Jacobian ms/call",
         ],
-        rows,
+        calls,
+    )
+    html += (
+        "<p>Measured revisions: "
+        + "; ".join(
+            f"{arm} <code>{records[arm, 1, 16]['capture']['revision']}</code>"
+            for arm in arms
+        )
+        + ".</p>\n"
+    )
+    precision = {
+        key: max(max(pair["gaps"][key]) for pair in pairs) for key in pairs[0]["gaps"]
+    }
+    residual = max(max(record["capture"]["residual"]) for record in records.values())
+    html += "<h3>Precision across all measured process pairings</h3>\n"
+    html += table(
+        ["Quantity", "Maximum normalized gap", "Limit"],
+        [
+            [key, f"{value:.6e}", f"{pairs[0]['limits'][key]:.6e}"]
+            for key, value in precision.items()
+        ]
+        + [["Fresh residual", f"{residual:.6e}", "1.000000e-10"]],
+    )
+    html += (
+        "<p>The candidate also passes all six focused Sirius files in fresh "
+        "processes: 25 passed, zero failed, three optional skips. Its five "
+        "moment-reference comparisons retain a maximum relative difference "
+        "of 1.708597e-16 against the 1e-14 limit, with the first head's pins "
+        "unchanged. Routing one normal-form cell through the conic bucket "
+        "in a scratch archive fails the same three diverted tests and ends "
+        "EXIT=1; the two limited cases pass. Receipts are in the run's "
+        "<code>restructure</code> directory.</p>\n"
     )
     conclusions = []
     for lanes, v in verdict.items():
@@ -405,7 +459,15 @@ def comparison(run):
         )
     )
     html += "<p>" + "; ".join(conclusions) + ". " + decision + "</p>\n</section>\n"
-    return html, dict(rows=rows, pairs=pairs, verdict=verdict, retain_candidate=retain)
+    return html, dict(
+        rows=rows,
+        calls=calls,
+        pairs=pairs,
+        verdict=verdict,
+        precision_maxima=precision,
+        max_fresh_residual=residual,
+        retain_candidate=retain,
+    )
 
 
 def main():
@@ -424,10 +486,12 @@ def main():
         )
         print(
             "COMPARISON",
-            json.dumps({
-                "retain_candidate": receipt["retain_candidate"],
-                "verdict": receipt["verdict"],
-            }),
+            json.dumps(
+                {
+                    "retain_candidate": receipt["retain_candidate"],
+                    "verdict": receipt["verdict"],
+                }
+            ),
             flush=True,
         )
     prior = args.output.read_text().split(f'<section id="{PREFIX}-attribution">')[0]

@@ -215,7 +215,9 @@
       model error and the rounding-over-&epsilon; cancellation cross between its ends), with the
       best attainable error and the &epsilon; that gives it recorded per slope. Production uses one
       strip width, a fixed fraction of each edge's length, so the strip is chosen only if one
-      such fraction meets 1e-10 at every slope; that fraction is the one recorded; (2) the chosen
+      such fraction meets 1e-10 at every slope; that fraction is the one recorded, with the
+      rounding term at that fraction per slope (the curve's rounding-over-&epsilon; branch fitted on
+      the small-&epsilon; side of each turnover and read at the production fraction); (2) the chosen
       route meets 1e-10 relative against that integral over the same targets, and at slopes
       &pi;/2 and 0 reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27) to the same
       1e-10 relative, while a
@@ -253,11 +255,12 @@
       and only the absolute sum bounds what two correctly rounded evaluations can differ by. On
       the Part II branch there is no strip cancellation and the tolerance is the floor. A
       negative control that reverses one cell's edge normals in the device build breaks that
-      agreement; (2) on one H200, fresh process and persistent cache disabled, the build at
+      agreement; (2) on one H200, in a fresh process with the persistent cache emptied first
+      (cleared, still written to), the build at
       1696 cells and on the prototype mesh at half its cell size (count recorded, near four
       times as many) compiles in at most 60&nbsp;s with an executable of at most 50&nbsp;MB and at
       most 64&nbsp;GB of host memory, the bounds kernel-compile-barrier owns, with the warm execute
-      time recorded and a second run hitting the persistent cache; (3) both builds are entered
+      time recorded, and a second fresh process hits the cache entry the first one wrote; (3) both builds are entered
       as program rows of <code>docs/research/compile-cost-evidence.html</code> carrying the fields
       its existing rows carry (compile wall, executable size, peak host memory) and the cell
       count, so a production mesh's cost is read from that ledger rather than re-measured.

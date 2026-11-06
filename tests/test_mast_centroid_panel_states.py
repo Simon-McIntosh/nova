@@ -23,6 +23,20 @@ CURRENT_PERTURBATION = 1.01
 SPACING = panel_renderer.DEFAULT_SPACING
 #: Levels the contour-path comparison is taken at.
 LEVEL_FRACTIONS = (0.2, 0.4, 0.6, 0.8)
+#: The declared control's switch: pin the assembler to the 256 slots the fine
+#: display grid overflowed, so the well_formed guard must fail.
+SLOT_CONTROL_ENV = "NOVA_PANEL_256_SLOT_CONTROL"
+
+if os.environ.get(SLOT_CONTROL_ENV) == "1":
+    import nova.equilibrium.display_flux as _display_flux
+
+    _assemble = _display_flux.assemble_separatrix_branches
+
+    def _forced_slots(*args, **kwargs):
+        kwargs["branch_capacity"] = 256
+        return _assemble(*args, **kwargs)
+
+    _display_flux.assemble_separatrix_branches = _forced_slots
 
 
 def test_committed_panel_states_are_present():

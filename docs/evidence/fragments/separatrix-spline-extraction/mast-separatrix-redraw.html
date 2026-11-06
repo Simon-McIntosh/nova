@@ -57,7 +57,7 @@ two files are different pictures rather than the same one twice: the plain
 panel is drawn at the producer's 4000-cell default, delivering 4286 cells
 (md5 <code>a9f168eef415757c8f8f521dd96a6466</code>), and the
 <code>-fine</code> panel at the 12000 cells its receipt records, delivering
-12353 (md5 <code>811b454b88529baf45421790ce7b863e</code>). The finer map reads
+12353 (md5 <code>0f1f60461833579beb5f21679d0ad08e</code>). The finer map reads
 as a finer mesh at full size, and its clipped-cell count rises from 1453 to
 4250 with it. A test compares the two committed files' digests, so a redraw
 that collapsed them to one picture fails rather than passing silently.</p>
@@ -84,6 +84,24 @@ rather than closing across the private flux region. The producer measures its
 own labels before saving and prints
 <code>LABEL_CHECK clipped=0 overlapping=0</code> on every lane.</p>
 
+<p id="mast-separatrix-redraw-reproduction-error">The cpu-lane receipt
+records <code>display_map.reproduction_relative_error</code> as exactly
+<code>0.0</code>, where the same lane read <code>1.79e-16</code> before and the
+other lanes read about <code>2e-16</code>. That exact zero is not agreement;
+it is the comparison reading one array twice, and it is a property of this
+producer's stand-in operator rather than of the display map. The map compares
+its evaluation at the lattice nodes against <code>operator.raster_image</code>,
+and this panel builds its operator as <code>_PanelOperator</code> onto the same
+<code>DisplayCoupling</code> the map is drawn through, so both operands are the
+same contraction of the same prepared response and the difference cancels bit
+for bit when both evaluations take the cached block. The non-zero readings on
+the other lanes are that same identity evaluated along a path that reassociates
+the sum, not a real disagreement. The figure therefore carries no information
+either way about whether the map reproduces the solve's own raster, and no
+claim is made from it here. The check with teeth on these panels is
+<code>max_node_mismatch_wb</code>, which compares the map against the stored
+state itself rather than against a copy of its own arithmetic.</p>
+
 <p id="mast-separatrix-redraw-gate-result">The redraw gate ran once at the head,
 as one job, on the reserved H200: slurm job <code>1306726</code> at revision
 <code>5f91ff873</code>, exit status 0, <b>11 passed in 2178.98 s</b>. The base
@@ -92,10 +110,12 @@ arm ran the same command at revision <code>2fd5d5b58</code> in slurm job
 carries one test id the base does not, and neither arm carries a failing id, so
 the gate shows <b>zero added failures</b> against the base.</p>
 
-<p id="mast-separatrix-redraw-control">The control for the new guard forces the
-display assembler back to 256 branch slots, loaded as a pytest plugin that pins
-<code>branch_capacity</code> on the one call
-<code>display_flux._branches</code> makes. It goes red exactly where it must:
+<p id="mast-separatrix-redraw-control">The control for the new guard lives in
+the test module itself and is re-runnable from the tree:
+<code>NOVA_PANEL_256_SLOT_CONTROL=1</code> makes it pin the display assembler
+back to 256 branch slots on the one call <code>display_flux._branches</code>
+makes, so the <code>well_formed</code> guard the panels now depend on must
+fail. It goes red exactly where it must:
 <b>5 failed, 6 passed, exit status 1</b>, with
 <code>test_committed_panel_state_renders[cpu-lane]</code>,
 <code>[titan-lane]</code> and <code>[full-axis-lane]</code> failing on

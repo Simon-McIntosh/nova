@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -411,14 +411,14 @@
     <p class="r-dec-ctx">The machine description carries only the smeared section, about 0.96 m² per arm. §8 needs each limb&#x27;s toroidal width and radial depth, and the arms&#x27; constant vertical thickness; their product with six must reproduce 5.8 m².</p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="sheet-route" data-choice="" data-by="" data-when="" data-sections="s3">
+<div class="r-dec" data-key="sheet-route" data-choice="part-ii-sheet" data-by="coordinator, by the section&#x27;s 1e-10 rule" data-when="2026-11-06T22:20:37+00:00" data-sections="s3">
     <p class="r-dec-q">Does a thin Part V polygon strip deliver the edge sheet, or does it need the Part II closed form?</p>
     <p class="r-dec-ctx">The strip reuses the production polygon route and adds no module or tile; Part II adds nova/biot/sheet.py and a sheet tile. §2 measures the strip&#x27;s best attainable error and decides on a 1e-10 relative threshold.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="part-v-strip">Thin Part V polygon strip</button>
-      <button class="r-opt" data-value="part-ii-sheet">Urankar Part II closed form</button>
+      <button class="r-opt chosen" data-value="part-ii-sheet">Urankar Part II closed form</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Measured (052fa853c, fragment icm-strip-error-sweep): the thin Part V strip against a 1e-13 ring-integral reference bottoms at 6.7e-8 worst case at eps/L 1e-4 (per-slope bests 1.3e-8 to 6.7e-8), every slope turns over inside the 1e-2 to 1e-8 sweep, all 60 references converged, and no single edge-length fraction meets 1e-10. An independent attempt on a 1.0 m segment floors at 3.1e-8. The strip misses the threshold by about two decades, so the edge sheet is the Urankar Part II closed form in nova/biot/sheet.py.</p>
     </div>
 </section>
 

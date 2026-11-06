@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T19:15:13.025Z",
+  "dispatched_at": "2026-11-06T19:05:50Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking measurement-record note. The tolerance-crossing finding and the per-lane path tables stand; the unproven cold-compile cause is recorded as a hypothesis in the coordinator's account, and the polish experiment re-tests read-count stability on common seeds.",
+      "recorded_at": "2026-11-06T19:19:02.394997+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Non-blocking measurement-record note. The tolerance-crossing finding and the per-lane path tables stand; the unproven cold-compile cause is recorded as a hypothesis in the coordinator's account, and the polish experiment re-tests read-count stability on common seeds.",
+      "recorded_at": "2026-11-06T19:19:07.836799+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence states as fact that the earlier Jacobian-launch record \"used another cold compilation before warming its caches\", but this node measured only within-arm repeatability of a warm cache, so the cause of the 7/17 against 6/8 difference is an untested hypothesis and should be labelled as one."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: the decision-absence control is cited as proof the instrument works, yet the driver that produced report-control.json is not committed, so a later reader cannot re-run the identical-path refusal or the injected done-bit flip and must trust the receipt alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the four commits against 73864287 commit by commit; 41c5769 adds the observer capture driver, 86ec2f7 adds the host-side moment export, 695c690 adds report.py and the fragment, d23b1641 strips exported SVG whitespace, and all 1777 inserted lines fall inside the three declared paths.",
+    "done_when": "the done_when asks for per-lane, per-update fresh residuals, accepted and rejected trial scales, refactor state, decision changes, the first diverging update with its numerical difference, a read-count-stability hypothesis and one data-ink figure; the fragment tables all of these and the gate logs base-1.log and head-1.log record READS [7,...] and [17,...] with EXIT=0.",
+    "goal": "the node goal is to find where tiny numerical changes move the sixteen-slice read count; docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html:2 names update 3 zero-based lane 2 and the 1e-10 tolerance crossing, and the receipts reproduce 7 base reads against 17 head reads in both fresh processes of each arm.",
+    "manifest": "read; status is complete at d23b1641d115 with four commits listed, and its artifacts carry base_reads 7, head_reads 17, first_split update 3 lane 2 and the 8.357e-11 gap; baseline_suite and after_suite are empty because the node declares a measurement gate and changes no test.",
+    "write_paths": "the declared paths are scripts/prototypes/bank_read_count_sensitivity, docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html and docs/figures/sub-millisecond-forward-path/bank-read-count-sensitivity; git diff --stat 73864287..d23b1641 adds capture.py, device.py, device.sh, report.py, the fragment and residual-history.svg, and no file under nova/ or tests/."
+  },
+  "justifications": {
+    "durability": "report.py:107-110 and report.py:130-160 assert receipt consistency and report-control.json records the identical-path refusal and a located injected done-bit flip, but nothing in CI runs the script and the driver that produced that control is not committed, so a regression in the observer or tabulation reddens no test.",
+    "evidence": "the six gate logs base-0..2.log and head-0..2.log each end EXIT=0 with cache-hit lines and READS of 7 and 17, and re-deriving the update-3 done vector from base-1.json and head-1.json yields exactly lanes 2,4,6,7,8,10,11,13 differing, matching the fragment.",
+    "fit": "capture.py, device.py and report.py follow the sibling bank_* prototype layout and use mechanism names, though report.py:283-330 restates the per-lane residual-history plotting idiom already present in scripts/prototypes/bank_solve_cycle/report.py:127-163.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html:2-21 states the first discrete split as update 3 lane 2 at 7.645e-11 versus 1.600e-10 and names the tolerance crossing, which is the deliverable the goal asked for.",
+    "reuse": "the diff imports observe_updates from scripts/prototypes/bank_solve_cycle/observe.py, execute and archive from scripts/prototypes/bank_wall_events, measurement.sh from bank_booking_determinism, save_checked from bank_solve_profile/plot.py:45 and fixture.build, so no added definition forks an owned capability.",
+    "scope_discipline": "every path in git diff --stat 73864287..d23b1641 lies inside the three declared write paths, and no product source or test file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to find where tiny numerical changes move the sixteen-slice read count; docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html:2 names update 3 zero-based lane 2 and the 1e-10 tolerance crossing, and the receipts reproduce 7 base reads against 17 head reads in both fresh processes of each arm.\nVERDICT done_when: the done_when asks for per-lane, per-update fresh residuals, accepted and rejected trial scales, refactor state, decision changes, the first diverging update with its numerical difference, a read-count-stability hypothesis and one data-ink figure; the fragment tables all of these and the gate logs base-1.log and head-1.log record READS [7,...] and [17,...] with EXIT=0.\nVERDICT write_paths: the declared paths are scripts/prototypes/bank_read_count_sensitivity, docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html and docs/figures/sub-millisecond-forward-path/bank-read-count-sensitivity; git diff --stat 73864287..d23b1641 adds capture.py, device.py, device.sh, report.py, the fragment and residual-history.svg, and no file under nova/ or tests/.\nVERDICT manifest: read; status is complete at d23b1641d115 with four commits listed, and its artifacts carry base_reads 7, head_reads 17, first_split update 3 lane 2 and the 8.357e-11 gap; baseline_suite and after_suite are empty because the node declares a measurement gate and changes no test.\nVERDICT diff: read the four commits against 73864287 commit by commit; 41c5769 adds the observer capture driver, 86ec2f7 adds the host-side moment export, 695c690 adds report.py and the fragment, d23b1641 strips exported SVG whitespace, and all 1777 inserted lines fall inside the three declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html:2-21 states the first discrete split as update 3 lane 2 at 7.645e-11 versus 1.600e-10 and names the tolerance crossing, which is the deliverable the goal asked for.\nSCORE evidence: 18\nJUSTIFICATION evidence: the six gate logs base-0..2.log and head-0..2.log each end EXIT=0 with cache-hit lines and READS of 7 and 17, and re-deriving the update-3 done vector from base-1.json and head-1.json yields exactly lanes 2,4,6,7,8,10,11,13 differing, matching the fragment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat 73864287..d23b1641 lies inside the three declared write paths, and no product source or test file is touched.\nSCORE durability: 15\nJUSTIFICATION durability: report.py:107-110 and report.py:130-160 assert receipt consistency and report-control.json records the identical-path refusal and a located injected done-bit flip, but nothing in CI runs the script and the driver that produced that control is not committed, so a regression in the observer or tabulation reddens no test.\nSCORE fit: 18\nJUSTIFICATION fit: capture.py, device.py and report.py follow the sibling bank_* prototype layout and use mechanism names, though report.py:283-330 restates the per-lane residual-history plotting idiom already present in scripts/prototypes/bank_solve_cycle/report.py:127-163.\nSCORE reuse: 18\nJUSTIFICATION reuse: the diff imports observe_updates from scripts/prototypes/bank_solve_cycle/observe.py, execute and archive from scripts/prototypes/bank_wall_events, measurement.sh from bank_booking_determinism, save_checked from bank_solve_profile/plot.py:45 and fixture.build, so no added definition forks an owned capability.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html:15 non-blocking: the sentence states as fact that the earlier Jacobian-launch record \"used another cold compilation before warming its caches\", but this node measured only within-arm repeatability of a warm cache, so the cause of the 7/17 against 6/8 difference is an untested hypothesis and should be labelled as one.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html:52 non-blocking: the decision-absence control is cited as proof the instrument works, yet the driver that produced report-control.json is not committed, so a later reader cannot re-run the identical-path refusal or the injected done-bit flip and must trust the receipt alone.\n",
+  "review_run_id": "r-20261106T190415788129-review-of-bank-read-count-sensitivity-d23b1641d115",
+  "reviewed_base_sha": "73864287c5db07bac083e61dca1f160859452351",
+  "reviewed_head_sha": "d23b1641d115bb7682ee262a5529405e873b84e1",
+  "reviewed_run_id": "r-20261106T183119731936-bank-read-count-sensitivity",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T19:22:43.970861+00:00",
+  "total": 108
+}

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="197">
+<meta name="plan-version" content="198">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -685,7 +685,10 @@
     <div class="r-comment-body"><p>[Jacobian launch measurements](/nova/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches.html#bank-jacobian-launches-landing): default tangent tiles of 32 cells and groups of two rings reduce sixteen-slice Jacobian launches from 2787 to 1778 (36.2%) and device time from 26.524-26.549 to 25.040-25.048 ms/call. All four 550-cell Jacobians meet 1e-12, six paired CPU files add no failure, the omission control fails, and all solve precision budgets pass. Whole-solve wall is higher with eight reads versus six; wall/read falls about 4.9%.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T155433949352-review-of-bank-solve-trace-head-1a40db649fa0" data-who="reckon-build" data-when="2026-11-06T16:07:08.663Z">
-    <div class="r-comment-body"><p>[Current solve attribution](/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html#bank-solve-trace-head-landing): independent review of r-20261106T144026733366-bank-solve-trace-head at 1a40db649fa005e3e1c60783067c19148152c50d (base d102ff6f103775ced8fe3b573122a235bec9da22) scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 12, fit 18, reuse 19, added_failure_count 0 (no arm recorded on a measurement node), two non-blocking findings (an exact-match JAX cache-hit log assertion at report.py:111 and reused process directories at device.py:28); the fragment&#x27;s group costs, walls, reads, updates, launches and closure all reconcile with the run&#x27;s own capture and attribution receipts.</p></div>
+    <div class="r-comment-body"><p>[Current solve attribution](/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html#bank-solve-trace-head-landing): independent review of r-20261106T144026733366-bank-solve-trace-head at 1a40db649fa005e3e1c60783067c19148152c50d (base d102ff6f103775ced8fe3b573122a235bec9da22) scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 12, fit 18, reuse 19, added_failure_count 0 (no arm recorded on a measurement node), two non-blocking findings (an exact-match JAX cache-hit log assertion at report.py:111 and reused process directories at device.py:28); the fragment's group costs, walls, reads, updates, launches and closure all reconcile with the run's own capture and attribution receipts.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T190415788129-review-of-bank-read-count-sensitivity-d23b1641d115" data-who="reckon-build" data-when="2026-11-06T19:15:13.025Z">
+    <div class="r-comment-body"><p>[Read-count sensitivity review](/nova/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html#bank-read-count-sensitivity-landing): scored 108/120 at d23b1641d115; the 7-versus-17 read pair, the update-3 lane-2 tolerance crossing, the lanes 2/4/6/7/8/10/11/13 disagreement, the per-update trial counts and the residual-history figure all reproduce from the run&#x27;s own receipts; two non-blocking findings record an uncommitted negative-control driver and a causal sentence stated beyond what this node measured.</p></div>
 </div>
 </section>
 </main>

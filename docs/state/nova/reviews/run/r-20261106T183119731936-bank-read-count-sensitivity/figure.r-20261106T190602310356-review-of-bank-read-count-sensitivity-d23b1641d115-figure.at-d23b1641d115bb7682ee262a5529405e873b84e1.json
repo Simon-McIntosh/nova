@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_finding": "none \u2014 the caption names what each panel shows (left, complete history; right, the same history near the unchanged 1e-10 tolerance), states that both axes are logarithmic, names the lane and the companion reads, and does not merely repeat the figure title.",
+  "completed_at": "2026-11-06T19:21:57Z",
+  "dispatched_at": "2026-11-06T19:08:05Z",
+  "figures": [
+    {
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-read-count-sensitivity/residual-history.svg",
+      "opened": true,
+      "rendered_attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T190602310356-review-of-bank-read-count-sensitivity-d23b1641d115-figure/image-0.png",
+      "rendered_size_px": [
+        1399,
+        720
+      ],
+      "script": "scripts/prototypes/bank_read_count_sensitivity/report.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_read_count_sensitivity/report.py",
+      "id": "f5fd9c7cc2d",
+      "line": 330,
+      "severity": "non-blocking",
+      "summary": "the right panel's y range 4e-11 to 2e-10 clips the head trace above the top limit with no off-scale indicator: head's update-2 residual is 1.6897e-9, about 8.4x the top limit, so the head line enters the zoom panel at its top-left corner with no marker, and a reader of the zoom alone cannot see where the head series came from or that its earlier value was far higher. The left panel does show that point, so the figure still carries it."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-read-count-sensitivity/residual-history.svg",
+      "id": "f9d7b3f9832",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the left panel labels only alternate decades (10^-2, 10^-4, 10^-6, 10^-8, 10^-10), so its first residual at 1.15e-1 sits above the highest labelled tick with no 10^-1 label and cannot be read off that axis; the figure's subject, the 1e-10 crossing, is fully labelled in both panels."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 axis, tick and title text renders in #52514e and legend text near-black on white, far above text contrast guidance; the base trace is #929292 and the tolerance threshold #666666, both at or above 3:1 against white.",
+    "data_ink": "pass \u2014 two residual traces with markers and one dotted threshold carry all of the ink; there are no fills, no gradients and no extra series. Head is drawn above base (zorder) so the subject trace is continuous along its whole length.",
+    "decoration": "pass \u2014 no gridlines, no background tint or shading, top and right spines removed on both panels, and a frameless legend above the panels.",
+    "label_collision": "pass \u2014 no label overlaps another label or the plotted data: the legend sits in clear space above both panels, tick labels are separated by more than a glyph width, axis titles sit below the tick labels, and no non-white pixel touches the canvas border, so no glyph is clipped by the canvas.",
+    "legibility": "pass \u2014 the two panels read at a glance: logarithmic vertical axes, an x axis labelled Batch update on each panel, one shared y axis labelled Fresh residual, and a frameless legend naming base, head and tolerance. Tick and axis text is 14-16 pt on a 1400 px canvas. A non-blocking note is recorded as a finding: the left panel labels alternate decades only, so its topmost labelled tick is 10^-2 while the first residual is 1.15e-1.",
+    "table_form": "pass \u2014 fresh residual against update is a continuous trajectory and is correctly drawn as a plot; the per-update numbers live in the fragment's table, not in the image."
+  },
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261106T190602310356-review-of-bank-read-count-sensitivity-d23b1641d115-figure",
+  "reviewed_base_sha": "73864287c5db07bac083e61dca1f160859452351",
+  "reviewed_head_sha": "d23b1641d115bb7682ee262a5529405e873b84e1",
+  "reviewed_run_id": "r-20261106T183119731936-bank-read-count-sensitivity",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T19:22:14.073331+00:00",
+  "total": null
+}

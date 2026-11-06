@@ -2,6 +2,7 @@
 
 import argparse
 from collections import Counter
+from copy import deepcopy
 from html import escape
 import json
 from pathlib import Path
@@ -12,6 +13,14 @@ import numpy as np
 from scripts.prototypes.bank_booking_determinism.compare import compare
 from scripts.prototypes.bank_booking_determinism.environments import SETTINGS
 from scripts.prototypes.bank_solve_cycle.report import pair_gaps
+
+
+def within_budget(gaps, limits):
+    """Require every supplied ratio to be finite and below its own limit."""
+    return all(
+        np.all(np.isfinite(values)) and np.all(np.asarray(values) <= limits[key])
+        for key, values in gaps.items()
+    )
 
 
 def table(identifier, headings, rows):
@@ -81,6 +90,19 @@ def main():
             comparison=comparison,
         )
     assert len(loaded["unset"]) == 5
+    control_reference = loaded["unset"][0]["precision"]
+    control_changed = deepcopy(control_reference)
+    control_changed["flux"][0][0] += control_reference["span"] * 1e-6
+    control_changed["axis"][0][0] += control_reference["minor_radius"] * 1e-3
+    control_changed["saddle"][0][0] += control_reference["minor_radius"] * 1e-3
+    control_changed["boundary_flux"][0] += control_reference["span"] * 2e-4
+    control_gaps, control_limits = pair_gaps(control_reference, control_changed)
+    assert not within_budget(control_gaps, control_limits)
+    control = {
+        key: float(np.max(control_gaps[key]))
+        for key in ("flux", "axis", "saddle", "boundary_flux")
+    }
+    assert all(control[key] > control_limits[key] for key in control)
     baseline_wall = settings["unset"]["median_wall_ms"]
     precision = {}
     for setting, records in loaded.items():
@@ -97,7 +119,7 @@ def main():
                 per_lane.append(
                     dict(unset_process=before_index, process=after_index, gaps=gaps)
                 )
-        passed = all(maxima[key] <= limits[key] for key in maxima)
+        passed = within_budget(maxima, limits)
         residual_passed = all(
             all(call["converged"]) and max(call["residual"]) <= 1e-10
             for row in records
@@ -115,7 +137,12 @@ def main():
             else None
         )
         settings[setting]["precision_passed"] = precision[setting]["passed"]
-    result = dict(settings=settings, precision=precision, processes=outcomes)
+    result = dict(
+        settings=settings,
+        precision=precision,
+        processes=outcomes,
+        precision_control=dict(ratios=control, accepted=False),
+    )
     (args.run / "environment-comparison.json").write_text(json.dumps(result, indent=2))
     summary_rows = []
     process_rows = []
@@ -271,6 +298,10 @@ def main():
         ["Setting", "Quantity / reference scale", "Largest ratio", "Budget", "Pass"],
         precision_rows,
     )
+    text += "<p>A controlled copy exceeds each paired precision budget: "
+    text += escape(json.dumps(control))
+    text += ". The same budget predicate rejects it. No product or test source "
+    text += "is mutated; this checks the comparison instrument.</p>\n"
     refused = [row for row in outcomes if row["exit_status"]]
     if refused:
         text += table(
@@ -313,6 +344,7 @@ def main():
         flush=True,
     )
     print("QUALIFYING_SETTINGS", json.dumps(good), flush=True)
+    print("PRECISION_CONTROL_REJECTED", json.dumps(control), flush=True)
     print("EXIT=0", flush=True)
 
 

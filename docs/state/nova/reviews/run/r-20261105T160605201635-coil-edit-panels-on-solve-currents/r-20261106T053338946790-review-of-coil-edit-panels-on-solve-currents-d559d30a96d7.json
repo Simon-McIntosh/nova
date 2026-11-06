@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-06T05:47:21.224Z",
   "dispatched_at": "2026-11-06T05:37:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T07:21:58.791314+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_coil_edit_panel_render.py",

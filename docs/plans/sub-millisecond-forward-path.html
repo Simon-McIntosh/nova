@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="211">
+<meta name="plan-version" content="212">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -728,6 +728,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T230055221718-review-of-bank-solve-trace-four-read-7d4813b89fb6" data-who="reckon-build" data-when="2026-11-06T23:20:40.063Z">
     <div class="r-comment-body"><p>Review of the four-read bank solve attribution landed: attribution reproduced from the committed reporter, three non-blocking findings (duplicated scope-split helper, duplicated launcher, reporter receipts naming a revision that does not contain the reporter), reuse scored 5 for the duplication.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T223228922016-bank-solve-trace-four-read" data-who="reckon-build" data-when="2026-11-06T22:54:51Z">
+    <div class="r-comment-body"><p>[Four-read solve attribution](/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-four-read.html#bank-solve-trace-four-read-landing): two fresh common-seed H200 processes take four reads and three updates at both widths; sixteen-slice wall 303.291–303.659 ms, core device subtotal 277.365 ms (17.335 ms/slice). Jacobian, residual and candidates total 63.40%; all closures below 0.0074 ms. Reviewed group-comparison SVG; no product or test changes.</p></div>
 </div>
 </section>
 </main>

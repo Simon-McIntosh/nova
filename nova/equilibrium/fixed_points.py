@@ -151,11 +151,9 @@ class BellField:
         else:
             rows = self.bank_rows[slots].reshape(3, -1, 6)
             moments = self.bank_moments.reshape(-1)
-            products = pairedfloat.multiply(
-                pairedfloat.wrap(rows), pairedfloat.wrap(moments[None, :, None])
-            )
             jets = pairedfloat.add(
-                _paired_sum(products, 1), pairedfloat.wrap(self.bank_exterior[slots])
+                pairedfloat.contract(rows, moments[None, :, None], axis=1, xp=jnp),
+                pairedfloat.wrap(self.bank_exterior[slots]),
             )
         scale = pairedfloat.wrap(self.mesh.scales[cell, triangle])
         square = pairedfloat.multiply(scale, scale)
@@ -202,10 +200,13 @@ class BellField:
             for i in range(2)
         )
         residual = tuple(v.reshape(18) for v in pairedfloat.subtract(scaled, taylor))
-        products = pairedfloat.multiply(
-            pairedfloat.wrap(self.mesh.transforms[cell, triangle]), residual
+        coefficients = pairedfloat.contract_paired(
+            pairedfloat.wrap(self.mesh.transforms[cell, triangle]),
+            residual,
+            axis=1,
+            xp=jnp,
         )
-        return pairedfloat.value(_paired_sum(products, 1))
+        return pairedfloat.value(coefficients)
 
     def local_value(self, cell, triangle, point):
         local = (point - self.mesh.origins[cell, triangle]) / self.mesh.scales[
@@ -244,19 +245,6 @@ class BellField:
         centres = jax.vmap(self.cell_value)(jnp.arange(len(values)), geometry.centre)
         values = values.at[:, 0].set(centres)
         return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
-
-
-def _paired_sum(values, axis):
-    """Balanced contraction retaining product and addition residues."""
-    values = tuple(jnp.moveaxis(v, axis, 0) for v in values)
-    while values[0].shape[0] > 1:
-        count = values[0].shape[0]
-        if count % 2:
-            values = tuple(jnp.concatenate((v, jnp.zeros_like(v[:1]))) for v in values)
-        values = pairedfloat.add(
-            tuple(v[::2] for v in values), tuple(v[1::2] for v in values)
-        )
-    return tuple(v[0] for v in values)
 
 
 def field_from_jets(

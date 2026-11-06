@@ -103,16 +103,35 @@ def square_root(pair, xp):
     return add(wrap(leading), wrap(correction))
 
 
-def contract(coefficients, moments):
-    """Contract two fp64 sequences without discarding product or sum residues."""
+def contract(coefficients, moments, *, axis=None, xp=None):
+    """Contract fp64 sequences, or broadcast arrays along an explicit axis.
+
+    Array contractions use a balanced reduction in the supplied namespace,
+    retaining product and summation residues without tracing a source-sized loop.
+    """
+    if axis is not None:
+        return contract_paired(wrap(coefficients), wrap(moments), axis=axis, xp=xp)
     total = wrap(0.0 * moments[0])
     for coefficient, moment in zip(coefficients, moments, strict=False):
         total = add(total, _two_product(coefficient, moment))
     return total
 
 
-def contract_paired(coefficients, moments):
-    """Contract paired coefficients against paired moments."""
+def contract_paired(coefficients, moments, *, axis=None, xp=None):
+    """Contract paired sequences, or broadcast paired arrays along an axis."""
+    if axis is not None:
+        if xp is None:
+            raise ValueError("an array contraction requires its array namespace")
+        values = tuple(xp.moveaxis(v, axis, 0) for v in multiply(coefficients, moments))
+        if values[0].shape[0] == 0:
+            return tuple(xp.sum(v, axis=0) for v in values)
+        while values[0].shape[0] > 1:
+            if values[0].shape[0] % 2:
+                values = tuple(
+                    xp.concatenate((v, xp.zeros_like(v[:1]))) for v in values
+                )
+            values = add(tuple(v[::2] for v in values), tuple(v[1::2] for v in values))
+        return tuple(v[0] for v in values)
     total = wrap(0.0 * moments[0][0])
     for coefficient, moment in zip(coefficients, moments, strict=False):
         total = add(total, multiply(moment, coefficient))

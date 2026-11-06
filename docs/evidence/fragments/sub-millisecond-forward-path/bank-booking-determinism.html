@@ -1,0 +1,89 @@
+<section id="bank-booking-determinism-landing">
+<h2>Booking repeatability investigation stopped at varying read inputs</h2>
+<p><strong>The two completed fresh H200 processes reproduce different initial
+booked moments and different solve paths. No product source was changed.</strong>
+The remaining measurements were stopped when the first unequal value was found
+in the read already supplied to booking. This is a blocked investigation,
+not a completed five-process determinism gate.</p>
+<table id="bank-booking-determinism-processes">
+<thead><tr><th>Fresh process</th><th>Initial moment SHA-256</th>
+<th>Largest moment difference from process 0</th><th>Reads, lanes 0–15</th>
+<th>Repeated solve wall [ms / 16 slices]</th><th>Largest fresh residual</th></tr></thead>
+<tbody>
+<tr><td>0</td><td><code>3589e1ace7efec0b42e179e6faaf661c136ee1c47c6ad969284fcf2edf55ccd8</code></td><td>0.000000000e+00</td><td>8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8</td><td>2011.070987</td><td>9.546852198e-11</td></tr>
+<tr><td>1</td><td><code>0b51e048d507ddc1b91bf1626d47f886dd384ef927ea8c33f8880a4b39fd7d48</code></td><td>1.165290087e-12</td><td>9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9</td><td>2332.745317</td><td>9.116263300e-11</td></tr>
+</tbody></table>
+<p>Each completed process compiled the same sixteen-lane fixture, ran one warm-up,
+and then made two timed calls. Both timed calls within each process had identical
+per-lane reads, steps and residuals. Process 2 was cancelled before its booking
+receipt; processes 3 and 4 were not started. All sixteen lanes in both completed
+processes converged below 1e-10.</p>
+<table id="bank-booking-determinism-localization">
+<thead><tr><th>Observed boundary or operation</th><th>Largest absolute difference</th>
+<th>Interpretation</th></tr></thead><tbody>
+<tr><td>Input physical sampled flux, all geometry leaves, axis position,
+read field coefficients</td><td>0, byte-identical</td><td>The comparison sees
+stable inputs as well as the changing values below.</td></tr>
+<tr><td>Input read.axis_flux</td><td>2.7755575615628914e-17</td><td>First unequal
+leaf before current.book executes; selected from nulls.jet.value in
+nova/equilibrium/topology.py:3287, _read_at_nulls.</td></tr>
+<tr><td>Input read.boundary_flux</td><td>2.7755575615628914e-17</td><td>Also varies
+before booking.</td></tr>
+<tr><td>Input read.membership / read.edge_interval</td><td>1.021405182655144e-14 /
+5.700995231450179e-14</td><td>Continuous read geometry already differs.</td></tr>
+<tr><td>current.book coefficient einsum, current.py:350</td><td>2.220446049250313e-16</td>
+<td>First unequal computed booking intermediate, despite byte-identical psi and
+fit_inverse. The current.py scatter-adds have not executed at this point.</td></tr>
+<tr><td>Whole-cell moments</td><td>0, byte-identical</td><td>All three components
+match before and after the full-cell mask.</td></tr>
+<tr><td>Cut-cell current / radial / vertical moments</td><td>1.1652900866465643e-12 /
+1.687538997430238e-14 / 1.6514567491299204e-14</td><td>Output differences
+propagate into the initial moments.</td></tr>
+</tbody></table>
+<p>The probe observes concrete arrays at Python line boundaries in the existing
+eager booking call; it does not insert callbacks or change compiled loop bodies.
+The earliest divergent input is the output of the fixture's compiled topology
+read. The arithmetic operation within that read has <strong>not</strong> been
+isolated. The coefficient einsum is a second observed divergence inside booking;
+this record does not infer that it explains the upstream one. The proposed
+repeated-index atomic scatter hypothesis is therefore not established.</p>
+<table id="bank-booking-determinism-controls">
+<thead><tr><th>Control</th><th>Measured result</th></tr></thead><tbody>
+<tr><td>Move the largest initial moment by one representable float64 increment</td>
+<td>Hash differs; detected absolute difference 2.842170943040401e-14;
+no nonfinite mismatch.</td></tr>
+<tr><td>Unchanged psi and geometry through the same pairwise comparator</td>
+<td>Byte-identical; this is observed equality, not a missing receipt.</td></tr>
+</tbody></table>
+<table id="bank-booking-determinism-suite">
+<thead><tr><th>CPU file on sirius</th><th>Baseline result</th><th>Head result</th></tr></thead>
+<tbody>
+<tr><td>test_bank_step_booking_batch.py</td><td>1 passed, 3 skipped; 40.87 s; EXIT=0</td><td>Not run</td></tr>
+<tr><td>test_bank_step_booking.py</td><td>1 failed, 4 passed; 44.23 s; EXIT=1.
+The known test_book_primal_keeps_exact_diverted_moments byte pin failed.</td><td>Not run</td></tr>
+<tr><td>test_conic_endpoint_consistency.py</td><td>1 passed; 17.08 s; EXIT=0</td><td>Not run</td></tr>
+<tr><td>test_bank_solve_driver.py</td><td>Cancelled during test_factor_reuse_costs;
+no suite completion claimed.</td><td>Not run</td></tr>
+<tr><td>test_support_read.py</td><td>13 passed, 2 skipped; 39.07 s; EXIT=0</td><td>Not run</td></tr>
+</tbody></table>
+<p>The required paired suite, five-process head check, head/base precision comparison
+and changed-operation timing remain unmeasured. No failure-count comparison is
+claimed. The known byte pin was left unchanged.</p>
+<table id="bank-booking-determinism-provenance">
+<thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Measured base</td><td><code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code></td></tr>
+<tr><td>H200 allocation</td><td>1306746; NVIDIA H200 NVL on 98dci4-gpu-0003;
+two CPU cores, one GPU, 48 GB; cancelled at scope stop.</td></tr>
+<tr><td>CPU allocation</td><td>1306749; sirius, 98dci4-clu-5027; cancelled at scope stop.</td></tr>
+<tr><td>Probe and comparison commits</td><td><code>125f7bf79ae30f919c7b87ccc24dd6c08d1ba3ca</code>,
+<code>933c9b62c924aaf1ca8cf9a84381543f4f2b6ddd</code>,
+<code>48612311decd978ad081f0aa9949dcaa1f248987</code></td></tr>
+<tr><td>Durable receipt directory</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T090435478592-bank-booking-determinism</code></td></tr>
+<tr><td>Completed device logs and arrays</td><td>base-0.log, base-1.log (both EXIT=0),
+base-0.json, base-1.json, base-0.npz, base-1.npz; comparison.log (EXIT=0),
+base-comparison.json.</td></tr>
+<tr><td>Receipt provenance</td><td>Every process log prints revision, imported nova
+and current module paths, resolved working directory, GPU identity and x64=true.
+Large raw arrays stay in the run directory.</td></tr>
+</tbody></table>
+</section>

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="209">
+<meta name="plan-version" content="210">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -722,6 +722,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T225846204189-review-of-bank-saddle-guards-670796a49b22" data-who="reckon-build" data-when="2026-11-06T23:11:57.509Z">
     <div class="r-comment-body"><p>Independent review of bank-saddle-guards at 670796a49b22 from base f6208aec84e3: 1 non-blocking finding (the cancellation assertion at tests/test_saddle_derivatives.py:143 cannot distinguish balanced from sequential paired association), zero added failures, scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 17, fit 18, reuse 20.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T222958991931-bank-saddle-guards" data-who="reckon-build" data-when="2026-11-06T22:54:21Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-saddle-guards.html#bank-saddle-guards-landing — production read guarded by a 2-failure keyword-removal control; pairedfloat owns both balanced contractions; 550-cell saddle third/fourth derivatives unchanged (absolute delta 0 &lt;= 1e-15); Sirius base 35/head 41 passed with the same 9 skips and zero added failures; H200 maximum lane median 4.82458517581108e-12 &lt;= 1e-11.</p></div>
 </div>
 </section>
 </main>

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="186">
+<meta name="plan-version" content="187">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -251,6 +251,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9" data-who="reckon-build" data-when="2026-11-06T10:33:08.454Z">
     <div class="r-comment-body"><p>Reviewed 4d35865804a0228c2d896897c43da66ba6aed3f9..5c998eea61f97c087eda08bab93c54d316d81b4a: a single added @pytest.mark.slow at tests/test_wall_events_batched.py:137 answers the prior blocking finding by moving the four 550-cell cases out of the default filter while the two light tests stay collected; scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 15, fit 20, reuse 20, one non-blocking finding on the missing assertion that pins the deselection.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261106T131053405056-review-of-bank-candidate-loop-cf045cc472e1" data-who="reckon-build" data-when="2026-11-06T13:22:56.180Z">
+    <div class="r-comment-body"><p>none — this node is a review; its deliverable is the stored record under the reviewed run&#x27;s review-records/, not a plan-section landing. Verdict on r-20261106T121451239466-bank-candidate-loop at cf045cc472e1 from b471be60: 18/17/19/15/17/19 (105/120), 0 added failures, 3 non-blocking findings, no blocker.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>
@@ -652,7 +655,7 @@
     <div class="r-comment-body"><p>review of bank-krylov-cleanup at 9c5a105b5..3aa79b52c scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 19, reuse 17, adds no failure over the base arm, and files four non-blocking findings; the Arnoldi column fix is correct and its capped-cycle guard reddens at 5.642e-3 under the recorded negative control.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T105556943473-review-of-bank-booking-determinism-f91d9586d406" data-who="reckon-build" data-when="2026-11-06T11:13:20.446Z">
-    <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism covering the one commit gained since the review at 684031cc1 — f91d9586d against base cb42f656 — records a parsed rubric (goal_fidelity 12, evidence 13, scope_discipline 20, durability 8, fit 16, reuse 15), added_failure_count 0, and four non-blocking findings: the wrapper cannot run two of the tabled flag arms, the shared-cache attribution is inferred across experiments rather than isolated, the allocation-record regex can silently drop its paragraph, and after_suite repeats baseline_suite. The prior review&#x27;s two blocking findings are answered: the global XLA flag prescription is removed and the predicate is renamed and scoped.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism covering the one commit gained since the review at 684031cc1 — f91d9586d against base cb42f656 — records a parsed rubric (goal_fidelity 12, evidence 13, scope_discipline 20, durability 8, fit 16, reuse 15), added_failure_count 0, and four non-blocking findings: the wrapper cannot run two of the tabled flag arms, the shared-cache attribution is inferred across experiments rather than isolated, the allocation-record regex can silently drop its paragraph, and after_suite repeats baseline_suite. The prior review's two blocking findings are answered: the global XLA flag prescription is removed and the predicate is renamed and scoped.</p></div>
 </div>
 </section>
 </main>

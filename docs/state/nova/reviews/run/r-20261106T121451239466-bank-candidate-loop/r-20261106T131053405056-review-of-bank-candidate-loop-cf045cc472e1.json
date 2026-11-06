@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T13:22:56.180Z",
+  "dispatched_at": "2026-11-06T13:13:17Z",
+  "evidence_inputs": [
+    "Baseline suite b471be60: 30 passed, 2 skipped, failure_count 0, EXIT=0 (base-suite.log).",
+    "Head suite 5a07221c7: 32 passed, 2 skipped, failure_count 0, EXIT=0 (head-suite.log); 5a07221c7 and cf045cc47 carry identical nova/equilibrium/topology.py and tests/test_candidate_inspection_batched.py.",
+    "Negative control: slots 0/1 support results swapped in a scratch archive, test_candidate_slots_match_individual_evaluation FAILED at tests/test_candidate_inspection_batched.py:123 with slot 1 False against expected True, EXIT=1.",
+    "H200 physical arm: 4 certificate cases (limited/diverted x trial/converged) passed in 968.06 s; limited admits no slot and selects 0, diverted admits slot 1 and selects 1, max form gap 5.55112e-16.",
+    "Paired H200 walls per batch read: 1 slice 43.581 -> 27.839 ms (-36.12%), 16 slices 142.797 -> 128.077 ms (-10.31%); max fresh residual 9.84244e-11 base and 9.52980e-11 head, inside the 1e-10 ceiling.",
+    "Largest paired precision gaps over every base/head process pair: flux 5.145e-14 (1e-8), axis 2.870e-14 (5e-4), saddle 1.438e-14 (5e-4), boundary_flux 4.351e-15 (1e-4).",
+    "Device attribution: candidate loop 36.134 -> 16.388 ms and 15548 -> 897 launches at 1 slice; 582.670 -> 416.539 ms and 41557 -> 2037 launches at 16 slices.",
+    "No nova/ production module calls module-level topology.read or support_read.read, so this optimisation is banked ahead of the route that will consume it."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-candidate-compact",
+      "recorded_at": "2026-11-06T13:28:54.448808+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "bank-candidate-compact",
+      "recorded_at": "2026-11-06T13:28:56.704730+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The reproduction log predates the final wording of the assertion. The slot-swap negative control and the H200 equality runs are the receipts the landing relies on.",
+      "recorded_at": "2026-11-06T13:28:59.300670+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_candidate_inspection_batched.py",
+      "id": "fab8b400a38",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "candidate_program() locates the truncation point with next() over an AST walk for a bare 'saddle_index = ...' assignment; if _read_at_nulls is refactored so that statement is moved or renamed the helper raises StopIteration rather than a message naming what broke, so a product-side refactor surfaces as an opaque test error in a test whose subject is candidate admission."
+    },
+    {
+      "file": "tests/test_candidate_inspection_batched.py",
+      "id": "f097e236865",
+      "line": 205,
+      "severity": "non-blocking",
+      "text": "test_candidate_slots_share_one_program rejects only a jaxpr scan whose params['length'] equals policy.null_capacity, so an unrolled Python loop over the sixteen slots restores exactly the sequential evaluation this node removed and still passes; the structural guard is narrower than the batching claim it is cited for."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-candidate-loop.html",
+      "id": "fb4448bc621",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "the sentence 'The structural regression reproduces at base' points at reproduction-test_candidate_inspection_batched.log, whose header names base b471be60 but whose tree field names the head worktree, and whose failing source line reads 'assert not scans' where the committed test reads 'assert len(scans) == 0'; the witness does not correspond line-for-line to the test it is offered as a red receipt for."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to make nova.equilibrium.topology._read_at_nulls inspect its candidate slots in one batched evaluation while preserving admission, the selected saddle, its normal form and the slot-0 rule; nova/equilibrium/topology.py:3302 now reconstructs that block as a jax.vmap over jnp.arange(policy.null_capacity) with the saddle mask applied afterwards, and the four preserved quantities are unchanged in the code that follows.\nVERDICT done_when: the brief's measures are a slot-by-slot equality test at the four 550-cell certificate states on the H200 plus a light CPU case and a slot-swap negative control, paired base/head CPU suites with no added failures, and paired H200 timing tables inside the per-lane precision budget; tests/test_candidate_inspection_batched.py asserts exactly the first, cpu-job.log records ADDED_FAILURES [] and both suite arms at failure_count 0, and attributes the last to scripts/prototypes/bank_candidate_loop/report.py over timing-summary.json.\nVERDICT write_paths: the manifest declares nova/equilibrium/topology.py, tests/test_candidate_inspection_batched.py, scripts/prototypes/bank_candidate_loop, the evidence fragment and a figures directory; all nine paths in the diff fall inside that set and the figures directory was correctly left unused.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T121451239466-bank-candidate-loop/manifest.md; it reports status complete, five commits beyond base b471be60, baseline_suite and after_suite both complete with failure_count 0, and cites the negative-control log as EXIT=1.\nVERDICT diff: read commit by commit against b471be60; bbe9f8ea is the only commit touching production source or tests (the other four change scripts/prototypes and the evidence fragment), and its topology.py hunk is confined to the candidate-inspection block with no dangling reference to the removed empty_form or dtype locals.\nCALL_SITES: nova/equilibrium/topology.py:3205, nova/equilibrium/topology.py:3253, nova/equilibrium/support_read.py:286, nova/equilibrium/support_read.py:320\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:3303 replaces the fori_loop of per-slot conds with jax.vmap(inspect)(indices) and re-applies the saddle mask at :3307-3315, leaving saddle_index and the slot-0 fallback untouched.\nSCORE evidence: 17\nJUSTIFICATION evidence: reports-complete.log PAIRED_COMPLETE reconciles with timing-summary.json and attribution-base.log/attribution-head.log on every tabled figure (582.670 -> 416.539 device ms, 41557 -> 2037 launches) and physical.log records 4 passed on the H200.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the only production hunk is nova/equilibrium/topology.py:3297-3336 and every other changed path lies under scripts/prototypes/bank_candidate_loop, tests/ or the declared evidence fragment.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_candidate_inspection_batched.py:112 asserts candidate flags and selection against an independent slotwise evaluation and the slot-swap control reddens it, but the same test passes on a correct revert to the sequential loop so batching itself rests on the narrower structural check at :205.\nSCORE fit: 17\nJUSTIFICATION fit: the added block at nova/equilibrium/topology.py:3322 follows the surrounding comment-and-tuple style and the mask reshape is the idiom already used for stacked forms, with no plan or run identifiers in the diff.\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/prototypes/bank_candidate_loop/device.py and suite.py import archive, execute, BASE_FILES and run_file from the wall-events prototype and pair_gaps/PAIR_LIMITS from bank_solve_cycle.report rather than restating them.\nFINDING tests/test_candidate_inspection_batched.py:29 non-blocking: candidate_program() locates its truncation point with next() over an AST walk for a bare 'saddle_index = ...' assignment, so a product-side refactor surfaces as an opaque StopIteration instead of a named failure.\nFINDING tests/test_candidate_inspection_batched.py:205 non-blocking: the structural assertion rejects only a scan of length null_capacity, so an unrolled loop over the sixteen slots restores the sequential evaluation this node removed and still passes.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-candidate-loop.html:18 non-blocking: the base structural-regression receipt names base b471be60 in its header but the head worktree in its tree field, and its failing source line differs from the committed assertion, so it is not a line-for-line red receipt for the test as landed.\n",
+  "review_run_id": "r-20261106T131053405056-review-of-bank-candidate-loop-cf045cc472e1",
+  "reviewed_base_sha": "b471be60b4b58e55e84a008633c9809e676f11e5",
+  "reviewed_head_sha": "cf045cc472e1f8a4daa447453676344f9deb49f2",
+  "reviewed_run_id": "r-20261106T121451239466-bank-candidate-loop",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T14:25:00+00:00",
+  "total": 105,
+  "verdicts": {
+    "call_sites": "the change is reached from nova/equilibrium/topology.py:3205 (read -> _read_at_nulls) and nova/equilibrium/topology.py:3253 (read_at_stationary_points -> _read_at_nulls); their only production-module callers are nova/equilibrium/support_read.py:286 and :320, and no forward-solve module calls either of them yet, so the measured gain is banked for the step that wires support_read.read into the route.",
+    "diff": "read commit by commit against b471be60; bbe9f8ea is the only commit touching production source or tests (the other four change scripts/prototypes and the evidence fragment), and its topology.py hunk is confined to the candidate-inspection block with no dangling reference to the removed empty_form or dtype locals.",
+    "done_when": "the brief's measures are a slot-by-slot equality test at the four 550-cell certificate states on the H200 plus a light CPU case and a slot-swap negative control, paired base/head CPU suites with no added failures, and paired H200 timing tables inside the per-lane precision budget; tests/test_candidate_inspection_batched.py asserts exactly the first, cpu-job.log records ADDED_FAILURES [] and both suite arms at failure_count 0, and attributes the last to scripts/prototypes/bank_candidate_loop/report.py over timing-summary.json.",
+    "goal": "the node's goal is to make nova.equilibrium.topology._read_at_nulls inspect its candidate slots in one batched evaluation while preserving admission, the selected saddle, its normal form and the slot-0 rule; nova/equilibrium/topology.py:3302 now reconstructs that block as a jax.vmap over jnp.arange(policy.null_capacity) with the saddle mask applied afterwards, and the four preserved quantities are unchanged in the code that follows.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T121451239466-bank-candidate-loop/manifest.md; it reports status complete, five commits beyond base b471be60, baseline_suite and after_suite both complete with failure_count 0, and cites the negative-control log as EXIT=1.",
+    "write_paths": "the manifest declares nova/equilibrium/topology.py, tests/test_candidate_inspection_batched.py, scripts/prototypes/bank_candidate_loop, the evidence fragment and a figures directory; all nine paths in the diff fall inside that set and the figures directory was correctly left unused."
+  }
+}

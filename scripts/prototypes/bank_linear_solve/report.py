@@ -158,6 +158,9 @@ def main():
     )
     fig.subplots_adjust(left=0.30, right=0.98, bottom=0.14, top=0.85, wspace=0.12)
     save_checked(fig, args.figure)
+    args.figure.write_text(
+        "\n".join(line.rstrip() for line in args.figure.read_text().splitlines()) + "\n"
+    )
     fig.savefig(args.preview, dpi=100)
     args.tables.write_text(table(rows) + "\n" + table(rows, precision=True))
     print(

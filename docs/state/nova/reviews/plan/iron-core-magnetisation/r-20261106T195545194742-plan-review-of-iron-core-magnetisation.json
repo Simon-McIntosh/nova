@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T20:05:50.349Z",
+  "dispatched_at": "2026-11-06T19:56:36Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:208",
+      "id": "done_when-1",
+      "reason": "without a named minimum target set, or a failure on any exclusion, a node satisfies both the 1e-10 claim and the sheet-route decision by measuring only the far targets that are easy for every route.",
+      "text": "the reference integral's exclusion clause (\"a target that does not reach this is reported and left out, never compared against\") puts no cap on how many targets may be excluded and requires no minimum surviving set, while \u00a71 lines 98\u2013101 record that this quadrature is near-singular for sliver cells and reads 4e-5 \u2014 so exactly the near targets \u00a72 exists to certify (those at half a cell width) can be dropped and done-when (2)'s 1e-10 claim still reads as met",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:209",
+      "id": "done_when-2",
+      "reason": "on the plan's own error model the crossing sits near \u03b5 \u2248 5 \u00b5m, so a sweep of 1e-2\u21921e-5 or 1e-3\u21921e-6 brackets it at one end or misses it entirely, and the sheet-route decision would be taken on a curve that never turns over.",
+      "text": "done-when (1) requires only that the strip's error \"is reported over three decades of \u03b5\" \u2014 the verb is reporting, so nothing in the clause can fail \u2014 and it fixes neither the range's endpoints nor a requirement that the crossing of the \u03b5\u00b2 model error with the rounding/\u03b5 cancellation lies inside the sweep, which is the one number the section is written to find (\"measure first where the two cross\", line 191)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:233",
+      "id": "reasoning-1",
+      "reason": "this is the only quantitative pass condition on the node's primary comparison, and as written it either hides a 1e-11 wiring defect on the strip branch or has no defined value on the Part II branch, so the check cannot tell a correct device build from a wrong one.",
+      "text": "\u00a73's done-when (1) sets the device-versus-host agreement tolerance to \"the strip's cancellation floor, near 1e-11 relative, not a tighter figure neither route can hold\", but that floor is the strip's *model* error against the exact sheet (\u00a72 lines 190\u2013191), not the disagreement between two implementations of the same kernel: on the strip branch both sides evaluate the same polygon closed form and should agree at round-off, so 1e-11 is about five decades looser than the comparison can hold; on the Part II branch, which \u00a72 explicitly leaves open, there is no strip and no cancellation floor, so the tolerance names nothing the sheet-route decision will record",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
+  "plan_fingerprint": "ba132bb406000e916faad4a40a60a589ec67eeea2c854d3aafba90b7f6046853",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261106T195545194742-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "42b6433c0ce7cc04f59fbd9fa93157bd0455df9a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 verified in the tree at 6adab8c7a: `nova/biot/completeelliptic.py:247` `complete_kind` and `:286` `complete_pole`, `nova/biot/incompleteelliptic.py:266` `incomplete_pole`, `nova/biot/constants.py`, `nova/biot/polygonanalytic.py`, `nova/biot/AGENTS.md` (its \"production route runs on the device\" claim at lines 29\u201333 is accurate), `nova/biot/tiledassembly.py:381` `_fill_tile`, `nova/biot/polysection.py:115` `PolySection`, `nova/biot/greens.py:324` `greens_psi` / `:357` `greens_bz_br`; the kernel-compile census \u00a73 (3) names is kernel-compile-barrier \u00a71, declared `done` and ordered by `plan-after`.",
+    "done_when": "a finding \u2014 \u00a72's reference-integral exclusion clause (line 208) lets the hard targets be dropped with no cap, and its \u03b5 sweep (line 209) names no range and no requirement that the crossing be inside it.",
+    "evidence_paths": "pass \u2014 \u00a72's done-when (3) parks the measurement in the `sheet-route` decision, and the receipts, gate logs and census rows sit under the GPFS root named in \u00a71 line 92 and in the compile ledger `docs/research/compile-cost-evidence.html`, not a scratchpad.",
+    "naming": "pass \u2014 \"Part II\" and \"Part V\" are Urankar paper parts rather than plan or sprint labels, the decision key `sheet-route` names the mechanism, and no ticket number or version tag enters the text or the module it names.",
+    "reasoning": "a finding \u2014 \u00a73's agreement tolerance (line 233) is taken from \u00a72's strip-versus-exact model error, which is not what the device-versus-host comparison measures, and it names no value at all on the Part II branch.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable (one validated edge-sheet field route, closed on whichever branch the measurement selects) and \u00a73 one (G on the device); each has a single pass condition and a declared negative control.",
+    "wiring": "pass \u2014 `s3` declares `depends-on [s2]` and `s4` is now `[s2, s3]`, so the matrix is ordered after both the sheet-route decision and the sheet route itself; `s6` waits on `[s2, s3, s4]` transitively and the `sheet-route` decision the nodes name resolves in the decisions block."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "2246eea81fe66e05ebeee51ffc18fcfdbc117b05f1f018ad4f6418e798dbcc36",
+    "s3": "22a5737ac27f9eb2fdf931a0c9294b45584ffcfa57a4e99e8d38a3c0cf4299e2",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:28:27.210307+00:00",
+  "total": null
+}

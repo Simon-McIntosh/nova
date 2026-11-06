@@ -139,7 +139,7 @@ def _cell_partition(
     if solved_branch and np.any(core & ~inside):
         raise RuntimeError("a confined-core centroid lies outside the closed branch")
     interior_noncore = inside & ~core
-    exterior = ~inside
+    exterior = ~(core | inside)
     if not np.all(core | interior_noncore | exterior):
         raise RuntimeError("the three support sets do not cover the mesh")
 
@@ -461,7 +461,12 @@ def measure(
                 equilibrium,
                 boundary_status,
             ),
-            {"contour": display, "partition": None},
+            {
+                "contour": display,
+                "partition": None,
+                "core": np.asarray(equilibrium.domains.core, dtype=bool),
+                "cell_current": np.asarray(equilibrium.cell_current, dtype=np.float64),
+            },
         )
     contour_measure = _polygon_measure(contour)
     if not np.isclose(

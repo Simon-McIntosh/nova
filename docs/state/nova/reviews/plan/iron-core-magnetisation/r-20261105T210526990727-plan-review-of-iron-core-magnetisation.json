@@ -167,6 +167,16 @@
       "note": "\u00a78 done-when (2) states its tolerance: the toroidal average agrees with the axisymmetric \u00a76 result beyond 2 m from the legs to within 2 % (cc22ac1a0).",
       "reason": "",
       "when": "2026-11-06T19:50:29.005827+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a78 now states the limbs sit at R \u2248 4.89 m (their own radius, not the plasma major radius), giving 2\u03c0R/6 \u2248 5.1 m spacing and R/6 \u2248 0.8 m decay (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-06T19:50:42.212141+00:00"
     }
   ],
   "responses": {
@@ -202,9 +212,9 @@
       "by": "",
       "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
       "commit_basis": "edit",
-      "note": "\u00a73 tolerance is now the best attainable error \u00a72 records in the sheet-route decision (near 1e-11), not 1e-12 (fad7c7e5f)",
+      "note": "\u00a78 now states the limbs sit at R \u2248 4.89 m (their own radius, not the plasma major radius), giving 2\u03c0R/6 \u2248 5.1 m spacing and R/6 \u2248 0.8 m decay (cc22ac1a0).",
       "reason": "",
-      "when": "2026-11-06T19:46:39.785996+00:00"
+      "when": "2026-11-06T19:50:42.212141+00:00"
     },
     "wiring-1": {
       "action": "acted",

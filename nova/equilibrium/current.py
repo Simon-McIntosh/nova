@@ -44,15 +44,15 @@ class Quadrature:
     ``segments`` sets cosine-spaced conic chords and cubic-ray chords, without
     changing fragment ownership. No polygon-count limit is imposed here.
     ``cut_batch_width`` controls the conic tile of ``book_tangent_channels``
-    only. Scalar ``book`` and ``book_tangent`` use fixed 32-cell cut tiles;
-    a narrower tile repeats conic strip propagation. Normal-form buckets use
-    eight cells independently of the conic tile.
+    only and defaults to 32. Scalar ``book`` and ``book_tangent`` use fixed
+    32-cell cut tiles; a narrower tile repeats conic strip propagation.
+    Normal-form buckets use eight cells independently of the conic tile.
     """
 
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
-    cut_batch_width: int = dataclass_field(default=16, metadata={"static": True})
+    cut_batch_width: int = dataclass_field(default=32, metadata={"static": True})
 
 
 class Booking(NamedTuple):
@@ -339,9 +339,9 @@ def _normal_rings(vertices, count, centre, form, selected, intervals, segments):
     )
 
 
-def _integrate_live_rings(rings, counts, evaluate, zero):
-    """Integrate compact live rings in groups of four without a capacity cutoff."""
-    width = min(4, len(counts))
+def _integrate_live_rings(rings, counts, evaluate, zero, width=4):
+    """Integrate compact live rings in bounded groups without a capacity cutoff."""
+    width = min(width, len(counts))
     live = counts >= 3
     count = jnp.sum(live, dtype=jnp.int32)
     indices = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
@@ -757,7 +757,7 @@ def book_tangent_channels(
             return value
 
         return _integrate_live_rings(
-            rings, counts, evaluate, jnp.zeros((channels, 3), dtype=psi.dtype)
+            rings, counts, evaluate, jnp.zeros((channels, 3), dtype=psi.dtype), width=2
         )
 
     def conic_cell(index):

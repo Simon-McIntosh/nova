@@ -228,7 +228,9 @@ def main():
     )
     ax.set_xlabel("Initial moment seed set")
     ax.set_ylabel("Fresh batch reads")
-    ax.set_ylim(0, max(sum(counts["base"] + counts["head"], [])) + 2)
+    maximum_reads = max(sum(counts["base"] + counts["head"], []))
+    ax.set_ylim(0, maximum_reads + 2)
+    ax.set_yticks(np.arange(0, maximum_reads + 1, 5))
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
     fig.legend(loc="upper center", ncol=4, frameon=False)
@@ -355,7 +357,7 @@ against fixed polishing">
 1e-14 relative; both measured processes are shown where counts differ. Grey dashed is
 base;
 blue solid is the fixed polish. The shared saver checks text bounds and overlaps.
-The producer inspects the 1400 by 720 PNG rendering; only the SVG is
+The producer inspected the 1400 by 720 PNG rendering; only the SVG is
 committed.</figcaption></figure>
 <h3 id="bank-near-root-polish-processes">Every process (0 warms the cache)</h3>
 {wall_table}

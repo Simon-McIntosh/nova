@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Read from the reviewed run's own gate logs rather than from the manifest's summary. baseline_suite cites paired/suite_summary_base.log, whose two per-file logs (suite_base_test_bank_step_booking.log, suite_base_test_bank_newton_step.log) record 5 passed and 18 passed with zero FAILED lines; after_suite cites paired/suite_summary_head.log, whose two logs record 5 passed and 18 passed with zero FAILED lines. Both summaries end EXIT=0. grep -c '^FAILED' over all four logs returns 0, so the head adds no failure the base did not have.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/paired-gate.log: EXIT=0, per-file status EXIT=0 EXIT=0 at revision 867ea92b5",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/stale-gate.log: EXIT=1, 1 failed 4 passed at revision 78820952c",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/compare-fleet.log: POSITIVE_CONTROL absolute 1.3877787807814457e-17, violations [], EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/compare-sirius.log: POSITIVE_CONTROL absolute 1.3877787807814457e-17, violations [], EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/negative-control.log: 1 failed in 10.14s, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/weak-guard-reproduction.log: WEAK_GUARD_ACCEPTED_NONIDENTITY_PERMUTATION, 1 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/wrapper-reproduction.log: unchanged wrapper suffix prints three EXIT=0 and one EXIT=1 then returns EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/dead-comparator-control.log: stubbed difference raises the control, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/outside-mask-control.log: 0.001 outside the conic mask, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/fleet-recovery.log: six field digests per arm match the retained BOOK_REPORT",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/paired/suite_summary_base.log: 5 passed, 18 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/paired/suite_summary_head.log: 5 passed, 18 passed, EXIT=0"
+  ],
+  "commits_read": [
+    "867ea92b5db425849eaa0d3013a2577be9b27674",
+    "14f049f25fdcbbf7c84abb6cea3fcd60b33954eb",
+    "5d822c1aea017990c482304faaffc2d8645c6b1d"
+  ],
+  "completed_at": "2026-11-06T12:58:18.230Z",
+  "dispatched_at": "2026-11-06T12:47:22Z",
+  "evidence_inputs": "The four predecessor findings are each answered with a recorded red case: the wrapper reproduction (wrapper-reproduction.log) shows the old suffix returning EXIT=0 over logs that contain an EXIT=1 arm; the comparator control refuses a stubbed difference (dead-comparator-control.log) and a 0.001 outside-mask move (outside-mask-control.log); the identity assertion refuses a non-identity permutation (negative-control.log) where the predecessor assertions accept it (weak-guard-reproduction.log); the fragment sentence is replaced with each host's actual result. The fleet receipts were regenerated because the originals were deleted, and fleet-recovery.log shows all six field digests per arm matching the retained BOOK_REPORT, so the regenerated comparison is over the same arrays. after_suite ran at 867ea92b5 rather than the reviewed head 5d822c1ae; git diff --stat 867ea92b5..5d822c1ae touches only sirius_measure.sh and the evidence fragment, so no test or measured module differs between the two revisions.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_test_repin/compare.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "The positive control perturbs only the base receipt, so passing the same receipt as both arguments still yields violations [] and EXIT=0; the same-arm half of the predecessor finding at scripts/prototypes/bank_test_repin/compare.py:39 is unguarded by the instrument, though the per-field before_sha256/after_sha256 rows now let a reader see it."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/bank_test_repin/sirius_measure.sh:25 and scripts/prototypes/bank_test_repin/sirius_suites.sh:39 are the two runtime callers; both were updated to the new entry shape by the same diff.",
+    "diff": "read commit by commit: three commits, tests and prototypes plus one evidence fragment, no product source.",
+    "done_when": "met: every condition is read from a recorded log carrying a revision header and a final EXIT= line, including a red arm (stale-gate.log EXIT=1) and a red control (negative-control.log 1 failed EXIT=1).",
+    "goal": "met: the four items the brief names landed in scripts/prototypes/bank_test_repin/sirius_suites.sh:53-54, scripts/prototypes/bank_test_repin/compare.py:42, tests/test_bank_newton_step.py:586 and docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html.",
+    "manifest": "read: status complete, both suite arms EXIT 0 with zero failure ids, eleven named logs present on disk.",
+    "write_paths": "respected: six changed paths, all inside the five declared paths, with nova/ untouched."
+  },
+  "justifications": {
+    "durability": "negative-control.log fails at tests/test_bank_newton_step.py:586 on a non-identity permutation while weak-guard-reproduction.log shows the predecessor's assertions accepting the same mutation, so the assertion is verified by reinstating the defect.",
+    "evidence": "paired-gate.log, stale-gate.log and the two compare logs each name the revision, the imported module path and a bare final EXIT= line, so each done_when condition is read from a log rather than claimed.",
+    "fit": "scripts/prototypes/bank_test_repin/suite_summary.py follows the sibling prototype scripts' shape and carries no plan, run, ticket or version identifier.",
+    "goal_fidelity": "scripts/prototypes/bank_test_repin/sirius_suites.sh:53-54 replaces the hardcoded echo EXIT=0 with the combined arm status, and stale-gate.log shows that same script returning EXIT=1 over a failing arm.",
+    "reuse": "scripts/prototypes/bank_test_repin/compare.py:14 extends the booking comparator by import; suite_summary.py composes already-written logs into a verdict, a narrower capability than the process-running scripts/prototypes/bank_newton_step/suite_arm.py:60-130, which it does not extend.",
+    "scope_discipline": "git diff --stat 589dd8e8d..5d822c1ae is six files, every one inside the manifest's declared paths, and nova/ is empty."
+  },
+  "outside_scope": "none",
+  "plan": "nova:sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the repin gate script and comparator able to show a failure and to tighten the preconditioner assertion; scripts/prototypes/bank_test_repin/sirius_suites.sh:53-54 now returns its arms' combined status, scripts/prototypes/bank_test_repin/compare.py:42 requires a one-ULP control before any verdict, and tests/test_bank_newton_step.py:586 asserts the exact identity block inverse.\nVERDICT done_when: the done_when names four conditions and the recorded gate exercises each: paired-gate.log ends EXIT=0 at head 867ea92b5, stale-gate.log ends EXIT=1 with test_book_primal_keeps_exact_diverted_moments FAILED at 78820952c, compare-fleet.log and compare-sirius.log each print POSITIVE_CONTROL absolute 1.3877787807814457e-17 followed by violations [] and EXIT=0, negative-control.log shows the identity assertion rejecting a non-identity permutation with 1 failed and EXIT=1, and the fragment states each host's corrected result with fresh counts 18+5 at base and head.\nVERDICT write_paths: read the five declared paths in the manifest; all six changed paths (tests/test_bank_newton_step.py, four files under scripts/prototypes/bank_test_repin, and docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html) lie inside them, and git diff --stat 589dd8e8d..5d822c1ae -- nova/ is empty, so no product source moved.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T122712521073-bank-repin-followups/manifest.md; it records status complete, baseline_suite and after_suite both EXIT 0 with zero failure ids at revisions 589dd8e8d and 867ea92b5, and names eleven log paths that all exist on disk.\nVERDICT diff: read all three commits against base 589dd8e8d; 867ea92b5 changes the runner, adds scripts/prototypes/bank_test_repin/suite_summary.py, rewrites compare.py's difference arithmetic onto the booking owner's primitives and tightens the Newton assertion, 14f049f25 passes the head tree to the measurement wrapper's comparator and stops masking its status with echo, and 5d822c1ae rewrites only the fragment sentence at issue and appends a landing section while retaining 72 existing lines.\nCALL_SITES: scripts/prototypes/bank_test_repin/sirius_measure.sh:25, scripts/prototypes/bank_test_repin/sirius_suites.sh:39\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the four items the brief names all landed, and scripts/prototypes/bank_test_repin/sirius_suites.sh:53 prints and returns the combined arm status instead of the removed hardcoded echo EXIT=0.\nSCORE evidence: 18\nJUSTIFICATION evidence: paired-gate.log, stale-gate.log, compare-fleet.log, compare-sirius.log and negative-control.log each carry a revision header, the imported module path and a bare final EXIT= line, so the done_when's four conditions are read from logs rather than from the manifest's account.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all six changed paths sit inside the manifest's declared write paths and nova/ is untouched; the sirius_measure.sh caller change at scripts/prototypes/bank_test_repin/sirius_measure.sh:25 is inside the declared directory and is what makes the imported primitives resolve.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_bank_newton_step.py:586 compares an independent constant np.eye(size) against the applied operator, and weak-guard-reproduction.log shows the predecessor's permutation assertions accepting the same mutated tree that negative-control.log shows this assertion rejecting.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/bank_test_repin/suite_summary.py:1-2 follows the sibling prototypes' docstring-and-argparse shape and introduces no plan, run or version identifier in any name.\nSCORE reuse: 16\nJUSTIFICATION reuse: scripts/prototypes/bank_test_repin/compare.py:14 imports difference and fingerprint from scripts/prototypes/bank_booking_determinism/compare.py rather than re-deriving them, while suite_summary.py has conceptual overlap with the log parsing inside scripts/prototypes/bank_newton_step/suite_arm.py:118-127 and does not extend it.\nFINDING scripts/prototypes/bank_test_repin/compare.py:42 non-blocking: the positive control perturbs only the base receipt, so passing the same receipt as both arguments still yields violations [] and EXIT=0; the same-arm half of the predecessor finding at scripts/prototypes/bank_test_repin/compare.py:39 is unguarded by the instrument, though the per-field before_sha256/after_sha256 rows do now let a reader see it.\n",
+  "review_run_id": "r-20261106T124446382860-review-of-bank-repin-followups-5d822c1aea01",
+  "reviewed_base_sha": "589dd8e8daf4b12bddf8105bd9e2b45497fac086",
+  "reviewed_head_sha": "5d822c1aea017990c482304faaffc2d8645c6b1d",
+  "reviewed_revision": "5d822c1aea017990c482304faaffc2d8645c6b1d",
+  "reviewed_run_id": "r-20261106T122712521073-bank-repin-followups",
+  "reviewer_node": "review-of-bank-repin-followups-5d822c1aea01",
+  "reviewer_run_id": "r-20261106T124446382860-review-of-bank-repin-followups-5d822c1aea01",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T13:10:00Z",
+  "total": 106,
+  "verdict": "pass"
+}

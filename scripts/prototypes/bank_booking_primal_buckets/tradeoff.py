@@ -172,6 +172,56 @@ def group_attribution(run):
         "The Jacobian itself is nearly unchanged per call, but it runs less "
         "often per read. This accounts for most of the apparent benefit.</p>\n"
     )
+    decomposition = []
+    for stage in ("step_residual", "step_jacobian", "lu_solve + update"):
+        rates, costs = {}, {}
+        for arm in ("base", "head"):
+            values = [records[arm, process, 16] for process in (1, 2)]
+            counts = [
+                v["calls"] if stage == "step_residual" else v["updates"] for v in values
+            ]
+            rates[arm] = float(
+                np.mean([n / v["reads"] for n, v in zip(counts, values, strict=True)])
+            )
+            costs[arm] = float(
+                np.mean(
+                    [
+                        v["device"]["groups"][stage]["device_ms"] / n
+                        for n, v in zip(counts, values, strict=True)
+                    ]
+                )
+            )
+        count_effect = costs["base"] * (rates["base"] - rates["head"])
+        cost_effect = rates["head"] * (costs["base"] - costs["head"])
+        assert abs(count_effect + cost_effect - reductions[stage]) < 1e-9
+        decomposition.append(
+            [
+                stage,
+                f"{rates['base']:.6f}",
+                f"{rates['head']:.6f}",
+                f"{count_effect:+.6f}",
+                f"{cost_effect:+.6f}",
+                f"{reductions[stage]:+.6f}",
+            ]
+        )
+    html += table(
+        [
+            "Stage",
+            "Base calls/read",
+            "Head calls/read",
+            "Fewer calls [ms/read]",
+            "Changed cost/call [ms/read]",
+            "Total reduction [ms/read]",
+        ],
+        decomposition,
+    )
+    html += (
+        "<p>The count contribution holds base cost per call fixed; the cost "
+        "contribution uses the head call rate. Their sum equals the measured "
+        "group reduction. The residual's reduced invocation rate hides its "
+        "higher per-call cost; the Jacobian and linear solve benefits are "
+        "almost entirely fewer invocations.</p>\n"
+    )
     html += "<h3>Device contribution and observed host gaps</h3>\n"
     html += table(
         ["Quantity [ms/read]", "Base", "Head", "Base − head"],

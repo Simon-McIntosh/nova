@@ -2948,7 +2948,7 @@ def _wall_events(field, geometry, policy, sigma):
             (_point_values(field, endpoints), values)
         )
 
-    points, values = jax.lax.map(lambda pair: one(*pair), (start, edge))
+    points, values = jax.vmap(one)(start, edge)
     return points.reshape(-1, 2), values.reshape(-1)
 
 

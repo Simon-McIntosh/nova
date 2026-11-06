@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1493",
+    "benchmarks/diiid_forward_gs_match.py:1952",
+    "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:290",
+    "benchmarks/display_map_promoted_figure.py:51",
+    "benchmarks/mast_centroid_solve_panels.py:1197"
+  ],
+  "completed_at": "2026-11-06T12:17:54.738Z",
+  "dispatched_at": "2026-11-06T12:08:28Z",
+  "findings": [
+    {
+      "file": "tests/test_display_flux.py",
+      "line": "614",
+      "severity": "blocking",
+      "text": "display.saddle_offset_mm is asserted only finite; the independent saddle-offset check the brief names was added in 122de5110 and deleted in f9debe44f, so one of the three self-referential assertions the node was chartered to replace now has no value check at all and a regression at nova/equilibrium/display_flux.py:395 passes the whole gate."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "120",
+      "severity": "non-blocking",
+      "text": "test_a_stored_panel_polishes_its_own_saddle fits the archive's own spline and never constructs a display map or reads a renderer field, so no display_flux regression can redden it, and the 0.2 bound at line 159 is stated with no justification for its size."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "the promoted-count check compares the committed receipt's promoted_node_count with the committed archive's mask prefix, and both artefacts are the renderer's own output, so a renderer regression reddens it only once the receipt is regenerated."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "the fragment records one red control and the brief asks for one per new check; the declared mutation leaves the new lattice-length acceptance assertion at tests/test_display_flux.py:398 passing (negative-control.log fails at the raises assertion), and the two stored-panel checks have no recorded red at all."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "baseline_suite.command carries an angle-bracket scratch-tree placeholder the record contract refuses, and measurement_module at manifest.md:17 names profile_map_cost.py rather than the module under test the scratch-tree base arm imported; both are recoverable from base-gate.log:3."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read 108174fbb..8671f73ed commit by commit \u2014 a0143e703 rewrites the tail guard to _wall_rows with the check behind `if discarded.size:`, 122de5110 adds a stored-panel test that f9debe44f replaces with two archive-only tests, and 8671f73ed records the profile and the new arm summaries in the fragment.",
+    "done_when": "done_when item 1 names the polished-saddle distance, the saddle offset and the promoted count plus the mask-tail refusal; the refusal and the count are now independently checked, the saddle test at tests/test_coil_edit_panel_render.py:120 measures the committed archive rather than the build, and tests/test_display_flux.py:614 asserts the saddle offset only finite; item 3's gate is recorded in head-gate.log and base-gate.log.",
+    "goal": "the node goal is to make the coil-edit panel guards able to fail on the defect they claim to guard; the delta repairs the false refusal at nova/equilibrium/display_flux.py:325 and makes the promoted count independent at tests/test_coil_edit_panel_render.py:81, but the saddle-offset check the goal names no longer exists.",
+    "manifest": "read; it records status complete, both arms at 11 and 16 passed with EXIT=0 and their logs, but baseline_suite.command at manifest.md:21 carries a scratch-tree placeholder and measurement_module at manifest.md:17 names the profiling script rather than the module under test.",
+    "write_paths": "the delta touches docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html, nova/equilibrium/display_flux.py, tests/test_coil_edit_panel_render.py and tests/test_display_flux.py, every one inside the five paths the manifest declares, and benchmarks/coil_edit_latency.py is untouched."
+  },
+  "justifications": {
+    "durability": "the mask-tail refusal carries a recorded red at negative-control.log ending EXIT=1 in 132.29 s, but tests/test_display_flux.py:614 asserts display.saddle_offset_mm only finite and tests/test_coil_edit_panel_render.py:120 never reads the renderer.",
+    "evidence": "head-gate.log ends `16 passed, 43 deselected in 412.65s` with EXIT=0 at f9debe44f and base-gate.log `11 passed, 43 deselected in 237.70s` with EXIT=0 at 70d362432, both naming their revision and command in the header.",
+    "fit": "nova/equilibrium/display_flux.py:230 `_wall_rows` follows the module's private-helper idiom and returns None rather than silently substituting a figure, matching the refusal style around it.",
+    "goal_fidelity": "nova/equilibrium/display_flux.py:325 now refuses only when rows are actually discarded, restoring the lattice-length prefix call at scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:304, but the saddle-offset repair the goal states is absent.",
+    "reuse": "no owner of a wall-row count exists \u2014 a search of nova/ for `non_lattice` and `wall_row` returns nothing \u2014 so nova/equilibrium/display_flux.py:230 is the first and forks nothing.",
+    "scope_discipline": "every path in `git diff --stat 108174fbb..8671f73ed` is one of the four paths this review was chartered to cover, and no unrelated edit rides along."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the coil-edit panel guards able to fail on the defect they claim to guard; the delta repairs the false refusal at nova/equilibrium/display_flux.py:325 and makes the promoted count independent at tests/test_coil_edit_panel_render.py:81, but the saddle-offset check the goal names no longer exists.\nVERDICT done_when: done_when item 1 names the polished-saddle distance, the saddle offset and the promoted count plus the mask-tail refusal; the refusal and the count are now independently checked, the saddle test at tests/test_coil_edit_panel_render.py:120 measures the committed archive rather than the build, and tests/test_display_flux.py:614 asserts the saddle offset only finite; item 3's gate is recorded in head-gate.log and base-gate.log.\nVERDICT write_paths: the delta touches docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html, nova/equilibrium/display_flux.py, tests/test_coil_edit_panel_render.py and tests/test_display_flux.py, every one inside the five paths the manifest declares, and benchmarks/coil_edit_latency.py is untouched.\nVERDICT manifest: read; it records status complete, both arms at 11 and 16 passed with EXIT=0 and their logs, but baseline_suite.command at manifest.md:21 carries a scratch-tree placeholder and measurement_module at manifest.md:17 names the profiling script rather than the module under test.\nVERDICT diff: read 108174fbb..8671f73ed commit by commit \u2014 a0143e703 rewrites the tail guard to _wall_rows with the check behind `if discarded.size:`, 122de5110 adds a stored-panel test that f9debe44f replaces with two archive-only tests, and 8671f73ed records the profile and the new arm summaries in the fragment.\nCALL_SITES: benchmarks/coil_edit_latency.py:1493, benchmarks/diiid_forward_gs_match.py:1952, scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:290, benchmarks/display_map_promoted_figure.py:51, benchmarks/mast_centroid_solve_panels.py:1197\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/display_flux.py:325 now refuses only when rows are actually discarded, restoring the lattice-length prefix call at scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:304, but the saddle-offset repair the goal states is absent.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-gate.log ends `16 passed, 43 deselected in 412.65s` with EXIT=0 at f9debe44f and base-gate.log `11 passed, 43 deselected in 237.70s` with EXIT=0 at 70d362432, both naming their revision and command in the header.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in `git diff --stat 108174fbb..8671f73ed` is one of the four paths this review was chartered to cover, and no unrelated edit rides along.\nSCORE durability: 10\nJUSTIFICATION durability: the mask-tail refusal carries a recorded red at negative-control.log ending EXIT=1 in 132.29 s, but tests/test_display_flux.py:614 asserts display.saddle_offset_mm only finite and tests/test_coil_edit_panel_render.py:120 never reads the renderer.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/display_flux.py:230 `_wall_rows` follows the module's private-helper idiom and returns None rather than silently substituting a figure, matching the refusal style around it.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner of a wall-row count exists \u2014 a search of nova/ for `non_lattice` and `wall_row` returns nothing \u2014 so nova/equilibrium/display_flux.py:230 is the first and forks nothing.\nFINDING tests/test_display_flux.py:614 blocking: display.saddle_offset_mm is asserted only finite; the independent saddle-offset check the brief names was added in 122de5110 and deleted in f9debe44f, so one of the three self-referential assertions the node was chartered to replace now has no value check at all and a regression at nova/equilibrium/display_flux.py:395 passes the whole gate.\nFINDING tests/test_coil_edit_panel_render.py:120 non-blocking: test_a_stored_panel_polishes_its_own_saddle fits the archive's own spline and never constructs a display map or reads a renderer field, so no display_flux regression can redden it, and the 0.2 bound at line 159 is stated with no justification for its size.\nFINDING tests/test_coil_edit_panel_render.py:81 non-blocking: the promoted-count check compares the committed receipt's promoted_node_count with the committed archive's mask prefix, and both artefacts are the renderer's own output, so a renderer regression reddens it only once the receipt is regenerated.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panel-guards.html:17 non-blocking: the fragment records one red control and the brief asks for one per new check; the declared mutation leaves the new lattice-length acceptance assertion at tests/test_display_flux.py:398 passing (negative-control.log fails at the raises assertion), and the two stored-panel checks have no recorded red at all.\nFINDING manifest.md:21 non-blocking: baseline_suite.command carries an angle-bracket scratch-tree placeholder the record contract refuses, and measurement_module at manifest.md:17 names profile_map_cost.py rather than the module under test the scratch-tree base arm imported; both are recoverable from base-gate.log:3.\n",
+  "review_run_id": "r-20261106T120704859135-review-of-coil-edit-panel-guards-8671f73ed949",
+  "reviewed_base_sha": "108174fbb4c0005772844581cbc749242d41495a",
+  "reviewed_head_sha": "8671f73ed949eed773c97517be101486749e8797",
+  "reviewed_run_id": "r-20261106T074800034935-coil-edit-panel-guards",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T12:24:21.535201+00:00",
+  "total": 94
+}

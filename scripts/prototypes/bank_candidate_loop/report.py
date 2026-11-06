@@ -1,6 +1,7 @@
 """Table paired solve timings, device ownership and every lane's precision."""
 
 import argparse
+import ast
 from html import escape
 import itertools
 import json
@@ -63,7 +64,7 @@ def main():
         [
             kind,
             state,
-            ", ".join(str(i) for i, flag in enumerate(json.loads(flags)) if flag)
+            ", ".join(str(i) for i, flag in enumerate(ast.literal_eval(flags)) if flag)
             or "none",
             int(selected),
             f"{float(error):.6g}",

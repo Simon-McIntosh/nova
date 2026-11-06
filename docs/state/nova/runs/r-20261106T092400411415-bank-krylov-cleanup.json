@@ -1,0 +1,875 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "9c5a105b5f35309a4fbdde84c5c06c4077312ff8",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/brief.txt",
+    "sha256": "45f0b10f67bfcade5c9b37abdee5b8e17d6c965913a3d53325fdd3ab0eb40219"
+  },
+  "budget": {
+    "budget_overrun": true,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 41,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 10586659,
+      "input_tokens_cumulative": 10586659,
+      "output_tokens": 83681,
+      "output_tokens_cumulative": 83681,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 154,
+    "files": 4,
+    "removed": 4
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1501,
+        "name": "step_batch",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1502
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1602,
+        "name": "solve_batch",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1603
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1898,
+        "name": "solve",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1899
+    },
+    {
+      "existing_function": {
+        "line": 537,
+        "name": "test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 478,
+        "name": "test_block_gmres_breakdown_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 501
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_block_gmres_breakdown_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 537,
+        "name": "test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "window_line": 559
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 68
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_frozen_set_keeps_fresh_continuous_area",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 76
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_fragment_switch_forces_fresh_extra_step",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 76
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_batch_reuses_factor_without_rebuilding_jacobians",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 76
+    },
+    {
+      "existing_function": {
+        "line": 293,
+        "name": "test_step_cap_reports_nonconvergence",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 76
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_reads_include_companion_lanes_after_two_halvings",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 67
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 191
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_frozen_set_keeps_fresh_continuous_area",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_fragment_switch_forces_fresh_extra_step",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_batch_reuses_factor_without_rebuilding_jacobians",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 293,
+        "name": "test_step_cap_reports_nonconvergence",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_reads_include_companion_lanes_after_two_halvings",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "window_line": 191
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "e93cd2d5d13b0d1d0571097532d290a4cd3842e7",
+    "070055ea1847519ee81f9c724f1e17e640de0cfc",
+    "3aa79b52c45dd7fbb06da8fb8c3d20faa30dabc7"
+  ],
+  "completed_at": "2026-11-06T10:28:29.681Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-06T09:27:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "sbatch --partition=sirius --cpus-per-task=4 --mem=32G --time=00:59:00 --job-name=bkc-suite --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/logs/slurm-paired-suite-%j.log --wait /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/scratch/paired_suite.sh",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/scratch/paired/head-suite.log"
+  },
+  "impl_move": {
+    "at_complete": 0.25773195876288657,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "correctness repair of the section 3 linear solve; section bounds not yet met",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-06T10:24:36.783943+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-06T09:24:36Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 30,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 7,
+    "mean_context": 128000,
+    "observed_at": "2026-11-06T09:24:17Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 30,
+      "aggregate_tokens_per_second": 315.234,
+      "detail": "",
+      "mean_tokens_per_second": 75.056,
+      "observed_at": "2026-11-06T09:24:17Z",
+      "runs": 4.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-06T10:28:29.681Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/manifest.md",
+  "member": "disposable-r-20261106T092400411415-bank-krylov-cleanup",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_bank_newton_step.py::test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_bank_newton_step.py::test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update"
+    ],
+    "declaration": "restore jnp.eye(width + 1, width) as the Hessenberg initialisation in a scratch copy; the breakdown update test in tests/test_bank_newton_step.py must fail",
+    "head_failure_ids": [
+      "tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/logs/negative-control-eye-breakdown.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/logs/negative-control-eye-breakdown.log",
+    "test_paths": [
+      "tests/test_bank_newton_step.py",
+      "tests/test_bank_solve_cycle.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "bank-krylov-cleanup",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov06/bank-krylov-cleanup.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/brief.txt",
+    "brief_sha256": "45f0b10f67bfcade5c9b37abdee5b8e17d6c965913a3d53325fdd3ab0eb40219",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1076,
+          "cached_input_tokens": 383499,
+          "input_tokens": 384577,
+          "output_tokens": 473,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 385050,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "_block_gmres solves its least-squares update over only the columns an Arnoldi step wrote, and tests/test_bank_newton_step.py matches a float64 reference to 1e-10 at an early breakdown and at a non-multiple iteration cap, failing with the identity initialisation restored; the cycle test toy NewtonFactor carries block inverses and indices built as newton_step builds them; paired sirius suites over the four named files add no failure and an H200 base-against-head sixteen-slice solve keeps every lane inside the precision budget, recorded in docs/evidence/fragments/sub-millisecond-forward-path/bank-krylov-cleanup.html",
+    "estimated_hours": null,
+    "goal": "Keep unwritten Arnoldi columns out of the GMRES least-squares update",
+    "id": "bank-krylov-cleanup",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-06T09:24:36Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 30,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 7,
+      "mean_context": 128000,
+      "observed_at": "2026-11-06T09:24:17Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 30,
+        "aggregate_tokens_per_second": 315.234,
+        "detail": "",
+        "mean_tokens_per_second": 75.056,
+        "observed_at": "2026-11-06T09:24:17Z",
+        "runs": 4.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T092400411415-bank-krylov-cleanup/manifest.md",
+    "negative_control": "restore jnp.eye(width + 1, width) as the Hessenberg initialisation in a scratch copy; the breakdown update test in tests/test_bank_newton_step.py must fail",
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/support_read.py",
+      "tests/test_bank_newton_step.py",
+      "tests/test_bank_solve_cycle.py",
+      "scripts/prototypes/bank_krylov_cleanup",
+      "docs/evidence/fragments/sub-millisecond-forward-path/bank-krylov-cleanup.html",
+      "docs/figures/sub-millisecond-forward-path/bank-krylov-cleanup"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 364752.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "bank-krylov-cleanup",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-06T09:27:08.594280+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.416,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 974.271,
+      "context-estimate": 218.867,
+      "records": 437.36,
+      "verdict-inputs": 625.141
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3aa79b52c45dd7fbb06da8fb8c3d20faa30dabc7",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "9c5a105b5f35309a4fbdde84c5c06c4077312ff8",
+    "reviewed_head_sha": "3aa79b52c45dd7fbb06da8fb8c3d20faa30dabc7",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 17,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261106T092400411415-bank-krylov-cleanup",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "ca809877-4663-4957-8cc5-4ee4f63b0f1c",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 10586659,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3601.457,
+    "generated_tokens": 83681,
+    "generation_seconds": 1442.816,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 79.3,
+    "machine_seconds": 2158.641,
+    "peak_input_tokens": 182460,
+    "tokens_per_second": 58.0,
+    "wall_tokens_per_second": 23.24
+  },
+  "time_budget": "60m",
+  "tool_steps": 91.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 2022,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: the manifest reports a blocker",
+        "effective_phase": "complete",
+        "elapsed_seconds": 5622,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T08:59:41Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-06T07:51:40Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 62445730,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/codex-home/cache"
+            },
+            {
+              "bytes": 28835802,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261106T070015356749-bank-wall-events",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1105,
+          "worker_pid": 618374
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the manifest reports a blocker",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T08:59:41Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1518,
+        "log_fresh": false,
+        "manifest_commits": [
+          "dcd05d88c490c0f313f703b5cbc32ce9c5140045",
+          "24039264591dffca244e867790fde4b7b2fa9504",
+          "fd9fa7dfd52de875752ef30a02fe9b04e41ad31c",
+          "85b8c62dcfd852789e881ebe122aa5bce831e98c",
+          "f33beae65d62710f4ed23085b19f71717ee77b0a",
+          "e048bb9b02bb943dabf5b93e8546f6575605cf0a",
+          "c3a3426ae0838529e0708d70943137bb80395153",
+          "6c68c6bf596ddcea7718b16216aabc4f923b24bb",
+          "52954858ea7f083ce5e52e950db534076a71a65f",
+          "5048feac4f28110ca2ea4bcded80db4fd548521c",
+          "ddedfda4758a3213484ca1f52b94ee003ad7ddde",
+          "a6dee513d31b0f1b3e6e0e2f7ebba811f0e8c751",
+          "be050629697cd4b8b30d19ea98562a3ace4f1911",
+          "4d35865804a0228c2d896897c43da66ba6aed3f9"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "615cd4e1451288848c2548d9cc77616283550f341f0d37fe2fdeb777a338aee9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "astra",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T070015356749-bank-wall-events/manifest.md; resolve the blocker before resuming the run",
+        "node": "bank-wall-events",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261106T070015356749-bank-wall-events",
+        "session": "s21-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261106T070015356749-bank-wall-events",
+          "session_id": "01a1afaa-f315-7e90-9c99-09b0b8b787d2",
+          "source": "stream"
+        },
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1261,
+        "terminal_at": "2026-11-06T09:03:49Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-wall-events"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1981,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T070015362785-bank-newton-krylov.at-83fb3a292c6fdcb0640c65c8faf7b92d7cff44a5.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074934055819-review-of-bank-newton-krylov-83fb3a292c6f/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 5581,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-06T08:08:50Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-06T07:52:11Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261106T074934055819-review-of-bank-newton-krylov-83fb3a292c6f",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 9401,
+          "worker_pid": 623503
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-06T08:08:50Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4565,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "0c6c1bd81be8ec683c8e765c438deb52f2684918bca1633a7435351c0305f171",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074934055819-review-of-bank-newton-krylov-83fb3a292c6f/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261106T070015362785-bank-newton-krylov.at-83fb3a292c6fdcb0640c65c8faf7b92d7cff44a5.json",
+        "node": "review-of-bank-newton-krylov-83fb3a292c6f",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261106T074934055819-review-of-bank-newton-krylov-83fb3a292c6f",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 4595,
+        "terminal_at": "2026-11-06T08:08:17Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-newton-krylov-83fb3a292c6f"
+      }
+    ]
+  },
+  "wall_seconds": 3637,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-06T10:28:40Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-06T09:28:08Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261106T092400411415-bank-krylov-cleanup",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 17646,
+    "worker_pid": 1233101
+  },
+  "worker_seconds": 3533,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

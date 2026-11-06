@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="172">
+<meta name="plan-version" content="173">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -610,7 +610,10 @@
     <div class="r-comment-body"><p>Review of bank-newton-krylov at 83fb3a29: block-preconditioned Krylov step lands with an independent float64 physical-update guard and a reddened unpreconditioned control; scores 18/17/18/16/17/14 and three non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T084922015844-review-of-bank-newton-krylov-2ad68aa7fad3" data-who="reckon-build" data-when="2026-11-06T09:11:00.931Z">
-    <div class="r-comment-body"><p>&lt;a href=&quot;/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-krylov.html#bank-newton-krylov-landing&quot;&gt;Block-GMRES evidence&lt;/a&gt;: independent review at head 2ad68aa7 scores goal_fidelity 18, evidence 19, scope_discipline 20, durability 15, fit 18, reuse 16 with zero added failures and three non-blocking findings, the first a latent early-termination defect in the new Hessenberg initialisation.</p></div>
+    <div class="r-comment-body"><p>&lt;a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-newton-krylov.html#bank-newton-krylov-landing"&gt;Block-GMRES evidence&lt;/a&gt;: independent review at head 2ad68aa7 scores goal_fidelity 18, evidence 19, scope_discipline 20, durability 15, fit 18, reuse 16 with zero added failures and three non-blocking findings, the first a latent early-termination defect in the new Hessenberg initialisation.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T092400411415-bank-krylov-cleanup" data-who="reckon-build" data-when="2026-11-06T10:28:29.681Z">
+    <div class="r-comment-body"><p>bank-krylov-cleanup — nova/equilibrium/support_read.py now zeroes the unwritten Hessenberg columns before the QR and sets their zero diagonal to one, so only columns an Arnoldi step wrote enter the least-squares; two float64-independent tests sit at 4.7e-16 and 3.9e-16 relative against 1e-10, and restoring the identity seed reddens the capped-cycle test at 5.6e-3; the cycle toy factor now builds its block inverse and gather indices from the block preconditioner the step uses; paired suites over the four bank files add no failure, and one H200 allocation over sixteen diverted 550-cell slices moves the whole-solve wall 1535.783 ms to 1534.185 ms (-0.03%) with every lane inside its precision budget (worst 0.26 of budget). Fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-krylov-cleanup.html</p></div>
 </div>
 </section>
 </main>

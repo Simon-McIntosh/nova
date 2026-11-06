@@ -17,12 +17,35 @@ from nova.equilibrium import fixed_points, support_read, topology
 from scripts.prototypes.bank_solve_profile.fixture import build
 
 
+def compare(run):
+    with np.load(run / "derivatives-base.npz") as reference:
+        with np.load(run / "derivatives-head.npz") as candidate:
+            assert candidate.files == reference.files
+            for key in candidate.files:
+                value, expected = candidate[key], reference[key]
+                assert np.isfinite(value).all() and np.any(value != 0)
+                error = float(np.max(np.abs(value - expected)))
+                print(
+                    f"PARITY {key} absolute_error={error:.17g} limit=1e-15", flush=True
+                )
+                np.testing.assert_allclose(value, expected, atol=1e-15, rtol=0)
+                altered = value.copy()
+                altered.flat[0] += 1e-12
+                detected = float(np.max(np.abs(altered - expected)))
+                assert detected > 1e-15
+                print(
+                    f"CONTROL {key} absolute_error={detected:.17g} refused=True",
+                    flush=True,
+                )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--states", type=Path, required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--arm", choices=("base", "head"), required=True)
+    parser.add_argument("--compare-only", action="store_true")
     args = parser.parse_args()
     print(
         f"revision={args.revision} nova={nova.__file__} "
@@ -30,6 +53,9 @@ def main():
         flush=True,
     )
     assert jax.config.jax_enable_x64
+    if args.compare_only:
+        compare(args.run)
+        return
     batch = build(16)
     assert len(batch.operands.geometry.centre) == 550
     common = args.run / "derivative-inputs.npz"
@@ -74,13 +100,7 @@ def main():
             arrays[f"{name}_{rank}"] = np.asarray(value)
     np.savez(args.run / f"derivatives-{args.arm}.npz", **arrays)
     if args.arm == "head":
-        with np.load(args.run / "derivatives-base.npz") as reference:
-            for key, value in arrays.items():
-                error = float(np.max(np.abs(value - reference[key])))
-                print(
-                    f"PARITY {key} absolute_error={error:.17g} limit=1e-15", flush=True
-                )
-                np.testing.assert_allclose(value, reference[key], atol=1e-15, rtol=0)
+        compare(args.run)
 
 
 if __name__ == "__main__":

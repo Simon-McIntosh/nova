@@ -38,6 +38,9 @@ the rejected-arm record is in
 
 <p><code>graded_residual</code> now owns the weighted panel loop through its
 <code>weight</code> argument, and the duplicate weighted-residual implementation
-has been removed. The two tangent suites and all tests importing
-<code>gradedresidual</code> are queued for the base/head Sirius gate.</p>
+has been removed. Sirius job <code>1306798</code> ran the base suite with 82
+tests collected, then reached its 59-minute time limit during
+<code>test_edge_term_tangents.py</code>. Four failures were visible in progress
+output, but the suite did not reach a summary; the head arm did not start. The
+required base/head failure comparison is therefore incomplete.</p>
 </section>

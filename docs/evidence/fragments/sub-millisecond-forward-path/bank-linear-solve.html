@@ -1,0 +1,220 @@
+<section id="bank-linear-solve-landing">
+<h2>Block GMRES cuts the batch linear solve to 6.44–10.50 ms; 1 ms remains unmet</h2>
+<p><strong>Use equilibrated dense GMRES with a per-cell 3 × 3 block inverse as the next linear route for <code>newton_step</code>.</strong>
+On sixteen diverted 550-cell systems it takes 6.439 ms at the trial state and
+10.495 ms at the converged state, versus 105.735 and 105.945 ms for double LU:
+16.4 and 10.1 times faster. Every lane meets the 1e-8 physical update-error
+limit, and every equilibrated condition-estimate × relative-residual product
+is at most 1e-8. <strong>No measured arm reaches about 1 ms for the sixteen-lane update.</strong>
+Even the best route remains 6.4–10.5 times above that target. These are linear
+solves only; they exclude the read, residual booking and Jacobian assembly.
+No product source or tests change in this measurement.</p>
+
+<h3 id="bank-linear-solve-method">Systems, timing and independent accuracy reference</h3>
+<p>The fixture is imported from <code>scripts/prototypes/bank_solve_profile/fixture.py</code>:
+the same diverted bank, root offset and sixteen moment perturbations used by
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-profile.html">bank solve profile</a>.
+The one-lane arm takes lane zero of that batch; it does not replace it with an
+unperturbed seed. The source includes the conic endpoint repair recorded in
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-breakpoint.html">bank solve breakpoint</a>.
+Extraction calls <code>step_residual</code>, <code>step_jacobian(fresh_geometry=True)</code>
+and <code>_equilibrate</code> at the trial state and at a freshly read terminal state.
+All sixteen lanes converge in 3–6 updates, with largest terminal fresh residual
+9.116263e-11. The systems are 1650 × 1650, with moment components stored in
+three 550-entry blocks. Each preconditioner block gathers the three components
+of one cell, rather than three adjacent vector entries.</p>
+<p>The original system is A x = b. With the product row and column scales R and C,
+the timed routes form B = R⁻¹ A C, solve B y = R⁻¹ b, and return x = C y.
+The balancing scales are prepared during extraction; their construction is excluded
+from every timed arm. The two elementwise operations forming B are included.
+The accuracy reference is <code>jnp.linalg.solve(A, b)</code> in float64 on the
+unequilibrated matrix, with largest reference relative residual 2.863032e-15.
+Each update error is ‖x − x_ref‖₂ / ‖x_ref‖₂. Every reported maximum is taken
+after evaluating each lane separately; no norm pooled across lanes can hide a bad lane.</p>
+<p>The complete comparison is one H200 NVL allocation, job 1306653, with two CPU
+cores and 48 GB, on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>.
+JAX is 0.11.0, x64 is asserted before array construction, and the measurement
+revision is <code>6c7110bcf42e14e26e37e4a715b761e30d8ae44d</code>.
+Each row has one warm call followed by twelve synchronized calls; the table
+reports their median wall. <code>block_until_ready</code> closes every timed call.
+Kernel launches are actual nonzero-duration GPU stream events in a separate
+warm XPlane trace, excluding memcpy and memset. Every trace must contain the
+known-present solve kernels, so an empty profiler capture is refused.
+Compilation and profiler overhead do not enter the wall samples.</p>
+<p>Extraction and the initial reproduction ran in job 1306650 at
+<code>43781a58d2947bec9c09256856af295a283051cd</code>. Its double-LU wall was
+5.895 ms at one lane and 106.016 ms at sixteen: the previously recorded
+6.02 ms single factor and 104.93 ms batch factor bottleneck still reproduces.
+The complete comparison reuses the exact archived systems and confirms the same
+cost. The commits between extraction and comparison change only the measurement
+and its report, so the measured product source is identical.</p>
+
+<h3 id="bank-linear-solve-routes">Routes and stopping rules</h3>
+<ul>
+<li><b>Double LU:</b> the present vmapped <code>lu_factor</code> plus <code>lu_solve</code> on B.</li>
+<li><b>Single LU + refinement:</b> factor B in float32, solve in float32,
+then apply the named number of corrections using the same factor. Each correction
+forms its residual against the original float64 B and accumulates the update in
+float64. Zero corrections is retained as the precision control. One correction
+meets the update bound, but at sixteen lanes the installed float32 factor route
+costs about 399 ms including that correction, much slower than double LU.
+Two or three corrections improve accuracy without curing the timing.</li>
+<li><b>Block GMRES:</b> left preconditioning with the inverse of each cell's 3 × 3
+diagonal block, restart width 20 and at most 20 cycles. Arnoldi and least squares
+reuse the installed JAX primitives; the instrument retains the executed inner-step
+count that the public GMRES result omits. It checks the true unpreconditioned
+residual of B after every restart, not the preconditioned residual. The tolerance
+is 1e-8 / κ̂(B), with κ̂ supplied by
+<code>support_read._krylov_condition_estimate</code>. The estimator and block-inverse
+setup are included in the timed call. Trial lanes take 20 Arnoldi steps; converged
+lanes take 40. These are restart-quantized counts, not Newton iterations.</li>
+<li><b>GMRES, both coordinate bounds:</b> a deliberately stricter diagnostic
+also requires κ̂(A) ‖A x − b‖₂ / ‖b‖₂ ≤ 1e-8. It retains both estimates in the timed
+call. This arm reaches its 400-step cap and misses that condition despite accurate
+updates. It is kept in both tables and marked as a miss.</li>
+<li><b>Stacked double LU:</b> direct <code>jax.lax.linalg.lu</code> on the stacked
+batch followed by the batched triangular solve. It is about 106 ms at sixteen
+lanes, indistinguishable in practical benefit from the present route; spelling
+the factor as a stacked operation does not expose a faster route in this installed JAX.</li>
+</ul>
+<p>κ̂(B) is 38.928–39.200 at the trial states and 38.480 at convergence, giving
+relative-residual tolerances about 2.55–2.60e-10. κ̂(A) is 1.737–1.779e8, whose
+corresponding tolerance is about 5.6–5.8e-17, below float64 epsilon.
+The equilibrated bound concerns y, so the independent physical x update check is
+also required. The main GMRES arm's largest physical error is 3.700225e-9;
+its largest balanced estimated bound is 8.435076e-9. The condition estimates
+are eight-direction Arnoldi estimates, not certified full condition numbers.
+The strict diagnostic shows why the coordinate system must be named when stating a
+residual tolerance; it is not silently substituted for the requested equilibrated solve.</p>
+
+<h3 id="bank-linear-solve-wall">Warm wall, correction count and launches</h3>
+<p>Every wall is milliseconds per complete batch call. Counts are the minimum–maximum
+across lanes: refinement corrections for LU arms, Arnoldi steps for GMRES; zero
+for double LU means no correction iterations, not no factorization.</p>
+<table><thead><tr><th>State</th><th>Arm</th><th>Lanes</th><th>Warm wall [ms]</th><th>Iterations / refinements</th><th>Kernel launches</th></tr></thead><tbody>
+<tr><td>trial</td><td>Double LU</td><td>1</td><td>6.083</td><td>0–0</td><td>124</td></tr>
+<tr><td>trial</td><td>Single LU, no refinement</td><td>1</td><td>5.239</td><td>0–0</td><td>80</td></tr>
+<tr><td>trial</td><td>Single LU + 1 refinement</td><td>1</td><td>5.296</td><td>1–1</td><td>88</td></tr>
+<tr><td>trial</td><td>Single LU + 2 refinements</td><td>1</td><td>6.113</td><td>2–2</td><td>101</td></tr>
+<tr><td>trial</td><td>Single LU + 3 refinements</td><td>1</td><td>6.357</td><td>3–3</td><td>110</td></tr>
+<tr><td>trial</td><td>Block GMRES</td><td>1</td><td>3.720</td><td>20–20</td><td>709</td></tr>
+<tr><td>trial</td><td>GMRES, both coordinate bounds</td><td>1</td><td>44.053</td><td>400–400</td><td>7973</td></tr>
+<tr><td>trial</td><td>Stacked double LU</td><td>1</td><td>6.039</td><td>0–0</td><td>124</td></tr>
+<tr><td>trial</td><td>Double LU</td><td>16</td><td>105.735</td><td>0–0</td><td>216</td></tr>
+<tr><td>trial</td><td>Single LU, no refinement</td><td>16</td><td>396.274</td><td>0–0</td><td>216</td></tr>
+<tr><td>trial</td><td>Single LU + 1 refinement</td><td>16</td><td>398.958</td><td>1–1</td><td>425</td></tr>
+<tr><td>trial</td><td>Single LU + 2 refinements</td><td>16</td><td>403.029</td><td>2–2</td><td>641</td></tr>
+<tr><td>trial</td><td>Single LU + 3 refinements</td><td>16</td><td>406.185</td><td>3–3</td><td>852</td></tr>
+<tr><td>trial</td><td>Block GMRES</td><td>16</td><td>6.439</td><td>20–20</td><td>724</td></tr>
+<tr><td>trial</td><td>GMRES, both coordinate bounds</td><td>16</td><td>89.390</td><td>400–400</td><td>8924</td></tr>
+<tr><td>trial</td><td>Stacked double LU</td><td>16</td><td>106.028</td><td>0–0</td><td>215</td></tr>
+<tr><td>converged</td><td>Double LU</td><td>1</td><td>6.127</td><td>0–0</td><td>124</td></tr>
+<tr><td>converged</td><td>Single LU, no refinement</td><td>1</td><td>5.261</td><td>0–0</td><td>80</td></tr>
+<tr><td>converged</td><td>Single LU + 1 refinement</td><td>1</td><td>5.457</td><td>1–1</td><td>88</td></tr>
+<tr><td>converged</td><td>Single LU + 2 refinements</td><td>1</td><td>6.141</td><td>2–2</td><td>101</td></tr>
+<tr><td>converged</td><td>Single LU + 3 refinements</td><td>1</td><td>6.419</td><td>3–3</td><td>110</td></tr>
+<tr><td>converged</td><td>Block GMRES</td><td>1</td><td>5.731</td><td>40–40</td><td>1072</td></tr>
+<tr><td>converged</td><td>GMRES, both coordinate bounds</td><td>1</td><td>43.806</td><td>400–400</td><td>7973</td></tr>
+<tr><td>converged</td><td>Stacked double LU</td><td>1</td><td>6.115</td><td>0–0</td><td>124</td></tr>
+<tr><td>converged</td><td>Double LU</td><td>16</td><td>105.945</td><td>0–0</td><td>216</td></tr>
+<tr><td>converged</td><td>Single LU, no refinement</td><td>16</td><td>396.200</td><td>0–0</td><td>216</td></tr>
+<tr><td>converged</td><td>Single LU + 1 refinement</td><td>16</td><td>398.872</td><td>1–1</td><td>425</td></tr>
+<tr><td>converged</td><td>Single LU + 2 refinements</td><td>16</td><td>402.819</td><td>2–2</td><td>641</td></tr>
+<tr><td>converged</td><td>Single LU + 3 refinements</td><td>16</td><td>405.968</td><td>3–3</td><td>852</td></tr>
+<tr><td>converged</td><td>Block GMRES</td><td>16</td><td>10.495</td><td>40–40</td><td>1134</td></tr>
+<tr><td>converged</td><td>GMRES, both coordinate bounds</td><td>16</td><td>89.068</td><td>400–400</td><td>8924</td></tr>
+<tr><td>converged</td><td>Stacked double LU</td><td>16</td><td>106.109</td><td>0–0</td><td>215</td></tr>
+</tbody></table>
+<figure id="bank-linear-solve-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/bank-linear-solve/wall.svg"
+alt="Logarithmic warm-wall comparison at trial and converged states for one and sixteen lanes; block GMRES is fastest at sixteen, and every arm lies above the one-millisecond batch target.">
+<figcaption>Warm wall on one H200: open circles are one lane and squares are sixteen;
+red marks an arm that misses its stated precision criterion. The dotted line is
+1 ms per batch. The strict GMRES diagnostic is red because its original-coordinate
+condition-residual product misses, while its physical update remains accurate.
+The shared <code>bank_solve_profile.plot.save_checked</code> accepted text bounds
+and overlaps. The producer inspected the 1400 × 720 PNG rendering; only the SVG is committed.</figcaption>
+</figure>
+
+<h3 id="bank-linear-solve-precision">Independent update precision</h3>
+<p>Values are maxima across the named lanes. The estimated-error column is
+κ̂(B) times the balanced relative residual for Block GMRES; for the other arms
+it is the maximum of that product and κ̂(A) times the original relative residual.
+Dense arms have no Krylov stopping tolerance: their PASS/MISS is decided by the
+independent physical update error. GMRES must pass both its stated estimated
+bound and the physical update check. A large dense-arm diagnostic bound therefore
+does not override its measured update agreement. Float32 without refinement
+misses every state/width pair; no failed arm has been dropped.</p>
+
+<table><thead><tr><th>State</th><th>Arm</th><th>Lanes</th><th>Update error</th><th>Original condition estimate</th><th>Balanced condition estimate</th><th>Estimated error bound</th><th>Meets precision</th></tr></thead><tbody>
+<tr><td>trial</td><td>Double LU</td><td>1</td><td>6.872e-14</td><td>1.769e+08</td><td>3.893e+01</td><td>1.257e-05</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Single LU, no refinement</td><td>1</td><td>1.307e-05</td><td>1.769e+08</td><td>3.893e+01</td><td>4.337e+03</td><td>MISS</td></tr>
+<tr><td>trial</td><td>Single LU + 1 refinement</td><td>1</td><td>5.741e-11</td><td>1.769e+08</td><td>3.893e+01</td><td>1.935e-02</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Single LU + 2 refinements</td><td>1</td><td>6.300e-14</td><td>1.769e+08</td><td>3.893e+01</td><td>2.166e-07</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Single LU + 3 refinements</td><td>1</td><td>6.335e-14</td><td>1.769e+08</td><td>3.893e+01</td><td>9.820e-08</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Block GMRES</td><td>1</td><td>2.246e-09</td><td>1.769e+08</td><td>3.893e+01</td><td>8.435e-09</td><td>PASS</td></tr>
+<tr><td>trial</td><td>GMRES, both coordinate bounds</td><td>1</td><td>6.331e-14</td><td>1.769e+08</td><td>3.893e+01</td><td>9.843e-08</td><td>MISS</td></tr>
+<tr><td>trial</td><td>Stacked double LU</td><td>1</td><td>6.872e-14</td><td>1.769e+08</td><td>3.893e+01</td><td>1.257e-05</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Double LU</td><td>16</td><td>9.125e-14</td><td>1.779e+08</td><td>3.920e+01</td><td>9.140e-06</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Single LU, no refinement</td><td>16</td><td>2.812e-05</td><td>1.779e+08</td><td>3.920e+01</td><td>2.840e+03</td><td>MISS</td></tr>
+<tr><td>trial</td><td>Single LU + 1 refinement</td><td>16</td><td>3.911e-10</td><td>1.779e+08</td><td>3.920e+01</td><td>3.042e-02</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Single LU + 2 refinements</td><td>16</td><td>9.756e-14</td><td>1.779e+08</td><td>3.920e+01</td><td>5.131e-07</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Single LU + 3 refinements</td><td>16</td><td>9.770e-14</td><td>1.779e+08</td><td>3.920e+01</td><td>1.268e-07</td><td>PASS</td></tr>
+<tr><td>trial</td><td>Block GMRES</td><td>16</td><td>3.700e-09</td><td>1.779e+08</td><td>3.920e+01</td><td>8.435e-09</td><td>PASS</td></tr>
+<tr><td>trial</td><td>GMRES, both coordinate bounds</td><td>16</td><td>9.777e-14</td><td>1.779e+08</td><td>3.920e+01</td><td>1.542e-07</td><td>MISS</td></tr>
+<tr><td>trial</td><td>Stacked double LU</td><td>16</td><td>9.125e-14</td><td>1.779e+08</td><td>3.920e+01</td><td>9.140e-06</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Double LU</td><td>1</td><td>2.063e-14</td><td>1.737e+08</td><td>3.848e+01</td><td>3.121e-06</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Single LU, no refinement</td><td>1</td><td>2.404e-05</td><td>1.737e+08</td><td>3.848e+01</td><td>7.621e+02</td><td>MISS</td></tr>
+<tr><td>converged</td><td>Single LU + 1 refinement</td><td>1</td><td>2.801e-10</td><td>1.737e+08</td><td>3.848e+01</td><td>1.508e-02</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Single LU + 2 refinements</td><td>1</td><td>1.865e-14</td><td>1.737e+08</td><td>3.848e+01</td><td>1.864e-07</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Single LU + 3 refinements</td><td>1</td><td>1.829e-14</td><td>1.737e+08</td><td>3.848e+01</td><td>1.855e-07</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Block GMRES</td><td>1</td><td>1.798e-14</td><td>1.737e+08</td><td>3.848e+01</td><td>4.039e-14</td><td>PASS</td></tr>
+<tr><td>converged</td><td>GMRES, both coordinate bounds</td><td>1</td><td>1.837e-14</td><td>1.737e+08</td><td>3.848e+01</td><td>9.831e-08</td><td>MISS</td></tr>
+<tr><td>converged</td><td>Stacked double LU</td><td>1</td><td>2.063e-14</td><td>1.737e+08</td><td>3.848e+01</td><td>3.121e-06</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Double LU</td><td>16</td><td>1.023e-13</td><td>1.737e+08</td><td>3.848e+01</td><td>7.512e-06</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Single LU, no refinement</td><td>16</td><td>4.284e-05</td><td>1.737e+08</td><td>3.848e+01</td><td>5.327e+03</td><td>MISS</td></tr>
+<tr><td>converged</td><td>Single LU + 1 refinement</td><td>16</td><td>3.796e-10</td><td>1.737e+08</td><td>3.848e+01</td><td>3.360e-02</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Single LU + 2 refinements</td><td>16</td><td>1.020e-13</td><td>1.737e+08</td><td>3.848e+01</td><td>6.130e-07</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Single LU + 3 refinements</td><td>16</td><td>1.023e-13</td><td>1.737e+08</td><td>3.848e+01</td><td>5.333e-07</td><td>PASS</td></tr>
+<tr><td>converged</td><td>Block GMRES</td><td>16</td><td>1.022e-13</td><td>1.737e+08</td><td>3.848e+01</td><td>1.159e-13</td><td>PASS</td></tr>
+<tr><td>converged</td><td>GMRES, both coordinate bounds</td><td>16</td><td>1.022e-13</td><td>1.737e+08</td><td>3.848e+01</td><td>1.060e-06</td><td>MISS</td></tr>
+<tr><td>converged</td><td>Stacked double LU</td><td>16</td><td>1.023e-13</td><td>1.737e+08</td><td>3.848e+01</td><td>7.512e-06</td><td>PASS</td></tr>
+</tbody></table>
+
+<h3 id="bank-linear-solve-recommendation">Adoption and reuse rule</h3>
+<p>Adopt the measured equilibrated block-GMRES route for the next implementation
+comparison, keeping double LU as a fallback when the condition-set residual bound
+is not reached. Require the same physical update validation during that integration.
+This measurement establishes the linear route's accuracy at the two fixture states;
+it does not establish nonlinear convergence or the final whole-solve latency with
+that route substituted.</p>
+<p>There is no dense LU factor to carry on the GMRES path. Rebuild the small block
+inverses and condition estimate whenever the Newton matrix is rebuilt, with one
+set per lane. The measured policy rebuilds all three every update. Retain that
+policy initially; this record does not justify reusing a stale matrix or
+preconditioner. If optional chord reuse is subsequently enabled, the existing
+finite fresh-residual contraction ratio ≤ 0.5 remains the eligibility rule,
+with a fresh-read nonlinear convergence check. It cannot be inferred from a small
+linear residual of the carried matrix. Present <code>solve_batch</code> defaults
+factor reuse off, even though <code>newton_step</code> supports that optional rule.</p>
+<p>The remaining limit is visible in the traces: useful GMRES still launches
+724 kernels at sixteen trial lanes and 1134 at convergence. The measured speedup
+therefore supplies a better route to implement, not a sub-millisecond result.</p>
+
+<h3 id="bank-linear-solve-receipts">Durable receipts</h3>
+<p>Run root: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T054124433158-bank-linear-solve</code>.
+<code>device.log</code> records extraction, the all-lane convergence receipt and
+initial timing reproduction; <code>comparison.log</code> records the complete
+comparison. Both end in <code>EXIT=0</code>.
+<code>measurement/trial.npz</code> and <code>measurement/converged.npz</code>
+retain A, b, R and C. <code>comparison/receipt.json</code> contains all 32 rows,
+twelve samples per row, every lane's error, condition estimates, residuals and
+iteration count. Each <code>comparison/trace-*</code> directory retains its raw
+XPlane capture. <code>render.log</code> records the checked figure generation and
+visual inspection. Large arrays and traces remain outside git.</p>
+<p>The complete measurement summary is
+<code>SUMMARY {"arms": 32, "precision_passes": 24, "fastest_batch_ms": 6.43851887434721}</code>.
+The eight misses are the four float32-only rows and four strict-coordinate GMRES
+rows. No product regression suite is claimed: this node changes measurement
+scripts and the evidence artifact only.</p>
+</section>

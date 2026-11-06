@@ -298,40 +298,52 @@ def main():
     head_wall = measured_costs["head"]["wall_ms"]
     base_reads = measured_costs["base"]["reads"]
     head_reads = measured_costs["head"]["reads"]
+    base_per_read = measured_costs["base"]["wall_per_read_ms"]
+    head_per_read = measured_costs["head"]["wall_per_read_ms"]
     text = f"""<section id="bank-near-root-polish-landing">
-<h2>Fixed near-root polishing and fresh certification</h2>
-<p><strong>Fixed read count: {stable}; every lane freshly certified: {certified};
-paired precision budgets: {passed_precision}.</strong>
-Head uses {head_reads[0]}–{head_reads[1]} reads per lane across all six seed sets,
-against {base_reads[0]}–{base_reads[1]} at base. The fixed schedule costs more:
-whole-solve wall is {head_wall[0]:.3f}–{head_wall[1]:.3f} ms at head against
+<h2>Negative result: fixed polishing stabilizes reads at higher latency</h2>
+<p><strong>The fixed polish is rejected as a product change.</strong>
+The experimental schedule used {head_reads[0]} reads per lane on every one of the
+six seed sets, against {base_reads[0]}–{base_reads[1]} at base. Whole-solve latency
+was {head_wall[0]:.3f}–{head_wall[1]:.3f} ms for the experiment versus
 {base_wall[0]:.3f}–{base_wall[1]:.3f} ms at base in the two fresh measured processes.
-This meets the count-stability measure with a latency regression.</p>
-<p>
-The batch enters polishing when every active lane has a valid finite residual at most
-1e-8.
-Sixteen full Newton updates have no backtracking. Each lane retains its lowest-residual
-valid state,
-then a separate fresh read certifies the retained state against the unchanged 1e-10
-limit.
-A failed certificate resumes adaptive search once; the update cap remains binding.</p>
-<p>The band is above the measured 1.6e-9 to 2.9e-9 residuals at update 2 and below
-the preceding
-3.7e-4 to 4.4e-4 residuals. The recorded adaptive near-root tail needed up to four
-further updates.
-An eight-step measurement still missed seed 5, lane 10: its best residual was
-1.3227463568910025e-10. Sixteen steps double that measured insufficient budget.
-The certificate, validity check and best-state selection decide success; this margin
-alone does not.</p>
+Wall per read was {head_per_read[0]:.3f}–{head_per_read[1]:.3f} ms versus
+{base_per_read[0]:.3f}–{base_per_read[1]:.3f} ms, including Newton work.
+Stable counts therefore came with a substantial latency regression.</p>
+<p>The four product and test files were restored byte for byte to base
+73864287c5db07bac083e61dca1f160859452351 in commit
+511d789cbfbe4e95e11a9da96b0dd06879a3d280. The prototype, figure and receipts remain as
+negative evidence. In all tables below, <code>head</code> names experimental revision
+42039a936366f4b71a04c3573c46d90213fb5ec6, whose product change was withdrawn;
+the suite and negative-control results belong to that experiment.</p>
+<p>The experiment entered the near-root band when every active lane had a valid,
+finite residual at most 1e-8. It took P=16 full Newton updates without backtracking,
+kept each lane's lowest-residual valid state, and certified those states with a
+separate fresh read at the unchanged 1e-10 limit. Failed certification resumed the
+adaptive search, within the original update cap.</p>
+<p>The 1e-8 band was above the measured 1.6e-9 to 2.9e-9 residuals at update 2 and
+below the preceding 3.7e-4 to 4.4e-4 residuals. P=8 failed on seed 5, lane 10:
+its best fresh residual was 1.3227463568910025e-10, above the certificate limit.
+That seed needed adaptive fallback and 16 reads, while the other five took 12.
+Doubling the polish to P=16 produced 20 reads on every seed set, at the latency
+reported above; every lane still passed the unchanged fresh certificate and the
+paired precision budgets.</p>
+<p>Near the root, full Newton steps did not reliably reduce the fresh residual.
+Even eight further full steps could leave a lane above 1e-10, while tiny changes in
+initial moments changed which evaluations crossed that threshold. These results
+identify the residual's own noise floor near 1e-10 as the constraint. The longer
+polish bought more chances to retain a certifiable state, at substantial cost;
+this experiment does not establish a product rule.</p>
 <p>At base 73864287c5db07bac083e61dca1f160859452351, the controlled seed-noise
 regression
-reproduces [2, 2] versus [3, 3] reads. Head 42039a936366f4b71a04c3573c46d90213fb5ec6
-gives
-[18, 18] for both. The scratch mutation certifies against the tracked reading instead
+reproduced [2, 2] versus [3, 3] reads. Experimental revision
+42039a936366f4b71a04c3573c46d90213fb5ec6
+gave
+[18, 18] for both. The scratch mutation certified against the tracked reading instead
 of the
 fresh one, falsely accepting state 1.0 rather than the certified 1.5; the regression
-fails
-with EXIT=1. Invalid full trials are separately shown unable to replace a valid
+failed
+with EXIT=1. Invalid full trials were separately shown unable to replace a valid
 state.</p>
 <p>H200 allocation 1307321 uses one card, two CPU cores and 48 GB under the reservation.
 The seed archive was built once at base in allocation 1307314 and reused byte for
@@ -356,7 +368,8 @@ against fixed polishing">
 <figcaption>Sixteen lanes share every batch read. Common seeds and five perturbations at
 1e-14 relative; both measured processes are shown where counts differ. Grey dashed is
 base;
-blue solid is the fixed polish. The shared saver checks text bounds and overlaps.
+blue solid is the rejected fixed polish. The shared saver checks text bounds and
+overlaps.
 The producer inspected the 1400 by 720 PNG rendering; only the SVG is
 committed.</figcaption></figure>
 <h3 id="bank-near-root-polish-processes">Every process (0 warms the cache)</h3>

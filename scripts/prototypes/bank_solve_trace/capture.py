@@ -109,16 +109,17 @@ def main():
     jax.block_until_ready(control(control_input))
     options = jax.profiler.ProfileOptions()
     options.python_tracer_level = 0
-    options.host_tracer_level = 2
-    options.enable_hlo_proto = True
+    options.host_tracer_level = 1
+    options.enable_hlo_proto = False
     options.raise_error_on_start_failure = True
-    with jax.profiler.trace(args.run / "trace", profiler_options=options):
+    with jax.profiler.trace(args.run / "control", profiler_options=options):
         with jax.profiler.TraceAnnotation("instrument_control"):
             copied = jax.device_put(host.copy())
             jax.block_until_ready(control(copied))
-        for lanes in (1, 16):
+    for lanes in (1, 16):
+        with jax.profiler.trace(args.run / f"trace-{lanes}", profiler_options=options):
             rows[lanes]["profiled_ms"] = []
-            for repeat in range(2):
+            for repeat in range(1):
                 with jax.profiler.TraceAnnotation(f"solve_{lanes}_{repeat}"):
                     started = time.perf_counter()
                     result = programs[lanes](*operands[lanes])
@@ -127,7 +128,7 @@ def main():
                         1000 * (time.perf_counter() - started)
                     )
             emit("PROFILED", **rows[lanes])
-    (args.run / "capture.json").write_text(json.dumps(rows, indent=2))
+        (args.run / "capture.json").write_text(json.dumps(rows, indent=2))
     emit("CAPTURE_COMPLETE", run=str(args.run), control_copy_bytes=host.nbytes)
 
 

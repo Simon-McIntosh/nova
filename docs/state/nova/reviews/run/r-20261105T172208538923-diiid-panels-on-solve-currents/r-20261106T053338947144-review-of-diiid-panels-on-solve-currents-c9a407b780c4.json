@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite at 12b6c640 reports 13 passed, 1 skipped, 0 failed (baseline-suite.log, EXIT=0); after_suite at 9a568b9ee reports 18 passed, 0 failed (focused-verified.log, EXIT=0); no failure id is present in either arm, so the difference is empty.",
+  "call_site_count": 5,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:2556",
+    "benchmarks/diiid_forward_gs_match.py:2882",
+    "benchmarks/diiid_forward_gs_match.py:1570",
+    "benchmarks/diiid_forward_gs_match.py:1617",
+    "benchmarks/diiid_forward_gs_match.py:5957"
+  ],
+  "completed_at": "2026-11-06T05:49:10.320Z",
+  "dispatched_at": "2026-11-06T05:37:33Z",
+  "findings": [
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1503",
+      "severity": "non-blocking",
+      "text": "_display_grid builds the display grid locally by arange over the lattice bounds, duplicating the grid construction owned by nova/equilibrium/display_flux.py:309-311, and _display_map only raises if the map's returned grid differs, so the node's done-when clause 'the display grid is taken from nova/equilibrium/display_flux.py' is met by an equality check rather than by reuse; the owner is peer-fenced (coil-edit-panels-on-solve-currents) and the worker records the gap in outside_scope."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "3559",
+      "severity": "non-blocking",
+      "text": "render_frame_comparison draws contours, the limiter and both null sets but no predicted separatrix on any of the four available frames, because nova/equilibrium/display_flux.py:204 _branches overflows at the production branch_capacity=256, and the receipt reports frames_with_separatrix 0 with every symmetric_rms_distance_m and symmetric_sup_distance_m null, so plan section 8's 'both figures draw the predicted separatrix' and its boundary-separation measure are absent; the refusal is instrumented and stated on the figure and in the fragment, with a capacity-1024 positive control admitting 627/465/537 segments."
+    },
+    {
+      "file": "tests/test_frame_operand_artifacts.py",
+      "line": "171",
+      "severity": "non-blocking",
+      "text": "test_persisted_bank_frame_rebuilds_to_one_em12 asserts artifact.is_file() on an operand under the GPFS evidence root named only by the committed receipt, so the focused gate turns red whenever that external store is absent or pruned, for a reason unrelated to any code change."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read all 15 commits from 12b6c640 to c9a407b78; the dead frame_figure is replaced by render_frame_comparison, the conductor matrix is published through content_store, operands are named by their content digest, checkpoint restoration is added, the terminal receipt gains a rendering block, and the two figures are refreshed.",
+    "done_when": "the measure's mechanism is asserted \u2014 tests/test_frame_operand_artifacts.py:330 pins the solved-node check, :238 pins the promoted-mask and compensation handoff, :158 rebuilds a committed frame \u2014 and its figure clause is recorded in render-final.log and artifact-verification.log (3 PNGs, TEXT_CHECK=passed, digests matching the landed files), but the receipt's frames_with_separatrix is 0 and every fine-map separation is null, and the display grid is verified against nova/equilibrium/display_flux.py rather than taken from it.",
+    "goal": "the goal is to redraw the DIII-D poloidal comparison on the display map of the solve's own currents; benchmarks/diiid_forward_gs_match.py:1909 now passes promoted=equilibrium.promoted_mask and a constraint-derived compensation callable into build_display_flux_map, and :3559 render_frame_comparison draws all five panels, four from persisted terminal operands.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/manifest.md; status complete with 15 commits, a literal focused pytest command that focused-verified.log records as 18 passed EXIT=0, baseline_suite 13 passed/1 skipped EXIT=0 at 12b6c640 and after_suite at 9a568b9ee, and a negative_control_log whose last line is EXIT=1.",
+    "write_paths": "read the six grants in the reviewed run's manifest; git diff --stat 12b6c640..c9a407b78 changes the benchmark, two test files, the dated figure directory and the landing fragment, every one inside the grants, with no plan file and no peer node's path touched."
+  },
+  "justifications": {
+    "durability": "tests/test_frame_operand_artifacts.py:330 fails when the compensation argument is dropped at the producer call site, as negative-control-numeric.log shows (7.5 Wb against the 1e-12 Wb bound), and :235 raises when a persisted digest is corrupted, though :171 hard-fails on external GPFS state.",
+    "evidence": "the manifest's tests line is the literal command in focused-verified.log (18 passed, EXIT=0) and negative-control-numeric.log reddens test_frame_operand_artifacts.py:330 at 7.5 Wb with EXIT=1, though the after arm ran at 9a568b9ee rather than the reviewed head and the five-frame values rest on artifact-verification.log rather than the gate.",
+    "fit": "render_frame_comparison at benchmarks/diiid_forward_gs_match.py:3559 uses the nova.media poloidal_axes, draw_flux_contours, draw_wall and draw_nulls vocabulary and adds no plan, issue or version label to any name.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1909 hands build_display_flux_map the terminal promoted mask and the constraint compensation, so the panels draw the solve's own currents, but :3559 draws no predicted separatrix on any frame because the assembler refuses at capacity 256.",
+    "reuse": "the added _publish_conductor_response (benchmarks/diiid_forward_gs_match.py:1626) publishes through nova/database/content_store.py:669 rather than a second store, and the search over nova/media for a figure-save or text-check owner found none, so _save_frame_figure forks nothing.",
+    "scope_discipline": "every path in git diff --stat 12b6c640..c9a407b78 lies inside the declared grants, and the only shared-code gap (nova/equilibrium/display_flux.py capacity) is recorded under outside_scope rather than edited."
+  },
+  "node": "review-of-diiid-panels-on-solve-currents-c9a407b780c4",
+  "node:reviewed": "diiid-panels-on-solve-currents",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to redraw the DIII-D poloidal comparison on the display map of the solve's own currents; benchmarks/diiid_forward_gs_match.py:1909 now passes promoted=equilibrium.promoted_mask and a constraint-derived compensation callable into build_display_flux_map, and :3559 render_frame_comparison draws all five panels, four from persisted terminal operands.\nVERDICT done_when: the measure's mechanism is asserted \u2014 tests/test_frame_operand_artifacts.py:330 pins the solved-node check, :238 pins the promoted-mask and compensation handoff, :158 rebuilds a committed frame \u2014 and its figure clause is recorded in render-final.log and artifact-verification.log (3 PNGs, TEXT_CHECK=passed, digests matching the landed files), but the receipt's frames_with_separatrix is 0 and every fine-map separation is null, and the display grid is verified against nova/equilibrium/display_flux.py rather than taken from it.\nVERDICT write_paths: read the six grants in the reviewed run's manifest; git diff --stat 12b6c640..c9a407b78 changes the benchmark, two test files, the dated figure directory and the landing fragment, every one inside the grants, with no plan file and no peer node's path touched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/manifest.md; status complete with 15 commits, a literal focused pytest command that focused-verified.log records as 18 passed EXIT=0, baseline_suite 13 passed/1 skipped EXIT=0 at 12b6c640 and after_suite at 9a568b9ee, and a negative_control_log whose last line is EXIT=1.\nVERDICT diff: read all 15 commits from 12b6c640 to c9a407b78; the dead frame_figure is replaced by render_frame_comparison, the conductor matrix is published through content_store, operands are named by their content digest, checkpoint restoration is added, the terminal receipt gains a rendering block, and the two figures are refreshed.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:2556, benchmarks/diiid_forward_gs_match.py:2882, benchmarks/diiid_forward_gs_match.py:1570, benchmarks/diiid_forward_gs_match.py:1617, benchmarks/diiid_forward_gs_match.py:5957\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:1909 hands build_display_flux_map the terminal promoted mask and the constraint compensation, so the panels draw the solve's own currents, but :3559 draws no predicted separatrix on any frame because the assembler refuses at capacity 256.\nSCORE evidence: 16\nJUSTIFICATION evidence: the manifest's tests line is the literal command in focused-verified.log (18 passed, EXIT=0) and negative-control-numeric.log reddens test_frame_operand_artifacts.py:330 at 7.5 Wb with EXIT=1, though the after arm ran at 9a568b9ee rather than the reviewed head and the five-frame values rest on artifact-verification.log rather than the gate.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --stat 12b6c640..c9a407b78 lies inside the declared grants, and the only shared-code gap (nova/equilibrium/display_flux.py capacity) is recorded under outside_scope rather than edited.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_frame_operand_artifacts.py:330 fails when the compensation argument is dropped at the producer call site, as negative-control-numeric.log shows (7.5 Wb against the 1e-12 Wb bound), and :235 raises when a persisted digest is corrupted, though :171 hard-fails on external GPFS state.\nSCORE fit: 17\nJUSTIFICATION fit: render_frame_comparison at benchmarks/diiid_forward_gs_match.py:3559 uses the nova.media poloidal_axes, draw_flux_contours, draw_wall and draw_nulls vocabulary and adds no plan, issue or version label to any name.\nSCORE reuse: 17\nJUSTIFICATION reuse: the added _publish_conductor_response (benchmarks/diiid_forward_gs_match.py:1626) publishes through nova/database/content_store.py:669 rather than a second store, and the search over nova/media for a figure-save or text-check owner found none, so _save_frame_figure forks nothing.\nFINDING benchmarks/diiid_forward_gs_match.py:1503 non-blocking: _display_grid builds the display grid locally by arange over the lattice bounds, duplicating the grid construction owned by nova/equilibrium/display_flux.py:309-311, and _display_map only raises if the map's returned grid differs, so the node's done-when clause 'the display grid is taken from nova/equilibrium/display_flux.py' is met by an equality check rather than by reuse; the owner is peer-fenced (coil-edit-panels-on-solve-currents) and the worker records the gap in outside_scope.\nFINDING benchmarks/diiid_forward_gs_match.py:3559 non-blocking: render_frame_comparison draws contours, the limiter and both null sets but no predicted separatrix on any of the four available frames, because nova/equilibrium/display_flux.py:204 _branches overflows at the production branch_capacity=256, and the receipt reports frames_with_separatrix 0 with every symmetric_rms_distance_m and symmetric_sup_distance_m null, so plan section 8's 'both figures draw the predicted separatrix' and its boundary-separation measure are absent; the refusal is instrumented and stated on the figure and in the fragment, with a capacity-1024 positive control admitting 627/465/537 segments.\nFINDING tests/test_frame_operand_artifacts.py:171 non-blocking: test_persisted_bank_frame_rebuilds_to_one_em12 asserts artifact.is_file() on an operand under the GPFS evidence root named only by the committed receipt, so the focused gate turns red whenever that external store is absent or pruned, for a reason unrelated to any code change.",
+  "review_run_id": "r-20261106T053338947144-review-of-diiid-panels-on-solve-currents-c9a407b780c4",
+  "reviewed_base_sha": "12b6c64063228c14a78e6fd0590d0b98debe6a98",
+  "reviewed_head_sha": "c9a407b780c4c40acf07de09d70e41738287911e",
+  "reviewed_run_id": "r-20261105T172208538923-diiid-panels-on-solve-currents",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T05:47:28+00:00",
+  "total": 101
+}

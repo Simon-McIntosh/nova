@@ -1,0 +1,127 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no suite; no test was executed and no failure count was measured",
+  "blocking_finding_count": 1,
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T05:51:26Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
+  ],
+  "findings": [
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8 (redraw the DIII-D panels with the repository's 14 pt tick/legend and 16 pt axis-label sizes before the bank figures are treated as evidence)",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "f8967d85692",
+      "line": 3640,
+      "severity": "blocking",
+      "summary": "The per-panel captions of frame_flux_comparison.png are drawn at fontsize=8, which is 10-12 px of ink on the 1400 px canvas and about 6 px in the ~900 px column the figure is read in. Those captions are the only place the figure states converged=False for all five frames and 'no closed branch; N candidate(s)', i.e. that no Nova separatrix exists in any panel. At the published column width the figure's central caveat cannot be read, so a reader sees a comparison of five fields and no statement that none of them converged."
+    },
+    {
+      "disposition": "index-worthy: emit the legend entry only when a closed boundary was drawn, as the caption already reports the refusal",
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+      "id": "f0f5eece419",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend advertises 'Nova separatrix' as a red line, but no red curve is drawn in any of the five panels: red ink measures 179 px in each of panels 1, 2, 4 and 5 and 0 px in panel 3, which is exactly the two red markers (axis triangle and X-point cross) and no curve. A reader is told a series exists that the picture does not contain."
+    },
+    {
+      "disposition": "exempted: the extra-GPFS vacuum contours are the terminal current map the node exists to show; the comparison inside the boundary remains readable, so nothing is redrawn in this review",
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+      "id": "f0f5eece419",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The Nova terminal-current psi contours are drawn over the whole display grid, so dense contour nests fill the vacuum region and the panel corners (3.2-4.3 thousand blue px per panel) and compete with the grey EFIT contours that carry the comparison. Clipping the Nova contours to the limiter would let the two fields be compared."
+    },
+    {
+      "disposition": "exempted: fill (open vs filled) is a second cue, so the two X-points remain separable; no colour change is made in a read-only review",
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+      "id": "f0f5eece419",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Nova axis, Nova X-point and Nova separatrix all resolve to the same colour (#cc0000: ink.axis_color, ink.xpoint_color and ink.separatrix_color are one value) and the two X-point markers share the 'X' glyph, so a reader must decode fill and shape together to tell the EFIT X-point from the Nova one."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8 (same redraw as the frame comparison captions)",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "f35f17780c5",
+      "line": 3867,
+      "severity": "non-blocking",
+      "summary": "The per-panel captions of displacement_decomposition.png are also drawn at fontsize=8 (8-12 px of ink on the 1400 px canvas, about 6 px at column width). They carry the shot, frame, classification and the axis dR/dZ numbers, which are the quantitative evidence for the panels above them; the panels themselves remain readable, so this does not hold the node."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8 (a table, or markers without connecting lines)",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "fc9d81b70a9",
+      "line": 3765,
+      "severity": "non-blocking",
+      "summary": "Five of the six panels of cohort_match_summary.png plot one scalar per frame and join the points with a line, across a categorical axis whose order (179, 44, 144, 146, 137) is arbitrary. Every segment implies a progression the data does not have, and the same five scalars are naturally a frame-by-metric table."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8 (annotate the missing frame as the companion figures do)",
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "id": "f18fff5311d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Frame 144 is a silent gap in all five metric panels: no marker, no line, and no note. Measured on the rendered PNG, panel 1's plotting band holds no blue ink between x=200 and x=319, and the tick labelled 144 carries no value. The two companion figures label that frame 'unavailable: no qualified axis', so a reader of this figure alone cannot tell an unavailable frame from a zero or an omitted one."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8 (label the threshold in the panel or the caption)",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "f3585e295c1",
+      "line": 3770,
+      "severity": "non-blocking",
+      "summary": "The grey dashed line at R2 = 1.0 in the first cohort panel is drawn with no label, legend entry or annotation, so nothing in the picture says it is the registered median interior-R2 bar the run is judged against."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8 (same redraw)",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "f15a0ee8a6f",
+      "line": 3766,
+      "severity": "non-blocking",
+      "summary": "cohort_match_summary.png draws its titles at 11 pt, axis labels at 10 pt and tick labels at 9 pt, against the repository's 16 pt axis-label and 14 pt tick-label sizes; at the ~900 px column width the frame ticks render about 8 px. Readable at native size, so this does not hold the node."
+    }
+  ],
+  "method": "each figure judged only from its rendered PNG at 1400x720 px, 100 dpi; ink extents measured on the PNG pixels to check what the render actually shows before a verdict was recorded",
+  "node": "review-of-diiid-panels-on-solve-currents-c9a407b780c4-figure",
+  "non_blocking_finding_count": 8,
+  "project": "nova",
+  "review_run_id": "r-20261106T054735985323-review-of-diiid-panels-on-solve-currents-c9a407b780c4-figure",
+  "reviewed_base_sha": "12b6c64063228c14a78e6fd0590d0b98debe6a98",
+  "reviewed_head_sha": "c9a407b780c4c40acf07de09d70e41738287911e",
+  "reviewed_run_id": "r-20261105T172208538923-diiid-panels-on-solve-currents",
+  "reviewer": "review-of-diiid-panels-on-solve-currents-c9a407b780c4-figure",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png": {
+      "contrast": "passes: near-black text on white",
+      "data_ink": "passes: markers, lines and the contour overlay carry the weight",
+      "decoration": "passes: despined, no gridlines or fills; the single grey dashed line is a threshold, not decoration",
+      "label_collision": "passes: nothing clipped or overlapping; the 'Nova separatrices: assembly refused' note sits in clear space below the overlay",
+      "legibility": "passes at native size: titles, axis labels and all five frame ticks (179, 44, 144, 146, 137) are readable; sizes are below the mandate (non-blocking finding recorded)",
+      "table_form": "fails: five of six panels plot one scalar per frame joined by a line, which is naturally a frame-by-metric table"
+    },
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png": {
+      "contrast": "passes: black and coloured markers and text on white",
+      "data_ink": "passes: boundaries, walls, markers and displacement lines only",
+      "decoration": "passes: axis off, no gridlines or fills; the blank margins come from the R-Z limits shared across panels",
+      "label_collision": "passes: no text is clipped or overlapping; markers in frames 44 and 137 sit within about 30 px but stay distinguishable, and frame 146's landmarks separate widely",
+      "legibility": "passes: five poloidal panels read at native size; the per-panel captions at 8 pt are half the mandated size (recorded as a non-blocking finding)",
+      "table_form": "passes: the figure is spatial, showing where the landmarks sit"
+    },
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png": {
+      "contrast": "passes: black legend and caption text on white, light grey EFIT contours still separate from the blue Nova contours",
+      "data_ink": "passes: contours, boundaries and markers carry the weight, with no gradient or decorative fill",
+      "decoration": "passes: axis off, no gridlines, no background fill",
+      "label_collision": "passes: no text is clipped or overlapping; the on-save text guard passed and the captions sit in clear space below each panel",
+      "legibility": "fails: the 8 pt per-panel captions render 10-12 px of ink on the 1400 px canvas and about 6 px at column width, and they are the only statement that no frame converged and no closed boundary was found",
+      "table_form": "passes: the content is genuinely spatial (poloidal fields in R-Z), not tabular"
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T06:02:55.297396+00:00",
+  "total": null
+}

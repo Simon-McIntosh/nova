@@ -26,7 +26,7 @@ def main():
         for arm in ("base", "head")
         for process in range(3)
     }
-    rows, loop_rows, precision = [], [], []
+    rows, loop_rows, precision, trace_rows = [], [], [], []
     metrics = {}
     for lanes in (1, 16):
         for arm in ("base", "head"):
@@ -42,9 +42,20 @@ def main():
                     attribution = load(directory / "attribution.json")
                     assert attribution["control"]["h2d_bytes"] == 2097152
                     assert attribution["control"]["kernels"] > 0
-                    jacobian = next(
+                    solve_trace = next(
                         x for x in attribution["solves"] if x["lanes"] == lanes
-                    )["groups"]["step_jacobian"]
+                    )
+                    jacobian = solve_trace["groups"]["step_jacobian"]
+                    trace_rows.append(
+                        [
+                            arm,
+                            process,
+                            lanes,
+                            jacobian["launches"],
+                            solve_trace["groups"]["step_residual"]["launches"],
+                            solve_trace["kernel_launches"],
+                        ]
+                    )
                     device_ms = jacobian["device_ms"] / calls
                     launches = jacobian["launches"] / calls
                     log = (device / f"capture-{arm}-{process}.log").read_text()
@@ -152,8 +163,9 @@ def main():
     )
     text += (
         "<p>The default conic tangent tile is 32 cells, twice the base "
-        "width. The derivative formula, ring grouping, channel vmap and "
-        "scalar booking are unchanged. The explicit quadrature width "
+        "width. Tangent ring integration uses groups of two; scalar "
+        "booking retains groups of four. The derivative formula and "
+        "channel vmap are unchanged. The explicit quadrature width "
         "remains available to bound memory. No product profiling "
         "annotations were added.</p>\n"
     )
@@ -218,6 +230,35 @@ def main():
             )
     text += table(
         ["Slices", "Measure", "Base mean", "Head mean", "Reduction"], comparison
+    )
+    text += (
+        "<p>The preceding wider-tile-only candidate reduced launch count "
+        "but slowed sixteen-slice ring integration. Its first measured "
+        "pair took 26.533513 versus 28.825903 Jacobian ms/call and "
+        "73.128484 versus 74.265157 ms/read. This motivated groups of two "
+        "rings within the wider tangent tile, retaining the base number "
+        "of cell-ring pairs per integration group. The preceding complete "
+        "receipts remain in the parent run's device and suites directories.</p>\n"
+    )
+    text += (
+        "<h3>Trace-wide accounting</h3><p>Compiler deduplication can bind "
+        "a shared conic kernel to the residual source. At one slice the "
+        "wider-tile-only trace attributed 1,344 extra launches per solve "
+        "to step_residual, so the exclusive Jacobian reduction alone "
+        "overstates the launch savings. Whole-trace counts below retain "
+        "that cost. Compare totals only beside the read/update counts "
+        "above; the trajectory controls how many calls run.</p>\n"
+    )
+    text += table(
+        [
+            "Arm",
+            "Process",
+            "Slices",
+            "Jacobian launches/solve",
+            "Residual launches/solve",
+            "All launches/solve",
+        ],
+        trace_rows,
     )
     text += (
         "<h3>Exclusive loop attribution</h3><p>Compiler source frames "

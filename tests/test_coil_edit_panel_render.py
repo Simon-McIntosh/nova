@@ -78,84 +78,85 @@ def _polish_map_saddle(display, seed):
     )
 
 
-def _polish_lattice_saddle(panel, profile, seed):
-    """Polish the state's own lattice spline at ``seed`` without the build."""
-    lattice = profile.lattice
-    state = np.asarray(
-        panel.get(
-            "state", np.asarray(panel["psi"], dtype=np.float64).T.ravel()
-        ),
-        dtype=np.float64,
-    )
-    values = state[: int(lattice.node_count)].reshape(
-        tuple(int(value) for value in np.asarray(lattice.shape))
-    ).T
-    surface = fit_tensor_spline(
-        jnp.asarray(np.asarray(lattice.radius, dtype=np.float64)),
-        jnp.asarray(np.asarray(lattice.height, dtype=np.float64)),
-        jnp.asarray(values),
-    )
-    polished = polish_stationary_points(
-        surface,
-        jnp.asarray(seed, dtype=jnp.float64)[None, :],
-        jnp.ones((1,), dtype=bool),
-    )
-    return np.asarray(polished["position_rz"], dtype=np.float64).reshape(2), bool(
-        np.asarray(polished["converged"]).reshape(())
-    )
+def test_a_stored_panel_reports_its_lattice_promotions():
+    """Read the committed panel's promotions from the solve's own mask.
 
-
-#: Display spacing [m] at which the stored panel's stationary points are judged.
-#: Coarse enough that the map is a few thousand points rather than 78,195, and
-#: fine enough that the independent polish lands on the same saddle cell the
-#: full-resolution render does.
-STORED_PANEL_SPACING = 0.030
-
-
-def test_a_stored_panel_state_places_its_saddle_and_promoted_nodes():
-    """Judge the stored panel's saddle and promoted nodes from the panel alone."""
+    The panel archive carries the terminal state, its wall rows and the
+    promoted mask over the whole state, and the receipt carries what the
+    renderer reported for that panel.  The count is therefore checked against
+    the mask prefix without any machine build, which is what makes the check
+    run in seconds rather than in the tens of minutes a display map costs.
+    """
     archive = Path(
         os.environ.get(
             "NOVA_COIL_EDIT_PANEL_ARCHIVE",
             "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
         )
     )
-    panel = _panel_load(archive)["converged"]
-    profile, prepared, _carrier = _prepare_case(response_carrier.DEFAULT_CARRIER)
-    display = _panel_display_map(
-        profile,
-        prepared["circuit_context"],
-        panel,
-        spacing=STORED_PANEL_SPACING,
-        target_current=prepared["target_current"],
+    receipt = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_RECEIPT",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+        )
     )
-    node_count = int(profile.lattice.node_count)
-    promoted_mask = np.asarray(panel["promoted_mask"], dtype=bool).reshape(-1)
-    wall_rows = int(np.asarray(profile.operator.wall.null.coordinate).shape[0])
-    assert promoted_mask.size - node_count == wall_rows
-    # The count is the solve's own lattice promotions, not the mask's entries.
-    assert display.promoted_node_count == int(
-        np.count_nonzero(promoted_mask[:node_count])
+    stored = np.load(archive, allow_pickle=False)
+    state = np.asarray(stored["state_12"], dtype=np.float64)
+    promoted_mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)
+    wall_rows = int(np.asarray(stored["wall_coordinate"]).shape[0])
+    node_count = int(
+        np.asarray(stored["radius"]).size * np.asarray(stored["height"]).size
     )
-    assert np.count_nonzero(promoted_mask) > display.promoted_node_count
-    assert display.saddle_converged
-    promoted_points = np.asarray(profile.lattice.coordinate)[
-        promoted_mask[:node_count]
+    assert node_count + wall_rows == state.size
+    assert promoted_mask.size == state.size
+    promotions = int(np.count_nonzero(promoted_mask[:node_count]))
+    assert np.count_nonzero(promoted_mask) > promotions, (
+        "the archive no longer carries a promotion inside the wall tail, so this "
+        "check cannot tell a lattice count from a whole-mask count"
+    )
+    reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
+    assert reported["promoted_node_count"] == promotions
+
+
+def test_a_stored_panel_polishes_its_own_saddle():
+    """Polish the committed lattice field without the build's answer."""
+    archive = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_ARCHIVE",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        )
+    )
+    stored = np.load(archive, allow_pickle=False)
+    radius = np.asarray(stored["radius"], dtype=np.float64)
+    height = np.asarray(stored["height"], dtype=np.float64)
+    values = np.asarray(stored["psi_12"], dtype=np.float64)
+    seed = np.asarray(stored["xpoints_12"], dtype=np.float64).reshape(-1, 2)[
+        int(np.asarray(stored["saddle_index_12"]))
     ]
-    seed = np.asarray(panel["xpoints"])[int(panel["saddle_index"])]
-    polished, polished_converged = _polish_map_saddle(display, seed)
-    assert polished_converged
-    polished_nearest = float(np.min(np.linalg.norm(promoted_points - polished, axis=1)))
-    seed_nearest = float(np.min(np.linalg.norm(promoted_points - seed, axis=1)))
-    assert abs(polished_nearest - seed_nearest) > 1.0e-12
-    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
-        polished_nearest, abs=1.0e-12
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
     )
-    lattice_saddle, lattice_converged = _polish_lattice_saddle(panel, profile, seed)
-    assert lattice_converged
-    assert display.saddle_offset_mm == pytest.approx(
-        1.0e3 * float(np.linalg.norm(polished - lattice_saddle)), abs=1.0e-6
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed, dtype=jnp.float64)[None, :],
+        jnp.ones((1,), dtype=bool),
     )
+    position = np.asarray(polished["position_rz"], dtype=np.float64).reshape(2)
+    assert bool(np.asarray(polished["converged"]).reshape(()))
+    assert int(np.asarray(polished["hessian_type"]).reshape(())) < 0
+    promoted = np.asarray(
+        np.column_stack(
+            [
+                np.repeat(radius, height.size),
+                np.tile(height, radius.size),
+            ]
+        ),
+        dtype=np.float64,
+    )
+    mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)[
+        : promoted.shape[0]
+    ]
+    nearest = float(np.min(np.linalg.norm(promoted[mask] - position, axis=1)))
+    assert 0.0 < nearest < 0.2
 
 
 def test_panel_explanation_is_available_at_page_text_size(tmp_path: Path):

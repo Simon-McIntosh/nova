@@ -24,6 +24,7 @@ import pytest
 from dataclasses import replace
 
 from pathlib import Path
+import matplotlib.pyplot as plt
 from PIL import Image
 
 from benchmarks.coil_edit_latency import (
@@ -36,6 +37,7 @@ from benchmarks.coil_edit_latency import (
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.display_flux import DisplayCoupling
+from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import PrescribedCurrentField
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
@@ -43,6 +45,7 @@ from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 from nova.linalg.interpolant import Linear
+from nova.linalg.tensor_spline import fit_tensor_spline
 from benchmarks import mast_response_carrier_warm as response_carrier
 
 configure_dtypes()
@@ -50,6 +53,110 @@ assert jax.config.jax_enable_x64 is True, (
     "the map is compared against the operator's own raster, so the test process "
     "must resolve the same working precision the operator was built in"
 )
+
+
+def _polish_map_saddle(display, seed):
+    """Polish the map's own field at ``seed`` without the build's answer.
+
+    The builder reports its polished saddle coordinate, so a distance measured
+    to that value agrees with whatever point the build chose.  This re-derives
+    the stationary point from the published flux alone, which is what pins the
+    caption's "polished X-point" claim.
+    """
+    surface = fit_tensor_spline(
+        jnp.asarray(display.radius),
+        jnp.asarray(display.height),
+        jnp.asarray(display.flux.T),
+    )
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed, dtype=jnp.float64)[None, :],
+        jnp.ones((1,), dtype=bool),
+    )
+    return np.asarray(polished["position_rz"], dtype=np.float64).reshape(2), bool(
+        np.asarray(polished["converged"]).reshape(())
+    )
+
+
+def test_a_stored_panel_reports_its_lattice_promotions():
+    """Read the committed panel's promotions from the solve's own mask.
+
+    The panel archive carries the terminal state, its wall rows and the
+    promoted mask over the whole state, and the receipt carries what the
+    renderer reported for that panel.  The count is therefore checked against
+    the mask prefix without any machine build, which is what makes the check
+    run in seconds rather than in the tens of minutes a display map costs.
+    """
+    archive = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_ARCHIVE",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        )
+    )
+    receipt = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_RECEIPT",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+        )
+    )
+    stored = np.load(archive, allow_pickle=False)
+    state = np.asarray(stored["state_12"], dtype=np.float64)
+    promoted_mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)
+    wall_rows = int(np.asarray(stored["wall_coordinate"]).shape[0])
+    node_count = int(
+        np.asarray(stored["radius"]).size * np.asarray(stored["height"]).size
+    )
+    assert node_count + wall_rows == state.size
+    assert promoted_mask.size == state.size
+    promotions = int(np.count_nonzero(promoted_mask[:node_count]))
+    assert np.count_nonzero(promoted_mask) > promotions, (
+        "the archive no longer carries a promotion inside the wall tail, so this "
+        "check cannot tell a lattice count from a whole-mask count"
+    )
+    reported = json.loads(receipt.read_text())["display_map"]["panels"]["converged"]
+    assert reported["promoted_node_count"] == promotions
+
+
+def test_a_stored_panel_polishes_its_own_saddle():
+    """Polish the committed lattice field without the build's answer."""
+    archive = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_ARCHIVE",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        )
+    )
+    stored = np.load(archive, allow_pickle=False)
+    radius = np.asarray(stored["radius"], dtype=np.float64)
+    height = np.asarray(stored["height"], dtype=np.float64)
+    values = np.asarray(stored["psi_12"], dtype=np.float64)
+    seed = np.asarray(stored["xpoints_12"], dtype=np.float64).reshape(-1, 2)[
+        int(np.asarray(stored["saddle_index_12"]))
+    ]
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
+    )
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed, dtype=jnp.float64)[None, :],
+        jnp.ones((1,), dtype=bool),
+    )
+    position = np.asarray(polished["position_rz"], dtype=np.float64).reshape(2)
+    assert bool(np.asarray(polished["converged"]).reshape(()))
+    assert int(np.asarray(polished["hessian_type"]).reshape(())) < 0
+    promoted = np.asarray(
+        np.column_stack(
+            [
+                np.repeat(radius, height.size),
+                np.tile(height, radius.size),
+            ]
+        ),
+        dtype=np.float64,
+    )
+    mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)[
+        : promoted.shape[0]
+    ]
+    nearest = float(np.min(np.linalg.norm(promoted[mask] - position, axis=1)))
+    assert 0.0 < nearest < 0.2
 
 
 def test_panel_explanation_is_available_at_page_text_size(tmp_path: Path):
@@ -238,6 +345,47 @@ def _coupling(lattice: FluxLattice) -> DisplayCoupling:
     return DisplayCoupling(plasma=plasma, external=external)
 
 
+def test_panel_reports_the_save_time_label_counts(tmp_path: Path, monkeypatch):
+    """The receipt's label counts are the save-time check's own measurement.
+
+    A count written from a constant could never contradict a clipped or
+    overlapping label.  This replaces the check with a stated measurement and
+    requires the renderer to publish exactly that, so the two cannot diverge.
+    """
+    import benchmarks.coil_edit_latency as renderer
+
+    calls: list[Any] = []
+
+    def stated(figure: Any) -> dict[str, int]:
+        calls.append(figure)
+        return {"clipped_labels": 7, "overlapping_labels": 3}
+
+    monkeypatch.setattr(renderer, "_label_defects", stated)
+    panel = _render_panel(
+        Path(
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+        ),
+        tmp_path / "panel.png",
+    )
+    assert panel["visual_inspection"] == {"clipped_labels": 7, "overlapping_labels": 3}
+    assert len(calls) == 1
+
+
+def test_the_label_check_measures_a_broken_figure():
+    """A label cut off the canvas and a pair written over each other are seen."""
+    import benchmarks.coil_edit_latency as renderer
+
+    figure, axis = plt.subplots(figsize=(14, 7.2), dpi=100)
+    axis.set_axis_off()
+    axis.text(0.5, 0.5, "one", transform=axis.transAxes, fontsize=40)
+    axis.text(0.5, 0.5, "two", transform=axis.transAxes, fontsize=40)
+    axis.text(1.4, 0.5, "off canvas", transform=axis.transAxes, fontsize=40)
+    counts = renderer._label_defects(figure)
+    plt.close(figure)
+    assert counts["overlapping_labels"] >= 1
+    assert counts["clipped_labels"] >= 1
+
+
 def test_the_panel_map_reproduces_the_operator_raster_image():
     """A state's panel map equals the operator's own raster at the nodes."""
     profile, lattice = _profile()
@@ -307,17 +455,19 @@ def test_committed_converged_panel_uses_its_terminal_currents():
         target_current=prepared["target_current"],
     )
     assert display.max_solved_node_mismatch_wb <= 10 * panel["residual"]
+    node_count = int(profile.lattice.node_count)
+    promoted_mask = np.asarray(panel["promoted_mask"], dtype=bool).reshape(-1)
+    wall_rows = int(np.asarray(profile.operator.wall.null.coordinate).shape[0])
+    assert promoted_mask.size - node_count == wall_rows
     assert display.promoted_node_count == int(
-        np.count_nonzero(panel["promoted_mask"][: profile.lattice.node_count])
+        np.count_nonzero(promoted_mask[:node_count])
     )
     assert display.saddle_converged
-    promoted_points = np.asarray(profile.lattice.coordinate)[
-        panel["promoted_mask"][: profile.lattice.node_count]
-    ]
-    polished_nearest = float(
-        np.min(np.linalg.norm(promoted_points - display.saddle_rz, axis=1))
-    )
+    promoted_points = np.asarray(profile.lattice.coordinate)[promoted_mask[:node_count]]
     seed = np.asarray(panel["xpoints"])[int(panel["saddle_index"])]
+    polished, polished_converged = _polish_map_saddle(display, seed)
+    assert polished_converged
+    polished_nearest = float(np.min(np.linalg.norm(promoted_points - polished, axis=1)))
     seed_nearest = float(np.min(np.linalg.norm(promoted_points - seed, axis=1)))
     assert abs(polished_nearest - seed_nearest) > 1.0e-12
     assert display.nearest_promoted_to_xpoint_m == pytest.approx(

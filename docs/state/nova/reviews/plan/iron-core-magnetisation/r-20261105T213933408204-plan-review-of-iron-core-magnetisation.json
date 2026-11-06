@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-05T21:50:27.547Z",
+  "dispatched_at": "2026-11-05T21:42:48Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:311",
+      "id": "reuse_search-1",
+      "reason": "citing the owner turns \u00a78 into one call plus a limb mesh, and removes its criterion (2) from the work entirely.",
+      "text": "\u00a78 says the limb field is evaluated \"with nova's 3D Biot-Savart route\" and requires the toroidal average to match the axisymmetric \u00a76 result to 2 %, but nova already owns both: `nova/biot/toroidalaverage.py:toroidal_points` (:23), `frame_magnetic_field` (:43, a `Target` plus `Solve` over `Bx`/`By`/`Bz` through `nova/biot/space.py:Segment`), and `average_toroidal_field` (:61) returning `ToroidalAverage(radial, toroidal, vertical, residual_rms)` (:14). The plan cites none of them, so \u00a78's route and its own acceptance comparison would both be built again beside the existing machinery.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:230",
+      "id": "deep_module-1",
+      "reason": "naming the one module that hides the record shape, the mesh and the solve is what makes the \u00a74 node reviewable; without it the section's depth is decided by the implementing worker rather than the design.",
+      "text": "\u00a74 sets out four substantially different behaviours \u2014 read each `iron_core` segment's outline, material and B-H table; mesh without slivers; fit a monotone law with `dB/dH > 0` holding its end values; Newton-solve `F(M) = M \u2212 c(|B|)B` \u2014 in one six-hour section that names no module, so the surface will distribute into whichever of `nova/imas`, `nova/biot` or `nova/equilibrium` is nearest at the time.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:278",
+      "id": "deep_module-2",
+      "reason": "\u00a76 is the section most likely to leak into every read path in the package, and a named seam converts it from an instruction to touch everything into one addition.",
+      "text": "\u00a76 specifies the integration as \"wherever a CoilSet solves grid or point targets\", which is an unbounded edit surface across every solve path rather than one entry point; \u00a77 and \u00a78 likewise name no file.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:185",
+      "id": "duplicate_owner-1",
+      "reason": "(a) alone can delete \u00a72 and \u00a73 \u2014 six plus five of the plan's forty-three hours \u2014 if the measurement goes the way the existing exact kernel suggests, and the other four each convert a new mechanism into an extension of one that already exists.",
+      "text": "five duplicate owners, listed as one census: (a) \u00a72's thin conic sheet kernel in a new `nova/biot/sheet.py` beside `nova/biot/polygonanalytic.py`, which already implements the *exact* Urankar Part V closed form of a polygon-section ring for flux and for both field components, with corners, flux moments and the same arsinh remainders \u2014 a magnetised cell's edge is an arbitrarily thin polygon, and \u00a72's own done-when (3) is precisely the \u03b5\u21920 measurement that would settle whether Part V already delivers the sheet, yet \u00a72 commits six hours to a parallel kernel before that measurement; (b) \u00a72's citation of the elliptic route is to `nova/biot/polygonanalytic.py` in the plan's text while the owners are `nova/biot/completeelliptic.py:complete_kind` (:247), `nova/biot/completeelliptic.py:complete_pole` (:286) and the third-kind constant cache at `nova/biot/constants.py:Constants.np2_pole` (:438) / `Constants.Pi` (:514, `complete_pole` for characteristics 1 to 3), with the partial-range \u03a0 at `nova/biot/incompleteelliptic.py:incomplete_pole` (:266) \u2014 eq 22a's K, E and \u03a0 all exist and are cached, and the plan names none of them; (c) \u00a74's Newton on `B = B_ext + G M` with a dense Jacobian and backtracking grades is the shape of `nova/equilibrium/reduced_newton.py` (module docstring, `external + P @ j` amplitudes, `jax.jacfwd` dense Jacobian, production backtracking grades, `ReducedNewtonStep` :299), which the plan does not cite; (d) \u00a74's `iron_core` read has no owner, and the tree already carries two forked readers of it \u2014 `scripts/prototypes/iron_magnetisation/west.py:31` and `scripts/west_stray_field/solve.py:57` \u2014 while `nova/imas/machine.py` owns machine-description reading through `MachineGeometryReader` (:271) / `ImasGeometryReader` (:294) / `StaticMachineDescription` (:553) and knows nothing of `iron_core`, so \u00a74 would add a third copy rather than extend the owner; (e) \u00a78's toroidal average and 3D field route, above.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:182",
+      "id": "interface_budget-1",
+      "reason": "if \u00a72's kernel is superseded by extending the Part V owner, two of these public additions vanish; the section must either name that retirement or say why the retirement cannot be made, and this plan proposes more net-new public surface than any other part of its design.",
+      "text": "with all four supplied counts at zero, \u00a72 adds the public module `nova/biot/sheet.py`, \u00a73 adds a fourth tile fill to `nova/biot/tiledassembly.py` (beside `_fill_tile` :381, `_fill_moment_tile` :410, `_fill_arc_tile` :436), \u00a74 adds a material/B-H law and a mesher, and \u00a76 adds an iron source to `nova/frame/coilset.py`-level composition \u2014 and no section states what it retires, merges or reuses in place of adding.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cc22ac1a0bf46d9984ff319c7227055b7eae1259",
+  "plan_fingerprint": "6db5739531610ec75f7fbfd220fdaed1b314cd6fc9f31b0b7fd456404eed72f0",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261105T213933408204-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "d3099489ed61fa6a521b2b54a94b95bb9c4ec5a9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a72's new module is genuinely deep, but \u00a74 bundles four distinct behaviours into one section with no owning module named, and \u00a76, \u00a77 and \u00a78 each name no file, so the design has no home for the complexity it is adding.",
+    "duplicate_owner": "a finding \u2014 five separate mechanisms the plan would add already have an owner in the tree, led by \u00a72's sheet kernel beside the exact Part V closed form in `nova/biot/polygonanalytic.py`; the census is below.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; against a zero baseline the plan adds a new public module, a fourth tile kind, a new source type, a material law and a mesher, and no section names what it retires or merges, or states why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan searches nova for the sheet kernel and the tile it will extend, but does not search for the 3D field and toroidal-average route it needs in \u00a78, the elliptic-integral and third-kind owners \u00a72 depends on, the Newton precedent \u00a74 reproduces, or the machine-description reader \u00a74 will add a third copy of.",
+    "thin_wrapper": "pass \u2014 the one thin layer the plan does propose, \u00a73's sheet tile beside the existing polygon and arc tiles in `nova/biot/tiledassembly.py`, is correctly argued as an extension of the existing tile plan, padding, device placement and compilation cache (`_fill_tile` :381, `_fill_moment_tile` :410, `_fill_arc_tile` :436) rather than a bespoke driver, which is the honest form."
+  },
+  "section_digests": {
+    "_document": "6745ac97c9601504390ccca2658014f33e184c706f5ab9e54630410066b59baa",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "24bce76aa5ab32065d66db3da100e5613c4731b38b7bb166c5c52f3a662f5536",
+    "s3": "a2aff1947a86ca47470a9e1e03ef4b3fd539ddf15281352595549dbc7dea8bd6",
+    "s4": "9bc07e466ddddb698f5acd53437be471c77f6087fb6b40a8c9ee6417d77aec32",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "e2b5c5f00ca0e565d64fa7efeb36b813de5dff49bd9d8f9df50258b33591b167",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "627b5197eed27111e04c1455b85cb0069c52df34bc68ac657850b2c20c804b37",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T05:38:46.444544+00:00"
+}

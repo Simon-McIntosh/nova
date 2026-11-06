@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Thin Part V strip error against the ring-integral reference | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-strip-error-sweep-summary">§2 — Where the thin Part V strip's error turns over</h2>
+    <p>Node <code>icm-strip-error-sweep</code> measures the only quantity the
+    sheet-route decision rests on: the relative error of a Urankar Part V polygon
+    strip against an exact line integral of nova's ring Green's functions, as the
+    strip width <code>eps</code> runs from <code>1e-2</code> to <code>1e-8</code>
+    of the segment length. The answer is that the strip <em>does not</em> reach
+    <code>1e-10</code> anywhere in that range: its best attainable worst-case
+    error over the fixed target set is <code>6.7e-08</code>, at
+    <code>eps/L = 1e-4</code>, and no single edge-length fraction meets
+    <code>1e-10</code> at every slope. Every one of the 60 target references
+    converged, so the failure is the strip's and not the instrument's.</p>
+
+    <h2 id="icm-strip-error-sweep-instrument">The reference, and the control that found a defect in it</h2>
+    <p>The reference is a Gauss-Legendre integral of <code>greens_psi</code> and
+    <code>greens_bz_br</code> along the segment (<code>scripts/edge_sheet/reference.py</code>),
+    with the initial panels graded geometrically toward the target's foot and
+    every panel bisected each round, stopping when two successive rounds agree to
+    <code>1e-13</code> relative. A component whose value is an exact symmetry zero
+    (the radial field on the segment's mirror plane, whose integrand is odd about
+    the foot) is held out of the convergence test, because its relative change is
+    a roundoff residue rather than a signal. That exclusion was found the hard way:
+the first full pass flagged the four broadside targets at slope <code>π/2</code>
+as non-converged, at <code>1e-4</code> to <code>1e-3</code> relative change on a
+component whose value is exactly zero, and holding those components out of the
+test cleared all four. The slope was then re-run with the corrected test and
+spliced into the receipt; the numbers below are the spliced run.</p>
+    <p>The control is an independent 80-node Gauss-Legendre quadrature of the same
+    segment. On its first run the reference disagreed with it in the radial field
+    by a factor of two in sign and in the vertical field by <code>1.4e-4</code>
+    relative at <code>eps = 1e-2</code>: the ring Green's functions take the
+    <em>target</em> first and the source loop last, and the reference had them
+    swapped. The flux component hid the fault, because the flux of two coaxial
+    loops is reciprocal in them. With the arguments in their documented order the
+    reference agrees with the control to every printed digit
+    (<code>psi 7.891555298525e-07</code>, <code>bz 3.941125183429e-08</code>,
+    <code>br -5.491738057798e-07</code> at the half-cell-width target of the
+    zero-slope segment). A second defect — an unbounded bisection that drove one
+    unconverging target to 16 GB and the allocator's kill — is closed by a panel
+    budget of <code>200000</code>, which reports non-convergence instead of
+    exhausting memory.</p>
+
+    <h2 id="icm-strip-error-sweep-geometry">Geometry and target set</h2>
+    <p>One segment of length <code>L = 0.10 m</code> — the long edge of a thin
+    cell — centred at <code>(R, Z) = (1.5, 0.0) m</code>, observed at the section's
+    fixed target set: <code>0.5</code> cell width (<code>0.01 m</code>),
+    <code>1</code> cell width (<code>0.02 m</code>), one segment length
+    (<code>0.10 m</code>) and ten segment lengths (<code>1.00 m</code>), each off
+    the segment's middle and off each of its two ends, for a cell width of
+    <code>0.02 m</code>. Four distances and three stations give twelve targets per
+    slope and sixty in total, at slopes <code>0</code>, <code>π/8</code>,
+    <code>π/4</code>, <code>3π/8</code> and <code>π/2</code>. The strip is the
+    rectangle of width <code>eps</code> on the segment carrying sheet density
+    <code>K/eps</code> through <code>polygon_analytic_greens</code>, so both
+    evaluations carry the same total current <code>K·L</code>.</p>
+
+    <h2 id="icm-strip-error-sweep-result">Result: best attainable error per slope</h2>
+    <p>The error at a target is the worst non-degenerate component relative error
+    of <code>(psi, B_Z, B_R)</code>; the curve is its maximum over the target set
+    at each width. <code>rounding</code> is the fitted <code>b/eps</code> term at
+    the best width</p>
+    <table>
+      <thead>
+        <tr>
+          <th>slope</th>
+          <th>best error</th>
+          <th><code>eps/L</code> at best</th>
+          <th>model term <code>a·eps²</code></th>
+          <th>rounding term <code>b/eps</code></th>
+          <th>cancellation <code>b/(eps·ε_mach)</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td><code>1.754e-08</code></td><td><code>3.16e-05</code></td><td><code>1.843e-09</code></td><td><code>2.702e-09</code></td><td><code>1.217e+07</code></td></tr>
+        <tr><td>π/8</td><td><code>6.748e-08</code></td><td><code>1.00e-04</code></td><td><code>1.853e-08</code></td><td><code>3.426e-08</code></td><td><code>1.543e+08</code></td></tr>
+        <tr><td>π/4</td><td><code>4.454e-08</code></td><td><code>1.00e-04</code></td><td><code>1.896e-08</code></td><td><code>2.776e-08</code></td><td><code>1.250e+08</code></td></tr>
+        <tr><td>3π/8</td><td><code>1.975e-08</code></td><td><code>1.00e-04</code></td><td><code>2.070e-08</code></td><td><code>4.333e-08</code></td><td><code>1.951e+08</code></td></tr>
+        <tr><td>π/2</td><td><code>1.328e-08</code></td><td><code>3.16e-05</code></td><td><code>1.725e-09</code></td><td><code>3.936e-09</code></td><td><code>1.773e+07</code></td></tr>
+      </tbody>
+    </table>
+    <p>The model branch is <code>1.8e-4 to 2.1e-4</code> at <code>eps/L = 1e-2</code>
+    and falls as <code>eps²</code>, as the plan predicts; the rounding branch rises
+    as the strip's two long edges cancel over a separation that shrinks with
+    <code>eps</code>. The crossing sits near <code>eps/L ≈ 3e-5 to 1e-4</code>.</p>
+
+    <h2 id="icm-strip-error-sweep-fraction">One production width for every slope</h2>
+    <p>A production strip takes one fixed fraction of each edge's length, so the
+    strip route survives only if some fraction meets <code>1e-10</code> at every
+    slope. No fraction does. The combined curve — the maximum over every slope and every
+    target at each width — bottoms at <code>6.748e-08</code> at
+    <code>eps/L = 1e-4</code>, seven hundred times above the <code>1e-10</code> the
+    strip route requires, and the best width of any single slope is
+    <code>1.328e-08</code>. The list of fractions meeting <code>1e-10</code> at
+    every slope is empty, so no single edge-length fraction qualifies.</p>
+    <figure>
+      <img src="/nova/figures/edge-sheet/strip-error-vs-width.svg"
+           alt="Worst relative error of the Part V strip against strip width for five slopes">
+      <figcaption>
+        Worst relative error of the Part V strip over the twelve-target set,
+        against strip width in units of the segment length, one curve per slope of
+        the segment against the radial direction. Filled markers sit at each
+        curve's minimum; the dotted grey line is the <code>1e-10</code> the sheet
+        route would have to reach. Every curve turns over inside the sweep — the
+        <code>eps²</code> model branch on the left, the rounding branch on the
+        right — and every minimum lies one to two decades above the line.
+      </figcaption>
+    </figure>
+
+    <h2 id="icm-strip-error-sweep-consequence">What this settles for the sheet route</h2>
+    <p>The Part V strip is a <code>1e-8</code>-to-<code>1e-7</code> representation of
+    a toroidal sheet at its best width, and no width does better, so the sheet does
+    not ship as a Part V polygon strip. The limiting mechanism is the cancellation
+    between the strip's two long edges, whose separation relative to the
+    <code>O(1 m)</code> major radius falls to <code>1e-7</code> at
+    <code>eps = 1e-8·L</code> while the kernel's own arithmetic is exact to
+    double-double; the fitted cancellation factor in the table above is the
+    measured multiple of machine epsilon that the subtraction costs. The next node
+    (`icm-edge-sheet-route`) therefore implements Urankar Part II in
+    <code>nova/biot/sheet.py</code>, and can reuse this module's
+    <code>sheet_reference</code> unchanged as its <code>1e-13</code> reference.</p>
+  </main>
+</body>
+</html>

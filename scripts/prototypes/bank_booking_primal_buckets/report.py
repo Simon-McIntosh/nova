@@ -52,7 +52,7 @@ def main():
         for arm in ("base", "head")
         for process in (1, 2)
     }
-    rows, precision = [], []
+    rows, precision, invocation_rows = [], [], []
     for lanes in (1, 16):
         for arm in ("base", "head"):
             for process in range(3):
@@ -60,6 +60,12 @@ def main():
                 assert all(capture["converged"]) and max(capture["residual"]) <= 1e-10
                 wall = float(np.median(capture["unprofiled_ms"]))
                 reads = capture["reads"]
+                updates = max(capture["steps"])
+                read_label = (
+                    f"{reads[0]} in all {lanes} lanes"
+                    if len(set(reads)) == 1
+                    else str(reads)
+                )
                 device = next(
                     (
                         x
@@ -81,12 +87,26 @@ def main():
                     )
                 else:
                     device_ms, launches = "warm-up", "warm-up"
+                if device:
+                    evaluations = max(reads) + updates
+                    invocation_rows.append(
+                        [
+                            arm,
+                            process,
+                            lanes,
+                            max(reads),
+                            updates,
+                            evaluations,
+                            f"{residual['device_ms'] / evaluations:.6f}",
+                            f"{residual['launches'] / evaluations:.2f}",
+                        ]
+                    )
                 rows.append(
                     [
                         arm,
                         process,
                         lanes,
-                        str(reads),
+                        read_label,
                         f"{wall:.6f}",
                         f"{wall / max(reads):.6f}",
                         device_ms,
@@ -150,6 +170,27 @@ def main():
             "Residual launches",
         ],
         rows,
+    )
+    text += "<h3>Residual work per invocation</h3>\n"
+    text += (
+        "<p>Each read evaluates its fresh residual, and each batch update "
+        "evaluates another residual. The count below is batch reads plus "
+        "maximum updates. This exposes trajectory changes beside the "
+        "whole-solve totals; fewer updates can lower total booking work "
+        "without making one booking cheaper.</p>\n"
+    )
+    text += table(
+        [
+            "Arm",
+            "Process",
+            "Slices",
+            "Reads",
+            "Updates",
+            "Residual calls",
+            "Device/call [ms]",
+            "Launches/call",
+        ],
+        invocation_rows,
     )
     maxima = {
         key: max(max(row["gaps"][key]) for row in precision)

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="179">
+<meta name="plan-version" content="180">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -239,6 +239,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T070015356749-bank-wall-events" data-who="reckon-build" data-when="2026-11-06T10:19:24Z">
     <div class="r-comment-body"><p>Batched wall polish preserves all four physical states within 1e-13 on H200 (six tests passed); common CPU suites add zero failures. One-slice whole wall improves 41.25%; repeated sixteen-slice wall/read improves 14.61% and 26.00%. Fresh head processes take 7 and 8 reads; initial current moments vary, while both wall implementations are bit-identical on all 496 captured identical-input lane/read states. Evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-wall-events.html#bank-wall-events-landing The four physical cases are now marked slow; login-only collection selects 2 with not slow and all 6 with slow or not slow.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261106T121451239466-bank-candidate-loop" data-who="reckon-build" data-when="2026-11-06T13:03:32Z">
+    <div class="r-comment-body"><p>[Batched candidate inspection](/nova/evidence/fragments/sub-millisecond-forward-path/bank-candidate-loop.html#bank-candidate-loop-landing): one vmap replaces the candidate scan; four 550-cell states and two light checks pass, the slot-swap control fails, and paired CPU suites add zero failures. On H200 at 16 slices candidate work falls from 582.670 to 416.539 device ms and 41557 to 2037 launches; mean whole-solve wall per batch read falls 10.31% (36.12% at one slice), with every lane inside the precision budget.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

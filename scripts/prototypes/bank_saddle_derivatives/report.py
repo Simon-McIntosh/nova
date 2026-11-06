@@ -149,7 +149,14 @@ def main():
     assert negative_status != 0 and set(failed) - set(suite["head"]["failure_ids"])
     certificate, status = read_log(run / "cpu-certificate-test_saddle_derivatives.log")
     assert status == 0 and "2 passed" in certificate
+    certificate_error = max(
+        float(v)
+        for v in re.findall(
+            r"DERIVATIVE state=\d+ rank=\d+ absolute_error=([0-9.e+-]+)", certificate
+        )
+    )
     summary = dict(
+        derivative_error=certificate_error,
         decisions=decisions["changes"],
         floors=statistics,
         precision=precision,
@@ -257,7 +264,8 @@ arithmetic; there is no added operator store or whole-mesh high-order rebuild.</
 <p>The independent reference evaluates the stored binary64 bank operands and
 Bell transform with 80-digit Decimal arithmetic. At the diverted 550-cell trial
 and saved converged saddles the test uses absolute and relative tolerances of
-2e-13. The default CPU lane uses the light diverted fixture with cancelling
+2e-13; the maximum measured absolute error is {certificate_error:.8e}.
+The default CPU lane uses the light diverted fixture with cancelling
 source and exterior contributions. Restoring Bell-derived third and fourth
 derivatives in a scratch copy fails {len(failed)} test cases; the head passes.
 The reference establishes arithmetic accuracy for this discrete polynomial,
@@ -274,8 +282,9 @@ landed noise-floor instrument imported unchanged. Both arms load the same
 base-generated seed and root arrays. Cut, normal and fragment masks remain
 unchanged throughout each population and agree between terminal arms. The
 certificate is 1e-10; each head median must be at most 1e-11. The shared saver
-checks text bounds and overlaps; the rendered preview is retained in the run
-directory.</figcaption></figure>
+checks text bounds and overlaps. The producer inspected the 1400 by 720 preview:
+no clipped or overlapping labels, and both series and thresholds are legible.
+The preview is retained in the run directory.</figcaption></figure>
 {table(["Lane", "Base median", "Head median", "Reduction"], floor_rows)}
 <h3 id="{prefix}-timings">Common-seed solve measurements</h3>
 <p>Each revision has its own compilation cache. Process 0 warms it; processes

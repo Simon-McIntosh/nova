@@ -1,44 +1,69 @@
 <section id="bank-saddle-derivatives-landing">
-<h2>Saddle derivatives: the rounded inputs retain the error</h2>
-<p><strong>Blocked before a product repair.</strong> The base reproduction confirms
-that evaluating the Bell polynomial accurately after the nodal contraction does
-not remove the higher-derivative noise. No product source or tests changed.</p>
-<p>The CPU experiment ran at <code>f3bb6ed265d0bca5c8b0c54ddac1d50cf22c625d</code>
-on the held fleet allocation, with x64 enabled before array construction.
-It imports the existing noise-floor instrument's <code>nudged</code> and
-<code>field_receipt</code> unchanged. It loads the saved converged moments and
-worst perturbation from the
-<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html">noise-floor attribution</a>:
-zero-based lane 12, pattern 14. Both evaluations hold the saddle position fixed
-and select the same cell and triangle.</p>
-<table>
-<thead><tr><th>Maximum absolute derivative change</th><th>Third derivative</th><th>Fourth derivative</th></tr></thead>
-<tbody>
-<tr><td>Current compiled calculation</td><td>1.1899370377932428e-12</td><td>2.1997692556396942e-10</td></tr>
-<tr><td>80-digit polynomial from rounded nodal jets</td><td>1.0888885301336834e-12</td><td>2.2460530628807333e-10</td></tr>
-<tr><td>80-digit bank contraction and polynomial</td><td>7.252748925988263e-15</td><td>9.909734459634264e-13</td></tr>
-<tr><td>Change attributable to rounded nodal inputs</td><td>1.0880203466247465e-12</td><td>2.2361433284210991e-10</td></tr>
-</tbody>
-</table>
-<p>The two high-accuracy references use the same binary64 bank rows, exterior,
-triangle transform and moments. Decimal arithmetic carries 80 digits through
-contraction, Taylor subtraction, polynomial coefficients and differentiation.
-These references isolate arithmetic rounding; they do not claim exact analytic
-Biot kernels. The exact contraction includes the exterior before any rounding
-back to binary64. A fourth-derivative change about 227 times smaller is available
-before nodal rounding, but it is lost at the input to <code>field_from_jets</code>.</p>
-<p>The permitted field constructor receives only contracted jets, sample indices
-and the mesh. A source upstream of that rounding must be passed from the bank.
-The bank owner also supplies the explicit curvature rates used by the Newton
-Jacobian. Changing only the primal curvature source would leave those rates
-bound to the Bell coefficients. This record requests a scope correction rather
-than claiming an unmeasured alternate discretisation.</p>
-<p>Prototype: <code>scripts/prototypes/bank_saddle_derivatives/inspect.py</code>.
-The durable receipt and successful log are <code>reproduction.json</code> and
-<code>reproduction.log</code> under
-<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T211000415402-bank-saddle-derivatives</code>.
-The log prints imported source, revision, cwd, CPU device and x64, and ends with
-<code>EXIT=0</code>. No derivative regression, Bell-restoration negative control,
-H200 floor population, paired timings, precision-budget comparison or paired
-suites has run. No per-lane figure is claimed from this single-pair diagnostic.</p>
+<h2>Saddle curvature from unrounded bank contractions</h2>
+<p><strong>All declared numerical gates pass.</strong></p>
+<p>The source rows, moments and exterior reach the saddle field through
+<code>support_read</code>. Existing paired-float arithmetic carries product and
+sum residues through the selected triangle's contraction, Taylor subtraction
+and Bell transform. Third and fourth derivatives feed the normal form; the
+explicit geometry tangent uses the same polynomial, including its fifth derivative
+for the moving fourth-order term. Low-order field evaluation and the stationary
+solve retain their existing jets. Only three triangle vertices need extended
+arithmetic; there is no added operator store or whole-mesh high-order rebuild.</p>
+<p>The independent reference evaluates the stored binary64 bank operands and
+Bell transform with 80-digit Decimal arithmetic. At the diverted 550-cell trial
+and saved converged saddles the test uses absolute and relative tolerances of
+2e-13; the maximum measured absolute error is 8.88178420e-16.
+The default CPU lane uses the light diverted fixture with cancelling
+source and exterior contributions. Restoring Bell-derived third and fourth
+derivatives in a scratch copy fails 2 test cases; the head passes.
+The reference establishes arithmetic accuracy for this discrete polynomial,
+not an exact analytic-kernel derivative.</p>
+<p>At identical sixteen-lane trial and saved converged states, substituting the
+base curvature function changes zero cut, normal or fragment decisions. Flipping
+a saved mask bit changes its signature, establishing that the comparison detects
+a known difference. The separate decision receipt records both full populations.</p>
+<figure id="bank-saddle-derivatives-floor"><img
+src="/nova/figures/sub-millisecond-forward-path/bank-saddle-derivatives/floor.svg"
+alt="Median fresh residual for sixteen lanes, base and accurate curvature">
+<figcaption>64 ulp-scale perturbations of each converged lane, measured by the
+landed noise-floor instrument imported unchanged. Both arms load the same
+base-generated seed and root arrays. Cut, normal and fragment masks remain
+unchanged throughout each population and agree between terminal arms. The
+certificate is 1e-10; each head median must be at most 1e-11. The shared saver
+checks text bounds and overlaps. The producer inspected the 1400 by 720 preview:
+no clipped or overlapping labels, and both series and thresholds are legible.
+The preview is retained in the run directory.</figcaption></figure>
+<table><thead><tr><th>Lane</th><th>Base median</th><th>Head median</th><th>Reduction</th></tr></thead><tbody><tr><td>0</td><td>4.92690333e-11</td><td>1.43884904e-12</td><td>34.24</td></tr><tr><td>1</td><td>4.67750283e-11</td><td>1.38911105e-12</td><td>33.67</td></tr><tr><td>2</td><td>5.36104494e-11</td><td>3.00559577e-12</td><td>17.84</td></tr><tr><td>3</td><td>7.93960453e-11</td><td>1.25766064e-12</td><td>63.13</td></tr><tr><td>4</td><td>4.98090458e-11</td><td>1.66977543e-12</td><td>29.83</td></tr><tr><td>5</td><td>9.16173803e-11</td><td>3.19033688e-12</td><td>28.72</td></tr><tr><td>6</td><td>6.66915412e-11</td><td>1.89714910e-12</td><td>35.15</td></tr><tr><td>7</td><td>6.30109298e-11</td><td>4.82458518e-12</td><td>13.06</td></tr><tr><td>8</td><td>9.99236249e-11</td><td>1.46371804e-12</td><td>68.27</td></tr><tr><td>9</td><td>7.32995886e-11</td><td>2.31636932e-12</td><td>31.64</td></tr><tr><td>10</td><td>3.20881099e-11</td><td>1.59161573e-12</td><td>20.16</td></tr><tr><td>11</td><td>1.58387081e-10</td><td>1.30739863e-12</td><td>121.15</td></tr><tr><td>12</td><td>3.50652840e-11</td><td>1.44240175e-12</td><td>24.31</td></tr><tr><td>13</td><td>2.94022584e-11</td><td>3.82271992e-12</td><td>7.69</td></tr><tr><td>14</td><td>2.96367375e-11</td><td>1.24877886e-12</td><td>23.73</td></tr><tr><td>15</td><td>1.10574661e-10</td><td>2.26663133e-12</td><td>48.78</td></tr></tbody></table>
+<h3 id="bank-saddle-derivatives-timings">Common-seed solve measurements</h3>
+<p>Each revision has its own compilation cache. Process 0 warms it; processes
+1 and 2 are fresh interpreters with XLA_FLAGS unset. Every wall is the median
+of three synchronized solves. Seed 0 is the shared base seed; seeds 1–5 add
+bounded 1e-14 relative perturbations. Every log reports the same archive digest
+<code>72e45171871d8b7db425b01fadc94a4c19c6614abcfd0e30373ac0e59eba758f</code>. Wall/read measures the whole solve divided by its batch
+reads, including Newton work; it is not isolated read latency.</p>
+<table><thead><tr><th>Arm</th><th>Process</th><th>Seed</th><th>Reads in lane order</th><th>Whole solve [ms]</th><th>Wall/read [ms]</th></tr></thead><tbody><tr><td>base</td><td>0</td><td>0</td><td>[9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]</td><td>641.356</td><td>71.262</td></tr><tr><td>base</td><td>0</td><td>1</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>478.710</td><td>79.785</td></tr><tr><td>base</td><td>0</td><td>2</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>517.762</td><td>73.966</td></tr><tr><td>base</td><td>0</td><td>3</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>429.206</td><td>71.534</td></tr><tr><td>base</td><td>0</td><td>4</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>430.821</td><td>71.804</td></tr><tr><td>base</td><td>0</td><td>5</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>429.096</td><td>71.516</td></tr><tr><td>base</td><td>1</td><td>0</td><td>[9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]</td><td>640.373</td><td>71.153</td></tr><tr><td>base</td><td>1</td><td>1</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>478.556</td><td>79.759</td></tr><tr><td>base</td><td>1</td><td>2</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>515.951</td><td>73.707</td></tr><tr><td>base</td><td>1</td><td>3</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>428.429</td><td>71.405</td></tr><tr><td>base</td><td>1</td><td>4</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>428.444</td><td>71.407</td></tr><tr><td>base</td><td>1</td><td>5</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>428.369</td><td>71.395</td></tr><tr><td>base</td><td>2</td><td>0</td><td>[9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]</td><td>639.658</td><td>71.073</td></tr><tr><td>base</td><td>2</td><td>1</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>478.302</td><td>79.717</td></tr><tr><td>base</td><td>2</td><td>2</td><td>[7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]</td><td>515.472</td><td>73.639</td></tr><tr><td>base</td><td>2</td><td>3</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>427.698</td><td>71.283</td></tr><tr><td>base</td><td>2</td><td>4</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>427.501</td><td>71.250</td></tr><tr><td>base</td><td>2</td><td>5</td><td>[6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]</td><td>427.857</td><td>71.310</td></tr><tr><td>head</td><td>0</td><td>0</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>306.942</td><td>76.735</td></tr><tr><td>head</td><td>0</td><td>1</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>306.301</td><td>76.575</td></tr><tr><td>head</td><td>0</td><td>2</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>305.315</td><td>76.329</td></tr><tr><td>head</td><td>0</td><td>3</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>306.498</td><td>76.625</td></tr><tr><td>head</td><td>0</td><td>4</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.680</td><td>76.170</td></tr><tr><td>head</td><td>0</td><td>5</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.777</td><td>76.194</td></tr><tr><td>head</td><td>1</td><td>0</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.603</td><td>76.151</td></tr><tr><td>head</td><td>1</td><td>1</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>305.377</td><td>76.344</td></tr><tr><td>head</td><td>1</td><td>2</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.922</td><td>76.231</td></tr><tr><td>head</td><td>1</td><td>3</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.561</td><td>76.140</td></tr><tr><td>head</td><td>1</td><td>4</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.992</td><td>76.248</td></tr><tr><td>head</td><td>1</td><td>5</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.953</td><td>76.238</td></tr><tr><td>head</td><td>2</td><td>0</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.591</td><td>76.148</td></tr><tr><td>head</td><td>2</td><td>1</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.886</td><td>76.222</td></tr><tr><td>head</td><td>2</td><td>2</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.959</td><td>76.240</td></tr><tr><td>head</td><td>2</td><td>3</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.685</td><td>76.171</td></tr><tr><td>head</td><td>2</td><td>4</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.548</td><td>76.137</td></tr><tr><td>head</td><td>2</td><td>5</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>304.273</td><td>76.068</td></tr></tbody></table>
+<h3 id="bank-saddle-derivatives-precision">Locked precision checks</h3>
+<p>All 16 lanes in every seed and process certify a fresh residual at most
+1e-10. The unchanged <code>pair_gaps</code> instrument checks flux and geometry
+against base and stationary positions and boundary flux against the analytic
+oracle. Values below are worst cases over every process, seed and lane.</p>
+<table><thead><tr><th>Quantity</th><th>Worst normalized gap</th><th>Limit</th></tr></thead><tbody><tr><td>flux</td><td>5.02897947e-14</td><td>1e-08</td></tr><tr><td>axis</td><td>3.65816265e-14</td><td>0.0005</td></tr><tr><td>saddle</td><td>1.36450020e-14</td><td>0.0005</td></tr><tr><td>boundary_flux</td><td>4.92182040e-15</td><td>0.0001</td></tr><tr><td>base_oracle_axis</td><td>1.04772696e-05</td><td>0.0005</td></tr><tr><td>base_oracle_saddle</td><td>9.25485729e-06</td><td>0.0005</td></tr><tr><td>base_oracle_boundary</td><td>2.59062599e-05</td><td>0.0001</td></tr><tr><td>head_oracle_axis</td><td>1.04772696e-05</td><td>0.0005</td></tr><tr><td>head_oracle_saddle</td><td>9.25485729e-06</td><td>0.0005</td></tr><tr><td>head_oracle_boundary</td><td>2.59062599e-05</td><td>0.0001</td></tr></tbody></table>
+<h3 id="bank-saddle-derivatives-suites">Paired Sirius suites</h3>
+<p>Each file runs in a fresh pytest process with a separate basetemp. The two
+arms share one seven-core Sirius job. The candidate inspection file selects its
+light cases. The derivative test is added at head; the scratch Bell restoration
+supplies its negative control. Added failure ids: [].</p>
+<table><thead><tr><th>Arm</th><th>File</th><th>Summary</th><th>Exit</th></tr></thead><tbody><tr><td>base</td><td>test_support_read</td><td>13 passed, 2 skipped in 75.32s (0:01:15)</td><td>0</td></tr><tr><td>base</td><td>test_tracked_read</td><td>4 passed in 85.30s (0:01:25)</td><td>0</td></tr><tr><td>base</td><td>test_candidate_inspection_batched</td><td>5 passed, 4 deselected in 54.85s</td><td>0</td></tr><tr><td>base</td><td>test_bank_solve_driver</td><td>10 passed in 344.39s (0:05:44)</td><td>0</td></tr><tr><td>base</td><td>test_bank_solve_cycle</td><td>3 passed in 243.38s (0:04:03)</td><td>0</td></tr><tr><td>base</td><td>test_bank_newton_step</td><td>18 passed in 172.37s (0:02:52)</td><td>0</td></tr><tr><td>base</td><td>test_bank_step_booking_batch</td><td>2 passed, 7 skipped in 66.56s (0:01:06)</td><td>0</td></tr><tr><td>head</td><td>test_support_read</td><td>13 passed, 2 skipped in 67.45s (0:01:07)</td><td>0</td></tr><tr><td>head</td><td>test_tracked_read</td><td>4 passed in 69.86s (0:01:09)</td><td>0</td></tr><tr><td>head</td><td>test_candidate_inspection_batched</td><td>5 passed, 4 deselected in 54.60s</td><td>0</td></tr><tr><td>head</td><td>test_bank_solve_driver</td><td>10 passed in 314.39s (0:05:14)</td><td>0</td></tr><tr><td>head</td><td>test_bank_solve_cycle</td><td>3 passed in 202.04s (0:03:22)</td><td>0</td></tr><tr><td>head</td><td>test_bank_newton_step</td><td>18 passed in 161.80s (0:02:41)</td><td>0</td></tr><tr><td>head</td><td>test_bank_step_booking_batch</td><td>2 passed, 7 skipped in 70.79s (0:01:10)</td><td>0</td></tr><tr><td>head</td><td>test_saddle_derivatives</td><td>2 passed in 10.82s</td><td>0</td></tr></tbody></table>
+<p>Base: <code>f3bb6ed265d0bca5c8b0c54ddac1d50cf22c625d</code>. Product head:
+<code>1af4c1b03199a417445b7c6320ff8f10677a1192</code>. Receipts, raw perturbation vectors,
+per-process timings, negative control and suite logs are retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T211000415402-bank-saddle-derivatives</code>. The script family is
+<code>scripts/prototypes/bank_saddle_derivatives</code>.</p>
+<h3 id="bank-saddle-derivatives-reproduction">Why the contraction is included</h3>
+<p>At the original base, the saved lane-12 perturbation moved the fourth
+derivative by 2.19977e-10. An 80-digit polynomial from already-rounded nodal jets
+still moved by 2.24605e-10; carrying 80 digits from the bank contraction onward
+reduced that movement to 9.90973e-13. The same cell, triangle and saddle position
+were used. This rules out polishing only the polynomial after nodal rounding.
+The reproduction receipt and log are retained beside these measurements.</p>
 </section>

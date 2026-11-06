@@ -1,0 +1,219 @@
+<section id="bank-residual-noise-floor-landing">
+<h2>Fresh-residual floor: rounding amplified into the saddle geometry</h2>
+<p><strong>The fresh residual is at its numerical floor near the 1e-10 certificate.</strong>
+Across 64 perturbations of each converged H200 lane, the median residual ranges
+from 3.2244e-11 to 1.5436e-10. All sixteen lanes cross the certificate at least
+once; four have medians above it. The largest residual is 2.9128e-10.
+CPU repeats of lanes 0 and 10 have medians 5.3227e-11 and 7.9666e-11 and also
+cross the certificate. This is not an H200-only effect.</p>
+<p><strong>The dominant path is the freshly reconstructed saddle geometry.</strong>
+Holding the saddle normal form and its edge intervals together at the unperturbed
+values reduces the maximum residual change from 2.05873e-10 to 1.53477e-12
+(134-fold), and the maximum componentwise spread from 2.46899e-10 to
+1.79057e-12 (138-fold). This is an attribution experiment, not a fresh-read
+certificate or a solver change. Product source, tests and the acceptance
+threshold are unchanged.</p>
+<h3 id="bank-residual-noise-floor-method">Measurement and controls</h3>
+<p>The numerical source is <code>6adab8c7a4799d094522e5f87a8b560c9fbe2bd2</code>.
+The probe imports <code>bank_solve_profile.fixture.build(16)</code>, the existing
+mask/signature observers and fingerprint helper. Its 550-cell diverted batch
+converged in 12 batch reads, with all sixteen terminal residuals at or below
+1e-10. Those moments are saved once and reused by every later experiment;
+the CPU repeat loads precisely lanes 0 and 10 from that file. No paired latency
+comparison is made.</p>
+<p>Double precision is configured before array construction and asserted in each
+process. A deterministic sign pattern moves each nonzero moment entry by one,
+two, three or four representable steps, cycling the magnitude over 64 patterns.
+Structural zeros are retained; subnormal perturbations of zero are not part of
+this population. Each evaluation calls <code>read_batch</code> afresh without
+tracking, then <code>step_residual(m, m, fresh_read)</code>. The norm is exactly
+the solver's maximum absolute concatenated moment residual. Table 1's spread
+is the maximum norm minus the minimum norm over the 64 evaluations.</p>
+<p>Attribution uses one signed ulp per nonzero output entry, with 64 patterns
+at each boundary. Wrappers and live-local trace hooks instrument the existing
+arithmetic, and the hook-presence assertion must see every requested boundary.
+The main and saddle-geometry probes reproduce their ordinary zero-injection
+residual vectors bit for bit. The deeper field probe unwraps the existing
+stationary JIT boundary so its cached-jet hook actually traces; its zero-injection
+vector differs from the ordinary evaluator by at most 7.9581e-13. Its injection
+changes are measured against its own zero-injection result. That scheduling
+effect is retained as a limit on interpreting its smallest rows.</p>
+<p>All moment perturbations retain the same cut, normal-cell and selected-fragment
+masks. The known-present whole-cell, conic-cell and normalization perturbations
+produce nonzero responses. Uniform moment-output rows reflect their binary
+spacing, not an empty observation. The fresh state's difference passed to
+<code>_directional_field</code> is exactly zero; both its jets and sampled
+coefficients are checked to be zero. The field-coefficient row perturbs the
+refreshed coefficients after that update. Flux-normalized density coefficients
+and the raw-current sum produce zero response in this fixture: its source is
+independent of normalized flux and its quadrature has no prescribed total-current
+normalization. The normalization-factor injection itself is detected.</p>
+<h3 id="bank-residual-noise-floor-lanes">Fresh residual by lane</h3>
+<table><thead><tr><th>Device</th><th>Lane</th><th>At saved state</th><th>Median</th><th>Minimum</th><th>Maximum</th><th>Max − min</th><th>Median / certificate</th><th>Above / 64</th></tr>
+</thead><tbody><tr><td>gpu</td><td>0</td><td>8.9528e-12</td><td>5.5373e-11</td><td>7.7449e-12</td><td>1.6234e-10</td><td>1.5460e-10</td><td>0.554</td><td>9</td></tr>
+<tr><td>gpu</td><td>1</td><td>9.6065e-12</td><td>7.3470e-11</td><td>2.8422e-12</td><td>1.8366e-10</td><td>1.8082e-10</td><td>0.735</td><td>16</td></tr>
+<tr><td>gpu</td><td>2</td><td>6.5057e-11</td><td>1.4366e-10</td><td>5.1713e-11</td><td>2.1087e-10</td><td>1.5916e-10</td><td>1.437</td><td>46</td></tr>
+<tr><td>gpu</td><td>3</td><td>1.7366e-11</td><td>3.8000e-11</td><td>8.4555e-12</td><td>2.0906e-10</td><td>2.0060e-10</td><td>0.380</td><td>12</td></tr>
+<tr><td>gpu</td><td>4</td><td>8.3730e-11</td><td>6.0218e-11</td><td>9.8197e-12</td><td>1.4501e-10</td><td>1.3519e-10</td><td>0.602</td><td>16</td></tr>
+<tr><td>gpu</td><td>5</td><td>5.4442e-11</td><td>1.3253e-10</td><td>5.6843e-11</td><td>2.5709e-10</td><td>2.0025e-10</td><td>1.325</td><td>43</td></tr>
+<tr><td>gpu</td><td>6</td><td>9.7629e-11</td><td>4.6647e-11</td><td>3.7659e-12</td><td>1.5494e-10</td><td>1.5118e-10</td><td>0.466</td><td>12</td></tr>
+<tr><td>gpu</td><td>7</td><td>7.7648e-11</td><td>3.2244e-11</td><td>1.3216e-12</td><td>1.0924e-10</td><td>1.0792e-10</td><td>0.322</td><td>2</td></tr>
+<tr><td>gpu</td><td>8</td><td>4.0856e-11</td><td>9.1831e-11</td><td>1.1028e-11</td><td>1.9483e-10</td><td>1.8380e-10</td><td>0.918</td><td>29</td></tr>
+<tr><td>gpu</td><td>9</td><td>7.3797e-11</td><td>3.8071e-11</td><td>9.2086e-12</td><td>1.0604e-10</td><td>9.6833e-11</td><td>0.381</td><td>3</td></tr>
+<tr><td>gpu</td><td>10</td><td>3.6934e-11</td><td>8.3261e-11</td><td>2.2126e-11</td><td>2.0466e-10</td><td>1.8254e-10</td><td>0.833</td><td>22</td></tr>
+<tr><td>gpu</td><td>11</td><td>9.9831e-11</td><td>1.5436e-10</td><td>8.7738e-11</td><td>2.9128e-10</td><td>2.0354e-10</td><td>1.544</td><td>60</td></tr>
+<tr><td>gpu</td><td>12</td><td>1.4879e-11</td><td>8.7489e-11</td><td>1.4651e-11</td><td>2.1487e-10</td><td>2.0022e-10</td><td>0.875</td><td>30</td></tr>
+<tr><td>gpu</td><td>13</td><td>4.8601e-11</td><td>8.2466e-11</td><td>1.2079e-11</td><td>1.7270e-10</td><td>1.6063e-10</td><td>0.825</td><td>20</td></tr>
+<tr><td>gpu</td><td>14</td><td>9.5852e-11</td><td>1.5093e-10</td><td>7.3825e-11</td><td>2.7146e-10</td><td>1.9763e-10</td><td>1.509</td><td>53</td></tr>
+<tr><td>gpu</td><td>15</td><td>1.7749e-11</td><td>6.2350e-11</td><td>1.7806e-11</td><td>1.9129e-10</td><td>1.7349e-10</td><td>0.624</td><td>12</td></tr>
+<tr><td>cpu</td><td>0</td><td>1.3543e-11</td><td>5.3227e-11</td><td>6.9065e-12</td><td>1.6281e-10</td><td>1.5591e-10</td><td>0.532</td><td>7</td></tr>
+<tr><td>cpu</td><td>10</td><td>2.8777e-11</td><td>7.9666e-11</td><td>1.6584e-11</td><td>1.6759e-10</td><td>1.5100e-10</td><td>0.797</td><td>17</td></tr>
+</tbody></table>
+<h3 id="bank-residual-noise-floor-stages">One-ulp injection by stage</h3>
+<p>The change is the infinity norm of the residual vector minus that same
+program's zero-injection vector. A lane's spread is the largest componentwise
+range across its 64 residual vectors. The change columns summarize all patterns
+and lanes; the spread columns summarize the sixteen lane spreads. These are
+output-sensitivity measurements, not additive estimates of rounding errors
+created inside each stage. A one-ulp perturbation at a small output can be much
+smaller than the accumulated error that reaches it.</p>
+<table><thead><tr><th>Injected output</th><th>Median |Δresidual|∞</th><th>Maximum |Δresidual|∞</th><th>Median lane spread</th><th>Maximum lane spread</th></tr>
+</thead><tbody><tr><td>field coefficients</td><td>5.6843e-14</td><td>1.5632e-13</td><td>9.9476e-14</td><td>1.7764e-13</td></tr>
+<tr><td>nodal jets</td><td>1.7621e-12</td><td>9.0097e-12</td><td>4.6896e-12</td><td>7.9012e-12</td></tr>
+<tr><td>stationary fluxes</td><td>0.0000e+00</td><td>7.1054e-15</td><td>0.0000e+00</td><td>7.1054e-15</td></tr>
+<tr><td>whole cells</td><td>2.8422e-14</td><td>2.8422e-14</td><td>5.6843e-14</td><td>5.6843e-14</td></tr>
+<tr><td>conic cells</td><td>5.6843e-14</td><td>5.6843e-14</td><td>1.1369e-13</td><td>1.1369e-13</td></tr>
+<tr><td>normal cells</td><td>1.4211e-14</td><td>1.4211e-14</td><td>2.8422e-14</td><td>2.8422e-14</td></tr>
+<tr><td>normalization</td><td>5.6843e-14</td><td>8.5265e-14</td><td>1.1369e-13</td><td>1.1369e-13</td></tr>
+<tr><td>subtraction</td><td>6.4623e-27</td><td>1.2925e-26</td><td>1.2925e-26</td><td>2.5849e-26</td></tr>
+<tr><td>signed coefficients</td><td>5.6843e-14</td><td>1.5632e-13</td><td>9.9476e-14</td><td>1.7764e-13</td></tr>
+<tr><td>conic vertices</td><td>1.3358e-12</td><td>3.7375e-12</td><td>7.4394e-12</td><td>7.4465e-12</td></tr>
+<tr><td>normalized coefficients</td><td>0.0000e+00</td><td>0.0000e+00</td><td>0.0000e+00</td><td>0.0000e+00</td></tr>
+<tr><td>raw current</td><td>0.0000e+00</td><td>0.0000e+00</td><td>0.0000e+00</td><td>0.0000e+00</td></tr>
+<tr><td>fit coefficients</td><td>0.0000e+00</td><td>0.0000e+00</td><td>0.0000e+00</td><td>0.0000e+00</td></tr>
+<tr><td>saddle position</td><td>2.5580e-13</td><td>7.5318e-13</td><td>4.7606e-13</td><td>9.9476e-13</td></tr>
+<tr><td>saddle direction</td><td>1.2790e-13</td><td>7.6739e-13</td><td>3.3440e-13</td><td>9.3792e-13</td></tr>
+<tr><td>saddle curvature</td><td>2.2382e-13</td><td>6.8212e-13</td><td>4.9738e-13</td><td>9.3792e-13</td></tr>
+<tr><td>saddle cubic</td><td>2.0961e-13</td><td>6.9633e-13</td><td>4.6541e-13</td><td>7.5318e-13</td></tr>
+<tr><td>edge intervals</td><td>0.0000e+00</td><td>1.0658e-13</td><td>0.0000e+00</td><td>1.4744e-13</td></tr>
+<tr><td>normal vertices</td><td>4.0101e-13</td><td>9.3792e-13</td><td>1.8474e-12</td><td>1.8616e-12</td></tr>
+<tr><td>read roots</td><td>0.0000e+00</td><td>1.0658e-13</td><td>0.0000e+00</td><td>1.1369e-13</td></tr>
+<tr><td>booking roots</td><td>1.4211e-14</td><td>9.9476e-14</td><td>2.8422e-14</td><td>1.4211e-13</td></tr>
+<tr><td>depressed linear</td><td>1.5632e-13</td><td>7.6739e-13</td><td>4.2988e-13</td><td>7.8160e-13</td></tr>
+<tr><td>depressed constant</td><td>3.2330e-13</td><td>8.6686e-13</td><td>7.3896e-13</td><td>1.0090e-12</td></tr>
+<tr><td>cubic discriminant</td><td>1.3145e-13</td><td>3.3396e-13</td><td>1.9318e-13</td><td>3.3396e-13</td></tr>
+<tr><td>cubic angle</td><td>3.4817e-13</td><td>7.6739e-13</td><td>6.5370e-13</td><td>7.6739e-13</td></tr>
+<tr><td>cached jets</td><td>3.9790e-13</td><td>1.5206e-12</td><td>1.3856e-12</td><td>2.0606e-12</td></tr>
+<tr><td>scaled jets</td><td>1.8332e-12</td><td>7.2049e-12</td><td>5.6843e-12</td><td>7.7875e-12</td></tr>
+<tr><td>taylor terms</td><td>1.7195e-12</td><td>5.5991e-12</td><td>4.2348e-12</td><td>9.1518e-12</td></tr>
+<tr><td>bell remainder</td><td>1.0658e-12</td><td>4.6043e-12</td><td>2.9274e-12</td><td>5.8122e-12</td></tr>
+<tr><td>bell coefficients</td><td>1.7053e-13</td><td>6.6791e-13</td><td>4.8317e-13</td><td>6.2528e-13</td></tr>
+<tr><td>stationary hessian</td><td>1.5765e-13</td><td>4.8317e-13</td><td>3.4817e-13</td><td>6.2528e-13</td></tr>
+<tr><td>third derivatives</td><td>1.5632e-13</td><td>4.5475e-13</td><td>3.5527e-13</td><td>4.5475e-13</td></tr>
+<tr><td>fourth derivatives</td><td>1.4211e-13</td><td>5.4001e-13</td><td>3.1131e-13</td><td>5.5422e-13</td></tr>
+</tbody></table>
+<figure id="bank-residual-noise-floor-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/bank-residual-noise-floor/stage-spread.svg"
+alt="Logarithmic residual spread: moment perturbations exceed the certificate, while individual one-ulp stage-output perturbations remain below it">
+<figcaption>The first row is the original one-to-four-ulp moment population;
+all other plotted rows inject one ulp at one output. Grey shows the median lane
+spread and blue the largest; red marks the largest spread above the 1e-10
+certificate reference. A zero median is omitted from the logarithmic axis.
+Additional geometric and inactive-stage controls are tabled above. The shared
+checked saver accepted all text bounds and overlaps on the 1400 × 720 canvas;
+the producer inspected the PNG rendering. Only the SVG is published.</figcaption>
+</figure>
+<h3 id="bank-residual-noise-floor-attribution">Where the bits are lost</h3>
+<p>The worst moment perturbation is pattern 14 in zero-based lane 12, at current
+component/cell 184. That cell belongs to the eight-cell saddle normal-form
+population. Across the population, saddle position changes by at most
+2.8866e-15 m (13 ulps), direction by 4.8406e-14 (436 ulps), curvature by
+3.5269e-12 (161,704 ulps), and the cubic ray coefficient by 1.1447e-10
+(32,993,940 ulps). Thus the one-ulp normal-form output rows do not represent the
+much larger errors arriving at those outputs.</p>
+<p><strong>Bank contraction and exterior cancellation.</strong>
+<code>support_read.nodal_jets</code> and the stationary cache contract the
+moment rows and add the exterior. An 80-digit sum of the same 1,650 products
+and exterior, using the saved moments and cached bank, shows an absolute jet
+error up to 1.6135e-16. At flux node 681, a sum of absolute terms 0.112928
+produces 3.38838e-5: cancellation ratio 3,332.79, and the recorded flux differs
+from the extended-precision sum by 2.8791e-18, or 424.88 output ulps.
+Across the selected jets the change in rounding error reaches 7.5888e-17.
+Consequently an injection of only one ulp at the final nodal value understates
+the rounding already present in that value. This reference evaluates the
+stored binary64 operands, not an exact analytic Biot kernel.</p>
+<p><strong>Bell reconstruction and fourth derivatives.</strong>
+<code>fixed_points.field_from_jets</code> contracts the signed Taylor remainder
+with <code>mesh.transforms</code>. In the inspected saddle triangle, high-order
+coefficient sums have cancellation ratios up to 62,709.52 (about 15.9 bits),
+and an 80-digit sum of the captured operands differs from a recorded coefficient
+by up to 5.0819e-18. The triangle scale is 0.0714198 m; taking fourth derivatives
+introduces <code>h^-4 = 38,434.87 m^-4</code>, before polynomial factors.
+The captured pair changes a coefficient by 3.4185e-17 and a fourth derivative
+by 8.3480e-12 while selecting the same cell and triangle and the same stationary
+point. The normal-form construction then carries the higher-derivative noise
+into its cubic rays and the edge intervals. These snapshots are an independent
+compiled inspection of the worst input pair; the exact floor attribution comes
+from the frozen-output contrasts, not from treating the snapshot as the original
+executable's bitwise trace.</p>
+<p>Freezing only the cubic ray coefficient leaves a maximum change of
+1.42094e-10; freezing only the edge intervals leaves 6.15330e-11. Freezing
+both the entire saddle form and the intervals leaves 1.53477e-12. By contrast,
+freezing field coefficients or axis/boundary fluxes leaves 2.05873e-10.
+The two continuous geometry outputs therefore have to be considered together.</p>
+<p><strong>The downstream booking reductions and final subtraction do not set
+this observed floor.</strong> One-ulp changes of whole, conic and normal-cell
+moments change the residual by at most 2.8422e-14, 5.6843e-14 and 1.4211e-14.
+Normalization-factor changes reach 8.5265e-14. A one-ulp change at the final
+residual is at most 1.2925e-26. The near-root subtraction exposes upstream error;
+subtraction of the close, same-sign binary64 operands is exact. The conic and
+normal vertex controls reach 3.7375e-12 and 9.3792e-13. The two used cubic
+intersection roots at the worst cell agree with 80-digit Newton refinement
+within 8.2529e-16, and cubic-intermediate injections stay below 8.6687e-13.
+The root formula is not the dominant source in these measurements.</p>
+<h3 id="bank-residual-noise-floor-records">Reproducible records</h3>
+<p>The scripts are under <code>scripts/prototypes/bank_residual_noise_floor</code>.
+Numeric receipts and raw vectors remain outside git under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T195757251008-bank-residual-noise-floor</code>:
+<code>gpu.json</code>, <code>cpu.json</code>, <code>gpu-states.npz</code>,
+<code>gpu-residuals.npz</code>, <code>cpu-residuals.npz</code>,
+<code>geometry.json</code>, <code>geometry-residuals.npz</code>,
+<code>propagation.json</code>, <code>propagation.npz</code>,
+<code>field/geometry.json</code>, <code>field/geometry-residuals.npz</code>,
+<code>combined/propagation.json</code>, <code>contraction.json</code> and
+<code>summary.json</code>. Each measurement log names the numerical revision,
+imported source, working directory, device and x64 flag, and ends with
+<code>EXIT=</code>.</p>
+<p>H200 allocations 1307329, 1307336, 1307339 and 1307341 each requested one card,
+four CPU cores and 48 GB under <code>gpu_0003_grpA</code>; sirius allocations
+1307331 and 1307343 requested seven CPU cores and 48 GB. These are adaptive
+attribution passes, with all lanes inside each allocation, not a row array.
+The main, CPU, propagation, final field, combined-geometry and contraction logs
+end with EXIT=0. The initial geometry job completed and persisted all injection
+rows, then its root-report formatter failed on a broadcast dimension; the
+corrected root receipt is in the successful propagation logs. The first field
+attempt (1307340) was refused by its hook audit before stage results were
+accepted; <code>field-hook-failure.log</code> retains that failure. The first
+figure save was refused for an out-of-canvas automatic tick; explicit tick
+positions pass in <code>report.log</code>. No product test suites were run
+because no product code or tests changed.</p>
+<p>The context records are
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html">read-count sensitivity</a>
+and <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-breakpoint.html">the conic-endpoint breakpoint</a>.
+The negative near-root-polish record was read from its assigned run directory
+before landing; this measurement does not reintroduce that latency-costly tail.</p>
+<h3 id="bank-residual-noise-floor-hypothesis">Estimate for a product experiment</h3>
+<p><strong>If the bank contraction and the cancellation-prone reconstruction of
+the saddle's higher derivatives were effectively exact, a residual-variation
+floor near 2e-12 is a reasonable hypothesis: roughly two orders below the
+observed 2e-10 variation and fifty times below the certificate.</strong>
+The 1.79057e-12 spread with both geometry outputs fixed supplies the scale for
+that estimate. It does not prove that a fully fresh solve will reach it.
+Making only the final subtraction exact offers no corresponding gain, and an
+exact Bell coefficient sum alone leaves rounding in its input jets.</p>
+<p>A product experiment should evaluate accurate third/fourth derivative bank
+rows or a compensated field reconstruction, preserving the same discretized
+equation and fresh-read certificate. It must repeat the saved-state perturbation
+population and demonstrate convergence and read counts without freezing any
+geometry. No such numerical change is made here.</p>
+</section>

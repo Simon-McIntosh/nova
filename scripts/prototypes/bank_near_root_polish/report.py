@@ -147,6 +147,20 @@ def main():
         arm: [[r["reads"][0] for r in arms[arm, p]["rows"]] for p in (0, 1, 2)]
         for arm in ("base", "head")
     }
+    measured_costs = {}
+    for arm in ("base", "head"):
+        selected = [row for row in rows if row[0] == arm and row[1] in (1, 2)]
+        measured_costs[arm] = {
+            "reads": [min(row[3] for row in selected), max(row[3] for row in selected)],
+            "wall_ms": [
+                min(row[5] for row in selected),
+                max(row[5] for row in selected),
+            ],
+            "wall_per_read_ms": [
+                min(row[6] for row in selected),
+                max(row[6] for row in selected),
+            ],
+        }
     passed_precision = all(all(row["passed"].values()) for row in comparisons)
     certified = all(
         row[-1] and np.isfinite(row[-2]) and row[-2] <= 1e-10 for row in certification
@@ -162,6 +176,10 @@ def main():
         fixed_head_reads=stable,
         all_certified=certified,
         precision_passed=passed_precision,
+        measured_costs=measured_costs,
+        maximum_fresh_residual=max(
+            row[-2] for row in certification if row[0] == "head"
+        ),
         precision=comparisons,
         precision_control_flux=max(gaps["flux"]),
         seed_relative_perturbations=perturbations,
@@ -274,10 +292,20 @@ def main():
         "/nova/figures/sub-millisecond-forward-path/"
         "bank-near-root-polish/batch-reads.svg"
     )
+    base_wall = measured_costs["base"]["wall_ms"]
+    head_wall = measured_costs["head"]["wall_ms"]
+    base_reads = measured_costs["base"]["reads"]
+    head_reads = measured_costs["head"]["reads"]
     text = f"""<section id="bank-near-root-polish-landing">
 <h2>Fixed near-root polishing and fresh certification</h2>
 <p><strong>Fixed read count: {stable}; every lane freshly certified: {certified};
 paired precision budgets: {passed_precision}.</strong>
+Head uses {head_reads[0]}–{head_reads[1]} reads per lane across all six seed sets,
+against {base_reads[0]}–{base_reads[1]} at base. The fixed schedule costs more:
+whole-solve wall is {head_wall[0]:.3f}–{head_wall[1]:.3f} ms at head against
+{base_wall[0]:.3f}–{base_wall[1]:.3f} ms at base in the two fresh measured processes.
+This meets the count-stability measure with a latency regression.</p>
+<p>
 The batch enters polishing when every active lane has a valid finite residual at most
 1e-8.
 Sixteen full Newton updates have no backtracking. Each lane retains its lowest-residual

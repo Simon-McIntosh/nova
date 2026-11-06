@@ -45,8 +45,10 @@ def main():
                     sys.executable,
                     "-P",
                     "-c",
-                    "import nova.equilibrium.current as m; print('MODULE',m.__file__,flush=True); "
-                    "from scripts.prototypes.bank_wall_events.capture import main; main()",
+                    "import nova.equilibrium.current as m; "
+                    "print('MODULE',m.__file__,flush=True); "
+                    "from scripts.prototypes.bank_wall_events.capture import main; "
+                    "main()",
                     "--run",
                     str(destination),
                     "--revision",

@@ -28,7 +28,8 @@ def run_file(tree, revision, name, label, run, scratch, selection=None):
         "-P",
         "-c",
         "import nova, nova.equilibrium.current as m; from pathlib import Path; "
-        "print('nova', nova.__file__, 'module', m.__file__, 'cwd', Path.cwd().resolve(), flush=True); "
+        "print('nova', nova.__file__, 'module', m.__file__, "
+        "'cwd', Path.cwd().resolve(), flush=True); "
         "import pytest, sys; sys.exit(pytest.main(sys.argv[1:]))",
         "-p",
         "no:cacheprovider",

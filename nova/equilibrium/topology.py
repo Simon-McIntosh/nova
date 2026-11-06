@@ -3297,75 +3297,40 @@ def _read_at_nulls(
             sigma * fourth,
         )
 
-    # Forms are computed once inside the candidate loop and the saddle's form
-    # is selected from them, so the curvature stencil is traced once. Slot 0 is
-    # always formed because it is the selection when no candidate is admitted.
-    dtype = nulls.jet.hessian.dtype
-    empty_form = jax.tree.map(
-        lambda leaf: jnp.zeros(leaf.shape, leaf.dtype),
-        jax.eval_shape(
-            lambda: saddle_normal_form(
-                jnp.zeros(2, dtype),
-                jnp.zeros((2, 2), dtype),
-                jnp.zeros((2, 2, 2), dtype),
-                policy.hessian_tolerance,
-                jnp.zeros((2, 2, 2, 2), dtype),
-            )
-        ),
-    )
-
-    def inspect(index, carry):
-        admitted, forms = carry
-
-        def evaluate_candidate(candidate_form):
-            support = _support_at_level(
-                geometry,
-                coefficient,
-                sigma,
-                nulls.jet.value[index],
-                axis,
-                candidate_form,
-                True,
-                policy,
-            )
-            area, intervals, labels, wall, selected, owner, support_valid, count = (
-                support
-            )
-            owner_index = jnp.argmax(owner)
-            private_index = jnp.where(selected[owner_index, 0], 1, 0)
-            private_label = labels[owner_index, private_index]
-            private_reaches_wall = jnp.any(wall & (labels == private_label))
-            reaches = jnp.any(owner[:, None] & selected)
-            return support_valid & reaches & private_reaches_wall
-
-        candidate_form = jax.lax.cond(
-            saddles[index] | (index == 0),
-            normal_form,
-            lambda _: empty_form,
-            index,
-        )
-        accepted = jax.lax.cond(
-            saddles[index],
-            evaluate_candidate,
-            lambda _: jnp.asarray(False),
+    def inspect(index):
+        candidate_form = normal_form(index)
+        support = _support_at_level(
+            geometry,
+            coefficient,
+            sigma,
+            nulls.jet.value[index],
+            axis,
             candidate_form,
+            True,
+            policy,
         )
-        forms = jax.tree.map(
-            lambda stack, leaf: stack.at[index].set(leaf), forms, candidate_form
-        )
-        return admitted.at[index].set(accepted), forms
+        area, intervals, labels, wall, selected, owner, support_valid, count = support
+        owner_index = jnp.argmax(owner)
+        private_index = jnp.where(selected[owner_index, 0], 1, 0)
+        private_label = labels[owner_index, private_index]
+        private_reaches_wall = jnp.any(wall & (labels == private_label))
+        reaches = jnp.any(owner[:, None] & selected)
+        return support_valid & reaches & private_reaches_wall, candidate_form
 
-    candidates_admitted, forms = jax.lax.fori_loop(
-        0,
-        policy.null_capacity,
-        inspect,
-        (
-            jnp.zeros(policy.null_capacity, dtype=bool),
-            jax.tree.map(
-                lambda leaf: jnp.zeros((policy.null_capacity, *leaf.shape), leaf.dtype),
-                empty_form,
+    # Slots are independent: inspect them together before applying admission.
+    # Slot 0 keeps its form because it is selected when no saddle is admitted.
+    indices = jnp.arange(policy.null_capacity)
+    accepted, forms = jax.vmap(inspect)(indices)
+    candidates_admitted = saddles & accepted
+    forms = jax.tree.map(
+        lambda leaf: jnp.where(
+            (saddles | (indices == 0)).reshape(
+                (policy.null_capacity,) + (1,) * (leaf.ndim - 1)
             ),
+            leaf,
+            jnp.zeros_like(leaf),
         ),
+        forms,
     )
     saddle_index = jnp.argmax(
         jnp.where(candidates_admitted, sigma * nulls.jet.value, -jnp.inf)

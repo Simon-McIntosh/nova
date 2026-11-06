@@ -11,6 +11,11 @@
       "kind": "exempted",
       "reason": "fixed at b29d9b939: the scale-bar label sits clear of the separatrix leg in the head render, inspected by the coordinator",
       "recorded_at": "2026-11-06T06:16:02.185791+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "promoted-nodes-xpoint-angles",
+      "recorded_at": "2026-11-06T06:16:09.086878+00:00"
     }
   },
   "findings": [

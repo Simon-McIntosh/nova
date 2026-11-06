@@ -632,7 +632,7 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         # tensor spline its own saddle is polished on, so both fields' contour
         # panels share one level array and one comparison grid.
         "display_state_flux": np.asarray(
-            complete_state_surface(np.c_[radius_grid.ravel(), height_grid.ravel()]),
+            complete_state_surface(radius_grid.ravel(), height_grid.ravel()),
             dtype=np.float64,
         ).reshape(complete.flux.shape),
         "promoted_source": np.asarray(

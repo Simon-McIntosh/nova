@@ -65,7 +65,7 @@ def injections(stage, seed, hits):
             frame.f_locals[name] = bump(frame.f_locals[name], label)
         return trace
 
-    original_solve = fixed_points.solve
+    original_solve = fixed_points.solve.__wrapped__
     original_curvature = topology._curvature_derivatives
 
     def solve(*args, **kwargs):

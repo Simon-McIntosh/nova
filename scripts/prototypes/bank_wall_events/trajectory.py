@@ -7,6 +7,7 @@ configure_dtypes()
 
 import argparse
 from dataclasses import replace
+import hashlib
 import inspect
 import json
 from pathlib import Path
@@ -32,6 +33,18 @@ def counters(result):
         key: np.asarray(getattr(result, key)).tolist()
         for key in ("steps", "reads", "refactors", "residual", "converged")
     }
+
+
+def fingerprints(tree):
+    result = {}
+    for path, value in jax.tree_util.tree_flatten_with_path(tree)[0]:
+        array = np.asarray(value)
+        result[jax.tree_util.keystr(path)] = dict(
+            shape=list(array.shape),
+            dtype=str(array.dtype),
+            sha256=hashlib.sha256(array.tobytes()).hexdigest(),
+        )
+    return result
 
 
 def difference(left, right):
@@ -71,6 +84,7 @@ def main():
         cwd=str(Path.cwd().resolve()),
         device=jax.devices()[0].device_kind,
         x64=bool(jax.config.jax_enable_x64),
+        harness_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     )
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"
     batch = fixture.build(16)
@@ -99,7 +113,13 @@ def main():
             contraction_limit=0.5,
         )
 
-    record = dict(arm=args.arm, repeat=args.repeat, revision=args.revision, calls=[])
+    record = dict(
+        arm=args.arm,
+        repeat=args.repeat,
+        revision=args.revision,
+        calls=[],
+        inputs=fingerprints(inputs),
+    )
 
     def persist():
         args.output.with_suffix(".json").write_text(json.dumps(record, indent=2))
@@ -113,6 +133,8 @@ def main():
         wall = 1000 * (time.perf_counter() - start)
         row = dict(call=call, wall_ms=wall, **counters(result))
         row["per_read_ms"] = (wall / np.asarray(result.reads)).tolist()
+        row["state"] = fingerprints(result.moments)
+        row["residual_path"] = np.asarray(result.residual_path).tolist()
         assert all(row["converged"]) and max(row["residual"]) <= 1e-10
         record["calls"].append(row)
         emit("UNALTERED", **row)

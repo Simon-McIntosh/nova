@@ -38,6 +38,13 @@
   ],
   "completed_at": "2026-11-06T08:09:33.582Z",
   "dispatched_at": "2026-11-06T07:51:59Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "polygon-near-band-quadrature",
+      "recorded_at": "2026-11-06T08:26:19.018062+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/biot/polygonanalytic.py",

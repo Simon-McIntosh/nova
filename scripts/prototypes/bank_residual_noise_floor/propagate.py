@@ -31,6 +31,7 @@ GROUPS = (
     "edge_interval",
     "field_coefficients",
     "fluxes",
+    "geometry",
 )
 
 
@@ -84,6 +85,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--revision", required=True)
+    parser.add_argument("--geometry-only", action="store_true")
     args = parser.parse_args()
     emit(
         "HEADER",
@@ -125,7 +127,17 @@ def main():
 
         def choose(actual, prior, name):
             return jax.tree.map(
-                lambda x, y: jnp.where(group == GROUPS.index(name), y, x), actual, prior
+                lambda x, y: jnp.where(
+                    (group == GROUPS.index(name))
+                    | (
+                        (group == GROUPS.index("geometry"))
+                        & (name in ("saddle_form", "edge_interval"))
+                    ),
+                    y,
+                    x,
+                ),
+                actual,
+                prior,
             )
 
         reading = fresh.reading
@@ -167,6 +179,8 @@ def main():
     moments = []
     supports = []
     for group, name in enumerate(GROUPS):
+        if args.geometry_only and name not in ("none", "geometry"):
+            continue
         baseline, fresh = jax.block_until_ready(
             program(bank, cache, state, original.reading, group)
         )

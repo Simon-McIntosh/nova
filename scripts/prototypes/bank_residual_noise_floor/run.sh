@@ -19,6 +19,7 @@ else
     export JAX_PLATFORMS=cuda,cpu
     EXTRA=()
 fi
+EXTRA+=("${@:6}")
 printf '# revision: %s tree: %s command: /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.bank_residual_noise_floor.%s --run %s --revision %s %s\n' "$REVISION" "$TREE" "$MODULE" "$RUN" "$REVISION" "${EXTRA[*]}"
 /home/ITER/mcintos/Code/nova/.venv/bin/python -m "scripts.prototypes.bank_residual_noise_floor.$MODULE" --run "$RUN" --revision "$REVISION" "${EXTRA[@]}"
 RESULT=$?

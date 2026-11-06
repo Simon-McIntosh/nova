@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-06T20:56:03.830Z",
   "dispatched_at": "2026-11-06T20:46:00Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The receipts carry instrumentation_delta 0.0, as the reviewer confirmed. Turning it into an assertion is prototype hardening, not a change to the attribution.",
+      "recorded_at": "2026-11-06T21:03:37.278633+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_residual_noise_floor/measure.py",

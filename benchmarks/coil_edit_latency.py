@@ -2100,6 +2100,20 @@ def _draw_null_set(
     )
 
 
+def _set_zorder(axis: Any, first_child: int, zorder: int) -> None:
+    """Set ``zorder`` on the artists ``draw_nulls`` added to ``axis``.
+
+    The two null sets are drawn by one owner that takes no zorder, so the
+    layer is applied to the artists each call appended.  Where the reference
+    and the solved set coincide, the reference is drawn last and above, so the
+    shared marker is read as the reference rather than as whichever set
+    happened to be painted second.
+    """
+    for artist in axis.get_children()[first_child:]:
+        if hasattr(artist, "set_zorder"):
+            artist.set_zorder(zorder)
+
+
 def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
     """Draw one edit's terminal flux over the reference field.
 
@@ -2156,14 +2170,6 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         panel["separatrix"],
     )
 
-    _draw_null_set(
-        axis,
-        loaded["reference_axis"],
-        loaded["reference_xpoints"],
-        loaded["reference_saddle_index"],
-        "#3366cc",
-        loaded["wall"],
-    )
     drawn_xpoints = np.asarray(panel["xpoints"], dtype=float).reshape(-1, 2).copy()
     saddle_index = panel["saddle_index"]
     if (
@@ -2172,6 +2178,7 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         and 0 <= saddle_index < len(drawn_xpoints)
     ):
         drawn_xpoints[saddle_index] = display.saddle_rz
+    solved_first = len(axis.get_children())
     _draw_null_set(
         axis,
         panel["axis"],
@@ -2180,6 +2187,17 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         "#cc7722",
         loaded["wall"],
     )
+    _set_zorder(axis, solved_first, 6)
+    reference_first = len(axis.get_children())
+    _draw_null_set(
+        axis,
+        loaded["reference_axis"],
+        loaded["reference_xpoints"],
+        loaded["reference_saddle_index"],
+        "#3366cc",
+        loaded["wall"],
+    )
+    _set_zorder(axis, reference_first, 7)
     poloidal_axes(axis)
 
 
@@ -2304,6 +2322,42 @@ def _panel_display_note(loaded: dict[str, Any]) -> str:
     return "  |  " + "; ".join(parts)
 
 
+def _label_defects(figure: Any) -> dict[str, int]:
+    """Count the text artists that clip the canvas or overlap each other.
+
+    A figure whose labels are cut off or written over one another is not
+    legible however right its numbers are, so the counts are measured on the
+    drawn figure at save time rather than asserted.  Text without ink (an
+    empty title, a hidden artist) is not counted.
+    """
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    canvas = figure.bbox
+    boxes = []
+    clipped = 0
+    for text in figure.findobj(matplotlib.text.Text):
+        if not text.get_visible() or not text.get_text().strip():
+            continue
+        box = text.get_window_extent(renderer)
+        if box.width <= 0.0 or box.height <= 0.0:
+            continue
+        if (
+            box.x0 < canvas.x0 - 0.5
+            or box.y0 < canvas.y0 - 0.5
+            or box.x1 > canvas.x1 + 0.5
+            or box.y1 > canvas.y1 + 0.5
+        ):
+            clipped += 1
+        boxes.append(box)
+    overlapping = sum(
+        1
+        for index, first in enumerate(boxes)
+        for second in boxes[index + 1 :]
+        if first.overlaps(second)
+    )
+    return {"clipped_labels": clipped, "overlapping_labels": overlapping}
+
+
 def _render_panel(
     data_path: Path,
     figure_path: Path,
@@ -2343,7 +2397,7 @@ def _render_panel(
         panel = loaded[label]
         _paint_panel(axis, loaded, panel)
         axis.set_title(
-            "edit %d  %+d%%  %s\nresidual %.3e Wb  %d trips"
+            "edit %d  fraction %+d%%  %s\nresidual %.3e Wb  %d active-set trips"
             % (
                 panel["edit_index"],
                 round(100.0 * panel["fraction"]),
@@ -2403,6 +2457,7 @@ def _render_panel(
     # Detailed measurements belong in the page caption, where the reader sees
     # them at body size instead of shrinking them with the image.
     caption += _panel_display_note(loaded)
+    inspection = _label_defects(figure)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=100)
     vector_path = figure_path.with_suffix(".svg")
@@ -2413,6 +2468,7 @@ def _render_panel(
         "figure": str(figure_path),
         "figure_vector": str(vector_path),
         "caption": caption,
+        "visual_inspection": inspection,
         "levels": [float(value) for value in loaded["levels"]],
         "level_band": {
             "axis_flux": loaded["reference_axis_flux"],
@@ -3548,6 +3604,8 @@ def main() -> None:
                             "platform": jax.devices()[0].platform,
                             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
                         },
+                        "caption": panel["caption"],
+                        "visual_inspection": panel["visual_inspection"],
                         "display_map": panel["display_map"],
                     },
                     indent=2,

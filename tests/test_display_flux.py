@@ -15,10 +15,35 @@ from nova.equilibrium.display_flux import (
     build_display_flux_map,
 )
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.linalg.interpolant import Linear
+from nova.linalg.tensor_spline import fit_tensor_spline
+
+
+def _polish_map_saddle(display, seed):
+    """Polish ``display``'s own flux surface at ``seed``, independently.
+
+    The build reports where its polished saddle landed, so a check that read the
+    distance to that coordinate would agree with any point the build chose.
+    This re-falsifies the claim from the published field alone.
+    """
+    surface = fit_tensor_spline(
+        jnp.asarray(display.radius),
+        jnp.asarray(display.height),
+        jnp.asarray(display.flux.T),
+    )
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed, dtype=jnp.float64)[None, :],
+        jnp.ones((1,), dtype=bool),
+    )
+    return np.asarray(polished["position_rz"], dtype=np.float64).reshape(2), bool(
+        np.asarray(polished["converged"]).reshape(())
+    )
+
 
 #: Radial and vertical extent [m] of the manufactured lattice.
 RADIUS = (0.6, 1.4)
@@ -325,11 +350,51 @@ def test_promoted_nodes_are_excluded_from_the_solved_mismatch():
         not display.saddle_converged
     )
     if display.saddle_converged:
-        offset = np.asarray(lattice.coordinate)[promoted] - display.saddle_rz
+        polished, converged = _polish_map_saddle(display, xpoint)
+        assert converged
+        offset = np.asarray(lattice.coordinate)[promoted] - polished
         assert display.nearest_promoted_to_xpoint_m == pytest.approx(
             float(np.min(np.linalg.norm(offset, axis=1))), rel=1.0e-12
         )
     assert display.reproduction_relative_error < 1.0e-10
+
+
+def test_the_promoted_mask_tail_must_be_the_non_lattice_rows():
+    """A state-wide mask is cut only when its tail is the operator's wall rows.
+
+    The solve keeps its wall rows after the lattice nodes, so a mask over the
+    whole state is longer than the lattice by that wall.  A mask whose tail is
+    any other length is not the state's layout, and truncating it would drop a
+    node the map cannot account for from the promoted count.
+    """
+    profile, lattice = _profile()
+    node = lattice.node_count
+    state, _residual = _solve_with_compensation(profile, node)
+    wall_rows = int(np.asarray(profile.operator.wall.null.coordinate).shape[0])
+    assert wall_rows > 0
+    accepted = np.zeros(node + wall_rows, dtype=bool)
+    accepted[[10, 11, 20, node + 1]] = True
+    display = build_display_flux_map(
+        profile,
+        np.concatenate([state, np.zeros(wall_rows)]),
+        coupling=_coupling(profile),
+        moments=_moment_law(state, node),
+        promoted=accepted,
+        xpoint_rz=np.asarray([1.0, 0.0]),
+        chunk=128,
+    )
+    assert display.promoted_node_count == 3
+    unexplained = np.zeros(node + wall_rows + 3, dtype=bool)
+    with pytest.raises(ValueError, match="discards .* state rows past the"):
+        build_display_flux_map(
+            profile,
+            np.concatenate([state, np.zeros(wall_rows + 3)]),
+            coupling=_coupling(profile),
+            moments=_moment_law(state, node),
+            promoted=unexplained,
+            xpoint_rz=np.asarray([1.0, 0.0]),
+            chunk=128,
+        )
 
 
 def test_dropping_the_compensation_moves_the_solved_mismatch():

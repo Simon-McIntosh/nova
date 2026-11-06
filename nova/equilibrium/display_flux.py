@@ -225,6 +225,23 @@ def _branches(
     return {key: np.asarray(assembled[key]) for key in BRANCH_KEYS}
 
 
+def _non_lattice_rows(operator, node_count: int, state_size: int) -> int:
+    """Return the rows the operator's state carries after its lattice nodes.
+
+    A solve keeps its wall rows after the plasma lattice in one state vector,
+    so the promoted mask it returns spans the lattice and those rows.  Only
+    the lattice prefix names nodes the map counts, and the discarded tail is
+    legitimate exactly when its length is the operator's wall row count.
+    """
+    if state_size == node_count:
+        return 0
+    wall = getattr(operator, "wall", None)
+    coordinate = getattr(getattr(wall, "null", None), "coordinate", None)
+    if coordinate is None:
+        return state_size - node_count
+    return int(np.asarray(coordinate).shape[0])
+
+
 def _topology_state(operator, state, requested_class):
     """Return the operator's own axis and X-point read of ``state``."""
     try:
@@ -267,7 +284,11 @@ def build_display_flux_map(
     ``max_solved_node_mismatch_wb``, which is the mismatch over the nodes the
     solve does claim.  ``promoted_node_count`` and
     ``nearest_promoted_to_xpoint_m`` locate that set, the distance being taken
-    to the polished X-point.  The saddles of the map and of the lattice spline are each
+    to the polished X-point.  A mask spanning the whole state is cut to the
+    lattice prefix only when the discarded tail is exactly the operator's
+    non-lattice (wall) rows; any other tail refuses, because truncating it
+    could drop a lattice node from the count.  The saddles of the map and of
+    the lattice spline are each
     polished on their own spline, and the map's separatrix branches are
     assembled on the map at the map's own saddle value.  A polish that does not
     land on a saddle -- either it fails to converge or the Hessian there is not
@@ -301,6 +322,15 @@ def build_display_flux_map(
             raise ValueError(
                 f"the promoted mask names {promoted_nodes.size} nodes, "
                 f"the lattice carries {node_count} and the state {state_size}"
+            )
+        discarded = promoted_nodes[node_count:]
+        if discarded.size != _non_lattice_rows(operator, node_count, state_size):
+            raise ValueError(
+                f"the promoted mask discards {discarded.size} state rows past the "
+                f"{node_count}-node lattice, but the operator's state carries "
+                f"{_non_lattice_rows(operator, node_count, state_size)} non-lattice "
+                "rows: the discarded tail is not the non-lattice rows, so a "
+                "lattice node may be dropped from the promoted count"
             )
         promoted_nodes = promoted_nodes[:node_count]
 

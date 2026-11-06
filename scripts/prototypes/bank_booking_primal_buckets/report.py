@@ -217,6 +217,14 @@ def main():
                     ]
                 )
         text += "<h3>Compiled 50-cell booking and byte pins</h3>\n"
+        text += (
+            "<p>The unchanged base already fails the stored CPU byte pins. "
+            "The paired compiled outputs above establish that grouping changes "
+            "only the three moment arrays at roundoff. The measured Sirius "
+            "pins were updated only after retaining this difference table; "
+            "the final verification arm passes those pins. The other CPU "
+            "family was not measured here.</p>\n"
+        )
         text += table(
             [
                 "Field",
@@ -226,7 +234,7 @@ def main():
             ],
             pin_rows,
         )
-    negative = args.run / "negative-test_book_primal_buckets.log"
+    negative = args.run / "verified-negative-test_book_primal_buckets.log"
     negative_text = negative.read_text()
     assert re.search(r"EXIT=[1-9][0-9]*\s*$", negative_text)
     failures = re.findall(r"^FAILED (\S+)", negative_text, re.MULTILINE)
@@ -238,7 +246,7 @@ def main():
         "terminates nonzero and fails: " + escape(", ".join(failures)) + ".</p>\n"
     )
     suite_rows = []
-    for arm in ("base", "head", "verified"):
+    for arm in ("base", "head", "verified", "matrix-base", "matrix-head"):
         for path in sorted(args.run.glob(f"{arm}-test_*.log")):
             log = path.read_text()
             summaries = re.findall(r"^=+ (.* in .*?) =+$", log, re.MULTILINE)

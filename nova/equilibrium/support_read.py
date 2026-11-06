@@ -1630,7 +1630,16 @@ def solve_batch(
     retain the smallest-residual valid trial: retaining the incumbent can stall
     at a non-smooth residual plateau above tolerance. Factor reuse is opt-in
     because extra iterations can cost more than skipped refactors.
+
+    Once every active lane has a valid residual at most 1e-8, eight full Newton
+    steps replace backtracking. Each lane retains its best valid state across
+    those steps, then a separate fresh read certifies the retained states at
+    ``tolerance``. Failed certificates resume adaptive search without repeating
+    the polish. The update cap includes polishing; a short remaining budget
+    stays adaptive. Certification reads count but do not consume an update.
     """
+    polish_steps = 8
+    near_root_band = 1e-8
     lanes, cells = moments[0].shape
     support = read_batch(
         operands,
@@ -1660,6 +1669,17 @@ def solve_batch(
             | jnp.any(
                 (reading.fragment_selected != fragments).reshape(lanes, -1), axis=-1
             )
+        )
+
+    def choose(mask, proposed, retained):
+        return jax.tree.map(
+            lambda value, prior: jnp.where(
+                mask.reshape(mask.shape + (1,) * (value.ndim - mask.ndim)),
+                value,
+                prior,
+            ),
+            proposed,
+            retained,
         )
 
     norm = magnitude(moments, support)
@@ -1694,10 +1714,16 @@ def solve_batch(
         jnp.zeros(lanes, jnp.int32),
         jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
         jnp.full((lanes, max_steps), jnp.nan, dtype),
+        jnp.int32(-1),
+        jnp.asarray(False),
+        moments,
+        norm,
     )
 
     def keep_going(carried):
-        return jnp.any(~carried[3]) & (jnp.max(carried[11]) < max_steps)
+        return (jnp.any(~carried[3]) & (jnp.max(carried[11]) < max_steps)) | (
+            carried[18] >= 0
+        )
 
     def advance(carried):
         (
@@ -1719,7 +1745,28 @@ def solve_batch(
             unfreezes,
             residual_path,
             update_path,
+            polish_left,
+            polished,
+            best_state,
+            best_norm,
         ) = carried
+        start_polish = (
+            ~polished
+            & jnp.all(
+                done
+                | (
+                    fresh.valid
+                    & jnp.isfinite(current_norm)
+                    & (current_norm <= near_root_band)
+                )
+            )
+            & (jnp.max(steps) + polish_steps <= max_steps)
+        )
+        polish_left = jnp.where(start_polish, polish_steps, polish_left)
+        polishing = polish_left > 0
+        certifying = polish_left == 0
+        best_state = choose(jnp.full(lanes, start_polish), state, best_state)
+        best_norm = jnp.where(start_polish, current_norm, best_norm)
         cut_now = (fresh.reading.membership > 0) & (
             fresh.reading.membership < 1 - 1e-14
         )
@@ -1799,10 +1846,19 @@ def solve_batch(
                 condition_diagnostics=False,
             )
 
-        correction = jax.lax.cond(
-            rebuild,
-            lambda _: jax.vmap(one_fresh)((state, step_support)),
-            lambda _: jax.lax.map(one_with_factor, (state, step_support, factor)),
+        def correct(_):
+            correction = jax.lax.cond(
+                rebuild,
+                lambda _: jax.vmap(one_fresh)((state, step_support)),
+                lambda _: jax.lax.map(one_with_factor, (state, step_support, factor)),
+                None,
+            )
+            return correction.update, correction.factor
+
+        update, next_factor = jax.lax.cond(
+            certifying,
+            lambda _: (jax.tree.map(jnp.zeros_like, state), factor),
+            correct,
             None,
         )
 
@@ -1822,29 +1878,46 @@ def solve_batch(
 
         search = _damped_scale(
             evaluate,
-            state,
-            correction.update,
+            choose(jnp.full(lanes, certifying), best_state, state),
+            update,
             current_norm,
             fresh,
             active=active,
-            max_steps=8,
+            max_steps=jnp.where(polishing | certifying, 1, 8),
             tolerance=tolerance,
             keep_incumbent=False,
+            backtrack=~(polishing | certifying),
         )
         candidate, next_read, next_norm = (
             search.state,
             search.auxiliary,
             search.residual,
         )
+        invalid_polish = polishing & (~next_read.valid | ~jnp.isfinite(next_norm))
+        candidate = choose(invalid_polish, state, candidate)
+        next_read = choose(invalid_polish, fresh, next_read)
+        next_norm = jnp.where(invalid_polish, current_norm, next_norm)
         drift = lock & selection_changed(
             next_read.reading, cut_set, normal_set, locked_fragments
         )
         next_done = done | (
-            next_read.valid
-            & jnp.isfinite(next_norm)
-            & (next_norm <= tolerance)
-            & ~drift
+            ~polishing
+            & (
+                next_read.valid
+                & jnp.isfinite(next_norm)
+                & (next_norm <= tolerance)
+                & (~drift | certifying)
+            )
         )
+        better = (
+            polishing
+            & active
+            & next_read.valid
+            & jnp.isfinite(next_norm)
+            & (next_norm < best_norm)
+        )
+        best_state = choose(better, candidate, best_state)
+        best_norm = jnp.where(better, next_norm, best_norm)
         slot = jnp.max(steps)
         update_norm = jnp.max(
             jnp.abs(
@@ -1867,16 +1940,27 @@ def solve_batch(
             cut_set,
             normal_set,
             locked_fragments,
-            correction.factor,
-            jnp.asarray(True),
+            next_factor,
+            ~certifying,
             current_norm,
-            steps + active.astype(jnp.int32),
-            refactors + (active & rebuild).astype(jnp.int32),
+            steps + (active & ~certifying).astype(jnp.int32),
+            refactors + (active & rebuild & ~certifying).astype(jnp.int32),
             reads + search.evaluations,
             freezes + start_freeze.astype(jnp.int32),
             unfreezes + (changed | drift).astype(jnp.int32),
-            residual_path.at[:, slot + 1].set(next_norm),
-            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0)),
+            residual_path.at[:, slot + (~certifying).astype(jnp.int32)].set(next_norm),
+            jax.lax.cond(
+                certifying,
+                lambda _: update_path,
+                lambda _: update_path.at[:, slot].set(
+                    jnp.where(active, update_norm, 0.0)
+                ),
+                None,
+            ),
+            jnp.where(polishing | certifying, polish_left - 1, polish_left),
+            polished | start_polish,
+            best_state,
+            best_norm,
         )
 
     final = jax.lax.while_loop(keep_going, advance, initial)

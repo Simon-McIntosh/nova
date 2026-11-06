@@ -629,3 +629,75 @@ def test_active_set_freeze_trajectory_converges(fresh_solution, frozen_solution)
     assert bool(fresh_solution.converged) and bool(frozen_solution.converged)
     assert int(frozen_solution.freezes) >= 1
     assert float(frozen_solution.residual) <= 1e-10
+
+
+@pytest.mark.parametrize("invalid_trial", [False, True])
+def test_uncertified_polish_resumes_adaptive_search(monkeypatch, invalid_trial):
+    """A tracked zero cannot certify; invalid trials cannot replace valid states."""
+    observed = []
+
+    def read(_operands, _cache, states, *_args, **_kwargs):
+        position = states[0][:, 0]
+        jax.debug.callback(lambda x: observed.append(np.asarray(x)), position)
+        reading = _moving_support(
+            states, jnp.full_like(position, 0.5), jnp.ones_like(position, bool)
+        )
+        if invalid_trial:
+            reading = reading._replace(valid=position != 1)
+        return reading
+
+    def residual(_operands, _base, state, support, *_args):
+        position = state[0]
+        value = jnp.where(position < 1, 2e-9, 2e-10 + (position - 1) * 1e-11)
+        value = jnp.where((position > 1) & (position < 2), 0.0, value)
+        # Retaining another state's read hides the residual of this state.
+        value = jnp.where(position != support.reading.boundary, 0.0, value)
+        if invalid_trial:
+            value = jnp.where(position == 1, 0.0, value)
+        return support_read.StepResidual(
+            (value, jnp.zeros_like(value), jnp.zeros_like(value)),
+            (*state, jnp.asarray(1.0)),
+            support.reading,
+            support.valid,
+        )
+
+    monkeypatch.setattr(support_read, "read_batch", read)
+    monkeypatch.setattr(support_read, "step_residual", residual)
+    monkeypatch.setattr(support_read, "newton_step", _unit_update)
+    points = jnp.zeros((1, 1, 2), dtype=jnp.float64)
+    state = tuple(jnp.zeros((1, 1), dtype=jnp.float64) for _ in range(3))
+    result = jax.jit(
+        lambda values: support_read.solve_batch(
+            None,
+            None,
+            values,
+            points,
+            points,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=12,
+        )
+    )(state)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    print(
+        "POLISH_FALLBACK",
+        np.asarray(result.moments[0]),
+        np.asarray(result.reads),
+        observed,
+    )
+    if invalid_trial:
+        # Invalid full trials cannot replace the valid incumbent at zero.
+        assert bool(result.converged[0])
+        assert bool(result.support.valid[0])
+        np.testing.assert_array_equal(result.moments[0], [[1.5]])
+    else:
+        assert bool(result.converged[0])
+        assert float(result.residual[0]) <= 1e-10
+        np.testing.assert_array_equal(result.moments[0], [[1.5]])
+        np.testing.assert_array_equal(result.steps, [9])
+        np.testing.assert_array_equal(result.reads, [12])
+    assert len(observed) == int(result.reads[0])

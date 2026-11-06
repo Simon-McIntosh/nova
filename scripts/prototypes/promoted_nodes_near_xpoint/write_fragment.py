@@ -476,7 +476,11 @@ every one is at least {pocket_below_min:.1f} mm below it in height (up to
 from it in the plane, their flux is {pocket_above_min:.4f} to {pocket_above_max:.4f} Wb
 <em>above</em> its flux, and their normalised flux runs {pocket_psi_min:.3f} to
 {pocket_psi_max:.3f} — entirely on the plasma side of the boundary value. They are
-{pocket_wall_min:.1f} to {pocket_wall_max:.1f} mm from the wall.</p>
+{pocket_wall_min:.1f} to {pocket_wall_max:.1f} mm from the wall, measured to the wall
+polyline's segments rather than to its vertices: the nearest of them sits
+{pocket_wall_min:.1f} mm off the first wall, and a vertex-only distance reports several
+times that, because the wall's vertices are far enough apart that a node alongside a
+straight run is nowhere near the closer of the two.</p>
 
 <p>So the pocket is a closed-flux lobe below an unadmitted saddle, bounded on one side
 by the wall and cut off from the axis on the other by the narrow band around that

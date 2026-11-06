@@ -28,6 +28,9 @@ if str(REPOSITORY) not in sys.path:
 import jax  # noqa: E402
 import jax.numpy as jnp  # noqa: E402
 
+from nova.equilibrium.boundary_comparison import (  # noqa: E402
+    _point_to_segment_distances,
+)
 from nova.equilibrium.flux_surface_connectivity import (  # noqa: E402
     polish_stationary_points,
 )
@@ -81,16 +84,21 @@ def flux_levels(state_surface, image_surface, receipt):
 
 
 def wall_distance(points, units):
-    """Return each point's distance in metres to the nearest wall vertex."""
+    """Return each point's distance in metres to the nearest wall segment.
+
+    The wall archive is a polyline, so the distance to it is the distance to
+    its segments: a vertex-only reading passes over the span between two
+    widely spaced vertices and overstates the clearance of any node that sits
+    alongside a straight run.
+    """
     distances = np.full(points.shape[0], np.inf)
     for unit in units:
         wall = np.column_stack(
             [np.asarray(unit["radius"], float), np.asarray(unit["height"], float)]
         )
-        distances = np.minimum(
-            distances,
-            np.linalg.norm(points[:, None, :] - wall[None, :, :], axis=2).min(axis=1),
-        )
+        if bool(unit.get("closed")) and not np.allclose(wall[0], wall[-1]):
+            wall = np.vstack([wall, wall[:1]])
+        distances = np.minimum(distances, _point_to_segment_distances(points, wall))
     return distances
 
 

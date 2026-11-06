@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
+from matplotlib.text import Text
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 if str(REPOSITORY) not in sys.path:
@@ -58,6 +59,20 @@ def levels_for(state_values, image_values):
     )
     pooled = pooled[np.isfinite(pooled)]
     return np.linspace(float(pooled.min()), float(pooled.max()), LEVELS)
+
+
+def text_artists(figure):
+    """Return every visible, non-empty text artist the figure carries.
+
+    A guard handed only the labels it was told about cannot see the legend,
+    a leader or a tick label, so the overlap clause never fires on the text a
+    reader actually reads.  The figure is asked for its own text instead.
+    """
+    return [
+        artist
+        for artist in figure.findobj(Text)
+        if artist.get_visible() and artist.get_text().strip()
+    ]
 
 
 def assert_inside(figure, artists, name):
@@ -160,7 +175,6 @@ def render(receipt, fields, destination, angles=None):
     )
     main = figure.add_subplot(grid[0, 0])
     zoom = figure.add_subplot(grid[0, 1])
-    labelled = []
 
     wall_units = receipt["wall_units"]
     for axes in (main, zoom):
@@ -255,18 +269,16 @@ def render(receipt, fields, destination, angles=None):
         },
         zorder=16,
     )
-    labelled.append(
-        main.text(
-            0.5,
-            1.015,
-            "zoom, %.0f mm across" % (1.0e3 * ZOOM_M),
-            transform=main.transAxes,
-            ha="center",
-            va="bottom",
-            color=IMAGE_COLOR,
-            fontsize=11,
-            zorder=17,
-        )
+    main.text(
+        0.5,
+        1.015,
+        "zoom, %.0f mm across" % (1.0e3 * ZOOM_M),
+        transform=main.transAxes,
+        ha="center",
+        va="bottom",
+        color=IMAGE_COLOR,
+        fontsize=11,
+        zorder=17,
     )
     half = 0.5 * ZOOM_M
     zoom.set_xlim(saddle[0] - half, saddle[0] + half)
@@ -356,13 +368,14 @@ def render(receipt, fields, destination, angles=None):
         bbox_to_anchor=(0.5, 0.995),
     )
 
-    assert_inside(figure, labelled, "promoted-nodes-panel")
+    artists = text_artists(figure)
+    assert_inside(figure, artists, "promoted-nodes-panel")
     destination.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(destination, dpi=200)
     plt.close(figure)
     return {
         "figure": str(destination),
-        "labels": len(labelled),
+        "labels": len(artists),
         "hot_nodes": int(hot.sum()),
     }
 

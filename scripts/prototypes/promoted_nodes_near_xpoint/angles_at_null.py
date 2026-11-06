@@ -435,10 +435,6 @@ def pair_blocks(blocks):
                     angle_between(left["bearing_deg"], right["bearing_deg"])
                     for right in image
                 ]
-            shifts = [
-                angle_between(left["bearing_deg"], right["bearing_deg"])
-                for right in image
-            ]
             partner = int(np.argmin(metric)) if metric else None
             pairs.append(
                 {
@@ -447,7 +443,19 @@ def pair_blocks(blocks):
                     "image_bearing_deg": (
                         image[partner]["bearing_deg"] if partner is not None else None
                     ),
-                    "shift_deg": float(min(shifts)) if shifts else None,
+                    # The shift belongs to the branch this one was paired with.
+                    # Reporting the closest of all image branches instead would
+                    # read as agreement whenever any other branch happened to
+                    # lie nearby, which is the opposite of a pairing.
+                    "shift_deg": (
+                        float(
+                            angle_between(
+                                left["bearing_deg"], image[partner]["bearing_deg"]
+                            )
+                        )
+                        if partner is not None
+                        else None
+                    ),
                     "unpaired_image_deg": sorted(
                         entry["bearing_deg"] for entry in image
                     ),

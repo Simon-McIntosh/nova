@@ -1,0 +1,49 @@
+<section id="bank-krylov-cleanup-landing">
+<h2>Unwritten Arnoldi columns kept out of the bank least-squares</h2>
+<p>A restarted cycle that ends before the restart width leaves the tail of the
+Hessenberg matrix unwritten. Seeding those columns with an identity and then
+solving the small least-squares by QR put a spurious component into the Newton
+update: a QR back-substitution couples every trailing column into the leading
+coefficients, so the corruption survived even when the trailing basis vectors
+were zero. The cycle now zeroes the unwritten columns before the QR and sets
+their zero diagonal to one so the triangular solve stays finite; the basis
+columns they would scale are already zero, so only columns an Arnoldi step
+actually wrote enter the solve.</p>
+<p>Two tests pin the behaviour against independent float64 references at 1e-10
+relative. An early breakdown is a guard rather than the defect: the basis
+vector a breakdown produces is zeroed, so an identity seed cannot reach the
+update there, and the test stays green with the seed restored. The mid-cycle
+cap is where the defect bites. Restoring the identity seed on a cycle capped at
+five columns of a width-20 restart reddens that test at 5.6e-3, against 4.7e-16
+with the fix; the deciding log is
+<code>logs/negative-control-eye-breakdown.log</code>.</p>
+<p>The cycle driver's toy factor now derives its block inverse and gather
+indices from the same block preconditioner the step uses, so a three-component
+double carries the fields' actual meaning rather than a shape-correct
+placeholder. Nothing the cycle test asserts changed.</p>
+<table id="bank-krylov-cleanup-suite"><caption>Paired suites, one fresh
+pytest process per file at each arm.</caption>
+<thead><tr><th>File</th><th>Base</th><th>Head</th></tr></thead><tbody>
+<tr><td>tests/test_bank_newton_step.py</td><td>16 passed</td><td>18 passed</td></tr>
+<tr><td>tests/test_bank_solve_cycle.py</td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td>tests/test_bank_solve_driver.py</td><td>10 passed</td><td>10 passed</td></tr>
+<tr><td>tests/test_bank_step_booking.py</td><td>1 failed, 4 passed</td><td>1 failed, 4 passed</td></tr>
+</tbody></table>
+<p><code>test_book_primal_keeps_exact_diverted_moments</code> fails at both
+arms: its committed byte pin is stale, it is outside this change, and it is
+reported unchanged rather than repaired here.</p>
+<table id="bank-krylov-cleanup-device"><caption>One H200 allocation, sixteen
+diverted 550-cell slices, base against head. Gaps are per-lane differences
+normalised by the unit they are judged against; every limit is met, the worst
+lane using 0.26 of its budget. Whole-solve wall moves
+301.857 ms to 301.764 ms
+(-0.03%), inside run-to-run noise; the head's largest fresh
+residual is 9.56e-11 against a 1e-10 budget.</caption>
+<thead><tr><th>Lane</th><th>Flux gap</th><th>Axis gap</th><th>Saddle gap</th>
+<th>Boundary gap</th><th>Head fresh residual</th></tr></thead><tbody>
+<tr><td>0</td><td>1.16e-14</td><td>1.00e-14</td><td>2.49e-15</td><td>4.31e-16</td><td>6.69e-11</td></tr><tr><td>1</td><td>4.64e-15</td><td>1.63e-14</td><td>3.02e-16</td><td>5.28e-16</td><td>8.88e-12</td></tr><tr><td>2</td><td>3.87e-15</td><td>9.02e-15</td><td>4.28e-16</td><td>3.06e-17</td><td>9.39e-12</td></tr><tr><td>3</td><td>3.33e-14</td><td>2.70e-14</td><td>8.14e-15</td><td>3.11e-15</td><td>7.91e-11</td></tr><tr><td>4</td><td>4.02e-14</td><td>8.09e-15</td><td>9.39e-15</td><td>3.91e-15</td><td>4.78e-11</td></tr><tr><td>5</td><td>7.35e-15</td><td>1.42e-14</td><td>1.54e-15</td><td>2.53e-16</td><td>8.73e-11</td></tr><tr><td>6</td><td>4.68e-14</td><td>6.98e-15</td><td>1.44e-14</td><td>4.25e-15</td><td>9.56e-11</td></tr><tr><td>7</td><td>1.20e-14</td><td>4.15e-15</td><td>3.02e-15</td><td>7.28e-16</td><td>3.04e-11</td></tr><tr><td>8</td><td>1.43e-14</td><td>5.51e-15</td><td>4.63e-15</td><td>1.13e-15</td><td>2.52e-11</td></tr><tr><td>9</td><td>1.43e-14</td><td>2.34e-15</td><td>2.30e-15</td><td>3.95e-16</td><td>5.16e-11</td></tr><tr><td>10</td><td>9.67e-15</td><td>4.35e-15</td><td>4.63e-15</td><td>1.52e-15</td><td>9.85e-12</td></tr><tr><td>11</td><td>5.03e-15</td><td>1.62e-14</td><td>1.35e-15</td><td>4.29e-16</td><td>7.57e-11</td></tr><tr><td>12</td><td>1.32e-14</td><td>9.45e-15</td><td>2.79e-15</td><td>8.38e-16</td><td>8.28e-11</td></tr><tr><td>13</td><td>1.43e-14</td><td>3.28e-15</td><td>2.58e-15</td><td>4.44e-16</td><td>3.44e-11</td></tr><tr><td>14</td><td>2.86e-14</td><td>9.70e-15</td><td>7.36e-15</td><td>2.18e-15</td><td>4.69e-11</td></tr><tr><td>15</td><td>7.35e-15</td><td>8.10e-15</td><td>3.16e-15</td><td>5.28e-16</td><td>9.39e-11</td></tr>
+</tbody></table>
+<p>Limits: flux and pair gaps below 1e-8 of span, axis and saddle below 5e-4 of
+minor radius, boundary flux below 1e-4 of span, oracle bounds below their own
+5e-4 and 1e-4.</p>
+</section>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EFIT inductance partition test guards</title>
+<meta name="plan" content="nova-portfolio-replan">
+<meta name="node" content="efit-parity-test-guards">
+</head>
+<body>
+<main>
+<article id="efit-parity-test-guards-landing" class="landing" data-node="efit-parity-test-guards" data-plan="nova-portfolio-replan">
+<h2>EFIT inductance partition test guards</h2>
+<p>Commit <code>8e7fe6def5e6a874992557c3dd04983a8922e307</code> makes the support sets disjoint by construction, independently checks out-of-core current, and removes expectations that pinned one direction of the live-versus-banked core difference.</p>
+<table id="efit-parity-test-guards-repairs">
+<caption>Repairs and their failure evidence</caption>
+<thead><tr><th>Finding</th><th>Change and measure</th></tr></thead>
+<tbody>
+<tr><td>The out-of-core assertion reused the benchmark's subtraction: <code>direct_out_of_core_current_a = total - core_current</code>. Adding that value back to the core reduces to the total-current check and cannot independently check the out-of-core support.</td><td>The test now sums <code>cell_current[~core]</code> from the reconstructed cell arrays and compares that independent support sum with <code>direct_out_of_core_current_a</code>. The open-contour result exposes the core mask and cell currents for this check.</td></tr>
+<tr><td>The core-divergence checks required the live support to have a different cell count, strictly more current, and <code>current_agrees == false</code>, pinning one direction of a diagnostic comparison.</td><td>Those direction-specific expectations are removed. The synthetic partition test instead checks the invariant: the three supports are pairwise disjoint, cover both cells, and their currents sum to the direct total.</td></tr>
+<tr><td>When a confined-core centroid lies outside the stored contour, <code>exterior = ~inside</code> overlaps the core support.</td><td>The exterior mask is now the complement of <code>core | inside</code>. The original two-cell reproduction had core membership <code>[true, false]</code>, interior non-core membership <code>[false, true]</code>, and exterior membership <code>[true, false]</code>: overlap count <code>1</code>, counted current <code>25 A</code>, direct current <code>18 A</code>.</td></tr>
+</tbody>
+</table>
+<table id="efit-parity-test-guards-measures">
+<caption>Focused CPU gate: base <code>659549857eb25922bde85e2620b1d0cd0447c650</code>, head <code>8e7fe6def5e6a874992557c3dd04983a8922e307</code>.</caption>
+<thead><tr><th>Run</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Base: inductance-partition and field-instrument tests</td><td>12 passed in 157.74 s, <code>EXIT=0</code>; log: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T053657211196-efit-parity-test-guards/base-gate.log</code>.</td></tr>
+<tr><td>Head: same two files, including the outside-contour core-centroid test</td><td>13 passed in 153.54 s, <code>EXIT=0</code>; log: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T053657211196-efit-parity-test-guards/head-gate.log</code>. There are zero added failures.</td></tr>
+<tr><td>Negative control: restore <code>exterior = ~inside</code></td><td><code>test_outside_contour_core_centroid_is_counted_once</code> fails at the core/exterior overlap assertion; <code>EXIT=1</code>. Log: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T053657211196-efit-parity-test-guards/negative-control.log</code>.</td></tr>
+</tbody>
+</table>
+</article>
+</main>
+</body>
+</html>

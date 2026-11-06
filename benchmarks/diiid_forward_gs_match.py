@@ -3716,9 +3716,10 @@ def render_frame_comparison(
                 count = reason.get("closed_candidate_count")
                 label += f"\nno closed branch; {count} candidate(s)"
         elif result.solve_exception_class == "NoQualifiedAxisError":
-            label += "\nunavailable: no qualified axis"
+            label += "\nno qualified axis"
         else:
-            label += f"\n{frame.get('plot_unavailable_reason', 'display unavailable')}"
+            reason = str(frame.get("plot_unavailable_reason", "display unavailable"))
+            label += f"\n{reason.split(':')[0][:22]}"
         position = axis.get_position()
         figure.text(position.x0, 0.26, label, va="top", fontsize=14, linespacing=1.5)
         if "labelled" not in frame:

@@ -1,0 +1,117 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T10:31:01.517Z",
+  "dispatched_at": "2026-11-06T10:18:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The coordinator redirected the node in its resume advice: test XLA settings in the measurement environment, with no product change. That followed the worker's correct scope stop, which found the first difference upstream of booking. Not following the original brief here was ordered, not drift.",
+      "recorded_at": "2026-11-06T10:42:15.332858+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "bank-booking-determinism",
+      "recorded_at": "2026-11-06T10:42:24.426714+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-booking-determinism",
+      "recorded_at": "2026-11-06T10:42:33.899808+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "This is a prototype measurement runner. Consolidating the fresh-process suite runners is cleanup outside this measurement and is not worth a resume.",
+      "recorded_at": "2026-11-06T10:42:52.135245+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "It is a prototype table emitter, and consolidating it is outside this measurement.",
+      "recorded_at": "2026-11-06T10:43:05.215514+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "The node has no product or test change after the redirect, so head equals base. The fragment says so, and one arm is the honest record.",
+      "recorded_at": "2026-11-06T10:43:19.955488+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html",
+      "id": "f70a65db36f",
+      "line": 50,
+      "severity": "blocking",
+      "text": "the node's own record states the five-process gate was stopped at the first unequal value and that the earliest divergence is the compiled topology read reported at topology.py:3287, so the brief's instruction to set status blocked and name the file and line outside current.py was not followed, and the shipped recommendation does not make any booking operation deterministic."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_determinism/measurement.sh",
+      "id": "f7519f7c3de",
+      "line": 10,
+      "severity": "blocking",
+      "text": "the recommendation prescribes a global XLA flag (--xla_gpu_deterministic_ops=true), which the brief excludes as the remedy, and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:15 records that the unset arm already passes byte identity and identical reads under the shared cache, so the +1.17% cost is recommended without evidence that the flag is necessary."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_determinism/report.py",
+      "id": "faf91d8f3ee",
+      "line": 201,
+      "severity": "non-blocking",
+      "text": "the qualifying-settings predicate accepts every setting (unset, deterministic, autotune-disabled) because it only compares each arm with itself, so it cannot distinguish a deterministic environment from a stable one and its name overstates what it establishes."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_determinism/suite.py",
+      "id": "fb2d0caab92",
+      "line": 146,
+      "severity": "non-blocking",
+      "text": "the fresh-process arm runner duplicates scripts/prototypes/bank_newton_step/suite_arm.py (git archive, per-file --basetemp process, module path header, receipt shape) instead of extending it, so a fix to the shared suite runner will not reach this copy."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_determinism/report.py",
+      "id": "fde83e7ef34",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "table() is a near-verbatim copy of scripts/prototypes/fixed_points/production_report.py:13, adding a third instance of the same fragment-table emitter."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T090435478592-bank-booking-determinism/manifest.md",
+      "id": "f585e474e44",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "after_suite repeats baseline_suite's command, revision cb42f656 and log_path, so added_failure_count 0 is one arm compared with itself rather than a head arm measuring the landed change."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the nine commits against cb42f656; every one adds measurement or reporting under scripts/prototypes/bank_booking_determinism plus the evidence fragment (1173 insertions, 0 deletions), with no change to product source or tests.",
+    "done_when": "the done_when requires the named operation in nova/equilibrium/current.py to be deterministic at head with the changed operation's device ms and the whole-solve wall tabled base against head; the gate that ran asserts within-setting byte identity of initial moments over five processes per compiler setting and never tables a changed operation or a base-against-head wall, so it does not assert the done_when.",
+    "goal": "the goal is to make the GPU booking of current moments reproducible across fresh processes; the landed change modifies no product code (nova/equilibrium/current.py is untouched in the diff) and instead recommends a compiler environment, while its own evidence records the first divergent value upstream of booking at nova/equilibrium/topology.py:3287 (_read_at_nulls).",
+    "manifest": "read; it reports status complete with 0 added failures, nine commits and the same base-suite log used as both baseline_suite and after_suite, and its landing line recommends deterministic_ops=true at +1.17% cost; its own fragment acknowledges the five-process determinism investigation is not the landed product change.",
+    "write_paths": "the manifest and prompt declare nova/equilibrium/current.py, scripts/prototypes/bank_booking_determinism, docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html and docs/figures/sub-millisecond-forward-path/bank-booking-determinism; the diff contains nine added files, all under scripts/prototypes/bank_booking_determinism and the evidence fragment; current.py and the figures directory are untouched and nothing lies outside the grant."
+  },
+  "justifications": {
+    "durability": "the guards are assert statements inside one-shot prototype scripts (scripts/prototypes/bank_booking_determinism/report.py:96, report.py:104) and no test in tests/ exercises them, so nothing reddens if the comparator or the recommendation regresses.",
+    "evidence": "scripts/prototypes/bank_booking_determinism/report.py:81 defines byte_identical only within one compiler setting and report.py:76 takes the moment difference from that setting's own five processes, so no base-against-head measurement of a changed operation exists and the done_when's quantitative measure is unmeasured.",
+    "fit": "scripts/prototypes/bank_booking_determinism/report.py and measure.py follow the per-prototype measure/report idiom of their siblings and carry no plan, sprint or ticket identifier.",
+    "goal_fidelity": "the diff touches no file under nova/ and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:50 records the determinism investigation as blocked at the first unequal read, so the goal of making the booking operation deterministic in product code is not delivered.",
+    "reuse": "scripts/prototypes/bank_booking_determinism/suite.py re-implements the archive-plus-fresh-per-file-pytest arm runner already owned by scripts/prototypes/bank_newton_step/suite_arm.py rather than extending it, and report.py:26 duplicates the fragment table emitter at scripts/prototypes/fixed_points/production_report.py:13.",
+    "scope_discipline": "git diff cb42f656 684031cc1 adds only scripts/prototypes/bank_booking_determinism and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html, both inside the declared write paths, with no out-of-scope path touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the GPU booking of current moments reproducible across fresh processes; the landed change modifies no product code (nova/equilibrium/current.py is untouched in the diff) and instead recommends a compiler environment, while its own evidence records the first divergent value upstream of booking at nova/equilibrium/topology.py:3287 (_read_at_nulls).\nVERDICT done_when: the done_when requires the named operation in nova/equilibrium/current.py to be deterministic at head with the changed operation's device ms and the whole-solve wall tabled base against head; the gate that ran asserts within-setting byte identity of initial moments over five processes per compiler setting and never tables a changed operation or a base-against-head wall, so it does not assert the done_when.\nVERDICT write_paths: the manifest and prompt declare nova/equilibrium/current.py, scripts/prototypes/bank_booking_determinism, docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html and docs/figures/sub-millisecond-forward-path/bank-booking-determinism; the diff contains nine added files, all under scripts/prototypes/bank_booking_determinism and the evidence fragment; current.py and the figures directory are untouched and nothing lies outside the grant.\nVERDICT manifest: read; it reports status complete with 0 added failures, nine commits and the same base-suite log used as both baseline_suite and after_suite, and its landing line recommends deterministic_ops=true at +1.17% cost; its own fragment acknowledges the five-process determinism investigation is not the landed product change.\nVERDICT diff: read the nine commits against cb42f656; every one adds measurement or reporting under scripts/prototypes/bank_booking_determinism plus the evidence fragment (1173 insertions, 0 deletions), with no change to product source or tests.\nCALL_SITES: none\nSCORE goal_fidelity: 5\nJUSTIFICATION goal_fidelity: the diff touches no file under nova/ and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:50 records the determinism investigation as blocked at the first unequal read, so the goal of making the booking operation deterministic in product code is not delivered.\nSCORE evidence: 8\nJUSTIFICATION evidence: scripts/prototypes/bank_booking_determinism/report.py:81 defines byte_identical only within one compiler setting and report.py:76 takes the moment difference from that setting's own five processes, so no base-against-head measurement of a changed operation exists and the done_when's quantitative measure is unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff cb42f656 684031cc1 adds only scripts/prototypes/bank_booking_determinism and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html, both inside the declared write paths, with no out-of-scope path touched.\nSCORE durability: 7\nJUSTIFICATION durability: the guards are assert statements inside one-shot prototype scripts (scripts/prototypes/bank_booking_determinism/report.py:96, report.py:104) and no test in tests/ exercises them, so nothing reddens if the comparator or the recommendation regresses.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/bank_booking_determinism/report.py and measure.py follow the per-prototype measure/report idiom of their siblings and carry no plan, sprint or ticket identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_booking_determinism/suite.py re-implements the archive-plus-fresh-per-file-pytest arm runner already owned by scripts/prototypes/bank_newton_step/suite_arm.py rather than extending it, and report.py:26 duplicates the fragment table emitter at scripts/prototypes/fixed_points/production_report.py:13.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:50 blocking: the node's own record states the five-process gate was stopped at the first unequal value and that the earliest divergence is the compiled topology read reported at topology.py:3287, so the brief's instruction to set status blocked and name the file and line outside current.py was not followed, and the shipped recommendation does not make any booking operation deterministic.\nFINDING scripts/prototypes/bank_booking_determinism/measurement.sh:10 blocking: the recommendation prescribes a global XLA flag (--xla_gpu_deterministic_ops=true), which the brief excludes as the remedy, and docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html:15 records that the unset arm already passes byte identity and identical reads under the shared cache, so the +1.17% cost is recommended without evidence that the flag is necessary.\nFINDING scripts/prototypes/bank_booking_determinism/report.py:201 non-blocking: the qualifying-settings predicate accepts every setting (unset, deterministic, autotune-disabled) because it only compares each arm with itself, so it cannot distinguish a deterministic environment from a stable one and its name overstates what it establishes.\nFINDING scripts/prototypes/bank_booking_determinism/suite.py:146 non-blocking: the fresh-process arm runner duplicates scripts/prototypes/bank_newton_step/suite_arm.py (git archive, per-file --basetemp process, module path header, receipt shape) instead of extending it, so a fix to the shared suite runner will not reach this copy.\nFINDING scripts/prototypes/bank_booking_determinism/report.py:26 non-blocking: table() is a near-verbatim copy of scripts/prototypes/fixed_points/production_report.py:13, adding a third instance of the same fragment-table emitter.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T090435478592-bank-booking-determinism/manifest.md:12 non-blocking: after_suite repeats baseline_suite's command, revision cb42f656 and log_path, so added_failure_count 0 is one arm compared with itself rather than a head arm measuring the landed change.",
+  "review_run_id": "r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900",
+  "reviewed_base_sha": "cb42f656f76a7d7e56da8a53d4754c22d131bdc0",
+  "reviewed_head_sha": "684031cc1900c3031abaf7ca738b8f12a08e89e4",
+  "reviewed_run_id": "r-20261106T090435478592-bank-booking-determinism",
+  "scores": {
+    "durability": 7,
+    "evidence": 8,
+    "fit": 16,
+    "goal_fidelity": 5,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T10:31:03.761041+00:00",
+  "total": 61
+}

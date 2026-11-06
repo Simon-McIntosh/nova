@@ -16,7 +16,7 @@ export TMPDIR=/tmp PYTHONPATH=$ROOT PYTHONDONTWRITEBYTECODE=1
 export XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
 SCRATCH=$(mktemp -d "$TMPDIR/batch-width-XXXXXX")
-trap 'rm -rvf "$SCRATCH"' EXIT
+trap 'result=$?; rm -rvf "$SCRATCH"; printf "EXIT=%s\n" "$result"; exit "$result"' EXIT
 export TMPDIR=$SCRATCH
 status=0
 for width in 16 32 64 128 256; do
@@ -30,5 +30,4 @@ for width in 16 32 64 128 256; do
         if [ -f "$RUN/width-$width-unfit.json" ]; then break; fi
     done
 done
-printf 'EXIT=%s\n' "$status"
 exit "$status"

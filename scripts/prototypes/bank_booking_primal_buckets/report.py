@@ -53,6 +53,7 @@ def main():
         for process in (1, 2)
     }
     rows, precision, invocation_rows = [], [], []
+    measured = {}
     for lanes in (1, 16):
         for arm in ("base", "head"):
             for process in range(3):
@@ -89,6 +90,13 @@ def main():
                     device_ms, launches = "warm-up", "warm-up"
                 if device:
                     evaluations = max(reads) + updates
+                    measured[arm, process, lanes] = dict(
+                        wall=wall,
+                        reads=max(reads),
+                        updates=updates,
+                        wall_per_read=wall / max(reads),
+                        device_per_call=residual["device_ms"] / evaluations,
+                    )
                     invocation_rows.append(
                         [
                             arm,
@@ -134,18 +142,38 @@ def main():
         '<section id="bank-booking-primal-buckets-landing">\n<h2>Primal '
         "booking in separate geometry populations</h2>\n"
     )
+
+    def interval(arm, lanes, key, digits=3):
+        values = [measured[arm, process, lanes][key] for process in (1, 2)]
+        low, high = min(values), max(values)
+        return (
+            f"{low:.{digits}f}"
+            if low == high
+            else f"{low:.{digits}f}–{high:.{digits}f}"
+        )
+
     text += (
         "<p><strong>The requested structure preserves precision, but does "
         "not make each booking cheaper.</strong> At one slice the paired "
-        "fresh processes take 96.369–96.669 ms at base and 100.004–100.341 ms "
-        "at head, both with four reads. At sixteen slices, base takes "
-        "603.760–604.689 ms with seven reads and six batch updates; head takes "
-        "461.597–462.133 ms with six reads and four updates. Wall per read "
-        "falls from 86.251–86.384 to 76.933–77.022 ms. Residual device work "
-        "per call rises from 2.865–2.866 to 3.934–3.941 ms at one slice and "
-        "from 9.124–9.140 to 9.807–9.817 ms at sixteen. Launches per call "
-        "also rise. The lower sixteen-slice total includes a shorter "
-        "trajectory and must not be presented as a booking speedup.</p>\n"
+        f"fresh processes take {interval('base', 1, 'wall')} ms at base and "
+        f"{interval('head', 1, 'wall')} ms at head, with "
+        f"{interval('base', 1, 'reads', 0)} / "
+        f"{interval('head', 1, 'reads', 0)} reads. At sixteen slices, base "
+        f"takes {interval('base', 16, 'wall')} ms with "
+        f"{interval('base', 16, 'reads', 0)} reads and "
+        f"{interval('base', 16, 'updates', 0)} batch updates; head takes "
+        f"{interval('head', 16, 'wall')} ms with "
+        f"{interval('head', 16, 'reads', 0)} reads and "
+        f"{interval('head', 16, 'updates', 0)} updates. Wall per read "
+        f"falls from {interval('base', 16, 'wall_per_read')} to "
+        f"{interval('head', 16, 'wall_per_read')} ms. Residual device work "
+        f"per call rises from {interval('base', 1, 'device_per_call')} to "
+        f"{interval('head', 1, 'device_per_call')} ms at one slice and "
+        f"from {interval('base', 16, 'device_per_call')} to "
+        f"{interval('head', 16, 'device_per_call')} ms at sixteen. "
+        "Launches per call also rise. The lower sixteen-slice total "
+        "includes a shorter trajectory and must not be presented as a "
+        "booking speedup.</p>\n"
     )
     text += (
         "<p>Primal and tangent booking share one cell-bucket loop and one "

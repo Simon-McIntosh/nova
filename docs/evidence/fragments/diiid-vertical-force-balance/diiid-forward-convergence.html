@@ -6,8 +6,10 @@ relative residuals from <code>0.0273</code> to <code>4.28</code>. The banked rec
 to one mechanism on four frames and to a refusal upstream of the fixed point on the fifth. It is
 <b>not</b> an alternating-mask switch: the active set has stopped changing (mask difference zero) at the
 terminal promotion of every branch, and the relative residual is <i>bit-identical</i> across the last two
-promotions. The inner Newton&ndash;Krylov solve accepts no further promotion at that frozen mask, and the
-outer active-set loop then terminates on mask stability rather than on the residual criterion.</p>
+promotions. The inner Newton&ndash;Krylov solve does keep accepting its steps &mdash; 24 of 24 attempted on the
+measured frame &mdash; and the promoted state reproduces the same residual to the bit, so the outer loop
+either stops on mask stability or spends its whole trip budget without moving. On the bank that is the
+outer active-set loop terminating on mask stability rather than on the residual criterion.</p>
 
 <h3>Per-frame mechanism</h3>
 
@@ -57,15 +59,43 @@ topology and misses its current by that much is a lost plasma, not a slow contra
 the label's, which is the displacement the vertical-force-balance plan already documents.</li>
 </ul>
 
-<p><b>Pending measurement.</b> The both-branch probe records, per promotion and per branch, the axis
-position and its wall containment, the area of the plasma support, and the toroidal current the profile
-carries inside its confined core against the frame's target. It also runs a continued arm with the
-mask-stability exits disabled, so a loop that would otherwise declare settlement has to spend its whole
-trip budget at the frozen mask. Those are the numbers that separate a stall which is the mechanism from a
-stall that is what is left after the plasma leaves. The probe is running as one job
-(<code>sched/1307367</code>, H200) over all five frames; its receipt is
-<code>convergence-receipt.json</code>'s <code>measured_branches</code> block, and until it lands the
-mechanism below is stated as the terminal symptom, not as an established cause.</p>
+<p><b>Measured: frame 179.</b> The both-branch probe (job <code>sched/1307430</code>, H200; receipt at
+<code>probe.json</code>, ingested into <code>convergence-receipt.json</code>'s measured block) re-solves
+each seed twice, once under the shipped policy and once with the mask-stability exits disabled so the
+loop must spend its whole trip budget at the frozen mask. On frame 179 the two arms differ exactly as
+the mechanism requires and the plasma is <i>present</i> in both:</p>
+
+<table>
+<thead><tr><th>seed</th><th>arm</th><th>trips</th><th>termination</th><th>terminal residual</th><th>accepted / attempted steps</th><th>mask difference</th><th>axis R, Z [m]</th><th>inside wall</th><th>confined current / target</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>shipped</td><td>2</td><td><code>ACTIVE_SET_SETTLED</code></td><td><code>2.726e-02</code></td><td>24 / 24</td><td>25 &rarr; 0</td><td>1.760, +0.043</td><td>yes</td><td>1.057</td></tr>
+<tr><td>limited</td><td>stability exits disabled</td><td>16</td><td><code>ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED</code></td><td><code>2.726e-02</code></td><td>24 / 24</td><td>25 &rarr; 0 &rarr; 0 &hellip;</td><td>1.760, +0.043</td><td>yes</td><td>1.057</td></tr>
+<tr><td>diverted</td><td>shipped</td><td>2</td><td><code>ACTIVE_SET_SETTLED</code></td><td><code>4.181e-01</code></td><td>24 / 24</td><td>13 &rarr; 0</td><td>1.761, &minus;0.264</td><td>yes</td><td>0.763</td></tr>
+<tr><td>diverted</td><td>stability exits disabled</td><td>16</td><td><code>ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED</code></td><td><code>4.181e-01</code></td><td>24 / 24</td><td>13 &rarr; 0 &rarr; 0 &hellip;</td><td>1.761, &minus;0.264</td><td>yes</td><td>0.763</td></tr>
+</tbody>
+</table>
+
+<p>Two facts follow, and both sharpen the verdict rather than merely confirming it. First, the stall is
+<b>not</b> a slow contraction that the settled exit cuts short: with that exit removed the loop spends all
+16 trips and the residual is bit-identical on every one of them, so continuing buys nothing. Second, it is
+<b>not</b> a plasma that has left the vessel on this frame: the axis sits inside the wall on both seeds,
+and the confined core carries <code>1.057</code>&times; the target current on the limited seed and
+<code>0.763</code>&times; on the diverted one. What stalls is the outer promotion itself &mdash; every
+attempted inner step is accepted (24 of 24) and the promotion still returns the same residual, so the
+fixed-point map is idempotent at that state.</p>
+
+<p><b>A caveat on the area.</b> The probe also records the plasma-region area the operator reports, and it
+reads <code>0.0 m&sup2;</code> on every arm while the confined-core current read on the same state is
+<code>~1 MA</code>. The two are computed from different structures, so this fragment reports the area as
+measured and does not use it as evidence either way; the current ratio and the axis containment are the
+presence measures the verdict rests on. Whether the empty plasma mask is a definition artefact or a real
+feature of the stalled state is a question the fix node should answer, and it is named in the
+recommended fix below.</p>
+
+<p><b>Still running.</b> Frames 44, 144, 146 and 137 ran behind 179 in the same job and land after this
+checkpoint; the resume step ingests them from <code>probe.json</code> (written per arm) and revises the
+per-frame table above rather than re-running anything. Until they land, the mechanism is measured on 179
+and stated as the terminal symptom on the others.</p>
 
 <h3>The branch decision on frames 179 and 44</h3>
 
@@ -145,14 +175,19 @@ residual and the converged flag.</p>
 <p><b>Change:</b> make the outer loop's terminal condition <i>fail closed</i> on the residual. Today
 <code>settled</code> and <code>stagnated</code> (the two conditions that stop the loop at a stable mask) are
 reachable while <code>selected_residual &gt; convergence_tolerance</code>, because both require only
-<code>selected_difference == 0</code> and zero accepted promotions. Two edits, in this order:</p>
+<code>selected_difference == 0</code>. The measured arms put that in the sharpest form: on frame 179
+<code>ACTIVE_SET_SETTLED</code> fires at a residual <code>2.7e-2</code> with 24 of 24 inner steps accepted,
+and with the exit removed the loop spends its full 16 trips at the same residual. A stable mask is
+therefore not evidence of a converged fixed point &mdash; it is evidence that the outer map stopped
+changing the state. Two edits, in this order:</p>
 
 <ol>
 <li><b>Carry the inner step-acceptance receipt.</b> Publish
 <code>attempted_newton_promotions</code> and <code>accepted_newton_promotions</code> per trip on
 <code>FixedPointResult</code> and through <code>ForwardSolveReceipt</code>. The banked receipts do not
-record them, so the reason the frozen-mask step is refused is currently invisible; this node could not
-measure it.</li>
+record them; the probe reconstructs the counts from <code>globalisation_decisions</code> for one frame and
+cannot do so for the rest. A frozen mask with <i>every</i> step accepted is a different defect from a
+frozen mask with the step refused, and the receipt cannot currently tell them apart.</li>
 <li><b>Distinguish a refused step from a converged mask.</b> When a trip ends with
 <code>mask difference == 0</code>, zero accepted promotions and a residual above tolerance, return a
 distinct termination reason (<code>ACTIVE_SET_STEP_REFUSED</code>) and keep the loop alive to its trip

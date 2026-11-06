@@ -21,7 +21,7 @@ GROUPS = (
     "lu_solve + update",
     "damped trial selection",
     "solve_batch (other)",
-    "compiler-generated",
+    "unbound compiler/library",
 )
 
 
@@ -117,4 +117,4 @@ def group(item):
         return "damped trial selection"
     if "solve_batch" in names:
         return "solve_batch (other)"
-    return "compiler-generated"
+    return "unbound compiler/library"

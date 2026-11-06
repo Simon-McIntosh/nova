@@ -121,7 +121,7 @@ def analyse(run, lanes):
                 ):
                     groups = {context_group}
                     method = "enclosing HLO loop"
-            if len(groups) != 1 or groups == {"compiler-generated"}:
+            if len(groups) != 1 or groups == {"unbound compiler/library"}:
                 if owners:
                     context = instructions[owners[-1]]
                     scores = {
@@ -136,7 +136,7 @@ def analyse(run, lanes):
                         ]
                         groups = {group(instructions[name]) for name in candidates}
                         method = "kernel symbol + enclosing HLO loop"
-                    if not groups or groups == {"compiler-generated"}:
+                    if not groups or groups == {"unbound compiler/library"}:
                         groups = {group(context)}
                         method = "enclosing HLO loop"
             label = (
@@ -145,7 +145,7 @@ def analyse(run, lanes):
                 else "shared: " + " / ".join(sorted(groups))
             )
             if not groups:
-                label = "compiler-generated"
+                label = "unbound compiler/library"
             ledger[key] = dict(
                 kernel=key[0],
                 hlo_op=hlo,

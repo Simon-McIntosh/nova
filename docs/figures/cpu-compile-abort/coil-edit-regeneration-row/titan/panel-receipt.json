@@ -11,7 +11,7 @@
       "unassembled": 0
     }
   },
-  "caption": "Both panels draw assembled solved separatrix lobes and legs through their polished X-points from the archived terminal currents; the converged panel has a promoted node within two lattice cells, so its near-X geometry remains uncertified.",
+  "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3416 to -0.1224 Wb)  |  every solved state imposes the vertical current-centre row at 0.031680 m (the reference's own centre, tolerance 1e-06 m)  |  reference is the unedited equilibrium, its admitted saddle above its axis (blue set: lobe solid, legs dashed, admitted saddle (0.585, +1.231) m)  |  solved sets orange: lobe solid, legs dashed, admitted saddle (0.583, +1.209) m above its axis in the converged panel and saddle (0.596, +1.170) m above its axis in the failed panel  |  other qualified nulls hollow  |  wall drawn  |  the converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 2.621e-02 Wb, solved-node mismatch 7.468e-09 Wb, 46 promoted nodes, nearest promoted node 0.056 m from its polished X-point; the non-converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.303e-02 Wb, solved-node mismatch 6.432e-04 Wb, 25 promoted nodes, nearest promoted node 2.451 m from its polished X-point",
   "display_map": {
     "moments_route": "stored terminal moments at the solve's target current",
     "panels": {
@@ -44,12 +44,12 @@
     "two_cell_threshold_m": 0.12125000008381903
   },
   "render": {
-    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/redraw_and_gate.py",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography_redraw_titan.py",
     "copied_from": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
     "device": "NVIDIA H200 NVL",
     "host": "98dci4-gpu-0003.iter.org",
-    "job_id": "1306556",
-    "log": "/work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/lane-redraw-ad534aecb.log",
+    "job_id": "1306662",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-redraw-titan.log",
     "partition": "betelgeuse",
     "platform": "gpu",
     "published_archive": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/panel-states.npz",
@@ -57,7 +57,7 @@
     "read_archive": "docs/figures/single-grid-solver-cutover/panel-states.npz",
     "read_archive_md5": "82a99c7036d06ca690faeda4552d7153",
     "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-titan.json",
-    "source_revision": "ad534aecbc9b2d34e90c8939c78be208f6763f91"
+    "source_revision": "5fb1848fd91ce376ebca8ab25139793cb65ecc4f"
   },
   "schema": "nova.coil-edit-panel-receipt",
   "set": "cpu-compile-abort-titan",
@@ -79,6 +79,7 @@
     "assembled_lobe_and_legs_visible": true,
     "clipped_labels": 0,
     "inspected_render": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
-    "overlapping_labels": 0
+    "overlapping_labels": 0,
+    "page_width_px": 900
   }
 }

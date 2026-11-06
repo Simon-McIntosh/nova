@@ -1,0 +1,242 @@
+<section id="bank-solve-trace-four-read-landing">
+<h2>Four-read solve: the work inside each call still dominates</h2>
+<p><strong>Both fresh H200 processes converge every lane in four reads and three
+updates. The sixteen-slice medians are 303.291 and 303.659 ms per batch,
+or 18.956 and 18.979 ms per slice.</strong> The maximum fresh residual is
+4.13536e-12. At width one the medians are 81.794 and 82.043 ms, with a fresh
+residual of 1.57740e-12. These measurements reproduce the four-read behavior
+reported by <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-saddle-derivatives.html#bank-saddle-derivatives-landing">the saddle-curvature record</a>.
+They attribute the saved certificate seed, not a neighbouring-slice warm start.</p>
+<p>The three largest groups at sixteen slices are Jacobian assembly
+(76.434–76.464 ms, 26.19–26.22% of device time), residual booking
+(56.292–56.339 ms, 19.30%), and candidate support evaluation
+(52.178–52.245 ms, 17.89–17.90%). Together they account for 63.40%.
+All three have modest launch growth with batch width, rather than one launch
+sequence per lane. Their costs are distributed across many batched kernels.</p>
+<h3 id="bank-solve-trace-four-read-floor">What four reads imply</h3>
+<p>At sixteen slices, a read costs 27.703 ms of attributed device work and its
+fresh-residual certification costs 7.990 ms: <strong>35.692 ms per read together</strong>.
+An update costs 8.119 ms for its residual, 25.483 ms for the Jacobian,
+8.820 ms for GMRES and update work, and 2.444 ms for equilibration:
+<strong>44.865 ms per update</strong>. These are means over the two fresh processes.
+The residual is split by compiler call scope: <code>newton_step</code> owns
+update evaluation; <code>solve_batch.magnitude</code> owns certification.</p>
+<p>The observed three updates and four reads imply
+<strong>4 × 35.692 + 3 × 44.865 ≈ 277.365 ms per batch</strong>, or
+<strong>17.335 ms per slice</strong>. The two process subtotals are 277.267 and
+277.463 ms. The target is 16 ms per sixteen-slice batch; this subtotal alone
+exceeds it by 261.365 ms, or 16.335 ms per slice. Even the four reads alone
+cost 142.769 ms per batch, or 8.923 ms per slice.</p>
+<p>This is a lower accounting floor for the measured implementation, not an
+irreducible hardware bound or a latency prediction for a redesigned solver.
+It excludes 14.376 ms of other/shared device activity and copies, plus gaps.
+Device durations can overlap: subtracting <em>all</em> measured overlap from
+this subtotal gives the conservative floor 275.936 ms per batch,
+or 17.246 ms per slice. Profiling affects the execution; the observed
+unprofiled wall remains the 303.291–303.659 ms range above.</p>
+<p>At width one, read plus certification costs 4.121 + 3.106 = 7.227 ms,
+and an update costs 1.737 + 3.370 + 2.695 + 0.215 = 8.017 ms.
+The corresponding four-read/three-update subtotal is 52.959 ms;
+14.265 ms of other device work remains outside it. The detailed tables retain
+both processes, with no invented split of shared fused kernels.</p>
+<figure id="bank-solve-trace-four-read-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/bank-solve-trace-four-read/device-time.svg"
+alt="Device time by source group for sixteen slices, with previous trace in grey and four-read trace in blue; Jacobian, residual and candidate support remain largest.">
+<figcaption>Device milliseconds per complete sixteen-slice solve. Each mark is
+the mean of two fresh processes. Grey squares are the previous trace's eight
+reads and six batch updates; blue circles are the current four reads and three
+updates. The two panels use different linear ranges to keep small groups
+readable. Shared-source groups are combined only in this figure. This is a
+historical workload inventory, not a paired revision speedup measurement.
+The data-ink saver passed text-bound and overlap checks. The producer inspected
+the 1400 × 720 PNG: labels, marks and both scales are legible without clipping.
+The PNG stays in the run directory; the SVG is the published artifact.</figcaption>
+</figure>
+<h3 id="bank-solve-trace-four-read-method">Inputs, cache and comparison scope</h3>
+<p>The pinned main base is <code>360c086b605d46d2ed2d867010e0b14ff1bc3796</code>,
+which contains merge <code>9101941b6</code>. Capture revision
+<code>276a3cab1ecfb043d33e4971ff09558865708b50</code> adds the runner only;
+product source and tests are unchanged from base. One reserved H200 allocation,
+<code>1307440</code>, ran on <code>98dci4-gpu-0003</code> with four CPUs,
+one GPU and 48 GB, completing in 6 min 31 s with <code>EXIT=0</code>.</p>
+<p>The runner imports <code>bank_solve_trace_head.device.main</code> and keeps
+<code>bank_solve_trace.capture</code> and <code>bank_solve_trace.analyse</code>
+unchanged. Its fixture adapter loads variant zero of the saved common-seed
+archive from the saddle-curvature measurement, generated at that study's base
+<code>f3bb6ed265d0bca5c8b0c54ddac1d50cf22c625d</code>. The archived SHA-256 is
+<code>72e45171871d8b7db425b01fadc94a4c19c6614abcfd0e30373ac0e59eba758f</code>,
+identical in all three capture logs. The moments are three float64 arrays of
+shape 16 × 550; seeds and prior stationary points have shape 16 × 2 × 2.
+Width one takes lane zero of these same arrays. The fixture still loads the
+bank and builds its metadata, but its freshly booked moments are replaced by
+the saved arrays before lowering either solve.</p>
+<p>Process zero warms one revision-specific cache. Processes one and two are
+fresh interpreters using that cache, with <code>XLA_FLAGS</code> unset through
+<code>bank_booking_determinism/measurement.sh</code>. Both measured processes
+log hits for the same two <code>jit_solve</code> keys. Each capture configures
+float64 before constructing arrays, asserts x64 and the GPU backend, and logs
+its revision, resolved directory and imported module paths. Each width uses
+five synchronized unprofiled calls followed by one profiled call, with
+<code>reuse_factor=False</code> and <code>max_steps=60</code>.</p>
+<p>The previous columns reproduce both processes of
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html#bank-solve-trace-head-landing">the previous solve attribution</a>,
+whose product base is <code>d102ff6f103775ced8fe3b573122a235bec9da22</code>.
+Those processes used independently built seeds and are not rerun here.
+Their wall/read values and iteration counts are shown for context; no causal
+revision speedup is inferred from the whole-solve totals. The present pair
+uses common seeds and identical compiled keys, following
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-booking-determinism.html">the booking-determinism protocol</a>.</p>
+<h3>1 slices: device ms / kernel launches / device share</h3>
+<table><thead><tr><th>Source group</th><th>Previous p1</th><th>Previous p2</th><th>Current p1</th><th>Current p2</th></tr></thead><tbody>
+<tr><td>read census</td><td>3.358 / 2223 / 4.38%</td><td>3.348 / 2223 / 4.37%</td><td>3.372 / 2226 / 5.02%</td><td>3.376 / 2226 / 5.02%</td></tr>
+<tr><td>read cut-cell membership</td><td>2.797 / 1362 / 3.65%</td><td>2.799 / 1362 / 3.65%</td><td>2.805 / 1363 / 4.17%</td><td>2.805 / 1363 / 4.17%</td></tr>
+<tr><td>read normal form + set</td><td>0.157 / 88 / 0.20%</td><td>0.157 / 88 / 0.21%</td><td>0.140 / 84 / 0.21%</td><td>0.139 / 84 / 0.21%</td></tr>
+<tr><td>read curvature stencil</td><td>0.071 / 32 / 0.09%</td><td>0.069 / 32 / 0.09%</td><td>0.185 / 96 / 0.28%</td><td>0.186 / 96 / 0.28%</td></tr>
+<tr><td>read wall events</td><td>1.700 / 764 / 2.22%</td><td>1.703 / 764 / 2.22%</td><td>1.688 / 764 / 2.51%</td><td>1.686 / 764 / 2.51%</td></tr>
+<tr><td>read candidate loop</td><td>3.239 / 888 / 4.23%</td><td>3.242 / 888 / 4.23%</td><td>3.251 / 888 / 4.84%</td><td>3.250 / 888 / 4.84%</td></tr>
+<tr><td>read fragment selection</td><td>2.101 / 1212 / 2.74%</td><td>2.099 / 1212 / 2.74%</td><td>2.110 / 1212 / 3.14%</td><td>2.110 / 1212 / 3.14%</td></tr>
+<tr><td>read continuous geometry</td><td>1.025 / 182 / 1.34%</td><td>1.030 / 182 / 1.34%</td><td>1.041 / 186 / 1.55%</td><td>1.044 / 186 / 1.55%</td></tr>
+<tr><td>read qualification</td><td>1.888 / 192 / 2.46%</td><td>1.885 / 192 / 2.46%</td><td>1.891 / 192 / 2.81%</td><td>1.890 / 192 / 2.81%</td></tr>
+<tr><td>step_residual</td><td>20.130 / 9804 / 26.28%</td><td>20.117 / 9804 / 26.27%</td><td>17.626 / 8901 / 26.22%</td><td>17.641 / 8901 / 26.24%</td></tr>
+<tr><td>step_jacobian</td><td>15.576 / 6177 / 20.33%</td><td>15.545 / 6177 / 20.30%</td><td>10.106 / 2724 / 15.03%</td><td>10.115 / 2724 / 15.05%</td></tr>
+<tr><td>equilibrate + lu_factor</td><td>0.650 / 51 / 0.85%</td><td>0.647 / 51 / 0.84%</td><td>0.648 / 51 / 0.96%</td><td>0.643 / 51 / 0.96%</td></tr>
+<tr><td>lu_solve + update</td><td>8.064 / 3018 / 10.53%</td><td>8.093 / 3018 / 10.57%</td><td>8.089 / 3018 / 12.03%</td><td>8.080 / 3018 / 12.02%</td></tr>
+<tr><td>damped trial selection</td><td>0.205 / 147 / 0.27%</td><td>0.205 / 147 / 0.27%</td><td>0.208 / 147 / 0.31%</td><td>0.208 / 147 / 0.31%</td></tr>
+<tr><td>solve_batch (other)</td><td>5.558 / 90 / 7.25%</td><td>5.554 / 90 / 7.25%</td><td>5.544 / 90 / 8.25%</td><td>5.544 / 90 / 8.25%</td></tr>
+<tr><td>unbound compiler/library</td><td>1.213 / 393 / 1.58%</td><td>1.214 / 393 / 1.59%</td><td>1.138 / 384 / 1.69%</td><td>1.133 / 384 / 1.69%</td></tr>
+<tr><td>Device copies and fills</td><td>8.876 / 0 / 11.59%</td><td>8.884 / 0 / 11.60%</td><td>7.382 / 0 / 10.98%</td><td>7.374 / 0 / 10.97%</td></tr>
+<tr><td>All device activity</td><td>76.606 / 26623 / 100%</td><td>76.592 / 26623 / 100%</td><td>67.224 / 22326 / 100%</td><td>67.225 / 22326 / 100%</td></tr>
+</tbody></table>
+<h3>16 slices: device ms / kernel launches / device share</h3>
+<table><thead><tr><th>Source group</th><th>Previous p1</th><th>Previous p2</th><th>Current p1</th><th>Current p2</th></tr></thead><tbody>
+<tr><td>read census</td><td>22.400 / 5368 / 3.69%</td><td>22.385 / 5368 / 3.69%</td><td>11.176 / 2693 / 3.83%</td><td>11.193 / 2693 / 3.84%</td></tr>
+<tr><td>read cut-cell membership</td><td>58.228 / 3011 / 9.60%</td><td>58.348 / 3011 / 9.61%</td><td>29.116 / 1509 / 9.98%</td><td>29.135 / 1509 / 9.98%</td></tr>
+<tr><td>read normal form + set</td><td>0.330 / 185 / 0.05%</td><td>0.330 / 185 / 0.05%</td><td>0.172 / 98 / 0.06%</td><td>0.171 / 98 / 0.06%</td></tr>
+<tr><td>read curvature stencil</td><td>0.385 / 80 / 0.06%</td><td>0.385 / 80 / 0.06%</td><td>0.446 / 103 / 0.15%</td><td>0.448 / 103 / 0.15%</td></tr>
+<tr><td>read wall events</td><td>7.569 / 2048 / 1.25%</td><td>7.568 / 2048 / 1.25%</td><td>3.762 / 1024 / 1.29%</td><td>3.768 / 1024 / 1.29%</td></tr>
+<tr><td>read candidate loop</td><td>104.411 / 2328 / 17.21%</td><td>104.287 / 2328 / 17.18%</td><td>52.178 / 1164 / 17.89%</td><td>52.245 / 1164 / 17.90%</td></tr>
+<tr><td>read fragment selection</td><td>15.338 / 2104 / 2.53%</td><td>15.349 / 2104 / 2.53%</td><td>7.664 / 1052 / 2.63%</td><td>7.714 / 1052 / 2.64%</td></tr>
+<tr><td>read continuous geometry</td><td>8.243 / 708 / 1.36%</td><td>8.243 / 708 / 1.36%</td><td>4.098 / 355 / 1.41%</td><td>4.100 / 355 / 1.41%</td></tr>
+<tr><td>read qualification</td><td>4.250 / 616 / 0.70%</td><td>4.255 / 616 / 0.70%</td><td>2.114 / 298 / 0.72%</td><td>2.122 / 298 / 0.73%</td></tr>
+<tr><td>step_residual</td><td>127.717 / 25177 / 21.05%</td><td>127.861 / 25177 / 21.07%</td><td>56.292 / 10845 / 19.30%</td><td>56.339 / 10845 / 19.30%</td></tr>
+<tr><td>step_jacobian</td><td>160.240 / 16746 / 26.41%</td><td>160.331 / 16746 / 26.42%</td><td>76.464 / 5427 / 26.22%</td><td>76.434 / 5427 / 26.19%</td></tr>
+<tr><td>equilibrate + lu_factor</td><td>14.693 / 108 / 2.42%</td><td>14.700 / 108 / 2.42%</td><td>7.326 / 54 / 2.51%</td><td>7.337 / 54 / 2.51%</td></tr>
+<tr><td>lu_solve + update</td><td>52.442 / 6588 / 8.64%</td><td>52.448 / 6588 / 8.64%</td><td>26.458 / 3294 / 9.07%</td><td>26.459 / 3294 / 9.07%</td></tr>
+<tr><td>damped trial selection</td><td>4.971 / 509 / 0.82%</td><td>4.969 / 509 / 0.82%</td><td>2.295 / 240 / 0.79%</td><td>2.291 / 240 / 0.79%</td></tr>
+<tr><td>solve_batch (other)</td><td>17.868 / 526 / 2.95%</td><td>17.871 / 526 / 2.94%</td><td>8.666 / 276 / 2.97%</td><td>8.665 / 276 / 2.97%</td></tr>
+<tr><td>unbound compiler/library</td><td>0.661 / 53 / 0.11%</td><td>0.664 / 53 / 0.11%</td><td>0.720 / 56 / 0.25%</td><td>0.720 / 56 / 0.25%</td></tr>
+<tr><td>shared: read continuous geometry / read cut-cell membership</td><td>0.066 / 30 / 0.01%</td><td>0.067 / 30 / 0.01%</td><td>0.031 / 14 / 0.01%</td><td>0.032 / 14 / 0.01%</td></tr>
+<tr><td>shared: step_jacobian / step_residual</td><td>0.044 / 24 / 0.01%</td><td>0.044 / 24 / 0.01%</td><td>0.003 / 3 / 0.00%</td><td>0.004 / 3 / 0.00%</td></tr>
+<tr><td>shared: read cut-cell membership / step_jacobian</td><td>0.005 / 6 / 0.00%</td><td>0.005 / 6 / 0.00%</td><td>0.000 / 0 / 0.00%</td><td>0.000 / 0 / 0.00%</td></tr>
+<tr><td>Device copies and fills</td><td>6.784 / 0 / 1.12%</td><td>6.813 / 0 / 1.12%</td><td>2.659 / 0 / 0.91%</td><td>2.656 / 0 / 0.91%</td></tr>
+<tr><td>shared: read cut-cell membership / step_jacobian / step_residual</td><td>0.000 / 0 / 0.00%</td><td>0.000 / 0 / 0.00%</td><td>0.003 / 3 / 0.00%</td><td>0.003 / 3 / 0.00%</td></tr>
+<tr><td>shared: read cut-cell membership / step_residual</td><td>0.000 / 0 / 0.00%</td><td>0.000 / 0 / 0.00%</td><td>0.003 / 3 / 0.00%</td><td>0.003 / 3 / 0.00%</td></tr>
+<tr><td>All device activity</td><td>606.646 / 66215 / 100%</td><td>606.921 / 66215 / 100%</td><td>291.647 / 28511 / 100%</td><td>291.835 / 28511 / 100%</td></tr>
+</tbody></table>
+<h3>Fresh-process counters and synchronized unprofiled wall</h3>
+<table><thead><tr><th>Trace</th><th>Slices</th><th>Process</th><th>Reads per lane</th><th>Updates per lane</th><th>Batch ms</th><th>ms/slice</th><th>ms/batch read</th></tr></thead><tbody>
+<tr><td>Previous</td><td>1</td><td>1</td><td>[4]</td><td>[3]</td><td>96.839</td><td>96.839</td><td>24.210</td></tr>
+<tr><td>Previous</td><td>1</td><td>2</td><td>[4]</td><td>[3]</td><td>97.489</td><td>97.489</td><td>24.372</td></tr>
+<tr><td>Current</td><td>1</td><td>1</td><td>[4]</td><td>[3]</td><td>81.794</td><td>81.794</td><td>20.449</td></tr>
+<tr><td>Current</td><td>1</td><td>2</td><td>[4]</td><td>[3]</td><td>82.043</td><td>82.043</td><td>20.511</td></tr>
+<tr><td>Previous</td><td>16</td><td>1</td><td>[8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]</td><td>[3, 6, 3, 3, 4, 3, 5, 4, 4, 4, 4, 3, 3, 4, 4, 3]</td><td>643.051</td><td>40.191</td><td>80.381</td></tr>
+<tr><td>Previous</td><td>16</td><td>2</td><td>[8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]</td><td>[3, 6, 3, 3, 4, 3, 5, 4, 4, 4, 4, 3, 3, 4, 4, 3]</td><td>642.945</td><td>40.184</td><td>80.368</td></tr>
+<tr><td>Current</td><td>16</td><td>1</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]</td><td>303.291</td><td>18.956</td><td>75.823</td></tr>
+<tr><td>Current</td><td>16</td><td>2</td><td>[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]</td><td>[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]</td><td>303.659</td><td>18.979</td><td>75.915</td></tr>
+</tbody></table>
+<h3>Read and update device costs</h3>
+<table><thead><tr><th>Slices</th><th>Process</th><th>Reads</th><th>Updates</th><th>Read ms/read</th><th>Certification ms/read</th><th>Residual ms/update</th><th>Jacobian ms/update</th><th>GMRES + update ms/update</th><th>Scaling ms/update</th><th>Total ms/update</th><th>Four-read floor ms</th><th>Floor ms/slice</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>4</td><td>3</td><td>4.121</td><td>3.104</td><td>1.736</td><td>3.369</td><td>2.696</td><td>0.216</td><td>8.017</td><td>52.953</td><td>52.953</td></tr>
+<tr><td>1</td><td>2</td><td>4</td><td>3</td><td>4.122</td><td>3.107</td><td>1.737</td><td>3.372</td><td>2.693</td><td>0.214</td><td>8.017</td><td>52.965</td><td>52.965</td></tr>
+<tr><td>16</td><td>1</td><td>4</td><td>3</td><td>27.682</td><td>7.987</td><td>8.115</td><td>25.488</td><td>8.819</td><td>2.442</td><td>44.864</td><td>277.267</td><td>17.329</td></tr>
+<tr><td>16</td><td>2</td><td>4</td><td>3</td><td>27.724</td><td>7.992</td><td>8.123</td><td>25.478</td><td>8.820</td><td>2.446</td><td>44.866</td><td>277.463</td><td>17.341</td></tr>
+</tbody></table>
+<h3>Closure against the profiled wall</h3>
+<table><thead><tr><th>Slices</th><th>Process</th><th>Device ms</th><th>Overlap ms</th><th>Gaps ms</th><th>Accounted ms</th><th>Profiled ms</th><th>Residual ms</th><th>Residual %</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>67.223549</td><td>0.830847</td><td>60.733177</td><td>127.125879</td><td>127.121439</td><td>0.004440</td><td>0.003493</td></tr>
+<tr><td>1</td><td>2</td><td>67.224715</td><td>0.828946</td><td>99.363888</td><td>165.759657</td><td>165.753828</td><td>0.005829</td><td>0.003516</td></tr>
+<tr><td>16</td><td>1</td><td>291.646766</td><td>1.429734</td><td>38.859029</td><td>329.076061</td><td>329.069467</td><td>0.006594</td><td>0.002004</td></tr>
+<tr><td>16</td><td>2</td><td>291.835305</td><td>1.426919</td><td>39.261599</td><td>329.669985</td><td>329.662625</td><td>0.007360</td><td>0.002233</td></tr>
+</tbody></table>
+<h3>Launches per invocation</h3>
+<table><thead><tr><th>Slices</th><th>Process</th><th>Group</th><th>Launches/solve</th><th>Invocations</th><th>Launches/invocation</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>step_jacobian</td><td>2724</td><td>3</td><td>908.000</td></tr>
+<tr><td>1</td><td>1</td><td>step_residual</td><td>8901</td><td>7</td><td>1271.571</td></tr>
+<tr><td>1</td><td>1</td><td>read candidate loop</td><td>888</td><td>4</td><td>222.000</td></tr>
+<tr><td>1</td><td>2</td><td>step_jacobian</td><td>2724</td><td>3</td><td>908.000</td></tr>
+<tr><td>1</td><td>2</td><td>step_residual</td><td>8901</td><td>7</td><td>1271.571</td></tr>
+<tr><td>1</td><td>2</td><td>read candidate loop</td><td>888</td><td>4</td><td>222.000</td></tr>
+<tr><td>16</td><td>1</td><td>step_jacobian</td><td>5427</td><td>3</td><td>1809.000</td></tr>
+<tr><td>16</td><td>1</td><td>step_residual</td><td>10845</td><td>7</td><td>1549.286</td></tr>
+<tr><td>16</td><td>1</td><td>read candidate loop</td><td>1164</td><td>4</td><td>291.000</td></tr>
+<tr><td>16</td><td>2</td><td>step_jacobian</td><td>5427</td><td>3</td><td>1809.000</td></tr>
+<tr><td>16</td><td>2</td><td>step_residual</td><td>10845</td><td>7</td><td>1549.286</td></tr>
+<tr><td>16</td><td>2</td><td>read candidate loop</td><td>1164</td><td>4</td><td>291.000</td></tr>
+</tbody></table>
+<h3 id="bank-solve-trace-four-read-scaling">Launch scaling and source owners</h3>
+<p>Jacobian launches per update rise from <strong>908 to 1809</strong>
+(1.99× for 16× the lanes). Residual launches per evaluation rise from
+<strong>1271.571 to 1549.286</strong> (1.22×); there are seven evaluations
+at both widths, four certifications plus three update residuals. Candidate
+support launches per read rise from <strong>222 to 291</strong> (1.31×).
+Thus none scales linearly with the number of lanes; none is a single launch
+or completely width-independent either. Both processes give the same counts.</p>
+<p>The source bindings are <code>support_read.step_jacobian</code> and
+<code>current.book_tangent_channels</code> for assembly,
+<code>current.book</code> for residual booking, and
+<code>topology._read_at_nulls.compact_candidates</code> → <code>inspect</code>
+→ <code>quadratic_cell_fragments</code> for candidates. The solve uses
+<code>vmap</code> across lanes and tangent channels; live-ring integration and
+geometry propagation remain internal loops. The ledger retains compiler
+source bindings for each kernel, including ambiguity where fusion shares owners.</p>
+<p>The inherited group labels <code>lu_solve + update</code> and
+<code>equilibrate + lu_factor</code> are preserved for comparison.
+They represent block-GMRES, its condition estimate, block preconditioning,
+update scaling and residual checking, and equilibration respectively;
+they do not imply dense LU. The compiled source metadata contains
+<code>_block_gmres</code> and the accurate bank
+<code>curvature_coefficients</code> at both widths and in both processes.</p>
+<h3 id="bank-solve-trace-four-read-controls">Closure and instrument checks</h3>
+<p>Device shares use all device activity as denominator. Launch counts exclude
+copies and fills, whose durations remain in their own row. Accounting uses
+measured device duration − measured overlap + measured gaps, compared with
+the separately blocked host wall. All four closure residuals are below
+0.0074 ms. Profiling adds 55–102% at one slice and about 8.5–8.6% at sixteen,
+so the group table decomposes profiled execution, not the unprofiled wall.
+No closure residual is allocated to a source group.</p>
+<p>The uniform read columns have an independent control: at width one the
+wall-event loops execute once and three times (<code>while.1746</code> and
+<code>while.1826</code>); at width sixteen they also execute once and three
+times (<code>while.1435</code> and <code>while.1628</code>). All four traces
+therefore contain four observed reads, agreeing with the result counters.</p>
+<p>Both profiler controls observe exactly 2,097,152 H2D bytes and a matrix
+multiply kernel. In the solve, width one has 12 H2D bytes and 1029 D2H bytes;
+width sixteen has zero H2D bytes and 789 D2H bytes. The positive copy control
+establishes that the zero is observed. Full transfer event counts and D2D
+bytes are retained in the attribution receipts. Removing the largest source
+group triggers <code>AssertionError: device attribution incomplete</code>;
+<code>omitted-group.log</code> ends with <code>EXIT=1</code>, while the intact
+report completes with <code>EXIT=0</code>.</p>
+<h3 id="bank-solve-trace-four-read-provenance">Reproduction and retained evidence</h3>
+<p>The committed runner and report are under
+<code>scripts/prototypes/bank_solve_trace_four_read</code>.
+The report reads the captured ledgers and serialized HLO, partitions residual
+cost by calling scope, verifies wall-loop counts, cache keys, convergence,
+compiled markers and closure, and writes the comparison tables and figure.
+No product source or test changes were made; no unrelated suite was run.</p>
+<p>Raw evidence is retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T223228922016-bank-solve-trace-four-read</code>:
+<code>device.log</code>, <code>capture-0.log</code> through
+<code>capture-2.log</code>, <code>attribution-1.log</code>,
+<code>attribution-2.log</code>, <code>report-complete.log</code>,
+<code>omitted-group.log</code>, <code>common-seeds.npz</code>,
+<code>summary.json</code>, <code>tables.html</code> and
+<code>device-time.png</code>, the direct SVG preview
+<code>device-time-svg.png</code> and <code>figure-inspection.log</code>. The three <code>process-*</code> directories hold
+raw traces and HLO; the two measured directories also hold the source-bound
+kernel ledgers and invocation receipts. The initial reporter refusal is
+preserved as <code>report.log</code>. The historical inputs remain under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T144026733366-bank-solve-trace-head</code>.
+Every successful measurement log retains its command and terminal
+<code>EXIT=0</code> line.</p>
+</section>

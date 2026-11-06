@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-05T22:11:08.797Z",
   "dispatched_at": "2026-11-05T22:05:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The assert compares two test constants and is redundant, but harmless. The approx assertion at line 78 is the guard, and the denominator control confirms it fails when the span and minor-radius denominators are swapped. The node is landed and nothing further is owed.",
+      "recorded_at": "2026-11-06T05:35:35.426740+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_bank_report_precision.py",

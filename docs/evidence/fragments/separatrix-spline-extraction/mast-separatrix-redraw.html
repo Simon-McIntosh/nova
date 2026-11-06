@@ -1,0 +1,86 @@
+<section data-reckon="evidence" id="mast-separatrix-redraw">
+<h2>The MAST centroid panels draw the assembled separatrix</h2>
+
+<p id="mast-separatrix-redraw-summary">Every MAST centroid panel now draws the
+separatrix it was computing and not showing. The three committed states are
+redrawn from their stored conductor currents and cell moments, and the
+right-hand panel of each lane carries the closed lobe around the magnetic axis
+and both open legs through the admitted X-point, with the hexagonal plasma mesh
+cut against that lobe and filled inside it. The boundary is the display map's
+own branch assembly: the panel reads <code>branches</code> and its
+<code>well_formed</code> verdict from
+<code>nova.equilibrium.display_flux</code> rather than asking the assembler a
+second time with a hand-composed argument order.</p>
+
+<p id="mast-separatrix-redraw-reproduced">The defect was reproduced before it
+was repaired. On the receipts committed at
+<code>c2e4fd211</code> every lane recorded
+<code>boundary_assembler: {available: true, overflow: true, well_formed:
+false}</code> with <code>boundary_branches_drawn: {closed_drawn: 0, open_drawn:
+0}</code> and <code>boundary_vertex_count: 0</code>, so the panels drew the
+field and the coil set but no boundary, and the plasma mesh was built and then
+had nothing to be cut against. The mechanism was the assembler's fixed 256
+branch slots: a 10 mm display map needs 677 segments on the cpu and titan lanes
+and 675 on the full-axis lane, so the assembly overflowed and, by construction,
+refused the whole field rather than returning a partial boundary.</p>
+
+<p id="mast-separatrix-redraw-measured">The redraw is read from each lane's own
+receipt. Segment counts are the map's assembled branches, the vertex count is
+the boundary the plasma mesh is cut against, and the saddle offset is the
+polished saddle's distance from the lattice saddle the seed came from.</p>
+
+<table id="mast-separatrix-redraw-table">
+<caption>Assembled separatrix, delivered mesh and saddle offset, one row per
+lane, read from <code>drawn_plasma_mesh</code> in each
+<code>centroid-solve.json</code>.</caption>
+<thead><tr><th>lane</th><th>closed segments</th><th>open segments</th><th>open legs drawn</th><th>boundary vertices</th><th>mesh cells delivered</th><th>cells clipped</th><th>saddle offset [mm]</th></tr></thead>
+<tbody>
+<tr><td>cpu-lane (12000 requested)</td><td>677</td><td>657</td><td>2</td><td>8125</td><td>12353</td><td>4250</td><td>13.19</td></tr>
+<tr><td>cpu-lane (4000 requested)</td><td>677</td><td>657</td><td>2</td><td>8125</td><td>4286</td><td>1453</td><td>13.19</td></tr>
+<tr><td>titan-lane</td><td>677</td><td>657</td><td>2</td><td>8125</td><td>4286</td><td>1453</td><td>13.19</td></tr>
+<tr><td>full-axis-lane</td><td>675</td><td>653</td><td>2</td><td>8101</td><td>4286</td><td>1449</td><td>9.91</td></tr>
+</tbody>
+</table>
+
+<figure id="mast-separatrix-redraw-figure">
+<img src="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png" alt="Two poloidal panels of the MAST centroid state at 12000 mesh cells. The left panel draws the conductors-only field with a red X marking its own saddle. The right panel draws the solved field with a thick closed separatrix lobe around the right-hand magnetic axis, two dashed legs leaving through the red X at the top, and the hexagonal plasma mesh filling the lobe.">
+<figcaption>cpu-lane at 12000 requested cells (12353 delivered). Left: the
+conductors-only field with its own saddle. Right: the solved field, the
+assembled separatrix as a closed lobe and two legs through the admitted
+X-point, and the plasma mesh cut against it. The two open legs run from the
+saddle out to the top and bottom of the map and are drawn dashed, because a leg
+is not a loop.</figcaption>
+</figure>
+
+<p id="mast-separatrix-redraw-fine-plain">The cpu lane is drawn twice, and the
+two files are different pictures rather than the same one twice: the plain
+panel is drawn at the producer's 4000-cell default, delivering 4286 cells
+(md5 <code>a9f168eef415757c8f8f521dd96a6466</code>), and the
+<code>-fine</code> panel at the 12000 cells its receipt records, delivering
+12353 (md5 <code>811b454b88529baf45421790ce7b863e</code>). The finer map reads
+as a finer mesh at full size, and its clipped-cell count rises from 1453 to
+4250 with it. A test compares the two committed files' digests, so a redraw
+that collapsed them to one picture fails rather than passing silently.</p>
+
+<p id="mast-separatrix-redraw-contours">The contour population is drawn at
+<code>#929292</code> with a 0.6 pt stroke. At the ink style's 0.35 pt default
+the strokes antialiased to about <code>#b8b8b8</code>, roughly 1.9:1 against
+white, which is below the ~3:1 a data population is asked to hold and is the
+level the earlier review rejected as too faint. The separatrix is drawn in the
+same ink and heavier, so the boundary reads as one of the drawn contours rather
+than as a second overlay in another colour.</p>
+
+<p id="mast-separatrix-redraw-invocation">Each receipt's <code>invocation</code>
+now names the repository producer,
+<code>benchmarks/mast_centroid_solve_panels.py panels</code>, so a reader can
+replay the receipt from the repository alone. The previous receipts named a
+run-local wrapper outside the repository, which no reader could open. A test
+asserts the receipt's <code>argv[0]</code> is the producer.</p>
+
+<p id="mast-separatrix-redraw-looked-at">Every PNG was rendered and looked at at
+full size. The separatrix runs through the red X-point marker and encloses the
+axis marker in all three lanes; the legs leave the saddle and exit the map
+rather than closing across the private flux region. The producer measures its
+own labels before saving and prints
+<code>LABEL_CHECK clipped=0 overlapping=0</code> on every lane.</p>
+</section>

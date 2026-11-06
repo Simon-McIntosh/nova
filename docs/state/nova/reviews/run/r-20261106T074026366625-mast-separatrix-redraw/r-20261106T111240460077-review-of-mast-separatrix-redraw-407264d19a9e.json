@@ -1,0 +1,61 @@
+{
+  "added_failure_basis": "Derived from the reviewed run's own arms. baseline_suite records revision 2fd5d5b581da04aca88e0e97f72a343cc8312d39, completed true, exit_status 0, failure_count 0, failure_ids [] (logs/base-arm-final.log, slurm 1306717, '10 passed in 2899.39s'). after_suite records revision 8e6ea80b216ed569546fab9256498b146f6dff8c, completed true, exit_status 0, failure_count 0, failure_ids [] (logs/gate-final-head-h200-record.log, slurm 1306805, '11 passed in 2186.84s'). Neither arm carries a failing id, so the added set is empty. The delivered head 407264d19a9e differs from the gate revision 8e6ea80b2 only by docs/evidence/fragments/separatrix-spline-extraction/mast-separatrix-redraw.html (git diff --stat 8e6ea80b2 407264d19a9e reports one file, no code, test or figure), so the zero-added result transfers to the head.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/mast_centroid_solve_panels.py:1430",
+    "benchmarks/mast_centroid_solve_panels.py:1697"
+  ],
+  "completed_at": "2026-11-06T11:31:25.561Z",
+  "dispatched_at": "2026-11-06T11:14:25Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_centroid_solve_panels.py",
+      "id": "f8dfab8c835",
+      "line": 82,
+      "severity": "non-blocking",
+      "text": "non-blocking: BOUNDARY_LINEWIDTH changes from 2.6 * 0.35 to 2.6 * 1.0, and the constant is shared with the separate `series` producer at benchmarks/mast_centroid_solve_panels.py:1697, which reaches it through the CLI dispatch at :2085. That producer's committed artifact, docs/figures/mast-centroid-capability/flux-function-series/flux-function-series.png, lies outside the node's declared write paths and was not redrawn, so the module now draws the series separatrix at 2.6 pt where the committed figure was drawn at 0.91 pt. A panels-local constant would have confined the change to the figures the node was fenced to regenerate."
+    },
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "id": "f180e49f709",
+      "line": 156,
+      "severity": "non-blocking",
+      "text": "non-blocking: the well_formed assertion reads `drawn`, which is the receipt the test regenerates into tmp_path through panel_renderer.panels(), and never the committed receipt's own drawn_plasma_mesh.boundary_assembler (only invocation at :126 and vacuum_nulls at :146 are read from the committed record). A committed receipt left in the shipped overflow state, boundary_assembler.well_formed false, would therefore pass the gate, so done-when 1's 'asserts well_formed is true on each lane's receipt' is guarded only through the redraw. The three committed receipts at 407264d19a9e do currently record well_formed true with closed_segment_count 677/677/675, so the committed artefact is correct; the guard is one step weaker than the wording."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Runtime code that reaches the change is the benchmark producer itself: benchmarks/mast_centroid_solve_panels.py:1430 (panels command) and :1697 (series command, which shares BOUNDARY_LINEWIDTH), both dispatching from the CLI at :2066-2086; the module is imported only by tests. I verified that nova/equilibrium/display_flux.py:117 DisplayFluxMap.well_formed and :101 branches are the owner the change reads, and that nova/media/poloidal.py:355 draw_separatrix_branches is the pre-existing painter it calls.",
+    "diff": "Read commit by commit against base 2fd5d5b58: 1eec7692f replaces _assembler_flags with _assembler_verdict reading display.branches and display.well_formed, 5f91ff873 redraws the four panels with CONTOUR_INK #929292 at 0.6 pt and BOUNDARY_LINEWIDTH 2.6*1.0, 9d0626331 re-renders the cpu -fine panel, 8e6ea80b2 moves the 256-slot control into the test module, and c02f8053b/d93cf3293/bd050c0a0/407264d19 add and then correct the evidence fragment. The diff also carries roughly sixty lines of ruff reformatting inside benchmarks/mast_centroid_solve_panels.py and tests/test_mast_centroid_panel_states.py.",
+    "done_when": "The three clauses map onto tests/test_mast_centroid_panel_states.py:158 (well_formed plus closed_drawn/open_drawn per lane), :173 (plain and fine cpu-lane digests differ), :126 (receipt argv[0] is the repository producer), the contour-ink constant at benchmarks/mast_centroid_solve_panels.py:80, and the gate result in docs/evidence/fragments/separatrix-spline-extraction/mast-separatrix-redraw.html and logs/gate-final-head-h200-record.log; the done-when measure is asserted, but the well_formed assertion reads the regenerated receipt rather than the committed one.",
+    "goal": "The goal is that the three MAST centroid lanes draw the assembled separatrix, and at 407264d19a9e every lane receipt records boundary_assembler.source nova.equilibrium.display_flux.DisplayFluxMap.branches, well_formed true, closed_segment_count 677/677/675, open_branch_count 2 and boundary_branches_drawn {closed_drawn: 1, open_drawn: 2}; the cpu-lane fine PNG renders a closed lobe around the axis triangle with two dashed legs through the red X-point.",
+    "manifest": "Read; it reports status complete, the eight commits, baseline_suite 10 passed at 2fd5d5b58 exit 0 and after_suite 11 passed at 8e6ea80b2 exit 0 with failure_ids empty in both, both logs present on disk, and a negative_control_log whose last line is EXIT=1; its evidence_inputs sentence that the gate revision differs from the delivered head by the evidence fragment only is confirmed by git diff --stat.",
+    "write_paths": "The declared paths are benchmarks/mast_centroid_solve_panels.py, tests/test_mast_centroid_panel_states.py, the three docs/figures/mast-centroid-capability lane directories and docs/evidence/fragments/separatrix-spline-extraction/mast-separatrix-redraw.html; every one of the fourteen files in git diff 2fd5d5b581da04aca88e0e97f72a343cc8312d39..407264d19a9e falls inside them, and nova/equilibrium/display_flux.py is untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_centroid_panel_states.py:158 is falsified by NOVA_PANEL_256_SLOT_CONTROL=1, which reddens cpu-lane and titan-lane with closed_segment_count 0 (logs/control-final-head-record.log:93,235), though the assertion reads the regenerated receipt at :156 rather than the committed one.",
+    "evidence": "logs/gate-final-head-h200-record.log ends '11 passed in 2186.84 s' and 'EXIT=0' at revision 8e6ea80b2 against logs/base-arm-final.log '10 passed' and 'EXIT=0' at 2fd5d5b58, and git diff 8e6ea80b2 407264d19a9e touches only the evidence fragment, so the zero added-failure claim is measured at the delivered code head.",
+    "fit": "The new helper at benchmarks/mast_centroid_solve_panels.py:1209 follows the module's receipt-dict idiom and reports the map's published fields under a source key; the only rough edge is the pointless '2.6 * 1.0' scaling written at :82.",
+    "goal_fidelity": "benchmarks/mast_centroid_solve_panels.py:1430 hands the drawn receipt the map's own verdict, and every lane receipt at 407264d19a9e records well_formed true with one closed lobe and two open legs drawn.",
+    "reuse": "The node removes a duplicated assemble_separatrix_branches call rather than adding one and reads the owner directly at nova/equilibrium/display_flux.py:117 DisplayFluxMap.well_formed and :101 branches; the nearest sibling, benchmarks/coil_edit_latency.py:1105, assembles from solver state rather than a DisplayFluxMap and is not an owner of this capability, and no reusable branch-summary helper exists in the repository.",
+    "scope_discipline": "All fourteen changed paths sit inside the five declared write paths, but BOUNDARY_LINEWIDTH at benchmarks/mast_centroid_solve_panels.py:82 is shared with the series producer at :1697 whose committed figure lies outside the granted paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: benchmarks/mast_centroid_solve_panels.py:1430 feeds the map's own branches to the receipt, and every lane receipt at 407264d19a9e records well_formed true, closed_segment_count 677/677/675 and boundary_branches_drawn {closed_drawn: 1, open_drawn: 2}.\nVERDICT done_when: tests/test_mast_centroid_panel_states.py:158,173,126 and the gate logs assert the three clauses, and logs/gate-final-head-h200-record.log records 11 passed exit 0 against logs/base-arm-final.log 10 passed exit 0, though the well_formed assertion reads the regenerated receipt at :156.\nVERDICT write_paths: every one of the fourteen paths in 2fd5d5b581da04aca88e0e97f72a343cc8312d39..407264d19a9e falls inside the benchmark, test, three lane-figure directories and the evidence fragment, and nova/equilibrium/display_flux.py is untouched.\nVERDICT manifest: read; it records status complete, baseline_suite 10 passed at 2fd5d5b58 and after_suite 11 passed at 8e6ea80b2 with empty failure_ids, and its evidence_inputs claim that the head adds only the fragment is confirmed by git diff --stat.\nVERDICT diff: read commit by commit; 1eec7692f swaps _assembler_flags for _assembler_verdict, 5f91ff873 redraws the panels at #929292 with BOUNDARY_LINEWIDTH 2.6*1.0, 9d0626331 re-renders the fine panel, 8e6ea80b2 moves the control into the test module, and the rest are evidence.\nCALL_SITES: benchmarks/mast_centroid_solve_panels.py:1430, benchmarks/mast_centroid_solve_panels.py:1697\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/mast_centroid_solve_panels.py:1430 hands the drawn receipt the map's own verdict and every lane receipt at 407264d19a9e records well_formed true with a closed lobe and two drawn legs.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/gate-final-head-h200-record.log ends '11 passed in 2186.84 s' and 'EXIT=0' at revision 8e6ea80b2 while git diff 8e6ea80b2 407264d19a9e touches only the evidence fragment.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every changed path is inside the declared write paths, but benchmarks/mast_centroid_solve_panels.py:82 shares BOUNDARY_LINEWIDTH with the series producer at :1697 whose committed figure is outside them.\nSCORE durability: 17\nJUSTIFICATION durability: the guard at tests/test_mast_centroid_panel_states.py:158 is falsified by the 256-slot control, which reddens two lane ids with closed_segment_count 0, but it reads the regenerated receipt at :156 rather than the committed one.\nSCORE fit: 17\nJUSTIFICATION fit: benchmarks/mast_centroid_solve_panels.py:1209 follows the module's receipt-dict idiom, with only the pointless '2.6 * 1.0' scaling at :82 as an edge.\nSCORE reuse: 19\nJUSTIFICATION reuse: the duplicated assembler call is removed and the change reads nova/equilibrium/display_flux.py:117 DisplayFluxMap.well_formed, though benchmarks/coil_edit_latency.py:1105 restates a similar summary inline from a different source.\nFINDING benchmarks/mast_centroid_solve_panels.py:82 non-blocking: BOUNDARY_LINEWIDTH is shared with the series producer at :1697, whose committed flux-function-series figure lies outside the node's write paths and was not redrawn.\nFINDING tests/test_mast_centroid_panel_states.py:156 non-blocking: the well_formed assertion reads the regenerated receipt, so a committed receipt left with well_formed false would pass the gate.",
+  "review_run_id": "r-20261106T111240460077-review-of-mast-separatrix-redraw-407264d19a9e",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "407264d19a9e079d9e01b528b469cd95e7cfc5f9",
+  "reviewed_run_id": "r-20261106T074026366625-mast-separatrix-redraw",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T11:36:51.785822+00:00",
+  "total": 106
+}

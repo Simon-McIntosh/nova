@@ -37,6 +37,11 @@
       "kind": "exempted",
       "reason": "the reviewer re-rendered the head SVG and composed the fragment from the archived receipt and both were byte-identical, so the post-gate commits are verified reproducible",
       "recorded_at": "2026-11-06T06:13:32.582208+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the in-place attempt produced no artifact and was superseded by lane job 1306509; nothing recorded rests on it",
+      "recorded_at": "2026-11-06T06:13:38.986901+00:00"
     }
   },
   "findings": [

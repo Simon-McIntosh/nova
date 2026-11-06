@@ -77,7 +77,13 @@ def main():
             rows,
         )
     )
-    rows, chart = [], []
+    samples = np.load(args.run / "gpu-residuals.npz")
+    input_spread = np.max(
+        np.ptp(np.stack([samples[f"perturbation_{i}"] for i in range(64)]), axis=0),
+        axis=-1,
+    )
+    rows = []
+    chart = [("moments (1–4 ulp)", np.median(input_spread), input_spread.max())]
     core = {
         "field_coefficients",
         "nodal_jets",
@@ -161,16 +167,18 @@ def main():
             color="#929292",
             markersize=7,
             zorder=3,
-            label="median lane" if y == 0 else None,
+            label="median lane" if y == 1 else None,
         )
         ax.plot(
             maximum,
             y,
             "o",
-            color=InkStyle().flux_color,
+            color="#cc0000" if maximum > 1e-10 else InkStyle().flux_color,
             markersize=7,
             zorder=4,
-            label="largest lane" if y == 0 else None,
+            label="above certificate"
+            if y == 0
+            else ("largest lane" if y == 1 else None),
         )
     ax.axvline(
         1e-10,
@@ -181,12 +189,14 @@ def main():
         zorder=1,
     )
     ax.set_xscale("log")
+    ax.set_xlim(1e-28, 1e-9)
+    ax.set_xticks([1e-26, 1e-22, 1e-18, 1e-14, 1e-10])
     ax.set_yticks(range(len(chart)), [c[0] for c in chart])
     ax.invert_yaxis()
-    ax.set_xlabel("Residual spread across 64 one-ulp injections")
+    ax.set_xlabel("Residual spread across 64 perturbations")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(False)
-    fig.legend(loc="upper center", ncol=3, frameon=False)
+    fig.legend(loc="upper center", ncol=4, frameon=False)
     fig.subplots_adjust(left=0.27, right=0.97, bottom=0.14, top=0.88)
     save_checked(fig, args.figure)
     args.figure.write_text(

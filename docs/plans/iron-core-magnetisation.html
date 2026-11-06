@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -217,7 +217,8 @@
       strip width, a fixed fraction of each edge's length, so the strip is chosen only if one
       such fraction meets 1e-10 at every slope; that fraction is the one recorded; (2) the chosen
       route meets 1e-10 relative against that integral over the same targets, and at slopes
-      &pi;/2 and 0 reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27), while a
+      &pi;/2 and 0 reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27) to the same
+      1e-10 relative, while a
       negative control with the sheet current's sign flipped on one edge fails that comparison;
       (3) the choice and the measurement behind it are recorded in the sheet-route decision.
     </p>
@@ -244,15 +245,17 @@
     </p>
     <p>
       Done when (1) the device build and the §2 host route agree in float64 over the
-      1696-cell prototype WEST mesh against its own centroids, target by target, to within the host
-      route's own rounding spread at that target: the largest change in the host value when its
-      edge sums are taken in reversed order, floored at 1e-13 relative. On the strip branch
-      that spread is set by the cancellation between the strip's two long edges, which
-      amplifies any change in summation order by about 1/&epsilon;; on the Part II branch there is
-      no such cancellation and the spread sits at the floor. A negative control that reverses
+      1696-cell prototype WEST mesh against its own centroids, target by target, to within the
+      rounding term of §2's measured error curve at the production strip width, floored at
+      1e-13 relative. That term is the cancellation between a strip's two long edges inside one
+      Part V evaluation; two float64 evaluations of the same closed form that round differently
+      (fused and unfused, device and host) can differ by about that much, while the order in
+      which a cell's edge sheets are added does not touch it. On the Part II branch there is no
+      such cancellation and the tolerance is the floor. A negative control that reverses
       one cell's edge normals in the device build breaks that agreement; (2) that 3392-square Gram builds on
       one H200 with the compile time and the warm execute time each recorded at 1696 cells and
-      at about four times that count, and a second run hits the persistent cache; (3) the
+      on the prototype mesh at half its cell size (its count recorded, near four times as
+      many), and a second run hits the persistent cache; (3) the
       program appears in the kernel-compile census with its compile wall and memory at both
       cell counts, measured the same way as the polygon tile, so a production mesh's cost is
       read from the census rather than re-measured.

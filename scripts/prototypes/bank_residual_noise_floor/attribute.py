@@ -168,7 +168,13 @@ def root_receipt(bank, reading, quadrature, cell):
         ctx.prec = 80
         for ray, edge, slot in np.argwhere(captured["hit"]):
             values = [
-                Decimal.from_float(float(captured[k][ray, edge]))
+                Decimal.from_float(
+                    float(
+                        np.broadcast_to(captured[k], captured["roots"].shape[:-1])[
+                            ray, edge
+                        ]
+                    )
+                )
                 for k in ("cubic", "quadratic", "linear", "constant")
             ]
             a, b, c, d = values

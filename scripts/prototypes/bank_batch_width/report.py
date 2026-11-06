@@ -20,6 +20,14 @@ def main():
     cells = []
     digests = set()
     for width in (16, 32, 64, 128, 256):
+        if (args.run / f"width-{width}-unfit.json").exists():
+            missing = json.loads((args.run / f"width-{width}-unfit.json").read_text())
+            assert width == 256
+            assert (
+                missing["memory_requirement"]["temporary_bytes"]
+                > missing["physical_bytes_estimate"]
+            )
+            continue
         cold = json.loads((args.run / f"width-{width}-process-0.json").read_text())
         for process in (1, 2):
             stem = args.run / f"width-{width}-process-{process}"
@@ -78,14 +86,15 @@ def main():
     )
     ax.set_xscale("log", base=2)
     ax.set_yscale("log", base=2)
-    ax.set_xticks([16, 32, 64, 128, 256])
+    widths = sorted({row["width"] for row in rows})
+    ax.set_xticks(widths)
     top = max(row["per_slice_ms"] for row in rows) * 1.4
     ax.set_yticks([value for value in (1, 2, 4, 8, 16, 32, 64) if value <= top])
     ax.xaxis.set_major_formatter(ScalarFormatter())
     ax.yaxis.set_major_formatter(ScalarFormatter())
     ax.xaxis.set_minor_locator(NullLocator())
     ax.yaxis.set_minor_locator(NullLocator())
-    ax.set_xlim(13, 310)
+    ax.set_xlim(13, max(widths) * 1.25)
     ax.set_ylim(0.8, top)
     ax.set_xlabel("Batch width [slices]")
     ax.set_ylabel("Converged solve wall per slice [ms]")

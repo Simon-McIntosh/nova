@@ -13,6 +13,7 @@ PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 REVISION=$(git -C "$ROOT" rev-parse HEAD)
 printf '# revision: %s tree: %s command: bash %s/scripts/prototypes/bank_batch_width/device.sh %s %s\n' "$REVISION" "$ROOT" "$ROOT" "$ROOT" "$RUN"
 export TMPDIR=/tmp PYTHONPATH=$ROOT PYTHONDONTWRITEBYTECODE=1
+export XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
 SCRATCH=$(mktemp -d "$TMPDIR/batch-width-XXXXXX")
 trap 'rm -rvf "$SCRATCH"' EXIT
@@ -26,6 +27,7 @@ for width in 16 32 64 128 256; do
         status=$?
         printf 'EXIT=%s\n' "$status" >> "$log"
         if [ "$status" -ne 0 ]; then break 2; fi
+        if [ -f "$RUN/width-$width-unfit.json" ]; then break; fi
     done
 done
 printf 'EXIT=%s\n' "$status"

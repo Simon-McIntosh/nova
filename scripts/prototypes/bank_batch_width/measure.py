@@ -30,8 +30,13 @@ def main():
     parser.add_argument("width", type=int)
     parser.add_argument("process", type=int)
     args = parser.parse_args()
-    print(f"NOVA={nova.__file__} MODULE={support_read.__file__}", flush=True)
+    print(
+        f"NOVA={nova.__file__} MODULE={support_read.__file__} "
+        f"CWD={Path.cwd().resolve()} DEVICE={jax.devices()[0].device_kind}",
+        flush=True,
+    )
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"
+    assert "H200" in jax.devices()[0].device_kind
     events = CacheEvents()
     logger = logging.getLogger("jax._src.compiler")
     logger.addHandler(events)
@@ -93,6 +98,36 @@ def main():
     assert lookups[0]["outcome"] == ("miss" if args.process == 0 else "hit")
     size = program.runtime_executable().size_of_generated_code_in_bytes()
     assert size > 0
+    analysis = program.memory_analysis()
+    required = dict(
+        temporary_bytes=analysis.temp_size_in_bytes,
+        argument_bytes=analysis.argument_size_in_bytes,
+        output_bytes=analysis.output_size_in_bytes,
+        alias_bytes=analysis.alias_size_in_bytes,
+    )
+    assert required["temporary_bytes"] > 0
+    capacity = jax.devices()[0].memory_stats()["bytes_limit"]
+    print(
+        "MEMORY_REQUIREMENT " + json.dumps(required | dict(capacity_bytes=capacity)),
+        flush=True,
+    )
+    if required["temporary_bytes"] > capacity:
+        assert args.width == 256, "required width exceeds available device capacity"
+        row = dict(
+            width=args.width,
+            fits=False,
+            compile_seconds=compile_seconds,
+            executable_bytes=size,
+            memory_requirement=required,
+            capacity_bytes=capacity,
+            cache=lookups,
+            physical_bytes_estimate=capacity / 0.95,
+        )
+        (args.run / f"width-{args.width}-unfit.json").write_text(
+            json.dumps(row, indent=2)
+        )
+        print("UNFIT " + json.dumps(row), flush=True)
+        return
     print(
         f"COMPILED width={args.width} seconds={compile_seconds} bytes={size}",
         flush=True,
@@ -131,6 +166,7 @@ def main():
         compile_seconds=compile_seconds,
         executable_bytes=size,
         memory=memory,
+        memory_requirement=required,
         cache=lookups,
         precision=precision,
         common_sha256=hashlib.sha256(common.read_bytes()).hexdigest(),

@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T22:10:03Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-saddle-derivatives.html",
+      "id": "fc47e789e7b",
+      "line": 32,
+      "severity": "non-blocking",
+      "summary": "The figcaption spends its last two sentences on the producer's own quality check ('The shared saver checks text bounds and overlaps. The producer inspected the 1400 by 720 preview: no clipped or overlapping labels, and both series and thresholds are legible.') rather than on what the picture shows. A reader cannot verify an inspection that happened elsewhere, and the space is what the sibling fragments use to describe the plotted series and marks; the repository's own rule puts the producer's rendered check in the gate log, not the caption. The independent read above confirms the claim itself: no label is clipped or overlapping, so nothing in the figure is misstated."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261106T220816273417-review-of-bank-saddle-derivatives-0445d7813334-figure",
+  "reviewed_base_sha": "f3bb6ed265d0bca5c8b0c54ddac1d50cf22c625d",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-saddle-derivatives/floor.svg"
+  ],
+  "reviewed_head_sha": "0445d7813334d8ae3bfefff378205c6bd2e521d0",
+  "reviewed_run_id": "r-20261106T211000415402-bank-saddle-derivatives",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "Pass. All text is near-black on white; the population series is the mid neutral grey at about 3:1 against the page and the subject series is the feature blue at about 5:1, both clear of the background.",
+    "data_ink": "Pass. The only ink is two marker-and-line series, two threshold rules, the axes and their labels; no fills, no gridlines, no shading, no error bars standing in for data.",
+    "decoration": "Pass. No gradient, no background fill, no styled frame; the top and right spines are absent, so the left and bottom axes are the only furniture.",
+    "label_collision": "Pass. No label is clipped, overlapping another label, or overlapping the data: the rendered ink bounding box sits at x 72-1358 of 1399 and y 32-674 of 720, at least 32 px clear of every canvas edge, and the four legend entries are separated by gaps of at least 8 px. The lane-8 base marker sits on the certificate rule, which is the measurement (9.992e-11 against 1e-10), not a collision, and the marker is drawn over the rule.",
+    "legibility": "Pass. Sixteen lanes, two data series, two threshold rules and four legend entries read at a glance at the rendered 1399x720 size; decade tick labels 1e-13 to 1e-9, both axis titles and every legend label are legible, and the two threshold rules run the full plot width so each lane can be read against them.",
+    "table_form": "Pass. The image plots a per-lane magnitude comparison on a log scale against two thresholds, which is a plotted relationship the table beneath it cannot show at a glance (every head marker far below the requirement rule, every base marker above it); the same medians are also tabled in the fragment, so the figure does not carry information that is only a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T22:18:35.409373+00:00",
+  "total": null,
+  "verification": {
+    "axis_calibration": "y-axis decade ticks measured at rows 100.5, 230, 359.5, 489 and 618.5, i.e. 129.5 px per decade, giving log10(value) = -9 - (row - 100.5)/129.5",
+    "data_match": "all sixteen blue marker centres land within 0.6 px of the value tabulated for the accurate-curvature arm, and all sixteen grey marker centres within 1 px of the base arm, so the plotted points are the recorded per-lane medians",
+    "instrument": "read-only pixel analysis of the attached rendered PNG image-0.png; no SVG was opened, read, rendered or shown",
+    "layering": "at lane 8 the dotted certificate rule is absent wherever it crosses the marker, so the data are drawn over the threshold rather than hidden beneath it",
+    "spot_checks": "lane 11 base 1.58387081e-10 is the highest grey marker and lane 7 head 4.82458518e-12 the highest blue marker, both matching the table; lane 8 base 9.99236249e-11 sits just above the certificate rule as the table requires",
+    "threshold_rules": "the two horizontal rules sit on rows 230 and 359.5, which are exactly the 1e-10 and 1e-11 ticks, so the certificate and the floor requirement are drawn at the values the caption claims"
+  }
+}

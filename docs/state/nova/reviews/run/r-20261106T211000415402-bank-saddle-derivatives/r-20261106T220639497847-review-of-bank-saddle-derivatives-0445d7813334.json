@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:283",
+    "nova/equilibrium/support_read.py:317",
+    "nova/equilibrium/support_read.py:943",
+    "nova/equilibrium/topology.py:3294"
+  ],
+  "completed_at": "2026-11-06T22:18:33.036Z",
+  "dispatched_at": "2026-11-06T22:08:01Z",
+  "findings": [
+    {
+      "file": "tests/test_saddle_derivatives.py",
+      "line": "113",
+      "severity": "non-blocking",
+      "text": "non-blocking: the evaluate closure rebuilds the field and supplies bank_rows, bank_moments and bank_exterior itself rather than reaching the change through nova/equilibrium/support_read.py:283, so dropping those three keywords from the production wiring - the step that makes the repair reach the saddle at all - leaves the test and the whole paired suite green, and the node's headline accuracy gain has no guard on the path that delivers it."
+    },
+    {
+      "file": "nova/equilibrium/fixed_points.py",
+      "line": "152",
+      "severity": "non-blocking",
+      "text": "non-blocking: curvature_coefficients composes the bank contraction from wrap, multiply and the new _paired_sum instead of extending nova/biot/pairedfloat.py:106 contract and :114 contract_paired, which own that capability for the same operands and which support_read.py:160 nodal_jets already spells as exterior plus one einsum, so a second contraction idiom now exists for one quantity."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit from f3bb6ed265 to 0445d78133 \u2014 a2416c572 reproduces the input-rounding attribution, 1af4c1b03 is the product fix in fixed_points/support_read/topology plus tests/test_saddle_derivatives.py, 47f6825c9 and 0775ade add receipt validation to the prototype report, 0445d7813 adds the evidence and figure; git diff --stat between the measured product head 1af4c1b03 and 0445d78133 is empty for nova/ and tests/, so the measured source is the landed source.",
+    "done_when": "the brief's three clauses are a reference test at the diverted 550-cell trial and converged saddles with a red negative control, a sixteen-lane floor at most 1e-11 per lane on the H200, and the locked precision budget with paired suites adding no failure; each is recorded in floor-base.log, floor-head.log, cpu-certificate-test_saddle_derivatives.log, cpu-negative-test_saddle_derivatives.log and the base/head suite logs, and each asserts its own number rather than restating the worker's prose.",
+    "goal": "the brief's goal is to compute the saddle's third and fourth derivatives from a source that does not amplify nodal rounding by h^-k; nova/equilibrium/fixed_points.py:141 curvature_coefficients carries the bank rows, moments and exterior in paired arithmetic through the selected triangle's Taylor residual and Bell transform, and nova/equilibrium/topology.py:3119 takes that branch whenever bank_rows is set, so the h^-4 amplification of rounded nodal flux is removed rather than re-derived.",
+    "manifest": "read; it records status complete, five commits, baseline 55 passed and head 57 passed with zero added failure ids, the 550-cell certificate arm at 2 passed, the restored-Bell negative control at EXIT=1 with maximum fourth-derivative discrepancy 1.2570500196318335e-12, and a landing line.",
+    "write_paths": "the declared paths are nova/equilibrium/support_read.py, nova/equilibrium/topology.py, nova/equilibrium/fixed_points.py, tests/test_saddle_derivatives.py, scripts/prototypes/bank_saddle_derivatives, docs/evidence/fragments/sub-millisecond-forward-path/bank-saddle-derivatives.html and docs/figures/sub-millisecond-forward-path/bank-saddle-derivatives; all twelve files in the diffstat lie inside that set."
+  },
+  "justifications": {
+    "durability": "tests/test_saddle_derivatives.py:132 does redden on the restored-Bell regression (6.432e-14 and 1.257e-12 against a 2e-13 tolerance), but its evaluate closure at tests/test_saddle_derivatives.py:113 passes the bank keywords itself, so the support_read.py:283 wiring the fix depends on is unguarded.",
+    "evidence": "I recomputed every per-lane median from floor-base/gpu.json and floor-head/gpu.json and they match the fragment's table exactly (head maximum 4.8245852e-12 against the 1e-11 bound), though the certificate log header at cpu-certificate-test_saddle_derivatives.log:1 omits the NOVA_SADDLE_CERTIFICATE export that suite.sh:49 sets.",
+    "fit": "the new definitions follow the surrounding Bell-owner style in nova/equilibrium/fixed_points.py:296 and ruff passes on the touched files with the repository configuration; the function-local import at nova/equilibrium/topology.py:3115 is required by the fixed_points/topology import cycle.",
+    "goal_fidelity": "nova/equilibrium/fixed_points.py:141 runs the contraction and the polynomial in paired arithmetic while nova/equilibrium/support_read.py:283 leaves the low-order jets and stationary solve on their previous path, which is what the goal asks and no more.",
+    "reuse": "nova/equilibrium/fixed_points.py:152 re-expresses the contraction that nova/biot/pairedfloat.py:106 contract and :114 contract_paired already own instead of extending that owner, though every arithmetic step it performs does come from the pairedfloat helpers.",
+    "scope_discipline": "every path in the diffstat is inside the declared set and the four post-measurement commits touch only the evidence fragment, the figure and scripts/prototypes/bank_saddle_derivatives."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief's goal is to compute the saddle's third and fourth derivatives from a source that does not amplify nodal rounding by h^-k; nova/equilibrium/fixed_points.py:141 curvature_coefficients carries the bank rows, moments and exterior in paired arithmetic through the selected triangle's Taylor residual and Bell transform, and nova/equilibrium/topology.py:3119 takes that branch whenever bank_rows is set, so the h^-4 amplification of rounded nodal flux is removed rather than re-derived.\nVERDICT done_when: the brief's three clauses are a reference test at the diverted 550-cell trial and converged saddles with a red negative control, a sixteen-lane floor at most 1e-11 per lane on the H200, and the locked precision budget with paired suites adding no failure; each is recorded in floor-base.log, floor-head.log, cpu-certificate-test_saddle_derivatives.log, cpu-negative-test_saddle_derivatives.log and the base/head suite logs, and each asserts its own number rather than restating the worker's prose.\nVERDICT write_paths: the declared paths are nova/equilibrium/support_read.py, nova/equilibrium/topology.py, nova/equilibrium/fixed_points.py, tests/test_saddle_derivatives.py, scripts/prototypes/bank_saddle_derivatives, docs/evidence/fragments/sub-millisecond-forward-path/bank-saddle-derivatives.html and docs/figures/sub-millisecond-forward-path/bank-saddle-derivatives; all twelve files in the diffstat lie inside that set.\nVERDICT manifest: read; it records status complete, five commits, baseline 55 passed and head 57 passed with zero added failure ids, the 550-cell certificate arm at 2 passed, the restored-Bell negative control at EXIT=1 with maximum fourth-derivative discrepancy 1.2570500196318335e-12, and a landing line.\nVERDICT diff: read commit by commit from f3bb6ed265 to 0445d78133 \u2014 a2416c572 reproduces the input-rounding attribution, 1af4c1b03 is the product fix in fixed_points/support_read/topology plus tests/test_saddle_derivatives.py, 47f6825c9 and 0775ade add receipt validation to the prototype report, 0445d7813 adds the evidence and figure; git diff --stat between the measured product head 1af4c1b03 and 0445d78133 is empty for nova/ and tests/, so the measured source is the landed source.\nCALL_SITES: nova/equilibrium/support_read.py:283, nova/equilibrium/support_read.py:317, nova/equilibrium/support_read.py:943, nova/equilibrium/topology.py:3294\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_points.py:141 runs the contraction and the polynomial in paired arithmetic while nova/equilibrium/support_read.py:283 leaves the low-order jets and stationary solve on their previous path, which is what the goal asks and no more.\nSCORE evidence: 17\nJUSTIFICATION evidence: I recomputed every per-lane median from floor-base/gpu.json and floor-head/gpu.json and they match the fragment's table exactly (head maximum 4.8245852e-12 against the 1e-11 bound), though the certificate log header at cpu-certificate-test_saddle_derivatives.log:1 omits the NOVA_SADDLE_CERTIFICATE export that suite.sh:49 sets.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diffstat is inside the declared set and the four post-measurement commits touch only the evidence fragment, the figure and scripts/prototypes/bank_saddle_derivatives.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_saddle_derivatives.py:132 does redden on the restored-Bell regression (6.432e-14 and 1.257e-12 against a 2e-13 tolerance), but its evaluate closure at tests/test_saddle_derivatives.py:113 passes the bank keywords itself, so the support_read.py:283 wiring the fix depends on is unguarded.\nSCORE fit: 16\nJUSTIFICATION fit: the new definitions follow the surrounding Bell-owner style in nova/equilibrium/fixed_points.py:296 and ruff passes on the touched files with the repository configuration; the function-local import at nova/equilibrium/topology.py:3115 is required by the fixed_points/topology import cycle.\nSCORE reuse: 14\nJUSTIFICATION reuse: nova/equilibrium/fixed_points.py:152 re-expresses the contraction that nova/biot/pairedfloat.py:106 contract and :114 contract_paired already own instead of extending that owner, though every arithmetic step it performs does come from the pairedfloat helpers.\nFINDING tests/test_saddle_derivatives.py:113 non-blocking: the evaluate closure rebuilds the field and supplies bank_rows, bank_moments and bank_exterior itself rather than reaching the change through nova/equilibrium/support_read.py:283, so dropping those three keywords from the production wiring - the step that makes the repair reach the saddle at all - leaves the test and the whole paired suite green, and the node's headline accuracy gain has no guard on the path that delivers it.\nFINDING nova/equilibrium/fixed_points.py:152 non-blocking: curvature_coefficients composes the bank contraction from wrap, multiply and the new _paired_sum instead of extending nova/biot/pairedfloat.py:106 contract and :114 contract_paired, which own that capability for the same operands and which support_read.py:160 nodal_jets already spells as exterior plus one einsum, so a second contraction idiom now exists for one quantity.\n",
+  "review_run_id": "r-20261106T220639497847-review-of-bank-saddle-derivatives-0445d7813334",
+  "reviewed_base_sha": "f3bb6ed265d0bca5c8b0c54ddac1d50cf22c625d",
+  "reviewed_head_sha": "0445d7813334d8ae3bfefff378205c6bd2e521d0",
+  "reviewed_run_id": "r-20261106T211000415402-bank-saddle-derivatives",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T22:23:10.418460+00:00",
+  "total": 97
+}

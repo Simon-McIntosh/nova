@@ -3,7 +3,7 @@
   "added_failure_ids": [],
   "added_failures_note": "a figure review runs no suite; no test was executed and no failure count was measured",
   "blocking_finding_count": 0,
-  "completed_at": "",
+  "completed_at": "2026-11-06T10:33:01.712Z",
   "dispatched_at": "2026-11-06T10:20:09Z",
   "figures_reviewed": [
     "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
@@ -108,6 +108,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-06T10:33:05.555905+00:00",
+  "timestamp": "2026-11-06T10:56:38.923567+00:00",
   "total": null
 }

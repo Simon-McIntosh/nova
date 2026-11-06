@@ -97,6 +97,8 @@ def main():
             "no:cacheprovider",
             f"--basetemp={scratch / 'certificate-tests'}",
             str(head / "tests/test_bank_step_booking_batch.py"),
+            "-m",
+            "slow or not slow",
             "-k",
             "certificate_jacobian or conic_channel_jacobian",
             "-vv",

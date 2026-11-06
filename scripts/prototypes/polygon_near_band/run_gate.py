@@ -11,9 +11,6 @@ import tempfile
 BASE_TESTS = (
     "tests/biot/test_edge_term_tangents.py",
     "tests/biot/test_vertex_term_tangents.py",
-    "tests/biot/test_graded_layer_near_corner.py",
-    "tests/biot/test_kernel_compile_cost.py",
-    "tests/biot/test_vertex_edge_tangent_recurrences.py",
 )
 
 

@@ -1814,7 +1814,9 @@ def _persist_frame_operands(
     """
 
     lattice = profile.lattice
-    points = _display_points(display) if points is None else np.asarray(points, dtype=float)
+    points = (
+        _display_points(display) if points is None else np.asarray(points, dtype=float)
+    )
     rows = (
         np.arange(points.shape[0], dtype=np.intp)
         if row_index is None
@@ -1994,9 +1996,7 @@ def rebuild_frame_separatrix(
         float(np.asarray(operands["saddle_flux"])),
         np.asarray(axis_rz, dtype=float).reshape(2),
     )
-    closed, _open_branches = _display_separatrix(
-        SimpleNamespace(branches=branches)
-    )
+    closed, _open_branches = _display_separatrix(SimpleNamespace(branches=branches))
     return closed, branches
 
 
@@ -2023,6 +2023,7 @@ def _display_map(
             compensation_current += np.asarray(
                 direction @ constraint.physical_unknown, dtype=float
             )
+
     def compensation(points: np.ndarray) -> np.ndarray:
         """Return the compensating conductor flux [Wb] at ``points``."""
         return targets.flux(points, compensation_current)
@@ -3663,7 +3664,9 @@ def render_frame_comparison(
         )
     handles.extend(
         (
-            Line2D([], [], marker="^", color="0.2", linestyle="none", label="EFIT axis"),
+            Line2D(
+                [], [], marker="^", color="0.2", linestyle="none", label="EFIT axis"
+            ),
             Line2D(
                 [], [], marker="X", color="0.2", linestyle="none", label="EFIT X-point"
             ),
@@ -3717,7 +3720,7 @@ def render_frame_comparison(
         else:
             label += f"\n{frame.get('plot_unavailable_reason', 'display unavailable')}"
         position = axis.get_position()
-        figure.text(position.x0, 0.26, label, va="top", fontsize=14)
+        figure.text(position.x0, 0.26, label, va="top", fontsize=14, linespacing=1.5)
         if "labelled" not in frame:
             continue
         radius, height = frame["radius"], frame["height"]
@@ -3950,8 +3953,7 @@ def displacement_figure(
         axis.plot(boundary[:, 0], boundary[:, 1], color="0.55", linewidth=1.3)
         displacement = result.displacement_decomposition
         label = (
-            f"shot {Path(result.shot).stem.split('_')[-1][-8:]}\n"
-            f"frame {result.frame}"
+            f"shot {Path(result.shot).stem.split('_')[-1][-8:]}\nframe {result.frame}"
         )
         if displacement is None:
             label += "\nunavailable: no qualified axis"
@@ -3978,7 +3980,9 @@ def displacement_figure(
             )
         axis.set_xlim(0.8, 2.5)
         axis.set_ylim(-1.6, 1.8)
-        figure.text(axis.get_position().x0, 0.24, label, va="top", fontsize=14)
+        figure.text(
+            axis.get_position().x0, 0.24, label, va="top", fontsize=14, linespacing=1.5
+        )
     _save_frame_figure(figure, path)
 
 

@@ -13,7 +13,7 @@ mkdir -p "$TMPDIR" "$LOGS" "$WORK/base"
 git -C /home/ITER/mcintos/Code/nova archive "$BASE_COMMIT" | tar -x -C "$WORK/base"
 BASE_TREE=$WORK/base
 REVISION_HEAD=$(git -C "$HEAD_TREE" rev-parse HEAD)
-for arm in base head; do
+for arm in ${ARMS:-base head}; do
   if [ "$arm" = base ]; then TREE=$BASE_TREE; REV=$BASE_COMMIT; else TREE=$HEAD_TREE; REV=$REVISION_HEAD; fi
   for name in test_bank_step_booking test_bank_newton_step test_bank_solve_cycle test_conic_endpoint_consistency; do
     LOG="$LOGS/suite_${arm}_${name}.log"
@@ -23,11 +23,17 @@ for arm in base head; do
       echo "# host $(hostname) cpu $(lscpu | sed -n 's/^Model name: *//p' | head -1)"
       echo "# command $PY -m pytest -p no:cacheprovider --basetemp=$BASETEMP -q $TREE/tests/$name.py (cwd $TREE)"
     } > "$LOG"
-    ( cd "$TREE" && PYTHONPATH="$TREE" "$PY" -m pytest -p no:cacheprovider \
-        --basetemp="$BASETEMP" -q "$TREE/tests/$name.py" ) >> "$LOG" 2>&1
-    status=$?
-    echo "EXIT=$status" >> "$LOG"
+    if [ "${PARALLEL:-0}" = 1 ]; then
+      ( cd "$TREE" && PYTHONPATH="$TREE" "$PY" -m pytest -p no:cacheprovider \
+          --basetemp="$BASETEMP" -q "$TREE/tests/$name.py" >> "$LOG" 2>&1
+        echo "EXIT=$?" >> "$LOG" ) &
+    else
+      ( cd "$TREE" && PYTHONPATH="$TREE" "$PY" -m pytest -p no:cacheprovider \
+          --basetemp="$BASETEMP" -q "$TREE/tests/$name.py" ) >> "$LOG" 2>&1
+      echo "EXIT=$?" >> "$LOG"
+    fi
   done
 done
+if [ "${PARALLEL:-0}" = 1 ]; then wait; fi
 grep -h "^EXIT=" "$LOGS"/suite_*.log | sort | uniq -c
 echo EXIT=0

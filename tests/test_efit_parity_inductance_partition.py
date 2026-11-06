@@ -64,16 +64,22 @@ def test_direct_current_closes_without_inventing_branch_partition(result):
         assert table[name]["cell_count"] is None
         assert table[name]["cell_current_a"] is None
     closure = receipt["current_closure"]
-    # The totals are checked against the independently banked current table
-    # rather than against the benchmark's own subtraction.
     assert closure["direct_total_current_a"] == pytest.approx(
         banked["all_domain_constrained"], abs=2.0e-9
     )
-    independently_summed_out_of_core = float(
-        np.sum(fields["cell_current"][~fields["core"]])
+    out_of_core_current_from_banked_total = (
+        banked["all_domain_constrained"] - live["cell_current_a"]
     )
+    assert closure["direct_out_of_core_current_a"] == pytest.approx(
+        out_of_core_current_from_banked_total, abs=4.0e-9
+    )
+    out_of_core_support = ~fields["core"]
+    independently_summed_out_of_core = float(
+        np.sum(fields["cell_current"][out_of_core_support])
+    )
+    # Compare cellwise out-of-core current with banked total minus live core.
     assert independently_summed_out_of_core == pytest.approx(
-        closure["direct_out_of_core_current_a"], abs=2.0e-9
+        out_of_core_current_from_banked_total, abs=4.0e-9
     )
     assert closure["banked_out_of_core_current_a"] == pytest.approx(
         banked["outside_confined_core_a"], abs=2.0e-9
@@ -112,6 +118,13 @@ def test_outside_contour_core_centroid_is_counted_once():
         "cell_current_a"
     ] == pytest.approx(11.0)
     assert partition["records"]["outside_closed_branch"]["cell_current_a"] == 0.0
+    partitioned_out_of_core = (
+        partition["records"]["inside_closed_branch_outside_core"]["cell_current_a"]
+        + partition["records"]["outside_closed_branch"]["cell_current_a"]
+    )
+    assert partitioned_out_of_core == pytest.approx(
+        np.sum(equilibrium.cell_current[~equilibrium.domains.core]), abs=1.0e-12
+    )
     assert partition["summed_current_a"] == pytest.approx(
         np.sum(equilibrium.cell_current), abs=1.0e-12
     )

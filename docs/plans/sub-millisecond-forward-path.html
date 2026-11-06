@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="198">
+<meta name="plan-version" content="199">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -688,7 +688,10 @@
     <div class="r-comment-body"><p>[Current solve attribution](/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html#bank-solve-trace-head-landing): independent review of r-20261106T144026733366-bank-solve-trace-head at 1a40db649fa005e3e1c60783067c19148152c50d (base d102ff6f103775ced8fe3b573122a235bec9da22) scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 12, fit 18, reuse 19, added_failure_count 0 (no arm recorded on a measurement node), two non-blocking findings (an exact-match JAX cache-hit log assertion at report.py:111 and reused process directories at device.py:28); the fragment's group costs, walls, reads, updates, launches and closure all reconcile with the run's own capture and attribution receipts.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T190415788129-review-of-bank-read-count-sensitivity-d23b1641d115" data-who="reckon-build" data-when="2026-11-06T19:15:13.025Z">
-    <div class="r-comment-body"><p>[Read-count sensitivity review](/nova/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html#bank-read-count-sensitivity-landing): scored 108/120 at d23b1641d115; the 7-versus-17 read pair, the update-3 lane-2 tolerance crossing, the lanes 2/4/6/7/8/10/11/13 disagreement, the per-update trial counts and the residual-history figure all reproduce from the run&#x27;s own receipts; two non-blocking findings record an uncommitted negative-control driver and a causal sentence stated beyond what this node measured.</p></div>
+    <div class="r-comment-body"><p>[Read-count sensitivity review](/nova/evidence/fragments/sub-millisecond-forward-path/bank-read-count-sensitivity.html#bank-read-count-sensitivity-landing): scored 108/120 at d23b1641d115; the 7-versus-17 read pair, the update-3 lane-2 tolerance crossing, the lanes 2/4/6/7/8/10/11/13 disagreement, the per-update trial counts and the residual-history figure all reproduce from the run's own receipts; two non-blocking findings record an uncommitted negative-control driver and a causal sentence stated beyond what this node measured.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T163741009656-review-of-bank-booking-primal-buckets-94fd0a54effb" data-who="reckon-build" data-when="2026-11-06T16:45:26.951Z">
+    <div class="r-comment-body"><p>Independent review of r-20261106T151851519466-bank-booking-primal-buckets at head 94fd0a54effb (base 9ab6ba60e1f5): scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 13, fit 16, reuse 18, added_failure_count 0; the delta&#x27;s ten commits restore a 32-cell primal conic tile and record a three-arm H200 comparison that beats base on residual device time and launches per call at one and sixteen slices, with three non-blocking findings (cut_batch_width validated then ignored for the primal path, no test guarding the tile width against the regression the previous review blocked, and a duplicate bare 32 in book_tangent); both review records stored with status parsed.</p></div>
 </div>
 </section>
 </main>

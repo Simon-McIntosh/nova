@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/support_read.py:414",
+    "nova/equilibrium/support_read.py:536",
+    "nova/equilibrium/support_read.py:560",
+    "nova/equilibrium/support_read.py:1135"
+  ],
+  "completed_at": "2026-11-06T16:45:26.951Z",
+  "dispatched_at": "2026-11-06T16:38:57Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/current.py",
+      "id": "f94c49bfec2",
+      "line": 475,
+      "severity": "non-blocking",
+      "text": "the delta validates quadrature.cut_batch_width at :475 and then ignores it for the primal path, deriving batch_width from the fixed _PRIMAL_CUT_BATCH_WIDTH at :479, so a caller that sets the documented Quadrature knob silently gets a 32-cell primal tile while book_tangent_channels at :813 still honours the same value; the two booking paths now disagree about what one option means, and a sweep that varies cut_batch_width no longer varies the primal booking it measures."
+    },
+    {
+      "file": "tests/test_book_primal_buckets.py",
+      "id": "f60fbddcbdb",
+      "line": 201,
+      "severity": "non-blocking",
+      "text": "no assertion covers the property this delta actually changes: reverting _PRIMAL_CUT_BATCH_WIDTH to 16 leaves every test green, because moment parity and the booking byte pins are indifferent to the cut tile and the only evidence the 32-cell tile survives is the manually run propagation count in restructure/comparison.json (base 672, prior 1344, head 672); the launch regression the prior review blocked is therefore unguarded against recurrence."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "id": "fcf97c2c7db",
+      "line": 623,
+      "severity": "non-blocking",
+      "text": "book_tangent still writes the same tile as a bare literal (batch_width = 32) while the delta introduces _PRIMAL_CUT_BATCH_WIDTH for that exact value at :65, so the one number now has a name in one path and a magic literal in the other and the two can drift apart silently."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s) of current.book in nova/equilibrium/support_read.py at lines 414, 536, 560 and 1135; none passes a custom cut_batch_width, so the ignored knob is reachable from prototypes only.",
+    "diff": "read all 10 commits 9ab6ba60..94fd0a54 against the base: e79d54fd is the only product commit (a named 32-cell primal tile constant plus a third device arm), the other nine add tradeoff.py and the fragment's attribution and three-arm sections, and git diff e79d54fd 94fd0a54 over nova/ and tests/ is empty so the measured candidate is the landed product.",
+    "done_when": "the node's measure is moment parity within 1e-14, an unchanged-or-repinned pin, paired suites with no added failures, and one H200 allocation tabling residual device ms, launches, per-process reads, whole-solve wall and wall per read against the precision budgets; the delta's gate is restructure/after-suite.json (EXIT=0, 25 passed, 3 skipped) plus restructure/comparison.json, whose verdict, precision maxima and 672/1344/672 propagation counts are all tabled in the fragment.",
+    "goal": "the delta's goal is to repair the reviewed node's tile regression and record the booking tradeoff; nova/equilibrium/current.py:65 and :479 restore a 32-cell primal tile while both booking paths keep calling the shared _integrate_bucket and _integrate_live_rings helpers, matching the GOAL line's five paths.",
+    "manifest": "read manifest.md; it is status complete at 94fd0a54, records baseline 1 failure (tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments) against 0 in restructure/after-suite.json, tables the three-arm H200 job 1307085, and records a head negative control at 3 failed / 2 passed with EXIT=1.",
+    "write_paths": "read the manifest's declared paths and git diff --name-status 9ab6ba60e1f5..94fd0a54effb: five files, all inside nova/equilibrium/current.py, scripts/prototypes/bank_booking_primal_buckets/ and the declared evidence fragment."
+  },
+  "justifications": {
+    "durability": "tests/test_book_primal_buckets.py:201 compares moments against an independent sequential reference and the negative control at restructure/verified-negative-test_book_primal_buckets.log reddens three diverted ids at EXIT=1, but reverting _PRIMAL_CUT_BATCH_WIDTH to 16 keeps every assertion green because no test observes the cut tile or a launch count.",
+    "evidence": "restructure/comparison.json records retain_candidate true with fresh residual 9.670e-11 under the 1e-10 limit and the fragment tables every requested column, but the 9.67e-11 margin is only 3% under its budget and the three-arm data is one allocation.",
+    "fit": "nova/equilibrium/current.py:65-66 places the new constant beside _NORMAL_CUT_BATCH_WIDTH with a mechanism comment and no plan label, but line :623 leaves the same 32 as a bare literal in book_tangent and :475-479 validates quadrature.cut_batch_width before ignoring it.",
+    "goal_fidelity": "nova/equilibrium/current.py:479 now derives the primal tile from _PRIMAL_CUT_BATCH_WIDTH (32) instead of the tangent knob, and the measured propagation count returns to base's 672 launches per residual call from the prior head's 1344.",
+    "reuse": "scripts/prototypes/bank_booking_primal_buckets/tradeoff.py:11 imports table from the sibling report module and :12 pair_gaps from scripts/prototypes/bank_solve_cycle/report.py:21 rather than re-deriving the precision budgets.",
+    "scope_discipline": "git diff --name-status 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad 94fd0a54effb4d2b58367d1d23d30bf4ba50adb8 lists exactly the five paths the GOAL line names, with no test, plan or topology.py change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the delta's goal is to repair the reviewed node's tile regression and record the booking tradeoff; nova/equilibrium/current.py:65 and :479 restore a 32-cell primal tile while both booking paths keep calling the shared _integrate_bucket and _integrate_live_rings helpers, matching the GOAL line's five paths.\nVERDICT done_when: the node's measure is moment parity within 1e-14, an unchanged-or-repinned pin, paired suites with no added failures, and one H200 allocation tabling residual device ms, launches, per-process reads, whole-solve wall and wall per read against the precision budgets; the delta's gate is restructure/after-suite.json (EXIT=0, 25 passed, 3 skipped) plus restructure/comparison.json, whose verdict, precision maxima and 672/1344/672 propagation counts are all tabled in docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html.\nVERDICT write_paths: read the manifest's declared paths and git diff --name-status 9ab6ba60e1f5..94fd0a54effb: five files, all inside nova/equilibrium/current.py, scripts/prototypes/bank_booking_primal_buckets/ and the declared evidence fragment.\nVERDICT manifest: read manifest.md; it is status complete at 94fd0a54, records baseline 1 failure (tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments) against 0 in restructure/after-suite.json, tables the three-arm H200 job 1307085, and records a head negative control at 3 failed / 2 passed with EXIT=1.\nVERDICT diff: read all 10 commits 9ab6ba60..94fd0a54 against the base: e79d54fd is the only product commit (a named 32-cell primal tile constant plus a third device arm), the other nine add tradeoff.py and the fragment's attribution and three-arm sections, and git diff e79d54fd 94fd0a54 over nova/ and tests/ is empty so the measured candidate is the landed product.\nCALL_SITES: nova/equilibrium/support_read.py:414, nova/equilibrium/support_read.py:536, nova/equilibrium/support_read.py:560, nova/equilibrium/support_read.py:1135\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:479 now derives the primal tile from _PRIMAL_CUT_BATCH_WIDTH (32) instead of the tangent knob, and the measured propagation count returns to base's 672 launches per residual call from the prior head's 1344.\nSCORE evidence: 18\nJUSTIFICATION evidence: restructure/comparison.json records retain_candidate true with fresh residual 9.670e-11 under the 1e-10 limit and the fragment tables every requested column, but the 9.67e-11 margin is only 3% under its budget and the three-arm data is one allocation.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad 94fd0a54effb4d2b58367d1d23d30bf4ba50adb8 lists exactly the five paths the GOAL line names, with no test, plan or topology.py change.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_book_primal_buckets.py:201 compares moments against an independent sequential reference and the negative control at restructure/verified-negative-test_book_primal_buckets.log reddens three diverted ids at EXIT=1, but reverting _PRIMAL_CUT_BATCH_WIDTH to 16 keeps every assertion green because no test observes the cut tile or a launch count.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/current.py:65-66 places the new constant beside _NORMAL_CUT_BATCH_WIDTH with a mechanism comment and no plan label, but line :623 leaves the same 32 as a bare literal in book_tangent and :475-479 validates quadrature.cut_batch_width before ignoring it.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/bank_booking_primal_buckets/tradeoff.py:11 imports table from the sibling report module and :12 pair_gaps from scripts/prototypes/bank_solve_cycle/report.py:21 rather than re-deriving the precision budgets.\nFINDING nova/equilibrium/current.py:475 non-blocking: the delta validates quadrature.cut_batch_width at :475 and then ignores it for the primal path, deriving batch_width from the fixed _PRIMAL_CUT_BATCH_WIDTH at :479, so a caller that sets the documented Quadrature knob silently gets a 32-cell primal tile while book_tangent_channels at :813 still honours the same value; the two booking paths now disagree about what one option means, and a sweep that varies cut_batch_width no longer varies the primal booking it measures.\nFINDING tests/test_book_primal_buckets.py:201 non-blocking: no assertion covers the property this delta actually changes: reverting _PRIMAL_CUT_BATCH_WIDTH to 16 leaves every test green, because moment parity and the booking byte pins are indifferent to the cut tile and the only evidence the 32-cell tile survives is the manually run propagation count in restructure/comparison.json (base 672, prior 1344, head 672); the launch regression the prior review blocked is therefore unguarded against recurrence.\nFINDING nova/equilibrium/current.py:623 non-blocking: book_tangent still writes the same tile as a bare literal (batch_width = 32) while the delta introduces _PRIMAL_CUT_BATCH_WIDTH for that exact value at :65, so the one number now has a name in one path and a magic literal in the other and the two can drift apart silently.\n",
+  "review_run_id": "r-20261106T163741009656-review-of-bank-booking-primal-buckets-94fd0a54effb",
+  "reviewed_base_sha": "9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad",
+  "reviewed_head_sha": "94fd0a54effb4d2b58367d1d23d30bf4ba50adb8",
+  "reviewed_run_id": "r-20261106T151851519466-bank-booking-primal-buckets",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T16:45:28.928847+00:00",
+  "total": 104
+}

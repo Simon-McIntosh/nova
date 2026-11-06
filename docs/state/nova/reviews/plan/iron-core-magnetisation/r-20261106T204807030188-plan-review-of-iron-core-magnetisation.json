@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T20:58:18.876Z",
+  "dispatched_at": "2026-11-06T20:49:06Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:250",
+      "id": "reasoning-1",
+      "reason": "a worker following the text measures a spread at the floor instead of the predicted 1/\u03b5-amplified value and has to either doubt a correct host route or widen a gate the plan fixed at 1e-13; the tolerance and its derivation must be restated to say which sum is reversed.",
+      "text": "\u00a73's done-when (1) sets the device-versus-host tolerance to \"the largest change in the host value when its edge sums are taken in reversed order\", then says \"On the strip branch that spread is set by the cancellation between the strip's two long edges, which amplifies any change in summation order by about 1/\u03b5\". A strip is one polygon whose two long edges are subtracted inside the Part V closed form; that cancellation is computed identically whichever order the caller adds the cell's separate edge sheets in, so the reversed-order spread does not see it and sits at the round-off level, floored at 1e-13, on both branches. The two readings of \"its edge sums\" (the cell's edge sheets, which \u00a73's own text calls \"signed sums of its edge sheets\", versus the polygon's internal edge traversal) give tolerances orders of magnitude apart, and under the reading the section's own vocabulary supplies the stated 1/\u03b5 contrast is false.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:220",
+      "id": "done_when-1",
+      "reason": "with no threshold the check cannot fail on the unfixed kernel either, and the negative control only establishes that some sensitivity exists, so the clause measures neither the route nor the guard.",
+      "text": "\u00a72's done-when (2) requires the chosen route to meet 1e-10 against the reference integral and then that \"at slopes \u03c0/2 and 0 [it] reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27), while a negative control with the sheet current's sign flipped on one edge fails that comparison\". The Snow comparison carries no tolerance at all, and the revision under review removed the \"to round-off\" that the earlier wording supplied, so nothing in the clause states how close the reproduction must be for it to pass.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:24",
+      "id": "wiring-1",
+      "reason": "the figure and the decision \u00a76 lands would be produced against a formulation the plan has not yet measured, so the evidence \u00a76 emits can be stale on arrival and the decision is recorded blind.",
+      "text": "`s6` waits on `s3` and `s4` only, yet its done-when (1) demands a with-iron figure \"whose curves come from the production path\", and the production formulation is chosen by the `formulation` decision that \u00a75 produces (\u00a75 line 311: \"Record the choice in the formulation decision below\") and that \u00a76 consumes (`data-sections=\"s6\"`). With this graph \u00a76 is dispatchable alongside \u00a75, and can regenerate the stray-field figure and record a formulation decision before \u00a75's candidate table exists.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:255",
+      "id": "done_when-2",
+      "reason": "the worker can pick any mesh near 6784 cells and the scaling reading is unaffected; naming it exactly would tighten the record but changes no mechanism.",
+      "text": "\u00a73's done-when (2) requires the Gram build recorded \"at 1696 cells and at about four times that count\", and done-when (3) the census at \"both cell counts\". \"About four times\" names no mesh and no cell count that a worker can be held to, and the 4\u00d7 mesh is otherwise unconstructed: \u00a73 says only that the mesh is an input.",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "7728797117fc6a7eb7a42c71fcfe917e9cf05e03",
+  "plan_fingerprint": "0eaebfab7ca85453973c0a90fe264de6572e28c58ea31ca3cff423f81a269e4a",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261106T204807030188-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "f04448b16e7a84e1230fc29ea5836dfd5664b2a6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/biot/polygonanalytic.py` carries the Urankar Part V full-turn reduction and is imported by `nova/biot/polysection.py:27` and `nova/biot/tiledassembly.py:63`; `complete_kind`/`complete_pole` (`nova/biot/completeelliptic.py:247,286`), `incomplete_pole` (`nova/biot/incompleteelliptic.py:266`), `nova/biot/constants.py`, `_fill_tile` (`nova/biot/tiledassembly.py:381`), `greens_psi`/`greens_bz_br` (`nova/biot/greens.py:324,357`) and `mesh` (`scripts/prototypes/iron_magnetisation/magnetisation.py:48`, which `interaction` at :133 consumes) all resolve.",
+    "done_when": "a finding \u2014 \u00a72's Snow cylinder/pancake clause (line 220) now names no tolerance, and \u00a73's scaling arm (line 255) asks for a mesh at \"about four times that count\".",
+    "evidence_paths": "pass \u2014 neither unit invents a scratch path; the durable root is declared at \u00a71 line 92 (`/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/`) and \u00a72's outcome is a recorded plan decision rather than a file.",
+    "naming": "pass \u2014 \u00a72 and \u00a73 introduce no plan labels, stage names or ticket numbers; `nova/biot/sheet.py` and the cell-interaction vocabulary name the mechanism.",
+    "reasoning": "a finding \u2014 \u00a73 derives its agreement tolerance from a quantity that cannot carry the amplification the text attributes to it: the strip's 1/\u03b5 two-long-edge cancellation happens inside one strip's closed-form evaluation and is invariant to the order in which separate edge sheets are summed.",
+    "single_goal": "pass \u2014 \u00a72 delivers one thing (the sheet route chosen and justified) and \u00a73 one thing (the cell interaction matrix on the device).",
+    "wiring": "a finding \u2014 `s6` declares `depends-on: [iron-core-magnetisation#s3, iron-core-magnetisation#s4]` but its done-when (1) requires curves from \"the production path\", which is settled only by the `formulation` decision that \u00a75's candidate table produces."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "76fc302f5b50c13d140efab20692b9cd4e428dfd1221bdb2d18f45b10b0d94f8",
+    "s3": "cd205231d80c88800e970280f63628d8d5549fa8b36d3ac1ccd4893ea7be8a9e",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T21:01:26.838654+00:00",
+  "total": null
+}

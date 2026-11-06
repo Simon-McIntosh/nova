@@ -475,6 +475,102 @@ def test_block_gmres_zero_right_and_iteration_exhaustion():
     assert int(steps) == 1 and float(condition * residual) > 1e-8
 
 
+def test_block_gmres_breakdown_leaves_unwritten_columns_out_of_the_update():
+    """A cycle that breaks down early must not solve over empty columns.
+
+    Block-diagonal cells make the preconditioned operator the identity, so the
+    Arnoldi run breaks down on its first step, with a ``width`` far larger than
+    the single column written. The reference solve is independent of the
+    Krylov path.
+    """
+    block = jnp.asarray([[2.0, 0.3, 0.1], [0.2, 3.0, 0.1], [0.0, 0.1, 4.0]])
+    cells = 4
+    matrix = jnp.zeros((3 * cells, 3 * cells), jnp.float64)
+    for cell in range(cells):
+        for row in range(3):
+            for column in range(3):
+                matrix = matrix.at[cell + cells * row, cell + cells * column].set(
+                    block[row, column] * (cell + 1)
+                )
+    right = jnp.arange(1.0, 3 * cells + 1.0, dtype=jnp.float64)[::-1]
+    inverse, indices = support_read._block_preconditioner(matrix)
+    solution, condition, residual, steps = support_read._block_gmres(
+        matrix, right, inverse, indices
+    )
+    reference = jnp.linalg.solve(matrix, right)
+    error = float(jnp.linalg.norm(solution - reference) / jnp.linalg.norm(reference))
+    print(
+        "BREAKDOWN_UPDATE",
+        "steps",
+        int(steps),
+        "error",
+        error,
+        "relative_residual",
+        float(residual),
+        flush=True,
+    )
+    assert int(steps) == 1 and 3 * cells > int(steps)
+    assert error <= 1e-10
+
+
+def _arnoldi_least_squares_reference(matrix, right, columns):
+    """One restarted Arnoldi cycle in float64 numpy, independent of the Jax path."""
+    values = np.asarray(matrix, dtype=np.float64)
+    target = np.asarray(right, dtype=np.float64)
+    basis = np.zeros((target.size, columns + 1))
+    hessenberg = np.zeros((columns + 1, columns))
+    basis[:, 0] = target / np.linalg.norm(target)
+    for column in range(columns):
+        candidate = values @ basis[:, column]
+        for _ in range(2):
+            projection = basis[:, : column + 1].T @ candidate
+            candidate = candidate - basis[:, : column + 1] @ projection
+            hessenberg[: column + 1, column] += projection
+        hessenberg[column + 1, column] = np.linalg.norm(candidate)
+        basis[:, column + 1] = candidate / hessenberg[column + 1, column]
+    right_hand = np.zeros(columns + 1)
+    right_hand[0] = np.linalg.norm(target)
+    coefficients = np.linalg.lstsq(hessenberg, right_hand, rcond=None)[0]
+    return basis[:, :columns] @ coefficients
+
+
+def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
+    """A cap that is not a multiple of the restart width must stop at the cap.
+
+    The cap stops a width-20 cycle after five columns, so the fifteen
+    unwritten columns must stay out of the least-squares. The update is
+    compared with an independent float64 Arnoldi cycle over those five
+    written columns.
+    """
+    size = 24
+    matrix = jnp.eye(size, dtype=jnp.float64)
+    for row in range(size - 1):
+        matrix = matrix.at[row + 1, row].set(0.35)
+        matrix = matrix.at[row, row + 1].set(0.25)
+    pattern = jnp.asarray([2.0, -1.0, 3.0, 1.5, -1.5], dtype=jnp.float64)
+    right = jnp.concatenate(
+        (pattern, jnp.full(size - pattern.size, 0.4, dtype=jnp.float64))
+    )
+    inverse, indices = support_read._block_preconditioner(matrix)
+    solution, condition, residual, steps = support_read._block_gmres(
+        matrix, right, inverse, indices, max_iterations=5
+    )
+    reference = _arnoldi_least_squares_reference(matrix, right, 5)
+    error = float(jnp.linalg.norm(solution - reference) / jnp.linalg.norm(reference))
+    print(
+        "CAP_UPDATE",
+        "steps",
+        int(steps),
+        "error",
+        error,
+        "relative_residual",
+        float(residual),
+        flush=True,
+    )
+    assert int(steps) == 5 and int(steps) % min(20, size) != 0
+    assert error <= 1e-10
+
+
 def test_terminal_verdict_requires_fresh_read():
     assert _terminal_verdict(8e-13, 9e-13, True)
     assert not _terminal_verdict(8e-13, 0.0303684, True)

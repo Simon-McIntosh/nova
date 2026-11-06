@@ -213,7 +213,9 @@
       1e-2 to 1e-8 of the segment length, at slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and &pi;/2, over that target
       set, and at every slope the error curve turns over strictly inside the sweep (the &epsilon;&sup2;
       model error and the rounding-over-&epsilon; cancellation cross between its ends), with the
-      best attainable error and the &epsilon; that gives it recorded per slope; (2) the chosen
+      best attainable error and the &epsilon; that gives it recorded per slope. Production uses one
+      strip width, a fixed fraction of each edge's length, so the strip is chosen only if one
+      such fraction meets 1e-10 at every slope; that fraction is the one recorded; (2) the chosen
       route meets 1e-10 relative against that integral over the same targets, and at slopes
       &pi;/2 and 0 reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27), while a
       negative control with the sheet current's sign flipped on one edge fails that comparison;
@@ -223,27 +225,37 @@
     <h2 id="s3">§3 — The cell interaction matrix on the device</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Build the cell interaction matrix G (B<sub>R</sub>, B<sub>Z</sub> and &psi; at targets per unit
-      M<sub>R</sub> and M<sub>Z</sub>) through the existing tile plan, padding, device placement and
+      Build the cell interaction matrix G (B<sub>R</sub> and B<sub>Z</sub> at the cell centroids per
+      unit M<sub>R</sub> and M<sub>Z</sub>, square, 2N by 2N for N cells, the operand of the §4 solve)
+      through the existing tile plan, padding, device placement and
       persistent compilation cache in <code>nova/biot/tiledassembly.py</code>, never a bespoke
       driver. If §2 chose the Part V strip, the edge sheets are polygon sources and G is built by
       the existing polygon tile (<code>_fill_tile</code>) with no new tile kind; only if §2 chose
       Part II is a sheet tile added beside the polygon, moment and arc tiles. A cell's columns are
       signed sums of its edge sheets, so a shared edge between two cells appears once with the net
-      sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n.
+      sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n. The same program, given a different target
+      set, gives &psi; and B of the magnetised iron at any external points (the coils, the plasma
+      grid, the probes), which is what §6 and §7 consume; that is a second target set, not a
+      second program. The strip width is the edge-length fraction the sheet-route decision
+      records. The mesh is an input: §3 measures on the §1 prototype mesh
+      (<code>mesh</code> in <code>scripts/prototypes/iron_magnetisation/magnetisation.py</code>,
+      1696 cells for WEST), and §4 and §5 rebuild G on their production meshes through this
+      program without changing it.
     </p>
     <p>
       Done when (1) the device build and the §2 host route agree in float64 over the
-      1696-cell WEST mesh against its own centroids, target by target, to within the host
+      1696-cell prototype WEST mesh against its own centroids, target by target, to within the host
       route's own rounding spread at that target: the largest change in the host value when its
       edge sums are taken in reversed order, floored at 1e-13 relative. On the strip branch
       that spread is set by the cancellation between the strip's two long edges, which
       amplifies any change in summation order by about 1/&epsilon;; on the Part II branch there is
       no such cancellation and the spread sits at the floor. A negative control that reverses
       one cell's edge normals in the device build breaks that agreement; (2) that 3392-square Gram builds on
-      one H200 with the compile time and the warm execute time each recorded, and a second
-      run hits the persistent cache; (3) the program appears in the kernel-compile
-      census with its compile wall and memory, measured the same way as the polygon tile.
+      one H200 with the compile time and the warm execute time each recorded at 1696 cells and
+      at about four times that count, and a second run hits the persistent cache; (3) the
+      program appears in the kernel-compile census with its compile wall and memory at both
+      cell counts, measured the same way as the polygon tile, so a production mesh's cost is
+      read from the census rather than re-measured.
       Heavy gates run on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one job.
     </p>
 

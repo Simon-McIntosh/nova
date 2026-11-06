@@ -422,12 +422,30 @@
         }
       ],
       "frames_drawn": 4,
-      "frames_with_separatrix": 0,
+      "frames_with_separatrix": 3,
       "max_node_mismatch_wb": {
         "maximum": 11.167432179393675,
         "mean": 5.679636265488114,
         "median": 5.352781397665694,
         "minimum": 0.8455500872273891
+      },
+      "per_frame": {
+        "137": {
+          "symmetric_rms_distance_m": 0.15994413533416596,
+          "symmetric_sup_distance_m": 0.6794105349966816
+        },
+        "146": {
+          "symmetric_rms_distance_m": null,
+          "symmetric_sup_distance_m": null
+        },
+        "179": {
+          "symmetric_rms_distance_m": 0.1598967387077574,
+          "symmetric_sup_distance_m": 0.5921968877517164
+        },
+        "44": {
+          "symmetric_rms_distance_m": 0.17252067808376556,
+          "symmetric_sup_distance_m": 0.8169173175512713
+        }
       },
       "reproduction_relative_error": {
         "maximum": 4.702771970109923e-14,
@@ -444,16 +462,16 @@
       "separation_definition": "symmetric nearest-point sup and RMS distance between the fine-map closed separatrix and the labelled EFIT LCFS",
       "source": "nova.equilibrium.display_flux.build_display_flux_map on the state's own currents, separatrix assembled at the map's own polished saddle value",
       "symmetric_rms_distance_m": {
-        "maximum": null,
-        "mean": null,
-        "median": null,
-        "minimum": null
+        "maximum": 0.17252067808376556,
+        "mean": 0.16412051737522962,
+        "median": 0.15994413533416596,
+        "minimum": 0.1598967387077574
       },
       "symmetric_sup_distance_m": {
-        "maximum": null,
-        "mean": null,
-        "median": null,
-        "minimum": null
+        "maximum": 0.8169173175512713,
+        "mean": 0.696174913433223,
+        "median": 0.6794105349966816,
+        "minimum": 0.5921968877517164
       }
     },
     "frame_records": [
@@ -1164,19 +1182,19 @@
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 0,
+            "closed_segment_count": 627,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
+          "separatrix_closed_points": 5017,
           "separatrix_saddle_to_label_x_m": 2.448598179178082,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_symmetric_rms_distance_m": 0.1598967387077574,
+          "separatrix_symmetric_sup_distance_m": 0.5921968877517164,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
@@ -1964,19 +1982,19 @@
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 0,
+            "closed_segment_count": 465,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
+          "separatrix_closed_points": 3721,
           "separatrix_saddle_to_label_x_m": 2.2422884473456057,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_symmetric_rms_distance_m": 0.17252067808376556,
+          "separatrix_symmetric_sup_distance_m": 0.8169173175512713,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
@@ -3693,19 +3711,19 @@
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 0,
+            "closed_segment_count": 537,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
+          "separatrix_closed_points": 4297,
           "separatrix_saddle_to_label_x_m": 0.17632215764534862,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_symmetric_rms_distance_m": 0.15994413533416596,
+          "separatrix_symmetric_sup_distance_m": 0.6794105349966816,
           "spacing_m": 0.01,
           "vertical_points": 321
         },

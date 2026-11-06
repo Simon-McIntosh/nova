@@ -1,0 +1,120 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite failure_ids [] at 73864287c5db07bac083e61dca1f160859452351 and after_suite failure_ids [] at 42039a936366f4b71a04c3573c46d90213fb5ec6, both completed true with EXIT=0 in fixed-polish/base-suite.log and fixed-polish/head-suite.log",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "The fixed polish is removed or its band widened such that -1e-14 and +1e-14 seeds cross the 1e-10 tolerance at different updates; the fragment records base giving [2,2] versus [3,3] reads.",
+      "file": "tests/test_bank_solve_cycle.py",
+      "line": 65
+    },
+    {
+      "condition_to_fail": "A polished lane is certified against a stale residual above 1e-10, so the reported residual exceeds tolerance.",
+      "file": "tests/test_bank_solve_cycle.py",
+      "line": 62
+    },
+    {
+      "condition_to_fail": "The restart budget no longer covers the fixed polish, leaving the diverted cycle lanes unconverged.",
+      "file": "tests/test_bank_solve_cycle.py",
+      "line": 220
+    },
+    {
+      "condition_to_fail": "An invalid full polish trial replaces a valid incumbent, so the returned state is invalid or not 1.5.",
+      "file": "tests/test_bank_solve_driver.py",
+      "line": 695
+    },
+    {
+      "condition_to_fail": "Certification accepts a tracked zero instead of a fresh read; demonstrated by fixed-polish/negative-control.log where the mutant returns 1.0 against the expected 1.5.",
+      "file": "tests/test_bank_solve_driver.py",
+      "line": 701
+    },
+    {
+      "condition_to_fail": "The driver's own read counter stops matching the number of read_batch invocations, e.g. if the certification read were not charged.",
+      "file": "tests/test_bank_solve_driver.py",
+      "line": 703
+    },
+    {
+      "condition_to_fail": "The update or read totals change, as under the removed polish (steps would not be 17) or a different P; this is a golden-value guard rather than a property check.",
+      "file": "tests/test_bank_solve_driver.py",
+      "line": 702
+    }
+  ],
+  "base_log_revision": "73864287c5db07bac083e61dca1f160859452351",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T20:11:29.838Z",
+  "dispatched_at": "2026-11-06T19:58:05Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The product change this finding addresses was reverted at the final head, which lands evidence only. Figure notes are cosmetic on a negative-result record.",
+      "recorded_at": "2026-11-06T20:17:19.075637+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The product change this finding addresses was reverted at the final head, which lands evidence only. Figure notes are cosmetic on a negative-result record.",
+      "recorded_at": "2026-11-06T20:17:21.577213+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "1674",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added choose() is a verbatim copy of the masked pytree selection at nova/equilibrium/solve.py:126; the module already imports _damped_scale from that file, so the helper should be lifted to module scope and imported rather than duplicated."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "1641",
+      "severity": "non-blocking",
+      "text": "non-blocking: polish_steps=16 is paid by every active lane as soon as the batch is in band, so head takes 20 reads and 1685-1689 ms against base's 7-15 reads and 525-983 ms; the change makes the count stable but worsens the converged wall on five of six seed sets, and no early-exit or smaller-P variant was measured."
+    }
+  ],
+  "head_log_revision": "42039a936366f4b71a04c3573c46d90213fb5ec6",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit: de9fd595b and 42039a936 carry all product and test change (support_read.py, solve.py, the two test files), the rest add scripts/prototypes/bank_near_root_polish and the evidence fragment; product and test code is final at 42039a936, the revision both suites measured.",
+    "done_when": "prompt.txt:127 lists four gate clauses; fixed-polish/head-0..2.log and base-0..2.log show head [20,20,20,20,20,20] versus base [8,8,7,15,9,8] with every one of 576 lane certificates converging, cpu-base-*.log and cpu-head-*.log exit 0 with zero failures at the final product/test revision, and fixed-polish/negative-control.log ends EXIT=1 on test_uncertified_polish_resumes_adaptive_search[False].",
+    "goal": "prompt.txt:38 states the goal as a batched read count insensitive to near-tolerance noise via a fixed near-root polish; nova/equilibrium/support_read.py:1641-1642 sets polish_steps=16 and near_root_band=1e-8, and docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html records head reads [20]*16 for all six seed sets against base 7-15, so the stated goal is met.",
+    "manifest": "manifest.md:1-33 names seven commits, eleven changed paths, both suite arms as completed with failure_count 0, the negative-control log, and a landing line that states the 20-reads-versus-7-15 read and wall regression rather than burying it.",
+    "write_paths": "prompt.txt:97-104 grants seven paths; git diff 73864287c5db07bac083e61dca1f160859452351 1046a4cd11d71b4f5344efe06595bb1543c0f057 changes eleven files, every one inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_solve_driver.py:698-703 carries the fresh-certificate guard that fixed-polish/negative-control.log shows reddening under the tracked-read mutation, and tests/test_bank_solve_cycle.py:65 compares two noise seeds whose counts differ at base.",
+    "evidence": "fixed-polish/head-0.log:1 and :5 bind the run to revision 42039a936366f4b71a04c3573c46d90213fb5ec6 and the imported module path, every suite log opens with its revision and ends EXIT=0, and the fragment tables all 576 lane certificates plus the pair_gaps budgets.",
+    "fit": "nova/equilibrium/support_read.py:1753-1769 follows the surrounding nested-closure style of selection_changed at 1653 and uses no plan or ticket identifier in any name or comment.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1641-1642 implements the declared band and P, and fixed-polish/head-0.log:8 reports 20 reads per lane on seed set 0, the insensitivity the goal names.",
+    "reuse": "nova/equilibrium/support_read.py:1674 adds a choose() that is a verbatim copy of the masked pytree selection already at nova/equilibrium/solve.py:126, which the module already imports _damped_scale from.",
+    "scope_discipline": "Every file in the 73864287c5db07bac083e61dca1f160859452351..1046a4cd11d71b4f5344efe06595bb1543c0f057 diffstat sits inside the seven paths granted at prompt.txt:97-104, including scripts/prototypes/bank_near_root_polish and docs/figures/sub-millisecond-forward-path/bank-near-root-polish."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 states the goal as a batched read count insensitive to near-tolerance noise via a fixed near-root polish; nova/equilibrium/support_read.py:1641-1642 sets polish_steps=16 and near_root_band=1e-8, and docs/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html records head reads [20]*16 for all six seed sets against base 7-15, so the stated goal is met.\nVERDICT done_when: prompt.txt:127 lists four gate clauses; fixed-polish/head-0..2.log and base-0..2.log show head [20,20,20,20,20,20] versus base [8,8,7,15,9,8] with every one of 576 lane certificates converging, cpu-base-*.log and cpu-head-*.log exit 0 with zero failures at the final product/test revision, and fixed-polish/negative-control.log ends EXIT=1 on test_uncertified_polish_resumes_adaptive_search[False].\nVERDICT write_paths: prompt.txt:97-104 grants seven paths; git diff 73864287c5db07bac083e61dca1f160859452351 1046a4cd11d71b4f5344efe06595bb1543c0f057 changes eleven files, every one inside them.\nVERDICT manifest: manifest.md:1-33 names seven commits, eleven changed paths, both suite arms as completed with failure_count 0, the negative-control log, and a landing line that states the 20-reads-versus-7-15 read and wall regression rather than burying it.\nVERDICT diff: Read commit by commit: de9fd595b and 42039a936 carry all product and test change (support_read.py, solve.py, the two test files), the rest add scripts/prototypes/bank_near_root_polish and the evidence fragment; product and test code is final at 42039a936, the revision both suites measured.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1641-1642 implements the declared band and P, and fixed-polish/head-0.log:8 reports 20 reads per lane on seed set 0, the insensitivity the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: fixed-polish/head-0.log:1 and :5 bind the run to revision 42039a936366f4b71a04c3573c46d90213fb5ec6 and the imported module path, every suite log opens with its revision and ends EXIT=0, and the fragment tables all 576 lane certificates plus the pair_gaps budgets.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every file in the 73864287c5db07bac083e61dca1f160859452351..1046a4cd11d71b4f5344efe06595bb1543c0f057 diffstat sits inside the seven paths granted at prompt.txt:97-104, including scripts/prototypes/bank_near_root_polish and docs/figures/sub-millisecond-forward-path/bank-near-root-polish.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_bank_solve_driver.py:698-703 carries the fresh-certificate guard that fixed-polish/negative-control.log shows reddening under the tracked-read mutation, and tests/test_bank_solve_cycle.py:65 compares two noise seeds whose counts differ at base.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/support_read.py:1753-1769 follows the surrounding nested-closure style of selection_changed at 1653 and uses no plan or ticket identifier in any name or comment.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/support_read.py:1674 adds a choose() that is a verbatim copy of the masked pytree selection already at nova/equilibrium/solve.py:126, which the module already imports _damped_scale from.\nFINDING nova/equilibrium/support_read.py:1674 non-blocking: the added choose() is a verbatim copy of the masked pytree selection at nova/equilibrium/solve.py:126; the module already imports _damped_scale from that file, so the helper should be lifted to module scope and imported rather than duplicated.\nFINDING nova/equilibrium/support_read.py:1641 non-blocking: polish_steps=16 is paid by every active lane as soon as the batch is in band, so head takes 20 reads and 1685-1689 ms against base's 7-15 reads and 525-983 ms; the change makes the count stable but worsens the converged wall on five of six seed sets, and no early-exit or smaller-P variant was measured.",
+  "review_run_id": "r-20261106T195625284162-review-of-bank-near-root-polish-1046a4cd11d7",
+  "reviewed_base_sha": "73864287c5db07bac083e61dca1f160859452351",
+  "reviewed_commits": [
+    "de9fd595be66a67532dc5b5bd0d9d1feba233d1c",
+    "934ac04c076ec543f1d7640e81cdf3b612aeffa3",
+    "42039a936366f4b71a04c3573c46d90213fb5ec6",
+    "7a15cad943c9f8b9a0f1d74d070bdf39f92f0a2d",
+    "898cc2371d36c6bad52c7b47398f850d019c6679",
+    "e1fa56a5db7609092079afbf52bcbbaf57dd620c",
+    "1046a4cd11d71b4f5344efe06595bb1543c0f057"
+  ],
+  "reviewed_head_sha": "1046a4cd11d71b4f5344efe06595bb1543c0f057",
+  "reviewed_run_id": "r-20261106T190538050441-bank-near-root-polish",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:07:28Z",
+  "total": 94
+}

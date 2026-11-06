@@ -245,20 +245,22 @@
     </p>
     <p>
       Done when (1) the device build and the §2 host route agree in float64 over the
-      1696-cell prototype WEST mesh against its own centroids, target by target, to within the
-      rounding term of §2's measured error curve at the production strip width, floored at
-      1e-13 relative. That term is the cancellation between a strip's two long edges inside one
-      Part V evaluation; two float64 evaluations of the same closed form that round differently
-      (fused and unfused, device and host) can differ by about that much, while the order in
-      which a cell's edge sheets are added does not touch it. On the Part II branch there is no
-      such cancellation and the tolerance is the floor. A negative control that reverses
-      one cell's edge normals in the device build breaks that agreement; (2) that 3392-square Gram builds on
-      one H200 with the compile time and the warm execute time each recorded at 1696 cells and
-      on the prototype mesh at half its cell size (its count recorded, near four times as
-      many), and a second run hits the persistent cache; (3) the
-      program appears in the kernel-compile census with its compile wall and memory at both
-      cell counts, measured the same way as the polygon tile, so a production mesh's cost is
-      read from the census rather than re-measured.
+      1696-cell prototype WEST mesh against its own centroids, entry by entry, to within the
+      largest per-slope rounding term §2 records at the production strip width (the worst slope,
+      since the mesh mixes them), floored at 1e-13, measured relative to the sum of the absolute
+      values of that entry's edge-sheet contributions rather than to the net entry. A cell's
+      four edge sheets nearly cancel at a distant target, so the net entry is ill-conditioned
+      and only the absolute sum bounds what two correctly rounded evaluations can differ by. On
+      the Part II branch there is no strip cancellation and the tolerance is the floor. A
+      negative control that reverses one cell's edge normals in the device build breaks that
+      agreement; (2) on one H200, fresh process and persistent cache disabled, the build at
+      1696 cells and on the prototype mesh at half its cell size (count recorded, near four
+      times as many) compiles in at most 60&nbsp;s with an executable of at most 50&nbsp;MB and at
+      most 64&nbsp;GB of host memory, the bounds kernel-compile-barrier owns, with the warm execute
+      time recorded and a second run hitting the persistent cache; (3) both builds are entered
+      as program rows of <code>docs/research/compile-cost-evidence.html</code> carrying the fields
+      its existing rows carry (compile wall, executable size, peak host memory) and the cell
+      count, so a production mesh's cost is read from that ledger rather than re-measured.
       Heavy gates run on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one job.
     </p>
 

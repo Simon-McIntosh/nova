@@ -1,6 +1,6 @@
 <section id="polygon-analytic-tangents-result">
 <h2>Polygon endpoint tangent regularisation</h2>
-<p><strong>Repairs committed; full comparison pending.</strong> The continuation repairs the small-corner vertex formulas and the nearly horizontal edge weights without changing the 1e-9 bound. The new Sirius baseline completed with three failures and 26 passes. The same job, <code>1306659</code>, is now testing committed head <code>ffcbcb5353d56a66e1cb5830fba729e3a088b94b</code>. The expanded independent integral tests pass; this record does not yet declare all five full-domain identities passing.</p>
+<p><strong>Complete: all five tangent identities pass.</strong> Sirius job <code>1306659</code> completed both files at base and head. The head has <strong>29 passed, zero failed</strong>, compared with three baseline failures, with <strong>zero added failure IDs</strong>. Every required 10,000-sample JVP identity and all five independent 50-digit comparisons pass the unchanged <code>1e-9</code> tangent bound. Both near-corner checks pass on 28 reference rows. The <a href="#polygon-analytic-tangents-final-gate">completed repair comparison</a> below supersedes the preserved intermediate checkpoints.</p>
 <p>Source and regression tests are committed at <code>3a147537adfda27f8552c97fc9e6e0fd65b0c7c0</code>, from base <code>acc972e71a3ed305704cc6151dd880af11091204</code>. The starting classification is the <a href="/nova/evidence/fragments/nova-portfolio-replan/lane-repair-biot-tangents.html">Biot tangent reproduction record</a>. At the initial checkpoint, the full two-arm Sirius measurement was still running; the focused results below did not declare that comparison complete.</p>
 <p>The base edge file reproduces the flux-line tangent discrepancy at <code>1.021e-3</code> against <code>1e-9</code>, with <code>1 failed, 10 passed, 13 deselected in 395.80s (0:06:35)</code>. An independent 50-digit weighted-arsinh integral reproduces a <code>1.104e-9</code> tangent error on domain sample 5. A separate 10,000-sample chunked JVP probe finds 276 weighted-arsinh discrepancies, maximum <code>3.096e-5</code>; their largest distance from the corner is <code>4.680e-5</code> times the target radius. These are arithmetic failures, with finite values and derivatives.</p>
 <table>
@@ -25,7 +25,7 @@
 </section>
 
 <section id="polygon-analytic-tangents-completed-gate">
-<h3>Completed Sirius comparison</h3>
+<h3>First completed Sirius comparison: partial repair</h3>
 <p>Job <code>1306553</code> completed in <code>01:17:43</code>. Every file and arm reached a pytest summary and wrote its own <code>EXIT=1</code>. The scheduler's <code>COMPLETED</code>/<code>0:0</code> describes the measurement driver; it does not mean the tests passed. The base is <code>acc972e71a3ed305704cc6151dd880af11091204</code> and the measured head is <code>004b19e3efc0c513b28e349a9b5dcf399ac6a64c</code>. Each log prints the imported module and resolved working directory beneath its own extracted arm.</p>
 <table>
 <thead><tr><th>File and arm</th><th>Receipt summary</th></tr></thead>
@@ -74,7 +74,7 @@
 </section>
 
 <section id="polygon-analytic-tangents-steep-edge">
-<h3>Nearly horizontal edge weights and the pending head arm</h3>
+<h3>Nearly horizontal edge repair checkpoint</h3>
 <p>The edge capture reproduces <code>tangent_max_relative=1.389e-08 bound=1e-09</code> on two of 10,000 rows. Sample 2730 has endpoint height difference <code>2.57808555737e-4 m</code> and slope <code>39266.596018709344</code>; sample 3730 has height difference <code>-2.48423000418e-4 m</code> and slope <code>-20255.76435145203</code>. Their relative discrepancies are <code>1.349e-8</code> and <code>1.389e-8</code>. Both are outside the corner and plane-pole regularisation bands. Full geometry and tangent coordinates are in <code>branch-repair/base/test_edge_term_tangents-flux_line_moments.json</code> under the evidence root.</p>
 <p><strong>Mechanism.</strong> Powers of the slope multiply the large plane intercept <code>r1 = corner_radius - b u</code>, then cancel when the root and arsinh weights are assembled. The radial tangent at sample 2730 is <code>27.648934074225348</code> at 50 digits, while the baseline NumPy tangent is <code>27.64890373435512</code>. The unnormalised polynomial coefficients lose information before either contraction is evaluated.</p>
 <p>Commit <code>ffcbcb5353d56a66e1cb5830fba729e3a088b94b</code> factors the weights using <code>A=1/sqrt(1+b²)</code> and <code>B=b/sqrt(1+b²)</code>. For large slopes both are formed through <code>1/b</code>, so the derivative of B does not subtract two nearly equal normalisation terms. The cancellation <code>A r1 - B² p</code> is evaluated as <code>A (A² corner_radius - A B u + B² r cos(phi))</code>. The higher moment coefficients factor through the same bounded quantities. The primal and tangent share these weights and retain the existing root and residual contractions.</p>
@@ -82,4 +82,33 @@
 <p>The single Sirius job's complete baseline at <code>e12121cec6e92ecba81d8419a387f74be4a3d898</code> reports <code>2 failed, 15 passed, 5 deselected in 1586.76s (0:26:26)</code> for vertex and <code>1 failed, 11 passed, 13 deselected in 458.28s (0:07:38)</code> for edge. The aggregate is <code>3 failed, 26 passed, 18 deselected</code>, <code>EXIT=1</code>. The head revision was supplied after its source and tests were committed. All four new file receipts and the aggregate readback belong under <code>/work/projects/imas_gpu/sophelio/evidence/polygon-analytic-tangents/branch-repair/</code>; the earlier comparison remains intact in the parent directory.</p>
 <p><strong>Remaining acceptance work:</strong> read both complete head file receipts, compare failure IDs against this baseline, inspect all five 10,000-sample identities against the unchanged <code>1e-9</code> bound, and verify both near-corner reference checks reached their rows. The worker parks on the job's terminal-state probe; it does not call the repair complete from the focused reference results.</p>
 <p>The head has now completed its first two repaired identities: horizontal flux passes all <code>10,000</code> samples at <code>6.632e-10</code>, with zero failing geometries against 220 at baseline; arsinh passes all <code>10,000</code> at <code>3.617e-11</code>, with zero against one. Both retain bit-identical returned primal halves and fully finite JVPs. These rows are in <code>branch-repair/head-vertex.log</code> and their geometry-capture JSON files under <code>branch-repair/head/</code>. The vertex file and the complete head arm are still running; their pending summaries are not inferred from these passing rows.</p>
+</section>
+
+<section id="polygon-analytic-tangents-final-gate">
+<h3>Completed repair: all five identities pass</h3>
+<p>Sirius job <code>1306659</code> completed in <code>01:16:19</code>, using one job with <code>02:30:00</code>, 96 GB and a fresh process per file and arm. The baseline is <code>e12121cec6e92ecba81d8419a387f74be4a3d898</code>; the measured head is <code>ffcbcb5353d56a66e1cb5830fba729e3a088b94b</code>. All four logs carry the revision, literal command, imported module and resolved working directory, reach their pytest summaries, and end with the command's own exit status. The two head processes each report <code>EXIT=0</code>.</p>
+<table>
+<thead><tr><th>File and arm</th><th>Complete receipt summary</th><th>Exit</th></tr></thead>
+<tbody>
+<tr><td>Base edge</td><td><code>1 failed, 11 passed, 13 deselected in 458.28s (0:07:38)</code></td><td>1</td></tr>
+<tr><td>Base vertex</td><td><code>2 failed, 15 passed, 5 deselected in 1586.76s (0:26:26)</code></td><td>1</td></tr>
+<tr><td>Head edge</td><td><code>12 passed, 13 deselected in 501.25s (0:08:21)</code></td><td>0</td></tr>
+<tr><td>Head vertex</td><td><code>17 passed, 5 deselected in 1673.74s (0:27:53)</code></td><td>0</td></tr>
+</tbody>
+</table>
+<p>The complete aggregate moves from <code>3 failed, 26 passed, 18 deselected</code> to <code>29 passed, 18 deselected</code>. The three baseline failure IDs are <code>test_tangent_matches_base_jvp[flux_line_moments]</code>, <code>test_tangent_matches_primal_jvp[arsinh_terms]</code> and <code>test_tangent_matches_primal_jvp[horizontal_flux_line_moments]</code>. The head failure set is empty; all three are repaired and the added-failure set is empty. This is the same explicit <code>not slow</code> arithmetic selection used throughout this comparison; cold-compile ratio rows remain excluded.</p>
+<table>
+<thead><tr><th>Required tangent family</th><th>Base JVP maximum relative error</th><th>Head JVP maximum relative error</th><th>Head 50-digit tangent maximum relative error</th><th>Reference geometries</th></tr></thead>
+<tbody>
+<tr><td>Edge flux-line moments</td><td><code>1.389e-8</code></td><td><code>7.821e-12</code></td><td><code>1.140e-11</code></td><td>5</td></tr>
+<tr><td>Vertex arsinh</td><td><code>2.180e-9</code></td><td><code>3.617e-11</code></td><td><code>6.410e-10</code></td><td>4</td></tr>
+<tr><td>Weighted vertex arsinh</td><td><code>8.808e-12</code></td><td><code>8.808e-12</code></td><td><code>1.872e-13</code></td><td>3</td></tr>
+<tr><td>Vertex flux moments</td><td><code>1.447e-12</code></td><td><code>1.447e-12</code></td><td><code>2.824e-12</code></td><td>3</td></tr>
+<tr><td>Vertex horizontal flux</td><td><code>8.618e-6</code></td><td><code>6.632e-10</code></td><td><code>7.396e-12</code></td><td>6</td></tr>
+</tbody>
+</table>
+<p>Every JVP row covers all <strong>10,000 samples</strong>, with zero failures, fully finite reference tangents and bit-identical returned primal halves. The geometry-capture reader detects the known baseline counts of 2 edge, 1 arsinh and 220 horizontal failures before reading zero at head. All five independent integral tests also pass their <code>1e-10</code> primal bound; the largest reported primal error is <code>2.091e-11</code>. The fragment's earlier sections name each mismatch's mechanism and the corresponding source repair; no tolerance was widened.</p>
+<p><code>test_near_corner_reference_is_the_exact_integral</code> and <code>test_near_corner_radial_tangent_meets_reference</code> both reach and pass their shared <strong>28 reference rows</strong>. The head maxima are <code>4.353e-14</code> for primal/reference, <code>2.172e-12</code> for hand/reference, <code>2.172e-12</code> for JVP/reference and <code>1.641e-15</code> for hand/JVP. Every reported distance/sign group has zero degraded samples under its existing allowance. The one-ULP positive control remains visible at <code>1.1653027654645727e-16</code>. The composed signed-offset check also passes at zero and both signs from <code>1e-12</code> through <code>1e-2</code>, with zero reported degradation.</p>
+<p>The declared negative control remains discriminating against this complete head: restoring the previous horizontal tangent fails <code>test_endpoint_terms_match_exact_integrals[horizontal_flux_line_moments]</code> at <code>1.817591739624177e-5</code>, with <code>1 failed in 35.85s</code> and <code>EXIT=1</code>; the same test passes in the completed head file. The head's deliberate truncated-product tests also report discrepancies above the bound, and the paired-channel guard produces the recorded refusal <code>the point-jet tangent requires an unpaired channel</code>.</p>
+<p>The four file receipts and <code>base-suite.log</code>/<code>head-suite.log</code> are under <code>/work/projects/imas_gpu/sophelio/evidence/polygon-analytic-tangents/branch-repair/</code>. The run directory retains <code>branch-harvest-result.json</code>, <code>receipt-audit.json</code> and <code>horizontal-negative-control.log</code>. The measured source and tests match the delivered tree; later commits update only this evidence fragment. This completes the worker's declared comparison and leaves plan-section closure and merged verification to the coordinator.</p>
 </section>

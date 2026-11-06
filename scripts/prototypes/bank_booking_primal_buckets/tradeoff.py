@@ -422,7 +422,14 @@ def main():
         (args.run / "restructure/comparison.json").write_text(
             json.dumps(receipt, indent=2)
         )
-        print("RETAIN_CANDIDATE", receipt["retain_candidate"], flush=True)
+        print(
+            "COMPARISON",
+            json.dumps({
+                "retain_candidate": receipt["retain_candidate"],
+                "verdict": receipt["verdict"],
+            }),
+            flush=True,
+        )
     prior = args.output.read_text().split(f'<section id="{PREFIX}-attribution">')[0]
     args.output.write_text(prior + html)
     print("ATTRIBUTED", json.dumps(receipt.get("reduction", {})), flush=True)

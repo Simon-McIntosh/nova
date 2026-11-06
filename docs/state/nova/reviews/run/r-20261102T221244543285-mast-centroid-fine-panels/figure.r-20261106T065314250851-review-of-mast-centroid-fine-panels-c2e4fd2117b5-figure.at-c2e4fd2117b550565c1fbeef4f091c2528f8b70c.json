@@ -9,6 +9,13 @@
     "docs/figures/mast-centroid-capability/full-axis-lane/vacuum-and-plasma-panels.png",
     "docs/figures/mast-centroid-capability/titan-lane/vacuum-and-plasma-panels.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "mast-separatrix-redraw",
+      "recorded_at": "2026-11-06T07:15:49.891512+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels-fine.png",

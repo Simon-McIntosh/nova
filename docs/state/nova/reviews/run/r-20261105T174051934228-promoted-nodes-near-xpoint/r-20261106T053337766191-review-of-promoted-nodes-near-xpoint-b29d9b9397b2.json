@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run records neither baseline_suite nor after_suite: it is an investigation node with no suite arm, so no failure id is added and none could be derived from an absent gate log.",
+  "call_sites": "none - the added modules are prototype scripts under scripts/prototypes/ that no production module imports; the change binds to nova.equilibrium.display_flux.build_display_flux_map, nova.equilibrium.forward_operator.ForwardFluxOperator.residual_shadow_mask and nova.equilibrium.reduced_newton._trip_boundary.trip_boundary",
+  "completed_at": "2026-11-06T05:48:35.924Z",
+  "dispatched_at": "2026-11-06T05:36:43Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py",
+      "id": "f9bb3ee2c9d",
+      "line": 65,
+      "severity": "non-blocking",
+      "summary": "The added _segmented_distance re-implements nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances -- the same projection-and-clip point-to-nearest-segment distance -- rather than importing or extending that owner, so the same geometry now has two implementations in a repository that already exports one and a test (tests/test_boundary_comparison.py) that covers it."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html",
+      "id": "f486544137f",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "The sentence concludes that the image-minus-state column 'measures geometry rather than an instrument gap', but the column it introduces reads +0.0000 mWb on all 31 upper-half-plane promoted nodes (about 1.6e-10 Wb, i.e. the image equals the state) and -2.6e-03 to -2.6e-02 Wb on the 29 lower-half-plane nodes, an asymmetry the reviewed run's own manifest records under blockers as unresolved and which the fragment does not mention; the headline saddle displacement and the solved-node control are unaffected, but the column must not be read node by node."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py",
+      "id": "febbcbf7bd8",
+      "line": 307,
+      "severity": "non-blocking",
+      "summary": "done_when item 2 asks for the lobe and leg direction shifts in degrees, and they are reported undefined because the branches are taken from display_flux.build_display_flux_map at the extractor's default branch_capacity of 256; re-counting the archived display field at measure-5-fields.npz's own image level gives one closed contour of 1330 vertices, so assembling at a capacity above 1330 (nova.equilibrium.separatrix_branches.assemble_separatrix_branches takes branch_capacity as a keyword) would have produced the degrees, and the capacity-bound explanation for their absence overstates the obstacle."
+    },
+    {
+      "file": "scripts/prototypes/promoted_nodes_near_xpoint/write_fragment.py",
+      "id": "f0b952318b2",
+      "line": 102,
+      "severity": "non-blocking",
+      "summary": "The module docstring at line 3 claims 'every number in the fragment is read from the receipt beside the log', but the composed prose hardcodes '677 segments' here, '256 segments' at line 99 and 'the window spans 3 mm' at line 160; the 3 mm is derived in render_panel.py:457 as max(1.5e-3, 3*span), so a saddle separation above 0.5 mm would silently make the fragment disagree with the figure it captions."
+    },
+    {
+      "file": "/work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint/measure-5d-gate.log",
+      "id": "f12d094412c",
+      "line": 6,
+      "severity": "non-blocking",
+      "summary": "The gate the manifest names ran at SOURCE_REVISION cf3607fe3, while the reviewed head is b29d9b939, so the three commits after the gate -- the undefined-separatrix handling, the fragment rewrite and both figure repairs -- were never exercised by the lane gate; the artefact is nevertheless reproducible, the committed SVG being byte-identical to a fresh render of the head renderer against the archived measure-5-fields.npz and the fragment byte-identical to write_fragment.compose(measure-5.json)."
+    },
+    {
+      "file": "/work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint/measure-5c-gate.log",
+      "id": "f0730b08f6b",
+      "line": 2,
+      "severity": "non-blocking",
+      "summary": "Attempt 5c ran the measurement and the panel in place on the login partition (PLACEMENT=in-place, RUNG=cpu, SLURM_JOB_PARTITION=rigel at lines 2-5), where the workstation rule forbids heavy work and where the run's own brief requires scripts/nova_lane/run.sh --force-submit --rungs h200,titan; it produced no artifact and was superseded by job 1306509, so nothing unsound was recorded, but the run's host discipline was breached once."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit over eighteen commits bd3b868db..b29d9b939: three measurement/renderer/composer scripts grown in place, a round runner, a scheduler state probe, a numpy receipt serialiser, the fragment composed twice and the panel re-rendered three times as figure defects were found and repaired.",
+    "done_when": "The brief names three items; items 1 and 3 are produced and their numbers reconcile with measure-5.json, and item 2 is produced in millimetres only -- the separatrix's lobe and leg angles are reported undefined because the extractor's default 256-segment capacity is not raised, so the 'in degrees' half of the measure is unasserted.",
+    "goal": "The reviewed goal is to determine whether the promoted nodes beside the X-point move the converged near-X-point geometry or merely leave it uncertified; docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html:76-78 answers it in millimetres and names the rule a repair would change.",
+    "manifest": "Read; it records status complete, the eighteen commits, the titan lane job 1306509 with ROUND-OK and EXIT_STATUS=0, and it discloses the upper/lower half-plane asymmetry of the image-minus-state column under blockers.",
+    "write_paths": "The manifest declares scripts/prototypes/promoted_nodes_near_xpoint/, the fragment and docs/figures/separatrix-spline-extraction/promoted-nodes-near-xpoint/; all seven changed paths lie inside them and no solver or producer source is touched."
+  },
+  "justifications": {
+    "durability": "No test file is in the write paths and the diff adds none; the only guards are runtime preconditions at scripts/prototypes/promoted_nodes_near_xpoint/run_round.py:63-77 (a step that returns success without a fresh artifact) and render_panel.py:226-241 (a label off the canvas, on another label, or on plotted data), which redden on a named regression but which no suite exercises.",
+    "evidence": "measure-5d-gate.log:6 shows the named gate ran at SOURCE_REVISION cf3607fe3, three commits before the reviewed head, so the two figure commits after it rest on a render log rather than the lane gate, and the fragment's image-minus-state column is half an unexplained null; the instrument itself is well validated, the image reproducing the solve on the nodes it claims at 7.468e-09 Wb against a 5.730e-09 Wb residual and the operator raster at 6.877e-12.",
+    "fit": "The prototypes follow the surrounding script idiom, draw through nova.media painters (poloidal_axes, draw_wall, draw_nulls, draw_scattered_contours, sample_cubic_controls) and carry no plan label or version suffix, but render_panel.py:137-241 puts the figure-legibility check that AGENTS.md assigns to a style module into a throwaway prototype, and the fragment quotes source line numbers at html:62-63 that will rot.",
+    "goal_fidelity": "All three done-when items land: scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:326 tables each promoted node's distance to the polished X-point and the drawn separatrix, :340-352 tables its domain label, and docs/evidence/fragments/separatrix-spline-extraction/promoted-nodes-near-xpoint.html:62-63 names the selecting rule and its owning module; the degrees half of item 2 is absent because the separatrix is reported unassembled.",
+    "reuse": "measure_promoted_nodes.py:65 _segmented_distance re-implements nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances instead of extending it; every other added definition (_json_default, _direction, _angle_degrees, _landmarks, the label placers) has no repository owner that a search over nova/ and nova/media/ found.",
+    "scope_discipline": "Every one of the seven paths changed in bd3b868db..b29d9b939 lies inside the manifest's three declared write paths, and nova/equilibrium/reduced_newton.py, forward_operator.py and display_flux.py are read but not modified."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T053337766191-review-of-promoted-nodes-near-xpoint-b29d9b9397b2",
+  "reviewed_base_sha": "bd3b868dbcd2b60fe0b0840778324f8356861173",
+  "reviewed_head_sha": "b29d9b9397b2b442d15b58e723fe8f3ba1be1d0b",
+  "reviewed_run_id": "r-20261105T174051934228-promoted-nodes-near-xpoint",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T06:03:51.067542+00:00",
+  "total": 83
+}

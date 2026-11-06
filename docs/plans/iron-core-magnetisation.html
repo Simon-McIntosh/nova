@@ -232,28 +232,25 @@
       unit M<sub>R</sub> and M<sub>Z</sub>, square, 2N by 2N for N cells, the operand of the §4 solve)
       through the existing tile plan, padding, device placement and
       persistent compilation cache in <code>nova/biot/tiledassembly.py</code>, never a bespoke
-      driver. If §2 chose the Part V strip, the edge sheets are polygon sources and G is built by
-      the existing polygon tile (<code>_fill_tile</code>) with no new tile kind; only if §2 chose
-      Part II is a sheet tile added beside the polygon, moment and arc tiles. A cell's columns are
+      driver. The sheet-route decision chose the Part II closed form, so a sheet tile evaluating
+      <code>nova/biot/sheet.py</code> is added beside the polygon, moment and arc tiles
+      (<code>_fill_tile</code>, <code>_fill_moment_tile</code>, <code>_fill_arc_tile</code>). A cell's columns are
       signed sums of its edge sheets, so a shared edge between two cells appears once with the net
       sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n. The same program, given a different target
       set, gives &psi; and B of the magnetised iron at any external points (the coils, the plasma
       grid, the probes), which is what §6 and §7 consume; that is a second target set, not a
-      second program. The strip width is the edge-length fraction the sheet-route decision
-      records. The mesh is an input: §3 measures on the §1 prototype mesh
+      second program. The mesh is an input: §3 measures on the §1 prototype mesh
       (<code>mesh</code> in <code>scripts/prototypes/iron_magnetisation/magnetisation.py</code>,
       1696 cells for WEST), and §4 and §5 rebuild G on their production meshes through this
       program without changing it.
     </p>
     <p>
       Done when (1) the device build and the §2 host route agree in float64 over the
-      1696-cell prototype WEST mesh against its own centroids, entry by entry, to within the
-      largest per-slope rounding term §2 records at the production strip width (the worst slope,
-      since the mesh mixes them), floored at 1e-13, measured relative to the sum of the absolute
-      values of that entry's edge-sheet contributions rather than to the net entry. A cell's
-      four edge sheets nearly cancel at a distant target, so the net entry is ill-conditioned
-      and only the absolute sum bounds what two correctly rounded evaluations can differ by. On
-      the Part II branch there is no strip cancellation and the tolerance is the floor. A
+      1696-cell prototype WEST mesh against its own centroids, entry by entry, to within
+      1e-13 measured relative to the sum of the absolute values of that entry's edge-sheet
+      contributions rather than to the net entry. A cell's four edge sheets nearly cancel at a
+      distant target, so the net entry is ill-conditioned and only the absolute sum bounds what
+      two correctly rounded evaluations of the closed form can differ by. A
       negative control that reverses one cell's edge normals in the device build breaks that
       agreement; (2) on one H200, in a fresh process whose <code>NOVA_COMPILATION_CACHE_ROOT</code>
       points at a new, empty directory the job creates for itself (never the shared pre-warm root
@@ -422,7 +419,7 @@
       <button class="r-opt" data-value="part-v-strip">Thin Part V polygon strip</button>
       <button class="r-opt chosen" data-value="part-ii-sheet">Urankar Part II closed form</button>
       </p>
-    <p class="r-dec-rat">Measured (052fa853c, fragment icm-strip-error-sweep): the thin Part V strip against a 1e-13 ring-integral reference bottoms at 6.7e-8 worst case at eps/L 1e-4 (per-slope bests 1.3e-8 to 6.7e-8), every slope turns over inside the 1e-2 to 1e-8 sweep, all 60 references converged, and no single edge-length fraction meets 1e-10. An independent attempt on a 1.0 m segment floors at 3.1e-8. The strip misses the threshold by about two decades, so the edge sheet is the Urankar Part II closed form in nova/biot/sheet.py.</p>
+    <p class="r-dec-rat">Measured (052fa853c, fragment icm-strip-error-sweep): the thin Part V strip against a 1e-13 ring-integral reference bottoms at 6.7e-8 worst case at eps/L 1e-4 (per-slope bests 1.3e-8 to 6.7e-8), every slope turns over inside the 1e-2 to 1e-8 sweep, all 60 references converged, and no single edge-length fraction meets 1e-10. An independent attempt on a 1.0 m segment floors at 3.1e-8 (/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/strip-sweep-attempt-1/strip-error-sweep.json). The strip misses the threshold by about two decades, so the edge sheet is the Urankar Part II closed form in nova/biot/sheet.py.</p>
     </div>
 </section>
 

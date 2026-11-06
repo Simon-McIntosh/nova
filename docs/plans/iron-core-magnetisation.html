@@ -255,15 +255,19 @@
       and only the absolute sum bounds what two correctly rounded evaluations can differ by. On
       the Part II branch there is no strip cancellation and the tolerance is the floor. A
       negative control that reverses one cell's edge normals in the device build breaks that
-      agreement; (2) on one H200, in a fresh process with the persistent cache emptied first
-      (cleared, still written to), the build at
+      agreement; (2) on one H200, in a fresh process whose <code>NOVA_COMPILATION_CACHE_ROOT</code>
+      points at a new, empty directory the job creates for itself (never the shared pre-warm root
+      <code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm</code>, which nothing here clears),
+      the build at
       1696 cells and on the prototype mesh at half its cell size (count recorded, near four
       times as many) compiles in at most 60&nbsp;s with an executable of at most 50&nbsp;MB and at
       most 64&nbsp;GB of host memory, the bounds kernel-compile-barrier owns, with the warm execute
       time recorded, and a second fresh process hits the cache entry the first one wrote; (3) both builds are entered
-      as program rows of <code>docs/research/compile-cost-evidence.html</code> carrying the fields
-      its existing rows carry (compile wall, executable size, peak host memory) and the cell
-      count, so a production mesh's cost is read from that ledger rather than re-measured.
+      in <code>docs/research/compile-cost-evidence.html</code>: as program rows with the columns
+      that table carries (program, cells, platform and host, compile wall, StableHLO or HLO
+      instructions, executable bytes, persistent-cache result, job, source), and with their peak
+      host memory as rows of its memory-ladder table keyed by function and scale, so a production
+      mesh's cost and memory are read from that ledger rather than re-measured.
       Heavy gates run on <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one job.
     </p>
 

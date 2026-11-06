@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1097",
+    "nova/equilibrium/support_read.py:1148",
+    "nova/equilibrium/current.py:385"
+  ],
+  "call_sites_emission": "sites",
+  "completed_at": "2026-11-06T18:35:45.173Z",
+  "dispatched_at": "2026-11-06T18:28:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The positional graft into the test reference is fragile but inert today. The next node to edit tests/test_bank_step_booking_batch.py should switch it to a keyword seam.",
+      "recorded_at": "2026-11-06T18:37:29.486723+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The global relative norm at 1e-12 is the brief's stated bound, and the channel-omission control reddens at 0.9992. A per-component peak-scaled bound, as in tests/test_biotgeometryautograd.py, is a test-hardening item for the next node to edit this file.",
+      "recorded_at": "2026-11-06T18:37:31.053831+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_bank_step_booking_batch.py",
+      "id": "f14980eac1b",
+      "line": 161,
+      "severity": "non-blocking",
+      "text": "The archived reference is grafted in by positional index (replace(arguments[9], cut_batch_width=...)), so inserting any parameter into book_tangent_channels' signature before the quadrature silently patches a different operand and the comparison stops comparing tile widths while still passing; a keyword or signature-checked seam would redden instead."
+    },
+    {
+      "file": "tests/test_bank_step_booking_batch.py",
+      "id": "f4750d7ac36",
+      "line": 92,
+      "severity": "non-blocking",
+      "text": "assert_jacobian_equal bounds a global Frobenius relative norm, so on the 550-cell matrix a large relative error confined to one small cell can be absorbed by the dominant entries and still satisfy 1e-12; the recorded control only removes a whole channel, which is the case this is sensitive to, and tests/test_biotgeometryautograd.py:113 peak_scaled_gap shows the repository's existing shape for a per-component bound."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The change is reached at runtime from nova/equilibrium/support_read.py:1148 step_jacobian through :1097 _local_booking_sensitivities, which is the only production caller of book_tangent_channels in nova, and the default Quadrature() constructed at nova/equilibrium/current.py:385 now carries the wider tile although book does not read that field.",
+    "diff": "Read commit by commit against the base: 35e7b1d25 and 1383a2bea carry the two product edits in nova/equilibrium/current.py, b02f0201c adds the light CPU and certificate comparisons to tests/test_bank_step_booking_batch.py, and the remaining six commits add or adjust drivers under scripts/prototypes/bank_jacobian_launches/ plus the evidence fragment, with no change to any other product module or test.",
+    "done_when": "The measure is a 1e-12 Jacobian comparison at the limited and diverted 550-cell trial and converged states as slow H200 cases plus a light CPU case, a failing omission control, six paired CPU suite files with no added failures, and one H200 allocation tabling device ms, launches, reads, updates, wall, wall per read and peak memory; tests/test_bank_step_booking_batch.py:60-225 holds the five comparisons, ring-pairs/device/certificate-tests.log records all four 550-cell relatives and EXIT=0, ring-pairs/suites/negative-test_bank_step_booking_batch.log records EXIT=1, and the fragment tables every requested column.",
+    "goal": "The node goal is to break the Jacobian's per-call launches down by loop and reduce them in book_tangent_channels without moving the Jacobian; nova/equilibrium/current.py:55 raises the default conic tangent tile to 32 cells and :339-368 sizes live-ring groups to two for the tangent path, and the evidence fragment's exclusive attribution table shows conic strip propagation falling 1344 to 672 launches per call at sixteen slices.",
+    "manifest": "The manifest reports nine commits to 573273954cc, a base arm and a head arm each at failure_count 0 and EXIT=0, a negative control at EXIT=1 with the failing test named, and a landing line that states the sixteen-slice whole-solve wall is higher at eight reads against six; its after_suite revision is 1383a2bea while the reviewed head is 573273954cc, and the commits between them touch only scripts/prototypes and the evidence fragment, which the diff confirms.",
+    "write_paths": "The five declared paths are read from the manifest; git diff --name-status 559c012a0c62c0d504522a15b4ecf592be272f3f 573273954cc908b975f5f5438567d1e39f2c5cd6 shows 13 files and all of them fall inside nova/equilibrium/current.py, tests/test_bank_step_booking_batch.py, scripts/prototypes/bank_jacobian_launches/ or docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches.html."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_booking_batch.py:149 reddens under the recorded dropped-channel mutation at 0.9992 relative while passing at 1.48e-16 at the head, and :202 compares the assembled 550-cell Jacobian against the archived base module, but no committed test asserts the launch reduction itself, so reverting the tile to 16 or the ring group to four would leave every lane green.",
+    "evidence": "The done_when's 1e-12 comparison is measured and recorded, not claimed: ring-pairs/device/certificate-tests.log prints JACOBIAN_PARITY 9.51e-16, 3.47e-16, 1.60e-17 and 4.95e-17 for the four 550-cell states with 5 passed and EXIT=0, negative-test_bank_step_booking_batch.log records the omission control at EXIT=1, and both suite arms end in a SUITE_SUMMARY with failure_count 0, though the head arm ran at 1383a2bea rather than the reviewed head.",
+    "fit": "The product edit at nova/equilibrium/current.py:55 and :342-343 is four lines in the file's existing dataclass-default and keyword-default idiom, its docstring at :46-49 is updated in place, and the added names (assert_jacobian_equal, certificate_machine, archived_channels) carry no plan label, version suffix or plan identifier.",
+    "goal_fidelity": "nova/equilibrium/current.py:55 and :339-368 widen the conic tangent tile to 32 cells and bound tangent ring groups to two, and the retained paired trace records sixteen-slice Jacobian launches falling 2787 to 1778 and device time 26.54 to 25.04 ms per call while the whole-trace table shows launches per solve rising 44302 to 52159, so the reduction holds per Jacobian call and per read rather than per solve.",
+    "reuse": "scripts/prototypes/bank_jacobian_launches/suite.py:12-13 reuses run_file and archive from the existing primal-bucket and wall-event suite drivers rather than forking them, and the one added helper assert_jacobian_equal computes a global relative Frobenius bound that neither tests/test_biotgeometryautograd.py:113 relative_gap (max pointwise) nor scripts/prototypes/bank_solve_cycle/report.py:21 pair_gaps (per-lane, unit-normalised) provides.",
+    "scope_discipline": "git diff --name-status 559c012a0 573273954cc lists 13 files and every one lies inside the manifest's declared write paths (nova/equilibrium/current.py, tests/test_bank_step_booking_batch.py, scripts/prototypes/bank_jacobian_launches/ and the declared evidence fragment), with no figure added and no plan or state file touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to break down and reduce the Jacobian's per-call launches in book_tangent_channels without moving the Jacobian; nova/equilibrium/current.py:55 defaults the conic tangent tile to 32 cells and :339-368 sizes tangent ring groups to two, and the fragment's attribution table shows conic strip propagation falling 1344 to 672 launches per call at sixteen slices.\nVERDICT done_when: the measure is a 1e-12 comparison at the limited and diverted 550-cell trial and converged states as slow H200 cases plus a light CPU case, a failing omission control, six paired CPU suite files with no added failures and one H200 timing allocation; tests/test_bank_step_booking_batch.py:60-225 holds the five comparisons, ring-pairs/device/certificate-tests.log records all four relatives and EXIT=0, negative-test_bank_step_booking_batch.log records EXIT=1, and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-launches.html tables every column the brief names.\nVERDICT write_paths: the manifest's five declared paths were read; git diff --name-status 559c012a0c62c0d504522a15b4ecf592be272f3f 573273954cc908b975f5f5438567d1e39f2c5cd6 lists 13 files, every one inside nova/equilibrium/current.py, tests/test_bank_step_booking_batch.py, scripts/prototypes/bank_jacobian_launches/ or the declared evidence fragment.\nVERDICT manifest: read; it names nine commits to 573273954cc, base 0 failures against head 0 failures with EXIT lines, a negative control at EXIT=1, and an honest landing line stating the higher sixteen-slice whole-solve wall, though its after_suite revision 1383a2bea is three commits short of the reviewed head with only driver and evidence commits between.\nVERDICT diff: read all nine commits against the base; 35e7b1d25 and 1383a2bea are the two product edits in nova/equilibrium/current.py, b02f0201c adds the tests, and the rest add drivers under scripts/prototypes/bank_jacobian_launches/ and the evidence fragment, with no other product or test file changed.\nCALL_SITES: nova/equilibrium/support_read.py:1097, nova/equilibrium/support_read.py:1148, nova/equilibrium/current.py:385\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:55 and :339-368 deliver the launch reduction the brief targets (2787 to 1778 launches and 26.54 to 25.04 ms per Jacobian call at sixteen slices) while the fragment's trace-wide table shows launches per solve rising 44302 to 52159.\nSCORE evidence: 18\nJUSTIFICATION evidence: ring-pairs/device/certificate-tests.log records JACOBIAN_PARITY 9.51e-16 to 4.95e-17 across the four 550-cell states with 5 passed and EXIT=0, and both suite arms end in SUITE_SUMMARY failure_count 0, though the head arm ran at 1383a2bea rather than the reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the 13 paths in git diff --name-status 559c012a0 573273954cc lies inside the manifest's declared write paths, with no figure added and no plan or state file touched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_bank_step_booking_batch.py:149 reddens at 0.9992 under the recorded dropped-channel mutation and :202 compares against the archived base module, but no committed test asserts the launch reduction, so reverting the tile to 16 or the ring group to four leaves every lane green.\nSCORE fit: 19\nJUSTIFICATION fit: the whole product change is four lines at nova/equilibrium/current.py:55 and :342-343, its docstring at :46-49 is updated in place, and no added name carries a plan label or version suffix.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/bank_jacobian_launches/suite.py:12-13 reuses the existing run_file and archive drivers rather than forking them, and assert_jacobian_equal at tests/test_bank_step_booking_batch.py:84 computes a global relative bound that tests/test_biotgeometryautograd.py:113 relative_gap does not provide.\nFINDING tests/test_bank_step_booking_batch.py:161 non-blocking: the archived reference is grafted in by positional index, so inserting a parameter into book_tangent_channels before the quadrature silently patches the wrong operand and the comparison stops comparing tile widths while still passing.\nFINDING tests/test_bank_step_booking_batch.py:92 non-blocking: the assertion bounds a global Frobenius relative norm, so a large relative error confined to one small cell of the 550-cell matrix can be absorbed by the dominant entries and still satisfy 1e-12; the recorded control only removes a whole channel.\n",
+  "review_run_id": "r-20261106T182726581317-review-of-bank-jacobian-launches-573273954cc9",
+  "reviewed_base_sha": "559c012a0c62c0d504522a15b4ecf592be272f3f",
+  "reviewed_head_sha": "573273954cc908b975f5f5438567d1e39f2c5cd6",
+  "reviewed_run_id": "r-20261106T172411041060-bank-jacobian-launches",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T18:35:46.764439+00:00",
+  "total": 108
+}

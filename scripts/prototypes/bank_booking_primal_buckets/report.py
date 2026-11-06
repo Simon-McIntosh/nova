@@ -135,6 +135,19 @@ def main():
         "booking in separate geometry populations</h2>\n"
     )
     text += (
+        "<p><strong>The requested structure preserves precision, but does "
+        "not make each booking cheaper.</strong> At one slice the paired "
+        "fresh processes take 96.369–96.669 ms at base and 100.004–100.341 ms "
+        "at head, both with four reads. At sixteen slices, base takes "
+        "603.760–604.689 ms with seven reads and six batch updates; head takes "
+        "461.597–462.133 ms with six reads and four updates. Wall per read "
+        "falls from 86.251–86.384 to 76.933–77.022 ms. Residual device work "
+        "per call rises from 2.865–2.866 to 3.934–3.941 ms at one slice and "
+        "from 9.124–9.140 to 9.807–9.817 ms at sixteen. Launches per call "
+        "also rise. The lower sixteen-slice total includes a shorter "
+        "trajectory and must not be presented as a booking speedup.</p>\n"
+    )
+    text += (
         "<p>Primal and tangent booking share one cell-bucket loop and one "
         "live-ring loop. Conic and normal-form cells enter separate "
         "populations, and live rings integrate in groups of four. The "

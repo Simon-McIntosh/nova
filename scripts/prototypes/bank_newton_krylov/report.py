@@ -20,8 +20,29 @@ def main():
     baseline = json.loads((args.run.parent / "baseline-suite.json").read_text())
     head_suite = json.loads((args.run / "after-suite.json").read_text())
     assert baseline["completed"] and head_suite["completed"]
-    assert head_suite["exit_status"] == 0
+    for suite in (baseline, head_suite):
+        assert suite["exit_status"] == int(suite["failure_count"] > 0)
     assert not set(head_suite["failure_ids"]) - set(baseline["failure_ids"])
+    booking = [
+        next(
+            row
+            for row in suite["file_results"]
+            if row["file"] == "tests/test_bank_step_booking.py"
+        )
+        for suite in (baseline, head_suite)
+    ]
+    for row in booking:
+        log = Path(row["log_path"]).read_text()
+        for name in (
+            "test_reuses_factor_only_while_residual_contracts",
+            "test_reuse_requires_observed_contraction",
+        ):
+            assert f"::{name} PASSED" in log
+    fingerprint = json.loads(
+        (args.run.parent / "carried-factor/fingerprint.json").read_text()
+    )
+    assert len(fingerprint["base"]) == 6
+    assert fingerprint["base"] == fingerprint["head"]
     negative = (args.run / "negative.log").read_text()
     physical = (args.run / "physical.log").read_text()
     assert physical.splitlines()[-1] == "EXIT=0"
@@ -169,19 +190,38 @@ Arnoldi count; lane numbers start at zero.</p>
         )
     )
     text += (
-        "<p>The six-file Sirius comparison has %d baseline failures and %d "
-        "head failures, with no added failure. Baseline's two stale synthetic "
+        "<p>The %d-file Sirius comparison has %d passed, %d skipped and %d "
+        "failed at base, and %d passed, %d skipped and %d failed at head, "
+        "with no added failure. Baseline's two stale synthetic "
         "booking/step doubles are corrected in the assigned test file. Both "
         "arms retain five skips: two limited-state cases without an X-point, "
         "two optional archived-matrix comparisons and one GPU timing case. "
+        "The added <code>test_bank_step_booking.py</code> ran on Sirius in "
+        "one fresh pytest process per arm with separate basetemps: base "
+        "%d passed/%d failed, head %d passed/%d failed. The real carried-factor "
+        "reuse/rebuild and missing-contraction checks pass in both arms. The "
+        "shared failure is <code>test_book_primal_keeps_exact_diverted_moments</code>: "
+        "base and head produce identical observed hashes, differing from the "
+        "stored expectations. No product code or tests changed for this "
+        "additional gate. The paired logs and fingerprint comparison are under "
+        "<code>carried-factor/</code> in the parent run directory. "
         "The unchanged cycle test accepts every lane below 1e-10. The H200 "
         "physical-update checks pass with trial/converged relative errors "
         "%s. Removing the cell-block preconditioner while capping GMRES at "
         "the preconditioned iteration count fails both physical-update tests "
         "with errors %s; <code>negative.log</code> ends with EXIT=1.</p>\n"
         % (
+            baseline["file_count"],
+            baseline["passed_count"],
+            baseline["skipped_count"],
             baseline["failure_count"],
+            head_suite["passed_count"],
+            head_suite["skipped_count"],
             head_suite["failure_count"],
+            booking[0]["passed_count"],
+            booking[0]["failure_count"],
+            booking[1]["passed_count"],
+            booking[1]["failure_count"],
             escape(str(errors)),
             escape(str(negative_errors)),
         )

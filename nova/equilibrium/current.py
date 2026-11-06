@@ -339,9 +339,9 @@ def _normal_rings(vertices, count, centre, form, selected, intervals, segments):
     )
 
 
-def _integrate_live_rings(rings, counts, evaluate, zero):
-    """Integrate compact live rings in groups of four without a capacity cutoff."""
-    width = min(4, len(counts))
+def _integrate_live_rings(rings, counts, evaluate, zero, width=4):
+    """Integrate compact live rings in bounded groups without a capacity cutoff."""
+    width = min(width, len(counts))
     live = counts >= 3
     count = jnp.sum(live, dtype=jnp.int32)
     indices = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
@@ -757,7 +757,7 @@ def book_tangent_channels(
             return value
 
         return _integrate_live_rings(
-            rings, counts, evaluate, jnp.zeros((channels, 3), dtype=psi.dtype)
+            rings, counts, evaluate, jnp.zeros((channels, 3), dtype=psi.dtype), width=2
         )
 
     def conic_cell(index):

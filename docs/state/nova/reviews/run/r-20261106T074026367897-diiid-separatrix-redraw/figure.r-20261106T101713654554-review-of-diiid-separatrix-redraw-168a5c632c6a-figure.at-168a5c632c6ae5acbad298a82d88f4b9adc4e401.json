@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no suite; no test was executed and no failure count was measured",
+  "blocking_finding_count": 0,
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T10:20:09Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png"
+  ],
+  "findings": [
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "f198fdd5f8d",
+      "line": 3907,
+      "severity": "non-blocking",
+      "summary": "The 'EFIT boundary and limiter' overlay of cohort_match_summary.png draws three series - the grey EFIT boundary, the red Nova separatrix and the black limiter - with no legend and no direct label, and its title names only the boundary and the limiter. A reader cannot tell that the red curves are the predicted separatrices the run exists to show, and may read them as a second EFIT boundary set."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "f9377257ecc",
+      "line": 3968,
+      "severity": "non-blocking",
+      "summary": "displacement_decomposition.png joins each landmark's EFIT and Nova positions with a segment drawn in the landmark colour, but the legend lists markers only, so the segments are unnamed. In frames 179 and 44 the X-point segment runs from the upper wall to the lower wall across the whole plasma, and a reader cannot tell it is the X-point displacement rather than a field line or a separatrix."
+    },
+    {
+      "disposition": "folded: nova:separatrix-spline-extraction s8",
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "id": "facefe1be2d",
+      "line": 3961,
+      "severity": "non-blocking",
+      "summary": "When a frame's displacement is unavailable (frame 144) the marker loop is skipped entirely, so its panel in displacement_decomposition.png draws no EFIT axis, X-point or centroid, although the companion frame_flux_comparison.png does draw that frame's EFIT axis and EFIT X-point. A reader comparing the two figures sees frame 144's EFIT landmarks in one and not in the other."
+    },
+    {
+      "disposition": "exempted: the two Nova landmarks nearly coincide in R-Z for that frame, so the overlap is the measured geometry; the triangle's apex stays visible above the square and the legend names both",
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png",
+      "id": "f1bad475c9e",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In frame 146's panel the Nova centroid (filled green square) and the Nova axis (filled blue triangle) sit almost on top of one another at the top of the panel, so the square partly covers the triangle. Both remain identifiable by colour and both are named in the legend, but a reader can miss the axis marker."
+    }
+  ],
+  "method": "each figure judged only from its rendered PNG at 1400x720 px; the named PNGs were opened directly and panel regions were cropped from those same PNGs to inspect labels, markers and contour clipping before any verdict was recorded",
+  "node": "review-of-diiid-separatrix-redraw-168a5c632c6a-figure",
+  "non_blocking_finding_count": 4,
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261106T101713654554-review-of-diiid-separatrix-redraw-168a5c632c6a-figure",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "168a5c632c6ae5acbad298a82d88f4b9adc4e401",
+  "reviewed_prior_findings": {
+    "note": "The nine findings of the r-20261105T172208538923 figure review are answered in the rendered PNGs, checked visually and not re-reported: the blocking 8 pt caption finding is gone (captions are drawn at fontsize 14 and read at column width); Nova contours are clipped to the limiter in every flux panel; the legend's four series (EFIT psi, Nova terminal-current psi, EFIT boundary, Nova separatrix) are all drawn somewhere in the figure; the EFIT and Nova nulls now differ by both colour and glyph (grey open triangle and grey cross versus red filled triangle and red plus); the five cohort metric panels are dot plots on a categorical frame axis with no joining lines; frame 144 is annotated 'unavailable: 144' in each cohort panel; and the first cohort panel's threshold line is labelled 'registered median bar'."
+  },
+  "reviewed_run_id": "r-20261106T074026367897-diiid-separatrix-redraw",
+  "reviewer": "review-of-diiid-separatrix-redraw-168a5c632c6a-figure",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png": {
+      "contrast": "passes: near-black text on white, and the grey 0.35 unavailability notes still clear the background",
+      "data_ink": "passes: markers, one labelled threshold line and the boundary overlay carry the weight",
+      "decoration": "passes: despined, no gridlines and no fills; the single grey dashed line is a labelled threshold rather than decoration",
+      "label_collision": "passes: nothing is clipped or overlapping, and each unavailability note sits in clear axes space",
+      "legibility": "passes: titles at 16 pt, axis labels at 16 pt and frame ticks at 14 pt read at column width, and every panel annotates the frames with no value",
+      "table_form": "passes: five panels are dot plots on a categorical frame axis with no joining lines, the form the node's brief permits, with the same numbers tabulated in the evidence fragment; the sixth panel is spatial"
+    },
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png": {
+      "contrast": "passes: black caption text and saturated blue, green and red markers on white",
+      "data_ink": "passes: boundaries, wall, landmark markers and displacement segments only",
+      "decoration": "passes: axis off, no gridlines and no fills; the blank margins come from the shared R-Z limits",
+      "label_collision": "passes: no text is clipped or overlapping; the only overlap is between two coincident Nova markers in frame 146, recorded as a non-blocking finding",
+      "legibility": "passes: the five per-panel captions are drawn at 14 pt and read at column width, carrying shot, frame, classification and the axis radial and vertical offsets",
+      "table_form": "passes: the figure is spatial, showing where each landmark sits and how far the Nova one is from the EFIT one"
+    },
+    "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png": {
+      "contrast": "passes: black captions and legend text on white; the light grey EFIT contours stay distinguishable from the blue Nova contours",
+      "data_ink": "passes: contours, boundaries, separatrices, the wall and the null markers carry the weight, with no gradient or decorative fill",
+      "decoration": "passes: each poloidal panel has its axis off, no gridlines and no background fill",
+      "label_collision": "passes: no text is clipped or overlapping, the six-line frame-146 caption fits its slot, and the legend clears the panels",
+      "legibility": "passes: the five per-panel captions are drawn at 14 pt and read at column width, stating shot, frame, conv=False, solved-node mismatch and, where it applies, the separatrix refusal",
+      "table_form": "passes: the content is genuinely spatial (poloidal flux fields in R-Z), not tabular"
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T10:33:05.555905+00:00",
+  "total": null
+}

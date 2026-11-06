@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "base-gate.log at 2fd5d5b58 reports 18 passed, 0 failed, EXIT=0; head-gate.log at e67ba8f0 reports 19 passed, 0 failed, EXIT=0; no failure id appears in either arm, so the difference is empty. The only commit after the head gate is 168a5c632, which touches docs and figures only.",
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:2642",
+    "benchmarks/diiid_forward_gs_match.py:6229"
+  ],
+  "completed_at": "2026-11-06T10:28:56.817Z",
+  "dispatched_at": "2026-11-06T10:16:51Z",
+  "findings": [
+    {
+      "file": "tests/test_diiid_forward_gs_match.py",
+      "line": "459",
+      "severity": "non-blocking",
+      "text": "the new test re-derives the separatrix with rebuild_frame_separatrix and asserts only that the distances it computes are finite, so a regression that stops redraw_persisted_bank writing symmetric_rms_distance_m or symmetric_sup_distance_m into the receipt, or that writes a wrong value there, leaves the suite green while the done-when receipt clause is the substance of the deliverable."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1992",
+      "severity": "non-blocking",
+      "text": "rebuild_frame_separatrix calls display_flux_module._branches, a private function of nova/equilibrium/display_flux.py, so a rename or signature change by the node that owns that module breaks the redraw path at runtime rather than at review time; the public owner build_display_flux_map exposes no standalone assembly entry point and this node was fenced out of that file."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367897-diiid-separatrix-redraw/manifest.md",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "the tests line carries the literal placeholder <worktree> and the manifest has no baseline_suite or after_suite block, so the gate command a promotion receipt is filled from is a template and the two arms survive only in the logs' own # command: headers."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read all 15 commits from 2fd5d5b58 to 168a5c632; the display grid now comes from the map, an accumulating conductor response is published through the content store, a persisted-frame redraw entry point and its CLI flag are added, the figure text is enlarged and the Nova contours clipped, and the receipt, three PNGs, gate test and evidence fragment are landed.",
+    "done_when": "the measure is asserted and its result is recorded: base-gate.log reads 18 passed EXIT=0 at 2fd5d5b58, head-gate.log reads 19 passed EXIT=0 with REVISION=e67ba8f0, negative-control-256.log reddens tests/test_diiid_forward_gs_match.py:462 at EXIT=1, and the local _display_grid construction is deleted at benchmarks/diiid_forward_gs_match.py:1504 in favour of the map's own grid.",
+    "goal": "the goal is to put the predicted separatrix on the DIII-D frames from each frame's own display map and report its distance to the EFIT boundary; benchmarks/diiid_forward_gs_match.py:6131 rebuilds each frame's separatrix from its persisted field and the receipt records frames_with_separatrix 3 with per-frame symmetric rms and sup distances for frames 137, 179 and 44 against 4 drawn frames.",
+    "manifest": "read; it states complete, names 12 of the 15 landed commits, and records the per-frame distances the receipt carries, though its tests line carries an unsubstituted <worktree> placeholder and it has no baseline_suite or after_suite block.",
+    "write_paths": "read the five grants in the reviewed run's manifest; every path in git diff --name-status 2fd5d5b58 168a5c632 lies inside them, with no edit to nova/equilibrium/display_flux.py and no plan write."
+  },
+  "justifications": {
+    "durability": "negative-control-256.log reddens tests/test_diiid_forward_gs_match.py:462 at assert drawn with EXIT=1 when display_flux._branches is pinned to 256 slots, which is the assembler regression the test exists to catch.",
+    "evidence": "base-gate.log and head-gate.log show 18 and 19 passed with EXIT=0 and negative-control-256.log shows the named test failing at EXIT=1, but the manifest's tests line at manifest.md:18 carries a <worktree> placeholder and no baseline_suite/after_suite block, so the gate receipt rests on the logs' command headers.",
+    "fit": "the change uses the nova.media poloidal_axes, draw_flux_contours, draw_wall and draw_nulls vocabulary and adds no plan, issue or version label to any name, but benchmarks/diiid_forward_gs_match.py:1992 reaches into display_flux_module._branches, a private symbol of a module another node owns.",
+    "goal_fidelity": "every diverted-class frame with a persisted field closes its own separatrix (receipt frames 137, 179 and 44 with 4297, 5017 and 3721 points) and frames 146 and 144 are captioned rather than substituted (benchmarks/diiid_forward_gs_match.py:6131).",
+    "reuse": "the added _publish_accumulated_response publishes through nova/database/content_store.py:236 and calls the existing _publish_conductor_response at :1620, and the display grid is read from nova/equilibrium/display_flux.py:93 DisplayFluxMap rather than rebuilt, though _display_points at :1504 is a local helper for a conversion the map itself could own.",
+    "scope_discipline": "git diff --name-status 2fd5d5b58 168a5c632 touches only benchmarks/diiid_forward_gs_match.py, the two declared test files, docs/figures/diiid-forward-onboarding/forward-gs-2026-11/ and the declared fragment."
+  },
+  "node": "review-of-diiid-separatrix-redraw-168a5c632c6a",
+  "node:reviewed": "diiid-separatrix-redraw",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to put the predicted separatrix on the DIII-D frames from each frame's own display map and report its distance to the EFIT boundary; benchmarks/diiid_forward_gs_match.py:6131 rebuilds each frame's separatrix from its persisted field and docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json records frames_with_separatrix 3 with per-frame symmetric rms and sup distances for frames 137, 179 and 44 against 4 drawn frames.\nVERDICT done_when: the measure is asserted and its result is recorded \u2014 base-gate.log reads 18 passed EXIT=0 at 2fd5d5b58, head-gate.log reads 19 passed EXIT=0 with REVISION=e67ba8f0, negative-control-256.log reddens tests/test_diiid_forward_gs_match.py:462 at EXIT=1 under a 256-slot pin, and the local _display_grid construction is deleted in favour of the map's own grid at benchmarks/diiid_forward_gs_match.py:1504; the figure clauses are landed in the three PNGs and stated in docs/evidence/fragments/separatrix-spline-extraction/diiid-separatrix-redraw.html.\nVERDICT write_paths: read the five grants in the reviewed run's manifest; git diff --name-status 2fd5d5b58 168a5c632 changes the benchmark, its two named test files, five files inside docs/figures/diiid-forward-onboarding/forward-gs-2026-11/ and the named fragment, every one inside the grants, with no edit to nova/equilibrium/display_flux.py and no plan write.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367897-diiid-separatrix-redraw/manifest.md; it states complete, names 12 of the 15 landed commits, records the per-frame distances that the receipt carries, and its tests line names the gate whose two log arms I read, though that line carries an unsubstituted <worktree> placeholder and the manifest has no baseline_suite or after_suite block.\nVERDICT diff: read all 15 commits from 2fd5d5b58 to 168a5c632; they replace the local display grid with the map's own points and an accumulating conductor-response object, add the persisted-frame redraw entry point and its CLI flag, enlarge the caption and legend type, clip the Nova contours to the limiter, drop the separatrix legend entry when no series is drawn, turn the cohort panels into a dot plot with an unavailability note and a labelled registered-median bar, regenerate the receipt and all three PNGs, and add the gate test and the evidence fragment.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:2642, benchmarks/diiid_forward_gs_match.py:6229\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every diverted-class frame with a persisted field closes its own separatrix (receipt frames 137, 179 and 44 with 4297, 5017 and 3721 points) and frames 146 and 144 are captioned rather than substituted (benchmarks/diiid_forward_gs_match.py:6131).\nSCORE evidence: 18\nJUSTIFICATION evidence: base-gate.log and head-gate.log show 18 and 19 passed with EXIT=0 and negative-control-256.log shows the named test failing at EXIT=1, but the manifest's tests line at manifest.md:18 carries a <worktree> placeholder and no baseline_suite/after_suite block, so the gate receipt rests on the logs' command headers.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 2fd5d5b58 168a5c632 touches only benchmarks/diiid_forward_gs_match.py, the two declared test files, docs/figures/diiid-forward-onboarding/forward-gs-2026-11/ and the declared fragment.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control-256.log reddens tests/test_diiid_forward_gs_match.py:462 at assert drawn with EXIT=1 when display_flux._branches is pinned to 256 slots, which is the assembler regression the test exists to catch.\nSCORE fit: 17\nJUSTIFICATION fit: the change uses the nova.media poloidal_axes, draw_flux_contours, draw_wall and draw_nulls vocabulary and adds no plan, issue or version label to any name, but benchmarks/diiid_forward_gs_match.py:1992 reaches into display_flux_module._branches, a private symbol of a module another node owns.\nSCORE reuse: 18\nJUSTIFICATION reuse: the added _publish_accumulated_response publishes through nova/database/content_store.py:236 and calls the existing _publish_conductor_response at :1620, and the display grid is read from nova/equilibrium/display_flux.py:93 DisplayFluxMap rather than rebuilt, though _display_points at :1504 is a local helper for a conversion the map itself could own.\nFINDING tests/test_diiid_forward_gs_match.py:459 non-blocking: the new test re-derives the separatrix with rebuild_frame_separatrix and asserts only that the distances it computes are finite, so a regression that stops redraw_persisted_bank writing symmetric_rms_distance_m or symmetric_sup_distance_m into the receipt, or that writes a wrong value there, leaves the suite green while the done-when receipt clause is the substance of the deliverable.\nFINDING benchmarks/diiid_forward_gs_match.py:1992 non-blocking: rebuild_frame_separatrix calls display_flux_module._branches, a private function of nova/equilibrium/display_flux.py, so a rename or signature change by the node that owns that module breaks the redraw path at import-independent runtime rather than at review time; the public owner build_display_flux_map does not expose a standalone assembly entry point and this node was fenced out of that file.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T074026367897-diiid-separatrix-redraw/manifest.md:18 non-blocking: the tests line carries the literal placeholder <worktree> and the manifest has no baseline_suite or after_suite block, so the gate command a promotion receipt is filled from is a template and the two arms survive only in the logs' own # command: headers.\n",
+  "review_run_id": "r-20261106T101241786327-review-of-diiid-separatrix-redraw-168a5c632c6a",
+  "reviewed_base_sha": "2fd5d5b581da04aca88e0e97f72a343cc8312d39",
+  "reviewed_head_sha": "168a5c632c6ae5acbad298a82d88f4b9adc4e401",
+  "reviewed_run_id": "r-20261106T074026367897-diiid-separatrix-redraw",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T10:24:31+00:00",
+  "total": 110
+}

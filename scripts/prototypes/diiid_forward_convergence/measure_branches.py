@@ -405,7 +405,11 @@ def _branch_record(
             "refusal_message": str(error),
         }
     record["arms"]["staged"] = {}
-    for steps in sorted({1, int(staged_steps) if staged_steps else trips}):
+    # The staged arm exists to give a state at a promotion boundary, and each
+    # distinct trip count costs its own compilation of the scan loop.  One
+    # promotion is what separates the first accepted step from the terminal one;
+    # the intermediate counts are already in the default arm's history.
+    for steps in sorted({1, int(staged_steps)}):
         steps = min(steps, trips)
         try:
             receipt, seconds = _solve(

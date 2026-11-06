@@ -1,0 +1,44 @@
+<section id="bank-saddle-derivatives-landing">
+<h2>Saddle derivatives: the rounded inputs retain the error</h2>
+<p><strong>Blocked before a product repair.</strong> The base reproduction confirms
+that evaluating the Bell polynomial accurately after the nodal contraction does
+not remove the higher-derivative noise. No product source or tests changed.</p>
+<p>The CPU experiment ran at <code>f3bb6ed265d0bca5c8b0c54ddac1d50cf22c625d</code>
+on the held fleet allocation, with x64 enabled before array construction.
+It imports the existing noise-floor instrument's <code>nudged</code> and
+<code>field_receipt</code> unchanged. It loads the saved converged moments and
+worst perturbation from the
+<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html">noise-floor attribution</a>:
+zero-based lane 12, pattern 14. Both evaluations hold the saddle position fixed
+and select the same cell and triangle.</p>
+<table>
+<thead><tr><th>Maximum absolute derivative change</th><th>Third derivative</th><th>Fourth derivative</th></tr></thead>
+<tbody>
+<tr><td>Current compiled calculation</td><td>1.1899370377932428e-12</td><td>2.1997692556396942e-10</td></tr>
+<tr><td>80-digit polynomial from rounded nodal jets</td><td>1.0888885301336834e-12</td><td>2.2460530628807333e-10</td></tr>
+<tr><td>80-digit bank contraction and polynomial</td><td>7.252748925988263e-15</td><td>9.909734459634264e-13</td></tr>
+<tr><td>Change attributable to rounded nodal inputs</td><td>1.0880203466247465e-12</td><td>2.2361433284210991e-10</td></tr>
+</tbody>
+</table>
+<p>The two high-accuracy references use the same binary64 bank rows, exterior,
+triangle transform and moments. Decimal arithmetic carries 80 digits through
+contraction, Taylor subtraction, polynomial coefficients and differentiation.
+These references isolate arithmetic rounding; they do not claim exact analytic
+Biot kernels. The exact contraction includes the exterior before any rounding
+back to binary64. A fourth-derivative change about 227 times smaller is available
+before nodal rounding, but it is lost at the input to <code>field_from_jets</code>.</p>
+<p>The permitted field constructor receives only contracted jets, sample indices
+and the mesh. A source upstream of that rounding must be passed from the bank.
+The bank owner also supplies the explicit curvature rates used by the Newton
+Jacobian. Changing only the primal curvature source would leave those rates
+bound to the Bell coefficients. This record requests a scope correction rather
+than claiming an unmeasured alternate discretisation.</p>
+<p>Prototype: <code>scripts/prototypes/bank_saddle_derivatives/inspect.py</code>.
+The durable receipt and successful log are <code>reproduction.json</code> and
+<code>reproduction.log</code> under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T211000415402-bank-saddle-derivatives</code>.
+The log prints imported source, revision, cwd, CPU device and x64, and ends with
+<code>EXIT=0</code>. No derivative regression, Bell-restoration negative control,
+H200 floor population, paired timings, precision-budget comparison or paired
+suites has run. No per-lane figure is claimed from this single-pair diagnostic.</p>
+</section>

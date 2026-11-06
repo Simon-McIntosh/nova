@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1477 _panel_display_map calls build_display_flux_map with the persisted promoted mask and compensation",
+    "benchmarks/display_map_promoted_figure.py:51 passes a fixture promoted mask of lattice length",
+    "benchmarks/diiid_forward_gs_match.py:1867 passes neither a promoted mask nor a seed and inherits the grid-sized branch allowance"
+  ],
+  "completed_at": "2026-11-06T05:47:21.224Z",
+  "dispatched_at": "2026-11-06T05:37:35Z",
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "id": "f9a6af13034",
+      "line": "301",
+      "severity": "non-blocking",
+      "text": "polished_nearest is recomputed from display.saddle_rz, the value the code under test chose, so the assertion cannot fail if the code measured to a wrong saddle; only the sibling abs(polished_nearest - seed_nearest) > 1.0e-12 line at :306 distinguishes the seed from the polished point, and an independent polish_stationary_points call on the map would pin the done_when's 'polished saddle, not the seed' claim."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "feb2979c5e2",
+      "line": "328",
+      "severity": "non-blocking",
+      "text": "the offset is taken from display.saddle_rz, the code's own output, so reverting the distance to any point the code also reports would keep the assertion green; it guards only the seed regression that tests/test_coil_edit_panel_render.py:306 already covers."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "id": "fdc682717f2",
+      "line": "294",
+      "severity": "non-blocking",
+      "text": "display.promoted_node_count is compared with np.count_nonzero of the same persisted mask handed to the map, so both sides move together and the assertion can only catch a truncation disagreement, never a wrong promoted count."
+    },
+    {
+      "file": "nova/equilibrium/display_flux.py",
+      "id": "feb512958ac",
+      "line": "305",
+      "severity": "non-blocking",
+      "text": "promoted_nodes[:node_count] silently discards the mask's entries past the lattice node prefix (the converged archive carries 60 nonzeros, of which 46 fall in the prefix) with no assertion that the discarded entries are the non-lattice tail rather than lattice nodes, so a mask ordered differently would under-report promoted_node_count without any check."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/head-capacity-ad534aecb.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/baseline-suite.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "three production call sites reach build_display_flux_map: benchmarks/coil_edit_latency.py:1477 _panel_display_map now passes the persisted promoted mask and compensation, benchmarks/display_map_promoted_figure.py:51 passes a fixture mask of lattice length, and benchmarks/diiid_forward_gs_match.py:1867 passes neither and inherits only the grid-sized branch allowance.",
+    "diff": "read commit by commit from e7df23944b98 to d559d30a96d7; the code changes are the producer's persisted state/promoted mask/compensation (344c20424, 315a77a8c, f7c890ee9, 527d13178), the grid-sized branch allowance (16f537acc), the polished-saddle distance with its fail-closed NaN (60e2a9f74, b88e4bb18), the committed-archive and overflow-control tests (73edf130f, ad534aecb), and the redrawn figures and evidence fragment (4d3f55dbb, d559d30a9).",
+    "done_when": "the gate at head-capacity-ad534aecb.log ran tests/test_display_flux.py and tests/test_coil_edit_panel_render.py at ad534aecb (11 passed in 1124.49s, EXIT=0) including the committed-archive rebuild and its forced 256-slot overflow control; the baseline arm at e7df2394 recorded 0 failures, the compensation-drop control failed the same test id (EXIT=1), and the committed receipts report the converged solved mismatch at 7.4683e-9 Wb against a 5.7303e-9 Wb residual. The nearest-distance assertions compare against display.saddle_rz rather than an independently polished saddle.",
+    "goal": "the node redraws the coil-edit panels on the display map of the solve's own currents and certifies near-X geometry: benchmarks/coil_edit_latency.py:3035-3055 persists each panel's state, promoted mask and compensating current, and docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:5-14 states the promoted count, nearest distance and near-X verdict for all five published sets.",
+    "manifest": "read; status complete, 19 commits, both suite arms with complete summaries and bare EXIT lines, added failures 0, the five receipts carrying max_solved_node_mismatch_wb 7.4683e-9 Wb, promoted_node_count 46/25 and nearest 0.056218/2.451193 m, and the 0.01595 Wb compensation-drop control failure; every number reconciles with the committed archives, which hold 20 flux fields, two current/state/mask/compensation payloads and 268,798/268,758 bytes.",
+    "write_paths": "all 25 changed paths in git diff e7df23944b98..d559d30a96d7 are inside the declared write paths: benchmarks/coil_edit_latency.py, nova/equilibrium/display_flux.py, tests/test_coil_edit_panel_render.py, tests/test_display_flux.py, the five figure directories and the two evidence fragments."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:312-314 guards the branch-capacity fix (a reverted 256 allowance reddens display.well_formed and the >256 closed-segment assertion) and :293 fails when compensation is dropped, but :301-308 and tests/test_display_flux.py:328 recompute the distance from display.saddle_rz, the code's own output, so they pin only that the seed was not used.",
+    "evidence": "head-capacity-ad534aecb.log records 11 passed in 1124.49s at revision ad534aecb with a bare EXIT=0, negative-control-73edf130f.log records test_committed_converged_panel_uses_its_terminal_currents failing with EXIT=1, and the committed receipts report the 7.4683e-9 Wb solved mismatch against the 5.7303e-9 Wb residual the archive carries, though the head arm sits two docs-only commits behind the reviewed head and the negative control predates the landed capacity and saddle code.",
+    "fit": "benchmarks/coil_edit_latency.py:1446-1520 loads stored moments through CellCurrentMoments and reuses _panel_display_coupling in the surrounding producer idiom, and nova/equilibrium/display_flux.py:211-214 names the capacity rule by its mechanism with no plan, stage or ticket label.",
+    "goal_fidelity": "benchmarks/coil_edit_latency.py:3035-3055 persists the solve's own state, promoted mask and constrained-row compensation and benchmarks/coil_edit_latency.py:2153-2180 draws the map's assembled branches and polished X-point, so the panels are drawn from the solve's own currents and the near-X verdict is stated per panel.",
+    "reuse": "the capability search over nova/equilibrium, nova/biot and benchmarks found assemble_separatrix_branches (nova/equilibrium/separatrix_branches.py:306) and build_display_flux_map as the owners, and the change passes a derived branch_capacity into that owner rather than forking an assembler.",
+    "scope_discipline": "every path in git diff e7df23944b98..d559d30a96d7 is a declared write path, and the only cross-cutting effect is the branch-capacity derivation at nova/equilibrium/display_flux.py:214 that the two other callers inherit from inside the declared file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw the coil-edit panels on the display map of the solve's own currents and certify the near-X geometry; benchmarks/coil_edit_latency.py:3035-3055 persists each panel's state, promoted mask and compensating current and docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:5-14 states the promoted count, nearest distance and near-X verdict per published set.\nVERDICT done_when: the gate at /work/projects/imas_gpu/sophelio/evidence/coil-edit-panels-on-solve-currents/head-capacity-ad534aecb.log ran both focused files (11 passed in 1124.49s, EXIT=0) including the committed-archive rebuild and its forced 256-slot overflow control, the baseline arm recorded 0 failures and the compensation-drop control failed the same test id (EXIT=1), but the nearest-distance assertions compare against the display's own saddle_rz rather than an independently polished saddle.\nVERDICT write_paths: all 25 changed paths in git diff e7df23944b98..d559d30a96d7 are inside the declared write paths (benchmarks/coil_edit_latency.py, nova/equilibrium/display_flux.py, tests/test_coil_edit_panel_render.py, tests/test_display_flux.py, the five figure directories and the two evidence fragments); no path outside them was touched.\nVERDICT manifest: read; it records status complete, 19 commits, both suite arms with complete summaries and bare EXIT lines, added failures 0, the 1.30x-residual converged solved-node mismatch (7.4683e-9 Wb against residual 5.7303e-9 Wb), and the 0.01595 Wb compensation-drop control failure, and its numbers reconcile with the five committed panel-receipt.json files and the archives.\nVERDICT diff: read commit by commit from e7df23944b98 to d559d30a96d7; 344c20424/315a77a8c/f7c890ee9/527d13178 carry terminal state, promoted mask and compensation into the producer and shrink the archives, 73edf130f adds the committed-archive test, 16f537acc sizes display branches from the grid and ad534aecb records the forced overflow control, b88e4bb18/60e2a9f74 move the nearest distance to the polished saddle and update test_display_flux, and 4d3f55dbb/d559d30a9 redraw the archives and record the fragment.\nCALL_SITES: benchmarks/coil_edit_latency.py:1477 _panel_display_map, benchmarks/display_map_promoted_figure.py:51, benchmarks/diiid_forward_gs_match.py:1867\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:3035-3055 persists the solve's own state, promoted mask and constrained-row compensation and benchmarks/coil_edit_latency.py:2153-2180 draws the map's assembled branches and polished X-point, so the panels are drawn from the solve's own currents.\nSCORE evidence: 16\nJUSTIFICATION evidence: head-capacity-ad534aecb.log records 11 passed in 1124.49s at revision ad534aecb with a bare EXIT=0, negative-control-73edf130f.log records the same test id failing with EXIT=1, and the committed receipts report the 7.4683e-9 Wb solved mismatch against the 5.7303e-9 Wb residual the archive carries, though the head arm sits two docs-only commits behind the reviewed head and the negative control predates the landed capacity and saddle code.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff e7df23944b98..d559d30a96d7 is a declared write path, and the only cross-cutting effect is the branch-capacity derivation at nova/equilibrium/display_flux.py:214 that other callers inherit inside the declared file.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:312-314 guards the branch-capacity fix (a reverted 256 allowance reddens display.well_formed and the >256 closed-segment assertion) and :293 fails when compensation is dropped, but :301-308 and tests/test_display_flux.py:328 recompute the distance from display.saddle_rz, the code's own output, so they pin only that the seed was not used.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py:1446-1520 loads stored moments through CellCurrentMoments and reuses _panel_display_coupling in the surrounding producer idiom, and nova/equilibrium/display_flux.py:211-214 names the capacity rule by its mechanism with no plan, stage or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the capability search over nova/equilibrium, nova/biot and benchmarks found assemble_separatrix_branches (nova/equilibrium/separatrix_branches.py:306) and build_display_flux_map as the owners, and the change passes a derived branch_capacity into that owner rather than forking an assembler.\nFINDING tests/test_coil_edit_panel_render.py:301 non-blocking: polished_nearest is recomputed from display.saddle_rz, the value the code under test chose, so the assertion cannot fail if the code measured to a wrong saddle; only the sibling abs(polished_nearest - seed_nearest) > 1.0e-12 line at :306 distinguishes the seed from the polished point, and an independent polish_stationary_points call on the map would pin the done_when's 'polished saddle, not the seed' claim.\nFINDING tests/test_display_flux.py:328 non-blocking: the offset is taken from display.saddle_rz, the code's own output, so reverting the distance to any point the code also reports would keep the assertion green; it guards only the seed regression that tests/test_coil_edit_panel_render.py:306 already covers.\nFINDING tests/test_coil_edit_panel_render.py:294 non-blocking: display.promoted_node_count is compared with np.count_nonzero of the same persisted mask handed to the map, so both sides move together and the assertion can only catch a truncation disagreement, never a wrong promoted count.\nFINDING nova/equilibrium/display_flux.py:305 non-blocking: promoted_nodes[:node_count] silently discards the mask's entries past the lattice node prefix (the converged archive carries 60 nonzeros, of which 46 fall in the prefix) with no assertion that the discarded entries are the non-lattice tail rather than lattice nodes, so a mask ordered differently would under-report promoted_node_count without any check.\n",
+  "review_run_id": "r-20261106T053338946790-review-of-coil-edit-panels-on-solve-currents-d559d30a96d7",
+  "reviewed_base_sha": "e7df23944b989ff71508e0eb83552305d94979a3",
+  "reviewed_head_sha": "d559d30a96d786f1c35b670d0d8da954a3dd854e",
+  "reviewed_run_id": "r-20261105T160605201635-coil-edit-panels-on-solve-currents",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T06:00:56.729923+00:00",
+  "total": 105
+}

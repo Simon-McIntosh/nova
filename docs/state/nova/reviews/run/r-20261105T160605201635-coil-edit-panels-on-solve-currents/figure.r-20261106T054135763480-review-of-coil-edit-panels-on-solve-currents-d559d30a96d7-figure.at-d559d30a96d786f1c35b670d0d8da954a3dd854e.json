@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_note": "The five attachment paths image-1.png, image-3.png, image-5.png, image-7.png and image-9.png are byte-identical to one another (md5 8e886777ab82df0c34cf88dfdfe69f55, 1400x608) and render the same picture as the five repository PNGs named above; those five are themselves byte-identical to one another (md5 3aced6c991929100c3f2ba87a8a66598, 1484x644). Every attached file was opened. The visual verdict therefore covers one rendered artifact, published at five repository paths.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T05:46:45Z",
+  "figures_reviewed": [
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png"
+  ],
+  "findings": [
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "fe82eefb3b8",
+      "line": 2410,
+      "severity": "blocking",
+      "summary": "the caption carrying every number a reader needs (map spacing, both node mismatches, promoted counts, nearest distance) is drawn with figure.suptitle(..., fontsize=9) into a 10.6 x 4.6 inch canvas saved at 140 dpi, 1484 x 644 px; scaled into the ~900 px reckon column that is about 5.5 pt, so the figure's only explanatory text is unreadable at page scale without zooming, and 9 pt is well under the 14 pt floor this repository sets for direct labels and the 16 pt it sets for axis labels"
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html",
+      "id": "f1b6d0eb881",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the page caption describes the previous rendition, not the picture above it: it names Left edit 2 at -14 % with terminal residual 4.129e-09 Wb and two trips and Right edit 7 at -4 % with 6.514e-03 Wb, sixteen trips, ended on active_set_iteration_budget_exhausted, while the redrawn PNG's own title rows read 'edit 12 +6% residual 5.730e-09 converged yes trips 3' and 'edit 9 +0% residual 6.612e-03 converged no trips 3'; the html file is outside the run's changed paths, so the new image was published under a caption every identity of which is now wrong"
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "fa4bb1f3ee4",
+      "line": 2178,
+      "severity": "non-blocking",
+      "summary": "the solved null set is painted after the reference null set, and at the magnetic axis the two coincide to about 0.03 m on a 10 mm map, so the filled orange axis triangle covers the reference's hollow blue one and only a thin blue sliver shows; the caption promises both null sets in their own styles and a reader cannot see the reference marker at the axis to check that promise"
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "black text on white; #3366cc 5.4:1 and #cc7722 3.4:1 both clear the 3:1 line floor",
+    "data_ink": "the contours and wall carry the ink; only the caption prose spends ~20 per cent of the canvas height on non-data",
+    "decoration": "no gradients, fills, shading or frames; axes are off",
+    "label_collision": "zero clipped and zero overlapping labels; the reference hollow axis marker is occluded by the solved filled marker beneath the caption's both-null-sets promise",
+    "legibility": "panels legible; the in-image caption at fontsize 9 renders at about 5.5 pt at page width and cannot be read without zooming",
+    "table_form": "a spatial poloidal comparison, not tabular information drawn as an image"
+  },
+  "notes": "Read only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the reviewed tree is untouched and this record is the only artifact. Judged only from the named PNGs: no SVG was opened, read, rendered or grepped, and no other image was opened. Anchors are to benchmarks/coil_edit_latency.py, the script the run's diff changes that draws these figures (figsize at :2343, _paint_panel at :2106, the null sets at :2162 and :2178, the caption at :2408-2411), and to the figure page's caption text.",
+  "project": "nova",
+  "raw_text": "FIGURE REVIEW of r-20261105T160605201635-coil-edit-panels-on-solve-currents at d559d30a96d786f1c35b670d0d8da954a3dd854e from base e7df23944b989ff71508e0eb83552305d94979a3.\n\nThe five repository PNGs named in this record are byte-identical to one another (md5 3aced6c991929100c3f2ba87a8a66598, 1484x644) and the five run-directory attachments (image-1/3/5/7/9.png) are byte-identical to one another (md5 8e886777ab82df0c34cf88dfdfe69f55, 1400x608). Two renders serve five published paths, so this review judges one rendered artifact.\n\nWhat the render shows: two poloidal panels side by side, axes off. Left title 'edit 12 +6% residual 5.730e-09 converged yes trips 3'; right title 'edit 9 +0% residual 6.612e-03 converged no trips 3'. Each panel draws the MAST first wall in black, the reference flux in pale grey-blue #9aa4b2 at the same shared levels, the solved flux in orange #cc7722, an assembled separatrix lobe as a solid curve with two dashed legs, and both null sets: blue #3366cc reference and orange solved, admitted saddle filled and other qualified nulls hollow. The converged panel's orange and blue sets coincide; the non-converged panel's orange lobe and legs sit visibly off the blue reference, which is the comparison the figure exists to make and it reads immediately. Above the panels, a single six-line centred caption carries the level range, the vertical-centre row, the saddle positions, the branch style, 'wall drawn', and both panels' map spacing, node mismatches, promoted counts and nearest distances.\n\nRUBRIC legibility: the panels are legible at a glance and the converged/non-converged difference is visible; the caption is drawn at fontsize 9 and renders at about 5.5 pt in the ~900 px reckon column, so the numbers cannot be read at page scale (blocking, benchmarks/coil_edit_latency.py:2410).\nRUBRIC data_ink: the contours, wall and separatrix carry the weight; the caption spends ~20 per cent of the canvas height on prose.\nRUBRIC decoration: no gradient, background fill, shading or frame; the axes are off.\nRUBRIC contrast: black text on white; #3366cc measures 5.4:1 and #cc7722 3.4:1 against white, both clear of 3:1; the grey-blue reference contours at 2.5:1 are the recessive comparison series by design.\nRUBRIC table_form: a spatial poloidal comparison; nothing here is naturally a table.\nRUBRIC label_collision: zero clipped and zero overlapping labels measured on the render (caption ink columns 51-1432 of 1484, panel titles 45-1424 with a 109-pixel gap, data below row 230); the one occlusion is the reference's hollow axis marker under the solved filled marker.\n\nFINDING benchmarks/coil_edit_latency.py:2410 (blocking): the caption carrying every number a reader needs is drawn at fontsize 9 into a 10.6 x 4.6 inch canvas at 140 dpi (1484 x 644 px), about 5.5 pt at page width, below the 14 pt direct-label and 16 pt axis-label floors this repository sets.\nFINDING docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html (non-blocking): the page caption still names edit 2 / edit 7 with residuals 4.129e-09 Wb and 6.514e-03 Wb and sixteen trips, while the redrawn image's titles read edit 12 / edit 9 with 5.730e-09 Wb and 6.612e-03 Wb and three trips; the html is outside the run's changed paths.\nFINDING benchmarks/coil_edit_latency.py:2178 (non-blocking): the solved null set is painted over the reference set, so at the axis the filled orange triangle covers the hollow blue one and the caption's both-null-sets promise cannot be checked there.\n",
+  "review_run_id": "r-20261106T054135763480-review-of-coil-edit-panels-on-solve-currents-d559d30a96d7-figure",
+  "reviewed_base_sha": "e7df23944b989ff71508e0eb83552305d94979a3",
+  "reviewed_head_sha": "d559d30a96d786f1c35b670d0d8da954a3dd854e",
+  "reviewed_paths_revision_note": "judged at d559d30a96d786f1c35b670d0d8da954a3dd854e; the figure PNGs for all five paths changed in this run per git diff --stat e7df23944b98..d559d30a96d7",
+  "reviewed_run_id": "r-20261105T160605201635-coil-edit-panels-on-solve-currents",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "text is pure black on white; the two data hues measure 5.4:1 (#3366cc blue) and 3.4:1 (#cc7722 orange) against white, both clear of the 3:1 line floor, and the recessive reference contours (#9aa4b2, 2.5:1) are the deliberate grey of the comparison series rather than a legibility failure.",
+    "data_ink": "the data carry the weight. The flux contours are the bulk of the ink, the wall is a thin closure, and there is no legend box or furniture competing with them; the caption prose spends about 20 per cent of the canvas height on text, which is the one place ink is spent on something other than data.",
+    "decoration": "no gradient, no background fill, no shading and no frame; the panels are white with line work only, and the style's despine rule is met because the axes are off entirely.",
+    "label_collision": "nothing is clipped and no text crosses text or data: the caption block occupies columns 51-1432 of a 1484-wide canvas and rows 7-133, the two panel titles occupy columns 45-1424 with a 109-pixel gap between them, and the plotted data begins below row 230. The one occlusion is inside the panels rather than between labels: the reference's hollow axis marker is painted over by the solved filled axis marker at the same point.",
+    "legibility": "the panels themselves are legible at a glance: the wall, both separatrix sets and both null sets can be told apart in both panels, and the non-converged panel's off-set lobe and legs are immediately visible. The explanatory text is not: the six-line caption is drawn at fontsize 9 inside the image and renders at about 5.5 pt in the reckon column, so the only place the panel's numbers appear cannot be read at page scale.",
+    "table_form": "the image is a spatial poloidal comparison of two solved states against a reference; nothing in it is naturally a table, and the scalar numbers it carries are supportive of the geometry rather than the subject."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T05:58:53.975267+00:00",
+  "total": null
+}

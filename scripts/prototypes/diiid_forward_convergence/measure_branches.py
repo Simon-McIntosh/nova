@@ -171,8 +171,12 @@ def _presence(profile, flux_map, wall, mask, target_current_a) -> dict[str, Any]
         confined_error = f"{type(error).__name__}: {error}"
     else:
         confined_error = None
-    axis = np.asarray(profile.operator.read(jnp.asarray(
-        np.asarray(flux_map, dtype=float).ravel()))[1].axis, dtype=float)
+    axis = np.asarray(
+        profile.operator.read(jnp.asarray(np.asarray(flux_map, dtype=float).ravel()))[
+            1
+        ].axis,
+        dtype=float,
+    )
     axis_inside = bool(
         inside_wall_units(np.asarray(axis, dtype=float)[None, :], wall)[0]
     )
@@ -288,9 +292,7 @@ def _harvest(node, path: str, arrays: dict[str, np.ndarray]) -> None:
         for key in list(node):
             value = node[key]
             if key == "_flux_grid":
-                arrays[f"{path}._flux_grid"] = np.asarray(
-                    node.pop(key), dtype=float
-                )
+                arrays[f"{path}._flux_grid"] = np.asarray(node.pop(key), dtype=float)
             else:
                 _harvest(value, f"{path}.{key}", arrays)
     elif isinstance(node, list | tuple):
@@ -319,9 +321,9 @@ def _self_check() -> None:
     _harvest(clean, "record", arrays)
     harvested = sorted(arrays)
     _assert_json_clean(clean)
-    positive = harvested == ["record.a.staged.1._flux_grid"] and not clean["a"][
-        "staged"
-    ]["1"]
+    positive = (
+        harvested == ["record.a.staged.1._flux_grid"] and not clean["a"]["staged"]["1"]
+    )
     leaked = {"a": {"staged": {"1": {"_flux_grid": np.zeros(3)}}}}
     try:
         _assert_json_clean(leaked)
@@ -351,25 +353,31 @@ def _self_check() -> None:
 
 
 def _branch_record(
-    prepared, topology_class, expansion, persist, staged_steps
+    prepared, topology_class, expansion, persist, staged_steps, record=None
 ) -> dict[str, Any]:
     profile = prepared["profile"]
     cold = prepared["cold"]
     seed = np.asarray(cold.branches.flux[int(topology_class)], dtype=float)
     carrier = f"diiid-convergence-probe:{expansion}:{topology_class.name}"
-    record: dict[str, Any] = {
-        "requested_class": topology_class.name.lower(),
-        "seed_identity_with_label": bool(
-            np.array_equal(seed, prepared["label_seed"])
-        ),
-        "seed_l2_distance_from_label": float(
-            np.linalg.norm(seed - prepared["label_seed"])
-        ),
-        "arms": {},
-    }
+    record: dict[str, Any] = {} if record is None else record
+    record.update(
+        {
+            "requested_class": topology_class.name.lower(),
+            "seed_identity_with_label": bool(
+                np.array_equal(seed, prepared["label_seed"])
+            ),
+            "seed_l2_distance_from_label": float(
+                np.linalg.norm(seed - prepared["label_seed"])
+            ),
+            "arms": {},
+        }
+    )
     try:
         receipt, seconds = _solve(
-            profile, seed, prepared["current"], prepared["target_current_a"],
+            profile,
+            seed,
+            prepared["current"],
+            prepared["target_current_a"],
             f"{carrier}:default",
         )
     except Exception as error:
@@ -390,9 +398,14 @@ def _branch_record(
     trips = max(1, min(int(default["active_set_iterations"]), STAGED_TRIP_LIMIT))
     try:
         receipt, seconds = _solve(
-            profile, seed, prepared["current"], prepared["target_current_a"],
+            profile,
+            seed,
+            prepared["current"],
+            prepared["target_current_a"],
             f"{carrier}:continued",
-            settled_exit=False, stagnation_stop=False, active_set_steps=16,
+            settled_exit=False,
+            stagnation_stop=False,
+            active_set_steps=16,
         )
         record["arms"]["continued"] = _record_receipt(
             receipt, seconds, prepared, topology_class
@@ -413,8 +426,12 @@ def _branch_record(
         steps = min(steps, trips)
         try:
             receipt, seconds = _solve(
-                profile, seed, prepared["current"], prepared["target_current_a"],
-                f"{carrier}:staged{steps}", active_set_steps=steps,
+                profile,
+                seed,
+                prepared["current"],
+                prepared["target_current_a"],
+                f"{carrier}:staged{steps}",
+                active_set_steps=steps,
             )
             record["arms"]["staged"][str(steps)] = _record_receipt(
                 receipt, seconds, prepared, topology_class
@@ -496,8 +513,12 @@ def run_frame(
                 flush=True,
             )
 
-        frame_record["branches"][branch_name] = _branch_record(
-            prepared, topology_class, expansion, persist, staged_steps
+        # The branch record is attached before it is filled, so a persist call
+        # made while an arm is still running writes that arm into the receipt
+        # rather than an empty branch.
+        holder = frame_record["branches"].setdefault(branch_name, {})
+        _branch_record(
+            prepared, topology_class, expansion, persist, staged_steps, holder
         )
 
     # Nothing should remain, but harvesting here makes the guarantee local to the

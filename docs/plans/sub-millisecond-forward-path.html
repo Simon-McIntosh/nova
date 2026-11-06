@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="204">
+<meta name="plan-version" content="205">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -706,7 +706,10 @@
     <div class="r-comment-body"><p>[Independent review of bank-near-root-polish](/nova/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html#bank-near-root-polish-landing): scored 16/16/20/17/19/20 across goal_fidelity, evidence, scope_discipline, durability, fit and reuse over delta 1046a4cd..ec674641. The withdrawal is byte-exact against base 73864287 (git diff base head -- nova tests empty; nova and tests trees identical), added_failure_count 0 with both suite arms completed and EXIT=0, and the negative result is recorded with its latency regression. Two non-blocking findings: after_suite names the withdrawn experiment 42039a93 rather than the delivered head, and the eight-step arm's read counts appear in the fragment with no committed receipt.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T204411124980-review-of-bank-residual-noise-floor-6bbb71884638" data-who="reckon-build" data-when="2026-11-06T20:56:03.830Z">
-    <div class="r-comment-body"><p>Independent review of r-20261106T195757251008-bank-residual-noise-floor at head 6bbb71884638 (base 6adab8c7a479): scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 15, fit 19, reuse 17 (total 109/120), added_failure_count 0, one non-blocking finding that the bit-for-bit zero-injection control is recorded rather than asserted; the 16-lane H200 and 2-lane sirius measurements, every stage row, the fragment numbers and the rendered data-ink figure reconcile against the run&#x27;s own receipts.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261106T195757251008-bank-residual-noise-floor at head 6bbb71884638 (base 6adab8c7a479): scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 15, fit 19, reuse 17 (total 109/120), added_failure_count 0, one non-blocking finding that the bit-for-bit zero-injection control is recorded rather than asserted; the 16-lane H200 and 2-lane sirius measurements, every stage row, the fragment numbers and the rendered data-ink figure reconcile against the run's own receipts.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T190538050441-bank-near-root-polish" data-who="reckon-build" data-when="2026-11-06T20:06:05Z">
+    <div class="r-comment-body"><p>[Negative fixed-polish result](/nova/evidence/fragments/sub-millisecond-forward-path/bank-near-root-polish.html#bank-near-root-polish-landing): band 1e-8, P=16 gave 20 reads on every common seed set against base 7–15, but whole-solve wall rose to 1684.921–1688.424 ms from 525.585–983.463 ms (84.246–84.421 versus 65.473–75.106 ms/read). P=8 failed seed 5 lane 10 at 1.3227463568910025e-10. Product and tests restored exactly to base; retain prototype and reviewed read-count figure as negative evidence. Full Newton steps do not reliably reduce fresh residual near its 1e-10 noise floor; no product rule proposed.</p></div>
 </div>
 </section>
 </main>

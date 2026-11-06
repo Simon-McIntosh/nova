@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T20:41:28.993Z",
+  "dispatched_at": "2026-11-06T20:33:09Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:237",
+      "id": "wiring-1",
+      "reason": "the node must know which mesh it is sizing, and if production rebuilds the mesh then G must be rebuilt and its measured compile and memory cost re-taken, which changes what \u00a73 and \u00a74 each own.",
+      "text": "\u00a73's done-when builds and sizes G over \"the 1696-cell WEST mesh\", but the plan never names where that mesh comes from: the production mesh is \u00a74's (`nova/biot/magnetisation.py`, \"Mesh it without slivers \u2026 quality triangles or merged quads\") and \u00a74 declares depends-on s3, so the only mesh available to \u00a73 is the \u00a71 prototype's `mesh(region, size)` in scripts/prototypes/iron_magnetisation/magnetisation.py:48, which \u00a73 does not cite; and because \u00a74 may change the cell shape and \u00a75 adds graded refinement, the 1696-cell count and the 3392-square shape whose compile and warm times \u00a73 records do not describe the production matrix",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:226",
+      "id": "reasoning-1",
+      "reason": "an implementer must either drop \u03c8 from G (and \u00a76/\u00a77 then needs it from somewhere else) or build a non-square matrix, so the wrong reading lands a differently shaped object than the plan specifies and the compile and memory gate measures it.",
+      "text": "\u00a73 defines G as \"B_R, B_Z and \u03c8 at targets per unit M_R and M_Z\" but its done-when (2) at line 243 requires \"that 3392-square Gram\", and 2N\u00d72N = 3392 holds only for B_R and B_Z on 1696 cells (the prototype's `interaction` returns exactly that, scripts/prototypes/iron_magnetisation/magnetisation.py:133), so carrying \u03c8 at the same targets gives 5088\u00d73392 and the node cannot satisfy both statements",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:216",
+      "id": "reasoning-2",
+      "reason": "without a stated rule \u00a73 can pick a width that silently fails the 1e-10 target \u00a72 established, and the reciprocal-\u03b5 tolerance means the gate would still be self-consistent while measuring the wrong accuracy.",
+      "text": "\u00a72 records \"the best attainable error and the \u03b5 that gives it recorded per slope\", but neither \u00a72 nor \u00a73 states how the production G chooses the strip width \u03b5: a 1696-cell mesh carries edges at several slopes, one global \u03b5 cannot be the per-slope optimum, and \u00a73's agreement tolerance is defined as the host's reversed-order spread which \"amplifies any change in summation order by about 1/\u03b5\" (line 240\u2013241), so an arbitrary \u03b5 moves both the matrix's accuracy and the gate's tolerance",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3a04a5cd8d87b40da1991d421251c6876de3c075",
+  "plan_fingerprint": "40581904f91b16978e6679f507711398ab0f21caeb9aab7003b8fab5a0e3aceb",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261106T203158665700-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "aeb86626cb6d38dc87f8dfb372e9fff02bbd9f11",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited symbol resolves: complete_kind and complete_pole at nova/biot/completeelliptic.py:247,286, incomplete_pole at nova/biot/incompleteelliptic.py:266, _fill_tile at nova/biot/tiledassembly.py:381, the moment and arc tiles at lines 410,436, the Urankar Part V reduction and its fixed-node arsinh rule in nova/biot/polygonanalytic.py, and PolySection as the device default per nova/biot/AGENTS.md; nova/biot/sheet.py is absent by design because \u00a72 creates it.",
+    "done_when": "pass \u2014 both changed nodes state a measurable tolerance and declare a negative control (\u00a72's sign-flipped sheet current on one edge at line 219, \u00a73's reversed cell edge normals at line 243).",
+    "evidence_paths": "pass \u2014 the gates name the GPU partition and durable records (the sheet-route decision, the kernel-compile census under docs/evidence/fragments/kernel-compile-barrier/ exists), and neither node writes to a scratch or node-local path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags appear in the changed text; `_fill_tile` is a real private symbol, not an invented one.",
+    "reasoning": "a finding \u2014 \u00a73 declares G to carry \u03c8 yet requires a 3392-square matrix, and neither changed node fixes the strip width \u03b5 that the production build must use.",
+    "single_goal": "pass \u2014 \u00a72's two routes and \u00a73's two tile branches are each closed on a single recorded outcome (the sheet-route decision), not on two independent deliverables.",
+    "wiring": "a finding \u2014 \u00a73's done-when measures the interaction matrix on a 1696-cell mesh that no node before it names and that the mesh owner (\u00a74) can only produce after \u00a73 has landed."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "83e95fe8689386266a38b16d3c2d83201c7b6063f22f791c1fb7eda1e2fd84f6",
+    "s3": "55a7b364b3213f1f1a0d4ec593c84d23cab74cfda1893672fac830d9de02eff1",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:44:29.084313+00:00",
+  "total": null
+}

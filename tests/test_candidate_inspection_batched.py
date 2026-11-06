@@ -17,6 +17,7 @@ import pytest
 
 from nova.equilibrium import fixed_points, support_read, topology
 from nova.equilibrium.solve_request import TopologyPolicy
+from tests.jaxpr_scans import subjaxprs
 
 assert jax.config.jax_enable_x64
 pytestmark = pytest.mark.timeout(1800)
@@ -214,11 +215,8 @@ def test_candidate_slots_match_individual_evaluation():
 def nested_equations(program):
     for equation in program.eqns:
         yield equation
-        for value in equation.params.values():
-            for child in value if isinstance(value, (tuple, list)) else (value,):
-                child = getattr(child, "jaxpr", child)
-                if hasattr(child, "eqns"):
-                    yield from nested_equations(child)
+        for child in subjaxprs(equation):
+            yield from nested_equations(child)
 
 
 def test_candidate_slots_share_one_program(monkeypatch):
@@ -269,11 +267,37 @@ def test_candidate_overflow_matches_full_evaluation():
         )
     assert bool(actual[0][0, 4]) and int(actual[2][0]) == 4
     assert np.all(np.asarray(actual[0][1, 1:5]))
-    program = jax.make_jaxpr(mapped(candidate_program()))(batch).jaxpr
+    assert int(batch_overflow_predicate(mapped(candidate_program()), batch)) == 1
+
+
+def batch_overflow_predicate(mapped, batch):
+    traced = jax.make_jaxpr(mapped)(batch)
+    program = traced.jaxpr
     # A lane-varying cond becomes selects under vmap; the overflow cond must survive.
     choices = [eq for eq in program.eqns if eq.primitive.name == "cond"]
     assert len(choices) == 1
     assert choices[0].invars[0].aval.shape == ()
+    predicate = program.replace(
+        eqns=program.eqns[: program.eqns.index(choices[0])],
+        outvars=[choices[0].invars[0]],
+    )
+    return jax.core.eval_jaxpr(predicate, traced.consts, *jax.tree.leaves(batch))[0]
+
+
+def test_candidate_nonoverflow_selects_compact_branch():
+    field, geometry, convention, policy, solved = small_case()
+    # One lane has no saddle; the other exactly fills slot 0 plus two saddles.
+    solved = jax.tree.map(lambda leaf: leaf[jnp.array([0, 1, 1])], solved)
+    sparse = solved._replace(valid=jnp.array([True, False, False]))
+    batch = jax.tree.map(lambda left, right: jnp.stack((left, right)), sparse, solved)
+    mapped = jax.vmap(
+        lambda lane: stationary_adapter(candidate_program())(
+            field, geometry, convention, policy, lane
+        )
+    )
+    predicate = int(batch_overflow_predicate(mapped, batch))
+    print("NONOVERFLOW_BRANCH", predicate, flush=True)
+    assert predicate == 0, "non-overflow batch must select compact candidate evaluation"
 
 
 @pytest.fixture(scope="module", params=["limited", "diverted"])

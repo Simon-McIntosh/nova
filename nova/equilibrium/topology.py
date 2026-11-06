@@ -35,6 +35,9 @@ from nova.geometry.hexstencil import HEX_RING
 from nova.jax.tree_util import Pytree
 from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
+# The 550-cell states have 0/0/1/1 saddles; allow slot 0 and a second saddle.
+_COMPACT_CANDIDATE_CAPACITY = 3
+
 _MATERIAL_CONNECTED_FRACTION = 0.01
 """Minimum share of the material grid an O candidate's component must reach.
 
@@ -3319,7 +3322,7 @@ def _read_at_nulls(
 
     indices = jnp.arange(policy.null_capacity)
     retained = saddles | (indices == 0)
-    compact_capacity = min(3, policy.null_capacity)
+    compact_capacity = min(_COMPACT_CANDIDATE_CAPACITY, policy.null_capacity)
 
     @jax.custom_batching.custom_vmap
     def any_lane_overflow(overflow):
@@ -3357,9 +3360,7 @@ def _read_at_nulls(
     # Slot 0 keeps its form because it is selected when no saddle is admitted.
     forms = jax.tree.map(
         lambda leaf: jnp.where(
-            (saddles | (indices == 0)).reshape(
-                (policy.null_capacity,) + (1,) * (leaf.ndim - 1)
-            ),
+            retained.reshape((policy.null_capacity,) + (1,) * (leaf.ndim - 1)),
             leaf,
             jnp.zeros_like(leaf),
         ),

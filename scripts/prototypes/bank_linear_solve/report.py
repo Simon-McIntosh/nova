@@ -18,6 +18,7 @@ LABELS = {
     "refined-2": "Single LU + 2 refinements",
     "refined-3": "Single LU + 3 refinements",
     "gmres": "Block GMRES",
+    "gmres-strict": "GMRES, both coordinate bounds",
     "stacked": "Stacked double LU",
 }
 
@@ -81,7 +82,7 @@ def main():
     parser.add_argument("--tables", type=Path, required=True)
     args = parser.parse_args()
     rows = json.loads(args.receipt.read_text())
-    assert len(rows) == 28 and all(len(r["samples_ms"]) >= 10 for r in rows)
+    assert len(rows) == 32 and all(len(r["samples_ms"]) >= 10 for r in rows)
     assert all(r["kernels"] > 0 for r in rows)
     plt.style.use("data-ink")
     fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100, sharey=True, sharex=True)

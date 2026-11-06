@@ -31,7 +31,9 @@ def relative(value, reference):
     return jnp.linalg.norm(value - reference) / jnp.linalg.norm(reference)
 
 
-def counted_gmres(matrix, right, original, raw_right, column, condition):
+def counted_gmres(
+    matrix, right, original, raw_right, column, condition, physical_bound=False
+):
     """Restarted left-preconditioned GMRES with exact Arnoldi step telemetry."""
     cells = right.size // 3
     indices = jnp.arange(cells)[:, None] + cells * jnp.arange(3)[None, :]
@@ -43,6 +45,8 @@ def counted_gmres(matrix, right, original, raw_right, column, condition):
 
     def error(solution):
         balanced = condition[1] * relative(matrix @ solution, right)
+        if not physical_bound:
+            return balanced
         physical = condition[0] * relative(original @ (column * solution), raw_right)
         return jnp.maximum(balanced, physical)
 
@@ -81,14 +85,26 @@ def make_arm(name, refinements=0):
     def one(matrix, right, row, column):
         balanced = matrix * column[None, :] / row[:, None]
         rhs = right / row
-        if name == "gmres":
+        if name.startswith("gmres"):
             condition = jnp.stack(
                 tuple(
                     support_read._krylov_condition_estimate(lambda v: a @ v, right.size)
-                    for a in (matrix, balanced)
+                    for a in (
+                        (matrix, balanced)
+                        if name == "gmres-strict"
+                        else (balanced, balanced)
+                    )
                 )
             )
-            return counted_gmres(balanced, rhs, matrix, right, column, condition)
+            return counted_gmres(
+                balanced,
+                rhs,
+                matrix,
+                right,
+                column,
+                condition,
+                physical_bound=name == "gmres-strict",
+            )
         working = balanced.astype(jnp.float32) if name == "refined" else balanced
         lu, pivots = linalg.lu_factor(working)
         solution = linalg.lu_solve((lu, pivots), rhs.astype(working.dtype)).astype(
@@ -111,7 +127,7 @@ def make_arm(name, refinements=0):
     def stacked(matrix, right, row, column):
         balanced = matrix * column[:, None, :] / row[:, :, None]
         lu, pivots, _ = jax.lax.linalg.lu(balanced)
-        solution = linalg.lu_solve((lu, pivots), right / row)
+        solution = linalg.lu_solve((lu, pivots), (right / row)[..., None])[..., 0]
         return column * solution, jnp.zeros(right.shape[0], dtype=jnp.int32)
 
     return stacked
@@ -218,6 +234,7 @@ def extract(batch, directory):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--systems", type=Path)
     parser.add_argument("--repeats", type=int, default=12)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
@@ -238,10 +255,10 @@ def main():
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"
     assert args.repeats >= 10
     args.output.mkdir(parents=True, exist_ok=True)
-    if not all(
-        (args.output / f"{state}.npz").exists() for state in ("trial", "converged")
-    ):
-        extract(fixture.build(16), args.output)
+    systems = args.systems or args.output
+    if args.systems is None:
+        extract(fixture.build(16), systems)
+    emit("SYSTEMS", path=str(systems))
     receipt = []
     arms = [
         ("present", 0),
@@ -250,10 +267,11 @@ def main():
         ("refined", 2),
         ("refined", 3),
         ("gmres", 0),
+        ("gmres-strict", 0),
         ("stacked", 0),
     ]
     for state in ("trial", "converged"):
-        with np.load(args.output / f"{state}.npz") as archive:
+        with np.load(systems / f"{state}.npz") as archive:
             full = tuple(
                 jnp.asarray(archive[key])
                 for key in ("matrix", "right", "row", "column")
@@ -298,9 +316,11 @@ def main():
                     np.asarray(conditions[0]) * residuals,
                     np.asarray(conditions[1]) * balanced_residuals,
                 )
+                if name == "gmres":
+                    bound = np.asarray(conditions[1]) * balanced_residuals
                 passed = bool(
                     np.all(errors <= 1e-8)
-                    and (name != "gmres" or np.all(bound <= 1e-8))
+                    and (not name.startswith("gmres") or np.all(bound <= 1e-8))
                 )
                 record = dict(
                     state=state,

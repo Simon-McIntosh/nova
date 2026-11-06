@@ -43,6 +43,10 @@ class Quadrature:
     ``sigma`` is the signed-flux convention supplied to the topology read.
     ``segments`` sets cosine-spaced conic chords and cubic-ray chords, without
     changing fragment ownership. No polygon-count limit is imposed here.
+    ``cut_batch_width`` controls the conic tile of ``book_tangent_channels``
+    only. Scalar ``book`` and ``book_tangent`` use fixed 32-cell cut tiles;
+    a narrower tile repeats conic strip propagation. Normal-form buckets use
+    eight cells independently of the conic tile.
     """
 
     sigma: object = 1.0
@@ -62,7 +66,7 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
-_PRIMAL_CUT_BATCH_WIDTH = 32
+_SCALAR_CUT_BATCH_WIDTH = 32
 _NORMAL_CUT_BATCH_WIDTH = 8
 
 
@@ -472,11 +476,9 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
 
-    if quadrature.cut_batch_width < 1:
-        raise ValueError("cut batch width must be positive")
     # Scalar moments use a wider cell tile than the multi-channel tangent.
     # Sharing its smaller tile repeats the conic strip propagation.
-    batch_width = min(_PRIMAL_CUT_BATCH_WIDTH, cells)
+    batch_width = min(_SCALAR_CUT_BATCH_WIDTH, cells)
     normal = cut & read.normal_form_cells
     zero = jax.tree.map(jnp.zeros_like, whole)
     conic = _integrate_bucket(cut & ~normal, batch_width, conic_cell, zero)
@@ -620,7 +622,7 @@ def book_tangent(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
-    batch_width = 32
+    batch_width = _SCALAR_CUT_BATCH_WIDTH
     cut_count = jnp.sum(cut, dtype=jnp.int32)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))

@@ -31,6 +31,12 @@ assert jax.config.jax_enable_x64
 pytestmark = [pytest.mark.slow, pytest.mark.timeout(1800)]
 
 
+def test_scalar_cut_tile_keeps_wide_batches():
+    # At 16 cells, conic strip propagation doubles from 672 to 1344 launches
+    # per residual call on the diverted 550-cell bank.
+    assert current._SCALAR_CUT_BATCH_WIDTH == 32
+
+
 def reference_book(psi, read, geometry, profile, quadrature=Quadrature()):
     """Integrate every selected fragment and normalize its current once.
 

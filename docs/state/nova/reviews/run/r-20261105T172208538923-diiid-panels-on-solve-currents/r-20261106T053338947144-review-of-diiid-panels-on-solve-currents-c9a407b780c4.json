@@ -24,6 +24,11 @@
       "kind": "folded",
       "node": "diiid-separatrix-redraw",
       "recorded_at": "2026-11-06T06:11:16.829247+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "large receipts live under the GPFS evidence root by the receipts-out-of-git rule; a pruned operand is a real evidence loss the test should surface, not hide",
+      "recorded_at": "2026-11-06T06:11:25.929686+00:00"
     }
   },
   "findings": [

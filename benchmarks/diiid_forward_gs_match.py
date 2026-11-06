@@ -3697,7 +3697,7 @@ def render_frame_comparison(
         poloidal_axes(axis)
         label = (
             f"shot {Path(result.shot).stem.split('_')[-1][-8:]}\n"
-            f"frame {result.frame} · conv={result.converged}"
+            f"frame {result.frame}\nconv={result.converged}"
         )
         if result.display_map is not None:
             display = result.display_map
@@ -3714,14 +3714,14 @@ def render_frame_comparison(
             if display.separatrix_closed_points == 0:
                 reason = display.separatrix_assembly or {}
                 count = reason.get("closed_candidate_count")
-                label += f"\nno closed branch; {count} candidate(s)"
+                label += f"\nno closed branch ({count})"
         elif result.solve_exception_class == "NoQualifiedAxisError":
             label += "\nno qualified axis"
         else:
             reason = str(frame.get("plot_unavailable_reason", "display unavailable"))
             label += f"\n{reason.split(':')[0][:22]}"
         position = axis.get_position()
-        figure.text(position.x0, 0.26, label, va="top", fontsize=14, linespacing=1.5)
+        figure.text(position.x0, 0.27, label, va="top", fontsize=14, linespacing=1.35)
         if "labelled" not in frame:
             continue
         radius, height = frame["radius"], frame["height"]
@@ -3957,7 +3957,7 @@ def displacement_figure(
             f"shot {Path(result.shot).stem.split('_')[-1][-8:]}\nframe {result.frame}"
         )
         if displacement is None:
-            label += "\nunavailable: no qualified axis"
+            label += "\nno qualified axis"
         else:
             for attribute, _, colour, marker in styles:
                 landmark = getattr(displacement, attribute)

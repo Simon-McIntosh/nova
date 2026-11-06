@@ -30,11 +30,19 @@ def main():
         environment = dict(
             os.environ,
             PYTHONPATH=str(args.root),
-            JAX_PLATFORMS="cuda",
+            JAX_PLATFORMS="cuda,cpu",
             TMPDIR=str(scratch),
             OPENBLAS_NUM_THREADS="1",
             OMP_NUM_THREADS="2",
         )
+        probe = [
+            sys.executable,
+            "-P",
+            "-c",
+            "from scripts.prototypes.bank_wall_events.trajectory import "
+            "callback_control; callback_control()",
+        ]
+        execute(args.root, head, probe, args.run / "callback-control.log", environment)
         command = [
             sys.executable,
             "-P",

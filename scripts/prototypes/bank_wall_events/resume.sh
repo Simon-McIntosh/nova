@@ -7,7 +7,7 @@
 #SBATCH --mem=96G
 #SBATCH --time=01:10:00
 set -u
-export TMPDIR=/tmp JAX_PLATFORMS=cuda
+export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu
 ROOT=$1
 RUN=$2
 BASE=$3

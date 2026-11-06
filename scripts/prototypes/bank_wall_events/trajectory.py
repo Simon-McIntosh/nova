@@ -69,6 +69,22 @@ def difference(left, right):
     )
 
 
+def callback_control():
+    """Require the CPU callback device while keeping computation on the GPU."""
+    assert jax.default_backend() == "gpu"
+    positive = []
+    jax.jit(
+        jax.vmap(
+            lambda lane: jax.debug.callback(
+                lambda x: positive.append(int(x)), lane, ordered=True
+            )
+        )
+    )(jnp.arange(16))
+    jax.effects_barrier()
+    assert positive == list(range(16)), positive
+    emit("LANE_ORDER_CONTROL", observed=positive)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
@@ -173,17 +189,7 @@ def main():
     exec(compile(other_source, "<paired-wall-polish>", "exec"), namespace)
     alternative = namespace["_wall_events"]
     observed = []
-    positive = []
-    jax.jit(
-        jax.vmap(
-            lambda lane: jax.debug.callback(
-                lambda x: positive.append(int(x)), lane, ordered=True
-            )
-        )
-    )(jnp.arange(16))
-    jax.effects_barrier()
-    assert positive == list(range(16)), positive
-    emit("LANE_ORDER_CONTROL", observed=positive)
+    callback_control()
 
     def capture(coefficients, points, values):
         observed.append(

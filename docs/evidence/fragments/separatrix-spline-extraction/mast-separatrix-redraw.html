@@ -103,28 +103,28 @@ claim is made from it here. The check with teeth on these panels is
 state itself rather than against a copy of its own arithmetic.</p>
 
 <p id="mast-separatrix-redraw-gate-result">The redraw gate ran as one job through
-the lane launcher: slurm job <code>1306726</code> at revision
-<code>5f91ff873</code>, exit status 0, <b>11 passed in 2178.98 s</b>. The base
-arm ran the same command at revision <code>2fd5d5b58</code> in slurm job
-<code>1306717</code>, exit status 0, <b>10 passed in 2899.39 s</b>. The head
-carries one test id the base does not, and neither arm carries a failing id, so
-the gate shows <b>zero added failures</b> against the base. Both arms ran on the
-reserved H200.</p>
+the lane launcher, at the revision this evidence ships with: slurm job
+<code>1306805</code> on the reserved H200 at revision <code>8e6ea80b2</code>,
+exit status 0, <b>11 passed in 2186.84 s</b>. The base arm ran the same command
+at revision <code>2fd5d5b58</code> in slurm job <code>1306717</code>, exit
+status 0, <b>10 passed in 2899.39 s</b>. The head carries one test id the base
+does not, and neither arm carries a failing id, so the gate shows <b>zero added
+failures</b> against the base. Both arms ran on the reserved H200.</p>
 
-<p id="mast-separatrix-redraw-gate-placement">The gate was then re-run at the
-final head <code>8e6ea80b2</code>, because the revision the evidence was written
-against had moved. Both the gate and its control were submitted at once and both
-landed on the <b>titan</b> rung after the H200 reservation refused them at that
-moment. That placement cannot serve the full-axis lane: the P100 holds 16 GB and
-the lane's JAX program asks for 2.46 GiB beyond it, so all three full-axis ids
-failed on <code>RESOURCE_EXHAUSTED</code> rather than on any assertion about the
-separatrix, and the gate ended <b>3 failed, 8 passed, exit status 1</b> in job
-<code>1306786</code>. That is a placement defect, not a regression: the same
-tree re-submitted to the reserved H200 alone is job <code>1306805</code>, and the
-revision is only reported as gated once that job's summary is read. The lesson is
-worth recording rather than smoothing over — a lane launcher that falls back from
-H200 to titan falls back onto a device this lane does not fit, which is the
-opposite of what the rung list is for.</p>
+<p id="mast-separatrix-redraw-gate-placement">The first attempt at that head
+went to the wrong device and is kept here rather than dropped. The gate and its
+control were submitted together and both fell to the <b>titan</b> rung when the
+H200 reservation refused them at that moment. That rung cannot serve the
+full-axis lane: a P100 holds 16 GB and the lane's JAX program asks for 2.46 GiB
+beyond it, so all three full-axis ids failed on
+<code>RESOURCE_EXHAUSTED</code> rather than on any assertion about the
+separatrix, and the gate ended 3 failed, 8 passed in job <code>1306786</code>.
+Had that figure been reported as the gate result it would have read as a
+regression in a change that has none. Re-submitted to the reserved H200 alone
+the same tree passed every id, which is what the paragraph above records, and
+which also measures how the two rungs differ: a lane launcher whose rung list
+falls back from H200 to titan falls back onto a device this lane does not fit,
+so a device-memory failure on the fallback rung is not evidence about the code.</p>
 
 <p id="mast-separatrix-redraw-control">The control for the new guard lives in
 the test module itself and is re-runnable from the tree:

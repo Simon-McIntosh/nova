@@ -1359,7 +1359,7 @@ def _block_gmres(matrix, right, inverse, indices, *, max_iterations=400):
         norm = jnp.linalg.norm(residual)
         vectors = jnp.zeros((right.size, width + 1), right.dtype)
         vectors = vectors.at[:, 0].set(residual / jnp.where(norm > 0, norm, 1.0))
-        hessenberg = jnp.eye(width + 1, width, dtype=right.dtype)
+        hessenberg = jnp.zeros((width + 1, width), right.dtype)
 
         def advance(state):
             basis, h, count, _ = state
@@ -1387,9 +1387,13 @@ def _block_gmres(matrix, right, inverse, indices, *, max_iterations=400):
             advance,
             (vectors, hessenberg, jnp.asarray(0), jnp.asarray(False)),
         )
+        written = jnp.arange(width) < count
+        hessenberg = jnp.where(written[None, :], hessenberg, 0.0)
         orthogonal, triangular = jnp.linalg.qr(hessenberg, mode="reduced")
+        triangular = triangular + jnp.diag((~written).astype(right.dtype))
         coefficients = solve_triangular(triangular, norm * orthogonal[0])
-        solution = solution + vectors[:, :width] @ coefficients
+        update = jnp.where(written[None, :], vectors[:, :width], 0.0) @ coefficients
+        solution = solution + update
         return solution, steps + count, relative(solution)
 
     solution, steps, residual = jax.lax.while_loop(

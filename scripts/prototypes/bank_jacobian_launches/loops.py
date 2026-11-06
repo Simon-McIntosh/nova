@@ -1,16 +1,43 @@
 """Resolve Jacobian launches to nested loop owners using compiler frames."""
 
 from collections import defaultdict
+import ast
+from functools import lru_cache
 import json
 from pathlib import Path
 import sys
 
 from scripts.prototypes.bank_solve_trace.provenance import metadata
+from scripts.prototypes.bank_solve_trace.groups import group
+
+
+@lru_cache(None)
+def propagation_lines():
+    from nova.equilibrium import topology
+
+    source = ast.parse(Path(topology.__file__).read_text())
+    function = next(
+        node
+        for node in source.body
+        if isinstance(node, ast.FunctionDef) and node.name == "quadratic_cell_fragments"
+    )
+    return {
+        node.lineno
+        for node in ast.walk(function)
+        if isinstance(node, ast.Call)
+        and any(
+            isinstance(arg, ast.Name) and arg.id == "propagate" for arg in node.args
+        )
+    }
 
 
 def owner(frames):
     names = {frame["function"] for frame in frames}
-    if any(".propagate" in name for name in names):
+    if any(".propagate" in name for name in names) or any(
+        frame["function"] == "quadratic_cell_fragments"
+        and frame["line"] in propagation_lines()
+        for frame in frames
+    ):
         return "conic strip propagation"
     if "_conic_ring_tangents" in names:
         return "channel-vmapped ring tangents"
@@ -37,7 +64,12 @@ def analyse(run):
                 continue
             names = row["candidates"]
             if row["method"] == "enclosing HLO loop":
-                names = row["enclosing"][-1:]
+                bound = [
+                    name
+                    for name in names
+                    if group(instructions[name]) == "step_jacobian"
+                ]
+                names = bound or row["enclosing"][-1:]
             labels = {owner(instructions[name]["stack"]) for name in names}
             label = (
                 next(iter(labels))

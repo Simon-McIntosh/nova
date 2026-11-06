@@ -7,6 +7,7 @@ configure_dtypes()
 
 import json
 import importlib.util
+from dataclasses import replace
 import os
 from pathlib import Path
 import sys
@@ -158,7 +159,15 @@ def archived_channels():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     print("REFERENCE_MODULE", module.__file__, flush=True)
-    return module.book_tangent_channels
+
+    def reference(*arguments):
+        arguments = list(arguments)
+        arguments[9] = replace(
+            arguments[9], cut_batch_width=module.Quadrature().cut_batch_width
+        )
+        return module.book_tangent_channels(*arguments)
+
+    return reference
 
 
 @pytest.fixture(scope="module", params=["limited", "diverted"])

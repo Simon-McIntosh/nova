@@ -44,15 +44,15 @@ class Quadrature:
     ``segments`` sets cosine-spaced conic chords and cubic-ray chords, without
     changing fragment ownership. No polygon-count limit is imposed here.
     ``cut_batch_width`` controls the conic tile of ``book_tangent_channels``
-    only. Scalar ``book`` and ``book_tangent`` use fixed 32-cell cut tiles;
-    a narrower tile repeats conic strip propagation. Normal-form buckets use
-    eight cells independently of the conic tile.
+    only and defaults to 32. Scalar ``book`` and ``book_tangent`` use fixed
+    32-cell cut tiles; a narrower tile repeats conic strip propagation.
+    Normal-form buckets use eight cells independently of the conic tile.
     """
 
     sigma: object = 1.0
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
-    cut_batch_width: int = dataclass_field(default=16, metadata={"static": True})
+    cut_batch_width: int = dataclass_field(default=32, metadata={"static": True})
 
 
 class Booking(NamedTuple):

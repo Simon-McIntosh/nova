@@ -63,8 +63,15 @@
 
     <figure>
       <img src="/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png"
-           alt="Six-panel DIII-D comparison: EFIT contours, Nova terminal-current contours, the EFIT boundary, the Nova separatrix and both null sets">
+           alt="Five-panel DIII-D comparison: EFIT contours, Nova terminal-current contours clipped to the limiter, the EFIT boundary, the Nova separatrix and both null sets">
     </figure>
+    <p>The three figures are rendered through <code>nova.media</code> and each
+    is checked by the producer's own text guard before it is written: no text
+    leaves the canvas and no two text artists overlap. The cohort summary is a
+    dot plot against frame with the registered median labelled on its line and
+    one unavailability note per panel; the displacement panel draws each
+    frame's landmarks against its EFIT boundary. All three were rendered and
+    inspected after the run that published them.</p>
 
     <h2 id="dsr-assembler">Branch capacity</h2>
     <p>The assembler sizes its branch slots from the grid it is given
@@ -83,10 +90,12 @@
     <p><code>tests/test_diiid_forward_gs_match.py</code> and
     <code>tests/test_frame_operand_artifacts.py</code> are run at the base
     revision and at the node head, on the CPU lane with
-    <code>JAX_PLATFORMS=cpu</code>, one process each, whole files. The base arm
-    is 18 passed (EXIT=0, 28 s). The head arm adds the persisted-frame test
-    described below. The negative control, its test id and its exit status are
-    in <code>negative-control-256.log</code>; the gate logs are
+    <code>JAX_PLATFORMS=cpu</code>, one process, whole files. The base arm is
+    18 passed (EXIT=0, 28.4 s) at <code>2fd5d5b58</code>; the head arm is 19
+    passed (EXIT=0, 460.9 s) at <code>e67ba8f0</code>, the extra test being the
+    persisted-frame assembler below. No failure is added at the head. The
+    negative control, its test id and its exit status are in
+    <code>negative-control-256.log</code>; the gate logs are
     <code>base-gate.log</code> and <code>head-gate.log</code> in the run
     directory.</p>
     <p><code>test_a_persisted_frame_assembles_its_separatrix_from_its_own_field</code>

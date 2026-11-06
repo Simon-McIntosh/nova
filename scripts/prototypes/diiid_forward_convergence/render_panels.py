@@ -67,6 +67,17 @@ def _bilinear(radius, height, flux, point) -> float:
     return float(flux[zi, ri])
 
 
+def _edge_flux(radius, height, flux, boundary) -> float:
+    """Return the median flux the map carries on the label boundary."""
+
+    values = np.asarray(
+        [_bilinear(radius, height, flux, point) for point in np.asarray(boundary)],
+        dtype=float,
+    )
+    values = values[np.isfinite(values)]
+    return float(np.median(values)) if values.size else float("nan")
+
+
 def _label_frame(row: dict, frame: int):
     radius, height = bench.canonical_axes(row)
     flux = corpus_flux_to_nova_total(
@@ -137,6 +148,7 @@ def render_frame(
             [saddle_flux],
             color=DEFAULT_INK.separatrix_color,
             linewidth=DEFAULT_INK.separatrix_linewidth,
+            wall=wall,
         )
         draw_nulls(
             axes,
@@ -153,11 +165,8 @@ def render_frame(
             }
         )
     label_axis_value = _bilinear(label_radius, label_height, label_flux, label_axis)
-    label_edge_value = _bilinear(
-        label_radius,
-        label_height,
-        label_flux,
-        np.asarray(label_boundary, dtype=float).mean(axis=0),
+    label_edge_value = _edge_flux(
+        label_radius, label_height, label_flux, label_boundary
     )
     gauge = float(record.get("additive_gauge_wb") or 0.0)
     if drawn["solved_field"]:
@@ -171,8 +180,8 @@ def render_frame(
         label_flux,
         label_levels,
         color=DEFAULT_INK.contour_color,
-        linewidth=0.6,
-        alpha=0.85,
+        linewidth=0.8,
+        alpha=0.95,
         wall=wall,
     )
     axes.plot(

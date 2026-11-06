@@ -18,12 +18,25 @@ TEST_FILES = (
 
 
 def _summary_reached(log_path: Path) -> bool:
-    contents = log_path.read_text(encoding="utf-8", errors="replace")
-    return bool(
-        re.search(
-            r"(?:\d+ (?:passed|failed|error|errors|skipped|xfailed|xpassed|deselected)|no tests ran)",
-            contents,
+    lines = [
+        line.strip()
+        for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if line.strip()
+    ]
+    if len(lines) < 2 or not re.fullmatch(r"EXIT=-?\d+", lines[-1]):
+        return False
+    summary = lines[-2]
+    if summary.startswith("no tests ran in "):
+        return True
+    return (
+        " in " in summary
+        and bool(
+            re.search(
+                r"\b(?:passed|failed|errors?|skipped|xfailed|xpassed|deselected)\b",
+                summary,
+            )
         )
+        and (summary.startswith("=") or bool(re.match(r"^\d+ ", summary)))
     )
 
 
@@ -53,6 +66,7 @@ def _run_file(
         "--overlap",
         "--ntasks=1",
         "--cpus-per-task=8",
+        "--cpu-bind=none",
         f"--job-name={step_name}",
         python,
         "-m",

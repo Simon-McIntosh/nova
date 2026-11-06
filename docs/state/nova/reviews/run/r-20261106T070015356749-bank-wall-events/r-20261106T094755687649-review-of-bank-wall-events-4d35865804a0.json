@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T10:04:41.502Z",
+  "dispatched_at": "2026-11-06T09:49:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-wall-events",
+      "recorded_at": "2026-11-06T10:11:54.845239+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_wall_events_batched.py",
+      "id": "f09861b16ee",
+      "line": 137,
+      "severity": "blocking",
+      "text": "the four heavy 550-cell tests carry no @pytest.mark.slow, so the repository's default filter at pyproject.toml:282 still collects them (pytest -m 'not slow' --collect-only returns all six) and a bare uv run pytest now runs a fixture the node's own CPU arms OOM-killed at 64 GiB and then 192 GiB (cpu-job.log FILE_COMPLETE head test_wall_events_batched -9); the sibling heavy tests in this family all carry the marker."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to evaluate all wall edges in one batched program in topology._wall_events while keeping the seeds, the bracket clip, the stationarity test and the output order, and nova/equilibrium/topology.py:2951 replaces jax.lax.map with jax.vmap(one)(start, edge) with nothing else in the function changed.\nVERDICT done_when: the brief asks for an edgewise comparison at the four 550-cell states within 1e-13, a failing bracket-clip negative control, five paired suite files with no added failures and one H200 table; tests/test_wall_events_batched.py:71-84 asserts the 1e-13 bound, negative-test_wall_events_batched.log:61-64 records the mutated tree failing at 0.675 with EXIT=1, and docs/evidence/fragments/sub-millisecond-forward-path/bank-wall-events.html:10-17 carries the four-row timing table.\nVERDICT write_paths: the source prompt declares nova/equilibrium/topology.py, tests/test_wall_events_batched.py, scripts/prototypes/bank_wall_events, docs/evidence/fragments/sub-millisecond-forward-path/bank-wall-events.html and a figures directory; git diff 50b66f2b7 4d3586580 touches only the first four and no concurrent node's path.\nVERDICT manifest: read; it reports status complete, 14 commits, 14 changed paths, baseline_suite 30 passed/2 skipped and after_suite 36 passed/2 skipped, and both figures reconcile with baseline-suite.log and after-suite.log, which each end EXIT=0 with zero FAILED ids.\nVERDICT diff: read all 14 commits against 50b66f2b7; the production change is one line, the test file is 150 added lines, and the remaining 12 files are prototype scaffolding and the evidence fragment, all inside the declared scope.\nCALL_SITES: nova/equilibrium/topology.py:3376, nova/equilibrium/topology.py:3176, nova/equilibrium/support_read.py:286, nova/equilibrium/support_read.py:320\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:2951 swaps only the outer edge loop, and tests/test_wall_events_batched.py:100-150 covers the four physical states and the first-edge clip control the brief names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the four rows at docs/evidence/fragments/sub-millisecond-forward-path/bank-wall-events.html:12-15 reconcile exactly with base/attribution.json and head/attribution.json (127.994/75028, 1.680/764, 408.762/188896, 8.551/2304), and pair_gaps recomputed from base/capture.json and head/capture.json gives every lane inside its budget.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 50b66f2b7 4d3586580 changes only nova/equilibrium/topology.py, tests/test_wall_events_batched.py, scripts/prototypes/bank_wall_events and the declared evidence fragment.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_wall_events_batched.py:109-117 reddens if the outer loop reverts to jax.lax.map and negative-test_wall_events_batched.log:61 shows the clip guard failing under the mutation, but the physical arms that carry the same guarantee cannot run in the default lane as landed.\nSCORE fit: 12\nJUSTIFICATION fit: tests/test_wall_events_batched.py:137 leaves test_certificate_wall_events_match_edgewise unmarked while every sibling heavy test in this family carries @pytest.mark.slow, as at tests/test_tracked_read_batch.py:48 and tests/test_tracked_read_accuracy.py:214.\nSCORE reuse: 19\nJUSTIFICATION reuse: the node adds no production definition at all, and scripts/prototypes/bank_wall_events/report.py:11-13 imports pair_gaps, PAIR_LIMITS and assemble from their owners instead of forking them.\nFINDING tests/test_wall_events_batched.py:137 blocking: the four heavy 550-cell tests carry no @pytest.mark.slow, so the repository's default filter at pyproject.toml:282 still collects them (pytest -m 'not slow' --collect-only returns all six) and a bare uv run pytest now runs a fixture the node's own CPU arms OOM-killed at 64 GiB and then 192 GiB (cpu-job.log FILE_COMPLETE head test_wall_events_batched -9); the sibling heavy tests in this family all carry the marker.",
+  "review_run_id": "r-20261106T094755687649-review-of-bank-wall-events-4d35865804a0",
+  "reviewed_base_sha": "50b66f2b7662c9fff3842f3f4e8cab2547386651",
+  "reviewed_head_sha": "4d35865804a0228c2d896897c43da66ba6aed3f9",
+  "reviewed_run_id": "r-20261106T070015356749-bank-wall-events",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 12,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T10:04:42.750312+00:00",
+  "total": 102
+}

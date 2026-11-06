@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T10:33:08.454Z",
+  "dispatched_at": "2026-11-06T10:25:40Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "A marker can be removed in any heavy-test file, and that is checked repo-wide by the slow-marker policy, not per file. The collection log records the deselection.",
+      "recorded_at": "2026-11-06T12:10:38.655708+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_wall_events_batched.py",
+      "id": "f20d027755a",
+      "line": 137,
+      "severity": "non-blocking",
+      "text": "no test asserts the heavy four stay deselected under addopts's '-m not slow' filter (pyproject.toml:282), so deleting the marker would redden nothing; the guard is the recorded one-time collection log collection-after-not-slow.log, not an assertion."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is a batched wall-edge polish, and the commit gained since the prior review at 4d3586580 is 5c998eea6, which adds only '@pytest.mark.slow' at tests/test_wall_events_batched.py:137 and touches no production code.\nVERDICT done_when: the source done_when asks for a 1e-13 edgewise comparison at four 550-cell states, a failing bracket-clip control, five paired suite files with no added failures and one H200 table; the gained commit preserves every numerical assertion unchanged and the manifest records the paired arms at baseline-suite.log and after-suite.log, each completed=true with failure_count=0 and EXIT=0.\nVERDICT write_paths: the source prompt declares nova/equilibrium/topology.py, tests/test_wall_events_batched.py, scripts/prototypes/bank_wall_events, docs/evidence/fragments/sub-millisecond-forward-path/bank-wall-events.html and a figures directory; git show 5c998eea6 --stat lists exactly one file, tests/test_wall_events_batched.py, inside that scope.\nVERDICT manifest: read; status is complete, the checkpoint states the repair precisely (one slow decorator over four physical cases, logs EXIT=0, no test bodies executed), commits ends at 5c998eea6, and its claimed collection counts reconcile with the logs it names.\nVERDICT diff: read the one commit against 4d3586580; it is a single added line placing @pytest.mark.slow above test_certificate_wall_events_match_edgewise, whose module-scoped physical_case fixture is parametrized limited/diverted and whose own parametrization is trial/converged, giving the four heavy ids and leaving test_seed_brackets_and_candidate_order and test_wall_edges_share_one_polish_program unmarked.\nCALL_SITES: nova/equilibrium/topology.py:3376\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/test_wall_events_batched.py:137 is the whole change and it answers the prior blocking finding at the same line, marking the four 550-cell cases slow while the two light tests stay in the default lane.\nSCORE evidence: 19\nJUSTIFICATION evidence: the defect is reproduced before the repair at collection-before-not-slow.log (6 tests collected at 4d3586580) and the repair is shown at collection-after-not-slow.log (2 of 6, 4 deselected) and collection-after-all.log (6 of 6), all EXIT=0 with the selected ids in collection-receipt.json.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show 5c998eea6 --stat reports 1 file changed, 1 insertion, confined to tests/test_wall_events_batched.py.\nSCORE durability: 15\nJUSTIFICATION durability: the four heavy tests still run under -m 'slow or not slow' per collection-after-all.log, but nothing at tests/test_wall_events_batched.py:137 fails if the marker is removed, so the default lane's protection is a recorded measurement rather than an assertion.\nSCORE fit: 20\nJUSTIFICATION fit: @pytest.mark.slow is the repository's own mechanism, declared at pyproject.toml:287 and used the same way by the sibling heavy suites at tests/equilibrium/test_certificate_550_convergence.py:51.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition, module or helper, and uses the pytest marker the repository already owns rather than introducing a parallel skip mechanism.\nFINDING tests/test_wall_events_batched.py:137 non-blocking: no test asserts the heavy four stay deselected under addopts's '-m not slow' filter (pyproject.toml:282), so deleting the marker would redden nothing; the guard is the recorded one-time collection log collection-after-not-slow.log, not an assertion.",
+  "review_run_id": "r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9",
+  "reviewed_base_sha": "4d35865804a0228c2d896897c43da66ba6aed3f9",
+  "reviewed_head_sha": "5c998eea61f97c087eda08bab93c54d316d81b4a",
+  "reviewed_run_id": "r-20261106T070015356749-bank-wall-events",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T10:35:35.189705+00:00",
+  "total": 114
+}

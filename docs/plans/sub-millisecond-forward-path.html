@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="183">
+<meta name="plan-version" content="184">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -248,6 +248,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T094755687649-review-of-bank-wall-events-4d35865804a0" data-who="reckon-build" data-when="2026-11-06T10:04:41.502Z">
     <div class="r-comment-body"><p>Reviewed r-20261106T070015356749-bank-wall-events at base 50b66f2b7662c9fff3842f3f4e8cab2547386651 and head 4d35865804a0228c2d896897c43da66ba6aed3f9; scored goal_fidelity 18, evidence 18, scope_discipline 18, durability 17, fit 12, reuse 19, added_failure_count 0; one blocking finding: the added heavy 550-cell tests are unmarked slow and enter the repository's default lane, which the node's own CPU arms OOM-killed at 64 GiB and 192 GiB.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261106T102218226688-review-of-bank-wall-events-5c998eea61f9" data-who="reckon-build" data-when="2026-11-06T10:33:08.454Z">
+    <div class="r-comment-body"><p>Reviewed 4d35865804a0228c2d896897c43da66ba6aed3f9..5c998eea61f97c087eda08bab93c54d316d81b4a: a single added @pytest.mark.slow at tests/test_wall_events_batched.py:137 answers the prior blocking finding by moving the four 550-cell cases out of the default filter while the two light tests stay collected; scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 15, fit 20, reuse 20, one non-blocking finding on the missing assertion that pins the deselection.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>
@@ -643,7 +646,7 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html#bank-repin-followups-landing — suite runner returns 1 for the historical stale-pin arm and 0 for fresh base/head arms (23 passed each); one-ULP controls detect 1.3877787807814457e-17 on both hosts; exact identity assertion rejects a non-identity permutation (1 failed, EXIT=1). Fleet receipts were recovered with all twelve field digests identical to the original record.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900" data-who="reckon-build" data-when="2026-11-06T10:31:01.517Z">
-    <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism at reviewed head 684031cc1900c3031abaf7ca738b8f12a08e89e4 against base cb42f656f76a7d7e56da8a53d4754c22d131bdc0 records a parsed rubric (goal_fidelity 5, evidence 8, scope_discipline 20, durability 7, fit 16, reuse 5), added_failure_count 0, and two blocking findings: the done_when&#x27;s changed operation in nova/equilibrium/current.py with base-against-head walls was never produced, and the delivered recommendation prescribes a global XLA flag the brief excluded while its own unset arm already passed.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism at reviewed head 684031cc1900c3031abaf7ca738b8f12a08e89e4 against base cb42f656f76a7d7e56da8a53d4754c22d131bdc0 records a parsed rubric (goal_fidelity 5, evidence 8, scope_discipline 20, durability 7, fit 16, reuse 5), added_failure_count 0, and two blocking findings: the done_when's changed operation in nova/equilibrium/current.py with base-against-head walls was never produced, and the delivered recommendation prescribes a global XLA flag the brief excluded while its own unset arm already passed.</p></div>
 </div>
 </section>
 </main>

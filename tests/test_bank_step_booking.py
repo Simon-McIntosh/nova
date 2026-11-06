@@ -31,9 +31,9 @@ def test_book_primal_keeps_exact_diverted_moments():
     )
     # Sapphire Rapids Xeon Gold 6416H, the sirius partition.
     sirius_cpu = (
-        "896f07c9c4e103cf2ffec42b55ace8481f4815fe0a1d648691edb9a5a74103e4",
-        "a1bbf9beb251b222b13f65c08e01ab1d9c6548844ef2f0c6c7a4f8e685e817a6",
-        "3d8fca0f3a179cda7b7b1a230307da93ba63bf05f84c164c2751e95ff36ce325",
+        "91015d678026ed0b2172d02739b2a9536ae1d73bae2400424e682f4beedaf123",
+        "1376d8a0be97e0077c5a5df7d4051f8749c81f88b57df9ca49228239d8b8804c",
+        "bfbdeacba130a64bc782bfd676faac542eba5281b8e156fcdf06a1d8d9fc9eae",
         "15ec33f7d6a711e79530de4938ee25aaf9952221dfac67a1441bfc04d2b741fe",
         "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
         "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",

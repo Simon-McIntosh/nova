@@ -210,7 +210,7 @@ def test_diverted_fixture_matches_sequential_booking():
     moments = tuple(jnp.zeros(len(operands.geometry.centre)) for _ in range(3))
     psi = support_read.nodal_jets(operands, moments)[operands.sample_index, 0]
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
-    quadrature = current.Quadrature(sigma=convention.sigma, segments=8)
+    quadrature = current.Quadrature(sigma=convention.sigma, segments=64)
     assert_moments_match(
         psi,
         support.reading,

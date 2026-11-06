@@ -5,7 +5,6 @@ from html import escape
 import itertools
 import json
 from pathlib import Path
-import re
 
 import numpy as np
 
@@ -53,7 +52,21 @@ def main():
         ("limited", "diverted"), ("trial", "converged")
     ):
         assert f"CERTIFICATE {kind} {state}" in physical
-    walls, devices, precisions, retained = [], [], [], []
+    cache_keys = {}
+    for arm, process in captures:
+        log = (args.run / f"device-{arm}-{process}.log").read_text()
+        assert "XLA_FLAGS=unset" in log
+        lookups = [
+            json.loads(line.split(" ", 1)[1])
+            for line in log.splitlines()
+            if line.startswith("CACHE_LOOKUP ")
+        ]
+        solves = [row for row in lookups if row["module"] == "jit_solve"]
+        assert len(solves) == 2 and all(row["outcome"] == "hit" for row in solves)
+        cache_keys[arm, process] = [row["key"] for row in solves]
+    for arm in ("base", "head"):
+        assert cache_keys[arm, 1] == cache_keys[arm, 2]
+    walls, devices, precisions, retained, summaries = [], [], [], [], []
     for lanes in (1, 16):
         for (arm, process), capture in captures.items():
             row = capture[str(lanes)]
@@ -71,10 +84,6 @@ def main():
                     f"{max(row['residual']):.6g}",
                 ]
             )
-            cache = (args.run / f"device-{arm}-{process}.log").read_text()
-            assert re.search(
-                r'CACHE_LOOKUP .*"outcome": "hit".*"module": "jit_solve"', cache
-            ), (arm, process)
         for arm in ("base", "head"):
             trace = json.loads((args.run / f"{arm}-1/attribution.json").read_text())
             control = trace["control"]
@@ -91,6 +100,20 @@ def main():
                     ", ".join(map(str, captures[arm, 1][str(lanes)]["reads"])),
                 ]
             )
+        per_read = {
+            arm: [
+                float(np.median(captures[arm, process][str(lanes)]["unprofiled_ms"]))
+                / max(captures[arm, process][str(lanes)]["reads"])
+                for process in (1, 2)
+            ]
+            for arm in ("base", "head")
+        }
+        reduction = 100 * (1 - np.mean(per_read["head"]) / np.mean(per_read["base"]))
+        summaries.append(
+            f"At {lanes} slices, mean wall per batch read falls {reduction:.2f}%: "
+            f"base {min(per_read['base']):.2f}–{max(per_read['base']):.2f} ms, "
+            f"head {min(per_read['head']):.2f}–{max(per_read['head']):.2f} ms."
+        )
         maxima = {key: 0.0 for key in PAIR_LIMITS}
         for left, right in itertools.product((1, 2), repeat=2):
             gaps, _ = pair_gaps(
@@ -132,6 +155,9 @@ def main():
         "width. The fixture is "
         "<code>bank_solve_profile.fixture.build(16)</code>; width 1 takes "
         "the first lane.</p>\n"
+        + "<p>"
+        + " ".join(summaries)
+        + "</p>\n"
         + table(
             [
                 "Slices",

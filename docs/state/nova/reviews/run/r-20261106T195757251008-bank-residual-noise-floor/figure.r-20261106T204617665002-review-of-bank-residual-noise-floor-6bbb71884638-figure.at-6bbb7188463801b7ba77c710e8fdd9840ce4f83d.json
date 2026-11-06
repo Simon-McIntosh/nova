@@ -1,0 +1,93 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720 RGB, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-residual-noise-floor/stage-spread.svg"
+  },
+  "attachment_note": "The single attached raster was opened with Read and judged directly; every claim below is measured on that image, never on SVG markup. No SVG was opened, read or re-rendered for this review. The figure is the only file the reviewed head adds under docs/figures (`git show --stat 6bbb71884` lists stage-spread.svg, 998 insertions, as the whole of that commit's figure change), and it is drawn by scripts/prototypes/bank_residual_noise_floor/report.py, which the same run's diff adds. The attached PNG measures 1399x720, one pixel narrower than the 1400x720 canvas the script constructs (figsize 14x7.2 at dpi 100) and that the fragment's caption names; the shortfall is one pixel of canvas, not a clipped label, since the outermost ink sits at x=178 and x=1332 of 1399.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T20:47:52Z",
+  "figure_checks": {
+    "clipping": "No ink touches the canvas edge. The outermost non-white pixels are x=178 (the 'moments' row label) and x=1332 (the red marker's right edge), on a 1399 px canvas, and y=16 (legend text) and y=683 (x axis title) on a 720 px canvas.",
+    "encoding_from_the_render": "Colour encodes one thing per marker, and it is applied consistently. Grey #929292 is the median over lanes; blue #3366cc is the largest lane; red #cc0000 replaces blue for the largest lane only when it exceeds 1e-10, which happens in exactly one row. The grey horizontal segment spans median to maximum on every row where the two differ. Four rows (whole cells, conic cells, normal cells, normalization) draw a single marker and one row (stationary fluxes) draws a single marker with no grey at all; these two cases are visually identical and are the subject of finding 1. The legend does not distinguish them.",
+    "font_to_render": "Row labels render 13-16 px tall, the axis titles about 20 px, and the legend labels 12-13 px, all at or above the page's body text size in a 1399 px column, so every string reads without zoom.",
+    "label_geometry": "Row labels occupy 17 bands on a 30.2 px pitch (y centres 110, 140, 170, 200, 231, 261, 291, 321, 352, 382, 412, 442, 473, 503, 533, 563, 594), each band 17-21 px tall and ending at the left spine. The x axis title 'Residual spread across 64 perturbations' renders as five word runs at y 659-683 spanning x 643-1094 with 9-12 px inter-word gaps, so the words are separated and not touching. The legend renders as four entries with their markers at x 314.5, 563.9, 770.1 and a dotted rule sample near x 950-1000, and their labels at x 343-513, 593-719, 799-920 and 999-1103; the tightest pair gap is 42 px.",
+    "render_provenance": "The attached image-0.png was opened with Read and judged directly at its native 1399x720. All geometric claims were measured on that raster with a PIL/numpy pass: markers located by colour-classified connected components (red #cc0000, blue #3366cc, grey #929292), text located by ink-density bands, and the plot frame from the dark-pixel column and row histograms (left spine x=377, bottom spine y=618). The pixel-to-value calibration was fixed by two independent anchors that agree: the dotted certificate rule sits at x=1306 for 1e-10, and the axis spans 1e-28 at x=377 to 1e-9 at the right edge, giving 51.6 px per decade; the stage values read from the raster then reproduce the run's own receipts to the printed digits (for example field_coefficients grey at x=1151.1 reads 1.0e-13 against a receipt median of 9.948e-14, and nodal_jets grey at x=1237.1 reads 4.7e-12 against 4.690e-12)."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-residual-noise-floor/stage-spread.svg",
+      "rubric": {
+        "contrast": "pass. Every text string is #52514e on white: 7.8:1 against the measured 1.05/(0.0843+0.05). The three marker colours clear the 3:1 graphical threshold on white: grey #929292 at 3.1:1 (the mid grey the repository's style rule names, not the 2:1 grey that rule rejects), blue #3366cc at 5.4:1 and red #cc0000 at 5.9:1. The dotted certificate rule at #666666 is the lowest-contrast mark at about 5.7:1 and remains visible against the white background along every row.",
+        "data_ink": "pass, with the horizontal extent recorded as finding 3. Only data is drawn: 26 markers, 12 median-to-maximum segments, the dotted certificate rule, the two axes that carry the scales and the 22 text strings. No fill, band or gradient is present anywhere on the canvas.",
+        "decoration": "pass. The plot has no grid (`ax.grid(False)` is the last of the axis decorations set by the drawing script), no background fill, no panel box, and the top and right spines are hidden. The figure-level legend is frameon=False and placed at upper centre, above the axes and clear of every data mark.",
+        "label_collision": "pass. Nothing is clipped: ink spans x 178-1358 of 1399 and y 16-683 of 720, so no edge is touched. No two text labels overlap: the five x tick labels are 149 px or more apart, the four legend entries 42 px or more, and the 17 row labels occupy separate bands on a 30.2 px pitch. No label sits over data, because the row labels end at the left spine (x=377) and the leftmost mark is at x=482.",
+        "legibility": "pass, with one encoding defect recorded as finding 3. The render is a horizontal dot plot: 17 named rows from 'moments (1-4 ulp)' at the top to 'fourth derivatives' at the bottom, on a logarithmic x axis labelled 'Residual spread across 64 perturbations' with ticks at 1e-26, 1e-22, 1e-18, 1e-14 and 1e-10, and a dotted vertical rule at 1e-10 labelled 'certificate' in the legend. Each row carries a grey median marker and a right-hand marker for the largest lane; the largest-lane marker is blue, or red in the one row whose maximum exceeds 1e-10 (the moments row, whose marker sits at x=1325.6, right of the rule at x=1306). Twenty-six marks are drawn and each is separable from its neighbours; the difficulty is not resolving a mark but comparing rows, since 24 of the 26 marks fall within x 1091-1252.",
+        "table_form": "pass. A figure, not a table image: the quantity the figure exists to convey is each stage's distance from a threshold on a common logarithmic scale, and the figure's own alt text and caption use it for that comparison. The exact numbers are supplied separately as an HTML table on the same page, so the figure is not standing in for tabular data."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "attached image-0.png pixel analysis (strict #929292 connected components per row band; neutral anti-aliased pixel count within 14 px of each blue centre: 0 for the four coincident rows, 18 for the field_coefficients control); run receipts at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T195757251008-bank-residual-noise-floor/{gpu.json,summary.json} recomputed with the same statistics the plotting code uses; caption at docs/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html:118-124",
+      "file": "scripts/prototypes/bank_residual_noise_floor/report.py",
+      "id": "ff154d6ece7",
+      "line": 169,
+      "severity": "non-blocking",
+      "summary": "The grey median marker is drawn at zorder 3 and the largest-lane marker at zorder 4 with the same markersize, so wherever the median equals the maximum the median mark is painted completely over and a reader sees one dot where two values are plotted. Measured on the attached render: in whole cells, conic cells, normal cells and normalization there are zero neutral anti-aliased pixels within 14 px of the marker centre, against 18 in the control row field coefficients where the two marks are 12 px apart, so the median glyph is not faintly visible but absent. Those four rows do coincide exactly in the run's own receipts (median spread equals maximum spread: 5.684e-14, 1.137e-13, 2.842e-14 and 1.137e-13), so the visible dot does carry the median value. The cost is a reading ambiguity that the caption makes worse rather than better: the caption's only rule for a single-dot row is 'A zero median is omitted from the logarithmic axis', which is true of exactly one of the five such rows (stationary fluxes, median spread 0.0) and false of these four. A reader who applies the caption's rule concludes that four stages whose lanes all share one spread have a zero median spread, and the reader has no way on the canvas to tell 'median coincident with maximum' from 'median omitted'. Four further rows (moments, scaled jets, bell coefficients, third derivatives) are partially occluded, with 35-52 visible grey pixels against 76-95 where the marks are well separated. Not blocking because no datum is lost -- the coincident dot shows the median value and the caption does explain the genuine zero -- but the two cases should be separable, for instance by offsetting the median marker or by drawing the median as a tick on the row's segment."
+    },
+    {
+      "evidence": "attached image-0.png (top row, single red marker at x=1325.6 against the certificate rule at x=1306, with no grey marker separable beneath it); report.py:86 seeding chart with np.median/np.max of input_spread; caption at docs/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html:118",
+      "file": "scripts/prototypes/bank_residual_noise_floor/report.py",
+      "id": "f4ccf554cac",
+      "line": 86,
+      "severity": "non-blocking",
+      "summary": "The top row plots a different quantity from every other row, on the same axis and against the same threshold rule. 'moments (1-4 ulp)' is seeded with the spread of the perturbed moment values themselves -- the input population -- while all 16 rows below it are spreads of the fresh residual after a one-ulp injection at a stage output. The x axis is labelled 'Residual spread across 64 perturbations' and the rule is the 1e-10 residual certificate, so the top row invites comparing a moment change to a residual threshold. It is also the only row that crosses the rule (its maximum marker is red at 2.4e-10, right of the certificate at 1e-10), which means the figure's single over-certificate mark is the one mark whose x value is not a residual. The caption does say 'The first row is the original one-to-four-ulp moment population', which discloses the difference in prose, but the axis label and the threshold rule are shared and unchanged, so a reader scanning the panel still reads the red marker as a stage over the certificate. Not blocking: the caption discloses it and the row is named 'moments'."
+    },
+    {
+      "evidence": "attached image-0.png (marker centroids x=487.5-1325.6; 24 of 26 between 1091.6 and 1251.9; plot frame at x=377 and bottom spine y=618; ticks at x=481, 687, 893, 1100 and 1306); report.py:192 explicit set_xlim",
+      "file": "scripts/prototypes/bank_residual_noise_floor/report.py",
+      "id": "ff03680acf3",
+      "line": 192,
+      "severity": "non-blocking",
+      "summary": "The fixed limits ax.set_xlim(1e-28, 1e-9) give 19 decades of logarithmic axis for data whose comparison is concentrated in two, so most of the plot width carries no data and the stages that set the floor are squeezed together. Measured on the attached render: the axes span x=377 to x=1358, 981 px at 51.6 px per decade; 24 of the 26 marks lie between x=1091 and x=1252, that is 161 px or 16 percent of the plot width; the 12 decades from 1e-26 to 1e-14 hold exactly one row (subtraction, at x=487-502) and about 620 px of empty white; the decade from 1e-10 to 1e-9 is also empty. The figure exists to show which stage's spread sits closest to the certificate, and that comparison is confined to a band narrower than the certificate diamond would be at any readable marker size, while 60 percent of the ink budget is spent on empty axis. Not blocking: every mark remains separable and the decade ticks let a reader recover any single value, and the wide limits exist to show the subtraction row's 1e-26 floor beside the certificate. A broken or two-panel axis, or limits near 1e-27 to 1e-11, would let the 16 core stages be compared at a glance."
+    },
+    {
+      "evidence": "docs/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html:118-124; attached image-0.png measured at 1399x720",
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html",
+      "id": "fc24a779850",
+      "line": 123,
+      "severity": "non-blocking",
+      "summary": "The caption spends its last two sentences on the production process rather than on what the reader is looking at: 'The shared checked saver accepted all text bounds and overlaps on the 1400 x 720 canvas; the producer inspected the PNG rendering. Only the SVG is published.' Two of the caption's five sentences therefore describe the tooling that made the figure, and one of the two numbers it states is slightly wrong about the delivered artifact -- the attached render is 1399x720, not 1400x720. The sentences a reader needs are the ones before them, which do their job: they name the two series, explain the red mark, and state the zero-median rule. Not blocking: the caption is not a restatement of a title, the figure has no title, and nothing here misleads a reader about the data."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is not a restatement of a title: the figure carries no title, identity is in the file name, and the caption states the encoding (grey median, blue largest, red above certificate), the zero-median omission rule, which row is the moment population, and what the comparison shows. It is accurate about the drawing except for the 1400 px canvas claim and the ambiguity finding 1 records.",
+    "finding_materiality": "Four non-blocking findings and no blocking finding. No label is clipped (ink stays inside 178-1358 of 1399 and 16-683 of 720), no label overlaps another label or the data, all text is 7.8:1 on white and renders at 12-20 px, and the figure does not depict tabular data, so none of the blocking categories is met.",
+    "rendered_artifact": "The single attached figure was opened with Read and inspected as an image at its native 1399x720, and every geometric claim in this record was measured on that raster by colour-classified connected-component analysis and ink-band detection rather than read from the drawing source.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the run manifest. No SVG was opened, read, listed or re-rendered, and no image other than the named attachment was opened."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T204617665002-review-of-bank-residual-noise-floor-6bbb71884638-figure",
+  "reviewed_base_sha": "6adab8c7a4799d094522e5f87a8b560c9fbe2bd2",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-residual-noise-floor/stage-spread.svg"
+  ],
+  "reviewed_head_sha": "6bbb7188463801b7ba77c710e8fdd9840ce4f83d",
+  "reviewed_run_id": "r-20261106T195757251008-bank-residual-noise-floor",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass, with one non-blocking encoding defect recorded as finding 3 (the axis spans 19 decades while 16 of the 17 rows occupy the middle 161 px of a 981 px plot width, so the stages that set the floor cannot be compared at a glance). Every individual mark is separable and every row is named: 17 row labels, both axis titles and a four-entry legend all read without zoom.",
+    "RUBRIC data_ink: pass, with the wasted horizontal extent recorded as finding 3. The only ink on the canvas is data: 26 circular markers, 12 horizontal median-to-maximum segments, one dotted certificate rule, the axes that carry the scales, and the text. No gradient, no fill, no shading and no decorative band is present.",
+    "RUBRIC decoration: pass. No gridlines (ax.grid(False)), no background fill, no frame box; the top and right spines are removed and only the left and bottom spines remain. The legend is frameless and sits above the plot area, clear of the data.",
+    "RUBRIC contrast: pass. All text is #52514e on white, measured at 7.8:1. The data marks clear the 3:1 graphical requirement: grey #929292 at 3.1:1, blue #3366cc at 5.4:1, red #cc0000 at 5.9:1. Nothing is lost to low contrast.",
+    "RUBRIC table_form: pass. The fragment already carries the exact per-stage numbers as an HTML table (stage-table.html); the figure contributes the one thing the table cannot, each stage's position on a log axis relative to the 1e-10 certificate rule, which is a spatial relationship rather than an image of a table.",
+    "RUBRIC label_collision: pass. No label is clipped and no two labels overlap. The leftmost ink is x=178 and the left spine is x=377, with the leftmost data mark at x=482, so no row label touches the data. The five x tick labels are at least 149 px apart (centres 481, 687, 893, 1100, 1306). The four legend entries are at least 42 px apart and the whole legend sits above the axes at y=16-38, where the top data row is at y=110. Text ink stays inside x 178-1358 of a 1399 px canvas. Marker-on-marker occlusion is not a label defect and is recorded as finding 1."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:59:48.826689+00:00",
+  "total": null
+}

@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T20:56:03.830Z",
+  "dispatched_at": "2026-11-06T20:46:00Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_residual_noise_floor/measure.py",
+      "line": 784,
+      "severity": "non-blocking",
+      "text": "instrumentation_delta is recorded but never asserted zero, so the fragment's claim that the main and saddle-geometry probes reproduce their ordinary zero-injection residual bit for bit rests on a field a reader must compare rather than a guard that fails; the same applies to attribute.py:262, and the CPU and geometry receipts do carry 0.0 today."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none: the change adds only scripts/prototypes and docs artefacts, and grep for bank_residual_noise_floor over nova/, tests/ and pyproject.toml returns nothing.",
+    "diff": "read commit by commit against 6adab8c7; the ten commits add measure.py, attribute.py, field.py, propagate.py, contraction.py, report.py, run.sh, field.sh, the fragment and the SVG, with every commit's touched paths inside the declared scope.",
+    "done_when": "the done-when is the measurement itself rather than a suite; the manifest's gate commands are the sbatch launches whose logs record 64 perturbations per lane, the CPU repeat and every stage row, and those logs end EXIT=0.",
+    "figure": "pass: the committed stage-spread.svg renders to a legible 1400x720 PNG with terminated axis labels, a frameless figure legend, no gridlines, a dotted certificate line at 1e-10 and red used only for the above-certificate mark, so it meets the data-ink and label-collision rules.",
+    "goal": "the node goal is a three-part measurement of the fresh residual floor, its stage attribution and an evidence fragment; measure.py:714, propagate.py:1086 and the fragment at docs/evidence/fragments/sub-millisecond-forward-path/bank-residual-noise-floor.html deliver all three.",
+    "manifest": "read; it records status complete, ten commits, the changed paths, a 64-perturbation H200/CPU table and the gate logs, and its artifacts maxima 2.9127988909749547e-10 and 1.5347723092418164e-12 reproduce exactly from summary.json and combined/propagation.json.",
+    "source_scope": "pass: git grep over the base..head range finds no reckon worktree path in any committed file, so the artifact-path rule is satisfied.",
+    "write_paths": "read the source manifest's orientation_write_paths; every path in git log --name-only base..head is inside the scripts prototype directory or the fragment/figure paths it declares, and no product or test file appears."
+  },
+  "justifications": {
+    "durability": "the scripts assert hook presence (measure.py:774), nonzero response for whole/conic/normalization (measure.py:843) and a 64x-lane receipt shape (report.py:1010), but nothing in CI runs them and the bit-for-bit zero-injection claim recorded at measure.py:784 is never asserted.",
+    "evidence": "gpu.log, cpu.log, propagation.log, field.log, combined.log, contraction.log and report.log each open with a HEADER naming revision 6adab8c7, the imported support_read.py, the H200 NVL or cpu device and x64 true, and end with EXIT=0, and summary.json reproduces the fragment's maxima and a 64x-lane perturbation shape.",
+    "fit": "measure.py:596 and report.py:1144 follow the sibling prototype idiom of configure_dtypes before array construction, a ruff E402 waiver, emit()-framed headers and path-scoped stages, with no plan labels or version suffixes in names.",
+    "goal_fidelity": "scripts/prototypes/bank_residual_noise_floor/measure.py:714 measures all sixteen H200 lanes and reloads lanes 0 and 10 on CPU, and propagate.py:1086 and report.py:1157 carry the stage split and the fragment's estimate.",
+    "reuse": "the modules import the existing fixture, emit/fingerprint observers, masks/signatures and the checked figure saver rather than copying them, and the only local re-definition is report.py:10 table(), which repeats a helper already present in six prototype report modules with no shared owner.",
+    "scope_discipline": "every path in the base..head diff (10 files, 2541 insertions) lies inside the three declared write paths scripts/prototypes/bank_residual_noise_floor, the evidence fragment and docs/figures/sub-millisecond-forward-path/bank-residual-noise-floor, and git log --name-only over the range shows no commit touching product or test code."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a three-part measurement of the fresh residual floor, its stage attribution and an evidence fragment; measure.py:714, propagate.py:1086 and the fragment deliver all three.\nVERDICT done_when: the done-when is the measurement itself rather than a suite; the manifest's gate commands are the sbatch launches whose logs record 64 perturbations per lane, the CPU repeat and every stage row, and those logs end EXIT=0.\nVERDICT write_paths: every path in git log --name-only base..head is inside the scripts prototype directory or the fragment/figure paths the manifest declares, and no product or test file appears.\nVERDICT manifest: read; status complete, ten commits, a 64-perturbation H200/CPU table, and its artifacts maxima 2.9127988909749547e-10 and 1.5347723092418164e-12 reproduce exactly from summary.json and combined/propagation.json.\nVERDICT diff: read commit by commit against 6adab8c7; the ten commits add the six probe modules, two shell launchers, the fragment and the SVG, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: measure.py:714 measures all sixteen H200 lanes and reloads lanes 0 and 10 on CPU, and propagate.py:1086 and report.py:1157 carry the stage split and the fragment's estimate.\nSCORE evidence: 19\nJUSTIFICATION evidence: every measurement log opens with a HEADER naming revision 6adab8c7, the imported support_read.py, the H200 NVL or cpu device and x64 true, and ends EXIT=0, while summary.json reproduces the fragment's maxima.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the 10-file base..head diff lies inside the three declared write paths, and no commit touches product or test code.\nSCORE durability: 15\nJUSTIFICATION durability: measure.py:774 and measure.py:843 assert hook presence and nonzero stage response, but no CI job runs them and the bit-for-bit control at measure.py:784 is recorded rather than asserted.\nSCORE fit: 19\nJUSTIFICATION fit: measure.py:596 and report.py:1144 follow the sibling prototype idiom of configure_dtypes first, a ruff E402 waiver and emit()-framed headers, with mechanism-named symbols and no plan labels.\nSCORE reuse: 17\nJUSTIFICATION reuse: the modules import the existing fixture, emit/fingerprint, masks/signatures and checked figure saver, and the only local re-definition is report.py:10 table(), a helper already repeated across six prototype report modules with no shared owner.\nFINDING scripts/prototypes/bank_residual_noise_floor/measure.py:784 non-blocking: instrumentation_delta is recorded but never asserted zero, so the fragment's bit-for-bit zero-injection claim rests on a field a reader must compare rather than a guard that fails, and attribute.py:262 carries the same gap.\n",
+  "review_run_id": "r-20261106T204411124980-review-of-bank-residual-noise-floor-6bbb71884638",
+  "reviewed_base_sha": "6adab8c7a4799d094522e5f87a8b560c9fbe2bd2",
+  "reviewed_head_sha": "6bbb7188463801b7ba77c710e8fdd9840ce4f83d",
+  "reviewed_run_id": "r-20261106T195757251008-bank-residual-noise-floor",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T21:01:42.585371+00:00",
+  "total": 109
+}

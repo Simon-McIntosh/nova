@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="192">
+<meta name="plan-version" content="194">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -671,6 +671,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T155815005577-review-of-bank-booking-primal-buckets-9ab6ba60e1f5" data-who="reckon-build" data-when="2026-11-06T16:11:36.584Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T151851519466-bank-booking-primal-buckets at head 9ab6ba60e1f5 (base d102ff6f1037): scores goal_fidelity 14, evidence 18, scope_discipline 20, durability 16, fit 18, reuse 19, added_failure_count 0; one blocking finding that the 16-cell primal conic tile regresses device/call and launches at the reviewed head, already repaired by e79d54fd8614 beyond it, plus one non-blocking stale-Broadwell-pin finding; both review records stored with status parsed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T171138037886-review-of-bank-booking-primal-buckets-1d3b4f1823ba" data-who="reckon-build" data-when="2026-11-06T17:18:38.377Z">
+    <div class="r-comment-body"><p>[Primal booking buckets](/nova/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html#bank-booking-primal-buckets-landing): independent review of the commits gained since 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad scores goal_fidelity 19, evidence 17, scope_discipline 18, durability 16, fit 19, reuse 5 (total 94) with zero added failures; the prior blocking 16-cell primal tile finding is closed by e79d54fd and 523346cd, and two non-blocking findings are recorded against the duplicated receipt loader and the constant-only tile guard.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T151851519466-bank-booking-primal-buckets" data-who="reckon-build" data-when="2026-11-06T17:10:05Z">
+    <div class="r-comment-body"><p>[Primal booking buckets](/nova/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html#bank-booking-primal-buckets-landing): shared buckets and four-ring groups retain &lt;=1.71e-16 moment error; restoring the primal tile to 32 cells removes doubled conic propagation. In three-arm H200 job 1307085, candidate versus base residual device/call is 2.291–2.293 versus 2.860–2.862 ms at one slice and 8.029–8.038 versus 9.111–9.126 ms at sixteen; launches/call fall to 1080.14 versus 1400.57 and 1549.62 versus 1798.81. Wall/read improves 9.28% and 2.01%. The retained job 1307054 gain was predominantly fewer updates/read, not cheaper booking. Candidate retained; coordinator judges landing. Final CPU contract: one shared fixed scalar tile, a failing tile=16 control, measured Broadwell repins, fleet booking 5 passed and Sirius three-file head 12 passed/3 optional skips; no new timing job.</p></div>
 </div>
 </section>
 </main>

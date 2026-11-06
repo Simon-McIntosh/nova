@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -26,7 +27,12 @@ import numpy as np
 from benchmarks import diiid_forward_gs_match as bench
 from benchmarks.diiid_corpus_conventions import corpus_flux_to_nova_total
 from nova.media.ink import DEFAULT_INK, poloidal_axes
-from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
+from nova.media.poloidal import (
+    draw_flux_contours,
+    draw_nulls,
+    draw_wall,
+    inside_wall_units,
+)
 
 OPERAND_ROOT = Path(
     "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs"
@@ -100,6 +106,45 @@ def _normalised_levels(axis_value: float, edge_value: float) -> np.ndarray:
     return np.linspace(axis_value, edge_value, LEVEL_COUNT + 2)[1:-1]
 
 
+def _shared_levels(pairs: list[tuple[float, float]]) -> np.ndarray:
+    """Return one level array spanning every supplied axis-to-boundary range.
+
+    Both fields are drawn at these same physical levels, which is what makes a
+    mismatch between them visible.  Taking the union rather than the solved
+    field's own range is what keeps each field's closed surfaces on the page:
+    spaced over one field's range alone, the other's contours collapse onto a
+    few levels or leave the array entirely.
+    """
+
+    finite = [
+        (float(axis_value), float(edge_value))
+        for axis_value, edge_value in pairs
+        if np.isfinite(axis_value) and np.isfinite(edge_value)
+    ]
+    if not finite:
+        return np.empty(0)
+    low = min(min(pair) for pair in finite)
+    high = max(max(pair) for pair in finite)
+    if not np.isfinite(low) or not np.isfinite(high) or np.isclose(low, high):
+        return np.empty(0)
+    return np.linspace(low, high, LEVEL_COUNT + 2)[1:-1]
+
+
+def _null_handle(marker: str, filled: bool, color: str, label: str):
+    return plt.Line2D(
+        [],
+        [],
+        marker=marker,
+        linestyle="none",
+        color=color,
+        markerfacecolor=color if filled else "none",
+        markeredgecolor=color,
+        markersize=6.5,
+        markeredgewidth=DEFAULT_INK.xpoint_markeredgewidth,
+        label=label,
+    )
+
+
 def render_frame(
     frame: int,
     record: dict,
@@ -108,8 +153,9 @@ def render_frame(
     output: Path,
 ) -> dict:
     figure, axes = plt.subplots(figsize=(14.0, 7.2))
+    figure.subplots_adjust(left=0.03, right=0.97, top=0.85, bottom=0.13)
     poloidal_axes(axes)
-    branch = record["branches"]["diverted"]
+    branch = record["banked_branches"]["diverted"]
     banked = record.get("banked_read") or {}
     operand = _display_operand(frame)
     drawn: dict[str, object] = {"frame": frame, "solved_field": False}
@@ -117,20 +163,30 @@ def render_frame(
         row, frame
     )
     label_flux = _oriented(label_flux, label_radius, label_height)
+    gauge = float(record.get("additive_gauge_wb") or 0.0)
     label_x = np.asarray(banked.get("reference_x_points_rz_m") or [], dtype=float)
-    label_settled = label_x.size > 0
-
+    label_axis_value = _bilinear(label_radius, label_height, label_flux, label_axis)
+    label_edge_value = _edge_flux(
+        label_radius, label_height, label_flux, label_boundary
+    )
+    ranges = [(label_axis_value - gauge, label_edge_value - gauge)]
+    handles = []
+    solved_axis = solved_x = None
+    saddle_flux = None
     if operand is not None:
         with np.load(operand) as data:
             radius = np.asarray(data["display_radius"], dtype=float)
             height = np.asarray(data["display_height"], dtype=float)
             flux = _oriented(np.asarray(data["flux"], dtype=float), radius, height)
-            saddle_rz = np.asarray(data["saddle_rz"], dtype=float)
             saddle_flux = float(data["saddle_flux"])
-        solved_axis = np.asarray(banked["nova_axis_rz_m"], dtype=float)
-        solved_x = np.asarray(banked["nova_x_point_rz_m"], dtype=float)
+        solved_axis = np.asarray(banked["nova_axis_rz_m"], dtype=float).reshape(-1)[:2]
+        solved_x = np.asarray(
+            banked["nova_x_point_rz_m"], dtype=float
+        ).reshape(-1, 2)
         axis_value = _bilinear(radius, height, flux, solved_axis)
-        levels = _normalised_levels(axis_value, saddle_flux)
+        edge_value = _edge_flux(radius, height, flux, label_boundary)
+        ranges.append((axis_value, edge_value))
+        levels = _shared_levels(ranges)
         draw_flux_contours(
             axes,
             radius,
@@ -150,39 +206,100 @@ def render_frame(
             linewidth=DEFAULT_INK.separatrix_linewidth,
             wall=wall,
         )
+        inside = np.asarray(
+            inside_wall_units(np.asarray(solved_x, dtype=float), wall), dtype=bool
+        )
+        solved_x_inside = bool(np.all(inside))
+        others = [solved_x[~inside]] if np.any(~inside) else []
+        if label_x.size:
+            others.append(label_x)
         draw_nulls(
             axes,
             magnetic_axis=solved_axis,
-            x_points=solved_x[None, :],
-            other_x_points=label_x if label_settled else None,
+            x_points=np.asarray(solved_x, dtype=float)[inside],
+            contain=wall,
+            other_x_points=(
+                np.concatenate(others) if others else None
+            ),
         )
+        handles.append(
+            plt.Line2D(
+                [], [], color=DEFAULT_INK.flux_color, lw=1.6, label="Nova solved flux"
+            )
+        )
+        handles.append(
+            plt.Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.separatrix_color,
+                lw=1.6,
+                label="solved separatrix",
+            )
+        )
+        handles.append(
+            _null_handle(
+                DEFAULT_INK.axis_marker, True, DEFAULT_INK.axis_color, "solved axis"
+            )
+        )
+        handles.append(
+            _null_handle(
+                DEFAULT_INK.xpoint_marker, True, DEFAULT_INK.xpoint_color,
+                "solved saddle",
+            )
+        )
+        axis_inside = bool(
+            inside_wall_units(np.asarray(solved_axis, dtype=float)[None, :], wall)[0]
+        )
+        if not axis_inside:
+            axes.plot(
+                solved_axis[0],
+                solved_axis[1],
+                marker=DEFAULT_INK.axis_marker,
+                markerfacecolor="none",
+                markeredgecolor=DEFAULT_INK.axis_color,
+                markeredgewidth=DEFAULT_INK.xpoint_markeredgewidth,
+                markersize=DEFAULT_INK.axis_markersize,
+                linestyle="none",
+                zorder=7,
+            )
+            handles.append(
+                _null_handle(
+                    DEFAULT_INK.axis_marker, False, DEFAULT_INK.axis_color,
+                    "solved axis (outside wall)",
+                )
+            )
         drawn.update(
             {
                 "solved_field": True,
                 "levels": [float(value) for value in levels],
                 "separatrix_flux_wb": saddle_flux,
-                "saddle_rz_m": saddle_rz.tolist(),
+                "solved_axis_rz_m": solved_axis.tolist(),
+                "solved_x_point_rz_m": solved_x.tolist(),
+                "solved_x_point_inside_wall": solved_x_inside,
+                "solved_axis_inside_wall": axis_inside,
             }
         )
-    label_axis_value = _bilinear(label_radius, label_height, label_flux, label_axis)
-    label_edge_value = _edge_flux(
-        label_radius, label_height, label_flux, label_boundary
-    )
-    gauge = float(record.get("additive_gauge_wb") or 0.0)
-    if drawn["solved_field"]:
-        label_levels = np.asarray(drawn["levels"], dtype=float) + gauge
     else:
-        label_levels = _normalised_levels(label_axis_value, label_edge_value)
+        levels = _shared_levels(ranges)
     draw_flux_contours(
         axes,
         label_radius,
         label_height,
         label_flux,
-        label_levels,
+        np.asarray(levels, dtype=float) + gauge,
         color=DEFAULT_INK.contour_color,
-        linewidth=0.8,
-        alpha=0.95,
+        linewidth=1.0,
         wall=wall,
+    )
+    handles.insert(
+        0 if not drawn["solved_field"] else 1,
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.contour_color,
+            lw=1.2,
+            label="EFIT label flux (gauge-aligned)",
+        ),
     )
     axes.plot(
         label_axis[0],
@@ -195,58 +312,69 @@ def render_frame(
         linestyle="none",
         zorder=6,
     )
+    handles.append(
+        _null_handle(
+            DEFAULT_INK.axis_marker, False, DEFAULT_INK.contour_color, "label axis"
+        )
+    )
+    if label_x.size:
+        handles.append(
+            _null_handle(
+                DEFAULT_INK.xpoint_marker, False, DEFAULT_INK.contour_color,
+                "label saddle",
+            )
+        )
     draw_wall(axes, wall[:, 0], wall[:, 1], close=True)
+    handles.append(
+        plt.Line2D([], [], color=DEFAULT_INK.wall_color, lw=1.4, label="first wall")
+    )
     axes.set_xlim(float(wall[:, 0].min()) - 0.15, float(wall[:, 0].max()) + 0.15)
     axes.set_ylim(float(wall[:, 1].min()) - 0.15, float(wall[:, 1].max()) + 0.15)
 
     terminal_residual = branch.get("residual")
     converged = record.get("converged")
+    parts = [f"frame {frame}", str(record["shot"])]
     if terminal_residual is not None:
-        caption = (
-            f"frame {frame}  {record['shot']}  |  diverted terminal residual "
-            f"{terminal_residual:.3e}  |  converged {str(converged).lower()}  |  "
-            f"tolerance 1e-5"
-        )
+        parts.append(f"diverted terminal residual {terminal_residual:.3e}")
+        parts.append(f"converged {str(converged).lower()}")
     else:
-        caption = (
-            f"frame {frame}  {record['shot']}  |  refused: "
-            "no qualified magnetic axis, no solved field drawn"
+        parts.append("refused: no qualified magnetic axis, no solved field")
+    achieved = branch.get("achieved_class")
+    consistent = branch.get("topology_consistent")
+    if achieved:
+        parts.append(
+            f"kept terminal topology {achieved} "
+            f"(consistent with its diverted seed: {str(consistent).lower()})"
         )
+    if drawn["solved_field"]:
+        parts.append(
+            "solved saddle "
+            + ("inside the wall" if drawn["solved_x_point_inside_wall"]
+               else "OUTSIDE the wall (a real solved null, drawn hollow)")
+        )
+        if not drawn["solved_axis_inside_wall"]:
+            parts.append("solved axis OUTSIDE the wall")
+    parts.append("tolerance 1e-5")
+    caption = textwrap.fill("  |  ".join(parts), width=150)
     figure.text(
-        0.5, 0.015, caption, ha="center", va="bottom", fontsize=12, color="#333333"
+        0.5, 0.02, caption, ha="center", va="bottom", fontsize=11, color="#333333"
     )
-    handles = [
-        plt.Line2D(
-            [], [], color=DEFAULT_INK.flux_color, lw=1.6, label="Nova solved flux"
-        ),
-        plt.Line2D(
-            [],
-            [],
-            color=DEFAULT_INK.contour_color,
-            lw=1.2,
-            label="EFIT label flux (gauge-aligned)",
-        ),
-        plt.Line2D(
-            [],
-            [],
-            color=DEFAULT_INK.separatrix_color,
-            lw=1.6,
-            label="solved separatrix",
-        ),
-        plt.Line2D([], [], color=DEFAULT_INK.wall_color, lw=1.4, label="first wall"),
-    ]
     figure.legend(
-        handles=handles, loc="upper center", ncol=4, frameon=False, fontsize=12
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=4,
+        frameon=False,
+        fontsize=11,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output, format="svg", bbox_inches="tight")
-    figure.savefig(
-        output.with_suffix(".png"), format="png", dpi=100, bbox_inches="tight"
-    )
+    figure.savefig(output, format="svg")
+    figure.savefig(output.with_suffix(".png"), format="png", dpi=100)
     plt.close(figure)
     drawn["svg"] = str(output)
     drawn["terminal_residual"] = terminal_residual
     drawn["converged"] = converged
+    drawn["legend_entries"] = [handle.get_label() for handle in handles]
     return drawn
 
 

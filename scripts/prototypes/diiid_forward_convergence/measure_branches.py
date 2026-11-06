@@ -1,21 +1,34 @@
 """Measure the forward fixed-point descent on both topology branches.
 
-For each declared DIII-D gate frame the script builds the same profile the
-benchmark builds, takes the bank's own cold-seed portfolio, and runs the
-registered Newton-Krylov request from each branch's seed.  It records the
-per-promotion relative residual, the per-promotion plasma-mask difference the
-active set reports, the globalisation factors the inner iteration applied, and
-the terminal class and topology read.
+For each declared DIII-D gate frame the script builds the profile the benchmark
+builds, takes the bank's own cold-seed portfolio, and runs the registered
+Newton-Krylov request from each branch's seed.  Per promotion it records the
+relative residual, the plasma-mask difference, the mask area, the accepted and
+attempted step counts and the globalisation factors.  At each staged state it
+records the plasma-presence read: the magnetic axis and whether it lies inside
+the governed wall, the area of the plasma support, and the toroidal current the
+profile carries inside the confined core against the frame's target.
 
-The measurement is read-only: it imports the benchmark's builders and the
-public solver, and it writes nothing into the repository.  A frame that fails
-before a topology read is recorded as a refusal with the exception that stopped
-it, so a missing axis is a measurement rather than a lost run.
+Three arms run per branch:
+
+``default``       the registered request, unmodified.
+``continued``     the same request with the mask-stability exits disabled, so the
+                  loop spends its whole trip budget at a frozen mask instead of
+                  declaring settlement.
+``staged``        the registered request capped at ``k`` active-set trips, for
+                  every ``k`` up to the default arm's trip count, which is how a
+                  per-promotion state is obtained at all: the public receipt
+                  persists the terminal state only.
+
+The measurement is read-only: it imports the benchmark's builders and the public
+solver, and it writes nothing into the repository.  A frame that fails before a
+topology read is recorded as a refusal with the exception that stopped it.
 """
 
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import time
 import traceback
@@ -27,15 +40,18 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from benchmarks import diiid_forward_gs_match as bench
-from nova.equilibrium.solve_request import ForwardSolveRequest  # noqa: F401
+from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
+from nova.media.poloidal import inside_wall_units
+from terminal_class import classify_terminal
 
 EXECUTION_FRAME_COUNT = bench.EXECUTION_FRAME_COUNT
 PROMOTION_TOLERANCE = bench.GATE_RESIDUAL_TOLERANCE
+STAGED_TRIP_LIMIT = 5
 
 
-def _finite_list(values: Any) -> list[float]:
+def _finite_list(values: Any) -> list[float | None]:
     array = np.asarray(values, dtype=np.float64).ravel()
     return [float(value) if np.isfinite(value) else None for value in array]
 
@@ -43,84 +59,6 @@ def _finite_list(values: Any) -> list[float]:
 def _int_list(values: Any) -> list[int]:
     array = np.asarray(values).ravel()
     return [int(value) for value in array]
-
-
-def classify_terminal(
-    residuals: list[float | None], terminal: float | None
-) -> dict[str, Any]:
-    """Classify a descent as contraction stall, cycle, divergence or refusal.
-
-    A refusal carries no finite terminal.  A divergence is a non-finite last
-    promotion stream or a terminal above the first reading with growth after
-    the descent's minimum.  A cycle is a period-2 repetition over the last four
-    promotions at either of the two levels.  Everything else with a finite
-    terminal above tolerance is a contraction stall, with the last-step ratio
-    reported so a slow contraction is distinguishable from a flat one.
-    """
-
-    if terminal is None or not np.isfinite(terminal):
-        return {"class": "refusal", "evidence": "no finite terminal residual"}
-    finite = [value for value in residuals if value is not None]
-    if not finite:
-        return {"class": "refusal", "evidence": "no finite promotion recorded"}
-    last = finite[-1]
-    first = finite[0]
-    if abs(last - terminal) > 1e-12 * max(1.0, abs(terminal)):
-        finite = finite + [terminal]
-    tail = finite[-4:]
-    cycle = False
-    cycle_detail = None
-    if len(tail) == 4:
-        even_gap = abs(tail[2] - tail[0]) / max(abs(tail[2]), 1e-300)
-        odd_gap = abs(tail[3] - tail[1]) / max(abs(tail[3]), 1e-300)
-        cycle = even_gap < 1e-3 and odd_gap < 1e-3 and tail[2] > PROMOTION_TOLERANCE
-        cycle_detail = {
-            "even_gap_relative": float(even_gap),
-            "odd_gap_relative": float(odd_gap),
-            "alternating_levels": tail,
-        }
-    ratios = [
-        float(finite[index + 1] / finite[index])
-        for index in range(len(finite) - 1)
-        if finite[index] > 0.0
-    ]
-    last_ratio = ratios[-1] if ratios else None
-    monotone = all(value < 1.0 for value in ratios[-3:]) if len(ratios) >= 3 else None
-    if terminal <= PROMOTION_TOLERANCE:
-        return {
-            "class": "contracted",
-            "evidence": "terminal residual within tolerance",
-            "last_ratio": last_ratio,
-        }
-    if cycle:
-        return {"class": "cycle", "evidence": cycle_detail, "last_ratio": last_ratio}
-    minimum = min(finite)
-    index_minimum = finite.index(minimum)
-    growing_after_minimum = (
-        index_minimum < len(finite) - 1 and finite[-1] > 2.0 * minimum
-    )
-    if not np.isfinite(last) or growing_after_minimum:
-        return {
-            "class": "divergence",
-            "evidence": {
-                "first": first,
-                "last": last,
-                "minimum": minimum,
-                "index_of_minimum": index_minimum,
-            },
-            "last_ratio": last_ratio,
-        }
-    return {
-        "class": "contraction_stall",
-        "evidence": {
-            "first": first,
-            "last": last,
-            "minimum": minimum,
-            "last_three_ratios_below_one": monotone,
-            "promotions": len(finite),
-        },
-        "last_ratio": last_ratio,
-    }
 
 
 def _wall_distance(boundary: np.ndarray, wall: np.ndarray) -> dict[str, Any]:
@@ -171,7 +109,6 @@ def _prepare_frame(frame: int, expansion: float):
     shipped_current = bench.shipped_current_at(
         row, machine.physical, bench.POLOIDAL_CONDUCTORS, time_ms
     )
-    circuit_current = bench.circuit_current_map(shipped_current)
     adapter = bench.complete_profile_current_adapter(
         profile,
         shipped_names=bench.POLOIDAL_CONDUCTORS,
@@ -210,127 +147,200 @@ def _prepare_frame(frame: int, expansion: float):
         "saddle": np.asarray(saddle, dtype=float),
         "contour": contour,
         "label_seed": np.asarray(label_seed, dtype=float),
-        "circuit_current": circuit_current,
     }
 
 
-def _branch_record(
-    prepared: dict[str, Any], topology_class: TopologyClass, expansion: float
-) -> dict[str, Any]:
-    profile = prepared["profile"]
-    cold = prepared["cold"]
-    seed = np.asarray(cold.branches.flux[int(topology_class)], dtype=float)
-    label_seed = prepared["label_seed"]
-    seed_identity = bool(np.array_equal(seed, label_seed))
-    seed_distance = float(np.linalg.norm(seed - label_seed))
+def _cell_area(profile) -> float:
+    radius = np.asarray(profile.lattice.radius, dtype=float)
+    height = np.asarray(profile.lattice.height, dtype=float)
+    return float(np.median(np.diff(radius)) * np.median(np.diff(height)))
+
+
+def _presence(profile, flux_map, wall, mask, target_current_a) -> dict[str, Any]:
+    """Return the plasma-presence read of one flux state."""
+
+    area = float(np.sum(np.asarray(mask, dtype=bool))) * _cell_area(profile)
+    try:
+        observation = profile.current_moment_observation(
+            jnp.asarray(np.asarray(flux_map, dtype=float).ravel()),
+            support=MomentIntegralSupport.CONFINED_CORE,
+        )
+        confined_current = float(np.asarray(observation.plasma_current))
+    except Exception as error:  # a failed read is recorded, never raised
+        confined_current = float("nan")
+        confined_error = f"{type(error).__name__}: {error}"
+    else:
+        confined_error = None
+    axis = np.asarray(profile.operator.read(jnp.asarray(
+        np.asarray(flux_map, dtype=float).ravel()))[1].axis, dtype=float)
+    axis_inside = bool(
+        inside_wall_units(np.asarray(axis, dtype=float)[None, :], wall)[0]
+    )
+    return {
+        "axis_rz_m": [float(value) for value in axis],
+        "axis_inside_wall": axis_inside,
+        "plasma_area_m2": area,
+        "confined_current_a": confined_current,
+        "target_current_a": float(target_current_a),
+        "confined_to_target_ratio": (
+            abs(confined_current) / abs(target_current_a)
+            if target_current_a and np.isfinite(confined_current)
+            else None
+        ),
+        "confined_current_error": confined_error,
+        "lattice_node_count": int(len(np.asarray(mask, dtype=bool))),
+    }
+
+
+def _solve(profile, seed, current, target_current_a, carrier: str, **overrides):
     request = bench._registered_solve_request(
         profile,
         seed,
-        jnp.asarray(prepared["current"]),
-        prepared["target_current_a"],
-        carrier_identity=f"diiid-convergence-probe:{expansion}:{topology_class.name}",
+        jnp.asarray(current),
+        target_current_a,
+        carrier_identity=carrier,
     )
+    if overrides:
+        request = dataclasses.replace(
+            request, policy=dataclasses.replace(request.policy, **overrides)
+        )
+    started = time.perf_counter()
+    receipt = profile.solve(request)
+    receipt.equilibrium.flux.block_until_ready()
+    return receipt, time.perf_counter() - started
+
+
+def _record_receipt(receipt, wall_seconds, prepared, topology_class) -> dict[str, Any]:
+    profile = prepared["profile"]
+    wall = prepared["wall"]
+    equilibrium = receipt.equilibrium
+    residual_history = _finite_list(receipt.residual_history)
+    terminal = float(equilibrium.fixed_point.residual)
+    decisions, factors = receipt.globalisation_decisions
+    topology = equilibrium.topology
+    flux = np.asarray(equilibrium.flux[: profile.lattice.node_count], dtype=float)
+    flux_grid = flux.reshape(profile.lattice.shape)
+    boundary_rz = bench._assembled_boundary_geometry(
+        flux_grid,
+        profile.lattice.radius,
+        profile.lattice.height,
+        float(topology.boundary_flux),
+        np.asarray(topology.axis, dtype=float),
+    )[0]
+    mask_history = _int_list(receipt.mask_history)
+    try:
+        masks = profile.operator.read(jnp.asarray(flux))[0]
+        terminal_mask = np.asarray(masks.plasma, dtype=bool).ravel()
+    except Exception:
+        terminal_mask = np.zeros(profile.lattice.node_count, dtype=bool)
+    presence = _presence(
+        profile, flux_grid, wall, terminal_mask, prepared["target_current_a"]
+    )
+    record = {
+        "status": "solved",
+        "wall_seconds": wall_seconds,
+        "residual_history": residual_history,
+        "mask_history": mask_history,
+        "amplitude_history": _finite_list(receipt.amplitude_history),
+        "globalisation_decisions": _finite_list(decisions),
+        "globalisation_factors": _finite_list(factors),
+        "attempted_promotions": len(_finite_list(factors)),
+        "accepted_promotions": int(
+            sum(1 for value in _finite_list(decisions) if value)
+        ),
+        "termination_reason": int(receipt.termination_reason),
+        "qualified": bool(np.asarray(receipt.qualified)),
+        "terminal_residual": terminal if np.isfinite(terminal) else None,
+        "terminal": classify_terminal(residual_history, float(terminal)),
+        "active_set_iterations": int(
+            getattr(equilibrium.fixed_point, "active_set_iterations", 0)
+        ),
+        "achieved_class": (
+            TopologyClass.DIVERTED.name.lower()
+            if bool(topology.diverted)
+            else TopologyClass.LIMITED.name.lower()
+        ),
+        "topology_matches_request": bool(topology.diverted)
+        == (topology_class is TopologyClass.DIVERTED),
+        "x_point_rz_m": [float(value) for value in np.asarray(topology.x_point)],
+        "x_point_inside_wall": bool(
+            inside_wall_units(np.asarray(topology.x_point)[None, :], wall)[0]
+        ),
+        "boundary_flux_wb": float(topology.boundary_flux),
+        "axis_flux_wb": float(topology.axis_flux),
+        "wall_contact": _wall_distance(boundary_rz, wall),
+        "presence": presence,
+        "_flux_grid": flux_grid,
+    }
+    return record
+
+
+def _branch_record(prepared, topology_class, expansion) -> dict[str, Any]:
+    profile = prepared["profile"]
+    cold = prepared["cold"]
+    seed = np.asarray(cold.branches.flux[int(topology_class)], dtype=float)
+    carrier = f"diiid-convergence-probe:{expansion}:{topology_class.name}"
     record: dict[str, Any] = {
         "requested_class": topology_class.name.lower(),
-        "seed_identity_with_label": seed_identity,
-        "seed_l2_distance_from_label": seed_distance,
-        "seed_l2_norm": float(np.linalg.norm(seed)),
-        "policy": {
-            "route": str(getattr(request.policy, "route", None)),
-            "newton_steps": int(getattr(request.policy, "newton_steps", -1)),
-            "gmres_iterations": int(getattr(request.policy, "gmres_iterations", -1)),
-            "warmup": int(getattr(request.policy, "warmup", -1)),
-            "relaxation": float(getattr(request.policy, "relaxation", float("nan"))),
-            "step_cap": float(getattr(request.policy, "step_cap", float("nan"))),
-            "tolerance": float(
-                getattr(request.policy, "qualification_tolerance", float("nan"))
-            ),
-        },
+        "seed_identity_with_label": bool(
+            np.array_equal(seed, prepared["label_seed"])
+        ),
+        "seed_l2_distance_from_label": float(
+            np.linalg.norm(seed - prepared["label_seed"])
+        ),
+        "arms": {},
     }
-    started = time.perf_counter()
     try:
-        receipt = profile.solve(request)
-        receipt.equilibrium.flux.block_until_ready()
-        wall_seconds = time.perf_counter() - started
-        equilibrium = receipt.equilibrium
-        residual_history = _finite_list(receipt.residual_history)
-        terminal = float(equilibrium.fixed_point.residual)
-        if not np.isfinite(terminal):
-            terminal_value: float | None = None
-        else:
-            terminal_value = terminal
-        decisions, factors = receipt.globalisation_decisions
-        topology = equilibrium.topology
-        diverted = bool(topology.diverted)
-        flux = np.asarray(equilibrium.flux[: profile.lattice.node_count], dtype=float)
-        flux_grid = flux.reshape(profile.lattice.shape)
-        boundary_rz = bench._assembled_boundary_geometry(
-            flux_grid,
-            profile.lattice.radius,
-            profile.lattice.height,
-            float(topology.boundary_flux),
-            np.asarray(topology.axis, dtype=float),
-        )[0]
-        record.update(
-            {
-                "status": "solved",
-                "wall_seconds": wall_seconds,
-                "residual_history": residual_history,
-                "mask_history": _int_list(receipt.mask_history),
-                "amplitude_history": _finite_list(receipt.amplitude_history),
-                "globalisation_decisions": _finite_list(decisions),
-                "globalisation_factors": _finite_list(factors),
-                "termination_reason": int(receipt.termination_reason),
-                "qualified": bool(np.asarray(receipt.qualified)),
-                "terminal_residual": terminal_value,
-                "terminal": classify_terminal(residual_history, terminal_value),
-                "active_set_iterations": int(
-                    getattr(equilibrium.fixed_point, "active_set_iterations", 0)
-                ),
-                "active_set_residuals": _finite_list(
-                    getattr(equilibrium.fixed_point, "active_set_residuals", ())
-                ),
-                "active_set_mask_differences": _int_list(
-                    getattr(equilibrium.fixed_point, "active_set_mask_differences", ())
-                ),
-                "achieved_diverted": diverted,
-                "achieved_class": (
-                    TopologyClass.DIVERTED.name.lower()
-                    if diverted
-                    else TopologyClass.LIMITED.name.lower()
-                ),
-                "topology_matches_request": diverted
-                == (topology_class is TopologyClass.DIVERTED),
-                "axis_rz_m": [float(value) for value in np.asarray(topology.axis)],
-                "x_point_rz_m": [
-                    float(value) for value in np.asarray(topology.x_point)
-                ],
-                "class_margin": float(topology.class_margin),
-                "boundary_flux_wb": float(topology.boundary_flux),
-                "axis_flux_wb": float(topology.axis_flux),
-                "finite": bool(equilibrium.finite.passed),
-                "boundary_point_count": int(len(boundary_rz)),
-                "wall_contact": _wall_distance(boundary_rz, prepared["wall"]),
-                "flux_shape": list(flux_grid.shape),
-                "flux_minmax_wb": [
-                    float(np.min(flux_grid)),
-                    float(np.max(flux_grid)),
-                ],
-                "_flux_grid": flux_grid,
-                "_boundary_rz": boundary_rz,
-            }
+        receipt, seconds = _solve(
+            profile, seed, prepared["current"], prepared["target_current_a"],
+            f"{carrier}:default",
         )
-    except Exception as error:  # a refusal is a measurement, not a lost frame
+    except Exception as error:
         record.update(
             {
                 "status": "refused",
-                "wall_seconds": time.perf_counter() - started,
                 "refusal_type": type(error).__name__,
                 "refusal_message": str(error),
                 "terminal": {"class": "refusal", "evidence": str(error)},
                 "traceback": traceback.format_exc()[-4000:],
             }
         )
+        return record
+    default = _record_receipt(receipt, seconds, prepared, topology_class)
+    record["arms"]["default"] = default
+    record["status"] = "solved"
+    trips = max(1, min(int(default["active_set_iterations"]), STAGED_TRIP_LIMIT))
+    try:
+        receipt, seconds = _solve(
+            profile, seed, prepared["current"], prepared["target_current_a"],
+            f"{carrier}:continued",
+            settled_exit=False, stagnation_stop=False, active_set_steps=16,
+        )
+        record["arms"]["continued"] = _record_receipt(
+            receipt, seconds, prepared, topology_class
+        )
+    except Exception as error:
+        record["arms"]["continued"] = {
+            "status": "refused",
+            "refusal_type": type(error).__name__,
+            "refusal_message": str(error),
+        }
+    record["arms"]["staged"] = {}
+    for steps in range(1, trips + 1):
+        try:
+            receipt, seconds = _solve(
+                profile, seed, prepared["current"], prepared["target_current_a"],
+                f"{carrier}:staged{steps}", active_set_steps=steps,
+            )
+            record["arms"]["staged"][str(steps)] = _record_receipt(
+                receipt, seconds, prepared, topology_class
+            )
+        except Exception as error:
+            record["arms"]["staged"][str(steps)] = {
+                "status": "refused",
+                "refusal_type": type(error).__name__,
+                "refusal_message": str(error),
+            }
     return record
 
 
@@ -357,10 +367,13 @@ def run_frame(frame: int, expansion: float, artifact_dir: Path) -> dict[str, Any
         )
     arrays: dict[str, np.ndarray] = {}
     for name, branch in frame_record["branches"].items():
-        for key in ("_flux_grid", "_boundary_rz"):
-            value = branch.pop(key, None)
-            if value is not None:
-                arrays[f"{name}_{key.strip('_')}"] = value
+        for arm_name, arm in (branch.get("arms") or {}).items():
+            if not isinstance(arm, dict):
+                continue
+            grid = arm.pop("_flux_grid", None)
+            if grid is None:
+                continue
+            arrays[f"{name}_{arm_name}_flux"] = grid
     arrays["wall"] = prepared["wall"]
     arrays["label"] = prepared["label"]
     arrays["radius"] = np.asarray(profile.lattice.radius)
@@ -381,14 +394,17 @@ def main() -> None:
     parser.add_argument(
         "--expansion",
         type=float,
-        default=bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
+        default=float(bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION),
     )
     arguments = parser.parse_args()
     configure_dtypes()
     output = arguments.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     receipt: dict[str, Any] = {
-        "measurement": "per-promotion forward descent on both topology branches",
+        "measurement": (
+            "per-promotion forward descent on both topology branches, with the "
+            "plasma-presence read of each terminal state"
+        ),
         "expansion": arguments.expansion,
         "tolerance": PROMOTION_TOLERANCE,
         "frames": {},
@@ -406,10 +422,23 @@ def main() -> None:
                     "seconds": round(time.perf_counter() - started, 1),
                     "branches": {
                         name: {
-                            "terminal": branch.get("terminal", {}).get("class"),
-                            "terminal_residual": branch.get("terminal_residual"),
-                            "achieved": branch.get("achieved_class"),
                             "status": branch.get("status"),
+                            "terminal": (
+                                (branch.get("arms") or {})
+                                .get("default", {})
+                                .get("terminal", {})
+                                .get("class")
+                                if branch.get("status") == "solved"
+                                else "refusal"
+                            ),
+                            "terminal_residual": (
+                                (branch.get("arms") or {})
+                                .get("default", {})
+                                .get("terminal_residual")
+                            ),
+                            "presence": (branch.get("arms") or {})
+                            .get("default", {})
+                            .get("presence"),
                         }
                         for name, branch in record["branches"].items()
                     },
@@ -418,8 +447,6 @@ def main() -> None:
             ),
             flush=True,
         )
-    # Every frame shares one lattice shape, so the compiled programs are reused
-    # across frames; clearing the caches here would only recompile them.
 
 
 if __name__ == "__main__":

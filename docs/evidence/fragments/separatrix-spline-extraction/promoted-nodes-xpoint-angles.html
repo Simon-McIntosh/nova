@@ -1,4 +1,4 @@
-<h2>Separatrix lobe and leg angles at the promoted coil-edit X-point</h2>
+<h2>Separatrix directions at the promoted coil-edit X-point</h2>
 <p>Re-runs the converged MAST 22086/43 boundary-coil edit
 (fraction +6.000e-02 on circuit 8, target
 933034.8750 A) on the assembler as it stands after the display-field
@@ -10,42 +10,66 @@ truncated one the earlier record had to report unassembled. The solve closes at
 wall, out of
 1126 physical nodes of which 37 are wall coordinates.</p>
 
-<p>The separatrix is assembled twice on the same display grid (0.0100 m), once
-from the
-converged state and once from the field of the currents, and both are well formed:
-<code>True</code> and <code>True</code>. Each carries
-585 and 5417 closed vertices, so neither is at a branch
-capacity.
-The X-point is polished on both fields: the state's saddle sits at
-(0.578763, 1.204704) m at -1.307e-01 Wb and the field's at
-(0.578421, 1.204795) m at -1.306e-01 Wb, a displacement of
-<strong>0.3545 mm</strong> (-0.3426 mm in R,
-+0.0909 mm in Z, 0.004 lattice cells at
-0.0928 m).</p>
+<p>Both separatrices are well formed: <code>True</code> and
+<code>True</code>. The state's trace carries 585 closed
+vertices over an arc of 5.2586 m and the field's 5417
+over 5.2578 m. The two counts are not comparable, and neither is wrong:
+the state's separatrix is assembled on the solve's own lattice
+(0.0928 m cells) while the field's is assembled on the display map
+(0.0100 m), and each trace is sampled at a fixed number of points per
+cell of its own grid. The counts therefore differ by exactly the ratio of the two
+grids (9.26 against 9.28) while the two curves agree in
+length to 0.813 mm: they are the same separatrix at two resolutions, and
+the median spacing between the state's samples is 8.76 mm against the
+field's 1.24 mm. Every branch direction below carries that difference,
+and the state's chord is read at the limit of its own sampling.</p>
+
+<p>The X-point itself is polished twice, on each field's own spline. On the solve's
+lattice the two nulls coincide at
+<strong>1.73e-06 mm</strong> and their Hessians agree to
+4.3e-08 relative; on the display map they sit
+<strong>0.3545 mm</strong> apart, with Hessians agreeing to
+2.4e-02 relative. The
+0.3545 mm the earlier record quoted is the display-map figure, and
+it is a real property of the reconstructed field at that resolution, not of the solve's
+lattice. The state's null on the lattice is
+(0.578763, 1.204704) m at -1.307e-01 Wb.</p>
 
 <table>
-  <caption>Separatrix directions at the X-point, converged state against the field of
-the
-  currents. Bearings are degrees from +R toward +Z.</caption>
-  <tr><th>landmark</th><th>state</th><th>field of the currents</th><th>change</th></tr>
-  <tr><td>lobe</td><td>+105.0°</td><td>+105.0°</td>
-      <td>+0.01°</td></tr>
-  <tr><td>legs found</td><td>2</td><td>2</td><td></td></tr>
-<tr><td>leg 0</td><td>-82.3</td><td>-82.3</td><td>+0.00</td><td>0.228</td></tr>
-<tr><td>leg 1</td><td>+61.1</td><td>+61.1</td><td>+0.01</td><td>0.232</td></tr>
+  <caption>The four asymptotic directions at the null, from the eigenvectors of the
+  poloidal-flux Hessian at each field's polished saddle, taken on the solve's lattice.
+  Bearings are degrees from +R toward +Z.</caption>
+  <tr><th>direction</th><th>converged state</th><th>field of the currents</th>
+      <th>difference</th></tr>
+<tr><td>arm 1</td><td>-168.16</td><td>-168.16</td><td>0.000001</td></tr>
+<tr><td>arm 2</td><td>-78.16</td><td>-78.16</td><td>0.000001</td></tr>
+<tr><td>arm 3</td><td>+11.84</td><td>+11.84</td><td>0.000001</td></tr>
+<tr><td>arm 4</td><td>+101.84</td><td>+101.84</td><td>0.000001</td></tr>
 </table>
 
-<p>Each leg direction is the chord from the polished saddle to the furthest sampled
-point
-of that open branch, so it describes the branch's extent rather than its local tangent
-at the
-null; both fields assemble two such branches. The lobe direction moves
-+0.01°
-and the two chords move by +0.00°, +0.01° respectively. The lobe tip moves 0.354 mm.
-With
-2 leg directions paired by far-end proximity, the worst
-far-end separation is 0.232 mm, so the legs are the same two structures in both
-fields rather than a re-paired set.</p>
+<p>The asymptotic directions are the four half-lines the separatrix approaches at the
+null, and they agree between the two fields to 0.000001° over
+4 directions: the promotion does not rotate the X.</p>
+
+<table>
+  <caption>The direction each assembled branch actually takes over its first one to two
+  display cells, read as the chord of that branch between 10 and 20 mm of arc length
+  from the saddle, on each field's own trace. <code>reach</code> is how far each branch
+  runs from the null.</caption>
+  <tr><th>branch</th><th>converged state</th><th>field of the currents</th>
+      <th>difference</th><th>reach [m]</th></tr>
+<tr><td>lobe out</td><td>-123.23</td><td>-123.01</td><td>0.221</td><td>2.4286</td></tr>
+<tr><td>lobe back</td><td>-33.51</td><td>-32.95</td><td>0.562</td><td>2.8223</td></tr>
+<tr><td>leg 0</td><td>+147.62</td><td>+146.73</td><td>0.895</td><td>4.6619</td></tr>
+<tr><td>leg 1</td><td>+56.57</td><td>+57.30</td><td>0.735</td><td>0.9102</td></tr>
+</table>
+
+<p>Over 4 branches the traced directions agree to
+0.895°. At 10 to 20 mm from a null the traced curve is still
+visibly rotated away from the asymptotic lines, which is why both measures are given:
+the asymptote is where the separatrix is going, and the chord is where the tracer has
+it. Each branch is identified across the two fields by its own reach, and the reaches
+agree to 4.975 mm, so the pairing is of the same four structures.</p>
 
 <h3>Why the halves differ</h3>
 <p>The promoted set is the union of two independent selections, which
@@ -103,17 +127,23 @@ those whose
   (0.8957, 0.0221) m, the filled cross the state's X-point and the hollow cross
 the field's.
   The left panel carries the locator for the 6.0 mm magnification on the right,
-which draws the lobe ray and the first two open-branch chords from the polished saddle.
-A chord runs from the saddle to that branch's furthest sampled point, which lies far
-outside the window, so it is not the branch's local curvature at the null.
+which draws all four branches leaving the null in both fields: the closed lobe out and
+back, and both open legs. Dotted grey lines are the four asymptotic directions from the
+Hessian at the state's polished saddle, so a branch that runs away from its asymptote
+within the window is visible as such.
   The nearest promoted node is 56.495 mm from the X-point; the quartiles are
   359.817, 614.324 and 2727.009 mm.</figcaption>
 </figure>
 
-<h3>Does the promotion move the geometry by an amount that matters?</h3>
-<p>The saddle moves 0.3545 mm, and the direction that changes most is the
-lobe at +0.01° — a fraction of the lobe's own width. A change of that size is
-well under one lattice cell. The rule a repair would change is the paste itself: the
+<h3>Does the promotion move the near-X-point geometry?</h3>
+<p>Every local reading at the null says no more than the grid it was taken on. On the
+solve's lattice the two polished nulls coincide to 1.73e-06 mm and the
+four arms agree to 0.000001°; on the display map the nulls sit
+0.3545 mm apart, the arms differ by
+0.290° and the traced chords by at most 0.895°.
+The promotion therefore perturbs nothing that the solve resolves, and the whole of the
+residual difference is the coarser interpolant the display map carries. The rule a
+repair would change is the paste itself: the
 exclude-shadow
 branch of <code>ForwardFluxOperator.residual_shadow_mask</code> in
 <code>nova/equilibrium/forward_operator.py</code> decides which nodes keep their

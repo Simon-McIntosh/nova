@@ -3,9 +3,9 @@
 The left panel is the whole machine: unfilled line contours of the converged
 state and of the field of the currents on one shared level array, the wall, the
 promoted nodes, both null sets, and a locator for the magnification.  The right
-panel is that magnification, carrying the lobe and leg directions as rays from
-the polished saddle.  Every number the figure writes into a figure is read from
-the receipt.
+panel is that magnification, carrying all four branches leaving the null in
+each field beside the asymptotic directions of the state's polished saddle.
+Every number the figure writes into a figure is read from the receipt.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ from nova.media.poloidal import (  # noqa: E402
     draw_flux_contours,
     draw_nulls,
     draw_wall,
+    sample_cubic_controls,
 )
 
 WIDTH_IN, HEIGHT_IN = 14.0, 7.2
@@ -42,6 +43,7 @@ POPULATION = "#929292"
 HIGHLIGHT = "#b3261e"
 LEVELS = 21
 HOT_WB = 1.0e-3
+ASYMPTOTE = "#6b6b6b"  # the four X-arm asymptotes at the null
 ZOOM_M = 6.0e-3
 DEG = "\N{DEGREE SIGN}"
 
@@ -110,7 +112,25 @@ def _ray(axes, origin, bearing, length, colour, text, dy, width=1.4, head=True):
     )
 
 
-def render(receipt, fields, destination):
+def open_branches(fields, name):
+    """Return every open branch of one field, from either archive layout.
+
+    A shared display-grid assembly keeps the resolved points directly, while
+    the solve's own archive keeps spline controls beside a validity mask.
+    """
+    prefix = "%s_open_" % name
+    direct = sorted(key for key in fields if key[len(prefix) :].isdigit())
+    if direct:
+        return [np.asarray(fields[key], float) for key in direct]
+    controls = np.asarray(fields["%s_open_controls" % name], float)
+    valid = np.asarray(fields["%s_open_valid" % name], bool)
+    return [
+        np.asarray(sample_cubic_controls(controls[slot], valid[slot]), float)
+        for slot in range(controls.shape[0])
+    ]
+
+
+def render(receipt, fields, destination, angles=None):
     """Draw the two-panel figure and return the written path."""
     radius = np.asarray(fields["display_radius"], float)
     height = np.asarray(fields["display_height"], float)
@@ -125,7 +145,6 @@ def render(receipt, fields, destination):
     saddle = np.asarray(receipt["x_point"]["state_rz"], float)
     image_saddle = np.asarray(receipt["x_point"]["image_rz"], float)
     axis_rz = np.asarray(receipt["nulls"]["axis_rz"], float)
-    separatrix = receipt["separatrix"]
 
     figure = plt.figure(figsize=(WIDTH_IN, HEIGHT_IN))
     grid = figure.add_gridspec(
@@ -158,10 +177,18 @@ def render(receipt, fields, destination):
         draw_flux_contours(
             axes, radius, height, state_flux, levels, linewidth=0.6, color="#4a4a4a"
         )
-        for polyline, colour, dash in (
+        drawn = [
             (fields["state_closed_polyline"], STATE_COLOR, (0, (5, 2))),
             (fields["image_closed_polyline"], IMAGE_COLOR, (0, (2, 2))),
+        ]
+        for name, colour, dash in (
+            ("state", STATE_COLOR, (0, (5, 2))),
+            ("image", IMAGE_COLOR, (0, (2, 2))),
         ):
+            for points in open_branches(fields, name):
+                if points.shape[0] > 2:
+                    drawn.append((points, colour, dash))
+        for polyline, colour, dash in drawn:
             polyline = np.asarray(polyline, float)
             if polyline.ndim == 2 and polyline.shape[0] > 2:
                 axes.plot(
@@ -213,32 +240,21 @@ def render(receipt, fields, destination):
     zoom.set_xlim(saddle[0] - half, saddle[0] + half)
     zoom.set_ylim(saddle[1] - half, saddle[1] + half)
 
-    lobe = separatrix["state_lobe_bearing_deg"]
-    labelled.append(
-        _ray(
-            zoom,
-            saddle,
-            lobe,
-            0.55 * half,
-            STATE_COLOR,
-            "lobe %.1f%s" % (lobe, DEG),
-            0.07 * half,
-        )
-    )
-    for index, pair in enumerate(separatrix["legs"][:2]):
-        labelled.append(
-            _ray(
-                zoom,
-                saddle,
-                pair["state_bearing_deg"],
-                0.55 * half,
-                STATE_COLOR,
-                "leg %d chord %.1f%s" % (index, pair["state_bearing_deg"], DEG),
-                -0.07 * half,
-                width=1.0,
-                head=False,
+    if angles is not None:
+        for entry in angles["state"]["asymptotic"]["directions"]:
+            direction = np.asarray(entry["unit"], float)
+            both = np.concatenate(
+                [saddle[None, :] - 1.6 * half * direction[None, :],
+                 saddle[None, :] + 1.6 * half * direction[None, :]]
             )
-        )
+            zoom.plot(
+                both[:, 0],
+                both[:, 1],
+                color=ASYMPTOTE,
+                linewidth=0.9,
+                linestyle=(0, (1, 2)),
+                zorder=7,
+            )
 
     figure.legend(
         handles=[
@@ -290,6 +306,14 @@ def render(receipt, fields, destination):
                 linewidth=1.4,
                 label="poloidal flux, field of the currents",
             ),
+            Line2D(
+                [],
+                [],
+                color=ASYMPTOTE,
+                linewidth=1.2,
+                linestyle=(0, (1, 2)),
+                label="X-arm asymptotes at the null",
+            ),
         ],
         loc="upper center",
         ncol=3,
@@ -314,10 +338,16 @@ def main():
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--fields", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--angles", type=Path, default=None)
     arguments = parser.parse_args()
     receipt = json.loads(arguments.receipt.read_text(encoding="utf-8"))
     fields = dict(np.load(arguments.fields))
-    print(json.dumps(render(receipt, fields, arguments.output)))
+    angles = (
+        json.loads(arguments.angles.read_text(encoding="utf-8"))
+        if arguments.angles is not None
+        else None
+    )
+    print(json.dumps(render(receipt, fields, arguments.output, angles)))
 
 
 if __name__ == "__main__":

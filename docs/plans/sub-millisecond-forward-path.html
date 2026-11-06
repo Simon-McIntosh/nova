@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="190">
+<meta name="plan-version" content="191">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -665,6 +665,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T151327016765-review-of-bank-solve-trace-head-1a40db649fa0-figure" data-who="reckon-build" data-when="2026-11-06T15:23:06.255Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T144026733366-bank-solve-trace-head at head 1a40db649fa005e3e1c60783067c19148152c50d: parsed, read-only, six rubric items recorded, no blocking finding, two non-blocking findings (the two panels share one axis title across a twenty-fold scale difference, and the axis title does not state that each plotted solve is the sixteen-slice batch total); the render is clean on clipping (zero text pixels in the outer 3 px frame), label collisions (10 px minimum label-to-marker gap), and contrast (text 7.9:1, grey series 3.11:1, blue series 6.91:1).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T144026733366-bank-solve-trace-head" data-who="reckon-build" data-when="2026-11-06T15:09:03Z">
+    <div class="r-comment-body"><p>[Current solve attribution](/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html#bank-solve-trace-head-landing): two fresh H200 processes from one warm cache agree on eight reads per lane and 66215 launches at sixteen slices; 642.945–643.051 ms unprofiled batch wall, 606.646–606.921 ms device, closure below 0.008 ms. Jacobian 160.240–160.331 ms, residual 127.717–127.861 ms and candidates 104.287–104.411 ms dominate; per-update device cost 47.087 ms versus read-plus-certification 36.730 ms. Historical comparison and checked figure committed.</p></div>
 </div>
 </section>
 </main>

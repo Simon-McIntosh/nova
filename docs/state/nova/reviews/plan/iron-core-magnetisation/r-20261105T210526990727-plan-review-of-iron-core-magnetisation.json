@@ -157,6 +157,16 @@
       "note": "s9 now waits on s6 and s8 in plan-section-depends-on, so the limb-corrected model exists before validation (cc22ac1a0).",
       "reason": "",
       "when": "2026-11-06T19:50:11.941762+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a78 done-when (2) states its tolerance: the toroidal average agrees with the axisymmetric \u00a76 result beyond 2 m from the legs to within 2 % (cc22ac1a0).",
+      "reason": "",
+      "when": "2026-11-06T19:50:29.005827+00:00"
     }
   ],
   "responses": {
@@ -174,9 +184,9 @@
       "by": "",
       "commit": "fad7c7e5f5c44fe28792058d5be2ca7e5929c640",
       "commit_basis": "edit",
-      "note": "\u00a73 done-when (1) adds a negative control: reversing one cell's edge normals in the device build must break the agreement (fad7c7e5f)",
+      "note": "\u00a78 done-when (2) states its tolerance: the toroidal average agrees with the axisymmetric \u00a76 result beyond 2 m from the legs to within 2 % (cc22ac1a0).",
       "reason": "",
-      "when": "2026-11-06T19:45:54.579232+00:00"
+      "when": "2026-11-06T19:50:29.005827+00:00"
     },
     "evidence_paths-1": {
       "action": "acted",

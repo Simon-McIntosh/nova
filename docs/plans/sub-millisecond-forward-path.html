@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="178">
+<meta name="plan-version" content="179">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -628,7 +628,10 @@
     <div class="r-comment-body"><p>reviewed run r-20261106T112206904285-bank-test-repin at base 78820952c16e00c5a5aff91ffa0b34d782c619e6 through head b06ee46c3c46cd16fd95fde7fdcedd3a83348193 as pass, 97/100 (goal_fidelity 19, evidence 15, scope_discipline 18, durability 16, fit 17, reuse 12), with four non-blocking findings and no added failures</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T124446382860-review-of-bank-repin-followups-5d822c1aea01" data-who="reckon-build" data-when="2026-11-06T12:58:18.230Z">
-    <div class="r-comment-body"><p>Review of r-20261106T122712521073-bank-repin-followups at head 5d822c1ae records six scores (goal_fidelity 19, evidence 18, scope_discipline 18, durability 19, fit 16, reuse 16), added_failure_count 0, and one non-blocking finding against scripts/prototypes/bank_test_repin/compare.py:42; the node&#x27;s four follow-up repairs are each answered by a recorded red case.</p></div>
+    <div class="r-comment-body"><p>Review of r-20261106T122712521073-bank-repin-followups at head 5d822c1ae records six scores (goal_fidelity 19, evidence 18, scope_discipline 18, durability 19, fit 16, reuse 16), added_failure_count 0, and one non-blocking finding against scripts/prototypes/bank_test_repin/compare.py:42; the node's four follow-up repairs are each answered by a recorded red case.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T122712521073-bank-repin-followups" data-who="reckon-build" data-when="2026-11-06T12:42:56Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-test-repin.html#bank-repin-followups-landing — suite runner returns 1 for the historical stale-pin arm and 0 for fresh base/head arms (23 passed each); one-ULP controls detect 1.3877787807814457e-17 on both hosts; exact identity assertion rejects a non-identity permutation (1 failed, EXIT=1). Fleet receipts were recovered with all twelve field digests identical to the original record.</p></div>
 </div>
 </section>
 </main>

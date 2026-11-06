@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/h200_test_lane/run.sh",
+    "scripts/nova_lane/standing_suite.sh"
+  ],
+  "completed_at": "2026-11-06T20:08:07.402Z",
+  "dispatched_at": "2026-11-06T20:01:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "an empty --cores value means the caller supplied no count, and the per-rung default is the intended result",
+      "recorded_at": "2026-11-06T20:16:13.102681+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/nova_lane/run.sh",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "non-blocking: an explicit empty --cores value falls through rung_cores' non-empty test and is silently replaced by the per-rung default, so a caller passing --cores \"$N\" with N unset gets a completed submission at 4 or 7 cores instead of a refusal, where the previous single default made the same slip harmless."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit from 8892f2c287e1c3014a953d66b624a16129c3f060 to 44096669c8ed797a11ab17cb3a8667cf7808f13e; one commit, three files, help text plus rung_cores plus two call sites in run.sh, two new dry-run tests, and one spliced AGENTS.md sentence.",
+    "done_when": "the done_when names tests/test_nova_lane_launcher.py, a negative control and the AGENTS.md sentence; gate-head.log records 14 passed EXIT=0, gate-base.log 12 passed EXIT=0, and negative-control.log records 1 failed / 13 passed EXIT=1 on test_dry_run_requests_four_cores_on_the_gpu_rungs.",
+    "goal": "the goal is that GPU rungs of scripts/nova_lane/run.sh default to 4 cores; run.sh:65-77 adds rung_cores (h200/titan 4, cpu 7) and run.sh:328 and run.sh:401 pass its value to sbatch on both the dry-run and submission paths, with --cores still overriding.",
+    "manifest": "read the reviewed manifest.md; it records status complete, the head commit 44096669c, both suite arms with exit_status 0 and empty failure_ids, the negative-control log path, and rubric lines for all six dimensions.",
+    "write_paths": "read the three declared paths against the diff at 8892f2c..44096669c; the 67 added lines touch only scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and AGENTS.md."
+  },
+  "justifications": {
+    "durability": "tests/test_nova_lane_launcher.py:82-85 assert the dry-run lines against literal 4/4/7 values independent of any input the test supplies, and negative-control.log shows the case fails when a single cores=7 default is restored.",
+    "evidence": "gate-head.log:10 records \"14 passed in 13.08s\" and EXIT=0 while gate-base.log:6 records \"12 passed\" at 8892f2c, and tests/test_nova_lane_launcher.py:82 is the same literal assertion the negative control reddens.",
+    "fit": "scripts/nova_lane/run.sh:65-77 mirrors the existing rung_platforms/rung_sbatch_flags dispatch functions and introduces no name the repository's naming rules forbid.",
+    "goal_fidelity": "scripts/nova_lane/run.sh:65 rung_cores resolves 4 on h200 and titan and 7 on cpu, and run.sh:401 supplies it to the submitting sbatch line, with ${cores} preserved as the override at run.sh:66.",
+    "reuse": "rung_cores extends the per-rung resolver family already owned by scripts/nova_lane/run.sh:55-80 rather than adding a second mechanism; the only other 4-core literal is scripts/h200_test_lane/prewarm.sh:217, a separate sbatch the brief placed out of scope.",
+    "scope_discipline": "the diff at 44096669c touches only scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and AGENTS.md, and AGENTS.md:478-480 splices a single sentence without rewriting the paragraph."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261106T200006906521-review-of-nova-lane-gpu-cores-44096669c8ed",
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_head_sha": "44096669c8ed797a11ab17cb3a8667cf7808f13e",
+  "reviewed_run_id": "r-20261106T195140206605-nova-lane-gpu-cores",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T20:19:56.763260+00:00",
+  "total": 115
+}

@@ -25,6 +25,7 @@ log="$run/floor.log"
 command=("$python" -P -m scripts.prototypes.bank_saddle_derivatives.floor --run "$run/floor" --revision "$revision")
 printf '# revision: %s tree: %s command: PYTHONPATH=%q NOVA_COMMON_SEEDS=%q' "$revision" "$scratch/source" "$PYTHONPATH" "$common" > "$log"
 printf ' %q' "${command[@]}" >> "$log"; printf '\n' >> "$log"
+head -n 1 "$log"
 set +e
 (cd "$scratch/source"; "${command[@]}") >> "$log" 2>&1
 result=$?

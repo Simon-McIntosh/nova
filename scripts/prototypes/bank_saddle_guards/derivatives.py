@@ -7,6 +7,8 @@ configure_dtypes()
 
 import argparse
 from pathlib import Path
+import shlex
+import sys
 
 import jax
 import jax.numpy as jnp
@@ -47,6 +49,11 @@ def main():
     parser.add_argument("--arm", choices=("base", "head"), required=True)
     parser.add_argument("--compare-only", action="store_true")
     args = parser.parse_args()
+    print(
+        f"# revision: {args.revision} tree: {Path.cwd().resolve()} "
+        f"command: {shlex.join(sys.orig_argv)}",
+        flush=True,
+    )
     print(
         f"revision={args.revision} nova={nova.__file__} "
         f"module={fixed_points.__file__} cwd={Path.cwd().resolve()}",

@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "nova/equilibrium/support_read.py:1466 (newton_step calls _block_gmres), nova/equilibrium/support_read.py:1555 (step_batch), nova/equilibrium/support_read.py:1776 and :1791 (solve_batch), nova/equilibrium/support_read.py:1913 (public solve entry calling solve_batch)",
+  "completed_at": "2026-11-06T10:57:00.863Z",
+  "dispatched_at": "2026-11-06T10:45:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The test hardcodes the restart width of 20 that production uses today. The next node to edit tests/test_bank_newton_step.py should derive it from support_read; on its own it is not worth a resume.",
+      "recorded_at": "2026-11-06T11:05:11.637756+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The worker's finding stands: a breakdown zeroes the next basis vector, so the identity seed cannot reach the update on that path. The capped-cycle test is the guard, the negative control reddens it, and the breakdown test documents the safe path.",
+      "recorded_at": "2026-11-06T11:05:15.416022+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The reviewer re-ran both tests and reproduced 3.91e-16 and 4.69e-16, so the values are accurate. Only the log capture omitted stdout.",
+      "recorded_at": "2026-11-06T11:05:18.892612+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The reference relies on the test matrix's block preconditioner being an identity permutation. The next node to edit this test should assert that; it is not worth a resume.",
+      "recorded_at": "2026-11-06T11:05:24.971742+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f8e79088952",
+      "line": 570,
+      "severity": "non-blocking",
+      "text": "assert int(steps) == 5 and int(steps) % min(20, size) != 0 hardcodes 20, the production restart width at nova/equilibrium/support_read.py:1342, instead of deriving it; if that width ever fell to 5 or below the cycle would run to its width rather than to the cap, the test would still pass at 1e-10, and the only path on which the unwritten-column defect can occur would silently lose its coverage."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f27a4e48c64",
+      "line": 478,
+      "severity": "non-blocking",
+      "text": "the brief required the breakdown test to be the arm the restored identity seed reddens, and it is not: logs/negative-control-eye-breakdown.log line 6 shows BREAKDOWN_UPDATE error 3.914e-16 with eye restored, so the assertion holds whatever the seed is, because a breakdown zeroes the next basis vector and the junk columns scale zeros; the delivered control reddens the capped-cycle test at 5.642e-3 instead, which is the honest substitute and is recorded, but the test reading 'breakdown' protects nothing the negative control demonstrated."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f5a79fc3369",
+      "line": 560,
+      "severity": "non-blocking",
+      "text": "the per-test values the landing record quotes as 4.69e-16 and 3.91e-16 are printed only here and at line 502, and both head-arm suite runs captured stdout without -s, so no log a reader can open carries either number; the 3.91e-16 figure appears only in the mutated negative-control log. Re-running the two tests at head reproduced 3.9137e-16 and 4.6893e-16, so the values are accurate, but the record's artifact line quotes a metric no log holds."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "id": "f69bad1cab4",
+      "line": 516,
+      "severity": "non-blocking",
+      "text": "_arnoldi_least_squares_reference applies the raw matrix, while nova/equilibrium/support_read.py:1349-1350 runs Arnoldi on the block-preconditioned operator and right-hand side; the two agree here only because _block_preconditioner of the chosen near-diagonal matrix happens to be the identity permutation, a property the test neither asserts nor documents, so any later change to the test matrix would redden this arm for a reason unrelated to the defect it guards."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 9c5a105b5 to 3aa79b52c: e93cd2d5d replaces the eye seed with zeros, masks unwritten columns before the QR and repairs the triangular diagonal; 070055ea1 rebuilds the cycle toy factor from _block_preconditioner without touching any assertion; 3aa79b52c adds only the 49-line evidence fragment.",
+    "done_when": "the brief's measures are met and recorded: tests/test_bank_newton_step.py:478 and :537 compare the returned update against independent float64 references at 1e-10, the negative control in logs/negative-control-eye-breakdown.log reddens the capped-cycle arm at 5.642e-3 with EXIT=1, the paired arms in scratch/paired/{base,head}-suite.log carry per-file summaries and identical failure ids, and device-{base,head}.log record the sixteen-slice paired walls with the fragment's per-lane gaps.",
+    "goal": "nova/equilibrium/support_read.py:1397-1405 at head 3aa79b52c zeroes every Hessenberg column no Arnoldi step wrote before the QR, sets those columns' zero diagonal to one so the triangular solve stays finite, and masks the basis in the update, so only written columns enter the least-squares; tests/test_bank_solve_cycle.py:42 now builds the toy factor's block_inverse and indices from support_read._block_preconditioner rather than a dense identity and all-zero gather.",
+    "manifest": "read; it records three commits, the paired base and after suite receipts with completed true and the same single pre-existing failure, the negative-control log and note, the H200 paired walls, and status complete, and its evidence_inputs correctly declines the breakdown clause the brief expected to reproduce.",
+    "write_paths": "the reviewed manifest declares nova/equilibrium/support_read.py, tests/test_bank_newton_step.py, tests/test_bank_solve_cycle.py, scripts/prototypes/bank_krylov_cleanup, the bank-krylov-cleanup evidence fragment and its figures directory; all four paths in the diff sit inside that set and the concurrent-node files nova/equilibrium/current.py and topology.py are untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to keep unwritten Arnoldi columns out of the bank least-squares and to make the cycle toy factor carry what its fields mean; nova/equilibrium/support_read.py:1397-1405 does the first and tests/test_bank_solve_cycle.py:42 does the second.\nVERDICT done_when: the brief's measures are recorded rather than claimed: tests/test_bank_newton_step.py:515 and :571 assert the update against independent float64 references at 1e-10, logs/negative-control-eye-breakdown.log carries BREAKDOWN_UPDATE and CAP_UPDATE lines and ends EXIT=1 on the capped-cycle arm, and scratch/paired/base-suite.log and head-suite.log carry per-file summaries 16/18, 3/3, 10/10, 1 failed 4 passed with the same failure id at both arms.\nVERDICT write_paths: every one of the four paths in git diff 9c5a105b5 3aa79b52c is inside the write paths the reviewed manifest declares, the worktree is clean, and nova/equilibrium/current.py and topology.py are untouched.\nVERDICT manifest: read; it names three commits, the paired suite receipts with completed true and the pre-existing booking failure, the negative-control log and note, the H200 base and head walls and 5.64e-3 as the control's value, and status complete; its evidence_inputs states plainly that the breakdown clause of the brief does not reproduce.\nVERDICT diff: read all three commits against base 9c5a105b5: e93cd2d5d changes 8 lines of support_read.py and adds 96 lines of test, 070055ea1 changes 5 lines of the cycle toy, 3aa79b52c adds the 49-line fragment and nothing else.\nCALL_SITES: nova/equilibrium/support_read.py:1466 (newton_step calls _block_gmres), nova/equilibrium/support_read.py:1555 (step_batch), nova/equilibrium/support_read.py:1776 and :1791 (solve_batch), nova/equilibrium/support_read.py:1913 (public solve entry calling solve_batch)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1397-1405 zeros the unwritten columns before the QR and adds the unit diagonal only where the triangular solve would otherwise be singular, so the least-squares sees written columns only, with the one deviation that the reversion guard lands on the capped cycle rather than the breakdown path the brief named.\nSCORE evidence: 17\nJUSTIFICATION evidence: scratch/paired/head-suite.log line 1 names revision 070055ea1 and the worktree, each file ends in a summary and the run ends EXIT=1 on the pre-existing booking failure, device-head.log:3 names the imported support_read.py path and the CUDA device, and the only gap is that the per-test update errors quoted in the landing record are printed at tests/test_bank_newton_step.py:561 and captured on pass so no log holds them.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 9c5a105b5 3aa79b52c lists four paths, all inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: the capped-cycle assertion at tests/test_bank_newton_step.py:571 reddens at 5.642e-3 when the eye seed is restored (logs/negative-control-eye-breakdown.log line 7), so it fails on exactly the regression it guards, while the width hardcoded at line 570 and the breakdown arm's independence from the seed cap what the pair protects.\nSCORE fit: 19\nJUSTIFICATION fit: ruff check passes unchanged over nova/equilibrium/support_read.py and both test files, and the added names and comments follow the file's private-helper style with no plan label, version suffix or ticket reference.\nSCORE reuse: 17\nJUSTIFICATION reuse: the production change extends the existing _block_gmres and reuses _block_preconditioner rather than adding a solver, and the one added definition, _arnoldi_least_squares_reference at tests/test_bank_newton_step.py:516, re-implements the Arnoldi mechanism nova/equilibrium/fixed_point.py:837 owns, deliberately and correctly, because an independent oracle cannot call the owner it certifies.\nFINDING tests/test_bank_newton_step.py:570 non-blocking: the assert hardcodes 20 for the production restart width, so a later width of 5 or less would leave the capped-cycle arms green while the cap path, the only one on which the defect can occur, stopped being exercised.\nFINDING tests/test_bank_newton_step.py:478 non-blocking: the brief made the breakdown test the arm the restored identity seed must redden and it is not, because a breakdown zeroes the next basis vector so the seed cannot reach the update (logs/negative-control-eye-breakdown.log line 6, 3.914e-16, passing); the delivered control reddens the capped-cycle arm instead, which is recorded and is the right substitute.\nFINDING tests/test_bank_newton_step.py:560 non-blocking: the two per-test update errors quoted in the landing record are printed only under -s and the head suite arm ran without it, so neither 4.69e-16 nor 3.91e-16 appears in a log a reader can open; re-running the two tests at head reproduced 3.9137e-16 and 4.6893e-16.\nFINDING tests/test_bank_newton_step.py:516 non-blocking: the reference Arnoldi applies the raw matrix while the code under test applies the block preconditioner, and the two agree only because _block_preconditioner of this near-diagonal matrix is the identity, an assumption the test neither asserts nor states.",
+  "review_run_id": "r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d",
+  "reviewed_base_sha": "9c5a105b5f35309a4fbdde84c5c06c4077312ff8",
+  "reviewed_head_sha": "3aa79b52c45dd7fbb06da8fb8c3d20faa30dabc7",
+  "reviewed_run_id": "r-20261106T092400411415-bank-krylov-cleanup",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T10:57:02.686255+00:00",
+  "total": 109
+}

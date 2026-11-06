@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="184">
+<meta name="plan-version" content="185">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -647,6 +647,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T101256601880-review-of-bank-booking-determinism-684031cc1900" data-who="reckon-build" data-when="2026-11-06T10:31:01.517Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T090435478592-bank-booking-determinism at reviewed head 684031cc1900c3031abaf7ca738b8f12a08e89e4 against base cb42f656f76a7d7e56da8a53d4754c22d131bdc0 records a parsed rubric (goal_fidelity 5, evidence 8, scope_discipline 20, durability 7, fit 16, reuse 5), added_failure_count 0, and two blocking findings: the done_when's changed operation in nova/equilibrium/current.py with base-against-head walls was never produced, and the delivered recommendation prescribes a global XLA flag the brief excluded while its own unset arm already passed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T104036666681-review-of-bank-krylov-cleanup-3aa79b52c45d" data-who="reckon-build" data-when="2026-11-06T10:57:00.863Z">
+    <div class="r-comment-body"><p>review of bank-krylov-cleanup at 9c5a105b5..3aa79b52c scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 19, reuse 17, adds no failure over the base arm, and files four non-blocking findings; the Arnoldi column fix is correct and its capped-cycle guard reddens at 5.642e-3 under the recorded negative control.</p></div>
 </div>
 </section>
 </main>

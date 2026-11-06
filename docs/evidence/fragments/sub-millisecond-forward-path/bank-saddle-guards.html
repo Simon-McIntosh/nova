@@ -1,0 +1,101 @@
+<section id="bank-saddle-guards-record">
+<h2 id="bank-saddle-guards-landing">Production saddle wiring guarded; contraction arithmetic retained</h2>
+<p><code>BellField.curvature_coefficients</code> now calls
+<code>pairedfloat.contract</code> for bank rows and
+<code>pairedfloat.contract_paired</code> for the Bell transform. The shared owners
+accept an explicit array axis and namespace and retain the same balanced
+reduction order. The local <code>_paired_sum</code> is removed.
+The production <code>support_read.py</code> is unchanged.</p>
+<h3 id="bank-saddle-guards-wiring">The guard reaches the production field</h3>
+<p><code>test_production_read_preserves_saddle_bank_derivatives</code> calls
+<code>support_read.read</code> and observes the third and fourth derivatives
+inside its real topology read with a JAX callback. It leaves the field builder
+and derivative arithmetic intact, requires a valid rebuilt read, and compares
+the derivatives at the solved saddle with the existing 80-digit bank reference.
+The original tolerance remains <code>rtol=2e-13, atol=2e-13</code>.</p>
+<p>The missing guard was reproduced at base: removing <code>bank_rows</code>,
+<code>bank_moments</code> and <code>bank_exterior</code> from the call inside
+<code>support_read.read</code> in a scratch archive left both original tests
+green (<code>2 passed, EXIT=0</code>,
+<code>reproduction-test_saddle_derivatives.log</code>).
+With the guard, the identical mutation produces
+<code>2 failed, 6 deselected, EXIT=1</code> in
+<code>negative-test_saddle_derivatives.log</code>. Both production-read cases
+fail: the largest fourth-derivative error is
+<code>1.2570500196318335e-12</code>. The unmutated file passes eight tests,
+including four NumPy/JAX odd/even cancellation cases.</p>
+<p>The separate diverted 550-cell certificate run also passes all eight tests.
+Across the trial and saved converged saddle, the production read's largest
+third/fourth derivative error against the reference is
+<code>4.4408920985006262e-16</code>
+(<code>certificate-test_saddle_derivatives.log</code>).</p>
+<h3 id="bank-saddle-guards-parity">Shared-state derivative parity</h3>
+<p>Fresh base and head processes use the same saved trial moments, converged
+moments and root seeds. The trial seed is built once at base; the converged
+state is lane 12 of the preceding derivative measurement's saved reference
+states. The common input archive has SHA-256 <code>5350219ed82da212dfce070b8fb53c1e56e67d662362362e409c1778fa70ddb5</code>.
+All four third/fourth derivative arrays, and both saddle positions, have
+maximum absolute base-to-head difference <strong>0</strong>, below the
+<code>1e-15</code> bound. The comparator checks nonzero finite data and detects
+a deliberate <code>1e-12</code> change in every array. Receipts:
+<code>derivatives-base.log</code>, <code>derivatives-head.log</code>,
+<code>derivatives-base.npz</code>, <code>derivatives-head.npz</code> and
+<code>parity-controls.log</code>.</p>
+<h3 id="bank-saddle-guards-suites">Paired Sirius suites</h3>
+<p>Job <code>1307441</code> runs one fresh pytest process per file, each with its
+own basetemp, with both arms in one seven-core Sirius allocation. All four
+named files are selected in full; no standalone test file imported
+<code>pairedfloat</code> at base. The owner checks are now in the saddle file.</p>
+<table><thead><tr><th>File</th><th>Base</th><th>Head</th></tr></thead><tbody>
+<tr><td>test_saddle_derivatives.py</td><td>2 passed</td><td>8 passed</td></tr>
+<tr><td>test_support_read.py</td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td></tr>
+<tr><td>test_bank_newton_step.py</td><td>18 passed</td><td>18 passed</td></tr>
+<tr><td>test_bank_step_booking_batch.py</td><td>2 passed, 7 skipped</td><td>2 passed, 7 skipped</td></tr>
+</tbody></table>
+<p>Total: base <strong>35 passed, 9 skipped</strong>; head
+<strong>41 passed, 9 skipped</strong>; zero added failures, both arms
+<code>EXIT=0</code>. The unchanged skips are two limited-state saddle cases
+and seven optional archived-matrix, timing or H200 Jacobian cases.
+The certificate and mutation controls run after the paired file suites.</p>
+<h3 id="bank-saddle-guards-floor">H200 residual floor</h3>
+<p>Job <code>1307442</code> runs the landed noise-floor instrument on one NVIDIA
+H200 NVL with four CPUs and 48 GB host memory. It starts within the prescribed
+ten-minute pending bound and completes with <code>EXIT=0</code>.
+The shared seed population is copied from the preceding derivative record,
+SHA-256 <code>72e45171871d8b7db425b01fadc94a4c19c6614abcfd0e30373ac0e59eba758f</code>; <code>XLA_FLAGS</code> is unset.
+The instrument applies 64 perturbations per lane. Every median is below
+<code>1e-11</code>, ranging from <code>1.1297629498585593e-12</code> to
+<code>4.8245851758110803e-12</code>.</p>
+<table><thead><tr><th>Lane</th><th>Median fresh residual</th></tr></thead><tbody>
+<tr><td>0</td><td>1.368682944757893e-12</td></tr>
+<tr><td>1</td><td>1.3891110484109959e-12</td></tr>
+<tr><td>2</td><td>3.0055957722652238e-12</td></tr>
+<tr><td>3</td><td>1.2576606422953773e-12</td></tr>
+<tr><td>4</td><td>1.2789769243681803e-12</td></tr>
+<tr><td>5</td><td>3.1903368835628498e-12</td></tr>
+<tr><td>6</td><td>1.1297629498585593e-12</td></tr>
+<tr><td>7</td><td>4.8245851758110803e-12</td></tr>
+<tr><td>8</td><td>1.4637180356658064e-12</td></tr>
+<tr><td>9</td><td>2.3163693185779266e-12</td></tr>
+<tr><td>10</td><td>1.2150280781497713e-12</td></tr>
+<tr><td>11</td><td>1.3713474800169934e-12</td></tr>
+<tr><td>12</td><td>1.4424017535930034e-12</td></tr>
+<tr><td>13</td><td>3.822719918389339e-12</td></tr>
+<tr><td>14</td><td>1.2487788580983761e-12</td></tr>
+<tr><td>15</td><td>2.2666313270747196e-12</td></tr>
+</tbody></table>
+<p>All thirteen stage probes finish. The zero-injection residual is bit-for-bit
+identical to the plain residual, the zero direction is exact, and the whole-cell,
+conic-cell and normalization probes each detect a nonzero change. No discrete
+mask changes occur across the 64 perturbations. Receipts:
+<code>floor.log</code>, <code>device-job.log</code>, <code>floor/gpu.json</code>
+and <code>floor/gpu-residuals.npz</code>. No wall comparison is made.</p>
+<h3 id="bank-saddle-guards-provenance">Revisions and durable receipts</h3>
+<p>Base: <code>f6208aec84e35a0c91dce481dec479814ad3f452</code>. Measured product and test head:
+<code>e68064d0953e267c3cbaa87f849a88ae407ee84c</code>. Subsequent commits only strengthen receipt validation
+and record this evidence; the measured product and tests are unchanged.
+All raw logs, arrays and suite JSON receipts live under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T222958991931-bank-saddle-guards</code>. Reproduction and gate drivers are committed under
+<code>scripts/prototypes/bank_saddle_guards</code>. The coordinator owns
+integration, merged verification and section closure.</p>
+</section>

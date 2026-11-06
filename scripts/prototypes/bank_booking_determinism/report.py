@@ -23,6 +23,48 @@ def within_budget(gaps, limits):
     )
 
 
+def stable_within_setting(summary):
+    """Observe repeated-process agreement, without inferring cold determinism."""
+    return (
+        summary["complete"] and summary["byte_identical"] and summary["identical_reads"]
+    )
+
+
+def measurement_protocol():
+    """State the shared-cache condition supported by the measured repeats."""
+    return """
+<p><strong>Established measurement condition: one shared, warm compilation cache
+per measured revision.</strong> A paired timing must give each arm its own cache,
+warm that cache once, then measure each arm in at least two fresh processes
+sharing that arm's warmed cache. Use
+<code>scripts/prototypes/bank_booking_determinism/measurement.sh
+CACHE_FOR_REVISION COMMAND ...</code>
+for the warm-up and each measured process. The wrapper leaves XLA_FLAGS unset
+and applies the measured cache thresholds; the caller owns the repeat protocol.</p>
+<p>The unset arm already had byte-identical initial moments and
+<code>read.axis_flux</code> across five processes, with seven reads on every lane.
+The read and whole solve missed on the first process and hit the same keys on
+the other four. <code>deterministic_ops</code> remains untested for separate cold
+compilations, which this experiment did not isolate, and is not recommended.</p>
+<p><strong>The original booking hypothesis was falsified.</strong> The first
+difference was upstream of booking, in the compiled read: the axis-flux value
+selected at <code>nova/equilibrium/topology.py:3287</code> already differed before
+<code>current.book</code> ran. That difference disappears with a shared cache.
+The booking scatter-adds therefore do not explain the first divergence.</p>
+<p><strong>What the report measures.</strong> Its
+<code>stable_within_setting</code> predicate checks each setting's agreement with
+itself across processes. It cannot distinguish a deterministic setting from
+one that is stable under the shared cache, and it does not test agreement
+between settings or separate cold compilations. Precision remains a separate
+check against the unset arm.</p>
+<p><strong>What the H200 lane would need.</strong> Give each measured revision
+its own shared compilation cache, warm each arm once, and repeat each arm in at
+least two fresh processes. Record the revision, effective flags, cache outcomes,
+initial-moment fingerprint and per-lane reads for each process. No global XLA
+flag is prescribed. No lane launcher, product source or test file was edited.</p>
+"""
+
+
 def table(identifier, headings, rows):
     return (
         f'<table id="bank-booking-determinism-{identifier}"><thead><tr>'
@@ -43,6 +85,10 @@ def main():
     parser.add_argument("run", type=Path)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
+    prior = args.fragment.read_text()
+    allocation_record = re.search(
+        r"<p>All fifteen processes ran in H200 allocation .*?</p>", prior, re.DOTALL
+    )
     outcomes = json.loads((args.run / "processes.json").read_text())
     assert len(outcomes) == 15
     loaded = {}
@@ -195,21 +241,21 @@ def main():
                     f"{record['solve_compile_seconds']:.6f}",
                 ]
             )
-    good = [
-        name
-        for name, row in settings.items()
-        if row["byte_identical"] and row["identical_reads"] and row["precision_passed"]
+    stable_settings = [
+        name for name, row in settings.items() if stable_within_setting(row)
     ]
-    recommendation = (
-        "Settings meeting byte identity, identical reads and the precision budget: "
-        + ", ".join(good)
-        if good
-        else "No setting establishes byte identity with identical reads "
-        "and the precision budget."
+    stability_summary = (
+        "Settings stable with themselves across fresh processes: "
+        + ", ".join(stable_settings)
+        if stable_settings
+        else "No setting is stable with itself across fresh processes."
     )
     text = '<section id="bank-booking-determinism-environments">\n'
     text += "<h2>Compiler environment comparison in one H200 allocation</h2>\n"
-    text += "<p>" + escape(recommendation) + "</p>\n"
+    text += measurement_protocol()
+    if allocation_record:
+        text += allocation_record[0] + "\n"
+    text += "<p>" + escape(stability_summary) + "</p>\n"
     text += "<p>Product source and tests are unchanged at base "
     text += "<code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code>. "
     text += "Each setting runs five fresh processes, each with one warm-up and three "
@@ -329,7 +375,6 @@ def main():
     text += "<p>Raw process logs, arrays, cache keys and per-lane "
     text += "precision receipts: <code>"
     text += escape(str(args.run)) + "</code>.</p>\n</section>\n"
-    prior = args.fragment.read_text()
     marker = '<section id="bank-booking-determinism-landing">'
     prior = prior[prior.index(marker) :]
     args.fragment.write_text(text + "\n" + prior)
@@ -343,7 +388,7 @@ def main():
         ),
         flush=True,
     )
-    print("QUALIFYING_SETTINGS", json.dumps(good), flush=True)
+    print("STABLE_WITHIN_SETTINGS", json.dumps(stable_settings), flush=True)
     print("PRECISION_CONTROL_REJECTED", json.dumps(control), flush=True)
     print("EXIT=0", flush=True)
 

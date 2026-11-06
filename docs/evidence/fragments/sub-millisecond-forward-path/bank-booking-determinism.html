@@ -1,38 +1,41 @@
 <section id="bank-booking-determinism-environments">
 <h2>Compiler environment comparison in one H200 allocation</h2>
-<p><strong>Recommended measurement environment: deterministic GPU operations
-with one shared persistent compilation cache.</strong> Use
-<code>scripts/prototypes/bank_booking_determinism/measurement.sh CACHE_ROOT COMMAND ...</code>
-before the Python measurement starts. The wrapper sets the exact measured flag,
-<code>--xla_gpu_deterministic_ops=true</code>, and the measured cache thresholds.</p>
-<p>At sixteen slices its median whole-solve wall is <strong>1.879660 s</strong>
-against <strong>1.857978 s</strong> with flags unset: <strong>+1.17%</strong>.
-Both have seven reads on all sixteen lanes and the same initial moments and
-converged quantities. Disabling autotuning also repeats exactly, but changes
-the path to ten reads per lane and costs <strong>2.483794 s (+33.68%)</strong>.
-All three settings have zero within-setting elementwise differences across
-five processes, including all 88 captured booking intermediates.</p>
-<p><strong>Scope of the inference.</strong> Flags unset also passes with this
-shared cache, so this experiment does not establish that either flag is
-necessary or that the deterministic flag alone cures independent cold
-compilations. The unset read and solve each miss on the first process and hit
-the same keys on the other four. The measured recommendation keeps the explicit
-deterministic policy with its small observed cost; disabling all autotuning
-pays for a different convergence path. The earlier fresh-process difference
-and the present cache-controlled result are retained separately.</p>
-<p><strong>What the H200 lane would need.</strong> Set the recommended flag
-before Python starts, use one durable cache root across the compared processes,
-and prewarm with that same flag: the three settings have different whole-solve
-cache keys. Keep the effective flags, actual cache outcomes, initial-moment
-fingerprint and per-lane reads in each receipt. The launcher must preserve those
-settings. No H200 lane launcher, product source or test file was edited here.</p>
+
+<p><strong>Established measurement condition: one shared, warm compilation cache
+per measured revision.</strong> A paired timing must give each arm its own cache,
+warm that cache once, then measure each arm in at least two fresh processes
+sharing that arm's warmed cache. Use
+<code>scripts/prototypes/bank_booking_determinism/measurement.sh
+CACHE_FOR_REVISION COMMAND ...</code>
+for the warm-up and each measured process. The wrapper leaves XLA_FLAGS unset
+and applies the measured cache thresholds; the caller owns the repeat protocol.</p>
+<p>The unset arm already had byte-identical initial moments and
+<code>read.axis_flux</code> across five processes, with seven reads on every lane.
+The read and whole solve missed on the first process and hit the same keys on
+the other four. <code>deterministic_ops</code> remains untested for separate cold
+compilations, which this experiment did not isolate, and is not recommended.</p>
+<p><strong>The original booking hypothesis was falsified.</strong> The first
+difference was upstream of booking, in the compiled read: the axis-flux value
+selected at <code>nova/equilibrium/topology.py:3287</code> already differed before
+<code>current.book</code> ran. That difference disappears with a shared cache.
+The booking scatter-adds therefore do not explain the first divergence.</p>
+<p><strong>What the report measures.</strong> Its
+<code>stable_within_setting</code> predicate checks each setting's agreement with
+itself across processes. It cannot distinguish a deterministic setting from
+one that is stable under the shared cache, and it does not test agreement
+between settings or separate cold compilations. Precision remains a separate
+check against the unset arm.</p>
+<p><strong>What the H200 lane would need.</strong> Give each measured revision
+its own shared compilation cache, warm each arm once, and repeat each arm in at
+least two fresh processes. Record the revision, effective flags, cache outcomes,
+initial-moment fingerprint and per-lane reads for each process. No global XLA
+flag is prescribed. No lane launcher, product source or test file was edited.</p>
 <p>All fifteen processes ran in H200 allocation <strong>1306766</strong>, two
 CPU cores, one NVIDIA H200 NVL and 48 GB, in the order unset, deterministic,
 autotune-disabled. Every process log ends EXIT=0; the allocation completed in
 20 min 42 s. Each setting's whole-solve executable missed once and hit four
 times. These are sequential-block wall comparisons in one allocation.</p>
-
-<p>Settings meeting byte identity, identical reads and the precision budget: unset, deterministic, autotune-disabled</p>
+<p>Settings stable with themselves across fresh processes: unset, deterministic, autotune-disabled</p>
 <p>Product source and tests are unchanged at base <code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code>. Each setting runs five fresh processes, each with one warm-up and three timed converged solves. A process wall is the median of its three repeats; a setting wall is the median of its five process medians. Costs below are relative to the unset setting within this allocation.</p>
 <table id="bank-booking-determinism-environment-summary"><thead><tr><th>Setting</th><th>Effective XLA_FLAGS</th><th>Complete processes</th><th>Distinct moment hashes</th><th>Distinct axis flux values</th><th>Largest moment difference</th><th>Largest axis flux difference</th><th>Byte-identical</th><th>Identical reads</th><th>Median solve [ms / 16 slices]</th><th>Wall change [%]</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>unset</td><td>unset</td><td>5</td><td>1</td><td>1</td><td>0.0</td><td>0.0</td><td>True</td><td>True</td><td>1857.978155836463</td><td>0.0</td><td>9.890754881780595e-11</td></tr><tr><td>deterministic</td><td>--xla_gpu_deterministic_ops=true</td><td>5</td><td>1</td><td>1</td><td>0.0</td><td>0.0</td><td>True</td><td>True</td><td>1879.659716039896</td><td>1.1669437627845447</td><td>9.890754881780595e-11</td></tr><tr><td>autotune-disabled</td><td>--xla_gpu_autotune_level=0</td><td>5</td><td>1</td><td>1</td><td>0.0</td><td>0.0</td><td>True</td><td>True</td><td>2483.793929219246</td><td>33.68262277018215</td><td>9.897860309138196e-11</td></tr></tbody></table><table id="bank-booking-determinism-environment-processes"><thead><tr><th>Setting</th><th>Process</th><th>read.axis_flux</th><th>Reads, lanes 0–15</th><th>Median solve [ms / 16 slices]</th><th>Largest fresh residual</th></tr></thead><tbody><tr><td>unset</td><td>0</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1862.746259</td><td>9.890754882e-11</td></tr><tr><td>unset</td><td>1</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1858.889380</td><td>9.890754882e-11</td></tr><tr><td>unset</td><td>2</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1857.978156</td><td>9.890754882e-11</td></tr><tr><td>unset</td><td>3</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1848.155202</td><td>9.890754882e-11</td></tr><tr><td>unset</td><td>4</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1856.780885</td><td>9.890754882e-11</td></tr><tr><td>deterministic</td><td>0</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1885.340430</td><td>9.890754882e-11</td></tr><tr><td>deterministic</td><td>1</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1878.987590</td><td>9.890754882e-11</td></tr><tr><td>deterministic</td><td>2</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1879.659716</td><td>9.890754882e-11</td></tr><tr><td>deterministic</td><td>3</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1880.469276</td><td>9.890754882e-11</td></tr><tr><td>deterministic</td><td>4</td><td>0.035874324541243535</td><td>7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7</td><td>1878.557589</td><td>9.890754882e-11</td></tr><tr><td>autotune-disabled</td><td>0</td><td>0.035874324541243591</td><td>10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10</td><td>2478.821727</td><td>9.897860309e-11</td></tr><tr><td>autotune-disabled</td><td>1</td><td>0.035874324541243591</td><td>10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10</td><td>2484.888881</td><td>9.897860309e-11</td></tr><tr><td>autotune-disabled</td><td>2</td><td>0.035874324541243591</td><td>10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10</td><td>2486.192916</td><td>9.897860309e-11</td></tr><tr><td>autotune-disabled</td><td>3</td><td>0.035874324541243591</td><td>10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10</td><td>2482.805314</td><td>9.897860309e-11</td></tr><tr><td>autotune-disabled</td><td>4</td><td>0.035874324541243591</td><td>10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10</td><td>2483.793929</td><td>9.897860309e-11</td></tr></tbody></table><table id="bank-booking-determinism-environment-fingerprints"><thead><tr><th>Setting</th><th>Process</th><th>Initial-moment SHA-256</th></tr></thead><tbody><tr><td>unset</td><td>0</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>unset</td><td>1</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>unset</td><td>2</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>unset</td><td>3</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>unset</td><td>4</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>deterministic</td><td>0</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>deterministic</td><td>1</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>deterministic</td><td>2</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>deterministic</td><td>3</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>deterministic</td><td>4</td><td>f4c8f5f426b19cb0009c5c9fb9d357ae593b93f47cdd4e44f63ef68b3ad37624</td></tr><tr><td>autotune-disabled</td><td>0</td><td>0181197a78aafb1ebc30fa322481c4744f66e4e0dd464427e4c56540b5228fff</td></tr><tr><td>autotune-disabled</td><td>1</td><td>0181197a78aafb1ebc30fa322481c4744f66e4e0dd464427e4c56540b5228fff</td></tr><tr><td>autotune-disabled</td><td>2</td><td>0181197a78aafb1ebc30fa322481c4744f66e4e0dd464427e4c56540b5228fff</td></tr><tr><td>autotune-disabled</td><td>3</td><td>0181197a78aafb1ebc30fa322481c4744f66e4e0dd464427e4c56540b5228fff</td></tr><tr><td>autotune-disabled</td><td>4</td><td>0181197a78aafb1ebc30fa322481c4744f66e4e0dd464427e4c56540b5228fff</td></tr></tbody></table><p>All fifteen processes use the same persistent cache root: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T090435478592-bank-booking-determinism/environments/compilation-cache</code>. Caching is enabled with the normal one-second minimum compilation time and zero-byte default size threshold. Small programs can miss in every process because they do not qualify for persistence. Counts below come from actual JAX compiler cache lookup events, not from elapsed time. The first miss and later hits are the cache instrument’s positive control. Flags are set before each Python process starts; no lane launcher was edited.</p>
 <table id="bank-booking-determinism-environment-cache"><thead><tr><th>Setting</th><th>Process</th><th>Cache hits</th><th>Cache misses</th><th>Solve cache</th><th>Solve cache key</th><th>Solve compile/load [s]</th></tr></thead><tbody><tr><td>unset</td><td>0</td><td>0</td><td>299</td><td>miss</td><td>jit_solve-f1ec2dac6e83f60d3160ed5f7e122c81655d8b054464f42ecff23d3807b55861</td><td>76.608849</td></tr><tr><td>unset</td><td>1</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-f1ec2dac6e83f60d3160ed5f7e122c81655d8b054464f42ecff23d3807b55861</td><td>20.677120</td></tr><tr><td>unset</td><td>2</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-f1ec2dac6e83f60d3160ed5f7e122c81655d8b054464f42ecff23d3807b55861</td><td>20.678279</td></tr><tr><td>unset</td><td>3</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-f1ec2dac6e83f60d3160ed5f7e122c81655d8b054464f42ecff23d3807b55861</td><td>20.517022</td></tr><tr><td>unset</td><td>4</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-f1ec2dac6e83f60d3160ed5f7e122c81655d8b054464f42ecff23d3807b55861</td><td>20.380693</td></tr><tr><td>deterministic</td><td>0</td><td>0</td><td>299</td><td>miss</td><td>jit_solve-9ac627b9185035a8ccce0a6ad9db777fbe7ce0c4fe6fc439d9fee7e6983f12bc</td><td>66.734326</td></tr><tr><td>deterministic</td><td>1</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-9ac627b9185035a8ccce0a6ad9db777fbe7ce0c4fe6fc439d9fee7e6983f12bc</td><td>20.603728</td></tr><tr><td>deterministic</td><td>2</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-9ac627b9185035a8ccce0a6ad9db777fbe7ce0c4fe6fc439d9fee7e6983f12bc</td><td>20.563217</td></tr><tr><td>deterministic</td><td>3</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-9ac627b9185035a8ccce0a6ad9db777fbe7ce0c4fe6fc439d9fee7e6983f12bc</td><td>20.527519</td></tr><tr><td>deterministic</td><td>4</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-9ac627b9185035a8ccce0a6ad9db777fbe7ce0c4fe6fc439d9fee7e6983f12bc</td><td>20.697372</td></tr><tr><td>autotune-disabled</td><td>0</td><td>0</td><td>299</td><td>miss</td><td>jit_solve-817c4c00ac4b83e4b24a2b6a84d7b490575de0ecf8c123dc7936f853fc649ca7</td><td>63.334912</td></tr><tr><td>autotune-disabled</td><td>1</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-817c4c00ac4b83e4b24a2b6a84d7b490575de0ecf8c123dc7936f853fc649ca7</td><td>20.642561</td></tr><tr><td>autotune-disabled</td><td>2</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-817c4c00ac4b83e4b24a2b6a84d7b490575de0ecf8c123dc7936f853fc649ca7</td><td>20.638437</td></tr><tr><td>autotune-disabled</td><td>3</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-817c4c00ac4b83e4b24a2b6a84d7b490575de0ecf8c123dc7936f853fc649ca7</td><td>20.541528</td></tr><tr><td>autotune-disabled</td><td>4</td><td>3</td><td>296</td><td>hit</td><td>jit_solve-817c4c00ac4b83e4b24a2b6a84d7b490575de0ecf8c123dc7936f853fc649ca7</td><td>20.427816</td></tr></tbody></table><p>The existing pair_gaps function compares every completed process against every unset process, retaining all sixteen lane values in environment-comparison.json. The table reports the maximum over those pairs and lanes; the fresh residual limit remains 1e-10.</p>
@@ -89,8 +92,9 @@ eager booking call; it does not insert callbacks or change compiled loop bodies.
 The earliest divergent input is the output of the fixture's compiled topology
 read. The arithmetic operation within that read has <strong>not</strong> been
 isolated. The coefficient einsum is a second observed divergence inside booking;
-this record does not infer that it explains the upstream one. The proposed
-repeated-index atomic scatter hypothesis is therefore not established.</p>
+this record does not infer that it explains the upstream one. The original booking scatter-add hypothesis was falsified: the first
+difference was already present in the compiled read before booking and disappears
+with a shared compilation cache.</p>
 <table id="bank-booking-determinism-controls">
 <thead><tr><th>Control</th><th>Measured result</th></tr></thead><tbody>
 <tr><td>Move the largest initial moment by one representable float64 increment</td>

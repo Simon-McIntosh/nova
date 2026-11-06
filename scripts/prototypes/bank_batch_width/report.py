@@ -16,6 +16,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("run", type=Path)
     parser.add_argument("figure", type=Path)
+    parser.add_argument("--partial", action="store_true")
     args = parser.parse_args()
     rows = []
     cells = []
@@ -29,9 +30,14 @@ def main():
                 > missing["physical_bytes_estimate"]
             )
             continue
-        cold = json.loads((args.run / f"width-{width}-process-0.json").read_text())
+        cold_path = args.run / f"width-{width}-process-0.json"
+        if args.partial and not cold_path.exists():
+            continue
+        cold = json.loads(cold_path.read_text())
         for process in (1, 2):
             stem = args.run / f"width-{width}-process-{process}"
+            if args.partial and not stem.with_suffix(".json").exists():
+                continue
             row = json.loads(stem.with_suffix(".json").read_text())
             assert stem.with_suffix(".log").read_text().splitlines()[-1] == "EXIT=0"
             assert cold["cache"][0]["outcome"] == "miss"
@@ -126,6 +132,7 @@ def main():
                     for name in rows[0]["precision"]
                 },
                 samples=len(rows),
+                partial=args.partial,
                 common_sha256=next(iter(digests)),
             )
         ),

@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-11-05T22:02:08.677Z",
   "dispatched_at": "2026-11-05T21:54:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "efit-parity-test-guards",
+      "recorded_at": "2026-11-06T05:38:36.477268+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_efit_parity_inductance_partition.py",

@@ -16,6 +16,13 @@
   ],
   "completed_at": "2026-11-06T09:34:47.248Z",
   "dispatched_at": "2026-11-06T09:21:09Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panel-guards",
+      "recorded_at": "2026-11-06T09:41:21.166842+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/display_flux.py",

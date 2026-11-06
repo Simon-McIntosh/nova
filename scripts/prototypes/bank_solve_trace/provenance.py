@@ -70,6 +70,7 @@ def metadata(path):
                 "stack": stack(first(meta, 15)),
                 "opcode": first(instruction, 2, b"").decode(),
                 "computation": first(computation, 1, b"").decode(),
+                "deduplicated_name": first(meta, 12, b"").decode(),
             }
     assert instructions and any(item["stack"] for item in instructions.values())
     return instructions

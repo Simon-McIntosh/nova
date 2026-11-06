@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import shlex
 import subprocess
@@ -129,16 +130,16 @@ def run_file(run, scratch, label, tree, revision, name, extra=(), overrides=None
         stream.write(f"EXIT={result.returncode}\n")
     content = log.read_text()
     failures = [
-        line.split(" - ")[0][7:]
+        line.split(" - ")[0].split(" ", 1)[1]
         for line in content.splitlines()
-        if line.startswith("FAILED ")
+        if line.startswith(("FAILED ", "ERROR "))
     ]
     return dict(
         revision=revision,
         command=literal,
         exit_status=result.returncode,
         log_path=str(log),
-        completed="short test summary info" in content or " passed" in content,
+        completed=bool(re.search(r"^=+ .+ in [0-9.]+s.* =+$", content, re.MULTILINE)),
         failure_count=len(failures),
         failure_ids=failures,
     )

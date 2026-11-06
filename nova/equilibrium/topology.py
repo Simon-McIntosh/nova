@@ -3317,11 +3317,44 @@ def _read_at_nulls(
         reaches = jnp.any(owner[:, None] & selected)
         return support_valid & reaches & private_reaches_wall, candidate_form
 
-    # Slots are independent: inspect them together before applying admission.
-    # Slot 0 keeps its form because it is selected when no saddle is admitted.
     indices = jnp.arange(policy.null_capacity)
-    accepted, forms = jax.vmap(inspect)(indices)
+    retained = saddles | (indices == 0)
+    compact_capacity = min(3, policy.null_capacity)
+
+    @jax.custom_batching.custom_vmap
+    def any_lane_overflow(overflow):
+        return overflow
+
+    @any_lane_overflow.def_vmap
+    def overflow_batch(axis_size, in_batched, overflow):
+        # An unbatched predicate keeps cond outside the map over read lanes.
+        return jnp.any(overflow), False
+
+    def full_candidates():
+        return jax.vmap(inspect)(indices)
+
+    def compact_candidates():
+        slots = jnp.nonzero(
+            retained, size=compact_capacity, fill_value=policy.null_capacity
+        )[0]
+        # Padding evaluates slot 0 and drops its duplicate on the scatter.
+        packed = jax.vmap(inspect)(jnp.where(slots < policy.null_capacity, slots, 0))
+        return jax.tree.map(
+            lambda leaf: (
+                jnp.zeros((policy.null_capacity,) + leaf.shape[1:], dtype=leaf.dtype)
+                .at[slots]
+                .set(leaf, mode="drop")
+            ),
+            packed,
+        )
+
+    accepted, forms = jax.lax.cond(
+        any_lane_overflow(jnp.sum(retained) > compact_capacity),
+        full_candidates,
+        compact_candidates,
+    )
     candidates_admitted = saddles & accepted
+    # Slot 0 keeps its form because it is selected when no saddle is admitted.
     forms = jax.tree.map(
         lambda leaf: jnp.where(
             (saddles | (indices == 0)).reshape(

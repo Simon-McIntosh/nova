@@ -258,12 +258,28 @@ def group_attribution(run):
         "not equated. The benefit is predominantly fewer updates per read, "
         "not faster booking or faster read geometry.</p>\n"
     )
+    propagation = {}
+    for arm in ("base", "head"):
+        propagation[arm] = []
+        for process in (1, 2):
+            kernels = json.loads((run / f"{arm}-{process}/kernels-16.json").read_text())
+            launches = sum(
+                row["launches"]
+                for row in kernels
+                if row["group"] == "step_residual"
+                and any(
+                    "quadratic_cell_fragments" in binding
+                    for binding in row["source_bindings"]
+                )
+            )
+            propagation[arm].append(launches / records[arm, process, 16]["calls"])
     html += (
         "<p>The residual kernel ledgers also explain the launch regression: "
         "conic strip propagation at <code>quadratic_cell_fragments</code> "
-        "runs 672 times per call at base and 1,344 at the first head. The "
-        "primal tile changed from 32 cells to the tangent tile's 16 cells. "
-        "The candidate restores the primal tile to 32 cells; the two shared "
+        f"runs {count_range(propagation['base'])} times per call at base and "
+        f"{count_range(propagation['head'])} at the first head. The primal "
+        "tile changed from 32 cells to the tangent tile's 16 cells. The "
+        "candidate restores the primal tile to 32 cells; the two shared "
         "helpers, separate normal population, and four-ring groups stay.</p>\n"
         "</section>\n"
     )
@@ -273,6 +289,8 @@ def group_attribution(run):
         reduction=reduction,
         group_rows=rows,
         call_rows=calls,
+        invocation_decomposition=decomposition,
+        propagation_per_call=propagation,
     )
 
 

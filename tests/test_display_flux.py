@@ -45,6 +45,27 @@ def _polish_map_saddle(display, seed):
     )
 
 
+def _polish_field(radius, height, values, seed):
+    """Polish a field given as ``values`` on ``(radius, height)`` at ``seed``.
+
+    Shared by the map and the lattice so the offset between them is measured
+    from two coordinates the test derives for itself.
+    """
+    surface = fit_tensor_spline(
+        jnp.asarray(np.asarray(radius, dtype=np.float64)),
+        jnp.asarray(np.asarray(height, dtype=np.float64)),
+        jnp.asarray(np.asarray(values, dtype=np.float64)),
+    )
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed, dtype=jnp.float64)[None, :],
+        jnp.ones((1,), dtype=bool),
+    )
+    return np.asarray(polished["position_rz"], dtype=np.float64).reshape(2), bool(
+        np.asarray(polished["converged"]).reshape(())
+    )
+
+
 #: Radial and vertical extent [m] of the manufactured lattice.
 RADIUS = (0.6, 1.4)
 HEIGHT = (-0.45, 0.45)
@@ -611,9 +632,80 @@ def test_display_map_spacing_and_saddle_are_reported():
     assert display.radius.size > lattice.radius.size
     assert np.all(np.isfinite(display.saddle_rz))
     assert np.all(np.isfinite(display.lattice_saddle_rz))
-    assert np.isfinite(display.saddle_offset_mm)
+    # The offset is a distance between two coordinates, so the test derives
+    # both from the fields themselves rather than reading the build's pair.
+    seed = np.asarray([DIVERTED_CENTRE, 0.0])
+    state = _diverted_field(np.asarray(lattice.coordinate))
+    lattice_values = (
+        np.asarray(state, dtype=np.float64)[: lattice.node_count]
+        .reshape(tuple(int(value) for value in np.asarray(lattice.shape)))
+        .T
+    )
+    map_saddle, map_polished = _polish_field(
+        display.radius, display.height, display.flux.T, seed
+    )
+    lattice_saddle, lattice_polished = _polish_field(
+        lattice.radius, lattice.height, lattice_values, seed
+    )
+    assert map_polished and lattice_polished
+    expected_offset_mm = 1.0e3 * float(np.linalg.norm(map_saddle - lattice_saddle))
+    assert display.saddle_offset_mm == pytest.approx(expected_offset_mm, abs=1.0e-9)
     assert np.all(np.isfinite(display.flux))
     assert display.max_node_mismatch_wb < 1.0e-6
+
+
+def test_the_saddle_offset_is_the_polished_distance_between_map_and_lattice():
+    """The reported offset is the polished map-to-lattice saddle distance.
+
+    The lattice state is a displaced copy of the field the coupling images, so
+    the two saddles are a known distance apart and neither coordinate can
+    stand in for the other.  Both ends are polished here from the fields
+    themselves, which is what the build's own pair of coordinates cannot do.
+    """
+    profile, lattice = _diverted_profile()
+    coordinate = np.asarray(lattice.coordinate, dtype=np.float64)
+    shift = np.asarray([0.011, -0.006])
+    state = _diverted_field(coordinate - shift)
+    zero = CellCurrentMoments(
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+    )
+    seed = np.asarray([DIVERTED_CENTRE, 0.0])
+    display = build_display_flux_map(
+        profile,
+        state,
+        coupling=_diverted_coupling(lattice.node_count),
+        moments=zero,
+        extent=(
+            DIVERTED_CENTRE - DIVERTED_EXTENT,
+            DIVERTED_CENTRE + DIVERTED_EXTENT,
+            -DIVERTED_EXTENT,
+            DIVERTED_EXTENT,
+        ),
+        xpoint_rz=seed,
+        chunk=512,
+    )
+    assert display.saddle_converged
+    lattice_values = (
+        np.asarray(state, dtype=np.float64)[: lattice.node_count]
+        .reshape(tuple(int(value) for value in np.asarray(lattice.shape)))
+        .T
+    )
+    map_saddle, map_polished = _polish_field(
+        display.radius, display.height, display.flux.T, seed
+    )
+    lattice_seed = seed + shift
+    lattice_saddle, lattice_polished = _polish_field(
+        lattice.radius, lattice.height, lattice_values, lattice_seed
+    )
+    assert map_polished and lattice_polished
+    expected_mm = 1.0e3 * float(np.linalg.norm(map_saddle - lattice_saddle))
+    assert expected_mm > 1.0, (
+        "the manufactured displacement no longer separates the two saddles, so "
+        "this check could not tell a real offset from a repeated coordinate"
+    )
+    assert display.saddle_offset_mm == pytest.approx(expected_mm, abs=1.0e-6)
 
 
 def test_a_seed_on_an_extremum_reports_no_saddle():

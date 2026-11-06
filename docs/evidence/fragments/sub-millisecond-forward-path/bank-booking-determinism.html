@@ -87,3 +87,16 @@ and current module paths, resolved working directory, GPU identity and x64=true.
 Large raw arrays stay in the run directory.</td></tr>
 </tbody></table>
 </section>
+
+<section id="bank-booking-determinism-cpu-completion">
+<h2>CPU baseline completed without a product change</h2>
+<p>The resumed sirius allocation 1306767 completed the previously interrupted
+bank solve driver: 10 passed in 255.79 s, EXIT=0. Together with the four
+completed files above, the five-file baseline is 29 passed, 5 skipped and
+one known exact-moment byte-pin failure. Head is base because product source
+and tests are unchanged; the same complete baseline receipt applies to both.</p>
+<p>The receipt is <code>environments/base-suite.json</code> with combined log
+<code>environments/base-suite.log</code> under the durable receipt directory
+above. Each file ran in a fresh process with its own temporary directory.
+The known failing test was left enabled and its hashes were not changed.</p>
+</section>

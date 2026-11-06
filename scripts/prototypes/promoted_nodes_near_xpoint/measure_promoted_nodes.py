@@ -40,9 +40,13 @@ import jax.numpy as jnp  # noqa: E402
 
 import benchmarks.coil_edit_latency as bench  # noqa: E402
 from nova.equilibrium import display_flux  # noqa: E402
+from nova.equilibrium.boundary_comparison import (  # noqa: E402
+    _point_to_segment_distances,
+)
 from nova.equilibrium.domain import PlasmaDomain  # noqa: E402
 from nova.equilibrium.topology import TopologyClass  # noqa: E402
 from nova.jax.config import configure_dtypes  # noqa: E402
+from nova.linalg.tensor_spline import fit_tensor_spline  # noqa: E402
 from nova.media.poloidal import sample_cubic_controls  # noqa: E402
 
 DOMAIN_NAMES = {
@@ -62,22 +66,6 @@ def _json_default(value):
     raise TypeError(f"{type(value).__name__} is not JSON serializable")
 
 
-def _segmented_distance(points, query):
-    """Return the shortest distance from every query point to a polyline."""
-    if points.shape[0] < 2:
-        return np.full(query.shape[0], np.nan)
-    start = points[:-1]
-    end = points[1:]
-    segment = end - start
-    length_squared = np.einsum("ij,ij->i", segment, segment)
-    length_squared = np.where(length_squared > 0.0, length_squared, 1.0)
-    offset = query[:, None, :]
-    parameter = np.einsum("qij,ij->qi", offset - start[None], segment)
-    parameter = np.clip(parameter / length_squared[None], 0.0, 1.0)
-    closest = start[None] + parameter[..., None] * segment[None]
-    return np.min(np.linalg.norm(query[:, None, :] - closest, axis=2), axis=1)
-
-
 def _direction(vector):
     """Return the unit direction of a 2-vector and its norm."""
     norm = float(np.linalg.norm(vector))
@@ -94,15 +82,35 @@ def _angle_degrees(left, right):
     return float(np.degrees(np.arccos(cosine)))
 
 
+def _bearing_degrees(direction):
+    """Return a 2-vector's bearing in the (radius, height) plane, in degrees."""
+    if direction is None:
+        return float("nan")
+    return float(np.degrees(np.arctan2(direction[1], direction[0])))
+
+
+def _wrap_degrees(angle):
+    """Return an angle difference folded into (-180, 180]."""
+    return float((angle + 180.0) % 360.0 - 180.0)
+
+
 def _landmarks(branches, saddle, axis):
     """Return the lobe and leg directions one separatrix assembly defines.
 
     The lobe direction runs from the magnetic axis to the point of the closed
     branch furthest from it -- the lobe tip.  Each leg direction runs from the
     polished saddle to the far end of that open branch, which is where the leg
-    leaves the traced field.
+    leaves the traced field.  Both are reported as unit vectors and as a
+    bearing measured from the +R axis in the (R, Z) plane.
     """
-    landmark = {"lobe_direction": None, "leg_directions": [], "lobe_tip": None}
+    landmark = {
+        "lobe_direction": None,
+        "lobe_bearing_deg": float("nan"),
+        "leg_directions": [],
+        "leg_bearings_deg": [],
+        "leg_far_rz": [],
+        "lobe_tip": None,
+    }
     closed = sample_cubic_controls(
         branches["closed_controls_rz"], branches["closed_valid"]
     )
@@ -112,7 +120,10 @@ def _landmarks(branches, saddle, axis):
         tip = int(np.argmax(radii))
         landmark["lobe_tip"] = closed[tip].tolist()
         landmark["lobe_direction"] = _direction(offsets[tip])[0]
+        landmark["lobe_bearing_deg"] = _bearing_degrees(landmark["lobe_direction"])
     legs = []
+    bearings = []
+    far_points = []
     valid = branches["open_valid"]
     for slot in range(np.asarray(valid).shape[0]):
         points = sample_cubic_controls(
@@ -122,9 +133,41 @@ def _landmarks(branches, saddle, axis):
             continue
         reach = np.linalg.norm(points - np.asarray(saddle, float), axis=1)
         far = int(np.argmax(reach))
-        legs.append(_direction(points[far] - np.asarray(saddle, float))[0])
+        offset, norm = _direction(points[far] - np.asarray(saddle, float))
+        if offset is None or norm < 1.0e-6:
+            continue
+        legs.append(offset)
+        bearings.append(_bearing_degrees(offset))
+        far_points.append(points[far].tolist())
     landmark["leg_directions"] = legs
+    landmark["leg_bearings_deg"] = bearings
+    landmark["leg_far_rz"] = far_points
     return landmark
+
+
+def _pair_legs(state_legs, image_legs):
+    """Pair each state leg with the image leg that ends nearest its own end."""
+    pairs = []
+    for index, direction in enumerate(state_legs["leg_directions"]):
+        far = np.asarray(state_legs["leg_far_rz"][index], dtype=np.float64)
+        if not image_legs["leg_directions"]:
+            continue
+        distance = [
+            float(np.linalg.norm(far - np.asarray(point, dtype=np.float64)))
+            for point in image_legs["leg_far_rz"]
+        ]
+        partner = int(np.argmin(distance))
+        pairs.append(
+            {
+                "state_bearing_deg": state_legs["leg_bearings_deg"][index],
+                "image_bearing_deg": image_legs["leg_bearings_deg"][partner],
+                "shift_deg": _angle_degrees(
+                    direction, image_legs["leg_directions"][partner]
+                ),
+                "far_end_separation_mm": 1.0e3 * min(distance),
+            }
+        )
+    return pairs
 
 
 def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
@@ -301,6 +344,16 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         promoted=mask[:grid_count],
         chunk=4096,
     )
+    complete_state_surface = fit_tensor_spline(
+        jnp.asarray(radius_nodes),
+        jnp.asarray(height_nodes),
+        jnp.asarray(state_field),
+    )
+    radius_grid, height_grid = np.meshgrid(
+        np.asarray(complete.radius, dtype=np.float64),
+        np.asarray(complete.height, dtype=np.float64),
+        indexing="ij",
+    )
     image_saddle = np.asarray(complete.saddle_rz, dtype=np.float64).reshape(2)
     image_saddle_flux = float(complete.saddle_flux)
     image_saddle_ok = bool(complete.saddle_converged)
@@ -323,7 +376,25 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
     promoted_index = np.nonzero(mask)[0]
     reference = state_saddle if state_saddle_ok else seed
     to_x_point = np.linalg.norm(coordinates[promoted_index] - reference, axis=1)
-    to_separatrix = _segmented_distance(state_polyline, coordinates[promoted_index])
+    to_separatrix = _point_to_segment_distances(
+        coordinates[promoted_index], state_polyline
+    )
+
+    # The residual-shadow rule composes two independent components.  Reading
+    # them apart is what tells a promoted node's own source; the concatenated
+    # mask alone labels every appended wall coordinate the same way whether
+    # the flood or the private-wall band selected it.
+    flood_mask, wall_mask = operator.residual_shadow_components(state, requested_class)
+    flood_mask = np.asarray(flood_mask, dtype=bool).reshape(-1)
+    wall_mask = np.asarray(wall_mask, dtype=bool).reshape(-1)
+
+    def _source(index: int) -> str:
+        if index < grid_count:
+            return "interior flood (private flux)" if flood_mask[index] else "unflooded"
+        wall_index = index - grid_count
+        if wall_index < wall_mask.size and wall_mask[wall_index]:
+            return "private-wall band"
+        return "wall coordinate, flood-promoted"
 
     rows = []
     for position, index in enumerate(promoted_index):
@@ -333,13 +404,55 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
                 "node": int(index),
                 "radius_m": float(coordinates[index, 0]),
                 "height_m": float(coordinates[index, 1]),
+                "promoted_source": _source(int(index)),
                 "distance_to_x_point_mm": float(1.0e3 * to_x_point[position]),
                 "distance_to_separatrix_mm": float(1.0e3 * to_separatrix[position]),
                 "domain_label": DOMAIN_NAMES.get(label, "unlabelled"),
                 "image_minus_state_wb": float(difference[index]),
+                "operator_image_minus_state_wb": (
+                    float(raster[index] - state_nodes[index])
+                    if index < grid_count
+                    else float("nan")
+                ),
                 "state_wb": float(state_nodes[index]),
                 "image_wb": float(image[index]),
             }
+        )
+
+    halves = {}
+    heights = coordinates[promoted_index, 1]
+    for name, selector in (
+        ("upper", heights > 0.0),
+        ("lower", heights <= 0.0),
+    ):
+        values = difference[promoted_index][selector]
+        halves[name] = {
+            "count": int(np.count_nonzero(selector)),
+            "max_abs_wb": float(np.max(np.abs(values))) if values.size else None,
+            "rms_wb": float(np.sqrt(np.mean(values**2))) if values.size else None,
+            "flux_min_wb": float(np.min(state_nodes[promoted_index][selector]))
+            if values.size
+            else None,
+            "flux_max_wb": float(np.max(state_nodes[promoted_index][selector]))
+            if values.size
+            else None,
+        }
+    # Every lattice node outside the promoted set, per half: the control that
+    # says what an unexcluded residual looks like at this convergence.
+    solved_grid = ~mask[:grid_count]
+    grid_heights = coordinates[:grid_count, 1]
+    for name, selector in (
+        ("upper", grid_heights > 0.0),
+        ("lower", grid_heights <= 0.0),
+    ):
+        control = np.abs(image[:grid_count] - state_nodes[:grid_count])[
+            solved_grid & selector
+        ]
+        halves[name]["solved_grid_max_abs_wb"] = (
+            float(np.max(control)) if control.size else None
+        )
+        halves[name]["solved_grid_count"] = int(
+            np.count_nonzero(solved_grid & selector)
         )
 
     solved = ~mask
@@ -390,6 +503,7 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         "promoted_wall_node_count": int(np.count_nonzero(mask[grid_count:])),
         "lattice_shape": list(shape),
         "promoted": rows,
+        "promoted_halves": halves,
         "nearest_promoted_to_x_point_mm": float(1.0e3 * to_x_point[order[0]]),
         "promoted_distance_quantiles_mm": {
             f"q{int(level * 100)}": float(1.0e3 * np.quantile(to_x_point, level))
@@ -445,6 +559,17 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
                     strict=False,
                 )
             ],
+            "state_lobe_bearing_deg": state_landmarks["lobe_bearing_deg"],
+            "image_lobe_bearing_deg": image_landmarks["lobe_bearing_deg"],
+            "lobe_bearing_change_deg": _wrap_degrees(
+                image_landmarks["lobe_bearing_deg"]
+                - state_landmarks["lobe_bearing_deg"]
+            ),
+            "state_leg_count": len(state_landmarks["leg_directions"]),
+            "image_leg_count": len(image_landmarks["leg_directions"]),
+            "state_leg_bearings_deg": state_landmarks["leg_bearings_deg"],
+            "image_leg_bearings_deg": image_landmarks["leg_bearings_deg"],
+            "legs": _pair_legs(state_landmarks, image_landmarks),
             "state_lobe_tip_rz": state_landmarks["lobe_tip"],
             "image_lobe_tip_rz": image_landmarks["lobe_tip"],
             "lobe_tip_shift_mm": (
@@ -503,6 +628,18 @@ def measure(edit_index: int, carrier: Path) -> tuple[dict, dict]:
         "display_radius": np.asarray(complete.radius, dtype=np.float64),
         "display_height": np.asarray(complete.height, dtype=np.float64),
         "display_flux": np.asarray(complete.flux, dtype=np.float64),
+        # The converged state on the same display grid, read from the same
+        # tensor spline its own saddle is polished on, so both fields' contour
+        # panels share one level array and one comparison grid.
+        "display_state_flux": np.asarray(
+            complete_state_surface(radius_grid.ravel(), height_grid.ravel()),
+            dtype=np.float64,
+        ).reshape(complete.flux.shape),
+        "promoted_source": np.asarray(
+            [row["promoted_source"] for row in rows], dtype="U40"
+        )
+        if rows
+        else np.asarray([], dtype="U40"),
     }
     return receipt, fields
 
@@ -534,6 +671,19 @@ def _print_headlines(receipt: dict) -> None:
         (f"leg_direction_shift_{index}_deg", value)
         for index, value in enumerate(separatrix["leg_direction_shifts_deg"])
     )
+    lines.extend(
+        [
+            ("lobe_bearing_state_deg", separatrix["state_lobe_bearing_deg"]),
+            ("lobe_bearing_image_deg", separatrix["image_lobe_bearing_deg"]),
+            ("lobe_bearing_change_deg", separatrix["lobe_bearing_change_deg"]),
+            ("state_leg_count", separatrix["state_leg_count"]),
+            ("image_leg_count", separatrix["image_leg_count"]),
+        ]
+    )
+    for index, pair in enumerate(separatrix["legs"]):
+        lines.append((f"leg_{index}_shift_deg", pair["shift_deg"]))
+    for half, block in receipt["promoted_halves"].items():
+        lines.append((f"promoted_{half}_max_abs_wb", block["max_abs_wb"]))
     for name, value in lines:
         print(f"HEADLINE {name} {value}", flush=True)
 

@@ -204,11 +204,16 @@
     <p>
       The reference is a Gauss&ndash;Legendre integral of <code>greens_psi</code> and
       <code>greens_bz_br</code> along the segment, refined by panel bisection until two successive
-      refinements agree to 1e-13 relative at that target; a target that does not reach this is
-      reported and left out, never compared against.
-      Done when (1) the Part V strip's error against that reference is reported over three
-      decades of &epsilon;, at slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and &pi;/2, for targets from half a cell width
-      to ten segment lengths away, with the best attainable error at each slope; (2) the chosen
+      refinements agree to 1e-13 relative at that target, with the panels clustered at the
+      target's foot on the segment. The target set is fixed: at every slope, targets at half a
+      cell width, one cell width, one segment length and ten segment lengths, both off the
+      segment's middle and off each end. A target in this set whose reference does not
+      converge fails the node; it is never dropped.
+      Done when (1) the Part V strip's error against that reference is measured for &epsilon; from
+      1e-2 to 1e-8 of the segment length, at slopes 0, &pi;/8, &pi;/4, 3&pi;/8 and &pi;/2, over that target
+      set, and at every slope the error curve turns over strictly inside the sweep (the &epsilon;&sup2;
+      model error and the rounding-over-&epsilon; cancellation cross between its ends), with the
+      best attainable error and the &epsilon; that gives it recorded per slope; (2) the chosen
       route meets 1e-10 relative against that integral over the same targets, and at slopes
       &pi;/2 and 0 reproduces Snow's cylinder and pancake forms (Part II eqs 24 to 27), while a
       negative control with the sheet current's sign flipped on one edge fails that comparison;
@@ -229,10 +234,13 @@
     </p>
     <p>
       Done when (1) the device build and the §2 host route agree in float64 over the
-      1696-cell WEST mesh against its own centroids to within the best attainable error §2
-      records in the sheet-route decision (the strip's cancellation floor, near 1e-11 relative,
-      not a tighter figure neither route can hold), and a negative control that reverses one
-      cell's edge normals in the device build breaks that agreement; (2) that 3392-square Gram builds on
+      1696-cell WEST mesh against its own centroids, target by target, to within the host
+      route's own rounding spread at that target: the largest change in the host value when its
+      edge sums are taken in reversed order, floored at 1e-13 relative. On the strip branch
+      that spread is set by the cancellation between the strip's two long edges, which
+      amplifies any change in summation order by about 1/&epsilon;; on the Part II branch there is
+      no such cancellation and the spread sits at the floor. A negative control that reverses
+      one cell's edge normals in the device build breaks that agreement; (2) that 3392-square Gram builds on
       one H200 with the compile time and the warm execute time each recorded, and a second
       run hits the persistent cache; (3) the program appears in the kernel-compile
       census with its compile wall and memory, measured the same way as the polygon tile.

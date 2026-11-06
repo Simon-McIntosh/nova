@@ -78,6 +78,86 @@ def _polish_map_saddle(display, seed):
     )
 
 
+def _polish_lattice_saddle(panel, profile, seed):
+    """Polish the state's own lattice spline at ``seed`` without the build."""
+    lattice = profile.lattice
+    state = np.asarray(
+        panel.get(
+            "state", np.asarray(panel["psi"], dtype=np.float64).T.ravel()
+        ),
+        dtype=np.float64,
+    )
+    values = state[: int(lattice.node_count)].reshape(
+        tuple(int(value) for value in np.asarray(lattice.shape))
+    ).T
+    surface = fit_tensor_spline(
+        jnp.asarray(np.asarray(lattice.radius, dtype=np.float64)),
+        jnp.asarray(np.asarray(lattice.height, dtype=np.float64)),
+        jnp.asarray(values),
+    )
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seed, dtype=jnp.float64)[None, :],
+        jnp.ones((1,), dtype=bool),
+    )
+    return np.asarray(polished["position_rz"], dtype=np.float64).reshape(2), bool(
+        np.asarray(polished["converged"]).reshape(())
+    )
+
+
+#: Display spacing [m] at which the stored panel's stationary points are judged.
+#: Coarse enough that the map is a few thousand points rather than 78,195, and
+#: fine enough that the independent polish lands on the same saddle cell the
+#: full-resolution render does.
+STORED_PANEL_SPACING = 0.030
+
+
+def test_a_stored_panel_state_places_its_saddle_and_promoted_nodes():
+    """Judge the stored panel's saddle and promoted nodes from the panel alone."""
+    archive = Path(
+        os.environ.get(
+            "NOVA_COIL_EDIT_PANEL_ARCHIVE",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        )
+    )
+    panel = _panel_load(archive)["converged"]
+    profile, prepared, _carrier = _prepare_case(response_carrier.DEFAULT_CARRIER)
+    display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        panel,
+        spacing=STORED_PANEL_SPACING,
+        target_current=prepared["target_current"],
+    )
+    node_count = int(profile.lattice.node_count)
+    promoted_mask = np.asarray(panel["promoted_mask"], dtype=bool).reshape(-1)
+    wall_rows = int(np.asarray(profile.operator.wall.null.coordinate).shape[0])
+    assert promoted_mask.size - node_count == wall_rows
+    # The count is the solve's own lattice promotions, not the mask's entries.
+    assert display.promoted_node_count == int(
+        np.count_nonzero(promoted_mask[:node_count])
+    )
+    assert np.count_nonzero(promoted_mask) > display.promoted_node_count
+    assert display.saddle_converged
+    promoted_points = np.asarray(profile.lattice.coordinate)[
+        promoted_mask[:node_count]
+    ]
+    seed = np.asarray(panel["xpoints"])[int(panel["saddle_index"])]
+    polished, polished_converged = _polish_map_saddle(display, seed)
+    assert polished_converged
+    polished_nearest = float(np.min(np.linalg.norm(promoted_points - polished, axis=1)))
+    seed_nearest = float(np.min(np.linalg.norm(promoted_points - seed, axis=1)))
+    assert abs(polished_nearest - seed_nearest) > 1.0e-12
+    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+        polished_nearest, abs=1.0e-12
+    )
+    lattice_saddle, lattice_converged = _polish_lattice_saddle(panel, profile, seed)
+    assert lattice_converged
+    assert display.saddle_offset_mm == pytest.approx(
+        1.0e3 * float(np.linalg.norm(polished - lattice_saddle)), abs=1.0e-6
+    )
+
+
 def test_panel_explanation_is_available_at_page_text_size(tmp_path: Path):
     archive = Path(
         "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"

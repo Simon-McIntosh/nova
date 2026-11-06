@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="iron-core-magnetisation">
   <meta name="plan-title" content="Iron Core Magnetisation — magnetised iron in nova from Urankar thin-sheet kernels">
   <meta name="plan-summary" content="Model WEST-type iron cores as magnetised cells whose edge sheets use Urankar kernels (a thin Part V strip or the Part II closed form), solve the B-H law by Newton, and correct for discrete limbs">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="43.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
-<meta name="plan-modified" content="2026-11-05">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
   <main class="plan-doc">
@@ -401,18 +401,18 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="limb-geometry" data-choice="" data-by="" data-when="" data-sections="s8">
+    <p class="r-dec-q">What are the real dimensions of the six outer return limbs and of the horizontal arms?</p>
+    <p class="r-dec-ctx">The machine description carries only the smeared section, about 0.96 m² per arm. §8 needs each limb&#x27;s toroidal width and radial depth, and the arms&#x27; constant vertical thickness; their product with six must reproduce 5.8 m².</p>
+    <p class="r-dec-rat"></p>
+    </div>
 <div class="r-dec" data-key="sheet-route" data-choice="" data-by="" data-when="" data-sections="s3">
     <p class="r-dec-q">Does a thin Part V polygon strip deliver the edge sheet, or does it need the Part II closed form?</p>
-    <p class="r-dec-ctx">The strip reuses the production polygon route and adds no module or tile; Part II adds nova/biot/sheet.py and a sheet tile. §2 measures the strip's best attainable error and decides on a 1e-10 relative threshold.</p>
+    <p class="r-dec-ctx">The strip reuses the production polygon route and adds no module or tile; Part II adds nova/biot/sheet.py and a sheet tile. §2 measures the strip&#x27;s best attainable error and decides on a 1e-10 relative threshold.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="part-v-strip">Thin Part V polygon strip</button>
       <button class="r-opt" data-value="part-ii-sheet">Urankar Part II closed form</button>
       </p>
-    <p class="r-dec-rat"></p>
-    </div>
-<div class="r-dec" data-key="limb-geometry" data-choice="" data-by="" data-when="" data-sections="s8">
-    <p class="r-dec-q">What are the real dimensions of the six outer return limbs and of the horizontal arms?</p>
-    <p class="r-dec-ctx">The machine description carries only the smeared section, about 0.96 m² per arm. §8 needs each limb&#x27;s toroidal width and radial depth, and the arms&#x27; constant vertical thickness; their product with six must reproduce 5.8 m².</p>
     <p class="r-dec-rat"></p>
     </div>
 </section>

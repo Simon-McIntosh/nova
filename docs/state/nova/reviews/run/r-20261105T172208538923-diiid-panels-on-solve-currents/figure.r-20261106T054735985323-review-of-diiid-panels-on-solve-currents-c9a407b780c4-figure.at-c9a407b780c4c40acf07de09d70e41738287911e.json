@@ -10,6 +10,13 @@
     "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
     "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/displacement_decomposition.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-separatrix-redraw",
+      "recorded_at": "2026-11-06T06:11:33.004053+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: nova:separatrix-spline-extraction s8 (redraw the DIII-D panels with the repository's 14 pt tick/legend and 16 pt axis-label sizes before the bank figures are treated as evidence)",

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="191">
+<meta name="plan-version" content="192">
 <meta name="plan-modified" content="2026-11-06">
 </head>
 <body>
@@ -668,6 +668,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T144026733366-bank-solve-trace-head" data-who="reckon-build" data-when="2026-11-06T15:09:03Z">
     <div class="r-comment-body"><p>[Current solve attribution](/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html#bank-solve-trace-head-landing): two fresh H200 processes from one warm cache agree on eight reads per lane and 66215 launches at sixteen slices; 642.945–643.051 ms unprofiled batch wall, 606.646–606.921 ms device, closure below 0.008 ms. Jacobian 160.240–160.331 ms, residual 127.717–127.861 ms and candidates 104.287–104.411 ms dominate; per-update device cost 47.087 ms versus read-plus-certification 36.730 ms. Historical comparison and checked figure committed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T155815005577-review-of-bank-booking-primal-buckets-9ab6ba60e1f5" data-who="reckon-build" data-when="2026-11-06T16:11:36.584Z">
+    <div class="r-comment-body"><p>Independent review of r-20261106T151851519466-bank-booking-primal-buckets at head 9ab6ba60e1f5 (base d102ff6f1037): scores goal_fidelity 14, evidence 18, scope_discipline 20, durability 16, fit 18, reuse 19, added_failure_count 0; one blocking finding that the 16-cell primal conic tile regresses device/call and launches at the reviewed head, already repaired by e79d54fd8614 beyond it, plus one non-blocking stale-Broadwell-pin finding; both review records stored with status parsed.</p></div>
 </div>
 </section>
 </main>

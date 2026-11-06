@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:414",
+    "nova/equilibrium/support_read.py:536",
+    "nova/equilibrium/support_read.py:560",
+    "nova/equilibrium/support_read.py:1135"
+  ],
+  "call_sites_emission": "sites",
+  "completed_at": "2026-11-06T16:11:36.584Z",
+  "dispatched_at": "2026-11-06T15:59:42Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": 476,
+      "severity": "blocking",
+      "text": "at the reviewed head book derives its conic tile from quadrature.cut_batch_width (16) instead of the previous fixed 32, which the run's own retained trace attributes to doubled conic strip propagation (672 to 1344 launches per residual) and to the rise in device/call from 2.865 to 3.94 ms; commit e79d54fd8614e359f4cfa581b3374d608ca4082e beyond this reviewed head restores a 32-cell primal tile, so promotion must include that commit or the reviewed revision lands the regression the node was dispatched to remove."
+    },
+    {
+      "file": "tests/test_bank_step_booking.py",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "the Broadwell pin tuple predates this change and is stale after it, because only the Sirius tuple at :33 was re-measured, so test_book_primal_keeps_exact_diverted_moments will fail on any Broadwell host; the fragment discloses the unmeasured family but the test carries no skip or environment guard."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all 13 commits against the base commit by commit; the product change is the 196-line restructure of nova/equilibrium/current.py, the tests add tests/test_book_primal_buckets.py and re-pin three Sirius hashes in tests/test_bank_step_booking.py with a per-field difference table, and commits e3c8b61c..9ab6ba60 touch only docs/evidence and scripts/prototypes.",
+    "done_when": "the measure is moment parity within 1e-14 per field over five states, an unchanged-or-repinned pin, paired suites with no added failures, and one H200 allocation tabling residual device ms, launches, per-process reads, wall and wall/read against the precision budgets; tests/test_book_primal_buckets.py:201 asserts the 1e-14 bound, baseline-suite.log runs 1 failure and after-suite.log 0, and every requested H200 column is tabled in the evidence fragment.",
+    "goal": "the node goal is to give current.book the same bucketed structure as book_tangent_channels with no conditional under vmap and one shared helper; nova/equilibrium/current.py:337-360 now holds _integrate_live_rings and _integrate_bucket and both book (:436, :479-482) and book_tangent_channels (:754, :814-816) call them, and the lax.cond is gone from book.",
+    "manifest": "read manifest.md; it records the 13 commits to 9ab6ba60e1f5, baseline 1 failure against after 0, the misrouted-normal negative control at EXIT=1 with three named test ids, and an honest landing line stating the sixteen-slice wall gain is a trajectory effect rather than a per-booking speedup; the file has since advanced to status in-progress with a fourteenth commit e79d54fd beyond this reviewed head, so its commit list no longer describes the reviewed revision.",
+    "write_paths": "read the manifest's declared paths; git diff --name-status d102ff6f103775ced8fe3b573122a235bec9da22 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad lists 14 files, all inside nova/equilibrium/current.py, tests/test_book_primal_buckets.py, tests/test_bank_step_booking.py, scripts/prototypes/bank_booking_primal_buckets/ or the declared evidence fragment."
+  },
+  "justifications": {
+    "durability": "tests/test_book_primal_buckets.py:201 compares current.book against an independent sequential reference and reddens under the misrouted-normal mutation recorded in negative-mutation.diff, but the byte-pin guard at tests/test_bank_step_booking.py:45 was re-pinned for Sirius only and its Broadwell tuple at :24 is left stale.",
+    "evidence": "tests/test_book_primal_buckets.py:201 asserts the 1e-14 parity the brief names, baseline-suite.log:1 failure and after-suite.log:0 failures are both retained with EXIT lines, and the fragment tables every column the brief requested for job 1307054, including the precision maxima against each budget.",
+    "fit": "the helpers at nova/equilibrium/current.py:337 and :356 follow the file's existing fori_loop and dynamic_slice idiom, carry mechanism docstrings, and introduce no plan label, version suffix or forbidden name.",
+    "goal_fidelity": "nova/equilibrium/current.py:479-482 gives book the requested population split, but at the reviewed head it also narrows the primal conic tile from 32 to 16 cells, so the measured residual device/call rises 2.865 to 3.94 ms and launches 1401 to 2314 per call, which is the opposite of the cost the node targets.",
+    "reuse": "the two nested bucket loops that existed in book and book_tangent_channels each now call the single owner at nova/equilibrium/current.py:337 and :356, so the duplication the brief forbade is removed rather than forked.",
+    "scope_discipline": "every path in git diff --name-status d102ff6f103775ced8fe3b573122a235bec9da22 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad is inside the manifest's declared write paths, and the book_tangent_channels edit at nova/equilibrium/current.py:754-816 is the shared-helper extraction the brief required."
+  },
+  "manifest_observation": "The reviewed run's manifest has advanced past the dispatched head: status is in-progress, commits list a fourteenth entry e79d54fd8614e359f4fca581b3374d608ca4082e, and its checkpoint names a pending three-arm H200 allocation and candidate CPU verification.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to give current.book the same bucketed structure as book_tangent_channels with no conditional under vmap and one shared helper; nova/equilibrium/current.py:337-360 now holds _integrate_live_rings and _integrate_bucket and both book (:436, :479-482) and book_tangent_channels (:754, :814-816) call them, and the lax.cond is gone from book.\nVERDICT done_when: the measure is moment parity within 1e-14 per field over five states, an unchanged-or-repinned pin, paired suites with no added failures, and one H200 allocation tabling residual device ms, launches, per-process reads, wall and wall/read against the precision budgets; tests/test_book_primal_buckets.py:201 asserts the 1e-14 bound, baseline-suite.log runs 1 failure and after-suite.log 0, and every requested H200 column is tabled in docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html.\nVERDICT write_paths: read the manifest's declared paths; git diff --name-status d102ff6f103775ced8fe3b573122a235bec9da22 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad lists 14 files, all inside nova/equilibrium/current.py, tests/test_book_primal_buckets.py, tests/test_bank_step_booking.py, scripts/prototypes/bank_booking_primal_buckets/ or the declared evidence fragment.\nVERDICT manifest: read manifest.md; it records the 13 commits to 9ab6ba60e1f5, baseline 1 failure against after 0, the misrouted-normal negative control at EXIT=1 with three named test ids, and an honest landing line stating the sixteen-slice wall gain is a trajectory effect rather than a per-booking speedup; the file has since advanced to status in-progress with a fourteenth commit e79d54fd beyond this reviewed head, so its commit list no longer describes the reviewed revision.\nVERDICT diff: read all 13 commits against the base commit by commit; the product change is the 196-line restructure of nova/equilibrium/current.py, the tests add tests/test_book_primal_buckets.py and re-pin three Sirius hashes in tests/test_bank_step_booking.py with a per-field difference table, and commits e3c8b61c..9ab6ba60 touch only docs/evidence and scripts/prototypes (git diff --quiet over nova/ and tests/ returns identical).\nCALL_SITES: nova/equilibrium/support_read.py:414, nova/equilibrium/support_read.py:536, nova/equilibrium/support_read.py:560, nova/equilibrium/support_read.py:1135\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:479-482 gives book the requested population split, but at the reviewed head it also narrows the primal conic tile from 32 to 16 cells, so the measured residual device/call rises 2.865 to 3.94 ms and launches 1401 to 2314 per call, which is the opposite of the cost the node targets.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/test_book_primal_buckets.py:201 asserts the 1e-14 parity the brief names, baseline-suite.log:1 failure and after-suite.log:0 failures are both retained with EXIT lines, and the fragment tables every column the brief requested for job 1307054, including the precision maxima against each budget.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --name-status d102ff6f103775ced8fe3b573122a235bec9da22 9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad is inside the manifest's declared write paths, and the book_tangent_channels edit at nova/equilibrium/current.py:754-816 is the shared-helper extraction the brief required.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_book_primal_buckets.py:201 compares current.book against an independent sequential reference and reddens under the misrouted-normal mutation recorded in negative-mutation.diff, but the byte-pin guard at tests/test_bank_step_booking.py:45 was re-pinned for Sirius only and its Broadwell tuple at :24 is left stale.\nSCORE fit: 18\nJUSTIFICATION fit: the helpers at nova/equilibrium/current.py:337 and :356 follow the file's existing fori_loop and dynamic_slice idiom, carry mechanism docstrings, and introduce no plan label, version suffix or forbidden name.\nSCORE reuse: 19\nJUSTIFICATION reuse: the two nested bucket loops that existed in book and book_tangent_channels each now call the single owner at nova/equilibrium/current.py:337 and :356, so the duplication the brief forbade is removed rather than forked; the only duplicate sequential formulation is the reference the brief asked to keep inside the test.\nFINDING nova/equilibrium/current.py:476 blocking: at the reviewed head book derives its conic tile from quadrature.cut_batch_width (16) instead of the previous fixed 32, which the run's own retained trace attributes to doubled conic strip propagation (672 to 1344 launches per residual) and to the rise in device/call from 2.865 to 3.94 ms; commit e79d54fd8614e359f4cfa581b3374d608ca4082e beyond this reviewed head restores a 32-cell primal tile, so promotion must include that commit or the reviewed revision lands the regression the node was dispatched to remove.\nFINDING tests/test_bank_step_booking.py:24 non-blocking: the Broadwell/login-class pin tuple predates this change and is stale after it, because only the Sirius tuple at :33 was re-measured, so test_book_primal_keeps_exact_diverted_moments will fail on any Broadwell host; the fragment discloses the unmeasured family but the test carries no skip or environment guard.\n",
+  "review_run_id": "r-20261106T155815005577-review-of-bank-booking-primal-buckets-9ab6ba60e1f5",
+  "reviewed_base_sha": "d102ff6f103775ced8fe3b573122a235bec9da22",
+  "reviewed_head_sha": "9ab6ba60e1f5a55c5e0b3985c7897a2d438a04ad",
+  "reviewed_run_id": "r-20261106T151851519466-bank-booking-primal-buckets",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T16:17:42.506055+00:00",
+  "total": 105
+}

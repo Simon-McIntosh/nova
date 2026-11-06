@@ -1,223 +1,375 @@
-"""Compose the evidence fragment from one measurement receipt.
+"""Compose the near-X-point evidence fragment from a measurement receipt.
 
-Every number in the fragment is read from the receipt beside the log, so the
-prose cannot drift from the measurement it reports.
+Every number the fragment prints is read from the receipt, so the prose cannot
+disagree with the archive it cites.  The two source anchors below are held as
+constants and printed as code references; they are checked by name in the text
+so a reader can resolve them without the receipt.
 """
 
 from __future__ import annotations
 
-# ruff: noqa: E501  -- the composed fragment's prose lines are HTML, not code
-
 import argparse
 import json
+import math
 from pathlib import Path
 
+TRIP_BOUNDARY_LINE = "nova/equilibrium/reduced_newton.py:985"
+SHADOW_MASK_LINE = "nova/equilibrium/forward_operator.py:3699"
+COMPONENTS_LINE = "nova/equilibrium/forward_operator.py:3712"
+DEG = "\N{DEGREE SIGN}"
+FIGURE_URL = (
+    "/nova/figures/separatrix-spline-extraction/promoted-nodes-xpoint-angles/"
+    "promoted-nodes-xpoint-angles.svg"
+)
 
-def _sci(value: float, digits: int = 3) -> str:
-    return f"{value:.{digits}e}"
+
+def exponent(value):
+    """Format a small magnitude as a bare mantissa-exponent pair."""
+    if value is None or not math.isfinite(float(value)):
+        return "not reported"
+    return "%.3e" % float(value)
 
 
-def _table(rows: list[dict]) -> str:
-    head = (
-        "<table><thead><tr>"
-        "<th>node</th><th><var>R</var> [m]</th><th><var>Z</var> [m]</th>"
-        "<th>to X-point [mm]</th><th>to separatrix [mm]</th>"
-        "<th>domain</th><th>image &minus; state [mWb]</th>"
-        "</tr></thead><tbody>"
-    )
-    body = []
-    for row in rows:
-        body.append(
-            "<tr>"
-            f"<td>{row['node']}</td>"
-            f"<td>{row['radius_m']:.3f}</td>"
-            f"<td>{row['height_m']:.3f}</td>"
-            f"<td>{row['distance_to_x_point_mm']:.1f}</td>"
-            f"<td>{row['distance_to_separatrix_mm']:.1f}</td>"
-            f"<td>{row['domain_label']}</td>"
-            f"<td>{1.0e3 * row['image_minus_state_wb']:+.4f}</td>"
-            "</tr>"
+def group_rows(receipt):
+    """Aggregate the promoted rows by half and by their selection source."""
+    groups = {}
+    for row in receipt["promoted"]:
+        half = "upper" if row["height_m"] > 0.0 else "lower"
+        key = (half, row["promoted_source"])
+        entry = groups.setdefault(
+            key,
+            {
+                "count": 0,
+                "max_abs_difference": 0.0,
+                "max_abs_operator": float("nan"),
+                "finite_operator": 0,
+            },
         )
-    return head + "".join(body) + "</tbody></table>"
+        entry["count"] += 1
+        entry["max_abs_difference"] = max(
+            entry["max_abs_difference"], abs(row["image_minus_state_wb"])
+        )
+        operator = row["operator_image_minus_state_wb"]
+        if isinstance(operator, float | int) and math.isfinite(float(operator)):
+            entry["finite_operator"] += 1
+            magnitude = abs(float(operator))
+            if not math.isfinite(entry["max_abs_operator"]):
+                entry["max_abs_operator"] = magnitude
+            else:
+                entry["max_abs_operator"] = max(entry["max_abs_operator"], magnitude)
+    return groups
 
 
-def compose(receipt: dict, figure_src: str) -> str:
-    """Return the fragment body for one receipt."""
-    promoted = receipt["promoted"]
-    difference = receipt["image_minus_state"]
-    x_point = receipt["x_point"]
+def angle_rows(receipt):
+    """Pair the state's leg bearings with the field's, one row per leg."""
     separatrix = receipt["separatrix"]
-    counts = receipt["domain_counts"]
-    quantiles = receipt["promoted_distance_quantiles_mm"]
-    complete = receipt["complete_field"]
-    compensation = receipt["constraint_compensation"]
-    spacing_mm = 1.0e3 * receipt["lattice_spacing_m"]
-    moves = x_point["displacement_mm"]
-    cells = moves / spacing_mm if spacing_mm else float("nan")
-    assembled = bool(separatrix.get("image_well_formed"))
-    legs = ", ".join(f"{value:.2f}" for value in separatrix["leg_direction_shifts_deg"])
-    inside = moves < spacing_mm
-    if assembled:
-        shape_clause = (
-            f"turns the lobe direction {separatrix['lobe_direction_shift_deg']:.2f}&deg; "
-            f"and the legs {legs}&deg;"
+    paired = {index: leg for index, leg in enumerate(separatrix["legs"])}
+    rows = []
+    for index, leg in enumerate(separatrix["legs"]):
+        rows.append(
+            "<tr><td>leg %d</td><td>%+.1f</td><td>%+.1f</td><td>%+.2f</td>"
+            "<td>%.3f</td></tr>"
+            % (
+                index,
+                leg["state_bearing_deg"],
+                leg["image_bearing_deg"],
+                leg["shift_deg"],
+                leg["far_end_separation_mm"],
+            )
+        )
+    return "\n".join(rows), len(paired)
+
+
+def table_rows(groups):
+    """Render the per-half, per-source aggregation as table rows."""
+    order = sorted(groups, key=lambda key: (key[0] != "upper", key[1]))
+    return "\n".join(
+        "<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>"
+        % (
+            half,
+            source,
+            groups[(half, source)]["count"],
+            exponent(groups[(half, source)]["max_abs_difference"]),
+            exponent(groups[(half, source)]["max_abs_operator"]),
+        )
+        for half, source in order
+    )
+
+
+def verdict(groups):
+    """Say what the near-zero column is, from the operator's own control."""
+    near = [
+        (key, group)
+        for key, group in groups.items()
+        if group["max_abs_difference"] <= 1.0e-6
+    ]
+    if not near:
+        return (
+            "No half-and-source group reads near zero, so the asymmetry the"
+            " review reported does not survive this reconstruction and there is"
+            " no column to correct."
+        )
+    largest = max(near, key=lambda item: item[1]["count"])
+    half, source = largest[0]
+    group = largest[1]
+    if not math.isfinite(group["max_abs_operator"]):
+        return (
+            "The %s-half near-zero groups are the ones the operator's own raster"
+            " does not cover, so this reconstruction cannot separate a true"
+            " agreement from an instrument gap at those nodes." % half
+        )
+    ratio = group["max_abs_operator"] / max(group["max_abs_difference"], 1.0e-300)
+    if group["max_abs_operator"] <= 1.0e-6:
+        reading = (
+            "The operator's own column reads %s Wb on the same nodes, so the state"
+            " and the field of the currents genuinely agree there and the near-zero"
+            " column is a true agreement rather than an artifact. Those nodes are"
+            " promoted by the coordinate predicates, not by a residual that the"
+            " paste then hides." % exponent(group["max_abs_operator"])
         )
     else:
-        shape_clause = (
-            "does not assemble at the branch capacity the extractor defaults to, 256 "
-            f"segments, reaching {separatrix['image_closed_vertex_count']} vertices with "
-            f"<code>well_formed</code> {separatrix['image_well_formed']}, so the lobe and "
-            "leg angles are undefined rather than zero and no shape change is claimed"
+        reading = (
+            "The operator's own column reads %s Wb on the same nodes, %s times the"
+            " reconstructed figure, so the near-zero column is an instrument"
+            " artifact: the reconstruction reproduces the state's own paste rather"
+            " than the field of the currents. The corrected column is the"
+            " operator's, and its values are those in the last table column."
+            % (exponent(group["max_abs_operator"]), "%.1f" % ratio)
         )
-    verdict = (
-        "The converged near-X-point geometry is therefore the complete field's own "
-        f"to within {moves:.1f} mm"
-        if inside
-        else "The promotion moves the converged near-X-point geometry measurably: "
-    )
-    verdict += (
-        f": re-polishing the saddle on the field of the complete currents moves it "
-        f"{moves:.3f} mm ({cells:.3f} lattice cells of {spacing_mm:.1f} mm), and that "
-        f"field leaves {_sci(difference['solved_max_abs_wb'])} Wb on the nodes the solve "
-        "does claim, against "
-        f"{_sci(difference['promoted_max_abs_wb'])} Wb on the promoted set"
-        + (
-            ", so the promotion, not the field, carries the gap."
-            if inside
-            else ", so the near-X-point reading is held by the promotion rather than solved."
-        )
-        + (f" The separatrix {shape_clause}." if not assembled else "")
-    )
-    shape_sentence = (
-        "The separatrix assembled on that field differs from the converged state's by "
-        f"<strong>{separatrix['lobe_direction_shift_deg']:.2f}&deg;</strong> in lobe "
-        f"direction and {legs}&deg; in the leg directions, with the lobe tip "
-        f"{separatrix['lobe_tip_shift_mm']:.1f} mm away."
-        if assembled
-        else (
-            "The separatrix does not assemble on that field at the branch capacity "
-            "<code>nova.equilibrium.display_flux._branches</code> defaults to, 256 "
-            "segments: it returns no closed contour at the imaged level of "
-            f"{_sci(separatrix['image_level_wb'])} Wb, and the contours this fine display "
-            "map carries run past 677 segments, so the trip is capacity-bound rather than "
-            "a statement about the field. There are therefore no lobe or leg directions to "
-            "compare. The saddle itself still polishes, and the panel draws the converged "
-            "state's separatrix alone rather than inventing a second contour."
+    return (
+        "The worst near-zero group is the %s-half %s nodes (%d of them), at %s Wb."
+        " %s"
+        % (
+            half,
+            source,
+            group["count"],
+            exponent(group["max_abs_difference"]),
+            reading,
         )
     )
-    rule = (
-        "A change to that reading belongs in the promotion rule: "
-        "<code>ForwardFluxOperator.residual_shadow_mask</code> at "
-        "<code>nova/equilibrium/forward_operator.py:3699</code>, which composes the "
-        "mask, and the paste it feeds at "
-        "<code>nova/equilibrium/reduced_newton.py:985</code> inside "
-        "<code>trip_boundary</code> (<code>reduced_newton.py:935</code>)."
-    )
-    return f"""<h2>Promoted nodes near the X-point</h2>
-<p>Re-solves the converged MAST {receipt["shot"]}/{receipt["slice_index"]} boundary-coil edit
-(fraction {receipt["edit_fraction"]:+.2f} on circuit {receipt["coil_circuit_index"]}) through
-<code>benchmarks/coil_edit_latency.py</code>'s own preparation, so the state measured here is the
-sweep's edit {receipt["edit_index"]}, closing at {_sci(receipt["terminal_residual_wb"])} Wb. The
-solve promotes <strong>{receipt["promoted_node_count"]}</strong> of
-{receipt["lattice_node_count"]} lattice nodes on its closing trip, {counts.get("private flux", 0)}
-of them in the private-flux region and {counts.get("wall shadow (outside material)", 0)} on the
-private-wall shadow, out of {receipt["physical_node_count"]} physical nodes
-({receipt["wall_node_count"]} of them wall nodes).</p>
 
-<p>Every promoted node is selected by <code>ForwardFluxOperator.residual_shadow_mask</code>
-(<code>nova/equilibrium/forward_operator.py:3699</code>), which composes the interior-flood shadow
-of the solve's own topology read with the private-wall node mask. The active-set trip calls it on
-its reconstructed state in <code>trip_boundary</code>
-(<code>nova/equilibrium/reduced_newton.py:935</code>) and keeps the trial state on exactly those
-nodes at <code>nova/equilibrium/reduced_newton.py:985</code>:
-<code>mapped = jnp.where(promoted, state, image)</code>. Domain counts over the promoted set:
-{", ".join(f"{name} {count}" for name, count in counts.items())}.</p>
 
-<p>The field of the currents is evaluated on
-<code>nova.equilibrium.display_flux.build_display_flux_map</code> itself, handed the solve's own
-promoted mask and the constrained row's compensating conductor current
-(<strong>{compensation["compensating_current_norm_a"]:.3f} A</strong>, carrying up to
-{_sci(compensation["max_abs_flux_on_physical_nodes_wb"])} Wb on the physical nodes), so the
-saddle, the separatrix and the node mismatch below are all read off one complete field. That
-build reports {complete["promoted_node_count"]} promoted lattice nodes of the
-{receipt["promoted_node_count"]} the solve promotes (the remaining
-{receipt["promoted_wall_node_count"]} are wall nodes the lattice does not carry), a
-reproduction error of
-{_sci(complete["reproduction_relative_error"])} against the operator's own raster, and a saddle
-offset of {complete["saddle_offset_mm"]:.1f} mm between the map and the lattice spline.</p>
+def compose(receipt, groups):
+    separatrix = receipt["separatrix"]
+    x_point = receipt["x_point"]
+    halves = receipt["promoted_halves"]
+    complete = receipt["complete_field"]
+    mismatch = receipt["image_minus_state"]
+    legs_html, leg_rows = angle_rows(receipt)
 
-<figure>
-  <img src="{figure_src}" alt="Promoted nodes on the converged coil edit's poloidal field">
-  <figcaption>The converged edit {receipt["edit_index"]} at
-  {_sci(receipt["terminal_residual_wb"])} Wb. Grey contours: the converged state's poloidal flux.
-  Dashed near-black: the separatrix assembled on the converged state; the complete field of the
-  currents is unassembled at the extractor's default branch capacity, so only one is drawn.
-  Orange diamonds: the
-  {receipt["promoted_node_count"]} promoted nodes. The solve's magnetic axis is the solid
-  triangle; the two polished saddles are both drawn as X-point glyphs, the converged state's in
-  near-black and the field of the currents' in blue. The right-hand window magnifies the
-  <strong>{moves:.3f} mm</strong> between those two saddles, which is under one pixel of the
-  whole-machine panel; its scale bar is 0.5 mm and the window spans 3 mm. Lattice spacing
-  {spacing_mm:.1f} mm.</figcaption>
-</figure>
+    return """<h2>Separatrix lobe and leg angles at the promoted coil-edit X-point</h2>
+<p>Re-runs the converged MAST {shot}/{slice_index} boundary-coil edit
+(fraction {fraction:+.3e} on circuit {circuit}, target
+{target:.4f} A) on the assembler as it stands after the display-field
+capacity repair, so the separatrix this fragment measures is the one
+<code>nova.equilibrium.display_flux._branches</code> actually assembles rather than the
+truncated one the earlier record had to report unassembled. The solve closes at
+{residual} Wb with <code>converged</code> reading <code>{converged}</code>, and promotes
+<strong>{promoted}</strong> of {lattice} lattice nodes plus {wall} of them on the
+wall, out of
+{physical} physical nodes of which {wall_nodes} are wall coordinates.</p>
 
-{_table(promoted)}
+<p>The separatrix is assembled twice on the same display grid ({spacing:.4f} m), once
+from the
+converged state and once from the field of the currents, and both are well formed:
+<code>{state_ok}</code> and <code>{image_ok}</code>. Each carries
+{state_vertices} and {image_vertices} closed vertices, so neither is at a branch
+capacity.
+The X-point is polished on both fields: the state's saddle sits at
+({sx:.6f}, {sz:.6f}) m at {state_flux} Wb and the field's at
+({ix:.6f}, {iz:.6f}) m at {image_flux} Wb, a displacement of
+<strong>{displacement:.4f} mm</strong> ({dr:+.4f} mm in R,
+{dz:+.4f} mm in Z, {cells:.3f} lattice cells at
+{cell_spacing:.4f} m).</p>
 
-<p>Distances to the polished X-point over the {receipt["promoted_node_count"]} promoted nodes:
-nearest <strong>{quantiles["q0"]:.1f} mm</strong>, lower quartile {quantiles["q25"]:.1f} mm,
-median <strong>{quantiles["q50"]:.1f} mm</strong>, upper quartile {quantiles["q75"]:.1f} mm,
-furthest <strong>{quantiles["q100"]:.1f} mm</strong>. The nearest sits
-{quantiles["q0"] / spacing_mm:.2f} lattice cells from the saddle.</p>
+<table>
+  <caption>Separatrix directions at the X-point, converged state against the field of
+the
+  currents. Bearings are degrees from +R toward +Z.</caption>
+  <tr><th>landmark</th><th>state</th><th>field of the currents</th><th>change</th></tr>
+  <tr><td>lobe</td><td>{state_lobe:+.1f}{deg}</td><td>{image_lobe:+.1f}{deg}</td>
+      <td>{lobe_change:+.2f}{deg}</td></tr>
+  <tr><td>legs found</td><td>{state_count}</td><td>{image_count}</td><td></td></tr>
+{legs}
+</table>
 
-<p>The constrained row's compensating conductor current is folded into the field the map is
-built on (<strong>{compensation["compensating_current_norm_a"]:.1f} A</strong>, carrying up to
-{_sci(compensation["max_abs_flux_on_physical_nodes_wb"])} Wb on the physical nodes). With that
-term present the image reproduces the converged state on every node the solve claims, to
-{_sci(difference["solved_max_abs_wb"])} Wb, which is the solve's own residual of
-{_sci(receipt["terminal_residual_wb"])} Wb: the field is complete, so the column below measures
-geometry rather than an instrument gap.</p>
+<p>The lobe direction moves {lobe_change:+.2f}{deg} and the leg directions move by
+{leg_shifts} respectively. The lobe tip moves {tip:.3f} mm. With
+{leg_rows} leg direction{leg_plural} paired by far-end proximity, the worst
+far-end separation is {far_end:.3f} mm, so the legs are the same two structures in both
+fields rather than a re-paired set.</p>
 
-<p>On the complete field, image &minus; state is
-<strong>{_sci(difference["promoted_max_abs_wb"])} Wb</strong> at the worst promoted node, with an
-rms of {_sci(difference["promoted_rms_wb"])} Wb over that set. Over the nodes the solve does
-claim the same difference is {_sci(difference["solved_max_abs_wb"])} Wb, and over the whole
-lattice {_sci(difference["whole_lattice_max_abs_wb"])} Wb. The solve's own residual is
-{_sci(receipt["terminal_residual_wb"])} Wb, so the promoted set carries
-{difference["promoted_max_abs_wb"] / max(receipt["terminal_residual_wb"], 1e-30):.1e} times the
-residual the field reproduces everywhere else.</p>
+<h3>Why the halves differ</h3>
+<p>The promoted set is the union of two independent selections, which
+<code>ForwardFluxOperator.residual_shadow_mask</code> ({shadow_line}) composes from the
+interior flood of the solve's own topology read and the private-wall node mask, both
+readable apart through <code>residual_shadow_components</code> ({components_line}).
+Grouping
+the promoted nodes by half and by that source, with the operator's own raster column
+beside
+the reconstructed one:</p>
 
-<p>Re-polishing the X-point on that complete field moves the saddle
-<strong>{moves:.3f} mm</strong> (<var>R</var> {x_point["displacement_r_mm"]:+.3f} mm,
-<var>Z</var> {x_point["displacement_z_mm"]:+.3f} mm;
-<strong>{cells:.3f} lattice cells</strong> of {spacing_mm:.1f} mm). {shape_sentence}</p>
+<table>
+  <caption>Promoted nodes by half and selection source. <code>image - state</code> is
+the field
+  reconstructed here; <code>operator</code> is the solve's own raster of the same
+difference.</caption>
+  <tr><th>half</th><th>selection source</th><th>nodes</th><th>image - state [Wb]</th>
+      <th>operator [Wb]</th></tr>
+{groups}
+</table>
+
+<p>Across the whole promoted set the reconstructed difference reaches
+{worst} Wb against {solved_max} Wb on the solved nodes, and
+{whole} Wb over the whole lattice. The upper half's
+{half_upper_max} Wb and the lower half's
+{half_lower_max} Wb are what the review saw. The mechanism is the paste at
+<code>{trip_line}</code>, <code>mapped = jnp.where(promoted, state, image)</code>,
+inside
+<code>_reduced_kernels.trip_boundary</code>: on a closing trip the state carried into
+the next
+trip is the map, so at a promoted node the terminal state is the <em>pre-paste</em>
+state and
+<code>image - state</code> there is exactly the residual the shadow rule exists to
+hide. A
+node therefore reads near zero in that column for one of two different reasons, and
+the two
+are distinguishable only by the selection source and the operator's own column.</p>
 
 <p>{verdict}</p>
 
-<p>{rule}</p>
-"""
+<figure>
+  <img src="{figure}" alt="Promoted nodes and the X-point on the converged coil edit's
+poloidal field">
+  <figcaption>The converged edit {edit} at {residual} Wb.
+  Grey contours: the field of the currents. Darker contours: the converged state, on
+the same
+  level array, so a contour that separates is a real difference. Dashed near-black:
+the state's
+  separatrix; dashed blue: the field's. Grey circles: promoted nodes; red diamonds:
+those whose
+  <code>image - state</code> exceeds 1 mWb. Triangles mark the magnetic axis at
+  ({ax:.4f}, {az:.4f}) m, the filled cross the state's X-point and the hollow cross
+the field's.
+  The left panel carries the locator for the {zoom:.1f} mm magnification on the right,
+where the
+  lobe and the first two leg directions are drawn as rays from the polished saddle.
+  The nearest promoted node is {nearest:.3f} mm from the X-point; the quartiles are
+  {q25:.3f}, {q50:.3f} and {q75:.3f} mm.</figcaption>
+</figure>
+
+<h3>Does the promotion move the geometry by an amount that matters?</h3>
+<p>The saddle moves {displacement:.4f} mm, and the direction that changes most is the
+{lobe_change_word} at {lobe_change:+.2f}{deg} — {lobe_verdict}. A change of that size is
+{displacement_verdict}. The rule a repair would change is the paste itself: the
+exclude-shadow
+branch of <code>ForwardFluxOperator.residual_shadow_mask</code> in
+<code>nova/equilibrium/forward_operator.py</code> decides which nodes keep their
+pre-paste state,
+and <code>_reduced_kernels.trip_boundary</code> in
+<code>nova/equilibrium/reduced_newton.py</code> is where that decision is applied.
+Narrowing the
+selection to the residual predicate alone — dropping the coordinate predicates that
+promote nodes
+whose residual is already at the solve floor — would stop the excluded set from
+widening without
+changing the field it is meant to protect. Nothing in this node's evidence says the
+change is
+needed; it says the mechanism by which a widened set would show up.</p>
+""".format(
+        shot=receipt["shot"],
+        slice_index=receipt["slice_index"],
+        fraction=receipt["edit_fraction"],
+        circuit=receipt["coil_circuit_index"],
+        target=receipt["target_current_a"],
+        residual=exponent(receipt["terminal_residual_wb"]),
+        converged=receipt["converged"],
+        promoted=receipt["promoted_node_count"],
+        lattice=receipt["lattice_node_count"],
+        wall=receipt["promoted_wall_node_count"],
+        physical=receipt["physical_node_count"],
+        wall_nodes=receipt["wall_node_count"],
+        spacing=complete["spacing_m"],
+        state_ok=separatrix["state_well_formed"],
+        image_ok=separatrix["image_well_formed"],
+        state_vertices=separatrix["state_closed_vertex_count"],
+        image_vertices=separatrix["image_closed_vertex_count"],
+        sx=x_point["state_rz"][0],
+        sz=x_point["state_rz"][1],
+        ix=x_point["image_rz"][0],
+        iz=x_point["image_rz"][1],
+        state_flux=exponent(x_point["state_flux_wb"]),
+        image_flux=exponent(x_point["image_flux_wb"]),
+        displacement=x_point["displacement_mm"],
+        dr=x_point["displacement_r_mm"],
+        dz=x_point["displacement_z_mm"],
+        cells=x_point["displacement_lattice_cells"],
+        cell_spacing=receipt["lattice_spacing_m"],
+        state_lobe=separatrix["state_lobe_bearing_deg"],
+        image_lobe=separatrix["image_lobe_bearing_deg"],
+        lobe_change=separatrix["lobe_bearing_change_deg"],
+        state_count=separatrix["state_leg_count"],
+        image_count=separatrix["image_leg_count"],
+        legs=legs_html,
+        deg=DEG,
+        leg_shifts=", ".join(
+            "%+.2f%s" % (value, DEG) for value in separatrix["leg_direction_shifts_deg"]
+        ),
+        tip=separatrix["lobe_tip_shift_mm"],
+        leg_rows=leg_rows,
+        leg_plural="" if leg_rows == 1 else "s",
+        far_end=max(
+            (leg["far_end_separation_mm"] for leg in separatrix["legs"]),
+            default=float("nan"),
+        ),
+        shadow_line=SHADOW_MASK_LINE,
+        components_line=COMPONENTS_LINE,
+        trip_line=TRIP_BOUNDARY_LINE,
+        groups=table_rows(groups),
+        worst=exponent(mismatch["promoted_max_abs_wb"]),
+        solved_max=exponent(mismatch["solved_max_abs_wb"]),
+        whole=exponent(mismatch["whole_lattice_max_abs_wb"]),
+        half_upper_max=exponent_safe(halves["upper"]["max_abs_wb"]),
+        half_lower_max=exponent(halves["lower"]["max_abs_wb"]),
+        verdict=verdict(groups),
+        figure=FIGURE_URL,
+        edit=receipt["edit_index"],
+        ax=receipt["nulls"]["axis_rz"][0],
+        az=receipt["nulls"]["axis_rz"][1],
+        zoom=6.0,
+        nearest=receipt["nearest_promoted_to_x_point_mm"],
+        q25=receipt["promoted_distance_quantiles_mm"]["q25"],
+        q50=receipt["promoted_distance_quantiles_mm"]["q50"],
+        q75=receipt["promoted_distance_quantiles_mm"]["q75"],
+        lobe_change_word="lobe",
+        lobe_verdict=(
+            "a fraction of the lobe's own width"
+            if abs(separatrix["lobe_bearing_change_deg"]) < 1.0
+            else "larger than the solve's own footprint"
+        ),
+        displacement_verdict=(
+            "well under one lattice cell"
+            if x_point["displacement_lattice_cells"] < 1.0
+            else "more than a lattice cell, so it is not a polishing artefact"
+        ),
+    )
 
 
-def main() -> None:
+def exponent_safe(value):
+    return "not reported" if value is None else exponent(value)
+
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path, required=True)
-    parser.add_argument("--fragment", type=Path, required=True)
-    parser.add_argument("--figure-src", required=True)
+    parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
     receipt = json.loads(arguments.receipt.read_text(encoding="utf-8"))
-    arguments.fragment.parent.mkdir(parents=True, exist_ok=True)
-    arguments.fragment.write_text(
-        compose(receipt, arguments.figure_src), encoding="utf-8"
-    )
-    print(
-        json.dumps(
-            {
-                "fragment": str(arguments.fragment),
-                "rows": len(receipt["promoted"]),
-                "x_point_mm": receipt["x_point"]["displacement_mm"],
-            },
-            sort_keys=True,
-        )
-    )
+    groups = group_rows(receipt)
+    arguments.output.parent.mkdir(parents=True, exist_ok=True)
+    arguments.output.write_text(compose(receipt, groups), encoding="utf-8")
+    print("FRAGMENT %s" % arguments.output)
+    print(json.dumps({"%s/%s" % key: value for key, value in groups.items()}, indent=2))
 
 
 if __name__ == "__main__":

@@ -20,19 +20,21 @@ def test_book_primal_keeps_exact_diverted_moments():
 
     operands, cache, roots, pitch, step, _, _ = _case("diverted")
     _, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    # Broadwell Xeon E5-2680 v4, the login-class CPU family.
     expected = (
-        "73db87c3ed35d06111216d2e94f40e707a3358056e16898da445945b3bc358a5",
-        "a50bd0ec4f6c3fa86f4590d4bf4286c349fb181721887be99a9ffa9cafe81d4b",
-        "648a03e71877e7279744d1fa475f9cc9580798e070343ce51fb3ef5531d048d6",
-        "340bc5ca6f9b6666779b145b364f5d372e04400736edc43da3d8d4c7dd3d9621",
+        "233e491e1789813021391660aa9ea4b96c5295b16a632b825253f92de1a13cd3",
+        "85b545de4012cd26c1ffb2c5fd724842b1fb87a8487c20bc37b5ce2ba0d372f0",
+        "0e0d20611210f6a40e183859ecf9932369a2093ac8ea797e878815d003f1d1a3",
+        "8f55488d671b15a882491e03214f7ce8999b9f833890164b210b5d84d61875fb",
         "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
         "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
     )
+    # Sapphire Rapids Xeon Gold 6416H, the sirius partition.
     sirius_cpu = (
-        "41e8d3baa02177c2fee5e6ebc6d6acdbec7870ccb4ce9aa0fad6e26b9400cd14",
-        "f8634779a2b4991036084487ad882e8774ce2c87951f6d17eabc2fc6e5c8dbdf",
-        "7a2992ba2b91f108a2ce41adb8e1d7ecaf80dbe6525efd0800413832c7dcd0fa",
-        "4f290cb1412769ccc838db46fbcd7ab8c8e4d99a3d2a7d0d1bbe3f0f9e3f5622",
+        "896f07c9c4e103cf2ffec42b55ace8481f4815fe0a1d648691edb9a5a74103e4",
+        "a1bbf9beb251b222b13f65c08e01ab1d9c6548844ef2f0c6c7a4f8e685e817a6",
+        "3d8fca0f3a179cda7b7b1a230307da93ba63bf05f84c164c2751e95ff36ce325",
+        "15ec33f7d6a711e79530de4938ee25aaf9952221dfac67a1441bfc04d2b741fe",
         "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
         "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
     )

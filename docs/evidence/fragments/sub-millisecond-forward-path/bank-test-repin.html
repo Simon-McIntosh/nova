@@ -1,0 +1,88 @@
+<section id="bank-test-repin-landing">
+<h2>A repinned booking receipt and a restart width the test reads from its module</h2>
+<p><strong>The booking byte pin carries the two hosts' current values, the
+capped-cycle check derives the Krylov restart width from
+<code>support_read._block_gmres</code>, and that test now asserts the identity
+permutation its raw-matrix reference depends on.</strong> No product code
+changed.</p>
+
+<h3 id="bank-test-repin-movement">Where the booking primal moved</h3>
+<p>The diverted fixture in <code>tests/test_support_read.py::_case</code> books
+the same state (axis and saddle seeds advanced by 0.03 pitch) from a git archive
+of <code>c57423e74</code>, the first parent of the conic-endpoint merge, and
+from the node's base <code>78820952c</code>. The fixture has 50 cells; its
+boundary uses an algebraic-conic cut interval in 29 of them, and those cells are
+the mask below. The cell-507 anchor from the breakpoint probe belongs to the
+550-cell certificate fixture and does not exist in this 50-cell test fixture.
+Every moved cell lies in the conic mask on both hosts; no other cell moved.</p>
+<table id="bank-test-repin-movement-table">
+<thead><tr><th>Host</th><th>Field</th><th>Moved cells</th><th>Max abs</th>
+<th>Cell</th><th>Max rel</th><th>Cell</th></tr></thead>
+<tbody>
+<tr><td>Broadwell E5-2680 v4</td><td>cell_current</td><td>12</td><td>7.844e-13</td><td>42</td><td>1.544e-11</td><td>42</td></tr>
+<tr><td>Broadwell E5-2680 v4</td><td>radial_moment</td><td>13</td><td>4.200e-14</td><td>42</td><td>1.972e-11</td><td>42</td></tr>
+<tr><td>Broadwell E5-2680 v4</td><td>vertical_moment</td><td>14</td><td>1.218e-10</td><td>42</td><td>8.970e-07</td><td>10</td></tr>
+<tr><td>Broadwell E5-2680 v4</td><td>raw_current</td><td>1 (scalar)</td><td>1.250e-12</td><td>—</td><td>8.315e-13</td><td>—</td></tr>
+<tr><td>Broadwell E5-2680 v4</td><td>normalization</td><td>0</td><td>0</td><td>—</td><td>0</td><td>—</td></tr>
+<tr><td>Broadwell E5-2680 v4</td><td>valid</td><td>0</td><td>0</td><td>—</td><td>0</td><td>—</td></tr>
+<tr><td>Sapphire Rapids Gold 6416H</td><td>cell_current</td><td>12</td><td>7.814e-13</td><td>42</td><td>1.538e-11</td><td>42</td></tr>
+<tr><td>Sapphire Rapids Gold 6416H</td><td>radial_moment</td><td>13</td><td>4.184e-14</td><td>42</td><td>1.965e-11</td><td>42</td></tr>
+<tr><td>Sapphire Rapids Gold 6416H</td><td>vertical_moment</td><td>14</td><td>3.831e-11</td><td>10</td><td>8.970e-07</td><td>10</td></tr>
+<tr><td>Sapphire Rapids Gold 6416H</td><td>raw_current</td><td>1 (scalar)</td><td>1.247e-12</td><td>—</td><td>8.294e-13</td><td>—</td></tr>
+<tr><td>Sapphire Rapids Gold 6416H</td><td>normalization</td><td>0</td><td>0</td><td>—</td><td>0</td><td>—</td></tr>
+<tr><td>Sapphire Rapids Gold 6416H</td><td>valid</td><td>0</td><td>0</td><td>—</td><td>0</td><td>—</td></tr>
+</tbody></table>
+<p id="bank-test-repin-conic-mask">Conic cut cells: 8, 9, 10, 11, 12, 15, 16,
+17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 40, 41,
+42, 43. The union of moved cell ids across the three moment fields is 8–12, 21, 30,
+32, 36, 37, 40–43 on both hosts; the per-field sets differ only within it, as
+the table's counts show. The vertical moment's
+relative change sits high because the quantity nearly cancels there: its
+absolute change is 1.2e-10 against values of order 1e-4. The
+<code>compare.py</code> check requires every moved cell to be in the mask and
+reported no violation on either host.</p>
+<p>Host identification is measured, not assumed. At
+<code>c57423e74</code> the fleet node reproduces the stored first pin
+(<code>73db87c3…</code>) byte for byte and the sirius node reproduces the
+stored second pin (<code>41e8d3ba…</code>) byte for byte, so the two stored
+tuples are the two hosts' pre-change values. The repinned tuples carry the base
+revision's values for the same two hosts: <code>233e491e…</code> (Broadwell,
+the login-class family, measured on the fleet allocation) and
+<code>896f07c9…</code> (Sapphire Rapids, measured in a sirius job).</p>
+
+<h3 id="bank-test-repin-newton">The restart width and the permutation the reference needs</h3>
+<p><code>test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update</code>
+now reads the restart width from <code>_block_gmres</code>'s own
+<code>width = min(20, right.size)</code> rather than restated: it parses the
+assignment from the function's source and fails loudly if the form changes, then
+caps the cycle at a quarter of that width. It also asserts that
+<code>_apply_block_inverse</code> of its matrix is an orthogonal permutation —
+entries in {0, 1} with every row and column summing to one — which is why the
+raw-matrix Arnoldi reference agrees with the preconditioned run.</p>
+<p><strong>Negative control.</strong> A scratch copy sets the matrix's
+<code>[0, 0]</code> entry to 4.0, so the first cell block inverts to 0.25 and the
+applied block inverse is not a permutation. The new assertion fails with
+<code>array([0., 0.25, 1.])</code> against <code>array([0., 1.])</code> and the
+test is reported failed; the log is <code>negative-control.log</code> in the run
+directory.</p>
+
+<h3 id="bank-test-repin-suites">Paired suites</h3>
+<p>Both arms ran on the sirius partition (<code>98dci4-clu-5013</code>, Xeon
+Gold 6416H), one fresh pytest process per file with its own
+<code>--basetemp</code>. The base arm is <code>78820952c</code>; the head arm is
+this node's commit on top of it. Head has no failure, and base's only failure
+is the stale booking pin.</p>
+<table id="bank-test-repin-suite-table">
+<thead><tr><th>File</th><th>Base 78820952c</th><th>Head df494beea</th></tr></thead>
+<tbody>
+<tr><td>tests/test_bank_step_booking.py</td><td>1 failed, 4 passed</td><td>5 passed</td></tr>
+<tr><td>tests/test_bank_newton_step.py</td><td>18 passed</td><td>18 passed</td></tr>
+<tr><td>tests/test_bank_solve_cycle.py</td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td>tests/test_conic_endpoint_consistency.py</td><td>1 passed</td><td>1 passed</td></tr>
+</tbody></table>
+<p>Base's single failing id is
+<code>tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments</code>,
+the pin this node moves. The suite logs end in a bare <code>EXIT=</code> line per
+file, and the two per-arm summary logs quote each file's own pytest summary
+line.</p>
+</section>

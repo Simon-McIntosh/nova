@@ -527,6 +527,71 @@ def _small_corner_horizontal(vertex, expansion_r, height, differential=None):
     )
 
 
+def _flux_line_weights(edge, vertex, expansion, height, differential=None):
+    """Form line-primitive weights with bounded slope coordinates.
+
+    A=1/sqrt(1+b²), B=b/sqrt(1+b²) are evaluated through 1/b for steep
+    slopes. Factoring A before forming each weight removes the cancellations
+    between powers of b and the plane intercept r1=corner_radius-b*u.
+    """
+    xp = edge.xp
+    de, dv, dc, dh = ({}, {}, None, None) if differential is None else differential
+    r = _EdgeScalar(vertex.radius, dv.get("radius"))
+    u = _EdgeScalar(vertex.level, dv.get("level"))
+    cr = r + _EdgeScalar(vertex.offset, dv.get("offset"))
+    b = _EdgeScalar(edge.slope, de.get("slope"))
+    centre, height = _EdgeScalar(expansion, dc), _EdgeScalar(height, dh)
+    steep = xp.abs(b.value) > 1.0
+    held = _edge_select(steep, 0.0, b, xp)
+    forward = 1.0 / (1.0 + held**2).root(xp)
+    inverse = 1.0 / _edge_select(steep, b, 1.0, xp)
+    inverse_norm = (1.0 + inverse**2).root(xp)
+    axial = _edge_select(steep, inverse.absolute(xp) / inverse_norm, forward, xp)
+    slope = _edge_select(
+        steep, _EdgeScalar(xp.sign(b.value)) / inverse_norm, held * forward, xp
+    )
+    p, s, t = _edge_product, _edge_scaled, _edge_total
+
+    def constant(value):
+        return _edge_range([], value * vertex.one, value * vertex.one)
+
+    cosine = vertex.cosine, dv.get("cosine", ([], None, None))
+    source = s(cosine, r)
+    displacement = t(constant(cr), s(source, -1.0))
+    plane = t(s(displacement, axial), constant(-slope * u))
+    along = t(constant(axial * u), s(displacement, slope))
+    sine_squared = t(
+        (vertex.ring_squared, dv.get("ring_squared", ([None], None, None))),
+        constant(-u * u),
+    )
+    squared = t(p(plane, plane), sine_squared)
+    first = t(
+        constant(axial * axial * cr - axial * slope * u), s(source, slope * slope)
+    )
+    lever = t(constant(height), s(plane, -slope))
+    roots = (
+        constant(axial * slope),
+        s(
+            t(
+                s(first, 2 * slope),
+                constant(-slope * centre),
+                s(along, 0.5 * slope * slope),
+            ),
+            axial,
+        ),
+        s(t(s(lever, slope), s(first, axial), s(along, 0.5 * axial * slope)), axial),
+    )
+    residuals = (
+        s(first, axial),
+        s(
+            t(p(first, t(first, constant(-centre))), s(squared, -0.5 * slope * slope)),
+            axial,
+        ),
+        s(t(p(first, lever), s(squared, -0.5 * axial * slope)), axial),
+    )
+    return tuple(zip(roots, residuals, strict=True))
+
+
 def _edge_residual_band(edge):
     """Select a plane pole close enough to amplify differentiated contractions."""
     xp = edge.xp
@@ -1504,15 +1569,11 @@ class _Edge:
         second graded ``arsinh`` residual.
         """
         xp = self.xp
-        one = vertex.one
         r = self.radius
         b1 = self.slope
         a = vertex.span
         a0 = self.axial_slope
-        a02 = self.squared_slope
-        r1 = self.plane_radius_value
         outer = vertex.cosine
-        plane_radius = self.plane_radius
         plane_squared = self.plane_squared
         gamma = range_function(
             [], vertex.level + b1 * vertex.offset, vertex.level + b1 * vertex.radius_sum
@@ -1520,9 +1581,6 @@ class _Edge:
         plane = vertex.split(plane_squared)
         plane_residual = self._second_residual(vertex)
         plane_derivative = product(gamma, self.edge_slope)
-
-        def constant(value):
-            return range_function([], value * one, value * one)
 
         def against_second_arsinh(weight):
             series = across_the_range(weight)
@@ -1541,41 +1599,8 @@ class _Edge:
                 reduced,
             )
 
-        j2_root = scaled(
-            total(scaled(gamma, 0.5), scaled(plane_radius, -2.0 * b1)),
-            1.0 / (a02 * a02),
-        )
-        j2_arsinh = scaled(
-            total(
-                scaled(product(plane_radius, plane_radius), b1 * b1),
-                scaled(plane_squared, -0.5),
-            ),
-            1.0 / a0**5,
-        )
-
-        base_root = constant(b1 / a02)
-        base_arsinh = total(constant(r1 / a0), scaled(plane_radius, -(b1 * b1) / a0**3))
-        radial_root = total(
-            constant(b1 * (2.0 * r1 - expansion_r) / a02),
-            scaled(j2_root, b1 * b1),
-        )
-        radial_arsinh = total(
-            constant((r1 - expansion_r) * r1 / a0),
-            scaled(
-                plane_radius,
-                -(b1 * b1) * (2.0 * r1 - expansion_r) / a0**3,
-            ),
-            scaled(j2_arsinh, b1 * b1),
-        )
-        vertical_root = total(
-            scaled(base_root, target_z_minus_expansion_z),
-            constant(r1 / a02),
-            scaled(j2_root, b1),
-        )
-        vertical_arsinh = total(
-            scaled(base_arsinh, target_z_minus_expansion_z),
-            scaled(plane_radius, -r1 * b1 / a0**3),
-            scaled(j2_arsinh, b1),
+        weights = _flux_line_weights(
+            self, vertex, expansion_r, target_z_minus_expansion_z
         )
 
         def full_turn(root_weight, arsinh_weight):
@@ -1583,11 +1608,7 @@ class _Edge:
                 product(outer, root_weight), stable=True
             ) + 4.0 * against_second_arsinh(product(outer, arsinh_weight))
 
-        return (
-            full_turn(base_root, base_arsinh),
-            full_turn(radial_root, radial_arsinh),
-            full_turn(vertical_root, vertical_arsinh),
-        )
+        return tuple(full_turn(root[0], residual[0]) for root, residual in weights)
 
     def flux_and_moment_terms(
         self,
@@ -4276,36 +4297,21 @@ def _edge_flux_line_moments_tangent(
 ):
     """Differentiate the flux line primitive and both moving expansion centres."""
     c = _EdgeReductionTangent(edge, d_edge, vertex, d_vertex)
-    p, s, t = _edge_product, _edge_scaled, _edge_total
-    b, a, a0, a02, r1 = c.b, c.a, c.axial, c.squared, c.r1
-    centre = _EdgeScalar(expansion_r, d_expansion_r)
-    height = _EdgeScalar(target_z_minus_expansion_z, d_target_z_minus_expansion_z)
-    plane, squared = c.plane_radius, c.plane_squared
-    j2_root = s(t(s(c.gamma, 0.5), s(plane, -2.0 * b)), 1.0 / (a02 * a02))
-    j2_arsinh = s(t(s(p(plane, plane), b * b), s(squared, -0.5)), 1.0 / a0**5)
-    base_root = c.constant(b / a02)
-    base_arsinh = t(c.constant(r1 / a0), s(plane, -(b * b) / a0**3))
-    radial_root = t(c.constant(b * (2.0 * r1 - centre) / a02), s(j2_root, b * b))
-    radial_arsinh = t(
-        c.constant((r1 - centre) * r1 / a0),
-        s(plane, -(b * b) * (2.0 * r1 - centre) / a0**3),
-        s(j2_arsinh, b * b),
+    weights = _flux_line_weights(
+        edge,
+        vertex,
+        expansion_r,
+        target_z_minus_expansion_z,
+        differential=(d_edge, d_vertex, d_expansion_r, d_target_z_minus_expansion_z),
     )
-    vertical_root = t(s(base_root, height), c.constant(r1 / a02), s(j2_root, b))
-    vertical_arsinh = t(
-        s(base_arsinh, height), s(plane, -r1 * b / a0**3), s(j2_arsinh, b)
-    )
+    a = c.a
 
     def full_turn(root, arsinh):
-        return 4.0 * a * c.root(p(c.cosine, root), stable=True) + 4.0 * c.second(
-            p(c.cosine, arsinh), stable=True
-        )
+        return 4.0 * a * c.root(
+            _edge_product(c.cosine, root), stable=True
+        ) + 4.0 * c.second(_edge_product(c.cosine, arsinh), stable=True)
 
-    rows = (
-        full_turn(base_root, base_arsinh),
-        full_turn(radial_root, radial_arsinh),
-        full_turn(vertical_root, vertical_arsinh),
-    )
+    rows = tuple(full_turn(root, residual) for root, residual in weights)
     return edge.flux_line_moments(
         vertex, expansion_r, target_z_minus_expansion_z
     ), tuple(row.tangent for row in rows)

@@ -462,7 +462,7 @@ def test_near_edge_tangent_meets_reference():
 
 def test_flux_line_tangent_matches_exact_integral():
     """Differentiate the elementary height primitives before angle integration."""
-    indices = np.asarray([6000, 6500, 8000])
+    indices = np.asarray([2730, 3730, 6000, 6500, 8000])
     primals, tangents = CASES["flux_line_moments"][-2:]
     p, t = (
         jax.tree.map(lambda v: np.asarray(v)[indices], tree)

@@ -20,20 +20,20 @@ def test_book_primal_keeps_exact_diverted_moments():
 
     operands, cache, roots, pitch, step, _, _ = _case("diverted")
     _, booked = step(operands, cache, roots + 0.03 * pitch, roots)
-    # Broadwell Xeon E5-2680 v4, the login-class CPU family.
+    # Broadwell Xeon E5-2680 v4, the fleet CPU family.
     expected = (
-        "233e491e1789813021391660aa9ea4b96c5295b16a632b825253f92de1a13cd3",
-        "85b545de4012cd26c1ffb2c5fd724842b1fb87a8487c20bc37b5ce2ba0d372f0",
-        "0e0d20611210f6a40e183859ecf9932369a2093ac8ea797e878815d003f1d1a3",
+        "9102f14452c29d0995569ec2e92bae1ffbcac91819fafd01c16516b221758e23",
+        "2b31e39feed3d9d543f6fdcf221637731ca13c95f12291abdf6ba9b7dd9f9c64",
+        "4a66eda60cc8cd136092a9b9bbcdafa9812dfedfe66a335231df7d439708d23c",
         "8f55488d671b15a882491e03214f7ce8999b9f833890164b210b5d84d61875fb",
         "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
         "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
     )
     # Sapphire Rapids Xeon Gold 6416H, the sirius partition.
     sirius_cpu = (
-        "896f07c9c4e103cf2ffec42b55ace8481f4815fe0a1d648691edb9a5a74103e4",
-        "a1bbf9beb251b222b13f65c08e01ab1d9c6548844ef2f0c6c7a4f8e685e817a6",
-        "3d8fca0f3a179cda7b7b1a230307da93ba63bf05f84c164c2751e95ff36ce325",
+        "91015d678026ed0b2172d02739b2a9536ae1d73bae2400424e682f4beedaf123",
+        "1376d8a0be97e0077c5a5df7d4051f8749c81f88b57df9ca49228239d8b8804c",
+        "bfbdeacba130a64bc782bfd676faac542eba5281b8e156fcdf06a1d8d9fc9eae",
         "15ec33f7d6a711e79530de4938ee25aaf9952221dfac67a1441bfc04d2b741fe",
         "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
         "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",

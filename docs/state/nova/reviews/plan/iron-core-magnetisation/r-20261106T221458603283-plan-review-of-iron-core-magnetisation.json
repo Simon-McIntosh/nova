@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-06T22:24:14.052Z",
+  "dispatched_at": "2026-11-06T22:16:12Z",
+  "findings": [
+    {
+      "anchor": "plan.html:258",
+      "id": "done_when-1",
+      "reason": "one clause naming a gate-owned cache directory (or pointing the gate at its own via NOVA_COMPILATION_CACHE) removes a shared-resource deletion and makes the cold-compile measurement mean what it claims.",
+      "text": "\u00a73 done-when (2) requires the build to run \"in a fresh process with the persistent cache emptied first\", but names no cache directory, and the persistent cache nova resolves is not necessarily private to this gate: `nova.jax.config.default_persistent_compilation_cache_root` returns `NOVA_COMPILATION_CACHE_ROOT` whenever the launch recipe exports it, which on the H200 lanes is the shared pre-warmed root `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm` (nova AGENTS.md), so a worker following the clause on betelgeuse can wipe the pre-warm every other lane's wall clock depends on, and then measure its own compile against a cache it has just destroyed",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:264",
+      "id": "anchors_resolve-1",
+      "reason": "as written a node must either add a column to a document outside its write scope or drop the memory measurement, and a bound nothing records is a bound no later reader can check.",
+      "text": "\u00a73 done-when (3) says the two builds are entered as program rows of `docs/research/compile-cost-evidence.html` \"carrying the fields its existing rows carry (compile wall, executable size, peak host memory)\", but that table's columns are Program, Cells, Platform and host, Compile wall (s), StableHLO or HLO instructions, Executable bytes, Persistent-cache result, Job, Source path or plan comment \u2014 peak host memory is recorded only in separate memory-ladder tables keyed by Function and Scale, never on a program row, so the 64 GB bound done-when (2) measures has no stated place to be read",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "813be3c3a0e4266223a14cb95fcdcda8f5746210",
+  "plan_fingerprint": "00adcc946830e3404e66426cd057a0739f8afef93011692151a388776cbfbc8a",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 2,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261106T221458603283-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "3c030013ee505af6ceafae236490a3ad48da8bc5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a73 done-when (3) requires the program rows to carry \"peak host memory\", and the receipts table it names has no such column.",
+    "done_when": "a finding \u2014 \u00a73 done-when (2) empties \"the persistent cache\" without naming a directory the gate owns, so the clause instructs a destructive act on a resource nova shares between lanes.",
+    "evidence_paths": "pass \u2014 \u00a72's measurement lands in the sheet-route decision and \u00a73's in docs/research/compile-cost-evidence.html, both durable in the repository; no session scratchpad or node-local temporary path is named.",
+    "naming": "pass \u2014 the new s2 and s3 text carries no plan labels, stage names, ticket numbers or version tags, and the symbols it would create (sheet, G, the strip fraction) are named by mechanism.",
+    "reasoning": "pass \u2014 \u00a72's \u03b5\u00b2-model-error versus rounding-over-\u03b5 cancellation matches \u00a71's near-singular-quadrature evidence (plan.html:98-101), \u00a73's absolute-sum denominator is the correct bound for four nearly cancelling edge sheets and is stated with that reason, and both sections name the real code path they build in \u2014 \u00a72 Urankar Part II in nova/biot/sheet.py against the Part V route in nova/biot/polygonanalytic.py, \u00a73 through nova/biot/tiledassembly.py `_fill_tile` with \u00a74 named as the consumer of G \u2014 so no mechanism is left without a caller.",
+    "single_goal": "pass \u2014 s2 owns one deliverable (choose and implement the edge-sheet route) and s3 owns one (build G on the device); each closes on a single verdict, and the three clauses of \u00a73's done-when all measure that one build.",
+    "wiring": "pass \u2014 s3 declares depends-on s2, which is the section that now records the per-slope rounding term its tolerance names, and the `sheet-route` decision s2 and s3 both cite exists at plan.html:414 with data-sections covering s3."
+  },
+  "section_digests": {
+    "_document": "9aa8088d284e5e9e86cc8f0443fe81e7a7c9e3ce47866555d1bb279919887143",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "756f260e7ba780eae2063b8fa86470ceb27a4768734f30de083410ffb13cca40",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T22:29:33.101449+00:00",
+  "total": null
+}

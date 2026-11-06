@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 import time
 
@@ -33,6 +34,11 @@ def main():
     print(
         f"NOVA={nova.__file__} MODULE={support_read.__file__} "
         f"CWD={Path.cwd().resolve()} DEVICE={jax.devices()[0].device_kind}",
+        flush=True,
+    )
+    print(
+        f"PREALLOCATE={os.environ.get('XLA_PYTHON_CLIENT_PREALLOCATE')} "
+        f"MEMORY_FRACTION={os.environ.get('XLA_PYTHON_CLIENT_MEM_FRACTION')}",
         flush=True,
     )
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"

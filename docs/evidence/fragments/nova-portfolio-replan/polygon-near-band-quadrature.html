@@ -1,0 +1,43 @@
+<section data-reckon="evidence" data-node="polygon-near-band-quadrature">
+<h2 id="polygon-near-band-quadrature">Polygon near-band quadrature</h2>
+<p>The CPU branch-share diagnostic used seven warm execution samples per case on
+the baseline revision <code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code>.
+The stable-branch share is computed as
+<code>(full wall - weighted-quadrature-suppressed wall) / full wall</code>.
+Target fractions use one paired target per source polygon; each single-target
+case is the exact-corner positive control.</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Coil set</th><th scope="col">Targets</th>
+    <th scope="col">Near-band targets</th><th scope="col">CPU baseline wall</th>
+    <th scope="col">CPU with weighted quadratures suppressed</th>
+    <th scope="col">Measured stable-branch share</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>MAST</td><td>single</td><td>1/1 (100%)</td><td>5.783 ms</td><td>5.381 ms</td><td>+6.95%</td></tr>
+    <tr><td>MAST</td><td>batched, 13 sections</td><td>1/13 (7.69%)</td><td>149.640 ms</td><td>158.676 ms</td><td>−6.04%</td></tr>
+    <tr><td>DIII-D</td><td>single</td><td>1/1 (100%)</td><td>5.716 ms</td><td>7.342 ms</td><td>−28.44%</td></tr>
+    <tr><td>DIII-D</td><td>batched, 140 sections</td><td>1/140 (0.714%)</td><td>630.142 ms</td><td>729.527 ms</td><td>−15.77%</td></tr>
+  </tbody>
+</table>
+
+<p>The batch medians did not improve when the weighted quadratures were
+suppressed, and their seven-sample wall ranges overlap: MAST 124.006–201.896 ms
+with the branch and 128.020–168.185 ms suppressed; DIII-D 559.152–701.167 ms
+with the branch and 643.932–778.275 ms suppressed. The measured batch share is
+therefore no positive saving above the CPU timing spread. The baseline selection
+path is retained, and no H200 compaction arm was run.</p>
+
+<p>The rejected per-target <code>lax.map</code>/<code>cond</code> arm measured
+109.904 ms before and 165.321 ms after on the CPU MAST paired batch, a 50.4%
+regression. The branch-share measurements and samples are in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/branch-share-cpu.json</code>;
+the rejected-arm record is in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/compare-cpu-paired.log</code>.</p>
+
+<p><code>graded_residual</code> now owns the weighted panel loop through its
+<code>weight</code> argument, and the duplicate weighted-residual implementation
+has been removed. The two tangent suites and all tests importing
+<code>gradedresidual</code> are queued for the base/head Sirius gate.</p>
+</section>

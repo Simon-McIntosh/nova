@@ -175,7 +175,26 @@ def _grading_width(offset, end, scale, xp):
     )
 
 
-def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
+def _weight_remainder(term, panel, x, y, xp):
+    """Split a harmonic weight into its endpoint value and vanishing remainder."""
+    bulk, near, far = term
+    cosine = y - x
+    previous, current = xp.ones_like(x), cosine
+    polynomial = 0.0
+    for order, coefficient in enumerate(bulk):
+        harmonic = previous if order == 0 else current
+        polynomial = polynomial + xp.asarray(coefficient)[..., None] * harmonic
+        if order:
+            previous, current = current, 2.0 * cosine * current - previous
+    near, far = xp.asarray(near), xp.asarray(far)
+    if panel:
+        return near, y * ((far - near)[..., None] + x * polynomial)
+    return far, x * ((near - far)[..., None] + y * polynomial)
+
+
+def graded_residual(
+    panels, pieces, nodes: int, xp, *, paired: bool = False, weight=None
+):
     """Return ``integral arsinh(N/W) da`` over two graded panels, log removed.
 
     Each entry of ``panels`` is ``(offset, end, scale, lower, upper)`` for one
@@ -191,7 +210,7 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
     far end.  The FIRST panel is graded from ``a = 0`` and the second from
     ``a = pi/2``.
     """
-    node, weight = _rule(nodes)
+    node, weights = _rule(2 * nodes if weight is not None else nodes)
     total = None if paired else 0.0
     for panel, (offset, end, scale, lower, upper) in enumerate(panels):
         # The logarithmic model resolves the denominator's singular end.
@@ -216,23 +235,33 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
         jacobian = 0.5 * span * held * xp.sqrt(1.0 + stretched * stretched)
         bounded = _regularised(numerator, denominator, model, sign, xp)
         model_integral = xp.sign(end) * _model_integral(offset, scale, lower, upper, xp)
+        if weight is None:
+            sampled = bounded
+        else:
+            endpoint, remainder = _weight_remainder(weight, panel, x, y, xp)
+            sampled = endpoint[..., None] * bounded + remainder * xp.arcsinh(
+                numerator / denominator
+            )
+            model_integral = endpoint * model_integral
         if paired:
-            quadrature = paired_wrap(xp.zeros_like(offset))
-            for index, one_weight in enumerate(weight):
-                quadrature = paired_add(
-                    quadrature,
+            paired_quadrature = paired_wrap(xp.zeros_like(offset))
+            for index, one_weight in enumerate(weights):
+                paired_quadrature = paired_add(
+                    paired_quadrature,
                     paired_scale(
                         paired_multiply(
                             paired_wrap(jacobian[:, index]),
-                            paired_wrap(bounded[:, index]),
+                            paired_wrap(sampled[:, index]),
                         ),
                         one_weight,
                     ),
                 )
-            panel_value = paired_subtract(quadrature, paired_wrap(model_integral))
+            panel_value = paired_subtract(
+                paired_quadrature, paired_wrap(model_integral)
+            )
             total = panel_value if total is None else paired_add(total, panel_value)
         else:
-            total = total + (jacobian * bounded) @ weight - model_integral
+            total = total + (jacobian * sampled) @ weights - model_integral
     return total
 
 
@@ -326,7 +355,16 @@ def _regularised_tangent(
     )
 
 
-def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
+def _graded_residual_tangent(
+    panels,
+    d_panels,
+    pieces_tangent,
+    nodes: int,
+    xp,
+    *,
+    weight=None,
+    d_weight=None,
+):
     """Return :func:`graded_residual` and its tangent over the same nodes.
 
     ``d_panels`` carries one tangent per panel quantity, and ``pieces_tangent``
@@ -334,7 +372,7 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
     tangents. The grading width is fixed in the tangent; integration-bound
     motion still contributes through the nodes and their Jacobian.
     """
-    node, weight = _rule(nodes)
+    node, weights = _rule(2 * nodes if weight is not None else nodes)
     total = d_total = 0.0
     for panel, (values, tangents) in enumerate(zip(panels, d_panels, strict=True)):
         offset, end, scale, lower, upper = values
@@ -386,11 +424,35 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
         model_integral, d_model_integral = _model_integral_tangent(
             offset, d_offset, scale, d_scale, lower, d_lower, upper, d_upper, xp
         )
+        if weight is None:
+            sampled, d_sampled = bounded, d_bounded
+        else:
+            endpoint, remainder = _weight_remainder(weight, panel, x, y, xp)
+            if d_weight is None:
+                d_endpoint = xp.zeros_like(endpoint)
+                d_remainder = xp.zeros_like(remainder)
+            else:
+                d_endpoint, d_remainder = _weight_remainder(d_weight, panel, x, y, xp)
+            quotient = numerator / denominator
+            integrand = xp.arcsinh(quotient)
+            d_quotient = _quotient_tangent(
+                numerator, d_numerator, denominator, d_denominator
+            )
+            d_integrand = d_quotient / xp.sqrt(1.0 + quotient**2)
+            sampled = endpoint[..., None] * bounded + remainder * integrand
+            d_sampled = (
+                d_endpoint[..., None] * bounded
+                + endpoint[..., None] * d_bounded
+                + d_remainder * integrand
+                + remainder * d_integrand
+            )
+            d_model_integral = d_endpoint * model_integral + endpoint * d_model_integral
+            model_integral = endpoint * model_integral
         orientation = xp.sign(end)
-        total = total + (jacobian * bounded) @ weight - orientation * model_integral
+        total = total + (jacobian * sampled) @ weights - orientation * model_integral
         d_total = (
             d_total
-            + _product_tangent(jacobian, d_jacobian, bounded, d_bounded) @ weight
+            + _product_tangent(jacobian, d_jacobian, sampled, d_sampled) @ weights
             - orientation * d_model_integral
         )
     return total, d_total

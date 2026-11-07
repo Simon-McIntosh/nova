@@ -1,0 +1,228 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T20:46:37Z",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "ff16f6ec1a5",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The trip-2 flux panel is cut off at its bottom edge: the blue solved contours and the red bounding surface terminate mid-curve at the panel border, so a reader cannot see whether the bounding surface closes, and the lower part of the field is simply not shown."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "id": "fc66039c621",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The trip axis of the residual plot runs to 15 while the data stop at trip 4, so roughly three quarters of that panel is empty and the plotted points are squeezed into the left quarter."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "id": "f9a4ac1b1a5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The poloidal panel occupies well under half the canvas width and sits in a large empty field, so the contour detail and the separate null markers are much smaller than the canvas allows."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "ffa46edf5fc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two solved X-point asterisks at the lower right sit almost on top of one another and the red bounding surface runs past the wall to the panel edge, making the individual nulls hard to tell apart."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T204531239676-review-of-diiid-frame-146-vertical-loss-a20dabf17a18-figure",
+  "reviewed_base_sha": "3aaef197ccb91323f12256c8472c92502e8800ec",
+  "reviewed_head_sha": "a20dabf17a186d37e6a51536720bfb78b3f80a3a",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "item": "legibility",
+      "rendered": "image-0.png",
+      "verdict": "pass \u2014 the poloidal panel, residual plot, legend and caption are readable at a glance"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "item": "data_ink",
+      "rendered": "image-0.png",
+      "verdict": "pass \u2014 contours, markers and the residual trace carry the ink; no fills"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "item": "decoration",
+      "rendered": "image-0.png",
+      "verdict": "pass \u2014 no gradient, shading or background fill"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "item": "contrast",
+      "rendered": "image-0.png",
+      "verdict": "pass \u2014 near-black text and axis labels clear the white background"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "item": "table_form",
+      "rendered": "image-0.png",
+      "verdict": "pass \u2014 the plotted flux/residual relation is not tabular information"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "item": "label_collision",
+      "rendered": "image-0.png",
+      "verdict": "pass \u2014 legend, axis labels and caption text do not overlap or clip"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "item": "legibility",
+      "rendered": "image-1.png",
+      "verdict": "pass \u2014 title, contours and residual strip are readable"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "item": "data_ink",
+      "rendered": "image-1.png",
+      "verdict": "pass \u2014 unfilled line contours and a thin residual trace carry the ink"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "item": "decoration",
+      "rendered": "image-1.png",
+      "verdict": "pass \u2014 no gradient, shading or background fill"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "item": "contrast",
+      "rendered": "image-1.png",
+      "verdict": "pass \u2014 black text on white clears contrast"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "item": "table_form",
+      "rendered": "image-1.png",
+      "verdict": "pass \u2014 a flux-contour comparison is not naturally a table"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "item": "label_collision",
+      "rendered": "image-1.png",
+      "verdict": "pass \u2014 title, residual strip labels and markers do not overlap"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "item": "legibility",
+      "rendered": "image-2.png",
+      "verdict": "pass \u2014 the frame-level panel, residual plot and four-line caption are readable"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "item": "data_ink",
+      "rendered": "image-2.png",
+      "verdict": "pass \u2014 contours and residual trace carry the ink"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "item": "decoration",
+      "rendered": "image-2.png",
+      "verdict": "pass \u2014 no gradient, shading or background fill"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "item": "contrast",
+      "rendered": "image-2.png",
+      "verdict": "pass \u2014 text clears the background"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "item": "table_form",
+      "rendered": "image-2.png",
+      "verdict": "pass \u2014 spatial contour comparison, not a table"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "item": "label_collision",
+      "rendered": "image-2.png",
+      "verdict": "pass \u2014 no clipped or overlapping labels"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "item": "legibility",
+      "rendered": "image-3.png",
+      "verdict": "pass \u2014 readable, though the poloidal panel is small against the canvas"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "item": "data_ink",
+      "rendered": "image-3.png",
+      "verdict": "pass \u2014 line contours and residual trace carry the ink"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "item": "decoration",
+      "rendered": "image-3.png",
+      "verdict": "pass \u2014 no gradient, shading or fill"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "item": "contrast",
+      "rendered": "image-3.png",
+      "verdict": "pass \u2014 text clears the background"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "item": "table_form",
+      "rendered": "image-3.png",
+      "verdict": "pass \u2014 spatial comparison, not tabular"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "item": "label_collision",
+      "rendered": "image-3.png",
+      "verdict": "fail \u2014 the two solved X-point asterisks at the lower right nearly touch, and the red bounding surface runs past the wall and out of the panel"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "item": "legibility",
+      "rendered": "image-4.png",
+      "verdict": "fail \u2014 the contour field and red bounding surface are cut off at the top edge, so the reader cannot see whether the surface closes"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "item": "data_ink",
+      "rendered": "image-4.png",
+      "verdict": "pass \u2014 contours carry the ink"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "item": "decoration",
+      "rendered": "image-4.png",
+      "verdict": "pass \u2014 no gradient or decoration"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "item": "contrast",
+      "rendered": "image-4.png",
+      "verdict": "pass \u2014 text clears the background"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "item": "table_form",
+      "rendered": "image-4.png",
+      "verdict": "pass \u2014 spatial comparison, not tabular"
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "item": "label_collision",
+      "rendered": "image-4.png",
+      "verdict": "fail \u2014 blue contours and the red bounding surface terminate at the panel top edge, mid-curve"
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:55:19.118444+00:00",
+  "total": null
+}

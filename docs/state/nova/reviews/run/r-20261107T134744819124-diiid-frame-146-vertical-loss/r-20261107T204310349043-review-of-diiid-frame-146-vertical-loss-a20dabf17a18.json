@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T20:54:39.930Z",
+  "dispatched_at": "2026-11-07T20:45:17Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 60,
+      "severity": "non-blocking",
+      "text": "render_trip_panels.py:60 _saddles re-implements stationary-point finding that nova/equilibrium/display_flux.py:172 _stationary_saddle already owns, and in a weaker form: the local version samples a 33x33 lattice with a sign test on the raw Hessian and no polish, so the saddle flux feeding the bounding surface is a grid-level candidate rather than a stationary point. The manifest names this under rubric.record but the fragment's bounding surface rests on it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 51,
+      "severity": "non-blocking",
+      "text": "_bilinear is named for bilinear interpolation but resolves the point to the nearest grid cell with int(round(...)); every axis flux, limiter flux and saddle flux quoted in per-trip-panels.json is therefore a nearest-cell sample. A reader of the name would not expect that error term."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 71,
+      "severity": "non-blocking",
+      "text": "_edge_flux is defined and never called; dead code in a landed script."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 300,
+      "severity": "non-blocking",
+      "text": "figure.suptitle(...) puts a title on the figure, against the repository's binding plotting rule that the caption carries identity and the figure needs no title or suptitle (nova AGENTS.md, data-ink rules). Three SVGs were committed with it."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 0,
+      "severity": "non-blocking",
+      "text": "done_when item 3 names the bounding surface from nova.equilibrium.connectivity_boundary.host_boundary_read; the fragment draws a reduced derivation instead. The substitution is stated in the text, so it is disclosed rather than hidden, but the named routine is not exercised."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T204310349043-review-of-diiid-frame-146-vertical-loss-a20dabf17a18",
+  "reviewed_base_sha": "00105c532e165d5aac774ba2d17bd73f102a7981",
+  "reviewed_head_sha": "a20dabf17a186d37e6a51536720bfb78b3f80a3a",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 4,
+    "evidence": 15,
+    "fit": 5,
+    "goal_fidelity": 15,
+    "reuse": 8,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:01:58.706823+00:00",
+  "total": 67
+}

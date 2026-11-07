@@ -83,12 +83,27 @@ the same program's primal compiled in 0.327 s under eight spun-up cores and
 3.07 was reported. Whether the bound or its repeat count should move is left to
 a node that owns that row; it was not widened here.</p>
 
-<h3>Negative control</h3>
+<h3>Before and after walls, and the negative control</h3>
+
+<p>One four-core <code>all_debug</code> job measured the shipped configuration
+(job <code>1307534</code>, CPU, MAST batched over 13 sections): the baseline
+revision's wall is 98.0895 ms and the head's is 98.4359 ms, against a bound of
+93.185 ms at 0.95 of the baseline. The head is 0.35% slower, so the benchmark's
+throughput assertion fails. That is the expected outcome of the arm this node
+chose: the near-band selection was retained unchanged after the branch-share
+diagnostic showed no saving, so no wall improvement was delivered to measure.</p>
 
 <p>Forcing the near-band selection to evaluate every target
-(<code>--force-all</code>, <code>all_debug</code> job <code>1307531</code>)
-reports <code>THROUGHPUT machine=MAST before_wall_ms=90.3142
-after_wall_ms=89.983 bound_ms=85.7985</code> and fails its own bound with
-<code>AssertionError</code> and <code>EXIT=1</code>, which is the refusal the
-check exists to produce.</p>
+(<code>--force-all</code>, job <code>1307535</code>) reports
+<code>before_wall_ms=97.9847 after_wall_ms=99.1203 bound_ms=93.0855</code> and
+fails the same assertion with <code>EXIT=1</code>. Because the unmutated arm
+fails that bound as well, this control shows that the assertion fires and
+prints its before wall; it does not discriminate the mutation from the shipped
+arm, and it is recorded here as such rather than as a passing gate.</p>
+
+<p>A first pair of runs (jobs <code>1307531</code> and <code>1307532</code>)
+measured the after arm from the main checkout instead of the worktree, because
+the launcher set no <code>PYTHONPATH</code>; both were discarded and repeated
+with <code>PYTHONPATH=$SLURM_SUBMIT_DIR</code>, and only the repeated runs'
+numbers appear above.</p>
 </section>

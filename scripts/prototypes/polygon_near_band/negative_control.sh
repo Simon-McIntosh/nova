@@ -8,5 +8,6 @@
 export TMPDIR=/tmp
 export RECKON_ALLOW_NESTED_LAUNCH=1
 export JAX_PLATFORMS=cpu
+export PYTHONPATH="$SLURM_SUBMIT_DIR"
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$SLURM_SUBMIT_DIR/scripts/prototypes/polygon_near_band/measure.py" --device cpu --compare --force-all --baseline-revision cb42f656f76a7d7e56da8a53d4754c22d131bdc0 --output /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/gate/negative-control.json
 echo EXIT=$?

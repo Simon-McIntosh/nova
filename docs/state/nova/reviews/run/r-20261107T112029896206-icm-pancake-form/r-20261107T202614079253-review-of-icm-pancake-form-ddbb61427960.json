@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T20:43:34.234Z",
+  "dispatched_at": "2026-11-07T20:29:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-sheet-tidy",
+      "recorded_at": "2026-11-07T20:52:40.328270+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-sheet-tidy",
+      "recorded_at": "2026-11-07T20:52:47.229642+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-sheet-tidy",
+      "recorded_at": "2026-11-07T20:52:51.552611+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "icm-sheet-tidy",
+      "recorded_at": "2026-11-07T20:52:54.902090+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "607",
+      "severity": "blocking",
+      "text": "blocking: _pancake_remainder(gamma, r, rp) is exactly nova.biot.zeta.zeta(rp, r, gamma, pi/2) -- the repository's owner for this integral -- measured to 2.4e-14..4.5e-13 relative over gamma in {0, 1e-9, 1e-4, 0.01, 0.4}; the node duplicated it rather than calling the owner. The rule at nova/biot/sheet.py:166 _double_exponential likewise re-implements nova/biot/zeta.py:104 _tanh_sinh_rule, the same s = (1 + tanh(pi/2 sinh t))/2 substitution with a different node count."
+    },
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": "192",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_one_edge_flipped_fails_the_pancake_comparison assembles its own flipped sum from pancake_antiderivative inside the test body, so it never exercises _pancake_flux and cannot redden on a regression in the two-ends assembly it names; the -k pancake mutation arm in negative_control.log left it among the 36 passing."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "726",
+      "severity": "non-blocking",
+      "text": "non-blocking: closed now selects the closed form on a sloped segment but the panelised quadrature on a flat one, so the public keyword inverts its own meaning with geometry; a caller asking for the closed route gets the slower numerical one at slope 0."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "166",
+      "severity": "non-blocking",
+      "text": "non-blocking: _PANCAKE_RULE is built once at import with no lru_cache, unlike every other fixed rule in nova/biot (zeta.py:104, arcbandedcoupling.py:34, gradedresidual.py:77), so the module pays for the rule on import even when only the sloped path is used."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112029896206-icm-pancake-form/gate.log",
+    "baseline_suite": null,
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112029896206-icm-pancake-form/negative_control.log"
+  },
+  "item_verdicts": {
+    "call_sites": "Searched nova/, apps/ and scripts/ for sheet_flux, sheet_field and SheetFlux; the only caller outside nova/biot/sheet.py is tests/test_edge_sheet.py, so the change reaches no production path today.",
+    "diff": "Read commit ddbb614 against its base dbbea0e: 3 files changed, +370/-14, the module docstring rewritten to describe the new default route, five new methods added beside the retained flat quadrature, and no existing test edited.",
+    "done_when": "The done_when asks for 1e-10 against the reference, 1e-10 against the landed slope-0 values, and a flipped-current control that fails; tests/test_edge_sheet.py:151-219 asserts all three and gate.log records 345 passed EXIT=0, with negative_control.log recording 48 failed EXIT=1 on the pancake comparisons.",
+    "goal": "The source goal asks for Urankar Part II eqs (26) and (27) to become the flat (slope 0) flux and field route with the existing quadrature kept as the check; nova/biot/sheet.py:689 _pancake_flux and :700 _pancake_field are that route and _flat_flux/_flat_field survive behind closed=True.",
+    "manifest": "The manifest is complete and honest about the routes and the measured 2.84e-13 / 1.68e-12, but its tests field is a JSON object naming no command and it carries no baseline_suite or after_suite arm, so its gate cannot be reconciled against the observed test diff.",
+    "write_paths": "The manifest declares nova/biot/sheet.py, tests/test_edge_sheet.py, docs/evidence/fragments/iron-core-magnetisation/icm-pancake-form.html and docs/figures/iron-core-magnetisation/icm-pancake-form; the commit changes only the first three, every one inside the grant."
+  },
+  "justifications": {
+    "durability": "the mutated arm in negative_control.log reddens all 12 parameters of test_flat_pancake_form_matches_reference and test_flat_pancake_field_matches_reference (48 failures), so the reference comparison is a real guard, but tests/test_edge_sheet.py:192 test_one_edge_flipped_fails_the_pancake_comparison rebuilds its own flipped sum from pancake_antiderivative and does not redden under that mutation.",
+    "evidence": "tests/test_edge_sheet.py:151-219 asserts the reference at TOLERANCE = 1e-10 and the quadrature agreement, and gate.log ends '345 passed' with EXIT=0, but gate.log:1 stamps revision dbbea0e (the base) so the log cannot be tied to the reviewed head ddbb614.",
+    "fit": "nova/biot/sheet.py:166-176 builds the rule at import without the lru_cache the rest of nova/biot uses (zeta.py:104, arcbandedcoupling.py:34), and the closed keyword means the quadrature on a flat sheet and the closed form on a sloped one.",
+    "goal_fidelity": "nova/biot/sheet.py:602-704 transcribes eqs (26) and (27) for the b_2 = 0 annulus and routes both flux() and field() through them, keeping the older surface-current route reachable behind closed=True.",
+    "reuse": "nova/biot/sheet.py:607 _pancake_remainder is nova/biot/zeta.py:189 zeta at alpha = pi/2 (measured agreement 2.4e-14 to 4.5e-13 over gamma 0 to 0.4), and nova/biot/sheet.py:166 _double_exponential re-implements nova/biot/zeta.py:104 _tanh_sinh_rule, the same s = (1 + tanh(pi/2 sinh t))/2 substitution.",
+    "scope_discipline": "git show --stat ddbb614 touches nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-pancake-form.html, all three inside the node's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal, read from its brief, is to make Urankar Part II eqs (26) and (27) the flat-sheet flux and field route with the existing quadrature kept as the check; nova/biot/sheet.py:689 _pancake_flux and :700 _pancake_field are that route and _flat_flux/_flat_field survive unchanged behind closed=True.\nVERDICT done_when: the done_when asks for 1e-10 against the reference, 1e-10 against the landed slope-0 values, and a flipped-current control that fails the pancake comparisons; tests/test_edge_sheet.py:151-219 asserts all three and gate.log ends '345 passed' with EXIT=0 while negative_control.log ends '48 failed, 36 passed' with EXIT=1.\nVERDICT write_paths: the manifest declares four paths; git show --stat ddbb614 changes nova/biot/sheet.py, tests/test_edge_sheet.py and the icm-pancake-form.html fragment, every one inside the grant and nothing outside it.\nVERDICT manifest: read in full; it is honest about the two routes and the measured 2.84e-13 flux and 1.68e-12 field worst deviations, but its tests field is a JSON object naming no runnable command and it records no baseline_suite or after_suite arm.\nVERDICT diff: read commit ddbb614 against its base dbbea0e; 3 files, +370/-14, all inside the declared scope, the module docstring rewritten to describe the new default route and the five new methods placed beside the retained flat quadrature.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:689 _pancake_flux and :700 _pancake_field implement the transcribed eqs (26) and (27) as the b_2 = 0 default, with _flat_flux retained behind closed=True.\nSCORE evidence: 15\nJUSTIFICATION evidence: tests/test_edge_sheet.py:151-219 assert the 1e-10 floor against scripts/edge_sheet/reference.py and against the quadrature, and gate.log ends 345 passed EXIT=0, but gate.log:1 stamps revision dbbea0e (the base) so the log cannot be tied to the reviewed head ddbb614.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git show --stat ddbb614 touches only nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-pancake-form.html, all inside the declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: negative_control.log reddens all 12 parameters of test_flat_pancake_form_matches_reference and test_flat_pancake_field_matches_reference (48 failures) under the sign mutation, but tests/test_edge_sheet.py:192 recomputes its own flipped sum and cannot redden on a regression in _pancake_flux.\nSCORE fit: 16\nJUSTIFICATION fit: nova/biot/sheet.py:726 gives the public closed keyword opposite meanings on a flat and a sloped segment, and :176 builds the rule at import without the lru_cache every other fixed rule in nova/biot uses (zeta.py:104, arcbandedcoupling.py:34).\nSCORE reuse: 3\nJUSTIFICATION reuse: nova/biot/sheet.py:607 _pancake_remainder equals nova/biot/zeta.py:189 zeta at alpha = pi/2 to 2.4e-14..4.5e-13 measured over gamma 0 to 0.4, and nova/biot/sheet.py:166 _double_exponential re-implements nova/biot/zeta.py:104 _tanh_sinh_rule's own substitution; neither extends the owner.\nFINDING nova/biot/sheet.py:607 blocking: _pancake_remainder duplicates nova.biot.zeta.zeta, the repository's owner of this exact integral, instead of calling it, and _double_exponential at :166 duplicates _tanh_sinh_rule at nova/biot/zeta.py:104.\nFINDING tests/test_edge_sheet.py:192 non-blocking: the in-suite flipped-current control builds its own sum from pancake_antiderivative and never reaches _pancake_flux, so it cannot guard the assembly it names.\nFINDING nova/biot/sheet.py:726 non-blocking: closed selects the quadrature on a flat sheet and the closed form on a sloped one, inverting the public keyword's meaning with geometry.\nFINDING nova/biot/sheet.py:166 non-blocking: _PANCAKE_RULE is built at import with no lru_cache, unlike the other fixed-rule owners in nova/biot.\n",
+  "review_run_id": "r-20261107T202614079253-review-of-icm-pancake-form-ddbb61427960",
+  "reviewed_base_sha": "dbbea0ea5dfce1cd797411866ec2b7ff963e8c59",
+  "reviewed_head_sha": "ddbb61427960e51d69421aec7372b6e093732468",
+  "reviewed_run_id": "r-20261107T112029896206-icm-pancake-form",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 3,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:05:00Z",
+  "total": 86
+}

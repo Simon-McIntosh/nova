@@ -367,16 +367,6 @@ def test_promoted_nodes_are_excluded_from_the_solved_mismatch():
     assert display.max_solved_node_mismatch_wb == pytest.approx(
         residual, rel=1.0e-6, abs=1.0e-15
     )
-    assert np.isnan(display.nearest_promoted_to_xpoint_m) == (
-        not display.saddle_converged
-    )
-    if display.saddle_converged:
-        polished, converged = _polish_map_saddle(display, xpoint)
-        assert converged
-        offset = np.asarray(lattice.coordinate)[promoted] - polished
-        assert display.nearest_promoted_to_xpoint_m == pytest.approx(
-            float(np.min(np.linalg.norm(offset, axis=1))), rel=1.0e-12
-        )
     assert display.reproduction_relative_error < 1.0e-10
 
 
@@ -561,6 +551,29 @@ def _diverted_coupling(node: int) -> DisplayCoupling:
     return DisplayCoupling(plasma=plasma, external=external)
 
 
+def _shifted_diverted_coupling(node: int, shift: np.ndarray) -> DisplayCoupling:
+    """Return the diverted field displaced by ``shift`` [m] at every point.
+
+    The map therefore carries its saddle away from the seed that selects it,
+    while the lattice state keeps the undisplaced field, so the two saddles and
+    the seed are three distinct coordinates.
+    """
+
+    def plasma(points: np.ndarray):
+        """Return zero plasma moment columns at ``points``."""
+        return (
+            np.zeros((points.shape[0], node)),
+            np.zeros((points.shape[0], node)),
+            np.zeros((points.shape[0], node)),
+        )
+
+    def external(points: np.ndarray) -> np.ndarray:
+        """Return the displaced diverted flux at ``points`` [Wb]."""
+        return _diverted_field(points - np.asarray(shift, dtype=np.float64))
+
+    return DisplayCoupling(plasma=plasma, external=external)
+
+
 def test_the_map_assembles_its_own_separatrix_branches():
     """The branches come from the fine map at the map's own saddle level."""
     profile, lattice = _diverted_profile()
@@ -708,6 +721,56 @@ def test_the_saddle_offset_is_the_polished_distance_between_map_and_lattice():
     assert display.saddle_offset_mm == pytest.approx(expected_mm, abs=1.0e-6)
 
 
+def test_the_nearest_promoted_distance_is_measured_to_the_polished_saddle():
+    """The reported distance runs from the promoted nodes to the field's saddle.
+
+    The coupling images a field displaced from the lattice state, so the map's
+    saddle sits a known distance from the seed that selects it.  The saddle is
+    re-polished here from the published field and the promoted nodes are named
+    here, so neither coordinate the build reports can stand in for the other.
+    """
+    profile, lattice = _diverted_profile()
+    coordinate = np.asarray(lattice.coordinate, dtype=np.float64)
+    shift = np.asarray([0.009, -0.005])
+    zero = CellCurrentMoments(
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+        jnp.zeros(lattice.node_count),
+    )
+    seed = np.asarray([DIVERTED_CENTRE, 0.0])
+    promoted = np.zeros(lattice.node_count, dtype=bool)
+    promoted[[30, 40, 50]] = True
+    display = build_display_flux_map(
+        profile,
+        _diverted_field(coordinate),
+        coupling=_shifted_diverted_coupling(lattice.node_count, shift),
+        moments=zero,
+        promoted=promoted,
+        extent=(
+            DIVERTED_CENTRE - DIVERTED_EXTENT,
+            DIVERTED_CENTRE + DIVERTED_EXTENT,
+            -DIVERTED_EXTENT,
+            DIVERTED_EXTENT,
+        ),
+        xpoint_rz=seed,
+        chunk=512,
+    )
+    assert display.saddle_converged
+    assert display.promoted_node_count == 3
+    saddle, polished = _polish_map_saddle(display, seed)
+    assert polished
+    np.testing.assert_allclose(display.saddle_rz, saddle, atol=1.0e-9)
+    to_saddle = np.linalg.norm(coordinate[promoted] - saddle, axis=1)
+    to_seed = np.linalg.norm(coordinate[promoted] - seed, axis=1)
+    assert abs(float(np.min(to_saddle)) - float(np.min(to_seed))) > 1.0e-3, (
+        "the manufactured displacement no longer separates the saddle from the "
+        "seed, so this check could not tell which point was measured"
+    )
+    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+        float(np.min(to_saddle)), abs=1.0e-9
+    )
+
+
 def test_a_seed_on_an_extremum_reports_no_saddle():
     """A seed that lands on an O-point is refused rather than read as a saddle."""
     profile, lattice = _diverted_profile()
@@ -719,11 +782,14 @@ def test_a_seed_on_an_extremum_reports_no_saddle():
     o_point = np.asarray(
         [DIVERTED_CENTRE + 0.47 * DIVERTED_SCALE, 0.47 * DIVERTED_SCALE]
     )
+    promoted = np.zeros(lattice.node_count, dtype=bool)
+    promoted[[30, 40]] = True
     display = build_display_flux_map(
         profile,
         _diverted_field(np.asarray(lattice.coordinate)),
         coupling=_diverted_coupling(lattice.node_count),
         moments=zero,
+        promoted=promoted,
         extent=(
             DIVERTED_CENTRE - DIVERTED_EXTENT,
             DIVERTED_CENTRE + DIVERTED_EXTENT,
@@ -737,6 +803,8 @@ def test_a_seed_on_an_extremum_reports_no_saddle():
     assert not display.saddle_converged
     assert np.all(np.isnan(display.saddle_rz))
     assert np.isnan(display.saddle_flux)
+    assert display.promoted_node_count == int(np.count_nonzero(promoted))
+    assert np.isnan(display.nearest_promoted_to_xpoint_m)
     assert display.branches == {}
     assert not display.well_formed
 

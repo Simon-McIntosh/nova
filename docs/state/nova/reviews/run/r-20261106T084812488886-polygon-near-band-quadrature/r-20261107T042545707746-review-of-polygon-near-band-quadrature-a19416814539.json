@@ -33,6 +33,11 @@
       "kind": "exempted",
       "reason": "a one-sample attribution slip between 3.04 and 3.05 in prose; both samples are over the 3.0 bound and the conclusion is unchanged",
       "recorded_at": "2026-11-07T04:41:18.717656+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "the regularised compile-ratio row is recorded in the fragment as an added failure and is carried on the landing ledger through --waive-suite-delta",
+      "recorded_at": "2026-11-07T04:41:25.803362+00:00"
     }
   },
   "findings": [

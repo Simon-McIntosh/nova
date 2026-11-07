@@ -69,12 +69,16 @@ root virtualenv with `PYTHONPATH` naming the arm's tree.
 | file | head | base |
 | --- | --- | --- |
 | `tests/test_bank_drive_continuation.py` | 3 passed | absent at base |
-| `tests/test_bank_solve_driver.py` | 10 passed | see the base job log |
-| `tests/test_bank_solve_cycle.py` | 3 passed | see the base job log |
-| `tests/test_support_read.py` | 13 passed, 2 skipped | see the base job log |
+| `tests/test_bank_solve_driver.py` | 10 passed | 10 passed |
+| `tests/test_bank_solve_cycle.py` | 3 passed | 3 passed |
+| `tests/test_support_read.py` | 13 passed, 2 skipped | 13 passed, 2 skipped |
 
-The base arm runs from an extracted archive of the base revision under the run
-directory; its per-file logs are `suite-base-*.log` beside the head arm's.
+No added failure. The base arm runs from `base-tree`, an archive of the base
+revision extracted under the run directory; its per-file logs are
+`suite-base-*.log` beside the head arm's. One earlier base submission pointed
+at a node-local `/tmp` path that does not exist on a compute node and its
+processes collected nothing (`EXIT=4`, `file or directory not found`); the arm
+was re-run from the GPFS extraction and the logs above are that run's.
 
 ## Provenance
 

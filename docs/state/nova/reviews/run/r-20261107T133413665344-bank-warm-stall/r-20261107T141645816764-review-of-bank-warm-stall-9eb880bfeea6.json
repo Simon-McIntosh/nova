@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T14:50:23.100Z",
+  "dispatched_at": "2026-11-07T14:18:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "28",
+      "severity": "blocking",
+      "text": "blocking: the record states the unit-scale Newton trial raises the fresh residual 7-20x at every single update, but its own table (lines 16-26) gives 6.92, 7.59, 4.21, 3.89, 1.91, 1.30, 1.71, 18.56, 4.23, 10.93 and 25.94 for updates 1-11, so only four of eleven are at or above 7x and the true range is 1.30-25.94x; the same sentence is repeated at line 48 and in the commit body of 8b9d96b75, so the evidence record states a measured quantity its own data contradicts."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: the figure caption says both arms fall by about a factor of two in the first ten updates and then plateau three orders of magnitude above the 1e-10 tolerance, but the table gives 1.796 to 0.4773 (a factor of 3.76) and 0.48 sits 9.7 orders above 1e-10, so both quantities are understated."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "line": "57",
+      "severity": "blocking",
+      "text": "blocking: the tolerance annotation is anchored at axes.get_xlim()[1] before set_xlim at line 67 narrows the limits, so the text artist falls outside the final axes and is absent from the committed PNG and SVG (verified by rendering the committed SVG at 1400 px); the repository's figure rules make a clipped label a blocking defect."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/render.py",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: its decision() emits 'class 1, cut 117, normal 8, ...' while the committed fragment table reads 'diverted, cut 117, normal 8, frag 338, saddle 1', and neither report.py nor render.py maps boundary_class 1 to 'diverted', so the committed renderer does not reproduce the committed table and the delivered table was not produced by the delivered pipeline."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the brief asks for the discrete decision at the seed, at each trial and at each accepted state, but the table carries a decision column only for the accepted state; the per-trial decisions retained in wp/report.json (trials[].decision) are not rendered, so a trial at which the cut set or ownership differs is invisible to a reader."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment records no revision, job id, node or tree provenance, so a reader cannot tell which commit the measurement ran at; every sibling fragment in the same directory cites its base and head revisions and its allocation."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/observed.py",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module re-implements the jax.lax.while_loop... jax.lax.while_loop monkeypatch and the solve_batch body-name guard that scripts/prototypes/bank_solve_cycle/observe.py already owns, and the cut/normal/fragment mask counting that scripts/prototypes/bank_read_count_sensitivity/capture.py owns, instead of importing and extending them as the brief directed; its own docstring cites bank_solve_cycle.observe but no import of it exists."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133413665344-bank-warm-stall/manifest.md",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: the tests line carries the unsubstituted placeholders <run> and <worktree>, so the promotion gate receipt cannot be filled from it and the log's own command header is the only re-runnable record left; the manifest contract refuses a template command carrying an unsubstituted placeholder."
+    }
+  ],
+  "justifications": {
+    "durability": "the reduced record at scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json now carries each arm's scalars so the evidence survives worktree reclamation, but scripts/prototypes/bank_warm_stall/observed.py:62-85 installs call-site wrappers with no check that the observed solve equals the unobserved",
+    "evidence": "the table reconciles exactly with the retained wp/reference report (u1 incumbent 1.796 to 1.347 at accepted scale 0.25), yet fragment line 28 states a 7-20x per-update trial ratio that the same table contradicts (1.30-25.94x), and the fragment cites no revision or job id.",
+    "fit": "the prototype follows the scripts/prototypes idiom and the nine changed paths carry no plan or version label, but plot.py:57 leaves a text artist clipped outside the axes in the committed figure.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:8-53 lands the brief's three work items -- a per-update lane table, a warm-against-cold comparison including the amplitude-1.0 reference arm, and one data-ink figure -- but the brief's per-trial discrete-decision column and the named observe/read-count-sensitivity instruments are not delivered.",
+    "reuse": "scripts/prototypes/bank_warm_stall/observed.py:34-60 re-implements the jax.lax.while_loop patch owned by scripts/prototypes/bank_solve_cycle/observe.py and the cut/normal/fragment mask counting owned by scripts/prototypes/bank_read_count_sensitivity/capture.py, neither of which it imports.",
+    "scope_discipline": "commits 8b9d96b75 and 9eb880bfe touch only the three declared paths and no product or test file, with the rendered PNG left untracked at docs/figures/sub-millisecond-forward-path/bank-warm-stall/residual-warm-vs-cold.png."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief's Work (1)-(3) is to trace the stalling slice, name the mechanism and write the fragment with one figure; the landed change does all three at docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:8-53, though the per-trial decision column and the brief's named observe/read-count-sensitivity imports are missing.\nVERDICT done_when: the brief's measure is the per-update table, the warm-against-cold comparison and one figure; the table reconciles with wp/report.json but its own summary sentence (fragment:28) misstates the trial ratio the table records.\nVERDICT write_paths: the declared paths are scripts/prototypes/bank_warm_stall, the bank-warm-stall fragment and figures/sub-millisecond-forward-path/bank-warm-stall; both commits stay inside them, with one untracked PNG under the figure directory.\nVERDICT manifest: read manifest.md:5-31 -- it now reads status complete with three commits, but its tests line (manifest.md:11) carries the unsubstituted placeholders <run> and <worktree>, so the gate receipt cannot be filled from it.\nVERDICT diff: read commit by commit against base 5f34f03c -- 8b9d96b75 adds five prototype modules plus run_h200.sh, the fragment and the SVG, and 9eb880bfe edits one fragment sentence; no product code or test is touched.\nCALL_SITES: nova/equilibrium/support_read.py:solve_batch, nova/equilibrium/support_read.py:newton_step, nova/equilibrium/support_read.py:read_batch, nova/equilibrium/support_read.py:_damped_scale\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:8-53 lands the brief's three work items -- a per-update lane table, a warm-against-cold comparison including the amplitude-1.0 reference arm, and one data-ink figure -- but the brief's per-trial discrete-decision column and the named observe/read-count-sensitivity instruments are not delivered.\nSCORE evidence: 10\nJUSTIFICATION evidence: the table reconciles exactly with the retained wp/report.json (u1 incumbent 1.796 to 1.347 at accepted scale 0.25), yet fragment line 28 states a 7-20x per-update trial ratio that the same table contradicts (1.30-25.94x), and the fragment cites no revision or job id.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: commits 8b9d96b75 and 9eb880bfe touch only the three declared paths and no product or test file, with the rendered PNG left untracked at docs/figures/sub-millisecond-forward-path/bank-warm-stall/residual-warm-vs-cold.png.\nSCORE durability: 7\nJUSTIFICATION durability: the reduced record at scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json now carries each arm's scalars so the evidence survives worktree reclamation, but scripts/prototypes/bank_warm_stall/observed.py:62-85 installs call-site wrappers with no check that the observed solve equals the unobserved one and the node adds no test, so nothing reddens if a wrapper perturbs the trajectory it measures.\nSCORE fit: 15\nJUSTIFICATION fit: the prototype follows the scripts/prototypes idiom and the nine changed paths carry no plan or version label, but plot.py:57 leaves a text artist clipped outside the axes in the committed figure.\nSCORE reuse: 11\nJUSTIFICATION reuse: scripts/prototypes/bank_warm_stall/observed.py:34-60 re-implements the jax.lax.while_loop patch owned by scripts/prototypes/bank_solve_cycle/observe.py and the cut/normal/fragment mask counting owned by scripts/prototypes/bank_read_count_sensitivity/capture.py, neither of which it imports.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:28 blocking: the record states the unit-scale Newton trial raises the fresh residual 7-20x at every single update, but its own table (lines 16-26) gives 6.92, 7.59, 4.21, 3.89, 1.91, 1.30, 1.71, 18.56, 4.23, 10.93 and 25.94 for updates 1-11, so only four of eleven are at or above 7x and the true range is 1.30-25.94x; the same sentence is repeated at line 48 and in the commit body of 8b9d96b75.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:44 non-blocking: the figure caption says both arms fall by about a factor of two in the first ten updates and then plateau three orders of magnitude above the 1e-10 tolerance, but the table gives 1.796 to 0.4773 (a factor of 3.76) and 0.48 sits 9.7 orders above 1e-10.\nFINDING scripts/prototypes/bank_warm_stall/plot.py:57 blocking: the tolerance annotation is anchored at axes.get_xlim()[1] before set_xlim at line 67 narrows the limits, so the text artist falls outside the final axes and is absent from the committed PNG and SVG.\nFINDING scripts/prototypes/bank_warm_stall/render.py:27 non-blocking: its decision() emits 'class 1, cut 117, normal 8, ...' while the committed fragment table reads 'diverted, cut 117, normal 8, frag 338, saddle 1', and neither report.py nor render.py maps boundary_class 1 to 'diverted'.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:15 non-blocking: the brief asks for the discrete decision at the seed, at each trial and at each accepted state, but the table carries a decision column only for the accepted state.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:3 non-blocking: the fragment records no revision, job id, node or tree provenance, so a reader cannot tell which commit the measurement ran at.\nFINDING scripts/prototypes/bank_warm_stall/observed.py:34 non-blocking: the module re-implements the jax.lax.while_loop monkeypatch and the solve_batch body-name guard that scripts/prototypes/bank_solve_cycle/observe.py already owns, and the mask counting that scripts/prototypes/bank_read_count_sensitivity/capture.py owns, instead of importing and extending them as the brief directed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133413665344-bank-warm-stall/manifest.md:11 blocking: the tests line carries the unsubstituted placeholders <run> and <worktree>, so the promotion gate receipt cannot be filled from it and the log's own command header is the only re-runnable record left; the manifest contract refuses a template command carrying an unsubstituted placeholder.\nNOTE: the reviewed worktree advanced from 9eb880bfe to 167c89c9b while this review ran; 167c89c9b adds scripts/prototypes/bank_warm_stall/compact.py, results/bank-warm-stall.json and two fragment paragraphs, and leaves every finding above unchanged. The reviewed pair records the commit the scored diff was read against.",
+  "review_run_id": "r-20261107T141645816764-review-of-bank-warm-stall-9eb880bfeea6",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "9eb880bfeea6d2a30d4d96946407c96221311c83",
+  "reviewed_revision": "9eb880bfeea6d2a30d4d96946407c96221311c83",
+  "reviewed_run_id": "r-20261107T133413665344-bank-warm-stall",
+  "rubric": "node",
+  "scores": {
+    "durability": 7,
+    "evidence": 10,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 11,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T14:45:00+00:00",
+  "total": 78,
+  "treatment": {
+    "done_when": "the fragment's stated per-update unit-trial ratio range matches its own table across all eleven rows, and the rendered figure shows the tolerance label inside the axes",
+    "goal": "correct the trial-ratio statement in the fragment to the measured 1.30-25.94x range and fix the clipped tolerance annotation so the committed figure carries no clipped text artist"
+  },
+  "verdicts": {
+    "diff": "VERDICT diff: read commit by commit against base 5f34f03c -- 8b9d96b75 adds five prototype modules plus run_h200.sh, the fragment and the SVG, and 9eb880bfe edits one fragment sentence; no product code or test is touched.",
+    "done_when": "VERDICT done_when: the brief's measure is the per-update-ids table, the warm-against-cold comparison and one figure; the table reconciles with wp/report.json but its own summary sentence (fragment:28) misstates the trial ratio the table records.",
+    "goal": "VERDICT goal: the brief's Work (1)-(3) is to trace the stalling slice, name the mechanism and write the fragment with one figure; the landed change does all three at docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:8-53, though the per-trial decision column and the brief's named observe/read-count-sensitivity imports are missing.",
+    "manifest": "VERDICT manifest: read manifest.md:5-31 -- it now reads status complete with three commits, but its tests line (manifest.md:11) carries the unsubstituted placeholders <run> and <worktree>, so the gate receipt cannot be filled from it.",
+    "write_paths": "VERDICT write_paths: the declared paths are scripts/prototypes/bank_warm_stall, the bank-warm-stall fragment and figures/sub-millisecond-forward-path/bank-warm-stall; both commits stay inside them, with one untracked PNG under the figure directory."
+  }
+}

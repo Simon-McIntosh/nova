@@ -1,0 +1,97 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-11-07T15:58:40.340Z",
+  "dispatched_at": "2026-11-07T15:40:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the lead chose this route after the printed eq 22a third-kind sum failed to reconcile (16 readings, spread 0.92): derive the third-kind block by the Part V pole reduction; the worker was re-briefed to that method, and the result agrees with the reference to 7.7e-12 and keeps the paper's characteristics as its poles",
+      "recorded_at": "2026-11-07T16:05:58.411267+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-pancake-form",
+      "recorded_at": "2026-11-07T16:06:11.015783+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-closed-field",
+      "recorded_at": "2026-11-07T16:06:23.617271+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the gate's exit status and command are supplied at promotion from the manifest's recorded test command; the log body shows 213 passed",
+      "recorded_at": "2026-11-07T16:06:38.339064+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "341",
+      "severity": "blocking",
+      "text": "antiderivative_closed is a reduction derived from the module's own integrand, not Part II eq 22a with the eq 13a/18a coefficient block the goal and done-when clause 1 name; the brief required reporting blocked with the unreconciled term rather than substituting a different derivation."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "536",
+      "severity": "non-blocking",
+      "text": "closed=True is silently ignored for a flat sheet and for a zero-slope sheet, so a caller passing closed=True on those geometries receives the graded/flat route with no error or warning."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "_divide hand-writes polynomial division in ascending coefficients where numpy.polynomial.polynomial.polydiv already provides the same quotient and remainder, so the module carries a second implementation of a library capability."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111912498902-icm-closed-flux/gate.log",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "the gate log ends at '213 passed in 14.19s' with no bare EXIT=<code> line and no revision, tree or command header, so promotion cannot read the gate's exit status or re-run it from the recorded command."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the change; sheet_flux and SheetFlux.flux have no callers outside nova/biot/sheet.py and the node's own tests.",
+    "diff": "six commits, three files; nova/biot/sheet.py gains _divide, _arsinh_rule, _residual_arsinh, _arc_remainder, _arsinh_term_closed and antiderivative_closed, and the flux entry points gain a closed keyword.",
+    "done_when": "clauses 2 and 3 are met and measured in tests/test_edge_sheet.py:101 and negative-control.log; clause 1 is not, because the eq 13a/18a block is reported unusable rather than reconciled into eq 22a.",
+    "goal": "the node's goal is the printed Part II closed form; nova/biot/sheet.py:341 delivers a self-derived complete-third-kind reduction instead, documented at docs/evidence/fragments/iron-core-magnetisation/icm-closed-flux.html:18 as not using the printed block.",
+    "manifest": "the manifest records the measurements and the negative control, but its `tests` field is a sentence rather than the literal command and gate.log carries no EXIT= line.",
+    "write_paths": "the diff touches nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-closed-flux.html, all inside the declared write paths."
+  },
+  "justifications": {
+    "call_sites": "searched nova/, scripts/ and apps/ for SheetFlux, sheet_flux and the sheet module import; the only references are inside nova/biot/sheet.py itself and its own tests.",
+    "diff": "read all six commits ac4033362..81840d5f9 commit by commit; the code change is one feature commit plus one docs commit after four evidence commits.",
+    "done_when": "read the done_when; clauses 2 and 3 are evidenced, clause 1 (eq 22a with the eq 13a/18a coefficient block reconciled) is not delivered and the fragment states the block is unusable.",
+    "durability": "tests/test_edge_sheet.py:101 fails if the closed form's relative deviation exceeds 1e-10 against the independent ring reference, and negative-control.log records 36 of those ids reddening under a sign-flip mutation.",
+    "evidence": "tests/test_edge_sheet.py:101 and :115 hold the flux to 1e-10 against scripts/edge_sheet/reference.py and the graded route, and I re-ran them (77 passed), but gate.log carries no EXIT= line and no revision, tree or command header, so promotion cannot read the gate's exit status from it.",
+    "fit": "nova/biot/sheet.py:247 follows the module's variable names (gamma, r, r1, b1, k2) and reuses graded_residual from nova.biot.gradedresidual; no plan label, ticket or author attribution appears in the changed paths.",
+    "goal": "read the source goal ('Compute the sloped sheet flux by the printed Part II closed form') and found the landed change delivers a closed form derived from the module integrand, not the printed eq 22a block.",
+    "goal_fidelity": "nova/biot/sheet.py:341 delivers a closed-form sloped flux at 1e-10, but it is a reduction derived from the module's own integrand, not the printed Part II eq 22a with the eq 13a/18a block that the goal names.",
+    "manifest": "read the source manifest; it states 213 passed with EXIT=0 and a 72-failure negative control, but its tests and after_suite fields are prose rather than a literal command or JSON.",
+    "reuse": "nova/biot/sheet.py:341 extends the complete_kind and complete_pole owners and the graded_residual owner, but nova/biot/sheet.py:81 hand-writes polynomial division that numpy.polynomial.polynomial.polydiv already provides.",
+    "scope_discipline": "git diff --stat ac4033362..81840d5f9 names exactly nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-closed-flux.html, all inside the four declared write paths.",
+    "write_paths": "read the four declared write paths and checked every diff path against them; all three changed files are inside the grant."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is the printed Part II closed form; nova/biot/sheet.py:341 delivers a self-derived complete-third-kind reduction instead, documented at docs/evidence/fragments/iron-core-magnetisation/icm-closed-flux.html:18 as not using the printed block.\nVERDICT done_when: clauses 2 and 3 are met and measured in tests/test_edge_sheet.py:101 and negative-control.log; clause 1 is not, because the eq 13a/18a block is reported unusable rather than reconciled into eq 22a.\nVERDICT write_paths: the diff touches nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-closed-flux.html, all inside the declared write paths.\nVERDICT manifest: the manifest records the measurements and the negative control, but its tests field is a sentence rather than the literal command and gate.log carries no EXIT= line.\nVERDICT diff: six commits, three files; nova/biot/sheet.py gains _divide, _arsinh_rule, _residual_arsinh, _arc_remainder, _arsinh_term_closed and antiderivative_closed, and the flux entry points gain a closed keyword.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:341 delivers a closed-form sloped flux at 1e-10, but it is a reduction derived from the module's own integrand, not the printed Part II eq 22a with the eq 13a/18a block that the goal names.\nSCORE evidence: 13\nJUSTIFICATION evidence: tests/test_edge_sheet.py:101 and :115 hold the flux to 1e-10 against scripts/edge_sheet/reference.py and the graded route, and I re-ran them (77 passed), but gate.log carries no EXIT= line and no revision, tree or command header, so promotion cannot read the gate's exit status from it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat ac4033362..81840d5f9 names exactly nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-closed-flux.html, all inside the four declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_edge_sheet.py:101 fails if the closed form's relative deviation exceeds 1e-10 against the independent ring reference, and negative-control.log records 36 of those ids reddening under a sign-flip mutation.\nSCORE fit: 17\nJUSTIFICATION fit: nova/biot/sheet.py:247 follows the module's variable names (gamma, r, r1, b1, k2) and reuses graded_residual from nova.biot.gradedresidual; no plan label, ticket or author attribution appears in the changed paths.\nSCORE reuse: 16\nJUSTIFICATION reuse: nova/biot/sheet.py:341 extends the complete_kind and complete_pole owners and the graded_residual owner, but nova/biot/sheet.py:81 hand-writes polynomial division that numpy.polynomial.polynomial.polydiv already provides.\nFINDING nova/biot/sheet.py:341 blocking: antiderivative_closed is a reduction derived from the module's own integrand, not Part II eq 22a with the eq 13a/18a coefficient block the goal and done-when clause 1 name; the brief required reporting blocked with the unreconciled term rather than substituting a different derivation.\nFINDING nova/biot/sheet.py:536 non-blocking: closed=True is silently ignored for a flat sheet and for a zero-slope sheet, so a caller passing closed=True on those geometries receives the eq 24/flat route with no error or warning.\nFINDING nova/biot/sheet.py:81 non-blocking: _divide hand-writes polynomial division in ascending coefficients where numpy.polynomial.polynomial.polydiv already provides the same quotient and remainder, so the module carries a second implementation of a library capability.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111912498902-icm-closed-flux/gate.log:5 non-blocking: the gate log ends at '213 passed in 14.19s' with no bare EXIT=<code> line and no revision, tree or command header, so promotion cannot read the gate's exit status or re-run it from the recorded command.",
+  "review_run_id": "r-20261107T153800776849-review-of-icm-closed-flux-81840d5f92dd",
+  "reviewed_base_sha": "ac40333623978444fd1c7a53190927c90dcaef56",
+  "reviewed_head_sha": "81840d5f92dd8e85c87382a69120a2d5590b882a",
+  "reviewed_run_id": "r-20261107T111912498902-icm-closed-flux",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T16:08:47.032094+00:00",
+  "total": 96
+}

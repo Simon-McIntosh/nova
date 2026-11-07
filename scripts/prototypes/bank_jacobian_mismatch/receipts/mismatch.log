@@ -1,0 +1,15 @@
+# revision 197974d3c60e4494816255b62aa04ef4ce1af531
+# tree .
+# command run_h200.sh --output /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T152015525295-bank-jacobian-mismatch/titan3/mismatch.json
+# driver-sha256 37ad666415168a05b80abe6f7a8b60f1de8d06d00a864f29280ef5b020f80e83
+# tree-dirty 0 tracked paths
+HEADER {"backend": "gpu", "cwd": ".", "devices": ["cuda:0"], "job": "1308060", "module": "nova/equilibrium/support_read.py", "nova": "nova/__init__.py", "revision": "197974d3c60e4494816255b62aa04ef4ce1af531", "tree": ".", "x64": true}
+POSITIVE_CONTROL {"relative_mismatch": 2.7288898290631643e-10}
+CERTIFICATE {"converged": true, "path": [0.11196354849636236, 0.00037229156744444936, 1.5918857343422133e-09, 1.5347723092418164e-12], "reads": 4, "residual": 1.5347723092418164e-12, "steps": 3}
+STALL-PROBE {"reads": 4, "residual_after_first_search": 1.344446727246492, "residual_before": 1.792595636328656}
+GRADIENT {"amplitude": 1.01, "ff_prime_flux_derivative": 0.0, "p_prime_flux_derivative": 0.0, "p_prime_value": 2815.386811252286, "supplied_gradient_max": 0.0, "supplied_gradient_shape": [9]}
+UNIT_TRIAL {"finite": true, "linear_prediction_norm": 1.5357549484840219e-13, "nonlinear_share": 0.9390475124864001, "residual_norm": 21.724326902866036, "state": "stalled-1e-2", "trial_ratio": 0.9390475124863987, "trial_residual_norm": 20.4001751385777}
+STATE {"base_residual_max": 1.792595636328656, "count_axis": 1, "count_cut": 99, "count_normal": 8, "count_saddle": 1, "count_whole": 239, "state": "stalled-1e-2"}
+STATE {"base_residual_max": 1.5347723092418164e-12, "count_axis": 1, "count_cut": 99, "count_normal": 8, "count_saddle": 1, "count_whole": 239, "state": "certificate"}
+EXIT=0
+EXIT=0

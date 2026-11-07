@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>bank-jacobian-mismatch</title>
+</head>
+<body>
+<h1>The step Jacobian is right at the stalled drive</h1>
+
+<p>The engaged forward step solves a linear model it assembles itself,
+<code>I - d(booked)/du</code>. Compared with central differences of the full
+fresh-read residual, that matrix is correct at the state where the 1e-2 drive
+stalls: the relative mismatch is between 6&thinsp;&times;&thinsp;10<sup>&minus;8</sup>
+and 6&thinsp;&times;&thinsp;10<sup>&minus;7</sup> at the two larger steps in
+every direction class, and it moves with the step the way roundoff does rather
+than the way a missing term would.
+What stalls the solve is not the matrix. A unit Newton step, which the linear
+model predicts will annihilate the residual, leaves
+<strong>93.9&nbsp;%</strong> of it standing: the fresh residual is strongly
+nonlinear over the step the step takes.</p>
+
+<h2 id="bank-jacobian-mismatch-what-is-compared">What is compared</h2>
+
+<p><code>support_read.step_jacobian</code> assembles the matrix from the bank
+channels, the closed-form cell-local booking sensitivities and, with
+<code>fresh_geometry=True</code>, the moving saddle and edge-interval term. The
+residual the loop evaluates is
+<code>step_residual(operands, moments, moments, support, profile, quadrature)</code>,
+whose blocks are <code>moments - booked[:3]</code>
+(<code>nova/equilibrium/support_read.py:547</code>); the solve uses it at
+<code>support_read.py:1417</code> as <code>right = -residual</code> against the
+same matrix, so the matrix must equal <code>d(residual)/du</code>.</p>
+
+<p>The comparison central-differences the fresh-read residual, re-running
+<code>support_read.read</code> at every perturbed state so the reading,
+ownership and clip set move with it, along 33 unit moment directions: five in
+each of the cut, normal-form, whole and stationary-point cells plus eight
+random, at relative steps 1e-5, 1e-6 and 1e-7. The displaced state moves by
+<code>eps &middot; scale &middot; e</code>, where <code>scale</code> is the
+block's largest moment magnitude, and the quotient is divided by that same
+magnitude, so both sides of the comparison act on the same vector.</p>
+
+<h2 id="bank-jacobian-mismatch-control">The control that has to pass first</h2>
+
+<p>Before any state is reported the driver differentiates a linear map with a
+known matrix &mdash; twelve directions over three blocks &mdash; through the
+same displacement, step magnitude and comparison code. It returned a relative
+mismatch of <strong>2.7&thinsp;&times;&thinsp;10<sup>&minus;10</sup></strong>,
+roundoff. The run aborts if that figure exceeds 1e-8, so a comparison that is
+wrong in sign or scale cannot reach the states below.</p>
+
+<h2 id="bank-jacobian-mismatch-mismatch">Relative mismatch per direction class</h2>
+
+<p>Both states, on one allocation at revision 197974d3c: the stalled 1e-2
+state (amplitude 1.01, cold seed, fresh residual maximum 1.7926) and the
+certificate state (amplitude 1.0, converged, fresh residual
+1.5&thinsp;&times;&thinsp;10<sup>&minus;12</sup>). Both carry 550 cells with 99
+cut, 8 normal-form, 239 whole, one axis and one saddle cell. Median over the
+directions of each class.</p>
+
+<p><table><thead><tr><th>state / step</th><th>cut</th><th>normal form</th><th>whole</th><th>axis cell</th><th>saddle cell</th><th>random</th></tr></thead><tbody>
+<tr><td>stalled 1e-5</td><td>3.6e-8</td><td>1.1e-8</td><td>3.6e-8</td><td>3.0e-8</td><td>2.1e-8</td><td>6.2e-8</td></tr>
+<tr><td>stalled 1e-6</td><td>5.4e-7</td><td>3.0e-9</td><td>4.5e-7</td><td>5.2e-7</td><td>1.1e-9</td><td>5.6e-7</td></tr>
+<tr><td>stalled 1e-7</td><td>2.5e-6</td><td>8.8e-8</td><td>2.7e-6</td><td>4.8e-6</td><td>9.3e-9</td><td>2.4e-6</td></tr>
+<tr><td>certificate 1e-5</td><td>4.0e-8</td><td>1.2e-8</td><td>2.5e-8</td><td>4.7e-8</td><td>2.1e-8</td><td>2.7e-8</td></tr>
+<tr><td>certificate 1e-6</td><td>4.0e-7</td><td>3.3e-9</td><td>5.2e-7</td><td>2.2e-7</td><td>1.0e-9</td><td>5.2e-7</td></tr>
+<tr><td>certificate 1e-7</td><td>4.5e-6</td><td>3.5e-8</td><td>6.1e-6</td><td>3.0e-6</td><td>4.1e-9</td><td>3.1e-6</td></tr>
+</tbody></table></p>
+
+<p>The certificate state reproduces the stalled one to within a factor of two in
+every class, so the two are not two different behaviours: a matrix wrong at the
+stalled state would have to be wrong differently twelve decades away in
+residual, and it is not.
+
+Three readings fix the interpretation. The mismatch <strong>falls at the
+large step</strong> &mdash; 3.6&thinsp;&times;&thinsp;10<sup>&minus;8</sup> at
+1e-5 against 5.4&thinsp;&times;&thinsp;10<sup>&minus;7</sup> at 1e-6 &mdash;
+which is the signature of a fixed absolute error in the residual divided by a
+shrinking step, not of a term the matrix is missing: a missing term would grow
+with the step, not shrink. The normal-form and saddle cells come in one to two
+decades lower than the rest, so the moving saddle term is the best-behaved part
+of the assembly, not the matrix's worst. Every class is below 1e-6 at 1e-5 and
+at 1e-6, which is where the plateau sits. At 1e-7 the quotient's own roundoff
+takes over and the mismatch rises to between 2.4&thinsp;&times;&thinsp;10<sup>&minus;6</sup>
+and 6.1&thinsp;&times;&thinsp;10<sup>&minus;6</sup>; that is a floor on the step
+size one can difference at, not a property of the matrix, and it is why the
+acceptance reading is taken at 1e-6.</p>
+
+<h2 id="bank-jacobian-mismatch-terms">Splitting the mismatch by term</h2>
+
+<p>Only one split moves the number, and it moves it in the safe direction.
+Replacing the moving-geometry contribution with its own central difference takes
+the median from 5.6&thinsp;&times;&thinsp;10<sup>&minus;7</sup> to
+8.3&thinsp;&times;&thinsp;10<sup>&minus;8</sup> (cut 5.4e-7 to 8.3e-8, whole
+4.5e-7 to 8.2e-8, axis 5.2e-7 to 6.6e-8, random 5.6e-7 to 9.4e-8). The
+cell-local booking sensitivity, by contrast, is already exact at this level:
+replacing it with its own difference changes nothing (5.4e-7 stays 5.4e-7). So
+the analytic booking tangent is not the source of the residue, and the
+fresh-geometry term carries a relative discrepancy of a few parts in
+10<sup>7</sup> &mdash; three decades below the acceptance floor and not a
+defect this measurement can pursue.</p>
+
+<p>The read refresh is the one large number in the receipt, and it is not a
+mismatch: at the normal-form and saddle cells the fresh and frozen reads differ
+by 73&nbsp;% and 100&nbsp;% of the derivative, so the read moving inside the
+stencil is most of the signal there. The matrix reproduces the resulting
+derivative anyway, to 3e-9 and 1e-9 respectively.</p>
+
+<h2 id="bank-jacobian-mismatch-decisions">The discrete decision inside the stencil</h2>
+
+<p>Across all 33 directions and all three steps, no cut set, normal-form set,
+fragment selection or ownership changes between the perturbed read and the
+unperturbed one, and the admitted saddle moves linearly in the step (7.96e-9,
+7.96e-10, 7.96e-11 at the cut cell; no jump). The stencil does not straddle a
+discrete boundary, so the central difference is differentiating a smooth map.</p>
+
+<h2 id="bank-jacobian-mismatch-stall">Why the solve stalls</h2>
+
+<p>The matrix being right does not make the step succeed. Taking the full Newton
+correction <code>&delta;</code> from the assembled matrix and the fresh residual
+and evaluating the fresh residual at <code>u + &delta;</code>:</p>
+
+<p><table><thead><tr><th>quantity</th><th>L2 norm</th></tr></thead><tbody>
+<tr><td>fresh residual at the stalled state</td><td>21.72</td></tr>
+<tr><td>what the linear model predicts after the unit step</td><td>1.5e-13</td></tr>
+<tr><td>fresh residual actually observed after the unit step</td><td>20.40</td></tr>
+</tbody></table></p>
+
+<p>The linear solve is exact to machine precision &mdash; the model predicts it
+will finish the job &mdash; and the true residual keeps 93.9&nbsp;% of its
+magnitude. The step therefore takes a Newton direction that is correct at the
+point it is evaluated at and wrong over its own length: the residual's curvature
+over one unit step is far larger than its gradient. The damped search then
+contracts the step until the contraction test is met, which is exactly the
+behaviour that burns sixty updates without converging. <strong>The stall is the
+nonlinearity of the fresh residual over a unit step, not a defect in the
+Jacobian.</strong></p>
+
+<h2 id="bank-jacobian-mismatch-gradient">The supplied gradient</h2>
+
+<p>The fixture supplies a zero density gradient at both states
+(<code>supplied_gradient_max = 0.0</code>, shape <code>(9,)</code>), and zero is
+the true derivative here: the booked profile's <code>p_prime</code> and
+<code>ff_prime</code> both have zero flux derivative at nine probe points, so
+both profiles are constant in flux. The amplitude scaling is consistent too,
+2787.512 &times; 1.01 = 2815.387. A control gradient of 1e-3 changes the booking
+column by the same 1e-9 as the analytic one, so nothing in this measurement
+turns on the gradient.</p>
+
+<h2 id="bank-jacobian-mismatch-figure">Figure</h2>
+
+<figure>
+<img src="/nova/figures/sub-millisecond-forward-path/bank-jacobian-mismatch/mismatch-by-direction-class.svg" alt="Relative mismatch between the assembled Jacobian and the central difference of the fresh-read residual, per direction class at relative step 1e-6, on a logarithmic axis. Every class sits between 1e-9 and 1e-6, below the dotted acceptance floor.">
+<figcaption>Relative mismatch at relative step 1e-6, median over the directions
+of each class, at the stalled 1e-2 state and at the certificate state. Left: the Jacobian as the step
+assembles it. Right: the same comparison with the moving-geometry term replaced
+by its own central difference. The dotted line marks the 10<sup>&minus;6</sup>
+acceptance floor.</figcaption>
+</figure>
+
+<h2 id="bank-jacobian-mismatch-retraction">Retraction of the first reading</h2>
+
+<p>An earlier attempt at this node reported a mismatch of 1.70 in every
+direction class, and read it as the booking tangent disagreeing with the
+residual everywhere and independent of the step. <strong>That conclusion is
+retracted.</strong> The number was a defect in the comparing driver: it negated
+a difference quotient of <code>moments - booked</code>, whose derivative is the
+very matrix it was comparing against, and it displaced the state by
+<code>eps &middot; scale</code> while applying the matrix to <code>e</code>,
+which predicts a relative mismatch of <code>1 + 1/scale</code> &mdash; exactly
+the three block constants (1.0056, 1.7009, 1.9939) it measured. The tell was
+that the figure was identical at a stalled state with residual 1.79 and at a
+certificate state with residual 1.5&thinsp;&times;&thinsp;10<sup>&minus;12</sup>;
+no property of the matrix is invariant across twelve decades of residual. The
+positive control above exists so that this failure cannot repeat: it fails
+loudly, before any state is reported, if the comparison is wrong in sign or in
+scale.</p>
+
+<h2 id="bank-jacobian-mismatch-reproduce">Reproducing this</h2>
+
+<p>The receipt and the gate log are committed beside the driver at
+<code>scripts/prototypes/bank_jacobian_mismatch/receipts/</code>, so the numbers
+above can be read against the run that produced them without access to a scratch
+directory. The log header records the revision, the driver's sha256 and the
+number of modified tracked paths, and its last line is the run's exit status, so
+the bytes that produced the receipt are identifiable from the log alone.</p>
+
+<h2 id="bank-jacobian-mismatch-next">What remains</h2>
+
+<p>The stall now points away from the Jacobian: the next question is what makes
+the residual this nonlinear over a unit step, and whether the damped search's
+contraction test should prefer a smaller trial step when the linear model
+predicts a residual three decades smaller than the one observed.</p>
+
+</article>
+</body>
+</html>

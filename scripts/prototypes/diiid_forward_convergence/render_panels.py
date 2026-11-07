@@ -517,11 +517,23 @@ def _draw_boundary(axes, dense_r, dense_z, dense, level, saddle, colour, width, 
     if refine and saddle.size == 2 and np.isfinite(level):
         fine_r, fine_z, local = _boundary_curve(dense_r, dense_z, dense, level, saddle)
         used = axes.contour(
-            fine_r, fine_z, local, levels=[level], colors=[colour], linewidths=[width]
+            fine_r,
+            fine_z,
+            local,
+            levels=[level],
+            colors=[colour],
+            linewidths=[width],
+            linestyles="solid",
         )
     else:
         used = axes.contour(
-            dense_r, dense_z, dense, levels=[level], colors=[colour], linewidths=[width]
+            dense_r,
+            dense_z,
+            dense,
+            levels=[level],
+            colors=[colour],
+            linewidths=[width],
+            linestyles="solid",
         )
     handles.append(used)
     return handles

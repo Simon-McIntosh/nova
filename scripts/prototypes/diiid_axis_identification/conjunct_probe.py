@@ -103,11 +103,21 @@ def main() -> int:
             self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material, surface
         )
 
+    import jax
+
     kind.qualified_o_candidates = wrapper
     psi = np.asarray(prepared["cold"].branches.flux[0])
-    status = "read returned"
+    material = np.asarray(profile.operator.inside_material, dtype=bool)
+    polarity = int(getattr(profile.operator, "polarity", 1))
+    status = "read_qualification returned"
     try:
-        profile.operator.read(psi, requested_class=int(TopologyClass.LIMITED))
+        with jax.disable_jit():
+            topology.read_qualification(
+                psi,
+                polarity,
+                material,
+                requested_class=int(TopologyClass.LIMITED),
+            )
     except Exception as error:
         status = repr(error)[:400]
     finally:

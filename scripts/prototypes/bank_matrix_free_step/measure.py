@@ -74,11 +74,10 @@ def build_seeds(args):
 def _load_seeds(path):
     """Return the saved lane states as device arrays on the batch's machine."""
     saved = np.load(path)
-    batch = _batch(saved["states"].shape[0])
-    states = tuple(
-        jnp.asarray(saved["states"][:, index])
-        for index in range(saved["states"].shape[1])
-    )
+    # The saved array is (components, lanes, cells).
+    components, lanes = saved["states"].shape[:2]
+    batch = _batch(lanes)
+    states = tuple(jnp.asarray(saved["states"][index]) for index in range(components))
     return (
         batch,
         states,

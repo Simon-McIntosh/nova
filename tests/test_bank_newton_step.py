@@ -544,10 +544,10 @@ def _restart_width(size):
     rather than duplicating the number, and fails loudly if the form changes.
     """
     pattern = re.compile(r"width = min\((\d+), right\.size\)")
-    match = pattern.search(inspect.getsource(support_read._block_gmres))
+    match = pattern.search(inspect.getsource(support_read._block_gmres_operator))
     assert match is not None, (
         "the restart width is no longer a literal min(<int>, right.size) in "
-        "_block_gmres; update this derivation before trusting the cap"
+        "_block_gmres_operator; update this derivation before trusting the cap"
     )
     return min(int(match.group(1)), size)
 
@@ -603,6 +603,71 @@ def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
     )
     assert int(steps) == cap and cap % width != 0
     assert error <= 1e-10
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(5400)
+@pytest.mark.parametrize("state", ["trial", "converged"])
+def test_matrix_free_update_matches_dense_update(diverted_linear_states, state):
+    """The product-form step must reproduce the assembled step's update.
+
+    The pair differ only in how the Jacobian reaches the Krylov solve, so a
+    matched update shows the matrix-free product, its cell-block
+    preconditioner and the shared stopping rule describe the same system.
+    """
+    from scripts.prototypes.bank_solve_profile import fixture
+
+    batch, states = diverted_linear_states
+    moments = tuple(value[0] for value in states[state])
+    support = jax.jit(
+        lambda bank, cache, values: support_read.read(
+            bank,
+            cache,
+            values,
+            batch.seeds,
+            batch.roots,
+            batch.convention,
+            batch.policy,
+        )
+    )(batch.operands, batch.cache, moments)
+
+    def step(matrix_free):
+        return support_read.newton_step(
+            batch.operands,
+            moments,
+            support,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+            fresh_geometry=True,
+            matrix_free=matrix_free,
+        )
+
+    dense = jax.jit(lambda: step(False))()
+    free = jax.jit(lambda: step(True))()
+    dense_update = jnp.concatenate(dense.update)
+    free_update = jnp.concatenate(free.update)
+    error = float(
+        jnp.linalg.norm(free_update - dense_update) / jnp.linalg.norm(dense_update)
+    )
+    print(
+        "MATRIX_FREE_UPDATE",
+        state,
+        "relative_error",
+        error,
+        "dense_iterations",
+        int(dense.krylov_iterations),
+        "free_iterations",
+        int(free.krylov_iterations),
+        "free_condition",
+        float(free.krylov_condition),
+        "free_residual",
+        float(free.krylov_residual),
+        flush=True,
+    )
+    assert error <= 1e-8
+    assert int(free.krylov_iterations) <= 60
+    assert float(free.krylov_condition * free.krylov_residual) <= 1e-8
 
 
 def test_terminal_verdict_requires_fresh_read():

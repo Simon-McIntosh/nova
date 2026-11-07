@@ -1,0 +1,147 @@
+{
+  "absent": [
+    "no base gate arm exists: the reviewed manifest declares baseline_suite: null and after_suite: null, so added_failure_count was derived from the head gate log alone and no failure delta could be measured",
+    "no production call site: nova.biot.sheet is imported only by tests/test_edge_sheet.py at the reviewed head, so the change is reachable from no runtime code"
+  ],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest declares baseline_suite: null and after_suite: null, so no base arm exists to subtract; the only unmutated arm is gate-sheet-flux.log at revision 156040975 (50 passed, 21 xfailed, EXIT=0), which contributes zero failing test ids. The negative-control log is a mutated arm and is not a baseline.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "b4523a429a4d6e401a42ed118cd90e6bb5ea179e",
+    "624e9f0065fef7535f9c01d29485e35e33d16ff3",
+    "c3872259e2a16aea2fb91eb32e40aabb8b14c12b",
+    "13156c16ce357e3429424bf5faf25b3cee00ab7a",
+    "e8d1b891066b017f4768d714cadf7378ad258e70",
+    "e7093ea9e20f1af7fea8af17db2cc42e600c83ec",
+    "156040975d136454a55010ab80024153423d81ce"
+  ],
+  "completed_at": "2026-11-07T01:19:09.319Z",
+  "dispatched_at": "2026-11-07T01:06:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-sheet-sloped",
+      "recorded_at": "2026-11-07T01:20:07.529386+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "route question referred to the lead: the flat and D parts are fixed-node quadrature of a closed-form antiderivative rather than the Part II/Snow closed form; whether that satisfies the locked part-ii-sheet decision is the lead's call, recorded on the plan before the field node",
+      "recorded_at": "2026-11-07T01:20:11.487758+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-sheet-sloped",
+      "recorded_at": "2026-11-07T01:20:26.843947+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "icm-sheet-sloped",
+      "recorded_at": "2026-11-07T01:20:29.542799+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "same route question as finding 1, referred to the lead (D part on quadrature, complete_kind unused)",
+      "recorded_at": "2026-11-07T01:20:33.334669+00:00"
+    },
+    "5": {
+      "kind": "folded",
+      "node": "icm-sheet-sloped",
+      "recorded_at": "2026-11-07T01:20:35.745386+00:00"
+    },
+    "6": {
+      "kind": "exempted",
+      "reason": "the per-target table carries the shortfall; a figure is added when the sloped node lands the final numbers",
+      "recorded_at": "2026-11-07T01:20:38.727359+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_edge_sheet.py",
+      "id": "f38d34f0801",
+      "line": "48",
+      "severity": "blocking",
+      "text": "blocking: the 21 MEASURED_MISSES entries are marked xfail(strict=True), which absorbs ANY failure at those targets, so a sloped flux that regresses by orders of magnitude still exits the gate green; the recorded error is interpolated into the reason string at :89 and never compared with the measured value, so only an improvement (XPASS) can fail and the recorded figures guard nothing."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "id": "f16b045a54f",
+      "line": "142",
+      "severity": "blocking",
+      "text": "blocking: the flat annulus is evaluated as a quadrature of greens_psi over r', not as Snow's pancake closed form (Part II eqs 26-27) that the done_when requires, and tests/test_edge_sheet.py:148 named for the pancake form compares only against scripts/edge_sheet/reference.py, so that clause of the measure is neither implemented nor asserted."
+    },
+    {
+      "file": "tests/test_edge_sheet.py",
+      "id": "fadad63f6e5",
+      "line": "184",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_segment_order_does_not_change_the_flux is tautological because SheetFlux.__init__ (nova/biot/sheet.py:71) sorts the endpoints by z and _flat_flux sorts by r, so forward and backward take the identical code path; the assertion cannot fail for any defect and adds no durability."
+    },
+    {
+      "file": "tests/test_edge_sheet.py",
+      "id": "f1fea67ea68",
+      "line": "176",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_flux_is_linear_in_sheet_current compares two evaluations of the same code path through a caller-supplied multiplicative argument, so a regression that zeroes or mis-scales the flux leaves it true; it is not independent of the value under test."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "id": "fbbe92bcc1b",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module docstring states the complete elliptic kinds enter through the closed form of the D part, but antiderivative (:88-110) evaluates the D term on the same Gauss-Legendre rule as the arsinh term; complete_kind and complete_pole are used only by antiderivative_uniform (:123), so the documented route is not the implemented one."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "id": "f7886e9afa6",
+      "line": "78",
+      "severity": "non-blocking",
+      "text": "non-blocking: the plan names the Part V module's fixed-node rule for the smooth arsinh integral; that capability is owned by graded_residual (nova/biot/gradedresidual.py:178) and the added _rule neither extends nor calls it, and the missing endpoint-log removal is exactly the measured cause of the start/end station failures the fragment reports."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html",
+      "id": "f1514abba68",
+      "line": "39",
+      "severity": "non-blocking",
+      "text": "non-blocking: the evidence fragment tabulates the error against standoff and slope but embeds no figure (zero img/svg elements), and the declared write path docs/figures/iron-core-magnetisation/icm-sheet-flux was never used, so the shortfall's scaling with standoff is not shown."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit (b4523a42, 624e9f00, c3872259, 13156c16, e8d1b891, e7093ea9, 156040975); it adds nova/biot/sheet.py (168 lines), tests/test_edge_sheet.py (188 lines) and the evidence fragment (127 lines), all inside the declared scope.",
+    "done_when": "brief.md:9-13 and plan section 2 require 1e-10 relative against sheet_reference over the fixed twelve-target set at five slopes plus Snow's cylinder and pancake closed forms; tests/test_edge_sheet.py:102 asserts the floor per target but carries 21 xfail(strict=True) marks, and no assertion evaluates eq (26), so the gate exits 0 with the measure unmet.",
+    "goal": "brief.md:1-9 asks for the conic sheet flux by Urankar Part II eq (22a); nova/biot/sheet.py:1-46 delivers a sheet flux for every slope, but by a derived antiderivative whose D part is itself quadratured, not by eq (22a)'s printed coefficients, and the evidence fragment records 9.2e-05 against the 1e-10 floor at the nearest standoff.",
+    "manifest": "read in full; it reports status blocked, gate 50 passed and 21 xfailed at EXIT=0, negative control 44 failed and 6 passed at EXIT=1, a worst relative error of 9.2e-05 at half a cell width, and its own landing line says the node's measure is not met.",
+    "write_paths": "the manifest's declared paths are nova/biot/sheet.py, tests/test_edge_sheet.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html and docs/figures/iron-core-magnetisation/icm-sheet-flux; the diff changes the first three and no others."
+  },
+  "justifications": {
+    "durability": "tests/test_edge_sheet.py:102 and :123 compare against the independent scripts/edge_sheet/reference.py integral and would redden on regression, but the 21 xfails at :48 absorb any worsening at the near standoffs and tests/test_edge_sheet.py:184 is tautological.",
+    "evidence": "tests/test_edge_sheet.py:102 asserts the floor at each fixed target and the fragment documents the per-target results, but the gate's EXIT=0 rests on the 21 xfails declared at tests/test_edge_sheet.py:48.",
+    "fit": "nova/biot/sheet.py follows the numpy/type-hint idiom of nova/biot/greens.py and introduces no banned name, but its docstring at :31 misdescribes how the sloped D part is evaluated.",
+    "goal_fidelity": "nova/biot/sheet.py:88-110 evaluates the sloped azimuthal integrand entirely on a fixed Gauss-Legendre rule rather than eq (22a)'s coefficient block, and the evidence fragment records 9.2e-05 against the 1e-10 floor at d = 0.01 m.",
+    "reuse": "nova/biot/sheet.py:20-21 extends complete_kind and complete_pole and reuses greens_psi, but the added _rule at :78 neither extends nor wraps the arsinh owner nova/biot/gradedresidual.py:178 that the plan names.",
+    "scope_discipline": "git diff --stat 22116b6d 156040975 lists only nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html, all inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.md asks for the conic sheet flux by Urankar Part II eq 22a; nova/biot/sheet.py:1-46 delivers a sheet flux for every slope but by a derived antiderivative whose D part is itself quadratured, not by eq (22a)'s printed coefficients, and the evidence fragment records 9.2e-05 against the 1e-10 floor at the nearest standoff.\nVERDICT done_when: brief.md:9-13 and plan section 2 require 1e-10 relative against sheet_reference over the fixed twelve-target set at five slopes plus Snow's cylinder and pancake closed forms; tests/test_edge_sheet.py:102 asserts the floor per target but carries 21 xfail(strict=True) marks at :48, and no assertion evaluates eq (26), so the gate exits 0 with the measure unmet.\nVERDICT write_paths: the manifest declares nova/biot/sheet.py, tests/test_edge_sheet.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html and docs/figures/iron-core-magnetisation/icm-sheet-flux; the diff changes the first three and no others.\nVERDICT manifest: read in full; it reports status blocked, gate 50 passed and 21 xfailed at EXIT=0, negative control 44 failed and 6 passed at EXIT=1, worst 9.2e-05 at half a cell width, and its landing line says the node's measure is not met.\nVERDICT diff: read commit by commit over seven commits against 22116b6d; it adds nova/biot/sheet.py, tests/test_edge_sheet.py and the evidence fragment, all new and all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:88-110 evaluates the sloped azimuthal integrand entirely on a fixed Gauss-Legendre rule rather than eq (22a)'s coefficient block, and the evidence fragment records 9.2e-05 against the 1e-10 floor at d = 0.01 m.\nSCORE evidence: 15\nJUSTIFICATION evidence: tests/test_edge_sheet.py:102 asserts the floor at each fixed target and the fragment documents the per-target results, but the gate's EXIT=0 rests on the 21 xfails declared at tests/test_edge_sheet.py:48.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 22116b6d 156040975 lists only nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html, all inside the manifest's declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_edge_sheet.py:102 and :123 compare against the independent scripts/edge_sheet/reference.py integral and would redden on regression, but the 21 xfails at :48 absorb any worsening at the near standoffs and tests/test_edge_sheet.py:184 is tautological.\nSCORE fit: 15\nJUSTIFICATION fit: nova/biot/sheet.py follows the numpy/type-hint idiom of nova/biot/greens.py and introduces no banned name, but its docstring at :31 misdescribes how the sloped D part is evaluated.\nSCORE reuse: 12\nJUSTIFICATION reuse: nova/biot/sheet.py:20-21 extends complete_kind and complete_pole and reuses greens_psi, but the added _rule at :78 neither extends nor wraps the arsinh owner nova/biot/gradedresidual.py:178 that the plan names.\nFINDING tests/test_edge_sheet.py:48 blocking: the 21 MEASURED_MISSES entries are marked xfail(strict=True), which absorbs any failure at those targets, so a sloped flux that regresses by orders of magnitude still exits green; the recorded error is interpolated into the reason string at :89 and never compared with the measured value.\nFINDING nova/biot/sheet.py:142 blocking: the flat annulus is evaluated as a quadrature of greens_psi over r', not as Snow's pancake closed form (Part II eqs 26-27) that the done_when requires, and tests/test_edge_sheet.py:148 named for the pancake form compares only against scripts/edge_sheet/reference.py.\nFINDING tests/test_edge_sheet.py:184 non-blocking: test_segment_order_does_not_change_the_flux is tautological because SheetFlux.__init__ (nova/biot/sheet.py:71) sorts the endpoints by z and _flat_flux sorts by r, so forward and backward take the identical code path.\nFINDING tests/test_edge_sheet.py:176 non-blocking: test_flux_is_linear_in_sheet_current compares two evaluations of the same code path through a caller-supplied multiplicative argument, so a regression that zeroes or mis-scales the flux leaves it true.\nFINDING nova/biot/sheet.py:31 non-blocking: the module docstring states the elliptic kinds enter through the closed form of the D part, but antiderivative (:88-110) evaluates the D term on the same Gauss-Legendre rule as the arsinh term and complete_kind/complete_pole are used only by antiderivative_uniform (:123).\nFINDING nova/biot/sheet.py:78 non-blocking: the plan names the Part V module's fixed-node rule for the smooth arsinh integral; that capability is owned by graded_residual (nova/biot/gradedresidual.py:178) and the added _rule neither extends nor calls it.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html:39 non-blocking: the evidence fragment tabulates error against standoff and slope but embeds no figure (zero img/svg elements), and the declared write path docs/figures/iron-core-magnetisation/icm-sheet-flux was never used.",
+  "review_run_id": "r-20261107T004533680767-review-of-icm-sheet-flux-156040975d13",
+  "reviewed_base_sha": "22116b6dbd603d7eafed498585c2df272f36d64e",
+  "reviewed_head_sha": "156040975d136454a55010ab80024153423d81ce",
+  "reviewed_run_id": "r-20261106T222233476179-icm-sheet-flux",
+  "reviewer_total": 85,
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 10,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T01:14:21+00:00",
+  "total": null
+}

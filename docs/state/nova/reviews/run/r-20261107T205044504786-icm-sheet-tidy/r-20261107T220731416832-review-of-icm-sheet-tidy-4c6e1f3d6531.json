@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured by this review: base arm b7d927c 392 passed EXIT=0, head arm 4c6e1f3d 416 passed EXIT=0, no failing id on either side",
+  "completed_at": "2026-11-07T22:43:01.551Z",
+  "dispatched_at": "2026-11-07T22:09:27Z",
+  "findings": [
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": 207,
+      "severity": "non-blocking",
+      "summary": "the docstring claims \"a regression that adds the ends instead of subtracting them turns this control into the reference value and fails it\", and that is false: the monkeypatch negates the upper antiderivative, so an add-the-ends assembly returns minus the reference (computed at r=1.35, z=0.4, gamma=-0.4: -2.3791789977911608e-07 against T=2.3791789977911608e-07), which the assertion at tests/test_edge_sheet.py:224 accepts. The control now exercises _pancake_flux's assembly as finding 8 asked, but it reddens on no regression of that assembly's two-ends difference."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html",
+      "line": 131,
+      "severity": "non-blocking",
+      "summary": "the fragment repeats the same false claim, that an add-the-ends regression \"returns the reference value and reddens this control\", so the evidence document asserts a guard the test does not provide."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html",
+      "line": 101,
+      "severity": "non-blocking",
+      "summary": "the 1259.9 ms \"before\" wall is quoted beside the 3.05 ms after-wall as though both came from the same measurement, but logs/closed-route-wall.log holds only the after arm (three post-change numbers, EXIT=0), so half of the before/after pair the done-when asks the fragment to record has no artefact a reader can open."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html",
+      "line": 12,
+      "severity": "non-blocking",
+      "summary": "the fragment says the node closes \"the five non-blocking findings of the closed-form field review and the blocking finding of the pancake review\" (six), while the manifest claims all eight and the brief carries nine numbered items; the record understates what the node did and hides the route-flag, lazy-rule and edge-flip work from a reader of the landing record."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T205044504786-icm-sheet-tidy/manifest.md",
+      "line": 19,
+      "severity": "non-blocking",
+      "summary": "baseline_suite: and after_suite: are both empty, so the promoted run carries no gate arms at all and its added-failure count cannot be derived from its own record; this review had to run both arms itself (392 passed at b7d927c, 416 passed at 4c6e1f3d, delta 0)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T205044504786-icm-sheet-tidy/logs/edge-sheet-gate.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "the gate log's header records revision b7d927ce while the code it measured is the worktree that became 4c6e1f3d, so a reader cannot tie the 416-passed result to the commit being promoted from the log alone."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to close the closed-form sheet reviews' findings and reuse the zeta owner; the landed tree does both \u2014 nova/biot/sheet.py:631 calls nova.biot.zeta.zeta with _pancake_remainder and its double-exponential rule deleted, nova/biot/completeelliptic.py:591 owns complete_kind_traced, and nova/biot/sheet.py:788 replaces closed= with route=.\nVERDICT done_when: read the done-when's three clauses; the gate the worker ran is the suite it names (tests/test_edge_sheet.py plus tests/test_biotcompleteelliptic.py) and I re-ran both arms \u2014 head 4c6e1f3d 416 passed EXIT=0, base b7d927c 392 passed EXIT=0 \u2014 so the 1e-10 value floor is asserted and unchanged, while clause (2)'s edge-flip guard at tests/test_edge_sheet.py:224 cannot redden on the regression its docstring names.\nVERDICT write_paths: the source node's five granted paths are nova/biot/sheet.py, nova/biot/completeelliptic.py, tests/test_edge_sheet.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html and docs/figures/iron-core-magnetisation/icm-sheet-tidy; every path in the diff is inside them and the figures directory was left untouched.\nVERDICT manifest: read; it declares complete with the gate command, three logs and a negative control at logs/negative-control.log (4 failed, 6 passed, EXIT=1), but its baseline_suite: and after_suite: fields are empty, so the run recorded no suite arms and its added-failure delta had to be re-measured.\nVERDICT diff: read commit 4c6e1f3d6 against b7d927c commit by commit \u2014 four files, 500 insertions and 154 deletions, all inside the declared scope; sheet.py carries the route flag, the zeta substitution, the jitted R block and the lazy rules, completeelliptic.py gains complete_kind_traced, and test_edge_sheet.py gains the route and guard tests plus the reworked edge-flip control.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:631 and nova/biot/completeelliptic.py:591 land the two headline items and every numbered brief finding has a matching change in the diff.\nSCORE evidence: 15\nJUSTIFICATION evidence: the done-when's suite is the one gated and its head arm is green at 416 passed, but logs/edge-sheet-gate.log:1 names the base revision the change was built on rather than 4c6e1f3d, and the 1259.9 ms before-wall quoted at icm-sheet-tidy.html:101 has no log behind it.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every hunk of 4c6e1f3d6 touches only the four files inside the manifest's five declared write paths, and nothing else in the tree moved.\nSCORE durability: 15\nJUSTIFICATION durability: the field guard at tests/test_edge_sheet.py:552 reddens under the declared mutation (logs/negative-control.log, 4 failed, EXIT=1), but the edge-flip control whose assertion sits at tests/test_edge_sheet.py:224 stays green on the add-the-ends regression its own docstring names.\nSCORE fit: 17\nJUSTIFICATION fit: the module-level configure_dtypes() at nova/biot/sheet.py:97 and the lru_cache rule builders follow nova/biot/zeta.py:96, and no added symbol carries a plan, sprint, ticket or version identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the flat sheet's remainder now calls the zeta owner at nova/biot/sheet.py:631 and complete_kind_traced sits with complete_kind at nova/biot/completeelliptic.py:591; a capability search over nova/biot found no other owner of the arsinh remainder or of a traced complete-kind adapter.\nFINDING tests/test_edge_sheet.py:207 non-blocking: the docstring claims \"a regression that adds the ends instead of subtracting them turns this control into the reference value and fails it\", and that is false: the monkeypatch negates the upper antiderivative, so an add-the-ends assembly returns minus the reference (computed at r=1.35, z=0.4, gamma=-0.4: -2.3791789977911608e-07 against T=2.3791789977911608e-07), which the assertion at tests/test_edge_sheet.py:224 accepts. The control now exercises _pancake_flux's assembly as finding 8 asked, but it reddens on no regression of that assembly's two-ends difference.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html:131 non-blocking: the fragment repeats the same false claim, that an add-the-ends regression \"returns the reference value and reddens this control\", so the evidence document asserts a guard the test does not provide.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html:101 non-blocking: the 1259.9 ms \"before\" wall is quoted beside the 3.05 ms after-wall as though both came from the same measurement, but logs/closed-route-wall.log holds only the after arm (three post-change numbers, EXIT=0), so half of the before/after pair the done-when asks the fragment to record has no artefact a reader can open.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tidy.html:12 non-blocking: the fragment says the node closes \"the five non-blocking findings of the closed-form field review and the blocking finding of the pancake review\" (six), while the manifest claims all eight and the brief carries nine numbered items; the record understates what the node did and hides the route-flag, lazy-rule and edge-flip work from a reader of the landing record.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T205044504786-icm-sheet-tidy/manifest.md:19 non-blocking: baseline_suite: and after_suite: are both empty, so the promoted run carries no gate arms at all and its added-failure count cannot be derived from its own record; this review had to run both arms itself (392 passed at b7d927c, 416 passed at 4c6e1f3d, delta 0).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T205044504786-icm-sheet-tidy/logs/edge-sheet-gate.log:1 non-blocking: the gate log's header records revision b7d927ce while the code it measured is the worktree that became 4c6e1f3d, so a reader cannot tie the 416-passed result to the commit being promoted from the log alone.\n",
+  "review_run_id": "r-20261107T220731416832-review-of-icm-sheet-tidy-4c6e1f3d6531",
+  "reviewed_base_sha": "b7d927ceef89eb2647fb24f8dc56ad9e38555a53",
+  "reviewed_head_sha": "4c6e1f3d65313bacef1bbc6dbfe71df2511ac7be",
+  "reviewed_run_id": "r-20261107T205044504786-icm-sheet-tidy",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T22:36:01.094273+00:00",
+  "total": 104
+}

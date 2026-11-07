@@ -367,6 +367,44 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "82bf5dd3e617f7e9b4b3ca47e55127bdfcded119",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 203649,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261107T152015525295-bank-jacobian-mismatch",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 203649,
+        "path": "/tmp/reckon-crew-scratch/r-20261107T152015525295-bank-jacobian-mismatch"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-jacobian-mismatch",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

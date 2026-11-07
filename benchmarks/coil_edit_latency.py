@@ -2155,11 +2155,16 @@ def _set_zorder(axis: Any, first_child: int, zorder: int) -> None:
 #: and the line rendered paler than the grey it named.
 REFERENCE_CONTOUR_COLOR = "#929292"
 SOLVED_CONTOUR_COLOR = "#cc7722"
+#: The reference boundary branch is drawn in this blue, so its legend entry is
+#: keyed to the same colour rather than to the contour grey.
+REFERENCE_BRANCH_COLOR = "#3366cc"
 CONTOUR_LINEWIDTH = 1.2
-#: Null markers in the legend stand for the two sets at one size each, matching
-#: the sizes the panel draws them at.
-REFERENCE_NULL_SIZE = DEFAULT_INK.axis_markersize * BENEATH_NULL_SCALE
-SOLVED_NULL_SIZE = DEFAULT_INK.axis_markersize
+#: Null markers in the legend stand for the two sets at the sizes the panel
+#: draws them, and carry both glyphs each set uses.
+REFERENCE_AXIS_SIZE = DEFAULT_INK.axis_markersize * BENEATH_NULL_SCALE
+REFERENCE_SADDLE_SIZE = DEFAULT_INK.xpoint_markersize * BENEATH_NULL_SCALE
+SOLVED_AXIS_SIZE = DEFAULT_INK.axis_markersize
+SOLVED_SADDLE_SIZE = DEFAULT_INK.xpoint_markersize
 
 
 def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
@@ -2212,7 +2217,10 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
     poloidal.draw_wall(axis, units=loaded["wall"])
 
     loaded["reference_branches_drawn"] = _draw_branch_set(
-        axis, loaded["reference_branches"], "#3366cc", loaded["reference_separatrix"]
+        axis,
+        loaded["reference_branches"],
+        REFERENCE_BRANCH_COLOR,
+        loaded["reference_separatrix"],
     )
     panel["branches_drawn"] = _draw_branch_set(
         axis,
@@ -2238,7 +2246,7 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         loaded["reference_axis"],
         loaded["reference_xpoints"],
         loaded["reference_saddle_index"],
-        "#3366cc",
+        REFERENCE_BRANCH_COLOR,
         loaded["wall"],
         beneath=True,
     )
@@ -2532,19 +2540,19 @@ def _render_panel(
                 [],
                 color=REFERENCE_CONTOUR_COLOR,
                 linewidth=CONTOUR_LINEWIDTH,
-                label="reference contours (unedited equilibrium)",
+                label="reference contours",
             ),
             Line2D(
                 [],
                 [],
                 color=SOLVED_CONTOUR_COLOR,
                 linewidth=CONTOUR_LINEWIDTH,
-                label="solved contours (terminal currents)",
+                label="solved contours",
             ),
             Line2D(
                 [],
                 [],
-                color=REFERENCE_CONTOUR_COLOR,
+                color=REFERENCE_BRANCH_COLOR,
                 linewidth=CONTOUR_LINEWIDTH,
                 linestyle="--",
                 label="reference saddle legs",
@@ -2560,24 +2568,42 @@ def _render_panel(
             Line2D(
                 [],
                 [],
-                color="#3366cc",
-                marker="^",
+                color=REFERENCE_BRANCH_COLOR,
+                marker=DEFAULT_INK.axis_marker,
                 linestyle="none",
-                markersize=REFERENCE_NULL_SIZE,
-                label="reference nulls (larger)",
+                markersize=REFERENCE_AXIS_SIZE,
+                label="reference axis",
+            ),
+            Line2D(
+                [],
+                [],
+                color=REFERENCE_BRANCH_COLOR,
+                marker=DEFAULT_INK.xpoint_marker,
+                linestyle="none",
+                markersize=REFERENCE_SADDLE_SIZE,
+                label="reference saddle",
             ),
             Line2D(
                 [],
                 [],
                 color=SOLVED_CONTOUR_COLOR,
-                marker="^",
+                marker=DEFAULT_INK.axis_marker,
                 linestyle="none",
-                markersize=SOLVED_NULL_SIZE,
-                label="solved nulls",
+                markersize=SOLVED_AXIS_SIZE,
+                label="solved axis",
+            ),
+            Line2D(
+                [],
+                [],
+                color=SOLVED_CONTOUR_COLOR,
+                marker=DEFAULT_INK.xpoint_marker,
+                linestyle="none",
+                markersize=SOLVED_SADDLE_SIZE,
+                label="solved saddle",
             ),
         ],
         loc="outside lower center",
-        ncol=3,
+        ncol=4,
         frameon=False,
         fontsize=13,
         handlelength=2.2,

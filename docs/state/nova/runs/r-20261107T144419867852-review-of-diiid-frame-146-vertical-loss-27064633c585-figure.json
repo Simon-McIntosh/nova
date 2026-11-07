@@ -296,6 +296,72 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "36dcacf065694366481ae0567530f3356ade17d3",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261107T144419867852-review-of-diiid-frame-146-vertical-loss-27064633c585-figure",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261107T144419867852-review-of-diiid-frame-146-vertical-loss-27064633c585-figure"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "36dcacf065694366481ae0567530f3356ade17d3",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-frame-146-vertical-loss-27064633c585-figure",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-07T15:23:31.501Z",
+            "session_id": "335677fd-6fd5-4806-915a-4473059e8123",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-frame-146-vertical-loss-27064633c585-figure"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 335677fd-6fd5-4806-915a-4473059e8123"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-07T15:23:31.501Z",
+      "session_id": "335677fd-6fd5-4806-915a-4473059e8123",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-frame-146-vertical-loss-27064633c585-figure"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 335677fd-6fd5-4806-915a-4473059e8123"
+  },
   "resume_waiver": {
     "reason": "the reviewed head is superseded by a resume; a later figure review of the delivered head replaces this one",
     "session_id": "335677fd-6fd5-4806-915a-4473059e8123",

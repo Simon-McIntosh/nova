@@ -118,6 +118,62 @@ for every target on any device measured, and the candidate is reverted.</strong>
 The node lands as the consolidation alone: one owner of the weighted graded
 residual, and the duplicate deleted.</p>
 
+<h3>The six JVP identity rows, at both revisions</h3>
+
+<p>Those rows exceed the suite's 300-second bound on a compile-bound host, which
+is why the gate above reports them as timeouts and why their outcome was
+unknown. Each row was therefore run on its own, one row at one arm per job, on
+<code>all_debug</code> with the bound raised to 3600 s on that command line
+only; the base arm resolves its two modules through the same overlay the gate
+uses, and every job has its own log root and pytest basetemp. Twelve jobs
+<code>1307551</code>–<code>1307562</code> all completed.</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Row</th><th scope="col">base cb42f656f</th>
+    <th scope="col">wall</th><th scope="col">head 6f54a9cdd</th>
+    <th scope="col">wall</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td>FAILED</td><td>1335.01 s</td><td>FAILED</td><td>1413.18 s</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>FAILED</td><td>1636.00 s</td><td>FAILED</td><td>1413.18 s</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>FAILED</td><td>1174.66 s</td><td>FAILED</td><td>831.49 s</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td>PASSED</td><td>1193.81 s</td><td>PASSED</td><td>957.19 s</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>PASSED</td><td>1393.07 s</td><td>PASSED</td><td>1001.46 s</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>FAILED</td><td>1055.62 s</td><td>FAILED</td><td>831.49 s</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Zero rows change state between the arms: base and head are red and
+green on exactly the same six rows, so this change adds no identity
+failure.</strong> The three <code>test_tangent_matches_base_jvp</code> rows do
+not reach their tangent tolerance at either revision: they stop on the earlier
+primal-bit equality assertion (<code>primal bits differ</code>),
+which is a property of compiling the tangent in one closure and the primal in
+another, and it fires identically without this change. That row therefore
+cannot evidence the 1e-9 tangent bound, and it is not repaired here: it belongs
+to whichever node owns the identity harness.</p>
+
+<p>The three <code>test_truncated_tangent_fails_identity</code> rows are the
+controls, and they discriminate. Each computes the identity under a
+deliberately truncated tangent and asserts the resulting error exceeds
+<code>SCAN_TOLERANCE</code>, so a row that passes reports both that the shipped
+tangent agrees with the base JVP and that a broken tangent is detected. Two of
+the three — <code>edge_integrands</code> and <code>flux_and_moment_terms</code>
+— <strong>pass at both revisions</strong>, which is the positive half of the
+control on the shipped arm. The third, <code>edge_terms</code>, is red at both
+revisions on the same primal-bit assertion reached inside the truncated call,
+so it is a pre-existing condition and unchanged by this node.</p>
+
+<p>A separate run of one row under <code>NOVA_TANGENT_TRUNCATION=1</code> (job
+<code>1307547</code>, <code>test_tangent_matches_base_jvp[edge_terms]</code>)
+also fails — with the identical <code>primal bits differ</code> assertion and
+not on the tangent error. Because the unmutated head arm fails that row for the
+same reason, <strong>that run does not discriminate</strong> and is recorded as
+such rather than as a passing control; the discriminating control is the two
+passing truncation rows above. The first forced-full-band control used earlier
+was replaced for the same defect.</p>
+
 <h3>Before and after walls, and the negative control</h3>
 
 <p>One four-core <code>all_debug</code> job measured the shipped configuration

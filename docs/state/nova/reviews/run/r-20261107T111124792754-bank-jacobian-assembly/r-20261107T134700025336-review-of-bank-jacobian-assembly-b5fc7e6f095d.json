@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-11-07T14:08:38.801Z",
   "dispatched_at": "2026-11-07T13:55:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-jacobian-assembly",
+      "recorded_at": "2026-11-07T19:57:48.316217+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html",

@@ -1,0 +1,98 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_note": "Two attachments were named: docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png (1400x720 RGBA) and the review run's image-1.png. Both were opened. A pixel difference of the two images has a null bounding box - every pixel of image-1.png equals the repository PNG - so the two attachments are the one 1400x720 figure and every verdict below describes that figure.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T19:17:33Z",
+  "fields": {
+    "RUBRIC contrast": "pass - title and legend text 21.0:1 on white; wall black; the reference contour stroke renders at 2.81:1 and is recorded as finding 4.",
+    "RUBRIC data_ink": "pass - unfilled line contours on one shared level array over the wall, both null sets; no fill, gradient, scatter or surface.",
+    "RUBRIC decoration": "pass - white canvas, axes off, no gridline, background fill, band, frame or shadow.",
+    "RUBRIC label_collision": "pass - ink rows 6-703 of 720, columns 48-1363 of 1400; 90 px title gutter and 39 px legend gutter; data begins 9 px below the title ink; nothing clipped or overlapping.",
+    "RUBRIC legibility": "pass - both two-line titles legible at 900 px page width; converged and not-converged panels separate at a glance; hollow reference null visible around the filled solved null at axis and saddle.",
+    "RUBRIC table_form": "pass - a spatial poloidal flux map with nulls and wall; not tabular information."
+  },
+  "figures_reviewed": [
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
+  ],
+  "findings": [
+    {
+      "disposition": "folded into the caption-repair node for the archive record: replace each block's opening clause with the rendition it embeds, keep the historical sentence as the history it is",
+      "file": "docs/evidence/archive/forward-solve-api-landed.html",
+      "id": "f94794271fe",
+      "line": 331,
+      "severity": "non-blocking",
+      "summary": "The cumulative archive record embeds this PNG in four figure blocks (lines 331, 431, 498 and 907) and each caption opens by describing a picture that is no longer there: 'Edit 7 (-4%, converged, residual 5.0e-09, left) beside edit 6 (-6%, non-converged, residual 4.4e-03, right)' and 'reference contours blue'. The image above those words is edits 12 and 9, and its reference contours are grey #929292, with blue now carrying only the reference nulls and the dashed saddle legs. Each block corrects itself only in a trailing clause ('The file has since been redrawn from edit 12 ...'), so a reader who stops at the first sentence takes the wrong states and the wrong encoding from a caption that is now internally contradictory - it says the same figure's reference contours are both blue and (in the added clause) not blue. The one caption defect this node was dispatched to close is therefore reduced at these four blocks rather than closed."
+    },
+    {
+      "disposition": "exempted: the line is outside this read-only review's write scope and outside the figure itself; recorded here for the coordinator to answer on the run's own record",
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html",
+      "id": "fefe0fec4e5",
+      "line": 91,
+      "severity": "non-blocking",
+      "summary": "The page's own twenty-edit table contradicts the figure drawn directly above it. Row 12 of that table is marked failed with terminal residual 5.2669e-03, one trip and termination active_set_settled, and row 9 with 2.6445e-03 and one trip, while the left panel's title reads 'edit 12 ... converged residual 5.730e-09 Wb 3 active-set iterations' and the right panel's 'edit 9 ... not converged residual 6.612e-03 Wb 3 active-set iterations'. The page's prose also reports 4 of 20 converged (edits 0, 2, 13, 17) where the archive the panel is drawn from, panel-states.npz at this head, holds five (edits 0, 1, 11, 12, 13). The figure itself is consistent with its archive - edit 12 is the largest residual among the converged states and edit 9 the largest among the non-converged, as the caption claims - so the defect is that the table and the convergence headline were not refreshed onto the same solve as the rendition. A reader cannot tell which of the two adjacent accounts to believe."
+    },
+    {
+      "disposition": "folded into the panel-legend node: add a reference/solved marker-plus-dashed-line key beside the two contour entries",
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "fc452c28a5d",
+      "line": 2526,
+      "severity": "non-blocking",
+      "summary": "The legend names only the contour colours. The reference nulls and the dashed saddle legs are drawn in blue #3366cc and the solved nulls and legs in orange #cc7722, and the legend's two entries both show a contour swatch (grey #929292 and orange), so the blue dashed traces and the blue hollow markers a reader meets along the boundary and at the saddle have no key anywhere in the image. The page caption names 'grey' and 'orange' contours and the hollow reference nulls but not the blue, so a reader meeting the PNG on its own - the case the legend was added for - has to infer which set the blue belongs to."
+    },
+    {
+      "disposition": "exempted: the reference family is visible and distinguishable at page width, so the defect does not stop a reader; raising the stroke to 1.0 pt would place it at the specified 3.1:1 if the coordinator wants the floor met exactly",
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f208ff5326c",
+      "line": 2159,
+      "severity": "non-blocking",
+      "summary": "The reference contour colour is specified as #929292, 3.11:1 against white, but 0.7 pt at 100 dpi is a 0.97 px stroke, so no pixel of the contour ever reaches the specified value: the darkest grey in the contour-only interior of the left panel measures #9a9a9a, 2.81:1, and the anti-aliased body of the line sits at #b9b9b9 (1.96:1) and lighter. The reference field is the comparison the figure exists to make, so it is the one mark that has to clear the floor; it is visible at the 900 px page width and every contour is distinguishable, but it reads one antialias step lighter than the colour that was chosen for it. This is an improvement on the previously reviewed rendition, which rendered at 1.52:1 and in the wrong hue."
+    },
+    {
+      "disposition": "exempted: the caption adds the definitions and map statistics that the image cannot carry, so it is not a caption that only repeats the title",
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html",
+      "id": "ff0520f2d74",
+      "line": 177,
+      "severity": "non-blocking",
+      "summary": "The page caption's opening sentence reproduces both panel titles verbatim - the edit index, the percentage, the convergence word, the terminal residual and the active-set iteration count are the title text read back - so the first thing under the figure repeats what the reader has just read in the figure. The caption does earn its place after that sentence, defining the percentage's base, defining an active-set iteration and giving the display-map statistics for both panels, so this is redundancy rather than absence; the values it repeats are the values the image shows."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass for the text - the titles and the two legend entries are pure black on white at 21.0:1, and the wall and coil outlines are black. The one mark below the repository's 3:1 floor is the reference contour stroke, measured at 2.81:1 and recorded as finding 4 rather than counted against the text.",
+    "data_ink": "pass - the field is unfilled line contours on one shared level array drawn over the black wall and coil outlines, with both null sets; there is no filled contour, no colour map, no scatter and no painted surface, so the ink that is not text is field, wall or null.",
+    "decoration": "pass - the canvas is plain white (91.0% of the 1,008,000 pixels are exactly #ffffff) with no gridline, background fill, shading band, frame, gradient or shadow; the only non-data ink is the title pair and the frameless legend beneath the panels.",
+    "label_collision": "pass - measured on the rendered PNG: no label is clipped (ink spans rows 6-703 of 720 and columns 48-1363 of 1400, so every margin is positive - top 6 px, bottom 16 px, left 48 px, right 36 px), no label overlaps another (title line 1 runs x 48-648 and x 738-1363, a blank 90 px gutter between the panels; title line 2 runs x 133-564 and x 835-1267; the two legend entries run x 368-708 and x 747-1030, a 39 px gutter), and no label touches the data (title ink ends at row 44, data ink begins at row 53, and the legend sits at rows 685-703 below data that ends at row 674).",
+    "legibility": "pass - each panel carries a two-line title naming the edit, the perturbed circuit, the perturbation against its seed, the convergence word, the terminal residual with its unit (Wb) and a count labelled 'active-set iterations', so both undefined quantities the earlier renditions carried are now defined in the image; both titles stay readable at the page's 900 px column width (14 pt on a 1400 px canvas renders at about 12.5 px), the converged and not-converged shapes separate at a glance, and the hollow blue reference marker reads around the filled orange solved marker at the magnetic axis and at the admitted saddle.",
+    "table_form": "pass - the figure is a spatial poloidal flux map with its null positions and its first wall; the information is two field geometries over one common wall, which is what a contour panel is for and is not a set of values that reads better as a table."
+  },
+  "measurements": {
+    "attachments_compared": "image-1.png and the repository PNG are pixel-identical (difference bounding box null); the PNG is at reviewed head ecf6221f877a308247a4758879fe7a525cb19829, sha256 472a7ed375db96421939f8843d7a2f06d2203d3e875eac3dc12bf45c1ffe816c",
+    "colours_measured": {
+      "legend_reference_swatch": "#959595 at 3.00:1",
+      "reference_contours_rendered_darkest": "#9a9a9a at 2.81:1",
+      "reference_contours_specified": "#929292 at 3.11:1",
+      "reference_markers_and_legs": "#3366cc at 5.37:1, 1,972 full-strength pixels",
+      "solved_contours_and_legs": "#cc7722 at 3.37:1, 4,009 full-strength pixels",
+      "title_and_legend_text": "#000000 at 21.0:1"
+    },
+    "image": "1400x720 RGBA, all alpha 255, 100 dpi, 9,826 distinct colours, 91.0% exact white",
+    "ink_bbox": "rows 6-703, columns 48-1363; margins top 6, bottom 16, left 48, right 36",
+    "legend_runs": "swatch x 368-408 + text to 708; swatch x 747-786 + text to 1030; 39 px gutter",
+    "null_coincidence": "at the magnetic axis in both panels the hollow blue reference diamond reads around the filled orange solved triangle, and at the admitted saddle the hollow blue cross reads around the filled orange cross, so the reference null is visible where the two coincide",
+    "page_scale_check": "downscaled to the 900 px reckon column width the titles, both legend entries and both contour families remain legible; the grey reference contours are the faintest mark but every contour is still distinguishable from its neighbours",
+    "row_bands": "title line 1 rows 6-24, title line 2 rows 30-44, data rows 53-674, legend rows 685-703",
+    "title_runs_line1": "x 48-648 (left panel), x 738-1363 (right panel), 90 px gutter",
+    "title_runs_line2": "x 133-564 (left), x 835-1267 (right)"
+  },
+  "notes": "Read-only review: no file was edited, created, moved, redrawn, relabelled or reformatted, and no SVG was opened, read, listed, searched, rendered or git-shown. Only the two named PNGs and derived crops of them were opened, plus the two HTML pages that carry the captions, the drawing script and the panel receipt/archive the figure is drawn from. The reviewed run's receipt claims 0 clipped and 0 overlapping labels; that claim was not taken on trust - the title, legend and data bands were re-measured directly on the rendered PNG and agree. The figure was also checked for internal consistency against panel-states.npz at this head, which is where findings 2 and 5 come from. A figure review runs no suite: added_failure_count is 0 with an empty id list by contract, and no scores are recorded.",
+  "project": "nova",
+  "review_run_id": "r-20261107T191623714258-review-of-coil-edit-panel-captions-ecf6221f877a-figure",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "ecf6221f877a308247a4758879fe7a525cb19829",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:31:18.887254+00:00",
+  "total": null
+}

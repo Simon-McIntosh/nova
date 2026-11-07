@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:3727 (_render_panel from the panel subcommand)",
+    "benchmarks/coil_edit_latency.py:3318 (_render_panel from the run path)",
+    "nova/media/poloidal.py:540 (draw_nulls, reached by benchmarks/solovev_certificate.py:2060 and benchmarks/zero_residual_check.py:606)"
+  ],
+  "completed_at": "2026-11-07T19:31:54.428Z",
+  "dispatched_at": "2026-11-07T19:16:10Z",
+  "findings": [
+    {
+      "file": "nova/media/poloidal.py",
+      "line": "611",
+      "severity": "non-blocking",
+      "text": "non-blocking: draw_nulls was changed in nova/media outside the node's five declared write paths with no scope extension recorded in the manifest, so a shared painter used by dozens of benchmarks was edited under a fence that never granted it."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "619",
+      "severity": "non-blocking",
+      "text": "non-blocking: the independent measurement compared with the receipt near-restates the renderer's own _label_defects filter (tests/test_coil_edit_panel_render.py:560), so both read zero on the delivered clean panel and the assertion cannot tell a measurement from a constant; the only demonstration that it fires is negative-control.log, which ran at revision 9d4e0f6 rather than at head."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "non-blocking: inspected_render names the published titan-converged-vs-nonconverged.png, while the measurement_command at line 82 wrote single-grid-panel.png into the run directory whose md5 is dc1f2925a5e0172f748f5b2a88c08eef against the published e9dd14eb3214d13a641d638d15b5d942, so the key names a file no recorded command produced."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest records the negative control as 2 failures (manifest.md:15) while negative-control.log ends \"3 failed, 1 passed, 7 deselected\", so the run's account of its red log disagrees with the log it cites."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to re-render the coil-edit panels and make every embedding caption describe the rendition drawn; benchmarks/coil_edit_latency.py:2526 names both series in a frameless figure legend, benchmarks/coil_edit_latency.py:2241 draws the reference nulls hollow and oversized beneath the solved ones through an InkStyle variant, benchmarks/coil_edit_latency.py:3738 merges the caption and the display map into the published receipt, and I read the committed PNG at ecf6221f8 and confirmed the defined titles, the two named series and the coincident hollow/filled nulls.\nVERDICT done_when: the done_when asks for re-rendered panels, matching captions, measured clip and overlap checks, and base-and-head arms with 0 added failures; head-gate.log records 10 passed, 1 deselected, EXIT=0 at 21d85f44e and negative-control.log records 3 failed EXIT=1, but the control ran at the pre-change revision 9d4e0f6 and the manifest records baseline_suite and after_suite null, so no base arm exists.\nVERDICT write_paths: the declared paths are benchmarks/coil_edit_latency.py, docs/figures/forward-solve-api/coil-edit-nonconvergence, docs/evidence/archive/forward-solve-api-landed.html, docs/figures/single-grid-solver-cutover/panel-receipt.json and tests/test_coil_edit_panel_render.py; six of the eight changed paths are inside them, but nova/media/ink.py and nova/media/poloidal.py are not.\nVERDICT manifest: read; it reports status complete, the seven commits 792beb13d through ecf6221f8, the head gate with its log, the H200 redraw at job 1308034, and one rubric line per dimension, and rubric.test_arms states that one test was deselected and no base arm was run.\nVERDICT diff: read commit by commit against 9d4e0f6; 21d85f44e carries the style variant, the receipt merge, the label and title test repairs and the single-grid receipt provenance, and ecf6221f8 carries only the redrawn PNG, its SVG and three receipt keys.\nCALL_SITES: benchmarks/coil_edit_latency.py:3727 (_render_panel from the panel subcommand), benchmarks/coil_edit_latency.py:3318 (_render_panel from the run path), nova/media/poloidal.py:540 (draw_nulls, reached by benchmarks/solovev_certificate.py:2060 and benchmarks/zero_residual_check.py:606)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png carries the legend, the \"+6% of the seed\" and \"3 active-set iterations\" titles and the hollow reference marker around the filled solved one, and I read its receipt and coil-edit-nonconvergence.html:177 to confirm the quoted residuals and promotion counts agree with panel-receipt.json.\nSCORE evidence: 12\nJUSTIFICATION evidence: head-gate.log:1 names revision 21d85f44e and ends 10 passed, EXIT=0, but negative-control.log:1 names the pre-change revision 9d4e0f6 and the manifest records baseline_suite null, so neither the red control nor a base arm belongs to the delivered head.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: nova/media/ink.py:84 and nova/media/poloidal.py:616 are outside the five declared write paths with no recorded scope extension, while every other changed path is inside them.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:643 fails if the reference markers are refilled or the hollow marker's scale and zorder are dropped and tests/test_coil_edit_panel_render.py:668 fails if _prepare_case stops populating family and circuit, but the label assertion at tests/test_coil_edit_panel_render.py:619 compares two computations that both read zero on a clean figure.\nSCORE fit: 18\nJUSTIFICATION fit: the constants and helpers added at benchmarks/coil_edit_latency.py:2112 and benchmarks/coil_edit_latency.py:2444 follow the module's named-constant and private-helper idiom and carry no plan, ticket or author reference.\nSCORE reuse: 18\nJUSTIFICATION reuse: the hollow fill is now the InkStyle field at nova/media/ink.py:89 consumed by the owner at nova/media/poloidal.py:616, replacing the artist post-pass the previous review flagged, and _merge_receipt at benchmarks/coil_edit_latency.py:2444 has no owner in nova/database or benchmarks (benchmarks/solve_program_size_gate.py:1977 merges row receipts within one gate, which is a different capability).\nFINDING nova/media/poloidal.py:616 non-blocking: draw_nulls was changed in nova/media outside the node's five declared write paths with no scope extension recorded in the manifest, so a shared painter used by dozens of benchmarks was edited under a fence that never granted it.\nFINDING tests/test_coil_edit_panel_render.py:619 non-blocking: the independent measurement compared with the receipt near-restates the renderer's own _label_defects filter (tests/test_coil_edit_panel_render.py:560), so both read zero on the delivered clean panel and the assertion cannot tell a measurement from a constant; the only demonstration that it fires is negative-control.log, which ran at revision 9d4e0f6 rather than at head.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:80 non-blocking: inspected_render names the published titan-converged-vs-nonconverged.png, while the measurement_command at line 82 wrote single-grid-panel.png into the run directory whose md5 is dc1f2925a5e0172f748f5b2a88c08eef against the published e9dd14eb3214d13a641d638d15b5d942, so the key names a file no recorded command produced.\nFINDING docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json:1 non-blocking: the manifest records the negative control as 2 failures (manifest.md:15) while negative-control.log ends \"3 failed, 1 passed, 7 deselected\", so the run's account of its red log disagrees with the log it cites.",
+  "review_run_id": "r-20261107T191416777502-review-of-coil-edit-panel-captions-ecf6221f877a",
+  "reviewed_base_sha": "9d4e0f6bccbece8ca8d1dd0c4c0e59651e1a1abd",
+  "reviewed_head_sha": "ecf6221f877a308247a4758879fe7a525cb19829",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 10
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:45:25.450638+00:00",
+  "total": 92
+}

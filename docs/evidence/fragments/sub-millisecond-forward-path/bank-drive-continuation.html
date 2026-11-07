@@ -1,3 +1,15 @@
+<figure id="bank-drive-continuation-figure">
+  <img src="/nova/figures/sub-millisecond-forward-path/bank-drive-continuation/reads-per-slice.svg"
+       alt="Batch reads per slice against the requested drive step for a direct solve and for drive continuation">
+  <figcaption>Batch reads per slice against the requested drive step, direct solve against
+  drive continuation, on the saved warm-start slice on one H200, sixteen lanes. Reads are
+  the batch's fresh evaluations, summed over a continuation's sub-steps. Filled markers
+  settled: the lane set converged and a continuation certified. Hollow marks an attempt
+  that did not: at a 1e-2 step no direct lane converges inside the sixty-update ceiling,
+  and the continuation converges all sixteen lanes but only as far as drive 1.008934, so
+  it is not certified at the requested 1.01.</figcaption>
+</figure>
+
 ## What changed
 
 `nova/equilibrium/drive_continuation.py` advances a drive change in adaptive
@@ -73,38 +85,51 @@ was re-run from the GPFS extraction and the logs above are that run's.
 
 ## Device measurement
 
-The device arm is **incomplete**, and this is the honest record of how far it
-got. It ran on titan, four lanes, on the saved warm-start slice
-(`warm-start-streams.npz`, the diverted 550-cell certificate's slice-0 state):
+One H200 (98dci4-gpu-0003, one card, four cores, 64 GB), sixteen lanes, on the
+saved warm-start slice (`warm-start-streams.npz`, the diverted 550-cell
+certificate's slice-0 state), two fresh processes per arm. The two processes
+agree exactly: the same read counts, the same sub-step sequence, the same final
+drive.
 
-| drive step | arm | converged | sub-steps | updates (batch) | reads (batch) | worst residual | wall |
+| drive step | arm | converged | sub-steps | updates | reads | worst residual | wall |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1e-3 | direct | 4 / 4 | — | 3 | 4 | 5.97e-11 | 52.7 s |
-| 1e-3 | continuation | 4 / 4, certified | 1 | 3 | 4 | 5.97e-11 | 174.0 s |
+| 1e-3 | direct | 16 / 16 | — | 3 | 4 | 6.30e-11 | 0.3 s |
+| 1e-3 | continuation | 16 / 16, certified | 1 | 3 | 4 | 6.30e-11 | 77.0 s |
+| 1e-2 | direct | **0 / 16** | — | 60 (ceiling) | 429 | 1.46 | 19.2 s |
+| 1e-2 | continuation | 16 / 16 at drive 1.008934, **not certified** | 52 | 277 | 1253 | 8.90e-7 | 213.2 s |
+
+Reads are the batch's fresh evaluations, summed over a continuation's
+sub-steps; the direct arm's timed call is warm while a continuation's first
+sub-solve compiles its own static `(max_steps, tolerance)` pair, so the 1e-3
+walls (0.3 s against 77.0 s) compare a warm call with a cold one and reads are
+the like-for-like quantity.
 
 At a 1e-3 relative drive step the two arms are the same cost, because the
-initial 1e-3 sub-step *is* the whole change: one sub-step, one solve, and
-`state_relative_gap` 0.0 between the states the two arms reach. The comparison
-that matters — a step where the direct solve stalls and continuation does not —
-is at 1e-2, and it did not land.
+initial 1e-3 sub-step *is* the whole change: one sub-step, one solve, and the
+states the two arms reach are identical.
 
-- **The H200 never admitted a card.** `squeue -w 98dci4-gpu-0003` reported
-  8 of 8 `gres/gpu` allocated; job 1308069 pended on `Resources` for 22 minutes
-  and was cancelled by id. Running on titan is the brief's fallback, and every
-  wall above is a titan wall (P100, 16 GB) that must not carry an H200 headline.
-- **Titan job 1308075 hit its 30-minute wall at the 1e-2 direct arm** (`sacct`
-  state `TIMEOUT`, elapsed 00:30:24), so no 1e-2 row exists for either arm and
-  no second fresh process completed. Four lanes rather than sixteen were used
-  because a P100 has 16 GB against the H200's 141.
-- **No figure is drawn**, because a single drive step per arm carries no trend
-  in reads against drive step. The figure this section was meant to hold is
-  deferred to the run that completes the 1e-2 pair.
+At 1e-2 the direct solve reaches nothing. It spends its whole sixty-update
+ceiling on every lane and reports no converged lane, its worst fresh residual
+1.46 — above the 1e-6 intermediate tolerance, let alone the 1e-10 certificate.
+
+The continuation advances the drive in 52 sub-steps, sixteen of which are
+accepted and thirty-six rejected, and converges all sixteen lanes as far as
+drive 1.008934: 89.3 % of the requested change, at a worst fresh residual of
+8.90e-7. It does not reach 1.01. The last 1.07e-3 of the change is refused at
+**every** sub-step size the rule tries, from 4e-3 down to the 1.9e-9 floor, and
+the solve reports six updates spent at each size. So the shortfall is not the
+rule choosing a step that is too coarse: a 1.9e-9 forward step from a state
+with residual 8.90e-7 is rejected too. The target sits behind something the
+warm-started Newton step does not cross from this seed, and the honest reading
+of the table is that continuation carries a 1e-2 change to 89 % where the
+direct solve carries it nowhere — not that it certifies the full change.
+
 - **Against the analytic oracle** at drive amplitude 1.001 the axis sits
   7.69e-4 m and the saddle 1.97e-4 m from the unit-drive analytic positions
   (0.544 m minor radius). That is the drift the warm-start record already
   measured and attributed to the drive moving the equilibrium rather than
   scaling it, so it is recorded as a measured drift and not as an accuracy
-  verdict; the locked residual clause is met at 5.97e-11 in both arms.
+  verdict; the locked residual clause is met at 6.30e-11 in both arms.
 
 ## Provenance
 

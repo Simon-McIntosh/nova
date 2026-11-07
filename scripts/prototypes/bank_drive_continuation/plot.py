@@ -2,7 +2,9 @@
 
 Reads the measurement's own JSONL so the figure and the record beside it are
 drawn from the same numbers. Reads are the batch's fresh evaluations at the
-slice, seed read and terminal certificate included.
+slice, seed read and terminal certificate included. A continuation's reads are
+summed over its sub-steps, because the solve result it ends on carries only the
+final sub-step's count.
 """
 
 import argparse
@@ -33,6 +35,13 @@ def style():
     return DEFAULT_INK.variant(label_fontsize=14.0)
 
 
+def total_reads(row):
+    substeps = row.get("substep_rows") or []
+    if substeps:
+        return sum(substep["reads"] for substep in substeps)
+    return row["reads_batch"]
+
+
 def read(paths):
     rows = {name: {} for name in STYLE}
     for path in paths:
@@ -41,9 +50,9 @@ def read(paths):
                 if not line.startswith("ARM "):
                     continue
                 row = json.loads(line[4:])
-                key = float(row["amplitude"])
+                key = float(row["step"])
                 slot = rows[row["arm"]]
-                if key in slot and slot[key]["reads_batch"] >= row["reads_batch"]:
+                if key in slot and total_reads(slot[key]) >= total_reads(row):
                     continue
                 slot[key] = row
     return rows
@@ -63,31 +72,51 @@ def main():
         points = sorted(rows[name].items())
         if not points:
             continue
-        steps = [amplitude - args.base for amplitude, _ in points]
-        reads = [row["reads_batch"] for _, row in points]
+        steps = [step for step, _ in points]
+        reads = [total_reads(row) for _, row in points]
+        settled = [
+            row["converged"] == row["lanes"] and row.get("certified") is not False
+            for _, row in points
+        ]
         axes.plot(
             steps,
             reads,
             color=spec["color"],
-            marker=spec["marker"],
             linestyle=spec["linestyle"],
             linewidth=2.6,
-            markersize=8,
             zorder=spec["zorder"],
             label=LABELS[name],
         )
-        for step, value, (_, row) in zip(steps, reads, points):
+        for (step, value, done) in zip(steps, reads, settled):
+            axes.plot(
+                step,
+                value,
+                linestyle="none",
+                marker=spec["marker"],
+                markersize=9,
+                markeredgewidth=1.6,
+                markeredgecolor=spec["color"],
+                markerfacecolor=spec["color"] if done else "white",
+                zorder=spec["zorder"] + 2,
+            )
+        offset = 12 if name == "direct" else -20
+        for step, value in zip(steps, reads):
             axes.annotate(
                 str(value),
                 (step, value),
                 textcoords="offset points",
-                xytext=(0, 10),
+                xytext=(0, offset),
                 ha="center",
                 fontsize=14,
                 color=spec["color"],
             )
     axes.set_xscale("log")
-    axes.set_xlabel("drive step (relative amplitude)")
+    axes.set_yscale("log")
+    ticks = sorted({step for slot in rows.values() for step in slot})
+    axes.set_xticks(ticks)
+    axes.set_xlim(ticks[0] / 2.0, ticks[-1] * 2.0)
+    axes.set_ylim(2.0, 4000.0)
+    axes.set_xlabel("requested drive step (relative amplitude)")
     axes.set_ylabel("batch reads per slice")
     axes.legend(frameon=False, loc="upper left")
     figure.tight_layout()

@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T04:27:32.548Z",
+  "dispatched_at": "2026-11-07T04:20:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 162,
+      "severity": "blocking",
+      "text": "The fragment still asserts the accepted-step counts that :13 says are withdrawn: :162 says 'and all 24 inner steps are accepted' for frame 137's limited seed, :186 says 'every attempted inner step is accepted' for the four present-plasma frames as a general claim, and :211 repeats 'all 24 inner steps are accepted' for frame 137's diverted seed. The top of the same document states '<b>Step acceptance is not measured here and no accepted-step count is claimed anywhere below</b>', so the record contradicts itself three times on the one measurement this delta exists to withdraw. A reader who lands on :186 cannot tell that the number behind it is the NOT_EXECUTED padding of nova/equilibrium/fixed_point.py:235-255. The negative control that was supposed to catch this (run_negative_control.py in the run scratch) counts the literal string '24 of 24', which these reworded claims do not contain, so it passed while the defect survived. Repair: delete the acceptance clause at :162, :186 and :211, or restate each against the loop-level evidence (bit-identical residual, zero mask difference) that is actually recorded."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 88,
+      "severity": "blocking",
+      "text": "The frame-146 bullet says the axis at Z = +1.56 m 'is <b>above</b> the top of the DIII-D limiter (the limiter spans Z = -1.664 to +1.664 m)'. The parenthetical is the rectangular bound of the solve grid, not the limiter: the limiter ring the panels draw and the receipt measures spans Z = -1.359 to +1.363 m (artifacts/frame-146-diverted-default.npz key 'limiter', 84 points, R 1.017-2.351), which is why :173 and :289 correctly give the top edge as +1.363 m and the clearance as 0.20 m. As written the sentence refutes its own claim, since +1.563 is inside the +1.664 it quotes. This is the exact correction this delta makes, so the stale number left in the same edited bullet must go."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+      "line": 160,
+      "severity": "non-blocking",
+      "text": "The self-check's solver-count half compares _inner_step_counts' output against attributes the test itself supplied: `class Stub` at :121-122 sets attempted_newton_promotions = 2 and accepted_newton_promotions = 2, and :160 asserts the returned pair equals (2, 2), so the assertion holds whatever the production solver does. The read at :103 and :106 uses `getattr(..., 0)`, so a renamed or absent attribute on the real fixed point result reads 0 silently and this check still passes; only an inspection of nova/equilibrium/fixed_point.py:438-439 confirms the names are current. The trace tally half of the self-check IS independent (hand-computed executed/accepted/refused/damped counts on three traces) and does fail on a reversion to counting padding, so the durable half is real; the solver-count half is not a guard against a rename."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 348,
+      "severity": "non-blocking",
+      "text": "The recommended fix cites the solver's promotion counters as 'fixed_point.py:4996-4997'. At this base the pair is at :4995-4996 (`attempted_newton_promotions=outer.attempted_promotions` then `accepted_newton_promotions=outer.accepted_promotions`), so :4997 is past the block. The citation at :20 (fixed_point.py:4759-4772 for ACTIVE_SET_SETTLED) does contain the predicate at :4766 and is correct; only the first citation is off by one. The record's value rests on citeable file:line anchors, so a wrong one costs a reader the check."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T041936710160-review-of-diiid-forward-convergence-32b91a5a5e19",
+  "reviewed_base_sha": "662e53a98e4d63fe106e219530687649308009e9",
+  "reviewed_head_sha": "32b91a5a5e196341d3d7019ae4d05249caa295af",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "scores": {
+    "durability": 13,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T04:31:46.354745+00:00",
+  "total": 94,
+  "verdicts": [
+    "goal: the reviewed delta is the two commits 662e53a98..32b91a5a5 repairing the record the brief asks for; docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html:13 now states step acceptance was not measured, but :162, :186 and :211 still claim the accepted counts the same sentence withdraws.",
+    "done_when: the brief's done-when item 1 asks for a per-promotion residual trajectory 'with step acceptance and damping'; the receipt (docs/figures/diiid-forward-convergence/convergence-receipt.json, every arm) now carries attempted_promotions null, accepted_promotions null and an inner_step_trace of 0 executed rows, so the trajectory is recorded but the acceptance and damping half is explicitly unmeasured.",
+    "write_paths: the manifest declares scripts/prototypes/diiid_forward_convergence/, the evidence fragment and docs/figures/diiid-forward-convergence/; all twelve paths in `git diff --name-only 662e53a98 32b91a5a5` lie inside those three roots.",
+    "manifest: read; it records the receipt rebuild, panel render, panel read-back, probe self-check, classifier control and presence control, names six gate logs and a negative-control log, and states baseline_suite and after_suite were not armed because no product source is in scope.",
+    "diff: read both commits commit by commit; 6a1143a67 replaces the padded-trace promotion counts with the solver's fixed point counters and a padding-excluding tally, withdraws the stored counts, draws the governed limiter ring and the grid bound and plots the label axis; 32b91a5a5 adds scripts/prototypes/diiid_forward_convergence/check_panels.py, which reads the committed SVG back."
+  ]
+}

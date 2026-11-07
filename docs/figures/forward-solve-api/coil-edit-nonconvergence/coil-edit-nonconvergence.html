@@ -98,6 +98,16 @@ mask &Delta; is 0 promotes nothing, which is what ends the loop.</p>
 <tr class="fail"><td>19</td><td>+20%</td><td>4.2667e-07</td><td>3.882e-02</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.1298</td></tr>
 </tbody>
 </table>
+<p><strong>The table and the panel above are different solves.</strong> Every row is the titan sweep
+(job <code>1275764</code> at revision <code>15b3aa2f8</code>), in which each edit is warm-started from
+the preceding edit's terminal state and edit 12 settles at <code>active_set_settled</code> with
+residual 5.2669e-03&nbsp;Wb. The panel above is drawn from the re-solved state archive
+(<code>panel-states.npz</code>, md5 <code>da0da1ec0d5515befa0bbd9e614e7fb0</code>), where edit 12
+converges at 5.730e-09&nbsp;Wb and edit 9 at 6.612e-03&nbsp;Wb; the caption names the same
+termination counts. Reading the two as one answer for one edit is the mistake they invite: the
+table's row 12 and the panel's converged panel are the same edit under two different solves, so the
+row that reconciles them is the archive, not the sweep.</p>
+
 <h2 id="groups">Grouping the non-converged sixteen</h2>
 <p>Almost all of the sixteen non-converged edits terminate with the same word, so the table groups them by
 the mechanism their traces support instead. The mechanism is decided by two facts only: whether any
@@ -174,7 +184,10 @@ out.</p>
 <h2 id="panel">A converged edit beside a non-converged one</h2>
 <figure>
 <img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets">
-<figcaption>Left: edit 12 (P4-upper circuit 8 current +6&#37; of the seed), converged, terminal residual 5.730e-09 Wb, three active-set iterations. Right: edit 9 (+0&#37;), not converged, terminal residual 6.612e-03 Wb, three active-set iterations. The percentage is the fraction by which the edit scales that circuit's current, and an <em>active-set iteration</em> is one active-set trip the driver took; the two panels are the two largest-residual points of their respective sets. The converged panel draws the field of its terminal currents on a 10 mm map (largest node mismatch 2.621e-02 Wb, solved-node mismatch 7.468e-09 Wb, 46 promoted nodes, nearest promoted node 0.056 m from its polished X-point); the non-converged panel draws its own (1.303e-02 Wb, 6.432e-04 Wb, 25 promoted nodes, nearest 2.451 m). Reference contours are grey and solved contours orange on one shared level array; the reference nulls are hollow and drawn beneath the filled solved nulls, so a coincident axis or saddle reads as both, and other qualified nulls are hollow in both sets over the MAST first wall.</figcaption>
+<figcaption>Left: edit 12 (P4-upper circuit 8 current +6&#37; of the seed), converged, terminal residual 5.730e-09 Wb, three active-set iterations. Right: edit 9 (+0&#37;), not converged, terminal residual 6.612e-03 Wb, three active-set iterations. The percentage is the fraction by which the edit scales that circuit's current, and an <em>active-set iteration</em> is one active-set trip the driver took; the two panels are the two largest-residual points of their respective sets. The converged panel draws the field of its terminal currents on a 10 mm map (largest node mismatch 2.621e-02 Wb, solved-node mismatch 7.468e-09 Wb, 46 promoted nodes, nearest promoted node 0.056 m from its polished X-point); the non-converged panel draws its own (1.303e-02 Wb, 6.432e-04 Wb, 25 promoted nodes, nearest 2.451 m). Reference contours are grey and solved contours orange, both at 1.2&nbsp;pt on one shared level array;
+the reference nulls are drawn larger and beneath the solved ones, so a coincident axis or saddle reads
+as both, and other qualified nulls are hollow in both sets over the MAST first wall. A frameless legend
+names the contour series, the dashed saddle legs and the two null sets.</figcaption>
 </figure>
 <h2 id="artifacts">Where this rides</h2>
 <ul>

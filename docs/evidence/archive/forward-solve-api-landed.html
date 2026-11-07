@@ -328,7 +328,7 @@
   <tr><td>partial walk</td><td>16, 18</td><td>2, 3</td><td>7/1, 0/7/1</td><td>32/0, 26/22/0</td><td>8.365e-04, 1.849e-03</td><td>1.740e-03, 4.870e-03</td></tr>
   </tbody>
   </table>
-  <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>Edit 7 (&minus;4&#37;, converged, residual 5.0e-09, left) beside edit 6 (&minus;6&#37;, non-converged, residual 4.4e-03, right): reference contours blue, solved contours orange on shared levels, reference nulls blue and solved nulls orange, over the MAST first wall. The boundary branch is drawn from the assembled set in both cases &mdash; lobe solid, saddle legs dashed, and a caption naming which of the two drawings each panel carries. The file has since been redrawn from edit 12 (+6&#37; of the P4-upper circuit 8 current, converged, terminal residual 5.730e-09 Wb, three active-set iterations) beside edit 9 (+0&#37;, not converged, 6.612e-03 Wb, three active-set iterations), with the reference nulls hollow and drawn beneath the filled solved nulls.</figcaption></figure>
+  <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>Edit 12 (+6&#37; of the P4-upper circuit 8 current, converged, terminal residual 5.730e-09&nbsp;Wb, three active-set iterations, left) beside edit 9 (+0&#37;, not converged, 6.612e-03&nbsp;Wb, three active-set iterations, right): reference contours grey and solved contours orange, both at 1.2&nbsp;pt on one shared level array, the reference nulls drawn larger and beneath the solved ones, other qualified nulls hollow in both sets, over the MAST first wall. The boundary branch is drawn from the assembled set in both cases &mdash; lobe solid, saddle legs dashed &mdash; and the legend names each series, each null set and the dashed legs. The rendition shown is the later redraw of that file; this block was first written against an earlier one.</figcaption></figure>
   <p>Receipt: <code>docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json</code>
   (per-edit traces) and <code>coil-edit-nonconvergence.html</code> (the twenty edits tabled beside each
   other, with the panel states in <code>panel-states.npz</code>).</p>
@@ -428,14 +428,13 @@ closure on two persisted failing states rather than on a synthetic fixture, and 
 negative control: at the saddle level each state assembles exactly one axis-enclosing cycle, and at
 that level displaced by 1e-3 the same call assembles no cycle and is not well formed. The control is
 what makes the assertion a measurement of the level rule rather than of the assembler's tolerance.</p>
-<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the closed lobe solid, the saddle legs dashed, both null sets and the unstructured first wall"><figcaption>Edit 7 (&minus;4&nbsp;&#37;, converged, residual 5.0e-09, left) beside edit 6
-(&minus;6&nbsp;&#37;, non-converged, residual 4.4e-03, right). The solved boundary branch is drawn with its
-axis-enclosing lobe solid and its two saddle-ended divertor legs dashed, in orange; the reference set
-is drawn in blue as unconnected crossings, because its own assembly is not well formed and its raw
-separatrix is a scan-order crossing list whose consecutive entries are neighbours in the raster walk
-rather than endpoints of one segment, so joining them drew a fan of chords across the vessel. The
-caption says so, and names the reference as the unedited equilibrium whose admitted saddle sits above
-its axis, against the solved states whose saddle sits below. Levels run between the axis flux 0.341217&nbsp;Wb
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the closed lobe solid, the saddle legs dashed, both null sets and the unstructured first wall"><figcaption>Edit 12 (+6&nbsp;&#37; of the P4-upper circuit 8 current, converged, terminal residual
+5.730e-09&nbsp;Wb, three active-set iterations, left) beside edit 9 (+0&nbsp;&#37;, not converged,
+6.612e-03&nbsp;Wb, three active-set iterations, right). Each boundary branch is drawn from its own
+assembled set: the axis-enclosing lobe solid and the two saddle-ended divertor legs dashed, in orange
+for the solved sets and in blue for the reference, which now assembles on these states. The caption
+names the reference as the unedited equilibrium whose admitted saddle sits above its axis, against the
+solved sets, whose admitted saddles also sit above their own axes. Levels run between the axis flux 0.341217&nbsp;Wb
 and the boundary flux &minus;0.122930&nbsp;Wb, and the shared level array is the same on both panels.
 Both null sets are drawn: solid triangles for each axis and filled crosses for each admitted saddle, and
 an empty cup for other qualified nulls &mdash; which, on this panel, is empty for both sets: the
@@ -496,9 +495,11 @@ comparison rather than an assertion: the reference's admitted saddle sits <em>ab
 (0.621&nbsp;m,&nbsp;&minus;1.303&nbsp;m). The panel was redrawn on a compute partition and both files
 verify through the SVG.</p>
 <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, all four edges of the saddle cell bracketed, both null sets and the first wall"><figcaption>The same panel after the edge-root repair. The solved branch is drawn with its
-axis-enclosing lobe solid and its saddle legs dashed in orange; the reference is drawn in blue as
-unconnected crossings, with the caption naming it as the unedited equilibrium whose admitted saddle
-sits above its axis. Both null sets are drawn, the wall is drawn from the unit collection, and the
+axis-enclosing lobe solid and its saddle legs dashed in orange; the reference is drawn in blue with
+its own lobe solid and its saddle legs dashed, and the caption names it as the unedited equilibrium
+whose admitted saddle sits above its axis. The panel now shown is edit 12 (+6&#37;, converged,
+5.730e-09&nbsp;Wb, three active-set iterations) beside edit 9 (+0&#37;, not converged,
+6.612e-03&nbsp;Wb, three active-set iterations). Both null sets are drawn, the wall is drawn from the unit collection, and the
 files verify through <code>converged-vs-nonconverged.svg</code>.</figcaption></figure>
 <p><strong>Followup.</strong> The edge-root probe written for this node reads one stationary root
 outside the crossing pair on states 10&ndash;12 where the dense scan and the analytic root both place
@@ -695,7 +696,9 @@ the 2026-09-15 restoration. The three runs the plan quotes now resolve to three 
 re-derives from those forensics is 370.367 ms, and the plan previously attributed it to a file
 holding 353.038 ms.</p>
 
-<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>The panel the caption repair covers: edit 7 (converged, residual 5.0e-09, left) beside edit 6 (non-converged, residual 4.4e-03, right). Both sets draw one admitted saddle and no other qualified null, which is what the caption now says in those words. The file has since been redrawn from edit 12 (+6&#37; of the P4-upper circuit 8 current, converged, terminal residual 5.730e-09 Wb, three active-set iterations) beside edit 9 (+0&#37;, not converged, 6.612e-03 Wb, three active-set iterations), with the reference nulls hollow and drawn beneath the filled solved nulls.</figcaption></figure>
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>The panel the caption repair covers: edit 12 (+6&#37; of the P4-upper circuit 8 current, converged,
+terminal residual 5.730e-09&nbsp;Wb, three active-set iterations, left) beside edit 9 (+0&#37;, not
+converged, 6.612e-03&nbsp;Wb, three active-set iterations, right). Both sets draw one admitted saddle and no other qualified null, which is what the caption now says in those words. The rendition shown is the later redraw of that file; this block was first written against an earlier one.</figcaption></figure>
 
 <h3>The termination word is all the receipt carried</h3>
 <p>All ten failures persisted the same termination word, <code>active_set_settled</code>, which the
@@ -904,7 +907,9 @@ With <code>--without-vertical-centroid</code>, the probe then observed
 <code>constraint_pairs=(None,)</code> and failed. Restoring the conditional branch returns the control arm
 to an empty tuple. This demonstrates that the command-line control changes the compiled solve rather than
 only changing receipt prose.</p>
-<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Constrained coil-edit terminal flux contours for a converged and a non-converged edit, with both null sets and the vessel wall"><figcaption>The promoted constrained fixture and panel now ride the current driver. The plotted state remains the branch artifact; only generated SVG trailing whitespace was normalised so the merge satisfies <code>git diff --check</code>. The file has since been redrawn from edit 12 (+6&#37; of the P4-upper circuit 8 current, converged, terminal residual 5.730e-09 Wb, three active-set iterations) beside edit 9 (+0&#37;, not converged, 6.612e-03 Wb, three active-set iterations), with the reference nulls hollow and drawn beneath the filled solved nulls.</figcaption></figure>
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Constrained coil-edit terminal flux contours for a converged and a non-converged edit, with both null sets and the vessel wall"><figcaption>Edit 12 (+6&#37; of the P4-upper circuit 8 current, converged, terminal residual 5.730e-09&nbsp;Wb,
+three active-set iterations, left) beside edit 9 (+0&#37;, not converged, 6.612e-03&nbsp;Wb, three
+active-set iterations, right). The promoted constrained fixture and panel now ride the current driver. The plotted state remains the branch artifact; only generated SVG trailing whitespace was normalised so the merge satisfies <code>git diff --check</code>. The rendition shown is the later redraw of that file; this block was first written against an earlier one.</figcaption></figure>
 <p>Gate logs:
 <code>combined-all-debug.log</code>, <code>census-agreement.log</code> and
 <code>negative-unconditional-constraint-pairs.log</code> under run

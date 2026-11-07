@@ -12,6 +12,7 @@
     }
   },
   "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3416 to -0.1224 Wb)  |  every solved state imposes the vertical current-centre row at 0.031680 m (the reference's own centre, tolerance 1e-06 m)  |  reference is the unedited equilibrium, its admitted saddle above its axis (blue set: lobe solid, legs dashed, admitted saddle (0.585, +1.231) m)  |  solved sets orange: lobe solid, legs dashed, admitted saddle (0.583, +1.209) m above its axis in the converged panel and saddle (0.596, +1.170) m above its axis in the failed panel  |  other qualified nulls hollow  |  wall drawn  |  the converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 2.621e-02 Wb, solved-node mismatch 7.468e-09 Wb, 46 promoted nodes, nearest promoted node 0.056 m from its polished X-point; the non-converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.303e-02 Wb, solved-node mismatch 6.432e-04 Wb, 25 promoted nodes, nearest promoted node 2.451 m from its polished X-point",
+  "command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png --receipt docs/figures/single-grid-solver-cutover/panel-receipt.json",
   "display_map": {
     "moments_route": "stored terminal moments at the solve's target current",
     "panels": {
@@ -78,8 +79,8 @@
   "visual_inspection": {
     "clipped_labels": 0,
     "inspected_render": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
-    "measured_from": "a render of docs/figures/single-grid-solver-cutover/panel-states.npz through _render_panel, whose save-time check draws the figure and reads every text artist's extent; the published PNG named by inspected_render is the same archive drawn by the same painters, so the counts describe that figure's text layout rather than being copied from another receipt",
-    "measurement_command": "python benchmarks/coil_edit_latency.py panel --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/single-grid-panel.png",
+    "measured_from": "the render this command writes: it draws panel-states.npz through _render_panel, whose save-time check draws the figure and reads every text artist's extent, so the counts and inspected_render describe the same file",
+    "measurement_command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png --receipt docs/figures/single-grid-solver-cutover/panel-receipt.json",
     "measurement_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/label-measure-single-grid.log",
     "overlapping_labels": 0
   }

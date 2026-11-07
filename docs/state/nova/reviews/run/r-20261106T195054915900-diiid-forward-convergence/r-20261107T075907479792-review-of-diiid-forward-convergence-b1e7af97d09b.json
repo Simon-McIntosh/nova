@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T08:06:57.831Z",
+  "dispatched_at": "2026-11-07T07:59:44Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 401,
+      "severity": "blocking",
+      "text": "The recommended-fix section ranks the frames wrongly and contradicts its own table: it names 137, 179 and 144's diverted seed as 'the three whose ... terminals are the smallest of the cohort (6.24e-2, 2.73e-2 on 179's limited seed, 5.93 on 144)' and then says 44 is next 'whose ... residual is the largest'. 144's diverted terminal is 5.927e+00, which is the largest in the document's own table at :70-75 (44 diverted is 4.276e+00), so 5.93 is not among the smallest and 44 is not the largest. This is the section the follow-on fix node reads to decide priority, and the two adjectives are the only ranking it gives. Repair: state the residuals without the superlatives, or rank them against the tabulated values (2.73e-2, 5.50e-2, 5.68e-2, 6.24e-2, 1.97e-1, 4.18e-1, 4.28, 5.93)."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 75,
+      "severity": "non-blocking",
+      "text": "The cohort table's discriminating-measurement column carries two superlatives its own rows falsify: :75 calls 137's 6.237e-02 'smallest residual of the cohort', but :74 in the same table gives 146's diverted terminal as 5.496e-02; :71 and :133 call 44's 4.276e+00 'the largest residual of the cohort', but 144's diverted terminal is 5.927e+00. Both sentences sit beside correct numbers, so a reader who checks the column finds it disagreeing with the row next to it. Repair: drop the superlatives or scope them to the confined non-lost arms and say so."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "line": 335,
+      "severity": "non-blocking",
+      "text": "The frame-146 panel does not show the solved axis it exists to implicate: render_panels.py:335-336 set the poloidal limits to the wall extent plus 0.15 m, so the top of the axes is about Z=+1.513 while that arm's axis is at Z=+1.563 (logs/panels.json), and the marker plotted at :254 is clipped away. The rendered SVG confirms it - the only markers inside the axes are the label axis, the label X-point, the solved X-point and the limiter contact - while the legend still carries 'solved axis (outside wall)' (:268, and the duplicate handle appended at :903 without any plot). logs/gate-inspection.log states the opposite ('axis outside the limiter drawn as a hollow triangle'), so the inspection record claims a mark the artifact does not show; the caption does state 'axis OUTSIDE the limiter', which is why this does not block. Repair: widen the poloidal limits to include the terminal axis, or drop the legend entry where the marker falls outside the drawn field."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/boundary_competition.py",
+      "line": 93,
+      "severity": "non-blocking",
+      "text": "The bounding-surface classification re-derives a decision the repository already owns and inverts its failure behaviour. nova/equilibrium/boundary_comparison.py:31 `classify_boundary_mode` classifies an achieved topology from a saddle-aware signed margin and raises on a NaN margin; boundary_competition.py:93-102 recomputes the same decision inline as `psi_limiter >= psi_saddle` and maps it to the same two class names, and because a NaN psi_saddle makes that comparison False it returns 'diverted' for an arm with no admitted saddle instead of refusing. No arm in this cohort hits that path (every one of the nine carries a finite psi_saddle in logs/gate-boundary.log), so the numbers stand; the duplicate decision is what the reuse dimension penalises. The genuinely new part - computing the two competing boundary fluxes from a stored grid - has no owner in nova/ and is correctly new."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/build_receipt.py",
+      "line": 123,
+      "severity": "non-blocking",
+      "text": "Every frame entry is written with `\"measured_branches\": {}` and nothing ever populates it; the measured data lands at `measured.branches` instead. Nothing in the tree reads the empty key (the only other occurrence is the same literal), so a reader or tool that takes the receipt's own field name at face value reads 'no branch was measured' on a receipt whose whole purpose is that measurement. Repair: delete the field."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T075907479792-review-of-diiid-forward-convergence-b1e7af97d09b",
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_head_sha": "b1e7af97d09bf889aea6b836b98808d0289beded",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 6,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T08:11:31.616208+00:00",
+  "total": 88,
+  "verdicts": [
+    "goal: the node's goal is to explain what stops five DIII-D gate frames converging; scripts/prototypes/diiid_forward_convergence/measure_branches.py runs both seeds of every frame, docs/figures/diiid-forward-convergence/convergence-receipt.json carries a terminal class and a 16-promotion residual history per arm, and the fragment names 'the stationary fixed-point map at a frozen mask' as the mechanism with a discriminating measurement per frame.",
+    "done_when: item 1's trajectory and class are recorded for nine of ten seeds (the tenth, 144's limited seed, refuses at axis identification and is named as a refusal), but the clause 'with step acceptance and damping' is not met: every arm's inner_step_trace is 0 executed of 24 slots and attempted_promotions/accepted_promotions are null, which the fragment states rather than papers over; items 2 and 3 are met, item 2 exceeded by the bounding-surface re-classification.",
+    "write_paths: the manifest declares scripts/prototypes/diiid_forward_convergence/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html and docs/figures/diiid-forward-convergence/; all twenty paths in `git diff --name-only 8892f2c287 b1e7af97d0` lie inside those three roots and no path under nova/ is touched.",
+    "manifest: read; it states status complete, lists 27 commits, names ten gate logs plus a negative-control log, and records baseline_suite and after_suite as not armed because no product source is in scope, which is the correct call for a node fenced out of product code.",
+    "diff: read commit by commit against 8892f2c287; the run adds eleven prototype scripts, one evidence fragment, six SVGs and two JSON receipts, and the review round's six commits (3a4ffeb8a, e61b1a883, 9cef5718e, 5098ee7ea, b1e7af97d) replace an asserted bounding surface with one measured from each arm's stored grid and withdraw the padded-trace promotion counts."
+  ]
+}

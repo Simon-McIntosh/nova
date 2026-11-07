@@ -97,6 +97,30 @@ def test_sloped_flux_matches_reference(angle, station, distance):
     )
 
 
+@pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
+def test_sloped_flux_closed_form_matches_reference(angle, station, distance):
+    """The pole-reduced azimuthal integral against the ring reference."""
+    start, end, targets = frame(angle)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    converged = reference.sheet_reference(target, start, end)
+    assert converged.converged
+    got = sheet_flux(target.r, target.z, start, end, closed=True)
+    relative = abs(got - converged.psi) / abs(converged.psi)
+    assert relative <= TOLERANCE, (
+        f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
+    )
+
+
+@pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
+def test_closed_form_agrees_with_the_graded_route(angle, station, distance):
+    """The two independent evaluations of one antiderivative agree."""
+    start, end, targets = frame(angle)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    closed = sheet_flux(target.r, target.z, start, end, closed=True)
+    routed = sheet_flux(target.r, target.z, start, end)
+    assert abs(closed - routed) <= TOLERANCE * abs(routed)
+
+
 @pytest.mark.parametrize("distance", DISTANCES)
 @pytest.mark.parametrize("station", STATIONS)
 def test_flat_pancake_form_matches_reference(station, distance):
@@ -124,6 +148,20 @@ def test_flipped_sheet_current_fails_the_comparison(angle):
     )
     converged = reference.sheet_reference(target, start, end)
     flipped = sheet_flux(target.r, target.z, start, end, sheet_current=-1.0)
+    assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)
+
+
+@pytest.mark.parametrize("angle", SLOPES)
+def test_flipped_sheet_current_fails_the_closed_form(angle):
+    """Negative control on the pole-reduced route, as on the graded one."""
+    start, end, targets = frame(angle)
+    target = next(
+        t for t in targets if t.distance == FAR[0] and t.station == TARGET_STATION
+    )
+    converged = reference.sheet_reference(target, start, end)
+    flipped = sheet_flux(
+        target.r, target.z, start, end, sheet_current=-1.0, closed=True
+    )
     assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)
 
 

@@ -6,6 +6,11 @@
   "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite arms in its manifest.md: base failure ids and head failure ids are both 11 for tests/biot/test_edge_term_tangents.py and differ by exactly one row, head-only test_tangent_compiles_within_bound[second_residual] against base-only test_tangent_compiles_within_bound[channel_split]. The vertex arms exist only as test_logs entries; comparing gate/base-test_vertex_term_tangents.log and gate/head-test_vertex_term_tangents.log gives 5 identical failure ids in both arms and adds none. Fifteen of the sixteen edge-arm failures are the 300 s pytest-timeout bound on compile-bound rows in both arms.",
   "completed_at": "2026-11-07T01:42:38.152Z",
   "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "polygon-near-band-quadrature",
+      "recorded_at": "2026-11-07T01:49:31.617137+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "polygon-near-band-quadrature",

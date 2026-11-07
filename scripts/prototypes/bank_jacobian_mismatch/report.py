@@ -122,6 +122,26 @@ def main():
     print(table_three(receipt))
     print("GRADIENT")
     print(json.dumps(receipt["gradient_check"], indent=2))
+    print("BLOCKS")
+    for state in receipt["states"]:
+        for block in (0, 1, 2):
+            for key in ("analytic-full", "booking-to-cd", "geometry-to-cd"):
+                column = f"{key}:h1e-06:rel"
+                values = [
+                    row[column]
+                    for row in state["directions"]
+                    if row["block"] == block and column in row
+                ]
+                values = [value for value in values if value == value]
+                if values:
+                    print(
+                        f"{state['label']} block {block} {key:16s} "
+                        f"median {statistics.median(values):.3g} "
+                        f"min {min(values):.3g} max {max(values):.3g} "
+                        f"n {len(values)}"
+                    )
+    print("UNIT_TRIAL")
+    print(json.dumps(receipt.get("unit_trial", {}), indent=2))
     for state in receipt["states"]:
         print("STATE", state["label"], state["base_residual_max"], state["class_counts"])
 

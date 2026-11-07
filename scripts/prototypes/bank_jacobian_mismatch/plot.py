@@ -1,9 +1,8 @@
 """Mismatch between the assembled Jacobian and the fresh-read central difference.
 
-Grouped by moment block, one colour per state, logarithmic ordinate. The block
-is the axis of the figure because the measured mismatch is constant within a
-block and independent of the state, which is what distinguishes a defect in the
-comparison from a defect in the matrix.
+Grouped bars per direction class, one bar per state, logarithmic ordinate.
+Left: the matrix as the step assembles it. Right: the same comparison with the
+moving-geometry contribution replaced by its own central difference.
 """
 
 import argparse
@@ -16,16 +15,22 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-BLOCKS = (0, 1, 2)
-LABELS = {0: "block 0", 1: "block 1", 2: "block 2"}
+CLASSES = ("cut", "normal", "whole", "axis", "saddle", "random")
+LABELS = {
+    "cut": "cut",
+    "normal": "normal\nform",
+    "whole": "whole",
+    "axis": "axis",
+    "saddle": "saddle",
+    "random": "random",
+}
 COLOURS = {"stalled-1e-2": "#c0392b", "certificate": "#2e8b57"}
 NAMES = {"stalled-1e-2": "stalled 1e-2", "certificate": "certificate"}
 STEP = "1e-06"
-WIDTH = 0.36
 
 
-def median_of(state, block, key):
-    values = [row[key] for row in state["directions"] if row["block"] == block]
+def median_of(state, klass, key):
+    values = [row[key] for row in state["directions"] if row["class"] == klass]
     values = [value for value in values if np.isfinite(value)]
     return float(np.median(values)) if values else np.nan
 
@@ -37,31 +42,33 @@ def main():
     args = parser.parse_args()
     receipt = json.loads(Path(args.receipt).read_text())
     states = {state["label"]: state for state in receipt["states"]}
+    width = 0.7 / max(len(states), 1)
+    offsets = (np.arange(len(states)) - (len(states) - 1) / 2) * width
     plt.style.use("data-ink")
     figure, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100, sharey=True)
-    positions = np.arange(len(BLOCKS))
+    positions = np.arange(len(CLASSES))
     series = (
         ("analytic-full", "Jacobian as assembled"),
-        ("booking-to-cd", "booking term to central difference"),
+        ("geometry-to-cd", "geometry term to central difference"),
     )
     for axis, (key, title) in zip(axes, series, strict=True):
-        for offset, (label, state) in zip((-WIDTH / 2, WIDTH / 2), states.items(), strict=True):
-            heights = [median_of(state, block, f"{key}:h{STEP}:rel") for block in BLOCKS]
+        for offset, (label, state) in zip(offsets, states.items(), strict=True):
+            heights = [median_of(state, klass, f"{key}:h{STEP}:rel") for klass in CLASSES]
             axis.bar(
                 positions + offset,
                 heights,
-                WIDTH,
+                width,
                 color=COLOURS[label],
                 label=NAMES[label],
                 zorder=3,
             )
         axis.set_yscale("log")
         axis.set_xticks(positions)
-        axis.set_xticklabels([LABELS[block] for block in BLOCKS])
+        axis.set_xticklabels([LABELS[klass] for klass in CLASSES])
         axis.set_title(title, fontsize=14)
         axis.spines["top"].set_visible(False)
         axis.spines["right"].set_visible(False)
-        axis.axhline(1.0, color="#929292", linewidth=1.2, linestyle=":", zorder=2)
+        axis.axhline(1e-6, color="#929292", linewidth=1.2, linestyle=":", zorder=2)
     axes[0].set_ylabel("relative mismatch at step 1e-6")
     handles, labels = axes[0].get_legend_handles_labels()
     figure.legend(handles, labels, frameon=False, loc="upper center", ncol=2)
@@ -69,7 +76,6 @@ def main():
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, format="svg", facecolor="white")
-    figure.savefig(output.with_suffix(".png"), format="png", dpi=140, facecolor="white")
     print("wrote", output)
 
 

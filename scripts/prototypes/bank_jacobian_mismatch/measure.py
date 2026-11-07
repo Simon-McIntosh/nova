@@ -142,6 +142,36 @@ def unit_direction(cell, block, cells):
     return tuple(blocks)
 
 
+def positive_control(cells=4, eps=1e-6, seed=7):
+    """The difference quotient on a linear map must return roundoff.
+
+    A random dense matrix stands in for the assembled Jacobian and the residual
+    is that matrix applied to the state, so the central difference is exact to
+    roundoff. The control exercises the same displacement, step magnitude and
+    comparison path as the real measurement; if that path is wrong in sign or
+    in scale the control fails before any state is reported.
+    """
+    rng = np.random.default_rng(seed)
+    matrix = jnp.asarray(rng.normal(size=(3 * cells, 3 * cells)))
+    state = tuple(jnp.asarray(rng.normal(size=cells)) for _ in range(3))
+    scale = tuple(
+        jnp.maximum(jnp.max(jnp.abs(value), axis=-1), 1e-30) for value in state
+    )
+    worst = 0.0
+    for block in range(3):
+        for cell in range(cells):
+            direction = unit_direction(cell, block, cells)
+            analytic = matrix @ jnp.concatenate(direction)
+            step_size = eps * float(scale[block])
+            plus = perturb(state, direction, scale, eps, 1.0)
+            minus = perturb(state, direction, scale, eps, -1.0)
+            quotient = (
+                matrix @ jnp.concatenate(plus) - matrix @ jnp.concatenate(minus)
+            ) / (2.0 * step_size)
+            worst = max(worst, mismatch(quotient, analytic)["rel"])
+    return worst
+
+
 def perturb(state, direction, scale, eps, sign):
     return tuple(
         value + sign * eps * scale_b * step
@@ -211,12 +241,18 @@ def measure_state(label, state, support, operands, cache, seeds, previous, conve
             minus = perturb(state, direction, scale, eps, -1.0)
             plus_support = read_one(plus)
             minus_support = read_one(minus)
-            fresh_cd = -(
+            # The displaced state moves by eps * scale * e, so the quotient is
+            # the derivative along that vector; dividing by its magnitude returns
+            # the directional derivative along e, which is what the matrix is
+            # applied to. The residual is moments - booked, so its derivative is
+            # the assembled matrix and takes no negation.
+            step_size = eps * float(scale[block])
+            fresh_cd = (
                 residual_one(plus, plus_support) - residual_one(minus, minus_support)
-            ) / (2.0 * eps)
-            frozen_cd = -(
+            ) / (2.0 * step_size)
+            frozen_cd = (
                 residual_frozen(plus, support) - residual_frozen(minus, support)
-            ) / (2.0 * eps)
+            ) / (2.0 * step_size)
             refresh = fresh_cd - frozen_cd
             hybrids = {
                 "analytic-full": analytic_full,
@@ -300,6 +336,12 @@ def main():
         job=os.environ.get("SLURM_JOB_ID"),
     )
     assert jax.config.jax_enable_x64
+    control_mismatch = positive_control()
+    emit("POSITIVE_CONTROL", relative_mismatch=control_mismatch)
+    if not control_mismatch < 1e-8:
+        raise SystemExit(
+            f"positive control failed: relative mismatch {control_mismatch:g}"
+        )
     operands, cache = machine.operands, machine.cache
     convention, policy = machine.convention, machine.policy
     quadrature = machine.quadrature
@@ -401,6 +443,60 @@ def main():
         "gradient_check": receipt_gradient,
         "states": [],
     }
+    def unit_trial(one_state, one_profile, label):
+        """Residual at the full Newton trial against the linear model's prediction.
+
+        If the assembled matrix is the derivative of the fresh residual, the
+        residual left after a unit step is the nonlinearity the linearisation
+        cannot carry, and the linear model predicts a relative mismatch of order
+        the solver tolerance.
+        """
+        one_support = read_at(
+            operands, cache, one_state, seeds, previous, convention, policy, axis_sign
+        )
+        matrix = support_read.step_jacobian(
+            operands,
+            one_state,
+            one_support,
+            one_profile,
+            gradient,
+            quadrature,
+            fresh_geometry=True,
+        )
+        residual = residual_vector(
+            operands, one_state, one_state, one_support, one_profile, quadrature
+        )
+        if not bool(jnp.all(jnp.isfinite(matrix))):
+            return {"state": label, "finite": False}
+        solution = jnp.linalg.solve(matrix, -residual)
+        cells = int(one_state[0].size)
+        flat = jnp.concatenate(one_state) + solution
+        trial = tuple(
+            flat[block * cells : (block + 1) * cells].reshape(value.shape)
+            for block, value in enumerate(one_state)
+        )
+        trial_support = read_at(
+            operands, cache, trial, seeds, previous, convention, policy, axis_sign
+        )
+        trial_residual = residual_vector(
+            operands, trial, trial, trial_support, one_profile, quadrature
+        )
+        predicted = residual + matrix @ solution
+        norm = float(jnp.linalg.norm(residual))
+        return {
+            "state": label,
+            "finite": True,
+            "residual_norm": norm,
+            "trial_residual_norm": float(jnp.linalg.norm(trial_residual)),
+            "trial_ratio": float(jnp.linalg.norm(trial_residual)) / norm,
+            "linear_prediction_norm": float(jnp.linalg.norm(predicted)),
+            "nonlinear_share": float(jnp.linalg.norm(trial_residual - predicted))
+            / norm,
+        }
+
+    unit = unit_trial(stalled_state, stalled_profile, "stalled-1e-2")
+    emit("UNIT_TRIAL", **unit)
+    receipt["unit_trial"] = unit
     for label, state, profile in states:
         support = read_at(operands, cache, state, seeds, previous, convention, policy, axis_sign)
         result = measure_state(

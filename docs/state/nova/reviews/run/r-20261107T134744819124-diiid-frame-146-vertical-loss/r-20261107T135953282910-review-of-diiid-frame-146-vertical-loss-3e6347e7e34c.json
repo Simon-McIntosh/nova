@@ -15,6 +15,13 @@
     }
   },
   "dispatched_at": "2026-11-07T14:01:53Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-vertical-loss",
+      "recorded_at": "2026-11-07T14:31:03.250886+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py",

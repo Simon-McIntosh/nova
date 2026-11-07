@@ -45,55 +45,8 @@ SLOPED = SLOPES[1:-1]
 STATIONS = ("middle", "start", "end")
 TARGET_STATION = "middle"
 
-MEASURED_MISSES = {
-    (np.pi / 8, "middle", 0.01): 9.20e-05,
-    (np.pi / 8, "start", 0.01): 2.82e-05,
-    (np.pi / 8, "end", 0.01): 3.18e-05,
-    (np.pi / 8, "middle", 0.02): 1.71e-06,
-    (np.pi / 8, "start", 0.02): 1.29e-06,
-    (np.pi / 8, "end", 0.02): 5.62e-07,
-    (np.pi / 8, "middle", 0.1): 2.72e-10,
-    (np.pi / 4, "middle", 0.01): 9.19e-05,
-    (np.pi / 4, "start", 0.01): 2.87e-05,
-    (np.pi / 4, "end", 0.01): 3.15e-05,
-    (np.pi / 4, "middle", 0.02): 1.90e-06,
-    (np.pi / 4, "start", 0.02): 1.24e-06,
-    (np.pi / 4, "end", 0.02): 6.86e-07,
-    (np.pi / 4, "middle", 0.1): 2.03e-10,
-    (3 * np.pi / 8, "middle", 0.01): 9.19e-05,
-    (3 * np.pi / 8, "start", 0.01): 2.95e-05,
-    (3 * np.pi / 8, "end", 0.01): 3.10e-05,
-    (3 * np.pi / 8, "middle", 0.02): 2.03e-06,
-    (3 * np.pi / 8, "start", 0.02): 1.15e-06,
-    (3 * np.pi / 8, "end", 0.02): 8.51e-07,
-    (3 * np.pi / 8, "middle", 0.1): 1.49e-10,
-}
-"""Targets where the fixed azimuthal rule measurably falls short of the floor.
-
-The entries carry the relative error measured at each case. They are marked
-``xfail(strict=True)`` rather than skipped, so a case that reaches the floor is
-an XPASS and fails the gate: the shortfall is a known defect of the rule, not a
-tolerance. Every other target of the fixed set asserts the floor outright.
-"""
-
 SLOPED_PARAMS = tuple(
-    pytest.param(
-        angle,
-        station,
-        distance,
-        marks=(
-            pytest.mark.xfail(
-                strict=True,
-                reason=(
-                    f"fixed azimuthal rule measured "
-                    f"{MEASURED_MISSES[(angle, station, distance)]:.2e} against "
-                    f"the {TOLERANCE:.0e} floor at this standoff"
-                ),
-            )
-            if (angle, station, distance) in MEASURED_MISSES
-            else ()
-        ),
-    )
+    pytest.param(angle, station, distance)
     for angle in SLOPED
     for distance in DISTANCES
     for station in STATIONS

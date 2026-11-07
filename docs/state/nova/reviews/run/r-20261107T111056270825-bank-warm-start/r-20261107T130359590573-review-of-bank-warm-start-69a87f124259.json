@@ -25,6 +25,11 @@
       "kind": "exempted",
       "reason": "This is a hardening or wording note in the gate's verification script. The warm-start measurement it checks, reads and updates per slice at three steps, is correct, and the stalled-slice identities are in the fragment's table.",
       "recorded_at": "2026-11-07T13:38:02.835697+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "This is a hardening or wording note in the gate's verification script. The warm-start measurement it checks, reads and updates per slice at three steps, is correct, and the stalled-slice identities are in the fragment's table.",
+      "recorded_at": "2026-11-07T13:38:12.581905+00:00"
     }
   },
   "findings": [

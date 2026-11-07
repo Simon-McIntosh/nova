@@ -1,8 +1,9 @@
-"""Termination naming for a mask that stops changing above tolerance.
+"""Stopping at a settled mask above tolerance.
 
-A settled active set is not a converged fixed point.  These tests pin the
-three endings apart: a settlement that proposed no Newton step (a stationary
-map), one whose steps were proposed and refused, and true convergence.
+A settled active set is not a converged fixed point, and it is not a stall
+until a Newton promotion at that mask has been tried.  These tests pin the
+three endings apart: a settlement that ends only after a refused promotion, one
+that keeps its trips because no promotion was proposed, and true convergence.
 """
 
 from __future__ import annotations
@@ -13,13 +14,14 @@ import jax.numpy as jnp
 
 from nova.equilibrium.fixed_point import (
     FixedPointTerminationReason,
+    active_set_settles_as_stall,
     active_set_stop_reason,
     newton_krylov,
 )
 from nova.equilibrium.solve_request import ForwardSolveReceipt
 
 
-def _refused_step_solve():
+def _settled_solve():
     """A map with no fixed point, held at a frozen mask above tolerance."""
 
     def mask(_state):
@@ -43,8 +45,8 @@ def _refused_step_solve():
     )
 
 
-def test_refused_step_at_a_frozen_mask_names_the_refused_step():
-    result = _refused_step_solve()
+def test_settled_mask_above_tolerance_attempts_a_promotion_before_it_ends():
+    result = _settled_solve()
 
     assert not bool(result.converged)
     assert float(result.residual) > 1.0e-12
@@ -54,31 +56,20 @@ def test_refused_step_at_a_frozen_mask_names_the_refused_step():
         int(result.termination_reason)
         == FixedPointTerminationReason.ACTIVE_SET_STEP_REFUSED
     )
-
-
-def test_stationary_map_is_named_as_stationary_and_not_as_converged():
-    result = _refused_step_solve()
-
-    reason = active_set_stop_reason(
-        converged=jnp.asarray(False),
-        cycle_detected=jnp.asarray(False),
-        nonfinite=jnp.asarray(False),
-        stationary=jnp.asarray(True),
-        step_refused=jnp.asarray(False),
-        settled=jnp.asarray(True),
-        stagnated=jnp.asarray(False),
-    )
-
-    assert int(reason) == FixedPointTerminationReason.ACTIVE_SET_STATIONARY
-    assert not bool(result.converged)
     assert (
         int(result.termination_reason) != FixedPointTerminationReason.ACTIVE_SET_SETTLED
     )
 
 
-def test_a_stable_mask_above_tolerance_never_reports_settled():
-    """Neither settlement ending may report the retired settled label."""
+def test_a_settlement_that_proposed_no_promotion_is_not_a_stall():
+    """The loop keeps its trips until a promotion at the frozen mask is tried."""
 
+    assert not bool(active_set_settles_as_stall(jnp.asarray(True), jnp.asarray(0)))
+    assert not bool(active_set_settles_as_stall(jnp.asarray(False), jnp.asarray(0)))
+    assert bool(active_set_settles_as_stall(jnp.asarray(True), jnp.asarray(1)))
+
+
+def test_a_settled_mask_above_tolerance_never_reports_settled():
     for stationary in (True, False):
         reason = active_set_stop_reason(
             converged=jnp.asarray(False),

@@ -352,6 +352,19 @@ class FixedPointTerminationReason(IntEnum):
     ACTIVE_SET_STEP_REFUSED = 12
 
 
+def active_set_settles_as_stall(
+    settled_mask: jax.Array | bool, attempted_promotions: jax.Array | int
+) -> jax.Array:
+    """Whether a settled active set is a genuine stall rather than untested.
+
+    A settled mask whose terminal trip proposed no Newton step has not tested
+    the frozen map, so the loop keeps its trips and runs the promotion: only a
+    promotion that was actually tried and refused ends the solve at a mask.
+    """
+
+    return jnp.asarray(settled_mask) & (jnp.asarray(attempted_promotions) > 0)
+
+
 def active_set_stop_reason(
     *,
     converged: jax.Array | bool,
@@ -684,6 +697,7 @@ class _ActiveSetIterationState(NamedTuple):
     stagnated: jax.Array
     settled: jax.Array
     stationary: jax.Array
+    stationary_seen: jax.Array
     step_refused: jax.Array
     presettlement: jax.Array
 
@@ -4811,7 +4825,7 @@ def _active_set_newton_krylov(
             & (selected_difference == 0)
             & (selected_residual == previous_live_residual)
         )
-        settled = (
+        settled_mask = (
             stop_on_active_set_settlement
             & own_mask_acceptance
             & selected_finite
@@ -4825,17 +4839,20 @@ def _active_set_newton_krylov(
                 | (selected_residual <= convergence_tolerance)
             )
         )
-        # A settlement above tolerance names what the mask did rather than
-        # claiming the solve finished.  The terminal trip's own promotion
-        # counts separate a map that returned the state it was given without
-        # proposing a step from a step that was proposed and refused; the
-        # padded globalisation trace cannot, because its unused slots read as
-        # NOT_EXECUTED whatever the solve did.
+        # A settled mask above tolerance ends the solve only once a Newton
+        # promotion at that mask has actually been tried and refused.  A
+        # settlement whose terminal trip proposed no step at all says nothing
+        # about the frozen map, so the loop keeps its trips and runs the
+        # promotion the next trip holds; only a repeated failure to move the
+        # residual is a stall.
         terminal_attempts = jnp.asarray(
             inner_result.attempted_newton_promotions, dtype=jnp.int32
         )
-        stationary = settled & (terminal_attempts == 0)
-        step_refused = settled & (terminal_attempts > 0)
+        stationary = settled_mask & (terminal_attempts == 0)
+        step_refused = settled_mask & (terminal_attempts > 0)
+        # Continue at the frozen mask until a promotion is actually tried: a
+        # settlement that proposed no step has not tested the frozen map.
+        settled = active_set_settles_as_stall(settled_mask, terminal_attempts)
         if stream_active_set:
             jax.debug.callback(
                 _print_active_set_trip,
@@ -4923,6 +4940,7 @@ def _active_set_newton_krylov(
         stagnated=jnp.asarray(False),
         settled=jnp.asarray(False),
         stationary=jnp.asarray(False),
+        stationary_seen=jnp.asarray(False),
         step_refused=jnp.asarray(False),
         presettlement=jnp.asarray(presettlement_incumbent_scoring),
     )
@@ -5031,6 +5049,7 @@ def _active_set_newton_krylov(
                 stagnated=stagnated,
                 settled=settled,
                 stationary=stationary,
+                stationary_seen=carry.stationary_seen | stationary,
                 step_refused=step_refused,
                 presettlement=next_presettlement,
             )
@@ -5050,6 +5069,20 @@ def _active_set_newton_krylov(
         step_refused=outer.step_refused,
         settled=outer.settled,
         stagnated=outer.stagnated,
+    )
+    # A mask that settled above tolerance on every trip while no Newton
+    # promotion was ever proposed is a stationary map, not an exhausted budget.
+    reason = jnp.where(
+        (
+            jnp.asarray(reason, dtype=jnp.int32)
+            == jnp.asarray(
+                FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+                dtype=jnp.int32,
+            )
+        )
+        & outer.stationary_seen,
+        jnp.asarray(FixedPointTerminationReason.ACTIVE_SET_STATIONARY, dtype=jnp.int32),
+        jnp.asarray(reason, dtype=jnp.int32),
     )
     frozen_result = outer.result._replace(
         state=outer.state,

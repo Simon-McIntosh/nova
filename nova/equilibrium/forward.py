@@ -2386,6 +2386,13 @@ class ForwardProfile:
             trace=residuals,
             converged=jnp.asarray(result.converged),
             termination_reason=jnp.asarray(result.termination_reason, dtype=jnp.int32),
+            attempted_newton_promotions=jnp.asarray(
+                sum(result.newton_steps_per_trip), dtype=jnp.int32
+            ),
+            accepted_newton_promotions=jnp.asarray(
+                sum(result.newton_steps_per_trip) - sum(result.rejected_steps_per_trip),
+                dtype=jnp.int32,
+            ),
             active_set_iterations=jnp.asarray(
                 result.active_set_iterations, dtype=jnp.int32
             ),

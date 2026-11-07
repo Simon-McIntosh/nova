@@ -56,8 +56,11 @@ def _default(value):
     raise TypeError(type(value))
 
 
-def solve(machine, moments, seeds, previous, profile):
-    def one(profile_leaf, moments_leaf, seeds_leaf, previous_leaf):
+def solve(machine, moments, seeds, previous, amplitude):
+    """One batched slice at a traced drive amplitude."""
+
+    def one(moments_leaf, seeds_leaf, previous_leaf, amplitude_leaf):
+        profile_leaf = streams.scaled_profile(machine.profile, amplitude_leaf)
         return support_read.solve_batch(
             machine.operands,
             machine.cache,
@@ -75,7 +78,7 @@ def solve(machine, moments, seeds, previous, profile):
             tolerance=TOLERANCE,
         )
 
-    return jax.jit(one)(profile, moments, seeds, previous)
+    return jax.jit(one)(moments, seeds, previous, amplitude)
 
 
 def _gradient(radius, flux):
@@ -125,20 +128,19 @@ def receipt(result, wall_ms, amplitude, machine, step, slice_index, role):
     )
 
 
-def timed_solve(machine, moments, seeds, previous, profile):
-    result = solve(machine, moments, seeds, previous, profile)
+def timed_solve(machine, moments, seeds, previous, amplitude):
+    result = solve(machine, moments, seeds, previous, amplitude)
     jax.block_until_ready(result.residual)
     started = perf_counter()
-    result = solve(machine, moments, seeds, previous, profile)
+    result = solve(machine, moments, seeds, previous, amplitude)
     jax.block_until_ready(result.residual)
     return result, 1e3 * (perf_counter() - started)
 
 
 def build_states(machine, path):
     """Converge slice 0 cold and save the arrays every process starts from."""
-    profile = streams.scaled_profile(machine.profile, 1.0)
     result, wall = timed_solve(
-        machine, machine.cold_states, machine.cold_seeds, machine.cold_seeds, profile
+        machine, machine.cold_states, machine.cold_seeds, machine.cold_seeds, 1.0
     )
     receipt(result, wall, 1.0, machine, 0.0, 0, "builder")
     states = tuple(np.asarray(value) for value in result.moments)
@@ -152,9 +154,8 @@ def build_states(machine, path):
     )
     # The exact solution of a scaled profile is the scaled exact solution.
     amplitude = 1.0 + (streams.SLICES - 1) * max(streams.STEPS)
-    scaled = streams.scaled_profile(machine.profile, amplitude)
-    scaled_result = jax.jit(lambda state, seed: _cold(machine, state, seed, scaled))(
-        machine.cold_states, machine.cold_seeds
+    scaled_result = jax.jit(lambda state, seed, drive: _cold(machine, state, seed, drive))(
+        machine.cold_states, machine.cold_seeds, amplitude
     )
     jax.block_until_ready(scaled_result.residual)
     exact = np.stack([np.asarray(value) for value in result.moments])
@@ -169,7 +170,8 @@ def build_states(machine, path):
     )
 
 
-def _cold(machine, state, seed, profile):
+def _cold(machine, state, seed, amplitude):
+    profile = streams.scaled_profile(machine.profile, amplitude)
     return support_read.solve_batch(
         machine.operands,
         machine.cache,
@@ -196,8 +198,9 @@ def run_chains(machine, path, role):
         amplitudes = streams.amplitudes(step)
         current, seeds = moments, stationary
         for index in range(1, streams.SLICES):
-            profile = streams.scaled_profile(machine.profile, float(amplitudes[index]))
-            result, wall = timed_solve(machine, current, seeds, seeds, profile)
+            result, wall = timed_solve(
+                machine, current, seeds, seeds, float(amplitudes[index])
+            )
             receipt(
                 result,
                 wall,

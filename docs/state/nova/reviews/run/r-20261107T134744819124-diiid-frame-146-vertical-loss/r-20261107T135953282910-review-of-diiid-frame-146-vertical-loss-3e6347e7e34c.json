@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T14:08:07.727Z",
+  "dispatched_at": "2026-11-07T14:01:53Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py",
+      "line": 50,
+      "severity": "non-blocking",
+      "text": "_arm re-implements the per-arm summary the repository already owns at scripts/prototypes/diiid_forward_convergence/build_receipt.py:29 _arm_summary (same residual_history/mask_history projection), without importing or extending it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "_trips records only active_cells and residual per trip, so the done_when's per-trip axis Z, confined current and net vertical force (or radial field at the current centroid) are carried only as terminal scalars; the manifest's rubric.trajectory concedes the substitution."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "FRAMES omits frame 144, yet the fragment's mechanism section (docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:121) and the manifest's discriminator rest on frame-144 amplitude 0.929 Wb / 25.28x ratio that no committed artefact reproduces."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 151,
+      "severity": "non-blocking",
+      "text": "done_when item 3 asks for a line-contour panel of each trip that matters; the landed figures are terminal-state panels only (section 'Terminal states side by side'), which the manifest records as an admitted deviation because the source probe saved no per-trip grids."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T135953282910-review-of-diiid-frame-146-vertical-loss-3e6347e7e34c",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "3e6347e7e34c67be594a3ed34f6ccb188c4b586e",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 7,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T14:22:19.600784+00:00",
+  "total": 74
+}

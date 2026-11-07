@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T14:03:09Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "id": "f947a909eb3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Right panel: the residual trajectory ends at active-set trip 4, but the x axis is drawn to 15, so about 70 percent of the panel width is empty axis and a reader has to hunt for where the trace stops. Exempted: the shared painter sizes the trip axis to the largest active-set limit rather than to the data, which keeps the two figures in this study on one x scale; narrowing one panel would break that comparison."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "id": "f947a909eb3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Right panel: the annotation 'tolerance 1e-5' is placed at roughly the 1e-4 decade, a full decade above the dotted 1e-5 tolerance line it names, so a reader scanning the text without tracing the dotted line can mistake 1e-4 for the tolerance. Exempted: the text sits in clear space by design to avoid overlapping the trace; the correct level is drawn and the caption is unambiguous."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "id": "fc66039c621",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Left panel: the red 'bounding surface (limited)' trace lies almost on top of the outer blue solved-flux contour and is drawn at the heavier weight, so the outer contour is largely hidden beneath it and the reader cannot tell whether the two are coincident or merely close. Exempted: the near-coincidence is the physical result for this frame, and the legend distinguishes the two traces by colour."
+    }
+  ],
+  "notes": [
+    "Both figures were judged only from the rendered PNGs named in the dispatch (image-0.png = frame 137, image-1.png = frame 146). No SVG was opened, read or parsed.",
+    "The run's diff (scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py) tabulates the per-trip receipt and does not draw these panels, so every finding is anchored to the figure's repository path with line null.",
+    "No blocking findings: no label is clipped, no label overlaps another or the data, and no data are concealed in either figure.",
+    "Captions carry measured values (terminal residual, converged flag, axis R/Z, closed core cells, confined-current ratio) rather than restating the title."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T140205279785-review-of-diiid-frame-146-vertical-loss-3e6347e7e34c-figure",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "3e6347e7e34c67be594a3ed34f6ccb188c4b586e",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg": {
+      "contrast": "passes \u2014 all text clears 4.5:1 on white.",
+      "data_ink": "defect \u2014 the same empty-division x axis as the frame-146 figure; see the finding below.",
+      "decoration": "passes \u2014 no gradient, background fill or decorative shading.",
+      "label_collision": "passes as to labels; the same tolerance-annotation placement concern applies and is recorded once below.",
+      "legibility": "passes \u2014 the closed blue flux contours, the red limited bounding surface and both null sets are readable, and the red bounding surface is visibly distinct from the blue contours.",
+      "table_form": "passes \u2014 spatial contour panel beside a residual trajectory."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg": {
+      "contrast": "passes \u2014 axis labels, tick labels, legend text and the grey caption line all clear 4.5:1 on the white page.",
+      "data_ink": "defect \u2014 the right panel plots data only over logical trips 0-4 while its x axis runs to 15, so roughly 70 percent of the panel width is empty axis; see the finding below.",
+      "decoration": "passes \u2014 no gradient, background fill or themed styling; the dashed grid-domain bound is itself data.",
+      "label_collision": "passes \u2014 no label is clipped by the canvas, overlaps another label, or sits on the data. The one placement concern is the tolerance annotation, recorded as a finding below.",
+      "legibility": "passes \u2014 both panels read at a glance; the blue solved-flux traces, the black DIII-D limiter and the red solved-axis marker outside the wall at the top of the left panel are each distinguishable without zooming.",
+      "table_form": "passes \u2014 the image is a spatial contour panel beside a residual trajectory; neither is information that is naturally a table."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T14:11:26.778076+00:00",
+  "total": null
+}

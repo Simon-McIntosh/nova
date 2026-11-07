@@ -13,6 +13,13 @@
   "call_sites": [],
   "completed_at": "2026-11-07T12:37:46.763Z",
   "dispatched_at": "2026-11-07T12:15:20Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-warm-start-06da3e1c56a7",
+      "recorded_at": "2026-11-07T13:00:13.772091+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html",

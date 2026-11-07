@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-07T19:06:13.106Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-frame-146-vertical-loss",
+      "recorded_at": "2026-11-07T19:30:56.651908+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T18:54:05Z",
   "findings": [
     {

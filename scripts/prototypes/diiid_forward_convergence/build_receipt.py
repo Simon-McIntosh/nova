@@ -45,7 +45,14 @@ def _arm_summary(arm: dict[str, Any]) -> dict[str, Any]:
         "active_set_iterations": arm.get("active_set_iterations"),
         "achieved_class": arm.get("achieved_class"),
         "topology_matches_request": arm.get("topology_matches_request"),
-        "terminal": arm.get("terminal"),
+        # The class is derived data: recompute it from the recorded history so a
+        # corrected classifier reaches every receipt without a re-solve.
+        "terminal": classify_terminal(
+            list(arm.get("residual_history") or []),
+            arm.get("terminal_residual"),
+        )
+        if arm.get("residual_history")
+        else arm.get("terminal"),
         "presence": arm.get("presence"),
         "x_point_rz_m": arm.get("x_point_rz_m"),
         "x_point_inside_wall": arm.get("x_point_inside_wall"),
@@ -134,8 +141,7 @@ def build(
                     "refusal_type": branch.get("refusal_type"),
                     "refusal_message": branch.get("refusal_message"),
                     "arms": {
-                        name: _arm_summary(arms.get(name) or {})
-                        for name in ARM_NAMES
+                        name: _arm_summary(arms.get(name) or {}) for name in ARM_NAMES
                     },
                     "staged": staged,
                 }

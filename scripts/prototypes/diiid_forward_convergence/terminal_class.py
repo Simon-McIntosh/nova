@@ -47,11 +47,17 @@ def classify_terminal(
         finite = finite + [terminal]
     tail = finite[-4:]
     if len(tail) == 4:
+        # A period-2 tail is [a, b, a, b]: each halving REPEATS the one before
+        # it, and the two levels a and b are separated.  Testing only the
+        # half-to-half disagreement fires on any monotone tail, which is the
+        # opposite reading; both halves of the condition are needed.
         even_gap = abs(tail[2] - tail[0]) / max(abs(tail[2]), 1e-300)
         odd_gap = abs(tail[3] - tail[1]) / max(abs(tail[3]), 1e-300)
+        level_gap = abs(tail[1] - tail[0]) / max(abs(tail[1]), 1e-300)
         if (
-            even_gap > CYCLE_RELATIVE_GAP
-            and odd_gap > CYCLE_RELATIVE_GAP
+            even_gap <= CYCLE_RELATIVE_GAP
+            and odd_gap <= CYCLE_RELATIVE_GAP
+            and level_gap > CYCLE_RELATIVE_GAP
             and tail[2] > tolerance
             and tail[3] > tolerance
         ):
@@ -61,6 +67,7 @@ def classify_terminal(
                     "alternating_levels": tail,
                     "even_gap_relative": float(even_gap),
                     "odd_gap_relative": float(odd_gap),
+                    "level_gap_relative": float(level_gap),
                 },
             }
     minimum = min(finite)

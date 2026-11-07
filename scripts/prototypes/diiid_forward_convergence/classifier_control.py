@@ -19,6 +19,13 @@ import json
 from terminal_class import classify_terminal
 
 PLATEAU = [0.5, 0.5, 0.5, 0.5]
+MONOTONE_TAIL = [
+    0.2220186058667106,
+    0.06514902744919306,
+    0.054961955870656456,
+    0.054961955870656456,
+]
+TRUE_CYCLE = [1.0, 0.5, 1.0, 0.5]
 
 
 def earlier_classifier(residuals: list[float], terminal: float) -> str:
@@ -40,26 +47,48 @@ def earlier_classifier(residuals: list[float], terminal: float) -> str:
     return "contraction stall"
 
 
+CASES = (
+    ("plateau", PLATEAU, "contraction stall"),
+    ("monotone tail", MONOTONE_TAIL, "contraction stall"),
+    ("true alternation", TRUE_CYCLE, "period-2 cycle"),
+)
+
+
 def main() -> None:
     shipped = classify_terminal(list(PLATEAU), PLATEAU[-1])
     earlier = earlier_classifier(list(PLATEAU), PLATEAU[-1])
+    cases = [
+        {
+            "case": name,
+            "input": values,
+            "required": required,
+            "shipped_class": classify_terminal(list(values), values[-1])["class"],
+        }
+        for name, values, required in CASES
+    ]
     result = {
-        "input": PLATEAU,
-        "shipped_class": shipped["class"],
+        "cases": cases,
+        "earlier_class_on_plateau": earlier,
+        "shipped_class_on_plateau": shipped["class"],
         "shipped_evidence": shipped.get("evidence"),
-        "earlier_class": earlier,
-        "requirement": "contraction stall",
-        "shipped_meets_requirement": shipped["class"] == "contraction stall",
         "negative_control_fires": earlier != shipped["class"],
     }
     print(json.dumps(result, indent=2, sort_keys=True))
-    if not result["shipped_meets_requirement"]:
-        print("FAIL: the shipped classifier reads a flat plateau as a cycle")
+    wrong = [case for case in cases if case["shipped_class"] != case["required"]]
+    if wrong:
+        for case in wrong:
+            print(
+                f"FAIL: {case['case']} reads {case['shipped_class']!r}, "
+                f"required {case['required']!r}"
+            )
         raise SystemExit(1)
     if not result["negative_control_fires"]:
         print("FAIL: the negative control does not distinguish the two readings")
         raise SystemExit(1)
-    print("PASS: plateau is a stall; the earlier rule reads it as a cycle")
+    print(
+        "PASS: a plateau and a monotone tail are stalls, a true alternation is a "
+        "cycle, and the earlier rule reads the plateau as a cycle"
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,121 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-07T16:15:18.306Z",
+  "dispatched_at": "2026-11-07T15:55:34Z",
+  "findings": [
+    {
+      "anchor": "plan.html:380",
+      "id": "done_when-1",
+      "reason": "without a control the node's measure cannot distinguish a real limb correction from a limb-shaped no-op, which is exactly the failure the other sections' controls exist to catch.",
+      "text": "\u00a78 declares no negative control: done-when (1) only reports \u03c6-resolved |B|, (2) requires agreement beyond 2 m from the legs, and (3) requires the dimensions used to match the decision, so an implementation that never models a discrete limb and returns the axisymmetric \u00a76 field satisfies all three",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:377",
+      "id": "reasoning-1",
+      "reason": "the worker implementing \u00a78 takes its limb geometry from the decision and its decay/range estimate from this paragraph, so the two disagree by about 20 % on the scale that sets \"within 2 m of the legs\".",
+      "text": "\u00a78 states \"The limbs sit at R \u2248 4.89 m (their own radius)\" and derives its 2\u03c0R/6 \u2248 5.1 m pitch and R/6 \u2248 0.8 m decay scale from that, while the changed decision now gives the limb a 1.200 m radial depth spanning R 4.7965\u20135.9965 m (centre 5.40 m, outer face 5.9965 m, pitch there 6.28 m)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:417",
+      "id": "reasoning-2",
+      "reason": "the paragraph's provenance clause already states that D and W are unsourced and follow from the lead's rule, so the decision is unchanged; only the word \"Check\" overstates what the identity shows.",
+      "text": "the changed rationale presents \"Check: w x 1.2 m = 0.960 m^2 ... equal to the IDS smear ... so iron is conserved\" as a verification, but w = 2\u03c0R_j/6 and R_j = 0.9169/1.2 are both defined from the same 0.9169 constant, so the product reproduces the smear identically and the check cannot fail",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "71ae7939359f9673c6ecf3e4c6a34568d3ef2645",
+  "plan_fingerprint": "f67bf8928a28e366c1996feba5e926d7b352e15da6383ba438f372fe884f53ce",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 13,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Deferred to \u00a78's shaping, before its dispatch, with the \u00a75 and \u00a76 controls: the control to add is that removing the discrete limbs (axisymmetric iron only) must fail done-when (1)'s behind-versus-between-limb difference; editing \u00a78's done-when now would hold \u00a72's queued nodes on a plan-wide review.",
+      "when": "2026-11-07T16:23:41.957487+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "611d0f7e1237efac8001a1256003f1769dea6f87",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a78 now places the limbs at R 4.80 to 6.00 m (centre about 5.40 m) from the limb-geometry decision, with pitch 2 pi R/6 about 5.7 m and decay scale R/6 about 0.9 m (611d0f7e1).",
+      "reason": "",
+      "when": "2026-11-07T16:25:19.821740+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "611d0f7e1237efac8001a1256003f1769dea6f87",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The rationale was rewritten in 71ae79393, after this review's snapshot: it no longer presents the w x 1.2 m product as a check, and its provenance clause says D and W follow from the constant-width rule.",
+      "reason": "",
+      "when": "2026-11-07T16:27:04.969090+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Deferred to \u00a78's shaping, before its dispatch, with the \u00a75 and \u00a76 controls: the control to add is that removing the discrete limbs (axisymmetric iron only) must fail done-when (1)'s behind-versus-between-limb difference; editing \u00a78's done-when now would hold \u00a72's queued nodes on a plan-wide review.",
+      "when": "2026-11-07T16:23:41.957487+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "611d0f7e1237efac8001a1256003f1769dea6f87",
+      "commit_basis": "edit",
+      "note": "\u00a78 now places the limbs at R 4.80 to 6.00 m (centre about 5.40 m) from the limb-geometry decision, with pitch 2 pi R/6 about 5.7 m and decay scale R/6 about 0.9 m (611d0f7e1).",
+      "reason": "",
+      "when": "2026-11-07T16:25:19.821740+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "611d0f7e1237efac8001a1256003f1769dea6f87",
+      "commit_basis": "edit",
+      "note": "The rationale was rewritten in 71ae79393, after this review's snapshot: it no longer presents the w x 1.2 m product as a check, and its provenance clause says D and W follow from the constant-width rule.",
+      "reason": "",
+      "when": "2026-11-07T16:27:04.969090+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v13.at-431f5135-r-20261107T155346178825-plan-review-of-i.json",
+  "review_run_id": "r-20261107T155346178825-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "431f51356c854cdecb7e10db36bf64a99887a650",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every module the plan cites resolves in the tree (nova/biot/{sheet,polygonanalytic,tiledassembly,toroidalaverage,completeelliptic,incompleteelliptic,constants,greens}.py, nova/equilibrium/{solve_request,reduced_newton}.py, nova/imas/machine.py), every named symbol exists (`complete_kind`, `complete_pole`, `incomplete_pole`, `greens_psi`, `greens_bz_br`, `toroidal_points`, `frame_magnetic_field`, `average_toroidal_field`), and the two external receipts the changed decision and the sheet-route decision cite exist (/work/projects/.../strip-sweep-attempt-1/strip-error-sweep.json, the limb-geometry report).",
+    "done_when": "a finding \u2014 \u00a78's three clauses contain no negative control, so a node returning the axisymmetric field everywhere satisfies every clause.",
+    "evidence_paths": "pass \u2014 the prototype receipts, the strip-sweep attempt and \u00a73's ledger (docs/research/compile-cost-evidence.html) all sit on durable paths that resolve on disk; no gate is pointed at a scratchpad or node-local temp.",
+    "naming": "pass \u2014 the changed paragraph carries no plan label, stage name, ticket number or version tag, and states mechanism rather than changelog.",
+    "reasoning": "a finding \u2014 the changed decision's section is arithmetically sound and resolves the three prior findings, but it leaves \u00a78's own numeric basis (limb radius, toroidal pitch, decay scale) computed from the geometry the change replaced.",
+    "single_goal": "pass \u2014 each node names one deliverable; \u00a76's two-deliverable split was raised and declined on a prior review and \u00a76 is unchanged.",
+    "wiring": "pass \u2014 every `plan-section-depends-on` entry resolves to an existing node (s3\u2190s2, s4\u2190s2,s3, s5\u2190s4, s6\u2190s3,s4,s5, s7\u2190s6 + forward-solve-api#s1, s8\u2190s6, s9\u2190s6,s8); \u00a79 now waits on s8 so the limb-corrected model exists before validation, and \u00a77 waits on the forward-solve seam it names (`ForwardSolveRequest` in nova/equilibrium/solve_request.py, which resolves)."
+  },
+  "section_digests": {
+    "_document": "bbea0326e147706ddc33a678c12e2f42156ec2b5535a739fba9f309d03c5dcf9",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "4310e745a250a32efce7e2b04fdc26726e777eae35807f30ed6a2abfac33a9e2",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T16:22:01.229946+00:00",
+  "total": null
+}

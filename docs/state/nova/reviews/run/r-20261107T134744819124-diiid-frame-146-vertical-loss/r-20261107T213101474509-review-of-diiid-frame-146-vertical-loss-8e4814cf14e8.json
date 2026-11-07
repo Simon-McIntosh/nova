@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-07T22:01:59.930Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a root-cause record that changes no product code; panel rendering is prototype evidence, and the regression test belongs to the fix node",
+      "recorded_at": "2026-11-07T22:11:45.178560+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T21:44:28Z",
   "findings": [
     {

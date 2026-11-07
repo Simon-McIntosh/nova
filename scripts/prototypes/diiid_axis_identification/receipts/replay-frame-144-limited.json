@@ -1,0 +1,47 @@
+{
+  "expansion": 0.02,
+  "frames": {
+    "144": {
+      "branches": {
+        "limited": {
+          "arms": {},
+          "refusal_message": "no qualified magnetic-axis candidate has a resolved component",
+          "refusal_type": "NoQualifiedAxisError",
+          "requested_class": "limited",
+          "seed_identity_with_label": false,
+          "seed_l2_distance_from_label": 5.57988848578467,
+          "status": "refused",
+          "terminal": {
+            "class": "refusal",
+            "evidence": "no qualified magnetic-axis candidate has a resolved component"
+          },
+          "traceback": "tification/nova/equilibrium/fixed_point.py\", line 2855, in bound\n    return map_fn(*state_arguments, *arguments)\n  File \"<repository>/nova/equilibrium/constraint.py\", line 2125, in shadowed_map\n    return evaluate(\n        state, pairs if runtime_pairs is None else runtime_pairs, shadow\n    )\n  File \"<repository>/nova/equilibrium/constraint.py\", line 2094, in evaluate\n    pair.functional.residual(\n    ~~~~~~~~~~~~~~~~~~~~~~~~^\n        profile,\n        ^^^^^^^^\n    ...<4 lines>...\n        jnp.asarray(pair.binding.scale),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<repository>/nova/equilibrium/constraint.py\", line 1125, in residual\n    return _constraint_residual(\n        self,\n    ...<6 lines>...\n        payload_is_active_mask=True,\n    )\n  File \"<repository>/nova/equilibrium/constraint.py\", line 171, in _constraint_residual\n    residual = (functional.observed(profile, context, payload) - target) / scale\n                ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<repository>/nova/equilibrium/constraint.py\", line 1109, in observed\n    observation = profile.current_moment_observation(\n        context.flux,\n        support=self.support,\n        target_current=context.target_current,\n    )\n  File \"<repository>/nova/equilibrium/forward.py\", line 1274, in current_moment_observation\n    current, _integrals, masks, _topology, _amplitude = self._integral_state(\n                                                        ~~~~~~~~~~~~~~~~~~~~^\n        flux, requested_class=requested_class, target_current=target_current\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<repository>/nova/equilibrium/forward.py\", line 1447, in _integral_state\n    masks, topology, current_moments = self.operator.read_with_current_moments(\n                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        flux, requested_class\n        ^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 3211, in read_with_current_moments\n    masks, topology = self.read(psi, requested_class)\n                      ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 3182, in read\n    require_qualified_axis(admitted)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"<repository>/nova/equilibrium/topology.py\", line 226, in require_qualified_axis\n    raise NoQualifiedAxisError(\n        \"no qualified magnetic-axis candidate has a resolved component\"\n    )\nnova.equilibrium.topology.NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n"
+        }
+      },
+      "frame": 144,
+      "frame_seconds": 1570.8777695130557,
+      "label_axis_rz_m": [
+        1.7594630718231201,
+        0.013277635909616947
+      ],
+      "label_saddle_rz_m": [
+        1.3818272352218628,
+        -1.060546636581421
+      ],
+      "lattice_shape": [
+        33,
+        33
+      ],
+      "leftover_array_keys": [],
+      "pseudo_wall_expansion": 0.02,
+      "reliable_flux_surfaces": 19,
+      "shot": "d3d_shot_001554e054.parquet",
+      "target_current_a": 988842.2265648842,
+      "time_ms": 3240.0,
+      "wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent"
+    }
+  },
+  "measurement": "per-promotion forward descent on both topology branches, with the plasma-presence read of each terminal state",
+  "peak_rss_kb": 12248348,
+  "tolerance": 1e-05
+}

@@ -375,6 +375,7 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--present", action="store_true")
+    parser.add_argument("--present-only", action="store_true")
     parser.add_argument("--present-cells", type=int)
     parser.add_argument("--max-steps", type=int, default=12)
     args = parser.parse_args()
@@ -390,6 +391,38 @@ def main():
         kind=args.kind,
         cells=args.cells,
     )
+    if args.present_only:
+        present = present_route(
+            args.kind,
+            args.cells,
+            args.present_cells or PRESENT_CELLS[args.cells],
+            args.output.parent / "present",
+        )
+        topology = present.get("topology") or {}
+        row = {
+            "kind": args.kind,
+            "case": CASES[args.kind],
+            "cells": args.cells,
+            "present": {
+                key: value
+                for key, value in present.items()
+                if key not in ("coordinates", "flux")
+            },
+            "present_x_point_rz_m": topology.get("x_point_rz_m"),
+            "present_class": topology.get("class"),
+            "present_read_status": topology.get("read_status"),
+            "present_axis_rz_m": topology.get("axis_rz_m"),
+            "present_axis_flux_wb": topology.get("axis_flux_wb"),
+            "present_boundary_flux_wb": topology.get("boundary_flux_wb"),
+        }
+        args.output.write_text(json.dumps(row, indent=2, default=float) + "\n")
+        emit(
+            "PRESENT_ONLY_ROW",
+            kind=args.kind,
+            cells=args.cells,
+            converged=present["converged"],
+        )
+        return
     built = build(args.kind, args.cells)
     fast = fast_route(built, args.max_steps)
     from tests.equilibrium import test_topology_read as fixture

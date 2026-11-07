@@ -340,6 +340,84 @@ def _weighted_root(vertex, term, *, differential=None):
     return value if differential is None else (value, derivative)
 
 
+_NEAR_BUCKET_CAPACITY = 16
+
+
+class _TargetSubset:
+    """The target-resolved attributes ``_weighted_root`` reads, gathered.
+
+    Only the attributes the graded root integral touches are gathered, so the
+    integral can be evaluated on a bucket of selected targets without carrying
+    the rest of the corner.
+    """
+
+    __slots__ = ("xp", "nodes", "radius", "level", "offset", "span")
+
+    def __init__(self, vertex, index):
+        self.xp = vertex.xp
+        self.nodes = vertex.nodes
+        self.radius = vertex.radius[index]
+        self.level = vertex.level[index]
+        self.offset = vertex.offset[index]
+        self.span = vertex.span[index]
+
+
+def _bucket_capacity(xp):
+    """Return the static size of the near-band bucket.
+
+    ``NOVA_NEAR_BUCKET=off`` selects the whole-array evaluation, which is the
+    arm the bucket is measured against.
+    """
+    if os.environ.get("NOVA_NEAR_BUCKET") == "off":
+        return 1 << 30
+    return _NEAR_BUCKET_CAPACITY
+
+
+def _gather_targets(value, index, xp):
+    """Gather every target-resolved leaf of a nested term on ``index``."""
+    if isinstance(value, (list, tuple)):
+        return type(value)(_gather_targets(item, index, xp) for item in value)
+    return xp.asarray(value)[index]
+
+
+def _confined_weighted_root(vertex, term, near, reduced):
+    """Evaluate the graded quadrature on a static bucket of near-band targets.
+
+    The near test is a function of the targets themselves, so its size is only
+    known at run time while a traced program needs a static shape. A bucket of
+    fixed capacity carries the selected targets and is scattered back over the
+    contraction; when more targets are selected than the bucket holds, the whole
+    array is evaluated instead, which is the unconfined result that the bucket
+    is only an optimisation of.
+    """
+    xp = vertex.xp
+    capacity = _bucket_capacity(xp)
+    order = xp.argsort(xp.where(near, 0, 1), stable=True)
+    index = order[:capacity]
+    values = _weighted_root(
+        _TargetSubset(vertex, index), _gather_targets(term, index, xp)
+    )
+    empty = xp.zeros_like(reduced)
+    if hasattr(empty, "at"):
+        scattered = empty.at[index].set(values)
+    else:
+        scattered = empty.copy()
+        scattered[index] = values
+    selected = xp.sum(xp.asarray(near, dtype=xp.int32))
+
+    def confined(_):
+        return xp.where(near, scattered, reduced)
+
+    def whole(_):
+        return xp.where(near, _weighted_root(vertex, term), reduced)
+
+    if xp is np:
+        return confined(None) if int(selected) <= capacity else whole(None)
+    from jax import lax
+
+    return lax.cond(selected <= capacity, confined, whole, None)
+
+
 def _small_corner_band(vertex):
     """Select radial primitives inside the smooth half-radius."""
     return vertex.radius + vertex.offset < 0.5 * vertex.xp.hypot(
@@ -727,7 +805,7 @@ class _Vertex:
         reduced = self.channel.against_root(term)
         if stable:
             near = _corner_remainder_band(self.radius, self.level, self.offset, self.xp)
-            return self.xp.where(near, _weighted_root(self, term), reduced)
+            return _confined_weighted_root(self, term, near, reduced)
         return reduced
 
     def against_root_paired(self, term: tuple):

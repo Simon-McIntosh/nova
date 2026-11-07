@@ -29,6 +29,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
+import nova.biot.gradedresidual as gradedresidual  # noqa: E402
 import nova.biot.polygonanalytic as polygonanalytic  # noqa: E402
 import nova.biot.momentchannel as momentchannel  # noqa: E402
 from tangent_identity import (  # noqa: E402
@@ -235,6 +236,20 @@ def test_channel_split_refuses_paired_data():
             channel, None, None, None, None, None, None, None, None, jnp
         )
     print(f"PAIRED_CHANNEL_REFUSAL={refused.value}")
+
+
+def test_graded_residual_refuses_paired_with_weight():
+    # a paired call returns one structure per panel pair; a weighted call returns
+    # one per target, so a caller that asks for both has no single shape to read
+    with pytest.raises(ValueError, match="paired call and a weighted call"):
+        gradedresidual.graded_residual(
+            (np.zeros((2, 4)),),
+            lambda x, y: (x, y),
+            8,
+            np,
+            paired=True,
+            weight=(np.ones(2), 1.0, 0.0),
+        )
 
 
 def _truncated_product(left, d_left, right, d_right):

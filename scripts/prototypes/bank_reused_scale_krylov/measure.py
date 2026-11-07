@@ -179,7 +179,14 @@ def run_jacobian(args):
     )
     assembly = jax.block_until_ready(assemble(states, support))
     applied = jax.block_until_ready(product(states, direction, support))
-    shape_ok = assembly.shape[-1] == 3 * cells == applied[0].shape[-1]
+    # The assembly is one (lanes, 3c, 3c) block per lane; the product returns
+    # a three-component update of (lanes, c) arrays.
+    shape_ok = (
+        assembly.ndim == 3
+        and tuple(assembly.shape[-2:]) == (3 * cells, 3 * cells)
+        and len(applied) == 3
+        and all(tuple(value.shape[-1:]) == (cells,) for value in applied)
+    )
     assemble_ms = _time(lambda: assemble(states, support), args.reps) * 1e3
     product_ms = _time(lambda: product(states, direction, support), args.reps) * 1e3
     break_even = assemble_ms / product_ms

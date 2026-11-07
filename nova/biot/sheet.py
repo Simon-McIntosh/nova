@@ -28,10 +28,18 @@ with ``D = sqrt(gamma^2 + r^2 + r'^2 - 2 r r' cos phi)``, ``beta_1 = Gamma_1/B_1
 denominator ``B_1^2 = r_1^2 - 2 r r_1 cos phi + r^2 (1 + b_1^2 sin^2 phi)``.
 This reproduces the paper's eq (8) and reduces to eq (24) at ``b_1 = 0``.
 
-The complete elliptic kinds enter through the closed form of the ``D`` part; the
-``arsinh`` part is evaluated on a fixed panelised Gauss-Legendre rule, the same
-class of rule the paper's eq (12b) leaves its residual integral to.  The
-straight-cylinder limit ``b_1 = 0`` is eq (24) and is evaluated in closed form.
+The complete elliptic kinds enter through the closed form of the ``D`` part.  The
+``arsinh`` part is log-singular at the azimuth where the denominator ``B_1``
+vanishes, which is a target level with the segment end, and a grid across the
+section hits it by alignment.  It is therefore taken on the graded two-panel
+rule of :mod:`nova.biot.polygonanalytic`, which subtracts a model of the
+logarithm in closed form, grades each panel with a sinh map from its own end and
+integrates the bounded remainder: ``_weighted_residual`` carries the polynomial
+weight ``cos(phi) (r_1 + b_1^2 r cos(phi))`` the sheet's own integrand needs.
+The ``D`` term is smooth but has a square-root layer of width ``D_0`` at
+``phi = 0``, so it is integrated on a sinh map anchored there, which is exact for
+``D = sqrt(D_0^2 + 4 r r_1 sin^2(phi/2))``.  The straight-cylinder limit
+``b_1 = 0`` is eq (24) and is evaluated in closed form.
 
 Two printed coefficient blocks could not be reconstructed from the available
 copy of the paper: the block feeding eq (22a) (``S``, ``M``, ``N`` and ``P_phi``
@@ -46,17 +54,29 @@ from __future__ import annotations
 import numpy as np
 
 from nova.biot.completeelliptic import complete_kind, complete_pole
+from nova.biot.gradedresidual import QUARTER
 from nova.biot.greens import MU0, greens_psi
+
+# ``_weighted_residual`` is private to the Part V module, which owns the graded
+# rule and its endpoint-log removal.  Importing it keeps one implementation of
+# that machinery; copying it here would let the two drift.
+from nova.biot.polygonanalytic import _weighted_residual
 
 __all__ = ["SheetFlux", "sheet_flux"]
 
 _PANELS = 8
-"""Sub-intervals of the azimuthal and segment rules, placed symmetrically."""
+"""Sub-intervals of the segment rule, placed symmetrically."""
 
 _NODES = 16
 """Gauss-Legendre nodes per panel; the rule is fixed, never adapted."""
 
 _GAUSS = np.polynomial.legendre.leggauss(_NODES)
+
+_ARSINH_NODES = 128
+"""Nodes of the graded arsinh rule, the Part V module's own count."""
+
+_GRADED_NODES = np.polynomial.legendre.leggauss(64)
+"""The sinh map's nodes; it is exact for the layer the square root carries."""
 
 
 class SheetFlux:
@@ -85,6 +105,67 @@ class SheetFlux:
         w = (half[:, None] * weights[None, :]).ravel()
         return x, w
 
+    def _root_term(self, gamma: float, r: float, rp: float) -> float:
+        """``a_1 b_1`` times the azimuthal integral of ``cos(phi) D``.
+
+        ``D^2 = (r - r_p)^2 + gamma^2 + 4 r r_p sin^2(phi/2)``, so the map
+        ``phi = width sinh(s)`` from ``phi = 0`` is exact for the square-root
+        layer there and leaves a smooth remainder.  The two squares are formed
+        from positive terms rather than by subtracting nearly equal radii, which
+        is what keeps the layer's own digits at a near standoff.
+        """
+        width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
+        width = width if width > 0.0 else 1.0
+        node, weight = _GRADED_NODES
+        span = np.arcsinh(np.pi / width)
+        stretch = 0.5 * span * (node + 1.0)
+        phi = width * np.sinh(stretch)
+        jacobian = 0.5 * span * width * np.cosh(stretch)
+        dense = np.sqrt(
+            (r - rp) ** 2 + gamma**2 + 4.0 * r * rp * np.sin(0.5 * phi) ** 2
+        )
+        return float(np.sum(jacobian * weight * np.cos(phi) * dense))
+
+    def _arsinh_term(self, gamma: float, r: float, r1: float, b1: float) -> float:
+        """The azimuthal integral of ``cos(phi) (r_1 + b_1^2 r cos(phi)) arsinh``.
+
+        The azimuth halves at ``a = phi/2 = pi/4``, and each half is graded from
+        its own end: ``a = phi/2`` runs over the first half, and the offset
+        ``pi/2 - a`` over the second.  ``c = cos^2 a - sin^2 a`` is ``-cos(phi)``,
+        in which the weight is a quadratic and the denominator is quadratic in
+        ``c`` and in the panel's own ``sin^2``.
+        """
+        a1sq = 1.0 + b1 * b1
+        spread = r1 - r
+        # the denominator's curvature at each graded end, read off the exact
+        # squares (r_1 + r)^2 - 4 r (r_1 - r b_1^2) b^2 on the phi = pi panel and
+        # (r_1 - r)^2 + 4 r (r_1 + r b_1^2) b^2 on the phi = 0 one
+        upper = 2.0 * np.sqrt(r * np.abs(r1 - r * b1 * b1))
+        lower = 2.0 * np.sqrt(r * (r1 + r * b1 * b1))
+        far = a1sq * gamma + b1 * (r1 + r)
+        near = a1sq * gamma + b1 * spread
+        one = np.ones(1)
+        panels = (
+            (one * (r1 + r), one * far, one * upper, 0.0, QUARTER),
+            (one * abs(spread), one * near, one * lower, 0.0, QUARTER),
+        )
+
+        def pieces(x, y):
+            return (
+                near + 2.0 * b1 * r * y,
+                np.sqrt(spread**2 + 4.0 * r * r1 * y + 4.0 * r * r * b1 * b1 * x * y),
+            )
+
+        # cos(phi) = -c and d phi = 2 da, so the weight is -2 r_1 c + 2 b_1^2 r c^2;
+        # the endpoint coefficients are its values at c = -1 and c = +1
+        weight = (
+            [-8.0 * b1 * b1 * r],
+            np.full(1, 2.0 * (r1 + b1 * b1 * r)),
+            np.full(1, 2.0 * (b1 * b1 * r - r1)),
+        )
+        value = _weighted_residual(panels, pieces, weight, _ARSINH_NODES, np)
+        return float(np.asarray(value).sum())
+
     def antiderivative(self, gamma: float, r: float, rp: float) -> float:
         """The sloped-segment antiderivative, integrated over the azimuth.
 
@@ -95,20 +176,10 @@ class SheetFlux:
         """
         b1 = self._slope
         a1sq = 1.0 + b1 * b1
-        a1 = np.sqrt(a1sq)
         r1 = rp - b1 * gamma
-        phi, w = self._rule(0.0, np.pi)
-        cos = np.cos(phi)
-        sin = np.sin(phi)
-        gap = gamma**2 + r * r + rp * rp - 2.0 * r * rp * cos
-        dense = np.sqrt(gap)
-        squared = r1 * r1 - 2.0 * r * r1 * cos + r * r * (1.0 + b1 * b1 * sin * sin)
-        gamma1 = a1sq * gamma + b1 * (r1 - r * cos)
-        integrand = (
-            a1 * b1 * dense
-            + (r1 + b1 * b1 * r * cos) * np.arcsinh(gamma1 / np.sqrt(squared))
-        ) / a1**3
-        return float(MU0 * r * a1 * np.sum(w * cos * integrand))
+        total = np.sqrt(a1sq) * b1 * self._root_term(gamma, r, rp)
+        total += self._arsinh_term(gamma, r, r1, b1)
+        return float(MU0 * r / a1sq * total)
 
     def _vertical_flux(self, r: float, z: float) -> float:
         """Eq (24): the exact closed form of a straight cylinder."""

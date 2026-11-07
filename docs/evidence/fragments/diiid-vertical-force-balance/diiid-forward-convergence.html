@@ -240,31 +240,89 @@ unconditionally, so the limited seed's equilibrium cannot reach the gate however
 
 <p>The table above reports the topology the solver recorded, which counts an admitted saddle. That field is not the same as which surface closes first; the next paragraph measures the latter, and on most of these arms the two disagree.</p>
 
-<p><b>Which surface bounds each terminal.</b> Two surfaces compete to bound a plasma: the separatrix through the admitted X-point, and the largest closed surface that clears the wall. The inner one wins, so the comparison is between two flux values read off the same solved map &mdash; &psi; at the admitted saddle, and the largest &psi; any node of the governed 84-point limiter ring carries (<code>boundary_competition.py</code>, one read per stored arm, no solve run; the values below are the committed <code>docs/figures/diiid-forward-convergence/boundary-competition.json</code>). The larger bounds. Frame 144's limited seed refuses at axis identification, so it has no terminal to classify and the table carries nine arms:</p>
+<p><b>Which surface bounds each terminal.</b> Two surfaces compete to bound a
+plasma: the separatrix through the admitted X-point, and the outermost closed surface that encloses
+the axis and still stays inside the wall. The inner one wins. The comparison cannot be made by
+taking the largest flux anywhere on the limiter ring: on a diverted equilibrium the ring beneath the
+X-point lies in the private-flux region, where the flux exceeds the separatrix value, so that rule
+reports a contact on the divertor floor while the surface it implies touches no wall at all. The
+class here is read by the engine's own axis-connected, saddle-aware flood fill
+(<code>nova.equilibrium.connectivity_boundary.host_boundary_read</code>) over each stored terminal
+flux grid, with the governed 84-point DIII-D limiter as the wall, and turned into a class by
+<code>nova.equilibrium.boundary_comparison.classify_boundary_mode</code> on its signed margin
+(<code>boundary_competition.py</code>, one read per stored arm, no solve run; the values below are
+the committed <code>docs/figures/diiid-forward-convergence/boundary-competition.json</code>). The
+margin is the wall's normalised flux less the X-point's, so a negative margin means the wall closes
+first; a margin of &minus;&infin; means the read found no X-point at all, and the wall is then the
+only obstruction. Frame 144's limited seed refuses at axis identification and has no terminal to
+classify, so the table carries eight solved arms:</p>
 
 
 <table>
-<thead><tr><th>frame</th><th>seed</th><th>&psi; at the axis</th><th>&psi; at the admitted saddle</th><th>&psi; at the limiter contact</th><th>bounding surface</th><th>measured class</th><th>contact point (R, Z) m</th><th>saddle inside the limiter?</th></tr></thead>
+<thead><tr><th>frame</th><th>seed</th><th>&psi; at the axis</th><th>&psi; of the binding surface</th><th>class margin</th><th>measured class</th><th>contact point (R, Z) m</th><th>contact gap m</th><th>closed core cells</th></tr></thead>
 <tbody>
-<tr><td>179</td><td>diverted</td><td><code>+0.0365</code></td><td><code>-1.3416</code></td><td><code>-0.3077</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
-<tr><td>179</td><td>limited</td><td><code>-0.1831</code></td><td><code>-1.5476</code></td><td><code>-1.3906</code></td><td>limiter</td><td><b>limited</b></td><td>(1.170, +1.363)</td><td>no</td></tr>
-<tr><td>44</td><td>diverted</td><td><code>+1.5380</code></td><td><code>-0.0498</code></td><td><code>+0.3419</code></td><td>limiter</td><td><b>limited</b></td><td>(1.428, -1.358)</td><td>yes</td></tr>
-<tr><td>44</td><td>limited</td><td><code>+1.6901</code></td><td><code>+0.4790</code></td><td><code>+0.2285</code></td><td>separatrix</td><td><b>diverted</b></td><td>(1.170, +1.363)</td><td>no</td></tr>
-<tr><td>137</td><td>diverted</td><td><code>+2.4925</code></td><td><code>+0.6655</code></td><td><code>+0.7311</code></td><td>limiter</td><td><b>limited</b></td><td>(1.401, -1.245)</td><td>yes</td></tr>
-<tr><td>137</td><td>limited</td><td><code>+1.7731</code></td><td><code>+0.0457</code></td><td><code>+0.2005</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
-<tr><td>144</td><td>diverted</td><td><code>+1.4820</code></td><td><code>+0.5325</code></td><td><code>+0.8402</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
-<tr><td>146</td><td>diverted</td><td><code>+6.4678</code></td><td><code>-1.9404</code></td><td><code>+3.5603</code></td><td>limiter</td><td><b>limited</b></td><td>(1.250, +1.363)</td><td>no</td></tr>
-<tr><td>146</td><td>limited</td><td><code>+1.8632</code></td><td><code>-0.0976</code></td><td><code>+0.0582</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
+<tr><td>179</td><td>diverted</td><td><code>-0.5304</code></td><td><code>-1.0352</code></td><td><code>-0.0675</code></td><td><b>limited</b></td><td>(1.655, +0.946)</td><td><code>0.125</code></td><td>162</td></tr>
+<tr><td>179</td><td>limited</td><td><code>-0.2006</code></td><td><code>-1.1190</code></td><td>&minus;&infin;</td><td><b>limited</b></td><td>(1.670, +1.071)</td><td><code>0.007</code></td><td>204</td></tr>
+<tr><td>44</td><td>diverted</td><td><code>+1.4234</code></td><td><code>+0.1923</code></td><td><code>-0.0174</code></td><td><b>limited</b></td><td>(1.615, +1.061)</td><td><code>0.022</code></td><td>216</td></tr>
+<tr><td>44</td><td>limited</td><td><code>+1.4837</code></td><td><code>+0.5194</code></td><td>&minus;&infin;</td><td><b>limited</b></td><td>(1.669, +1.073)</td><td><code>0.005</code></td><td>209</td></tr>
+<tr><td>137</td><td>diverted</td><td><code>+1.8669</code></td><td><code>+0.7697</code></td><td><code>-0.0206</code></td><td><b>limited</b></td><td>(1.047, &minus;0.496)</td><td><code>0.001</code></td><td>214</td></tr>
+<tr><td>137</td><td>limited</td><td><code>+1.7620</code></td><td><code>+0.3427</code></td><td><code>-0.0590</code></td><td><b>limited</b></td><td>(1.695, +1.074)</td><td><code>0.002</code></td><td>289</td></tr>
+<tr><td>144</td><td>diverted</td><td><code>+1.4421</code></td><td><code>+0.9220</code></td><td>&minus;&infin;</td><td><b>limited</b></td><td>(1.667, +1.066)</td><td><code>0.011</code></td><td>158</td></tr>
+<tr><td>146</td><td>diverted</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><b>refused</b></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>146</td><td>limited</td><td><code>+1.8616</code></td><td><code>+0.4503</code></td><td>&minus;&infin;</td><td><b>limited</b></td><td>(1.725, +1.065)</td><td><code>0.010</code></td><td>236</td></tr>
 </tbody>
 </table>
 
-<p><b>Every terminal but one is bounded by the limiter.</b> The limiter ring carries more flux than the admitted saddle on eight of the nine arms, so the surface that closes first is the limiter-contact surface, and these are <b>limited</b> states. The solver's recorded <code>topology</code> class is a different quantity: it counts an admitted saddle and says nothing about which surface closes inside the other. The single diverted-bounding terminal is frame 44's limited seed, the only arm whose separatrix closes before the wall does.</p>
+<p><b>Every terminal in the cohort is limited, and one arm has no plasma to bound.</b> On all eight
+solved arms the wall closes before any X-point does, so the binding surface is the limiter-contact
+surface and the state is <b>limited</b>. Frame 146's diverted seed is the ninth arm and the read
+refuses it outright: its axis at <code>R=1.234, Z=+1.563 m</code> is above the limiter's top edge, so
+the flood has nowhere in the vessel to grow from and there is no axis-connected plasma left to
+bound. The solver's recorded <code>topology</code> class is a different quantity: it counts an
+admitted saddle and says nothing about which surface closes inside the other.</p>
 
-<p><b>Verdict, re-derived from the bounding surface.</b> On <b>179 both terminals are limited</b> states: each is bounded by its limiter-contact surface, and the kept diverted-seed terminal is the worse of the two (<code>4.181e-01</code> against <code>2.726e-02</code>). The question the branch rule asks &mdash; diverted or limited &mdash; therefore has the same answer on both branches, so the bank's choice was between two limited stalls, and the 15.3&times; larger residual is a stall that a confined plasma sat at, not a topology it lost. On <b>44 the choice is inverted</b>: the kept terminal is limited (<code>4.276e+00</code>) and the discarded one is the cohort's only <b>diverted</b> terminal (<code>1.970e-01</code>), so the rule kept the wrong class as well as the worse residual, at 21.7&times;. Neither terminal is a root of the other branch, and neither is below <code>1e-5</code>, so preferring the discarded one would still converge nothing &mdash; but on 44 the bank's selection and the physics disagree, and a reader of the banked table would not know it.</p>
+<p><b>Frame 179.</b> Both terminals are limited, so the branch rule's question &mdash; diverted or
+limited &mdash; has the same answer on both branches, and the bank's selection changed nothing
+topologically. The kept diverted-seed terminal is the worse of the two (<code>4.181e-01</code>
+against <code>2.726e-02</code>), and its binding surface stands <code>0.125 m</code> inside the wall
+at <code>(1.655, +0.946)</code> &mdash; the largest contact gap of the cohort, consistent with an arm
+whose margin is negative but small: the X-point nearly closed first. The 15.3&times; larger residual
+is a stall that a confined plasma sat at, not a topology it lost.</p>
 
-<p><b>The one diverted-bounding terminal is not a diverted configuration.</b> Frame 44's limited seed is bounded by its separatrix, but the admitted saddle that defines it sits at <code>R=1.105 m, Z=+1.563 m</code> &mdash; above the limiter's <code>+1.363 m</code> top edge and outside the vessel, the same place frame 146's axis is lost. A separatrix through a saddle outside the wall bounds nothing physical, so this arm's <i>diverted</i> class is an artefact of the solver admitting an X-point above the vessel, not evidence of a diverted equilibrium. Its panel is drawn, and the X-point legs cannot be resolved there for the same reason: the map does not enclose the saddle, so no refinement of a level set inside the domain will close it.</p>
+<p><b>Frame 44.</b> Both terminals are limited as well, so the earlier reading that the discarded
+limited-seed terminal was the cohort's only diverted one is withdrawn: its binding surface reaches
+the wall at <code>(1.669, +1.073)</code>, five millimetres from the limiter, and no X-point is found
+on that map. What the bank did on 44 is still visible and still wrong in its arithmetic: it kept the
+terminal at <code>4.276e+00</code> over the one at <code>1.970e-01</code>, a factor of 21.7, while
+both are limited stalls on a confined plasma. Neither terminal is a root of the other branch and
+neither is below <code>1e-5</code>, so preferring the discarded one would converge nothing &mdash;
+but the selection never compared two classes, and the record should not claim it did.</p>
 
-<p><b>Resolution caveat.</b> The contact flux is sampled at the ring nodes through the solved 33&times;33 map, and the bounding level set is contoured on a cubic interpolant of that same field. The drawn surface can therefore close a grid cell or two from the marked contact node; the classification above rests on the sampled values, not on the drawn curve.</p>
+<p><b>What the class does and does not decide.</b> The reclassification removes the one claim this
+cohort previously made about a diverted configuration: no terminal here is diverted, and the
+saddle the solver admitted on 44's limited seed sits above the vessel at
+<code>R=1.105 m, Z=+1.563 m</code> without bounding anything. The mechanism that stops these frames
+is therefore never a lost topology. It is the one the per-frame sections derive: a promotion that
+returns the same residual at a frozen mask (179, 44, 137, 144), and, on 146's diverted seed, a
+plasma driven out of the top of the vessel until no axis-connected region remains.</p>
+
+<p><b>Four panels, not five.</b> The panel for frame 44's limited seed is withdrawn: it was drawn
+because that arm alone was read as separatrix-bounded, and with the axis-connected read it is
+limited like every other solved terminal. Each remaining panel draws the surface
+<code>host_boundary_read</code> returns, marks the point where that surface reaches the wall, and
+draws only the axis-connected component. A read-back check
+(<code>boundary_readback.py</code>) refuses any limited arm whose recorded contact stands more than
+one grid cell from the boundary it is supposed to bound; it passes on every arm above at
+<code>0.000 m</code> against a <code>0.100 m</code> cell, and refuses the superseded receipt, whose
+drawn level set stands <code>0.20</code> to <code>0.47 m</code> from the contact point it recorded.</p>
+
+<p><b>Resolution caveat.</b> The radii are ray-cast from the seed axis through the solved
+33&times;33 map and read at <code>0.999</code> of the flux span, so the reported surface sits a hair
+inside the true binding level. That residual is what the contact gap measures: it is one millimetre
+on five arms and one or two grid cells at most elsewhere, except on 179's diverted seed, where the
+margin is small enough (<code>-0.0675</code>) that <code>0.1&nbsp;%</code> of the span is
+<code>0.125 m</code> of radius. The classification rests on the read's own normalised margin
+against its own surface, not on the drawn curve.</p>
 
 
 
@@ -299,15 +357,6 @@ residual is two decades above tolerance.</figcaption>
 largest of the cohort. The solved separatrix closes around a confined plasma &mdash; axis R=1.720,
 Z=&minus;0.141, <code>352</code> closed core cells, <code>1.097</code>&times; the target current &mdash; so
 the miss is not a lost plasma even though the achieved class is <i>limited</i>.</figcaption>
-</figure>
-
-<figure>
-<img src="/nova/figures/diiid-forward-convergence/frame-44-limited-flux-contours.svg" alt="frame 44 limited-seed terminal: the admitted saddle sits above the limiter's top edge, so the bounding separatrix lies outside the vessel">
-<figcaption>Frame 44's limited seed, drawn because it is the only arm the limiter does not bound. The admitted
-saddle is the red asterisk at the top, R=1.105 m, Z=+1.563 m: outside the limiter, above its +1.363 m edge.
-The separatrix through it is the bounding surface by the flux comparison, and it bounds nothing physical
-there, so this arm's <i>diverted</i> class is an artefact of an X-point admitted above the vessel. The four
-legs cannot be resolved because the map does not enclose the saddle.</figcaption>
 </figure>
 
 <figure>

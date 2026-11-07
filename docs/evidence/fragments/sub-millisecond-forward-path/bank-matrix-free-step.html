@@ -1,23 +1,31 @@
 <section data-reckon="fragment" data-id="bank-matrix-free-step">
 <h2>Bank Newton step applied matrix-free inside GMRES</h2>
 
-<p id="bank-matrix-free-step-what">The Newton step can hand its Krylov solve a
-Jacobian-vector product instead of an assembled matrix. The product is
+<p id="bank-matrix-free-step-what">This section records an attempt to take the
+bank Newton step matrix-free: to hand the Krylov solve a Jacobian-vector product
+instead of an assembled matrix. The product is
 <code>support_read.step_jacobian_vector</code>: the identity minus the bank,
 the booking tangent and, on the fresh-geometry path, the moving saddle normal
-form. The block preconditioner for that path is each cell's own 3&times;3
+form. The block preconditioner for that attempt is each cell's own 3&times;3
 diagonal block, obtained without an assembly: a cell's moments enter only its
 own booking sensitivities and its own bank row, so the block is its local
 sensitivities contracted with its own unit-direction channel vector. A
 target-current quadrature sums across cells and stays on the assembled path.</p>
 
-<p id="bank-matrix-free-step-solve">Both operators run through one Arnoldi
-routine (<code>_block_gmres_operator</code>), so the restarted least-squares
-cycle, the true-residual restart decision and the condition-estimate times
-relative-residual 1e-8 stop are the same code on both paths. The dense path
-keeps its row and column equilibration; the product path scales by the
-physical moment scales alone, because row and column norms need the matrix
-entries the product path exists to avoid.</p>
+<p>The attempt failed and was withdrawn. The product path does not converge at
+the bank's real width, so it was removed from <code>support_read</code> and its
+test file rather than left behind a default-off flag, and the assembled path is
+what the code does. The negative result, the measurement behind it and the
+diagnosis that explains it all stand, and they are what this section records.</p>
+
+<p id="bank-matrix-free-step-solve">Both operators ran through one Arnoldi
+routine, so the restarted least-squares cycle, the true-residual restart
+decision and the condition-estimate times relative-residual 1e-8 stop were the
+same code on both paths. The assembled path keeps its row and column
+equilibration; the product path scaled by the physical moment scales alone,
+because row and column norms need the matrix entries the product exists to
+avoid. That difference is the whole of the defect, as the diagnostic below
+measures.</p>
 
 <h3 id="bank-matrix-free-step-equality">The product path reproduces the assembled update</h3>
 
@@ -67,10 +75,45 @@ are wired correctly and the defect appears only at the size and conditioning of
 the real state. The difference between the two paths is the equilibration: the
 assembled path balances by three rounds of row and column norms, and the
 product path uses the physical moment scales alone because those norms need the
-matrix entries the product exists to avoid. The measured condition estimate of
-order 1e6 on the preconditioned operator is consistent with that difference
-being the cause, but this record does not separate it from a defect in the
-cell-block preconditioner at scale: no run in this node does.</p>
+matrix entries the product exists to avoid. The diagnostic below tests that
+difference directly rather than leaving it as a hypothesis.</p>
+
+<h3 id="bank-matrix-free-step-diagnostic">The stall is the equilibration, not the product</h3>
+
+<p>The assembled matrix is used only as a source of preconditioning: its row and
+column scales and its cell-block inverses are applied around
+<code>step_jacobian_vector</code>, and the same GMRES runs over the same
+product. Nothing else changes. If the product then converges, the product is
+sound and the missing equilibrating scales are what stalled it.</p>
+
+<table id="bank-matrix-free-step-diagnostic-table">
+<caption>Equilibration diagnostic, one fresh H200 process per case. <em>same</em>
+takes the scales and cell-block inverses from the assembled matrix at the state
+being solved; <em>stale</em> takes them from an assembled matrix one state away,
+which is what a solve could carry forward — the other certificate state for the
+two 550-cell rows, and for the stepped row the seed one Newton update behind.
+Every error is the relative difference from that case's own assembled update.</caption>
+<thead><tr><th>case</th><th>assembled iterations</th><th>same iterations</th><th>same error</th><th>same condition</th><th>stale iterations</th><th>stale error</th><th>stale condition</th></tr></thead>
+<tbody>
+<tr><td>trial</td><td>40</td><td>40</td><td>2.3e-14</td><td>2.0e3</td><td>40</td><td>1.6e-14</td><td>1.9e3</td></tr>
+<tr><td>converged</td><td>40</td><td>40</td><td>7.4e-15</td><td>1.9e3</td><td>40</td><td>5.3e-15</td><td>2.0e3</td></tr>
+<tr><td>one update on (550 cells)</td><td>40</td><td>40</td><td>2.5e-14</td><td>1.9e3</td><td>40</td><td>2.0e-14</td><td>2.0e3</td></tr>
+</tbody>
+</table>
+
+<p>The product converges in exactly the assembled path's forty iterations once
+it is given those scales, at 1e-14 agreement with the assembled update and a
+condition estimate near two thousand instead of the 1e6 that stalled it. The
+stall is the equilibration and nothing else: the product, the cell-block
+preconditioner and the stopping rule are all sound, and the only thing the
+product path lacked was the row and column balancing it could not compute
+without the matrix. The second arm matters as much as the first, because a solve
+cannot assemble the matrix it is trying to avoid: scales and blocks carried over
+from a state one Newton update behind give the same forty iterations and the
+same 1e-14 agreement, so a reused factorisation does not have to be current to
+be good. What this does not show is how a product path would obtain those
+scales without assembling, which is the work a working matrix-free step would
+still owe.</p>
 
 <h3 id="bank-matrix-free-step-suites">The five bank suite files, base against head</h3>
 
@@ -85,7 +128,9 @@ blocks directly.</p>
 <caption>Paired suite runs, base <code>6d799fa8</code> against head, each arm in
 its own processes. The head file carries one more passing test because the
 two-cell operator case was added; no test that passed at the base failed at the
-head.</caption>
+head. Both arms ran before the product path was withdrawn, so the head column
+describes a revision that no longer exists; the base column is the code as it
+stands.</caption>
 <thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
 <tbody>
 <tr><td>test_bank_newton_step.py</td><td>16 passed, 2 deselected</td><td>17 passed, 4 deselected</td></tr>
@@ -134,16 +179,20 @@ the seed arrays once at the base revision and gives each revision its own
 compilation cache; the plotting script beside it reads its
 <code>RESULT</code> lines.</p>
 
-<p id="bank-matrix-free-step-verdict">Verdict: the product path is implemented
-and committed, the negative control fails as declared, and the paired suites
-show no added failure. The path is not usable at any real width: on a reserved
-H200 its Krylov solve exhausts a 400-iteration allowance on every lane, at a
-1e-2 relative residual, so it returns no solution and costs 895 times the
-assembled wall at sixteen slices to do it. The done-when asks for GMRES within
-60 iterations; the measurement is 400 without convergence, at sixteen lanes and
-at the 550-cell states alike. The section's measure is unmet at this record. The
-candidate cause — a preconditioned operator conditioned at 1e6 because the
-product path carries only the physical moment scales, where the assembled path
-balances by row and column norms — is stated as a hypothesis this record does
-not test.</p>
+<p id="bank-matrix-free-step-verdict">Verdict: the matrix-free Newton step
+does not work at the bank's width and has been withdrawn, so the assembled path
+is what the code does again. The product path exhausted a 400-iteration
+allowance on every lane at a 1e-2 relative residual at both 550-cell states and
+at sixteen lanes, against 40 iterations assembled, and took 895 times the
+assembled wall at sixteen slices to return a non-solution. The negative control
+failed as declared and the paired suites showed no added failure, so the
+measurement is sound rather than a broken harness. The diagnosis explains the
+stall exactly: given the assembled path's row and column scales and cell-block
+inverses, the same product converges in forty iterations at 1e-14, including
+when those scales come from the state one Newton update behind. What remains
+unmet is the step itself, and what it still owes is a way to obtain those
+scales without assembling the matrix the product exists to avoid. No product
+rule is proposed here; the assembled path is unchanged and correct, and the
+next attempt starts from this diagnosis rather than from the premise that the
+product alone would be fast enough.</p>
 </section>

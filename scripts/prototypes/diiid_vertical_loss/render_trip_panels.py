@@ -1,32 +1,39 @@
 """Render a poloidal flux-contour panel for one active-set trip.
 
-Each panel draws the trip's own solved field (saved by the per-trip driver as
-``frame-<n>-trip-<k>.npz``) as line contours, the EFIT label field at the same
-physical levels, both null sets, the governed limiter ring, the bounding surface
-read on that trip's grid, and the measured axis position.  A residual strip
-below the panel carries the residual at every trip the frame reached.
+The trip's own solved field (saved by the per-trip driver as
+``frame-<n>-trip-<k>.npz``) is drawn as line contours against the EFIT label at
+the same physical levels, with both null sets, the governed limiter ring, the
+axis-connected bounding surface the connectivity owner reads, and the measured
+axis position.  A residual strip below the panel carries the relative residual
+at every trip the frame reached.
 
-The bounding surface is derived here from the trip's own flux grid: the saddle
-of the solved field and the flux the governed limiter carries, with the lower of
-the two as the bounding flux, which is the same competition ``host_boundary_read``
-applies.  That routine takes an equilibrium grid object (it evaluates
-``wall_flux`` on the wall nodes) and the per-trip archives carry only the flux
-array, the wall and the limiter, so it cannot be called on them; the derivation
-here is the reduced form, and the fragment says so.
+The geometry is not derived here.  The bounding surface comes from
+``nova.equilibrium.connectivity_boundary.host_boundary_read`` on the trip's flux
+grid and limiter units, and the stationary points come from
+``nova.equilibrium.flux_surface_connectivity.polish_stationary_points`` on the
+field's own tensor spline.
 """
 
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import RegularGridInterpolator
 
+import jax.numpy as jnp
+
+from nova.equilibrium.connectivity_boundary import host_boundary_read
+from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import (
     draw_flux_contours,
@@ -45,86 +52,92 @@ def _oriented(flux: np.ndarray, radius: np.ndarray, height: np.ndarray) -> np.nd
     return array.T
 
 
-def _bilinear(radius, height, flux, point) -> float:
-    r = np.interp(point[0], radius, np.arange(len(radius)), left=np.nan, right=np.nan)
-    z = np.interp(point[1], height, np.arange(len(height)), left=np.nan, right=np.nan)
-    if not np.isfinite(r) or not np.isfinite(z):
-        return float("nan")
-    ri, zi = int(round(r)), int(round(z))
-    return float(flux[zi, ri])
+def _point_flux(radius, height, flux) -> RegularGridInterpolator:
+    """Return genuine bilinear interpolation of the map at arbitrary points."""
 
-
-def _edge_flux(radius, height, flux, boundary) -> float:
-    values = np.asarray(
-        [_bilinear(radius, height, flux, point) for point in np.asarray(boundary)],
-        dtype=float,
+    return RegularGridInterpolator(
+        (np.asarray(height, dtype=float), np.asarray(radius, dtype=float)),
+        np.asarray(flux, dtype=float),
+        method="linear",
+        bounds_error=False,
+        fill_value=np.nan,
     )
-    values = values[np.isfinite(values)]
-    return float(np.median(values)) if values.size else float("nan")
 
 
-def _saddles(radius, height, flux, count=3) -> np.ndarray:
-    """Return interior saddle points of the field, strongest Hessian first."""
+def _stationary(surface, seeds, hessian_type):
+    """Polish stationary candidates on a field's own tensor spline."""
 
-    dz, dr = np.gradient(flux, height, radius)
-    magnitude = np.abs(dr) + np.abs(dz)
-    scale = float(np.median(magnitude)) or 1.0
-    found = []
-    margin = 3
+    seeds = np.asarray(seeds, dtype=float).reshape(-1, 2)
+    if not seeds.size:
+        return np.empty((0, 2)), np.empty(0)
+    polished = polish_stationary_points(
+        surface,
+        jnp.asarray(seeds),
+        jnp.ones((seeds.shape[0],), dtype=bool),
+    )
+    position = np.asarray(polished["position_rz"], dtype=float).reshape(-1, 2)
+    value = np.asarray(polished["value"], dtype=float).reshape(-1)
+    converged = np.asarray(polished["converged"], dtype=bool).reshape(-1)
+    kind = np.asarray(polished["hessian_type"]).reshape(-1)
+    keep = converged & (kind == hessian_type) & np.all(np.isfinite(position), axis=1)
+    return position[keep], value[keep]
+
+
+def _candidates(magnitude, radius, height, count=6):
+    """Return grid-scale stationary seeds for the polish to refine.
+
+    These are seeds only: every returned coordinate is moved onto the field's
+    true stationary point by :func:`_stationary` before it is drawn.
+    """
+
+    margin = 2
+    seeds = []
     for i in range(margin, len(height) - margin):
         for j in range(margin, len(radius) - margin):
-            if magnitude[i, j] > 0.25 * scale:
-                continue
-            neighbours = magnitude[i - 1 : i + 2, j - 1 : j + 2]
-            if magnitude[i, j] > neighbours.min():
-                continue
-            d2r = flux[i, j + 1] - 2 * flux[i, j] + flux[i, j - 1]
-            d2z = flux[i + 1, j] - 2 * flux[i, j] + flux[i - 1, j]
-            if d2r * d2z >= 0:
-                continue
-            found.append((magnitude[i, j], radius[j], height[i]))
-    found.sort()
-    return np.asarray([[r, z] for _, r, z in found[:count]], dtype=float).reshape(-1, 2)
+            block = magnitude[i - 1 : i + 2, j - 1 : j + 2]
+            if magnitude[i, j] <= block.min():
+                seeds.append((magnitude[i, j], radius[j], height[i]))
+    seeds.sort()
+    return np.asarray([[r, z] for _, r, z in seeds[:count]], dtype=float)
 
 
-def _extremum(radius, height, flux, boundary):
-    """Return the field extremum inside a boundary polygon."""
-
-    mesh = np.meshgrid(radius, height)
-    points = np.c_[mesh[0].ravel(), mesh[1].ravel()]
-    inside = inside_wall_units(points, np.asarray(boundary, dtype=float))
-    flat = flux.ravel().copy()
-    flat[~inside] = np.nan
-    if not np.isfinite(flat).any():
-        return None
-    index = (
-        int(np.nanargmax(flat))
-        if abs(np.nanmax(flat)) > abs(np.nanmin(flat))
-        else int(np.nanargmin(flat))
-    )
-    return points[index]
+def _gradient_magnitude(radius, height, flux):
+    dz, dr = np.gradient(flux, height, radius)
+    return np.abs(dr) + np.abs(dz)
 
 
-def _shared_levels(ranges) -> np.ndarray:
-    finite = [
-        (float(a), float(b)) for a, b in ranges if np.isfinite(a) and np.isfinite(b)
-    ]
-    if not finite:
-        return np.empty(0)
-    low = min(min(pair) for pair in finite)
-    high = max(max(pair) for pair in finite)
-    if np.isclose(low, high):
-        return np.empty(0)
-    return np.linspace(low, high, LEVEL_COUNT + 2)[1:-1]
+def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
+    """Draw only the level ring that encloses the axis.
+
+    The full level set also carries lobes that bound no plasma; drawing those
+    reads as a boundary the state does not have, so each ring is tested for
+    containment of the measured axis and non-enclosing rings are dropped.
+    """
+
+    if not np.isfinite(level) or axis is None:
+        return False
+    contour = axes.contour(radius, height, flux, levels=[level], colors="none")
+    kept = False
+    for collection in contour.allsegs[0]:
+        points = np.asarray(collection, dtype=float)
+        if points.shape[0] < 4:
+            continue
+        ring = plt.matplotlib.path.Path(points)
+        if not ring.contains_point((axis[0], axis[1])):
+            continue
+        axes.plot(
+            points[:, 0],
+            points[:, 1],
+            color=colour,
+            linewidth=width,
+            zorder=DEFAULT_INK.zorder_separatrix,
+        )
+        kept = True
+    contour.remove()
+    return kept
 
 
-def render_trip(
-    frame: int,
-    trip: int,
-    archive: Path,
-    rows: list[dict],
-    out: Path,
-) -> dict:
+def render_trip(frame, trip, archive, rows, out) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
@@ -137,153 +150,162 @@ def render_trip(
     row = next(r for r in rows if r["frame"] == frame and r["trip"] == trip)
     axis = np.asarray(row["axis_rz_m"], dtype=float) if row.get("axis_rz_m") else None
 
-    saddles = _saddles(radius, height, flux)
-    limiter_flux = np.asarray(
-        [_bilinear(radius, height, flux, p) for p in limiter], dtype=float
+    mesh_r, mesh_z = np.meshgrid(radius, height)
+    points = np.c_[mesh_r.ravel(), mesh_z.ravel()]
+    inside = inside_wall_units(points, limiter).reshape(len(height), len(radius))
+    grid = SimpleNamespace(
+        rg=radius,
+        zg=height,
+        inside_limiter=inside,
+        limiter_r=limiter[:, 0],
+        limiter_z=limiter[:, 1],
     )
-    limiter_flux = float(np.nanmin(limiter_flux))
-    saddle_flux = (
-        float(np.min([_bilinear(radius, height, flux, p) for p in saddles]))
-        if len(saddles)
-        else float("nan")
-    )
-    if np.isfinite(saddle_flux) and saddle_flux > limiter_flux:
-        bounding, bounds = saddle_flux, "saddle"
-    else:
-        bounding, bounds = limiter_flux, "limiter"
 
-    label_axis = _extremum(radius, height, label, label_boundary)
-    label_saddles = _saddles(radius, height, label)
-    label_limiter = np.asarray(
-        [_bilinear(radius, height, label, p) for p in limiter], dtype=float
-    )
-    label_limiter = float(np.nanmin(label_limiter))
-    label_saddle = (
-        float(np.min([_bilinear(radius, height, label, p) for p in label_saddles]))
-        if len(label_saddles)
-        else float("nan")
-    )
-    label_bounding = max(label_limiter, label_saddle)
+    boundary = None
+    if axis is not None and inside[
+        int(np.argmin(np.abs(height - axis[1]))),
+        int(np.argmin(np.abs(radius - axis[0]))),
+    ]:
+        boundary = host_boundary_read(flux, grid, tuple(axis))
+    bounding = float(boundary.psi_bnd) if boundary is not None and boundary.found else np.nan
 
-    axis_value = (
-        _bilinear(radius, height, flux, axis) if axis is not None else float("nan")
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(flux)
     )
-    levels = _shared_levels(
-        [
-            (axis_value, bounding),
-            (float(_bilinear(radius, height, label, label_axis)), label_bounding),
-        ]
+    seeds = _candidates(_gradient_magnitude(radius, height, flux), radius, height)
+    saddles, saddle_values = _stationary(surface, seeds, -1)
+    extremum, _ = _stationary(surface, [axis] if axis is not None else [], 1)
+    label_surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(label)
+    )
+    label_seeds = _candidates(_gradient_magnitude(radius, height, label), radius, height)
+    label_saddles, _ = _stationary(label_surface, label_seeds, -1)
+    label_axis = _extremum(label, radius, height, label_boundary)
+    label_axis_points, _ = (
+        _stationary(label_surface, [label_axis], 1)
         if label_axis is not None
-        else [(axis_value, bounding)]
+        else (np.empty((0, 2)), None)
     )
 
-    frame_rows = sorted(
-        [r for r in rows if r["frame"] == frame], key=lambda r: r["trip"]
+    solved_value = _point_flux(radius, height, flux)
+    label_value = _point_flux(radius, height, label)
+    axis_value = float(solved_value(axis)[0]) if axis is not None else np.nan
+    label_axis_value = (
+        float(label_value(label_axis)[0]) if label_axis is not None else np.nan
     )
+    label_limit = float(np.nanmin(label_value(limiter))) if len(limiter) else np.nan
+    edge = bounding if np.isfinite(bounding) else label_limit
+    levels = _shared_levels([(axis_value, edge), (label_axis_value, label_limit)])
+    if not len(levels):
+        levels = np.linspace(
+            float(np.nanmin(flux)), float(np.nanmax(flux)), LEVEL_COUNT + 2
+        )[1:-1]
 
-    figure, (axes, strip) = plt.subplots(
-        2,
-        1,
-        figsize=(14.0, 7.2),
-        gridspec_kw={"height_ratios": [5.4, 1.0], "hspace": 0.12},
-    )
-    figure.subplots_adjust(left=0.03, right=0.97, top=0.88, bottom=0.14)
+    figure = plt.figure(figsize=(14.0, 7.2))
+    layout = figure.add_gridspec(2, 1, height_ratios=[6.4, 0.9], hspace=0.10)
+    axes = figure.add_subplot(layout[0])
+    strip = figure.add_subplot(layout[1])
+    figure.subplots_adjust(left=0.03, right=0.97, top=0.97, bottom=0.11)
     poloidal_axes(axes)
+
     draw_flux_contours(
         axes, radius, height, flux, levels, color=DEFAULT_INK.flux_color, wall=wall
     )
     draw_flux_contours(
-        axes,
-        radius,
-        height,
-        label,
-        levels,
-        color="#9a9a9a",
-        linewidth=1.0,
-        wall=None,
+        axes, radius, height, label, levels, color="#9a9a9a", linewidth=1.0, wall=None
     )
-    draw_flux_contours(
+    _connected_surface(
         axes,
         radius,
         height,
         flux,
-        [bounding],
-        color=DEFAULT_INK.separatrix_color,
-        linewidth=DEFAULT_INK.separatrix_linewidth,
+        bounding,
+        axis,
+        DEFAULT_INK.separatrix_color,
+        DEFAULT_INK.separatrix_linewidth,
     )
-    if np.isfinite(label_bounding):
-        draw_flux_contours(
-            axes,
-            radius,
-            height,
-            label,
-            [label_bounding],
-            color="#606060",
-            linewidth=1.0,
-        )
     draw_wall(axes, radius=limiter[:, 0], height=limiter[:, 1], close=True)
+
+    hollow = dataclasses.replace(
+        DEFAULT_INK,
+        axis_color="#606060",
+        xpoint_color="#606060",
+        axis_marker="o",
+        xpoint_marker="o",
+    )
     draw_nulls(
         axes,
         magnetic_axis=axis,
-        x_points=saddles[:1] if len(saddles) else None,
+        x_points=saddles if len(saddles) else None,
     )
-    if label_axis is not None:
+    if len(label_axis_points):
         draw_nulls(
             axes,
-            magnetic_axis=label_axis,
-            x_points=label_saddles[:1] if len(label_saddles) else None,
-            contain=None,
+            magnetic_axis=None,
+            x_points=None,
+            style=hollow,
         )
+        for point in label_axis_points:
+            axes.plot(
+                point[0],
+                point[1],
+                marker="^",
+                markersize=DEFAULT_INK.axis_markersize,
+                markerfacecolor="none",
+                markeredgecolor="#606060",
+                linestyle="none",
+            )
+        for point in label_saddles:
+            axes.plot(
+                point[0],
+                point[1],
+                marker="X",
+                markersize=DEFAULT_INK.xpoint_markersize,
+                markerfacecolor="none",
+                markeredgecolor="#606060",
+                linestyle="none",
+            )
     if len(label_boundary):
         axes.plot(
             label_boundary[:, 0],
             label_boundary[:, 1],
             color="#555555",
-            linewidth=1.1,
+            linewidth=1.0,
             linestyle="--",
             zorder=DEFAULT_INK.zorder_separatrix,
         )
 
-    trips = [r["trip"] for r in frame_rows]
-    residuals = [
-        r["residual"] if r.get("residual") is not None else np.nan for r in frame_rows
+    handles = [
+        plt.Line2D([], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"),
+        plt.Line2D([], [], color="#9a9a9a", linewidth=2.0, label="EFIT flux"),
+        plt.Line2D([], [], color=DEFAULT_INK.separatrix_color, linewidth=2.6, label="bounding surface"),
+        plt.Line2D([], [], color="black", linewidth=2.0, label="limiter"),
+        plt.Line2D([], [], color="#606060", linewidth=1.6, linestyle="--", label="EFIT boundary"),
+        plt.Line2D([], [], marker="^", linestyle="none", color=DEFAULT_INK.axis_color, markersize=7, label="solved axis"),
+        plt.Line2D([], [], marker="X", linestyle="none", color=DEFAULT_INK.xpoint_color, markersize=7, label="solved X-point"),
+        plt.Line2D([], [], marker="^", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT axis"),
+        plt.Line2D([], [], marker="X", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT X-point"),
     ]
-    strip.plot(
-        trips, residuals, marker="o", color=DEFAULT_INK.flux_color, linewidth=1.6
-    )
-    strip.plot(
-        [trip],
-        [row.get("residual", np.nan)],
-        marker="o",
-        markersize=8,
-        color=DEFAULT_INK.separatrix_color,
-    )
+    figure.legend(handles=handles, loc="upper center", ncol=5, frameon=False, fontsize=12)
+
+    frame_rows = sorted([r for r in rows if r["frame"] == frame], key=lambda r: r["trip"])
+    trips = [r["trip"] for r in frame_rows]
+    residuals = [r.get("residual", np.nan) for r in frame_rows]
+    strip.plot(trips, [r if r is not None else np.nan for r in residuals], marker="o", color=DEFAULT_INK.flux_color, linewidth=1.6)
+    strip.plot([trip], [row.get("residual", np.nan)], marker="o", markersize=8, color=DEFAULT_INK.separatrix_color)
     strip.set_xlim(min(trips) - 0.3, max(trips) + 0.3)
     strip.set_xticks(trips)
-    strip.set_xlabel("active-set trip", fontsize=16)
-    strip.set_ylabel("residual", fontsize=16)
-    strip.tick_params(labelsize=14)
+    strip.set_xlabel("active-set trip", fontsize=14)
+    strip.set_ylabel("relative residual", fontsize=14)
+    strip.tick_params(labelsize=12)
     strip.spines[["top", "right"]].set_visible(False)
-    strip.set_ylim(0, max([v for v in residuals if np.isfinite(v)] + [0.1]) * 1.15)
+    finite = [v for v in residuals if v is not None and np.isfinite(v)]
+    strip.set_ylim(0, max(finite + [0.1]) * 1.2)
 
     axes.set_aspect("equal")
-    axes.set_xlim(
-        float(np.min(limiter[:, 0])) - 0.05, float(np.max(limiter[:, 0])) + 0.15
-    )
-    z_low = float(np.min(limiter[:, 1])) - 0.05
-    z_high = float(np.max(limiter[:, 1])) + 0.05
-    if axis is not None and np.isfinite(axis[1]):
-        z_low = min(z_low, float(axis[1]) - 0.08)
-        z_high = max(z_high, float(axis[1]) + 0.08)
-    axes.set_ylim(z_low, z_high)
+    axes.set_xlim(float(np.nanmin(radius)), float(np.nanmax(radius)))
+    axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
 
-    figure.suptitle(
-        f"DIII-D frame {frame}, trip {trip}: solved contours in blue, "
-        f"EFIT label in grey; "
-        f"bounding flux {bounding:.3f} Wb from the {bounds}",
-        fontsize=14,
-        y=0.965,
-    )
     out.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(out, format="svg")
     figure.savefig(out.with_suffix(".check.png"), dpi=110)
@@ -296,27 +318,50 @@ def render_trip(
         "axis_inside_limiter": None
         if axis is None
         else bool(inside_wall_units(axis[None, :], limiter)[0]),
+        "bounding_flux": None if not np.isfinite(bounding) else bounding,
+        "boundary_found": None if boundary is None else bool(boundary.found),
+        "boundary_class": None
+        if boundary is None
+        else ("diverted" if boundary.is_diverted else "limited"),
         "saddles_rz_m": saddles.tolist(),
-        "bounding_flux": bounding,
-        "bounds": bounds,
-        "limiter_flux": limiter_flux,
-        "saddle_flux": saddle_flux,
-        "label_bounding_flux": label_bounding,
+        "saddle_flux": saddle_values.tolist(),
         "residual": row.get("residual"),
         "svg": str(out),
     }
 
 
-def main() -> None:
+def _extremum(flux, radius, height, boundary):
+    mesh = np.meshgrid(radius, height)
+    points = np.c_[mesh[0].ravel(), mesh[1].ravel()]
+    inside = inside_wall_units(points, np.asarray(boundary, dtype=float))
+    flat = np.asarray(flux, dtype=float).ravel().copy()
+    flat[~inside] = np.nan
+    if not np.isfinite(flat).any():
+        return None
+    upper = abs(np.nanmax(flat)) > abs(np.nanmin(flat))
+    index = int(np.nanargmax(flat)) if upper else int(np.nanargmin(flat))
+    return points[index]
+
+
+def _shared_levels(ranges):
+    finite = [
+        (float(a), float(b)) for a, b in ranges if np.isfinite(a) and np.isfinite(b)
+    ]
+    if not finite:
+        return np.empty(0)
+    low = min(min(pair) for pair in finite)
+    high = max(max(pair) for pair in finite)
+    if np.isclose(low, high):
+        return np.empty(0)
+    return np.linspace(low, high, LEVEL_COUNT + 2)[1:-1]
+
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--rows", type=Path, required=True)
-    parser.add_argument("--figures", type=Path, required=True)
-    parser.add_argument(
-        "--panels",
-        nargs="+",
-        default=["146:1", "146:2", "137:2"],
-    )
+    parser.add_argument("--figures", dest="figures", type=Path, required=True)
+    parser.add_argument("--panels", nargs="+", default=["146:1", "146:2", "137:2"])
     arguments = parser.parse_args()
     rows = json.loads(arguments.rows.read_text())["rows"]
     records = []

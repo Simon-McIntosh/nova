@@ -104,6 +104,15 @@ and the confined core carries <code>1.057</code>&times; the target current on th
 attempted inner step is accepted (24 of 24) and the promotion still returns the same residual, so the
 fixed-point map is idempotent at that state.</p>
 
+<p><b>Frame 144, diverted seed.</b> Its limited seed refuses at axis identification, but its diverted
+seed solves, and it is the clearest instance of the pattern: the mask difference is <code>0</code> at the
+first trip and stays there, the shipped policy settles after <i>one</i> trip at residual
+<code>5.927</code>, the continued arm spends sixteen trips at the same number, and every inner step is
+accepted (24 of 24). The plasma is again present &mdash; axis at R=1.759, Z=+0.013, inside the wall, and
+<code>1.073</code>&times; the target current &mdash; and the achieved topology is the diverted one its seed
+asked for. A fixed-point map that begins already stationary explains all of these terminals at once: the
+residual the gate reads is set by the state the seed enters, and no promotion the loop can take moves it.</p>
+
 <p><b>The area, corrected.</b> The probe first reported a closed plasma area of <code>0.0 m&sup2;</code>
 on every arm beside a confined current of about <code>1 MA</code>. That was a defect in the measurement,
 not in the plasma: the area was counted from a mask attribute the domain partition does not carry, and the
@@ -119,10 +128,10 @@ Both hold. The area now agrees with the current read, and both say the plasma is
 these terminals.</p>
 
 <p><b>Still running.</b> Frames 146 and 137 are measuring now (job <code>sched/1307525</code>, H200, one
-process per frame). Frame 144 is the one frame whose two seeds do not share a fate: its limited seed
-refuses at axis identification before any promotion, which is the refusal the banked record carries and
-is upstream of the fixed point, while its diverted seed solves and is being measured now. Those three are ingested
-by the same merge step that produced this section, so the table grows without anything being re-solved.</p>
+process per frame) and are ingested by the same merge step that produced this section, so the table grows
+without anything being re-solved. Frame 144's diverted seed is measured above; its limited seed refuses at
+axis identification before any promotion, which is the refusal the banked record carries and is upstream of
+the fixed point.</p>
 
 <h3>The branch decision on frames 179 and 44</h3>
 

@@ -1,10 +1,12 @@
 <section id="bank-route-rows-landing">
 <h2>Fast-route convergence and oracle precision beyond the diverted seed</h2>
-<p><strong>The fast route converges on both 550-cell certificate rows and, on the
-diverted row, stays inside the locked precision budget with its X-point 6.80e-6 m
-from the analytic one. The limited row converges at 9.64e-11 of the 1e-10
-residual limit — under four percent in hand — and its oracle ratios are not
-measured here, so that half of the row is a shortfall rather than a pass.</strong></p>
+<p><strong>The fast route converges on all four measured certificate rows — both
+cases at 550 cells and at 2000 cells — and the two diverted rows stay inside the
+locked precision budget throughout, the 2000-cell row four times tighter than the
+550-cell one. The limited rows converge at 9.64e-11 and 6.64e-11 against the
+1e-10 limit, under four percent in hand, and their oracle ratios are not
+measured here, so that half of each limited row is a shortfall rather than a
+pass.</strong></p>
 <p>Each row runs the fast route from the certificate seed — the analytic read,
 booked — to a fresh-read residual, then runs the default present route on the
 same certificate row. Geometry is judged against the analytic oracle under the
@@ -38,16 +40,21 @@ map the gap is reported beside that map's own interpolation offset.</p>
 <td>no saddle on a limited row</td>
 </tr>
 <tr>
-<td>diverted, about 2000 cells</td>
-<td colspan="10">not run: the operator bank is not stored at this size and its build does not fit the allocation — see below</td>
+<td>diverted, 2000 cells</td><td>6172</td><td>2</td><td>5.12e-13 Wb</td>
+<td>2.083e-6</td><td>2.662e-6</td><td>3.721e-6</td><td>pass</td>
+<td colspan="2">not run — its process pool broke</td><td>not measurable</td>
+<td>not measured on this row</td>
 </tr>
 <tr>
-<td>limited, about 2000 cells</td>
-<td colspan="10">not run: the operator bank is not stored at this size and its build does not fit the allocation — see below</td>
+<td>limited, 2000 cells</td><td>6176</td><td>2</td><td>6.64e-11 Wb</td>
+<td colspan="3">not measured — see below</td><td>shortfall</td>
+<td colspan="2">not run — the row raised at its oracle before reaching it</td>
+<td>not measurable</td>
+<td>no saddle on a limited row</td>
 </tr>
 <tr>
 <td>diverted and limited, about 5000 cells</td>
-<td colspan="10">not run: the operator matrix alone is 7.2 GB at this size and the build is nine times the 550-cell row — see below</td>
+<td colspan="10">not run: the operator matrix alone is 7.2 GB and the build is about five times the 2000-cell wall of 626 s, which did not fit the allocation — see below</td>
 </tr>
 </tbody></table>
 
@@ -114,25 +121,35 @@ units. The two null sets sit within 7e-6 m and are drawn overlapping at this
 scale. Terminal fresh residual 1.208e-12 Wb, converged.</figcaption>
 </figure>
 
-<p><strong>Why the 2000-cell and 5000-cell rows were not run.</strong> Only the
-diverted 550-cell bank is stored; every other row builds its own operator matrix
-through <code>build_jet_matrix</code>. That build took 328.8 s for 1743 lattice
-nodes and 550 cells on an H200 carrying five other jobs, and its first batched
-launch alone reported 294 s while compiling. A 2000-cell hex realisation carries
-about 6300 nodes, so its matrix is
-<code>nodes &times; cells &times; 3 &times; 6 &times; 8</code> = 1.8 GB and its
-build is roughly three and a half times the 550-cell wall, before the present
-route's own machine build and solve; two 550-cell rows, two 2000-cell rows and
-their present arms do not fit one allocation, and the two jobs that did share
-the reservation ran concurrently until the certificate benchmark's analytic-flux
-process pool broke under the contention. At 5000 cells the matrix alone is 7.2 GB and the build is
-nine times the measured 550-cell wall. Both rows are reported as unrun rather
-than dropped, and the 550-cell pair is the part of §4 clause 2 this node
-answers.</p>
+<p><strong>The 2000-cell rows did build and converge; the 5000-cell row did
+not fit.</strong> Only the diverted 550-cell bank is stored, so every other row
+builds its own operator matrix through <code>build_jet_matrix</code>. At 2000
+cells the diverted row realised 6172 lattice nodes and the limited row 6176, and
+each build took about 626 s on the H200 to write a 1.78 GB matrix — under twice
+the 550-cell wall of 328.8 s, not the three-and-a-half times this node first
+estimated from node count alone. Both fast routes then converged in two updates.
+The diverted 2000-cell row is the most accurate row measured here, with its axis
+1.53e-6 m and its X-point 1.95e-6 m from the analytic ones: four times tighter
+than the 550-cell row on each stationary point and seven times tighter on the
+boundary flux. That is the bank's build-and-resolution trade in one comparison,
+and it is why the 550-cell pass should be read as the coarse end of a trend
+rather than as the route's precision. Neither 2000-cell row completed: the
+diverted row's present arm died when the certificate benchmark's analytic-flux
+process pool broke under contention with the other job on the node, and the
+limited row raised at its oracle, which is the same defect repaired in
+<code>row_oracle</code> for the 550-cell row. Both fast routes had already
+written their terminal state, so the convergence and the diverted row's ratios
+are measured and only their present arms are missing. At 5000 cells the matrix
+alone is 7.2 GB and the build was projected at about five times the 626 s wall,
+which did not fit the allocation; that row is reported unrun rather than
+dropped.</p>
 
 <p>Receipts: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/gate-diverted-550.log</code> (the diverted row at the final revision, clean exit),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.log</code> (fast route, three updates),
-<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/retry/limited-550.log</code> (limited fast route, seven updates),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-550.log</code> (limited fast route, seven updates; the run exits 1 at its oracle),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.log</code> and
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-2000.log</code> (the 2000-cell fast routes, two updates each),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.npz</code> (the 2000-cell archived state; that run wrote its archive before its present arm died),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.npz</code> (the archived state the panel is drawn
 from), and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/final/</code> (the present arms attempted and their
 failures).</p>

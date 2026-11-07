@@ -4,6 +4,18 @@
   "call_sites": "scripts/prototypes/diiid_axis_identification/census.py, scripts/prototypes/diiid_axis_identification/local_index.py, scripts/prototypes/diiid_axis_identification/render_seed_panel.py",
   "completed_at": "",
   "dispatched_at": "2026-11-07T13:51:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T17:41:13.092734+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T17:41:16.730746+00:00"
+    }
+  },
   "findings": [
     {
       "id": "f8ae4186009",

@@ -58,6 +58,27 @@ N(k) = 2 r' (a_1^2 r' - r_1) / (a k^2)</pre>
     The <em>D</em> part of the closed form is therefore settled to machine
     precision.</p>
 
+    <h2 id="icm-closed-flux-partone">What Part I settles, and what it does not</h2>
+    <p>Part I (<em>Filament approximation</em>, MAG-16(5), 1980) defines the
+    notation Part II reuses. Its eq (14d) closes with
+    <code>(b = r_1 + r)</code>, so the undefined <code>b</code> in Part II's
+    <code>S(k)</code> is the target radius plus the local source radius. Its
+    eq (12) writes the vector potential as
+    <code>(a/r) {dn u_i, sgn(alpha_i)[(1 - k^2/2)K(theta_i,k) - E(theta_i,k)]}</code>,
+    which fixes the reading of Part II's bracket
+    <code>{2 sn u cn u, cn^2 u - sn^2 u}</code>: the columns are
+    <code>j = r</code> then <code>j = phi</code>, so the phi column carries
+    <code>cn^2 u - sn^2 u</code>. Part I also shows the boundary terms always
+    arrive as <code>sn u_i cd u_i</code> with <code>cd u = cn u / dn u</code>
+    (its <code>W(theta_i,k) = E - k^2 sn u_i cd u_i</code>), which is what the
+    <code>dn u_i [L(k) - b_1^2 a sn^2 u_i]</code> factor in Part II eq (18) is
+    built from.</p>
+    <p>Part I does <strong>not</strong> resolve the coefficient block. It is the
+    constant-radius filament; its own <code>S(k) = k^2(a^2+b^2) - 2b^2</code>
+    (eq 14d) is the field-gradient block, not the vector-potential block of
+    Part II eq (13a), and the two are different functions of the same
+    symbol.</p>
+
     <h2 id="icm-closed-flux-discrepancy">The discrepancy that stops the node</h2>
     <p>The printed <code>M(k) K + N(k) E</code> does not reduce to that
     expression. At the same end, with <code>S</code> read at
@@ -70,14 +91,63 @@ N(k) = 2 r' (a_1^2 r' - r_1) / (a k^2)</pre>
     Reading <code>S</code> at <code>b = r'</code> or <code>b = c_1</code> moves
     <code>M</code> by only a few per cent and cannot close it, so the misprint
     is not in that one symbol.</p>
-    <p>What this node did <strong>not</strong> resolve is whether the printed
-    <code>M</code>, <code>N</code> belong to the same quantity as the module's
-    <code>R</code>. Eq (13) is written after an integration by parts and its
-    <code>{2 sn u cn u, cn^2 u - sn^2 u}</code> bracket may carry a factor and
-    a boundary term that the module's <code>R</code> does not. Settling that,
-    and reducing the arsinh/third-kind block to a form that the verified flux
-    agrees with at 1e-10, is the remaining work. No quadrature was substituted
-    for a closed form and no coefficient was fitted.</p>
+
+    <h3 id="icm-closed-flux-integral">The eq (13) integral, evaluated exactly</h3>
+    <p>Part II eq (13)'s phi column carries
+    <code>int_0^{u_i} du [S - T sn^2 u](cn^2 u - sn^2 u)</code>. That integral is
+    elementary in the complete case <code>u_i = K</code>, giving
+    <code>M = S(1 - 2/k^2) + b_1^2 a (4 - k^2)/(6 k^2)</code> and
+    <code>N = 2S/k^2 - b_1^2 a (4 + k^2)/(6 k^2)</code>, and adding eq (13)'s
+    constant <code>-r'(r^2+r_1^2)/(a r)</code> folded into the <code>K</code>
+    coefficient. Evaluated with <code>S</code> and <code>T</code> exactly as
+    printed, and compared against a Gauss-Legendre quadrature of the same
+    <code>u</code>-integral (scipy <code>ellipj</code>, 400,000 points):</p>
+    <table>
+      <thead><tr><th>segment end</th><th>u-integral, quadrature</th><th>derived M K + N E</th><th>printed M K + N E</th></tr></thead>
+      <tbody>
+        <tr><td>(r',z') = (1.5, 0.6)</td><td>-4.7406755</td><td>-4.7406755</td><td>-4.3464800</td></tr>
+        <tr><td>(r',z') = (0.8, -0.5)</td><td>-4.1261708</td><td>-4.1261708</td><td>-3.7261758</td></tr>
+      </tbody>
+    </table>
+    <p>The derived coefficients reproduce the paper's own integral to every
+    digit carried. The printed <code>M</code> and <code>N</code> do not, and
+    the gap grows with the standoff and with <code>b_1</code>. That is the
+    misprint this node can name: <strong>printed</strong>
+    <code>M = S - a(d_1 + a_1^2 r' + b_1^2 r)/(2r) - r'(r^2+r_1^2)/(ar)</code>,
+    <strong>corrected</strong>
+    <code>M = S(1 - 2/k^2) + b_1^2 a(4-k^2)/(6k^2) - r'(r^2+r_1^2)/(ar)</code>;
+    <strong>printed</strong> <code>N = 2r'(a_1^2 r' - r_1)/(a k^2)</code>,
+    <strong>corrected</strong>
+    <code>N = 2S/k^2 - b_1^2 a(4+k^2)/(6k^2)</code>. The measurement is the
+    table above.</p>
+
+    <h3 id="icm-closed-flux-thirdkind">The block that still does not close</h3>
+    <p>With those corrected coefficients, the full eq (22a) assembly &mdash;
+    the <code>g</code> term, the <code>[M K + N E]</code> term and the
+    third-kind sum &mdash; still does not equal a constant multiple of the
+    module's antiderivative at both ends. At <code>(r',z') = (1.5, 0.6)</code>
+    the three terms are <code>g = +0.2124</code>, <code>D = +5.3024</code>,
+    <code>Pi = -4.9779</code>, sum <code>+0.5369</code>, against a module value
+    of <code>0.2277</code>; at <code>(0.8, -0.5)</code> they are
+    <code>-0.0107</code>, <code>+4.6151</code>, <code>-4.7836</code>, sum
+    <code>-0.1793</code>, against <code>-1.4856</code>. The ratios are 2.36 and
+    0.12, so no normalisation reconciles them. The third-kind sum is the
+    suspect: it is the size of the <code>D</code> term and of opposite sign, so
+    an error in <code>P_phi</code>'s row choice, in the <code>(+/-)</code>
+    pairing with <code>p = 1, 2</code>, or in the sign of
+    <code>(-1)^p</code> moves the total by far more than the residual.</p>
+    <p>One trap found and recorded for a successor:
+    <code>complete_pole(pole, complement)</code> takes
+    <code>pole = 1 - n</code> and evaluates
+    <code>int da/((cos^2 a + pole sin^2 a) sqrt(1 - k^2 sin^2 a))</code>, not
+    <code>Pi(n, k)</code> directly. Passing <code>n_p^2</code> where
+    <code>1 - n_p^2</code> belongs moves the third-kind sum by far more than the residual the block is
+    trying to close, and it presents as a coefficient defect rather than a
+    calling-convention one.</p>
+    <p>No quadrature was substituted for a closed form and no coefficient was
+    fitted: every number above is either the printed expression evaluated as
+    read, or an elementary closed form derived from the paper's own integrand
+    and checked against it.</p>
 
     <h2 id="icm-closed-flux-state">State of the working tree</h2>
     <p>No source or test change was made: <code>nova/biot/sheet.py</code> and

@@ -1,0 +1,91 @@
+<section id="bank-limited-contact-result">
+  <h3>Analytic limiter contact: the saved oracle chose a vertex</h3>
+  <p><strong>The analytic limited boundary is the outboard edge midpoint
+  (R, Z) = (7.801395789307387 m, 0), exactly the existing
+  <code>designed_contact()</code>, so the boundary-flux clause must compare
+  against 0 Wb rather than the saved vertex's −0.04915504379573403 Wb.</strong></p>
+  <p>The whole-wall maximum is 2.2322358387255243e−14 Wb in binary64,
+  indistinguishable from the closed-form zero. Its flux margin over
+  <code>designed_contact()</code> is exactly zero, and its margin over the saved
+  oracle vertex is 49.15504379575635 mWb. The maximum lies halfway along edge
+  120 (zero-based, last vertex to first), at arc length 18.524824880579 m
+  from vertex zero on a wall of perimeter 18.637767833164 m.</p>
+  <table>
+    <thead><tr><th>Point</th><th>R [m]</th><th>Z [m]</th><th>Arc from maximum [mm]</th><th>Analytic total flux [mWb]</th><th>Flux minus designed contact [mWb]</th></tr></thead>
+    <tbody>
+      <tr><td>Global maximum / designed contact</td><td>7.801395789307387</td><td>0</td><td>0</td><td>2.232235839e−11</td><td>0</td></tr>
+      <tr><td>Saved oracle vertex, both rows</td><td>7.801395789307387</td><td>0.11294295258504541</td><td>112.942952585</td><td>−49.155043795734</td><td>−49.155043795756</td></tr>
+      <tr><td>Route, 550 cells</td><td>7.801395789307387</td><td>−0.008344485542996827</td><td>−8.344485543</td><td>−0.268317467679</td><td>−0.268317467702</td></tr>
+      <tr><td>Route, 2000 cells</td><td>7.801395789307387</td><td>0.000024328921917643465</td><td>0.024328922</td><td>−2.280821468e−6</td><td>−2.280843791e−6</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-limited-contact/wall-flux.svg" alt="Analytic flux over the whole limiter perimeter and a close view of the contact edge; the maximum and designed contact coincide, both route points lie near it, and the saved oracle vertex lies lower." />
+    <figcaption>Analytic total flux along the 121-edge saved wall, evaluated
+    directly as 2π case.flux; positive arc follows the saved vertex order.
+    Left: the entire perimeter, wrapped about the maximum. Right: the contact
+    edge and its neighbours. Blue marks the maximum and route contacts; the
+    grey cross is the saved oracle vertex. The 2000-cell point is only 24.3 µm
+    from the maximum, so its hollow triangle surrounds the maximum's dot at
+    this scale. The 550-cell point is 8.34 mm away. The figure's text and data
+    collision checks pass, and the rendered PNG was visually inspected.</figcaption>
+  </figure>
+  <h4 id="bank-limited-contact-method">Independent scan and reproducible discrepancy</h4>
+  <p>The prototype reads <code>limited-550-oracle.npz</code> and
+  <code>limited-2000-oracle.npz</code> from the saved bank-route-rows run
+  <code>r-20261107T111216113482-bank-route-rows/results</code>. It uses their
+  <code>wall</code>, <code>analytic_roots[1]</code>, and
+  <code>solved_roots[1]</code>, without constructing an operator or solving an
+  equilibrium. Both saved walls agree with <code>limiter_contour()</code>
+  for <code>reference_cases()["weak-rotation-reactor"].static_limit()</code>
+  within 1.35e−14 m. The archived inputs' SHA-256 digests are in the receipt.</p>
+  <p>All 121 edges, including their interiors, are sampled at a maximum
+  spacing of 0.999669 mm: 18,704 samples. A second scan uses 37,338 samples at
+  no more than 0.499963 mm. Both find the same maximum. An independent
+  polynomial calculation enumerates all real interior roots of the cubic
+  derivative on every straight edge, together with the vertices: 180
+  candidates, again the same maximum. The static flux is
+  ψ = ψa − kp(R² − R₀²)²/2 − kzZ²; its nested surfaces expand from the axis
+  maximum, so the first wall contact is the largest wall flux.</p>
+  <p>The scan resolves a nonzero range, −9.693631868582 to approximately
+  0 Wb, and verifies the known axis flux of 49.94072179477446 Wb. These
+  controls prevent a zero-valued or constant instrument from passing.
+  The analytic route-minus-saved-oracle gaps reproduce as
+  <strong>0.04888672632805477 Wb</strong> (550) and
+  <strong>0.04915504151491256 Wb</strong> (2000). The original receipt records
+  boundary-clause ratios 9.917576173044452e−4 and 9.855976707807599e−4;
+  these are retained as recorded solve results, not recomputed solves.</p>
+  <h4 id="bank-limited-contact-attribution">Correction belongs to the comparison</h4>
+  <p>At the saved run's revision
+  <code>9d5a148c8b3015172c850cd4e908739134ffeff8</code>,
+  <code>scripts/prototypes/bank_route_rows/measure.py::row_oracle</code>
+  selects <code>wall_points[int(np.argmax(wall_flux))]</code>: vertices
+  only. It does not call <code>designed_contact()</code>. Its saved reference
+  is vertex zero, 112.94 mm above that helper's midpoint. The helper is already
+  correct and requires no implementation change.</p>
+  <p>The route's <code>nova/equilibrium/topology.py::_wall_events</code>
+  enumerates vertices and polished interior edge tangencies;
+  <code>read_at_stationary_points</code> selects an eligible wall event.
+  The saved route contacts have edge parameters 0.463058848064409 and
+  0.5001077044709776, confirming interior-edge selection. This measurement
+  establishes no vertex-only defect in that route. The 550-cell displacement
+  is a numerical contact error on its solved/interpolated field; its cause is
+  not identifiable from the saved points alone.</p>
+  <p>Use the analytic edge maximum, 0 Wb, and the corresponding axis-to-boundary
+  span 49.94072179477446 Wb in the comparison. Analytic flux evaluated at the
+  saved route points differs from this boundary by 5.372719057e−6 and
+  4.567102173e−11 of that span. These contact-only errors do not certify the
+  route's reported boundary flux: that scalar is absent from the saved NPZs,
+  and this node performs no fresh read.</p>
+  <h4 id="bank-limited-contact-reproduce">Artifacts and execution</h4>
+  <p>Prototype: <code>scripts/prototypes/bank_limited_contact/measure.py</code>,
+  <code>plot.py</code>, and <code>run.sh</code>. Run the launcher with a log
+  path followed by <code>--inputs</code> pointing to the saved results,
+  <code>--output</code> for the JSON receipt, and optional <code>--figure</code>
+  and <code>--preview</code> paths. It pins JAX to CPU and uses the existing
+  project environment. Logs, receipt, input-source excerpt and inspected PNG
+  are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T225042811649-bank-limited-contact</code>.
+  The gate log contains the exact command, revision, imported source paths
+  and process wall time, and ends with <code>EXIT=0</code>. Execution runs
+  in the assigned compute allocation; no separate login-host timing is claimed.</p>
+</section>

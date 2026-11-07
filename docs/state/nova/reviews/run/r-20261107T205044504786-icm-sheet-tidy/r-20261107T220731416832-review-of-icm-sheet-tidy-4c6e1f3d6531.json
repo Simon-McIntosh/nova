@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "the before wall (1259.9 ms) is the pre-change closed route measured by the closed-field node's own gate (97.9 s over its 285-test gate, about 1.2 s per evaluation); only the before log is missing, the after arm is logged",
       "recorded_at": "2026-11-07T22:58:30.355549+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "record-keeping only; the reviewer ran both gate arms itself (392 passed at b7d927c, 416 at 4c6e1f3d, delta 0), so the landing's correctness is established",
+      "recorded_at": "2026-11-07T22:58:52.159873+00:00"
     }
   },
   "findings": [

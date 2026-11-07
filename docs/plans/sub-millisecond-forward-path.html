@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="236">
+<meta name="plan-version" content="237">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -802,7 +802,10 @@
     <div class="r-comment-body"><p>Independent review of the two commits gained since f57db2361: the limited-row oracle ratios and residual floor reconcile exactly against results/limited-oracle.log, with one blocking finding (the fragment's "60-segment wall" justification for the boundary miss is wrong: the compared wall is limiter_contour's 121 points and the neighbouring wall node is 0.0189 Wb away) and three non-blocking findings (duplicated archive block in the new driver, the missing limited 550-cell panel, and the residual-floor wording).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T204343185318-review-of-bank-jacobian-mismatch-82bf5dd3e617" data-who="reckon-build" data-when="2026-11-07T21:12:26.946Z">
-    <div class="r-comment-body"><p>review of r-20261107T152015525295-bank-jacobian-mismatch at 82bf5dd3e scored goal 15, evidence 15, scope 19, durability 10, fit 15, reuse 17, with four non-blocking findings (the fragment&#x27;s stated 6e-8..6e-7 range contradicts its own table, the launcher&#x27;s TERM trap writes a non-bare EXIT line, the committed evidence names no device although the run was a Tesla P100, and the manifest&#x27;s tests line names a titan2 run while the committed log is titan3).</p></div>
+    <div class="r-comment-body"><p>review of r-20261107T152015525295-bank-jacobian-mismatch at 82bf5dd3e scored goal 15, evidence 15, scope 19, durability 10, fit 15, reuse 17, with four non-blocking findings (the fragment's stated 6e-8..6e-7 range contradicts its own table, the launcher's TERM trap writes a non-bare EXIT line, the committed evidence names no device although the run was a Tesla P100, and the manifest's tests line names a titan2 run while the committed log is titan3).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T152015525295-bank-jacobian-mismatch" data-who="reckon-build" data-when="2026-11-07T20:27:34Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html</p></div>
 </div>
 </section>
 </main>

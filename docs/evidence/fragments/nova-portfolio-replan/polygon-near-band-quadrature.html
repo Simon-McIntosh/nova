@@ -83,6 +83,41 @@ the same program's primal compiled in 0.327 s under eight spun-up cores and
 3.07 was reported. Whether the bound or its repeat count should move is left to
 a node that owns that row; it was not widened here.</p>
 
+<h3>The confined arm, measured on three devices</h3>
+
+<p>A candidate that gathers the selected targets onto a static bucket of 16,
+evaluates the graded quadrature there and scatters back was measured against
+the whole-array evaluation on the same packed inputs, one batched call per coil
+set per arm, through <code>scripts/nova_lane/run.sh</code>:</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Device</th><th scope="col">Coil set</th>
+    <th scope="col">baseline</th><th scope="col">head, whole array</th>
+    <th scope="col">head, confined bucket</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>H200 cuda:0 (run A)</td><td>MAST</td><td>0.655 ms</td><td>0.675 ms</td><td>0.899 ms</td></tr>
+    <tr><td>H200 cuda:0 (run A)</td><td>DIII-D</td><td>0.940 ms</td><td>1.026 ms</td><td>0.902 ms</td></tr>
+    <tr><td>H200 cuda:0 (run B)</td><td>MAST</td><td>0.505 ms</td><td>0.942 ms</td><td>0.940 ms</td></tr>
+    <tr><td>H200 cuda:0 (run B)</td><td>DIII-D</td><td>1.043 ms</td><td>1.017 ms</td><td>1.003 ms</td></tr>
+    <tr><td>titan cuda:0</td><td>MAST</td><td>2.957 ms</td><td>2.934 ms</td><td>2.968 ms</td></tr>
+    <tr><td>titan cuda:0</td><td>DIII-D</td><td>7.289 ms</td><td>7.326 ms</td><td>7.303 ms</td></tr>
+    <tr><td>CPU x64, 4 cores</td><td>MAST</td><td>84.82 ms</td><td>86.01 ms</td><td>86.96 ms</td></tr>
+    <tr><td>CPU x64, 4 cores</td><td>DIII-D</td><td>500.24 ms</td><td>499.18 ms</td><td>497.33 ms</td></tr>
+  </tbody>
+</table>
+
+<p>The two H200 runs are the same arms: the baseline MAST wall moves from 0.655
+to 0.505 ms, a third, so a single-sample H200 row cannot resolve a change of
+the size the bucket would deliver. Titan and CPU, where the walls are stable,
+place the bucket within one percent of the whole-array evaluation on both coil
+sets. <strong>The goal is therefore refuted by measurement: confining the
+near-band quadrature to the targets that select it does not beat evaluating it
+for every target on any device measured, and the candidate is reverted.</strong>
+The node lands as the consolidation alone: one owner of the weighted graded
+residual, and the duplicate deleted.</p>
+
 <h3>Before and after walls, and the negative control</h3>
 
 <p>One four-core <code>all_debug</code> job measured the shipped configuration

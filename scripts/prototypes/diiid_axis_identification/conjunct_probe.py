@@ -1,8 +1,9 @@
-"""Print the axis-admission conjuncts the frame 144 limited seed was refused on.
+"""Print the axis-admission conjuncts for the frame 144 limited field.
 
-The seed is read through the operator's own qualification path with
+The field is read through the operator's own qualification path with
 ``qualified_o_candidates`` wrapped, so the values printed are the ones the
-refusal was computed from rather than a reimplementation of them.
+qualification computed rather than a reimplementation of them. The field is
+either the cached limited seed or one captured at a refusal.
 """
 
 from __future__ import annotations
@@ -26,7 +27,10 @@ for extra in (
         sys.path.insert(0, str(extra))
 
 import measure_branches  # noqa: E402
-from nova.equilibrium.topology import TopologyClass  # noqa: E402
+from nova.equilibrium.topology import (  # noqa: E402
+    _MATERIAL_CONNECTED_FRACTION,
+    TopologyClass,
+)
 import benchmarks.diiid_forward_gs_match as bench  # noqa: E402
 
 def _first(value) -> float | None:
@@ -42,6 +46,12 @@ def _float(value) -> float | None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--capture",
+        type=Path,
+        default=None,
+        help="npz written by capture_refusal.py; read its field instead of the cached seed",
+    )
     arguments = parser.parse_args()
 
     expansion = float(bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION)
@@ -56,7 +66,9 @@ def main() -> int:
         import jax.numpy as jnp
 
         material_cell_count = int(np.asarray(jnp.sum(inside_material)))
-        floor = int(max(np.floor(0.01 * material_cell_count), 1))
+        floor = int(
+            max(np.floor(_MATERIAL_CONNECTED_FRACTION * material_cell_count), 1)
+        )
         finite_o = np.asarray(jnp.isfinite(vmap_o[:, 0]))
         shapes = {
             "vmap_o": list(np.shape(vmap_o)),
@@ -162,25 +174,38 @@ def main() -> int:
             self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material, surface
         )
 
-    kind.qualified_o_candidates = wrapper
-    psi = np.asarray(prepared["cold"].branches.flux[0])
-    material = np.asarray(profile.operator.inside_material, dtype=bool)
+    if arguments.capture is None:
+        psi = np.asarray(
+            prepared["cold"].branches.flux[int(TopologyClass.LIMITED)], dtype=float
+        )
+        material = np.asarray(profile.operator.inside_material, dtype=bool)
+        requested = int(TopologyClass.LIMITED)
+        source = "cached limited seed"
+    else:
+        held = np.load(arguments.capture)
+        psi = np.asarray(held["psi"], dtype=float)
+        material = np.asarray(held["inside_material"], dtype=bool)
+        requested = int(held["requested_class"])
+        if requested < 0:
+            requested = None
+        source = f"captured field {arguments.capture.name}"
     polarity = int(getattr(profile.operator, "polarity", 1))
     status = "read_qualification returned"
     try:
+        kind.qualified_o_candidates = wrapper
         with jax.disable_jit():
             topology.read_qualification(
                 psi,
                 polarity,
                 material,
-                requested_class=int(TopologyClass.LIMITED),
+                requested_class=requested,
             )
     except Exception as error:
         status = repr(error)[:400]
     finally:
         kind.qualified_o_candidates = original
 
-    payload = {"read_status": status, "passes": records}
+    payload = {"read_status": status, "field_source": source, "passes": records}
     arguments.output.write_text(json.dumps(payload, indent=2))
     print(json.dumps(payload, indent=2)[:8000])
     return 0

@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[second_residual]"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite arm records in manifest.md plus the logs they cite, not from its prose. Edge arm: 11 FAILED ids at base and 11 at head, differing by exactly one row - head-only test_tangent_compiles_within_bound[second_residual] against base-only test_tangent_compiles_within_bound[channel_split] - confirmed independently in gate/base-test_edge_term_tangents.log and gate/head-test_edge_term_tangents.log. Vertex arm: the same five test_tangent_compiles_within_three_primals ids in both arms, adding none. tests/biot/test_graded_layer_near_corner.py: 0 failures in both arms. tests/biot/test_vertex_edge_tangent_recurrences.py: the same two compile-ratio ids in both arms, adding none. The armed head arm is at revision 03ef34709, not the reviewed head 9c8bc37e.",
+  "completed_at": "2026-11-07T03:37:02.816Z",
+  "dispatched_at": "2026-11-07T03:29:29Z",
+  "findings": [
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": 730,
+      "severity": "non-blocking",
+      "text": "xp.where(near, _weighted_root(self, term), reduced) still evaluates the graded quadrature for every target before selecting the near band, so the goal's confinement is absent from the landed tree; recorded rather than blocked because the refutation is measured across three devices and stated in the fragment."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/manifest.md",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "the armed head arm was measured at 03ef34709 and never at the reviewed head 9c8bc37e, whose only source delta is the six-line refusal at nova/biot/gradedresidual.py:218, so the gate receipt describes a tree the review is not of."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/manifest.md",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "the fence asks for 0 added failures and the arms carry 1, tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[second_residual], which the compile-ratio measurement bounds as an estimator excursion but does not remove."
+    },
+    {
+      "file": "nova/biot/gradedresidual.py",
+      "line": 218,
+      "severity": "non-blocking",
+      "text": "the paired-and-weighted refusal is the only production behaviour this node adds after its gate and no test asserts it, so a regression of that guard is silent."
+    },
+    {
+      "file": "scripts/prototypes/polygon_near_band/jacobian_equivalence.py",
+      "line": 84,
+      "severity": "non-blocking",
+      "text": "the equivalence harness prints bitwise_equal and the maximum relative difference but contains no assertion, so the brief's bitwise-or-bounded-at-1e-14 clause is recorded as evidence rather than enforced and a nonzero difference would still exit 0."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "the branch-share paragraph states \"no H200 compaction arm was run\" while the same document reports two H200 confined rows at lines 88-96, so the deliverable contradicts itself."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to confine the polygon near-band quadrature to the targets that select it; at 9c8bc37e6 nova/biot/polygonanalytic.py:730 still evaluates _weighted_root over the whole target array and only then xp.where-selects the near band, so the confinement is not in the landed change and the node instead records a three-device measurement that refutes it (docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html:104-118).\nVERDICT done_when: read the node's evidence fence; the walls and near-band fractions are tabled before and after with the device named on both coil sets (fragment lines 88-103 plus gate/confined-arms.json, confined-arms-h200b.json, confined-arms-titan.json, confined-arms-cpu.json), _weighted_residual is gone from nova and tests, the five 1e-9 JVP rows tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp pass at both arms (gate/head-test_vertex_term_tangents.log: 5 failed, 17 passed, and none of the 5 failures are those rows), and the two-file pytest delta is 1 added failure rather than the 0 the fence names.\nVERDICT write_paths: read the manifest's declared set; all 20 files in the diff (nova/biot/polygonanalytic.py, nova/biot/gradedresidual.py, 17 files under scripts/prototypes/polygon_near_band/, and the fragment) are inside it, and the two declared test files are declared but unmodified by the diff so no assertion of the node's own lands.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/manifest.md; it records status complete, base cb42f656 and an armed head arm at 03ef34709 (not the reviewed head 9c8bc37e), 11 edge and 5 vertex failures in each arm, a discriminating mutation control at gate/weighted-files/head-mutation-vertex-primal-jvp.log whose five rows fail under NOVA_TANGENT_TRUNCATION=1, and it states plainly that the confinement arm was reverted and the identity rows are red at both revisions.\nVERDICT diff: read commit by commit from cb42f656 to 9c8bc37e6; 4b0abe9b5 moves _weight_remainder into nova/biot/gradedresidual.py and gives graded_residual and _graded_residual_tangent a keyword-only weight/d_weight pair while deleting _weighted_residual, 9888adfde through 676ab81e4 add the near-band bucket and b0184122c reverts it, 3da7e7a09 adds the paired+weight ValueError, and the remainder commit measurement harnesses and the fragment.\nCALL_SITES: nova/biot/polygonanalytic.py:765 (_Vertex._first_residual -> graded_residual weight=), nova/biot/polygonanalytic.py:1040 (_Edge._second_residual -> graded_residual paired=/weight=), nova/biot/polygonanalytic.py:3385 (_first_residual_tangent -> _graded_residual_tangent weight=/d_weight=), nova/biot/polygonanalytic.py:3943 (_second_residual_tangent -> _graded_residual_tangent weight=/d_weight=), nova/biot/polygonarc.py:290 (graded_residual, unweighted)\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:730 is unchanged in kind from the base and the goal's confinement is not in the landed tree, with the shortfall offset by a recorded eight-row three-device refutation.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate/confined-arms.json and the titan and CPU receipts give the before/after walls and gate/jacobian-equivalence.json gives bitwise-identical packed moments over both coil sets, but the armed after_suite in manifest.md:18 names revision 03ef34709 rather than the reviewed 9c8bc37e and records 1 added failure against a fence that asks for 0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every one of the 20 changed paths sits inside the declared write set, and the only path outside the source-and-test core is the scripts/prototypes/polygon_near_band harness the done_when requires.\nSCORE durability: 13\nJUSTIFICATION durability: no test file is touched by the diff, so durability rests on the pre-existing tests/biot/test_vertex_term_tangents.py:360 rows, which do redden under the recorded mutation at gate/weighted-files/head-mutation-vertex-primal-jvp.log, and the one production guard added after the gate, nova/biot/gradedresidual.py:218, has no assertion exercising it.\nSCORE fit: 18\nJUSTIFICATION fit: the merged body at nova/biot/gradedresidual.py:241 follows the surrounding loop's idiom, ruff check --no-cache over the two source modules and scripts/prototypes/polygon_near_band reports no findings, and no added name carries a version, plan or sprint token.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/biot/gradedresidual.py:195 graded_residual is the repository's owner of the graded panel loop and the change extends it with weight while git grep over nova, tests and scripts at 9c8bc37e6 finds _weighted_residual nowhere, so the duplicate is deleted rather than wrapped.\nFINDING nova/biot/polygonanalytic.py:730 non-blocking: xp.where(near, _weighted_root(self, term), reduced) still evaluates the graded quadrature for every target before selecting the near band, so the goal's confinement is absent from the landed tree; it is recorded here rather than blocked because the node paid for the negative answer with an eight-row measurement across H200, titan and CPU and states the refutation in the fragment.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/manifest.md:18 non-blocking: the armed head arm was measured at 03ef34709 and never at the reviewed head 9c8bc37e, whose only source delta is the six-line refusal at nova/biot/gradedresidual.py:218, so the gate receipt describes a tree the review is not of.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/manifest.md:5 non-blocking: the fence asks for 0 added failures and the arms carry 1, tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[second_residual], which the compile-ratio measurement bounds as an estimator excursion but does not remove.\nFINDING nova/biot/gradedresidual.py:218 non-blocking: the paired-and-weighted refusal is the only production behaviour this node adds after its gate and no test asserts it, so a regression of that guard is silent.\nFINDING scripts/prototypes/polygon_near_band/jacobian_equivalence.py:84 non-blocking: the equivalence harness prints bitwise_equal and the maximum relative difference but contains no assertion, so the brief's bitwise-or-bounded-at-1e-14 clause is recorded as evidence rather than enforced as a gate and would report a nonzero difference with exit 0.\nFINDING docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html:30 non-blocking: the branch-share paragraph states \"no H200 compaction arm was run\" while the same document reports two H200 confined rows at lines 88-96, so the deliverable contradicts itself.\n",
+  "review_run_id": "r-20261107T032821877633-review-of-polygon-near-band-quadrature-9c8bc37e67f9",
+  "reviewed_base_sha": "cb42f656f76a7d7e56da8a53d4754c22d131bdc0",
+  "reviewed_head_sha": "9c8bc37e67f9a4d373effc3859768f74aa87d3c6",
+  "reviewed_items": {
+    "call_sites": "nova/biot/polygonanalytic.py:765, nova/biot/polygonanalytic.py:1040, nova/biot/polygonanalytic.py:3385, nova/biot/polygonanalytic.py:3943, nova/biot/polygonarc.py:290",
+    "diff": "read commit by commit from cb42f656 to 9c8bc37e6: the weight argument and the deletion of _weighted_residual, the near-band bucket and its revert, the paired+weight refusal, and measurement harnesses plus the fragment.",
+    "done_when": "the walls and near-band fractions are tabled before and after with the device named on both coil sets across H200, titan and CPU; _weighted_residual is deleted from nova and tests; the five 1e-9 JVP rows test_tangent_matches_primal_jvp pass at both arms; the two-file pytest delta is 1 added failure rather than the 0 the fence names.",
+    "goal": "the node goal is to confine the polygon near-band quadrature to the targets that select it; at 9c8bc37e6 nova/biot/polygonanalytic.py:730 still evaluates _weighted_root over the whole target array and then xp.where-selects the near band, so the confinement is not in the landed change and the node instead records a three-device measurement that refutes it.",
+    "manifest": "it records status complete, base cb42f656 and an armed head arm at 03ef34709, 11 edge and 5 vertex failures in each arm, a discriminating mutation control at gate/weighted-files/head-mutation-vertex-primal-jvp.log, and states plainly that the confinement arm was reverted and the identity rows are red at both revisions.",
+    "write_paths": "all 20 files in the diff are inside the declared write set; the two declared test files are declared but unmodified, so no assertion of the node's own lands."
+  },
+  "reviewed_run_id": "r-20261106T084812488886-polygon-near-band-quadrature",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T03:36:18+00:00",
+  "total": 94
+}

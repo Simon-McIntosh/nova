@@ -229,6 +229,43 @@ with <code>configure_dtypes()</code> called before any array is built and
 the done-when, and the near-band branch was selected in both cases, so the
 weighted quadrature was exercised rather than bypassed.</p>
 
+<h3>The other files that import the graded residual</h3>
+
+<p>Two further files import <code>nova.biot.gradedresidual</code> and were not
+run by the gate above. Both were run at both revisions in one allocation, one
+fresh process per file per arm with its own basetemp
+(job <code>1307573</code>, <code>gate/weighted-files/</code>):</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">File</th><th scope="col">base cb42f656f</th>
+    <th scope="col">head</th><th scope="col">Added failures</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><code>test_graded_layer_near_corner.py</code></td><td>2 passed, 1 skipped</td><td>2 passed, 1 skipped</td><td>0</td></tr>
+    <tr><td><code>test_vertex_edge_tangent_recurrences.py</code></td><td>2 failed, 20 passed</td><td>2 failed, 20 passed</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<p>The same two rows fail in both arms of the recurrences file,
+<code>test_tangent_compiles_within_three_primals[across]</code> and
+<code>[graded_residual]</code>, on the 3.0 compile-ratio bound (base 3.139 and
+3.452, head 3.943 and 3.467): the same estimator excursion measured on the edge
+file above, and pre-existing. The skipped row,
+<code>test_base_program_roundoff_floor</code>, is skipped for a missing retained
+reference in both arms.</p>
+
+<p><strong>The discriminating control.</strong> The vertex row
+<code>test_tangent_matches_primal_jvp</code> passes in the shipped head (the
+vertex file's only failures are its five
+<code>test_tangent_compiles_within_three_primals</code> rows, and the file
+reports 17 passes covering the five primal-JVP cases). Run under
+<code>NOVA_TANGENT_TRUNCATION=1</code> in the same allocation, <strong>all five
+of its cases fail</strong> — <code>vertex</code>, <code>arsinh_terms</code>,
+<code>against_first_arsinh</code>, <code>flux_moment_residuals</code>,
+<code>horizontal_flux_line_moments</code>. The shipped head passes what the
+mutated head fails, which is what a control has to show.</p>
+
 <h3>Before and after walls, and the negative control</h3>
 
 <p>One four-core <code>all_debug</code> job measured the shipped configuration

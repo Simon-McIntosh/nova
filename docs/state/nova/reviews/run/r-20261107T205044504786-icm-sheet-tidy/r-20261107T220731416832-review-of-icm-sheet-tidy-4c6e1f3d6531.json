@@ -9,6 +9,11 @@
       "kind": "exempted",
       "reason": "wording only: the control does redden on an add-the-ends regression (it returns minus the reference), only the docstring's stated mechanism is wrong; the next node that edits tests/test_edge_sheet.py corrects the docstring",
       "recorded_at": "2026-11-07T22:57:57.606764+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the fragment repeats finding 0's wording; corrected with the docstring in the next node touching the test file",
+      "recorded_at": "2026-11-07T22:58:16.272044+00:00"
     }
   },
   "findings": [

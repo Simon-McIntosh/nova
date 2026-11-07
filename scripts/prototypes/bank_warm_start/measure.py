@@ -33,6 +33,7 @@ import numpy as np
 
 import nova
 from nova.equilibrium import support_read
+from scripts.prototypes.bank_solve_profile import fixture as profile_fixture
 from scripts.prototypes.bank_warm_start import streams
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -85,7 +86,7 @@ def _one(machine):
             machine.convention,
             machine.policy,
             profile_leaf,
-            _gradient,
+            profile_fixture.gradient,
             machine.quadrature,
             max_steps=MAX_STEPS,
             reuse_factor=False,
@@ -94,10 +95,6 @@ def _one(machine):
         )
 
     return one
-
-
-def _gradient(radius, flux):
-    return jnp.zeros_like(radius)
 
 
 def receipt(result, wall_ms, amplitude, machine, step, slice_index, role):
@@ -169,9 +166,9 @@ def build_states(machine, path):
     )
     # The exact solution of a scaled profile is the scaled exact solution.
     amplitude = 1.0 + (streams.SLICES - 1) * max(streams.STEPS)
-    scaled_result = jax.jit(lambda state, seed, drive: _cold(machine, state, seed, drive))(
-        machine.cold_states, machine.cold_seeds, amplitude
-    )
+    scaled_result = jax.jit(
+        lambda state, seed, drive: solve(machine, state, seed, seed, drive)
+    )(machine.cold_states, machine.cold_seeds, amplitude)
     jax.block_until_ready(scaled_result.residual)
     exact = np.stack([np.asarray(value) for value in result.moments])
     probe = np.stack([np.asarray(value) for value in scaled_result.moments])
@@ -182,26 +179,6 @@ def build_states(machine, path):
         probe_residual=float(np.max(np.asarray(scaled_result.residual))),
         steps=np.asarray(scaled_result.steps).tolist(),
         reads=np.asarray(scaled_result.reads).tolist(),
-    )
-
-
-def _cold(machine, state, seed, amplitude):
-    profile = streams.scaled_profile(machine.profile, amplitude)
-    return support_read.solve_batch(
-        machine.operands,
-        machine.cache,
-        state,
-        seed,
-        seed,
-        machine.convention,
-        machine.policy,
-        profile,
-        _gradient,
-        machine.quadrature,
-        max_steps=MAX_STEPS,
-        reuse_factor=False,
-        contraction_limit=0.5,
-        tolerance=TOLERANCE,
     )
 
 

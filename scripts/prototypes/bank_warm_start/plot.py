@@ -9,30 +9,21 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from nova.media.ink import DEFAULT_INK, trace_axes
+
 CANVAS = (14.0, 7.2)
 COLOURS = {1e-5: "#2f6fd0", 1e-3: "#d97b16", 1e-2: "#7a4fbf"}
 LABELS = {1e-5: "step 1e-5", 1e-3: "step 1e-3", 1e-2: "step 1e-2"}
 
 
 def style():
+    """The house sheet plus the ink module's trace furniture, at page sizes."""
     try:
         plt.style.use("data-ink")
     except OSError:
         pass
-    plt.rcParams.update(
-        {
-            "font.size": 14,
-            "axes.labelsize": 16,
-            "xtick.labelsize": 14,
-            "ytick.labelsize": 14,
-            "legend.fontsize": 14,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "axes.grid": False,
-            "figure.facecolor": "white",
-            "axes.facecolor": "white",
-        }
-    )
+    plt.rcParams.update({"axes.labelsize": 16, "legend.fontsize": 14})
+    return DEFAULT_INK.variant(label_fontsize=14.0)
 
 
 def main():
@@ -41,8 +32,9 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     summary = json.loads(args.report.read_text())
-    style()
+    ink = style()
     figure, axes = plt.subplots(figsize=CANVAS, dpi=100)
+    trace_axes(axes, ink)
     arm = summary["arms"]["runner1"]["table"]
     steps = sorted({row["step"] for row in arm if row["slice"] > 0})
     offsets = {step: (index - (len(steps) - 1) / 2) * 0.16 for index, step in enumerate(steps)}
@@ -67,9 +59,13 @@ def main():
     axes.set_yticks([3, 10, 30, 100, 500])
     axes.set_yticklabels(["3", "10", "30", "100", "500"])
     axes.set_ylim(2.4, 900)
-    axes.legend(frameon=False, ncol=len(steps), loc="upper center", bbox_to_anchor=(0.5, 1.14))
-    for side in ("top", "right"):
-        axes.spines[side].set_visible(False)
+    axes.legend(
+        frameon=False,
+        ncol=len(steps),
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.14),
+        fontsize=ink.label_fontsize,
+    )
     figure.tight_layout()
     figure.savefig(args.out, format="svg")
     figure.savefig(args.out.with_suffix(".png"), format="png", dpi=140)

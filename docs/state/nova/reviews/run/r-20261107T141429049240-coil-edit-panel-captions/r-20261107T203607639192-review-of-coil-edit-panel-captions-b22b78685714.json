@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:3358 (_render_panel from the run subcommand)",
+    "benchmarks/coil_edit_latency.py:3767 (_render_panel from the panel subcommand)",
+    "nova/media/poloidal.py:draw_flux_contours",
+    "nova/media/poloidal.py:draw_wall",
+    "nova/media/poloidal.py:draw_nulls (reached unchanged by _paint_panel at benchmarks/coil_edit_latency.py:2165)"
+  ],
+  "completed_at": "2026-11-07T20:51:53.006Z",
+  "dispatched_at": "2026-11-07T20:37:45Z",
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "610",
+      "severity": "blocking",
+      "text": "blocking: the done_when requires the file to run at base and head with 0 added failures, but manifest.md:16-17 record baseline_suite and after_suite as null, no base arm was run, and the head arm deselects the pre-existing test at tests/test_coil_edit_panel_render.py:428, so \"0 added failures\" is inferred from six unchanged pre-existing tests passing rather than measured against a base."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "line": "84",
+      "severity": "non-blocking",
+      "text": "non-blocking: visual_inspection.measurement_log cites a log whose own \"# command:\" line wrote single-grid-panel.png in the run directory with no --receipt and no --display-map at revision b14f60f7b, so the receipt's measured_from claim that the log and the inspected published PNG are the same file is unsupported by the log it names."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "line": "78",
+      "severity": "non-blocking",
+      "text": "non-blocking: the edit removed assembled_lobe_and_legs_visible and page_width_px from visual_inspection while adding the measurement provenance, dropping two recorded inspection facts that the sibling receipt at docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json:78 still carries, with no record of why."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "560",
+      "severity": "non-blocking",
+      "text": "non-blocking: _measure_labels near-restates the renderer's _label_defects (benchmarks/coil_edit_latency.py:2393) including the same furniture exclusion, so on the clean delivered panel both sides read zero and the assertion at tests/test_coil_edit_panel_render.py:619 cannot by itself distinguish a measurement from a constant; only the mutation control demonstrates it fires."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to re-render the coil-edit panels and make every embedding caption describe them; benchmarks/coil_edit_latency.py:2512 titles each panel \"edit 12  P4-UPPER circuit 8 current +6% of the seed ... 3 active-set iterations\", benchmarks/coil_edit_latency.py:2247 draws the reference nulls 1.8x and beneath the solved ones, benchmarks/coil_edit_latency.py:3774 merges the caption and inspection into the panel receipt, and the committed PNG shows the two defined titles, the six-entry frameless legend, the grey/orange contour families, the oversized blue reference markers around the filled orange ones and the drawn wall.\nVERDICT done_when: three clauses; panels and captions are met (docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:187 and the five spliced blocks at docs/evidence/archive/forward-solve-api-landed.html:331,431,910 name edit 12 at 5.730e-09 Wb and edit 9 at 6.612e-03 Wb with the receipt's 0 clipped and 0 overlapping), but clause 3's requirement that the file run at base and head is unmet: manifest.md:16-17 record baseline_suite null and after_suite null and no base arm was run.\nVERDICT write_paths: the five declared paths are benchmarks/coil_edit_latency.py, the coil-edit-nonconvergence directory, the archive html, the single-grid receipt and the test file; all eight changed files in the diff against fb6f1726a lie inside them, and the nova/media edits the prior review flagged are absent from this diff.\nVERDICT manifest: read; status complete, ten commits 792beb13d..b22b78685, head arm 10 passed 1 deselected, negative control 3 failed EXIT=1 at aca80277e, H200 job 1308065 for the redraw, and one rubric line per dimension with rubric.test_arms stating the deselection and the absent base arm explicitly.\nVERDICT diff: read all ten commits against fb6f1726a; the code commits add the measured label check at benchmarks/coil_edit_latency.py:2393, the beneath-null style at :2247, the defined titles at :2512, the figure legend at :2528 and receipt merging at :2446, the docs commits splice five archive figcaptions and the page caption, and the last two commits carry only the redraw's PNG, SVG and receipt.\nCALL_SITES: benchmarks/coil_edit_latency.py:3358 (_render_panel from the run subcommand), benchmarks/coil_edit_latency.py:3767 (_render_panel from the panel subcommand), nova/media/poloidal.py:draw_flux_contours, nova/media/poloidal.py:draw_wall, nova/media/poloidal.py:draw_nulls (reached unchanged by _paint_panel at benchmarks/coil_edit_latency.py:2165)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the committed PNG at docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png carries the defined titles, the six-entry legend and the oversized reference markers, and its receipt's display map matches every number quoted at docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:187.\nSCORE evidence: 8\nJUSTIFICATION evidence: head-gate.log records 10 passed EXIT=0 at revision 21d85f44e and mutation-control-aca80277e.log records 3 failed EXIT=1, but manifest.md:16-17 record baseline_suite and after_suite null and the delivered head's own arm (panel-test-aca80277e.log) carries no revision header and no EXIT line.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff against fb6f1726a is inside the five declared write paths, and the archive change splices figcaptions at docs/evidence/archive/forward-solve-api-landed.html:331 rather than rewriting the cumulative record.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:625 reddens if the reference marker stops being larger or stops being beneath the solved one and tests/test_coil_edit_panel_render.py:679 reddens if the panel receipt loses its caption, though the \"independent\" label assertion at tests/test_coil_edit_panel_render.py:619 rests on a near-copy of the renderer's own filter.\nSCORE fit: 18\nJUSTIFICATION fit: the constants and private helpers added at benchmarks/coil_edit_latency.py:2112-2163 follow the file's existing named-constant and leading-underscore idiom and carry no plan, ticket, version or author reference.\nSCORE reuse: 17\nJUSTIFICATION reuse: _null_style at benchmarks/coil_edit_latency.py:2115 wraps the existing DEFAULT_INK.variant owner and the furniture filter extends the existing _label_defects at benchmarks/coil_edit_latency.py:2393, while _merge_receipt at benchmarks/coil_edit_latency.py:2446 has no owner in nova/database and the only sibling label-count measurement (benchmarks/mast_centroid_solve_panels.py:1379) is an inline block in a file outside this node's write paths.\nFINDING tests/test_coil_edit_panel_render.py:610 blocking: the done_when requires the file to run at base and head with 0 added failures, but manifest.md:16-17 record baseline_suite and after_suite as null, no base arm was run, and the head arm deselects the pre-existing test at tests/test_coil_edit_panel_render.py:428, so \"0 added failures\" is inferred from six unchanged pre-existing tests passing rather than measured against a base.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:84 non-blocking: visual_inspection.measurement_log cites a log whose own \"# command:\" line wrote single-grid-panel.png in the run directory with no --receipt and no --display-map at revision b14f60f7b, so the receipt's measured_from claim that the log and the inspected published PNG are the same file is unsupported by the log it names.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:78 non-blocking: the edit removed assembled_lobe_and_legs_visible and page_width_px from visual_inspection while adding the measurement provenance, dropping two recorded inspection facts that the sibling receipt at docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json:78 still carries, with no record of why.\nFINDING tests/test_coil_edit_panel_render.py:560 non-blocking: _measure_labels near-restates the renderer's _label_defects (benchmarks/coil_edit_latency.py:2393) including the same furniture exclusion, so on the clean delivered panel both sides read zero and the assertion at tests/test_coil_edit_panel_render.py:619 cannot by itself distinguish a measurement from a constant; only the mutation control demonstrates it fires.",
+  "review_run_id": "r-20261107T203607639192-review-of-coil-edit-panel-captions-b22b78685714",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "b22b7868571497d8ebe28f7896870a7da1873131",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "scores": {
+    "durability": 17,
+    "evidence": 8,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:56:08.373300+00:00",
+  "total": 98
+}

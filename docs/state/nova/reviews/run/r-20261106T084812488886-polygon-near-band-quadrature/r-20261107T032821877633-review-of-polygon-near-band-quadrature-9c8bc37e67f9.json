@@ -38,6 +38,11 @@
       "kind": "exempted",
       "reason": "prototype measurement harness; the bitwise-identical result is recorded in gate/jacobian-equivalence.json and the fragment",
       "recorded_at": "2026-11-07T03:44:25.542656+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the coordinator corrects the contradicting sentence in the landed fragment on main in the merge beat",
+      "recorded_at": "2026-11-07T03:44:35.115556+00:00"
     }
   },
   "findings": [

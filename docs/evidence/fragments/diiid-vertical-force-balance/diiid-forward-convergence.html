@@ -262,6 +262,8 @@ unconditionally, so the limited seed's equilibrium cannot reach the gate however
 
 <p><b>Verdict, re-derived from the bounding surface.</b> On <b>179 both terminals are limited</b> states: each is bounded by its limiter-contact surface, and the kept diverted-seed terminal is the worse of the two (<code>4.181e-01</code> against <code>2.726e-02</code>). The question the branch rule asks &mdash; diverted or limited &mdash; therefore has the same answer on both branches, so the bank's choice was between two limited stalls, and the 15.3&times; larger residual is a stall that a confined plasma sat at, not a topology it lost. On <b>44 the choice is inverted</b>: the kept terminal is limited (<code>4.276e+00</code>) and the discarded one is the cohort's only <b>diverted</b> terminal (<code>1.970e-01</code>), so the rule kept the wrong class as well as the worse residual, at 21.7&times;. Neither terminal is a root of the other branch, and neither is below <code>1e-5</code>, so preferring the discarded one would still converge nothing &mdash; but on 44 the bank's selection and the physics disagree, and a reader of the banked table would not know it.</p>
 
+<p><b>The one diverted-bounding terminal is not a diverted configuration.</b> Frame 44's limited seed is bounded by its separatrix, but the admitted saddle that defines it sits at <code>R=1.105 m, Z=+1.563 m</code> &mdash; above the limiter's <code>+1.363 m</code> top edge and outside the vessel, the same place frame 146's axis is lost. A separatrix through a saddle outside the wall bounds nothing physical, so this arm's <i>diverted</i> class is an artefact of the solver admitting an X-point above the vessel, not evidence of a diverted equilibrium. Its panel is drawn, and the X-point legs cannot be resolved there for the same reason: the map does not enclose the saddle, so no refinement of a level set inside the domain will close it.</p>
+
 <p><b>Resolution caveat.</b> The contact flux is sampled at the ring nodes through the solved 33&times;33 map, and the bounding level set is contoured on a cubic interpolant of that same field. The drawn surface can therefore close a grid cell or two from the marked contact node; the classification above rests on the sampled values, not on the drawn curve.</p>
 
 
@@ -297,6 +299,15 @@ residual is two decades above tolerance.</figcaption>
 largest of the cohort. The solved separatrix closes around a confined plasma &mdash; axis R=1.720,
 Z=&minus;0.141, <code>352</code> closed core cells, <code>1.097</code>&times; the target current &mdash; so
 the miss is not a lost plasma even though the achieved class is <i>limited</i>.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-forward-convergence/frame-44-limited-flux-contours.svg" alt="frame 44 limited-seed terminal: the admitted saddle sits above the limiter's top edge, so the bounding separatrix lies outside the vessel">
+<figcaption>Frame 44's limited seed, drawn because it is the only arm the limiter does not bound. The admitted
+saddle is the red asterisk at the top, R=1.105 m, Z=+1.563 m: outside the limiter, above its +1.363 m edge.
+The separatrix through it is the bounding surface by the flux comparison, and it bounds nothing physical
+there, so this arm's <i>diverted</i> class is an artefact of an X-point admitted above the vessel. The four
+legs cannot be resolved because the map does not enclose the saddle.</figcaption>
 </figure>
 
 <figure>

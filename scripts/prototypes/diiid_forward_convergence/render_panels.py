@@ -562,6 +562,7 @@ def render_measured_frame(
     artifact: Path,
     output: Path,
     boundary: dict | None = None,
+    branch: str = "diverted",
 ) -> dict:
     """Draw one frame's MEASURED terminal state as line contours.
 
@@ -576,7 +577,7 @@ def render_measured_frame(
     wall = grid["wall"]
     limiter = grid["limiter"]
     flux, label = grid["flux"], grid["label"]
-    measured = receipt_frame["measured"]["branches"]["diverted"]["arms"]["default"]
+    measured = receipt_frame["measured"]["branches"][branch]["arms"]["default"]
     terminal_residual = measured.get("terminal_residual")
     converged = bool(receipt_frame.get("converged"))
     presence = measured.get("presence") or {}
@@ -807,7 +808,7 @@ def render_measured_frame(
     ratio = presence.get("confined_to_target_ratio")
     parts = [
         f"frame {frame}",
-        f"diverted terminal residual {terminal_residual:.3e}",
+        f"{branch} terminal residual {terminal_residual:.3e}",
         f"converged {str(converged).lower()}",
         f"axis R={solved_axis[0]:.3f} Z={solved_axis[1]:+.3f} m",
         f"axis {'inside' if axis_inside else 'OUTSIDE'} the limiter",
@@ -989,6 +990,33 @@ def main() -> None:
                 )
             )
             print(json.dumps(rendered[-1], sort_keys=True, default=float), flush=True)
+            # A terminal the solver records as diverted can be bounded by its
+            # limiter instead.  Where the bounding surface is the separatrix, the
+            # X-point legs are the state a reader has to judge, so that arm is
+            # drawn beside the frame's diverted terminal.
+            for branch, arms in (analysis.get(str(frame)) or {}).items():
+                entry = (arms or {}).get("default") or {}
+                if branch == "diverted" or entry.get("bounds") != "separatrix":
+                    continue
+                extra = arguments.artifact_dir / f"frame-{frame}-{branch}-default.npz"
+                if not extra.exists():
+                    continue
+                extra_output = (
+                    arguments.output_dir / f"frame-0-flux-contours.svg"
+                ).with_name(f"frame-{frame}-{branch}-flux-contours.svg")
+                rendered.append(
+                    render_measured_frame(
+                        frame,
+                        receipt["frames"][str(frame)],
+                        extra,
+                        extra_output,
+                        entry,
+                        branch,
+                    )
+                )
+                print(
+                    json.dumps(rendered[-1], sort_keys=True, default=float), flush=True
+                )
         refused = [item["frame"] for item in rendered if "refused" in item]
         arguments.record.write_text(
             json.dumps({"panels": rendered}, indent=2, default=float) + "\n"

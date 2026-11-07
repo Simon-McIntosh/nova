@@ -109,6 +109,15 @@ def draw(collected, path):
     axis.set_xticks(widths)
     axis.set_xticklabels([str(width) for width in widths])
     axis.minorticks_off()
+    # A log axis with two unequal arms labels only one decade, so the ticks are
+    # stated outright in the units the reader compares against the target.
+    values = [value for value in data.values()]
+    low, high = min(values), max(values)
+    candidates = [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+    ticks = [value for value in candidates if low / 1.6 <= value <= high * 1.6]
+    if ticks:
+        axis.set_yticks(ticks)
+        axis.set_yticklabels([f"{value:g}" for value in ticks])
     axis.set_xlabel("bank width [slices]")
     axis.set_ylabel("whole-solve wall per slice [ms]")
     axis.set_xlim(widths[0] * 0.85, widths[-1] * 1.25)

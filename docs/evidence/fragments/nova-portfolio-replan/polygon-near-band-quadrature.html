@@ -255,6 +255,23 @@ file above, and pre-existing. The skipped row,
 <code>test_base_program_roundoff_floor</code>, is skipped for a missing retained
 reference in both arms.</p>
 
+<p><strong>The reviewed head revision.</strong> The two files were re-run at
+<code>7c3754325</code>, the revision carrying the refusal guard, on the shared
+fleet node rather than on a dedicated allocation. The graded-layer file is
+unchanged at 2 passed and 1 skipped. The recurrences file reports
+<strong>3 failed, 19 passed</strong>: <code>[across]</code> at 3.27 and
+<code>[graded_residual]</code> at 3.74 as before, plus
+<code>[regularised]</code> at 3.04, which passed in both earlier arms. That
+third row is a genuine delta and not a load artefact: measured back to back on
+the same node under the same load average near 20, the base arm reads 2.91 in
+127.85 s and the head arm 3.05 in 125.02 s, a repeat of the head row reading
+3.04. Both arms spend about 126 s, so the two arms are comparable, and the row
+sits close enough to the 3.0 bound that a 4.5 % increase crosses it. Its
+primal and tangent equation counts are unaffected by the consolidation, so the
+movement is the compile-time estimator rather than a change in the programs
+being compiled. It is recorded here as an added failure, not absorbed into the
+bound.</p>
+
 <p><strong>The discriminating control.</strong> The vertex row
 <code>test_tangent_matches_primal_jvp</code> passes in the shipped head (the
 vertex file's only failures are its five

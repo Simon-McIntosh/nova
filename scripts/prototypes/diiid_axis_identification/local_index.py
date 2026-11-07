@@ -97,6 +97,7 @@ def main() -> int:
     parser.add_argument("--census", type=Path, required=True)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--loop-radius", type=float, default=None)
     arguments = parser.parse_args()
 
     radius, height, seed = load_seed(arguments.cache, 144)
@@ -106,7 +107,7 @@ def main() -> int:
 
     candidates = json.loads(arguments.census.read_text())["critical_points"]
     spacing = float(np.hypot(np.diff(radius).mean(), np.diff(height).mean()))
-    loop_radius = spacing
+    loop_radius = spacing if arguments.loop_radius is None else arguments.loop_radius
 
     kept, dropped = [], []
     for point in candidates:
@@ -147,7 +148,7 @@ def main() -> int:
         print("kept", entry["local_index"], entry["r"], entry["z"])
     for entry in dropped:
         print("dropped", entry["local_index"], entry["r"], entry["z"])
-    return 0
+    return 0 if residual == 0 else 1
 
 
 if __name__ == "__main__":

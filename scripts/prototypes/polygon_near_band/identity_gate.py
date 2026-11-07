@@ -65,6 +65,8 @@ def main() -> int:
     parser.add_argument("--base-revision", required=True)
     parser.add_argument("--log-root", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=3600)
+    parser.add_argument("--arm", choices=("base", "head", "both"), default="both")
+    parser.add_argument("--only", default=None)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     args.log_root.mkdir(parents=True, exist_ok=True)
@@ -77,7 +79,14 @@ def main() -> int:
     ) as directory:
         scratch = Path(directory)
         overlay = _base_overlay(root, args.base_revision, scratch)
-        for arm, revision in (("base", args.base_revision), ("head", head_revision)):
+        arms = (
+            (("base", args.base_revision), ("head", head_revision))
+            if args.arm == "both"
+            else (
+                (args.arm, args.base_revision if args.arm == "base" else head_revision),
+            )
+        )
+        for arm, revision in arms:
             env = os.environ.copy()
             env["JAX_PLATFORMS"] = "cpu"
             env["PYTHONUNBUFFERED"] = "1"
@@ -96,7 +105,7 @@ def main() -> int:
                 f"--timeout={args.timeout}",
                 "--basetemp",
                 str(scratch / f"pytest-{arm}"),
-                *IDS,
+                *((args.only,) if args.only else IDS),
             ]
             with log_path.open("w", encoding="utf-8") as log:
                 log.write(

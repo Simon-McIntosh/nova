@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import resource
 import time
 import traceback
 from pathlib import Path
@@ -40,6 +41,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from benchmarks import diiid_forward_gs_match as bench
+from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes
@@ -156,10 +158,24 @@ def _cell_area(profile) -> float:
     return float(np.median(np.diff(radius)) * np.median(np.diff(height)))
 
 
+def _core_mask(profile, flux_map) -> np.ndarray:
+    """Return the closed plasma cells the domain partition assigns to the core.
+
+    The partition marks a cell CORE only when the field closes around the axis
+    *and* the cell belongs to the axis's connected component, so its count is a
+    closed-region area rather than an active-set size.
+    """
+
+    flat = jnp.asarray(np.asarray(flux_map, dtype=float).ravel())
+    masks = profile.operator.read(flat)[0]
+    return np.asarray(masks.label).ravel() == int(PlasmaDomain.CORE)
+
+
 def _presence(profile, flux_map, wall, mask, target_current_a) -> dict[str, Any]:
     """Return the plasma-presence read of one flux state."""
 
-    area = float(np.sum(np.asarray(mask, dtype=bool))) * _cell_area(profile)
+    cells = np.asarray(mask, dtype=bool)
+    area = float(np.sum(cells)) * _cell_area(profile)
     try:
         observation = profile.current_moment_observation(
             jnp.asarray(np.asarray(flux_map, dtype=float).ravel()),
@@ -184,6 +200,7 @@ def _presence(profile, flux_map, wall, mask, target_current_a) -> dict[str, Any]
         "axis_rz_m": [float(value) for value in axis],
         "axis_inside_wall": axis_inside,
         "plasma_area_m2": area,
+        "closed_core_cells": int(np.sum(cells)),
         "confined_current_a": confined_current,
         "target_current_a": float(target_current_a),
         "confined_to_target_ratio": (
@@ -232,11 +249,7 @@ def _record_receipt(receipt, wall_seconds, prepared, topology_class) -> dict[str
         np.asarray(topology.axis, dtype=float),
     )[0]
     mask_history = _int_list(receipt.mask_history)
-    try:
-        masks = profile.operator.read(jnp.asarray(flux))[0]
-        terminal_mask = np.asarray(masks.plasma, dtype=bool).ravel()
-    except Exception:
-        terminal_mask = np.zeros(profile.lattice.node_count, dtype=bool)
+    terminal_mask = _core_mask(profile, flux)
     presence = _presence(
         profile, flux_grid, wall, terminal_mask, prepared["target_current_a"]
     )
@@ -581,6 +594,7 @@ def main() -> None:
             arguments.staged_steps,
         )
         receipt["frames"][str(frame)] = record
+        receipt["peak_rss_kb"] = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
         print(
             "FRAME "

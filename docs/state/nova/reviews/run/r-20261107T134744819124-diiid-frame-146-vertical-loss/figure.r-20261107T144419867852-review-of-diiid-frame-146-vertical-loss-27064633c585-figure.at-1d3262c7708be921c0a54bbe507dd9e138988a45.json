@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T15:12:15Z",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The rendered PNG this review is instructed to judge does not exist. The reviewed head 1d3262c77's tree under docs/figures/diiid-frame-146-vertical-loss/ contains only frame-146-flux-contours.svg and frame-137-flux-contours.svg; a recursive search of that directory and the whole reviewed run directory for '*.png' returns nothing. panels.json names this PNG path as the panel's rendered output, so the run's own record claims a render that is absent from the committed tree. A reader of the evidence fragment therefore has no image, and this review has no artifact to judge."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
+      "id": "f787c8caf4f",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The rendered PNG for the frame 137 control panel, named in panels.json, also does not exist anywhere in the reviewed head's tree. Both attached figures are SVG-only, so neither the subject panel nor the control panel that carries the comparison can be reviewed as a picture, and the run's figure deliverable is unverified at the rendered level."
+    }
+  ],
+  "note": "Read-only review. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted on the reviewed run's behalf; this record is the only artifact written. The status is unparsed because the rubric produced no readable review: the artifacts it must judge are absent, and the brief forbids deriving a visual verdict from SVG source.",
+  "project": "nova",
+  "review_run_id": "r-20261107T144419867852-review-of-diiid-frame-146-vertical-loss-27064633c585-figure",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "1d3262c7708be921c0a54bbe507dd9e138988a45",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "unable to judge: no rendered PNG exists at the reviewed head",
+    "data_ink": "unable to judge: no rendered PNG exists at the reviewed head",
+    "decoration": "unable to judge: no rendered PNG exists at the reviewed head",
+    "label_collision": "unable to judge: no rendered PNG exists at the reviewed head",
+    "legibility": "unable to judge: no rendered PNG exists at the reviewed head; the only committed artifacts are SVG, which this review is forbidden to open, render or read, so no visual verdict can be given",
+    "table_form": "unable to judge: no rendered PNG exists at the reviewed head"
+  },
+  "status": "unparsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:24:09.056177+00:00",
+  "total": null
+}

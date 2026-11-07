@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T15:21:28.153Z",
+  "dispatched_at": "2026-11-07T15:06:41Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trip_trajectory.py",
+      "id": "f233cab878e",
+      "line": 48,
+      "severity": "blocking",
+      "text": "_trip_state reads presence.get('axis_inside_limiter'), a key no producer sets: the committed run output trip-trajectory/trajectory.json records axis_inside_limiter: null for both the label axis and trip 1, so the one quantity this node's diagnosis turns on is never persisted."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trip_trajectory.py",
+      "id": "f5b33559120",
+      "line": 92,
+      "severity": "blocking",
+      "text": "base_arrays sets 'limiter': prepared['wall'], but _prepare_frame returns only 'wall' (measure_branches.py:241). The saved limiter array is therefore the wall (z range +/-1.664 m), not the DIII-D limiter (+/-1.359/+1.363 m), so every panel drawn from these npz files shows the wrong boundary and an axis at Z=+1.563 m reads as inside the limiter."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trip_trajectory.py",
+      "id": "f1a1fe0d7ad",
+      "line": 52,
+      "severity": "blocking",
+      "text": "promotion_step_norm_wb is amplitudes[0] for every k, so each re-solve reports trip 1's step norm instead of trip k's; the persisted 1.090 Wb for frame 146 contradicts the node's headline discriminator (first_step_amplitude_wb 25.2774 Wb from trace_vertical_loss.py) by 23x for the same seed."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trip_trajectory.py",
+      "id": "f3f0dce6024",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "_trip_state re-implements the per-arm summary projection (presence/mask_history/amplitude_history) that build_receipt.py:29 _arm_summary owns and that trace_vertical_loss.py was repaired to import at revision 27064633c, re-forking the capability the prior review flagged."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trip_trajectory.py",
+      "id": "fb0dc107406",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "The module docstring usage names --frame 146 while argparse accepts --frames, and label_axis_inside_limiter is initialised to None and never filled."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T144353188372-review-of-diiid-frame-146-vertical-loss-27064633c585",
+  "reviewed_base_sha": "27064633c585d1e4e64926cb09e6b904e1eb5365",
+  "reviewed_head_sha": "1d3262c7708be921c0a54bbe507dd9e138988a45",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 2,
+    "evidence": 5,
+    "fit": 14,
+    "goal_fidelity": 10,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:37:22.707803+00:00",
+  "total": 55
+}

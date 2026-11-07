@@ -1095,59 +1095,6 @@ def _local_booking_sensitivities(
     )
 
 
-def _moment_scales(moments, booked):
-    """Physical scale of each moment component, shared by row and column."""
-    return jnp.stack(
-        tuple(
-            jnp.maximum(jnp.maximum(jnp.max(jnp.abs(a)), jnp.max(jnp.abs(b))), 1e-12)
-            for a, b in zip(moments, booked[:3], strict=True)
-        )
-    )
-
-
-def _cell_diagonal_blocks(
-    operands, moments, support, profile, density_gradient, quadrature, booked
-):
-    """Each cell's three-moment diagonal Jacobian block, without the assembly.
-
-    A cell's own moments reach only its own booking sensitivities and its own
-    bank row, so the block is that cell's local sensitivities contracted with
-    its own unit-direction channel vector. The target-current coupling sums
-    across every cell and is therefore not local; a quadrature carrying one
-    must assemble instead.
-    """
-    if quadrature.target_current is not None:
-        raise ValueError(
-            "a cell block diagonal is local; a target-current coupling is not"
-        )
-    local = _local_booking_sensitivities(
-        operands, moments, support, profile, density_gradient, quadrature, booked
-    )
-    cells = moments[0].size
-
-    def own_channels(cell):
-        def one(block):
-            direction = tuple(
-                jax.nn.one_hot(cell, cells) if index == block else jnp.zeros(cells)
-                for index in range(3)
-            )
-            jets, field = _directional_field(operands, direction)
-            return jnp.concatenate(
-                (
-                    jets[operands.sample_index[cell], 0],
-                    field.sampled_coefficient(operands.geometry)[cell],
-                    jnp.reshape(field.value(support.reading.axis), (1,)),
-                    jnp.reshape(field.value(support.reading.boundary), (1,)),
-                )
-            )
-
-        return jnp.stack(tuple(one(block) for block in range(3)))
-
-    channels = jax.vmap(own_channels)(jnp.arange(cells))
-    response = jnp.einsum("cok,cik->coi", local, channels)
-    return jnp.eye(3, dtype=response.dtype) - response
-
-
 _FRESH_GEOMETRY_NODE_CAPACITY = 3
 
 
@@ -1285,7 +1232,12 @@ def step_jacobian(
 
 def _equilibrate(matrix, moments, booked):
     """Scale moment blocks physically, then balance row and column norms."""
-    scales = _moment_scales(moments, booked)
+    scales = jnp.stack(
+        tuple(
+            jnp.maximum(jnp.maximum(jnp.max(jnp.abs(a)), jnp.max(jnp.abs(b))), 1e-12)
+            for a, b in zip(moments, booked[:3], strict=True)
+        )
+    )
     column = jnp.repeat(scales, moments[0].size)
     row = column
     balanced = matrix * column[None, :] / row[:, None]
@@ -1334,8 +1286,14 @@ def _krylov_condition_estimate(matvec, size: int, width: int = 8):
     return jnp.maximum(largest / smallest, 1.0)
 
 
-def _invert_cell_blocks(blocks):
+def _block_preconditioner(matrix):
     """Invert each cell's three moment components, stored in component blocks."""
+    cells = matrix.shape[0] // 3
+    indices = (
+        jnp.arange(cells, dtype=jnp.int32)[:, None]
+        + cells * jnp.arange(3, dtype=jnp.int32)[None, :]
+    )
+    blocks = matrix[indices[:, :, None], indices[:, None, :]]
     cofactors = jnp.stack(
         (
             jnp.cross(blocks[:, 1], blocks[:, 2]),
@@ -1346,21 +1304,7 @@ def _invert_cell_blocks(blocks):
     )
     determinant = jnp.sum(blocks[:, 0] * cofactors[:, 0], axis=-1)
     inverse = jnp.swapaxes(cofactors, -1, -2) / determinant[:, None, None]
-    return inverse.reshape(-1, 3), _cell_block_indices(blocks.shape[0]).reshape(-1)
-
-
-def _cell_block_indices(cells):
-    return (
-        jnp.arange(cells, dtype=jnp.int32)[:, None]
-        + cells * jnp.arange(3, dtype=jnp.int32)[None, :]
-    )
-
-
-def _block_preconditioner(matrix):
-    """Extract each cell's component block from an assembled matrix and invert."""
-    indices = _cell_block_indices(matrix.shape[0] // 3)
-    blocks = matrix[indices[:, :, None], indices[:, None, :]]
-    return _invert_cell_blocks(blocks)
+    return inverse.reshape(-1, 3), indices.reshape(-1)
 
 
 def _apply_block_inverse(inverse, indices, vector):
@@ -1377,29 +1321,13 @@ def _block_gmres(matrix, right, inverse, indices, *, max_iterations=400):
     a kernel per earlier vector. QR solves the small least-squares problem;
     the true residual, rather than its Hessenberg estimate, decides each restart.
     """
-    return _block_gmres_operator(
-        lambda value: matrix @ value,
-        right,
-        inverse,
-        indices,
-        max_iterations=max_iterations,
-    )
-
-
-def _block_gmres_operator(operator, right, inverse, indices, *, max_iterations=400):
-    """Restarted Arnoldi solve over a supplied product, never a stored matrix.
-
-    ``operator`` returns the equilibrated matrix times a vector, so a
-    matrix-free Jacobian-vector product and an assembled dense matrix take
-    exactly the same solve, stopping rule and residual measure.
-    """
     from jax.scipy.linalg import solve_triangular
 
     def precondition(value):
         return _apply_block_inverse(inverse, indices, value)
 
     def matvec(value):
-        return precondition(operator(value))
+        return precondition(matrix @ value)
 
     condition = _krylov_condition_estimate(matvec, right.size)
     target = precondition(right)
@@ -1408,11 +1336,11 @@ def _block_gmres_operator(operator, right, inverse, indices, *, max_iterations=4
     width = min(20, right.size)
 
     def relative(solution):
-        return jnp.linalg.norm(target - matvec(solution)) / denominator
+        return jnp.linalg.norm(precondition(right - matrix @ solution)) / denominator
 
     def cycle(carried):
         solution, steps, _ = carried
-        residual = precondition(right - operator(solution))
+        residual = precondition(right - matrix @ solution)
         norm = jnp.linalg.norm(residual)
         vectors = jnp.zeros((right.size, width + 1), right.dtype)
         vectors = vectors.at[:, 0].set(residual / jnp.where(norm > 0, norm, 1.0))
@@ -1473,16 +1401,13 @@ def newton_step(
     condition_diagnostics: bool | None = None,
     factor_cache: NewtonFactor | None = None,
     contraction_ratio: jax.Array | float | None = None,
-    matrix_free: bool = False,
 ) -> NewtonStep:
     """Solve the bank-backed linear system at one fixed support decision.
 
     Local analytic booking sensitivities compose with the bank into a dense
-    matrix, or, on request, the same composition is applied as a
-    Jacobian-vector product inside the Krylov solve. Physical moment scales
-    and block conditioning precede block GMRES. Its condition estimate and
-    residual both describe the equilibrated, left-preconditioned operator;
-    their product must be at most 1e-8.
+    matrix. Physical moment scales and diagonal equilibration precede block
+    GMRES. Its condition estimate and residual both describe the equilibrated,
+    left-preconditioned operator; their product must be at most 1e-8.
     A carried block inverse skips assembly while the fresh residual contracts by at
     least half. Its linear residual certifies the carried matrix solve; the
     caller must check convergence against a fresh read of the new state.
@@ -1493,8 +1418,6 @@ def newton_step(
     cells = moments[0].size
     if condition_diagnostics is None:
         condition_diagnostics = cells == 1
-    if matrix_free and condition_diagnostics:
-        raise ValueError("a matrix-free step stores no matrix to condition")
     boundaries = (cells, 2 * cells)
     right = -jnp.concatenate(tuple(jnp.ravel(value) for value in residual.residual))
 
@@ -1513,86 +1436,26 @@ def newton_step(
         inverse, indices = _block_preconditioner(balanced)
         return NewtonFactor(matrix, row, column, inverse, indices)
 
-    def block_rebuild(_):
-        """Cell-local blocks only; no dense assembly, so no matrix is stored."""
-        scales = _moment_scales(moments, residual.booked)
-        blocks = _cell_diagonal_blocks(
-            operands,
-            moments,
-            support,
-            profile,
-            density_gradient,
-            quadrature,
-            residual.booked,
-        )
-        balanced = blocks * (scales[None, :, None] / scales[None, None, :])
-        inverse, indices = _invert_cell_blocks(balanced)
-        row = jnp.repeat(scales, cells)
-        empty = jnp.zeros((0, 0), dtype=blocks.dtype)
-        return NewtonFactor(empty, row, row, inverse, indices)
-
-    if matrix_free:
-        if factor_cache is None:
-            factor = block_rebuild(None)
-            refactored = jnp.asarray(True)
-        else:
-            if contraction_ratio is None:
-                raise ValueError(
-                    "factor reuse requires a measured residual contraction ratio"
-                )
-            reuse = jnp.isfinite(contraction_ratio) & (contraction_ratio <= 0.5)
-            factor = jax.lax.cond(reuse, lambda _: factor_cache, block_rebuild, None)
-            refactored = ~reuse
-
-        def operator(value):
-            direction = tuple(
-                (factor.column * value)[block * cells : (block + 1) * cells]
-                for block in range(3)
-            )
-            product = step_jacobian_vector(
-                operands,
-                moments,
-                direction,
-                support,
-                profile,
-                density_gradient,
-                quadrature,
-                residual.booked,
-                fresh_geometry=fresh_geometry,
-            )
-            return jnp.concatenate(tuple(product)) / factor.row
-
-        scaled_right = right / factor.row
-        solution, condition, krylov_residual, iterations = _block_gmres_operator(
-            operator, scaled_right, factor.block_inverse, factor.indices
-        )
-        solution = factor.column * solution
-        scaled_norm = jnp.linalg.norm(scaled_right)
-        linear_residual = jnp.linalg.norm(
-            operator(solution) - scaled_right
-        ) / jnp.where(scaled_norm > 0, scaled_norm, 1.0)
-        balanced = None
+    if factor_cache is None:
+        factor = rebuild(None)
+        refactored = jnp.asarray(True)
     else:
-        if factor_cache is None:
-            factor = rebuild(None)
-            refactored = jnp.asarray(True)
-        else:
-            if contraction_ratio is None:
-                raise ValueError(
-                    "factor reuse requires a measured residual contraction ratio"
-                )
-            reuse = jnp.isfinite(contraction_ratio) & (contraction_ratio <= 0.5)
-            factor = jax.lax.cond(reuse, lambda _: factor_cache, rebuild, None)
-            refactored = ~reuse
-        balanced = factor.matrix * factor.column[None, :] / factor.row[:, None]
-        solution, condition, krylov_residual, iterations = _block_gmres(
-            balanced, right / factor.row, factor.block_inverse, factor.indices
-        )
-        solution = factor.column * solution
-        right_norm = jnp.linalg.norm(right)
-        linear_residual = jnp.linalg.norm(factor.matrix @ solution - right) / jnp.where(
-            right_norm > 0, right_norm, 1.0
-        )
+        if contraction_ratio is None:
+            raise ValueError(
+                "factor reuse requires a measured residual contraction ratio"
+            )
+        reuse = jnp.isfinite(contraction_ratio) & (contraction_ratio <= 0.5)
+        factor = jax.lax.cond(reuse, lambda _: factor_cache, rebuild, None)
+        refactored = ~reuse
+    balanced = factor.matrix * factor.column[None, :] / factor.row[:, None]
+    solution, condition, krylov_residual, iterations = _block_gmres(
+        balanced, right / factor.row, factor.block_inverse, factor.indices
+    )
+    solution = factor.column * solution
+    right_norm = jnp.linalg.norm(right)
+    linear_residual = jnp.linalg.norm(factor.matrix @ solution - right) / jnp.where(
+        right_norm > 0, right_norm, 1.0
+    )
     if condition_diagnostics:
         condition_before = jnp.linalg.cond(factor.matrix)
         condition_after = jnp.linalg.cond(balanced)
@@ -1741,7 +1604,6 @@ def solve_batch(
     contraction_limit: float = 0.5,
     freeze_active_set: bool = True,
     iterations: int = 12,
-    matrix_free: bool = False,
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
@@ -1907,7 +1769,6 @@ def solve_batch(
                 condition_diagnostics=False,
                 factor_cache=prior,
                 contraction_ratio=jnp.asarray(0.0),
-                matrix_free=matrix_free,
             )
 
         def one_fresh(items):
@@ -1921,7 +1782,6 @@ def solve_batch(
                 quadrature,
                 fresh_geometry=True,
                 condition_diagnostics=False,
-                matrix_free=matrix_free,
             )
 
         correction = jax.lax.cond(

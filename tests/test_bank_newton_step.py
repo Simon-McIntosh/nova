@@ -351,70 +351,6 @@ def test_dense_newton_step_solves_scaled_residual(monkeypatch):
     assert bool(step.converged)
 
 
-def test_matrix_free_step_solves_the_same_system(monkeypatch):
-    """The product path reaches the assembled system's update on two cells.
-
-    The operator, its cell blocks and the product are supplied directly, so
-    this pins the product path's plumbing in the default lane: same right-hand
-    side, same stop, and a different preconditioner must not move the update.
-    """
-    cells = 2
-    matrix = jnp.asarray(
-        [
-            [2.0, 0.3, 0.1, 0.05, 0.0, 0.0],
-            [0.2, 3.0, 0.1, 0.0, 0.04, 0.0],
-            [0.0, 0.1, 4.0, 0.0, 0.0, 0.02],
-            [0.03, 0.0, 0.0, 2.5, 0.2, 0.1],
-            [0.0, 0.05, 0.0, 0.1, 3.5, 0.15],
-            [0.0, 0.0, 0.04, 0.0, 0.1, 4.5],
-        ]
-    )
-    moments = tuple(jnp.asarray([1.0, 2.0]) for _ in range(3))
-    residual = tuple(
-        jnp.asarray(values) for values in ([1e-3, 2e-3], [1e-2, 3e-2], [2e-2, 1e-2])
-    )
-    booked = current.Booking(*moments, jnp.asarray(1.0), jnp.asarray(1.0), True)
-    boundaries = (cells, 2 * cells)
-
-    def product(operands, values, direction, *args, **kwargs):
-        return tuple(jnp.split(matrix @ jnp.concatenate(direction), boundaries))
-
-    indices = support_read._cell_block_indices(cells)
-    blocks = matrix[indices[:, :, None], indices[:, None, :]]
-
-    monkeypatch.setattr(
-        support_read,
-        "step_residual",
-        lambda *args: support_read.StepResidual(residual, booked, None, True),
-    )
-    monkeypatch.setattr(support_read, "step_jacobian", lambda *args, **kwargs: matrix)
-    monkeypatch.setattr(support_read, "step_jacobian_vector", product)
-    monkeypatch.setattr(
-        support_read, "_cell_diagonal_blocks", lambda *args, **kwargs: blocks
-    )
-    dense = support_read.newton_step(None, moments, None, None, None, None)
-    free = support_read.newton_step(
-        None, moments, None, None, None, None, matrix_free=True
-    )
-    expected = jnp.concatenate(dense.update)
-    actual = jnp.concatenate(free.update)
-    error = float(jnp.linalg.norm(actual - expected) / jnp.linalg.norm(expected))
-    print(
-        "SMALL_MATRIX_FREE",
-        "relative_error",
-        error,
-        "dense_iterations",
-        int(dense.krylov_iterations),
-        "free_iterations",
-        int(free.krylov_iterations),
-        flush=True,
-    )
-    assert error <= 1e-8
-    assert int(free.krylov_iterations) <= 60
-    assert float(free.krylov_condition * free.krylov_residual) <= 1e-8
-    assert bool(free.converged)
-
-
 @pytest.fixture(scope="module")
 def diverted_linear_states():
     from scripts.prototypes.bank_solve_profile import fixture
@@ -608,10 +544,10 @@ def _restart_width(size):
     rather than duplicating the number, and fails loudly if the form changes.
     """
     pattern = re.compile(r"width = min\((\d+), right\.size\)")
-    match = pattern.search(inspect.getsource(support_read._block_gmres_operator))
+    match = pattern.search(inspect.getsource(support_read._block_gmres))
     assert match is not None, (
         "the restart width is no longer a literal min(<int>, right.size) in "
-        "_block_gmres_operator; update this derivation before trusting the cap"
+        "_block_gmres; update this derivation before trusting the cap"
     )
     return min(int(match.group(1)), size)
 
@@ -667,71 +603,6 @@ def test_block_gmres_cap_mid_cycle_leaves_unwritten_columns_out_of_the_update():
     )
     assert int(steps) == cap and cap % width != 0
     assert error <= 1e-10
-
-
-@pytest.mark.slow
-@pytest.mark.timeout(5400)
-@pytest.mark.parametrize("state", ["trial", "converged"])
-def test_matrix_free_update_matches_dense_update(diverted_linear_states, state):
-    """The product-form step must reproduce the assembled step's update.
-
-    The pair differ only in how the Jacobian reaches the Krylov solve, so a
-    matched update shows the matrix-free product, its cell-block
-    preconditioner and the shared stopping rule describe the same system.
-    """
-    from scripts.prototypes.bank_solve_profile import fixture
-
-    batch, states = diverted_linear_states
-    moments = tuple(value[0] for value in states[state])
-    support = jax.jit(
-        lambda bank, cache, values: support_read.read(
-            bank,
-            cache,
-            values,
-            batch.seeds,
-            batch.roots,
-            batch.convention,
-            batch.policy,
-        )
-    )(batch.operands, batch.cache, moments)
-
-    def step(matrix_free):
-        return support_read.newton_step(
-            batch.operands,
-            moments,
-            support,
-            batch.profile,
-            fixture.gradient,
-            batch.quadrature,
-            fresh_geometry=True,
-            matrix_free=matrix_free,
-        )
-
-    dense = jax.jit(lambda: step(False))()
-    free = jax.jit(lambda: step(True))()
-    dense_update = jnp.concatenate(dense.update)
-    free_update = jnp.concatenate(free.update)
-    error = float(
-        jnp.linalg.norm(free_update - dense_update) / jnp.linalg.norm(dense_update)
-    )
-    print(
-        "MATRIX_FREE_UPDATE",
-        state,
-        "relative_error",
-        error,
-        "dense_iterations",
-        int(dense.krylov_iterations),
-        "free_iterations",
-        int(free.krylov_iterations),
-        "free_condition",
-        float(free.krylov_condition),
-        "free_residual",
-        float(free.krylov_residual),
-        flush=True,
-    )
-    assert error <= 1e-8
-    assert int(free.krylov_iterations) <= 60
-    assert float(free.krylov_condition * free.krylov_residual) <= 1e-8
 
 
 def test_terminal_verdict_requires_fresh_read():

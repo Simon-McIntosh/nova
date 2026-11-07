@@ -223,3 +223,113 @@ def test_certificate_jacobian_matches_base(
     with patch.object(current, "book_tangent_channels", archived_channels):
         expected = jax.jit(lambda b, m, s: matrix(b, m, s))(bank, moments, support)
     assert_jacobian_equal(actual, expected, f"{kind}-550-{state}")
+
+
+def assert_peak_scaled_equal(actual, expected, label, tolerance=1e-12):
+    """Compare two batched Jacobians against each row component's own peak."""
+    from tests.test_biotgeometryautograd import peak_scaled_gap
+
+    actual, expected = np.asarray(actual), np.asarray(expected)
+    assert actual.shape == expected.shape
+    assert np.isfinite(actual).all() and np.isfinite(expected).all()
+    lanes, cells = actual.shape[0], actual.shape[-1] // 3
+    rows = (lanes, 3, cells, 3 * cells)
+    gap = peak_scaled_gap(actual.reshape(rows), expected.reshape(rows))
+    print("PEAK_SCALED_GAP", label, gap, flush=True)
+    assert gap <= tolerance, (label, gap)
+
+
+def test_shared_ring_geometry_matches_per_direction_cpu():
+    """A small conic case: one shared ring geometry equals rebuilding it."""
+    from tests.test_current_book_vectorised import _cells
+
+    psi, reading, geometry, profile = _cells(1, slope=0.2)
+    quadrature = current.Quadrature(segments=8)
+    directions = jnp.eye(6, dtype=jnp.float64)[jnp.asarray([0, 5])][:, None]
+    flux_rates = jnp.zeros((2, *psi.shape), dtype=jnp.float64)
+    levels = jnp.zeros(2, dtype=jnp.float64)
+
+    @jax.jit
+    def compare():
+        booked = current.book(psi, reading, geometry, profile, quadrature)
+
+        def gradient(radius, flux):
+            return jnp.full_like(radius, 0.2)
+
+        arguments = (
+            psi,
+            flux_rates,
+            reading,
+            directions,
+            levels,
+            levels,
+            geometry,
+            profile,
+            gradient,
+            quadrature,
+            booked,
+            jnp.arange(2),
+        )
+        shared = current.book_tangent_channels(*arguments)
+        rebuilt = current.book_tangent_channels(
+            *arguments, shared_ring_geometry=False
+        )
+        return shared, rebuilt
+
+    shared, rebuilt = compare()
+    shared, rebuilt = np.asarray(shared), np.asarray(rebuilt)
+    peak = np.max(np.abs(rebuilt))
+    gap = np.max(np.abs(shared - rebuilt)) / peak
+    print("PEAK_SCALED_GAP", "conic-small-shared", gap, flush=True)
+    assert gap <= 1e-12, gap
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(1800)
+@pytest.mark.parametrize("state", ["trial", "converged"])
+def test_shared_ring_geometry_matches_per_direction(certificate_machine, state):
+    """Every 550-cell state assembles identically with shared ring geometry."""
+    from scripts.prototypes.read_route.measure import sample_field
+
+    kind, machine = certificate_machine
+    bank, cache, roots, convention, policy, profile, quadrature, moments, analytic = (
+        machine
+    )
+    assert len(bank.geometry.centre) == 550
+    if state == "trial":
+        reading = jax.jit(topology.read)(
+            sample_field(analytic, bank.geometry), bank.geometry, convention, policy
+        )
+        psi = jax.vmap(jax.vmap(analytic.value))(bank.geometry.sample_points)
+        moments = current.book(psi, reading, bank.geometry, profile, quadrature)[:3]
+    support = jax.jit(
+        lambda b, m: support_read.read(
+            b,
+            cache,
+            m,
+            roots,
+            roots,
+            convention,
+            policy,
+        )
+    )(bank, moments)
+
+    def matrix(b, m, s, *, shared):
+        return support_read.step_jacobian(
+            b,
+            m,
+            s,
+            profile,
+            lambda r, p: jnp.zeros_like(r),
+            quadrature,
+            fresh_geometry=True,
+            shared_ring_geometry=shared,
+        )
+
+    actual = jax.jit(lambda b, m, s: matrix(b, m, s, shared=True))(
+        bank, moments, support
+    )
+    expected = jax.jit(lambda b, m, s: matrix(b, m, s, shared=False))(
+        bank, moments, support
+    )
+    assert_peak_scaled_equal(actual, expected, f"{kind}-550-{state}")

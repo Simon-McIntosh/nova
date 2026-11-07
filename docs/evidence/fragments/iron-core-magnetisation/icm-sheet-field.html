@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Conic sheet field: the measured accuracy of the differentiated flux | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-sheet-field-summary">§2 — The conic sheet field, measured on the section's target set</h2>
+    <p>Node <code>icm-sheet-field</code> adds the magnetic field
+    <code>B_R</code>, <code>B_Z</code> of a conic toroidal sheet beside the flux
+    that <code>nova/biot/sheet.py</code> already carries, sharing its elliptic
+    setup. The field is the exact gradient of the same closed-form
+    antiderivative, so the two components cost one extra quadrature pass each on
+    the rule the flux already builds, and no parallel module was written. Both
+    components hold the section's <code>1e-10</code> floor at all twelve fixed
+    targets and all five slopes, and <code>tests/test_edge_sheet.py</code>
+    asserts it: no target is excused, no tolerance was loosened.</p>
+
+    <h2 id="icm-sheet-field-measure">Measured: worst relative error per slope</h2>
+    <p>Geometry is the section's own: segments of length <code>0.1 m</code>
+    centred at <code>r = 1.5 m</code>, a cell width of <code>0.02 m</code>, and
+    twelve targets at half a cell, one cell, one segment and ten segments off
+    the middle and off each end of the segment. The reference is the ring
+    quadrature in <code>scripts/edge_sheet/reference.py</code>, panel-bisected to
+    <code>1e-13</code>. The worst relative error over both components at each
+    slope is:</p>
+    <table>
+      <thead>
+        <tr><th>slope [deg]</th><th>worst relative error</th><th>where</th><th>floor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0.0</td><td><code>1.34e-15</code></td><td>half a cell, middle, <code>B_Z</code></td><td>met</td></tr>
+        <tr><td>22.5</td><td><code>4.19e-12</code></td><td>ten segments, middle, <code>B_Z</code></td><td>met</td></tr>
+        <tr><td>45.0</td><td><code>4.33e-13</code></td><td>ten segments, middle, <code>B_Z</code></td><td>met</td></tr>
+        <tr><td>67.5</td><td><code>3.96e-13</code></td><td>ten segments, end, <code>B_Z</code></td><td>met</td></tr>
+        <tr><td>90.0</td><td><code>1.14e-13</code></td><td>ten segments, middle, <code>B_Z</code></td><td>met</td></tr>
+      </tbody>
+    </table>
+    <p>The worst case is <code>4.2e-12</code>, a factor of twenty-four inside the
+    floor. The log is <code>field-measure.log</code> in this run's directory; it
+    records the full twelve-row table per slope.</p>
+
+    <h2 id="icm-sheet-field-anchor">The cylinder branch against Part II eq (25)</h2>
+    <p>The vertical branch (<code>b_1 = 0</code>) is held against Snow's closed
+    form as an independent anchor rather than only against the ring reference.
+    Part II eq (25), per end and per unit sheet current, is</p>
+    <pre><code>B_r = a/(2r) [(1 + k'^2) K(k) - 2 E(k)]
+B_z = gamma/a [K(k) + (r' - r)/(r' + r) Pi(n_3^2, k)]</code></pre>
+    <p>with <code>a^2 = (r + r')^2 + gamma^2</code>,
+    <code>k^2 = 4 r r'/a^2</code> and <code>n_3^2 = 4 r r'/(r + r')^2</code>. The
+    field is the difference of the two ends scaled by <code>mu_0/(2 pi)</code>.
+    It reproduces both components of the shipped field to <code>1e-10</code> at
+    every one of the twelve targets, which is the test the anchor carries.</p>
+    <p>Part II eq (27), the thin pancake, was <strong>not</strong> transcribed.
+    Its second branch is written in terms of the vector potential
+    <code>A_phi0^(2)(pi/2)</code> of eq (20b), which lies outside the cropped
+    page, and a trial transcription of the first branch against the reference
+    missed by a factor of <code>9e4</code> at the middle station, so it was
+    discarded rather than fitted. The flat branch is therefore held to the ring
+    reference at <code>1e-10</code> and not to a closed form of its own. Part II
+    itself states that eqs (25) and (27) agree with the standard forms derived
+    from Biot-Savart, and the ring reference <em>is</em> that derivation carried
+    out numerically.</p>
+
+    <h2 id="icm-sheet-field-negative-control">Negative control</h2>
+    <p>The declared mutation is the sheet current's sign. With
+    <code>sheet_current = -1</code> the field must miss every comparison, and
+    <code>test_flipped_sheet_current_fails_the_field_comparison</code> asserts
+    exactly that: at each of the five slopes the flipped field departs from the
+    ring reference by more than the relative floor, and at <code>pi/2</code> it
+    departs from eq (25) as well. Both assertions run in the same gate as the
+    positive ones, so a kernel that silently ignored the current's sign would
+    fail there rather than pass everywhere.</p>
+
+    <h2 id="icm-sheet-field-derivation">What the derivation carries</h2>
+    <p>Three terms decide whether the measure is reachable, and each was found by
+    a measurement rather than by reading the algebra:</p>
+    <ul>
+      <li><strong>The segment line's own radius enters the height derivative.</strong>
+      The antiderivative puts <code>r_1 = r' - b_1 gamma</code>, so at a fixed
+      end <code>r_1</code> depends on the target height and
+      <code>d(r_1)/dgamma = -b_1</code> multiplies the arsinh <em>without</em> the
+      flux's field weight. Using the weighted integral there instead left the
+      height component uniformly <code>0.33</code> to <code>0.6</code> relative
+      out on all four sloped branches while the radial one was exact, which is
+      the signature of a missing term rather than a scaling error.</li>
+      <li><strong>The standoff is formed from positive terms.</strong>
+      <code>W = r_1 - r cos(phi)</code> and the pole numerator both vanish with
+      the standoff at <code>phi = 0</code>. Written as the difference of two
+      <code>O(r)</code> values they lose every digit that the graded azimuthal
+      rule buys, and three of the twelve targets stopped improving at
+      <code>1e-9</code> no matter how many panels were added, even though the
+      rule itself was converged to twelve digits.</li>
+      <li><strong>A target on the segment's line stands off by rounding alone.</strong>
+      The start and end stations lie on the segment's own extended line, so
+      <code>r_1 - r</code> is <code>2e-16</code> rather than zero, and the graded
+      nodes reach <code>phi = 3e-17</code>, below that standoff. The pole kernel
+      there reads <code>1e16</code> and its weighted contribution is wrong in the
+      second digit. Snapping a standoff within <code>1e-12 r</code> to zero took
+      the 22.5-degree branch from <code>8.1e-01</code> to <code>4.2e-12</code>.</li>
+    </ul>
+    <p>Each of the three was reproduced by an independent finite difference of
+    the landed flux before it was changed, so the closed form is anchored to the
+    flux it differentiates and not only to the ring reference.</p>
+  </main>
+</body>
+</html>

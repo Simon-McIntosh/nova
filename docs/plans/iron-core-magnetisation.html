@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -474,7 +474,10 @@
     <div class="r-comment-body"><p>§2 sloped sheet reviewed at f598eb5bdb55debbf63a8aa9e609b6dc91128cb2 against base 590c627a8836cbbfc74849d58069db83d65c114d: the goal holds (71 passed, 0 xfail, worst sloped 3.4e-13, worst over the fixed set 6.9e-13), the negative control refuses (65 failed, 6 passed, EXIT=1); two non-blocking findings (stale claim in icm-sheet-flux.html:36, no assertion guarding the by-import requirement).</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261107T003956760144-icm-sheet-sloped" data-who="reckon-build" data-when="2026-11-07T01:16:28.416Z">
-    <div class="r-comment-body"><p>§2 sloped sheet holds the 1e-10 floor at every near standoff (worst 3.4e-13, was 9.2e-05) on the Part V module&#x27;s graded arsinh rule with its endpoint-log removal imported from `_weighted_residual`, plus a sinh map for the D term and cancellation-free squares; the 21 strict xfails are removed.</p></div>
+    <div class="r-comment-body"><p>§2 sloped sheet holds the 1e-10 floor at every near standoff (worst 3.4e-13, was 9.2e-05) on the Part V module's graded arsinh rule with its endpoint-log removal imported from `_weighted_residual`, plus a sinh map for the D term and cancellation-free squares; the 21 strict xfails are removed.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261107T023957720676-review-of-icm-sheet-field-59d1c8b73759" data-who="reckon-build" data-when="2026-11-07T02:51:44.955Z">
+    <div class="r-comment-body"><p>review of run r-20261107T004204319193-icm-sheet-field at head 59d1c8b737596c9e2009107454d5ae02e589c031: parsed record scoring all six dimensions (goal_fidelity 18, evidence 13, scope_discipline 20, durability 17, fit 19, reuse 17), added_failure_count 0, one blocking finding (the pancake closed-form anchor required by done-when clause 2 is absent) and one non-blocking finding.</p></div>
 </div>
 </section>
 </main>

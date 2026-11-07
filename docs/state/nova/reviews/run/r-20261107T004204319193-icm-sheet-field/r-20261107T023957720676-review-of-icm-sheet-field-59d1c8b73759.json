@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured by this review: baseline arm 911982b4 71 passed, head arm 59d1c8b73 136 passed, both EXIT=0",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T02:51:44.955Z",
+  "dispatched_at": "2026-11-07T02:41:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the Snow pancake closed form (Part II eqs 26-27) is the same route question already referred to the lead from the flux review: the flat case is a quadrature that holds 1e-10 against the 1e-13 reference, and whether \u00a72 needs the transcribed closed form as an independent anchor is the lead's call; \u00a72 stays implementable until it is settled",
+      "recorded_at": "2026-11-07T02:53:28.777567+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "log header cosmetic; the gate result is recorded in the log body",
+      "recorded_at": "2026-11-07T02:53:31.137128+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": "205",
+      "severity": "blocking",
+      "text": "blocking: done_when clause (2) requires the slope-0 field to reproduce the pancake form (Part II eqs 26-27) to 1e-10, but test_flat_pancake_field_matches_reference compares only against scripts/edge_sheet/reference.py and the manifest records the form as not transcribed, so a required anchor is missing and the negative control cannot fail \"both comparisons\"."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T004204319193-icm-sheet-field/elliptic-tests.log",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the log's revision header is empty because the recording command ran outside a version-control tree, so the auxiliary gate log cannot be tied to the revision it measured."
+    }
+  ],
+  "gate_logs": {
+    "after": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T023957720676-review-of-icm-sheet-field-59d1c8b73759/review-gate-head.log",
+    "baseline": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T023957720676-review-of-icm-sheet-field-59d1c8b73759/review-gate-base.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit d7ace9329, 8036c2743, 7d0cc6f71, c4a917eb5 and 59d1c8b73 against base 911982b4; 365 insertions over 3 files, all inside the declared paths, and the last commit is comment-only.",
+    "done_when": "clause (1) is measured by tests/test_edge_sheet.py:193-200 against scripts/edge_sheet/reference.py and clause (2)'s cylinder anchor by :214-221, but no test measures the pancake form, so clause (2) is only half asserted.",
+    "goal": "the node's goal is \"Compute the Part II conic sheet field to 1e-10\"; nova/biot/sheet.py:284-303 implements the sloped branch and :304-315 the flat one, exposed as sheet_field at :383-388.",
+    "manifest": "read in full; it records status complete, six commits, the gate command at line 11, test_logs field-tests.log, and eq_27_form: not transcribed under evidence_inputs.",
+    "write_paths": "the manifest declares nova/biot/sheet.py, tests/test_edge_sheet.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-field.html and a figures directory; the diff touches the first three and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_edge_sheet.py:193-221 compares the field against the independent ring reference and the eq (25) transcription, so reverting a kernel term reddens them, while the negative control at :224-245 tests only sign linearity.",
+    "evidence": "tests/test_edge_sheet.py:193-200 asserts clause (1) and :214-221 the cylinder anchor, but no test asserts the pancake form clause (2) names, so the gate measures part of its done_when.",
+    "fit": "nova/biot/sheet.py:199-283 follows the module's existing graded-rule and docstring idiom (:113-182) and imports the shared elliptic, greens and residual owners rather than restating them.",
+    "goal_fidelity": "nova/biot/sheet.py:284-303 and :304-315 return B_R and B_Z as the exact gradient of the landed antiderivative, and an independent re-measurement with scripts/edge_sheet/reference.py reproduced the run's per-slope worst errors exactly (4.19e-12 worst, 22.5 deg).",
+    "reuse": "the addition extends nova/biot/sheet.py, the owner of the conic-sheet closed form, reusing complete_kind/complete_pole, _weighted_residual at :63 and greens_bz_br at :57, though nova/biot/polygonanalytic.py:1845 already owns per-edge full-turn field integrals on the plan's separate Part V route.",
+    "scope_discipline": "every path in the diff 911982b4..59d1c8b73 is nova/biot/sheet.py, tests/test_edge_sheet.py or the declared evidence fragment."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is \"Compute the Part II conic sheet field to 1e-10\"; nova/biot/sheet.py:284-303 implements the sloped branch and :304-315 the flat one, exposed as sheet_field at :383-388.\nVERDICT done_when: clause (1) is measured by tests/test_edge_sheet.py:193-200 against scripts/edge_sheet/reference.py and clause (2)'s cylinder anchor by :214-221, but no test measures the pancake form, so clause (2) is only half asserted.\nVERDICT write_paths: the manifest declares nova/biot/sheet.py, tests/test_edge_sheet.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-field.html and a figures directory; the diff touches the first three and nothing outside them.\nVERDICT manifest: read in full; it records status complete, six commits, the gate command at line 11, test_logs field-tests.log, and eq_27_form: not transcribed under evidence_inputs.\nVERDICT diff: read commit by commit d7ace9329, 8036c2743, 7d0cc6f71, c4a917eb5 and 59d1c8b73 against base 911982b4; 365 insertions over 3 files, all inside the declared paths, and the last commit is comment-only.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:284-303 and :304-315 return B_R and B_Z as the exact gradient of the landed antiderivative, and an independent re-measurement with scripts/edge_sheet/reference.py reproduced the run's per-slope worst errors exactly (4.19e-12 worst, 22.5 deg).\nSCORE evidence: 13\nJUSTIFICATION evidence: tests/test_edge_sheet.py:193-200 asserts clause (1) and :214-221 the cylinder anchor, but no test asserts the pancake form clause (2) names, so the gate measures part of its done_when.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff 911982b4..59d1c8b73 is nova/biot/sheet.py, tests/test_edge_sheet.py or the declared evidence fragment.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_edge_sheet.py:193-221 compares the field against the independent ring reference and the eq (25) transcription, so reverting a kernel term reddens them, while the negative control at :224-245 tests only sign linearity.\nSCORE fit: 19\nJUSTIFICATION fit: nova/biot/sheet.py:199-283 follows the module's existing graded-rule and docstring idiom (:113-182) and imports the shared elliptic, greens and residual owners rather than restating them.\nSCORE reuse: 17\nJUSTIFICATION reuse: the addition extends nova/biot/sheet.py, the owner of the conic-sheet closed form, reusing complete_kind/complete_pole, _weighted_residual at :63 and greens_bz_br at :57, though nova/biot/polygonanalytic.py:1845 already owns per-edge full-turn field integrals on the plan's separate Part V route.\nFINDING tests/test_edge_sheet.py:205 blocking: done_when clause (2) requires the slope-0 field to reproduce the pancake form (Part II eqs 26-27) to 1e-10, but test_flat_pancake_field_matches_reference compares only against scripts/edge_sheet/reference.py and the manifest records the form as not transcribed, so a required anchor is missing and the negative control cannot fail \"both comparisons\".\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T004204319193-icm-sheet-field/elliptic-tests.log:3 non-blocking: the log's revision header is empty because the recording command ran outside a version-control tree, so the auxiliary gate log cannot be tied to the revision it measured.",
+  "review_run_id": "r-20261107T023957720676-review-of-icm-sheet-field-59d1c8b73759",
+  "reviewed_base_sha": "911982b47e02ce52378d3e680a387944264dd518",
+  "reviewed_commits": [
+    "d7ace9329",
+    "8036c2743",
+    "7d0cc6f71",
+    "c4a917eb5",
+    "59d1c8b73"
+  ],
+  "reviewed_head_sha": "59d1c8b737596c9e2009107454d5ae02e589c031",
+  "reviewed_run_id": "r-20261107T004204319193-icm-sheet-field",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T02:57:08.538930+00:00",
+  "total": 104
+}

@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-07T19:18:37.033Z",
   "dispatched_at": "2026-11-07T19:05:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-jacobian-mismatch-1af9c7e75d08",
+      "recorded_at": "2026-11-07T20:35:49.872564+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",

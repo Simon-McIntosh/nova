@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_figure_count": 2,
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T18:55:36Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png"
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "fae065c2b04",
+      "line": 813,
+      "severity": "non-blocking",
+      "summary": "The residual panel's x axis is set to `-0.5 .. span + 0.5` with `span = max(int(trips[-1]), 1)`, so both figures run to active-set trip 15 while the plotted trajectory ends at trip 4. Eleven of sixteen slots are empty and the five real points are squeezed into under a third of the panel width, halving the resolution a reader has for the trip-1 rise that the frame-146 argument rests on."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The EFIT label flux contours are drawn in a very light grey that is hard to follow against white and noticeably fainter than the blue solved flux; where the two interleave in the poloidal panel the reference field a reader needs to compare against is the harder one to trace."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
+      "id": "f787c8caf4f",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "At the lower edge of the poloidal panel the red solved X-point cross and the red limiter-contact marker are drawn almost on top of each other, so a reader cannot separate the X-point from the contact point at the rendered scale, though the caption's bounding-surface reading does not depend on telling them apart."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Both figures place the poloidal panel at roughly a seventh of the canvas width, so the closed contours, the limiter outline and the solved-axis and X-point markers are drawn small relative to the space the legend and the wide residual axis consume; the panel is legible but the data the figure exists to show is the smallest element on the page."
+    }
+  ],
+  "notes": [
+    "Both figures were judged only from the rendered PNGs named in the dispatch: image-0.png is frame 137 (the frame that holds its plasma) and image-1.png is frame 146 (the frame that loses it). No SVG was opened, read, listed, searched or parsed.",
+    "The two PNGs correspond to the run's committed panels at docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg and frame-146-flux-contours.svg on the reviewed head, which the run ships without PNG twins; the figure paths above name the PNG the reader is shown.",
+    "Finding anchoring: the residual-axis defect is reported against scripts/prototypes/diiid_forward_convergence/render_panels.py line 813, which the run reuses unchanged; the remaining findings are in the drawn artifact itself and carry a null line.",
+    "No blocking defect was found: no label is clipped or overlapping in frame 146, and in frame 137 the one near-collision is between two markers rather than between text, leaving every caption, legend entry and axis label readable.",
+    "This is a read-only figure review. No figure, caption or script was edited, moved or reformatted."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T185427174655-review-of-diiid-frame-146-vertical-loss-4c40f2138e44-figure",
+  "reviewed_base_sha": "c2ca81c4cdef3e08ba3832f44bfba078dec0643c",
+  "reviewed_head_sha": "4c40f2138e44e814ba631c81b569a0e2252e1b15",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png": {
+      "contrast": "states a defect \u2014 the EFIT label flux contours are drawn in a very light grey that is hard to follow against white, particularly where they interleave with the darker blue solved-flux contours.",
+      "data_ink": "states a defect \u2014 the right residual panel's x axis runs to 15 while the trajectory ends at trip 4, so eleven of sixteen slots are empty and the five real points are drawn in under a third of the panel's width.",
+      "decoration": "passes \u2014 no gradient, no background fill, no styled theme; the poloidal panel carries no axes or gridlines, and the only dotted lines are the grid-domain bound and the stated 1e-5 tolerance.",
+      "label_collision": "states a defect \u2014 at the lower edge of the poloidal panel the red solved X-point cross and the red limiter-contact marker sit almost on top of one another, so a reader cannot separate the two symbols at this scale.",
+      "legibility": "passes \u2014 the red bounding surface and the blue core contours around it read at a glance; the reader sees immediately that the axis (red triangle) sits inside the limiter and the plasma is confined, matching the caption's 234 closed core cells.",
+      "table_form": "passes \u2014 both panels are plots of a spatial field and of a trajectory against trip; neither is information naturally a table."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png": {
+      "contrast": "states a defect \u2014 the grey EFIT label flux contours and the light grey 'tolerance 1e-5' text sit low against white, and the label contours are noticeably fainter than the blue solved flux.",
+      "data_ink": "states a defect \u2014 the same over-wide residual axis: the trajectory ends at trip 4 and the axis runs to 15, so two thirds of the panel is blank and the single rise at trip 1 is compressed.",
+      "decoration": "passes \u2014 no gradient or fill; the poloidal panel has no axes or ticks, and the dotted lines mark only the grid-domain bound and the 1e-5 tolerance.",
+      "label_collision": "passes \u2014 the trip labels 27, 40, 1, 0, 0 sit clear above their points, the solved-axis triangle and solved X-point are distinct from the hollow label markers, and no text is clipped at a panel edge.",
+      "legibility": "passes \u2014 the reader sees the red open 'solved axis (outside wall)' triangle sitting above the black limiter, with the legend naming that reading directly; the caption's 8 closed core cells and 0.039x target agree with the picture.",
+      "table_form": "passes \u2014 a scalar-field panel and a trajectory plot; no table content is drawn as an image."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:03:15.518673+00:00",
+  "total": null
+}

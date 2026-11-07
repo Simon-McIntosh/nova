@@ -63,7 +63,15 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.completeelliptic import complete_kind, complete_pole
+import jax
+import jax.numpy as jnp
+
+from nova.biot.completeelliptic import (
+    _complete_kind_tangent,
+    _complete_pole_tangent,
+    complete_kind,
+    complete_pole,
+)
 from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.greens import MU0, greens_bz_br, greens_psi
 
@@ -83,17 +91,49 @@ def _divide(numerator, denominator):
 
     The bracketed weight ``N(cos phi)`` is quartic and the sheet's squared
     denominator is quadratic in ``cos phi``, so splitting the integrand onto the
-    denominator leaves a quadratic quotient and a linear remainder.
+    denominator leaves a quadratic quotient and a linear remainder.  ``polydiv``
+    trims the remainder's high coefficients, so it is padded back to one
+    coefficient per divisor degree: the reductions index the remainder by degree,
+    and a zero linear term is still a linear term.
     """
-    rest = np.array(numerator, dtype=np.float64)
-    divisor = np.array(denominator, dtype=np.float64)
-    quotient = np.zeros(rest.size - divisor.size + 1)
-    for order in range(quotient.size - 1, -1, -1):
-        factor = rest[order + divisor.size - 1] / divisor[-1]
-        quotient[order] = factor
-        for index, coefficient in enumerate(divisor):
-            rest[order + index] -= factor * coefficient
-    return quotient, rest[: divisor.size - 1]
+    divisor = np.asarray(denominator, dtype=np.float64)
+    quotient, remainder = np.polynomial.polynomial.polydiv(
+        np.asarray(numerator, dtype=np.float64), divisor
+    )
+    rest = np.zeros(divisor.size - 1)
+    rest[: remainder.size] = remainder
+    return quotient, rest
+
+
+@jax.custom_jvp
+def _complete_kind_traced(complement):
+    """``(K, E)`` on traced arguments, differentiated by their own recurrence."""
+    return complete_kind(complement, xp=jnp)
+
+
+@_complete_kind_traced.defjvp
+def _complete_kind_traced_jvp(primals, tangents):
+    (complement,), (complement_tangent,) = primals, tangents
+    values = _complete_kind_traced(complement)
+    _, slopes = _complete_kind_tangent(complement, complement_tangent, xp=jnp)
+    return values, tuple(slopes)
+
+
+@jax.custom_jvp
+def _complete_pole_traced(pole, complement):
+    """Complete third kind on traced arguments, differentiated by its own rule."""
+    return complete_pole(pole, complement, xp=jnp)
+
+
+@_complete_pole_traced.defjvp
+def _complete_pole_traced_jvp(primals, tangents):
+    pole, complement = primals
+    pole_tangent, complement_tangent = tangents
+    value = _complete_pole_traced(pole, complement)
+    _, slope = _complete_pole_tangent(
+        pole, pole_tangent, complement, complement_tangent, xp=jnp
+    )
+    return value, slope
 
 
 _ARSINH_NODES = 128
@@ -566,10 +606,8 @@ class SheetFlux:
         weights_second = (
             (offset + slope * roots[1]) / (4.0 * squared[2]) / (roots[1] - roots[0])
         )
-        third = complete_pole(
-            1.0 - 1.0 / xp.stack(roots),
-            xp.full((2,), complement),
-            xp=xp,
+        third = _complete_pole_traced(
+            1.0 - 1.0 / xp.stack(roots), xp.full((2,), complement)
         )
         third_kind = xp.sum(
             -(xp.stack([weights, weights_second]) / xp.stack(roots)) * third
@@ -578,8 +616,8 @@ class SheetFlux:
         quotient_small, remainder_small = self._closed_divide(kept, kept_squared, xp)
         folded_small = self._closed_folded(quotient_small, k2, K, E, xp)
         pole = (1.0 + (-kept_squared[0] / kept_squared[1])) / 2.0
-        single = complete_pole(
-            xp.reshape(1.0 - 1.0 / pole, (1,)), xp.reshape(complement, (1,)), xp=xp
+        single = _complete_pole_traced(
+            xp.reshape(1.0 - 1.0 / pole, (1,)), xp.reshape(complement, (1,))
         )
         third_small = -remainder_small[0] / (2.0 * kept_squared[1] * pole) * single[0]
 
@@ -597,7 +635,7 @@ class SheetFlux:
         a = span**0.5
         k2 = 4.0 * r * rp / span
         complement = (gamma * gamma + (r - rp) ** 2) / span
-        first, second = complete_kind(complement, xp=xp)
+        first, second = _complete_kind_traced(complement)
         root = 2.0 * a * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second) / (3.0 * k2)
         mean = (
             0.5

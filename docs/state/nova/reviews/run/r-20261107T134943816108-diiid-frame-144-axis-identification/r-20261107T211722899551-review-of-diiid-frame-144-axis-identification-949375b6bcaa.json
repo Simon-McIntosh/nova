@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-11-07T21:37:18.581Z",
+  "dispatched_at": "2026-11-07T21:19:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html",
+      "line": 186,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:186 cites job 1308081, 1588 s and 12.2 GB peak, but no log in the run directory carries that job id (grep over the run's *.out/*.log returns nothing); the replay-144.slurm.out carries no job id line, so the elapsed and memory figures are quoted but not attributable to a stored log."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html",
+      "line": 198,
+      "severity": "non-blocking",
+      "text": "the replay column prints 5.57988848578467 while replay/probe.json records seed_l2_distance_from_label 5.579888485784667; the table's premise is that the two columns are identical, and truncating one operand to a different digit count makes the equality a claim the artefact does not literally support."
+    }
+  ],
+  "justifications": {
+    "durability": "No assertion was added in this commit and the node has no test file in its write paths, so nothing in this change fails if the analysis regresses; the prior 8130772bb review scored the same gap at 4.",
+    "evidence": "The five cited frames all resolve at 8130772bb (forward.py:1274 current_moment_observation, forward.py:1447 _integral_state, forward_operator.py:3211 read_with_current_moments, forward_operator.py:3182 require_qualified_axis, topology.py:226 raise NoQualifiedAxisError), and replay/probe.json independently records refused with empty arms.",
+    "fit": "The new section uses the fragment's own table, pre/code and caption idioms and introduces no plan, sprint or ticket identifier.",
+    "goal_fidelity": "diiid-frame-144-axis-identification.html:206-219 states why the probes admitted the candidate and the product raises - 'the difference is the field and the path, not the comparison' - which is the naming the brief's step 2 asks for.",
+    "reuse": "The change adds no definition; it cites existing module symbols (forward_operator.py:3182, topology.py:226) rather than re-implementing qualification, and no capability is duplicated.",
+    "scope_discipline": "git diff --stat 8130772bb..949375b6b lists exactly one file, the fragment, with no product source touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261107T211722899551-review-of-diiid-frame-144-axis-identification-949375b6bcaa",
+  "reviewed_base_sha": "8130772bbf8b17b93f666cafc922f5e088058a20",
+  "reviewed_head_sha": "949375b6bcaacd37da86ea96b863a8c81013ff4c",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:50:10.056557+00:00",
+  "total": 96,
+  "verdicts": {
+    "diff": "Read commit by commit against 8130772bb: one commit, 949375b6b, adding a replay table, the traceback, a path-explanation paragraph, a host-side dump hook and a note on landing 1af4c1b03 to the one fragment file.",
+    "done_when": "The done_when asks for reproduction, a cited rejecting rule, and the fragment with a panel and a recommended fix; the manifest records job 1308081 and replay/probe.json records status refused, empty arms and seed_l2_distance_from_label 5.579888485784667, which is the reproduction the section claims.",
+    "goal": "The node goal (brief.md) is to reproduce the frame-144 limited refusal, name the rule that rejects the axis, and record it; the landed section at diiid-frame-144-axis-identification.html:182-235 answers the naming question by placing the raise inside the current-moment integral rather than on the plain qualification path the probes exercised.",
+    "manifest": "The manifest states status complete, lists commits through 949375b6b, and its checkpoint records job 1308081 with the raise chain; it declares no test file in the write paths and records no gate log for the replay, matching what the run directory holds.",
+    "write_paths": "The declared write paths are scripts/prototypes/diiid_axis_identification, the fragment, and docs/figures/diiid-frame-144-axis-identification; the diff over 8130772bb..949375b6b touches only the fragment (57 insertions, 1 deletion)."
+  }
+}

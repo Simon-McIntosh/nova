@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T21:22:08Z",
+  "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged only from the rendered PNG, image-0.png, 1400x720)",
+  "findings": [
+    {
+      "disposition": "exempted: the label text is legible at 1400 px and the figure's claim is duplicated in the evidence fragment's prose; the contrast defect does not stop a reader reading the panel.",
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two direct labels and the EFIT-axis cross are drawn in a mid green (about #2ca02c, roughly 2.7:1 on white), so the annotation that carries the figure's message - that the EFIT labelled axis is present and the flux axis was rejected - is the lowest-contrast text on the canvas and is hard to read for a low-vision reader or in print."
+    },
+    {
+      "disposition": "folded: the evidence fragment diiid-frame-144-axis-identification should state in its caption the separation between the EFIT label axis and the rejected flux maximum, since the axis-free poloidal style will not show it.",
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The panel carries no coordinate scale and draws the EFIT label axis and the rejected axis within a few pixels of one another inside the innermost contour loop, so a reader cannot tell whether the two axes are nearly coincident or merely both near the flux maximum; the recorded seed distance from the label (L2 5.58) is not visible anywhere in the figure and cannot be inferred without axes."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T212003748052-review-of-diiid-frame-144-axis-identification-949375b6bcaa-figure",
+  "reviewed_base_sha": "8130772bbf8b17b93f666cafc922f5e088058a20",
+  "reviewed_head_sha": "949375b6bcaacd37da86ea96b863a8c81013ff4c",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "fail (non-blocking): the two green direct labels and the green cross marker render in a mid green of roughly #2ca02c, about 2.7:1 against the white panel, below the 4.5:1 text threshold; the black legend text clears it easily.",
+    "data_ink": "pass: the contour field, the limiter and the null markers carry the ink; the right-hand legend is large but is text naming the marks, not decoration.",
+    "decoration": "pass: no gradient, no background fill, no gridlines, no frame; the marks are contours, the limiter, the nulls, two leader lines and their labels.",
+    "label_collision": "pass: 'rejected axis' and 'EFIT axis' are neither clipped at the canvas edge nor overlapping each other or the contour lines; both leader lines terminate on the same marker, which is where the two axes are drawn, not a collision.",
+    "legibility": "pass: at 1400 px the seed's flux contours, the black limiter, the four marker styles and both green direct labels are readable at a glance; the legend's four glyphs are distinguishable at their rendered size.",
+    "table_form": "pass: the image carries no numeric table; the right side is a legend only."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:39:02.559329+00:00",
+  "total": null
+}

@@ -4,6 +4,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-07T16:14:45.260Z",
   "dispatched_at": "2026-11-07T15:52:40Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-warm-stall",
+      "recorded_at": "2026-11-07T19:56:06.171588+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",

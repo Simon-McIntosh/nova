@@ -84,6 +84,54 @@ populated at <code>nova/equilibrium/forward.py:2738</code>, where
 <code>mask_history</code> takes <code>history.active_set_mask_differences</code>.
 </p>
 
+<h3>Each trip's own field</h3>
+<p>
+Each panel below is drawn from that trip's own solved flux grid, saved by the
+trajectory job as <code>frame-&lt;n&gt;-trip-&lt;k&gt;.npz</code>. Blue contours are
+the trip's solved field, grey contours the EFIT label at the same physical
+levels; the thick red curve is the bounding surface read on that trip's grid,
+the black outline the governed limiter, the dashed grey curve the EFIT label
+boundary, and the markers the solved and label nulls. The strip under each
+panel carries the residual at every trip the frame reached, sized to the trips
+present.
+</p>
+<figure>
+<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg"
+     alt="Frame 146 at trip 1: a closed solved field centred inside the limiter">
+<figcaption>
+Frame 146, trip 1. The axis (triangle) sits inside the limiter and the solved
+field closes around it: 0.912&times;Ip confined at Z=&minus;0.346 m.
+</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+     alt="Frame 146 at trip 2: the axis lifted above the limiter top">
+<figcaption>
+Frame 146, trip 2, after the 83.21 Wb promotion. The axis triangle is
+now at Z=+1.556 m, above the limiter top at +1.363 m, and the closed field
+around it has collapsed: 0.046&times;Ip confined.
+</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg"
+     alt="Frame 137 at trip 2: a closed field still centred inside the limiter">
+<figcaption>
+Frame 137 at the same trip, after a 6.156 Wb promotion. Its axis stays at
+Z=&minus;0.361 m inside the limiter with 0.737&times;Ip confined.
+</figcaption>
+</figure>
+<p>
+The bounding surface in these panels is derived on the trip's own grid as the
+larger of the saddle flux and the flux the limiter carries. The host routine
+<code>host_boundary_read</code> takes an equilibrium grid and evaluates
+<code>wall_flux</code> on its wall nodes; the per-trip archives carry the flux
+array, the wall ring and the limiter but no such grid, so the reduced
+competition is drawn here rather than the host read. The saddle points marked
+are grid-level candidates (33&times;33 lattice), which is why more than one
+appears; the solved axis position is the measured one from the trajectory
+table.
+</p>
+
 <h3>Where the two branches part at trip 2</h3>
 <p>
 Frame 137's promotion changes fewer mask entries each trip: 24, then 20, then 9,

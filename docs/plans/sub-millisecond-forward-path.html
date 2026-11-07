@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="232">
+<meta name="plan-version" content="233">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -790,7 +790,10 @@
     <div class="r-comment-body"><p>review of bank-jacobian-assembly at b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2: the product change is reverted and the landed diff is documentation and prototype runners only, two blocking findings record that the fragment reports an attempted-and-failed 550-cell parity gate as never run and that the required table omits assembly device ms and launches per call.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T141645816764-review-of-bank-warm-stall-9eb880bfeea6" data-who="reckon-build" data-when="2026-11-07T14:50:23.100Z">
-    <div class="r-comment-body"><p>sub-millisecond-forward-path §3 — independent review of run r-20261107T133413665344-bank-warm-stall at base 5f34f03c / head 9eb880bfeea6d2a30d4d96946407c96221311c83: scores goal_fidelity 17, evidence 10, scope_discipline 18, durability 7, fit 15, reuse 11 (total 78); 8 findings, 3 blocking (the fragment&#x27;s 7-20x per-update trial ratio is contradicted by its own table&#x27;s 1.30-25.94x range; the figure&#x27;s tolerance label is clipped out of the rendered canvas by plot.py:57; the manifest&#x27;s tests line carries unsubstituted &lt;run&gt;/&lt;worktree&gt; placeholders).</p></div>
+    <div class="r-comment-body"><p>sub-millisecond-forward-path §3 — independent review of run r-20261107T133413665344-bank-warm-stall at base 5f34f03c / head 9eb880bfeea6d2a30d4d96946407c96221311c83: scores goal_fidelity 17, evidence 10, scope_discipline 18, durability 7, fit 15, reuse 11 (total 78); 8 findings, 3 blocking (the fragment's 7-20x per-update trial ratio is contradicted by its own table's 1.30-25.94x range; the figure's tolerance label is clipped out of the rendered canvas by plot.py:57; the manifest's tests line carries unsubstituted &lt;run&gt;/&lt;worktree&gt; placeholders).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T154619090298-review-of-bank-warm-stall-22ca7d05a9ab" data-who="reckon-build" data-when="2026-11-07T16:14:45.260Z">
+    <div class="r-comment-body"><p>independent review of r-20261107T133413665344-bank-warm-stall scored over base 9eb880bfeea6d2a30d4d96946407c96221311c83..head 22ca7d05a9abdef7369b69fa856f976bbfe4d1db; two blocking findings on the fragment&#x27;s warm-against-cold claims and two non-blocking.</p></div>
 </div>
 </section>
 </main>

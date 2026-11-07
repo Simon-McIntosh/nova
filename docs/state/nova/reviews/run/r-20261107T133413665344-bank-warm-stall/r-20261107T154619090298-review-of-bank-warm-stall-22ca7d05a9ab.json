@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T16:14:45.260Z",
+  "dispatched_at": "2026-11-07T15:52:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "6",
+      "severity": "blocking",
+      "text": "blocking: the added paragraph states the two arms' residuals 'stay within 0.3% for all sixty updates' and that 'neither converges in sixty updates', but the reduced record committed in the same round gives accepted-residual relative differences of 83%, 65% and up to 321% from update 11 onward (max 321% at update 19; warm path rising 0.4813 to 1.529, cold 0.8818 to 2.273), and its own parenthetical '(0 of 16 lanes warm, 1 of 16 cold)' records a cold lane that did converge."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "48",
+      "severity": "blocking",
+      "text": "blocking: the rewritten figcaption says both arms 'then plateau between 0.44 and 0.55', but the committed record gives lane 0's warm path reaching 1.529 and its cold path 2.273 after update 11 (warm terminal 1.271, cold terminal 1.350), which is also what the committed figure shows; the same claim is repeated at line 53."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: the claim that 'over sixty updates the warm and cold axis positions stay within 2e-5 of each other throughout' is contradicted by the committed record, whose axis fields differ by 4.2e-5 in x within the first ten updates and by up to 7.9e-4 over the sixty (update 19); the sentence predates this commit, which is what makes the record checkable."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "non-blocking: plot.py reads row['residual'] from the full run report, so it raises KeyError on the committed reduced record (whose rows carry accepted_residual); only render.py was made to read the reduced record, so the committed figure cannot be re-rendered from the tree it ships with."
+    }
+  ],
+  "justifications": {
+    "durability": "render.py is a manual reproduction with no assertion behind it, and nothing in the tree reddens if bank-warm-stall.html:6 drifts from results/bank-warm-stall.json, as it already has.",
+    "evidence": "scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json reconciles the fragment table and render.py reproduces its twelve rows byte for byte, yet the caption at bank-warm-stall.html:48 and the added paragraph at :6 state a warm-against-cold agreement the same record gives as up to 321% apart.",
+    "fit": "compact.py, render.py and plot.py follow the scripts/prototypes idiom and carry no plan or version label, and plot.py:61 records the anchoring mechanism rather than a change history.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:6 lands the fix round and the reduced record, but the fragment's headline that the stall is not warm-start specific rests on an agreement claim ('within 0.3% for all sixty updates') that its own committed record contradicts.",
+    "reuse": "compact.py is the first reducer for this instrument; a search of scripts/prototypes found bank_candidate_compact, which owns solver support compaction and not record reduction, so there is no owner to extend.",
+    "scope_discipline": "commits 167c89c9b and 22ca7d05a touch only the six declared paths under scripts/prototypes/bank_warm_stall, docs/evidence/fragments/sub-millisecond-forward-path/ and docs/figures/sub-millisecond-forward-path/, with no product code and no test changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief asks for the stalling slice's trace, the mechanism and a fragment with one figure; this delta is the fix round on that record, and it repairs the trial-ratio range and the clipped annotation while leaving the warm-against-cold agreement claim false at bank-warm-stall.html:6.\nVERDICT done_when: the measure is the per-update table, the warm-against-cold comparison and one figure; the table reconciles with results/bank-warm-stall.json and the figure now carries its tolerance label, but two comparison quantities at bank-warm-stall.html:6 and :48 contradict that same record.\nVERDICT write_paths: the declared paths are scripts/prototypes/bank_warm_stall, the fragment and the figure directory; commits 167c89c9b and 22ca7d05a change only files inside them, namely results/bank-warm-stall.json, compact.py, render.py, plot.py, the fragment and the SVG.\nVERDICT manifest: read manifest.md, which reads status complete with four commits, carries the literal sbatch command whose gate log ends EXIT=0, and names every review item fixed except item 4.\nVERDICT diff: read both commits against 9eb880bfe; 167c89c9b adds compact.py, the 176 KB reduced record and three fragment paragraphs, and 22ca7d05a rewrites the ratio sentences, the caption, the plot annotation ordering and render.py, with no product code or test touched.\nCALL_SITES: nova/equilibrium/support_read.py:_damped_scale, nova/equilibrium/support_read.py:newton_step, nova/equilibrium/support_read.py:read_batch, nova/equilibrium/support_read.py:solve_batch\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:6 lands the fix round and the reduced record, but the fragment's headline that the stall is not warm-start specific rests on an agreement claim ('within 0.3% for all sixty updates') that its own committed record contradicts.\nSCORE evidence: 9\nJUSTIFICATION evidence: scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json reconciles the fragment table and render.py reproduces its twelve rows byte for byte, yet the caption at bank-warm-stall.html:48 and the added paragraph at :6 state a warm-against-cold agreement the same record gives as up to 321% apart.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: commits 167c89c9b and 22ca7d05a touch only the six declared paths under scripts/prototypes/bank_warm_stall, docs/evidence/fragments/sub-millisecond-forward-path/ and docs/figures/sub-millisecond-forward-path/, with no product code and no test changed.\nSCORE durability: 6\nJUSTIFICATION durability: render.py is a manual reproduction with no assertion behind it, and nothing in the tree reddens if bank-warm-stall.html:6 drifts from results/bank-warm-stall.json, as it already has.\nSCORE fit: 16\nJUSTIFICATION fit: compact.py, render.py and plot.py follow the scripts/prototypes idiom and carry no plan or version label, and plot.py:61 records the anchoring mechanism rather than a change history.\nSCORE reuse: 16\nJUSTIFICATION reuse: compact.py is the first reducer for this instrument; a search of scripts/prototypes found bank_candidate_compact, which owns solver support compaction and not record reduction, so there is no owner to extend.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:6 blocking: the added paragraph states the two arms' residuals 'stay within 0.3% for all sixty updates' and that 'neither converges in sixty updates', but the reduced record committed in the same round gives accepted-residual relative differences of 83%, 65% and up to 321% from update 11 onward (max 321% at update 19; warm path rising 0.4813 to 1.529, cold 0.8818 to 2.273), and its own parenthetical '(0 of 16 lanes warm, 1 of 16 cold)' records a cold lane that did converge.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:48 blocking: the rewritten figcaption says both arms 'then plateau between 0.44 and 0.55', but the committed record gives lane 0's warm path reaching 1.529 and its cold path 2.273 after update 11 (warm terminal 1.271, cold terminal 1.350), which is also what the committed figure shows; the same claim is repeated at line 53.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:44 non-blocking: the claim that 'over sixty updates the warm and cold axis positions stay within 2e-5 of each other throughout' is contradicted by the committed record, whose axis fields differ by 4.2e-5 in x within the first ten updates and by up to 7.9e-4 over the sixty (update 19); the sentence predates this commit, which is what makes the record checkable.\nFINDING scripts/prototypes/bank_warm_stall/plot.py:40 non-blocking: plot.py reads row['residual'] from the full run report, so it raises KeyError on the committed reduced record, so the committed figure cannot be re-rendered from the tree it ships with.\n",
+  "review_run_id": "r-20261107T154619090298-review-of-bank-warm-stall-22ca7d05a9ab",
+  "reviewed_base_sha": "9eb880bfeea6d2a30d4d96946407c96221311c83",
+  "reviewed_head_sha": "22ca7d05a9abdef7369b69fa856f976bbfe4d1db",
+  "reviewed_revision": "22ca7d05a9abdef7369b69fa856f976bbfe4d1db",
+  "reviewed_run_id": "r-20261107T133413665344-bank-warm-stall",
+  "rubric": "node",
+  "scores": {
+    "durability": 6,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 12,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T16:12:00+00:00",
+  "total": 78,
+  "treatment": {
+    "done_when": "every quantitative claim in bank-warm-stall.html about warm-against-cold agreement, plateau range and convergence count matches a value a reader can read out of results/bank-warm-stall.json, and plot.py renders the committed figure from that file.",
+    "goal": "restate the warm-against-cold comparison from the committed record (agreement over the first ten updates only, then the divergence, and the correct plateau range) and let plot.py read the reduced record so the figure is re-renderable from the tree."
+  },
+  "verdicts": {
+    "diff": "VERDICT diff: read both commits against 9eb880bfe; 167c89c9b adds compact.py, the 176 KB reduced record and three fragment paragraphs, and 22ca7d05a rewrites the ratio sentences, the caption, the plot annotation ordering and render.py, with no product code or test touched.",
+    "done_when": "VERDICT done_when: the measure is the per-update table, the warm-against-cold comparison and one figure; the table reconciles with results/bank-warm-stall.json and the figure now carries its tolerance label, but two comparison quantities at bank-warm-stall.html:6 and :48 contradict that same record.",
+    "goal": "VERDICT goal: the brief asks for the stalling slice's trace, the mechanism and a fragment with one figure; this delta is the fix round on that record, and it repairs the trial-ratio range and the clipped annotation while leaving the warm-against-cold agreement claim false at bank-warm-stall.html:6.",
+    "manifest": "VERDICT manifest: read manifest.md, which reads status complete with four commits, carries the literal sbatch command whose gate log ends EXIT=0, and names every review item fixed except item 4.",
+    "write_paths": "VERDICT write_paths: the declared paths are scripts/prototypes/bank_warm_stall, the fragment and the figure directory; commits 167c89c9b and 22ca7d05a change only files inside them, namely results/bank-warm-stall.json, compact.py, render.py, plot.py, the fragment and the SVG."
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T15:59:19Z",
+  "evidence_inputs": [
+    "The reviewed figure is one panel, 1400x720 at the rendered size, fresh residual against update, warm (blue #2f6fd0) against cold (orange #d97b16), log ordinate, tolerance drawn as a dotted grey line at 1e-10 with the word 'tolerance' above its right end.",
+    "The rendered PNG shows the blue trace from update 0, orange appearing only from about update 10; the two coincide before that. The plotted data confirm why: the run's report.json gives warm 1.796, 1.347, ... 0.477 at updates 0-10 and cold 1.793, 1.344, ... 0.477, i.e. within 0.3% through update 10.",
+    "After update 10 the PNG shows orange above blue, with spikes near updates 18, 42 and 48, and blue stepping up around update 44 and staying near 1.3. The data behind that: cold ranges 0.844 to 2.273 over updates 10-60, warm 0.477 to 1.529, terminating at 1.271 warm and 1.350 cold.",
+    "The reviewed run's manifest headline states the two arms' residuals are 'within 0.3 percent for all sixty updates'; the committed record contradicts that for updates after 10 (maximum relative difference 0.76). This is a record-accuracy observation for the coordinator, not a figure finding beyond the caption mismatch recorded above."
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "id": "f5f0b876342",
+      "line": 50,
+      "severity": "blocking",
+      "summary": "The cold arm is fully occluded by the warm arm over updates 0-9, so the rendered PNG shows the cold curve only from about update 10. plot.py draws both series with the same circular marker and marker size and puts warm at zorder 3 over cold at zorder 2, and over those ten updates the two arms coincide to under 0.5% (cold 1.344 to 0.477, warm 1.347 to 0.477), so the orange trace is completely hidden. A reader sees a single blue trace from 0 to 9 and cannot tell whether the cold arm has data there or is missing; the first visible orange point looks like the start of that arm. Separate the under-drawn series with a dash pattern, or offset its markers, so both arms are readable where they coincide."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "id": "fc43e1af489",
+      "line": 57,
+      "severity": "non-blocking",
+      "summary": "The logarithmic ordinate spans about 10.4 decades, from the 1e-10 tolerance to the data maximum near 2.3, while every plotted value lies in the top 1.8 decades, so roughly 92% of the panel is empty axis. The consequence a reader feels is that the per-update behaviour the record relies on is unreadable: the warm arm moves 0.477 to 1.53 and the cold arm 0.844 to 2.27 after update 10, and on this scale that variation is a few pixels of wobble. A broken axis, or an inset of the 0.4 to 2.4 band beside the full-range panel, would carry both the 9.7-decade distance to tolerance and the per-update structure. The axis span is a deliberate choice to show distance-to-tolerance, so this does not hold the node."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-warm-stall/residual-warm-vs-cold.svg",
+      "id": "f2ec07f59d5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption does not describe what the rendered picture shows for the cold arm or for the last third of the run. It states that both arms fall from 1.796 to 0.4773 and then plateau between 0.44 and 0.55 (fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html line 48). In the PNG the cold trace sits near 1.0 and ranges 0.844 to 2.27 after update 10, ending at 1.35, and even the warm trace climbs to 1.53 around update 44 and settles near 1.27 - both clearly visible. The quoted endpoints and band are the warm arm's first ten updates only, so a reader comparing caption to picture meets a contradiction about the quantity the figure exists to compare."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "id": "f0d1424b0fb",
+      "line": 40,
+      "severity": "non-blocking",
+      "summary": "The committed plotting script cannot regenerate the committed figure from the committed data. plot.py plots row['residual'], and that key exists only in the run's wp/report.json (61 rows, update 61 rows, seed plus sixty accepted states); the committed reduced record scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json carries rows keyed 'accepted_residual' with no 'residual', so plot.py raises KeyError against it and the figure has no reproducible data path in the tree. Reading 'accepted_residual' (or committing the plotted series) would close that gap."
+    }
+  ],
+  "judged_from": "the rendered PNG only; no SVG was opened",
+  "project": "nova",
+  "rendered_image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T155315425239-review-of-bank-warm-stall-22ca7d05a9ab-figure/image-0.png",
+  "review_run_id": "r-20261107T155315425239-review-of-bank-warm-stall-22ca7d05a9ab-figure",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_figure": "docs/figures/sub-millisecond-forward-path/bank-warm-stall/residual-warm-vs-cold.svg",
+  "reviewed_head_sha": "22ca7d05a9abdef7369b69fa856f976bbfe4d1db",
+  "reviewed_run_id": "r-20261107T133413665344-bank-warm-stall",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: FAIL - the cold arm is invisible for updates 0-9 because the warm arm is drawn exactly over it, and the two traces are squeezed into the same few pixels of a ten-decade ordinate for the rest of the run.",
+    "RUBRIC data_ink: FAIL - about 92% of the panel is empty axis (1e-10 to 2.3); the per-update structure the record cites, warm 0.477 to 1.53 and cold 0.844 to 2.27 after update 10, is a band a few pixels tall at the top of the panel.",
+    "RUBRIC decoration: pass - no gradient or background fill, no gridlines, top and right spines absent, one dotted grey line at the 1e-10 tolerance carrying a real reference.",
+    "RUBRIC contrast: pass - dark axis and tick text on white, grey tolerance label clear, and the blue #2f6fd0 and orange #d97b16 series both clear 3:1 against the page.",
+    "RUBRIC table_form: pass - a residual-against-update trajectory is a plotted relationship, not information naturally read as a table.",
+    "RUBRIC label_collision: pass - the two-entry legend sits above the axes, the tolerance label sits above the dotted line clear of all data, and no axis label or tick is clipped."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T16:12:00+00:00",
+  "total": null,
+  "verdicts": {
+    "contrast": "RUBRIC contrast: pass - dark axis and tick text on white, grey tolerance label clear, and the blue #2f6fd0 and orange #d97b16 series both clear 3:1 against the page.",
+    "data_ink": "RUBRIC data_ink: FAIL - about 92% of the panel is empty axis (1e-10 to 2.3); the per-update structure the record cites, warm 0.477 to 1.53 and cold 0.844 to 2.27 after update 10, is a band a few pixels tall at the top of the panel.",
+    "decoration": "RUBRIC decoration: pass - no gradient or background fill, no gridlines, top and right spines absent, one dotted grey line at the 1e-10 tolerance carrying a real reference.",
+    "label_collision": "RUBRIC label_collision: pass - the two-entry legend sits above the axes, the tolerance label sits above the dotted line clear of all data, and no axis label or tick is clipped.",
+    "legibility": "RUBRIC legibility: FAIL - the cold arm is invisible for updates 0-9 because the warm arm is drawn exactly over it, and the two traces are squeezed into the same few pixels of a ten-decade ordinate for the rest of the run.",
+    "table_form": "RUBRIC table_form: pass - a residual-against-update trajectory is a plotted relationship, not information naturally read as a table."
+  }
+}

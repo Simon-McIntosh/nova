@@ -33,6 +33,11 @@
       "kind": "exempted",
       "reason": "the refused combination has no caller; the guard only stops a silent behaviour change and carries no result",
       "recorded_at": "2026-11-07T03:44:15.424351+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "prototype measurement harness; the bitwise-identical result is recorded in gate/jacobian-equivalence.json and the fragment",
+      "recorded_at": "2026-11-07T03:44:25.542656+00:00"
     }
   },
   "findings": [

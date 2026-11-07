@@ -1,0 +1,124 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-11-07T04:17:49.990Z",
+  "dispatched_at": "2026-11-07T04:09:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:00.074946+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:02.001859+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:03.574743+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:06.078049+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:08.492809+00:00"
+    },
+    "5": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:10.527985+00:00"
+    },
+    "6": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T04:20:12.273952+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/device.sh",
+      "line": "37",
+      "severity": "blocking",
+      "text": "blocking: the run pipelines through tee without set -o pipefail, so the `|| status=1` guard never fires and the script printed EXIT=0 for the vmap allocation in which both width-128 passes died with RESOURCE_EXHAUSTED (logs/break-even/slurm-1307579.log has two crash traces and ends EXIT=0; progress.log records pass 1 and pass 2 width 128 done); a gate driver that cannot report a failed arm silently certifies a crashed measurement."
+    },
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/measure.py",
+      "line": "119",
+      "severity": "non-blocking",
+      "text": "non-blocking: _time measures host wall with perf_counter around block_until_ready and no kernel-launch count is taken anywhere, while the done_when asks for device ms and launches and the fragment's table labels these columns device time; the ratio is large enough that the decision stands, but the record names a quantity the instrument did not measure."
+    },
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/measure.py",
+      "line": "198",
+      "severity": "non-blocking",
+      "text": "non-blocking: shape_ok is computed and returned as the shape_consistent field but never asserted, so the two 16-lane vmap processes printed shape_consistent false and still exited 0; the instrument's only self-check is advisory and cannot fail the run it is guarding."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the base revision recorded as 83badf86af2074ec0d83497665410cc052692fa6 does not resolve to any object in the repository (the actual parent is 83badf86af2072ec0d83497665410cc052692fa6, one digit transposed), and the manifest's orientation_base_sha repeats the unresolvable value; a reader cannot check the revision the record names."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the table caption says each process reported the median of five synchronized calls, but measure.py:124 returns the mean of the repetitions (total wall divided by reps); the record misdescribes its own statistic."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the headline 16-lane batched rows were produced at revisions ee73d7402 and 0ff67b7e3 by runs whose own shape check printed false, and the corrected check at 1c550adc7 was never re-run on that arm, so 'the timings are unaffected' is asserted rather than measured."
+    },
+    {
+      "file": "manifest.md",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rubric claims two fresh batched processes and two lane-sequential processes agree at 16 and 128 slices, but at 128 there is one lane-sequential process (logs/break-even-map/progress.log shows a single 128 pass) and no batched result (the vmap 128 arm crashed twice), so the replication the record claims does not exist at that width."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all six commits against base 83badf86af2072ec0d83497665410cc052692fa6; four files and 314 insertions, changing no production or test source.",
+    "done_when": "The done_when's unconditional clause asks one H200 measurement to give the device cost and the break-even at 16 and 128 slices; scripts/prototypes/bank_reused_scale_krylov/device.sh:37 yields host-wall ms at 16 (two vmap processes) and lane-sequential ms at 16 and 128 (one process each), records no launch count, and logs/gate-vmap.log:4 records EXIT=0 over a width-128 arm that crashed twice.",
+    "goal": "The goal is to replace later-update Jacobian assembly with Jacobian-vector GMRES under the first update scales; the landed change measures one product against one assembly and refuses that route, which the brief's item (1) stop condition permits when 40 products cost more than one assembly at both widths, with break-evens of 0.352 at 16 lanes and 0.841 at 128 lanes.",
+    "manifest": "Read; status complete, six commits cited, both gate logs named, artifacts tabled, and the negative control waived because the brief made that mutation conditional on implementing the refused branch.",
+    "write_paths": "Read the reviewed manifest's orientation_write_paths; all four paths in the diff are inside the declared set, and nova/equilibrium/support_read.py and tests/test_bank_newton_step.py are correctly untouched because the branch was refused."
+  },
+  "justifications": {
+    "durability": "measure.py:198 computes shape_ok and returns it as shape_consistent but never asserts it, so the one self-check the prototype carries cannot fail a run.",
+    "evidence": "scripts/prototypes/bank_reused_scale_krylov/device.sh:37 prints EXIT=0 for the vmap allocation that crashed twice at width 128 (logs/break-even/slurm-1307579.log:67), and measure.py:119 times host wall, not the device cost the done_when names.",
+    "fit": "The runner follows the repository's one-measure.py-per-prototype idiom and reuses scripts/prototypes/bank_solve_profile/fixture.py, with mechanism-based names and no plan labels or run identifiers.",
+    "goal_fidelity": "scripts/prototypes/bank_reused_scale_krylov/measure.py:206 computes the break-even the goal's branch turns on, and the record delivers the brief's sanctioned refusal when 40 products cost more than one assembly.",
+    "reuse": "measure.py reuses fixture.py and support_read.step_jacobian/step_jacobian_vector, but _time re-implements a wall timer where scripts/prototypes/bank_jacobian_launches/ already owns the launch and device-time capture the brief asked for.",
+    "scope_discipline": "The diff touches only scripts/prototypes/bank_reused_scale_krylov/{measure.py,device.sh,measure.sbatch} and docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html, all inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to replace later-update Jacobian assembly with Jacobian-vector GMRES under the first update scales; the landed change measures one product against one assembly and refuses that route, which the brief's item (1) stop condition permits when 40 products cost more than one assembly at both widths, with break-evens of 0.352 at 16 lanes and 0.841 at 128 lanes.\nVERDICT done_when: The done_when's unconditional clause asks one H200 measurement to give the device cost and the break-even at 16 and 128 slices; scripts/prototypes/bank_reused_scale_krylov/device.sh:37 yields host-wall ms at 16 (two vmap processes) and lane-sequential ms at 16 and 128 (one process each), records no launch count, and logs/gate-vmap.log:4 records EXIT=0 over a width-128 arm that crashed twice.\nVERDICT write_paths: Read the reviewed manifest's orientation_write_paths; all four paths in the diff are inside the declared set, and nova/equilibrium/support_read.py and tests/test_bank_newton_step.py are correctly untouched because the branch was refused.\nVERDICT manifest: Read; status complete, six commits cited, both gate logs named, artifacts tabled, and the negative control waived because the brief made that mutation conditional on implementing the refused branch.\nVERDICT diff: Read all six commits against base 83badf86af2072ec0d83497665410cc052692fa6; four files and 314 insertions, changing no production or test source.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_reused_scale_krylov/measure.py:206 computes the break-even the goal's branch turns on, and the record delivers the brief's sanctioned refusal.\nSCORE evidence: 10\nJUSTIFICATION evidence: scripts/prototypes/bank_reused_scale_krylov/device.sh:37 prints EXIT=0 for the vmap allocation that crashed twice at width 128 (logs/break-even/slurm-1307579.log:67), and measure.py:119 times host wall, not the device cost the done_when names.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The diff touches only scripts/prototypes/bank_reused_scale_krylov/{measure.py,device.sh,measure.sbatch} and docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html, all inside the declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: measure.py:198 computes shape_ok and returns it as shape_consistent but never asserts it, so the one self-check the prototype carries cannot fail a run.\nSCORE fit: 17\nJUSTIFICATION fit: The runner follows the repository's one-measure.py-per-prototype idiom and reuses scripts/prototypes/bank_solve_profile/fixture.py, with mechanism-based names and no plan labels or run identifiers.\nSCORE reuse: 15\nJUSTIFICATION reuse: measure.py reuses fixture.py and support_read.step_jacobian/step_jacobian_vector, but _time re-implements a wall timer where scripts/prototypes/bank_jacobian_launches/ already owns the launch and device-time capture the brief asked for.\nFINDING scripts/prototypes/bank_reused_scale_krylov/device.sh:37 blocking: the run pipelines through tee without set -o pipefail, so the `|| status=1` guard never fires and the script printed EXIT=0 for the vmap allocation in which both width-128 passes died with RESOURCE_EXHAUSTED (logs/break-even/slurm-1307579.log has two crash traces and ends EXIT=0; progress.log records pass 1 and pass 2 width 128 done); a gate driver that cannot report a failed arm silently certifies a crashed measurement.\nFINDING scripts/prototypes/bank_reused_scale_krylov/measure.py:119 non-blocking: _time measures host wall with perf_counter around block_until_ready and no kernel-launch count is taken anywhere, while the done_when asks for device ms and launches and the fragment's table labels these columns device time; the ratio is large enough that the decision stands, but the record names a quantity the instrument did not measure.\nFINDING scripts/prototypes/bank_reused_scale_krylov/measure.py:198 non-blocking: shape_ok is computed and returned as the shape_consistent field but never asserted, so the two 16-lane vmap processes printed shape_consistent false and still exited 0; the instrument's only self-check is advisory and cannot fail the run it is guarding.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html:15 non-blocking: the base revision recorded as 83badf86af2074ec0d83497665410cc052692fa6 does not resolve to any object in the repository (the actual parent is 83badf86af2072ec0d83497665410cc052692fa6, one digit transposed), and the manifest's orientation_base_sha repeats the unresolvable value; a reader cannot check the revision the record names.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html:5 non-blocking: the table caption says each process reported the median of five synchronized calls, but measure.py:124 returns the mean of the repetitions (total wall divided by reps); the record misdescribes its own statistic.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html:13 non-blocking: the headline 16-lane batched rows were produced at revisions ee73d7402 and 0ff67b7e3 by runs whose own shape check printed false, and the corrected check at 1c550adc7 was never re-run on that arm, so 'the timings are unaffected' is asserted rather than measured.\nFINDING manifest.md:20 non-blocking: the rubric claims two fresh batched processes and two lane-sequential processes agree at 16 and 128 slices, but at 128 there is one lane-sequential process (logs/break-even-map/progress.log shows a single 128 pass) and no batched result (the vmap 128 arm crashed twice), so the replication the record claims does not exist at that width.\n",
+  "review_run_id": "r-20261107T040803591339-review-of-bank-reused-scale-krylov-01814799400e",
+  "reviewed_base_sha": "83badf86af2072ec0d83497665410cc052692fa6",
+  "reviewed_head_sha": "01814799400e98a0ae717bbf31b89d1d3aff5eef",
+  "reviewed_run_id": "r-20261107T032332010435-bank-reused-scale-krylov",
+  "scores": {
+    "durability": 10,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T04:22:48.271873+00:00",
+  "total": 86
+}

@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-07T15:23:31.501Z",
   "dispatched_at": "2026-11-07T15:12:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-frame-146-vertical-loss-1d3262c7708b",
+      "recorded_at": "2026-11-07T16:00:01.917134+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",

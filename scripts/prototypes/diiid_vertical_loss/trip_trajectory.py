@@ -70,7 +70,7 @@ def _trip_state(
         "target_current_a": presence.get("target_current_a"),
         "confined_to_target_ratio": presence.get("confined_to_target_ratio"),
         "closed_core_cells": presence.get("closed_core_cells"),
-        "boundary_set_size": masks[k - 1]
+        "changed_mask_entries": masks[k - 1]
         if k - 1 < len(masks)
         else (masks[-1] if masks else None),
         "promotion_step_norm_wb": step_norm,
@@ -156,7 +156,7 @@ def run(frame: int, out_dir: Path, artifacts: Path) -> dict[str, Any]:
         print(json.dumps(state, sort_keys=True, default=float), flush=True)
         (out_dir / "trajectory.json").write_text(json.dumps(record, indent=2) + "\n")
         previous = flux
-        if state["boundary_set_size"] in (0, -1) and arm["active_set_iterations"] <= k:
+        if state["changed_mask_entries"] in (0, -1) and arm["active_set_iterations"] <= k:
             break
     return record
 

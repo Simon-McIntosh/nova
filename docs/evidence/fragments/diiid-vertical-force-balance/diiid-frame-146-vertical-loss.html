@@ -76,13 +76,20 @@ is the flux change from the previous trip, so trip 1 has none.
 <td>0.709</td><td>0</td><td>5.5&times;10<sup>&minus;13</sup></td><td>0.062</td></tr>
 </tbody>
 </table>
+<p>
+The <b>changed mask entries</b> column is the length of that trip's
+<code>active_set_mask_differences</code> entry &mdash; the number of mask entries
+that changed on that trip, not a count of boundary cells in the set. The field is
+populated at <code>nova/equilibrium/forward.py:2738</code>, where
+<code>mask_history</code> takes <code>history.active_set_mask_differences</code>.
+</p>
 
 <h3>Where the two branches part at trip 2</h3>
 <p>
 Frame 137's promotion changes fewer mask entries each trip: 24, then 20, then 9,
-and each step moves a few Wb of flux. Frame 146 changes more on its second trip
-than on its first &mdash; 27, then 1, then 39 in the changed count it reports
-&mdash; and lands 83 Wb of column height on a seed 151 Wb from the label. The axis does not drift
+then 9, then 0, and each step moves a few Wb of flux. Frame 146 changes more on
+its second trip than on its first &mdash; 27, then 39, then 0 &mdash; and lands
+83 Wb of column height on a seed 151 Wb from the label. The axis does not drift
 upward over several trips; it is carried out of the vessel and left there in one
 step. After trip 3 the set is empty, the step falls to 3.37 Wb, and the residual
 plateaus at 5.6e-2 with nothing left to correct.

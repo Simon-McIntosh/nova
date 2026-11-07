@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-07T08:06:57.831Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "diiid-forward-convergence",
+      "recorded_at": "2026-11-07T08:13:30.407161+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T07:59:44Z",
   "findings": [
     {

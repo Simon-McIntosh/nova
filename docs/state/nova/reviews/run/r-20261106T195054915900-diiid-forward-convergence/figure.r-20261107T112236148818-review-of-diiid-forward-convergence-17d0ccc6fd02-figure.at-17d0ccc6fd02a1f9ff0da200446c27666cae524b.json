@@ -11,6 +11,13 @@
   "attachment_note": "Each of the five attached PNGs was opened with the read tool and judged as a picture. No SVG was opened, read, listed, searched, rendered or shown, and no image other than these five PNGs was viewed. The mapping above is read from each render's own burnt-in caption line, which names its frame.",
   "completed_at": "2026-11-07T11:42:08.426Z",
   "dispatched_at": "2026-11-07T11:24:00Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-stopping-rule-fix",
+      "recorded_at": "2026-11-07T11:46:16.765521+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",

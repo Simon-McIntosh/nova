@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": "none",
   "completed_at": "2026-11-07T19:07:46.376Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T19:36:48.226358+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T18:57:40Z",
   "findings": [
     "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:5 non-blocking: the node goal is to name why the frame 144 limited seed refuses at axis identification, and the fragment's own conclusion is that the refusal is not reproduced and the seed the refused branch held is unknown (html:64-70), so the central question is narrowed to a record-provenance hypothesis rather than answered.",

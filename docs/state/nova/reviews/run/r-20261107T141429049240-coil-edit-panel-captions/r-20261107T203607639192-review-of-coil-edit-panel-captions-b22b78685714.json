@@ -9,6 +9,13 @@
     "nova/media/poloidal.py:draw_nulls (reached unchanged by _paint_panel at benchmarks/coil_edit_latency.py:2165)"
   ],
   "completed_at": "2026-11-07T20:51:53.006Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "coil-edit-panel-captions",
+      "recorded_at": "2026-11-07T21:07:12.124625+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T20:37:45Z",
   "findings": [
     {

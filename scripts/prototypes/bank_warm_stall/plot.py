@@ -52,6 +52,14 @@ def main():
     axes.axhline(
         args.tolerance, color="#929292", linewidth=1.2, linestyle=":", zorder=1
     )
+    axes.set_xlabel("update")
+    axes.set_ylabel("fresh residual")
+    axes.set_yscale("log")
+    axes.set_xlim(
+        -1.2, max(len(record[arm]["table"]) for arm in ("warm", "cold")) - 0.3
+    )
+    # anchored after the limits: placed earlier, the point falls outside the
+    # final axes and the label is clipped away entirely
     axes.annotate(
         "tolerance",
         xy=(axes.get_xlim()[1], args.tolerance),
@@ -60,12 +68,6 @@ def main():
         ha="right",
         fontsize=ink.label_fontsize,
         color="#6b6b6b",
-    )
-    axes.set_xlabel("update")
-    axes.set_ylabel("fresh residual")
-    axes.set_yscale("log")
-    axes.set_xlim(
-        -1.2, max(len(record[arm]["table"]) for arm in ("warm", "cold")) - 0.3
     )
     axes.legend(frameon=False, ncol=2, loc="upper center", bbox_to_anchor=(0.5, 1.12))
     figure.tight_layout()

@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T05:01:13.875Z",
+  "dispatched_at": "2026-11-07T04:52:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Wording or figure-reproducibility note in a negative-result measurement record. The decision rests on the device-time table, where dense assembly beats one product threefold at 16 slices, and is unaffected.",
+      "recorded_at": "2026-11-07T05:03:40.208501+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Wording or figure-reproducibility note in a negative-result measurement record. The decision rests on the device-time table, where dense assembly beats one product threefold at 16 slices, and is unaffected.",
+      "recorded_at": "2026-11-07T05:03:42.044125+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Wording or figure-reproducibility note in a negative-result measurement record. The decision rests on the device-time table, where dense assembly beats one product threefold at 16 slices, and is unaffected.",
+      "recorded_at": "2026-11-07T05:03:43.900609+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Wording or figure-reproducibility note in a negative-result measurement record. The decision rests on the device-time table, where dense assembly beats one product threefold at 16 slices, and is unaffected.",
+      "recorded_at": "2026-11-07T05:03:45.857636+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/figure.py",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: the measured device times are hard-coded in ARMS, so the figure cannot be regenerated from the measurement output and will silently drift from the fragment's table when the prototype is re-run, while the sibling prototype reads its numbers from a saved profile."
+    },
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/figure.py",
+      "line": "28",
+      "severity": "non-blocking",
+      "text": "non-blocking: the script sets the house rcParams by hand instead of applying the repository's one style sheet (plt.style.use(\"data-ink\"), as scripts/prototypes/compile_pass_profile/figure.py:19 does) and draws on a 14x5.2 canvas rather than the 14x7.2 slide default, so figure styling now has two owners."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the caption says host wall was taken \"as the median and the mean of five repetitions per process\" and then reads 37.72/37.72 and 1345.24/1379.39, but each slash pair is the two processes' medians, not a median and mean of one process (process one at 128 slices is 1345.24/1353.81 in logs/recheck/measure/map-16-128.log), so a reader taking the stated grammar is given numbers the log does not contain."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"it makes the product cheap by the same factor\" is not what the measurement shows, because batching improves the assembly per lane about 4.1-fold (9.29 against 2.28 ms) but the product only about 1.7-fold (11.52 against 6.71 ms); the independence conclusion still holds, but the stated factor does not."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read both commits against 01814799400e; 532664e63 repairs the driver and the instrument in three prototype files and 9965b9a19 adds the figure and rewrites the fragment's numbers, 695 insertions and 40 deletions across the six declared paths.",
+    "done_when": "The done_when asks one H200 allocation at 16 and 128 slices for the device ms and launches of one batched product against one batched assembly; logs/recheck/slurm-1307590.log shows one allocation whose map-16-128.log and vmap-16.log deliver six rows carrying device ms, launches and break-evens 0.3395-0.8071, while the 128-slice fused arm has no result because its graph requests a 130.56 GiB temporary that logs/recheck/control/vmap-128.log records, so that width is lane-sequential rather than batched.",
+    "goal": "The node goal is to replace later-update Jacobian assembly with Jacobian-vector GMRES under the first update scales; the two commits gained since the prior review (532664e63, 9965b9a19) instead complete the brief's item (1) refusal branch, replacing host wall with device time and launches from one XLA profile per arm at scripts/prototypes/bank_reused_scale_krylov/measure.py:136.",
+    "manifest": "Read; status complete, eight commits cited, the gate command and the recheck logs named, and the negative control recorded as the 128-slice fused arm that must fail, which logs/gate-control.log ends EXIT=1.",
+    "write_paths": "Read the reviewed manifest's orientation_write_paths; all six files in the diff (measure.py, device.sh, measure.sbatch, figure.py, the evidence fragment and break-even.svg) are inside the declared prototype, fragment and figure paths, and nova/equilibrium/support_read.py and tests/test_bank_newton_step.py remain untouched."
+  },
+  "justifications": {
+    "durability": "measure.py:264 asserts the assembly and product shapes address one system, a guard whose failure condition the earlier revision exercised when it printed shape_consistent false, but no test exercises it, so a regression would surface only by re-running the measurement.",
+    "evidence": "measure.py:136 traces one warm invocation per arm and sums bank_solve_trace's device events, and logs/recheck/measure/map-16-128.log carries the 1189.41-1190.02 ms device times and 393858 launches the fragment tables.",
+    "fit": "figure.py:20 uses mechanism-based names and the sibling prototype layout, but figure.py:28 hand-sets rcParams instead of applying the repository's data-ink style sheet that scripts/prototypes/compile_pass_profile/figure.py:19 uses.",
+    "goal_fidelity": "scripts/prototypes/bank_reused_scale_krylov/measure.py:264 reports the break-even the brief's item (1) turns on, so the increment completes the sanctioned refusal rather than the replacement the goal names.",
+    "reuse": "measure.py:38 imports the XLA-profile reader at scripts/prototypes/bank_solve_trace/analyse.py:15 rather than re-parsing traces, leaving only a thin profiler wrapper whose per-call aggregation no existing helper exposes.",
+    "scope_discipline": "every path in the two commits lies within the declared prototype, fragment or figure path, and no production or test source changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to replace later-update Jacobian assembly with Jacobian-vector GMRES under the first update scales; the two commits gained since the prior review (532664e63, 9965b9a19) instead complete the brief's item (1) refusal branch, replacing host wall with device time and launches from one XLA profile per arm at scripts/prototypes/bank_reused_scale_krylov/measure.py:136.\nVERDICT done_when: The done_when asks one H200 allocation at 16 and 128 slices for the device ms and launches of one batched product against one batched assembly; logs/recheck/slurm-1307590.log shows one allocation whose map-16-128.log and vmap-16.log deliver six rows carrying device ms, launches and break-evens 0.3395-0.8071, while the 128-slice fused arm has no result because its graph requests a 130.56 GiB temporary that logs/recheck/control/vmap-128.log records, so that width is lane-sequential rather than batched.\nVERDICT write_paths: Read the reviewed manifest's orientation_write_paths; all six files in the diff (measure.py, device.sh, measure.sbatch, figure.py, the evidence fragment and break-even.svg) are inside the declared prototype, fragment and figure paths, and nova/equilibrium/support_read.py and tests/test_bank_newton_step.py remain untouched.\nVERDICT manifest: Read; status complete, eight commits cited, the gate command and the recheck logs named, and the negative control recorded as the 128-slice fused arm that must fail, which logs/gate-control.log ends EXIT=1.\nVERDICT diff: Read both commits against 01814799400e; 532664e63 repairs the driver and the instrument in three prototype files and 9965b9a19 adds the figure and rewrites the fragment's numbers, 695 insertions and 40 deletions across the six declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_reused_scale_krylov/measure.py:264 reports the break-even the brief's item (1) turns on, so the increment completes the sanctioned refusal rather than the replacement the goal names.\nSCORE evidence: 17\nJUSTIFICATION evidence: measure.py:136 traces one warm invocation per arm and sums bank_solve_trace's device events, and logs/recheck/measure/map-16-128.log carries the 1189.41-1190.02 ms device times and 393858 launches the fragment tables.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the two commits lies within the declared prototype, fragment or figure path, and no production or test source changed.\nSCORE durability: 12\nJUSTIFICATION durability: measure.py:264 asserts the assembly and product shapes address one system, a guard whose failure condition the earlier revision exercised when it printed shape_consistent false, but no test exercises it, so a regression would surface only by re-running the measurement.\nSCORE fit: 16\nJUSTIFICATION fit: figure.py:20 uses mechanism-based names and the sibling prototype layout, but figure.py:28 hand-sets rcParams instead of applying the repository's data-ink style sheet that scripts/prototypes/compile_pass_profile/figure.py:19 uses.\nSCORE reuse: 17\nJUSTIFICATION reuse: measure.py:38 imports the XLA-profile reader at scripts/prototypes/bank_solve_trace/analyse.py:15 rather than re-parsing traces, leaving only a thin profiler wrapper whose per-call aggregation no existing helper exposes.\nFINDING scripts/prototypes/bank_reused_scale_krylov/figure.py:20 non-blocking: the measured device times are hard-coded in ARMS, so the figure cannot be regenerated from the measurement output and will silently drift from the fragment's table when the prototype is re-run, while the sibling prototype reads its numbers from a saved profile.\nFINDING scripts/prototypes/bank_reused_scale_krylov/figure.py:28 non-blocking: the script sets the house rcParams by hand instead of applying the repository's one style sheet (plt.style.use(\"data-ink\"), as scripts/prototypes/compile_pass_profile/figure.py:19 does) and draws on a 14x5.2 canvas rather than the 14x7.2 slide default, so figure styling now has two owners.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html:5 non-blocking: the caption says host wall was taken \"as the median and the mean of five repetitions per process\" and then reads 37.72/37.72 and 1345.24/1379.39, but each slash pair is the two processes' medians, not a median and mean of one process (process one at 128 slices is 1345.24/1353.81 in logs/recheck/measure/map-16-128.log), so a reader taking the stated grammar is given numbers the log does not contain.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-reused-scale-krylov.html:15 non-blocking: \"it makes the product cheap by the same factor\" is not what the measurement shows, because batching improves the assembly per lane about 4.1-fold (9.29 against 2.28 ms) but the product only about 1.7-fold (11.52 against 6.71 ms); the independence conclusion still holds, but the stated factor does not.",
+  "review_run_id": "r-20261107T045045998260-review-of-bank-reused-scale-krylov-9965b9a19f83",
+  "reviewed_base_sha": "01814799400e98a0ae717bbf31b89d1d3aff5eef",
+  "reviewed_head_sha": "9965b9a19f83de7e12a48d13f33200c2d43317ac",
+  "reviewed_run_id": "r-20261107T032332010435-bank-reused-scale-krylov",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T05:10:59.006580+00:00",
+  "total": 98
+}

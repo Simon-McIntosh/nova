@@ -35,6 +35,7 @@ for width in $WIDTHS; do
   for pass in $(seq 1 "$PASSES"); do
     echo "# pass $pass width $width start" >> "$OUT/progress.log"
     run jacobian --width "$width" --seeds "$OUT/seeds-wide.npz" --reps 5 \
+      --execution "${EXECUTION:-vmap}" \
       | tee -a "$OUT/jacobian-$width.log" || status=1
     echo "# pass $pass width $width done" >> "$OUT/progress.log"
   done

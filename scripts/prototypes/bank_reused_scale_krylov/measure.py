@@ -150,33 +150,47 @@ def run_jacobian(args):
     direction = tuple(value * 0.5 for value in states)
     support = _read(batch, states)
 
-    assemble = jax.jit(
-        jax.vmap(
-            lambda values, reading: support_read.step_jacobian(
-                batch.operands,
-                values,
-                reading,
-                batch.profile,
-                fixture.gradient,
-                batch.quadrature,
-                fresh_geometry=True,
+    # `vmap` fuses the lanes into one kernel graph and is the batched cost;
+    # `map` walks the lanes inside one compiled program, which bounds the
+    # intermediate memory when the fused graph exceeds the device.
+    def assemble_one(values, reading):
+        return support_read.step_jacobian(
+            batch.operands,
+            values,
+            reading,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+            fresh_geometry=True,
+        )
+
+    def product_one(values, change, reading):
+        return support_read.step_jacobian_vector(
+            batch.operands,
+            values,
+            change,
+            reading,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+            fresh_geometry=True,
+        )
+
+    if args.execution == "map":
+        assemble = jax.jit(
+            lambda values, reading: jax.lax.map(
+                lambda pair: assemble_one(pair[0], pair[1]), (values, reading)
             )
         )
-    )
-    product = jax.jit(
-        jax.vmap(
-            lambda values, change, reading: support_read.step_jacobian_vector(
-                batch.operands,
-                values,
-                change,
-                reading,
-                batch.profile,
-                fixture.gradient,
-                batch.quadrature,
-                fresh_geometry=True,
+        product = jax.jit(
+            lambda values, change, reading: jax.lax.map(
+                lambda triple: product_one(triple[0], triple[1], triple[2]),
+                (values, change, reading),
             )
         )
-    )
+    else:
+        assemble = jax.jit(jax.vmap(assemble_one))
+        product = jax.jit(jax.vmap(product_one))
     assembly = jax.block_until_ready(assemble(states, support))
     applied = jax.block_until_ready(product(states, direction, support))
     # The assembly is one (lanes, 3c, 3c) block per lane; the product returns
@@ -192,6 +206,7 @@ def run_jacobian(args):
     break_even = assemble_ms / product_ms
     return {
         "mode": "jacobian",
+        "execution": args.execution,
         "width": args.width,
         "cells": int(cells),
         "matrix_dimension": int(assembly.shape[-1]),
@@ -213,6 +228,7 @@ def main():
     parser.add_argument("--width", type=int, default=16)
     parser.add_argument("--seeds", default=None)
     parser.add_argument("--reps", type=int, default=5)
+    parser.add_argument("--execution", choices=["vmap", "map"], default="vmap")
     args = parser.parse_args()
     _header([f"--width={args.width}", f"--reps={args.reps}"])
     payload = {"seeds": build_seeds, "jacobian": run_jacobian}[args.mode](args)

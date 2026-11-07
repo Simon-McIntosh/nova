@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "confinement refuted by the three-device measurement recorded in the fragment; the candidate was reverted",
       "recorded_at": "2026-11-07T03:43:45.557033+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the only source delta between the armed head 03ef34709 and 9c8bc37e6 is the paired-and-weighted ValueError, which no caller reaches",
+      "recorded_at": "2026-11-07T03:43:55.323204+00:00"
     }
   },
   "findings": [

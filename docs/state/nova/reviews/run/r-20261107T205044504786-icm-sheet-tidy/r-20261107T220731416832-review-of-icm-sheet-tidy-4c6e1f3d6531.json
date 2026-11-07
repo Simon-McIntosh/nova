@@ -14,6 +14,11 @@
       "kind": "exempted",
       "reason": "the fragment repeats finding 0's wording; corrected with the docstring in the next node touching the test file",
       "recorded_at": "2026-11-07T22:58:16.272044+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the before wall (1259.9 ms) is the pre-change closed route measured by the closed-field node's own gate (97.9 s over its 285-test gate, about 1.2 s per evaluation); only the before log is missing, the after arm is logged",
+      "recorded_at": "2026-11-07T22:58:30.355549+00:00"
     }
   },
   "findings": [

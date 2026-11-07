@@ -240,7 +240,7 @@ def graded_residual(
         sign = xp.sign(end)[:, None]
         scaled = scale[:, None] * panel_offset
         model = xp.sqrt(offset[:, None] ** 2 + scaled * scaled)
-        jacobian = 0.5 * span * held * hyperbolic.5 * span * held * xp.sqrt(1.0 + stretched * stretched)
+        jacobian = 0.5 * span * held * hyperbolic
         bounded = _regularised(numerator, denominator, model, sign, xp)
         model_integral = xp.sign(end) * _model_integral(offset, scale, lower, upper, xp)
         if weight is None:

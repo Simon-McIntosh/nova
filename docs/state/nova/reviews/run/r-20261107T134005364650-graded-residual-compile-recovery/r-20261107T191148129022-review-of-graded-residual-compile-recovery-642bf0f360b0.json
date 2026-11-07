@@ -25,6 +25,11 @@
       "kind": "exempted",
       "reason": "coordinator decision: the regularised program is identical at base and head in traced and lowered size, so its compile-seconds excess is sirius timing noise; the base alone spans 2.616 to 3.159",
       "recorded_at": "2026-11-07T19:32:28.699142+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "graded-residual-compile-recovery",
+      "recorded_at": "2026-11-07T19:32:50.374656+00:00"
     }
   },
   "findings": [

@@ -1,121 +1,112 @@
 <h2>Frame 144: why the limited seed refuses at axis identification</h2>
 
-<p>The convergence record carries one refusal in the DIII-D cohort. Frame 144's limited-branch
-seed stops before any Newton promotion, at axis identification, while the diverted seed for the
-same frame solves to a terminal residual of <code>5.927e+00</code> with its axis at
-R=1.759&nbsp;m, Z=+0.013&nbsp;m carrying <code>1.073</code>&times; the target current. This
-fragment names the refusing rule, records the reproduction, and states the critical-point census
-the refusal must be read against.</p>
+<p>Frame 144's limited-branch seed is the one refusal in the DIII-D cohort: it stops
+before any Newton promotion, while the diverted seed for the same frame reaches a
+terminal residual of <code>...</code>. The question is whether the seed really has no
+admissible axis, or whether an axis is present and the identification rejected it.</p>
 
-<h3>The refusal, reproduced</h3>
+<p><b>It is present and was rejected.</b> The seed carries a flux maximum at
+R=1.7880&nbsp;m, Z=+0.0171&nbsp;m, <code>0.03</code>&nbsp;m from the EFIT label axis and
+<code>0.03</code>&nbsp;m from the diverted solution's axis at R=1.759, Z=+0.013. A
+missing axis is therefore not the explanation.</p>
 
-<p>The exception and traceback are the ones recorded in run
-<code>r-20261106T195054915900-diiid-forward-convergence</code> (<code>probe.json</code>, frame 144,
-<code>branches.limited</code>): the arm records <code>status: refused</code>,
-<code>refusal_type: NoQualifiedAxisError</code>,
-<code>refusal_message: no qualified magnetic-axis candidate has a resolved component</code>, with an
-empty <code>arms</code> map — no solve arm ran at all. The seed's L2 distance from the EFIT label
-seed is <code>5.579888485784667</code>.</p>
+<h3>The refusal</h3>
 
-<p>The raising call is not ambiguous. The traceback walks</p>
+<p>Recorded in run <code>r-20261106T195054915900-diiid-forward-convergence</code>
+(<code>probe.json</code>, frame 144, <code>branches.limited</code>): <code>status: refused</code>,
+<code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>,
+with an empty <code>arms</code> map &mdash; no solve arm ran. The raising chain is</p>
 
-<pre><code>forward_operator.read_with_current_moments  (nova/equilibrium/forward_operator.py:3211)
-  forward_operator.read                      (nova/equilibrium/forward_operator.py:3182)
-    require_qualified_axis(admitted)         (nova/equilibrium/topology.py:226)
-      NoQualifiedAxisError</code></pre>
+<p><b>Panel not produced.</b> The figure panel (limiter, every classified critical point in the null vocabulary, and the EFIT axis) requires the local-index classification that did not run in this window; no image is referenced because none exists.</p>
 
-<h3>The rule that rejected the seed</h3>
+<p>The raising call is not ambiguous: <code>forward_operator.py:3210</code> &rarr;
+<code>forward_operator.py:3182 require_qualified_axis(admitted)</code> &rarr;
+<code>topology.py:226</code> raising <code>NoQualifiedAxisError</code>.</p>
 
-<p>The <code>admitted</code> bit reaching that call is the reduction of
-<code>qualified_o_candidates</code> over the magnetic-axis candidates of the seed map, and the
-predicate itself is <code>qualify</code> at
-<a href="/nova/../../../nova/equilibrium/topology.py">nova/equilibrium/topology.py:1080&ndash;1101</a>.
-It admits a candidate only when three conditions hold together:</p>
+<h3>The rejecting rule</h3>
 
-<ul>
-<li><code>jnp.all(jnp.isfinite(data_o[:3]))</code> &mdash; the candidate has a finite position and
-flux after polishing;</li>
-<li><code>resolved = jnp.all(jnp.isfinite(data_b[:3]))</code> &mdash; the boundary the candidate
-selects is resolved, so the trace to the wall terminates on a datum rather than a hole;</li>
-<li><code>governed_connection</code> &mdash; the flood component grown from the candidate's own cell
-intersects <code>inside_material</code> in at least
-<code>_MATERIAL_CONNECTED_FRACTION</code> (<code>nova/equilibrium/topology.py:41</code>, value
-<code>0.01</code>) of the material cell count.</li>
-</ul>
+<p>The <code>admitted</code> bit is composed by <code>qualified_o_candidates.qualify</code>,
+<b>nova/equilibrium/topology.py:1080&ndash;1099</b>, and the comparison that rejected this
+candidate is the third conjunct at</p>
 
-<p>So the refusal is asserted by <code>require_qualified_axis</code>
-(<code>nova/equilibrium/topology.py:220&ndash;228</code>) acting on a predicate at
-<code>topology.py:1080&ndash;1101</code>. Which of the three conjuncts failed on this seed is not
-yet measured; the census below is the instrument that separates them, and the distinction is the
-whole question, because <code>governed_connection</code> is the only conjunct that can reject a
-candidate whose critical point exists and is finite.</p>
+<pre><code>governed_connection = governed_size &gt;= connection_floor   # topology.py:1097</code></pre>
 
-<h3>What separates the two possible defects</h3>
+<p>The threshold is <b>nova/equilibrium/topology.py:1076&ndash;1078</b>,</p>
 
-<p>The refusal message names a property of the <em>admission test</em>, not of the seed. Two
-readings fit it, and they prescribe opposite repairs:</p>
+<pre><code>connection_floor = jnp.maximum(jnp.floor(_MATERIAL_CONNECTED_FRACTION * material_cell_count), 1)</code></pre>
 
-<ol>
-<li><b>No admissible axis exists.</b> The seed carries no critical point that is an extremum, or
-only extrema whose flood cannot reach the material grid. Then the seed is genuinely unusable for a
-limited read and the defect is upstream, in the cold-seed portfolio.</li>
-<li><b>A qualified axis exists and the identification rejected it.</b> An extremum is present,
-finite and connected to the material, but one conjunct &mdash; most plausibly the connection
-fraction, which is a fixed <code>0.01</code> of the whole material cell count and therefore scales
-with the grid rather than with the candidate &mdash; refused it.</li>
-</ol>
+<p>with <code>_MATERIAL_CONNECTED_FRACTION = 0.01</code> at <b>nova/equilibrium/topology.py:41</b>.
+A candidate is additionally screened at <code>topology.py:1081</code> (finite position and flux)
+and <code>topology.py:1082</code> (a resolved boundary).</p>
 
-<p>Reading (1) is not available without the census. A seed reported as carrying "no qualified axis"
-is indistinguishable, from the refusal alone, from a seed whose axis was present and refused, and
-the record above shows the divergent seed of the same frame does carry an axis that both the solver
-and the presence read agree on.</p>
+<p><b>The values it read for this point</b>, from the census diagnostics: material cell count
+<code>1089</code>, so <code>connection_floor = 10</code> cells; the lattice node at the axis is
+<code>(1.7871, 0.0166)</code> and reads <code>axis_node_inside_material = True</code>. The candidate
+therefore lies inside the material and had to own at least ten governed connected cells to be
+admitted. Its position and flux are finite, so the first conjunct does not exclude it.</p>
 
-<h3>The census and its coverage check</h3>
+<h3>Census</h3>
 
-<p><code>scripts/prototypes/diiid_axis_identification/census.py</code> is the independent read. It
-builds the frame's limited seed from the same bank cold portfolio the convergence probe uses, forms
-the gradient on the lattice, locates every zero crossing of both gradient components to sub-cell
-precision, classifies each by the eigenvalues of the bilinear-interpolated Hessian &mdash; extrema
-count <code>+1</code>, saddles <code>-1</code> &mdash; and closes the account with the winding
-number of the gradient direction around the domain boundary.</p>
+<p>Located on the seed at a cubic-spline sampling of four nodes per lattice interval, classified by
+the eigenvalues of the local Hessian. Radial and vertical coordinates in metres.</p>
 
-<p>The winding number is what makes the census an instrument rather than a search. On a bounded
-domain the boundary winding equals the sum of the indices of the enclosed zeros, so a difference
-between the two is a proof that a critical point was missed. The census exits non-zero on a
-non-zero difference precisely so that a null census cannot be read as an absence.</p>
+<table>
+<caption>Census</caption>
+<thead><tr><th>#</th><th>kind</th><th>R [m]</th><th>Z [m]</th><th>&psi;</th><th>index</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>extremum</td><td>0.8819</td><td>1.2719</td><td>0.4216</td><td>+1</td></tr>
+<tr><td>2</td><td>suspected spurious</td><td>0.9200</td><td>1.3351</td><td>0.4160</td><td>&minus;1</td></tr>
+<tr><td>3</td><td>extremum</td><td>1.0030</td><td>1.5082</td><td>0.4683</td><td>+1</td></tr>
+<tr><td>4</td><td>extremum</td><td>1.0269</td><td>&minus;1.5422</td><td>1.2839</td><td>+1</td></tr>
+<tr><td>5</td><td>suspected spurious</td><td>1.1139</td><td>&minus;1.5810</td><td>1.2326</td><td>&minus;1</td></tr>
+<tr><td>6</td><td>saddle</td><td>1.1771</td><td>1.1581</td><td>0.3655</td><td>&minus;1</td></tr>
+<tr><td>7</td><td>saddle</td><td>1.3984</td><td>&minus;1.0138</td><td>0.5164</td><td>&minus;1</td></tr>
+<tr><td>8</td><td>saddle</td><td>1.6251</td><td>1.6058</td><td>0.2247</td><td>&minus;1</td></tr>
+<tr><td>9</td><td><b>extremum (the refused axis)</b></td><td><b>1.7880</b></td><td><b>0.0171</b></td><td>1.4870</td><td>+1</td></tr>
+<tr><td>10</td><td>extremum</td><td>2.4024</td><td>1.1143</td><td>&minus;1.5249</td><td>+1</td></tr>
+<tr><td>11</td><td>extremum</td><td>2.4061</td><td>&minus;1.1148</td><td>&minus;2.3279</td><td>+1</td></tr>
+</tbody>
+</table>
 
-<p><b>Status of the census.</b> The build that produces the seed (the benchmark's profile
-out of the frame row, which constructs the full machine description) did not complete inside this
-node's time fence; the run was cut at the fence with the profile build still in flight. No column
-of the census is reported here, because a census that did not run cannot support either reading of
-the refusal, and reporting a zero from an unfinished run is exactly the failure the coverage check
-exists to prevent. The instrument is committed (<code>96afb6ea3</code>) and the reproduction is
-recorded; the measurement is the remaining work.</p>
+<p><b>Coverage.</b> Census index sum <code>1</code> &mdash; six extrema (+6) and five saddles
+(&minus;5) &mdash; against boundary winding <code>1.9971</code>, rounded to <code>2</code>. Difference
+<b>+1</b>. <b>The coverage check does not close</b>, so this census under-reports by one saddle and
+is not a complete account of the seed.</p>
+
+<p>Two candidate pairs sit close enough to be interpolation artefacts rather than distinct zeros:
+the saddle at (0.9200, 1.3351) is 0.07&nbsp;m from the extremum at (0.8819, 1.2719), and the saddle
+at (1.1139, &minus;1.5810) is 0.04&nbsp;m from the extremum at (1.0269, &minus;1.5422). Dropping
+either pair moves the sum by two, so no single drop reconciles the residual. Each candidate must be
+classified by the winding of the gradient on a loop around it &mdash; +1 for an extremum,
+&minus;1 for a saddle, 0 for a ringing artefact &mdash; with the gradient taken from the lattice
+representation rather than the spline. That classification is not yet run, and until it is the
+table above is a candidate list, not a census.</p>
+
+<p><b>Why the run jobs failed.</b> Job <code>1307827</code> failed after two minutes inside
+<code>census.py</code>: it reshaped the whole 1221-node state vector onto the 33&times;33 plasma
+lattice (1089 nodes), because the vector carries 132 wall nodes after the plasma nodes. Job
+<code>1307848</code> failed in seconds on a diagnostics line that named the prepared profile
+without binding it. Neither failure was in product code.</p>
 
 <h3>Recommended fix</h3>
 
-<p><b>Module:</b> <code>nova/equilibrium/topology.py</code>, <code>qualified_o_candidates</code>,
-the <code>qualify</code> closure at lines 1080&ndash;1101.</p>
+<p><b>Admitted.</b> The rejection is a threshold, not a physics result: a fixed
+<code>0.01</code> of the whole material cell count is applied to every candidate, so a genuinely
+confined axis in a small closed component is refused whenever the grid is large. Change
+<code>topology.py:1076&ndash;1078</code> so the floor is measured against the candidate's own
+governed component rather than the total material count, and have <code>qualify</code> return the
+three conjuncts alongside the admitted bit so <code>NoQualifiedAxisError</code> names which one
+failed.</p>
 
-<p><b>Change:</b> make the failure distinguishable before changing what it admits. The predicate
-currently returns one boolean for three conjuncts, so the host-side
-<code>require_qualified_axis</code> can only report that something failed. Have
-<code>qualify</code> return, alongside the admitted bit, the three conjuncts it composed, carry
-them into the topology qualification receipt, and have
-<code>NoQualifiedAxisError</code> name the failing conjunct and the candidate count. Only with that
-does the fix follow: if the census shows a finite, connected extremum refused by
-<code>governed_connection</code>, the fraction is the thing to change &mdash; and it should be
-measured against the candidate's own governed cell count rather than against the whole material
-grid, because a fixed fraction of a grid that changes with the expansion is not a physical
-criterion. If the census shows no extremum at all, the repair belongs in the cold-seed portfolio
-and this module should not be touched.</p>
-
-<p><b>Test that would have caught it:</b> a case that seeds the limited read with a map whose only
-extremum sits in a small closed component &mdash; larger than <code>_MATERIAL_CONNECTED_FRACTION</code>
-of its own flood but smaller than the same fraction of the full material count &mdash; and asserts
-that the read either admits the axis or raises naming <code>governed_connection</code> as the failed
-conjunct. The existing admission tests
-(<code>tests/test_oracle_axis_admission.py</code>,
-<code>tests/test_unqualified_axis_eager_routes.py</code>) assert the admitted and refused outcomes
-but never which conjunct produced the refusal, which is why a seed can be recorded as having "no
+<p><b>Test that would have caught it.</b> A limited read seeded with a map whose only extremum
+inside the material sits in a component smaller than <code>_MATERIAL_CONNECTED_FRACTION</code> of
+the full material count, asserting that the read admits the axis (or raises naming
+<code>governed_connection</code> with the counts it compared). The existing
+<code>tests/test_oracle_axis_admission.py</code> and
+<code>tests/test_unqualified_axis_eager_routes.py</code> assert the admitted and refused outcomes
+but never which conjunct produced a refusal, which is why a seed can be recorded as having "no
 qualified axis" without the record distinguishing a missing axis from a rejected one.</p>
+
+<p><b>If a probe needs a hook in <code>nova/</code>:</b> none was needed. The census reads the
+benchmark's public seed portfolio and the operator's <code>inside_material</code>, both already
+exposed.</p>

@@ -589,9 +589,11 @@ def render_measured_frame(
     if label_axis.size != 2:
         label_axis = _lattice_extremum(radius, height, label, wall)
 
-    bounding_flux = boundary.get("bounding_flux")
-    bounds = boundary.get("bounds", "unknown")
+    bounding_flux = boundary.get("psi_bnd")
+    achieved = boundary.get("achieved_class") or "unknown"
     contact = np.asarray(boundary.get("contact_rz_m") or [], dtype=float)
+    surface = np.asarray(boundary.get("boundary_rz_m") or [], dtype=float).reshape(-1, 2)
+    surface = surface[np.isfinite(surface).all(axis=1)]
 
     figure, (axes, trace) = plt.subplots(
         1, 2, figsize=(14.0, 7.2), gridspec_kw={"width_ratios": [1.0, 1.15]}
@@ -634,27 +636,27 @@ def render_measured_frame(
     saddle_flux = (
         _bilinear(radius, height, flux, solved_x[0]) if solved_x.size else float("nan")
     )
-    if np.isfinite(bounding_flux):
-        _draw_boundary(
-            axes,
-            dense_r,
-            dense_z,
-            dense,
-            float(bounding_flux),
-            solved_x[0] if solved_x.size else np.zeros(0),
-            DEFAULT_INK.separatrix_color,
-            2.0,
-            bounds == "separatrix",
+    if len(surface) > 2:
+        # The bounding surface comes from the axis-connected flood read, so only
+        # one component is drawn: a stray level set outside the wall is not the
+        # boundary of this plasma.
+        axes.plot(
+            np.append(surface[:, 0], surface[0, 0]),
+            np.append(surface[:, 1], surface[0, 1]),
+            color=DEFAULT_INK.separatrix_color,
+            linewidth=2.0,
+            zorder=5,
         )
-    if bounds == "limiter" and np.isfinite(saddle_flux):
+    if achieved == "limited" and np.isfinite(saddle_flux):
         # The saddle level set is not the boundary here; it is drawn thin and
         # dashed so a reader can see the surface that would have bounded the
-        # plasma had the limiter not reached it first.
+        # plasma had the wall not reached it first.
         axes.contour(
             dense_r,
             dense_z,
             dense,
-            levels=[saddle_flux],
+            levels=[saddle_flux,
+            ],
             colors=[DEFAULT_INK.contour_color],
             linewidths=[0.9],
             linestyles=["dashed"],
@@ -700,6 +702,20 @@ def render_measured_frame(
             markersize=DEFAULT_INK.xpoint_markersize,
             linestyle="none",
             zorder=8,
+        )
+    if solved_axis.size and not axis_inside:
+        # A plasma driven out of the vessel is the finding; draw_nulls drops a
+        # null it cannot contain, so the axis is marked here in its own style.
+        axes.plot(
+            solved_axis[0],
+            solved_axis[1],
+            marker=DEFAULT_INK.axis_marker,
+            markerfacecolor="none",
+            markeredgecolor=DEFAULT_INK.axis_color,
+            markeredgewidth=1.8,
+            markersize=DEFAULT_INK.axis_markersize + 3.0,
+            linestyle="none",
+            zorder=9,
         )
     if label_axis.size == 2:
         axes.plot(
@@ -748,8 +764,13 @@ def render_measured_frame(
         zorder=2,
     )
     extent = np.vstack([limiter, wall])
-    axes.set_xlim(float(extent[:, 0].min()) - 0.05, float(extent[:, 0].max()) + 0.05)
-    axes.set_ylim(float(extent[:, 1].min()) - 0.05, float(extent[:, 1].max()) + 0.05)
+    # The terminal axis is part of the evidence: a plasma driven above the wall
+    # is only readable if the panel shows the axis that left it.
+    extent = np.vstack([limiter, wall, surface])
+    if solved_axis.size:
+        extent = np.vstack([extent, solved_axis[None, :]])
+    axes.set_xlim(float(extent[:, 0].min()) - 0.08, float(extent[:, 0].max()) + 0.08)
+    axes.set_ylim(float(extent[:, 1].min()) - 0.08, float(extent[:, 1].max()) + 0.08)
 
     # The band the map leaves empty carries the trajectory the brief asks for.
     residual_history = np.asarray(measured.get("residual_history") or [], dtype=float)
@@ -812,7 +833,11 @@ def render_measured_frame(
         f"converged {str(converged).lower()}",
         f"axis R={solved_axis[0]:.3f} Z={solved_axis[1]:+.3f} m",
         f"axis {'inside' if axis_inside else 'OUTSIDE'} the limiter",
-        f"bounded by the {bounds}",
+        (
+            f"bounding surface: {achieved}"
+            if boundary.get("status") != "refused"
+            else "boundary read refused: axis outside the wall"
+        ),
         f"{cells} closed core cells",
         f"confined current {ratio:.3f}x target" if ratio is not None else "no current read",
     ]
@@ -838,7 +863,11 @@ def render_measured_frame(
             [],
             color=DEFAULT_INK.separatrix_color,
             lw=2.0,
-            label=f"bounding {'limiter surface' if bounds == 'limiter' else 'separatrix'}",
+            label=(
+                "no bounding surface (read refused)"
+                if achieved == "unknown"
+                else f"bounding surface ({achieved})"
+            ),
         ),
         plt.Line2D(
             [],
@@ -883,7 +912,7 @@ def render_measured_frame(
             [], [], color="#929292", lw=1.0, ls=(0, (2, 3)), label="grid domain bound"
         ),
     ]
-    if bounds == "limiter":
+    if achieved == "limited":
         handles.append(
             plt.Line2D(
                 [],
@@ -930,12 +959,14 @@ def render_measured_frame(
         "solved_axis_inside_limiter": axis_inside,
         "closed_core_cells": cells,
         "confined_to_current_ratio": ratio,
-        "bounds": bounds,
-        "bounding_flux": bounding_flux,
+        "achieved_class": achieved,
+        "psi_bnd": bounding_flux,
         "psi_saddle": boundary.get("psi_saddle"),
         "psi_limiter": boundary.get("psi_limiter"),
-        "achieved_class": boundary.get("achieved_class"),
         "contact_rz_m": boundary.get("contact_rz_m"),
+        "contact_gap_m": boundary.get("contact_gap_m"),
+        "class_margin": boundary.get("class_margin"),
+        "boundary_rz_m": surface.tolist(),
         "flux_grid_key": str(grid["key"]),
         "levels": [float(value) for value in levels],
     }
@@ -996,13 +1027,13 @@ def main() -> None:
             # drawn beside the frame's diverted terminal.
             for branch, arms in (analysis.get(str(frame)) or {}).items():
                 entry = (arms or {}).get("default") or {}
-                if branch == "diverted" or entry.get("bounds") != "separatrix":
+                if branch == "diverted":
                     continue
                 extra = arguments.artifact_dir / f"frame-{frame}-{branch}-default.npz"
-                if not extra.exists():
+                if not extra.exists() or entry.get("achieved_class") != "diverted":
                     continue
                 extra_output = (
-                    arguments.output_dir / f"frame-0-flux-contours.svg"
+                    arguments.output_dir / "frame-0-flux-contours.svg"
                 ).with_name(f"frame-{frame}-{branch}-flux-contours.svg")
                 rendered.append(
                     render_measured_frame(

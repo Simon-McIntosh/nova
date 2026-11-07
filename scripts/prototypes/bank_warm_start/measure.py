@@ -123,7 +123,7 @@ def receipt(result, wall_ms, amplitude, machine, step, slice_index, role):
         axis_error=axis_error.tolist(),
         saddle_error=saddle_error.tolist(),
         boundary_error=(boundary - oracle_boundary).tolist(),
-        oracle_span=float(oracle_span[0]),
+        oracle_span=float(np.asarray(oracle_span).ravel()[0]),
         minor_radius=machine.minor_radius,
     )
 

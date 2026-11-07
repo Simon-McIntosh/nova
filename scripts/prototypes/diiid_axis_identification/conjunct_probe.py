@@ -12,6 +12,8 @@ import json
 import sys
 from pathlib import Path
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -68,49 +70,97 @@ def main() -> int:
             "candidates": [],
         }
         records.append(entry)
+
+        coordinate = self.grid.coordinate
+        finite_o = jnp.isfinite(vmap_o[:, 0])
+        owner_index = jax.vmap(
+            lambda position: jnp.argmin(
+                jnp.sum((coordinate - position) ** 2, axis=1)
+            )
+        )(vmap_o[:, :2])
+        seedable = (
+            jnp.zeros(coordinate.shape[0], dtype=bool).at[owner_index].max(finite_o)
+        )
+        seed_material = inside_material | seedable
+
+        def qualify(data_o):
+            data_x = self.x_point_data(vmap_x, polarity, data_o[2])
+            data_b = self.boundary(data_o, vmap_x, data_w, polarity)
+            closed = self.psi_mask(polarity, psi_grid, data_b[2])
+            component = self.axis_component(
+                psi_grid,
+                data_b[2],
+                data_o[2],
+                data_o[:2],
+                closed,
+                seed_material,
+                jnp.equal(data_b[2], data_x[2]),
+                data_x[:2],
+                surface,
+                polarity=polarity,
+            )
+            open_component = self.axis_component(
+                psi_grid,
+                data_b[2],
+                data_o[2],
+                data_o[:2],
+                jnp.ones_like(closed),
+                seed_material,
+                jnp.equal(data_b[2], data_x[2]),
+                data_x[:2],
+                surface,
+                polarity=polarity,
+            )
+            governed_size = jnp.sum(component & inside_material)
+            governed_size_all_open = jnp.sum(open_component & inside_material)
+            resolved = jnp.all(jnp.isfinite(data_b[:3]))
+            admitted = (
+                jnp.all(jnp.isfinite(data_o[:3])) & resolved & (governed_size >= floor)
+            )
+            return (
+                admitted,
+                governed_size,
+                governed_size_all_open,
+                resolved,
+                jnp.isfinite(data_o[0]),
+                data_o[2],
+                data_b[0],
+                data_b[1],
+                data_b[2],
+                component & inside_material,
+            )
+
+        measured = jax.vmap(qualify)(jnp.asarray(vmap_o))
+        (admitted, governed, open_governed, resolved, finite,
+         axis_flux, b0, b1, b2, masks) = measured
         candidates = entry["candidates"]
-        for index in range(np.asarray(vmap_o).shape[0]):
-            row = {"index": int(index)}
-            try:
-                one = np.asarray(vmap_o)[index : index + 1]
-                row["r"] = _float(one[0, 0])
-                row["z"] = _float(one[0, 1])
-                data_o = self.o_point_data(one, polarity)
-                data_x = self.x_point_data(vmap_x, polarity, data_o[2])
-                data_b = self.boundary(one, vmap_x, data_w, polarity)
-                closed = self.psi_mask(polarity, psi_grid, data_b[2])
-                row["flux"] = _first(data_o[2])
-                row["data_b"] = [_first(part) for part in data_b[:3]]
-                row["resolved"] = bool(np.all(np.isfinite(row["data_b"])))
-                row["finite_o"] = bool(np.all(np.isfinite([row["r"], row["z"], row["flux"]])))
-
-                def component_size(mask) -> int:
-                    component = self.axis_component(
-                        psi_grid,
-                        data_b[2],
-                        data_o[2],
-                        data_o[:2],
-                        mask,
-                        inside_material,
-                        jnp.equal(data_b[2], data_x[2]),
-                        data_x[:2],
-                        surface,
-                        polarity=polarity,
-                    )
-                    return int(np.asarray(jnp.sum(component & inside_material)))
-
-                row["governed_size"] = component_size(closed)
-                row["governed_size_all_open"] = component_size(jnp.ones_like(closed))
-                row["error"] = None
-            except Exception as error:  # recorded per candidate, not swallowed
-                row["error"] = repr(error)[:500]
-            candidates.append(row)
+        for index in range(int(finite is not None and np.shape(finite)[0] or 0)):
+            candidates.append(
+                {
+                    "index": index,
+                    "r": _first(vmap_o[index, 0]),
+                    "z": _first(vmap_o[index, 1]),
+                    "flux": _first(axis_flux[index]),
+                    "finite_o": bool(np.asarray(finite[index])),
+                    "resolved": bool(np.asarray(resolved[index])),
+                    "data_b": [
+                        _first(b0[index]),
+                        _first(b1[index]),
+                        _first(b2[index]),
+                    ],
+                    "governed_size": int(np.asarray(governed[index])),
+                    "governed_size_all_open": int(np.asarray(open_governed[index])),
+                    "governed_inside_material": int(
+                        np.asarray(jnp.sum(masks[index]))
+                    ),
+                    "admitted": bool(np.asarray(admitted[index])),
+                    "connection_floor_cells": floor,
+                }
+            )
         entry["completed"] = True
         return original(
             self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material, surface
         )
-
-    import jax
 
     kind.qualified_o_candidates = wrapper
     psi = np.asarray(prepared["cold"].branches.flux[0])

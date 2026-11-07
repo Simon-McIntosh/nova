@@ -4,6 +4,13 @@
   "call_sites": [],
   "completed_at": "2026-11-07T03:53:15.851Z",
   "dispatched_at": "2026-11-07T03:43:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-forward-convergence-662e53a98e4d",
+      "recorded_at": "2026-11-07T04:16:27.962785+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",

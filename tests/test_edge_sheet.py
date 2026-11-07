@@ -20,6 +20,8 @@ import pytest
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.sheet import MU0, SheetFlux, sheet_field, sheet_flux
 
+import nova.biot.sheet as sheet_module
+
 REFERENCE_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "edge_sheet" / "reference.py"
 )
@@ -104,7 +106,7 @@ def test_sloped_flux_closed_form_matches_reference(angle, station, distance):
     target = next(t for t in targets if t.distance == distance and t.station == station)
     converged = reference.sheet_reference(target, start, end)
     assert converged.converged
-    got = sheet_flux(target.r, target.z, start, end, closed=True)
+    got = sheet_flux(target.r, target.z, start, end, route="closed")
     relative = abs(got - converged.psi) / abs(converged.psi)
     assert relative <= TOLERANCE, (
         f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
@@ -113,11 +115,17 @@ def test_sloped_flux_closed_form_matches_reference(angle, station, distance):
 
 @pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
 def test_closed_form_agrees_with_the_graded_route(angle, station, distance):
-    """The two independent evaluations of one antiderivative agree."""
+    """The two routes agree on ``R``, the one block they do not share.
+
+    ``A``, the arsinh remainder the paper leaves to quadrature, is taken from
+    ``_arsinh_gradient`` by both routes, so this comparison cannot fail on it and
+    says nothing about it: it checks the closed ``R`` block against the graded
+    one, and nothing else.
+    """
     start, end, targets = frame(angle)
     target = next(t for t in targets if t.distance == distance and t.station == station)
-    closed = sheet_flux(target.r, target.z, start, end, closed=True)
-    routed = sheet_flux(target.r, target.z, start, end)
+    closed = sheet_flux(target.r, target.z, start, end, route="closed")
+    routed = sheet_flux(target.r, target.z, start, end, route="quadrature")
     assert abs(closed - routed) <= TOLERANCE * abs(routed)
 
 
@@ -135,14 +143,14 @@ def test_flat_pancake_form_matches_reference(station, distance):
 def test_flat_pancake_quadrature_matches_reference(station, distance):
     """The kept surface-current integral against the reference, as it landed.
 
-    ``closed=True`` on a flat sheet selects the panelised radial rule that the
-    section shipped before the closed form existed, so the closed form's default
-    route is held to it here as well as to the reference.
+    ``route="quadrature"`` selects the panelised radial rule that the section
+    shipped before the closed form existed, so the cross-check is held to the
+    reference in its own right as well as through its agreement with eq (26).
     """
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
     converged = reference.sheet_reference(target, start, end)
-    routed = sheet_flux(target.r, target.z, start, end, closed=True)
+    routed = sheet_flux(target.r, target.z, start, end, route="quadrature")
     assert abs(routed - converged.psi) <= TOLERANCE * abs(converged.psi)
 
 
@@ -153,7 +161,7 @@ def test_flat_pancake_closed_form_agrees_with_the_quadrature(station, distance):
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
     closed_form = sheet_flux(target.r, target.z, start, end)
-    routed = sheet_flux(target.r, target.z, start, end, closed=True)
+    routed = sheet_flux(target.r, target.z, start, end, route="quadrature")
     relative = abs(closed_form - routed) / abs(routed)
     assert relative <= TOLERANCE, (
         f"measured {relative:.2e} against the {TOLERANCE:.0e} floor"
@@ -166,7 +174,7 @@ def test_flat_pancake_field_quadrature_matches_reference(station, distance):
     """The kept surface-current integral's field against the reference."""
     _, _, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
-    assert field_relative(0.0, target, closed=True) <= TOLERANCE
+    assert field_relative(0.0, target, route="quadrature") <= TOLERANCE
 
 
 @pytest.mark.parametrize("distance", DISTANCES)
@@ -176,7 +184,7 @@ def test_flat_pancake_field_agrees_with_the_quadrature(station, distance):
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
     closed_form = sheet_field(target.r, target.z, start, end)
-    routed = sheet_field(target.r, target.z, start, end, closed=True)
+    routed = sheet_field(target.r, target.z, start, end, route="quadrature")
     scale = max(abs(component) for component in routed)
     for got, expected in zip(closed_form, routed, strict=True):
         if abs(expected) <= reference.DEGENERATE * scale:
@@ -189,24 +197,31 @@ def test_flat_pancake_field_agrees_with_the_quadrature(station, distance):
 
 @pytest.mark.parametrize("distance", DISTANCES)
 @pytest.mark.parametrize("station", STATIONS)
-def test_one_edge_flipped_fails_the_pancake_comparison(station, distance):
+def test_one_edge_flipped_fails_the_pancake_comparison(station, distance, monkeypatch):
     """Negative control: the two ends' contributions carry opposite signs.
 
     The sheet's current runs azimuthally, so reversing one edge's sign is the
-    mutation that must not reproduce the flux; the antiderivative is differenced
-    between the ends, and an implementation that adds them reads as the value
-    below instead.
+    mutation that must not reproduce the flux.  The flip is applied to the
+    antiderivative as ``_pancake_flux`` calls it, so the assembly under test is
+    the module's own two-ends difference rather than a copy of it in this file:
+    a regression that adds the ends instead of subtracting them turns this
+    control into the reference value and fails it.
     """
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
     converged = reference.sheet_reference(target, start, end)
     sheet = SheetFlux(start, end)
-    gamma = float(start[1]) - target.z
-    flipped = MU0 * target.r * (
-        sheet.pancake_antiderivative(gamma, target.r, float(end[0]))
-        + sheet.pancake_antiderivative(gamma, target.r, float(start[0]))
-    )
-    assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)
+    _, upper = sheet._pancake_ends()
+    original = SheetFlux.pancake_antiderivative
+
+    def flipped(self, gamma, r, rp):
+        value = original(self, gamma, r, rp)
+        return -value if rp == upper else value
+
+    with monkeypatch.context() as patch:
+        patch.setattr(SheetFlux, "pancake_antiderivative", flipped)
+        got = sheet.flux(target.r, target.z)
+    assert got != pytest.approx(converged.psi, rel=TOLERANCE)
 
 
 @pytest.mark.parametrize("distance", DISTANCES)
@@ -239,7 +254,7 @@ def test_flipped_sheet_current_fails_the_closed_form(angle):
     )
     converged = reference.sheet_reference(target, start, end)
     flipped = sheet_flux(
-        target.r, target.z, start, end, sheet_current=-1.0, closed=True
+        target.r, target.z, start, end, sheet_current=-1.0, route="closed"
     )
     assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)
 
@@ -259,23 +274,23 @@ def test_segment_order_does_not_change_the_flux(angle):
     assert backward == pytest.approx(forward, rel=1e-14)
 
 
-def measured_field(angle, target, *, closed=False):
+def measured_field(angle, target, *, route="closed"):
     """The field and the reference at one fixed target."""
     start, end, _ = frame(angle)
     converged = reference.sheet_reference(target, start, end)
     assert converged.converged
-    got = sheet_field(target.r, target.z, start, end, closed=closed)
+    got = sheet_field(target.r, target.z, start, end, route=route)
     return got, (converged.br, converged.bz)
 
 
-def field_relative(angle, target, *, closed=False):
+def field_relative(angle, target, *, route="closed"):
     """The largest component error, as a fraction of the larger component.
 
     A component the symmetry extinguishes is held out: the axisymmetric sheet
     puts no radial field on the mid-plane, so there the reference returns a
     rounding residual rather than a value to divide by.
     """
-    (got_r, got_z), (ref_r, ref_z) = measured_field(angle, target, closed=closed)
+    (got_r, got_z), (ref_r, ref_z) = measured_field(angle, target, route=route)
     scale = max(abs(ref_r), abs(ref_z))
     worst = 0.0
     for got, expected in ((got_r, ref_r), (got_z, ref_z)):
@@ -312,7 +327,7 @@ def test_sloped_field_matches_reference(angle, station, distance):
     """A sloped segment's field against the ring reference at the floor."""
     _, _, targets = frame(angle)
     target = next(t for t in targets if t.distance == distance and t.station == station)
-    relative = field_relative(angle, target)
+    relative = field_relative(angle, target, route="quadrature")
     assert relative <= TOLERANCE, (
         f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
     )
@@ -323,7 +338,7 @@ def test_sloped_closed_form_field_matches_reference(angle, station, distance):
     """The closed form's own field against the ring reference at the floor."""
     _, _, targets = frame(angle)
     target = next(t for t in targets if t.distance == distance and t.station == station)
-    relative = field_relative(angle, target, closed=True)
+    relative = field_relative(angle, target, route="closed")
     assert relative <= TOLERANCE, (
         f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
     )
@@ -331,11 +346,16 @@ def test_sloped_closed_form_field_matches_reference(angle, station, distance):
 
 @pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
 def test_closed_form_field_agrees_with_the_graded_route(angle, station, distance):
-    """The two evaluations of one antiderivative agree on both components."""
+    """The two routes agree on ``R``, the one block they do not share.
+
+    ``A`` comes from ``_arsinh_gradient`` on both routes, so a disagreement here
+    can only come from the closed ``R`` block's own value or its partials; the
+    shared term cancels identically and this test says nothing about it.
+    """
     start, end, targets = frame(angle)
     target = next(t for t in targets if t.distance == distance and t.station == station)
-    closed = sheet_field(target.r, target.z, start, end, closed=True)
-    routed = sheet_field(target.r, target.z, start, end)
+    closed = sheet_field(target.r, target.z, start, end, route="closed")
+    routed = sheet_field(target.r, target.z, start, end, route="quadrature")
     scale = max(abs(component) for component in routed)
     for got, expected in zip(closed, routed, strict=True):
         if abs(expected) <= reference.DEGENERATE * scale:
@@ -389,3 +409,163 @@ def test_flipped_sheet_current_fails_the_field_comparison(angle):
             if abs(snow_value) <= reference.DEGENERATE * snow_scale:
                 continue
             assert abs(value - snow_value) > TOLERANCE * abs(snow_value)
+
+
+_INSTRUMENTED = (
+    "antiderivative",
+    "antiderivative_closed",
+    "_vertical_flux",
+    "_pancake_flux",
+    "_flat_flux",
+    "_sloped_field",
+    "_sloped_field_closed",
+    "_pancake_field",
+    "_flat_field",
+)
+"""The evaluators that make up the two route families, by name."""
+
+CLOSED_FAMILY = {
+    0.0: {"_pancake_flux", "_pancake_field"},
+    np.pi / 4: {"antiderivative_closed", "_sloped_field_closed"},
+    np.pi / 2: {"_vertical_flux", "_sloped_field_closed"},
+}
+"""The closed form's own evaluators, by slope."""
+
+QUADRATURE_FAMILY = {
+    0.0: {"_flat_flux", "_flat_field"},
+    np.pi / 4: {"antiderivative", "_sloped_field"},
+    np.pi / 2: {"antiderivative", "_sloped_field"},
+}
+"""The surface-current cross-check's evaluators, by slope."""
+
+
+def record_calls(monkeypatch, recorded):
+    """Record which of the route evaluators the next call reaches."""
+    for name in _INSTRUMENTED:
+        original = getattr(SheetFlux, name)
+
+        def recorder(self, *args, _name=name, _original=original, **kwargs):
+            recorded.append(_name)
+            return _original(self, *args, **kwargs)
+
+        monkeypatch.setattr(SheetFlux, name, recorder)
+
+
+@pytest.mark.parametrize("angle", (0.0, np.pi / 4, np.pi / 2))
+def test_route_flag_selects_one_family_at_every_slope(angle, monkeypatch):
+    """The flag names one family, and it names the same one at every slope.
+
+    A flat sheet takes Snow's pancake form, a vertical one eq (24) and a sloped
+    one the pole-reduced antiderivative; all three are the closed form, and the
+    cross-check is the surface-current quadrature at all three.
+    """
+    start, end, _ = frame(angle)
+    sheet = SheetFlux(start, end)
+    recorded = []
+    record_calls(monkeypatch, recorded)
+
+    sheet.flux(1.35, 0.4, route="closed")
+    sheet.field(1.35, 0.4, route="closed")
+    assert set(recorded) == CLOSED_FAMILY[angle]
+
+    recorded.clear()
+    sheet.flux(1.35, 0.4, route="quadrature")
+    sheet.field(1.35, 0.4, route="quadrature")
+    assert set(recorded) == QUADRATURE_FAMILY[angle]
+
+
+@pytest.mark.parametrize("angle", SLOPES)
+def test_route_flag_defaults_to_the_closed_form(angle):
+    """The unqualified call is the closed route, whatever the slope."""
+    start, end, _ = frame(angle)
+    sheet = SheetFlux(start, end)
+    assert sheet.flux(1.35, 0.4) == sheet.flux(1.35, 0.4, route="closed")
+    assert sheet.field(1.35, 0.4) == sheet.field(1.35, 0.4, route="closed")
+    assert sheet_flux(1.35, 0.4, start, end) == sheet.flux(1.35, 0.4, route="closed")
+
+
+@pytest.mark.parametrize("angle", SLOPES)
+def test_an_unknown_route_is_refused(angle):
+    """A misspelt route is refused rather than silently resolved to a default."""
+    start, end, _ = frame(angle)
+    sheet = SheetFlux(start, end)
+    with pytest.raises(ValueError):
+        sheet.flux(1.35, 0.4, route="graded")
+    with pytest.raises(ValueError):
+        sheet.field(1.35, 0.4, route="graded")
+
+
+@pytest.mark.parametrize("angle", SLOPES)
+def test_closed_flux_route_evaluates_the_elliptic_form(angle, monkeypatch):
+    """Guard: the closed flux route must evaluate the complete elliptic kinds.
+
+    The two routes agree to the floor by design, so values alone cannot tell
+    them apart; a closed route replaced by the graded one returns the same
+    numbers.  This fails on that substitution at every slope.
+    """
+    start, end, _ = frame(angle)
+    sheet = SheetFlux(start, end)
+    calls = []
+    original = sheet_module.complete_kind
+
+    def spy(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(sheet_module, "complete_kind", spy)
+    sheet.flux(1.35, 0.4, route="closed")
+    assert calls, "the closed flux route did not evaluate the elliptic kinds"
+    calls.clear()
+    sheet.flux(1.35, 0.4, route="quadrature")
+    assert not calls, "the quadrature flux route reached the closed form"
+
+
+@pytest.mark.parametrize("angle", SLOPES)
+def test_closed_field_route_evaluates_the_closed_block(angle, monkeypatch):
+    """Guard: the closed field route must evaluate the closed block itself.
+
+    A flat sheet's closed field is eq (27) through ``_pancake_field``; a
+    non-flat one takes the complete elliptic ``R`` block's own partials through
+    ``_closed_root_gradient``.  Replacing either body with the graded route's
+    leaves both agreeing to the floor and neither marker reached, so this is the
+    assertion that reddens on that substitution.
+    """
+    start, end, _ = frame(angle)
+    sheet = SheetFlux(start, end)
+    if angle == 0.0:
+        marker, holder, target = "_pancake_field", SheetFlux, "_pancake_field"
+    else:
+        marker, holder, target = (
+            "_closed_root_gradient",
+            sheet_module,
+            "_closed_root_gradient",
+        )
+    calls = []
+    original = getattr(holder, target)
+
+    def spy(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(holder, target, spy)
+    sheet.field(1.35, 0.4, route="closed")
+    assert calls, f"the closed field route did not evaluate {marker}"
+    calls.clear()
+    sheet.field(1.35, 0.4, route="quadrature")
+    assert not calls, f"the quadrature field route reached {marker}"
+
+
+def test_closed_root_is_the_elliptic_block():
+    """``R`` equals eq (22a) formed independently from the complete kinds."""
+    height, radius, source = 0.37, 1.61, 1.55
+    span = height**2 + (radius + source) ** 2
+    k2 = 4.0 * radius * source / span
+    first, second = complete_kind(1.0 - k2)
+    expected = (
+        2.0
+        * np.sqrt(span)
+        * (2.0 * (1.0 - k2) * float(first) + (k2 - 2.0) * float(second))
+        / (3.0 * k2)
+    )
+    got = float(sheet_module._closed_root(height, radius, source))
+    assert got == pytest.approx(expected, rel=1e-14)

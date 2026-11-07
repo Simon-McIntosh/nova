@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run declares no baseline_suite and no after_suite (manifest.md:21-22), so there are no suite arms to difference; it changes no product code and no test file, and its single gate, the H200 measurement allocation recorded at warm-start-gate.log, ends EXIT=0 with all three roles at exit 0.",
+  "assertion_analysis": [
+    "scripts/prototypes/bank_warm_start/measure.py:258 assert jax.config.jax_enable_x64 fails if configure_dtypes() did not enable extended precision, which is the single condition under which the receipt would report single-precision numbers as double.",
+    "No other assertion is added: report.py:38-43 computes geometry_ok, flux_ok and residual_ok from receipt values with no independent source, so a wrong oracle or a mis-scaled budget would leave the table green; the receipts themselves are the record."
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T12:37:46.763Z",
+  "dispatched_at": "2026-11-07T12:15:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html",
+      "line": "63",
+      "severity": "blocking",
+      "text": "blocking: the count \"four of seven slices every lane runs to the 60-update ceiling with the residual unchanged\" contradicts the fragment's own table at html:31-52 and warm-start-runner1.jsonl, where five slices (1, 4, 5, 6, 7) have every lane at 60 updates and slices 1 and 4 end with a terminal residual above their seed value (1.80 to 2.24, 1e-2 and 1.73 to 2.42); the same paragraph's sibling claim at html:69 that \"the residual clause passes on all 21 converged warm slices\" is 15 of 21, since the six non-converged coarse-step slices carry terminal residuals of 2.24, 1.80, 0.242, 1.73, 3.46 and 5.20."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html",
+      "line": "68",
+      "severity": "non-blocking",
+      "text": "non-blocking: the axis drift is stated as \"5.9e-5 of the minor radius at a 1e-5 step, 5.1e-3 at 1e-3\" but those are metres from measure.py:115 axis_error, which are 1.1e-4 and 9.4e-3 of the 0.544 m minor radius, so the prose understates the drift relative to the budget it compares against."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111056270825-bank-warm-start/manifest.md",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: status is complete while blockers at manifest.md:27 names an uncertified clause of the evidence fence and html:68-69 confirms only the cheap scaled unit-drive oracle was tested, so the per-slice-drive analytic oracle the done-when requires was never constructed."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_start/streams.py",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "non-blocking: STEP_ORIGIN is defined and referenced nowhere in the tree, so the physical justification for the three step sizes lives only in dead source and in the fragment prose."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_start/streams.py",
+      "line": "70",
+      "severity": "non-blocking",
+      "text": "non-blocking: the analytic oracle is assembled inline (analytic_axis at streams.py:88 from roots, fluxes from a topology.read, a second test_topology_read._analytic_inputs call at streams.py:76 for the minor radius) and its error metrics are re-derived at measure.py:115-122 and report.py:38-43, duplicating scripts/prototypes/bank_newton_converge/fresh_solve.py:32 analytic_oracle, which already returns axis_error, saddle_error, minor_radius, boundary_flux_error and the span ratios and asserts the reference gradient is below 1e-10."
+    }
+  ],
+  "head_log_revision": "49f919b148ab85a82ed2a56a7afbf32bc1333c0f",
+  "item_verdicts": {
+    "diff": "The five commits from acff793928732503a84525c3fe29ca260dbf9035 to 06da3e1c56a741478cc3d73404500e7b9a95e625 add 1916 lines with no deletions across scripts/prototypes/bank_warm_start/{streams,measure,report,plot}.py, run_h200.sh, submit_h200.sbatch, the evidence fragment and one SVG; the three fix commits address only this node's own harness, and the receipts at warm-start-gate.log:6-13 confirm all three roles exited 0.",
+    "done_when": "brief.txt:7-8 requires per-slice reads, updates, rebuilds, warm-start fresh residual and wall from two fresh H200 processes plus every converged slice inside the locked precision budget against its own analytic-oracle solve; docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:19-53 tables every cost column, but html:68-69 states the geometry and boundary-flux clauses are not certified, so the oracle clause of the done-when is unmet.",
+    "goal": "The node goal asks for per-slice reads and updates when each slice is warm-started from its stream predecessor; scripts/prototypes/bank_warm_start/streams.py:1-98 carries sixteen lanes through eight slices at three stated profile-amplitude steps, each slice seeded from its own previous converged state, so the goal is measured, though all sixteen lanes share one ramp rather than sixteen independent drives.",
+    "manifest": "manifest.md:5-16 records status complete, five commits e08e4a73a..06da3e1c5, the H200 sbatch gate warm-start-gate.log ending EXIT=0, and a blockers line naming the uncertified geometry clause while baseline_suite and after_suite are blank at manifest.md:21-22.",
+    "write_paths": "The manifest at manifest.md:3 declares scripts/prototypes/bank_warm_start, docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html and docs/figures/sub-millisecond-forward-path/bank-warm-start; all eight files in the base-to-head diff resolve inside those three paths and no product or test file is touched."
+  },
+  "justifications": {
+    "durability": "The only assertion the diff adds is the extended-precision guard at scripts/prototypes/bank_warm_start/measure.py:258, which would redden if configure_dtypes() left x64 off, and nothing in the change pins the reported read, update or wall figures, so a reverted seed or a mis-timed window would ship silently.",
+    "evidence": "The gate at warm-start-gate.log:6-13 ran three roles to EXIT=0 and the report table reconciles with warm-start-runner1.jsonl, but docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:63 and :69 state counts its own per-slice table contradicts, and html:68-69 records the oracle clause of the done-when as uncertified.",
+    "fit": "scripts/prototypes/bank_warm_start/report.py and plot.py follow the sibling receipt-recorder idiom of scripts/prototypes/bank_read_count_sensitivity/report.py and the plot uses the data-ink sheet at scripts/prototypes/bank_warm_start/plot.py:12-30, with one unused constant left at streams.py:31.",
+    "goal_fidelity": "scripts/prototypes/bank_warm_start/measure.py:208-231 seeds each slice from the previous converged state and records reads and updates per slice, meeting the goal, while streams.py:1-12 documents that all sixteen lanes share one drive ramp because support_read.solve_batch takes one profile for the batch.",
+    "reuse": "streams.py:70-90 extends the shared scripts/prototypes/bank_newton_step/measure.py:190 machine and scripts/prototypes/bank_solve_profile/fixture.py build, but measure.py:115-122 and report.py:38-43 re-derive the axis, saddle, boundary and span metrics that scripts/prototypes/bank_newton_converge/fresh_solve.py:32 analytic_oracle already owns and returns.",
+    "scope_discipline": "Every path in git diff --stat acff7939..06da3e1c lands under the three paths declared at manifest.md:3, and grep over nova/, tests/, benchmarks/ and apps/ finds no import of bank_warm_start."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal asks for per-slice reads and updates when each slice is warm-started from its stream predecessor; scripts/prototypes/bank_warm_start/streams.py:1-98 carries sixteen lanes through eight slices at three stated profile-amplitude steps, each slice seeded from its own previous converged state, so the goal is measured, though all sixteen lanes share one ramp rather than sixteen independent drives.\nVERDICT done_when: brief.txt:7-8 requires per-slice reads, updates, rebuilds, warm-start fresh residual and wall from two fresh H200 processes plus every converged slice inside the locked precision budget against its own analytic-oracle solve; docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:19-53 tables every cost column, but html:68-69 states the geometry and boundary-flux clauses are not certified, so the oracle clause of the done-when is unmet.\nVERDICT write_paths: the manifest at manifest.md:3 declares scripts/prototypes/bank_warm_start, docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html and docs/figures/sub-millisecond-forward-path/bank-warm-start; all eight files in the base-to-head diff resolve inside those three paths and no product or test file is touched.\nVERDICT manifest: manifest.md:5-16 records status complete, five commits e08e4a73a..06da3e1c5, the H200 sbatch gate warm-start-gate.log ending EXIT=0, and a blockers line naming the uncertified geometry clause while baseline_suite and after_suite are blank at manifest.md:21-22.\nVERDICT diff: the five commits from acff793928732503a84525c3fe29ca260dbf9035 to 06da3e1c56a741478cc3d73404500e7b9a95e625 add 1916 lines with no deletions across scripts/prototypes/bank_warm_start/{streams,measure,report,plot}.py, run_h200.sh, submit_h200.sbatch, the evidence fragment and one SVG; the three fix commits address only this node's own harness, and the receipts at warm-start-gate.log:6-13 confirm all three roles exited 0.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_warm_start/measure.py:208-231 seeds each slice from the previous converged state and records reads and updates per slice, meeting the goal, while streams.py:1-12 documents that all sixteen lanes share one drive ramp because support_read.solve_batch takes one profile for the batch.\nSCORE evidence: 10\nJUSTIFICATION evidence: the gate at warm-start-gate.log:6-13 ran three roles to EXIT=0 and the report table reconciles with warm-start-runner1.jsonl, but docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:63 and :69 state counts its own per-slice table contradicts, and html:68-69 records the oracle clause of the done-when as uncertified.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --stat acff7939..06da3e1c lands under the three paths declared at manifest.md:3, and grep over nova/, tests/, benchmarks/ and apps/ finds no import of bank_warm_start.\nSCORE durability: 10\nJUSTIFICATION durability: the only assertion the diff adds is scripts/prototypes/bank_warm_start/measure.py:258 assert jax.config.jax_enable_x64, which would redden if extended precision were off, and nothing in the change pins the reported read, update or wall figures so a wrong time window or a reverted seed would ship silently.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/bank_warm_start/report.py and plot.py follow the sibling receipt-recorder idiom of scripts/prototypes/bank_read_count_sensitivity/report.py and the plot uses the data-ink sheet at scripts/prototypes/bank_warm_start/plot.py:12-30, with one unused constant left at streams.py:31.\nSCORE reuse: 8\nJUSTIFICATION reuse: streams.py:70-90 extends the shared scripts/prototypes/bank_newton_step/measure.py:190 machine and scripts/prototypes/bank_solve_profile/fixture.py build, but measure.py:115-122 and report.py:38-43 re-derive the axis, saddle, boundary and span metrics that scripts/prototypes/bank_newton_converge/fresh_solve.py:32 analytic_oracle already owns and returns.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:63 blocking: the count \"four of seven slices every lane runs to the 60-update ceiling with the residual unchanged\" contradicts the fragment's own table at html:31-52 and warm-start-runner1.jsonl, where five slices (1, 4, 5, 6, 7) have every lane at 60 updates and slices 1 and 4 end with a terminal residual above their seed value (1.80 to 2.24, 1e-2 and 1.73 to 2.42); the same paragraph's sibling claim at html:69 that \"the residual clause passes on all 21 converged warm slices\" is 15 of 21, since the six non-converged coarse-step slices carry terminal residuals of 2.24, 1.80, 0.242, 1.73, 3.46 and 5.20, so a reader quoting these two numbers into the plan records a stall count and a precision pass set that the receipts deny.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:68 non-blocking: the axis drift is stated as \"5.9e-5 of the minor radius at a 1e-5 step, 5.1e-3 at 1e-3\" but those are metres from measure.py:115 axis_error, which are 1.1e-4 and 9.4e-3 of the 0.544 m minor radius, so the prose understates the drift relative to the budget it compares against by a factor of 5.4.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111056270825-bank-warm-start/manifest.md:5 non-blocking: status is complete while blockers at manifest.md:27 names an uncertified clause of the evidence fence and html:68-69 confirms only the cheap scaled unit-drive oracle was tested, so the per-slice-drive analytic oracle the done-when requires was never constructed and the record should carry that shortfall as the reason the node is incomplete on that clause rather than complete.\nFINDING scripts/prototypes/bank_warm_start/streams.py:31 non-blocking: STEP_ORIGIN is defined and referenced nowhere in the tree, so the physical justification for the three step sizes lives only in dead source and in the fragment prose and will not be updated with it.\nFINDING scripts/prototypes/bank_warm_start/streams.py:70 non-blocking: the analytic oracle is assembled inline (analytic_axis at streams.py:88 from roots, fluxes from a topology.read, a second test_topology_read._analytic_inputs call at streams.py:76 for the minor radius) and its error metrics are re-derived at measure.py:115-122 and report.py:38-43, duplicating scripts/prototypes/bank_newton_converge/fresh_solve.py:32 analytic_oracle, which already returns axis_error, saddle_error, minor_radius, boundary_flux_error and the span ratios and asserts the reference gradient is below 1e-10; the fork dropped that reference validation and the ratio fields, which is how the unit misstatement at html:68 arose.",
+  "review_run_id": "r-20261107T121315374736-review-of-bank-warm-start-06da3e1c56a7",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_commits": [
+    "e08e4a73a",
+    "a734d28a2",
+    "dda03cb54",
+    "49f919b14",
+    "06da3e1c5"
+  ],
+  "reviewed_head_sha": "06da3e1c56a741478cc3d73404500e7b9a95e625",
+  "reviewed_run_id": "r-20261107T111056270825-bank-warm-start",
+  "scores": {
+    "durability": 10,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 8,
+    "scope_discipline": 19
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T12:40:00Z",
+  "total": 79
+}

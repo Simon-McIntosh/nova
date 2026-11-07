@@ -56,7 +56,11 @@ map the gap is reported beside that map's own interpolation offset.</p>
 0.7343 m minor radius, with the boundary flux 9.29e-7 Wb inside a 0.03587 Wb
 span. The axis and X-point are about fifty times inside their budget and the
 boundary flux is 3.9 times inside its own — the row's closest approach, and the
-clause that would give first on a coarser bank. The limited row
+clause that would give first on a coarser bank. A repeat of the diverted row
+alone at the final revision reproduced this: three updates and
+1.592e-12 Wb fresh residual with every budget clause passing, so the numbers
+are stable to about 3e-13 between runs rather than to four significant figures.
+The limited row
 needs seven updates and terminates at 9.64e-11, which is inside the 1e-10 limit
 by four percent — a pass this measurement would not repeat confidently under a
 different compile of the same program, and the row is named here as marginal for
@@ -126,7 +130,8 @@ nine times the measured 550-cell wall. Both rows are reported as unrun rather
 than dropped, and the 550-cell pair is the part of §4 clause 2 this node
 answers.</p>
 
-<p>Receipts: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.log</code> (fast route, three updates),
+<p>Receipts: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/gate-diverted-550.log</code> (the diverted row at the final revision, clean exit),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.log</code> (fast route, three updates),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/retry/limited-550.log</code> (limited fast route, seven updates),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.npz</code> (the archived state the panel is drawn
 from), and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/final/</code> (the present arms attempted and their

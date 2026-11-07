@@ -63,7 +63,7 @@ def build_seeds(args):
     path = os.path.join(directory, f"seeds-{args.width}.npz")
     np.savez(
         path,
-        states=np.stack([np.asarray(value[0]) for value in batch.states]),
+        states=np.stack([np.asarray(value) for value in batch.states]),
         seeds=np.asarray(batch.seeds_batch),
         previous=np.asarray(batch.previous_batch),
     )

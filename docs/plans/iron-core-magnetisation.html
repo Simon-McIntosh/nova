@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="20">
-<meta name="plan-modified" content="2026-11-07">
+<meta name="plan-version" content="21">
+<meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
   <main class="plan-doc">
@@ -503,6 +503,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261107T220731416832-review-of-icm-sheet-tidy-4c6e1f3d6531" data-who="reckon-build" data-when="2026-11-07T22:43:01.551Z">
     <div class="r-comment-body"><p>review of run r-20261107T205044504786-icm-sheet-tidy at base b7d927ce / head 4c6e1f3d scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 15, fit 17, reuse 20 (total 104); six non-blocking findings, none blocking; added failures 0, measured from both arms this review ran (base 392 passed EXIT=0, head 416 passed EXIT=0) because the reviewed run recorded no baseline_suite/after_suite.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261107T205044504786-icm-sheet-tidy" data-who="reckon-build" data-when="2026-11-07T22:02:26.243Z">
+    <div class="r-comment-body"><p>icm-sheet-tidy closed all eight closed-form sheet review findings with no measured value changed: the route flag now selects the closed form at every slope by default (quadrature by an explicit option), the flat sheet&#x27;s arsinh remainder calls nova.biot.zeta.zeta (equivalence reproduced at 1.5e-13 to 4.5e-13), _pancake_remainder and its private rule are deleted, complete_kind_traced lives in nova/biot/completeelliptic.py, no redundant local jax imports remain, every fixed rule is lazily built, and the closed field evaluation is jitted at 3.05 ms against 1259.9 ms before (413x); the closed route is guarded by spies that redden when it is replaced by the graded one (negative control 4 failed, 6 passed, exit 1), and the gate is 416 passed, exit 0.</p></div>
 </div>
 </section>
 </main>

@@ -59,7 +59,7 @@ topology and misses its current by that much is a lost plasma, not a slow contra
 the label's, which is the displacement the vertical-force-balance plan already documents.</li>
 </ul>
 
-<p><b>Measured: frame 179.</b> The both-branch probe (job <code>sched/1307430</code>, H200; receipt at
+<p><b>Measured: frames 179 and 44.</b> The both-branch probe (job <code>sched/1307430</code>, H200; receipt at
 <code>probe.json</code>, ingested into <code>convergence-receipt.json</code>'s measured block) re-solves
 each seed twice, once under the shipped policy and once with the mask-stability exits disabled so the
 loop must spend its whole trip budget at the frozen mask. On frame 179 the two arms differ exactly as
@@ -75,6 +75,26 @@ the mechanism requires and the plasma is <i>present</i> in both:</p>
 </tbody>
 </table>
 
+<p><b>Frame 44</b> behaves the same way, and it is the frame whose banked terminal the earlier reading
+called a lost plasma:</p>
+
+<table>
+<thead><tr><th>seed</th><th>arm</th><th>trips</th><th>termination</th><th>terminal residual</th><th>accepted / attempted steps</th><th>mask difference</th><th>axis R, Z [m]</th><th>inside wall</th><th>confined current / target</th><th>achieved topology</th></tr></thead>
+<tbody>
+<tr><td>diverted</td><td>shipped</td><td>2</td><td><code>ACTIVE_SET_SETTLED</code></td><td><code>4.276e+00</code></td><td>24 / 24</td><td>75 &rarr; 0</td><td>1.720, &minus;0.141</td><td>yes</td><td>1.097</td><td><b>limited</b>, against its seed</td></tr>
+<tr><td>diverted</td><td>stability exits disabled</td><td>16</td><td><code>ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED</code></td><td><code>4.276e+00</code></td><td>24 / 24</td><td>75 &rarr; 0 &rarr; 0 &hellip;</td><td>1.720, &minus;0.141</td><td>yes</td><td>1.097</td><td><b>limited</b></td></tr>
+<tr><td>limited</td><td>shipped</td><td>2</td><td><code>ACTIVE_SET_SETTLED</code></td><td><code>1.970e-01</code></td><td>24 / 24</td><td>0 &rarr; 0</td><td>1.773, &minus;0.106</td><td>yes</td><td>0.661</td><td>diverted, against its seed</td></tr>
+<tr><td>limited</td><td>stability exits disabled</td><td>16</td><td><code>ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED</code></td><td><code>1.970e-01</code></td><td>24 / 24</td><td>0 &rarr; 0 &hellip;</td><td>1.773, &minus;0.106</td><td>yes</td><td>0.661</td><td>diverted</td></tr>
+</tbody>
+</table>
+
+<p>Frame 44's diverted seed carries <code>1.097</code>&times; the target current with its axis inside the
+wall, and it still terminates at <code>4.28</code> &mdash; the largest residual of the cohort &mdash; while
+achieving the <i>limited</i> topology. Its limited seed starts with a mask difference of <code>0</code>:
+the partition never changes from the first trip, so there is nothing for a promotion to act on. So on this
+frame too the plasma is present and the miss is not plasma loss; what differs between the two seeds is the
+state they enter, not a path the loop fails to travel.</p>
+
 <p>Two facts follow, and both sharpen the verdict rather than merely confirming it. First, the stall is
 <b>not</b> a slow contraction that the settled exit cuts short: with that exit removed the loop spends all
 16 trips and the residual is bit-identical on every one of them, so continuing buys nothing. Second, it is
@@ -84,18 +104,24 @@ and the confined core carries <code>1.057</code>&times; the target current on th
 attempted inner step is accepted (24 of 24) and the promotion still returns the same residual, so the
 fixed-point map is idempotent at that state.</p>
 
-<p><b>A caveat on the area.</b> The probe also records the plasma-region area the operator reports, and it
-reads <code>0.0 m&sup2;</code> on every arm while the confined-core current read on the same state is
-<code>~1 MA</code>. The two are computed from different structures, so this fragment reports the area as
-measured and does not use it as evidence either way; the current ratio and the axis containment are the
-presence measures the verdict rests on. Whether the empty plasma mask is a definition artefact or a real
-feature of the stalled state is a question the fix node should answer, and it is named in the
-recommended fix below.</p>
+<p><b>The area, corrected.</b> The probe first reported a closed plasma area of <code>0.0 m&sup2;</code>
+on every arm beside a confined current of about <code>1 MA</code>. That was a defect in the measurement,
+not in the plasma: the area was counted from a mask attribute the domain partition does not carry, and the
+handler that exists so one bad read cannot kill a frame turned the error into an all-false mask. The area
+is now the partition's own CORE label &mdash; the cells the field closes around the axis and connects to
+&mdash; and it is re-derived from the saved grids without re-solving. Re-derived: frame 179 reads
+<code>1.233 m&sup2;</code> diverted and <code>1.833 m&sup2;</code> limited against a label field of
+<code>1.679 m&sup2;</code>; frame 44 reads <code>1.870 m&sup2;</code> diverted and
+<code>1.126 m&sup2;</code> limited against <code>1.248 m&sup2;</code>. The measure carries its controls in
+<code>presence_control.py</code>: the frame's own EFIT label field, a known closed plasma, must read a
+positive area, and the counting arithmetic must reproduce a disc of known area to within twenty percent.
+Both hold. The area now agrees with the current read, and both say the plasma is confined at every one of
+these terminals.</p>
 
-<p><b>Still running.</b> Frames 44, 144, 146 and 137 ran behind 179 in the same job and land after this
-checkpoint; the resume step ingests them from <code>probe.json</code> (written per arm) and revises the
-per-frame table above rather than re-running anything. Until they land, the mechanism is measured on 179
-and stated as the terminal symptom on the others.</p>
+<p><b>Still running.</b> Frames 146 and 137 are measuring now (job <code>sched/1307525</code>, H200, one
+process per frame). Frame 144 refused at axis identification in both branches, before any promotion, which
+is the refusal the banked record also carries and is upstream of the fixed point. Those three are ingested
+by the same merge step that produced this section, so the table grows without anything being re-solved.</p>
 
 <h3>The branch decision on frames 179 and 44</h3>
 

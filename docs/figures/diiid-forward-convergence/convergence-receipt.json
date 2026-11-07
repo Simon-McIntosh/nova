@@ -108,6 +108,39 @@
       },
       "converged": false,
       "frame": 144,
+      "measured": {
+        "branches": {
+          "limited": {
+            "arms": {
+              "continued": {
+                "refusal_message": null,
+                "refusal_type": null,
+                "status": null
+              },
+              "default": {
+                "refusal_message": null,
+                "refusal_type": null,
+                "status": null
+              }
+            },
+            "refusal_message": "no qualified magnetic-axis candidate has a resolved component",
+            "refusal_type": "NoQualifiedAxisError",
+            "requested_class": "limited",
+            "staged": {},
+            "status": "refused"
+          }
+        },
+        "label_axis_rz_m": [
+          1.7594630718231201,
+          0.013277635909616947
+        ],
+        "lattice_shape": [
+          33,
+          33
+        ],
+        "shot": "d3d_shot_001554e054.parquet",
+        "target_current_a": 988842.2265648842
+      },
       "measured_branches": {},
       "pseudo_wall_expansion": 0.02,
       "residual_tolerance": 1e-05,
@@ -916,6 +949,610 @@
       },
       "converged": false,
       "frame": 44,
+      "measured": {
+        "branches": {
+          "diverted": {
+            "arms": {
+              "continued": {
+                "accepted_promotions": 24,
+                "achieved_class": "limited",
+                "active_set_iterations": 16,
+                "attempted_promotions": 24,
+                "globalisation_factors": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "mask_history": [
+                  75,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "presence": {
+                  "axis_inside_wall": true,
+                  "axis_rz_m": [
+                    1.7197394886941786,
+                    -0.1411962142970118
+                  ],
+                  "confined_current_a": 1297781.9799366817,
+                  "confined_current_error": null,
+                  "confined_to_target_ratio": 1.0972404357173007,
+                  "lattice_node_count": 1089,
+                  "plasma_area_m2": 0.0,
+                  "target_current_a": 1182769.0064013004
+                },
+                "residual_history": [
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873,
+                  4.275695785485873
+                ],
+                "status": "solved",
+                "terminal": {
+                  "class": "contraction stall",
+                  "evidence": {
+                    "first_residual": 4.275695785485873,
+                    "note": "a flat tail is a plateau, not a period-2 cycle: the two alternating levels a cycle requires do not exist here",
+                    "promotions": 16,
+                    "residual_repeats_exactly": true,
+                    "terminal_residual": 4.275695785485873
+                  }
+                },
+                "terminal_residual": 4.275695785485873,
+                "termination_reason": 8,
+                "topology_matches_request": false,
+                "wall_contact": {
+                  "min_distance_m": null,
+                  "nodes_within_1cm": 0
+                },
+                "wall_seconds": 620.3693244215101,
+                "x_point_inside_wall": true,
+                "x_point_rz_m": [
+                  1.5752974999992693,
+                  -1.1513129555353323
+                ]
+              },
+              "default": {
+                "accepted_promotions": 24,
+                "achieved_class": "limited",
+                "active_set_iterations": 2,
+                "attempted_promotions": 24,
+                "globalisation_factors": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "mask_history": [
+                  75,
+                  0,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1
+                ],
+                "presence": {
+                  "axis_inside_wall": true,
+                  "axis_rz_m": [
+                    1.7197394886941786,
+                    -0.1411962142970118
+                  ],
+                  "confined_current_a": 1297781.9799366817,
+                  "confined_current_error": null,
+                  "confined_to_target_ratio": 1.0972404357173007,
+                  "lattice_node_count": 1089,
+                  "plasma_area_m2": 0.0,
+                  "target_current_a": 1182769.0064013004
+                },
+                "residual_history": [
+                  4.275695785485873,
+                  4.275695785485873,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "status": "solved",
+                "terminal": {
+                  "class": "contraction stall",
+                  "evidence": {
+                    "first_residual": 4.275695785485873,
+                    "note": "a flat tail is a plateau, not a period-2 cycle: the two alternating levels a cycle requires do not exist here",
+                    "promotions": 2,
+                    "residual_repeats_exactly": true,
+                    "terminal_residual": 4.275695785485873
+                  }
+                },
+                "terminal_residual": 4.275695785485873,
+                "termination_reason": 10,
+                "topology_matches_request": false,
+                "wall_contact": {
+                  "min_distance_m": null,
+                  "nodes_within_1cm": 0
+                },
+                "wall_seconds": 607.4532390534878,
+                "x_point_inside_wall": true,
+                "x_point_rz_m": [
+                  1.5752974999992693,
+                  -1.1513129555353323
+                ]
+              }
+            },
+            "refusal_message": null,
+            "refusal_type": null,
+            "requested_class": "diverted",
+            "staged": {
+              "1": {
+                "accepted_promotions": 24,
+                "achieved_class": "limited",
+                "active_set_iterations": 1,
+                "attempted_promotions": 24,
+                "globalisation_factors": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "mask_history": [
+                  75
+                ],
+                "presence": {
+                  "axis_inside_wall": true,
+                  "axis_rz_m": [
+                    1.7197394886941786,
+                    -0.1411962142970118
+                  ],
+                  "confined_current_a": 1297781.9799366817,
+                  "confined_current_error": null,
+                  "confined_to_target_ratio": 1.0972404357173007,
+                  "lattice_node_count": 1089,
+                  "plasma_area_m2": 0.0,
+                  "target_current_a": 1182769.0064013004
+                },
+                "residual_history": [
+                  4.275695785485873
+                ],
+                "status": "solved",
+                "terminal": {
+                  "class": "contraction stall",
+                  "evidence": {
+                    "first_residual": 4.275695785485873,
+                    "note": "a flat tail is a plateau, not a period-2 cycle: the two alternating levels a cycle requires do not exist here",
+                    "promotions": 1,
+                    "residual_repeats_exactly": false,
+                    "terminal_residual": 4.275695785485873
+                  }
+                },
+                "terminal_residual": 4.275695785485873,
+                "termination_reason": 8,
+                "topology_matches_request": false,
+                "wall_contact": {
+                  "min_distance_m": null,
+                  "nodes_within_1cm": 0
+                },
+                "wall_seconds": 607.9153664037585,
+                "x_point_inside_wall": true,
+                "x_point_rz_m": [
+                  1.5752974999992693,
+                  -1.1513129555353323
+                ]
+              }
+            },
+            "status": "solved"
+          },
+          "limited": {
+            "arms": {
+              "continued": {
+                "accepted_promotions": 24,
+                "achieved_class": "diverted",
+                "active_set_iterations": 16,
+                "attempted_promotions": 24,
+                "globalisation_factors": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "mask_history": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "presence": {
+                  "axis_inside_wall": true,
+                  "axis_rz_m": [
+                    1.7725540046909127,
+                    -0.10611579806768207
+                  ],
+                  "confined_current_a": 781948.1908616415,
+                  "confined_current_error": null,
+                  "confined_to_target_ratio": 0.6611165719000377,
+                  "lattice_node_count": 1089,
+                  "plasma_area_m2": 0.0,
+                  "target_current_a": 1182769.0064013004
+                },
+                "residual_history": [
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  0.19700278756964593
+                ],
+                "status": "solved",
+                "terminal": {
+                  "class": "contraction stall",
+                  "evidence": {
+                    "first_residual": 0.19700278756964593,
+                    "note": "a flat tail is a plateau, not a period-2 cycle: the two alternating levels a cycle requires do not exist here",
+                    "promotions": 16,
+                    "residual_repeats_exactly": true,
+                    "terminal_residual": 0.19700278756964593
+                  }
+                },
+                "terminal_residual": 0.19700278756964593,
+                "termination_reason": 8,
+                "topology_matches_request": false,
+                "wall_contact": {
+                  "min_distance_m": null,
+                  "nodes_within_1cm": 0
+                },
+                "wall_seconds": 566.970995163545,
+                "x_point_inside_wall": true,
+                "x_point_rz_m": [
+                  1.1050653234744223,
+                  1.563153605653375
+                ]
+              },
+              "default": {
+                "accepted_promotions": 24,
+                "achieved_class": "diverted",
+                "active_set_iterations": 2,
+                "attempted_promotions": 24,
+                "globalisation_factors": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "mask_history": [
+                  0,
+                  0,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1,
+                  -1
+                ],
+                "presence": {
+                  "axis_inside_wall": true,
+                  "axis_rz_m": [
+                    1.7725540046909127,
+                    -0.10611579806768207
+                  ],
+                  "confined_current_a": 781948.1908616415,
+                  "confined_current_error": null,
+                  "confined_to_target_ratio": 0.6611165719000377,
+                  "lattice_node_count": 1089,
+                  "plasma_area_m2": 0.0,
+                  "target_current_a": 1182769.0064013004
+                },
+                "residual_history": [
+                  0.19700278756964593,
+                  0.19700278756964593,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "status": "solved",
+                "terminal": {
+                  "class": "contraction stall",
+                  "evidence": {
+                    "first_residual": 0.19700278756964593,
+                    "note": "a flat tail is a plateau, not a period-2 cycle: the two alternating levels a cycle requires do not exist here",
+                    "promotions": 2,
+                    "residual_repeats_exactly": true,
+                    "terminal_residual": 0.19700278756964593
+                  }
+                },
+                "terminal_residual": 0.19700278756964593,
+                "termination_reason": 10,
+                "topology_matches_request": false,
+                "wall_contact": {
+                  "min_distance_m": null,
+                  "nodes_within_1cm": 0
+                },
+                "wall_seconds": 544.9304496236145,
+                "x_point_inside_wall": true,
+                "x_point_rz_m": [
+                  1.1050653234744223,
+                  1.563153605653375
+                ]
+              }
+            },
+            "refusal_message": null,
+            "refusal_type": null,
+            "requested_class": "limited",
+            "staged": {
+              "1": {
+                "accepted_promotions": 24,
+                "achieved_class": "diverted",
+                "active_set_iterations": 1,
+                "attempted_promotions": 24,
+                "globalisation_factors": [
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "mask_history": [
+                  0
+                ],
+                "presence": {
+                  "axis_inside_wall": true,
+                  "axis_rz_m": [
+                    1.7725540046909127,
+                    -0.10611579806768207
+                  ],
+                  "confined_current_a": 781948.1908616415,
+                  "confined_current_error": null,
+                  "confined_to_target_ratio": 0.6611165719000377,
+                  "lattice_node_count": 1089,
+                  "plasma_area_m2": 0.0,
+                  "target_current_a": 1182769.0064013004
+                },
+                "residual_history": [
+                  0.19700278756964593
+                ],
+                "status": "solved",
+                "terminal": {
+                  "class": "contraction stall",
+                  "evidence": {
+                    "first_residual": 0.19700278756964593,
+                    "note": "a flat tail is a plateau, not a period-2 cycle: the two alternating levels a cycle requires do not exist here",
+                    "promotions": 1,
+                    "residual_repeats_exactly": false,
+                    "terminal_residual": 0.19700278756964593
+                  }
+                },
+                "terminal_residual": 0.19700278756964593,
+                "termination_reason": 8,
+                "topology_matches_request": false,
+                "wall_contact": {
+                  "min_distance_m": null,
+                  "nodes_within_1cm": 0
+                },
+                "wall_seconds": 578.4868806023151,
+                "x_point_inside_wall": true,
+                "x_point_rz_m": [
+                  1.1050653234744223,
+                  1.563153605653375
+                ]
+              }
+            },
+            "status": "solved"
+          }
+        },
+        "label_axis_rz_m": [
+          1.7179585695266724,
+          -0.050308577716350555
+        ],
+        "lattice_shape": [
+          33,
+          33
+        ],
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "target_current_a": 1182769.0064013004
+      },
       "measured_branches": {},
       "pseudo_wall_expansion": 0.02,
       "residual_tolerance": 1e-05,

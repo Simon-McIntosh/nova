@@ -191,10 +191,15 @@ def main() -> int:
     prepared = _prepare_frame(arguments.frame, arguments.expansion)
     cold = prepared["cold"]
     seed = np.asarray(cold.branches.flux[int(TopologyClass.LIMITED)], dtype=float)
-    radius = np.asarray(prepared["profile"].lattice.radius, dtype=float)
-    height = np.asarray(prepared["profile"].lattice.height, dtype=float)
-    if seed.shape != (radius.size, height.size):
-        seed = seed.reshape(radius.size, height.size)
+    lattice = prepared["profile"].lattice
+    radius = np.asarray(lattice.radius, dtype=float)
+    height = np.asarray(lattice.height, dtype=float)
+    node_count = int(lattice.node_count)
+    if seed.size < node_count:
+        raise SystemExit(f"seed carries {seed.size} nodes, shorter than the {node_count} plasma nodes")
+    # The state vector carries the wall nodes after the plasma lattice, so the
+    # plasma flux is the leading slice rather than the whole array.
+    seed = np.reshape(seed[:node_count], (radius.size, height.size), order="C")
 
     points = _critical_points(seed, radius, height)
     winding = _boundary_winding(seed, radius, height)

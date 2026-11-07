@@ -38,12 +38,39 @@ alone. The same test then fails on its own agreement assertion.</caption>
 </table>
 
 <p>Log: <code>logs/negative-control-matrix-free.log</code>, last line
-<code>EXIT=1</code> with both parameter ids failing. The head arm of the same
-test, run against the unmutated product, did not finish inside the node's
-budget: on the shared CPU node the 550-cell fixture plus one product solve per
-state ran 46 minutes at six cores and was stopped at the run budget without
-reaching its summary line, so this fragment records the negative control and
-not a passing head row.</p>
+<code>EXIT=1</code> with both parameter ids failing.</p>
+
+<h3 id="bank-matrix-free-step-head">The unmutated product path fails the same test</h3>
+
+<p>Run against the unmutated product on a reserved H200, the test fails at both
+states. The product does not reproduce the assembled update, and it does not
+converge: the Krylov solve spends its whole 400-iteration allowance and stops
+with a relative residual of order 1e-2, so the update it returns is not a
+solution of the system at all. The assembled path reaches the same system in
+40 iterations, which is one restart cycle.</p>
+
+<table id="bank-matrix-free-step-head-table">
+<caption>The same test at the head revision with no mutation, one H200
+allocation, five minutes forty-eight seconds for both states. The condition
+estimate is that of the preconditioned operator; the residual is the true
+preconditioned relative residual the stopping rule reads.</caption>
+<thead><tr><th>state</th><th>relative update difference</th><th>assembled iterations</th><th>product iterations</th><th>condition estimate</th><th>relative residual</th></tr></thead>
+<tbody>
+<tr><td>trial</td><td>3.68</td><td>40</td><td>400 (allowance)</td><td>1.04e6</td><td>1.06e-2</td></tr>
+<tr><td>converged</td><td>8.55</td><td>40</td><td>400 (allowance)</td><td>1.01e6</td><td>3.67e-2</td></tr>
+</tbody>
+</table>
+
+<p>The light two-cell case in the default lane passes at 3.4e-16 relative with
+six iterations on both paths, so the operator, the cell blocks and the product
+are wired correctly and the defect appears only at the size and conditioning of
+the real state. The difference between the two paths is the equilibration: the
+assembled path balances by three rounds of row and column norms, and the
+product path uses the physical moment scales alone because those norms need the
+matrix entries the product exists to avoid. The measured condition estimate of
+order 1e6 on the preconditioned operator is consistent with that difference
+being the cause, but this record does not separate it from a defect in the
+cell-block preconditioner at scale: no run in this node does.</p>
 
 <h3 id="bank-matrix-free-step-suites">The five bank suite files, base against head</h3>
 
@@ -75,23 +102,47 @@ have no saddle or X-point to mistake for the axis; the skip in
 <code>test_bank_step_booking_batch.py</code> is the paired device-timing case
 that the H200 lane owns.</p>
 
-<h3 id="bank-matrix-free-step-timing">Device timing: not measured</h3>
+<h3 id="bank-matrix-free-step-timing">The same failure at sixteen slices, and its cost</h3>
 
-<p>Two H200 allocations were taken for the base-against-head timing and neither
-produced a table. The first ran with a prototype loader that sliced the saved
-lane states on the wrong axis, so every mode raised before timing; it was
-cancelled by id once the traceback was read. The second was launched with the
-loader corrected and had reached only the shared seed build when the node's
-budget expired. The driver that would produce the table is
-<code>scripts/prototypes/bank_matrix_free_step/device.sh</code>: it builds the
-seed arrays once at the base revision, loads them in every arm, gives each
-revision its own compilation cache, and times only repetitions after a warm
-call. Its numbers, and the wall-per-slice figure against width, are outstanding
-work for this section.</p>
+<p>The width is not what breaks it. On the same reserved H200, at sixteen lanes,
+the assembled update converges on every lane in 40 iterations and 49.6 ms,
+while the product update spends the 400-iteration allowance on every lane and
+takes 44.4 s — 895 times the assembled wall for an answer that is not a
+solution.</p>
 
-<p id="bank-matrix-free-step-verdict">Verdict: the product path is implemented,
-committed and pinned by a negative control that fails as declared. The
-done-when's device table, its iteration-count evidence for the chosen
-preconditioner and the paired base-against-head suites are not measured, so the
-section's measure is unmet at this record.</p>
+<table id="bank-matrix-free-step-width-table">
+<caption>One batched update at sixteen lanes on a reserved H200, both arms from
+the same saved seed arrays, timed after a warm call. The seeded states are the
+prototype's diverted bank batch, not the 550-cell certificate state.</caption>
+<thead><tr><th>path</th><th>update wall [ms]</th><th>per-lane wall [ms]</th><th>GMRES iterations</th></tr></thead>
+<tbody>
+<tr><td>assembled</td><td>49.6</td><td>3.10</td><td>40 on every lane</td></tr>
+<tr><td>matrix-free</td><td>44400</td><td>2770</td><td>400 on every lane, allowance exhausted</td></tr>
+</tbody>
+</table>
+
+<p>The assembled whole solve at the same width is 300.7 ms, 18.79 ms per slice,
+over four reads and four updates. The paired table the done-when asks for —
+sixteen, sixty-four and one hundred twenty-eight slices, base against head —
+could not be produced inside this record: the product arm alone costs 44 s per
+width, so the arm that was to be compared never finished. The wall-per-slice
+figure against width is therefore not drawn, because one width of an arm that
+does not converge is not a comparison. The driver that would produce both is
+<code>scripts/prototypes/bank_matrix_free_step/device.sh</code>, which builds
+the seed arrays once at the base revision and gives each revision its own
+compilation cache; the plotting script beside it reads its
+<code>RESULT</code> lines.</p>
+
+<p id="bank-matrix-free-step-verdict">Verdict: the product path is implemented
+and committed, the negative control fails as declared, and the paired suites
+show no added failure. The path is not usable at any real width: on a reserved
+H200 its Krylov solve exhausts a 400-iteration allowance on every lane, at a
+1e-2 relative residual, so it returns no solution and costs 895 times the
+assembled wall at sixteen slices to do it. The done-when asks for GMRES within
+60 iterations; the measurement is 400 without convergence, at sixteen lanes and
+at the 550-cell states alike. The section's measure is unmet at this record. The
+candidate cause — a preconditioned operator conditioned at 1e6 because the
+product path carries only the physical moment scales, where the assembled path
+balances by row and column norms — is stated as a hypothesis this record does
+not test.</p>
 </section>

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="245">
+<meta name="plan-version" content="247">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -830,6 +830,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T225042811649-bank-limited-contact" data-who="reckon-build" data-when="2026-11-07T23:06:26Z">
     <div class="r-comment-body"><p>bank-limited-contact — [evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html#bank-limited-contact-result) locates the analytic wall maximum at (7.801395789307387 m, 0), exactly designed_contact, with flux 2.2322358387255243e-14 Wb; the saved oracle used a vertex 49.15504379575635 mWb lower. The 550/2000-cell route points are 8.34449 mm/24.3289 micrometres from that maximum. The CPU gate passes in 15 s; [wall-flux figure](/nova/figures/sub-millisecond-forward-path/bank-limited-contact/wall-flux.svg) is rendered and inspected.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T195900261697-bank-drive-continuation" data-who="reckon-build" data-when="2026-11-07T22:57:13Z">
+    <div class="r-comment-body"><p>sub-millisecond-forward-path section 3 — nova/equilibrium/drive_continuation.py advances a drive change in adaptive warm-started solve_batch sub-steps (initial relative step 1e-3 from the warm-start record, doubling inside a six-update budget and halving after a miss), certifying the state at the target drive with the unchanged terminal fresh read at 1e-10; tests/test_bank_drive_continuation.py shows a direct solve missing its budget where continuation certifies, the rule growing and shrinking, and the certificate being a fresh read at the target drive; three CPU tests pass and paired suites add no failure, with the fragment at docs/evidence/fragments/sub-millisecond-forward-path/bank-drive-continuation.html</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T230636452975-review-of-bank-drive-continuation-b818dab4d60f" data-who="reckon-build" data-when="2026-11-07T23:40:49.731Z">
+    <div class="r-comment-body"><p>review of bank-drive-continuation at b818dab4d: goal_fidelity 17, evidence 11, scope_discipline 20, durability 14, fit 18, reuse 20 (total 100), four non-blocking findings, added_failure_count 0</p></div>
 </div>
 </section>
 </main>

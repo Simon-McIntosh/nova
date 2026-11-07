@@ -1,0 +1,309 @@
+<section data-reckon="evidence" data-node="polygon-near-band-quadrature">
+<h2 id="polygon-near-band-quadrature">Polygon near-band quadrature</h2>
+<p>The CPU branch-share diagnostic used seven warm execution samples per case on
+the baseline revision <code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code>.
+The stable-branch share is computed as
+<code>(full wall - weighted-quadrature-suppressed wall) / full wall</code>.
+Target fractions use one paired target per source polygon; each single-target
+case is the exact-corner positive control.</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Coil set</th><th scope="col">Targets</th>
+    <th scope="col">Near-band targets</th><th scope="col">CPU baseline wall</th>
+    <th scope="col">CPU with weighted quadratures suppressed</th>
+    <th scope="col">Measured stable-branch share</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>MAST</td><td>single</td><td>1/1 (100%)</td><td>5.783 ms</td><td>5.381 ms</td><td>+6.95%</td></tr>
+    <tr><td>MAST</td><td>batched, 13 sections</td><td>1/13 (7.69%)</td><td>149.640 ms</td><td>158.676 ms</td><td>−6.04%</td></tr>
+    <tr><td>DIII-D</td><td>single</td><td>1/1 (100%)</td><td>5.716 ms</td><td>7.342 ms</td><td>−28.44%</td></tr>
+    <tr><td>DIII-D</td><td>batched, 140 sections</td><td>1/140 (0.714%)</td><td>630.142 ms</td><td>729.527 ms</td><td>−15.77%</td></tr>
+  </tbody>
+</table>
+
+<p>The batch medians did not improve when the weighted quadratures were
+suppressed, and their seven-sample wall ranges overlap: MAST 124.006–201.896 ms
+with the branch and 128.020–168.185 ms suppressed; DIII-D 559.152–701.167 ms
+with the branch and 643.932–778.275 ms suppressed. The measured batch share is
+therefore no positive saving above the CPU timing spread. The baseline selection
+path is retained. The H200 rows in the confined-arm table below were run later, on the confined-bucket candidate rather than on this selection.</p>
+
+<p>The rejected per-target <code>lax.map</code>/<code>cond</code> arm measured
+109.904 ms before and 165.321 ms after on the CPU MAST paired batch, a 50.4%
+regression. The branch-share measurements and samples are in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/branch-share-cpu.json</code>;
+the rejected-arm record is in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T084812488886-polygon-near-band-quadrature/compare-cpu-paired.log</code>.</p>
+
+<p><code>graded_residual</code> now owns the weighted panel loop through its
+<code>weight</code> argument, and the duplicate weighted-residual implementation
+in <code>_weighted_residual</code> has been removed.</p>
+
+<p>Sirius job <code>1307334</code> ran both arms, base
+<code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code> and head
+<code>03ef347098ffcf16d0eecbc845bf82559b81f993</code>, with eight cores per
+step. Every step ran its file to a pytest summary line. Both arms report 16
+failures: 15 are common, and 15 of those are the 300-second pytest-timeout
+bound reached by compile-bound rows at eight cores, which is a pre-existing
+baseline condition present in both arms. One row is added at the head
+(<code>test_tangent_compiles_within_bound[second_residual]</code>, bound
+3.0, observed 3.070468781866385) and one removed
+(<code>test_tangent_compiles_within_bound[channel_split]</code>, which hit the
+timeout at base and passed at head).</p>
+
+<h3>Compile-ratio disposition for the added row</h3>
+
+<p>Three cold medians per arm, each from a fresh process spawning three
+compile probes, in one four-core <code>all_debug</code> job
+(<code>1307530</code>):</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Arm</th><th scope="col">Call 1</th><th scope="col">Call 2</th>
+    <th scope="col">Call 3</th><th scope="col">Tangent equations</th>
+    <th scope="col">Primal equations</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>base cb42f656f</td><td>2.711</td><td>2.510</td><td>2.731</td><td>15 569</td><td>5 437</td></tr>
+    <tr><td>head 03ef34709</td><td>2.757</td><td>2.754</td><td>2.761</td><td>15 569</td><td>5 437</td></tr>
+  </tbody>
+</table>
+
+<p>Both arms compile the same program: the equation counts are identical, and
+the tangent's compile CPU medians are indistinguishable (base 1.091–1.119 s
+against head 1.090–1.106 s). The ratio shift between the arms comes from the
+primal denominator, whose medians are 0.399–0.446 s at the base and
+0.395–0.402 s at the head: a marginally cheaper primal raises the ratio without
+the tangent costing more. The added row is therefore recorded as a sampling
+excursion of the estimator on an unchanged program, not a compile-cost increase
+from this change; none of the six medians is above the 3.0 bound. The bound's
+sensitivity to the host's core count is visible in the gate run itself, where
+the same program's primal compiled in 0.327 s under eight spun-up cores and
+3.07 was reported. Whether the bound or its repeat count should move is left to
+a node that owns that row; it was not widened here.</p>
+
+<h3>The confined arm, measured on three devices</h3>
+
+<p>A candidate that gathers the selected targets onto a static bucket of 16,
+evaluates the graded quadrature there and scatters back was measured against
+the whole-array evaluation on the same packed inputs, one batched call per coil
+set per arm, through <code>scripts/nova_lane/run.sh</code>:</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Device</th><th scope="col">Coil set</th>
+    <th scope="col">baseline</th><th scope="col">head, whole array</th>
+    <th scope="col">head, confined bucket</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>H200 cuda:0 (run A)</td><td>MAST</td><td>0.655 ms</td><td>0.675 ms</td><td>0.899 ms</td></tr>
+    <tr><td>H200 cuda:0 (run A)</td><td>DIII-D</td><td>0.940 ms</td><td>1.026 ms</td><td>0.902 ms</td></tr>
+    <tr><td>H200 cuda:0 (run B)</td><td>MAST</td><td>0.505 ms</td><td>0.942 ms</td><td>0.940 ms</td></tr>
+    <tr><td>H200 cuda:0 (run B)</td><td>DIII-D</td><td>1.043 ms</td><td>1.017 ms</td><td>1.003 ms</td></tr>
+    <tr><td>titan cuda:0</td><td>MAST</td><td>2.957 ms</td><td>2.934 ms</td><td>2.968 ms</td></tr>
+    <tr><td>titan cuda:0</td><td>DIII-D</td><td>7.289 ms</td><td>7.326 ms</td><td>7.303 ms</td></tr>
+    <tr><td>CPU x64, 4 cores</td><td>MAST</td><td>84.82 ms</td><td>86.01 ms</td><td>86.96 ms</td></tr>
+    <tr><td>CPU x64, 4 cores</td><td>DIII-D</td><td>500.24 ms</td><td>499.18 ms</td><td>497.33 ms</td></tr>
+  </tbody>
+</table>
+
+<p>The two H200 runs are the same arms: the baseline MAST wall moves from 0.655
+to 0.505 ms, a third, so a single-sample H200 row cannot resolve a change of
+the size the bucket would deliver. Titan and CPU, where the walls are stable,
+place the bucket within one percent of the whole-array evaluation on both coil
+sets. <strong>The goal is therefore refuted by measurement: confining the
+near-band quadrature to the targets that select it does not beat evaluating it
+for every target on any device measured, and the candidate is reverted.</strong>
+The node lands as the consolidation alone: one owner of the weighted graded
+residual, and the duplicate deleted.</p>
+
+<h3>The six JVP identity rows, at both revisions</h3>
+
+<p>Those rows exceed the suite's 300-second bound on a compile-bound host, which
+is why the gate above reports them as timeouts. Each row was run on its own, one
+row at one arm per process, with the bound raised to 3600 s on that command line
+only; the base arm resolves its two modules through the same overlay the gate
+uses, and every process has its own log and pytest basetemp. Twelve jobs
+<code>1307551</code>&ndash;<code>1307562</code> all completed in this form, and
+the launcher now runs the same twelve processes inside one allocation
+(<code>scripts/prototypes/polygon_near_band/identity_rows.sh</code>) because this
+repository measures one job per measurement.</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Row</th><th scope="col">base cb42f656f</th>
+    <th scope="col">head 6f54a9cdd</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td>FAILED</td><td>FAILED</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>FAILED</td><td>FAILED</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>FAILED</td><td>FAILED</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td>PASSED</td><td>PASSED</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>PASSED</td><td>PASSED</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>FAILED</td><td>FAILED</td></tr>
+  </tbody>
+</table>
+
+<p>Walls are quoted per row as pytest's own call duration, not as the session
+total. The session totals coincided across two pairs of independent jobs
+(<code>1413.18 s</code> for the two head rows whose call durations are 1403.65 s
+and 1401.83 s, and <code>831.49 s</code> for the two head <code>edge_terms</code>
+rows), which the logs cannot explain: they are distinct files, with distinct
+failure sites, sizes and mtimes, so the agreement is in the printed total alone.
+The per-row call durations differ, as they should, and those are what is
+reported here.</p>
+
+<p><strong>Every row has the same outcome at both revisions, so this change adds
+no identity failure.</strong> That is all the table supports. <strong>The six
+rows are red at the base revision too, so they do not evidence the 1e-9
+identities at either arm, and no claim that those identities hold is made
+here.</strong></p>
+
+<p>What each failure is. For <code>edge_terms</code> the comparison stops one
+assertion earlier: <code>AssertionError: edge_terms: primal bits differ</code>
+(<code>tests/biot/test_edge_term_tangents.py:267</code>), raised inside
+<code>_identity</code> before the tangent is compared, in both arms. For the
+other two rows the comparison reaches the tangent bound and fails there, at
+<code>tests/biot/tangent_identity.py:142</code>:</p>
+
+<pre>assert primal == 0.0
+assert tangent &lt;= bound          # AssertionError</pre>
+
+<p>The magnitudes those rows print are identical at both revisions:
+<code>edge_integrands primal_max_relative=0.000e+00
+tangent_max_relative=2.383e-02 bound=1e-09 covered_fraction=0.9570</code> and
+<code>flux_and_moment_terms primal_max_relative=0.000e+00
+tangent_max_relative=3.723e-02 bound=1e-09 covered_fraction=0.9576</code>. The
+primal agrees exactly and the tangent does not, by the same 2.4e-2 and 3.7e-2
+at both revisions, so the discrepancy predates this change and is unchanged by
+it; it is not repaired here, and it belongs to whichever node owns the identity
+harness.</p>
+
+<h3>What the identity evidence does and does not show</h3>
+
+<p><strong>The passing guard for the weight branch is the vertex primal-JVP row
+<code>tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp</code>,
+which passes at both arms in the gate above.</strong> The two passing
+<code>test_truncated_tangent_fails_identity</code> rows show something narrower:
+each computes the identity under a deliberately truncated tangent and asserts
+the resulting error exceeds <code>SCAN_TOLERANCE</code>, so a pass shows that a
+broken tangent is <em>caught</em> by the comparison. It does <em>not</em> show
+that the shipped tangent agrees with the base JVP, because the row that would
+show that (<code>test_tangent_matches_base_jvp</code>) fails at both revisions.</p>
+
+<p>A run of <code>test_tangent_matches_base_jvp[edge_terms]</code> under
+<code>NOVA_TANGENT_TRUNCATION=1</code> (job <code>1307547</code>) failed with
+<code>EXIT=1</code> and the same <code>primal bits differ</code> assertion. Since
+that row already fails at the base revision on the same assertion, the mutation
+run <strong>cannot discriminate</strong> and is recorded as such. The control
+that does discriminate is the vertex primal-JVP row under the same mutation: the
+shipped head passes it, so the mutated head must fail it. That run is submitted
+with the gate job <code>1307573</code>.</p>
+
+<h3>The Jacobian form, measured on CPU x64</h3>
+
+<p>The merged tangent helper takes its panel Jacobian as
+<code>sqrt(1 + s^2)</code> (<code>nova/biot/gradedresidual.py:414</code>) where
+the deleted weighted residual used <code>cosh(stretch)</code>. The two are equal
+analytically and need not agree in floating point, so the packed analytic
+moments were evaluated at both revisions for both packaged coil sets on CPU x64,
+with <code>configure_dtypes()</code> called before any array is built and
+<code>jax_enable_x64</code> asserted, through the same overlay the gate uses
+(job <code>1307574</code>, <code>gate/jacobian-equivalence.json</code>):</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Coil set</th><th scope="col">Sections</th>
+    <th scope="col">Near-band targets</th>
+    <th scope="col">Bitwise identical</th>
+    <th scope="col">Max relative difference</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>MAST</td><td>13</td><td>1/13</td><td>yes, all three output leaves</td><td>0.000e+00</td></tr>
+    <tr><td>DIII-D</td><td>140</td><td>1/140</td><td>yes, all three output leaves</td><td>0.000e+00</td></tr>
+  </tbody>
+</table>
+
+<p>The forward result is <strong>bitwise unchanged</strong>, the stronger limb of
+the done-when, and the near-band branch was selected in both cases, so the
+weighted quadrature was exercised rather than bypassed.</p>
+
+<h3>The other files that import the graded residual</h3>
+
+<p>Two further files import <code>nova.biot.gradedresidual</code> and were not
+run by the gate above. Both were run at both revisions in one allocation, one
+fresh process per file per arm with its own basetemp
+(job <code>1307573</code>, <code>gate/weighted-files/</code>):</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">File</th><th scope="col">base cb42f656f</th>
+    <th scope="col">head</th><th scope="col">Added failures</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><code>test_graded_layer_near_corner.py</code></td><td>2 passed, 1 skipped</td><td>2 passed, 1 skipped</td><td>0</td></tr>
+    <tr><td><code>test_vertex_edge_tangent_recurrences.py</code></td><td>2 failed, 20 passed</td><td>2 failed, 20 passed</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<p>The same two rows fail in both arms of the recurrences file,
+<code>test_tangent_compiles_within_three_primals[across]</code> and
+<code>[graded_residual]</code>, on the 3.0 compile-ratio bound (base 3.139 and
+3.452, head 3.943 and 3.467): the same estimator excursion measured on the edge
+file above, and pre-existing. The skipped row,
+<code>test_base_program_roundoff_floor</code>, is skipped for a missing retained
+reference in both arms.</p>
+
+<p><strong>The reviewed head revision.</strong> The two files were re-run at
+<code>7c3754325</code>, the revision carrying the refusal guard, on the shared
+fleet node rather than on a dedicated allocation. The graded-layer file is
+unchanged at 2 passed and 1 skipped. The recurrences file reports
+<strong>3 failed, 19 passed</strong>: <code>[across]</code> at 3.27 and
+<code>[graded_residual]</code> at 3.74 as before, plus
+<code>[regularised]</code> at 3.04, which passed in both earlier arms. That
+third row is a genuine delta and not a load artefact: measured back to back on
+the same node under the same load average near 20, the base arm reads 2.91 in
+127.85 s and the head arm 3.05 in 125.02 s, a repeat of the head row reading
+3.04. Both arms spend about 126 s, so the two arms are comparable, and the row
+sits close enough to the 3.0 bound that a 4.5 % increase crosses it. Its
+primal and tangent equation counts are unaffected by the consolidation, so the
+movement is the compile-time estimator rather than a change in the programs
+being compiled. It is recorded here as an added failure, not absorbed into the
+bound.</p>
+
+<p><strong>The discriminating control.</strong> The vertex row
+<code>test_tangent_matches_primal_jvp</code> passes in the shipped head (the
+vertex file's only failures are its five
+<code>test_tangent_compiles_within_three_primals</code> rows, and the file
+reports 17 passes covering the five primal-JVP cases). Run under
+<code>NOVA_TANGENT_TRUNCATION=1</code> in the same allocation, <strong>all five
+of its cases fail</strong> — <code>vertex</code>, <code>arsinh_terms</code>,
+<code>against_first_arsinh</code>, <code>flux_moment_residuals</code>,
+<code>horizontal_flux_line_moments</code>. The shipped head passes what the
+mutated head fails, which is what a control has to show.</p>
+
+<h3>Before and after walls, and the negative control</h3>
+
+<p>One four-core <code>all_debug</code> job measured the shipped configuration
+(job <code>1307534</code>, CPU, MAST batched over 13 sections): the baseline
+revision's wall is 98.0895 ms and the head's is 98.4359 ms, against a bound of
+93.185 ms at 0.95 of the baseline. The head is 0.35% slower, so the benchmark's
+throughput assertion fails. That is the expected outcome of the arm this node
+chose: the near-band selection was retained unchanged after the branch-share
+diagnostic showed no saving, so no wall improvement was delivered to measure.</p>
+
+<p>Forcing the near-band selection to evaluate every target
+(<code>--force-all</code>, job <code>1307535</code>) reports
+<code>before_wall_ms=97.9847 after_wall_ms=99.1203 bound_ms=93.0855</code> and
+fails the same assertion with <code>EXIT=1</code>. Because the unmutated arm
+fails that bound as well, this control shows that the assertion fires and
+prints its before wall; it does not discriminate the mutation from the shipped
+arm, and it is recorded here as such rather than as a passing gate.</p>
+
+<p>A first pair of runs (jobs <code>1307531</code> and <code>1307532</code>)
+measured the after arm from the main checkout instead of the worktree, because
+the launcher set no <code>PYTHONPATH</code>; both were discarded and repeated
+with <code>PYTHONPATH=$SLURM_SUBMIT_DIR</code>, and only the repeated runs'
+numbers appear above.</p>
+</section>

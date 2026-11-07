@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-07T21:12:26.946Z",
   "dispatched_at": "2026-11-07T20:46:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking wording in an evidence-only fragment; the table and figure carry the per-class values and the conclusion (no missing Jacobian term) does not depend on the headline range",
+      "recorded_at": "2026-11-07T22:32:58.295339+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",

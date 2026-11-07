@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Conic sheet field by the printed Part II closed form: value exact, derivative still short at the line stations | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-closed-field-summary">Where this stands</h2>
+    <p><code>nova/biot/sheet.py</code> now evaluates the sloped conic sheet's
+    field by differentiating the Part II closed form directly, reusing the
+    reconciled coefficient block the flux route already carries:
+    <code>_closed_bracket</code> forms the azimuthal integral <code>S</code> in
+    complete elliptic integrals, and <code>_closed_gradient</code> takes its two
+    partials, so <code>sheet_field(..., closed=True)</code> costs no azimuthal
+    quadrature beyond the one <code>arsinh</code> remainder the paper itself
+    leaves there.</p>
+    <p>The <strong>value</strong> is exact: the traced closed form reproduces
+    <code>SheetFlux.antiderivative_closed</code> to <code>3.1e-14</code> at every
+    segment end tested. The <strong>derivative</strong> is not, at the start and
+    end stations, so the field misses the section's <code>1e-10</code> floor
+    there and this node is blocked rather than landed.</p>
+
+    <h2 id="icm-closed-field-measure">Measured: relative field error, twelve targets</h2>
+    <p>Segments of length <code>0.1 m</code> centred at <code>r = 1.5 m</code>,
+    a cell width of <code>0.02 m</code>, the section's four standoffs and three
+    stations, against <code>scripts/edge_sheet/reference.py</code>. Worst
+    component error per target, held as a fraction of the larger component:</p>
+    <table>
+      <thead>
+        <tr><th>slope [deg]</th><th>middle 0.01</th><th>middle 0.02</th><th>middle 0.1</th><th>middle 1.0</th><th>worst start</th><th>worst end</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>22.5</td><td>1.07e-10</td><td>1.74e-12</td><td>5.37e-13</td><td>1.45e-12</td><td>7.90e-02</td><td>4.58e-01</td></tr>
+        <tr><td>45.0</td><td>1.58e-10</td><td>3.12e-11</td><td>6.01e-13</td><td>4.32e-14</td><td>5.30e-02</td><td>5.36e-01</td></tr>
+        <tr><td>67.5</td><td>6.48e-10</td><td>7.21e-11</td><td>4.21e-12</td><td>1.42e-13</td><td>2.31e-02</td><td>3.54e-01</td></tr>
+      </tbody>
+    </table>
+    <p>Every <strong>start</strong> and <strong>end</strong> station fails, by
+    <code>8.6e-03</code> to <code>5.4e-01</code>, and the two closest middle
+    targets sit just over the floor at <code>1.1e-10</code> to
+    <code>6.5e-10</code>. Those targets share one property: the target lies on
+    the segment's own supporting line, so <code>r_1 - r</code> is zero (or
+    <code>1e-8</code>) rather than <code>O(1)</code>.</p>
+
+    <h2 id="icm-closed-field-diagnosis">What the defect is, and what it is not</h2>
+    <p>The bracket is <code>S = a_1 b_1 R + mean - arc</code>, with
+    <code>R</code> the complete first- and second-kind block, <code>mean</code>
+    the <code>arsinh</code> remainder the paper leaves to quadrature, and
+    <code>arc</code> the pole-reduced third-kind remainder. Each was split out
+    and differentiated separately at a failing target
+    (<code>r = 2.470073509</code>, <code>gamma = -0.382683432</code>, where
+    <code>r_1 - r = 0</code> exactly):</p>
+    <table>
+      <thead><tr><th>piece</th><th>dS/dgamma, centred difference</th><th>dS/dgamma, autodiff</th></tr></thead>
+      <tbody>
+        <tr><td><code>a_1 b_1 R</code></td><td>-1.07032333</td><td>-1.07032333</td></tr>
+        <tr><td><code>mean</code></td><td>6.22 (h = 1e-3) / 6.20 (h = 1e-5)</td><td>1.99367226</td></tr>
+        <tr><td><code>arc</code></td><td>-5.5913 (h = 1e-3) / -5.5583 (h = 1e-5)</td><td>-5.59269719</td></tr>
+      </tbody>
+    </table>
+    <p>The complete-integral pieces differentiate correctly, and so does the
+    third-kind reduction on both of its branches: the reduced and unreduced
+    splits each match a centred difference of their own value to six digits, and
+    the unreduced derivative agrees with the reduced one where the two overlap.
+    The defect is confined to <code>mean</code>, the <code>arsinh</code>
+    remainder.</p>
+    <p>Two findings narrow it further, and both were measured rather than
+    reasoned about:</p>
+    <ul>
+      <li><strong>The autodiff is internally consistent.</strong> A hand-written
+      partial derivative of that same integrand, carrying
+      <code>d(r_1)/dgamma = -b_1</code> explicitly, reproduces
+      <code>jax.grad</code> to <code>1e-16</code> on both components
+      (<code>0.276963396110442</code> and <code>-0.828903819545025</code>).
+      So the traced algebra is not missing a term; the expression being
+      differentiated is not the function the difference quotients sample.</li>
+      <li><strong>The difference quotients do not converge to it.</strong> At
+      <code>h = 1e-3, 1e-4, 1e-5, 1e-6</code> the quotient reads
+      <code>0.8645, 0.8642, 0.8610, 0.8290</code> — flat to four digits across
+      the first two steps and then moving away, which is the signature of a
+      near-singularity rather than of either side being simply wrong. The
+      nearby rounded constant is <code>0.8641</code>, three times the autodiff
+      value, not a perturbation of it.</li>
+    </ul>
+    <p>The singled-out structure is the standoff. <code>gap = r_1 - r</code> is a
+    scalar shared by every azimuthal node, and <code>_closed_residual</code>
+    snaps it to zero inside <code>1e-12 r</code> so the pole kernel cannot read
+    a rounding residue (that snap is what the flux route needs, and the landed
+    flux depends on it). At exactly these targets the snap therefore replaces a
+    whole integrand by a different one, and a finite difference across the
+    threshold samples the change while autodiff, evaluated on the snapped
+    branch, does not. Making the snap value-only — keeping
+    <code>d(gap)/dgamma</code> through a <code>stop_gradient</code> correction —
+    moved the autodiff the wrong way (<code>1.99</code> to <code>0.15</code>),
+    so the snap is not the whole account and that attempt was reverted; the
+    landed code carries the snap exactly as the flux route does.</p>
+
+    <h2 id="icm-closed-field-state">State of the working tree</h2>
+    <p><code>_closed_bracket</code>, <code>_closed_gradient</code>,
+    <code>_sloped_field_closed</code> and <code>closed=</code> on
+    <code>field()</code> and <code>sheet_field()</code> are in place and
+    committed. The complete-kind and third-kind evaluations are traced through
+    <code>jax.custom_jvp</code> wrappers whose tangents come from
+    <code>nova.biot.completeelliptic</code>'s own recurrences — the private
+    <code>_complete_kind_tangent</code> and <code>_complete_pole_tangent</code>
+    are imported for this and nothing else. <code>_divide</code> is
+    <code>numpy.polynomial.polynomial.polydiv</code>, padded back to one
+    remainder coefficient per divisor degree.</p>
+    <p><strong>No closed-form field test was added.</strong> The twelve-target
+    comparison the node needs would fail on six of nine sloped parameter sets,
+    and a suite that lands red on its own new assertion is not a delivery. The
+    existing flux and field tests are unchanged and were not re-run in this
+    attempt; the value route they cover is untouched by the tangent tracing.</p>
+
+    <h2 id="icm-closed-field-next">What the next attempt has</h2>
+    <p>The remaining question is narrow and stated: why a centred difference of
+    <code>_closed_residual</code> in <code>gamma</code> and <code>r</code> reads
+    <code>0.864</code> where its autodiff (and an independent hand derivation,
+    agreeing with it to <code>1e-16</code>) reads <code>0.277</code>. The next
+    step is to evaluate the two at interior points away from the supporting
+    line — where both agree — and walk the standoff towards zero while watching
+    both, so the crossover and its order are measured rather than inferred. That
+    locates whether the residual needs the treatment the user directed:
+    separating its near-singular part into a reduced expression whose derivative
+    is conditioned like its value, the way the pole remainder already is.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,231 @@
+"""Advance a large drive change in adaptive warm-started sub-steps.
+
+A bank solve is seeded from the previous slice's converged state, so the seed
+is only as good as the distance to the new drive. Measured on the diverted
+550-cell certificate, a slice warm-started across a 1e-3 relative amplitude
+step converges in three to six updates, while a 1e-2 step stalls at the solve's
+sixty-update ceiling from a warm seed and from a cold one alike
+(``bank-warm-start``). The stall is not a warm-start defect: the assembled
+Jacobian agrees with central differences of the fresh residual to about 1e-8
+at the stalled state, so the step direction is right and the linear model is
+simply invalid that far from the seed (``bank-jacobian-mismatch``).
+
+The remedy is drive continuation. A large drive change is split into sub-steps,
+each a warm-started :func:`nova.equilibrium.support_read.solve_batch` from the
+previous sub-step's converged state. Nothing inside the solve changes: it is
+called with the same Newton step, the same fresh-residual line search and the
+same terminal certification; only the drive each call is asked for is smaller.
+The driver adapts the sub-step size from the outcome of each call, and it
+certifies the state at the target drive against the unchanged fresh-read
+residual of at most :data:`CERTIFICATION_TOLERANCE`.
+
+Why the initial size is what it is
+---------------------------------
+:data:`INITIAL_RELATIVE_STEP` is 1e-3, the largest relative drive step the
+warm-start record shows every lane converging, at three to six updates against
+a sixty-update ceiling. A smaller initial size costs more sub-steps per decade
+of drive for no extra robustness, and a larger one is the step the record shows
+stalling.
+"""
+
+from typing import Callable, NamedTuple
+
+import jax.numpy as jnp
+
+from nova.equilibrium import support_read
+
+#: Relative drive change of the first sub-step. See the module docstring.
+INITIAL_RELATIVE_STEP = 1e-3
+
+#: Factor applied to the sub-step after a sub-solve converges inside budget.
+GROWTH = 2.0
+
+#: Factor applied to the sub-step after a sub-solve misses its budget.
+SHRINK = 0.5
+
+#: Smallest sub-step the driver will attempt before reporting the change
+#: unconverged. A step below this cannot buy progress the previous one missed.
+MINIMUM_RELATIVE_STEP = 1e-9
+
+#: Updates a sub-solve may take before the sub-step counts as a failure. The
+#: warm-start record's worst converging slice at a 1e-3 step took six updates.
+UPDATE_BUDGET = 6
+
+#: Tolerance an intermediate sub-solve stops at. It only has to leave the next
+#: sub-step a usable seed, which the record shows a residual two orders above
+#: the certification budget already is.
+INTERMEDIATE_TOLERANCE = 1e-6
+
+#: The locked residual clause of the precision budget, applied to the state at
+#: the target drive by the solve's own terminal fresh read.
+CERTIFICATION_TOLERANCE = 1e-10
+
+
+class SubStep(NamedTuple):
+    """One warm-started sub-solve and the drive it was asked for."""
+
+    drive: float
+    change: float
+    sub_step: float
+    tolerance: float
+    updates: int
+    reads: int
+    residual: float
+    converged: bool
+    final: bool
+
+
+class DriveContinuationResult(NamedTuple):
+    """The state reached at the target drive and how it was reached."""
+
+    result: support_read.SolveResult
+    drive: float
+    certified: bool
+    substeps: tuple[SubStep, ...]
+    updates: int
+    reads: int
+    sub_step: float
+    reason: str | None
+
+
+def _batch_count(values) -> int:
+    """Return a batch's update or read count.
+
+    Every lane of one batch read and one batch update pays the whole call, so
+    the batch's cost is the largest per-lane count rather than the sum.
+    """
+    return int(jnp.max(values))
+
+
+def advance_drive(
+    operands,
+    cache,
+    moments,
+    seeds,
+    seeds_previous,
+    convention,
+    policy,
+    profile_at: Callable[[float], object],
+    density_gradient,
+    quadrature,
+    *,
+    start_drive: float,
+    target_drive: float,
+    axis_sign: float = -1.0,
+    initial_relative_step: float = INITIAL_RELATIVE_STEP,
+    growth: float = GROWTH,
+    shrink: float = SHRINK,
+    minimum_relative_step: float = MINIMUM_RELATIVE_STEP,
+    update_budget: int = UPDATE_BUDGET,
+    intermediate_tolerance: float = INTERMEDIATE_TOLERANCE,
+    certification_tolerance: float = CERTIFICATION_TOLERANCE,
+    max_substeps: int = 256,
+    solve_options: dict | None = None,
+) -> DriveContinuationResult:
+    """Reach ``target_drive`` from lanes converged at ``start_drive``.
+
+    ``moments`` and ``seeds_previous`` are the warm start: the converged state
+    and the stationary points its own read returned. ``profile_at`` builds the
+    profile a drive asks for, so the driver never inspects the profile's
+    internals.
+
+    Each sub-step solves at ``drive + change`` with ``tolerance`` set to the
+    intermediate budget, except the sub-step that reaches the target, which is
+    solved at :data:`CERTIFICATION_TOLERANCE` and whose terminal accepted state
+    is therefore certified by the solve's own fresh read. A sub-solve that
+    leaves any lane unconverged, or the batch above ``update_budget`` updates,
+    is rejected: the drive does not advance, the sub-step is halved, and the
+    same drive is retried. A sub-solve inside budget doubles the sub-step.
+
+    ``solve_options`` are passed through to
+    :func:`nova.equilibrium.support_read.solve_batch` unchanged.
+    """
+    options = dict(solve_options or {})
+    span = abs(target_drive - start_drive)
+    if span == 0:
+        raise ValueError("the target drive equals the start drive")
+    scale = abs(start_drive) or span
+    sub_step = initial_relative_step * scale
+    drive = float(start_drive)
+    direction = 1.0 if target_drive > start_drive else -1.0
+    state_moments = moments
+    state_previous = seeds_previous
+    substeps: list[SubStep] = []
+    updates = reads = 0
+    certified = False
+    reason = None
+    result = None
+    while drive != float(target_drive):
+        if len(substeps) >= max_substeps:
+            reason = f"sub-step ceiling reached at drive {drive:.12g}"
+            break
+        remaining = abs(float(target_drive) - drive)
+        attempted = sub_step
+        change = min(attempted, remaining)
+        final = change >= remaining
+        tolerance = certification_tolerance if final else intermediate_tolerance
+        attempt = support_read.solve_batch(
+            operands,
+            cache,
+            state_moments,
+            seeds,
+            state_previous,
+            convention,
+            policy,
+            profile_at(drive + direction * change),
+            density_gradient,
+            quadrature,
+            axis_sign,
+            max_steps=update_budget,
+            tolerance=tolerance,
+            **options,
+        )
+        steps = _batch_count(attempt.steps)
+        batch_reads = _batch_count(attempt.reads)
+        residual = float(jnp.max(attempt.residual))
+        converged = bool(jnp.all(attempt.converged))
+        accepted = converged and residual <= tolerance
+        updates += steps
+        reads += batch_reads
+        substeps.append(
+            SubStep(
+                drive + direction * change,
+                change,
+                attempted,
+                tolerance,
+                steps,
+                batch_reads,
+                residual,
+                converged,
+                final,
+            )
+        )
+        if accepted:
+            result = attempt
+            drive = float(target_drive) if final else drive + direction * change
+            state_moments = attempt.moments
+            state_previous = attempt.support.stationary.position
+            if final:
+                certified = residual <= certification_tolerance
+                break
+            sub_step = min(attempted * growth, scale)
+        else:
+            sub_step *= shrink
+            if sub_step < minimum_relative_step * scale:
+                reason = (
+                    f"sub-step floor reached at drive {drive:.12g} with "
+                    f"residual {residual:.6g}"
+                )
+                break
+    if not certified and reason is None and result is None:
+        reason = f"no sub-step solved at drive {drive:.12g}"
+    return DriveContinuationResult(
+        result,
+        drive,
+        certified,
+        tuple(substeps),
+        updates,
+        reads,
+        sub_step,
+        reason,
+    )

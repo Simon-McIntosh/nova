@@ -217,8 +217,35 @@ def main() -> int:
     index_sum = int(sum(point["morse_index"] for point in points))
     residual = int(round(winding)) - index_sum
 
+    admission = {}
+    operator = getattr(profile, "operator", None)
+    inside_material = getattr(operator, "inside_material", None)
+    if inside_material is not None:
+        material = np.asarray(inside_material, dtype=bool)
+        floor = int(max(np.floor(0.01 * int(material.sum())), 1))
+        admission = {
+            "material_cell_count": int(material.sum()),
+            "material_connected_fraction": 0.01,
+            "connection_floor_cells": floor,
+            "axis_node_inside_material": bool(
+                material[
+                    int(
+                        np.argmin(
+                            np.sum(
+                                (np.c_[np.meshgrid(radius, height, indexing="ij")[0].ravel(),
+                                       np.meshgrid(radius, height, indexing="ij")[1].ravel()]
+                                 - np.asarray(prepared["axis"], dtype=float)) ** 2,
+                                axis=1,
+                            )
+                        )
+                    )
+                ]
+            ),
+        }
+
     record = {
         "frame": arguments.frame,
+        "admission": admission,
         "branch": "limited",
         "grid": {"radius": [float(radius[0]), float(radius[-1]), radius.size],
                  "height": [float(height[0]), float(height[-1]), height.size]},

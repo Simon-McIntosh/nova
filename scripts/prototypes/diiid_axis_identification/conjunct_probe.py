@@ -24,6 +24,7 @@ for extra in (
         sys.path.insert(0, str(extra))
 
 import measure_branches  # noqa: E402
+from nova.equilibrium.topology import TopologyClass  # noqa: E402
 import benchmarks.diiid_forward_gs_match as bench  # noqa: E402
 
 def _float(value) -> float | None:
@@ -106,7 +107,7 @@ def main() -> int:
     psi = np.asarray(prepared["cold"].branches.flux[0])
     status = "read returned"
     try:
-        profile.operator.read(psi, requested_class="limited")
+        profile.operator.read(psi, requested_class=int(TopologyClass.LIMITED))
     except Exception as error:
         status = repr(error)[:400]
     finally:

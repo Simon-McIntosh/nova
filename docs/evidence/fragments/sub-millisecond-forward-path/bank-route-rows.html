@@ -1,9 +1,10 @@
 <section id="bank-route-rows-landing">
 <h2>Fast-route convergence and oracle precision beyond the diverted seed</h2>
-<p><strong>The fast route converges and stays inside the locked precision budget
-on both 550-cell certificate rows; its X-point is 6.80e-6 m from the analytic
-one on the diverted row. The limited row lands at 9.64e-11 of the 1e-10
-residual limit, so it passes with less than one significant figure in hand.</strong></p>
+<p><strong>The fast route converges on both 550-cell certificate rows and, on the
+diverted row, stays inside the locked precision budget with its X-point 6.80e-6 m
+from the analytic one. The limited row converges at 9.64e-11 of the 1e-10
+residual limit — under four percent in hand — and its oracle ratios are not
+measured here, so that half of the row is a shortfall rather than a pass.</strong></p>
 <p>Each row runs the fast route from the certificate seed — the analytic read,
 booked — to a fresh-read residual, then runs the default present route on the
 same certificate row. Geometry is judged against the analytic oracle under the
@@ -32,7 +33,7 @@ map the gap is reported beside that map's own interpolation offset.</p>
 </tr>
 <tr>
 <td>limited, 550 cells</td><td>1743</td><td>7</td><td>9.64e-11 Wb</td>
-<td colspan="3">oracle measurement in flight</td><td>pending</td>
+<td colspan="3">not measured — see below</td><td>shortfall</td>
 <td>no</td><td>0.08986 Wb</td><td>not measurable</td>
 <td>no saddle on a limited row</td>
 </tr>
@@ -60,6 +61,18 @@ needs seven updates and terminates at 9.64e-11, which is inside the 1e-10 limit
 by four percent — a pass this measurement would not repeat confidently under a
 different compile of the same program, and the row is named here as marginal for
 that reason.</p>
+
+<p>The limited row's oracle ratios are missing for a reason that belongs to the
+harness rather than to the route. Its first archive read a second stationary
+row a limited case does not have, so the process raised at the oracle after the
+seven updates and before it archived the state that the ratios and the panel are
+drawn from; that defect is repaired in <code>row_oracle</code>, which judges a
+limited row against its limiter contact. Re-running the repaired row needs the
+limited operator bank rebuilt in the new process: 328.8 s for 1743 nodes on a
+contended H200, and 436 s for its first batched launch on the P100 fallback,
+where the remaining 1739 nodes would have taken hours. The row is therefore
+tabled with its convergence measured and its precision unmeasured, and it is the
+one piece of §4 clause 2 this node leaves open.</p>
 
 <p>The present route does not converge on either row. Its own status is cited
 from the committed certificate receipts at the base revision

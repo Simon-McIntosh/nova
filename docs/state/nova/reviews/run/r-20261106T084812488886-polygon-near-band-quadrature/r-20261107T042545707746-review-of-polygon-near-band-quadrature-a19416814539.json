@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "prototype runner header; the measurement it cites comes from the two fresh-process logs the fragment names",
       "recorded_at": "2026-11-07T04:41:02.130224+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "prototype runner; the cited measurement is the two fresh-process logs, not this script's single-process form",
+      "recorded_at": "2026-11-07T04:41:11.109621+00:00"
     }
   },
   "findings": [

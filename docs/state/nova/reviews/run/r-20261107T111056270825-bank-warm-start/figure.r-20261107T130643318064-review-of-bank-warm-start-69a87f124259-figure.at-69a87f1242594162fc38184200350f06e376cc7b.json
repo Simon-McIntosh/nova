@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_note": "The caption does more than restate the figure: it names the sixteen-lane batch, the two fresh H200 processes, the ceiling behind the coarse plateau and the logarithmic ordinate.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T13:08:36Z",
+  "figures_reviewed": [
+    "docs/figures/sub-millisecond-forward-path/bank-warm-start/reads-per-slice.svg"
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The figure is published with the evidence fragment's caption, which states the ceiling explicitly ('runs to the solve's 60-update ceiling and 481 reads, at which point the seed read's residual is not reduced at all'), so the plateau is not read alone; a second convergence cue in the figure would duplicate a distinction the caption already carries, and this review is read-only."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_warm_start/plot.py",
+      "id": "fb2579d652b",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The 1e-2 series is plotted from reads_max with no convergence marker, so its ~481-read plateau presents six slices abandoned at the 60-update ceiling as a measured per-slice read cost. Slice 3 of that step (22 reads) is the one coarse slice that converged, and nothing in the picture distinguishes it from the six that did not: a reader without the caption sees reads fall from 480 to 22 and back, not a solve that stopped."
+    }
+  ],
+  "images_read": [
+    "image-0.png"
+  ],
+  "project": "nova",
+  "read_only": true,
+  "review_run_id": "r-20261107T130643318064-review-of-bank-warm-start-69a87f124259-figure",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "69a87f1242594162fc38184200350f06e376cc7b",
+  "reviewed_run_id": "r-20261107T111056270825-bank-warm-start",
+  "reviewer": "review-of-bank-warm-start-69a87f124259-figure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass \u2014 the axis labels, tick labels and legend entries all render near-black on white and no text sits on a coloured fill or on a plotted line.",
+    "data_ink": "pass \u2014 six polylines and their markers are the only ink inside the axes; no fills, confidence bands or background shading compete with the data.",
+    "decoration": "pass \u2014 the top and right spines are absent, there are no gridlines, no gradient and no background fill; the frameless top legend is the only element that is not data or axis furniture.",
+    "label_collision": "pass \u2014 no label is clipped and none overlaps another or the data: every tick label and both axis titles lie fully inside the 1400x720 canvas, and the legend sits above the axes clear of the plotted series.",
+    "legibility": "pass \u2014 three series are separable at a glance on the log ordinate: the blue flat-at-3 line lies along the bottom, the orange 4->12 rise crosses the 10 tick at slice 6, and the purple series reads as two ~480 plateaus either side of its collapse to 22 at slice 3.",
+    "table_form": "pass \u2014 the point of the evidence is the shape of reads across slice index (the slice-3 dip, the slice-6 rise, the coarse plateau), which reads faster from three lines than from the 21-row per-slice table placed beside it."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T13:17:29.489028+00:00",
+  "total": null
+}

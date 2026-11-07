@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest declares no baseline_suite and no after_suite (manifest.md, both empty), so there are no suite arms to difference: it is a measurement node that changes no product code and no test file. Its gates are warm-start-gate.log (the H200 allocation, EXIT=0 with all three roles at exit 0) and warm-start-repair-gate.log (revision 69a87f124, EXIT=0 with two red negative-control arms reproduced by me).",
+  "assertion_analysis": [
+    "scripts/prototypes/bank_warm_start/verify_receipts.py:53 fails if the fragment does not state '5 of the 7 coarse-step slices'; the regression it guards is the parent's 'four of seven' wording, and it does redden on that parent text \u2014 I reproduced exit 1 with three failures.",
+    "scripts/prototypes/bank_warm_start/verify_receipts.py:58 fails if the fragment reverts to '21 converged warm slices', which is the exact sentence 69a87f124 removed; it is a substring guard on the old wording rather than on the value, so a different phrasing of the question those two counts answer would not be caught.",
+    "scripts/prototypes/bank_warm_start/verify_receipts.py:60-63 independently checks the 15-of-21 phrasing against a recount of warm-start-report.json, so this assertion's two sides do not move together.",
+    "scripts/prototypes/bank_warm_start/verify_receipts.py:70 is a substring presence test on plot.py's text; it fails only if the identifier disappears entirely, so removing the trace_axes(axes, ink) call while leaving the import would keep it green.",
+    "No assertion in the diff compares a value against the same variable the run supplied: both count checks derive their left side from the report and their right side from the fragment file. The fragment's per-slice residual list at html:69 (2.24, 1.80, 2.42 pending, 1.73, 3.46, 5.20) and its named slice ids have no assertion at all."
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T13:19:33.676Z",
+  "dispatched_at": "2026-11-07T13:06:30Z",
+  "figure_reviewed": "docs/figures/sub-millisecond-forward-path/bank-warm-start/reads-per-slice.svg rendered to PNG at 1960x1008 and inspected: three separable series, no gridlines or fills, top and right spines absent, frameless legend above the axes, no clipped or overlapping label.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_warm_start/verify_receipts.py",
+      "line": "48",
+      "severity": "non-blocking",
+      "text": "non-blocking: counts() builds the exact stalled slice list at :32 (it returns [1, 4, 5, 6, 7]) and main() immediately reduces it to len() at :48, so the fragment's identity claim 'slices 1, 4, 5, 6 and 7' is never compared with the receipt; a fragment that named the wrong five slices while still saying 'five of the seven' would pass the gate. The same paragraph's terminal residuals (2.24, 1.80, 0.242, 1.73, 3.46, 5.20) are likewise unguarded."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_start/verify_receipts.py",
+      "line": "70",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reuse arm is the bare test 'trace_axes' in args.source.read_text(); it asserts the identifier appears anywhere in plot.py, so a regression that deletes the trace_axes(axes, ink) call at plot.py:37 and leaves the import at plot.py:12 still passes, even though the figure would then lose the house style it is checked for."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_start/verify_receipts.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: counts() reads only report['arms']['runner1']['table'], so the fragment's counts are checked against one of the two fresh processes the done_when requires; a runner2 that disagrees would not be noticed. In this receipt the two arms agree exactly on reads, updates and convergence and within 0.4% on wall, so the recorded numbers are sound, but the guard does not establish that."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_start/verify_receipts.py",
+      "line": "51",
+      "severity": "non-blocking",
+      "text": "non-blocking: WORDS maps only 0..9 content, and stalled_forms is built eagerly at :50-52, so a receipt reporting no stall (or more than nine) raises KeyError before any failure is printed \u2014 the gate dies with a traceback exactly where it should report the disagreement, which it exists to describe. It still exits nonzero, so the drift would not ship silently."
+    }
+  ],
+  "head_log_revision": "69a87f1242594162fc38184200350f06e376cc7b",
+  "item_verdicts": {
+    "diff": "Read commit by commit against 06da3e1c5: 0d96c5a5c replaces the local zero gradient with scripts/prototypes/bank_solve_profile/fixture.py:42 (also zeros, so no numerical change), replaces the duplicated _cold with the existing solve at measure.py:63, and replaces plot.py's restated rcParams with nova.media.ink.trace_axes at plot.py:12; 69a87f124 corrects two fragment paragraphs and adds verify_receipts.py.",
+    "done_when": "The source done_when (brief.txt:7-8) requires per-slice reads, updates, rebuilds, warm-start fresh residual and whole-slice wall from two fresh H200 processes, with every converged slice inside the locked precision budget; for the gained commits the gate is scripts/prototypes/bank_warm_start/verify_receipts.py, whose recorded run at warm-start-repair-gate.log ends EXIT=0 and recomputes both corrected counts (5 of 7 coarse slices stalled, 15 of 21 warm slices fully converged) from warm-start-report.json.",
+    "goal": "The node was dispatched to measure, per step size and slice, how many batch reads and updates a warm-started slice needs and to write it into docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:1-78; the two gained commits correct that fragment's stall and convergence counts at html:63 and html:69 and reuse the shared style, so the delta serves the node goal rather than extending it.",
+    "manifest": "manifest.md records status complete, seven commits e08e4a73a..69a87f124, the repair gate at warm-start-repair-gate.log as both tests and negative_control_log, and a checkpoint claiming verify_receipts.py's controls fail when either answering change is reverted; I re-ran both arms myself and reproduced exit 1 (three failures) on the parent fragment and exit 1 (one failure) on the parent plot.py.",
+    "write_paths": "The node's three granted paths are scripts/prototypes/bank_warm_start, docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html and docs/figures/sub-millisecond-forward-path/bank-warm-start; git diff --stat 06da3e1c5..69a87f124 changes exactly five files \u2014 the fragment, reads-per-slice.svg, measure.py, plot.py and the new verify_receipts.py \u2014 and every one resolves inside those paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_warm_start/verify_receipts.py:44-78 is a real guard whose red arms I reproduced, but it checks only the two counts, and its reuse arm at :70 is a bare substring test that would pass with the trace_axes call removed and the import left in place.",
+    "evidence": "warm-start-repair-gate.log records the gate at revision 69a87f124 ending EXIT=0 with receipts {coarse_slices 7, stalled_slices [1,4,5,6,7], warm_slices 21, fully_converged 15}, and I reproduced its two red arms; the gate does not assert the per-slice residual values html:69 lists in the same sentence.",
+    "fit": "scripts/prototypes/bank_warm_start/verify_receipts.py:1-38 follows the sibling receipt-audit idiom of scripts/prototypes/diverted_300_regression/audit_receipts.py:1-25, and plot.py:19-26 now takes its furniture from the house style module; the only new lint is one E501 at verify_receipts.py:51.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:63 now states five of seven coarse slices stall with slices 1, 4, 5, 6 and 7 named, and html:69 states 15 of 21 warm slices fully converge, both matching warm-start-report.json rows exactly.",
+    "reuse": "plot.py:12 imports nova.media.ink (a real owner at nova/media/ink.py:171 trace_axes and :151 DEFAULT_INK) and measure.py:89 imports scripts/prototypes/bank_solve_profile/fixture.py:42, so both refactors extend an existing owner; a search over scripts/ for a generic fragment-versus-receipt checker found only node-specific auditors, so verify_receipts.py is the first of its capability.",
+    "scope_discipline": "git diff --stat 06da3e1c5..69a87f124 names five paths and all five lie under the three write paths declared at manifest.md:3; no product module, test file or plan is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node was dispatched to measure, per step size and slice, how many batch reads and updates a warm-started slice needs and write it into docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html; the two gained commits correct that fragment's stall and convergence counts at html:63 and html:69 and reuse the shared style, so the delta serves the node goal rather than extending it.\nVERDICT done_when: the source done_when (brief.txt:7-8) requires per-slice reads, updates, rebuilds, warm-start fresh residual and whole-slice wall from two fresh H200 processes with every converged slice inside the locked precision budget; for the gained commits the gate is scripts/prototypes/bank_warm_start/verify_receipts.py, whose recorded run at warm-start-repair-gate.log ends EXIT=0 and recomputes both corrected counts from warm-start-report.json.\nVERDICT write_paths: the node's three granted paths are scripts/prototypes/bank_warm_start, docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html and docs/figures/sub-millisecond-forward-path/bank-warm-start; git diff --stat 06da3e1c5..69a87f124 changes exactly five files and every one resolves inside those paths.\nVERDICT manifest: manifest.md records status complete, seven commits e08e4a73a..69a87f124, the repair gate at warm-start-repair-gate.log, and a checkpoint claiming its negative controls fail when either answering change is reverted, which I reproduced myself at exit 1 and exit 1.\nVERDICT diff: read commit by commit against 06da3e1c5; two commits, 175 insertions and 120 deletions across the fragment (two paragraphs corrected), the SVG (restyled through nova.media.ink), measure.py (the local _gradient and _cold replaced by profile_fixture.gradient and the existing solve, both numerically identical), plot.py (locally restated rcParams replaced by trace_axes) and the new verify_receipts.py.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-start.html:63 states five of seven coarse slices stall naming 1, 4, 5, 6 and 7 and html:69 states 15 of 21 warm slices fully converge, both matching the per-row values in warm-start-report.json.\nSCORE evidence: 16\nJUSTIFICATION evidence: warm-start-repair-gate.log records verify_receipts.py at revision 69a87f124 ending EXIT=0 with receipts {coarse_slices 7, stalled_slices [1,4,5,6,7], warm_slices 21, fully_converged 15}, and I reproduced both of its red arms; the gate leaves the per-slice residuals listed in the same fragment sentence unasserted.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 06da3e1c5..69a87f124 names five paths, all under the three write paths declared at manifest.md:3, and no product module, test file or plan is touched.\nSCORE durability: 15\nJUSTIFICATION durability: scripts/prototypes/bank_warm_start/verify_receipts.py:53-78 is a real guard whose red arms I reproduced, but it covers only the two counts and its reuse arm at :70 is a substring test that survives removing the trace_axes call.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_warm_start/verify_receipts.py:1-38 follows the sibling receipt-audit idiom of scripts/prototypes/diverted_300_regression/audit_receipts.py:1-25 and plot.py:19-26 takes its furniture from the house style module, with one new E501 at verify_receipts.py:51.\nSCORE reuse: 19\nJUSTIFICATION reuse: plot.py:12 imports nova/media/ink.py:171 trace_axes and DEFAULT_INK and measure.py:89 imports scripts/prototypes/bank_solve_profile/fixture.py:42, extending both owners; a capability search over scripts/ found no generic fragment-versus-receipt checker, only node-specific auditors.\nFINDING scripts/prototypes/bank_warm_start/verify_receipts.py:48 non-blocking: counts() builds the exact stalled slice list at :32 and main() reduces it to len() at :48, so the fragment's identity claim 'slices 1, 4, 5, 6 and 7' and its terminal residual values are never compared with the receipt.\nFINDING scripts/prototypes/bank_warm_start/verify_receipts.py:70 non-blocking: the reuse arm is a bare substring test on plot.py's text, so deleting the trace_axes(axes, ink) call while leaving the import still passes.\nFINDING scripts/prototypes/bank_warm_start/verify_receipts.py:24 non-blocking: counts() reads only arms.runner1, so a divergence in the second fresh process the done_when requires would not be detected.\nFINDING scripts/prototypes/bank_warm_start/verify_receipts.py:51 non-blocking: WORDS covers 0..9 and stalled_forms is built eagerly, so a receipt with no stall raises KeyError instead of reporting the disagreement.\n",
+  "review_run_id": "r-20261107T130359590573-review-of-bank-warm-start-69a87f124259",
+  "review_scope": "the two commits gained since review r-20261107T121315374736 at 06da3e1c5; the run's original base acff793928732503a84525c3fe29ca260dbf9035 and the earlier five commits are covered by the prior record",
+  "reviewed_base_sha": "06da3e1c56a741478cc3d73404500e7b9a95e625",
+  "reviewed_commits": [
+    "0d96c5a5c",
+    "69a87f124"
+  ],
+  "reviewed_head_sha": "69a87f1242594162fc38184200350f06e376cc7b",
+  "reviewed_run_id": "r-20261107T111056270825-bank-warm-start",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T13:20:00Z",
+  "total": 107
+}

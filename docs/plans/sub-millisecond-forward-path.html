@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="228">
+<meta name="plan-version" content="229">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -779,6 +779,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T121315374736-review-of-bank-warm-start-06da3e1c56a7" data-who="reckon-build" data-when="2026-11-07T12:37:46.763Z">
     <div class="r-comment-body"><p>bank-warm-start reviewed at base acff7939 head 06da3e1c: goal 15, evidence 10, scope 19, durability 10, fit 17, reuse 8, one blocking finding that the fragment counts five stalled coarse-step slices as four and reports 21 residual-clause passes where its own table shows 15</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T130359590573-review-of-bank-warm-start-69a87f124259" data-who="reckon-build" data-when="2026-11-07T13:19:33.676Z">
+    <div class="r-comment-body"><p>independent review of r-20261107T111056270825-bank-warm-start over the two commits it gained since 06da3e1c5 (0d96c5a5c, 69a87f124) scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 15, fit 18, reuse 19, and records four non-blocking findings, all in verify_receipts.py</p></div>
 </div>
 </section>
 </main>

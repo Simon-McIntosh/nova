@@ -1,0 +1,78 @@
+<section data-reckon="fragment" id="bank-warm-start-fragment" data-plan="sub-millisecond-forward-path" data-node="bank-warm-start">
+  <h2>bank-warm-start — reads and updates of a warm-started bank slice</h2>
+  <p class="r-meta">Measures §4's warm start on the 550-cell diverted certificate: sixteen lanes carried through eight slices at three stated profile-amplitude steps, every slice seeded from its stream's previous converged state through <code>support_read.solve_batch</code> unchanged. One H200, allocation 1307763, three processes — a builder that converges slice 0 and saves the stream arrays, then two fresh interpreters on a warm compilation cache that load those exact arrays.</p>
+
+  <h3 id="bank-warm-start-setup">What a slice is driven by</h3>
+  <p>The bank solve's runtime input is the profile: one <code>RotatingDomainProfile</code> travels with the call while the operator bank and geometry are fixed operands. A slice's drive is that profile's amplitude — <code>p_prime</code> and <code>ff_prime</code> scaled together, which at a constant-gradient source is the plasma-current knob. The three steps are relative amplitude changes per slice, chosen against the certificate's ~1 MA plasma on a 1 ms slice boundary:</p>
+  <table id="bank-warm-start-steps">
+    <thead><tr><th>step</th><th>physical reading</th></tr></thead>
+    <tbody>
+      <tr><td>1e-5</td><td>slow flattop slice, about 10 A of plasma current</td></tr>
+      <tr><td>1e-3</td><td>fast ramp slice, about 1 kA of plasma current</td></tr>
+      <tr><td>1e-2</td><td>deliberately coarse time grid, about 10 kA of plasma current</td></tr>
+    </tbody>
+  </table>
+  <p><strong>The batch carries one drive, not sixteen.</strong> <code>solve_batch</code> takes a single <code>profile</code> and a single operator bank for the whole call, so sixteen lanes of one batched solve are sixteen distinct cold seeds on one shared ramp — not sixteen independently driven streams. A batch of shots that differ in drive is not expressible through this entry point today; that is a property of the entry point, not of this measurement.</p>
+
+  <h3 id="bank-warm-start-tables">Per-slice cost</h3>
+  <p>Every figure below is the mean over the sixteen lanes of one batch, from two fresh processes that agree within 0.4% on wall and exactly on reads and updates. Reads count every fresh evaluation the slice makes, the seed read included; the solve carries no tracking state between reads, so <em>every read rebuilds the whole connected-domain decision</em> — the read-rebuild count equals the read count in every row, and the factor-refactor count equals the update count because the solve never reuses a factor.</p>
+  <table id="bank-warm-start-summary">
+    <thead><tr><th>drive step</th><th>slices</th><th>reads / slice (mean, max)</th><th>updates / slice (mean, max)</th><th>rebuilds = reads / slice</th><th>warm-start fresh residual, max</th><th>terminal fresh residual, max</th><th>wall / slice, mean</th><th>wall / slice, max</th></tr></thead>
+    <tbody>
+      <tr><td>cold slice 0</td><td>1</td><td>4.00, 4</td><td>3.00, 3</td><td>4</td><td>1.37e-01</td><td>2.57e-12</td><td>304.5 ms</td><td>304.5 ms</td></tr>
+      <tr><td>1e-5</td><td>1–7</td><td>3.00, 3</td><td>2.00, 2</td><td>3</td><td>1.80e-03</td><td>2.88e-11</td><td>215.5 ms</td><td>216.4 ms</td></tr>
+      <tr><td>1e-3</td><td>1–7</td><td>6.00, 12</td><td>4.00, 6</td><td>6.00</td><td>1.80e-01</td><td>6.12e-11</td><td>428.6 ms</td><td>757.8 ms</td></tr>
+      <tr><td>1e-2</td><td>1–7</td><td>403.3, 481</td><td>46.2, 60</td><td>403.3</td><td>5.20e+00</td><td>5.20e+00</td><td>15.17 s</td><td>21.50 s</td></tr>
+    </tbody>
+  </table>
+  <p>The per-slice detail behind those means, one row per slice, first fresh process; the second process repeats every read and update count exactly:</p>
+  <table id="bank-warm-start-per-slice">
+    <thead><tr><th>step</th><th>slice</th><th>amplitude</th><th>reads</th><th>updates</th><th>fresh before first update</th><th>terminal residual</th><th>wall [ms]</th><th>converged / 16</th></tr></thead>
+    <tbody>
+      <tr><td>1e-5</td><td>1</td><td>1.000010</td><td>3</td><td>2</td><td>1.80e-03</td><td>3.84e-12</td><td>216.4</td><td>16</td></tr>
+      <tr><td>1e-5</td><td>2</td><td>1.000020</td><td>3</td><td>2</td><td>1.80e-03</td><td>4.85e-12</td><td>215.2</td><td>16</td></tr>
+      <tr><td>1e-5</td><td>3</td><td>1.000030</td><td>3</td><td>2</td><td>1.80e-03</td><td>2.88e-11</td><td>215.1</td><td>16</td></tr>
+      <tr><td>1e-5</td><td>4</td><td>1.000040</td><td>3</td><td>2</td><td>1.80e-03</td><td>4.85e-12</td><td>215.2</td><td>16</td></tr>
+      <tr><td>1e-5</td><td>5</td><td>1.000050</td><td>3</td><td>2</td><td>1.80e-03</td><td>6.31e-12</td><td>215.6</td><td>16</td></tr>
+      <tr><td>1e-5</td><td>6</td><td>1.000060</td><td>3</td><td>2</td><td>1.80e-03</td><td>7.45e-12</td><td>215.8</td><td>16</td></tr>
+      <tr><td>1e-5</td><td>7</td><td>1.000070</td><td>3</td><td>2</td><td>1.80e-03</td><td>2.93e-12</td><td>215.5</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>1</td><td>1.001000</td><td>4</td><td>3</td><td>1.80e-01</td><td>6.12e-11</td><td>303.0</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>2</td><td>1.002000</td><td>4</td><td>3</td><td>1.80e-01</td><td>5.11e-11</td><td>302.9</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>3</td><td>1.003000</td><td>5</td><td>4</td><td>1.80e-01</td><td>3.06e-12</td><td>390.3</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>4</td><td>1.004000</td><td>6</td><td>4</td><td>1.80e-01</td><td>7.57e-12</td><td>427.3</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>5</td><td>1.005000</td><td>6</td><td>4</td><td>1.80e-01</td><td>4.37e-12</td><td>427.3</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>6</td><td>1.006000</td><td>12</td><td>6</td><td>1.80e-01</td><td>4.19e-12</td><td>757.8</td><td>16</td></tr>
+      <tr><td>1e-3</td><td>7</td><td>1.007000</td><td>5</td><td>4</td><td>1.80e-01</td><td>4.68e-12</td><td>391.9</td><td>16</td></tr>
+      <tr><td>1e-2</td><td>1</td><td>1.010000</td><td>429</td><td>60</td><td>1.80e+00</td><td>2.24e+00</td><td>19335.3</td><td>0</td></tr>
+      <tr><td>1e-2</td><td>2</td><td>1.020000</td><td>481</td><td>15 (one lane 60)</td><td>2.87e+00</td><td>1.80e+00</td><td>21500.8</td><td>15</td></tr>
+      <tr><td>1e-2</td><td>3</td><td>1.030000</td><td>22</td><td>8</td><td>3.59e+00</td><td>5.97e-12</td><td>1254.3</td><td>16</td></tr>
+      <tr><td>1e-2</td><td>4</td><td>1.040000</td><td>448</td><td>60</td><td>1.73e+00</td><td>2.42e-01</td><td>15424.0</td><td>0</td></tr>
+      <tr><td>1e-2</td><td>5</td><td>1.050000</td><td>481</td><td>60</td><td>1.73e+00</td><td>1.73e+00</td><td>16222.3</td><td>0</td></tr>
+      <tr><td>1e-2</td><td>6</td><td>1.060000</td><td>481</td><td>60</td><td>3.46e+00</td><td>3.46e+00</td><td>16219.7</td><td>0</td></tr>
+      <tr><td>1e-2</td><td>7</td><td>1.070000</td><td>481</td><td>60</td><td>5.20e+00</td><td>5.20e+00</td><td>16222.4</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <figure id="bank-warm-start-reads-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-warm-start/reads-per-slice.svg" alt="Batch reads per slice against slice index for the three drive steps, on a logarithmic axis" width="1400">
+    <figcaption>Batch reads per warm-started slice, sixteen lanes, two fresh H200 processes that agree exactly on the counts. The slow flattop step sits flat at three reads; the fast ramp grows from four to twelve as the slices accumulate drive; the coarse step runs to the solve's 60-update ceiling and 481 reads, at which point the seed read's residual is not reduced at all. Logarithmic ordinate.</figcaption>
+  </figure>
+
+  <h3 id="bank-warm-start-answer">Does a warm slice reach one update?</h3>
+  <p><strong>No.</strong> At the slowest step a warm-started slice takes <em>two</em> updates and <em>three</em> reads — the seed read, one trial read and the terminal certificate — and 215 ms of the batch's wall, against 304 ms cold. A slice never converged in one update in any of the 21 warm slices measured at the three steps, and never in zero. The seed's own fresh residual, before any update, is 1.8e-3 at a 1e-5 step and 1.8e-1 at 1e-3: the warm start buys about two orders of magnitude of residual, not a converged state.</p>
+  <p>At a 1e-3 step the slice needs 3–6 updates and 4–12 reads, and at a 1e-2 step the solve stalls outright. <strong>Five of the seven coarse-step slices</strong> (1, 4, 5, 6 and 7) run every lane to the 60-update ceiling and finish with no lane converged. Three of those five end with the residual exactly where their seed left it (slices 5, 6 and 7, at 1.73, 3.46 and 5.20): the search takes no step at all, which is the non-smooth residual plateau the driver documents, now reached from a warm seed. Slice 1 ends <em>above</em> its seed (1.80 to 2.24) and slice 4 ends below it but far from convergence (1.73 to 0.242). The remaining two coarse slices fail on one lane each or none: slice 2 converges 15 of 16 lanes, and slice 3 is the only coarse slice that converges fully (9 updates, residual 6.0e-12).</p>
+  <p><strong>Where the 1 ms gap is.</strong> One warm batch read costs about 72 ms here (215 ms over three reads; 76 ms per read cold), which is 360× §1's 0.2 ms per-slice read bound. The step count is not the binding term at a realistic slice step: even the three-read slice is 215 ms, so the target cannot be reached by converging faster — it needs the read's own wall to fall by the same factor. At the coarse step both terms fail together, and no read count helps.</p>
+
+  <h3 id="bank-warm-start-oracle">Precision against the analytic oracle, and what the oracle can and cannot say</h3>
+  <p>The terminal fresh residual meets the locked residual clause on every slice that converged: 2.6e-12 cold, at most 2.9e-11 at a 1e-5 step and 6.1e-11 at 1e-3, all at or under the 1e-10 budget.</p>
+  <p>The geometry clause needs an oracle solve of each slice's own drive, and the cheap construction of one — the unit-drive analytic solution scaled by the slice's amplitude — <strong>is refuted by measurement</strong>. A cold solve at amplitude 1.07 does not land on 1.07× the unit-drive state: it runs to 60 updates and 436 reads and ends 95% away in relative moment, with a fresh residual of 17.4, because the drive scale also moves the equilibrium rather than merely scaling it. The fixed analytic axis and X-point are therefore <em>not</em> the solution of a scaled drive, and the axis drift this run measures against them — 5.9e-5 of the minor radius at a 1e-5 step, 5.1e-3 at 1e-3, on a budget of 2.7e-4 m at a minor radius of 0.544 m — is a measured drift of the equilibrium, not an accuracy verdict on the solve.</p>
+  <p>What this node can and cannot certify, stated plainly: <strong>15 of the 21 warm slices</strong> converge in every lane and pass the residual clause; the other six carry at least one unconverged lane and are counted as failures of the clause, with terminal residuals of 2.24, 1.80, 0.242, 1.73, 3.46 and 5.20. The geometry and boundary-flux clauses are <strong>not</strong> certified for a scaled drive, because the analytic oracle at that drive was not constructed. The slow-step drift sits inside the budget (5.9e-5 against 2.7e-4) and the fast-step drift does not, and the difference tracks the accumulated amplitude as the refuted scaling law predicts.</p>
+
+  <h3 id="bank-warm-start-provenance">Provenance</h3>
+  <ul>
+    <li>Revision <code>49f919b148ab85a82ed2a56a7afbf32bc1333c0f</code>, worktree tree, <code>nova/equilibrium/support_read.py</code> as imported.</li>
+    <li>H200 allocation 1307763 on 98dci4-gpu-0003, <code>betelgeuse</code> under <code>gpu_0003_grpA</code>, one GPU, four cores, 48 GB; <code>EXIT=0</code>. Two earlier allocations (1307733, 1307735, 1307739) were stopped against defects in this node's own harness — a profile passed as a jit argument, a scalar span indexed, and a jit wrapper rebuilt per call — none in product code.</li>
+    <li>Three processes: builder (pid 2465999) converging slice 0 and writing the stream arrays, then two fresh interpreters (pids 2512964, 2556023) loading the same arrays from one warmed compilation cache with <code>XLA_FLAGS</code> unset.</li>
+    <li>Receipts and logs in the run directory: <code>warm-start-{builder,runner1,runner2}.jsonl</code>, <code>warm-start-report.json</code>, <code>warm-start-allocation.log</code>.</li>
+  </ul>
+</section>

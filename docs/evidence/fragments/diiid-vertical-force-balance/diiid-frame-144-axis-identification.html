@@ -229,6 +229,12 @@ three conjuncts can be read on the actual refusing field, which is the one measu
 investigation could not obtain: the field lives inside the trace and the trace raises before any
 host code sees it.</p>
 
+<p><b>The receipts are committed with the source.</b> The replay record, the per-candidate conjunct
+values and the capture trace are stored under
+<code>scripts/prototypes/diiid_axis_identification/receipts/</code>, with a README naming the job
+and revision that produced each and the command that repeats it; a reader can check these claims
+after the crew run directory is collected.</p>
+
 <p><b>One landing touched the identification path in between.</b>
 <code>git log 554fcc237..8130772bb -- nova/equilibrium/topology.py</code> returns exactly one
 commit, <code>1af4c1b03</code> <i>retain bank precision through saddle curvature</i>. The replay

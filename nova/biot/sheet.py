@@ -253,7 +253,10 @@ class SheetFlux:
         arsinh_term = self._arsinh_term(gamma, r, r1, b1)
         root_gamma = float(np.sum(rule * cosine * gamma / dense))
         root_radial = float(np.sum(rule * cosine * (r - rp * cosine) / dense))
-        arsinh_gamma = -b1 * arsinh_term + float(
+        # d(r_1)/dgamma = -b_1 carries the arsinh WITHOUT the field weight, so
+        # the weighted flux integral cannot stand in for it here
+        arsinh_plain = float(np.sum(rule * cosine * arsinh))
+        arsinh_gamma = -b1 * arsinh_plain + float(
             np.sum(rule * cosine * smear * gamma_pole / (a1 * dense))
         )
         arsinh_radial = b1 * b1 * float(

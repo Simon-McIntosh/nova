@@ -122,7 +122,8 @@ prototype's diverted bank batch, not the 550-cell certificate state.</caption>
 </table>
 
 <p>The assembled whole solve at the same width is 300.7 ms, 18.79 ms per slice,
-over four reads and four updates. The paired table the done-when asks for —
+over four reads and three updates per lane, closing on a fresh residual between
+1e-12 and 3.6e-12, which is inside the locked 1e-10 budget. The paired table the done-when asks for —
 sixteen, sixty-four and one hundred twenty-eight slices, base against head —
 could not be produced inside this record: the product arm alone costs 44 s per
 width, so the arm that was to be compared never finished. The wall-per-slice

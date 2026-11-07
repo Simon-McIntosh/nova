@@ -63,7 +63,14 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.completeelliptic import complete_kind, complete_pole
+import jax
+import jax.numpy as jnp
+
+from nova.biot.completeelliptic import (
+    _complete_kind_tangent,
+    complete_kind,
+    complete_pole,
+)
 from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.greens import MU0, greens_bz_br, greens_psi
 
@@ -83,17 +90,32 @@ def _divide(numerator, denominator):
 
     The bracketed weight ``N(cos phi)`` is quartic and the sheet's squared
     denominator is quadratic in ``cos phi``, so splitting the integrand onto the
-    denominator leaves a quadratic quotient and a linear remainder.
+    denominator leaves a quadratic quotient and a linear remainder.  ``polydiv``
+    trims the remainder's high coefficients, so it is padded back to one
+    coefficient per divisor degree: the reductions index the remainder by degree,
+    and a zero linear term is still a linear term.
     """
-    rest = np.array(numerator, dtype=np.float64)
-    divisor = np.array(denominator, dtype=np.float64)
-    quotient = np.zeros(rest.size - divisor.size + 1)
-    for order in range(quotient.size - 1, -1, -1):
-        factor = rest[order + divisor.size - 1] / divisor[-1]
-        quotient[order] = factor
-        for index, coefficient in enumerate(divisor):
-            rest[order + index] -= factor * coefficient
-    return quotient, rest[: divisor.size - 1]
+    divisor = np.asarray(denominator, dtype=np.float64)
+    quotient, remainder = np.polynomial.polynomial.polydiv(
+        np.asarray(numerator, dtype=np.float64), divisor
+    )
+    rest = np.zeros(divisor.size - 1)
+    rest[: remainder.size] = remainder
+    return quotient, rest
+
+
+@jax.custom_jvp
+def _complete_kind_traced(complement):
+    """``(K, E)`` on traced arguments, differentiated by their own recurrence."""
+    return complete_kind(complement, xp=jnp)
+
+
+@_complete_kind_traced.defjvp
+def _complete_kind_traced_jvp(primals, tangents):
+    (complement,), (complement_tangent,) = primals, tangents
+    values = _complete_kind_traced(complement)
+    _, slopes = _complete_kind_tangent(complement, complement_tangent, xp=jnp)
+    return values, tuple(slopes)
 
 
 _ARSINH_NODES = 128
@@ -387,9 +409,38 @@ class SheetFlux:
         ``S = a_1 b_1 R + A`` is the bracket :meth:`antiderivative` carries, so
         the field is the total derivative of the same closed form rather than a
         numerical difference of its values.  The ``z`` derivative is taken in
-        ``gamma = z' - z``, the radial one at fixed source; both reuse the
-        landed ``R`` and ``A`` and add the derivative kernels on the shared
-        graded rule.
+        ``gamma = z' - z``, the radial one at fixed source; ``R``'s partials are
+        the derivative kernels on the shared graded rule, and ``A``'s come from
+        :meth:`_arsinh_gradient`.
+        """
+        b1 = self._slope
+        a1 = np.sqrt(1.0 + b1 * b1)
+        width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
+        width = width if width > 0.0 else 1.0
+        phi, rule = self._azimuth_rule(width)
+        cosine = np.cos(phi)
+        dense = np.sqrt(
+            (r - rp) ** 2 + gamma**2 + 4.0 * r * rp * np.sin(0.5 * phi) ** 2
+        )
+        root = self._root_term(gamma, r, rp)
+        root_gamma = float(np.sum(rule * cosine * gamma / dense))
+        root_radial = float(np.sum(rule * cosine * (r - rp * cosine) / dense))
+        arsinh_term, arsinh_gamma, arsinh_radial = self._arsinh_gradient(gamma, r, rp)
+        value = a1 * b1 * root + arsinh_term
+        gamma_value = a1 * b1 * root_gamma + arsinh_gamma
+        radial_value = a1 * b1 * root_radial + arsinh_radial
+        return float(value), gamma_value, radial_value
+
+    def _arsinh_gradient(
+        self, gamma: float, r: float, rp: float
+    ) -> tuple[float, float, float]:
+        """``(A, dA/dgamma, dA/dr)``: the arsinh remainder and its partials.
+
+        ``A`` is the one piece of the antiderivative the paper leaves to
+        quadrature.  Its partials are the pole coefficient of
+        ``d(arsinh beta_1)/dx`` contracted onto the same graded rule, and
+        ``d(r_1)/dgamma = -b_1`` enters the height component WITHOUT the field
+        weight, so the weighted flux integral cannot stand in for it.
         """
         b1 = self._slope
         a1sq = 1.0 + b1 * b1
@@ -403,10 +454,9 @@ class SheetFlux:
         dense = np.sqrt(
             (r - rp) ** 2 + gamma**2 + 4.0 * r * rp * np.sin(0.5 * phi) ** 2
         )
-        # ``B_1^2 = W^2 + a_1^2 r^2 sin^2 phi`` is the exact squared denominator.
-        # ``W`` and ``Q`` both vanish with the standoff at the singular azimuth,
-        # so each is formed from positive terms: written as the difference of
-        # two O(r) values they lose every digit the grading buys there.
+        # ``W`` vanishes with the standoff at the singular azimuth, so it is
+        # formed from positive terms: written as the difference of two O(r)
+        # values it loses every digit the grading buys there.
         half_sine = np.sin(0.5 * phi) ** 2
         # a target on the segment's supporting line stands off by rounding
         # alone; taken at face value that standoff is what the graded nodes
@@ -427,25 +477,14 @@ class SheetFlux:
             -b1 * cosine * denominator
             - Gamma * (-gap + 2.0 * r1 * half_sine + r * b1 * b1 * sine_sq)
         ) / denominator
-
-        root = self._root_term(gamma, r, rp)
-        arsinh_term = self._arsinh_term(gamma, r, r1, b1)
-        root_gamma = float(np.sum(rule * cosine * gamma / dense))
-        root_radial = float(np.sum(rule * cosine * (r - rp * cosine) / dense))
-        # d(r_1)/dgamma = -b_1 carries the arsinh WITHOUT the field weight, so
-        # the weighted flux integral cannot stand in for it here
         arsinh_plain = float(np.sum(rule * cosine * arsinh))
-        arsinh_gamma = -b1 * arsinh_plain + float(
+        gamma_value = -b1 * arsinh_plain + float(
             np.sum(rule * cosine * smear * gamma_pole / (a1 * dense))
         )
-        arsinh_radial = b1 * b1 * float(
+        radial_value = b1 * b1 * float(
             np.sum(rule * cosine * cosine * arsinh)
         ) + float(np.sum(rule * cosine * smear * radial_pole / (a1 * dense)))
-
-        value = a1 * b1 * root + arsinh_term
-        gamma_value = a1 * b1 * root_gamma + arsinh_gamma
-        radial_value = a1 * b1 * root_radial + arsinh_radial
-        return float(value), gamma_value, radial_value
+        return self._arsinh_term(gamma, r, r1, b1), gamma_value, radial_value
 
     def _sloped_field(self, r: float, r_z: float) -> tuple[float, float]:
         """``(B_R, B_Z)`` from the gradient of the flux, exact in the closed form."""
@@ -467,6 +506,68 @@ class SheetFlux:
             float(MU0 / (2.0 * np.pi * r * a1sq) * b_z),
         )
 
+    def _closed_gradient(self, gamma: float, r: float, rp: float):
+        """``(S, dS/dgamma, dS/dr)`` with ``R`` closed and ``A`` shared.
+
+        ``R`` is the complete first- and second-kind block, and its partials are
+        the forward-mode tangents of those same expressions through
+        :mod:`nova.biot.completeelliptic`'s own descent.  ``A``, the arsinh
+        remainder the paper leaves to quadrature, is taken whole from
+        :meth:`_arsinh_gradient`: one kernel, evaluated the same way on both
+        routes, so the two fields cannot disagree about a piece neither
+        computes in closed form.
+        """
+        import jax
+
+        from nova.jax.config import configure_dtypes
+
+        configure_dtypes()
+        assert jax.config.jax_enable_x64, "the closed form needs double arithmetic"
+        import jax.numpy as jnp
+
+        b1 = self._slope
+        a1 = np.sqrt(1.0 + b1 * b1)
+
+        def root_part(theta):
+            height, radius = theta[0], theta[1]
+            span = height * height + (radius + rp) ** 2
+            k2 = 4.0 * radius * rp / span
+            complement = (height * height + (radius - rp) ** 2) / span
+            first, second = _complete_kind_traced(complement)
+            return (
+                2.0
+                * span**0.5
+                * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second)
+                / (3.0 * k2)
+            )
+
+        root, gradient = jax.value_and_grad(root_part)(jnp.asarray([gamma, r]))
+        arsinh_term, arsinh_gamma, arsinh_radial = self._arsinh_gradient(gamma, r, rp)
+        return (
+            float(a1 * b1) * float(root) + arsinh_term,
+            float(a1 * b1) * float(gradient[0]) + arsinh_gamma,
+            float(a1 * b1) * float(gradient[1]) + arsinh_radial,
+        )
+
+    def _sloped_field_closed(self, r: float, r_z: float) -> tuple[float, float]:
+        """``(B_R, B_Z)`` from the closed form's own partial derivatives."""
+        a1sq = 1.0 + self._slope**2
+        b_r = b_z = 0.0
+        ends = (
+            (float(self.end[1]) - r_z, float(self.end[0]), 1.0),
+            (float(self.start[1]) - r_z, float(self.start[0]), -1.0),
+        )
+        for height, radius, sign in ends:
+            value, gamma_value, radial_value = self._closed_gradient(
+                height, r, radius
+            )
+            b_r += sign * gamma_value
+            b_z += sign * (value + r * radial_value)
+        return (
+            float(MU0 / (2.0 * np.pi * a1sq) * b_r),
+            float(MU0 / (2.0 * np.pi * r * a1sq) * b_z),
+        )
+
     def _flat_field(self, r: float, z: float) -> tuple[float, float]:
         """The surface-current integral of the ring field over a flat annulus."""
         z0 = float(self.start[1])
@@ -480,10 +581,17 @@ class SheetFlux:
         bz, br = greens_bz_br(np.full_like(rp, r), np.full_like(rp, z), rp, z0)
         return float(np.sum(w * br)), float(np.sum(w * bz))
 
-    def field(self, r: float, z: float) -> tuple[float, float]:
-        """``(B_R, B_Z)`` [T] at ``(r, z)``, per the sheet current set at build."""
+    def field(self, r: float, z: float, *, closed: bool = False) -> tuple[float, float]:
+        """``(B_R, B_Z)`` [T] at ``(r, z)``, per the sheet current set at build.
+
+        ``closed`` takes the field from the closed-form antiderivative's own
+        partial derivatives in place of the graded route's derivative kernels.
+        The two share no arithmetic in the ``D`` part, so they check each other.
+        """
         if self._flat:
             b_r, b_z = self._flat_field(r, z)
+        elif closed:
+            b_r, b_z = self._sloped_field_closed(r, z)
         else:
             b_r, b_z = self._sloped_field(r, z)
         return float(b_r * self.sheet_current), float(b_z * self.sheet_current)
@@ -553,7 +661,9 @@ def sheet_flux(
 
 
 def sheet_field(
-    r: float, z: float, start, end, *, sheet_current: float = 1.0
+    r: float, z: float, start, end, *, sheet_current: float = 1.0, closed: bool = False
 ) -> tuple[float, float]:
     """``(B_R, B_Z)`` [T] of a conic sheet at ``(r, z)``."""
-    return SheetFlux(start, end, sheet_current=sheet_current).field(r, z)
+    return SheetFlux(start, end, sheet_current=sheet_current).field(
+        r, z, closed=closed
+    )

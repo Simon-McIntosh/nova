@@ -180,22 +180,23 @@ def test_segment_order_does_not_change_the_flux(angle):
     assert backward == pytest.approx(forward, rel=1e-14)
 
 
-def measured_field(angle, target):
-    """The closed-form field and the reference at one fixed target."""
+def measured_field(angle, target, *, closed=False):
+    """The field and the reference at one fixed target."""
     start, end, _ = frame(angle)
     converged = reference.sheet_reference(target, start, end)
     assert converged.converged
-    return sheet_field(target.r, target.z, start, end), (converged.br, converged.bz)
+    got = sheet_field(target.r, target.z, start, end, closed=closed)
+    return got, (converged.br, converged.bz)
 
 
-def field_relative(angle, target):
+def field_relative(angle, target, *, closed=False):
     """The largest component error, as a fraction of the larger component.
 
     A component the symmetry extinguishes is held out: the axisymmetric sheet
     puts no radial field on the mid-plane, so there the reference returns a
     rounding residual rather than a value to divide by.
     """
-    (got_r, got_z), (ref_r, ref_z) = measured_field(angle, target)
+    (got_r, got_z), (ref_r, ref_z) = measured_field(angle, target, closed=closed)
     scale = max(abs(ref_r), abs(ref_z))
     worst = 0.0
     for got, expected in ((got_r, ref_r), (got_z, ref_z)):
@@ -236,6 +237,34 @@ def test_sloped_field_matches_reference(angle, station, distance):
     assert relative <= TOLERANCE, (
         f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
     )
+
+
+@pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
+def test_sloped_closed_form_field_matches_reference(angle, station, distance):
+    """The closed form's own field against the ring reference at the floor."""
+    _, _, targets = frame(angle)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    relative = field_relative(angle, target, closed=True)
+    assert relative <= TOLERANCE, (
+        f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
+    )
+
+
+@pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
+def test_closed_form_field_agrees_with_the_graded_route(angle, station, distance):
+    """The two evaluations of one antiderivative agree on both components."""
+    start, end, targets = frame(angle)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    closed = sheet_field(target.r, target.z, start, end, closed=True)
+    routed = sheet_field(target.r, target.z, start, end)
+    scale = max(abs(component) for component in routed)
+    for got, expected in zip(closed, routed, strict=True):
+        if abs(expected) <= reference.DEGENERATE * scale:
+            continue
+        relative = abs(got - expected) / abs(expected)
+        assert relative <= TOLERANCE, (
+            f"measured {relative:.2e} against the {TOLERANCE:.0e} floor"
+        )
 
 
 @pytest.mark.parametrize("distance", DISTANCES)

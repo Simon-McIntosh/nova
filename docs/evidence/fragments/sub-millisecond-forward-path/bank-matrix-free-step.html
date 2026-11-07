@@ -1,0 +1,66 @@
+<section data-reckon="fragment" data-id="bank-matrix-free-step">
+<h2>Bank Newton step applied matrix-free inside GMRES</h2>
+
+<p id="bank-matrix-free-step-what">The Newton step can hand its Krylov solve a
+Jacobian-vector product instead of an assembled matrix. The product is
+<code>support_read.step_jacobian_vector</code>: the identity minus the bank,
+the booking tangent and, on the fresh-geometry path, the moving saddle normal
+form. The block preconditioner for that path is each cell's own 3&times;3
+diagonal block, obtained without an assembly: a cell's moments enter only its
+own booking sensitivities and its own bank row, so the block is its local
+sensitivities contracted with its own unit-direction channel vector. A
+target-current quadrature sums across cells and stays on the assembled path.</p>
+
+<p id="bank-matrix-free-step-solve">Both operators run through one Arnoldi
+routine (<code>_block_gmres_operator</code>), so the restarted least-squares
+cycle, the true-residual restart decision and the condition-estimate times
+relative-residual 1e-8 stop are the same code on both paths. The dense path
+keeps its row and column equilibration; the product path scales by the
+physical moment scales alone, because row and column norms need the matrix
+entries the product path exists to avoid.</p>
+
+<h3 id="bank-matrix-free-step-equality">The product path reproduces the assembled update</h3>
+
+<p><code>tests/test_bank_newton_step.py::test_matrix_free_update_matches_dense_update</code>
+solves the same linear system twice at the diverted 550-cell trial and
+converged certificate states, once through the assembled matrix and once
+through the product, and compares the whole physical update vector.</p>
+
+<table id="bank-matrix-free-step-negative-control">
+<caption>The declared negative control: the booking-tangent term dropped from the
+product in a scratch copy of the head tree, so the product describes the bank
+alone. The same test then fails on its own agreement assertion.</caption>
+<thead><tr><th>state</th><th>relative update difference</th><th>assembled iterations</th><th>mutated product iterations</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>trial</td><td>1.365</td><td>40</td><td>201</td><td>assert 1.365 &le; 1e-8 fails</td></tr>
+<tr><td>converged</td><td>0.2669</td><td>40</td><td>391</td><td>assert 0.2669 &le; 1e-8 fails</td></tr>
+</tbody>
+</table>
+
+<p>Log: <code>logs/negative-control-matrix-free.log</code>, last line
+<code>EXIT=1</code> with both parameter ids failing. The head arm of the same
+test, run against the unmutated product, did not finish inside the node's
+budget: on the shared CPU node the 550-cell fixture plus one product solve per
+state ran for 34 minutes at six cores without reaching its summary line, so
+this fragment records the negative control and not a passing head row.</p>
+
+<h3 id="bank-matrix-free-step-timing">Device timing: not measured</h3>
+
+<p>Two H200 allocations were taken for the base-against-head timing and neither
+produced a table. The first ran with a prototype loader that sliced the saved
+lane states on the wrong axis, so every mode raised before timing; it was
+cancelled by id once the traceback was read. The second was launched with the
+loader corrected and had reached only the shared seed build when the node's
+budget expired. The driver that would produce the table is
+<code>scripts/prototypes/bank_matrix_free_step/device.sh</code>: it builds the
+seed arrays once at the base revision, loads them in every arm, gives each
+revision its own compilation cache, and times only repetitions after a warm
+call. Its numbers, and the wall-per-slice figure against width, are outstanding
+work for this section.</p>
+
+<p id="bank-matrix-free-step-verdict">Verdict: the product path is implemented,
+committed and pinned by a negative control that fails as declared. The
+done-when's device table, its iteration-count evidence for the chosen
+preconditioner and the paired base-against-head suites are not measured, so the
+section's measure is unmet at this record.</p>
+</section>

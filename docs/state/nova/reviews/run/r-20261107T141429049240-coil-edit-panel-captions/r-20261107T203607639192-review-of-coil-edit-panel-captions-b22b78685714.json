@@ -17,6 +17,13 @@
     }
   },
   "dispatched_at": "2026-11-07T20:37:45Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panel-captions",
+      "recorded_at": "2026-11-07T21:07:27.244135+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_coil_edit_panel_render.py",

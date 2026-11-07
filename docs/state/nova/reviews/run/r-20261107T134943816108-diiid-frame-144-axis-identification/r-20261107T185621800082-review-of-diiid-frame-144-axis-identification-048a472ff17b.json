@@ -11,6 +11,13 @@
     }
   },
   "dispatched_at": "2026-11-07T18:57:40Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T19:37:06.197488+00:00"
+    }
+  },
   "findings": [
     "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:5 non-blocking: the node goal is to name why the frame 144 limited seed refuses at axis identification, and the fragment's own conclusion is that the refusal is not reproduced and the seed the refused branch held is unknown (html:64-70), so the central question is narrowed to a record-provenance hypothesis rather than answered.",
     "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:114 non-blocking: the census table is internally inconsistent with the coverage paragraph \u2014 the row at (1.0269, -1.5422) is labelled 'extremum' with index +1 while html:135 lists the same point as dropped with index 0, and rows 2 and 5 are labelled 'spurious' but carry index -1, which is the saddle label this run's own local_index.py:68-72 reserves for a nonzero winding.",

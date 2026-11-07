@@ -1,0 +1,40 @@
+<section id="graded-residual-compile-cost">
+<h2>Graded-residual compile cost</h2>
+
+<p>The consolidation of the weighted graded residual into
+<code>graded_residual</code> left the polynomial map's Jacobian rebuilt from the
+sinh as <code>sqrt(1 + sinh^2)</code>, which traces a square, an add and a square
+root on top of the transcendental where the map derivative is known in closed
+form. Taking <code>xp.cosh(stretch)</code> directly, in both the value path and
+the tangent, recovers the base revision's own expression and cannot move a
+value: the packed moments are bitwise equal on both coil sets
+(<code>jacobian_equivalence.py</code> reports <code>EQUIVALENCE_OK</code>,
+<code>DIII-D.bitwise_equal = true</code> and
+<code>MAST.bitwise_equal = true</code>).</p>
+
+<table>
+<thead><tr><th>Row</th><th>Base</th><th>Head</th><th>Bound</th></tr></thead>
+<tbody>
+<tr><td><code>second_residual</code></td>
+<td>2.669 / 2.666 / 2.684</td>
+<td>2.583 / 2.551 / 2.559</td><td>3.0, met</td></tr>
+<tr><td><code>regularised</code></td>
+<td>2.994 / 2.994 / 2.997</td>
+<td>3.016 / 2.954 / 2.970</td><td>3.0, not met on one of three samples</td></tr>
+</tbody>
+</table>
+
+<p>The <code>regularised</code> row is unweighted: it is built from
+<code>_regularised_tangent</code>, so the harmonic-weight path is not in its
+graph and reducing that path cannot move it. Its head median (2.970) already
+sits below its own base median (2.994), which puts the residual overage inside
+the measurement spread rather than in a known remaining term. A later arm on the
+same partition recorded base samples from 2.616 to 3.018 across runs, so three
+single-sample medians do not separate the two revisions on this row. No
+unweighted reduction inside <code>_regularised_tangent</code> has yet been
+applied.</p>
+
+<p>Commits: <code>f7f7fb6a2</code> (Jacobian from cosh),
+<code>48c0db6dc</code> (single-job gate launcher),
+<code>8e4c14488</code> (repair of a truncated edit).</p>
+</section>

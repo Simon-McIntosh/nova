@@ -1,12 +1,3 @@
-<figure id="bank-drive-continuation-figure">
-  <img src="/nova/figures/sub-millisecond-forward-path/bank-drive-continuation/reads-per-slice.svg"
-       alt="Batch reads per slice against the drive step for a direct solve and for drive continuation">
-  <figcaption>Batch reads per slice against the drive step, direct solve against drive
-  continuation, on the saved warm-start slice. Both arms read at least a seed read and a
-  terminal certificate; a direct solve at the coarse step spends its whole sixty-update
-  ceiling and reports no converged lane.</figcaption>
-</figure>
-
 ## What changed
 
 `nova/equilibrium/drive_continuation.py` advances a drive change in adaptive
@@ -79,6 +70,41 @@ revision extracted under the run directory; its per-file logs are
 at a node-local `/tmp` path that does not exist on a compute node and its
 processes collected nothing (`EXIT=4`, `file or directory not found`); the arm
 was re-run from the GPFS extraction and the logs above are that run's.
+
+## Device measurement
+
+The device arm is **incomplete**, and this is the honest record of how far it
+got. It ran on titan, four lanes, on the saved warm-start slice
+(`warm-start-streams.npz`, the diverted 550-cell certificate's slice-0 state):
+
+| drive step | arm | converged | sub-steps | updates (batch) | reads (batch) | worst residual | wall |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1e-3 | direct | 4 / 4 | — | 3 | 4 | 5.97e-11 | 52.7 s |
+| 1e-3 | continuation | 4 / 4, certified | 1 | 3 | 4 | 5.97e-11 | 174.0 s |
+
+At a 1e-3 relative drive step the two arms are the same cost, because the
+initial 1e-3 sub-step *is* the whole change: one sub-step, one solve, and
+`state_relative_gap` 0.0 between the states the two arms reach. The comparison
+that matters — a step where the direct solve stalls and continuation does not —
+is at 1e-2, and it did not land.
+
+- **The H200 never admitted a card.** `squeue -w 98dci4-gpu-0003` reported
+  8 of 8 `gres/gpu` allocated; job 1308069 pended on `Resources` for 22 minutes
+  and was cancelled by id. Running on titan is the brief's fallback, and every
+  wall above is a titan wall (P100, 16 GB) that must not carry an H200 headline.
+- **Titan job 1308075 hit its 30-minute wall at the 1e-2 direct arm** (`sacct`
+  state `TIMEOUT`, elapsed 00:30:24), so no 1e-2 row exists for either arm and
+  no second fresh process completed. Four lanes rather than sixteen were used
+  because a P100 has 16 GB against the H200's 141.
+- **No figure is drawn**, because a single drive step per arm carries no trend
+  in reads against drive step. The figure this section was meant to hold is
+  deferred to the run that completes the 1e-2 pair.
+- **Against the analytic oracle** at drive amplitude 1.001 the axis sits
+  7.69e-4 m and the saddle 1.97e-4 m from the unit-drive analytic positions
+  (0.544 m minor radius). That is the drift the warm-start record already
+  measured and attributed to the drive moving the equilibrium rather than
+  scaling it, so it is recorded as a measured drift and not as an accuracy
+  verdict; the locked residual clause is met at 5.97e-11 in both arms.
 
 ## Provenance
 

@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run armed no suite: its manifest records baseline_suite and after_suite empty, consistent with a measurement node the brief forbids from changing product code or tests. Its gate is the measurement and reporting pair, and both pooled/device.log and pooled/report.log end EXIT=0.",
+  "call_sites": "none",
+  "call_sites_note": "the diff adds only scripts/prototypes/bank_batch_width/measure.py, report.py and device.sh, which no runtime module imports; the measured entry point nova/equilibrium/support_read.py:solve_batch at line 1587 is read, not modified.",
+  "completed_at": "2026-11-07T00:17:41.093Z",
+  "dispatched_at": "2026-11-07T00:06:27Z",
+  "durability_note": "the added assertions are independent of the values the run supplied: report.py:46 reads the solve's own fresh-read residual, report.py:43-44 read the compiler logger's cache events and compare the cold key against the warm one, and report.py:38-41 compare each lane's axis, X-point and boundary flux against the closed-form analytic oracle rather than against anything the reporter passed in. pooled/residual-control.log shows that residual assertion refusing a copied receipt at EXIT=1 while the intact report ends EXIT=0, so the guard is demonstrated to fire. The score is held at 15 rather than higher because the brief forbids the node from adding a test, so nothing runs these guards in a suite.",
+  "figure_check": "rendered docs/figures/sub-millisecond-forward-path/bank-batch-width/wall-per-slice.svg to a 1400 px PNG and inspected it: log-log axes, two green series separated by marker and dash that nearly coincide, a dotted 1 ms target along the foot of the plot, a frameless figure-level legend above the panels, no gridlines, top and right spines removed, no clipped or overlapping text, canvas 31.1 by 16 cm.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The width-256 refusal holds against both the derived and the measured capacity. Labelling the 150 GB figure as derived is a wording fix in a measurement record.",
+      "recorded_at": "2026-11-07T00:22:03.415264+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_batch_width/measure.py",
+      "line": 130,
+      "severity": "non-blocking",
+      "text": "physical_bytes_estimate is derived as capacity/0.95 and the fragment presents that 150.114 GB as the allocator-visible physical capacity, while the capacity the script compares against is capacity_bytes at 142.608 GB; the width-256 refusal is unaffected because 183.694 GB exceeds both figures, but the published number reads as observed rather than derived."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 00c38a599e21 to 847f48f10778; eight commits add measure.py, report.py, device.sh, the fragment and the SVG, and change no product module and no test.",
+    "done_when": "the done_when names the fragment tables, two fresh processes per width on saved common seeds, the seven per-width columns, the locked precision budget and one data-ink log-log figure with the 1 ms target; scripts/prototypes/bank_batch_width/report.py:43-77 asserts each of those against the receipts and pooled/report.log records EXIT=0 with samples=8.",
+    "goal": "the node's goal is to measure the converged batched solve wall per slice against batch width on one H200; docs/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html tables widths 16/32/64/128 with a memory refusal at 256 and a best of 13.928235 ms per slice.",
+    "manifest": "read; status complete, eight commits listed beyond the base, tests names the sbatch device.sh command, and every receipt it cites ends EXIT=0: the 13 pooled/width-*-process-*.log child logs, pooled/report.log, pooled/device.log and pooled/figure-inspection.log.",
+    "write_paths": "the node was fenced to scripts/prototypes/bank_batch_width, docs/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html and docs/figures/sub-millisecond-forward-path/bank-batch-width; all five files in the diff fall inside them and no product or test file is touched."
+  },
+  "measured_revision_note": "the timings in the fragment were measured at bc057c84ffb298125b157a489e80fd37d8f8596e, as its own text states; the two commits after it, 2ded845a8 and 847f48f10, touch only the fragment, the SVG and the reporter's partial-sweep path, so no measured number came from a later tree than the one the fragment names.",
+  "node": "bank-batch-width",
+  "plan": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure the converged batched solve wall per slice against batch width on one H200; docs/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html tables widths 16/32/64/128 with a memory refusal at 256 and a best of 13.928235 ms per slice.\nVERDICT done_when: the done_when names the fragment tables, two fresh processes per width on saved common seeds, the seven per-width columns, the locked precision budget and one data-ink log-log figure with the 1 ms target; scripts/prototypes/bank_batch_width/report.py:43-77 asserts each of those against the receipts and pooled/report.log records EXIT=0 with samples=8.\nVERDICT write_paths: the node was fenced to scripts/prototypes/bank_batch_width, docs/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html and docs/figures/sub-millisecond-forward-path/bank-batch-width; all five files in the diff fall inside them and no product or test file is touched.\nVERDICT manifest: read; status complete, eight commits listed beyond the base, tests names the sbatch device.sh command, and every receipt it cites ends EXIT=0: the 13 pooled/width-*-process-*.log child logs, pooled/report.log, pooled/device.log and pooled/figure-inspection.log.\nVERDICT diff: read commit by commit from 00c38a599e21 to 847f48f10778; eight commits add measure.py, report.py, device.sh, the fragment and the SVG, and change no product module and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html answers all three brief items, the width table, the limiting resource at 256 and the remaining 13.928-fold gap to 1 ms.\nSCORE evidence: 19\nJUSTIFICATION evidence: the REPORT line in pooled/report.log and the SUMMARY lines in pooled/width-{16,32,64,128}-process-{1,2}.log reconcile to the fragment table digit for digit, and each of those logs prints the H200 device identity above its result.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five files in git diff 00c38a599e21..847f48f10778 lie inside the three declared write paths and none of them is a product module or a test.\nSCORE durability: 15\nJUSTIFICATION durability: report.py:46 and report.py:43-44 are independent guards, the solve's own fresh-read residual and the compiler logger's cache events, and pooled/residual-control.log demonstrates the refusal at EXIT=1, but the brief forbids a test file so nothing runs them in a suite.\nSCORE fit: 19\nJUSTIFICATION fit: measure.py:1-6 follows the sibling prototype idiom of scripts/prototypes/tracked_read_steady_batch/measure.py, and ruff check passes clean on all three added scripts.\nSCORE reuse: 20\nJUSTIFICATION reuse: measure.py:19-23 reuse fixture, CacheEvents, analytic_oracle and _analytic_inputs and report.py:11 reuses save_checked, while no existing prototype owns a converged-solve width sweep.\nFINDING scripts/prototypes/bank_batch_width/measure.py:130 non-blocking: physical_bytes_estimate is derived as capacity/0.95 and the fragment presents that 150.114 GB as the allocator-visible physical capacity, while the capacity the script compares against is 142.608 GB; the width-256 refusal is unaffected because 183.694 GB exceeds both, but the published figure reads as observed rather than derived.\n",
+  "reuse_note": "searched scripts/prototypes for an existing owner of a batched width sweep. tracked_read_steady_batch/measure.py sweeps BATCHES over the read rather than the converged solve; bank_step_launch_fusion/sweep_width.py sweeps the local booking tangent on a P100; batched_factor/measure.py measures a moment correction. None owns the converged-solve width sweep, so the added runner does not fork an owned capability. The added files extend existing owners: scripts/prototypes/bank_solve_profile/fixture, scripts/prototypes/bank_booking_determinism/measure.CacheEvents with its measurement.sh, scripts/prototypes/bank_newton_converge/fresh_solve.analytic_oracle, tests/equilibrium/test_topology_read._analytic_inputs and scripts/prototypes/bank_solve_profile/plot.save_checked.",
+  "review_run_id": "r-20261107T000449718404-review-of-bank-batch-width-847f48f10778",
+  "reviewed_base_sha": "00c38a599e215bbe678cef8305b38bca898bf56f",
+  "reviewed_head_sha": "847f48f107789c3120ea90acc79db5de9cbbd3ee",
+  "reviewed_run_id": "r-20261106T225958281351-bank-batch-width",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T00:22:08.955459+00:00",
+  "total": 113
+}

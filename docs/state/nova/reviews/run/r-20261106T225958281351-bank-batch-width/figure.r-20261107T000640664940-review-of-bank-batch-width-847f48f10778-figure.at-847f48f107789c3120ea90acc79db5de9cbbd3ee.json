@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T00:09:08Z",
+  "figures": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-batch-width/wall-per-slice.svg",
+      "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T000640664940-review-of-bank-batch-width-847f48f10778-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The comparison is the coincidence itself, and both processes' exact walls are carried by the evidence fragment's table; the two are never more than 0.02 ms apart, so the merged trace states the result faithfully and the figure is not unreadable.",
+      "file": "scripts/prototypes/bank_batch_width/report.py",
+      "id": "fe010989a44",
+      "line": 82,
+      "severity": "non-blocking",
+      "summary": "Both processes are drawn in the same colour (#2e8b57) and their walls agree to within 0.03 ms per slice, so the dashed process-2 line renders entirely inside the solid process-1 line and the two markers sit concentrically at all four widths: the legend promises two series but the panel shows one trace, and a reader cannot see process 2's separate measurements or tell the two processes apart."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The brief requires the 1 ms target on the same axis, and that target is 13 ms below the data; the exact per-width result is read from the evidence fragment's table, so the compressed band does not hide a number a reader needs.",
+      "file": "scripts/prototypes/bank_batch_width/report.py",
+      "id": "f789732e2a0",
+      "line": 110,
+      "severity": "non-blocking",
+      "summary": "The y-axis spans 0.8 to 26.6 ms so the 1 ms target rule fits on the panel, while the measured values span only 13.9 to 19.0 ms per slice: the whole width trend occupies about 9 percent of the plot height and sits directly above the topmost labelled tick (16), so a reader can barely see the fall from 19.0 to 13.9 ms per slice or judge where it stops falling."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 axis, tick and legend text is near-black on white, and the green used for the data (#2e8b57) clears the white background above 3:1.",
+    "data_ink": "pass \u2014 the only marks are the two processes' four points, their connecting lines and one dotted target rule; there is no gradient, fill, shading or secondary series.",
+    "decoration": "pass \u2014 no gradient, background fill, band or stylised theme is present; the top and right spines are absent and the remaining two spines are plain rules.",
+    "label_collision": "pass \u2014 no label is clipped at any canvas edge, no two labels overlap, and no label sits on the data; the two processes' markers lie concentrically on top of each other, which is recorded below as a finding about series, not about labels.",
+    "legibility": "pass \u2014 the y label 'Converged solve wall per slice [ms]', the y ticks 1, 2, 4, 8, 16, the x ticks 16, 32, 64 and 128, and the x label 'Batch width [slices]' are all readable at the rendered size, and the three-entry legend sits clear of the panel.",
+    "table_form": "pass \u2014 the image plots a continuous relationship (wall per slice against batch width) on labelled log axes, and the exact per-process values are carried by the evidence fragment's table rather than by the picture."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass - axis labels, tick labels and legend readable at the rendered size.\nRUBRIC data_ink: pass - two four-point series, their lines and one target rule; no gradients or fills.\nRUBRIC decoration: pass - no gradient, fill, band or styled theme; top and right spines absent.\nRUBRIC contrast: pass - near-black text on white, green #2e8b57 above 3:1 on white.\nRUBRIC table_form: pass - a plotted continuous relationship, not tabular information.\nRUBRIC label_collision: pass - no clipped or overlapping labels, and no label over the data.\nFINDING (non-blocking) report.py:82 - both processes share one colour and coincide, so the dashed process-2 line and its square markers are hidden inside process 1's solid line and circles; the figure shows one trace where the legend promises two.\nFINDING (non-blocking) report.py:110 - the y axis spans 0.8 to 26.6 ms to hold the 1 ms target while the data span 13.9 to 19.0 ms, so the width trend occupies about 9 percent of the plot height above the topmost labelled tick.\n",
+  "review_run_id": "r-20261107T000640664940-review-of-bank-batch-width-847f48f10778-figure",
+  "reviewed_base_sha": "00c38a599e215bbe678cef8305b38bca898bf56f",
+  "reviewed_head_sha": "847f48f107789c3120ea90acc79db5de9cbbd3ee",
+  "reviewed_run_id": "r-20261106T225958281351-bank-batch-width",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass \u2014 axis, tick and legend text is near-black on white, and the green used for the data (#2e8b57) clears the white background above 3:1.",
+    "data_ink": "pass \u2014 the only marks are the two processes' four points, their connecting lines and one dotted target rule; there is no gradient, fill, shading or secondary series.",
+    "decoration": "pass \u2014 no gradient, background fill, band or stylised theme is present; the top and right spines are absent and the remaining two spines are plain rules.",
+    "label_collision": "pass \u2014 no label is clipped at any canvas edge, no two labels overlap, and no label sits on the data; the two processes' markers lie concentrically on each other, which is recorded below as a finding about series, not about labels.",
+    "legibility": "pass \u2014 the y label 'Converged solve wall per slice [ms]', the y ticks 1, 2, 4, 8, 16, the x ticks 16, 32, 64 and 128, and the x label 'Batch width [slices]' are all readable at the rendered size, and the three-entry legend sits clear of the panel.",
+    "table_form": "pass \u2014 the image plots a continuous relationship (wall per slice against batch width) on labelled log axes, and the exact per-process values are carried by the evidence fragment's table rather than by the picture."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T00:19:58.523642+00:00",
+  "total": null
+}

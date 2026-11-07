@@ -11,6 +11,13 @@
     }
   },
   "dispatched_at": "2026-11-07T20:29:19Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T20:46:19.466259+00:00"
+    }
+  },
   "findings": [
     "scripts/prototypes/diiid_axis_identification/capture_refusal.py:86 non-blocking: the record's `status` field carries `refused: TracerArrayConversionError` for the instrument's own traced-call failure, the same field and the same word a product refusal would use, so the run behind the fragment's null result is indistinguishable from a genuine refusal to anything reading the JSON alone.",
     "scripts/prototypes/diiid_axis_identification/capture_refusal.py:111 non-blocking: three read_qualification calls are recorded but only the last concrete field is saved (np.savez at :114), and the npz carries no call index, so the saved psi cannot be tied to the call site that produced it and a later probe cannot tell which of the two concrete calls it is reading.",

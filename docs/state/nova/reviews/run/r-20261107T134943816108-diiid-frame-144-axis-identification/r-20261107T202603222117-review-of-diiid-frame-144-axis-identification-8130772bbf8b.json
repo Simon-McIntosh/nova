@@ -1,0 +1,39 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-11-07T20:35:31.217Z",
+  "dispatched_at": "2026-11-07T20:29:19Z",
+  "findings": [
+    "scripts/prototypes/diiid_axis_identification/capture_refusal.py:86 non-blocking: the record's `status` field carries `refused: TracerArrayConversionError` for the instrument's own traced-call failure, the same field and the same word a product refusal would use, so the run behind the fragment's null result is indistinguishable from a genuine refusal to anything reading the JSON alone.",
+    "scripts/prototypes/diiid_axis_identification/capture_refusal.py:111 non-blocking: three read_qualification calls are recorded but only the last concrete field is saved (np.savez at :114), and the npz carries no call index, so the saved psi cannot be tied to the call site that produced it and a later probe cannot tell which of the two concrete calls it is reading.",
+    "scripts/prototypes/diiid_axis_identification/conjunct_probe.py:130 non-blocking: the probe still recomposes the admission expression (`governed_size >= floor`) and reports its own `admitted` boolean rather than the bit qualified_o_candidates returns, so the instrument agrees with the product only by construction and would not report a divergence in the product's composition (the earlier finding on the hardcoded 0.01 is fixed: _MATERIAL fraction imported at :30).",
+    "scripts/prototypes/diiid_axis_identification/capture_refusal.py:125 non-blocking: the process exits 0 for every outcome, including a run that captured no concrete field at all, so any gate keyed on the exit status reads an empty capture as a success."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T202603222117-review-of-diiid-frame-144-axis-identification-8130772bbf8b",
+  "review_text": "VERDICT goal: the goal is to name why the frame 144 limited seed refuses at axis identification; docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:92-108 now measures the field the solve reads and reports the axis admitted there too, so the earlier cache-only evidence is strengthened but the refusing rule is still unnamed.\nVERDICT done_when: the coverage clause is unchanged and recorded at two lattice spacings, and the reproduce clause is now supported by conjunct-captured-field.json, whose read_status is 'read_qualification returned' on 'captured field refusal-144-limited-b.npz'.\nVERDICT write_paths: all four commits touch scripts/prototypes/diiid_axis_identification/capture_refusal.py, conjunct_probe.py and the named fragment, every one inside the declared write paths.\nVERDICT manifest: read; it carries ten attributed retries, rubric self-checks, and no baseline_suite/after_suite arms, which is consistent with a root-cause node whose write paths hold no test file.\nVERDICT diff: read commit by commit (4a42e895c, c62c3a525, c60208af7, 8130772bb): 3 files, 190 insertions, 21 deletions, no product source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:100 states on every capturable field the axis is admitted, leaving the node's central question answered only negatively.\nSCORE evidence: 15\nJUSTIFICATION evidence: conjunct-captured-field.json records field_source, requested_class None and governed_size 397 for the axis candidate, but capture_refusal.py:86 files the instrument's own TracerArrayConversionError under the same status word a product refusal uses.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in 048a472ff..8130772bb is inside the declared write paths and no nova/ file is modified.\nSCORE durability: 4\nJUSTIFICATION durability: the increment adds two prototype scripts and evidence text and no assertion, so nothing reddens if the capture or the conjunct probe regresses.\nSCORE fit: 15\nJUSTIFICATION fit: capture_refusal.py:76-83 misindents the _solve call's arguments, and both scripts monkeypatch class methods as the surrounding prototypes do; conjunct_probe.py:66-68 now reads _MATERIAL_CONNECTED_FRACTION from nova/equilibrium/topology.py:41, answering the earlier hardcoded-fraction finding.\nSCORE reuse: 17\nJUSTIFICATION reuse: conjunct_probe.py:30 imports the product's fraction rather than restating it, but :129-130 still recomposes the admitted expression owned by nova/equilibrium/topology.py:1080-1099.\nFINDING scripts/prototypes/diiid_axis_identification/capture_refusal.py:86 non-blocking: an instrument failure is written to `status` as 'refused: TracerArrayConversionError', the same field and word a product refusal would use, so the run behind the fragment's null result reads as a refusal from the JSON alone.\nFINDING scripts/prototypes/diiid_axis_identification/capture_refusal.py:111 non-blocking: three calls are recorded but only the last concrete field is saved and the npz carries no call index, so the saved psi cannot be tied to the call it came from.\nFINDING scripts/prototypes/diiid_axis_identification/conjunct_probe.py:130 non-blocking: the probe recomposes the admission expression and reports its own admitted boolean instead of the product's returned bit, so it agrees with the product by construction rather than by measurement.\nFINDING scripts/prototypes/diiid_axis_identification/capture_refusal.py:125 non-blocking: the script exits 0 for every outcome including an empty capture, so a gate keyed on exit status reads a capture of nothing as a success.\n",
+  "reviewed_base_sha": "048a472ff17ba6eaa03eb57876722da7e7990f23",
+  "reviewed_head_sha": "8130772bbf8b17b93f666cafc922f5e088058a20",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "scores": {
+    "durability": 4,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:45:04.386526+00:00",
+  "total": 84,
+  "verdicts": {
+    "diff": "Read commit by commit from 048a472ff17b to 8130772bbf8b (4 commits, 3 files, 190 insertions, 21 deletions): a new capture_refusal.py, a --capture path through conjunct_probe.py that imports _MATERIAL_CONNECTED_FRACTION from the product, and the fragment's captured-field paragraph plus the census index-column correction.",
+    "done_when": "The done_when's coverage clause is unchanged and the fragment still records the two lattice spacings honestly; the reproduce clause is strengthened by the captured-field run, whose receipt conjunct-captured-field.json shows field_source 'captured field refusal-144-limited-b.npz' and read_qualification returning.",
+    "goal": "The goal is to name why the frame 144 limited seed refuses at axis identification; the four commits since 048a472ff capture the field the solve actually hands to read_qualification (capture_refusal.py, job 1308066) and probe it (conjunct-captured-field.json), finding the axis at (1.7868, 0.0180) admitted at governed_size 397 against floor 10, so the refusal is now shown not to reproduce on the solve's own field rather than only on the cache, while the rule that fired remains unnamed (fragment html:92-108).",
+    "manifest": "Read; status waiting on replay job 1308074, ten retry_failures each attributed, rubric self-checks present and honest, no baseline_suite or after_suite arms because no test file is in scope; changed_paths now lists conjunct_probe.py, answering the earlier omission.",
+    "write_paths": "Read the manifest's declared paths (scripts/prototypes/diiid_axis_identification, the fragment, docs/figures/diiid-frame-144-axis-identification); all four commits touch only capture_refusal.py, conjunct_probe.py and the fragment, all inside them, and no nova/ source is changed."
+  },
+  "verdicts_note": "see review_text"
+}

@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:3649 (panel subcommand)",
+    "benchmarks/coil_edit_latency.py:3244 (run path into _render_panel)",
+    "scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:261"
+  ],
+  "completed_at": "2026-11-07T17:26:56.538Z",
+  "dispatched_at": "2026-11-07T17:15:30Z",
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "559",
+      "severity": "non-blocking",
+      "text": "non-blocking: panel[\"visual_inspection\"] is the very dict object the patched _label_defects returned into captured[\"counts\"], so the assertion compares a value with itself and holds whatever the renderer does."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "604",
+      "severity": "non-blocking",
+      "text": "non-blocking: the title assertion is fed the circuit_context by the test itself and nothing asserts benchmarks/coil_edit_latency.py:764-769 still populates family and circuit, so deleting those two keys would leave the test green while every rendered title fell back to \"boundary-circuit current\"."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "2108",
+      "severity": "non-blocking",
+      "text": "non-blocking: _hollow_markers post-processes the artists nova/media/poloidal.py:540 draw_nulls just appended, in a module that already parameterises null colour and marker through InkStyle.variant at benchmarks/coil_edit_latency.py:2098, so the fill decision is now made away from its owner."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the redraw replaced the published receipt with the panel subcommand's six-key output and dropped state_archive, state_archive_md5, solve, render, set, figure, figure_vector, assembly_drawn and near_x_geometry, so the receipt no longer records the archive digest or the source revision the figure was drawn from."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "428",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_committed_converged_panel_uses_its_terminal_currents was the only executed guard on the published receipt's display_map and it was deselected from both arms; the compared display_map is in fact unchanged between base and head, so the exclusion is defensible but leaves the claim unverified by any run."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "non-blocking: measurement_command carries an unsubstituted \"<run>\" placeholder and the counts were measured from a fresh render into the run directory rather than from the published titan-converged-vs-nonconverged.png beside the receipt, which the removed inspected_render key no longer identifies."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against fb6f1726; 792beb13d carries the code and tests, b14f60f7b and bc81c7959 the captions, 39f9f8ede the single-grid receipt and 9d4e0f6bc the redrawn figure and its receipt, and the archive is spliced with three caption lines replaced rather than rewritten.",
+    "done_when": "the done_when asks for re-rendered panels, matching captions and base-and-head test arms with a negative control; the manifest records a head arm of 10 passed 1 deselected at bc81c7959 in head-gate.log, a two-failure negative control at negative-control.log, and the H200 render at render-panel-h200.log, but records no base arm (baseline_suite null) and deselects the one test that reads the rewritten receipt.",
+    "goal": "the node goal is to re-render the coil-edit panels and make every caption describe the rendition drawn; benchmarks/coil_edit_latency.py:2459 now titles each panel with the edited circuit and \"of the seed\", benchmarks/coil_edit_latency.py:2218 hollows the reference null set beneath the solved one, benchmarks/coil_edit_latency.py:3670 persists the caption on the panel path, and docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:177 plus three blocks of docs/evidence/archive/forward-solve-api-landed.html now name edit 12 and edit 9.",
+    "manifest": "read; it reports status complete, the five commits 792beb13d through 9d4e0f6bc, the head gate at tests/test_coil_edit_panel_render.py with one test deselected, and its own rubric lines, and it states in rubric.test_arms that no base arm was run.",
+    "write_paths": "the declared paths are benchmarks/coil_edit_latency.py, docs/figures/forward-solve-api/coil-edit-nonconvergence/, docs/evidence/archive/forward-solve-api-landed.html, docs/figures/single-grid-solver-cutover/panel-receipt.json and tests/test_coil_edit_panel_render.py; all eight paths in the diff sit inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:580 reddens when the hollowing is disabled, but line 559 compares panel[\"visual_inspection\"] against the same dict object the patched _label_defects returned.",
+    "evidence": "head-gate.log records 10 passed and EXIT=0 but tests/test_coil_edit_panel_render.py:428 was deselected and the manifest records baseline_suite null, so the done_when's base arm never ran even though zero head failures make added failures provably zero.",
+    "fit": "the added helpers at benchmarks/coil_edit_latency.py:2108 and benchmarks/coil_edit_latency.py:2272 follow the module's private-helper and percent-format idiom and carry no plan or ticket reference.",
+    "goal_fidelity": "benchmarks/coil_edit_latency.py:2459 and docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:177 now name the rendition actually drawn, and I verified the caption's edit 12 residual 5.730e-09 and edit 9 residual 6.612e-03 with three trips each against panel-states.npz.",
+    "reuse": "benchmarks/coil_edit_latency.py:2108 rewrites marker artists after the fact instead of extending nova/media/poloidal.py:540 draw_nulls, which already takes its null styling through InkStyle.variant and fixes markerfacecolor at poloidal.py:660.",
+    "scope_discipline": "every path in the diff is inside the five declared write paths, and the archive change at docs/evidence/archive/forward-solve-api-landed.html:331 replaces three caption lines and deletes nothing else."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to re-render the coil-edit panels and make every caption describe the rendition drawn; benchmarks/coil_edit_latency.py:2459 now titles each panel with the edited circuit and \"of the seed\", benchmarks/coil_edit_latency.py:2218 hollows the reference null set beneath the solved one, benchmarks/coil_edit_latency.py:3670 persists the caption on the panel path, and docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:177 plus three blocks of docs/evidence/archive/forward-solve-api-landed.html now name edit 12 and edit 9.\nVERDICT done_when: the done_when asks for re-rendered panels, matching captions and base-and-head test arms with a negative control; the manifest records a head arm of 10 passed 1 deselected at bc81c7959 in head-gate.log, a two-failure negative control at negative-control.log, and the H200 render at render-panel-h200.log, but records no base arm (baseline_suite null) and deselects the one test that reads the rewritten receipt.\nVERDICT write_paths: the declared paths are benchmarks/coil_edit_latency.py, docs/figures/forward-solve-api/coil-edit-nonconvergence/, docs/evidence/archive/forward-solve-api-landed.html, docs/figures/single-grid-solver-cutover/panel-receipt.json and tests/test_coil_edit_panel_render.py; all eight paths in the diff sit inside them.\nVERDICT manifest: read; it reports status complete, the five commits 792beb13d through 9d4e0f6bc, the head gate at tests/test_coil_edit_panel_render.py with one test deselected, and its own rubric lines, and it states in rubric.test_arms that no base arm was run.\nVERDICT diff: read commit by commit against fb6f1726; 792beb13d carries the code and tests, b14f60f7b and bc81c7959 the captions, 39f9f8ede the single-grid receipt and 9d4e0f6bc the redrawn figure and its receipt, and the archive is spliced with three caption lines replaced rather than rewritten.\nCALL_SITES: benchmarks/coil_edit_latency.py:3649 (panel subcommand), benchmarks/coil_edit_latency.py:3244 (run path into _render_panel), scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py:261\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:2459 and docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:177 now name the rendition actually drawn, and I verified the caption's edit 12 residual 5.730e-09 and edit 9 residual 6.612e-03 with three trips each against panel-states.npz.\nSCORE evidence: 13\nJUSTIFICATION evidence: head-gate.log records 10 passed and EXIT=0 but tests/test_coil_edit_panel_render.py:428 was deselected and the manifest records baseline_suite null, so the done_when's base arm never ran even though zero head failures make added failures provably zero.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in the diff is inside the five declared write paths, and the archive change at docs/evidence/archive/forward-solve-api-landed.html:331 replaces three caption lines and deletes nothing else.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:580 reddens when the hollowing is disabled, but line 559 compares panel[\"visual_inspection\"] against the same dict object the patched _label_defects returned.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers at benchmarks/coil_edit_latency.py:2108 and benchmarks/coil_edit_latency.py:2272 follow the module's private-helper and percent-format idiom and carry no plan or ticket reference.\nSCORE reuse: 10\nJUSTIFICATION reuse: benchmarks/coil_edit_latency.py:2108 rewrites marker artists after the fact instead of extending nova/media/poloidal.py:540 draw_nulls, which already takes its null styling through InkStyle.variant and fixes markerfacecolor at poloidal.py:660.\nFINDING tests/test_coil_edit_panel_render.py:559 non-blocking: panel[\"visual_inspection\"] is the very dict object the patched _label_defects returned into captured[\"counts\"], so the assertion compares a value with itself and holds whatever the renderer does.\nFINDING tests/test_coil_edit_panel_render.py:604 non-blocking: the title assertion is fed the circuit_context by the test itself and nothing asserts benchmarks/coil_edit_latency.py:764-769 still populates family and circuit, so deleting those two keys would leave the test green while every rendered title fell back to \"boundary-circuit current\".\nFINDING benchmarks/coil_edit_latency.py:2108 non-blocking: _hollow_markers post-processes the artists nova/media/poloidal.py:540 draw_nulls just appended, in a module that already parameterises null colour and marker through InkStyle.variant at benchmarks/coil_edit_latency.py:2098, so the fill decision is now made away from its owner.\nFINDING docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json:1 non-blocking: the redraw replaced the published receipt with the panel subcommand's six-key output and dropped state_archive, state_archive_md5, solve, render, set, figure, figure_vector, assembly_drawn and near_x_geometry, so the receipt no longer records the archive digest or the source revision the figure was drawn from.\nFINDING tests/test_coil_edit_panel_render.py:428 non-blocking: test_committed_converged_panel_uses_its_terminal_currents was the only executed guard on the published receipt's display_map and it was deselected from both arms; the compared display_map is in fact unchanged between base and head, so the exclusion is defensible but leaves the claim unverified by any run.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:81 non-blocking: measurement_command carries an unsubstituted \"<run>\" placeholder and the counts were measured from a fresh render into the run directory rather than from the published titan-converged-vs-nonconverged.png beside the receipt, which the removed inspected_render key no longer identifies.",
+  "review_run_id": "r-20261107T171327465872-review-of-coil-edit-panel-captions-9d4e0f6bccbe",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "9d4e0f6bccbece8ca8d1dd0c4c0e59651e1a1abd",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 10,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T17:34:37.206679+00:00",
+  "total": 90
+}

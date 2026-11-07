@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_note": "Two attachments were named. .../docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png (1400x720 RGBA) and the review run's image-1.png. image-1.png is a re-encoded copy of the same 1400x720 picture (different SHA-256, identical panel titles, contours and null markers at identical positions), so both attachments are judged as the one figure and every verdict below describes that figure.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T17:18:40Z",
+  "figures_reviewed": [
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+      "id": "f79289581dc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The reference flux contours read at 1.52:1 against the white canvas. The script asks for #9aa4b2 (2.52:1) through the house 0.35 pt contour stroke, which is 0.49 px at 100 dpi, so the stroke never reaches its own colour: no pixel of the rendered 1400x720 PNG is #9aa4b2 and the darkest reference-contour pixels measure #cdd2d9. The reference field is the comparison the figure exists to make, and beside the 3.37:1 orange solved contours it reads at page scale only as faint grey lines. It is visible, so a reader can still read the figure, but it sits below the 3:1 floor the repository's plotting rules set for a mark that has to read."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "ffb8fe1488b",
+      "line": 2160,
+      "severity": "non-blocking",
+      "summary": "The image identifies no series: it carries no legend and no direct label, and the reference set is not one colour - the reference flux contours are pale blue-grey (#9aa4b2) while the reference separatrix branches (#3366cc) and reference null markers are saturated blue. A reader can infer the orange marks as the solved state from the filled orange axis and saddle markers, but nothing in the picture says which contour family is the reference or which dashed trace is which set; the encoding is stated only in the page caption."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass - the title text is pure black on white (measured 21.0:1) and the wall and coil outlines are black; the one mark below the 3:1 floor is the reference-contour family, recorded as finding 1 rather than counted against the text.",
+    "data_ink": "pass - the field is drawn as unfilled line contours on one shared level array, over the black wall outline, with both null sets; there is no filled contour, no colour map, no scatter and no painted surface, so every mark in the panel is data.",
+    "decoration": "pass - the canvas is plain white, both poloidal panels have their axes off, and there is no gridline, background fill, shading band, frame or shadow anywhere in the image.",
+    "label_collision": "pass - measured on the rendered PNG: title ink spans x 48-1363 of 1400 with an 89 px blank gutter between the two panels' first title line, the top margin is 6 px and the right margin 37 px, no axis or tick label is drawn, and no label touches the data (title ink ends at row 44, data ink begins at row 53).",
+    "legibility": "pass - each panel carries a two-line title at the top naming the edit, the perturbed circuit, the perturbation with its base, the convergence flag, the terminal residual with its unit (Wb) and the active-set iteration count; both titles remain readable at the page's 900 px column width, the two panels' converged and not-converged shapes read at a glance, and the hollow reference marker is visible around the filled solved one at the magnetic axis and at the X-point.",
+    "table_form": "pass - the figure depicts a spatial poloidal flux map and its null positions; the information is the geometry of two fields against a shared wall, which is not a set of values that reads as a table."
+  },
+  "measurements": {
+    "attachments_compared": "image-1.png and the repository PNG are the same picture; SHA-256 differs (re-encode) but dimensions, titles, contours and markers match.",
+    "colours_measured": {
+      "reference_branches_and_nulls": "#3366cc at 5.37:1",
+      "reference_contours_rendered_darkest": "#cdd2d9 at 1.52:1",
+      "reference_contours_specified": "#9aa4b2 at 2.52:1, present in 0 pixels",
+      "solved_contours_and_branches": "#cc7722 at 3.37:1, 1239 full-strength pixels",
+      "title_text": "#000000 at 21.0:1"
+    },
+    "data_ink_starts_row": 53,
+    "image": "1400x720 RGBA, 100 dpi, matplotlib 3.11.1",
+    "ink_bbox": "rows 6-715, columns 48-1363",
+    "page_scale_check": "rendered at 900 px wide (the reckon column width) the reference-contour family retains 11408 of 25635 native pale pixels proportionally and stays visible as faint grey lines; at 700 px it is still present (6501 pixels). No series disappears.",
+    "title_band": "line 1 rows 6-20 spanning x 48-1363 with a blank run x 649-737 between the panels; line 2 rows 30-44 spanning x 133-1267"
+  },
+  "notes": "Read-only review: no file was edited, redrawn, relabelled or reformatted, and no SVG was opened. The page caption in coil-edit-nonconvergence.html was read only to check that it is not a restatement of the title; it carries the edit numbers, residuals, iteration counts, reference/solved encoding and the display-map figures, so no caption finding is recorded. The reviewed run's own claim that the receipt measures 0 clipped and 0 overlapping labels was not taken on trust: the title bands were re-measured directly on the PNG as recorded above and agree.",
+  "project": "nova",
+  "review_run_id": "r-20261107T171546934311-review-of-coil-edit-panel-captions-9d4e0f6bccbe-figure",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "9d4e0f6bccbece8ca8d1dd0c4c0e59651e1a1abd",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T17:31:51.925240+00:00",
+  "total": null
+}

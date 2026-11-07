@@ -60,6 +60,8 @@ def main():
         )
         seeds = jnp.asarray(archive["stationary"][: args.lanes])
 
+    accepted_states = []
+
     def continuation_solve(
         _operands,
         _cache,
@@ -77,9 +79,15 @@ def main():
         tolerance=1e-10,
         **_options,
     ):
-        return predecessor.solve(
+        attempt = predecessor.solve(
             drive, state, seed, warm, max_steps=max_steps, tolerance=tolerance
         )
+        if (
+            bool(jnp.all(attempt.converged))
+            and float(jnp.max(attempt.residual)) <= tolerance
+        ):
+            accepted_states.append((float(drive), attempt.moments))
+        return attempt
 
     reached = drive_continuation.advance_drive(
         None,
@@ -175,6 +183,44 @@ def main():
             boundary_flux_delta_max=float(
                 np.max(np.abs(np.asarray(reading.boundary_flux) - base_boundary_flux))
             ),
+        )
+
+    @jax.jit
+    def singular_values(one_state, amplitude):
+        profile = streams.scaled_profile(machine.profile, amplitude)
+        support = support_read.read(
+            machine.operands,
+            machine.cache,
+            one_state,
+            seeds[0],
+            seeds[0],
+            machine.convention,
+            machine.policy,
+        )
+        matrix = support_read.step_jacobian(
+            machine.operands,
+            one_state,
+            support,
+            profile,
+            profile_fixture.gradient,
+            machine.quadrature,
+            fresh_geometry=True,
+        )
+        singular = jnp.linalg.svd(matrix, compute_uv=False)
+        return singular[0], singular[-1], support.valid
+
+    for accepted_drive, accepted_state in accepted_states[-3:]:
+        largest, smallest, valid = singular_values(
+            tuple(value[0] for value in accepted_state),
+            jnp.asarray(accepted_drive),
+        )
+        emit(
+            "CONDITION",
+            drive=accepted_drive,
+            largest_singular=float(largest),
+            smallest_singular=float(smallest),
+            condition_number=float(largest / smallest),
+            valid=bool(valid),
         )
     emit("DONE", drive=drive)
 

@@ -1,0 +1,7966 @@
+{
+ "warm": {
+  "revision": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "amplitude": 1.01,
+  "lane": 0,
+  "seed_residual": 1.7961880123533547,
+  "terminal_residual": 1.2710224858233659,
+  "reads": [
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429
+  ],
+  "updates": [
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60
+  ],
+  "converged": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "residual_path": [
+   1.7961880123533547,
+   1.347141009265016,
+   1.3190716909353881,
+   1.2574450188686512,
+   1.2407068126177947,
+   1.0954367940640637,
+   0.9236645273957933,
+   0.5673681030814421,
+   0.5590164752773603,
+   0.49098037165877173,
+   0.47729133314695105,
+   0.4813173585045831,
+   0.5116143796172992,
+   0.5081090218616282,
+   0.5073592475990836,
+   0.5238402579105212,
+   0.5221764903036927,
+   0.526829123565733,
+   0.5406082255013303,
+   0.5394504328053529,
+   0.5541520664007606,
+   0.5525280689677459,
+   0.5591958289231087,
+   0.563980652500959,
+   0.5746424955914051,
+   0.5744336714871849,
+   0.7263984689213885,
+   0.690911543194332,
+   0.6857679555767362,
+   0.6981513056773565,
+   0.6958548137463509,
+   0.7115275930883627,
+   0.7094149810133246,
+   0.795128257816657,
+   0.7702443073922467,
+   0.766312346557342,
+   0.8015301319873345,
+   0.7905807217888139,
+   0.7913127074426995,
+   0.8600494093828246,
+   0.834701877176002,
+   0.833916424446187,
+   0.9566567566666748,
+   0.902599354349519,
+   0.8985149326062185,
+   1.5294852968277297,
+   1.2287618006998713,
+   1.2968643806782723,
+   1.2642385624831007,
+   1.2551558519200086,
+   1.2557157336323144,
+   1.2564245131451628,
+   1.2574771943603764,
+   1.2568311414043762,
+   1.264280940121381,
+   1.2573581353407093,
+   1.32460845549258,
+   1.2646293466989533,
+   1.265531766660601,
+   1.2650371721987455,
+   1.2710224858233659
+  ],
+  "table": [
+   {
+    "update": 0,
+    "incumbent": 1.7961880123533547,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.347141009265016,
+    "trials": [
+     {
+      "scale": 1.000000000000019,
+      "residual": 12.426079635395617,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000342,
+      "residual": 2.4848043026586453,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000001527,
+      "residual": 1.347141009265016,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 2015.2294556679906,
+    "krylov_iterations": 40,
+    "cumulative_reads": 4,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 115,
+     "normal_cells": 8,
+     "fragments": 336,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7854542244786882,
+      0.04577567551180594
+     ],
+     "axis_flux": 0.03571947923140501,
+     "boundary_flux": -7.911270032120628e-05
+    }
+   },
+   {
+    "update": 1,
+    "incumbent": 1.347141009265016,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.3190716909353881,
+    "trials": [
+     {
+      "scale": 1.0000000000001532,
+      "residual": 10.22676994124076,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000146,
+      "residual": 3.1817401213055803,
+      "valid": true
+     },
+     {
+      "scale": 0.250000000000073,
+      "residual": 1.3190716909353881,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 321.54761412718176,
+    "krylov_iterations": 40,
+    "cumulative_reads": 7,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7843317287211817,
+      0.044962216396397435
+     ],
+     "axis_flux": 0.03561216010972632,
+     "boundary_flux": -0.00013421974434324707
+    }
+   },
+   {
+    "update": 2,
+    "incumbent": 1.3190716909353881,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.2574450188686512,
+    "trials": [
+     {
+      "scale": 1.0000000000000318,
+      "residual": 5.5506477912703645,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000001124,
+      "residual": 2.180548880966178,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000672,
+      "residual": 1.3904661701191259,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000138115,
+      "residual": 1.2574450188686512,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 310.0470199770971,
+    "krylov_iterations": 40,
+    "cumulative_reads": 11,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7839217461576529,
+      0.04466721067980934
+     ],
+     "axis_flux": 0.035573474931995884,
+     "boundary_flux": -0.00015387359417133503
+    }
+   },
+   {
+    "update": 3,
+    "incumbent": 1.2574450188686512,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.2407068126177947,
+    "trials": [
+     {
+      "scale": 1.0000000000000429,
+      "residual": 4.886379885533117,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000199539,
+      "residual": 2.1348656075119843,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000997696,
+      "residual": 1.2407068126177947,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 289.9159979014319,
+    "krylov_iterations": 40,
+    "cumulative_reads": 14,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 120,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7832133354304338,
+      0.04415728476925185
+     ],
+     "axis_flux": 0.03550672010534402,
+     "boundary_flux": -0.0001876578252800568
+    }
+   },
+   {
+    "update": 4,
+    "incumbent": 1.2407068126177947,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.0954367940640637,
+    "trials": [
+     {
+      "scale": 1.0000000000020142,
+      "residual": 2.3707462237736863,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001023,
+      "residual": 1.2553574852009959,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000163786,
+      "residual": 1.0954367940640637,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 252.3184378106461,
+    "krylov_iterations": 40,
+    "cumulative_reads": 17,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 120,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7826965543651703,
+      0.04377630677940452
+     ],
+     "axis_flux": 0.03545797705158573,
+     "boundary_flux": -0.0002120583216848364
+    }
+   },
+   {
+    "update": 5,
+    "incumbent": 1.0954367940640637,
+    "accepted_scale": 0.5,
+    "accepted_residual": 0.9236645273957933,
+    "trials": [
+     {
+      "scale": 1.0000000000004317,
+      "residual": 1.422027125868432,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001078,
+      "residual": 0.9236645273957933,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 218.94612709777644,
+    "krylov_iterations": 40,
+    "cumulative_reads": 19,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7819376707027041,
+      0.043201419474030604
+     ],
+     "axis_flux": 0.035385963977772016,
+     "boundary_flux": -0.0002479709152135913
+    }
+   },
+   {
+    "update": 6,
+    "incumbent": 0.9236645273957933,
+    "accepted_scale": 0.5,
+    "accepted_residual": 0.5673681030814421,
+    "trials": [
+     {
+      "scale": 1.0000000000001292,
+      "residual": 1.5790489975405393,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000006761,
+      "residual": 0.5673681030814421,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 184.19818883432194,
+    "krylov_iterations": 40,
+    "cumulative_reads": 21,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7815712064239826,
+      0.042911326840026534
+     ],
+     "axis_flux": 0.035350772533852576,
+     "boundary_flux": -0.00026528837120545626
+    }
+   },
+   {
+    "update": 7,
+    "incumbent": 0.5673681030814421,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 0.5590164752773603,
+    "trials": [
+     {
+      "scale": 1.000000000000011,
+      "residual": 10.53197956246997,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001616,
+      "residual": 5.290115220869751,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000017775,
+      "residual": 2.612417115797186,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000168146,
+      "residual": 1.2596737493850014,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000084073,
+      "residual": 0.5803995268735633,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000027266,
+      "residual": 0.5590164752773603,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 221.01086920639182,
+    "krylov_iterations": 40,
+    "cumulative_reads": 27,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814571931997276,
+      0.042876633386916885
+     ],
+     "axis_flux": 0.03533363082332637,
+     "boundary_flux": -0.0002750171109696011
+    }
+   },
+   {
+    "update": 8,
+    "incumbent": 0.5590164752773603,
+    "accepted_scale": 0.125,
+    "accepted_residual": 0.49098037165877173,
+    "trials": [
+     {
+      "scale": 1.000000000000607,
+      "residual": 2.361727792368548,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000017357,
+      "residual": 1.8831320317628055,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000162026,
+      "residual": 0.8051077473012214,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000028144,
+      "residual": 0.49098037165877173,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 1800.4401184756098,
+    "krylov_iterations": 40,
+    "cumulative_reads": 31,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7815141229891922,
+      0.042867043639869075
+     ],
+     "axis_flux": 0.03534516531004592,
+     "boundary_flux": -0.0002680500399444023
+    }
+   },
+   {
+    "update": 9,
+    "incumbent": 0.49098037165877173,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 0.47729133314695105,
+    "trials": [
+     {
+      "scale": 1.0000000000000255,
+      "residual": 5.367207357047647,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000019836,
+      "residual": 2.661189409425461,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000002141,
+      "residual": 1.2954268923460859,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000148773,
+      "residual": 0.6392797552353215,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000028995,
+      "residual": 0.47729133314695105,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 202.05722743654246,
+    "krylov_iterations": 40,
+    "cumulative_reads": 36,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781392970064481,
+      0.042826519780301525
+     ],
+     "axis_flux": 0.03532738643519961,
+     "boundary_flux": -0.00027807885827488775
+    }
+   },
+   {
+    "update": 10,
+    "incumbent": 0.47729133314695105,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.4813173585045831,
+    "trials": [
+     {
+      "scale": 1.0000000000001146,
+      "residual": 12.37712209514389,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000021159,
+      "residual": 5.830096287203467,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000006328,
+      "residual": 2.7294343746158773,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000003164,
+      "residual": 1.690004503707769,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000042888,
+      "residual": 0.8478916490415429,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000040431,
+      "residual": 0.5753576861491183,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000002049767,
+      "residual": 0.4998904869998597,
+      "valid": true
+     },
+     {
+      "scale": 0.00781250000039671,
+      "residual": 0.4813173585045831,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 181.19229592660042,
+    "krylov_iterations": 40,
+    "cumulative_reads": 44,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814192419518204,
+      0.04283175836964467
+     ],
+     "axis_flux": 0.03533162102013881,
+     "boundary_flux": -0.00027563455935694707
+    }
+   },
+   {
+    "update": 11,
+    "incumbent": 0.4813173585045831,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5116143796172992,
+    "trials": [
+     {
+      "scale": 1.0000000000000269,
+      "residual": 33.52343634121426,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002301,
+      "residual": 13.261413140410099,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000106626,
+      "residual": 6.84186114637167,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000053313,
+      "residual": 3.5469001347797047,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000043225,
+      "residual": 1.8701587579466832,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000216126,
+      "residual": 1.0251961814481518,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000015349,
+      "residual": 0.6196048984980393,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000152529,
+      "residual": 0.5116143796172992,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 244.9525714674896,
+    "krylov_iterations": 40,
+    "cumulative_reads": 52,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813520969505034,
+      0.04281402333079851
+     ],
+     "axis_flux": 0.035321274521321555,
+     "boundary_flux": -0.0002815439603312669
+    }
+   },
+   {
+    "update": 12,
+    "incumbent": 0.5116143796172992,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 0.5081090218616282,
+    "trials": [
+     {
+      "scale": 1.0000000000000882,
+      "residual": 3.4816735869747077,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000056621,
+      "residual": 2.6494420153502105,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000283107,
+      "residual": 1.2089478536313578,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000161202,
+      "residual": 0.6927899028713682,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000080601,
+      "residual": 0.5466708776692428,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000403004,
+      "residual": 0.5131699702221084,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000454362,
+      "residual": 0.5081090218616282,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 346.30264666050607,
+    "krylov_iterations": 40,
+    "cumulative_reads": 59,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813660911543712,
+      0.04281505333330204
+     ],
+     "axis_flux": 0.03532372253137559,
+     "boundary_flux": -0.00028010500327692105
+    }
+   },
+   {
+    "update": 13,
+    "incumbent": 0.5081090218616282,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5073592475990836,
+    "trials": [
+     {
+      "scale": 1.0000000000003348,
+      "residual": 7.176119275018884,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000021835,
+      "residual": 3.331587526368317,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000032807,
+      "residual": 2.2402385072172635,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000106648,
+      "residual": 1.0620506439879023,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000191053,
+      "residual": 0.655870870982298,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000955264,
+      "residual": 0.540756043859858,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000477632,
+      "residual": 0.5127932635072057,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000187524,
+      "residual": 0.5073592475990836,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 218.25935861826179,
+    "krylov_iterations": 40,
+    "cumulative_reads": 67,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781381316659069,
+      0.04281760037558958
+     ],
+     "axis_flux": 0.03532622774559463,
+     "boundary_flux": -0.0002786518059912986
+    }
+   },
+   {
+    "update": 14,
+    "incumbent": 0.5073592475990836,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5238402579105212,
+    "trials": [
+     {
+      "scale": 1.0000000000000089,
+      "residual": 22.21815018809375,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000007165,
+      "residual": 10.36321215126948,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000107486,
+      "residual": 4.902623624022972,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000053743,
+      "residual": 2.2814857817281364,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000220066,
+      "residual": 1.4008498366253264,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000110033,
+      "residual": 0.7722745915617111,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000550164,
+      "residual": 0.5770903204601012,
+      "valid": true
+     },
+     {
+      "scale": 0.00781250000063563,
+      "residual": 0.5238402579105212,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 162.82966693552115,
+    "krylov_iterations": 40,
+    "cumulative_reads": 75,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814277959273335,
+      0.042827821361055646
+     ],
+     "axis_flux": 0.03533360786572888,
+     "boundary_flux": -0.00027440622933042335
+    }
+   },
+   {
+    "update": 15,
+    "incumbent": 0.5238402579105212,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5221764903036927,
+    "trials": [
+     {
+      "scale": 1.0000000000000713,
+      "residual": 8.31534343543693,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000004333,
+      "residual": 4.26358789547416,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000005417,
+      "residual": 2.2005678903360604,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000003611,
+      "residual": 1.1607199557191024,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000166349,
+      "residual": 0.6687832112103678,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000019282,
+      "residual": 0.5485956899208588,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000166565,
+      "residual": 0.5255544049962282,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001871418,
+      "residual": 0.5221764903036927,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 231.63557063557434,
+    "krylov_iterations": 40,
+    "cumulative_reads": 83,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814059280771897,
+      0.042821276150091056
+     ],
+     "axis_flux": 0.035330323089046364,
+     "boundary_flux": -0.00027627035939888994
+    }
+   },
+   {
+    "update": 16,
+    "incumbent": 0.5221764903036927,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.526829123565733,
+    "trials": [
+     {
+      "scale": 1.0000000000000526,
+      "residual": 14.231384447539355,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000007279,
+      "residual": 7.338949394396522,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000223543,
+      "residual": 3.801592333270804,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000111772,
+      "residual": 2.000992213325219,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000109186,
+      "residual": 1.093593223573322,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000054593,
+      "residual": 0.6611609305021062,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000001816297,
+      "residual": 0.5501858821407382,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000354855,
+      "residual": 0.526829123565733,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 250.12851078936046,
+    "krylov_iterations": 40,
+    "cumulative_reads": 91,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781369082122353,
+      0.04281107825272596
+     ],
+     "axis_flux": 0.035324701440298215,
+     "boundary_flux": -0.0002794735704320954
+    }
+   },
+   {
+    "update": 17,
+    "incumbent": 0.526829123565733,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5406082255013303,
+    "trials": [
+     {
+      "scale": 1.0000000000001195,
+      "residual": 20.52017096800421,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000022531,
+      "residual": 9.5816659804658,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000007307,
+      "residual": 4.519721620116641,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000082534,
+      "residual": 2.0834288907409686,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000197141,
+      "residual": 1.3215330066818893,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000985705,
+      "residual": 0.7585447237437108,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000395475,
+      "residual": 0.586799959851021,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001372949,
+      "residual": 0.5406082255013303,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 162.22909365362185,
+    "krylov_iterations": 40,
+    "cumulative_reads": 99,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814123182213109,
+      0.04282050601680312
+     ],
+     "axis_flux": 0.03533157018834585,
+     "boundary_flux": -0.00027552113486604176
+    }
+   },
+   {
+    "update": 18,
+    "incumbent": 0.5406082255013303,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5394504328053529,
+    "trials": [
+     {
+      "scale": 1.000000000000035,
+      "residual": 9.155064426886867,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000007394,
+      "residual": 4.711053150731956,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000011091,
+      "residual": 2.444042733842437,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000022708,
+      "residual": 1.299430702232911,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000011354,
+      "residual": 0.7347904977823134,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000005677,
+      "residual": 0.5759804115465386,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000531453,
+      "residual": 0.5446846558378269,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001005142,
+      "residual": 0.5394504328053529,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 238.32220568790473,
+    "krylov_iterations": 40,
+    "cumulative_reads": 107,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781388436910785,
+      0.042813506449236614
+     ],
+     "axis_flux": 0.03532796924593153,
+     "boundary_flux": -0.0002775668646531954
+    }
+   },
+   {
+    "update": 19,
+    "incumbent": 0.5394504328053529,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5541520664007606,
+    "trials": [
+     {
+      "scale": 1.00000000000002,
+      "residual": 21.627759270134096,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000007422,
+      "residual": 10.285082009264627,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000003194,
+      "residual": 5.334198714545877,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000074524,
+      "residual": 2.7993334967169545,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000037262,
+      "residual": 1.5150708862933158,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000200258,
+      "residual": 0.8692281446347891,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000100129,
+      "residual": 0.610644608688375,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000500645,
+      "residual": 0.5541520664007606,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 254.87656277040003,
+    "krylov_iterations": 40,
+    "cumulative_reads": 115,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813368604206885,
+      0.042799756666066294
+     ],
+     "axis_flux": 0.03532004942643998,
+     "boundary_flux": -0.0002820874657454671
+    }
+   },
+   {
+    "update": 20,
+    "incumbent": 0.5541520664007606,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5525280689677459,
+    "trials": [
+     {
+      "scale": 1.00000000000033,
+      "residual": 6.420102355188028,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000003219,
+      "residual": 2.942322003263861,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000023067,
+      "residual": 2.051934108605572,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000115336,
+      "residual": 1.0163462895382906,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000057668,
+      "residual": 0.6721308539305255,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000031687,
+      "residual": 0.5778163385663362,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000070416,
+      "residual": 0.5561181301204101,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001225426,
+      "residual": 0.5525280689677459,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 222.27363876194585,
+    "krylov_iterations": 40,
+    "cumulative_reads": 123,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813506557265602,
+      0.04280199421311807
+     ],
+     "axis_flux": 0.03532232215440662,
+     "boundary_flux": -0.00028076818397134926
+    }
+   },
+   {
+    "update": 21,
+    "incumbent": 0.5525280689677459,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5591958289231087,
+    "trials": [
+     {
+      "scale": 1.000000000000053,
+      "residual": 15.315053281187481,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002959,
+      "residual": 7.171741320275608,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000232486,
+      "residual": 3.3460868279021767,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000116243,
+      "residual": 2.144133746056582,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000058122,
+      "residual": 1.0625027833462752,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000031097,
+      "residual": 0.6924135865912149,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000182337,
+      "residual": 0.5862065920352251,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000199032,
+      "residual": 0.5591958289231087,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 164.50325121266772,
+    "krylov_iterations": 40,
+    "cumulative_reads": 131,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813834877040384,
+      0.0428088815389447
+     ],
+     "axis_flux": 0.03532756125673384,
+     "boundary_flux": -0.0002777495529668601
+    }
+   },
+   {
+    "update": 22,
+    "incumbent": 0.5591958289231087,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.563980652500959,
+    "trials": [
+     {
+      "scale": 1.000000000000047,
+      "residual": 14.540647519199496,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000023431,
+      "residual": 7.517397347976953,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000002861,
+      "residual": 3.9120869122541535,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000175737,
+      "residual": 2.075844152848589,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000038149,
+      "residual": 1.1500526683935561,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000100141,
+      "residual": 0.7049620506488452,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000051859,
+      "residual": 0.5884059441935108,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500002160095,
+      "residual": 0.563980652500959,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 255.39425224529037,
+    "krylov_iterations": 40,
+    "cumulative_reads": 139,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813459831502663,
+      0.04279861467837062
+     ],
+     "axis_flux": 0.03532183443602073,
+     "boundary_flux": -0.00028101405866720716
+    }
+   },
+   {
+    "update": 23,
+    "incumbent": 0.563980652500959,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5746424955914051,
+    "trials": [
+     {
+      "scale": 1.0000000000002,
+      "residual": 18.529957481728104,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000007659,
+      "residual": 8.65367299097418,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000038447,
+      "residual": 4.056275374536895,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000011535,
+      "residual": 2.5838616364978932,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000057675,
+      "residual": 1.2440543626983782,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000020664,
+      "residual": 0.7577976852824406,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000017302,
+      "residual": 0.6128278237324452,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001053211,
+      "residual": 0.5746424955914051,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 161.93241570332614,
+    "krylov_iterations": 40,
+    "cumulative_reads": 147,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813854549816819,
+      0.04280712170217762
+     ],
+     "axis_flux": 0.03532810481621554,
+     "boundary_flux": -0.00027740471343754166
+    }
+   },
+   {
+    "update": 24,
+    "incumbent": 0.5746424955914051,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.5744336714871849,
+    "trials": [
+     {
+      "scale": 1.0000000000000722,
+      "residual": 10.530670382300372,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000011625,
+      "residual": 5.445204348160445,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000023802,
+      "residual": 2.844211979742738,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000011901,
+      "residual": 1.5272891543679492,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000059505,
+      "residual": 0.8655316541955358,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000079926,
+      "residual": 0.6304947752539505,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000001338863,
+      "residual": 0.58321512529416,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000669432,
+      "residual": 0.5744336714871849,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 248.46459226294283,
+    "krylov_iterations": 40,
+    "cumulative_reads": 155,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813582564021897,
+      0.042799392381250814
+     ],
+     "axis_flux": 0.03532398330105594,
+     "boundary_flux": -0.00027974966930177604
+    }
+   },
+   {
+    "update": 25,
+    "incumbent": 0.5744336714871849,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.7263984689213885,
+    "trials": [
+     {
+      "scale": 1.0000000000000289,
+      "residual": 91.86210851707747,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000002399,
+      "residual": 33.33346090430469,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000058586,
+      "residual": 13.481535690106057,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000004394,
+      "residual": 7.0126899352331975,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000073232,
+      "residual": 3.6903340891827696,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000402775,
+      "residual": 1.9974786204929842,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000002323974,
+      "residual": 1.1435942675746134,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001161987,
+      "residual": 0.7263984689213885,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 250.9220571058507,
+    "krylov_iterations": 40,
+    "cumulative_reads": 163,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812243866283914,
+      0.04276576815595599
+     ],
+     "axis_flux": 0.035303243545748,
+     "boundary_flux": -0.0002916195480735172
+    }
+   },
+   {
+    "update": 26,
+    "incumbent": 0.7263984689213885,
+    "accepted_scale": 0.125,
+    "accepted_residual": 0.690911543194332,
+    "trials": [
+     {
+      "scale": 1.000000000031873,
+      "residual": 2.178579919655313,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000159365,
+      "residual": 1.0751471057156579,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000796824,
+      "residual": 0.7502024079371807,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000398412,
+      "residual": 0.690911543194332,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 134.50114636143013,
+    "krylov_iterations": 40,
+    "cumulative_reads": 167,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812396966504365,
+      0.042752654751415035
+     ],
+     "axis_flux": 0.035307538709357135,
+     "boundary_flux": -0.00028889941299987314
+    }
+   },
+   {
+    "update": 27,
+    "incumbent": 0.690911543194332,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 0.6857679555767362,
+    "trials": [
+     {
+      "scale": 1.0000000000008091,
+      "residual": 3.3312572234380085,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000027632,
+      "residual": 2.642680540458329,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000008052,
+      "residual": 1.300917852268583,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000207243,
+      "residual": 0.8355543161625434,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000103621,
+      "residual": 0.7106848368837433,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000891606,
+      "residual": 0.6857679555767362,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 330.8663403386422,
+    "krylov_iterations": 40,
+    "cumulative_reads": 173,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781270093683654,
+      0.04275613933164505
+     ],
+     "axis_flux": 0.03531266566857716,
+     "boundary_flux": -0.00028590272689230816
+    }
+   },
+   {
+    "update": 28,
+    "incumbent": 0.6857679555767362,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.6981513056773565,
+    "trials": [
+     {
+      "scale": 1.000000000000361,
+      "residual": 20.56244726274339,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000398,
+      "residual": 9.534986173332875,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000004644,
+      "residual": 4.420701063000777,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000013932,
+      "residual": 1.9566258345676175,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000006966,
+      "residual": 1.4636582531976643,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000039183,
+      "residual": 0.910413389885548,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000002495826,
+      "residual": 0.74267138445623,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001247913,
+      "residual": 0.6981513056773565,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 173.53093791040368,
+    "krylov_iterations": 40,
+    "cumulative_reads": 181,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7813145889147735,
+      0.0427657236959449
+     ],
+     "axis_flux": 0.0353196570554635,
+     "boundary_flux": -0.00028187908928465293
+    }
+   },
+   {
+    "update": 29,
+    "incumbent": 0.6981513056773565,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.6958548137463509,
+    "trials": [
+     {
+      "scale": 1.0000000000000755,
+      "residual": 9.337477328567545,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000014041,
+      "residual": 4.883463380272673,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000014374,
+      "residual": 2.6091585608500623,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000007187,
+      "residual": 1.4591656162051407,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000087759,
+      "residual": 0.8903021154998925,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000052656,
+      "residual": 0.730263516758896,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000027425,
+      "residual": 0.7001497317483114,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000234923,
+      "residual": 0.6958548137463509,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 254.53641531395283,
+    "krylov_iterations": 40,
+    "cumulative_reads": 189,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812908105151715,
+      0.042759235837441845
+     ],
+     "axis_flux": 0.03531607629931848,
+     "boundary_flux": -0.0002839198029167846
+    }
+   },
+   {
+    "update": 30,
+    "incumbent": 0.6958548137463509,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.7115275930883627,
+    "trials": [
+     {
+      "scale": 1.000000000000074,
+      "residual": 23.27468858305609,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005661,
+      "residual": 10.945396221207432,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000014152,
+      "residual": 5.751926632792959,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000007076,
+      "residual": 3.089543925743598,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000005873,
+      "residual": 1.7381176155448799,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000053071,
+      "residual": 1.0579667509470738,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000002535284,
+      "residual": 0.774127860563695,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000855024,
+      "residual": 0.7115275930883627,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 274.7686414181055,
+    "krylov_iterations": 40,
+    "cumulative_reads": 197,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812365697235768,
+      0.04274559306618281
+     ],
+     "axis_flux": 0.03530777845271604,
+     "boundary_flux": -0.0002886667800350335
+    }
+   },
+   {
+    "update": 31,
+    "incumbent": 0.7115275930883627,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 0.7094149810133246,
+    "trials": [
+     {
+      "scale": 1.0000000000001281,
+      "residual": 5.786178096736485,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000029203,
+      "residual": 2.558229958266061,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000057054,
+      "residual": 1.9777765958806697,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000028527,
+      "residual": 1.0821930454192454,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000389576,
+      "residual": 0.7975685238068877,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000273777,
+      "residual": 0.7241323221041966,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000050517,
+      "residual": 0.7094149810133246,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000050517,
+      "residual": 0.7094149810133246,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 213.2616692296398,
+    "krylov_iterations": 40,
+    "cumulative_reads": 205,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781263097968048,
+      0.04275009169645371
+     ],
+     "axis_flux": 0.035312084810151106,
+     "boundary_flux": -0.0002861702540114377
+    }
+   },
+   {
+    "update": 32,
+    "incumbent": 0.7094149810133246,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.795128257816657,
+    "trials": [
+     {
+      "scale": 1.0000000000000246,
+      "residual": 56.299034710713315,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000001449,
+      "residual": 25.286031423975942,
+      "valid": true
+     },
+     {
+      "scale": 0.250000000000483,
+      "residual": 11.712061662386645,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000108674,
+      "residual": 5.464516846914385,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000054337,
+      "residual": 2.4685336651277723,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000078487,
+      "residual": 1.7435454250184321,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000043772,
+      "residual": 1.0249416121580452,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500002224977,
+      "residual": 0.795128257816657,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 227.14461391159142,
+    "krylov_iterations": 40,
+    "cumulative_reads": 213,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781372998400645,
+      0.042775095869401786
+     ],
+     "axis_flux": 0.03532920078118782,
+     "boundary_flux": -0.00027634111186919353
+    }
+   },
+   {
+    "update": 33,
+    "incumbent": 0.795128257816657,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 0.7702443073922467,
+    "trials": [
+     {
+      "scale": 1.0000000000001719,
+      "residual": 4.037234541057387,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000014604,
+      "residual": 2.0713990521538364,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000002482,
+      "residual": 1.083795766282222,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000002874,
+      "residual": 0.8018817909909188,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000022425,
+      "residual": 0.7702443073922467,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000022425,
+      "residual": 0.7702443073922467,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000022425,
+      "residual": 0.7702443073922467,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000022425,
+      "residual": 0.7702443073922467,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 205.21356117828262,
+    "krylov_iterations": 40,
+    "cumulative_reads": 221,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781286552325686,
+      0.04274729468001216
+     ],
+     "axis_flux": 0.035316502556077975,
+     "boundary_flux": -0.00028351381548084723
+    }
+   },
+   {
+    "update": 34,
+    "incumbent": 0.7702443073922467,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 0.766312346557342,
+    "trials": [
+     {
+      "scale": 1.0000000000000293,
+      "residual": 7.75212537930129,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010385,
+      "residual": 4.088472829261036,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000155775,
+      "residual": 2.2235160550904425,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000077888,
+      "residual": 1.282953395642835,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000058416,
+      "residual": 0.8663412478260426,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000002391996,
+      "residual": 0.7797470743809782,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000001195998,
+      "residual": 0.766312346557342,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000001195998,
+      "residual": 0.766312346557342,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 253.16082378776704,
+    "krylov_iterations": 40,
+    "cumulative_reads": 229,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812474711353343,
+      0.04273652554731518
+     ],
+     "axis_flux": 0.035310634605122904,
+     "boundary_flux": -0.0002868558603072672
+    }
+   },
+   {
+    "update": 35,
+    "incumbent": 0.766312346557342,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.8015301319873345,
+    "trials": [
+     {
+      "scale": 1.000000000000042,
+      "residual": 38.081058761563355,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000633,
+      "residual": 14.724053731212052,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000162,
+      "residual": 7.736429583847041,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000081,
+      "residual": 4.145693596044694,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000049453,
+      "residual": 2.3134148938310233,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000890156,
+      "residual": 1.3877835421626799,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000519255,
+      "residual": 0.9321087392580409,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001013785,
+      "residual": 0.8015301319873345,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 286.9124492529124,
+    "krylov_iterations": 40,
+    "cumulative_reads": 237,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811740339020097,
+      0.04271852231058843
+     ],
+     "axis_flux": 0.03529935472943286,
+     "boundary_flux": -0.00029331489399352974
+    }
+   },
+   {
+    "update": 36,
+    "incumbent": 0.8015301319873345,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 0.7905807217888139,
+    "trials": [
+     {
+      "scale": 1.0000000000043985,
+      "residual": 2.946695994159157,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000032655,
+      "residual": 2.4653672592865377,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000033882,
+      "residual": 1.2882628850535696,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000024491,
+      "residual": 0.9014768120779166,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000313556,
+      "residual": 0.8055954336160056,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000224501,
+      "residual": 0.7905807217888139,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000224501,
+      "residual": 0.7905807217888139,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000224501,
+      "residual": 0.7905807217888139,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 8586.48156727731,
+    "krylov_iterations": 40,
+    "cumulative_reads": 245,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812029901471664,
+      0.04272222333648715
+     ],
+     "axis_flux": 0.03530419658489776,
+     "boundary_flux": -0.00029049055157004454
+    }
+   },
+   {
+    "update": 37,
+    "incumbent": 0.7905807217888139,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.7913127074426995,
+    "trials": [
+     {
+      "scale": 1.00000000000003,
+      "residual": 11.677361350016383,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000008232,
+      "residual": 5.357080757545603,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000016464,
+      "residual": 2.3446622252480225,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000008232,
+      "residual": 1.8516575981534231,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000007203,
+      "residual": 1.1019766325384808,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000819886,
+      "residual": 0.8670330348555524,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000307677,
+      "residual": 0.8050497384623867,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500003160127,
+      "residual": 0.7913127074426995,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 162.5447110776039,
+    "krylov_iterations": 40,
+    "cumulative_reads": 253,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812295905087627,
+      0.04272770654938827
+     ],
+     "axis_flux": 0.035308402111256604,
+     "boundary_flux": -0.0002880670118211836
+    }
+   },
+   {
+    "update": 38,
+    "incumbent": 0.7913127074426995,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.8600494093828246,
+    "trials": [
+     {
+      "scale": 1.000000000000026,
+      "residual": 57.92480323468716,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000008297,
+      "residual": 19.191789897150258,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000016987,
+      "residual": 10.028798360103337,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000008297,
+      "residual": 5.339871963861654,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000212334,
+      "residual": 2.937142328848765,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000106167,
+      "residual": 1.718214060963561,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000860773,
+      "residual": 1.1048395161646738,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500001296381,
+      "residual": 0.8600494093828246,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 290.45974393404373,
+    "krylov_iterations": 40,
+    "cumulative_reads": 261,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811329849851802,
+      0.042704339450158
+     ],
+     "axis_flux": 0.035293531225940714,
+     "boundary_flux": -0.00029658679304763266
+    }
+   },
+   {
+    "update": 39,
+    "incumbent": 0.8600494093828246,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 0.834701877176002,
+    "trials": [
+     {
+      "scale": 1.0000000000002902,
+      "residual": 1.5613455688973517,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000106921,
+      "residual": 1.6886362313065177,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000008362,
+      "residual": 1.0311697905823962,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000094312,
+      "residual": 0.8600506308212488,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000003518566,
+      "residual": 0.834701877176002,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000003518566,
+      "residual": 0.834701877176002,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000003518566,
+      "residual": 0.834701877176002,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000003518566,
+      "residual": 0.834701877176002,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 367.42553808513827,
+    "krylov_iterations": 40,
+    "cumulative_reads": 269,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811674092160517,
+      0.042706523897228274
+     ],
+     "axis_flux": 0.03529954503725745,
+     "boundary_flux": -0.00029304725153776355
+    }
+   },
+   {
+    "update": 40,
+    "incumbent": 0.834701877176002,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 0.833916424446187,
+    "trials": [
+     {
+      "scale": 1.0000000000000637,
+      "residual": 7.126497231591891,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000017839,
+      "residual": 3.1539591191429537,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000059225,
+      "residual": 2.4468554586085034,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000133796,
+      "residual": 1.332405369947267,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000078047,
+      "residual": 0.9571588996077338,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000122645,
+      "residual": 0.8557627145754338,
+      "valid": true
+     },
+     {
+      "scale": 0.0156250000006411,
+      "residual": 0.833916424446187,
+      "valid": true
+     },
+     {
+      "scale": 0.0156250000006411,
+      "residual": 0.833916424446187,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 182.45980250420726,
+    "krylov_iterations": 40,
+    "cumulative_reads": 277,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812011674187656,
+      0.04271303503030483
+     ],
+     "axis_flux": 0.035304932269121896,
+     "boundary_flux": -0.00028993635744367353
+    }
+   },
+   {
+    "update": 41,
+    "incumbent": 0.833916424446187,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.9566567566666748,
+    "trials": [
+     {
+      "scale": 1.0000000000002556,
+      "residual": 82.49689579113169,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000012033,
+      "residual": 29.05788533539708,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000018552,
+      "residual": 12.722883194598168,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000090614,
+      "residual": 6.750219609678496,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000056632,
+      "residual": 3.6810332335274154,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000003398,
+      "residual": 2.1177693064709615,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000101939,
+      "residual": 1.3290535699718617,
+      "valid": true
+     },
+     {
+      "scale": 0.00781250000353642,
+      "residual": 0.9566567566666748,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 298.27124063872003,
+    "krylov_iterations": 40,
+    "cumulative_reads": 285,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781077078518304,
+      0.04268336458623449
+     ],
+     "axis_flux": 0.035285799340933933,
+     "boundary_flux": -0.0003009022567836698
+    }
+   },
+   {
+    "update": 42,
+    "incumbent": 0.9566567566666748,
+    "accepted_scale": 0.125,
+    "accepted_residual": 0.902599354349519,
+    "trials": [
+     {
+      "scale": 1.0000000000022378,
+      "residual": 2.4898187439300585,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000006088,
+      "residual": 1.3074289589195018,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000019021,
+      "residual": 0.9593532525070145,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000095104,
+      "residual": 0.902599354349519,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000095104,
+      "residual": 0.902599354349519,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000095104,
+      "residual": 0.902599354349519,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000095104,
+      "residual": 0.902599354349519,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000095104,
+      "residual": 0.902599354349519,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 127.42477097944901,
+    "krylov_iterations": 40,
+    "cumulative_reads": 293,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811209674125843,
+      0.04268288941272268
+     ],
+     "axis_flux": 0.0352938472648337,
+     "boundary_flux": -0.00029612048643266295
+    }
+   },
+   {
+    "update": 43,
+    "incumbent": 0.902599354349519,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 0.8985149326062185,
+    "trials": [
+     {
+      "scale": 1.0000000000000333,
+      "residual": 6.256025297284701,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005964,
+      "residual": 2.6975752199117125,
+      "valid": true
+     },
+     {
+      "scale": 0.250000000001386,
+      "residual": 2.2446368474060137,
+      "valid": true
+     },
+     {
+      "scale": 0.125000000000693,
+      "residual": 1.2948427580578823,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000320534,
+      "residual": 0.9905911988053333,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000160267,
+      "residual": 0.9130822269553249,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000801335,
+      "residual": 0.8985149326062185,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000801335,
+      "residual": 0.8985149326062185,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 183.57118896358458,
+    "krylov_iterations": 40,
+    "cumulative_reads": 301,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781151581090319,
+      0.04268884116215074
+     ],
+     "axis_flux": 0.035298724275612134,
+     "boundary_flux": -0.0002933053717603195
+    }
+   },
+   {
+    "update": 44,
+    "incumbent": 0.8985149326062185,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.5294852968277297,
+    "trials": [
+     {
+      "scale": 1.0000000000000042,
+      "residual": 202.62772885020144,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000004713,
+      "residual": 90.49286226627035,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000021708,
+      "residual": 40.0732430642422,
+      "valid": true
+     },
+     {
+      "scale": 0.125000000001408,
+      "residual": 18.570847907074835,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000106029,
+      "residual": 8.418634501725307,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000244216,
+      "residual": 3.8099512409307223,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000001722972,
+      "residual": 2.7656800801060797,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000878053,
+      "residual": 1.5294852968277297,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 294.13646328946476,
+    "krylov_iterations": 40,
+    "cumulative_reads": 309,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781487603726028,
+      0.04276673876242126
+     ],
+     "axis_flux": 0.035350838334632234,
+     "boundary_flux": -0.0002634243154763685
+    }
+   },
+   {
+    "update": 45,
+    "incumbent": 1.5294852968277297,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.2287618006998713,
+    "trials": [
+     {
+      "scale": 1.0000000000001303,
+      "residual": 2.390781732145342,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000043758,
+      "residual": 1.2287618006998713,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 220.93401403804367,
+    "krylov_iterations": 40,
+    "cumulative_reads": 317,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7810103807238717,
+      0.04261311173977008
+     ],
+     "axis_flux": 0.035280591171967766,
+     "boundary_flux": -0.00030312556389592345
+    }
+   },
+   {
+    "update": 46,
+    "incumbent": 1.2287618006998713,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2968643806782723,
+    "trials": [
+     {
+      "scale": 1.0000000000000167,
+      "residual": 51.722401250054446,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000008412,
+      "residual": 23.107674403988653,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000142486,
+      "residual": 10.611402162422436,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000283823,
+      "residual": 4.613708913285421,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000141911,
+      "residual": 1.7924365025594469,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000651916,
+      "residual": 2.108997877272394,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000058642,
+      "residual": 1.489748435019706,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500006563704,
+      "residual": 1.2968643806782723,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 341.31173559940174,
+    "krylov_iterations": 40,
+    "cumulative_reads": 325,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811155194760455,
+      0.04263715701788078
+     ],
+     "axis_flux": 0.035296914053906905,
+     "boundary_flux": -0.00029376214444203395
+    }
+   },
+   {
+    "update": 47,
+    "incumbent": 1.2968643806782723,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.2642385624831007,
+    "trials": [
+     {
+      "scale": 1.0000000000000648,
+      "residual": 4.395835743760031,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000088205,
+      "residual": 2.522314202180638,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000287215,
+      "residual": 1.575118143749492,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000214542,
+      "residual": 1.2642385624831007,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000214542,
+      "residual": 1.2642385624831007,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000214542,
+      "residual": 1.2642385624831007,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000214542,
+      "residual": 1.2642385624831007,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000214542,
+      "residual": 1.2642385624831007,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 263.62997852658367,
+    "krylov_iterations": 40,
+    "cumulative_reads": 333,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.780958342218477,
+      0.04259687628135007
+     ],
+     "axis_flux": 0.03527317431592016,
+     "boundary_flux": -0.00030731051966406534
+    }
+   },
+   {
+    "update": 48,
+    "incumbent": 1.2642385624831007,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 1.2551558519200086,
+    "trials": [
+     {
+      "scale": 1.000000000000295,
+      "residual": 5.35029923847825,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000100806,
+      "residual": 2.0781886109136707,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000019695,
+      "residual": 2.249264024353508,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000246184,
+      "residual": 1.5132675460140632,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000882051,
+      "residual": 1.2997488711897631,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000225668,
+      "residual": 1.2551558519200086,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000225668,
+      "residual": 1.2551558519200086,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000225668,
+      "residual": 1.2551558519200086,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 169.13876913184512,
+    "krylov_iterations": 40,
+    "cumulative_reads": 341,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7810167904068979,
+      0.04260950410597768
+     ],
+     "axis_flux": 0.03528235913388417,
+     "boundary_flux": -0.00030202839735970474
+    }
+   },
+   {
+    "update": 49,
+    "incumbent": 1.2551558519200086,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2557157336323144,
+    "trials": [
+     {
+      "scale": 1.0000000000000244,
+      "residual": 15.676710190607679,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000104058,
+      "residual": 8.453353391321983,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000127065,
+      "residual": 4.73555960908611,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000780434,
+      "residual": 2.8352034506369392,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000390217,
+      "residual": 1.8730007602403163,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000002964795,
+      "residual": 1.4028276839268585,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000001482398,
+      "residual": 1.2786713857542793,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500004050118,
+      "residual": 1.2557157336323144,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 374.7199517624413,
+    "krylov_iterations": 40,
+    "cumulative_reads": 349,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809784618269806,
+      0.04260046229146217
+     ],
+     "axis_flux": 0.035276455134527894,
+     "boundary_flux": -0.00030541054131974954
+    }
+   },
+   {
+    "update": 50,
+    "incumbent": 1.2557157336323144,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2564245131451628,
+    "trials": [
+     {
+      "scale": 1.0000000000000644,
+      "residual": 16.51254852666186,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000034013,
+      "residual": 6.834358124381026,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000524386,
+      "residual": 2.837361728934127,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000262193,
+      "residual": 2.699131282533699,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000512253,
+      "residual": 1.7002957371236818,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000027747,
+      "residual": 1.3671761179032558,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000005571595,
+      "residual": 1.276633393331906,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500002785798,
+      "residual": 1.2564245131451628,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 251.59150102006177,
+    "krylov_iterations": 40,
+    "cumulative_reads": 357,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7810148093974376,
+      0.042608635510096075
+     ],
+     "axis_flux": 0.035282116339139184,
+     "boundary_flux": -0.00030216057556355845
+    }
+   },
+   {
+    "update": 51,
+    "incumbent": 1.2564245131451628,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2574771943603764,
+    "trials": [
+     {
+      "scale": 1.0000000000000864,
+      "residual": 16.003209383064885,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000034419,
+      "residual": 8.622201975144336,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000258144,
+      "residual": 4.8236974193931985,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000516284,
+      "residual": 2.8813854167418214,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000301166,
+      "residual": 1.8976780044837653,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000167793,
+      "residual": 1.4136726219202131,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000009249,
+      "residual": 1.282053163554508,
+      "valid": true
+     },
+     {
+      "scale": 0.0078125000046245,
+      "residual": 1.2574771943603764,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 376.20796729682525,
+    "krylov_iterations": 40,
+    "cumulative_reads": 365,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.780975630271681,
+      0.04259940231351193
+     ],
+     "axis_flux": 0.03527608012608127,
+     "boundary_flux": -0.00030561859369549117
+    }
+   },
+   {
+    "update": 52,
+    "incumbent": 1.2574771943603764,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2568311414043762,
+    "trials": [
+     {
+      "scale": 1.0000000000000104,
+      "residual": 15.194425932122044,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000020814,
+      "residual": 6.2682587799415685,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000260175,
+      "residual": 2.560861787538826,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000106535,
+      "residual": 2.544224647593758,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000532675,
+      "residual": 1.6429643595863297,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000001951314,
+      "residual": 1.3506537652685324,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000006658448,
+      "residual": 1.2732889983529674,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500003329224,
+      "residual": 1.2568311414043762,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 239.74039530813062,
+    "krylov_iterations": 40,
+    "cumulative_reads": 373,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7810094364012636,
+      0.04260699164170009
+     ],
+     "axis_flux": 0.03528134720517546,
+     "boundary_flux": -0.00030259467465196146
+    }
+   },
+   {
+    "update": 53,
+    "incumbent": 1.2568311414043762,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.264280940121381,
+    "trials": [
+     {
+      "scale": 1.0000000000001832,
+      "residual": 19.605787338425344,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010489,
+      "residual": 10.463818899025966,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000524447,
+      "residual": 5.778178866877013,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000262224,
+      "residual": 3.3742629346194946,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000805306,
+      "residual": 2.153424737732095,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000402653,
+      "residual": 1.5380252102625178,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000002013265,
+      "residual": 1.3098382783747127,
+      "valid": true
+     },
+     {
+      "scale": 0.00781250000305928,
+      "residual": 1.264280940121381,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 383.2562235433914,
+    "krylov_iterations": 40,
+    "cumulative_reads": 381,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809607800459075,
+      0.042595580694347386
+     ],
+     "axis_flux": 0.03527384285704176,
+     "boundary_flux": -0.000306894764890646
+    }
+   },
+   {
+    "update": 54,
+    "incumbent": 1.264280940121381,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.2573581353407093,
+    "trials": [
+     {
+      "scale": 1.0000000000003948,
+      "residual": 7.432071513090975,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000052858,
+      "residual": 3.0975240721488717,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000541095,
+      "residual": 2.8321144631537223,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000117462,
+      "residual": 1.7327062189029618,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000462505,
+      "residual": 1.3675768118424259,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000008792835,
+      "residual": 1.2740818956684024,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000004396417,
+      "residual": 1.2573581353407093,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000004396417,
+      "residual": 1.2573581353407093,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 163.53273564234328,
+    "krylov_iterations": 40,
+    "cumulative_reads": 389,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809994736283952,
+      0.04260410011030079
+     ],
+     "axis_flux": 0.03527989721871198,
+     "boundary_flux": -0.0003034158555866853
+    }
+   },
+   {
+    "update": 55,
+    "incumbent": 1.2573581353407093,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.32460845549258,
+    "trials": [
+     {
+      "scale": 1.0000000000000056,
+      "residual": 58.91887333615853,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000035798,
+      "residual": 19.893454018270305,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000015342,
+      "residual": 10.620952238669034,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000268485,
+      "residual": 5.872587585946704,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000402726,
+      "residual": 3.4357384053465836,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000002517035,
+      "residual": 2.197795406481191,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000010306617,
+      "residual": 1.5736288544772634,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500003188247,
+      "residual": 1.32460845549258,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 391.4965186210316,
+    "krylov_iterations": 40,
+    "cumulative_reads": 397,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809012817300107,
+      0.04258129695158621
+     ],
+     "axis_flux": 0.03526472147838217,
+     "boundary_flux": -0.00031211625215789605
+    }
+   },
+   {
+    "update": 56,
+    "incumbent": 1.32460845549258,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.2646293466989533,
+    "trials": [
+     {
+      "scale": 1.0000000000002274,
+      "residual": 1.5490212379315977,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000012027,
+      "residual": 1.9116935423397337,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000055401,
+      "residual": 1.3740888521574846,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000277006,
+      "residual": 1.2646293466989533,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000277006,
+      "residual": 1.2646293466989533,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000277006,
+      "residual": 1.2646293466989533,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000277006,
+      "residual": 1.2646293466989533,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000277006,
+      "residual": 1.2646293466989533,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 311.157967508501,
+    "krylov_iterations": 40,
+    "cumulative_reads": 405,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809995989285807,
+      0.042600886911355856
+     ],
+     "axis_flux": 0.03528043191075666,
+     "boundary_flux": -0.00030305129453513303
+    }
+   },
+   {
+    "update": 57,
+    "incumbent": 1.2646293466989533,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.265531766660601,
+    "trials": [
+     {
+      "scale": 1.0000000000000373,
+      "residual": 15.963507648377288,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000041234,
+      "residual": 8.605952900635728,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000063316,
+      "residual": 4.819122924035284,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000112457,
+      "residual": 2.8827229431027916,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000360798,
+      "residual": 1.9020015875027099,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000001028884,
+      "residual": 1.4200077165819351,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000514442,
+      "residual": 1.289766876310253,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500003543544,
+      "residual": 1.265531766660601,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 383.0311010516234,
+    "krylov_iterations": 40,
+    "cumulative_reads": 413,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809606162157394,
+      0.04259174586850647
+     ],
+     "axis_flux": 0.03527442093011415,
+     "boundary_flux": -0.00030649533297978133
+    }
+   },
+   {
+    "update": 58,
+    "incumbent": 1.265531766660601,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2650371721987455,
+    "trials": [
+     {
+      "scale": 1.0000000000000826,
+      "residual": 15.565317815358071,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000003117,
+      "residual": 6.365917237254173,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000207795,
+      "residual": 2.604933295425994,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000062338,
+      "residual": 2.576583752912235,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000031169,
+      "residual": 1.6600034748462065,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000127629,
+      "residual": 1.3613789802710272,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000638145,
+      "residual": 1.2820303383651606,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500003506511,
+      "residual": 1.2650371721987455,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 249.9520984989692,
+    "krylov_iterations": 40,
+    "cumulative_reads": 421,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809950215919477,
+      0.042599494446742846
+     ],
+     "axis_flux": 0.03527977557697729,
+     "boundary_flux": -0.0003034218667652824
+    }
+   },
+   {
+    "update": 59,
+    "incumbent": 1.2650371721987455,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2710224858233659,
+    "trials": [
+     {
+      "scale": 1.0000000000000935,
+      "residual": 18.903931717762177,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000128634,
+      "residual": 10.111739837598805,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000209427,
+      "residual": 5.599700244344007,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000964753,
+      "residual": 3.2859713557138406,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000549752,
+      "residual": 2.111492676766403,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000156439,
+      "residual": 1.5196058333721112,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000004515822,
+      "residual": 1.3118945360268555,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500011858443,
+      "residual": 1.2710224858233659,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 389.38812111420816,
+    "krylov_iterations": 40,
+    "cumulative_reads": 429,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809482951887903,
+      0.042588576695255106
+     ],
+     "axis_flux": 0.035272565006179965,
+     "boundary_flux": -0.0003075539292707043
+    }
+   }
+  ],
+  "seed_decision": {
+   "valid": 1,
+   "reason": 0,
+   "boundary_class": 1,
+   "cut_cells": 117,
+   "normal_cells": 8,
+   "fragments": 338,
+   "admitted_saddles": 1,
+   "qualified": 1,
+   "axis": [
+    1.7870573957340379,
+    0.04677603605544745
+   ],
+   "axis_flux": 0.035872887470110526,
+   "boundary_flux": -9.293695766175176e-07
+  }
+ },
+ "cold": {
+  "revision": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "amplitude": 1.01,
+  "lane": 0,
+  "seed_residual": 1.792595636328656,
+  "terminal_residual": 1.349856129120326,
+  "reads": [
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437,
+   437
+  ],
+  "updates": [
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   26,
+   60,
+   60,
+   60,
+   60,
+   60
+  ],
+  "converged": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "residual_path": [
+   1.792595636328656,
+   1.344446727246492,
+   1.2877364691719748,
+   1.2304386227072186,
+   1.221520285561688,
+   1.0814385364392365,
+   0.9175521396993958,
+   0.5645449888673895,
+   0.5568008730552947,
+   0.4884685592944109,
+   0.4766479805151249,
+   0.8818466101865852,
+   0.846520707807727,
+   0.844239371961848,
+   1.813394059629239,
+   1.285606572018935,
+   1.2578164357337158,
+   1.262322532002642,
+   1.2573772958532032,
+   2.272540733033111,
+   1.6935800087658635,
+   1.4022109909997766,
+   1.369319299621992,
+   1.3704438386148325,
+   1.3670952241023997,
+   1.4069492009184188,
+   1.393376494602876,
+   1.363935381234839,
+   1.360189940147464,
+   1.4281720150232644,
+   1.3534499084491785,
+   1.356560780162468,
+   1.3556953917422732,
+   1.3511512932634702,
+   1.356810363947055,
+   1.3356123883805537,
+   1.3251784455851876,
+   1.7444322226596256,
+   1.41633841627592,
+   1.3933637520933928,
+   1.3865776600649582,
+   1.3953828383938145,
+   1.3845431378349105,
+   1.8916987120872903,
+   1.7240741393065235,
+   1.4093567313545776,
+   1.383315319354864,
+   1.3818190287786365,
+   1.376914660555812,
+   1.8541524550500696,
+   1.723825511330574,
+   1.4112688497627204,
+   1.3831918628686708,
+   1.3782837125921503,
+   1.6747169248556162,
+   1.6228151701996723,
+   1.4196720464137087,
+   1.3564658648500512,
+   1.3520679527578636,
+   1.353951390811858,
+   1.349856129120326
+  ],
+  "table": [
+   {
+    "update": 0,
+    "incumbent": 1.792595636328656,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.344446727246492,
+    "trials": [
+     {
+      "scale": 1.0000000000000202,
+      "residual": 12.781426359790487,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000003144,
+      "residual": 2.5244305055213587,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000275674,
+      "residual": 1.344446727246492,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 2134.908978348904,
+    "krylov_iterations": 40,
+    "cumulative_reads": 4,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 115,
+     "normal_cells": 8,
+     "fragments": 336,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7854655469033796,
+      0.045768840734229516
+     ],
+     "axis_flux": 0.0357227609423585,
+     "boundary_flux": -7.726615187665133e-05
+    }
+   },
+   {
+    "update": 1,
+    "incumbent": 1.344446727246492,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.2877364691719748,
+    "trials": [
+     {
+      "scale": 1.0000000000000262,
+      "residual": 10.344232562120489,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000056058,
+      "residual": 3.190473680550241,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000735123,
+      "residual": 1.2877364691719748,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 322.7388652104961,
+    "krylov_iterations": 40,
+    "cumulative_reads": 7,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7843401488144717,
+      0.04495595129338197
+     ],
+     "axis_flux": 0.035614564568959305,
+     "boundary_flux": -0.00013287839353339696
+    }
+   },
+   {
+    "update": 2,
+    "incumbent": 1.2877364691719748,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.2304386227072186,
+    "trials": [
+     {
+      "scale": 1.0000000000001854,
+      "residual": 5.575797360709913,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000009357,
+      "residual": 2.1712907019071324,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000571576,
+      "residual": 1.368594483316123,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000701772,
+      "residual": 1.2304386227072186,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 310.7255365946203,
+    "krylov_iterations": 40,
+    "cumulative_reads": 11,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7839289848817614,
+      0.04466166745013809
+     ],
+     "axis_flux": 0.03557555934995191,
+     "boundary_flux": -0.00015271124071240032
+    }
+   },
+   {
+    "update": 3,
+    "incumbent": 1.2304386227072186,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.221520285561688,
+    "trials": [
+     {
+      "scale": 1.0000000000000173,
+      "residual": 4.876763953518221,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000085423,
+      "residual": 2.1318665589638472,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000063878,
+      "residual": 1.221520285561688,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 290.38414052345695,
+    "krylov_iterations": 40,
+    "cumulative_reads": 14,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 120,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7832185779193486,
+      0.04415304569585776
+     ],
+     "axis_flux": 0.03550825618587209,
+     "boundary_flux": -0.00018680156804874222
+    }
+   },
+   {
+    "update": 4,
+    "incumbent": 1.221520285561688,
+    "accepted_scale": 0.25,
+    "accepted_residual": 1.0814385364392365,
+    "trials": [
+     {
+      "scale": 1.0000000000002631,
+      "residual": 2.3768472557773705,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000149358,
+      "residual": 1.2473142997544429,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000501266,
+      "residual": 1.0814385364392365,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 252.73623972118125,
+    "krylov_iterations": 40,
+    "cumulative_reads": 17,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 120,
+     "normal_cells": 8,
+     "fragments": 337,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7827003764116907,
+      0.04377315565617206
+     ],
+     "axis_flux": 0.035459115785216086,
+     "boundary_flux": -0.0002114229333130115
+    }
+   },
+   {
+    "update": 5,
+    "incumbent": 1.0814385364392365,
+    "accepted_scale": 0.5,
+    "accepted_residual": 0.9175521396993958,
+    "trials": [
+     {
+      "scale": 1.0000000000000908,
+      "residual": 1.4254837264556173,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000151862,
+      "residual": 0.9175521396993958,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 219.14515546209864,
+    "krylov_iterations": 40,
+    "cumulative_reads": 19,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7819394719175632,
+      0.043199867354263975
+     ],
+     "axis_flux": 0.03538652030510327,
+     "boundary_flux": -0.00024765998511672556
+    }
+   },
+   {
+    "update": 6,
+    "incumbent": 0.9175521396993958,
+    "accepted_scale": 0.5,
+    "accepted_residual": 0.5645449888673895,
+    "trials": [
+     {
+      "scale": 1.0000000000004339,
+      "residual": 1.5778088740125753,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000398289,
+      "residual": 0.5645449888673895,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 182.09297819721095,
+    "krylov_iterations": 40,
+    "cumulative_reads": 21,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7815720873005745,
+      0.0429105504583913
+     ],
+     "axis_flux": 0.03535104808052029,
+     "boundary_flux": -0.0002651342836724456
+    }
+   },
+   {
+    "update": 7,
+    "incumbent": 0.5645449888673895,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 0.5568008730552947,
+    "trials": [
+     {
+      "scale": 1.0000000000000644,
+      "residual": 10.841943368056931,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000454243,
+      "residual": 5.4502096024551605,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000007965784,
+      "residual": 2.694625005143834,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000003982892,
+      "residual": 1.3018116602001015,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000005703278,
+      "residual": 0.6022880095707137,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000462428,
+      "residual": 0.5568008730552947,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 222.1592591780658,
+    "krylov_iterations": 40,
+    "cumulative_reads": 27,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814548997394684,
+      0.04287509503238055
+     ],
+     "axis_flux": 0.03533340582337088,
+     "boundary_flux": -0.0002751497328022094
+    }
+   },
+   {
+    "update": 8,
+    "incumbent": 0.5568008730552947,
+    "accepted_scale": 0.125,
+    "accepted_residual": 0.4884685592944109,
+    "trials": [
+     {
+      "scale": 1.0000000000004616,
+      "residual": 2.1240988774318836,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000763752,
+      "residual": 1.7444839742498246,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000280346,
+      "residual": 0.7551687359114965,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000572814,
+      "residual": 0.4884685592944109,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 6052.316317960552,
+    "krylov_iterations": 40,
+    "cumulative_reads": 31,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781503296951868,
+      0.042863507792843404
+     ],
+     "axis_flux": 0.03534359058169972,
+     "boundary_flux": -0.00026895523188026155
+    }
+   },
+   {
+    "update": 9,
+    "incumbent": 0.4884685592944109,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 0.4766479805151249,
+    "trials": [
+     {
+      "scale": 1.0000000000000893,
+      "residual": 6.230811549646191,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000087286,
+      "residual": 3.1203307950011663,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000469871,
+      "residual": 1.5461118892200716,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000006546447,
+      "residual": 0.7560057324380125,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000007166227,
+      "residual": 0.4926508538426333,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000006000909,
+      "residual": 0.4766479805151249,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 209.05920508488853,
+    "krylov_iterations": 40,
+    "cumulative_reads": 37,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7814344867290088,
+      0.04284123517252779
+     ],
+     "axis_flux": 0.03533341145107363,
+     "boundary_flux": -0.00027470790929086354
+    }
+   },
+   {
+    "update": 10,
+    "incumbent": 0.4766479805151249,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 0.8818466101865852,
+    "trials": [
+     {
+      "scale": 1.0000000000000142,
+      "residual": 228.65135796240398,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000970056,
+      "residual": 72.0728659494792,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000009010165,
+      "residual": 24.95528940817975,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000007275422,
+      "residual": 11.280136608413713,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000005717195,
+      "residual": 5.820834377057409,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000006669137,
+      "residual": 3.0201602748519747,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000049497285,
+      "residual": 1.5980485617021856,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500065175655,
+      "residual": 0.8818466101865852,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 224.53513237576814,
+    "krylov_iterations": 40,
+    "cumulative_reads": 45,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812115318430202,
+      0.04278502615407799
+     ],
+     "axis_flux": 0.035298744694803146,
+     "boundary_flux": -0.00029455479959406813
+    }
+   },
+   {
+    "update": 11,
+    "incumbent": 0.8818466101865852,
+    "accepted_scale": 0.5,
+    "accepted_residual": 0.846520707807727,
+    "trials": [
+     {
+      "scale": 1.000000000005849,
+      "residual": 1.6949266527098104,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000908111,
+      "residual": 0.846520707807727,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 144.0817150764226,
+    "krylov_iterations": 40,
+    "cumulative_reads": 53,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812089167721117,
+      0.04270659319667226
+     ],
+     "axis_flux": 0.035307300779153124,
+     "boundary_flux": -0.0002884459005019497
+    }
+   },
+   {
+    "update": 12,
+    "incumbent": 0.846520707807727,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 0.844239371961848,
+    "trials": [
+     {
+      "scale": 1.0000000000000584,
+      "residual": 8.786801944647536,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000001955389,
+      "residual": 4.6687955785209,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000206074,
+      "residual": 2.566792681448433,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000001466542,
+      "residual": 1.5037817860014968,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000014911287,
+      "residual": 0.9919035889419803,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000010564056,
+      "residual": 0.8656773682235297,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000175000528,
+      "residual": 0.844239371961848,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000175000528,
+      "residual": 0.844239371961848,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 279.65909560219774,
+    "krylov_iterations": 40,
+    "cumulative_reads": 61,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811656569501153,
+      0.042695262646157695
+     ],
+     "axis_flux": 0.03530074179573151,
+     "boundary_flux": -0.00029218933800058845
+    }
+   },
+   {
+    "update": 13,
+    "incumbent": 0.844239371961848,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.813394059629239,
+    "trials": [
+     {
+      "scale": 1.0000000000000162,
+      "residual": NaN,
+      "valid": false
+     },
+     {
+      "scale": 0.5000000001896302,
+      "residual": 122.64681320550696,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000001986427,
+      "residual": 54.26776312624417,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000013545015,
+      "residual": 24.424788947871114,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000016592643,
+      "residual": 11.286530859818036,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000012415168,
+      "residual": 5.208115271755368,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000125000378,
+      "residual": 2.284917460491293,
+      "valid": true
+     },
+     {
+      "scale": 0.00781250009756127,
+      "residual": 1.813394059629239,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 289.81121894333603,
+    "krylov_iterations": 40,
+    "cumulative_reads": 69,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 335,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7816011883024376,
+      0.04279650932374941
+     ],
+     "axis_flux": 0.03536827432107289,
+     "boundary_flux": -0.00025347627071126155
+    }
+   },
+   {
+    "update": 14,
+    "incumbent": 1.813394059629239,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.285606572018935,
+    "trials": [
+     {
+      "scale": 1.0000000000000644,
+      "residual": 2.2921946386652934,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000002002069,
+      "residual": 1.285606572018935,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 153.04570622121432,
+    "krylov_iterations": 40,
+    "cumulative_reads": 77,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781091623390566,
+      0.0426325739432
+     ],
+     "axis_flux": 0.03529303307499757,
+     "boundary_flux": -0.00029602522652120603
+    }
+   },
+   {
+    "update": 15,
+    "incumbent": 1.285606572018935,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 1.2578164357337158,
+    "trials": [
+     {
+      "scale": 1.0000000000000444,
+      "residual": 5.379116167219564,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000003822467,
+      "residual": 3.072856173704537,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000002730334,
+      "residual": 1.90345054790086,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000001365167,
+      "residual": 1.356551711389372,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000033446587,
+      "residual": 1.2578164357337158,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000033446587,
+      "residual": 1.2578164357337158,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000033446587,
+      "residual": 1.2578164357337158,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000033446587,
+      "residual": 1.2578164357337158,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 284.64792776352215,
+    "krylov_iterations": 40,
+    "cumulative_reads": 85,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.780994658078234,
+      0.042608124417966804
+     ],
+     "axis_flux": 0.035278328017365065,
+     "boundary_flux": -0.0003044225418826671
+    }
+   },
+   {
+    "update": 16,
+    "incumbent": 1.2578164357337158,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.262322532002642,
+    "trials": [
+     {
+      "scale": 1.0000000000002127,
+      "residual": 19.134040607336885,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000003257014,
+      "residual": 8.276335638873505,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000021355395,
+      "residual": 3.5337430328747885,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000040772982,
+      "residual": 3.105790152968723,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000024906573,
+      "residual": 1.8625079846642478,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000293677346,
+      "residual": 1.4200159715116314,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000268767213,
+      "residual": 1.2930446960401412,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500178117916,
+      "residual": 1.262322532002642,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 270.0461850257719,
+    "krylov_iterations": 40,
+    "cumulative_reads": 93,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7810373519014522,
+      0.042617745776320715
+     ],
+     "axis_flux": 0.035284977272937584,
+     "boundary_flux": -0.00030060527416507634
+    }
+   },
+   {
+    "update": 17,
+    "incumbent": 1.262322532002642,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.2573772958532032,
+    "trials": [
+     {
+      "scale": 1.0000000000007967,
+      "residual": 11.395878484662788,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000338274,
+      "residual": 6.237935662121984,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000004109403,
+      "residual": 3.5888605016506574,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000002537055,
+      "residual": 2.2420383816958633,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000039983379,
+      "residual": 1.5626944757353272,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000025683768,
+      "residual": 1.3083649745442187,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500012841884,
+      "residual": 1.2628138787327714,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500383388158,
+      "residual": 1.2573772958532032,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 353.33078294559044,
+    "krylov_iterations": 40,
+    "cumulative_reads": 101,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781010154273688,
+      0.04261123135677242
+     ],
+     "axis_flux": 0.03528080136863678,
+     "boundary_flux": -0.0003029957847159433
+    }
+   },
+   {
+    "update": 18,
+    "incumbent": 1.2573772958532032,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 2.272540733033111,
+    "trials": [
+     {
+      "scale": 1.0000000000000113,
+      "residual": NaN,
+      "valid": false
+     },
+     {
+      "scale": 0.5000000000000042,
+      "residual": 213.16712914060759,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000020708807,
+      "residual": 62.64879622433588,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000001704688,
+      "residual": 21.06906542385207,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000032539535,
+      "residual": 11.058688874145531,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000268816185,
+      "residual": 6.107414509982988,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000352609334,
+      "residual": 3.5649679027379904,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500254237525,
+      "residual": 2.272540733033111,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 378.5018987670386,
+    "krylov_iterations": 40,
+    "cumulative_reads": 109,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 7,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7806014902978529,
+      0.04251695974781367
+     ],
+     "axis_flux": 0.03521756922651756,
+     "boundary_flux": -0.00033927826481510223
+    }
+   },
+   {
+    "update": 19,
+    "incumbent": 2.272540733033111,
+    "accepted_scale": 1.0,
+    "accepted_residual": 1.6935800087658635,
+    "trials": [
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000022613,
+      "residual": 1.6935800087658635,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 303.60807365876923,
+    "krylov_iterations": 40,
+    "cumulative_reads": 117,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812138536544884,
+      0.04262936399910233
+     ],
+     "axis_flux": 0.035317122056638096,
+     "boundary_flux": -0.0002816655842988866
+    }
+   },
+   {
+    "update": 20,
+    "incumbent": 1.6935800087658635,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.4022109909997766,
+    "trials": [
+     {
+      "scale": 1.0000000000006655,
+      "residual": 2.5792538779140983,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002031,
+      "residual": 1.4022109909997766,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 209.04172536580708,
+    "krylov_iterations": 40,
+    "cumulative_reads": 125,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808350503749124,
+      0.04254126457192083
+     ],
+     "axis_flux": 0.03525835320312324,
+     "boundary_flux": -0.00031536825826899517
+    }
+   },
+   {
+    "update": 21,
+    "incumbent": 1.4022109909997766,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 1.369319299621992,
+    "trials": [
+     {
+      "scale": 1.0000000000006766,
+      "residual": 3.0392797681245725,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002043,
+      "residual": 2.8048656448609535,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000106953,
+      "residual": 1.7484327805391615,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000053477,
+      "residual": 1.4294444535461253,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000039954,
+      "residual": 1.369319299621992,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000039954,
+      "residual": 1.369319299621992,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000039954,
+      "residual": 1.369319299621992,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000039954,
+      "residual": 1.369319299621992,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 276.48979966747095,
+    "krylov_iterations": 20,
+    "cumulative_reads": 133,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809170594045447,
+      0.04256003974299126
+     ],
+     "axis_flux": 0.03527105435410002,
+     "boundary_flux": -0.0003080830130233351
+    }
+   },
+   {
+    "update": 22,
+    "incumbent": 1.369319299621992,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.3704438386148325,
+    "trials": [
+     {
+      "scale": 1.0000000000000357,
+      "residual": 16.69910142892178,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001257,
+      "residual": 9.03720017278475,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000373,
+      "residual": 5.093125031998682,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000002875,
+      "residual": 3.07379819790782,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000011337,
+      "residual": 2.0502158678069122,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000097033,
+      "residual": 1.5416476292275547,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000048517,
+      "residual": 1.39725809007561,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000028663,
+      "residual": 1.3704438386148325,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 426.1392975662447,
+    "krylov_iterations": 40,
+    "cumulative_reads": 141,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808766154403766,
+      0.04255079495464614
+     ],
+     "axis_flux": 0.03526478993236374,
+     "boundary_flux": -0.00031167471344082086
+    }
+   },
+   {
+    "update": 23,
+    "incumbent": 1.3704438386148325,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.3670952241023997,
+    "trials": [
+     {
+      "scale": 1.0000000000001472,
+      "residual": 13.799781331251815,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000424,
+      "residual": 5.427653406392075,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000014716,
+      "residual": 2.095705252782011,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000006317,
+      "residual": 2.4152741011752994,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000015668,
+      "residual": 1.6660764252911378,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000007834,
+      "residual": 1.4349831698781088,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000155,
+      "residual": 1.377564114309621,
+      "valid": true
+     },
+     {
+      "scale": 0.0078125000000775,
+      "residual": 1.3670952241023997,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 271.5135699480567,
+    "krylov_iterations": 40,
+    "cumulative_reads": 149,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.780907733611063,
+      0.04255791088630725
+     ],
+     "axis_flux": 0.03526960954175599,
+     "boundary_flux": -0.000308910982804295
+    }
+   },
+   {
+    "update": 24,
+    "incumbent": 1.3670952241023997,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.4069492009184188,
+    "trials": [
+     {
+      "scale": 1.0000000000000353,
+      "residual": 43.53856015399644,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000409,
+      "residual": 16.69907293149251,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000002565,
+      "residual": 9.05096933522357,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000003555,
+      "residual": 5.11443421269,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000003578,
+      "residual": 3.0991453997676786,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000004965,
+      "residual": 2.0776599301115084,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000024824,
+      "residual": 1.5659827771460613,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000048957,
+      "residual": 1.4069492009184188,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 442.88201171517784,
+    "krylov_iterations": 40,
+    "cumulative_reads": 157,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808270268489126,
+      0.04253947016446488
+     ],
+     "axis_flux": 0.03525710969481362,
+     "boundary_flux": -0.0003160786626717473
+    }
+   },
+   {
+    "update": 25,
+    "incumbent": 1.4069492009184188,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.393376494602876,
+    "trials": [
+     {
+      "scale": 1.0000000000010716,
+      "residual": 2.477654211558871,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005358,
+      "residual": 2.476254273499734,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000002679,
+      "residual": 1.623776698926136,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000050848,
+      "residual": 1.393376494602876,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000050848,
+      "residual": 1.393376494602876,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000050848,
+      "residual": 1.393376494602876,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000050848,
+      "residual": 1.393376494602876,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000050848,
+      "residual": 1.393376494602876,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 381.6901496652858,
+    "krylov_iterations": 40,
+    "cumulative_reads": 165,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809707269221182,
+      0.04257238414956564
+     ],
+     "axis_flux": 0.03527936619548737,
+     "boundary_flux": -0.0003033133015913319
+    }
+   },
+   {
+    "update": 26,
+    "incumbent": 1.393376494602876,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 1.363935381234839,
+    "trials": [
+     {
+      "scale": 1.0000000000001859,
+      "residual": 5.606067163925047,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000004451,
+      "residual": 3.247281692037518,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000005623,
+      "residual": 2.0492803892383193,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000033853,
+      "residual": 1.4748590465426332,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000016927,
+      "residual": 1.363935381234839,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000016927,
+      "residual": 1.363935381234839,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000016927,
+      "residual": 1.363935381234839,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000016927,
+      "residual": 1.363935381234839,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 329.37601996350054,
+    "krylov_iterations": 40,
+    "cumulative_reads": 173,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808762239041327,
+      0.042550766165036204
+     ],
+     "axis_flux": 0.03526472628649839,
+     "boundary_flux": -0.00031170585844797987
+    }
+   },
+   {
+    "update": 27,
+    "incumbent": 1.363935381234839,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.360189940147464,
+    "trials": [
+     {
+      "scale": 1.000000000000102,
+      "residual": 13.139223385668586,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000051,
+      "residual": 5.21034870118941,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000001318,
+      "residual": 1.9922823400578125,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000008207,
+      "residual": 2.3510191589721856,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000013524,
+      "residual": 1.6391663396588996,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000006762,
+      "residual": 1.4224434822631906,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000086077,
+      "residual": 1.3694481416609108,
+      "valid": true
+     },
+     {
+      "scale": 0.00781250000014477,
+      "residual": 1.360189940147464,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 263.58025471590173,
+    "krylov_iterations": 40,
+    "cumulative_reads": 181,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809063304386692,
+      0.04255764904515871
+     ],
+     "axis_flux": 0.03526938913381981,
+     "boundary_flux": -0.0003090320561869348
+    }
+   },
+   {
+    "update": 28,
+    "incumbent": 1.360189940147464,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.4281720150232644,
+    "trials": [
+     {
+      "scale": 1.000000000000008,
+      "residual": 59.799663235058276,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000298,
+      "residual": 20.228259278715,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000149,
+      "residual": 10.843477483582092,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000000024,
+      "residual": 6.0370183042021495,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000004985,
+      "residual": 3.568779132944698,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000012434,
+      "residual": 2.3143695806895295,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000003871,
+      "residual": 1.6816351471440214,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000019354,
+      "residual": 1.4281720150232644,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 444.2880566388441,
+    "krylov_iterations": 40,
+    "cumulative_reads": 189,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808069177757366,
+      0.04253494125807112
+     ],
+     "axis_flux": 0.03525399280545802,
+     "boundary_flux": -0.0003178610173656936
+    }
+   },
+   {
+    "update": 29,
+    "incumbent": 1.4281720150232644,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.3534499084491785,
+    "trials": [
+     {
+      "scale": 1.0000000000048583,
+      "residual": 1.5302959075051987,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000008106,
+      "residual": 1.9497002237106074,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000004053,
+      "residual": 1.4460642080167645,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000001272477,
+      "residual": 1.3534499084491785,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000001272477,
+      "residual": 1.3534499084491785,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000001272477,
+      "residual": 1.3534499084491785,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000001272477,
+      "residual": 1.3534499084491785,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000001272477,
+      "residual": 1.3534499084491785,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 278.9429118488403,
+    "krylov_iterations": 40,
+    "cumulative_reads": 197,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809168570748057,
+      0.042560120501877984
+     ],
+     "axis_flux": 0.03527101957732443,
+     "boundary_flux": -0.00030809350441322235
+    }
+   },
+   {
+    "update": 30,
+    "incumbent": 1.3534499084491785,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.356560780162468,
+    "trials": [
+     {
+      "scale": 1.0000000000000318,
+      "residual": 17.80055416622406,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000159,
+      "residual": 9.593917516397582,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000008893,
+      "residual": 5.373978631235417,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000000082,
+      "residual": 3.2111477613806727,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000001142,
+      "residual": 2.1139037089666175,
+      "valid": true
+     },
+     {
+      "scale": 0.0312500000000571,
+      "residual": 1.5625449156990214,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000002855,
+      "residual": 1.389584930516591,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000075691,
+      "residual": 1.356560780162468,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 428.13988325382365,
+    "krylov_iterations": 40,
+    "cumulative_reads": 205,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808734904319912,
+      0.042550209882095694
+     ],
+     "axis_flux": 0.03526430275770113,
+     "boundary_flux": -0.00031194467971842204
+    }
+   },
+   {
+    "update": 31,
+    "incumbent": 1.356560780162468,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.3556953917422732,
+    "trials": [
+     {
+      "scale": 1.000000000000108,
+      "residual": 10.086758392035755,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001341,
+      "residual": 4.311538819147096,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000017336,
+      "residual": 1.552774533913123,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000000579,
+      "residual": 2.1107213654881605,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000014365,
+      "residual": 1.5514445534320345,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000071824,
+      "residual": 1.3914361518555722,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000101932,
+      "residual": 1.3556953917422732,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000101932,
+      "residual": 1.3556953917422732,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 228.31132038175133,
+    "krylov_iterations": 40,
+    "cumulative_reads": 213,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809254116989828,
+      0.042562079738120547
+     ],
+     "axis_flux": 0.035272344220620734,
+     "boundary_flux": -0.0003073336262998106
+    }
+   },
+   {
+    "update": 32,
+    "incumbent": 1.3556953917422732,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.3511512932634702,
+    "trials": [
+     {
+      "scale": 1.0000000000000488,
+      "residual": 12.523209894445586,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000141,
+      "residual": 6.870768611117711,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000015954,
+      "residual": 3.961940119314079,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000007977,
+      "residual": 2.479989901362302,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000007794,
+      "residual": 1.731360413838317,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000013952,
+      "residual": 1.4195184130216632,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000006976,
+      "residual": 1.3594567145495517,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000138375,
+      "residual": 1.3511512932634702,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 408.907605338923,
+    "krylov_iterations": 40,
+    "cumulative_reads": 221,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808959802408506,
+      0.04255535209056134
+     ],
+     "axis_flux": 0.0352677855523388,
+     "boundary_flux": -0.0003099472297915611
+    }
+   },
+   {
+    "update": 33,
+    "incumbent": 1.3511512932634702,
+    "accepted_scale": 0.03125,
+    "accepted_residual": 1.356810363947055,
+    "trials": [
+     {
+      "scale": 1.0000000000000262,
+      "residual": 100.71455451500354,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000131,
+      "residual": 44.39643453601592,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000241,
+      "residual": 21.052136692758708,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000001543,
+      "residual": 8.955828529409196,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000000034,
+      "residual": 3.835488618953562,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000001264,
+      "residual": 1.356810363947055,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000000738,
+      "residual": 2.056030198472101,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000024963,
+      "residual": 1.5571337110026207,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 430.2314743936557,
+    "krylov_iterations": 40,
+    "cumulative_reads": 229,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 336,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7816456304434556,
+      0.042727641050128044
+     ],
+     "axis_flux": 0.035383974252409134,
+     "boundary_flux": -0.00024341155532402162
+    }
+   },
+   {
+    "update": 34,
+    "incumbent": 1.356810363947055,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.3356123883805537,
+    "trials": [
+     {
+      "scale": 1.0000000000013118,
+      "residual": 1.7434502657595203,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000006559,
+      "residual": 2.5216966271150625,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000102396,
+      "residual": 2.954176031359971,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000051198,
+      "residual": 3.1742976741195363,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000025599,
+      "residual": 3.2846704039334753,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000005268445,
+      "residual": 3.339862997665925,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000024372,
+      "residual": 1.3356123883805537,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000024372,
+      "residual": 1.3356123883805537,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 155.08087643386182,
+    "krylov_iterations": 40,
+    "cumulative_reads": 237,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 336,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.781638831127769,
+      0.04272603113216661
+     ],
+     "axis_flux": 0.03538291362674539,
+     "boundary_flux": -0.00024401724012937132
+    }
+   },
+   {
+    "update": 35,
+    "incumbent": 1.3356123883805537,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.3251784455851876,
+    "trials": [
+     {
+      "scale": 1.0000000000041391,
+      "residual": 1.7441106803965312,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000023634,
+      "residual": 2.508808710969177,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000039893,
+      "residual": 2.9337948400679963,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000199465,
+      "residual": 3.1502549384872935,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000040916,
+      "residual": 3.2588402713741047,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000151185,
+      "residual": 3.3131522565186913,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000004681117,
+      "residual": 3.340304956797752,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500002637768,
+      "residual": 1.3251784455851876,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 154.73308121358758,
+    "krylov_iterations": 40,
+    "cumulative_reads": 245,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 336,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7816354842923026,
+      0.04272523922653158
+     ],
+     "axis_flux": 0.035382391583424176,
+     "boundary_flux": -0.0002443153542759884
+    }
+   },
+   {
+    "update": 36,
+    "incumbent": 1.3251784455851876,
+    "accepted_scale": 1.0,
+    "accepted_residual": 1.7444322226596256,
+    "trials": [
+     {
+      "scale": 1.0000000000016802,
+      "residual": 1.7444322226596256,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000052658,
+      "residual": 2.502474367344611,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000206823,
+      "residual": 2.9237735654148693,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000435657,
+      "residual": 3.1384288909833487,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000082426,
+      "residual": 3.2461322900335503,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000041213,
+      "residual": 3.3000095203049398,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000005104753,
+      "residual": 3.3269465199856043,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500002552377,
+      "residual": 3.3404136489838834,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 154.5645887034891,
+    "krylov_iterations": 40,
+    "cumulative_reads": 253,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812104054150424,
+      0.042625016438850236
+     ],
+     "axis_flux": 0.03531611601499431,
+     "boundary_flux": -0.0002821891117674869
+    }
+   },
+   {
+    "update": 37,
+    "incumbent": 1.7444322226596256,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.41633841627592,
+    "trials": [
+     {
+      "scale": 1.0000000000000677,
+      "residual": 2.5659111710068174,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010151,
+      "residual": 1.41633841627592,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 209.37471411606114,
+    "krylov_iterations": 40,
+    "cumulative_reads": 261,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808358139314702,
+      0.04253979157462383
+     ],
+     "axis_flux": 0.03525824220541272,
+     "boundary_flux": -0.0003154035289839066
+    }
+   },
+   {
+    "update": 38,
+    "incumbent": 1.41633841627592,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 1.3933637520933928,
+    "trials": [
+     {
+      "scale": 1.0000000000004736,
+      "residual": 3.528134266903379,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000003578,
+      "residual": 3.101260819707022,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000004147,
+      "residual": 1.8768675712900205,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000011877,
+      "residual": 1.479748114530551,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000044864,
+      "residual": 1.3933637520933928,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000044864,
+      "residual": 1.3933637520933928,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000044864,
+      "residual": 1.3933637520933928,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000044864,
+      "residual": 1.3933637520933928,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 189.9820181318817,
+    "krylov_iterations": 40,
+    "cumulative_reads": 269,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809270071685737,
+      0.04256075054470792
+     ],
+     "axis_flux": 0.03527237928978606,
+     "boundary_flux": -0.0003072971464582156
+    }
+   },
+   {
+    "update": 39,
+    "incumbent": 1.3933637520933928,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.3865776600649582,
+    "trials": [
+     {
+      "scale": 1.0000000000001057,
+      "residual": 10.144761807629607,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001011,
+      "residual": 5.65010894460147,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000015615,
+      "residual": 3.343677184924047,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000012784,
+      "residual": 2.172441641285488,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000014111,
+      "residual": 1.5846268026091366,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000070555,
+      "residual": 1.4127750342380807,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000035277,
+      "residual": 1.3865776600649582,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000035277,
+      "residual": 1.3865776600649582,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 395.42807057863314,
+    "krylov_iterations": 40,
+    "cumulative_reads": 277,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.780880619402674,
+      0.04255017989083555
+     ],
+     "axis_flux": 0.03526519774026252,
+     "boundary_flux": -0.0003114147032432337
+    }
+   },
+   {
+    "update": 40,
+    "incumbent": 1.3865776600649582,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.3953828383938145,
+    "trials": [
+     {
+      "scale": 1.0000000000000808,
+      "residual": 22.414217173576418,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000404,
+      "residual": 10.272795177331517,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000175,
+      "residual": 4.337018962189376,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000002612,
+      "residual": 1.5690835155937535,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000009939,
+      "residual": 2.1893137611142564,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000086646,
+      "residual": 1.6130356399568484,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000076078,
+      "residual": 1.4395154072482228,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000020695,
+      "residual": 1.3953828383938145,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 368.77800410961805,
+    "krylov_iterations": 40,
+    "cumulative_reads": 285,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809327141838578,
+      0.04256209507276239
+     ],
+     "axis_flux": 0.03527326768118404,
+     "boundary_flux": -0.0003067878727001873
+    }
+   },
+   {
+    "update": 41,
+    "incumbent": 1.3953828383938145,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.3845431378349105,
+    "trials": [
+     {
+      "scale": 1.0000000000001767,
+      "residual": 8.932476551835748,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000002359,
+      "residual": 5.016714249225657,
+      "valid": true
+     },
+     {
+      "scale": 0.250000000000161,
+      "residual": 3.0117604592671228,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000006897,
+      "residual": 1.9954630073509776,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000015704,
+      "residual": 1.507703660739594,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000007852,
+      "residual": 1.3975309537237308,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000132235,
+      "residual": 1.3845431378349105,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000132235,
+      "residual": 1.3845431378349105,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 383.53541854690013,
+    "krylov_iterations": 40,
+    "cumulative_reads": 293,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808925589910642,
+      0.042552946017051056
+     ],
+     "axis_flux": 0.0352670512381775,
+     "boundary_flux": -0.00031035199160305916
+    }
+   },
+   {
+    "update": 42,
+    "incumbent": 1.3845431378349105,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.8916987120872903,
+    "trials": [
+     {
+      "scale": 1.0000000000000087,
+      "residual": NaN,
+      "valid": false
+     },
+     {
+      "scale": 0.5000000000000062,
+      "residual": 128.1158855791262,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000089,
+      "residual": 56.55321483884563,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000000513,
+      "residual": 25.16252411279939,
+      "valid": true
+     },
+     {
+      "scale": 0.0625000000000038,
+      "residual": 12.401336317552605,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000000133,
+      "residual": 4.958051806291174,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000001398,
+      "residual": 1.8916987120872903,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000004441,
+      "residual": 2.378525921796765,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 441.6909669355193,
+    "krylov_iterations": 40,
+    "cumulative_reads": 301,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 336,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7818132599020648,
+      0.04276471484027662
+     ],
+     "axis_flux": 0.03540977324856055,
+     "boundary_flux": -0.00022864799458927005
+    }
+   },
+   {
+    "update": 43,
+    "incumbent": 1.8916987120872903,
+    "accepted_scale": 1.0,
+    "accepted_residual": 1.7240741393065235,
+    "trials": [
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000002653,
+      "residual": 1.7240741393065235,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 165.73882932103734,
+    "krylov_iterations": 40,
+    "cumulative_reads": 309,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812113785547372,
+      0.04262364279193316
+     ],
+     "axis_flux": 0.0353162139810445,
+     "boundary_flux": -0.0002821803977409931
+    }
+   },
+   {
+    "update": 44,
+    "incumbent": 1.7240741393065235,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.4093567313545776,
+    "trials": [
+     {
+      "scale": 1.0000000000007492,
+      "residual": 2.568953741491498,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000468,
+      "residual": 1.4093567313545776,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 209.22283515871413,
+    "krylov_iterations": 40,
+    "cumulative_reads": 317,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808357432141582,
+      0.042538840594543825
+     ],
+     "axis_flux": 0.03525819709536481,
+     "boundary_flux": -0.0003154548791114809
+    }
+   },
+   {
+    "update": 45,
+    "incumbent": 1.4093567313545776,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 1.383315319354864,
+    "trials": [
+     {
+      "scale": 1.0000000000002207,
+      "residual": 3.373217218165216,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000004666,
+      "residual": 3.0065434232695907,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000020905,
+      "residual": 1.833883142188995,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000040393,
+      "residual": 1.4613846663402796,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000005403,
+      "residual": 1.383315319354864,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000005403,
+      "residual": 1.383315319354864,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000005403,
+      "residual": 1.383315319354864,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000005403,
+      "residual": 1.383315319354864,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 198.85693048510788,
+    "krylov_iterations": 20,
+    "cumulative_reads": 325,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809240087574927,
+      0.042559204358821115
+     ],
+     "axis_flux": 0.03527188371419516,
+     "boundary_flux": -0.00030760492273528256
+    }
+   },
+   {
+    "update": 46,
+    "incumbent": 1.383315319354864,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.3818190287786365,
+    "trials": [
+     {
+      "scale": 1.0000000000001303,
+      "residual": 11.452013369569542,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001824,
+      "residual": 6.32713393888865,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000912,
+      "residual": 3.692475115109815,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000009337,
+      "residual": 2.3520824522788644,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000006012,
+      "residual": 1.675556216838558,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000010362,
+      "residual": 1.425218099551273,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000042077,
+      "residual": 1.3818190287786365,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000042077,
+      "residual": 1.3818190287786365,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 404.5515032012657,
+    "krylov_iterations": 40,
+    "cumulative_reads": 333,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808708145212186,
+      0.04254708471020681
+     ],
+     "axis_flux": 0.035263648086848974,
+     "boundary_flux": -0.0003123266880101445
+    }
+   },
+   {
+    "update": 47,
+    "incumbent": 1.3818190287786365,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.376914660555812,
+    "trials": [
+     {
+      "scale": 1.0000000000000877,
+      "residual": 11.433985801639636,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000439,
+      "residual": 4.673041387168233,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000011885,
+      "residual": 1.718713549944745,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000006148,
+      "residual": 2.228453771076481,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000013192,
+      "residual": 1.607729878722651,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000045706,
+      "residual": 1.4254659230331441,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000013519,
+      "residual": 1.3831510570157803,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000067595,
+      "residual": 1.376914660555812,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 245.4600917751628,
+    "krylov_iterations": 40,
+    "cumulative_reads": 341,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808985253150356,
+      0.04255343880835044
+     ],
+     "axis_flux": 0.03526794177220734,
+     "boundary_flux": -0.00030986449455869524
+    }
+   },
+   {
+    "update": 48,
+    "incumbent": 1.376914660555812,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.8541524550500696,
+    "trials": [
+     {
+      "scale": 1.0000000000000067,
+      "residual": 242.8281654118736,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000017,
+      "residual": 79.95429763776525,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000067,
+      "residual": 27.82574200754556,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000001482,
+      "residual": 12.980833799523595,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000000265,
+      "residual": 7.154031194038353,
+      "valid": true
+     },
+     {
+      "scale": 0.031250000000016334,
+      "residual": 4.155083692926951,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000017705,
+      "residual": 2.626545534256948,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000006469,
+      "residual": 1.8541524550500696,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 447.1601628710275,
+    "krylov_iterations": 40,
+    "cumulative_reads": 349,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 118,
+     "normal_cells": 7,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7806553422865212,
+      0.04249797258595108
+     ],
+     "axis_flux": 0.03523028652734912,
+     "boundary_flux": -0.00033146370415437147
+    }
+   },
+   {
+    "update": 49,
+    "incumbent": 1.8541524550500696,
+    "accepted_scale": 1.0,
+    "accepted_residual": 1.723825511330574,
+    "trials": [
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     },
+     {
+      "scale": 1.0000000000007112,
+      "residual": 1.723825511330574,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 263.98120115381164,
+    "krylov_iterations": 40,
+    "cumulative_reads": 357,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7812134205731733,
+      0.04262876593992239
+     ],
+     "axis_flux": 0.03531702691918786,
+     "boundary_flux": -0.00028170804040645084
+    }
+   },
+   {
+    "update": 50,
+    "incumbent": 1.723825511330574,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.4112688497627204,
+    "trials": [
+     {
+      "scale": 1.0000000000004146,
+      "residual": 2.571660986310249,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000376,
+      "residual": 1.4112688497627204,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 208.7986213462994,
+    "krylov_iterations": 40,
+    "cumulative_reads": 365,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808362313943533,
+      0.04254130963912307
+     ],
+     "axis_flux": 0.035258523415394094,
+     "boundary_flux": -0.00031526410139705053
+    }
+   },
+   {
+    "update": 51,
+    "incumbent": 1.4112688497627204,
+    "accepted_scale": 0.0625,
+    "accepted_residual": 1.3831918628686708,
+    "trials": [
+     {
+      "scale": 1.00000000000043,
+      "residual": 3.2877887446447573,
+      "valid": true
+     },
+     {
+      "scale": 0.500000000000321,
+      "residual": 2.956549540921827,
+      "valid": true
+     },
+     {
+      "scale": 0.250000000000102,
+      "residual": 1.8144788810433,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000032227,
+      "residual": 1.4563337557349882,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000048153,
+      "residual": 1.3831918628686708,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000048153,
+      "residual": 1.3831918628686708,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000048153,
+      "residual": 1.3831918628686708,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000048153,
+      "residual": 1.3831918628686708,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 204.92969904697202,
+    "krylov_iterations": 20,
+    "cumulative_reads": 373,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809228680114082,
+      0.0425611532266104
+     ],
+     "axis_flux": 0.0352719419776423,
+     "boundary_flux": -0.00030756808942907106
+    }
+   },
+   {
+    "update": 52,
+    "incumbent": 1.3831918628686708,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.3782837125921503,
+    "trials": [
+     {
+      "scale": 1.000000000000027,
+      "residual": 12.392410220725836,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000968,
+      "residual": 6.816505371605928,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000001642,
+      "residual": 3.947168815790562,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000011305,
+      "residual": 2.485520434572237,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000005652,
+      "residual": 1.7472083562925889,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000004887,
+      "residual": 1.4434222770035348,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000095177,
+      "residual": 1.3858993066373557,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000047589,
+      "residual": 1.3782837125921503,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 409.6330499146076,
+    "krylov_iterations": 40,
+    "cumulative_reads": 381,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808937989472748,
+      0.04255451044773171
+     ],
+     "axis_flux": 0.03526743941359554,
+     "boundary_flux": -0.0003101494970953381
+    }
+   },
+   {
+    "update": 53,
+    "incumbent": 1.3782837125921503,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.6747169248556162,
+    "trials": [
+     {
+      "scale": 1.0000000000000118,
+      "residual": 126.65470625548579,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000204,
+      "residual": 55.89891717879492,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000102,
+      "residual": 24.88003926891924,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000000924,
+      "residual": 12.212570286040503,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000002046,
+      "residual": 4.898574830029389,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000001798,
+      "residual": 1.8633506950684762,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000000899,
+      "residual": 2.351307625514181,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000004495,
+      "residual": 1.6747169248556162,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 434.68262717165067,
+    "krylov_iterations": 40,
+    "cumulative_reads": 389,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7811217126562595,
+      0.04260669476163975
+     ],
+     "axis_flux": 0.03530274714727172,
+     "boundary_flux": -0.0002899124911271802
+    }
+   },
+   {
+    "update": 54,
+    "incumbent": 1.6747169248556162,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.6228151701996723,
+    "trials": [
+     {
+      "scale": 1.0000000000000806,
+      "residual": 2.86325064894676,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000005405,
+      "residual": 1.6228151701996723,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 235.22784543063827,
+    "krylov_iterations": 40,
+    "cumulative_reads": 397,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 7,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7807389235612743,
+      0.04251884801253287
+     ],
+     "axis_flux": 0.03524342656247016,
+     "boundary_flux": -0.0003239258791048658
+    }
+   },
+   {
+    "update": 55,
+    "incumbent": 1.6228151701996723,
+    "accepted_scale": 0.5,
+    "accepted_residual": 1.4196720464137087,
+    "trials": [
+     {
+      "scale": 1.000000000000664,
+      "residual": 1.9533149711361375,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000010639,
+      "residual": 1.4196720464137087,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 198.48803980824616,
+    "krylov_iterations": 40,
+    "cumulative_reads": 405,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7810080722255013,
+      0.04258100085026237
+     ],
+     "axis_flux": 0.03528513934994269,
+     "boundary_flux": -0.00029998900451961354
+    }
+   },
+   {
+    "update": 56,
+    "incumbent": 1.4196720464137087,
+    "accepted_scale": 0.125,
+    "accepted_residual": 1.3564658648500512,
+    "trials": [
+     {
+      "scale": 1.0000000000003453,
+      "residual": 4.24255050003201,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000004314,
+      "residual": 2.486880638719967,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000010447,
+      "residual": 1.5986973678292316,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000049344,
+      "residual": 1.3564658648500512,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000049344,
+      "residual": 1.3564658648500512,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000049344,
+      "residual": 1.3564658648500512,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000049344,
+      "residual": 1.3564658648500512,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000049344,
+      "residual": 1.3564658648500512,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 293.68663072773177,
+    "krylov_iterations": 40,
+    "cumulative_reads": 413,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7808698712935034,
+      0.042549362751636614
+     ],
+     "axis_flux": 0.035263729887739556,
+     "boundary_flux": -0.00031226347495287566
+    }
+   },
+   {
+    "update": 57,
+    "incumbent": 1.3564658648500512,
+    "accepted_scale": 0.015625,
+    "accepted_residual": 1.3520679527578636,
+    "trials": [
+     {
+      "scale": 1.000000000000048,
+      "residual": 8.893869971863893,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000556,
+      "residual": 3.764785406977005,
+      "valid": true
+     },
+     {
+      "scale": 0.25000000000009376,
+      "residual": 3.2953266174885414,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000004688,
+      "residual": 1.9747009487474116,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000021264,
+      "residual": 1.5060754595372998,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000010632,
+      "residual": 1.378227292062249,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000010529,
+      "residual": 1.3520679527578636,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000010529,
+      "residual": 1.3520679527578636,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 205.9976379147543,
+    "krylov_iterations": 40,
+    "cumulative_reads": 421,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809167755490634,
+      0.04256008160783363
+     ],
+     "axis_flux": 0.0352709941882528,
+     "boundary_flux": -0.0003080981405620344
+    }
+   },
+   {
+    "update": 58,
+    "incumbent": 1.3520679527578636,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.353951390811858,
+    "trials": [
+     {
+      "scale": 1.0000000000000715,
+      "residual": 17.07866982301215,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000000564,
+      "residual": 9.223422462962148,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000653,
+      "residual": 5.181194567972611,
+      "valid": true
+     },
+     {
+      "scale": 0.1250000000000229,
+      "residual": 3.1108813961344453,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000009731,
+      "residual": 2.061159326811847,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000003847,
+      "residual": 1.5370347926769767,
+      "valid": true
+     },
+     {
+      "scale": 0.01562500000001812,
+      "residual": 1.3829359817607951,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000070244,
+      "residual": 1.353951390811858,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 426.7269953623306,
+    "krylov_iterations": 40,
+    "cumulative_reads": 429,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.780875326763588,
+      0.042550612871523945
+     ],
+     "axis_flux": 0.03526457471185928,
+     "boundary_flux": -0.00031177884207070713
+    }
+   },
+   {
+    "update": 59,
+    "incumbent": 1.353951390811858,
+    "accepted_scale": 0.0078125,
+    "accepted_residual": 1.349856129120326,
+    "trials": [
+     {
+      "scale": 1.0000000000000535,
+      "residual": 12.469298212038005,
+      "valid": true
+     },
+     {
+      "scale": 0.5000000000001041,
+      "residual": 4.998563570157842,
+      "valid": true
+     },
+     {
+      "scale": 0.2500000000000971,
+      "residual": 1.8931699522413012,
+      "valid": true
+     },
+     {
+      "scale": 0.12500000000007758,
+      "residual": 2.2851245101272823,
+      "valid": true
+     },
+     {
+      "scale": 0.06250000000004385,
+      "residual": 1.6097172257076267,
+      "valid": true
+     },
+     {
+      "scale": 0.03125000000006267,
+      "residual": 1.4067867248962074,
+      "valid": true
+     },
+     {
+      "scale": 0.015625000000023915,
+      "residual": 1.3579842795407018,
+      "valid": true
+     },
+     {
+      "scale": 0.007812500000169175,
+      "residual": 1.349856129120326,
+      "valid": true
+     }
+    ],
+    "refactored": 1,
+    "krylov_condition": 255.58524249258565,
+    "krylov_iterations": 40,
+    "cumulative_reads": 437,
+    "decision": {
+     "valid": 1,
+     "reason": 0,
+     "boundary_class": 1,
+     "cut_cells": 119,
+     "normal_cells": 8,
+     "fragments": 334,
+     "admitted_saddles": 1,
+     "qualified": 1,
+     "axis": [
+      1.7809044412824888,
+      0.04255726528007191
+     ],
+     "axis_flux": 0.03526908378366134,
+     "boundary_flux": -0.00030919334387585366
+    }
+   }
+  ],
+  "seed_decision": {
+   "valid": 1,
+   "reason": 0,
+   "boundary_class": 1,
+   "cut_cells": 117,
+   "normal_cells": 8,
+   "fragments": 338,
+   "admitted_saddles": 1,
+   "qualified": 1,
+   "axis": [
+    1.7870723583846746,
+    0.04677064015808661
+   ],
+   "axis_flux": 0.035877383278859344,
+   "boundary_flux": 1.640776797864752e-06
+  }
+ }
+}

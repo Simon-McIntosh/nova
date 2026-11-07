@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-07T14:35:13",
+  "updated": "2026-11-07T23:51:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -550475,16 +550475,16 @@
         "backend": "codex",
         "purpose": "dispatch",
         "opened_at": "2026-11-07T13:35:09Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-11-07T22:51:00Z",
+        "held_seconds": 33351,
         "utilisation_pct": 100.0,
         "resets_at": "2026-11-11T09:00:01Z",
         "effective_ceiling_pct": 100.0,
         "reason": "utilisation 100% with burn multiple 2.2x and projected exhaustion 2026-11-09T07:15:28Z is at or above the 100.0% ceiling for a dispatch; the account surface was read at 2026-11-07T13:35:07Z and is the operative reading Resolve with `reckon crew budget --check`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume --ready`.",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 3391
+    "_version": 3392
   }
 }

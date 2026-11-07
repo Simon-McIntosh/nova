@@ -66,11 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json",
-    "after_suite.revision",
-    "compile/cache"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -227,6 +222,11 @@
   },
   "orientation_input_tokens": 3120776.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json",
+    "after_suite.revision",
+    "compile/cache"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

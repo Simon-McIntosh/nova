@@ -67,9 +67,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "nova/equilibrium/topology.py;"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -227,6 +224,9 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "nova/equilibrium/topology.py;"
+  ],
   "pace": {
     "allowance": {
       "burn_multiple": 4.949532435421309,

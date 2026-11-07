@@ -66,10 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-first-moment-centroid-consumers.html",
-    "42/42"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -226,6 +222,10 @@
   },
   "orientation_input_tokens": 3642628.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-first-moment-centroid-consumers.html",
+    "42/42"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

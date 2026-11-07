@@ -65,18 +65,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "tests/test_fused_same_state_read.py:200",
-    "test_fused_same_state_read.py",
-    "test_topology_o_qualification.py",
-    "test_equilibrium_forward_reference.py",
-    "test_forward_operator_domain.py",
-    "/",
-    "test_sol_support_selection.py",
-    "test_two_branch_batch_cost.py",
-    "benchmarks/exact_clip_low_state_discriminator.py:530",
-    "plan/coordinator"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -233,6 +221,18 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_fused_same_state_read.py:200",
+    "test_fused_same_state_read.py",
+    "test_topology_o_qualification.py",
+    "test_equilibrium_forward_reference.py",
+    "test_forward_operator_domain.py",
+    "/",
+    "test_sol_support_selection.py",
+    "test_two_branch_batch_cost.py",
+    "benchmarks/exact_clip_low_state_discriminator.py:530",
+    "plan/coordinator"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -1422,10 +1422,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "benchmarks/efit_forward_parity_slice.py's",
-    "_attribution_figure/_composition_figure/_passive_inclusive_figure"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/efit_forward_parity_slice.py",
@@ -1589,6 +1585,10 @@
   },
   "orientation_input_tokens": 3267590.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "benchmarks/efit_forward_parity_slice.py's",
+    "_attribution_figure/_composition_figure/_passive_inclusive_figure"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

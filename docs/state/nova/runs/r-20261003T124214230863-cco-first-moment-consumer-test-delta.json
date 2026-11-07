@@ -66,10 +66,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "tests/test_observation_kernels.py",
-    "tests/test_forward_moment_class.py"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -225,6 +221,10 @@
   },
   "orientation_input_tokens": 6652527.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_observation_kernels.py",
+    "tests/test_forward_moment_class.py"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -1356,10 +1356,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "set_support_clip_mode/support_clip_mode",
-    "nova/equilibrium/forward_operator.py"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -1526,6 +1522,10 @@
   },
   "orientation_input_tokens": 4058685.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "set_support_clip_mode/support_clip_mode",
+    "nova/equilibrium/forward_operator.py"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

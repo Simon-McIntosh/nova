@@ -747,14 +747,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "frozen_current_flux_image_gate.py",
-    "absolute-flux-error.svg",
-    "weak-110-frozen-prediction-analytic-terminal.svg",
-    "tests/test_frozen_current_flux_image_gate.py::test_render_only_reproduces_receipted_panel_set",
-    "docs/figures/cut-cell-current-attribution",
-    "docs/figures/millisecond-converged-solve"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/diverted_chord_response_attribution.py benchmarks/solve_program_size_gate.py benchmarks/frozen_current_flux_image_gate.py",
@@ -920,6 +912,14 @@
   },
   "orientation_input_tokens": 1582122.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "frozen_current_flux_image_gate.py",
+    "absolute-flux-error.svg",
+    "weak-110-frozen-prediction-analytic-terminal.svg",
+    "tests/test_frozen_current_flux_image_gate.py::test_render_only_reproduces_receipted_panel_set",
+    "docs/figures/cut-cell-current-attribution",
+    "docs/figures/millisecond-converged-solve"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

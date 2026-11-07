@@ -66,10 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "frozen_current_flux_image_gate.py",
-    "tests/renderer_wall_scan.py"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -226,6 +222,10 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "frozen_current_flux_image_gate.py",
+    "tests/renderer_wall_scan.py"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

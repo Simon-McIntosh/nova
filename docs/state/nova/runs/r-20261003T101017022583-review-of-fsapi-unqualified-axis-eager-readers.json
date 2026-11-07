@@ -65,13 +65,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "tests/test_fused_same_state_read.py",
-    "oracle_start_newton_probe.py",
-    "settled_mask_stall.py",
-    "operator.read",
-    "1158/1308"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -228,6 +221,13 @@
   },
   "orientation_input_tokens": 3282850.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_fused_same_state_read.py",
+    "oracle_start_newton_probe.py",
+    "settled_mask_stall.py",
+    "operator.read",
+    "1158/1308"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

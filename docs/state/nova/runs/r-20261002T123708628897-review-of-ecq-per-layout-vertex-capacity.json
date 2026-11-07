@@ -65,13 +65,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "census-diverted-single-null.json",
-    "censused-rows.json",
-    "/",
-    "forward_operator.py",
-    "docs/figures/exact-clip-moment-quadrature/capacity/"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -228,6 +221,13 @@
   },
   "orientation_input_tokens": 3135900.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "census-diverted-single-null.json",
+    "censused-rows.json",
+    "/",
+    "forward_operator.py",
+    "docs/figures/exact-clip-moment-quadrature/capacity/"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

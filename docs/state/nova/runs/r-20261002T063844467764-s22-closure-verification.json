@@ -68,9 +68,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "strong/diverted"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -226,6 +223,9 @@
   },
   "orientation_input_tokens": 2103976.0,
   "outcome": "closure check: f-ecq-density-promotion-record and f-fsa-audit-mesh-size-threshold met and resolved; the two cpu-compile-abort closures not met (no per-row certificate receipt on disk); review pass 87/100",
+  "outside_scope_paths": [
+    "strong/diverted"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

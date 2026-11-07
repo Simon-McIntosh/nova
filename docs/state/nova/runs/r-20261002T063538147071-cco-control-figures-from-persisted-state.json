@@ -109,7 +109,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "env PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-control-figures-from-persisted-state JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider --timeout 0 tests/test_centroid_constrained_fixture.py",
@@ -289,6 +288,7 @@
   },
   "orientation_input_tokens": 5561104.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

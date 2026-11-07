@@ -65,10 +65,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree.html",
-    "PNG/SVG"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -225,6 +221,10 @@
   },
   "orientation_input_tokens": 3143051.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree.html",
+    "PNG/SVG"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

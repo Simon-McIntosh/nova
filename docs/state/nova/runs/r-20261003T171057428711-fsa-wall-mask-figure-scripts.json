@@ -200,12 +200,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/figures",
-    "docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/measure.py:113",
-    "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/measure.py:70",
-    "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure/measure.py:70"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py docs/figures/cut-cell-current-attribution/continuous-support/draw_trips.py docs/figures/cut-cell-current-attribution/direction-generators/measure.py docs/figures/cut-cell-current-attribution/merit-model/measure.py docs/figures/cut-cell-current-attribution/outboard-hole/measure.py docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
@@ -373,6 +367,12 @@
   },
   "orientation_input_tokens": 2334488.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/figures",
+    "docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/measure.py:113",
+    "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/measure.py:70",
+    "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure/measure.py:70"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

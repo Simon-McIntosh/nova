@@ -66,13 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html:97",
-    "measure.log",
-    "312.57",
-    "/home/ITER/mcintos/.cache/nova-forward-solve-timeouts/",
-    "1280617/1280623);"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -229,6 +222,13 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html:97",
+    "measure.log",
+    "312.57",
+    "/home/ITER/mcintos/.cache/nova-forward-solve-timeouts/",
+    "1280617/1280623);"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

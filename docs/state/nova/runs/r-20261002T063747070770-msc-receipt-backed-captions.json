@@ -68,10 +68,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "benchmarks/profile-coefficients-recompile.json",
-    "~/.config/reckon/crew/reports/nova/s19-review/profile-args/."
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "python docs/figures/millisecond-converged-solve/render_strict_exit_incidence.py; python docs/figures/millisecond-converged-solve/render_scan_prototype_residuals.py; verification in the gate log",
@@ -242,6 +238,10 @@
   },
   "orientation_input_tokens": 8933742.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "benchmarks/profile-coefficients-recompile.json",
+    "~/.config/reckon/crew/reports/nova/s19-review/profile-args/."
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

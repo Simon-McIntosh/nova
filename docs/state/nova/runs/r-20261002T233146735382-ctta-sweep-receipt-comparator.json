@@ -746,7 +746,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_brute_force.py -q",
@@ -927,6 +926,7 @@
   },
   "orientation_input_tokens": 580973.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

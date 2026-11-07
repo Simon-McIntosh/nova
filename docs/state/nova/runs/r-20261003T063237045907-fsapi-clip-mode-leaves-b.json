@@ -1760,12 +1760,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "nova/equilibrium/forward_operator.py",
-    "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json",
-    "benchmarks/sol_ledger_current_census.py",
-    "tests/test_forward_compile_identity._certificate_row"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -1932,6 +1926,12 @@
   },
   "orientation_input_tokens": 10988797.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "nova/equilibrium/forward_operator.py",
+    "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json",
+    "benchmarks/sol_ledger_current_census.py",
+    "tests/test_forward_compile_identity._certificate_row"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -69,7 +69,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-converged-span-offset JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m benchmarks.centroid_constrained_fixture_receipt --span-offset-receipt",
@@ -234,6 +233,7 @@
   },
   "orientation_input_tokens": 4462941.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

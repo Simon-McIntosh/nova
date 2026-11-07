@@ -2540,7 +2540,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu python -m pytest --timeout 0 tests/test_forward_solve_clip_mode_request.py",
@@ -2745,6 +2744,7 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": {
       "burn_multiple": 3.3752154517842468,

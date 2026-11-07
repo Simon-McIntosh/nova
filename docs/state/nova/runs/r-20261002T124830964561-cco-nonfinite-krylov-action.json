@@ -92,10 +92,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "nova/equilibrium/constraint.py",
-    "/"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-nonfinite-krylov-action /home/ITER/mcintos/Code/nova/.venv/bin/python -m benchmarks.centroid_constrained_fixture_receipt --diagnose-linear-action --source-root /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T094100739066-cco-unit-leverage-positive-control/receipt --output-root /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T124830964561-cco-nonfinite-krylov-action/receipt",
@@ -260,6 +256,10 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "nova/equilibrium/constraint.py",
+    "/"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

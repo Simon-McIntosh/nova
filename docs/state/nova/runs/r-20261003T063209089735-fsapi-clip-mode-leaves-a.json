@@ -1824,12 +1824,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "benchmarks/limited_row_shadow_census.py:96.",
-    "tests/test_forward_support_clip_mode.py",
-    "set_support_clip_mode/support_clip_mode",
-    "nova/equilibrium/forward_operator.py"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -1998,6 +1992,12 @@
   },
   "orientation_input_tokens": 4754066.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "benchmarks/limited_row_shadow_census.py:96.",
+    "tests/test_forward_support_clip_mode.py",
+    "set_support_clip_mode/support_clip_mode",
+    "nova/equilibrium/forward_operator.py"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -732,10 +732,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/plans/millisecond-converged-solve.html",
-    "docs/state/nova/crew.json"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "python3 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134117794154-msc-figure-cohort-cite-or-retire/figure-citation-scan.py .",
@@ -919,6 +915,10 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/plans/millisecond-converged-solve.html",
+    "docs/state/nova/crew.json"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

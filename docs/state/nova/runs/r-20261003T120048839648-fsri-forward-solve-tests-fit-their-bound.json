@@ -71,13 +71,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "hit/miss",
-    "negative-attempt1-cancelled.log",
-    "negative.log",
-    "confirm.log",
-    "confirm-lane-forced-3600.log"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -238,6 +231,13 @@
   },
   "orientation_input_tokens": 3967626.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "hit/miss",
+    "negative-attempt1-cancelled.log",
+    "negative.log",
+    "confirm.log",
+    "confirm-lane-forced-3600.log"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

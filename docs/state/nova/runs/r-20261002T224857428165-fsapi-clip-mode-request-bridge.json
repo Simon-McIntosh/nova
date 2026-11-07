@@ -836,13 +836,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture",
-    "nova/equilibrium/forward_operator.py:2627",
-    "self.grid.null",
-    "/",
-    "tests/test_forward_solve_clip_mode_request.py)."
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv JAX_PLATFORMS=cpu uv run --no-sync pytest -p no:cacheprovider -q tests/test_forward_solve_clip_mode_bridge.py",
@@ -1020,6 +1013,13 @@
   },
   "orientation_input_tokens": 1243181.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture",
+    "nova/equilibrium/forward_operator.py:2627",
+    "self.grid.null",
+    "/",
+    "tests/test_forward_solve_clip_mode_request.py)."
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

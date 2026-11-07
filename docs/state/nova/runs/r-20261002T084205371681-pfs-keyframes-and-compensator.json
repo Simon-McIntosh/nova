@@ -68,9 +68,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/evidence/archive/figure-and-solver-audit-landed.html"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/playable-forward-solve/pfs-keyframes-and-compensator/render_figures.py .",
@@ -237,6 +234,9 @@
   },
   "orientation_input_tokens": 6238399.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/evidence/archive/figure-and-solver-audit-landed.html"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

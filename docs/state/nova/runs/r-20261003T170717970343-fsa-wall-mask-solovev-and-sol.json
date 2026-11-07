@@ -3411,11 +3411,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "solovev_cut_cell_moments.py",
-    "sol_current_demonstration.py",
-    "nova/"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/solovev_certificate.py benchmarks/solovev_solver_discriminator.py benchmarks/solovev_off_axis_census.py benchmarks/solovev_cut_cell_moments.py benchmarks/sol_current_demonstration.py",
@@ -3583,6 +3578,11 @@
   },
   "orientation_input_tokens": 2409348.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "solovev_cut_cell_moments.py",
+    "sol_current_demonstration.py",
+    "nova/"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

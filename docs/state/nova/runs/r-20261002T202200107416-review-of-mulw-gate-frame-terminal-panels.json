@@ -61,10 +61,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "corruption/panel",
-    "instrument/input"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -226,6 +222,10 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "corruption/panel",
+    "instrument/input"
+  ],
   "pace": {
     "allowance": {
       "burn_multiple": 3.4606820827585953,

@@ -70,11 +70,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure/measure.py:70",
-    "repaired-remeasure-receipt/measure.py:70.",
-    "limited-touch/render.py:55"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_renderer_wall_scan.py",
@@ -255,6 +250,11 @@
   },
   "orientation_input_tokens": 1831311.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure/measure.py:70",
+    "repaired-remeasure-receipt/measure.py:70.",
+    "limited-touch/render.py:55"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -695,7 +695,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_brute_force.py",
@@ -919,6 +918,7 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

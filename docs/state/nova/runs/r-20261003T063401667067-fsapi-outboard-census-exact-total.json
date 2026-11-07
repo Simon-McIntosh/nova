@@ -97,9 +97,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "tests/test_outboard_hole_census_gate.py"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -258,6 +255,9 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_outboard_hole_census_gate.py"
+  ],
   "pace": {
     "allowance": {
       "burn_multiple": 1.7980304318995655,

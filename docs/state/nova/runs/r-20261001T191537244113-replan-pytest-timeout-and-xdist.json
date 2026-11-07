@@ -69,7 +69,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "uv lock --check",
@@ -234,6 +233,7 @@
   },
   "orientation_input_tokens": 786633.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -66,11 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "benchmarks/frozen_current_flux_image_gate.py",
-    "refs/s19-tips/cca-gate-b-frozen-current-flux-image",
-    "receipt.json"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -228,6 +223,11 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "benchmarks/frozen_current_flux_image_gate.py",
+    "refs/s19-tips/cca-gate-b-frozen-current-flux-image",
+    "receipt.json"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

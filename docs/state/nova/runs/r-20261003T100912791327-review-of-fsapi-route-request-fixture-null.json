@@ -53,12 +53,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "_profile/_LinearTarget",
-    "tests/test_prescribed_current_solve.py",
-    "tests/test_route_solve_requests.py",
-    "tests/test_prescribed_current_solve.py."
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -215,6 +209,12 @@
   },
   "orientation_input_tokens": 1851968.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "_profile/_LinearTarget",
+    "tests/test_prescribed_current_solve.py",
+    "tests/test_route_solve_requests.py",
+    "tests/test_prescribed_current_solve.py."
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

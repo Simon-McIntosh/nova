@@ -66,10 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "benchmarks/centroid_field_response_probe.py:122-151;",
-    "steering-frame/public-observation"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-consumers /home/ITER/mcintos/Code/nova/.venv/bin/python - [inline displaced exact-clip centroid measurement]",
@@ -233,6 +229,10 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "benchmarks/centroid_field_response_probe.py:122-151;",
+    "steering-frame/public-observation"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

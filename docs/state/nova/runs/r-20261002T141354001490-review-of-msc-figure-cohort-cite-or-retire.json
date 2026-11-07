@@ -65,16 +65,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "jacobi-ratio-vs-constant-discriminator.png",
-    "cross-revision/receipt.json",
-    "process-per-row/certificate.json",
-    "rows/*.json",
-    "host-profile/profile.json",
-    "outer-loop.json",
-    "late-trips/profile.json",
-    "diverted-oracle-census-fine.png"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -231,6 +221,16 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "jacobi-ratio-vs-constant-discriminator.png",
+    "cross-revision/receipt.json",
+    "process-per-row/certificate.json",
+    "rows/*.json",
+    "host-profile/profile.json",
+    "outer-loop.json",
+    "late-trips/profile.json",
+    "diverted-oracle-census-fine.png"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

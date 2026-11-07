@@ -66,12 +66,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "1.393",
-    "1.0698",
-    "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator",
-    "suptitle_lines/suptitle_widest_inches"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -236,6 +230,12 @@
   },
   "orientation_input_tokens": 4368271.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "1.393",
+    "1.0698",
+    "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator",
+    "suptitle_lines/suptitle_widest_inches"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

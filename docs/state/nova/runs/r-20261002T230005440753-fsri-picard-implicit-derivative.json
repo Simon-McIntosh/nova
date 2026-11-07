@@ -75,14 +75,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "3.19177",
-    "3.14823",
-    "3.14745",
-    "0.18544",
-    "0.18618",
-    "0.18619"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -246,6 +238,14 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [
+    "3.19177",
+    "3.14823",
+    "3.14745",
+    "0.18544",
+    "0.18618",
+    "0.18619"
+  ],
   "pace": {
     "allowance": {
       "burn_multiple": 4.725282681176427,

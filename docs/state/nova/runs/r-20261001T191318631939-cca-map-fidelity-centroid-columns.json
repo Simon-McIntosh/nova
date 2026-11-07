@@ -72,10 +72,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "weak-rotation-reactor-static-cells-110-exact.json",
-    "0.093"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_map_fidelity_centroid.py -q",
@@ -239,6 +235,10 @@
   },
   "orientation_input_tokens": 4064465.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "weak-rotation-reactor-static-cells-110-exact.json",
+    "0.093"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

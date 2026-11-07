@@ -56,7 +56,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -213,6 +212,7 @@
   },
   "orientation_input_tokens": null,
   "outcome": "review of an S22 wave 2 triage report: pass; follow-ons recorded on the triage promotion",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

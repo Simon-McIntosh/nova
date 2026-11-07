@@ -668,7 +668,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python tests/renderer_wall_scan.py benchmarks/plasma_cell_first_step_directions.py benchmarks/plasma_cell_fixed_point_attribution.py benchmarks/plasma_cell_map_fidelity.py benchmarks/plasma_cell_production_ladder.py benchmarks/plasma_cell_seed_policy.py benchmarks/plasma_cell_terminal_state.py benchmarks/plasma_cell_trip_panels.py",
@@ -838,6 +837,7 @@
   },
   "orientation_input_tokens": 1775915.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

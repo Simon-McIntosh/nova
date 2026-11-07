@@ -88,7 +88,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider tests/test_plasma_cell_terminal_state_draw_order.py",
@@ -270,6 +269,7 @@
   },
   "orientation_input_tokens": 1282121.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

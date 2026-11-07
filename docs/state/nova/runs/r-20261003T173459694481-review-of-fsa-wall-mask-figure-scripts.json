@@ -66,14 +66,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "product/test",
-    "tests/renderer_wall_scan.py",
-    "docs/figures/centroid-constrained-oracle-solve/",
-    "certificate-ladder-500-1000-probe/measure.py:113",
-    "repaired-remeasure-receipt/measure.py:70;",
-    "repaired-remeasure/measure.py:70)."
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -230,6 +222,14 @@
   },
   "orientation_input_tokens": 2536753.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "product/test",
+    "tests/renderer_wall_scan.py",
+    "docs/figures/centroid-constrained-oracle-solve/",
+    "certificate-ladder-500-1000-probe/measure.py:113",
+    "repaired-remeasure-receipt/measure.py:70;",
+    "repaired-remeasure/measure.py:70)."
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

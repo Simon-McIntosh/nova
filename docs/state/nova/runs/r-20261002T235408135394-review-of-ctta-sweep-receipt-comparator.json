@@ -65,9 +65,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "receipt_from_tree/receipt_of/write_receipts/--write"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -224,6 +221,9 @@
   },
   "orientation_input_tokens": 3399347.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "receipt_from_tree/receipt_of/write_receipts/--write"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

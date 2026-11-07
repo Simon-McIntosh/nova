@@ -278,12 +278,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "tests/test_exact_clip_memory.py",
-    "tests/test_solve_path_census_inputs.py::test_solve_path_prefix_slices_do_not_feed_the_null_census",
-    "nova/equilibrium/reduced_newton.py.",
-    "tests/test_exact_clip_seed_bracket.py::test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -456,6 +450,12 @@
   },
   "orientation_input_tokens": 2951119.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_exact_clip_memory.py",
+    "tests/test_solve_path_census_inputs.py::test_solve_path_prefix_slices_do_not_feed_the_null_census",
+    "nova/equilibrium/reduced_newton.py.",
+    "tests/test_exact_clip_seed_bracket.py::test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

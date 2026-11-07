@@ -65,10 +65,6 @@
     "status": "overridden"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "evidence/.../dependency-change.log",
-    "/nova/../docs/evidence/..."
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -230,6 +226,10 @@
   },
   "orientation_input_tokens": 1821663.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "evidence/.../dependency-change.log",
+    "/nova/../docs/evidence/..."
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

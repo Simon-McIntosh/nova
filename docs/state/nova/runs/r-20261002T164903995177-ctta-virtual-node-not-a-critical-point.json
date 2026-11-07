@@ -655,9 +655,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "nova/imas/contour_tree_layout.py"
-  ],
   "gate": "passed",
   "gate_check": {
     "command": "JAX_PLATFORMS=cpu python -m pytest --timeout 0 -p no:cacheprovider tests/test_contour_tree_merge.py tests/test_contour_tree_brute_force.py tests/test_contour_tree_mesh.py tests/test_contour_tree_conventions.py",
@@ -839,6 +836,9 @@
   },
   "orientation_input_tokens": 3566370.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "nova/imas/contour_tree_layout.py"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

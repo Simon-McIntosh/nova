@@ -82,7 +82,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -243,6 +242,7 @@
   },
   "orientation_input_tokens": 1644060.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

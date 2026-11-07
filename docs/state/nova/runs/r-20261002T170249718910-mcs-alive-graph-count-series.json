@@ -139,7 +139,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py --output-dir /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count --programs 20",
@@ -345,6 +344,7 @@
   },
   "orientation_input_tokens": null,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

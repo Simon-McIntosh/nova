@@ -268,7 +268,6 @@
     "status": "compatible"
   },
   "failure_classification": null,
-  "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
     "command": "pytest tests/test_nova_lane_launcher.py",
@@ -447,6 +446,7 @@
   },
   "orientation_input_tokens": 726941.0,
   "outcome": "",
+  "outside_scope_paths": [],
   "pace": {
     "allowance": null,
     "bar": null,

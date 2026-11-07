@@ -53,12 +53,6 @@
     "status": "no-execution-measure"
   },
   "failure_classification": null,
-  "follow_on_paths": [
-    "docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-timeout-equals-form-test.html",
-    "16.38s",
-    "gate.log",
-    "metric/label"
-  ],
   "gate": "not-run",
   "gate_check": null,
   "impl_move": {
@@ -215,6 +209,12 @@
   },
   "orientation_input_tokens": 2799585.0,
   "outcome": "",
+  "outside_scope_paths": [
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-timeout-equals-form-test.html",
+    "16.38s",
+    "gate.log",
+    "metric/label"
+  ],
   "pace": {
     "allowance": null,
     "bar": null,

@@ -10,71 +10,86 @@
 <section id="summary">
 <h2>Summary</h2>
 <p>
-Frame 146's diverted branch terminates with its axis at R=1.234 m, Z=+1.563 m &mdash;
-0.20 m above the DIII-D limiter top at Z=+1.363 m, with no closed core cells and
-0.039&times;Ip confined. Frames 137, 144, 179 and 44 keep their plasma.
+Frame 146's diverted branch terminates with its axis at R=1.210 m, Z=+1.556 m
+&mdash; 0.19 m above the DIII-D limiter top at Z=+1.363 m &mdash; with no closed
+core cells and 0.046&times;Ip confined. Frames 137, 144, 179 and 44 keep their
+plasma.
 </p>
 <p>
-Two hypotheses are refuted by measurement on the same time slice, and one
-mechanism survives. The coils, the profiles and the current normalisation are
-adequate: frame 146's <em>limited</em> branch, on the same extracted profiles,
-the same coil set and the same 1.624 MA target, reaches a held diverted plasma at
-Z=+0.027 m with 1.134&times;Ip confined. What differs is not the seed's distance
-from the label but the size of the first step the active-set iteration takes from
-it, and the boundary-set trajectory that step triggers.
+The mechanism is the <em>second</em> active-set promotion. At trip 1 the two
+frames are indistinguishable: frame 146 holds 0.912&times;Ip at Z=&minus;0.346 m
+and frame 137 holds 0.920&times;Ip at Z=&minus;0.362 m, both inside the limiter,
+within 1% of each other on both measures. At trip 2 their promotion steps differ
+by 13.5&times; &mdash; 83.21 Wb against 6.156 Wb &mdash; and frame 146's
+boundary set <em>grows</em> from 27 to 39 cells where frame 137's contracts from
+24 to 20. That one step throws the axis to Z=+1.556 m, outside the limiter, and
+leaves 0.046&times;Ip confined.
+</p>
+<p>
+<b>Correction to the earlier reading of this fragment.</b> A previous version
+named a 25.28 Wb first-promotion step as the discriminator against frame 137's
+1.40 Wb. Those numbers came from a defect in the tabulation: every re-solve
+reported <code>amplitude_history[0]</code>, the first promotion of the run,
+whatever trip the row described. Measured per trip, the first promotion is
+<em>not</em> where the frames differ, and 25 Wb is not a quantity this
+trajectory reproduces. The discriminator is the trip-2 step.
 </p>
 </section>
 
 <section id="trajectory">
-<h2>1. Per-trip trajectory, frames 146 and 137</h2>
+<h2>1. Per-trip trajectory, measured</h2>
 <p>
-Both frames' diverted seeds are almost exactly the same distance from their EFIT
-label &mdash; 151.05 Wb for frame 146, 150.27 Wb for frame 137, a 0.5% difference.
-The first-step promotion amplitude differs by a factor of eighteen.
+Each row is its own solve: <code>active_set_steps=k</code> stops the solve after
+exactly k promotions, so the state at trip k is a real solve state rather than a
+read of a terminal. Axis containment is judged with
+<code>inside_wall_units</code> against the governed 84-point DIII-D limiter,
+which spans Z &minus;1.359 to +1.363 m; the step norm is the norm of the
+difference between consecutive trip flux states.
 </p>
 <table>
 <caption>
-Per-frame seed distance from the EFIT label, first-step promotion amplitude,
-active boundary-set size per trip, and terminal plasma presence. Frame 146
-diverted/continued is the arm compared against frame 137.
+Frame 146 against the frame 137 control, diverted branch, one row per
+active-set trip. Ratio is confined current over the 1.624 MA target. Step norm
+is the flux change from the previous trip, so trip 1 has none.
 </caption>
 <thead>
-<tr><th>frame</th><th>branch</th><th>seed L2 [Wb]</th><th>amplitude [Wb]</th>
-<th>active cells per trip</th><th>axis Z [m]</th><th>in limiter</th>
-<th>Iconf/Ip</th><th>residual</th></tr>
+<tr><th>frame</th><th>trip</th><th>axis R [m]</th><th>axis Z [m]</th>
+<th>inside limiter</th><th>Iconf/Ip</th><th>boundary set</th>
+<th>step norm [Wb]</th><th>residual</th></tr>
 </thead>
 <tbody>
-<tr><td>146</td><td>diverted</td><td>151.05</td><td>25.28</td>
-<td>27, 40, 1, 0, 0, 0 &hellip;</td><td>+1.563</td><td>false</td>
-<td>0.039</td><td>5.496e-2</td></tr>
-<tr><td>146</td><td>limited</td><td>9.29</td><td>0.879</td>
-<td>9, 0, 0 &hellip;</td><td>+0.027</td><td>true</td>
-<td>1.134</td><td>6.350e-2</td></tr>
-<tr><td>137</td><td>diverted</td><td>150.27</td><td>1.404</td>
-<td>24, 20, 9, 9, 0, 0 &hellip;</td><td>&minus;0.442</td><td>true</td>
-<td>0.709</td><td>6.237e-2</td></tr>
-<tr><td>137</td><td>limited</td><td>8.97</td><td>0.913</td>
-<td>11, 0, 0 &hellip;</td><td>&minus;0.136</td><td>true</td>
-<td>1.091</td><td>5.683e-2</td></tr>
+<tr><td>146</td><td>1</td><td>1.688</td><td>&minus;0.346</td><td>yes</td>
+<td>0.912</td><td>27</td><td>&mdash;</td><td>0.128</td></tr>
+<tr><td>146</td><td>2</td><td>1.211</td><td><b>+1.556</b></td><td><b>no</b></td>
+<td>0.046</td><td><b>39</b></td><td><b>83.21</b></td><td>0.221</td></tr>
+<tr><td>146</td><td>3</td><td>1.220</td><td>+1.563</td><td>no</td>
+<td>0.041</td><td>0</td><td>3.37</td><td>0.056</td></tr>
+<tr><td>137</td><td>1</td><td>1.611</td><td>&minus;0.362</td><td>yes</td>
+<td>0.920</td><td>24</td><td>&mdash;</td><td>0.130</td></tr>
+<tr><td>137</td><td>2</td><td>1.667</td><td>&minus;0.361</td><td>yes</td>
+<td>0.737</td><td><b>20</b></td><td><b>6.156</b></td><td>0.111</td></tr>
+<tr><td>137</td><td>3</td><td>1.700</td><td>&minus;0.239</td><td>yes</td>
+<td>0.706</td><td>9</td><td>1.68</td><td>0.067</td></tr>
+<tr><td>137</td><td>4</td><td>1.655</td><td>&minus;0.443</td><td>yes</td>
+<td>0.709</td><td>9</td><td>1.69</td><td>0.062</td></tr>
+<tr><td>137</td><td>5</td><td>1.655</td><td>&minus;0.443</td><td>yes</td>
+<td>0.709</td><td>0</td><td>5.5&times;10<sup>&minus;13</sup></td><td>0.062</td></tr>
 </tbody>
 </table>
 
-<h3>The boundary-set trajectory diverges at trip 2</h3>
+<h3>Where the two branches part at trip 2</h3>
 <p>
-Frame 137's active set shrinks monotonically once from its seed &mdash;
-24, 20, 9, 9, 0 &mdash; walking a boundary inward onto the reliable flux
-surfaces, and terminates with the axis at Z=&minus;0.442 m, inside the vessel,
-with 71% of the target current confined and a diverted X-point.
+Frame 137's promotion walks the boundary inward: 24 cells, then 20, then 9, and
+each step is a few walls of flux. Frame 146's promotion on the same trip adds
+cells &mdash; 27 to 39 &mdash; instead of removing them, and lands 83 Wb of
+column height on a seed that was 151 Wb from the label. The axis does not drift
+upward over several trips; it is carried out of the vessel and left there in one
+step. After trip 3 the set is empty, the step falls to 3.37 Wb, and the residual
+plateaus at 5.6e-2 with nothing left to correct.
 </p>
 <p>
-Frame 146's active set <em>grows</em> on the second trip, 27 &rarr; 40, then
-collapses through 1 and 0 and stays empty. Once the set is empty there is no
-boundary row through which a vertical-field correction can be applied: the
-residual repeats to all printed digits from trip five onward
-(5.496e-2, sixteen promotions) and the axis is left 0.20 m above the limiter.
-The alternate-level pattern the stopping rule reports is a period-2 cycle across
-trips 2&ndash;4 (levels 0.2220, 0.0651, 0.0550), after which the plateau is flat
-and the arm is stopped as a contraction stall.
+The plateau itself is not a symptom: frame 137 plateaus at 6.2e-2 and keeps its
+plasma. It is the vertical position and the confined fraction that separate them.
 </p>
 </section>
 
@@ -83,107 +98,77 @@ and the arm is stopped as a contraction stall.
 <table>
 <thead><tr><th>hypothesis</th><th>verdict</th><th>measurement</th></tr></thead>
 <tbody>
-<tr>
-<td>The profile or current normalisation pushes the axis up</td>
-<td>refuted</td>
-<td>Frame 146 limited: axis Z=+0.027 m, Iconf/Ip=1.134. The normalisation on the
-same profiles and the same 1.624 MA target produces a centred plasma.</td>
-</tr>
-<tr>
-<td>The coil currents give no vertical equilibrium for the extracted profiles</td>
-<td>refuted</td>
-<td>Frame 146 limited reaches a diverted equilibrium with a qualified X-point at
-R=1.353, Z=&minus;1.250 m and 1.134&times;Ip confined. The coils and profiles support
-a vertical equilibrium; the diverted branch's failure is not a property of them.</td>
-</tr>
-<tr>
-<td>The seed drives an n=0 vertical displacement the fixed point does not restore</td>
-<td>sustained, with the discriminator moved from the seed to the first step</td>
-<td>Seeds are equidistant (151.05 vs 150.27 Wb), so seed distance alone does not
-explain the outcome. The first-step amplitude is 25.28 Wb on frame 146 against
-1.404 Wb on frame 137 for that same seed distance, and 146's active set grows
-before collapsing. The un-restored displacement is real; its cause is the step
-size and the boundary set it produces, not the seed's displacement.</td>
-</tr>
+<tr><td>The profile or current normalisation pushes the axis up</td><td>refuted</td>
+<td>Frame 146 limited branch and frame 146 trip 1 both hold a centred plasma at
+0.912&ndash;1.134&times;Ip. Trip 1 of both frames differs by 1% on this frame's own
+extraction.</td></tr>
+<tr><td>The coil currents give no vertical equilibrium for the extracted profiles</td><td>refuted</td>
+<td>Trip 1 of frame 146 is a held diverted plasma at 0.912&times;Ip, Z=&minus;0.346 m,
+inside the limiter, from the same coils, profiles and target.</td></tr>
+<tr><td>The seed drives an n=0 displacement the fixed point does not restore</td><td>sustained, located at trip 2</td>
+<td>The seed distances are 151.05 Wb and 150.27 Wb for frames 146 and 137. Trip 1
+is healthy on both, so neither the seed nor the first promotion carries the
+displacement. Trip 2 does: 83.21 Wb against 6.156 Wb, with the boundary set
+growing before it collapses.</td></tr>
 </tbody>
 </table>
 <p>
-<b>The mechanism.</b> On frame 146 the diverted branch's promotion step is
-6.0&times; the seed-to-label flux distance (25.28 Wb against a seed 151.05 Wb out)
-and 18&times; frame 137's step for an equivalent seed. That step admits more cells
-than the initial set held &mdash; 40 against 27 &mdash; rather than contracting onto
-the reliable flux surfaces. The next trips then remove the set entirely, and an
-empty active boundary set leaves no rank with which the iteration can correct an
-n=0 vertical offset. The residual therefore cannot fall below 5.496e-2, and the
-axis stays where the over-large first step put it: 0.20 m above the limiter.
-</p>
-<p>
-Frame 144 (diverted seed 109.29 Wb, amplitude 0.929 Wb) lands at Z=+0.013 m with
-1.073&times;Ip, which is consistent: the one arm that overshoots its set is the one
-that loses its plasma.
+<b>The mechanism.</b> The promotion executed on the second active-set trip of
+frame 146 is unbounded relative to the state it is applied to. It admits 12 more
+boundary cells than it started with, against a control that admits none, and it
+moves the flux by 83 Wb &mdash; more than half the seed's own 151 Wb distance
+from the label. The resulting state has its axis above the limiter and almost no
+confined current. Every later trip inherits that state with an empty boundary set
+and cannot bring it back.
 </p>
 </section>
 
 <section id="fix">
 <h2>3. Recommended fix</h2>
 <p>
-<code>nova/equilibrium/fixed_point.py</code>, in the active-set promotion that
-builds the next boundary set from the current promotion: bound the promotion
-step by the reliable flux-surface set before the cells are admitted, and refuse
-a set that contains more cells than the set it replaces unless the residual
-decreased on that trip.
+<b>Module and place.</b> <code>nova/equilibrium/fixed_point.py</code>, in the
+active-set promotion that builds the next boundary set from the current
+promotion &mdash; the same routine that admits or withdraws boundary cells. A
+step-size or trust-region bound belongs there, applied to the promotion flux
+update before the cells are admitted: bound the step by the reliable
+flux-surface set and by the flux distance between the current state and the
+seed, and refuse a promotion that admits more cells than the set it replaces
+unless that trip reduced the residual.
 </p>
 <p>
-The hook that makes the guard observable: a forward-solve request carrying a
-reliable flux-surface set must assert, at termination, that the terminal
-boundary set is non-empty and that the terminal axis lies inside the limiter
-when the achieved class is not <code>lost</code>. A terminal axis outside the
-limiter with an empty boundary set is a defect in the promotion step, and it is
-currently reported as an ordinary contraction stall.
+<b>The test that would have caught it.</b> A forward-solve test that runs frame
+146's diverted branch to the second trip and asserts two things: that the
+promotion step norm does not exceed the state's distance from the seed, and
+that a terminal with an empty boundary set cannot carry an axis outside the
+limiter. With an 83 Wb step on a 151 Wb seed, the first assertion fails at 55%
+of the budget, which is the signature of a first-order method that has lost its
+trust region.
 </p>
 <p>
-Neither change is made here: this node measures and explains, and
-<code>nova/equilibrium/fixed_point.py</code> is owned by a concurrent node.
+<b>Relation to the stopping-rule fix</b> (run
+<code>r-20261107T141006905473</code>, which now requires an attempted promotion
+before the settle exit). That fix makes the settle exit honest: a branch cannot report convergence
+without having attempted a promotion. This finding is the complementary half. The stopping rule governs
+<em>when the loop ends</em>; the trip-2 defect governs <em>what a single step may
+do</em> while it is still running. Frame 146 does attempt promotions, so it
+satisfies the new stopping rule and still loses its plasma: the step bound is
+what the trajectory shows is missing, and the stopping rule would not have
+caught it.
 </p>
-</section>
-
-<section id="panels">
-<h2>Terminal states side by side</h2>
-<figure>
-<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg"
- alt="Frame 146 diverted terminal: solved flux contours with the axis 0.20 m above the limiter and no bounding surface, beside the active-set residual trace showing the mask growing 27 to 40 then collapsing to zero">
-<figcaption>
-Frame 146, diverted branch terminal. Solved contours in blue over the EFIT label
-contours in grey, the DIII-D limiter in black, both null sets, and the grid
-domain bound. The bounding-surface read is refused because the axis lies outside
-the wall, which is the state under study: 8 closed core cells, 0.039&times;Ip,
-residual 5.496e-2. Right panel: relative residual per active-set trip with the
-active-set size above each point &mdash; 27, 40, 1, 0, 0 &mdash; the mask growing
-on trip 2 and then collapsing to empty, after which the residual is flat.
-</figcaption>
-</figure>
-<figure>
-<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg"
- alt="Frame 137 diverted terminal: solved flux contours inside the limiter with a closed bounding surface and 234 core cells, beside a monotonically shrinking active-set trace">
-<figcaption>
-Frame 137, the comparison that holds its plasma. Same extraction and nearly the
-same seed distance, but the active set shrinks monotonically (24, 20, 9, 9, 0),
-the bounding surface closes (red), and the terminal axis sits at Z=&minus;0.442 m
-with 234 core cells and 0.709&times;Ip. Residual 6.237e-2 on a plateau, so the
-plateau alone does not discriminate: the vertical position does.
-</figcaption>
-</figure>
 </section>
 
 <section id="evidence">
 <h2>Evidence</h2>
 <ul>
-<li>Receipt: <code>vertical-loss-receipt.json</code> produced by
-<code>scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py</code> from
-run <code>r-20261106T195054915900-diiid-forward-convergence/probe.json</code>.</li>
-<li>Terminal grids: that run's <code>artifacts/frame-146-diverted-*.npz</code> and
-<code>frame-137-diverted-*.npz</code>. Limiter Z range &minus;1.359 to +1.363 m,
-wall Z range &plusmn;1.664 m, grid R 0.84&ndash;2.54 m, Z &plusmn;1.60 m.</li>
+<li>Driver: <code>scripts/prototypes/diiid_vertical_loss/trip_trajectory.py</code>,
+run as SLURM job 1307948 (COMPLETED, 00:54:16) through
+<code>scripts/nova_lane/run.sh --rungs h200,titan,cpu --mem 96G --time 01:30:00</code>.</li>
+<li>Per-trip flux grids: run directory
+<code>trip-trajectory/frame-&lt;n&gt;-trip-&lt;k&gt;.npz</code>, carrying the flux
+grid, the governed limiter and the wall.</li>
+<li>Steps are measured, not inferred: <code>_arm_summary</code> supplies the
+presence read and the mask history; the step norm is
+<code>|| flux_k &minus; flux_{k&minus;1} ||</code> over the lattice.</li>
 </ul>
 </section>
 

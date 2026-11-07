@@ -93,6 +93,14 @@ def render(state_path, row_path, output_path, preview_path, title, cells=None):
     solved = data["solved_flux"]
     solved_roots = data["solved_roots"]
     analytic_roots = data["analytic_roots"]
+    if kind == "limited":
+        # The boundary reference is the limiter's designed contact, taken from
+        # the wall geometry rather than from the archived stationary pair.
+        from scripts.prototypes.bank_route_rows.measure import limited_contact
+
+        analytic_roots = np.stack(
+            (np.asarray(analytic_roots[0]), limited_contact(wall))
+        )
     span = float(np.ptp(analytic_flux))
     levels = np.linspace(
         float(np.asarray(analytic_flux).min()) + 0.1 * span,

@@ -1,7 +1,10 @@
 #!/bin/bash
 # Run one certificate row through the fast route and the present route.
 set -u
-export TMPDIR=/tmp JAX_PLATFORMS=cuda PYTHONDONTWRITEBYTECODE=1
+# A recompute from archived state needs no device, so the platform is
+# overridable; the measuring runs leave it at cuda.
+export TMPDIR=/tmp PYTHONDONTWRITEBYTECODE=1
+export JAX_PLATFORMS=${JAX_PLATFORMS:-cuda}
 ROOT=$(git rev-parse --show-toplevel)
 export PYTHONPATH=$ROOT
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python

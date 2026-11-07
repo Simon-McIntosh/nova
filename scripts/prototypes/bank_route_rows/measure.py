@@ -288,12 +288,27 @@ def present_route(kind, cells, requested_cells=None, root=None):
     )
 
 
+def limited_contact(wall):
+    """Return the limited row's boundary reference point on the wall.
+
+    Delegates to the oracle fixtures' ``designed_contact`` so the reference is
+    the same point the certificate itself is designed against, rather than a
+    search this module could get subtly wrong.
+    """
+    from scripts.analytic_oracle_fixtures.measure import designed_contact
+
+    return np.asarray(designed_contact(np.asarray(wall, dtype=np.float64)))
+
+
 def row_oracle(kind, analytic, roots, reading, wall):
     """Judge one read against stationary points found on analytic flux alone.
 
     A limited row has no X-point, so its boundary is the limiter contact: the
-    wall node carrying the largest analytic flux, which is where a closed flux
-    surface first touches the wall.
+    midpoint of the wall's midplane-crossing edge at the largest major radius,
+    from the oracle's own ``designed_contact``.  The largest analytic flux over
+    the wall *vertices* is not that point — the vertices straddle the midplane
+    where the flux is zero, so the vertex maximum is a sample either side of it
+    and picks up the flux a whole wall segment carries.
     """
     from scripts.prototypes.tracked_read.measure import newton_reference
 
@@ -304,8 +319,7 @@ def row_oracle(kind, analytic, roots, reading, wall):
     gradient = np.asarray(analytic.evaluate(jnp.asarray(axis)).gradient)
     assert np.linalg.norm(gradient) < 1e-10
     wall_points = np.asarray(wall)
-    wall_flux = np.asarray(jax.vmap(analytic.value)(jnp.asarray(wall_points)))
-    contact = wall_points[int(np.argmax(wall_flux))]
+    contact = limited_contact(wall_points)
     boundary_flux = float(analytic.value(jnp.asarray(contact)))
     wall = wall_points
     radius = 0.5 * float(np.ptp(wall[:, 0]))

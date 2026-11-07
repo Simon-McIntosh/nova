@@ -88,7 +88,7 @@ def main() -> int:
     field = np.asarray(seed).T
     levels = poloidal.contour_levels(field, 12)
     poloidal.draw_flux_contours(
-        axes, radius, height, field, levels, color=DEFAULT_INK.flux_color
+        axes, radius, height, field, levels, color="#1f4d99", linewidth=1.3
     )
     poloidal.draw_wall(axes, radius=limiter[:, 0], height=limiter[:, 1])
 
@@ -174,27 +174,6 @@ def main() -> int:
         labelspacing=0.9,
     )
 
-    lines = ["kept critical points, local index"]
-    for entry in kept:
-        kind = "saddle" if entry["local_index"] < 0 else "extremum"
-        star = " *" if entry is rejected else "  "
-        lines.append(
-            "%s %-8s R=%.4f  Z=%+.4f  index %+d"
-            % (star, kind, entry["r"], entry["z"], entry["local_index"])
-        )
-    lines.append("")
-    lines.append("kept index sum    %+d" % record["kept_index_sum"])
-    lines.append("boundary winding  %.4f" % record["boundary_winding"])
-    lines.append("difference        %+d" % record["winding_minus_index_sum"])
-    figure.text(
-        0.50,
-        0.34,
-        "\n".join(lines),
-        family="monospace",
-        fontsize=12,
-        va="top",
-        color="#333333",
-    )
     figure.savefig(arguments.output, format="svg")
     print("null tally:", tally)
     print("wrote", arguments.output)

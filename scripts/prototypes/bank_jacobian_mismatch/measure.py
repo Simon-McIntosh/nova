@@ -150,7 +150,8 @@ def perturb(state, direction, scale, eps, sign):
 
 
 def measure_state(label, state, support, operands, cache, seeds, previous, convention,
-                  policy, profile, quadrature, gradient, axis_sign, count, rng):
+                  policy, profile, quadrature, gradient, axis_sign, count, rng,
+                  control_gradient=None, control_count=0):
     cells = int(state[0].size)
     scale = tuple(jnp.maximum(jnp.max(jnp.abs(value), axis=-1), 1e-30) for value in state)
 
@@ -184,6 +185,16 @@ def measure_state(label, state, support, operands, cache, seeds, previous, conve
 
     matrix_full = assemble_fresh(state, support)
     matrix_static = assemble_static(state, support)
+    matrix_control = None
+    if control_gradient is not None:
+        @jax.jit
+        def assemble_control(moments_state, moments_support):
+            return support_read.step_jacobian(
+                operands, moments_state, moments_support, profile, control_gradient,
+                quadrature, fresh_geometry=True,
+            )
+
+        matrix_control = assemble_control(state, support)
     classify = class_cells(support.reading, np.asarray(operands.geometry.centre))
     picks = direction_list(classify, count, cells, rng)
     base_residual = residual_vector(operands, state, state, support, profile, quadrature)
@@ -193,6 +204,7 @@ def measure_state(label, state, support, operands, cache, seeds, previous, conve
         flat = jnp.concatenate(direction)
         analytic_full = matrix_full @ flat
         analytic_static = matrix_static @ flat
+        analytic_control = None if matrix_control is None else matrix_control @ flat
         row = {"class": klass, "cell": cell, "block": block, "direction": name}
         for eps in STEPS:
             plus = perturb(state, direction, scale, eps, 1.0)
@@ -223,6 +235,14 @@ def measure_state(label, state, support, operands, cache, seeds, previous, conve
                 float(jnp.linalg.norm(analytic_static - frozen_cd)),
                 float(jnp.linalg.norm(frozen_cd)),
             )
+            if analytic_control is not None and len(rows) < control_count:
+                row[f"booking-to-cd-control:h{tag}:rel"] = mismatch(
+                    frozen_cd + (analytic_control - analytic_static), fresh_cd
+                )["rel"]
+                row[f"matrix-control-change:h{tag}"] = relative(
+                    float(jnp.linalg.norm(analytic_control - analytic_full)),
+                    float(jnp.linalg.norm(analytic_full)),
+                )
             decisions.append(
                 {
                     "class": klass,
@@ -342,11 +362,43 @@ def main():
         ("stalled-1e-2", stalled_state, streams.scaled_profile(machine.profile, 1.01)),
         ("certificate", certificate_state, machine.profile),
     )
+    def profile_probe(one_profile, amplitude, points, flux):
+        """The flux derivative of the booked source at the probe points."""
+        step = 1e-6
+        high = np.asarray(one_profile.p_prime(flux + step))
+        low = np.asarray(one_profile.p_prime(flux - step))
+        field_high = np.asarray(one_profile.ff_prime(flux + step))
+        field_low = np.asarray(one_profile.ff_prime(flux - step))
+        provided = np.asarray(gradient(points, flux))
+        return {
+            "amplitude": float(amplitude),
+            "p_prime_value": float(np.max(np.abs(np.asarray(one_profile.p_prime(flux))))),
+            "p_prime_flux_derivative": float(np.max(np.abs((high - low) / (2 * step)))),
+            "ff_prime_flux_derivative": float(
+                np.max(np.abs((field_high - field_low) / (2 * step)))
+            ),
+            "supplied_gradient_max": float(np.max(np.abs(provided))),
+            "supplied_gradient_shape": list(provided.shape),
+        }
+
+    stalled_profile = streams.scaled_profile(machine.profile, 1.01)
+    probe_flux = jnp.linspace(0.0, 1.0, 9)
+    probe_points = jnp.full_like(probe_flux, 1.0)
+    gradient_check = {
+        "stalled": profile_probe(stalled_profile, 1.01, probe_points, probe_flux),
+        "certificate": profile_probe(machine.profile, 1.0, probe_points, probe_flux),
+    }
+    emit("GRADIENT", **gradient_check["stalled"])
+    receipt_gradient = gradient_check
+    def control(radius, flux):
+        return jnp.full_like(radius, 1e-3)
+
     rng = np.random.default_rng(20261107)
     receipt = {
         "revision": revision,
         "module": support_read.__file__,
         "steps": list(STEPS),
+        "gradient_check": receipt_gradient,
         "states": [],
     }
     for label, state, profile in states:
@@ -367,6 +419,8 @@ def main():
             axis_sign,
             args.classes,
             rng,
+            control_gradient=control,
+            control_count=6,
         )
         receipt["states"].append(result)
         output.write_text(json.dumps(receipt, indent=2))

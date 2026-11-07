@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-07T18:04:47.321Z",
   "dispatched_at": "2026-11-07T17:52:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the seed-distance regression is guarded by the assertions at :763-768, which the review read; the recorded control reddens at :762 on the same mutation",
+      "recorded_at": "2026-11-07T18:18:10.667886+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_display_flux.py",

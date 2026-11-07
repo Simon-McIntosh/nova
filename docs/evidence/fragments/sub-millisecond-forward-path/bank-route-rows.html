@@ -3,10 +3,9 @@
 <p><strong>The fast route converges on all four measured certificate rows — both
 cases at 550 cells and at 2000 cells — and the two diverted rows stay inside the
 locked precision budget throughout, the 2000-cell row four times tighter than the
-550-cell one. The limited rows converge at 9.64e-11 and 6.64e-11 against the
-1e-10 limit, under four percent in hand, and their oracle ratios are not
-measured here, so that half of each limited row is a shortfall rather than a
-pass.</strong></p>
+550-cell one. The limited rows pass the axis clause and miss the boundary clause
+by about ten times at both resolutions, and their terminal residuals sit at their
+own numerical floor rather than short of what the route can reach.</strong></p>
 <p>Each row runs the fast route from the certificate seed — the analytic read,
 booked — to a fresh-read residual, then runs the default present route on the
 same certificate row. Geometry is judged against the analytic oracle under the
@@ -24,7 +23,7 @@ map the gap is reported beside that map's own interpolation offset.</p>
 <th>Row</th><th>Lattice nodes</th><th>Fast updates</th><th>Fast fresh residual</th>
 <th>Axis / a</th><th>X-point / a</th><th>Boundary / span</th><th>Budget</th>
 <th>Present converged</th><th>Present terminal residual</th>
-<th>X-point gap, lattice</th><th>Asymptote angles</th>
+<th>X-point gap, lattice</th><th>Asymptote angles</th><th>Residual floor, median / max</th>
 </tr></thead>
 <tbody>
 <tr>
@@ -32,29 +31,33 @@ map the gap is reported beside that map's own interpolation offset.</p>
 <td>1.048e-5</td><td>9.255e-6</td><td>2.591e-5</td><td>pass</td>
 <td>no</td><td>0.1938 Wb</td><td>not measurable</td>
 <td>fast 49.647&deg;, 120.708&deg;; oracle 49.647&deg;, 120.709&deg;; largest difference 5.5e-4&deg;</td>
+<td>not measured on this row; the diverted 550 batch straddles 1e-10</td>
 </tr>
 <tr>
-<td>limited, 550 cells</td><td>1743</td><td>7</td><td>9.64e-11 Wb</td>
-<td colspan="3">not measured — see below</td><td>shortfall</td>
+<td>limited, 550 cells</td><td>1743</td><td>5</td><td>9.64e-11 Wb</td>
+<td>1.158e-5</td><td>n/a</td><td>9.918e-4</td><td>miss (boundary)</td>
 <td>no</td><td>0.08986 Wb</td><td>not measurable</td>
 <td>no saddle on a limited row</td>
+<td>1.22e-10 / 2.55e-10</td>
 </tr>
 <tr>
 <td>diverted, 2000 cells</td><td>6172</td><td>2</td><td>5.12e-13 Wb</td>
 <td>2.083e-6</td><td>2.662e-6</td><td>3.721e-6</td><td>pass</td>
 <td colspan="2">not run — its process pool broke</td><td>not measurable</td>
 <td>not measured on this row</td>
+<td>not measured on this row</td>
 </tr>
 <tr>
 <td>limited, 2000 cells</td><td>6176</td><td>2</td><td>6.64e-11 Wb</td>
-<td colspan="3">not measured — see below</td><td>shortfall</td>
-<td colspan="2">not run — the row raised at its oracle before reaching it</td>
+<td>2.297e-6</td><td>n/a</td><td>9.856e-4</td><td>miss (boundary)</td>
+<td colspan="2">not run</td>
 <td>not measurable</td>
 <td>no saddle on a limited row</td>
+<td>8.05e-11 / 1.20e-10</td>
 </tr>
 <tr>
 <td>diverted and limited, about 5000 cells</td>
-<td colspan="10">not run: the operator matrix alone is 7.2 GB and the build is about five times the 2000-cell wall of 626 s, which did not fit the allocation — see below</td>
+<td colspan="12">not run: the operator matrix alone is 7.2 GB and the build is about five times the 2000-cell wall of 626 s, which did not fit the allocation — see below</td>
 </tr>
 </tbody></table>
 
@@ -66,24 +69,52 @@ boundary flux is 3.9 times inside its own — the row's closest approach, and th
 clause that would give first on a coarser bank. A repeat of the diverted row
 alone at the final revision reproduced this: three updates and
 1.592e-12 Wb fresh residual with every budget clause passing, so the numbers
-are stable to about 3e-13 between runs rather than to four significant figures.
-The limited row
-needs seven updates and terminates at 9.64e-11, which is inside the 1e-10 limit
-by four percent — a pass this measurement would not repeat confidently under a
-different compile of the same program, and the row is named here as marginal for
-that reason.</p>
+are stable to about 3e-13 between runs rather than to four significant figures.</p>
 
-<p>The limited row's oracle ratios are missing for a reason that belongs to the
-harness rather than to the route. Its first archive read a second stationary
-row a limited case does not have, so the process raised at the oracle after the
-seven updates and before it archived the state that the ratios and the panel are
-drawn from; that defect is repaired in <code>row_oracle</code>, which judges a
-limited row against its limiter contact. Re-running the repaired row needs the
-limited operator bank rebuilt in the new process: 328.8 s for 1743 nodes on a
-contended H200, and 436 s for its first batched launch on the P100 fallback,
-where the remaining 1739 nodes would have taken hours. The row is therefore
-tabled with its convergence measured and its precision unmeasured, and it is the
-one piece of §4 clause 2 this node leaves open.</p>
+<p><strong>Both limited rows pass the axis clause and miss the boundary one by
+about ten times, at both resolutions.</strong> Against the analytic flux on a
+2.0318 m minor radius and a 49.990 Wb span, the 550-cell row places its axis
+2.35e-5 m out (1.158e-5 of the minor radius, 43 times inside the 5e-4 budget)
+and the 2000-cell row 4.67e-6 m out (2.297e-6, 218 times inside). The boundary
+flux is another matter: it differs from the analytic flux at the limiter contact
+by 0.0496 Wb on the 550-cell row and 0.0493 Wb on the 2000-cell row, which is
+9.918e-4 and 9.856e-4 of the span against a 1e-4 budget. Neither row has a
+magnetic island, so no X-point ratio applies; the boundary clause is the only
+one they miss.</p>
+
+<p>That the boundary ratio is flat between 550 and 2000 cells is the informative
+part. A discretisation error would fall as the lattice refines, and this one does
+not move: 9.9 times its budget on both rows after nearly quadrupling the cell
+count, with both rows selecting the identical limiter contact at
+(7.8014, 1.1294e-1) m. What is measured is therefore not a bank resolution
+limit. Two readings are consistent with it and this instrument does not separate
+them: the route's boundary flux is the value its own terminal surface carries at
+the wall, which need not be the flux at the single wall node with the largest
+analytic value, and a one-node difference on a 60-segment wall is exactly the
+scale of 0.05 Wb seen here; or the read carries a boundary-flux offset that the
+axis point does not share. Resolving it needs the oracle to compare boundary
+fluxes at the route's own boundary point rather than at the argmax wall node,
+which is a change to this measurement and not to the route. Until that is
+measured, both limited rows are tabled as missing the boundary clause, and that
+is what the row says rather than a pass.</p>
+
+<p><strong>The limited residuals sit at their own noise floor.</strong> Moving
+each converged moment by one to four representable steps, with the landed
+noise-floor instrument's <code>nudged</code> imported unchanged and sixteen
+patterns per row, leaves the 550-cell fresh residual with a median of
+1.219e-10 and a maximum of 2.547e-10 against a converged baseline of
+9.641e-11, and the 2000-cell row with a median of 8.049e-11 and a maximum of
+1.201e-10 against 6.639e-11. Every perturbed read stayed valid. So the terminal
+residual is not evidence that either row stopped short of its attainable
+accuracy: a single rounding step in the converged state moves it further than
+the distance the route covered to reach its certificate, exactly as the diverted
+lanes behaved before the saddle-curvature repair. The 550-cell row's baseline of
+9.641e-11 lies between the smallest perturbed residual it produced (9.459e-11)
+and their median (1.219e-10), and its floor straddles 1e-10 — the residual limit
+stays inside this row's numerical noise, so the 9.64e-11 pass at 550 cells is a
+coefficient of the arithmetic rather than a margin the route controls. The
+2000-cell row's floor sits lower, from 4.638e-11 to 1.201e-10 around a baseline
+of 6.639e-11, and reaches past the limit at its maximum as well.</p>
 
 <p>The present route does not converge on either row. Its own status is cited
 from the committed certificate receipts at the base revision
@@ -133,20 +164,21 @@ The diverted 2000-cell row is the most accurate row measured here, with its axis
 than the 550-cell row on each stationary point and seven times tighter on the
 boundary flux. That is the bank's build-and-resolution trade in one comparison,
 and it is why the 550-cell pass should be read as the coarse end of a trend
-rather than as the route's precision. Neither 2000-cell row completed: the
-diverted row's present arm died when the certificate benchmark's analytic-flux
-process pool broke under contention with the other job on the node, and the
-limited row raised at its oracle, which is the same defect repaired in
-<code>row_oracle</code> for the 550-cell row. Both fast routes had already
-written their terminal state, so the convergence and the diverted row's ratios
-are measured and only their present arms are missing. At 5000 cells the matrix
+rather than as the route's precision. No 2000-cell row's present arm was measured: the
+diverted row's died when the certificate benchmark's analytic-flux process pool
+broke under contention with the other job on the node, and neither limited row
+reached one. The limited rows' own oracle ratios and residual floors come from a
+second allocation that rebuilt both limited banks and re-ran them with the
+repaired <code>row_oracle</code>, 329 s at 550 cells and 636 s at 2000 cells. At
+5000 cells the matrix
 alone is 7.2 GB and the build was projected at about five times the 626 s wall,
 which did not fit the allocation; that row is reported unrun rather than
 dropped.</p>
 
 <p>Receipts: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/gate-diverted-550.log</code> (the diverted row at the final revision, clean exit),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.log</code> (fast route, three updates),
-<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-550.log</code> (limited fast route, seven updates; the run exits 1 at its oracle),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-oracle.log</code> (both limited rows rebuilt, their oracle ratios and their sixteen-move residual floors, clean exit),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-550.log</code> (the first limited fast route, which exits 1 at its oracle),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.log</code> and
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-2000.log</code> (the 2000-cell fast routes, two updates each),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.npz</code> (the 2000-cell archived state; that run wrote its archive before its present arm died),

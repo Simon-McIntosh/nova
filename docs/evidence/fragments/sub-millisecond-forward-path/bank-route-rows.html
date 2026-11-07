@@ -106,8 +106,9 @@ about 6300 nodes, so its matrix is
 <code>nodes &times; cells &times; 3 &times; 6 &times; 8</code> = 1.8 GB and its
 build is roughly three and a half times the 550-cell wall, before the present
 route's own machine build and solve; two 550-cell rows, two 2000-cell rows and
-their present arms do not fit one allocation, and the reservation admitted only
-one job at a time. At 5000 cells the matrix alone is 7.2 GB and the build is
+their present arms do not fit one allocation, and the two jobs that did share
+the reservation ran concurrently until the certificate benchmark's analytic-flux
+process pool broke under the contention. At 5000 cells the matrix alone is 7.2 GB and the build is
 nine times the measured 550-cell wall. Both rows are reported as unrun rather
 than dropped, and the 550-cell pair is the part of §4 clause 2 this node
 answers.</p>

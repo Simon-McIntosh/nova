@@ -151,7 +151,7 @@ def main() -> int:
     handles = [
         _handle("^", True, DEFAULT_INK.axis_color, "O-point (the rejected axis)"),
         _handle("X", True, DEFAULT_INK.xpoint_color, "saddle"),
-        _handle("X", False, DEFAULT_INK.xpoint_color, "other extremum"),
+        _handle("X", False, DEFAULT_INK.xpoint_color, "extremum, or saddle outside"),
         plt.Line2D(
             [],
             [],

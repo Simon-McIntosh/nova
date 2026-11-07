@@ -2077,7 +2077,7 @@ def _draw_null_set(
     saddle_index: int,
     color: str,
     wall: Any = None,
-    hollow: bool = False,
+    beneath: bool = False,
 ) -> dict[str, int]:
     """Draw the admitted saddle and the other qualified nulls of one set.
 
@@ -2086,10 +2086,10 @@ def _draw_null_set(
     are drawn hollow and unfiltered, so a set that carries a second saddle
     outside the vessel reads as two stationary points rather than one.
 
-    ``hollow`` draws the axis and the admitted saddle as an outline in the set's
-    colour instead of a fill. Two filled sets at one point read as whichever was
-    painted last, so the lower set is drawn hollow and slightly oversized and
-    the upper filled one sits inside its outline.
+    ``beneath`` draws the set oversized. Two filled sets at one point read as
+    whichever was painted last, so the lower set is drawn larger and the upper
+    one sits inside it, and a coincident axis or saddle reads as both sets
+    rather than as the one painted second.
     """
     array = np.atleast_2d(np.asarray(x_points, dtype=float))
     if not 0 <= saddle_index < array.shape[0]:
@@ -2102,22 +2102,22 @@ def _draw_null_set(
         magnetic_axis=magnetic_axis,
         x_points=admitted,
         other_x_points=other,
-        style=_null_style(color, hollow=hollow),
+        style=_null_style(color, beneath=beneath),
         contain=wall,
     )
 
 
-#: The reference outline is drawn larger than the solved fill so the fill sits
-#: inside it where the two coincide.
-HOLLOW_NULL_SCALE = 1.7
+#: The reference set is drawn larger than the solved one so the solved marker
+#: sits inside it where the two coincide.
+BENEATH_NULL_SCALE = 1.8
 
 
-def _null_style(color: str, *, hollow: bool) -> Any:
+def _null_style(color: str, *, beneath: bool) -> Any:
     """Return the ink variant one null set is drawn in.
 
-    The fill decision belongs with the colour and the marker shape, which is
-    what ``InkStyle.variant`` exists for, so a hollow set is a variant of the
-    house style rather than a pass over the artists a call appended.
+    The marker weight is a quantity the house style already carries, so a set
+    drawn beneath another is a variant of it rather than a pass over the
+    artists a draw call appended.
     """
     overrides = {
         "axis_color": color,
@@ -2125,13 +2125,11 @@ def _null_style(color: str, *, hollow: bool) -> Any:
         "axis_marker": "^",
         "xpoint_marker": "X",
     }
-    if hollow:
-        overrides["null_marker_facecolor"] = "none"
-        overrides["axis_markersize"] = DEFAULT_INK.axis_markersize * HOLLOW_NULL_SCALE
+    if beneath:
+        overrides["axis_markersize"] = DEFAULT_INK.axis_markersize * BENEATH_NULL_SCALE
         overrides["xpoint_markersize"] = (
-            DEFAULT_INK.xpoint_markersize * HOLLOW_NULL_SCALE
+            DEFAULT_INK.xpoint_markersize * BENEATH_NULL_SCALE
         )
-        overrides["axis_markeredgewidth"] = 1.7
         overrides["xpoint_markeredgewidth"] = 1.7
     return DEFAULT_INK.variant(**overrides)
 
@@ -2151,12 +2149,17 @@ def _set_zorder(axis: Any, first_child: int, zorder: int) -> None:
 
 
 #: The reference field is the comparison the panel exists to make, so its grey
-#: reaches 3.18:1 on white and is stroked at the same weight as the solved set
-#: rather than thinned beneath it. A 0.35 pt stroke is 0.49 px at 100 dpi and so
-#: never covers a pixel, which renders the line paler than the colour asked for.
+#: is stroked at a weight that covers a pixel and reaches its colour: 1.2 pt is
+#: 1.7 px at 100 dpi and reads 3.18:1 on white. A 0.35 pt stroke is 0.49 px, so
+#: every reference pixel was a partial coverage of the colour the call asked for
+#: and the line rendered paler than the grey it named.
 REFERENCE_CONTOUR_COLOR = "#929292"
 SOLVED_CONTOUR_COLOR = "#cc7722"
-CONTOUR_LINEWIDTH = 0.7
+CONTOUR_LINEWIDTH = 1.2
+#: Null markers in the legend stand for the two sets at one size each, matching
+#: the sizes the panel draws them at.
+REFERENCE_NULL_SIZE = DEFAULT_INK.axis_markersize * BENEATH_NULL_SCALE
+SOLVED_NULL_SIZE = DEFAULT_INK.axis_markersize
 
 
 def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
@@ -2226,10 +2229,9 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         and 0 <= saddle_index < len(drawn_xpoints)
     ):
         drawn_xpoints[saddle_index] = display.saddle_rz
-    # The reference set is drawn first, hollow and slightly oversized, so the
-    # filled solved marker sits inside its outline where the two coincide. Two
-    # filled sets at one point read as whichever was painted last, and the
-    # caption promises both.
+    # The reference set is drawn first and oversized, so the solved marker sits
+    # inside it where the two coincide. Two filled sets at one point read as
+    # whichever was painted last, and the caption promises both.
     reference_first = len(axis.lines)
     _draw_null_set(
         axis,
@@ -2238,7 +2240,7 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         loaded["reference_saddle_index"],
         "#3366cc",
         loaded["wall"],
-        hollow=True,
+        beneath=True,
     )
     _set_zorder(axis, reference_first, 6)
     solved_first = len(axis.lines)
@@ -2530,18 +2532,52 @@ def _render_panel(
                 [],
                 color=REFERENCE_CONTOUR_COLOR,
                 linewidth=CONTOUR_LINEWIDTH,
-                label="reference (unedited equilibrium)",
+                label="reference contours (unedited equilibrium)",
             ),
             Line2D(
                 [],
                 [],
                 color=SOLVED_CONTOUR_COLOR,
                 linewidth=CONTOUR_LINEWIDTH,
-                label="solved (terminal currents)",
+                label="solved contours (terminal currents)",
+            ),
+            Line2D(
+                [],
+                [],
+                color=REFERENCE_CONTOUR_COLOR,
+                linewidth=CONTOUR_LINEWIDTH,
+                linestyle="--",
+                label="reference saddle legs",
+            ),
+            Line2D(
+                [],
+                [],
+                color=SOLVED_CONTOUR_COLOR,
+                linewidth=CONTOUR_LINEWIDTH,
+                linestyle="--",
+                label="solved saddle legs",
+            ),
+            Line2D(
+                [],
+                [],
+                color="#3366cc",
+                marker="^",
+                linestyle="none",
+                markersize=REFERENCE_NULL_SIZE,
+                label="reference nulls (larger)",
+            ),
+            Line2D(
+                [],
+                [],
+                color=SOLVED_CONTOUR_COLOR,
+                marker="^",
+                linestyle="none",
+                markersize=SOLVED_NULL_SIZE,
+                label="solved nulls",
             ),
         ],
         loc="outside lower center",
-        ncol=2,
+        ncol=3,
         frameon=False,
         fontsize=13,
         handlelength=2.2,
@@ -2573,8 +2609,8 @@ def _render_panel(
         "vertical current-centre row %s  |  reference is the unedited "
         "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
         "solved sets orange: %s, admitted %s %s in the converged panel "
-        "and %s %s in the failed panel  |  the reference nulls are hollow and "
-        "drawn beneath the filled solved nulls, so a coincident axis or saddle "
+        "and %s %s in the failed panel  |  the reference nulls are drawn "
+        "larger and beneath the solved ones, so a coincident axis or saddle "
         "reads as both  |  other qualified nulls hollow in both sets  |  "
         "wall drawn"
         % (

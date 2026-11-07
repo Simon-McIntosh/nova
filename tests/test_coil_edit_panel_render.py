@@ -625,24 +625,19 @@ def test_a_rendered_panel_measures_no_clipped_or_overlapping_labels(
 def test_a_coincident_reference_null_stays_visible_under_the_solved_one(
     tmp_path: Path, monkeypatch: Any
 ) -> None:
-    """The reference marker is hollow, larger and drawn beneath the solved one.
+    """The reference marker is larger and drawn beneath the solved one.
 
     At the magnetic axis the two sets sit within a few centimetres, so two
-    filled markers at one point read as whichever was painted last. An unfilled
-    outline at a larger size keeps the lower set visible inside the upper one.
+    markers of one size at one point read as whichever was painted last. An
+    oversized lower marker keeps the reference set visible as a margin around
+    the solved one, without the panel reaching into the painter's vocabulary.
     """
-    from matplotlib.colors import to_rgba
-
     _, captured = _render_capturing(tmp_path, monkeypatch)
     figure = captured["figure"]
     reference = _null_markers(figure, REFERENCE_NULL_COLOR)
     solved = _null_markers(figure, SOLVED_NULL_COLOR)
     assert reference and solved, "both null sets must be drawn"
 
-    for artist in reference:
-        assert to_rgba(artist.get_markerfacecolor())[3] == 0.0, (
-            "a filled reference marker hides the set beneath it"
-        )
     assert max(a.get_markersize() for a in reference) > max(
         a.get_markersize() for a in solved
     )

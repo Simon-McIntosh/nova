@@ -611,14 +611,11 @@ def draw_nulls(
                 point[1],
                 marker=style.axis_marker,
                 markersize=style.axis_markersize,
-                markeredgewidth=style.axis_markeredgewidth,
                 color=style.axis_color,
-                markeredgecolor=style.axis_color,
-                markerfacecolor=style.null_marker_facecolor or style.axis_color,
                 linestyle="none",
                 zorder=style.zorder_markers,
             )
-    for points, marker, size, width, color, edge, takes_null_face in (
+    for points, marker, size, width, color, edge in (
         (
             x_points,
             style.xpoint_marker,
@@ -626,7 +623,6 @@ def draw_nulls(
             style.xpoint_markeredgewidth,
             style.xpoint_color,
             None,
-            True,
         ),
         (
             strike_points,
@@ -635,7 +631,6 @@ def draw_nulls(
             style.strike_markeredgewidth,
             style.strike_color,
             style.strike_markeredgecolor,
-            False,
         ),
     ):
         if points is None:
@@ -662,10 +657,8 @@ def draw_nulls(
             markersize=size,
             markeredgewidth=width,
             color=color,
+            markerfacecolor=color,
             markeredgecolor=edge or color,
-            markerfacecolor=(style.null_marker_facecolor or color)
-            if takes_null_face
-            else color,
             linestyle="none",
             zorder=style.zorder_markers,
         )

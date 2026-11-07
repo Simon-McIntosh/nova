@@ -89,15 +89,30 @@ the flux of the saddle at (1.3984, &minus;1.0138), which is <code>0.5164</code>;
 is therefore the separatrix the saddle defines, not a wall contact.</li>
 </ul>
 
+<p><b>The field the solve actually reads returns the same values.</b> The solve was then
+instrumented to save the field handed to <code>read_qualification</code>, and the probe was run
+on that saved field (job <code>1308066</code>, <code>conjunct-captured-field.json</code>). It
+reproduces the table above exactly: <code>requested_class</code> is <code>None</code> at that
+call site, <code>material_cell_count</code> is <code>1089</code>, the candidate at
+(1.7868, 0.0180) reads <code>governed_size = 397</code>, <code>all_open = 457</code>, and
+<code>read_qualification</code> returns without raising.</p>
+
 <p><b>What this means for the refusal, and what it does not.</b> The earlier draft of this
 fragment reported the third conjunct, <code>governed_connection</code>, as the comparison that
 rejected this axis, on the strength of <code>material_cell_count 1089</code> and a floor of
 <code>10</code>. That reading is <b>withdrawn</b>: by measurement the comparison passes
-comfortably. The refusal recorded in <code>probe.json</code> below is therefore <b>not
-reproduced</b> from the state this probe reads (<code>prepared["cold"].branches.flux[0]</code>),
-and the seed that the refused limited branch actually held is the open question. The
-identification is not refusing a qualified axis on the evidence measured here; on this seed it
-finds one.</p>
+comfortably, on the cached seed and on the field the solve reads. <b>The refusal recorded in
+<code>probe.json</code> is not reproduced by either.</b></p>
+
+<p><b>Where the reproduction stops.</b> The qualifying read is reached inside a traced solve:
+the capture records three calls, two on concrete arrays and a third on a traced one, and the
+trace then raises <code>TracerArrayConversionError</code> inside
+<code>grid.read_census</code> before any refusal can be observed. That is the instrument
+failing to follow the traced call, not a second product defect proven here &mdash; the traced
+path was never executed to completion. So the honest statement is: <b>on every field this
+investigation could capture, the axis at (1.7868, 0.0180) is admitted</b>, and the branch
+refusal record names no field from which its own refusal can be replayed.</p>
+
 
 <h3>Census</h3>
 

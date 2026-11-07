@@ -1,0 +1,105 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_map": {
+    "image-0.png": "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+    "image-1.png": "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+    "image-2.png": "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+    "image-3.png": "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+    "image-4.png": "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg"
+  },
+  "attachment_note": "Each of the five attached PNGs was opened with the read tool and judged as a picture. No SVG was opened, read, listed, searched, rendered or shown, and no image other than these five PNGs was viewed. The mapping above is read from each render's own burnt-in caption line, which names its frame.",
+  "completed_at": "2026-11-07T11:42:08.426Z",
+  "dispatched_at": "2026-11-07T11:24:00Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "fe3433d5d1f",
+      "line": 812,
+      "severity": "non-blocking",
+      "summary": "The residual panel's x-axis is sized from the padded length of the residual history rather than from the points that exist, so every one of the five panels (frame 137, 144, 146, 179, 44) draws ticks 0 to 15 while the frame records at most five trips: 11 to 15 of the 16 ticks are empty and the trajectory the node exists to show is compressed into the left fifth to left eighth of the panel. The data remain readable; the defect is that the panel spends most of its ink on an axis range no point occupies. Sizing the axis from the finite entries of residual_history would remove it without changing any plotted value."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "f469b3785f2",
+      "line": 926,
+      "severity": "non-blocking",
+      "summary": "The legend handle labelled 'solved axis (outside wall)' is a hollow axis-marker triangle, but the condition that adds it is that a solved X-POINT lies outside the wall, and the mark that condition produces in the panel is a hollow red X. In frame 146 that is exactly what a reader faces: a hollow red X at the left of the panel with no legend entry keying it, while the hollow-triangle entry keys the separate axis mark at the top left. The mark is visible and its position is informative, so the panel is still readable, but the reader cannot name it from the legend; naming the outside X-point in its own entry would fix it."
+    }
+  ],
+  "method": "Visual read of the five rendered PNGs only. Each caption line was checked against the frame's own record in docs/figures/diiid-forward-convergence/convergence-receipt.json -- the terminal residual, the converged flag, the mask-difference counts above each point and the number of plotted trips in every panel agree with that record, so no panel is out of step with the data it claims to show. Script line references below are to scripts/prototypes/diiid_forward_convergence/render_panels.py at the reviewed head, and are lines in the script that draws the figure, never lines of SVG markup. This review is read only: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted.",
+  "project": "nova",
+  "review_node": "review-of-diiid-forward-convergence-17d0ccc6fd02-figure",
+  "review_run_id": "r-20261107T112236148818-review-of-diiid-forward-convergence-17d0ccc6fd02-figure",
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_figures": [
+    "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg"
+  ],
+  "reviewed_head_sha": "17d0ccc6fd02a1f9ff0da200446c27666cae524b",
+  "reviewed_node": "diiid-forward-convergence",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "reviewed_scripts": [
+    "scripts/prototypes/diiid_forward_convergence/render_panels.py"
+  ],
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "image-0.png": {
+      "contrast": "passed: caption #333333 and annotations #555555 on white; the reference field is #999999 grey, deliberately lighter than the solved field but still visible along its whole length.",
+      "data_ink": "defect: the trajectory panel's x-axis runs 0 to 15 while the frame carries five points at trips 0 to 4; 11 of 16 ticks are empty and the residual curve is squeezed into the left fifth of the panel. The left poloidal panel is also narrow (about 205 px of the 1400 px canvas), leaving roughly 40 percent of the left column blank because the equal-aspect map fixes its width when the vessel is tall and narrow.",
+      "decoration": "passed: line contours on white with no gradient, background fill, shading or made-up styling; the only boxed marks (dotted grid-domain rectangle, dashed label boundary) are data and both are keyed.",
+      "figure": "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+      "frame": 137,
+      "label_collision": "passed: no text is clipped at the canvas edge and no two text artists overlap; each mask-difference count clears its neighbouring count and the axis top.",
+      "legibility": "passed: the flux map, the red limited bounding surface, the black limiter, the grid-domain dotted rectangle and the five residual points are each distinguishable at a glance; the five mask-difference counts (24, 20, 9, 9, 0) sit above their own points.",
+      "table_form": "passed: both panels are genuine plots (a poloidal field and a residual trajectory); the scalar summary sits in a caption sentence, not as a tabulated image."
+    },
+    "image-1.png": {
+      "contrast": "passed: dark caption and annotations on white, grey reference contours visible.",
+      "data_ink": "defect: one data point on an axis that runs to 15, so 15 of 16 ticks are empty; the residual, which is this node's terminal measurement, occupies the left fifth of the panel and the rest of the panel carries nothing.",
+      "decoration": "passed: no gradient, fill or styling beyond the data.",
+      "figure": "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+      "frame": 144,
+      "label_collision": "passed: the lone '0' annotation sits above its point and clear of the left spine; nothing is clipped.",
+      "legibility": "passed: the limited bounding surface, the wall and the single point in the trajectory are all visible, and the caption's 5.927e+00 is the residual the single plotted point carries. The solved axis and the label axis coincide at the core centre, so one filled triangle reads for both; both marks are drawn and the reading is not lost.",
+      "table_form": "passed: a poloidal field and a trajectory, not a picture of a table."
+    },
+    "image-2.png": {
+      "contrast": "passed: all text is dark on white; the grey label field and the grey label boundary remain visible across the whole panel.",
+      "data_ink": "defect: five data points on an axis that runs to 15, so 11 of 16 ticks are empty and the residual curve occupies the left fifth of the panel.",
+      "decoration": "passed: no gradient, fill or background shading; the red swatch on the 'no bounding surface (read refused)' entry is the legend telling the truth that no surface is drawn.",
+      "figure": "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+      "frame": 146,
+      "label_collision": "passed: '27' and '40' sit above their own points and clear of each other and of the axis top; the three caption lines do not overlap one another.",
+      "legibility": "defect: the solved X-point of this frame lies outside the wall and is drawn as a hollow red X at the left of the panel, and no legend entry in the figure keys that mark. The only hollow-red entry reads 'solved axis (outside wall)' and carries a hollow triangle, which keys the different mark at the top left. A reader can see the hollow red X but cannot name it from the legend, and the caption names only the axis, not the saddle.",
+      "table_form": "passed: the panels are a field map and a trajectory."
+    },
+    "image-3.png": {
+      "contrast": "passed: dark text on white throughout.",
+      "data_ink": "defect: two data points on an axis that runs to 15, so 14 of 16 ticks are empty and the trajectory occupies the left eighth of the panel.",
+      "decoration": "passed: no decorative fill or styling.",
+      "figure": "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+      "frame": 179,
+      "label_collision": "passed: '13' and '0' are separated and neither touches the axis top or a neighbouring label.",
+      "legibility": "passed: both points (4.18e-01 and its repeat) and their counts (13, 0) are readable, and the limited bounding surface, wall and nulls are all distinguishable.",
+      "table_form": "passed: a field map and a trajectory."
+    },
+    "image-4.png": {
+      "contrast": "passed: dark text on white throughout.",
+      "data_ink": "defect: two data points on an axis that runs to 15, so 14 of 16 ticks are empty and the trajectory occupies the left eighth of the panel.",
+      "decoration": "passed: no gradient or decorative fill.",
+      "figure": "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg",
+      "frame": 44,
+      "label_collision": "passed: '75' and '0' are clear of each other and of the axis top.",
+      "legibility": "passed: the two coincident points and their counts (75, 0) are readable, and the bounding surface, wall and solved axis are distinguishable; the terminal residual 4.276e+00 in the caption matches the plotted value.",
+      "table_form": "passed: a field map and a trajectory."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T11:42:16.686446+00:00",
+  "total": null
+}

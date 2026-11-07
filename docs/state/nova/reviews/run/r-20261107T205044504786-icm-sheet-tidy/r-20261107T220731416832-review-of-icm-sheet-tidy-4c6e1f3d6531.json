@@ -29,6 +29,11 @@
       "kind": "exempted",
       "reason": "record-keeping only; the reviewer ran both gate arms itself (392 passed at b7d927c, 416 at 4c6e1f3d, delta 0), so the landing's correctness is established",
       "recorded_at": "2026-11-07T22:59:14.669372+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "record-keeping only; the reviewer ran both gate arms itself (392 passed at b7d927c, 416 at 4c6e1f3d, delta 0), so the landing's correctness is established",
+      "recorded_at": "2026-11-07T22:59:32.853081+00:00"
     }
   },
   "findings": [

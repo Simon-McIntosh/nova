@@ -7,6 +7,13 @@
     "tests/biot/test_graded_layer_near_corner.py::collection"
   ],
   "completed_at": "2026-11-07T19:21:29.868Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "graded-residual-compile-recovery",
+      "recorded_at": "2026-11-07T19:31:40.777142+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T19:13:36Z",
   "findings": [
     {

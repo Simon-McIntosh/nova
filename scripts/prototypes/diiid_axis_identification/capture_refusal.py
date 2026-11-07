@@ -42,12 +42,18 @@ def main() -> int:
     original_read = kind.read_qualification
     calls: list[dict] = []
 
+    def capture(value):
+        try:
+            return np.asarray(value)
+        except Exception:
+            return None
+
     def wrapper(self, psi, polarity, inside_material, requested_class=None, *rest):
         calls.append(
             {
-                "psi": np.asarray(psi),
+                "psi": capture(psi),
                 "polarity": int(np.asarray(polarity)),
-                "inside_material": np.asarray(inside_material, dtype=bool),
+                "inside_material": capture(inside_material),
                 "requested_class": None
                 if requested_class is None
                 else int(np.asarray(requested_class)),
@@ -65,13 +71,16 @@ def main() -> int:
     status = "solved"
     detail = ""
     try:
-        receipt, seconds = measure_branches._solve(
+        import jax
+
+        with jax.disable_jit():
+            receipt, seconds = measure_branches._solve(
             profile,
             seed,
             prepared["current"],
             prepared["target_current_a"],
-            "diiid-frame-144-axis-capture:limited",
-        )
+                "diiid-frame-144-axis-capture:limited",
+            )
         detail = f"solve returned, residual {float(receipt.equilibrium.fixed_point.residual)}"
     except Exception as error:
         status = f"refused: {type(error).__name__}"
@@ -89,15 +98,19 @@ def main() -> int:
                 "call": index,
                 "polarity": call["polarity"],
                 "requested_class": call["requested_class"],
-                "inside_material_cells": int(call["inside_material"].sum()),
-                "psi_shape": list(call["psi"].shape),
+                "inside_material_cells": None
+                if call["inside_material"] is None
+                else int(np.sum(call["inside_material"])),
+                "psi_shape": None if call["psi"] is None else list(call["psi"].shape),
+                "psi_concrete": call["psi"] is not None,
             }
             for index, call in enumerate(calls)
         ],
     }
     arguments.output.with_suffix(".json").write_text(json.dumps(record, indent=2))
-    if calls:
-        last = calls[-1]
+    concrete = [call for call in calls if call["psi"] is not None]
+    if concrete:
+        last = concrete[-1]
         np.savez(
             arguments.output,
             psi=last["psi"],

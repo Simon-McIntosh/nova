@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T22:01:59.930Z",
+  "dispatched_at": "2026-11-07T21:44:28Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/trip_trajectory.py",
+      "line": 159,
+      "severity": "non-blocking",
+      "text": "The only gate log (trip-trajectory/gate.log) records revision 00105c532, and commit 3aaef197c then changed this loop guard and the emitted column name (boundary_set_size -> changed_mask_entries) in the same file. The rename is textually inert for the numbers, but every trajectory row the fragment quotes was produced by code that is not the reviewed head, so the head revision carries no gate of its own."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 140,
+      "severity": "non-blocking",
+      "text": "380 lines of panel rendering land with no test and no assertion anywhere in the diff; the only check on the geometry the panels show is the author's own PNG inspection, so a regression in render_trip would change the evidence figures silently."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "The fragment quotes 39 changed mask entries at frame 146 trip 2, while the run manifest's artifacts.active_set_trajectory states [27,40,...] for the same trip. The measured trajectory-rows.json supports 39 (mask differences); the manifest's 40 comes from the older receipt arm and was not updated, so two landed records disagree on one number."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T213101474509-review-of-diiid-frame-146-vertical-loss-8e4814cf14e8",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "8e4814cf14e863c6ed80e366f0a61c593d268bcb",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 3,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T22:07:14.951930+00:00",
+  "total": 89
+}

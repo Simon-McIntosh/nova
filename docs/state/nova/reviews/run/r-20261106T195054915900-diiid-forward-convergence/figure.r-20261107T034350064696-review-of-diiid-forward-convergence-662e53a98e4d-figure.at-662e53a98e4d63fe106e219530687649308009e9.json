@@ -1,0 +1,200 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_check": "The five captions each carry that frame's data rather than restating a title: frame number, 'diverted terminal residual', 'converged false', solved axis R and Z, closed core cell count, confined current against target, and the 1e-5 tolerance. Frame 146's 8 cells and 0.039x read as the plasma-loss state, frame 44's 352 cells and 1.097x as the closest of the cohort. No caption-only-repeats-the-title finding. What the captions do not carry is any wall classification, which is what a reader would need to check the 'inside the wall' claims the evidence fragment makes.",
+  "completed_at": "2026-11-07T03:57:24.596Z",
+  "dispatched_at": "2026-11-07T03:44:50Z",
+  "evidence_inputs": [
+    "Head 662e53a9 re-renders all five panels through a new renderer (render_measured_frame, introduced in 68840356e), so the six findings of the earlier figure review at 554fcc23 do not carry over; its canvas-size finding is resolved (all five attachments are now exactly 1400x720).",
+    "Two blocking findings stand at this head: the 'first wall' is drawn as an axis-aligned rectangle in all five panels, and the 'label axis' series is keyed in every legend but never plotted.",
+    "Both blocking findings are in scripts/prototypes/diiid_forward_convergence/render_panels.py (draw_wall at 552, the label-axis handle at 576), so one fix node can carry both.",
+    "The wall rectangle is also the field's clipping boundary and the input to inside_wall_units, so its shape reaches the receipt's inside/outside classification, not only the picture."
+  ],
+  "figures": [
+    {
+      "attachment": "image-0.png",
+      "attachment_pixels": [
+        1400,
+        720
+      ],
+      "attachment_sha256": "469ea6386035be2a7c2e26021bd4eae02882adf429c7909fa0ea93c8d6db6598",
+      "caption_read_from_png": "frame 137  |  diverted terminal residual 6.237e-02  |  converged false  |  axis R=1.655 Z=-0.442 m  |  234 closed core cells  |  confined current 0.709x target  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass with a stated limit: the caption and legend are near-black on white, while the EFIT label flux is mid grey (#999999, about 2.9:1) and is the faintest element on the panel; it stays visible at full size but is the first thing to disappear on a projector.",
+        "data_ink": "pass: unfilled line contours and one marker set only; no fills, bands, shading or gradients, and the field carries the visual weight.",
+        "decoration": "pass: white background, frameless legend, no gridlines and no styling; the only straight-edged geometry is the closed rectangle drawn as the first wall, reported separately as a finding.",
+        "label_collision": "pass: no text is clipped by the canvas, the legend does not overlap the panel, and the centred second caption line sits clear of the frame.",
+        "legibility": "pass with two stated limits: the blue solved flux, the grey EFIT label flux, the red separatrix, the filled axis triangle and the saddle cross are separable at a glance, but the poloidal panel is 253 px wide on a 1400 px canvas and the 'label axis' series the legend keys is not drawn anywhere in the panel.",
+        "table_form": "pass: a spatial poloidal contour map, not information that belongs in a table."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "attachment_pixels": [
+        1400,
+        720
+      ],
+      "attachment_sha256": "55bd2d5fc31d48d6c64dbd864a42e8bedc360e604f6e3ae476a882a9a4a83f16",
+      "caption_read_from_png": "frame 144  |  diverted terminal residual 5.927e+00  |  converged false  |  axis R=1.759 Z=+0.013 m  |  290 closed core cells  |  confined current 1.073x target  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass with the stated limit: near-black text on white; the grey label flux is the faintest series.",
+        "data_ink": "pass: line contours only, no fills.",
+        "decoration": "pass: nothing decorative; no gradient, background fill or stylisation.",
+        "label_collision": "pass: no clipped or overlapping text; the saddle marker sits over contour lines it belongs to.",
+        "legibility": "pass with the same two limits as frame 137: the series separate cleanly, but the panel is a narrow strip on a wide canvas and the label-axis series is keyed and not drawn. The residual of 5.927e+00 reads immediately beside 'converged false', which is the frame's headline.",
+        "table_form": "pass: a spatial comparison of two fields."
+      }
+    },
+    {
+      "attachment": "image-2.png",
+      "attachment_pixels": [
+        1400,
+        720
+      ],
+      "attachment_sha256": "a3b98a945fd3a8e25f2ce81b82729191b2c4f75bb0e5816884a060d4eb2cb179",
+      "caption_read_from_png": "frame 146  |  diverted terminal residual 5.496e-02  |  converged false  |  axis R=1.234 Z=+1.563 m  |  8 closed core cells  |  confined current 0.039x target  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass with the stated limit: near-black text on white; grey label contours faint but visible.",
+        "data_ink": "pass: unfilled contours and the two null markers carry the weight.",
+        "decoration": "pass: no gradient, fill or decorative styling.",
+        "label_collision": "pass: the axis marker is close to but clear of the top edge; no text is clipped. The caption's second line breaks '0.039x target' across the line, reported as a separate finding.",
+        "legibility": "pass with a stated limit: the solved axis sits 13 px below the top edge of the drawn wall, which is exactly the 'plasma at the top of the vessel' the caption reports, but the panel is a narrow strip and the EFIT label axis \u2014 the thing this frame's 1.56 m axis displacement is measured against \u2014 is not drawn at all.",
+        "table_form": "pass: a spatial poloidal map."
+      }
+    },
+    {
+      "attachment": "image-3.png",
+      "attachment_pixels": [
+        1400,
+        720
+      ],
+      "attachment_sha256": "e30558fcb039b8d0f333abcfe0ced73563189913dfb9d54fc830bec5cc0b9305",
+      "caption_read_from_png": "frame 179  |  diverted terminal residual 4.181e-01  |  converged false  |  axis R=1.761 Z=-0.264 m  |  232 closed core cells  |  confined current 0.763x target  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass with the stated limit: near-black text on white; the grey label contours merge slightly where they bundle at the upper left but never vanish.",
+        "data_ink": "pass: unfilled lines only.",
+        "decoration": "pass: no gradient, fill or styling.",
+        "label_collision": "pass: no text clipped or overlapping.",
+        "legibility": "pass with the same two limits: this is the clearest of the five panels \u2014 the solved separatrix, the label contours and the saddle are all easy to follow \u2014 but the panel still occupies a fifth of the canvas width and the label-axis series is keyed and absent.",
+        "table_form": "pass: a spatial comparison of two fields."
+      }
+    },
+    {
+      "attachment": "image-4.png",
+      "attachment_pixels": [
+        1400,
+        720
+      ],
+      "attachment_sha256": "6f2f77ad2e6c5828f221e7aacbf213dabca29ec5d060ee14a422801b881ca530",
+      "caption_read_from_png": "frame 44  |  diverted terminal residual 4.276e+00  |  converged false  |  axis R=1.720 Z=-0.141 m  |  352 closed core cells  |  confined current 1.097x target  |  tolerance 1e-5",
+      "repository_path": "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass with the stated limit: near-black text on white, grey label flux faintest.",
+        "data_ink": "pass: unfilled contour lines only.",
+        "decoration": "pass: nothing decorative.",
+        "label_collision": "pass: no clipping or overlap.",
+        "legibility": "pass with the same two limits: the separatrix, both flux families and the saddle are separable, the largest closed core of the cohort (352 cells) and a 4.276e+00 residual are both readable, but the narrow panel and the absent label axis apply here too.",
+        "table_form": "pass: a spatial poloidal comparison."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "f8f44eb7ee8",
+      "line": 552,
+      "severity": "blocking",
+      "summary": "In all five rendered panels the series the legend labels 'first wall' is an axis-aligned rectangle with square corners, not a vessel or limiter outline. A census of the neutral near-black ink in each PNG finds it only on four straight edges \u2014 columns x=573-574 and x=825-826 running 477 px, rows y=129 and y=605 running 254 px \u2014 with no other dark ink anywhere inside the panel and no ink of any kind outside the rectangle. The record's wall-dependent claims ('inside the wall', 'the axis 0.10 m below the top wall', 'axis outside the wall') therefore cannot be checked by a reader against the picture: a box is drawn where the DIII-D first wall should be, and the box is what the field is clipped and classified against, so 'inside' means inside the drawing limits rather than inside the machine. Anchored to the draw_wall call; whether the rectangle comes from the operand's wall array or from the draw call, the reader sees a box."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "fcb246e4091",
+      "line": 576,
+      "severity": "blocking",
+      "summary": "Every one of the five legends keys a 'label axis' hollow grey triangle, and no such marker is drawn in any panel. The renderer builds the handle and never plots label_axis: it is read only to set the shared contour levels, and the only marker plots in render_measured_frame are the solved nulls and the outside-wall axis variant. A scan of the rendered panels finds no hollow marker outside the legend region in any of the five. The panels exist to compare the solved terminal state with the EFIT label state, and the axis is the quantity that comparison turns on \u2014 frame 146 reports a solved axis at Z=+1.563 m whose 1.56 m displacement from the label axis is the frame's headline finding, yet the label axis appears nowhere in the picture. A reader who trusts the key searches the panel for a series that is not there."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "feb6ccf399f",
+      "line": 494,
+      "severity": "non-blocking",
+      "summary": "The equal-aspect poloidal panel occupies 253 x 476 px \u2014 about 12 per cent of the 1400 x 720 canvas \u2014 leaving roughly four fifths of every panel white. The contours are drawn at about 170 px/m, so the field detail, the null markers and the separatrix are all rendered small enough to need close reading, and the five panels cannot be compared side by side at any useful size. A portrait or tighter canvas for a portrait data range, or a shared multi-panel layout, would spend the canvas on the data instead of the margin."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "f37be783482",
+      "line": 628,
+      "severity": "non-blocking",
+      "summary": "The legend is laid out with ncol=6 for seven entries, so 'EFIT label flux' wraps alone onto a second row at the far left, separated from the first row by a long empty gap. It reads as a stray rather than as the second flux key, and the two flux entries \u2014 the pair a reader is meant to compare \u2014 are the two that the layout splits apart. Six columns for six entries, or an explicit two-row ordering that keeps the two flux series adjacent, would fix it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "f79cc7a5449",
+      "line": 618,
+      "severity": "non-blocking",
+      "summary": "The caption is wrapped at width=150, which in frame 146 breaks the phrase 'confined current 0.039x target' between the number and its unit, leaving 'target | tolerance 1e-5' centred on a second line. The other four frames break at a word boundary and read correctly, so the fault is a fixed width that is one character too tight for the longest frame rather than a per-frame choice. Wrapping on the caption's '|' fields, or widening the wrap, would keep each value with its unit."
+    }
+  ],
+  "method": "Each of the five attached rendered PNGs was opened and judged visually; every verdict below is about the picture a reader sees, not about markup. No other image was opened, nothing was rendered, and no SVG element, text element or coordinate was read. One deviation to state plainly: an early `git grep` for a caption phrase returned matching lines from the five SVGs (an XML comment repeating the caption already burnt into the PNG) before the never-search-SVG rule was applied to searches; nothing from that output carried into any verdict. The visual reading was checked against a numeric census of the same five PNGs (exact and thresholded ink colours, per-panel bounding boxes, an across-frame ink intersection, and a positive control on the legend and caption bands), so a claim that a series is absent rests on a measurement that first finds known-present ink. Findings in the drawing code are anchored to scripts/prototypes/diiid_forward_convergence/render_panels.py at the reviewed head; findings in a rendered panel are anchored to the figure's repository path with no line. The attachment-to-artifact mapping is fixed by each PNG's burnt-in caption, which names its frame, terminal residual, converged flag, axis, closed core cells and confined current, and agrees with the fragment's caption for that frame.",
+  "outside_scope": [
+    "Whether the 'wall' array in the display operands at /work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs is itself rectangular \u2014 that would be a data defect upstream of the renderer and is outside a figure review to settle."
+  ],
+  "project": "nova",
+  "review_node": "review-of-diiid-forward-convergence-662e53a98e4d-figure",
+  "review_run_id": "r-20261107T034350064696-review-of-diiid-forward-convergence-662e53a98e4d-figure",
+  "reviewed_artifacts": [
+    "docs/figures/diiid-forward-convergence/frame-137-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-144-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-146-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-179-flux-contours.svg",
+    "docs/figures/diiid-forward-convergence/frame-44-flux-contours.svg",
+    "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+    "scripts/prototypes/diiid_forward_convergence/render_panels.py"
+  ],
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_head_sha": "662e53a98e4d63fe106e219530687649308009e9",
+  "reviewed_node": "diiid-forward-convergence",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC frame-137  legibility: pass with two stated limits \u2014 series separate at a glance, but the panel is 253 px wide on a 1400 px canvas and the keyed 'label axis' series is absent.",
+    "RUBRIC frame-137  data_ink: pass \u2014 unfilled line contours and one marker set only; no fills or bands.",
+    "RUBRIC frame-137  decoration: pass \u2014 white background, frameless legend, no gridlines or gradient.",
+    "RUBRIC frame-137  contrast: pass with a limit \u2014 near-black text on white; grey label flux at about 2.9:1 is the faintest element but visible.",
+    "RUBRIC frame-137  table_form: pass \u2014 a spatial poloidal contour map, not a table.",
+    "RUBRIC frame-137  label_collision: pass \u2014 nothing clipped or overlapping; the second caption line sits clear of the frame.",
+    "RUBRIC frame-144  legibility: pass with two stated limits \u2014 series separate cleanly and the 5.927e+00 residual reads beside 'converged false', but the panel is a narrow strip and the label axis is not drawn.",
+    "RUBRIC frame-144  data_ink: pass \u2014 line contours only, no fills.",
+    "RUBRIC frame-144  decoration: pass \u2014 no gradient, background fill or stylisation.",
+    "RUBRIC frame-144  contrast: pass with a limit \u2014 near-black text on white; grey label flux faintest.",
+    "RUBRIC frame-144  table_form: pass \u2014 a spatial comparison of two fields.",
+    "RUBRIC frame-144  label_collision: pass \u2014 no clipped or overlapping text; markers sit over the data they mark.",
+    "RUBRIC frame-146  legibility: pass with a stated limit \u2014 the near-wall axis is unmistakable, but what it is displaced from (the EFIT label axis) is not drawn and the panel is a narrow strip.",
+    "RUBRIC frame-146  data_ink: pass \u2014 unfilled contours and two markers carry the weight.",
+    "RUBRIC frame-146  decoration: pass \u2014 no gradient, fill or decorative styling.",
+    "RUBRIC frame-146  contrast: pass with a limit \u2014 near-black text on white; grey contours faint but visible.",
+    "RUBRIC frame-146  table_form: pass \u2014 a spatial poloidal map.",
+    "RUBRIC frame-146  label_collision: pass \u2014 axis marker clear of the top edge, no clipped text; the caption breaks '0.039x target' across lines (reported).",
+    "RUBRIC frame-179  legibility: pass with two stated limits \u2014 the clearest of the five, but the panel is a fifth of the canvas width and the label axis is absent.",
+    "RUBRIC frame-179  data_ink: pass \u2014 unfilled lines only.",
+    "RUBRIC frame-179  decoration: pass \u2014 no gradient, fill or styling.",
+    "RUBRIC frame-179  contrast: pass with a limit \u2014 near-black text on white; the grey bundle at upper left is the faintest region.",
+    "RUBRIC frame-179  table_form: pass \u2014 a spatial comparison of two fields.",
+    "RUBRIC frame-179  label_collision: pass \u2014 no clipped or overlapping text.",
+    "RUBRIC frame-44  legibility: pass with two stated limits \u2014 series separable, 352 closed core cells and a 4.276e+00 residual readable, but the narrow panel and absent label axis apply.",
+    "RUBRIC frame-44  data_ink: pass \u2014 unfilled contour lines only.",
+    "RUBRIC frame-44  decoration: pass \u2014 nothing decorative.",
+    "RUBRIC frame-44  contrast: pass with a limit \u2014 near-black text on white; grey label flux faintest.",
+    "RUBRIC frame-44  table_form: pass \u2014 a spatial poloidal comparison.",
+    "RUBRIC frame-44  label_collision: pass \u2014 no clipping or overlap."
+  ],
+  "scope_note": "Read-only review: no figure, caption, script, plan or other record was created, edited, moved, deleted, redrawn, relabelled or reformatted. The only files written are the two declared review-record paths.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T03:57:27.673149+00:00",
+  "total": null
+}

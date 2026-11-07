@@ -27,6 +27,11 @@ import measure_branches  # noqa: E402
 from nova.equilibrium.topology import TopologyClass  # noqa: E402
 import benchmarks.diiid_forward_gs_match as bench  # noqa: E402
 
+def _first(value) -> float | None:
+    array = np.ravel(np.asarray(value))
+    return float(array[0]) if array.size and np.isfinite(array[0]) else None
+
+
 def _float(value) -> float | None:
     array = np.asarray(value)
     return float(array) if array.size == 1 and np.all(np.isfinite(array)) else None
@@ -51,17 +56,10 @@ def main() -> int:
         material_cell_count = int(np.asarray(jnp.sum(inside_material)))
         floor = int(max(np.floor(0.01 * material_cell_count), 1))
         finite_o = np.asarray(jnp.isfinite(vmap_o[:, 0]))
-        data_o = self.o_point_data(vmap_o, polarity)
-        data_x = self.x_point_data(vmap_x, polarity, data_o[2])
-        data_b = self.boundary(data_o, vmap_x, data_w, polarity)
-        closed = self.psi_mask(polarity, psi_grid, data_b[2])
-        seed_material = inside_material
         shapes = {
             "vmap_o": list(np.shape(vmap_o)),
-            "data_o": [list(np.shape(part)) for part in data_o],
-            "data_x": [list(np.shape(part)) for part in data_x],
-            "data_b": [list(np.shape(part)) for part in data_b],
-            "closed": list(np.shape(closed)),
+            "vmap_x": list(np.shape(vmap_x)),
+            "inside_material": list(np.shape(inside_material)),
         }
         entry = {
             "shapes": shapes,
@@ -72,39 +70,40 @@ def main() -> int:
         records.append(entry)
         candidates = entry["candidates"]
         for index in range(np.asarray(vmap_o).shape[0]):
-            row = {
-                "index": int(index),
-                "r": _float(vmap_o[index, 0]),
-                "z": _float(vmap_o[index, 1]),
-                "flux": _float(data_o[2][index]),
-                "finite_o": bool(finite_o[index]),
-                "data_b": [_float(data_b[k][index]) for k in range(3)],
-                "resolved": bool(np.all(np.isfinite(np.asarray(data_b[:3])[..., index] if np.asarray(data_b).ndim > 2 else np.asarray([data_b[k][index] for k in range(3)])))),
-            }
-
-            def component_size(mask) -> int:
-                component = self.axis_component(
-                    psi_grid,
-                    data_b[2],
-                    data_o[2],
-                    data_o[:2],
-                    mask,
-                    seed_material,
-                    jnp.equal(data_b[2], data_x[2]),
-                    data_x[:2],
-                    surface,
-                    polarity=polarity,
-                )
-                return int(np.asarray(jnp.sum(component & inside_material)))
-
+            row = {"index": int(index)}
             try:
+                one = np.asarray(vmap_o)[index : index + 1]
+                row["r"] = _float(one[0, 0])
+                row["z"] = _float(one[0, 1])
+                data_o = self.o_point_data(one, polarity)
+                data_x = self.x_point_data(vmap_x, polarity, data_o[2])
+                data_b = self.boundary(one, vmap_x, data_w, polarity)
+                closed = self.psi_mask(polarity, psi_grid, data_b[2])
+                row["flux"] = _first(data_o[2])
+                row["data_b"] = [_first(part) for part in data_b[:3]]
+                row["resolved"] = bool(np.all(np.isfinite(row["data_b"])))
+                row["finite_o"] = bool(np.all(np.isfinite([row["r"], row["z"], row["flux"]])))
+
+                def component_size(mask) -> int:
+                    component = self.axis_component(
+                        psi_grid,
+                        data_b[2],
+                        data_o[2],
+                        data_o[:2],
+                        mask,
+                        inside_material,
+                        jnp.equal(data_b[2], data_x[2]),
+                        data_x[:2],
+                        surface,
+                        polarity=polarity,
+                    )
+                    return int(np.asarray(jnp.sum(component & inside_material)))
+
                 row["governed_size"] = component_size(closed)
                 row["governed_size_all_open"] = component_size(jnp.ones_like(closed))
                 row["error"] = None
-            except Exception as error:  # recorded, not swallowed silently
-                row["governed_size"] = None
-                row["governed_size_all_open"] = None
-                row["error"] = repr(error)[:400]
+            except Exception as error:  # recorded per candidate, not swallowed
+                row["error"] = repr(error)[:500]
             candidates.append(row)
         entry["completed"] = True
         return original(

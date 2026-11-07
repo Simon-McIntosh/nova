@@ -1,0 +1,127 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-07T13:56:25.824Z",
+  "dispatched_at": "2026-11-07T13:48:53Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T134657122292-plan-review-of-iron-core-magnetisation/plan.html:417",
+      "id": "reasoning-1",
+      "reason": "a worker must pick one of 0.1875 m or 1.200 m and the choice changes the geometry \u00a78 evaluates the field on, so the node's field correction is built on an unresolved dimension.",
+      "text": "the decision derives the limb section as 0.800 m toroidal width \u00d7 1.200 m radial depth (0.960 m\u00b2, which the arithmetic does give) and then says \"Radial extents and heights are the IDS values ... outer edge R 4.9840 m\"; the IDS radial extent is 0.1875 m (4.7965\u20134.9840), so the decision states two radial depths for one limb, and \u00a78 done-when (3) (\"the limb dimensions used are the ones recorded in the \u00a78 limb-geometry decision\") therefore has no single answer for a worker to implement",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T134657122292-plan-review-of-iron-core-magnetisation/plan.html:417",
+      "id": "reasoning-2",
+      "reason": "the decision must name which radial face is held and where the 1.200 m depth extends, or \u00a78's own consistency check fails for geometric reasons the plan would then be unable to explain.",
+      "text": "if the derived 1.200 m depth is anchored at the declared outer edge R 4.9840 m, the limb's inner face lands at R \u2248 3.784 m, roughly 0.71 m inboard of the Fh/Fb outer edge (4.7965 \u2212 0.3), yet \u00a70 states the limb sits 0.3 m outboard of those coils and \u00a78 derives its 2\u03c0R/6 \u2248 5.1 m spacing and R/6 \u2248 0.8 m decay from a limb at R \u2248 4.89 m; the discrete limbs would then be displaced about 0.5 m from the axisymmetric slab they replace, so \u00a78 done-when (2)'s 2 % agreement between the toroidal average and the \u00a76 axisymmetric result measures a geometry change, not a modelling error",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T134657122292-plan-review-of-iron-core-magnetisation/plan.html:417",
+      "id": "reasoning-3",
+      "reason": "the values are the lead's directed choice, which the plan may adopt, and the missing provenance is a wording correction that does not move the node's work.",
+      "text": "the decision presents D = 1.200 m and W = 0.800 m as \"Derived\", but the report it cites records both as \"no accessible source\" and concludes \u00a78 \"must treat D, W and the arm width as a single free parameter fixed by D\u00b7W = h\u00b7W = 0.960 m\u00b2\"; the decision flags only the limbs' toroidal angular datum as unsourced",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "26836cf631a182730d3ea80238407f66c14023ce",
+  "plan_fingerprint": "7e43a557a61cdc4fe31615a7e7573a5e80fd8630aef386a9ff02e3c26f6eac29",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 13,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The limb decision now states one depth: the IDS 0.1875 m extent is the smear (0.9169/4.89), not a dimension; the limb is 1.200 m deep by 0.800 m wide (fb6f1726a).",
+      "reason": "",
+      "when": "2026-11-07T14:14:58.693808+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The limb's inner face is held at R 4.7965 m, 0.3 m outboard of the Fh/Fb coils, and the 1.200 m depth extends outward to R 5.9965 m with the arms (fb6f1726a).",
+      "reason": "",
+      "when": "2026-11-07T14:15:30.368043+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "The rationale now says no source states D, W or the arm width; they follow from the lead's constant-width rule and iron conservation (fb6f1726a).",
+      "reason": "",
+      "when": "2026-11-07T14:15:56.532891+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+      "commit_basis": "edit",
+      "note": "The limb decision now states one depth: the IDS 0.1875 m extent is the smear (0.9169/4.89), not a dimension; the limb is 1.200 m deep by 0.800 m wide (fb6f1726a).",
+      "reason": "",
+      "when": "2026-11-07T14:14:58.693808+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+      "commit_basis": "edit",
+      "note": "The limb's inner face is held at R 4.7965 m, 0.3 m outboard of the Fh/Fb coils, and the 1.200 m depth extends outward to R 5.9965 m with the arms (fb6f1726a).",
+      "reason": "",
+      "when": "2026-11-07T14:15:30.368043+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+      "commit_basis": "edit",
+      "note": "The rationale now says no source states D, W or the arm width; they follow from the lead's constant-width rule and iron conservation (fb6f1726a).",
+      "reason": "",
+      "when": "2026-11-07T14:15:56.532891+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v13.json",
+  "review_run_id": "r-20261107T134657122292-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "13fbc6f91f594c5387b31d37c10f2922e42985b9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the limb-geometry search report exists at the cited path; 156040975, 59d1c8b7, f598eb5b, 052fa853c, 0aa2122b1, 646d7daec, cc22ac1a0 and 5756b61db all resolve as commits; nova/biot/sheet.py, toroidalaverage.py (toroidal_points, frame_magnetic_field, average_toroidal_field at 23/42/66 lines) and the elliptic owners exist.",
+    "done_when": "a finding \u2014 \u00a78's done-when (3) binds the limb dimensions to the limb-geometry decision, which is self-contradictory, so that measure cannot be satisfied or failed.",
+    "evidence_paths": "pass \u2014 the new decision cites /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/ and the crew report under the reports root; the five new s2 comments cite commits only.",
+    "naming": "pass \u2014 the new decision and comment text carry no plan labels, stage names or ticket numbers into code, and no changelog prose.",
+    "reasoning": "a finding \u2014 the limb-geometry decision derives a 1.200 m radial depth for each limb and in the next sentence keeps the IDS radial extents (R 4.7965\u20134.9840, depth 0.1875 m), which cannot both hold; the derived depth then places the limb's inner face at R \u2248 3.784 m, about 0.7 m inboard of the Fh/Fb outer edge the limb is supposed to sit 0.3 m outboard of.",
+    "single_goal": "pass \u2014 each section still names one deliverable, and the changed unit adds none.",
+    "wiring": "pass \u2014 the declarations resolve (s4 now waits on s2 and s3, s9 on s6 and s8, s7 on forward-solve-api#s1), and the changed unit adds no relationship the graph omits."
+  },
+  "section_digests": {
+    "_document": "3b4fe147149288c0647d0b769942ed7fc85781a713313ff57d0d8a3fe42298bd",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "4310e745a250a32efce7e2b04fdc26726e777eae35807f30ed6a2abfac33a9e2",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T14:14:32.289121+00:00",
+  "total": null
+}

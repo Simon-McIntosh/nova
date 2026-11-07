@@ -370,7 +370,7 @@ def main():
         )
         receipt["states"].append(result)
         output.write_text(json.dumps(receipt, indent=2))
-        emit("STATE", label=label, base_residual_max=result["base_residual_max"],
+        emit("STATE", state=label, base_residual_max=result["base_residual_max"],
              **{f"count_{name}": count for name, count in result["class_counts"].items()})
     print("EXIT=0", flush=True)
 

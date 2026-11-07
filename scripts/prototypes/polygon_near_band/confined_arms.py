@@ -1,9 +1,13 @@
-"""Compare the baseline, the unconfined head and the confined near-band bucket.
+"""Compare the baseline, the unconfined head and a confined near-band bucket.
 
 The three arms differ only in where the graded quadrature is evaluated: the
 baseline revision's kernel, this worktree's kernel with the whole-array
-evaluation, and this worktree's kernel with the static near-band bucket. Each
-arm is compiled and timed on the same packed inputs for each coil set.
+evaluation, and a candidate kernel that gathered the selected targets onto a
+static bucket. The candidate was measured with this harness and reverted: on
+titan and CPU it moved the wall by under one percent either way, and the H200
+rows vary by a third between runs, so the rows cannot separate the arms. The
+``NOVA_NEAR_BUCKET`` switch it used no longer exists in the kernel, and a rerun
+now reports the whole-array arm twice.
 """
 
 from __future__ import annotations

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Conic sheet flux: the measured accuracy of the fixed azimuthal rule | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-sheet-flux-summary">§2 — The conic sheet flux, measured on the section's target set</h2>
+    <p>Node <code>icm-sheet-flux</code> gives the poloidal flux of a conic
+    toroidal sheet in <code>nova/biot/sheet.py</code>. Every inclination of the
+    section's slope set is implemented, and the flat and vertical forms hold the
+    section's <code>1e-10</code> floor at every one of the twelve fixed targets.
+    The <strong>sloped</strong> form does not: at the three near standoffs its
+    fixed panel rule falls short, reaching <code>9.2e-05</code> at half a cell
+    width. The node is therefore delivered <em>blocked</em> on that measure,
+    with the errors below, so the coordinator can choose between a
+    singularity-subtracted azimuthal rule and reconstructing the paper's closed
+    coefficients. Every fixed-set target asserts the <code>1e-10</code> floor;
+    the 21 measured misses (seven per sloped slope) are declared
+    <code>xfail(strict=True)</code> with the relative error measured at that
+    target in the reason, so a case that reaches the floor is an XPASS and fails
+    the gate rather than passing quietly. The rule was not adapted per target and
+    no tolerance was loosened.</p>
+    <p>The section's graded arsinh rule was tried as the remedy and did not
+    settle it. Reusing its grading width, two-panel sinh map and 128-node rule
+    reproduces a brute-force quadrature of the arsinh integral to
+    <code>3e-12</code> at an isolated endpoint, and takes the middle standoff at
+    half a cell width from <code>9.2e-05</code> to <code>1.8e-10</code>, but the
+    start and end stations -- where the target sits on the segment's extended
+    line and the denominator vanishes at an end -- read
+    <code>1.5e-04</code> to <code>2.5e-04</code> at every standoff, worse than
+    the plain rule's <code>2e-13</code> there. Those stations need the rule's
+    endpoint-log removal, which was not ported, so the plain rule is what
+    shipped.</p>
+
+    <h2 id="icm-sheet-flux-measure">Measured: worst relative error per slope and form</h2>
+    <p>Geometry is the section's own: segments of length <code>0.1 m</code>
+    centred at <code>(r, z) = (1.5, 0) m</code>, cell width <code>0.02 m</code>,
+    and twelve targets per slope — three stations (off the middle, off the start,
+    off the end) at four standoffs (<code>0.01</code>, <code>0.02</code>,
+    <code>0.1</code> and <code>1.0 m</code>). Reference:
+    <code>scripts/edge_sheet/reference.py</code> <code>sheet_reference</code>,
+    converged at every target.</p>
+    <table>
+      <thead><tr><th>form</th><th>inclination</th><th>worst at d = 0.01 m</th><th>worst at d = 0.02 m</th><th>worst at d = 0.1 m</th><th>worst at d = 1.0 m</th><th>meets 1e-10</th></tr></thead>
+      <tbody>
+        <tr><td>flat annulus</td><td>0</td><td>4.7e-16</td><td>3.4e-16</td><td>2.2e-16</td><td>2.1e-16</td><td>yes, all 12</td></tr>
+        <tr><td>sloped</td><td>π/8</td><td>9.2e-05</td><td>1.7e-06</td><td>2.7e-10</td><td>2.1e-13</td><td>no</td></tr>
+        <tr><td>sloped</td><td>π/4</td><td>9.2e-05</td><td>1.9e-06</td><td>2.0e-10</td><td>7.5e-15</td><td>no</td></tr>
+        <tr><td>sloped</td><td>3π/8</td><td>9.2e-05</td><td>2.0e-06</td><td>1.5e-10</td><td>2.6e-15</td><td>no</td></tr>
+        <tr><td>cylinder</td><td>π/2</td><td>6.9e-13</td><td>8.0e-14</td><td>1.3e-14</td><td>6.3e-15</td><td>yes, all 12</td></tr>
+      </tbody>
+    </table>
+    <p>The shortfall is the fixed rule's, not the reference's: the reference
+    converged at every target (<code>converged=True</code> throughout), and the
+    error is nearly identical at the three stations for a given standoff, which
+    is the signature of a quadrature limit on the azimuthal integrand rather
+    than of a geometry-dependent defect. At <code>d = 0.1 m</code> only the
+    middle station misses (<code>2.7e-10</code>, <code>2.0e-10</code>,
+    <code>1.5e-10</code>); the start and end stations hold
+    <code>5.8e-11</code> to <code>8.8e-11</code>. The azimuthal integrand is
+    near-singular as the segment's foot approaches the target, and a uniform
+    8-panel by 16-node Gauss-Legendre rule cannot resolve it there.</p>
+
+    <h2 id="icm-sheet-flux-antiderivative">The antiderivative that is used</h2>
+    <p>Part II's expressions are <em>antiderivatives</em> in the source
+    coordinate, not definite values: the finite segment enters as the difference
+    between the two ends. Established by measurement — in the cylinder limit the
+    eq (24) expression at one end alone misses the reference by
+    <code>75</code> per cent, and the difference of the two ends reproduces it to
+    <code>3e-16</code>.</p>
+    <p>For a sloped segment, parameterised <code>r' = b_1 z' + c_1</code>, with
+    <code>gamma = z' - z</code>, <code>r_1 = c_1 + b_1 z</code> and
+    <code>a_1^2 = 1 + b_1^2</code>,</p>
+    <pre>a_1^3 f(phi) = a_1 b_1 D + (r_1 + b_1^2 r cos phi) arsinh(beta_1)</pre>
+    <p>with <code>D = sqrt(gamma^2 + r^2 + r'^2 - 2 r r' cos phi)</code>,
+    <code>beta_1 = Gamma_1 / B_1</code>,
+    <code>Gamma_1 = a_1^2 gamma + b_1 (r_1 - r cos phi)</code> and
+    <code>B_1^2 = r_1^2 - 2 r r_1 cos phi + r^2 (1 + b_1^2 sin^2 phi)</code>,
+    which reproduces the paper's eq (8) and reduces to eq (24) at
+    <code>b_1 = 0</code>. The flux is
+    <code>psi = mu0 a_1 r [f(end_2) - f(end_1)]</code>, with the azimuthal
+    integral on the fixed panelised Gauss-Legendre rule. The flat annulus
+    evaluates the surface-current integral of the ring flux
+    (<code>nova.biot.greens.greens_psi</code>) on the same rule.</p>
+
+    <h2 id="icm-sheet-flux-coefficients">The printed coefficient block, with its term breakdown</h2>
+    <p>The scanned paper's block for eq (22a) — <code>S(k)</code>,
+    <code>M(k)</code>, <code>N(k)</code> and <code>P_j(n_p)</code> of eqs (13a)
+    and (18a) — assembles to an expression that disagrees with the verified
+    azimuthal quadrature by a factor, not by rounding. Measured on
+    <code>R_1, Z_1, R_2, Z_2 = 0.8, -0.5, 1.5, 0.6</code> at
+    <code>(r, z) = (0.5, 0)</code>, <code>b_1 = 0.636364</code>:</p>
+    <table>
+      <thead><tr><th>segment end</th><th>quadrature of the D part</th><th>eq (18a) closed D part</th><th>K</th><th>E</th><th>M</th><th>N</th></tr></thead>
+      <tbody>
+        <tr><td>z' = 0.6</td><td>-6.492e-01</td><td>+4.861</td><td>2.0581</td><td>1.2487</td><td>-3.3651</td><td>+2.0656</td></tr>
+        <tr><td>z' = -0.5</td><td>-5.638e-01</td><td>+4.168</td><td>2.3174</td><td>1.1615</td><td>-1.6119</td><td>+0.0081</td></tr>
+      </tbody>
+    </table>
+    <p>The closed D part is off by <code>7.5</code> and <code>7.4</code> units on
+    the two ends while the quadrature's own value stays near
+    <code>-0.6</code>. The arsinh part of the same assembly is
+    <code>+4.249e-01</code> and <code>-2.144e-02</code> against quadratures of
+    <code>+8.413e-01</code> and <code>-6.896e-01</code>, and the third-kind sum
+    <code>P_j Pi</code> contributes <code>-5.227</code> and <code>+1.247</code>;
+    the assembled total is <code>+5.936e-02</code> and <code>+5.393</code>
+    against quadrature totals of <code>+1.138e-01</code> and
+    <code>-7.428e-01</code>. No reading of the <code>(2r)</code> factor or of
+    the <code>P_j</code> denominator tried closes that gap, so the printed form
+    is not used. Eq (26)'s flat coefficients are unavailable for the same
+    reason.</p>
+
+    <h2 id="icm-sheet-flux-negative-control">Negative control</h2>
+    <p>Flipping the sign of the closed form's sheet current leaves
+    <code>65</code> of the <code>71</code> tests not passing
+    (<code>44 failed</code>, <code>21 xfailed</code>, <code>EXIT=1</code>): every
+    reference comparison, the flat pancake form, the cylinder form and the
+    flipped-current control. The six that still pass are the linearity test and
+    the five segment-order tests, which a global sign flip leaves true. The head
+    arm passes <code>50</code> and xfails <code>21</code> at <code>EXIT=0</code>.</p>
+  </main>
+</body>
+</html>

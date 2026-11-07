@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachment_note": "Two attachments were named: the repository PNG (1400x720 RGBA, 100 dpi, sha256 ade4e1f0...) and the review run's image-1.png (1400x720 RGBA). Both were opened and both show the same rendition - the same two titles, the same residuals 5.730e-09 and 6.612e-03, the same '3 active-set iterations' and the same six-entry legend. They are not byte-identical: the ink boxes differ by about 9 px (repository PNG columns 48-1363, image-1 columns 39-1372) and a blurred difference shows one picture displaced by a few pixels against the other, which is a rasterisation offset rather than a different figure. Every verdict below therefore describes both attachments; the pixel coordinates quoted are the repository PNG's.",
+  "caption_verdict": "pass - the page caption at docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:187 names the states the image shows (edit 12 at +6% of the seed, converged, 5.730e-09 Wb, three active-set iterations; edit 9 at +0%, not converged, 6.612e-03 Wb, three active-set iterations) and does more than repeat the titles: it defines the percentage's base, defines an active-set iteration and gives the display-map statistics for both panels. It does, however, describe the encoding incompletely in the same way the legend does - it says 'reference contours are grey and solved contours orange' and never says that the blue that a reader meets along the boundary is the reference saddle legs and lobe (finding 1).",
+  "completed_at": "2026-11-07T20:59:14.018Z",
+  "dispatched_at": "2026-11-07T20:39:00Z",
+  "fields": {
+    "RUBRIC contrast": "pass - text 21.0:1; solved #cc7722 3.37:1; reference blue #3366cc 5.37:1; reference contours 3.19:1 rendered (3.11:1 specified), above the 3:1 floor.",
+    "RUBRIC data_ink": "pass - unfilled line contours on one shared level array, black wall, filled null markers; no fill, gradient, scatter or surface.",
+    "RUBRIC decoration": "pass - 89.9% exact white, axes off, no gridline, background fill, band, frame or shadow.",
+    "RUBRIC label_collision": "pass - ink rows 6-703 of 720, columns 48-1363 of 1400; margins 6/16/48/36 px; 90 px title gutter; 12 px between data and legend; nothing clipped or overlapping.",
+    "RUBRIC legibility": "pass - both two-line titles define their quantities ('+6% of the seed', '3 active-set iterations', residual with Wb); panels separate at a glance at 1400 px and at the 900 px page width; the legend's reference-leg colour is wrong (finding 1) but every mark stays visible.",
+    "RUBRIC table_form": "pass - a spatial poloidal flux map with wall, lobe, legs and nulls; not tabular information."
+  },
+  "figures_reviewed": [
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
+  ],
+  "findings": [
+    {
+      "disposition": "folded into a panel-legend repair node: give the 'reference saddle legs' handle color='#3366cc', and either add a 'reference lobe' entry or reword the entry to cover both the solid lobe and the dashed legs",
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "fe3c5cf4331",
+      "line": 2547,
+      "severity": "non-blocking",
+      "summary": "The legend keys the reference saddle legs with the contour grey, but the panel draws those legs in blue. The handle is built at benchmarks/coil_edit_latency.py:2547 with color=REFERENCE_CONTOUR_COLOR (#929292) and linestyle '--', while the reference branch is drawn at :2215 in '#3366cc' - the reference lobe solid and its saddle legs dashed - and the reference nulls at :2241 in the same blue. Measured on the rendered PNG, the legend swatch for 'reference saddle legs' (rows 665-666) is (144,144,144) grey, and every reference leg stroke in the data is (51,102,204) blue, walking the separatrix beside the orange solved legs in both panels. So the key names a colour the plot never uses for that series, and the blue dashed legs and blue solid reference lobe have no entry of their own: a reader who looks for grey dashed legs finds none, and has to infer the blue family from the blue null markers. This is the repair of the earlier finding that the blue was unkeyed - the entry was added, but with the wrong colour, so the gap it was meant to close is now a mismatch."
+    },
+    {
+      "disposition": "folded into the same panel-legend repair node: add the cross-handle entries, or state in the legend that the triangle marks the axis and the cross the admitted saddle",
+      "file": "benchmarks/coil_edit_latency.py",
+      "id": "f6c868e9da8",
+      "line": 2560,
+      "severity": "non-blocking",
+      "summary": "The legend keys the two null sets with triangles only, while the admitted saddle is drawn as a filled cross in each set. Both null handles (:2560-2577) carry marker='^', and in the rendered PNG the magnetic axis of each panel carries a triangle pair while the admitted saddle carries a filled blue cross under a filled orange cross. A reader meeting the figure on its own therefore meets two marker glyphs in the plot and a key that explains only one of them, and the caption's 'other qualified nulls hollow in both sets' uses a hollow vocabulary that the legend also omits. Under the house vocabulary the distinction is deliberate - triangle for the axis, cross for the admitted saddle - so the defect is the key's, not the drawing's."
+    },
+    {
+      "disposition": "exempted: refreshing or superseding the sidecar is outside a read-only figure review's write scope; recorded here for the coordinator to answer on the run's own record - either mark it superseded beside the panel-receipt superseded block or have the render write it",
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.json",
+      "id": "fc5f50f8c25",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "The JSON record sitting beside the PNG in the figure directory names a different rendition from the one rendered: its converged block carries edit_index 7, fraction -0.04, residual 5.033e-09 and trips 1, and its non_converged block edit_index 6, fraction -0.06, residual 4.422e-03 and trips 1, while the PNG is titled with edit 12 at +6%, residual 5.730e-09, and edit 9 at +0%, residual 6.612e-03, three active-set iterations each. The file names itself as this figure's receipt ('figure' and 'receipt' both point at converged-vs-nonconverged.png) and predates the render (on-disk mtime 15:15 against the PNG's 21:28), while the current record for the same render is panel-receipt.json. A reader who opens the sidecar the figure directory holds is given states the picture does not show."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass - title and legend text are pure black on white at 21.0:1; the solved contour and leg stroke #cc7722 measures 3.37:1; the reference-null and reference-leg stroke #3366cc measures 5.37:1; the reference contour stroke renders at (144,144,144) = 3.19:1 against the specified #929292 = 3.11:1, so the reference family now clears the 3:1 floor that the previously reviewed rendition of this figure missed at 2.81:1. The wall and coil outlines are black. No text sits on a coloured ground.",
+    "data_ink": "pass - the ink is the field, the wall and the nulls. Both flux families are unfilled line contours on one shared level array (14 levels, drawn at 1.2 pt), the wall and coil outlines are black lines, and the nulls are filled markers. There is no filled contour, no colour map, no scatter cloud and no painted surface; the only non-data ink is the two title lines and one frameless legend.",
+    "decoration": "pass - the canvas is plain white (89.9% of the 1,008,000 pixels are exactly #ffffff) with no gridline, background fill, shading band, frame, gradient or drop shadow. The axes are off on both poloidal panels, as the house rule requires, and the scale comes from the machine geometry drawn in the panel.",
+    "label_collision": "pass - measured on the rendered PNG, not taken from the receipt. Ink occupies rows 6-703 of 720 and columns 48-1363 of 1400, so every margin is positive (top 6 px, bottom 16 px, left 48 px, right 36 px) and nothing is clipped. No label overlaps another: title line 1 runs x 48-648 and x 738-1363 (a 90 px gutter between the panels) and title line 2 runs x 133-564 and x 835-1267; the legend's first row breaks into x 199-624, 662-905, 954-970 and 998-1197, with gutters of 38, 49 and 28 px, and its second row into x 199-567, 662-879, 957-967 and 997-1101. No label sits on data: title ink ends at row 44, the data band starts at row 53 (9 px clear) and ends at row 646, and the legend occupies rows 658-676 and 685-703, 12 px below the data.",
+    "legibility": "pass - both panels carry a two-line title that defines the quantities it uses: 'edit 12  P4-UPPER circuit 8 current +6% of the seed  converged / residual 5.730e-09 Wb  3 active-set iterations' and 'edit 9 ... +0% of the seed  not converged / residual 6.612e-03 Wb  3 active-set iterations'. The percentage names its base ('of the seed'), the count names its unit of work ('active-set iterations') and the residual carries its unit (Wb), so the two quantities earlier renditions left undefined are defined in the image itself. At a glance the converged panel's solved contours sit on the reference contours while the non-converged panel's separate from them at the lower edge and around the saddle, which is the comparison the figure exists to make. Titles, legend text and the wall outline all read at the 1400 px canvas and at the 900 px column width the receipt renders for. One defect sits in the key rather than the picture: the legend's colour for the reference saddle legs is not the colour those legs are drawn in (finding 1), so a reader cannot take the correct identification of that one series from the image alone; every mark remains visible and distinguishable.",
+    "table_form": "pass - the image is a spatial poloidal flux map with its wall, its closed lobe, its dashed saddle legs and its null positions. The information is two field geometries over one common wall, which is what a contour panel is for; it is not a set of values that would read better as a table."
+  },
+  "measurements": {
+    "attachments_compared": "the repository PNG (sha256 ade4e1f0...) and image-1.png (sha256 7be2714a...) show the same rendition; a blurred difference shows a few-pixel displacement, not different content",
+    "colours_measured": {
+      "legend_reference_saddle_legs_swatch": "(144,144,144) grey - the drawn legs are (51,102,204) blue (finding 1)",
+      "reference_contours_rendered_darkest": "(144,144,144) at 3.19:1",
+      "reference_contours_specified": "#929292 at 3.11:1",
+      "reference_nulls_and_legs_drawn": "#3366cc at 5.37:1",
+      "solved_contours_and_legs": "#cc7722 at 3.37:1",
+      "title_and_legend_text": "#000000 at 21.0:1"
+    },
+    "image": "1400x720 RGBA at 100 dpi, 89.9% exact white",
+    "ink_bbox": "rows 6-703, columns 48-1363; margins top 6, bottom 16, left 48, right 36",
+    "legend_runs": "row 1 x 199-624, 662-905, triangle at 954-970, text to 1197; row 2 x 199-567, 662-879, triangle at 957-967, text to 1101",
+    "null_coincidence": "at the magnetic axis of both panels the larger filled blue triangle reads around the smaller filled orange triangle, and at the admitted saddle the filled blue cross reads around the filled orange cross, so the reference null is visible where the two coincide - the defect the brief set out to close is closed in the drawn picture",
+    "receipt_cross_check": "panel-receipt.json visual_inspection reports clipped_labels 0 and overlapping_labels 0; those figures were not taken on trust - the bands above were measured directly on the rendered PNG and agree",
+    "row_bands": "title line 1 rows 6-24, title line 2 rows 30-44, data rows 53-646, legend row 1 rows 658-676, legend row 2 rows 685-703",
+    "title_runs_line1": "x 48-648 (left panel), x 738-1363 (right panel), 90 px gutter",
+    "title_runs_line2": "x 133-564 (left), x 835-1267 (right)"
+  },
+  "notes": "Read-only review: no file was edited, created, moved, redrawn, relabelled or reformatted, and no SVG was opened, read, listed, searched, rendered or git-shown; only the two named PNGs and crops derived from them were opened, plus the page and archive HTML that carry the captions, the drawing script and the figure's receipts. The archive record's five embedding blocks (docs/evidence/archive/forward-solve-api-landed.html:331, 431, 497, 699, 910) now lead with the states the image shows, so the caption defect the node was dispatched against is closed there; only the legend's rendering of the reference series (finding 1) is still wrong in both the image and the page caption. The dashed solver legs run to the top and bottom of the invisible axes box and end there in white, which is the normal framing of a poloidal panel rather than a clip: the wall those legs cross is drawn and nothing lands on a label. A figure review runs no suite, so added_failure_count is 0 with an empty id list by contract, and no scores are recorded.",
+  "project": "nova",
+  "review_run_id": "r-20261107T203726215451-review-of-coil-edit-panel-captions-b22b78685714-figure",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "b22b7868571497d8ebe28f7896870a7da1873131",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:02:05.336035+00:00",
+  "total": null
+}

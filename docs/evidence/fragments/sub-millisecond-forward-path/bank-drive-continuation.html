@@ -1,0 +1,83 @@
+<figure id="bank-drive-continuation-figure">
+  <img src="/nova/figures/sub-millisecond-forward-path/bank-drive-continuation/reads-per-slice.svg"
+       alt="Batch reads per slice against the drive step for a direct solve and for drive continuation">
+  <figcaption>Batch reads per slice against the drive step, direct solve against drive
+  continuation, on the saved warm-start slice. Both arms read at least a seed read and a
+  terminal certificate; a direct solve at the coarse step spends its whole sixty-update
+  ceiling and reports no converged lane.</figcaption>
+</figure>
+
+## What changed
+
+`nova/equilibrium/drive_continuation.py` advances a drive change in adaptive
+warm-started sub-steps above `support_read.solve_batch`.
+
+`solve_batch` runs a 550-cell diverted slice warm-started from its neighbour in two
+updates and three reads at a 1e-5 relative profile-amplitude step, and in four updates
+and six reads at 1e-3. At 1e-2 it stalls at the sixty-update ceiling, warm or cold. The
+stall is not a warm-start defect and not a wrong step direction: the assembled Jacobian
+agrees with central differences of the fresh residual to about 1e-8 at the stalled
+state. The linear model is simply invalid that far from the seed — the unit trial's
+predicted residual is 1.5e-13 against a measured 20.40, or 0.94 of its starting value.
+
+The remedy is drive continuation. A drive change is split into sub-steps, each a
+warm-started `solve_batch` from the previous sub-step's converged state. Nothing inside
+the solve changes: the Newton step, the fresh-residual line search and the terminal
+certification are the product's, called with the same arguments; only the drive each
+call is asked for is smaller.
+
+### The sub-step rule
+
+- **Initial size: 1e-3**: the largest relative
+  step the warm-start record shows every lane converging, at three to six updates
+  against a sixty-update ceiling.
+- **A sub-solve inside a six-update budget doubles the sub-step** and the drive advances.
+- **A sub-solve that leaves a lane unconverged, or the batch above that budget, is
+  rejected**: the drive does not advance, the sub-step halves, and the same drive is
+  retried.
+- **A floor of 1e-9 relative** ends the attempt: the driver reports the drive it reached
+  and why, rather than halving forever.
+- **Intermediate sub-solves stop at 1e-6.** That only has to leave the next sub-step a
+  usable seed, which the record shows a residual two orders above the certification
+  budget already is.
+- **The sub-step that reaches the target is solved at 1e-10**, and the state is certified
+  by that solve's own terminal fresh read against the locked residual clause. A
+  certificate is reported only when every lane's fresh residual is at or under 1e-10 at
+  the target drive.
+
+## CPU evidence
+
+`tests/test_bank_drive_continuation.py` drives the seam with a scalar residual whose
+Newton basin is limited — `r(x, d) = t + C t³`, `t = x − d`, with an exact step
+direction and the product's own `_damped_scale` line search — so the fixture has the
+property the H200 record shows without any code deciding when a solve should fail. Three
+tests pass in about 35 s, and the negative control reddens two of them.
+
+| check | result |
+| --- | --- |
+| a direct solve over the whole drive change | misses a six-update budget, no lane converged |
+| the same change through continuation | certified at the target drive, nine sub-steps, six growths, three shrinks |
+| the rule | every accepted sub-step doubles, every rejected one halves, the applied change is the smaller of the sub-step and the remaining drive |
+| the certificate | a read performed at the target drive, 1e-10 tolerance, worst lane at most 1e-10 |
+| negative control | certifying the final state at the intermediate 1e-6 tolerance fails `test_direct_solve_fails_where_continuation_certifies` and `test_final_certificate_is_a_full_fresh_read_at_the_target` |
+
+## Paired suites
+
+One Sirius job, one fresh process per file, each with its own basetemp, from the shared
+root virtualenv with `PYTHONPATH` naming the arm's tree.
+
+| file | head | base |
+| --- | --- | --- |
+| `tests/test_bank_drive_continuation.py` | 3 passed | absent at base |
+| `tests/test_bank_solve_driver.py` | 10 passed | see the base job log |
+| `tests/test_bank_solve_cycle.py` | 3 passed | see the base job log |
+| `tests/test_support_read.py` | 13 passed, 2 skipped | see the base job log |
+
+The base arm runs from an extracted archive of the base revision under the run
+directory; its per-file logs are `suite-base-*.log` beside the head arm's.
+
+## Provenance
+
+Revision and tree are named in each log's header lines, and every log ends with a bare
+`EXIT=` line. The base arm's tests run from `base-tree`, an archive of the node's base
+revision extracted under the run directory.

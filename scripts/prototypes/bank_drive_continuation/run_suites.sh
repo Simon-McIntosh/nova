@@ -34,11 +34,16 @@ arm() {
     echo "SUITE $role $name $(tail -n 2 "$log" | tr '\n' ' ')"
 }
 
+ARMS=${ARMS:-head base}
+if [[ " $ARMS " == *" head "* ]]; then
 arm head "$TREE" "$HEAD_REVISION" "$TREE/tests/test_bank_drive_continuation.py"
 arm head "$TREE" "$HEAD_REVISION" "$TREE/tests/test_bank_solve_driver.py"
 arm head "$TREE" "$HEAD_REVISION" "$TREE/tests/test_bank_solve_cycle.py"
 arm head "$TREE" "$HEAD_REVISION" "$TREE/tests/test_support_read.py"
+fi
+if [[ " $ARMS " == *" base "* ]]; then
 arm base "$BASE" "$BASE_REVISION" "$BASE/tests/test_bank_solve_driver.py"
 arm base "$BASE" "$BASE_REVISION" "$BASE/tests/test_bank_solve_cycle.py"
 arm base "$BASE" "$BASE_REVISION" "$BASE/tests/test_support_read.py"
+fi
 echo "SUITES-DONE"

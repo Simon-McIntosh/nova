@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "the seed-distance regression is guarded by the assertions at :763-768, which the review read; the recorded control reddens at :762 on the same mutation",
       "recorded_at": "2026-11-07T18:18:10.667886+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "a test-local fixture duplicate; folding the shift into the owner is a refactor outside this node's single write path",
+      "recorded_at": "2026-11-07T18:18:22.649033+00:00"
     }
   },
   "findings": [

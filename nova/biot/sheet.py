@@ -48,8 +48,9 @@ the derivative of ``arsinh(beta_1)`` is what remains, and it is rational over
 ``B_1^2 D``.  Splitting that bracket onto ``B_1^2``'s pole pair leaves complete
 integrals of the first, second and third kinds and one smooth ``arsinh``
 integral, the remainder the paper itself leaves to quadrature.  The two routes
-share no arithmetic, so they check each other; ``closed=True`` selects the
-reduction.
+share no arithmetic in the ``R`` block, so they check each other there;
+``route="closed"`` is the default and ``route="quadrature"`` selects the graded
+one.
 
 The flat sheet's own closed form is the paper's eqs (26) and (27), transcribed in
 :meth:`SheetFlux.pancake_antiderivative` and :meth:`SheetFlux._pancake_field`.
@@ -57,11 +58,11 @@ They are the ``b_2 = 0`` case of the same antiderivative, carrying complete
 integrals of all three kinds plus the paper's one remaining ``arsinh`` integral
 ``g_0^(2)(pi/2)``.  That integral is log-singular at the azimuth where the target
 is level with the sheet's plane, which is where eight of the section's twelve
-fixed targets sit, so it runs on a double-exponential rule: the map clusters
-nodes geometrically toward both ends and resolves the logarithm there without an
-adaptive decision.  The flat sheet's surface-current integral
+fixed targets sit, so it is evaluated by :func:`nova.biot.zeta.zeta`, this
+repository's owner of that integral, which carries the tanh-sinh rule its
+near-plane case needs.  The flat sheet's surface-current integral
 (:func:`nova.biot.greens.greens_psi` over the segment) is kept beside it as the
-independent check, taken by ``closed=True``.
+independent check, taken by ``route="quadrature"``.
 
 The block feeding eq (22a) (``S``, ``M``, ``N`` and ``P_phi`` of eqs 13a and 18a)
 could not be reconstructed from the available copy of the paper: assembled as
@@ -71,20 +72,48 @@ rounding.  It is therefore not used; the sloped case is reduced as above.
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 
 import jax
 import jax.numpy as jnp
 
 from nova.biot.completeelliptic import (
-    _complete_kind_tangent,
     complete_kind,
+    complete_kind_traced,
     complete_pole,
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.greens import MU0, greens_bz_br, greens_psi
+from nova.biot.zeta import zeta
+from nova.jax.config import configure_dtypes
 
-__all__ = ["SheetFlux", "sheet_field", "sheet_flux"]
+__all__ = ["ROUTES", "SheetFlux", "sheet_field", "sheet_flux"]
+
+# The closed form is built from jitted programs, and a compiled program cannot
+# carry single precision past the geometry it was traced on.  Enabling x64 once,
+# here, is what `complete_kind_traced` is then entitled to assume.
+configure_dtypes()
+assert jax.config.jax_enable_x64, "the closed form needs double arithmetic"
+
+ROUTES = ("closed", "quadrature")
+"""The two evaluation routes :meth:`SheetFlux.flux` and :meth:`SheetFlux.field` offer.
+
+``"closed"`` is the production route at every slope: Part II eqs (22a)/(23a)
+for a sloped segment, Snow's eqs (23)/(24)/(26)/(27) form for a vertical or flat
+one.  ``"quadrature"`` is the independent cross-check, the same antiderivative
+taken by Gauss-Legendre quadrature, and it shares no arithmetic with the closed
+route in the block it is compared on.
+"""
+
+
+def _checked_route(route: str) -> str:
+    """Return ``route`` if it names an evaluation family, refusing anything else."""
+    if route not in ROUTES:
+        raise ValueError(f"route must be one of {ROUTES}, not {route!r}")
+    return route
+
 
 _PANELS = 8
 """Sub-intervals of the segment rule, placed symmetrically."""
@@ -92,7 +121,11 @@ _PANELS = 8
 _NODES = 16
 """Gauss-Legendre nodes per panel; the rule is fixed, never adapted."""
 
-_GAUSS = np.polynomial.legendre.leggauss(_NODES)
+
+@lru_cache(maxsize=None)
+def _gauss_rule():
+    """The panelised rule's nodes and weights, built once on first use."""
+    return np.polynomial.legendre.leggauss(_NODES)
 
 
 def _divide(numerator, denominator):
@@ -114,25 +147,15 @@ def _divide(numerator, denominator):
     return quotient, rest
 
 
-@jax.custom_jvp
-def _complete_kind_traced(complement):
-    """``(K, E)`` on traced arguments, differentiated by their own recurrence."""
-    return complete_kind(complement, xp=jnp)
-
-
-@_complete_kind_traced.defjvp
-def _complete_kind_traced_jvp(primals, tangents):
-    (complement,), (complement_tangent,) = primals, tangents
-    values = _complete_kind_traced(complement)
-    _, slopes = _complete_kind_tangent(complement, complement_tangent, xp=jnp)
-    return values, tuple(slopes)
-
-
 _ARSINH_NODES = 128
 """Nodes of the graded arsinh rule, the Part V module's own count."""
 
-_GRADED_NODES = np.polynomial.legendre.leggauss(64)
-"""The sinh map's nodes; it is exact for the layer the square root carries."""
+
+@lru_cache(maxsize=None)
+def _graded_nodes():
+    """The sinh map's nodes; it is exact for the layer the square root carries."""
+    return np.polynomial.legendre.leggauss(64)
+
 
 _FIELD_PANELS = 140
 _FIELD_RATIO = 1.25
@@ -143,37 +166,36 @@ singular azimuth.  A target level with a segment end puts ``B_1`` at zero on
 grading in the sinh variable resolves it, and the count is the one measured to
 hold the section's floor."""
 
-_FIELD_RULE = np.polynomial.legendre.leggauss(_FIELD_NODES)
+
+@lru_cache(maxsize=None)
+def _field_rule():
+    """The field kernels' azimuthal nodes and weights, built once on first use."""
+    return np.polynomial.legendre.leggauss(_FIELD_NODES)
+
 
 _FLAT_PANELS = 64
 _FLAT_NODES = 32
 """The flat annulus's radial rule; its kernel varies on the standoff scale."""
 
-_PANCAKE_NODES = 90
-_PANCAKE_STEP = 0.05
-_PANCAKE_REACH = 3.0
-"""The flat sheet's arsinh remainder, on a double-exponential rule.
 
-``g_0^(2)(pi/2)`` is log-singular at the azimuth where the target is level with
-the sheet's plane, and the map ``phi = (pi/2)(1 + tanh((pi/2) sinh t))`` clusters
-nodes geometrically toward both ends, where the logarithm is.  The reach stops
-short of where the hyperbolic tangent saturates, so no node lands on an
-endpoint: at
-``|t| = 3`` the nearest node stands ``3e-14`` of a radian inside the range.
-"""
+@jax.jit
+def _closed_root(height, radius, source):
+    """``R``: the closed form's complete first- and second-kind ``D`` block.
 
-
-def _double_exponential(nodes: int, step: float, reach: float):
-    """Nodes and weights on ``[0, pi]``, clustered toward both ends."""
-    index = np.arange(-nodes, nodes + 1) * step
-    stretch = 0.5 * np.pi * np.sinh(index)
-    nodes_at = 0.5 * np.pi * (1.0 + np.tanh(stretch))
-    weights = step * (0.5 * np.pi) ** 2 * np.cosh(index) / np.cosh(stretch) ** 2
-    live = np.abs(index) <= reach
-    return nodes_at[live], weights[live]
+    ``2a[2(1 - k^2)K + (k^2 - 2)E] / (3k^2)`` of eq (22a), with the modulus
+    ``k^2 = 4 r r' / a^2`` and its complement both formed from the geometry
+    rather than by subtraction.
+    """
+    span = height * height + (radius + source) ** 2
+    k2 = 4.0 * radius * source / span
+    complement = (height * height + (radius - source) ** 2) / span
+    first, second = complete_kind_traced(complement)
+    return (
+        2.0 * span**0.5 * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second) / (3.0 * k2)
+    )
 
 
-_PANCAKE_RULE = _double_exponential(_PANCAKE_NODES, _PANCAKE_STEP, _PANCAKE_REACH)
+_closed_root_gradient = jax.jit(jax.value_and_grad(_closed_root, argnums=(0, 1)))
 
 
 class SheetFlux:
@@ -194,7 +216,7 @@ class SheetFlux:
 
     def _rule(self, lower: float, upper: float):
         """Panelised Gauss-Legendre nodes and weights on ``[lower, upper]``."""
-        nodes, weights = _GAUSS
+        nodes, weights = _gauss_rule()
         edges = np.linspace(lower, upper, _PANELS + 1)
         half = 0.5 * np.diff(edges)
         centre = 0.5 * (edges[1:] + edges[:-1])
@@ -213,7 +235,7 @@ class SheetFlux:
         """
         width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
         width = width if width > 0.0 else 1.0
-        node, weight = _GRADED_NODES
+        node, weight = _graded_nodes()
         span = np.arcsinh(np.pi / width)
         stretch = 0.5 * span * (node + 1.0)
         phi = width * np.sinh(stretch)
@@ -427,7 +449,7 @@ class SheetFlux:
         ring distance and turns the logarithm at ``phi = 0`` into a logarithm of
         the grading variable, which geometric panels in ``s`` resolve.
         """
-        node, weight = _FIELD_RULE
+        node, weight = _field_rule()
         span = np.arcsinh(np.pi / width)
         index = np.arange(_FIELD_PANELS + 1)
         edges = span * (_FIELD_RATIO**index - 1.0) / (_FIELD_RATIO**_FIELD_PANELS - 1.0)
@@ -517,9 +539,9 @@ class SheetFlux:
         gamma_value = -b1 * arsinh_plain + float(
             np.sum(rule * cosine * smear * gamma_pole / (a1 * dense))
         )
-        radial_value = b1 * b1 * float(
-            np.sum(rule * cosine * cosine * arsinh)
-        ) + float(np.sum(rule * cosine * smear * radial_pole / (a1 * dense)))
+        radial_value = b1 * b1 * float(np.sum(rule * cosine * cosine * arsinh)) + float(
+            np.sum(rule * cosine * smear * radial_pole / (a1 * dense))
+        )
         return self._arsinh_term(gamma, r, r1, b1), gamma_value, radial_value
 
     def _sloped_field(self, r: float, r_z: float) -> tuple[float, float]:
@@ -553,31 +575,11 @@ class SheetFlux:
         routes, so the two fields cannot disagree about a piece neither
         computes in closed form.
         """
-        import jax
-
-        from nova.jax.config import configure_dtypes
-
-        configure_dtypes()
-        assert jax.config.jax_enable_x64, "the closed form needs double arithmetic"
-        import jax.numpy as jnp
-
         b1 = self._slope
         a1 = np.sqrt(1.0 + b1 * b1)
-
-        def root_part(theta):
-            height, radius = theta[0], theta[1]
-            span = height * height + (radius + rp) ** 2
-            k2 = 4.0 * radius * rp / span
-            complement = (height * height + (radius - rp) ** 2) / span
-            first, second = _complete_kind_traced(complement)
-            return (
-                2.0
-                * span**0.5
-                * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second)
-                / (3.0 * k2)
-            )
-
-        root, gradient = jax.value_and_grad(root_part)(jnp.asarray([gamma, r]))
+        root, gradient = _closed_root_gradient(
+            jnp.asarray(gamma), jnp.asarray(r), jnp.asarray(rp)
+        )
         arsinh_term, arsinh_gamma, arsinh_radial = self._arsinh_gradient(gamma, r, rp)
         return (
             float(a1 * b1) * float(root) + arsinh_term,
@@ -594,30 +596,13 @@ class SheetFlux:
             (float(self.start[1]) - r_z, float(self.start[0]), -1.0),
         )
         for height, radius, sign in ends:
-            value, gamma_value, radial_value = self._closed_gradient(
-                height, r, radius
-            )
+            value, gamma_value, radial_value = self._closed_gradient(height, r, radius)
             b_r += sign * gamma_value
             b_z += sign * (value + r * radial_value)
         return (
             float(MU0 / (2.0 * np.pi * a1sq) * b_r),
             float(MU0 / (2.0 * np.pi * r * a1sq) * b_z),
         )
-
-    def _pancake_remainder(self, gamma: float, r: float, rp: float) -> float:
-        """``g_0^(2)(pi/2)``: the paper's one numerical arsinh integral.
-
-        ``arsinh(beta_2)`` with ``beta_2 = (r' - r cos phi) / sqrt(gamma^2 +
-        r^2 sin^2 phi)``, over the half range the transformation ``phi = pi - 2
-        alpha`` maps to ``alpha`` in ``[0, pi/2]``, so the factor is one half of
-        the full turn's integral.  The denominator vanishes with the azimuth at a
-        target level with the sheet's plane, which is a logarithm, and the
-        double-exponential map resolves it.
-        """
-        phi, weights = _PANCAKE_RULE
-        denominator = np.sqrt(gamma**2 + r**2 * np.sin(phi) ** 2)
-        numerator = rp - r * np.cos(phi)
-        return 0.5 * float(np.sum(weights * np.arcsinh(numerator / denominator)))
 
     def _pancake_terms(
         self, gamma: float, r: float, rp: float
@@ -639,9 +624,18 @@ class SheetFlux:
         big_k = float(np.ravel(first)[0])
         big_e = float(np.ravel(second)[0])
         c = np.sqrt(gamma**2 + r**2)
-        remainder = self._pancake_remainder(gamma, r, rp)
-        potential = -rp / (2.0 * a * r) * (
-            (r * r - rp * rp - 3.0 * gamma**2) * big_k + span * big_e
+        # ``g_0^(2)(pi/2)`` is ``zeta`` with the arc half-angle folded to
+        # pi/2, so the flat sheet calls the repository's owner of this
+        # integral rather than a second transcription of its rule.
+        remainder = float(
+            np.ravel(zeta(np.asarray(rp), np.asarray(r), np.asarray(gamma), np.pi / 2))[
+                0
+            ]
+        )
+        potential = (
+            -rp
+            / (2.0 * a * r)
+            * ((r * r - rp * rp - 3.0 * gamma**2) * big_k + span * big_e)
         )
         potential += r * remainder
         height = 2.0 * remainder - 2.0 * rp / a * big_k
@@ -690,9 +684,13 @@ class SheetFlux:
         """Eq (26) over the segment: ``mu0 r`` times the two ends' difference."""
         gamma = float(self.start[1]) - z
         lower, upper = self._pancake_ends()
-        return MU0 * r * (
-            self.pancake_antiderivative(gamma, r, upper)
-            - self.pancake_antiderivative(gamma, r, lower)
+        return (
+            MU0
+            * r
+            * (
+                self.pancake_antiderivative(gamma, r, upper)
+                - self.pancake_antiderivative(gamma, r, lower)
+            )
         )
 
     def _pancake_field(self, r: float, z: float) -> tuple[float, float]:
@@ -723,20 +721,27 @@ class SheetFlux:
         bz, br = greens_bz_br(np.full_like(rp, r), np.full_like(rp, z), rp, z0)
         return float(np.sum(w * br)), float(np.sum(w * bz))
 
-    def field(self, r: float, z: float, *, closed: bool = False) -> tuple[float, float]:
+    def field(
+        self, r: float, z: float, *, route: str = "closed"
+    ) -> tuple[float, float]:
         """``(B_R, B_Z)`` [T] at ``(r, z)``, per the sheet current set at build.
 
-        ``closed`` takes the field from the surface-current integral of the ring
-        Green's function, in place of eq (27)'s closed form; on a sloped segment
-        it takes the closed-form antiderivative's own partial derivatives in
-        place of the graded route's derivative kernels.  The two routes of each
-        share no arithmetic, so they check each other.
+        ``route`` names the evaluation family and means the same thing at every
+        slope.  ``"closed"`` is the production route: eq (27) on a flat sheet,
+        the closed-form antiderivative's own partial derivatives on a sloped
+        one.  ``"quadrature"`` is the independent cross-check, the
+        surface-current integral of the ring Green's function, which shares no
+        arithmetic with the closed route in the ``R`` block, so a disagreement
+        between them is a defect in one.
         """
+        _checked_route(route)
         if self._flat:
             b_r, b_z = (
-                self._flat_field(r, z) if closed else self._pancake_field(r, z)
+                self._pancake_field(r, z)
+                if route == "closed"
+                else self._flat_field(r, z)
             )
-        elif closed:
+        elif route == "closed":
             b_r, b_z = self._sloped_field_closed(r, z)
         else:
             b_r, b_z = self._sloped_field(r, z)
@@ -780,21 +785,28 @@ class SheetFlux:
             np.sum(w * greens_psi(np.full_like(rp, r), np.full_like(rp, z), rp, z0))
         )
 
-    def flux(self, r: float, z: float, *, closed: bool = False) -> float:
+    def flux(self, r: float, z: float, *, route: str = "closed") -> float:
         """Poloidal flux [Wb] at ``(r, z)``, per the sheet current set at build.
 
-        ``closed`` selects the surface-current integral of the ring flux in place of
-        the flat sheet's eq (26), and the pole reduction of the azimuthal
-        integral in place of the graded arsinh rule on a sloped segment.  Each
-        pair is two independent evaluations of one antiderivative, so a
-        disagreement between them is a defect in one.
+        ``route`` names the evaluation family and means the same thing at every
+        slope.  ``"closed"`` is the production route: eq (26) on a flat sheet,
+        eq (24) on a vertical one, and the pole-reduced antiderivative on a
+        sloped one.  ``"quadrature"`` is the independent cross-check, the
+        surface-current integral of the ring flux, which shares no arithmetic
+        with the closed route in the ``R`` block, so a disagreement between them
+        is a defect in one.
         """
+        _checked_route(route)
         if self._flat:
-            value = self._flat_flux(r, z) if closed else self._pancake_flux(r, z)
-        elif self._slope == 0.0:
+            value = (
+                self._pancake_flux(r, z) if route == "closed" else self._flat_flux(r, z)
+            )
+        elif self._slope == 0.0 and route == "closed":
             value = self._vertical_flux(r, z)
         else:
-            evaluate = self.antiderivative_closed if closed else self.antiderivative
+            evaluate = (
+                self.antiderivative_closed if route == "closed" else self.antiderivative
+            )
             upper = evaluate(float(self.end[1]) - z, r, float(self.end[0]))
             lower = evaluate(float(self.start[1]) - z, r, float(self.start[0]))
             value = upper - lower
@@ -802,16 +814,14 @@ class SheetFlux:
 
 
 def sheet_flux(
-    r: float, z: float, start, end, *, sheet_current: float = 1.0, closed: bool = False
+    r: float, z: float, start, end, *, sheet_current: float = 1.0, route: str = "closed"
 ) -> float:
     """Poloidal flux [Wb] of a conic sheet at ``(r, z)``."""
-    return SheetFlux(start, end, sheet_current=sheet_current).flux(r, z, closed=closed)
+    return SheetFlux(start, end, sheet_current=sheet_current).flux(r, z, route=route)
 
 
 def sheet_field(
-    r: float, z: float, start, end, *, sheet_current: float = 1.0, closed: bool = False
+    r: float, z: float, start, end, *, sheet_current: float = 1.0, route: str = "closed"
 ) -> tuple[float, float]:
     """``(B_R, B_Z)`` [T] of a conic sheet at ``(r, z)``."""
-    return SheetFlux(start, end, sheet_current=sheet_current).field(
-        r, z, closed=closed
-    )
+    return SheetFlux(start, end, sheet_current=sheet_current).field(r, z, route=route)

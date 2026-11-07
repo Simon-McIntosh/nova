@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Tidying the closed-form sheet routes | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-sheet-tidy-summary">§2 — The closed-form sheet routes, tidied</h2>
+    <p>Node <code>icm-sheet-tidy</code> closes the five non-blocking findings of
+    the closed-form field review and the blocking finding of the pancake review.
+    No measured value moves: every value test on
+    <code>tests/test_edge_sheet.py</code> and
+    <code>tests/test_biotcompleteelliptic.py</code> stays at the section's
+    <code>1e-10</code> floor and passes unchanged — 416 tests, exit 0.</p>
+
+    <h2 id="icm-sheet-tidy-route-flag">The route flag now means one thing at every slope</h2>
+    <p>Before this node <code>closed=True</code> inverted its own meaning with
+    geometry: it selected the closed form on a sloped segment and the
+    surface-current quadrature on a flat one. The keyword is replaced by
+    <code>route</code>, whose values are <code>"closed"</code> and
+    <code>"quadrature"</code>:</p>
+    <table>
+      <thead>
+        <tr><th>sheet</th><th><code>route="closed"</code> (default)</th><th><code>route="quadrature"</code></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>flat (slope 0)</td><td>Snow eqs (26)/(27), <code>_pancake_flux</code>/<code>_pancake_field</code></td><td><code>_flat_flux</code>/<code>_flat_field</code></td></tr>
+        <tr><td>vertical (slope <code>pi/2</code>) and sloped</td><td>eq (24) flux, closed antiderivative's own partials for the field</td><td><code>antiderivative</code> / <code>_sloped_field</code></td></tr>
+      </tbody>
+    </table>
+    <p><code>test_route_flag_selects_one_family_at_every_slope</code> instruments
+    every evaluator and asserts the flag reaches the closed family's members at
+    <code>0</code>, <code>pi/4</code> and <code>pi/2</code>, and the quadrature
+    family's at the same three; <code>test_route_flag_defaults_to_the_closed_form</code>
+    asserts the unqualified call is the closed one; and an unknown route is
+    refused rather than silently resolved.</p>
+
+    <h2 id="icm-sheet-tidy-guard">A value comparison cannot see the route, so the guard does</h2>
+    <p>The closed and graded routes agree to the floor by design, so replacing
+    the closed route's body with the graded one leaves every value test green.
+    Two guards close that: <code>test_closed_flux_route_evaluates_the_elliptic_form</code>
+    spies on <code>complete_kind</code> in the module and requires the closed
+    flux route to reach it and the quadrature route not to, at every slope; and
+    <code>test_closed_field_route_evaluates_the_closed_block</code> requires
+    <code>_pancake_field</code> on a flat sheet and the jitted
+    <code>_closed_root_gradient</code> at every other slope.
+    <code>test_closed_root_is_the_elliptic_block</code> checks the closed
+    <code>R</code> against eq (22a) formed independently from the complete kinds,
+    to <code>1e-14</code>.</p>
+    <p>The declared negative control replaces <code>_sloped_field_closed</code>'s
+    body with the graded route: 4 failed, 6 passed, exit 1, the four failures
+    being every non-flat slope. The log is
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T205044504786-icm-sheet-tidy/logs/negative-control.log</code>.</p>
+
+    <h2 id="icm-sheet-tidy-r-only">The agreement checks the R block only</h2>
+    <p>Both routes take the paper's arsinh remainder from
+    <code>_arsinh_gradient</code>, so the closed-versus-graded agreement is a
+    statement about <code>R</code> alone: <code>A</code> is shared by
+    construction and cancels identically. The two agreement tests say so in
+    their docstrings, and this record says so here.</p>
+
+    <h2 id="icm-sheet-tidy-zeta">The flat sheet's arsinh remainder is the owner's</h2>
+    <p><code>_pancake_remainder</code> and its private double-exponential rule are
+    deleted. <code>_pancake_terms</code> now calls
+    <code>nova.biot.zeta.zeta(rp, r, gamma, pi/2)</code>, this repository's owner
+    of that integral and of the tanh-sinh rule its near-plane case needs. The
+    equivalence was reproduced before the replacement over
+    <code>gamma in {0, 1e-9, 1e-4, 0.01, 0.4}</code> at
+    <code>r = 1.5</code>, <code>rp = 1.55</code>:</p>
+    <table>
+      <thead>
+        <tr><th><code>gamma</code></th><th><code>_pancake_remainder</code></th><th><code>zeta(rp, r, gamma, pi/2)</code></th><th>relative</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td><code>1.939258460092232e+00</code></td><td><code>1.939258460093098e+00</code></td><td><code>4.46e-13</code></td></tr>
+        <tr><td>1e-9</td><td><code>1.939258459045443e+00</code></td><td><code>1.939258459045894e+00</code></td><td><code>2.33e-13</code></td></tr>
+        <tr><td>1e-4</td><td><code>1.939153771701676e+00</code></td><td><code>1.939153771701389e+00</code></td><td><code>1.48e-13</code></td></tr>
+        <tr><td>0.01</td><td><code>1.929098060268406e+00</code></td><td><code>1.929098060268525e+00</code></td><td><code>6.18e-14</code></td></tr>
+        <tr><td>0.4</td><td><code>1.664555487424347e+00</code></td><td><code>1.664555487424389e+00</code></td><td><code>2.51e-13</code></td></tr>
+      </tbody>
+    </table>
+    <p>The flat-sheet value tests are unchanged and still hold <code>1e-10</code>.</p>
+
+    <h2 id="icm-sheet-tidy-wall">The closed field evaluation, jitted</h2>
+    <p>The closed field route built a fresh <code>root_part</code> closure and ran
+    <code>jax.value_and_grad</code> on it, so every call re-traced the program.
+    The <code>R</code> block is now a module-level <code>jax.jit</code>'d function
+    evaluated through one cached <code>value_and_grad</code>, and
+    <code>configure_dtypes()</code> is called once at import rather than on each
+    evaluation. Per-evaluation wall for the same segment
+    (<code>[1.45, 0.0]</code> to <code>[1.55, 0.0866]</code>, target
+    <code>(1.5, 0.5)</code>), 50 to 200 calls averaged, <code>JAX_PLATFORMS=cpu</code>:</p>
+    <table>
+      <thead>
+        <tr><th>evaluation</th><th>before</th><th>after</th><th>ratio</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>closed field</td><td><code>1259.9 ms</code></td><td><code>3.05 ms</code></td><td>413&times;</td></tr>
+        <tr><td>quadrature field</td><td><code>2.92 ms</code></td><td><code>2.89 ms</code></td><td>unchanged</td></tr>
+        <tr><td>closed flux</td><td><code>2.02 ms</code></td><td><code>1.99 ms</code></td><td>unchanged (never traced)</td></tr>
+      </tbody>
+    </table>
+    <p>The closed field route is now within about 5% of the graded one, so §3's
+    device tile can build on it. Logs:
+    <code>logs/closed-route-wall.log</code>
+    <code>logs/edge-sheet-gate.log</code>.</p>
+
+    <h2 id="icm-sheet-tidy-ownership">Ownership and lazy rules</h2>
+    <p><code>_complete_kind_traced</code> moved to
+    <code>nova/biot/completeelliptic.py</code> as <code>complete_kind_traced</code>,
+    beside <code>complete_kind</code> and <code>_complete_kind_tangent</code>, and
+    <code>sheet.py</code> imports it. The redundant <code>import jax</code> and
+    <code>import jax.numpy as jnp</code> inside <code>_closed_gradient</code> are
+    gone; the module already binds both, and the only import that had a reason to
+    be local — <code>nova.jax.config</code> — is now a module-scope import made
+    once. Every fixed rule still in <code>sheet.py</code> is built lazily behind
+    <code>functools.lru_cache</code> (<code>_gauss_rule</code>,
+    <code>_graded_nodes</code>, <code>_field_rule</code>), as the rules in
+    <code>nova/biot/zeta.py</code> are, so importing the module builds no rule.</p>
+
+    <h2 id="icm-sheet-tidy-repro">The pancake edge-flip control exercises the module's assembly</h2>
+    <p><code>test_one_edge_flipped_fails_the_pancake_comparison</code> previously
+    assembled its own flipped sum inside the test body, so it never exercised
+    <code>_pancake_flux</code>. It now flips one end's antiderivative as the
+    module calls it and takes the value from the public
+    <code>SheetFlux.flux</code>, so the assembly under test is
+    <code>_pancake_flux</code>'s own two-ends difference: a regression that adds
+    the ends returns the reference value and reddens this control.</p>
+  </main>
+</body>
+</html>

@@ -84,6 +84,7 @@ __all__ = [
     "TRIPS",
     "complete_kind",
     "complete_kind_paired",
+    "complete_kind_traced",
     "complete_pole",
     "complete_pole_paired",
 ]
@@ -584,6 +585,27 @@ def _accumulate_tangent_scanned(
         arithmetic, d_arithmetic, span, d_arithmetic + d_root
     )
     return _quotient_tangent(numerator, d_numerator, denominator, d_denominator)
+
+
+@jax.custom_jvp
+def complete_kind_traced(complement):
+    """Return ``(K, E)`` on traced arguments, differentiated by their own recurrence.
+
+    :func:`complete_kind` is arithmetic with a fixed trip count, so it traces;
+    what it cannot do on its own is offer the descent's analytic tangent to
+    reverse-mode, which walks a Python loop whose length an AD tape would have
+    to replay.  Declaring the tangent here keeps that cost at one recurrence per
+    trip and makes the pair differentiable inside a compiled program.
+    """
+    return complete_kind(complement, xp=jax.numpy)
+
+
+@complete_kind_traced.defjvp
+def _complete_kind_traced_jvp(primals, tangents):
+    (complement,), (complement_tangent,) = primals, tangents
+    values = complete_kind_traced(complement)
+    _, slopes = _complete_kind_tangent(complement, complement_tangent, xp=jax.numpy)
+    return values, tuple(slopes)
 
 
 def _complete_kind_tangent(complement, d_complement, *, xp=np, trips: int = TRIPS):

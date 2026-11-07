@@ -67,36 +67,44 @@
     the unreduced derivative agrees with the reduced one where the two overlap.
     The defect is confined to <code>mean</code>, the <code>arsinh</code>
     remainder.</p>
-    <p>Two findings narrow it further, and both were measured rather than
-    reasoned about:</p>
-    <ul>
-      <li><strong>The autodiff is internally consistent.</strong> A hand-written
-      partial derivative of that same integrand, carrying
-      <code>d(r_1)/dgamma = -b_1</code> explicitly, reproduces
-      <code>jax.grad</code> to <code>1e-16</code> on both components
-      (<code>0.276963396110442</code> and <code>-0.828903819545025</code>).
-      So the traced algebra is not missing a term; the expression being
-      differentiated is not the function the difference quotients sample.</li>
-      <li><strong>The difference quotients do not converge to it.</strong> At
-      <code>h = 1e-3, 1e-4, 1e-5, 1e-6</code> the quotient reads
-      <code>0.8645, 0.8642, 0.8610, 0.8290</code> — flat to four digits across
-      the first two steps and then moving away, which is the signature of a
-      near-singularity rather than of either side being simply wrong. The
-      nearby rounded constant is <code>0.8641</code>, three times the autodiff
-      value, not a perturbation of it.</li>
-    </ul>
-    <p>The singled-out structure is the standoff. <code>gap = r_1 - r</code> is a
-    scalar shared by every azimuthal node, and <code>_closed_residual</code>
-    snaps it to zero inside <code>1e-12 r</code> so the pole kernel cannot read
-    a rounding residue (that snap is what the flux route needs, and the landed
-    flux depends on it). At exactly these targets the snap therefore replaces a
-    whole integrand by a different one, and a finite difference across the
-    threshold samples the change while autodiff, evaluated on the snapped
-    branch, does not. Making the snap value-only — keeping
-    <code>d(gap)/dgamma</code> through a <code>stop_gradient</code> correction —
-    moved the autodiff the wrong way (<code>1.99</code> to <code>0.15</code>),
-    so the snap is not the whole account and that attempt was reverted; the
-    landed code carries the snap exactly as the flux route does.</p>
+    <p>A difference quotient is not the instrument to settle this, and using one
+    cost the earlier attempt its diagnosis: the quotient and the autodiff agree
+    to four digits at every real standoff (0.5 to <code>2.4e-4</code>), and
+    diverge only where the step itself moves the standoff by two orders of
+    magnitude more than the standoff, so near the line the quotient is the
+    unreliable side, not the derivative.</p>
+    <p>The instrument that settles it is the landed route's own analytic
+    kernels. <code>_gradients</code> forms the same bracket and its two partials
+    term by term, and it is known good: its field reproduces the ring reference
+    at these targets. Comparing the two triples at the same end of the same
+    target:</p>
+    <table>
+      <thead><tr><th>end</th><th>S</th><th>dS/dgamma graded / closed</th><th>dS/dr graded / closed</th></tr></thead>
+      <tbody>
+        <tr><td>end</td><td>-16.90779693 / -16.907797</td><td>0.83563409 / 0.35514198</td><td>-9.67041253 / -9.86943903</td></tr>
+        <tr><td>start</td><td>-17.34165329 / -17.34165326</td><td>0.68025345 / 1.24327170</td><td>-9.29365056 / -9.06044096</td></tr>
+      </tbody>
+    </table>
+    <p>The values agree to nine digits and <strong>the partials do not</strong>:
+    <code>dS/dgamma</code> comes out at 0.43 times the analytic one at the end
+    and 1.83 times it at the start, and <code>dS/dr</code> is out by 2.0 and
+    2.5 percent. That is the defect, stated against an independent derivation
+    rather than against a quotient.</p>
+    <p>One more measurement fixes where it is not: the closed-form
+    <strong>flux</strong>'s own numerical derivative at this target reproduces
+    the reference field (<code>B_R = 4.551e-09</code>, <code>B_Z =
+    -5.891e-09</code> against the reference's <code>4.551e-09</code> and
+    <code>-5.891e-09</code>), so the flux route is sound at the same station and
+    the error enters with the differentiation, not with the geometry or the
+    bracket's value.</p>
+    <p>The narrowed question is which term of <code>_closed_gradient</code>
+    supplies the wrong slope: the <code>arsinh</code> remainder is the only piece
+    that is not a complete integral, and it is the piece the earlier difference
+    quotients pointed at. Its standoff <code>gap = r_1 - r</code> is one scalar
+    shared by every azimuthal node, snapped to zero inside <code>1e-12 r</code>;
+    making that snap value-only with a <code>stop_gradient</code> correction
+    moved its autodiff from <code>1.99</code> to <code>0.15</code> and was
+    reverted, so the snap alone does not account for it.</p>
 
     <h2 id="icm-closed-field-state">State of the working tree</h2>
     <p><code>_closed_bracket</code>, <code>_closed_gradient</code>,
@@ -116,16 +124,18 @@
     attempt; the value route they cover is untouched by the tangent tracing.</p>
 
     <h2 id="icm-closed-field-next">What the next attempt has</h2>
-    <p>The remaining question is narrow and stated: why a centred difference of
-    <code>_closed_residual</code> in <code>gamma</code> and <code>r</code> reads
-    <code>0.864</code> where its autodiff (and an independent hand derivation,
-    agreeing with it to <code>1e-16</code>) reads <code>0.277</code>. The next
-    step is to evaluate the two at interior points away from the supporting
-    line — where both agree — and walk the standoff towards zero while watching
-    both, so the crossover and its order are measured rather than inferred. That
-    locates whether the residual needs the treatment the user directed:
-    separating its near-singular part into a reduced expression whose derivative
-    is conditioned like its value, the way the pole remainder already is.</p>
+    <p>The remaining question is narrow and stated: which term of
+    <code>_closed_gradient</code> contributes a slope that is 0.43 times the
+    analytic one at the end of the segment and 1.83 times it at the start. The
+    comparison to make is per term, against <code>_gradients</code>' own kernels
+    at the same <code>(gamma, r, r_p)</code> rather than against a quotient:
+    <code>R</code> and <code>arc</code> already match their quotients, so the
+    <code>arsinh</code> remainder is the term to hold against its analytic
+    counterpart, and the sign of its error reverses between the two ends.
+    If the remainder's near-singular part needs separating into a reduced
+    expression whose derivative is conditioned like its value — as the pole
+    remainder already is — that is the modification to make, not another
+    quotient study.</p>
   </main>
 </body>
 </html>

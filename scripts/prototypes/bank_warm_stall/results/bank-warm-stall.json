@@ -7962,5 +7962,15 @@
    "axis_flux": 0.035877383278859344,
    "boundary_flux": 1.640776797864752e-06
   }
+ },
+ "reference": {
+  "revision": null,
+  "amplitude": 1.0,
+  "seed_residual": 0.11196354844685175,
+  "terminal_residual": 4.064304448547773e-12,
+  "reads": 4,
+  "updates": 3,
+  "converged": 16,
+  "lanes": 16
  }
 }

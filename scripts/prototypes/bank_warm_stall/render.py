@@ -148,6 +148,15 @@ def summary(record):
         f"axis separation          {figures['axis_first_ten']:.1e} over the first ten "
         f"updates, {figures['axis_all']:.1e} over all {figures['updates']}",
     ]
+    control = record.get("reference")
+    if control is not None:
+        lines.append(
+            f"reference at {control['amplitude']}  "
+            f"seed {number(control['seed_residual'])}, "
+            f"terminal {number(control['terminal_residual'])} over "
+            f"{control['updates']} updates and {control['reads']} reads, "
+            f"{control['converged']} of {control['lanes']} lanes converged"
+        )
     return lines
 
 

@@ -71,14 +71,35 @@ def lane(arm, index):
     }
 
 
+def reference(path):
+    """The amplitude-1.0 control arm, from the summary its own job emitted."""
+    for line in path.read_text().splitlines():
+        if line.startswith("SUMMARY "):
+            summary = json.loads(line.split(" ", 1)[1])
+            return {
+                "revision": None,
+                "amplitude": summary["amplitude"],
+                "seed_residual": summary["fresh_before"][0],
+                "terminal_residual": max(summary["terminal_residual"]),
+                "reads": summary["reads"][0],
+                "updates": summary["updates"][0],
+                "converged": sum(summary["converged"]),
+                "lanes": len(summary["converged"]),
+            }
+    raise SystemExit(f"no SUMMARY line in {path}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--lane", type=int, default=0)
+    parser.add_argument("--unity", type=Path)
     args = parser.parse_args()
     record = json.loads(args.report.read_text())
     reduced = {name: lane(record[name], args.lane) for name in ("warm", "cold")}
+    if args.unity is not None:
+        reduced["reference"] = reference(args.unity)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(reduced, indent=1))
     print(f"WROTE {args.out} {args.out.stat().st_size} bytes")

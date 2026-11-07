@@ -59,9 +59,17 @@ def build(kind, cells):
 
     certificate, profile = _case_and_profile(kind)
     if kind == "diverted" and cells == 550:
-        operands, cache, roots, convention, policy, profile, quadrature, moments, analytic = (
-            seeded_machine("diverted")
-        )
+        (
+            operands,
+            cache,
+            roots,
+            convention,
+            policy,
+            profile,
+            quadrature,
+            moments,
+            analytic,
+        ) = seeded_machine("diverted")
         return dict(
             operands=operands,
             cache=cache,
@@ -181,7 +189,11 @@ def fast_route(built, max_steps=12):
             next_support = read(operands, cache, candidate)
             refreshed = residual(operands, candidate, candidate, next_support)
             fresh_norm = magnitude(refreshed)
-            if bool(next_support.valid) and np.isfinite(fresh_norm) and fresh_norm < before:
+            if (
+                bool(next_support.valid)
+                and np.isfinite(fresh_norm)
+                and fresh_norm < before
+            ):
                 emit("ACCEPT", index=index, length=length, fresh_residual=fresh_norm)
                 moments = candidate
                 accepted = True
@@ -224,7 +236,11 @@ def present_route(kind, cells, requested_cells=None, root=None):
     certificate.PART_ROOT = root / "parts"
     certificate.FIGURE_ROOT = root / "figures"
     certificate.DIAGNOSTIC_ROOT = root / "diagnostics"
-    for directory in (certificate.PART_ROOT, certificate.FIGURE_ROOT, certificate.DIAGNOSTIC_ROOT):
+    for directory in (
+        certificate.PART_ROOT,
+        certificate.FIGURE_ROOT,
+        certificate.DIAGNOSTIC_ROOT,
+    ):
         directory.mkdir(parents=True, exist_ok=True)
     saved = sys.argv
     sys.argv = [
@@ -240,7 +256,9 @@ def present_route(kind, cells, requested_cells=None, root=None):
     finally:
         sys.argv = saved
     part = json.loads(
-        certificate._part_path(CASES[kind], requested_cells or PRESENT_CELLS[cells]).read_text()
+        certificate._part_path(
+            CASES[kind], requested_cells or PRESENT_CELLS[cells]
+        ).read_text()
     )
     solver = part["solver"]
     render = part.get("render_data") or {}
@@ -264,7 +282,51 @@ def present_route(kind, cells, requested_cells=None, root=None):
         coordinates=np.asarray(render["coordinates_rz_m"]) if render else None,
         flux=np.asarray(render["terminal_flux_wb"]) if render else None,
         wall_units=render.get("wall_units_rz_m"),
-        part_path=str(certificate._part_path(CASES[kind], requested_cells or PRESENT_CELLS[cells])),
+        part_path=str(
+            certificate._part_path(CASES[kind], requested_cells or PRESENT_CELLS[cells])
+        ),
+    )
+
+
+def row_oracle(kind, analytic, roots, reading, wall):
+    """Judge one read against stationary points found on analytic flux alone.
+
+    A limited row has no X-point, so its boundary is the limiter contact: the
+    wall node carrying the largest analytic flux, which is where a closed flux
+    surface first touches the wall.
+    """
+    from scripts.prototypes.tracked_read.measure import newton_reference
+
+    if kind == "diverted":
+        oracle, analytic_roots = analytic_oracle(analytic, roots, reading, wall)
+        return oracle, analytic_roots
+    axis, axis_flux = newton_reference(analytic, roots[0])
+    gradient = np.asarray(analytic.evaluate(jnp.asarray(axis)).gradient)
+    assert np.linalg.norm(gradient) < 1e-10
+    wall_points = np.asarray(wall)
+    wall_flux = np.asarray(jax.vmap(analytic.value)(jnp.asarray(wall_points)))
+    contact = wall_points[int(np.argmax(wall_flux))]
+    boundary_flux = float(analytic.value(jnp.asarray(contact)))
+    wall = wall_points
+    radius = 0.5 * float(np.ptp(wall[:, 0]))
+    span = abs(boundary_flux - axis_flux)
+    assert radius > 0 and span > 0
+    axis_error = float(np.linalg.norm(np.asarray(reading.axis) - axis))
+    boundary_error = abs(float(reading.boundary_flux) - boundary_flux)
+    return (
+        {
+            "axis_error": axis_error,
+            "minor_radius": radius,
+            "axis_ratio": axis_error / radius,
+            "saddle_error": None,
+            "saddle_ratio": None,
+            "boundary_error": boundary_error,
+            "flux_span": span,
+            "boundary_ratio": boundary_error / span,
+            "boundary_point": contact.tolist(),
+            "x_point_note": "limited row: no magnetic island boundary",
+        },
+        np.stack((axis, contact)),
     )
 
 
@@ -277,10 +339,11 @@ def asymptote_angles(analytic, saddle):
     themselves lie 45 degrees off those asymptotes whenever the two
     eigenvalues have equal magnitude, which is why the ratio is used.
     """
-    def scalar(r, z):
-        return analytic.value(jnp.asarray((r, z)))
 
-    hessian = np.asarray(jax.hessian(scalar)(*jnp.asarray(saddle, dtype=jnp.float64)))
+    def gradient(point):
+        return analytic.evaluate(jnp.asarray(point)).gradient
+
+    hessian = np.asarray(jax.jacobian(gradient)(jnp.asarray(saddle, dtype=jnp.float64)))
     values, vectors = np.linalg.eigh(hessian)
     order = np.argsort(values)
     positive = vectors[:, order[-1]]
@@ -289,7 +352,12 @@ def asymptote_angles(analytic, saddle):
         return {"hessian_eigenvalues": values.tolist(), "class": "not_a_saddle"}
     cross = np.sqrt(values[-1] / -values[0])
     bearings = sorted(
-        float(np.degrees(np.arctan2(*(positive + sign * cross * vectors[:, order[0]])[::-1])) % 180.0)
+        float(
+            np.degrees(
+                np.arctan2(*(positive + sign * cross * vectors[:, order[0]])[::-1])
+            )
+            % 180.0
+        )
         for sign in (1.0, -1.0)
     )
     return {
@@ -327,8 +395,8 @@ def main():
     from tests.equilibrium import test_topology_read as fixture
 
     _, _, wall, _, _ = fixture._analytic_inputs(args.kind)
-    oracle, analytic_roots = analytic_oracle(
-        fast["analytic"], built["roots"], fast["reading"], wall
+    oracle, analytic_roots = row_oracle(
+        args.kind, fast["analytic"], built["roots"], fast["reading"], wall
     )
     emit("ORACLE", **oracle)
     metric_path = args.output.with_suffix(".npz")
@@ -337,7 +405,9 @@ def main():
         nodes=fast["nodes"],
         solved_flux=fast["solved_flux"],
         analytic_roots=analytic_roots,
-        solved_roots=np.asarray(jnp.stack((fast["reading"].axis, fast["reading"].boundary))),
+        solved_roots=np.asarray(
+            jnp.stack((fast["reading"].axis, fast["reading"].boundary))
+        ),
         wall=np.asarray(wall),
         converged=np.asarray(fast["converged"]),
         residual_sup=np.asarray(fast["fresh_residual"]),
@@ -358,7 +428,11 @@ def main():
         "oracle": oracle,
         "budget": {
             "axis": oracle["axis_ratio"] <= 5e-4,
-            "xpoint": oracle["saddle_ratio"] <= 5e-4,
+            "xpoint": (
+                None
+                if oracle.get("saddle_ratio") is None
+                else oracle["saddle_ratio"] <= 5e-4
+            ),
             "boundary": oracle["boundary_ratio"] <= 1e-4,
             "residual": fast["fresh_residual"] <= 1e-10,
         },
@@ -371,7 +445,9 @@ def main():
             args.present_cells or PRESENT_CELLS[args.cells],
             args.output.parent / "present",
         )
-        row["present"] = {k: v for k, v in present.items() if k not in ("coordinates", "flux")}
+        row["present"] = {
+            k: v for k, v in present.items() if k not in ("coordinates", "flux")
+        }
         topology_res = present.get("topology") or {}
         x_point = topology_res.get("x_point_rz_m")
         if x_point is not None:
@@ -406,13 +482,12 @@ def main():
                 }
             else:
                 row["flux_gap"] = {"matched_nodes": 0}
-    angles = None
-    if fast["reading"].boundary is not None:
-        hessian, values, ratio = asymptote_angles(
-            fast["analytic"], fast["reading"].boundary, 1.0
+    if args.kind == "diverted" and fast["reading"].boundary is not None:
+        row["fast_asymptotes"] = asymptote_angles(
+            fast["analytic"], fast["reading"].boundary
         )
-        angles = {"hessian_eigenvalues": values.tolist(), "eigenvalue_ratio": ratio}
-        row["fast_asymptotes"] = angles
+    elif args.kind != "diverted":
+        row["fast_asymptotes"] = {"class": "not_a_saddle"}
     args.output.write_text(json.dumps(row, indent=2, default=float) + "\n")
     emit("ROW", **{k: row[k] for k in ("kind", "cells", "realised_cells")})
     emit("EXIT_ROW", ok=True)

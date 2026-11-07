@@ -41,7 +41,12 @@ def check_text(figure):
     ]
     boxes = [artist.get_window_extent(renderer) for artist in artists]
     for artist, box in zip(artists, boxes, strict=True):
-        if box.x0 < 0 or box.y0 < 0 or box.x1 > figure.bbox.width or box.y1 > figure.bbox.height:
+        if (
+            box.x0 < 0
+            or box.y0 < 0
+            or box.x1 > figure.bbox.width
+            or box.y1 > figure.bbox.height
+        ):
             raise ValueError(f"text leaves canvas: {artist.get_text()}")
     for first in range(len(boxes)):
         for second in range(first + 1, len(boxes)):
@@ -121,7 +126,9 @@ def render(state_path, row_path, output_path, preview_path, title):
         xpoint_marker="X",
         xpoint_markersize=22,
     )
-    draw_nulls(axes, analytic_roots[0], analytic_roots[1:], style=oracle_style, contain=wall)
+    draw_nulls(
+        axes, analytic_roots[0], analytic_roots[1:], style=oracle_style, contain=wall
+    )
     outline(axes, analytic_roots[0], "^", 16, NEUTRAL, 8)
     if len(analytic_roots) > 1:
         outline(axes, analytic_roots[1], "X", 16, NEUTRAL, 8)
@@ -132,26 +139,70 @@ def render(state_path, row_path, output_path, preview_path, title):
         xpoint_markersize=12,
         zorder_markers=9,
     )
-    draw_nulls(axes, solved_roots[0], solved_roots[1:], style=solved_style, contain=wall)
+    draw_nulls(
+        axes, solved_roots[0], solved_roots[1:], style=solved_style, contain=wall
+    )
     axes.set_aspect("equal")
     lower, upper = np.min(wall, axis=0), np.max(wall, axis=0)
     margin = 0.04 * (upper - lower)
     axes.set_xlim(lower[0] - margin[0], upper[0] + margin[0])
     axes.set_ylim(lower[1] - margin[1], upper[1] + margin[1])
     oracle = row["oracle"]
+    saddle = oracle.get("saddle_ratio")
+    xpoint = "n/a" if saddle is None else f"{saddle:.2e} a"
     caption = (
-        f"{title}   terminal fresh residual {row['fast']['fresh_residual']:.3e} Wb, "
+        f"{title}   terminal fresh residual {row['fast']['fresh_residual']:.3e}, "
         f"converged {row['fast']['converged']}; axis {oracle['axis_ratio']:.2e} a, "
-        f"X-point {oracle['saddle_ratio']:.2e} a, boundary {oracle['boundary_ratio']:.2e} a"
+        f"X-point {xpoint}, boundary {oracle['boundary_ratio']:.2e} span"
     )
     handles = [
         Line2D([], [], color=feature, lw=3, label="fast-route flux"),
-        Line2D([], [], color=feature, marker="^", markersize=10, linestyle="none", label="fast axis"),
-        Line2D([], [], color=feature, marker="X", markersize=10, linestyle="none", label="fast X-point"),
+        Line2D(
+            [],
+            [],
+            color=feature,
+            marker="^",
+            markersize=10,
+            linestyle="none",
+            label="fast axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=feature,
+            marker="X",
+            markersize=10,
+            linestyle="none",
+            label="fast X-point",
+        ),
         Line2D([], [], color=NEUTRAL, lw=2.6, ls="--", label="oracle flux"),
-        Line2D([], [], color=NEUTRAL, marker="^", markersize=14, markerfacecolor="white", linestyle="none", label="oracle axis"),
-        Line2D([], [], color=NEUTRAL, marker="X", markersize=14, markerfacecolor="white", linestyle="none", label="oracle X-point"),
-        Line2D([], [], color=DEFAULT_INK.wall_color, lw=DEFAULT_INK.wall_linewidth, label="wall"),
+        Line2D(
+            [],
+            [],
+            color=NEUTRAL,
+            marker="^",
+            markersize=14,
+            markerfacecolor="white",
+            linestyle="none",
+            label="oracle axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=NEUTRAL,
+            marker="X",
+            markersize=14,
+            markerfacecolor="white",
+            linestyle="none",
+            label="oracle X-point",
+        ),
+        Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.wall_color,
+            lw=DEFAULT_INK.wall_linewidth,
+            label="wall",
+        ),
     ]
     figure.legend(
         handles=handles,
@@ -169,7 +220,17 @@ def render(state_path, row_path, output_path, preview_path, title):
     figure.savefig(preview_path, format="png", dpi=DPI)
     figure.savefig(output_path, format="svg")
     plt.close(figure)
-    print("PANEL " + json.dumps({"output": str(output_path), "preview": str(preview_path), "caption": caption}), flush=True)
+    print(
+        "PANEL "
+        + json.dumps(
+            {
+                "output": str(output_path),
+                "preview": str(preview_path),
+                "caption": caption,
+            }
+        ),
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

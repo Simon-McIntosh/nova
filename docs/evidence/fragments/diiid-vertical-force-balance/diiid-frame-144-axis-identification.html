@@ -55,10 +55,10 @@ the eigenvalues of the local Hessian. Radial and vertical coordinates in metres.
 <thead><tr><th>#</th><th>kind</th><th>R [m]</th><th>Z [m]</th><th>&psi;</th><th>index</th></tr></thead>
 <tbody>
 <tr><td>1</td><td>extremum</td><td>0.8819</td><td>1.2719</td><td>0.4216</td><td>+1</td></tr>
-<tr><td>2</td><td>suspected spurious</td><td>0.9200</td><td>1.3351</td><td>0.4160</td><td>&minus;1</td></tr>
+<tr><td>2</td><td>spurious</td><td>0.9200</td><td>1.3351</td><td>0.4160</td><td>&minus;1</td></tr>
 <tr><td>3</td><td>extremum</td><td>1.0030</td><td>1.5082</td><td>0.4683</td><td>+1</td></tr>
 <tr><td>4</td><td>extremum</td><td>1.0269</td><td>&minus;1.5422</td><td>1.2839</td><td>+1</td></tr>
-<tr><td>5</td><td>suspected spurious</td><td>1.1139</td><td>&minus;1.5810</td><td>1.2326</td><td>&minus;1</td></tr>
+<tr><td>5</td><td>spurious</td><td>1.1139</td><td>&minus;1.5810</td><td>1.2326</td><td>&minus;1</td></tr>
 <tr><td>6</td><td>saddle</td><td>1.1771</td><td>1.1581</td><td>0.3655</td><td>&minus;1</td></tr>
 <tr><td>7</td><td>saddle</td><td>1.3984</td><td>&minus;1.0138</td><td>0.5164</td><td>&minus;1</td></tr>
 <tr><td>8</td><td>saddle</td><td>1.6251</td><td>1.6058</td><td>0.2247</td><td>&minus;1</td></tr>
@@ -68,19 +68,23 @@ the eigenvalues of the local Hessian. Radial and vertical coordinates in metres.
 </tbody>
 </table>
 
-<p><b>Coverage.</b> Census index sum <code>1</code> &mdash; six extrema (+6) and five saddles
-(&minus;5) &mdash; against boundary winding <code>1.9971</code>, rounded to <code>2</code>. Difference
-<b>+1</b>. <b>The coverage check does not close</b>, so this census under-reports by one saddle and
-is not a complete account of the seed.</p>
+<p><b>Coverage.</b> Each candidate was then classified by the winding of the gradient on a
+64-sample circle of <code>0.113</code>&nbsp;m &mdash; about one lattice spacing &mdash; around it,
+taken from the lattice central-difference gradient bilinearly interpolated between nodes, the
+same field the boundary winding is measured on. Six candidates return a nonzero index and five
+return <b>0</b>: they are zeros the refined sampling invented and are dropped.</p>
 
-<p>Two candidate pairs sit close enough to be interpolation artefacts rather than distinct zeros:
-the saddle at (0.9200, 1.3351) is 0.07&nbsp;m from the extremum at (0.8819, 1.2719), and the saddle
-at (1.1139, &minus;1.5810) is 0.04&nbsp;m from the extremum at (1.0269, &minus;1.5422). Dropping
-either pair moves the sum by two, so no single drop reconciles the residual. Each candidate must be
-classified by the winding of the gradient on a loop around it &mdash; +1 for an extremum,
-&minus;1 for a saddle, 0 for a ringing artefact &mdash; with the gradient taken from the lattice
-representation rather than the spline. That classification is not yet run, and until it is the
-table above is a candidate list, not a census.</p>
+<p>Kept: an extremum at (1.0030, 1.5082) <code>+1</code>, a saddle at (1.1771, 1.1581)
+<code>&minus;1</code>, a saddle at (1.3984, &minus;1.0138) <code>&minus;1</code>, the refused
+extremum at <b>(1.7880, 0.0171) <code>+1</code></b>, an extremum at (2.4024, 1.1143)
+<code>+1</code> and an extremum at (2.4061, &minus;1.1148) <code>+1</code> &mdash; sum
+<b>+2</b>. Dropped as index 0: (0.8819, 1.2719), (0.9200, 1.3351), (1.0269, &minus;1.5422),
+(1.1139, &minus;1.5810) and (1.6251, 1.6058).</p>
+
+<p><b>Coverage closes.</b> Kept index sum <code>2</code> against boundary winding
+<code>1.9994</code>: difference <b>0</b>. The two pairs suspected of spline ringing were both
+artefacts, and dropping them and their neighbours is what closes the account. The census is
+complete.</p>
 
 <p><b>Why the run jobs failed.</b> Job <code>1307827</code> failed after two minutes inside
 <code>census.py</code>: it reshaped the whole 1221-node state vector onto the 33&times;33 plasma

@@ -6,7 +6,7 @@ relative residuals from <code>0.0273</code> to <code>4.28</code>. The banked rec
 to one mechanism on four frames and to a refusal upstream of the fixed point on the fifth. It is
 <b>not</b> an alternating-mask switch: the active set has stopped changing (mask difference zero) at the
 terminal promotion of every branch, and the relative residual is <i>bit-identical</i> across the last two
-promotions. Nine of the ten seeds are measured below. Eight of them stall with the plasma still confined and
+promotions. All ten seeds are measured below. Nine of them stall with the plasma still confined and
 carrying its current; one (frame 146's diverted seed) is a plasma driven to the top of the vessel and lost;
 one (frame 144's limited seed) refuses at axis identification before any promotion runs. The inner Newton&ndash;Krylov solve does keep accepting its steps &mdash; 24 of 24 attempted on the
 measured frame &mdash; and the promoted state reproduces the same residual to the bit, so the outer loop
@@ -176,10 +176,16 @@ Both hold. The area now agrees with the current read, and both say the plasma is
 these terminals. Frames 137 and 146 are counted by the same code path in the probe itself
 (<code>_core_mask</code> over <code>PlasmaDomain.CORE</code>), which is the path the control exercises.</p>
 
-<p><b>Still unmeasured.</b> One branch remains: frame 137's diverted seed (job <code>sched/1307571</code>).
-Its limited seed is measured above, and the merge step ingests the diverted one without touching what is
-already here. Frame 144's limited seed refuses at axis identification before any promotion, which is the
-refusal the banked record carries and is upstream of the fixed point.</p>
+<p><b>Frame 137, diverted seed</b> (job <code>sched/1307571</code>, rc 0, <code>2.1 ks</code>, peak RSS
+<code>31.2 GB</code>). It reproduces the banked terminal to every printed digit &mdash;
+<code>6.2369e-2</code> &mdash; so the re-solve is the same state, and it shows the same structure: the mask
+moves <code>24 &rarr; 20 &rarr; 9 &rarr; 0</code>, the shipped policy settles at <code>5</code> trips, the
+continued arm spends sixteen at the identical residual, and all <code>24</code> inner steps are accepted.
+Its plasma is the weakest of the present-plasma set &mdash; axis at R=1.655, Z=&minus;0.442, 234 core cells,
+<code>0.709</code>&times; the target current &mdash; and it is confined, so this frame belongs with 179, 44,
+137's limited seed and 144's diverted seed, not with 146. With this arm every seed in the cohort is measured.
+Frame 144's limited seed remains the one refusal, at axis identification before any promotion, which is
+upstream of the fixed point.</p>
 
 <h3>The branch decision on frames 179 and 44</h3>
 

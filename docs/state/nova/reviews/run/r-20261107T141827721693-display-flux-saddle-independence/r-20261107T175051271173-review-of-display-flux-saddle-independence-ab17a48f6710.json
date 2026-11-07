@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:1493",
+    "benchmarks/diiid_forward_gs_match.py:2031",
+    "benchmarks/display_map_promoted_figure.py:51",
+    "benchmarks/mast_centroid_solve_panels.py:1192"
+  ],
+  "completed_at": "2026-11-07T18:04:47.321Z",
+  "dispatched_at": "2026-11-07T17:52:44Z",
+  "findings": [
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "f1a769c0d21",
+      "line": "769",
+      "severity": "non-blocking",
+      "text": "the recorded negative control never reaches this assertion \u2014 the mutated run reddens at :762 first (negative-control.log: `0.38025 (ACTUAL), 0.339 (DESIRED)`) \u2014 so the regression the brief names, reverting the distance to the seed xpoint, is established only by reading :763-768 rather than by a recorded red."
+    },
+    {
+      "file": "tests/test_display_flux.py",
+      "id": "f2b554e0c33",
+      "line": "554",
+      "severity": "non-blocking",
+      "text": "_shifted_diverted_coupling re-declares the zero-plasma moment closure already owned by _diverted_coupling at :546 (and _coupling at :161) instead of giving the owner an optional shift argument, leaving three copies of the same closure in the file."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read fb6f1726a..ab17a48f6 commit by commit \u2014 one commit, one file; it deletes the saddle_converged branch at base:373, adds _shifted_diverted_coupling at :554, and adds test_the_nearest_promoted_distance_is_measured_to_the_polished_saddle at :724.",
+    "done_when": "all three clauses are met and recorded \u2014 no `if display.saddle_converged:` remains in the head file; saddle_offset_mm is independently checked at :695-721 and nearest_promoted_to_xpoint_m at :763-771; the negative control ends EXIT=1 with 3 failing ids; base and head arms record 11 and 12 passed.",
+    "goal": "the goal is to make the display-flux saddle checks run and check something independent; at ab17a48f6 tests/test_display_flux.py:758 asserts saddle_converged before the polished-saddle checks, :763-771 compares the reported promoted distance with a saddle re-polished from the published field, and :803-809 covers the refusal path, so the base conditional at :373 is gone.",
+    "manifest": "read; records status complete, commits [ab17a48f6], base 11 passed / head 12 passed both EXIT=0 with named logs, and a negative control ending EXIT=1 with 3 ids; it discloses the coil-edit arms ran from this worktree at ab17a48f6.",
+    "write_paths": "the sole declared path tests/test_display_flux.py is the only file in `git show --stat ab17a48f6` (78 insertions, 10 deletions); no product source is touched."
+  },
+  "justifications": {
+    "durability": "tests/test_display_flux.py:769 reddens if nova/equilibrium/display_flux.py:422 measured to the seed instead of saddle_rz: :765 proves node 40 sits on the seed, so a seed-measured value would be 0 against an expected 0.0103 m, and negative-control.log records the shifted-saddle control failing at :762.",
+    "evidence": "base-display-flux.log ends `11 passed in 314.02s`-style summaries with EXIT=0 at fb6f1726a and head-display-flux.log `12 passed in 314.02s` with EXIT=0 at ab17a48f6, and the coil-edit arms record 7 passed each, though the base coil-edit arm ran from this worktree with SOURCE_REVISION=ab17a48f6.",
+    "fit": "tests/test_display_flux.py:554 and :724 follow the file's fixture-helper and sentinel-message idiom, and neither name carries a plan, version or ticket label.",
+    "goal_fidelity": "tests/test_display_flux.py:758 asserts convergence unconditionally and :769 compares nearest_promoted_to_xpoint_m against a saddle the test re-polishes at :760, so no saddle assertion can be skipped by the fixture.",
+    "reuse": "tests/test_display_flux.py:760 reuses the existing _polish_map_saddle and :746 the diverted-field fixtures, but :554 re-declares the zero-plasma closure that _diverted_coupling at :546 already owns.",
+    "scope_discipline": "`git show --stat ab17a48f6` names tests/test_display_flux.py alone, exactly the granted write path, with no product or documentation edits riding along."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the display-flux saddle checks run and check something independent; at ab17a48f6 tests/test_display_flux.py:758 asserts saddle_converged before the polished-saddle checks, :763-771 compares the reported promoted distance with a saddle re-polished from the published field, and :803-809 covers the refusal path, so the base conditional at :373 is gone.\nVERDICT done_when: all three clauses are met and recorded \u2014 no `if display.saddle_converged:` remains in the head file (grep returns only asserts at :601, :641, :702, :758, :803); saddle_offset_mm is independently checked at :695-721 and nearest_promoted_to_xpoint_m at :763-771; the negative control negative-control.log ends EXIT=1 with 3 failing ids; base and head arms record 11 and 12 passed.\nVERDICT write_paths: the sole declared path tests/test_display_flux.py is the only file in `git show --stat ab17a48f6` (78 insertions, 10 deletions); no product source is touched.\nVERDICT manifest: read; it records status complete, commits [ab17a48f6], changed_paths [tests/test_display_flux.py], base 11 passed / head 12 passed both EXIT=0 with named logs, and a negative control ending EXIT=1 with 3 ids; it discloses that the coil-edit arms ran from this worktree at ab17a48f6 (base-coil-edit-panel-render-h200.log:5 SOURCE_REVISION=ab17a48f6) because the fence refuses a base checkout.\nVERDICT diff: read fb6f1726a..ab17a48f6 commit by commit \u2014 one commit, one file; it deletes the saddle_converged branch at base:373, adds _shifted_diverted_coupling at :554, and adds test_the_nearest_promoted_distance_is_measured_to_the_polished_saddle at :724.\nCALL_SITES: benchmarks/coil_edit_latency.py:1493, benchmarks/diiid_forward_gs_match.py:2031, benchmarks/display_map_promoted_figure.py:51, benchmarks/mast_centroid_solve_panels.py:1192\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_display_flux.py:758 asserts convergence unconditionally and :769 compares nearest_promoted_to_xpoint_m against a saddle the test re-polishes at :760, so no saddle assertion can be skipped by the fixture.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-display-flux.log ends `11 passed in 295.74s` with EXIT=0 at fb6f1726a and head-display-flux.log `12 passed in 314.02s` with EXIT=0 at ab17a48f6, and the coil-edit arms record 7 passed each, though the base coil-edit arm ran from this worktree with SOURCE_REVISION=ab17a48f6 (the file it tests is byte-identical, verified by `git show --stat ab17a48f6`).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git show --stat ab17a48f6` names tests/test_display_flux.py alone, exactly the granted write path, with no product or documentation edits riding along.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_display_flux.py:769 reddens if nova/equilibrium/display_flux.py:422 measured to the seed instead of saddle_rz: :765 proves node 40 sits on the seed, so a seed-measured value would be 0 against an expected 0.0103 m, and negative-control.log records the shifted-saddle control failing at :762.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_display_flux.py:554 and :724 follow the file's fixture-helper and sentinel-message idiom, and neither name carries a plan, version or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: tests/test_display_flux.py:760 reuses the existing _polish_map_saddle and :746 the diverted-field fixtures, but :554 re-declares the zero-plasma closure that _diverted_coupling at :546 already owns.\nFINDING tests/test_display_flux.py:769 non-blocking: the recorded negative control never reaches this assertion \u2014 the mutated run reddens at :762 first (negative-control.log: `0.38025 (ACTUAL), 0.339 (DESIRED)`) \u2014 so the regression the brief names, reverting the distance to the seed xpoint, is established only by reading :763-768 rather than by a recorded red.\nFINDING tests/test_display_flux.py:554 non-blocking: _shifted_diverted_coupling re-declares the zero-plasma moment closure already owned by _diverted_coupling at :546 (and _coupling at :161) instead of giving the owner an optional shift argument, leaving three copies of the same closure in the file.\n",
+  "review_run_id": "r-20261107T175051271173-review-of-display-flux-saddle-independence-ab17a48f6710",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "ab17a48f671071f3b787fb31ccdbb39036968525",
+  "reviewed_run_id": "r-20261107T141827721693-display-flux-saddle-independence",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T18:15:30.878160+00:00",
+  "total": 111
+}

@@ -218,6 +218,7 @@ def main() -> int:
     residual = int(round(winding)) - index_sum
 
     admission = {}
+    profile = prepared["profile"]
     operator = getattr(profile, "operator", None)
     inside_material = getattr(operator, "inside_material", None)
     if inside_material is not None:

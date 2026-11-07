@@ -21,6 +21,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import measure  # noqa: E402
 
+RELATIVE_BOUND = 1e-14
+
 
 def _moments(kernel, coilset):
     polygons = coilset.polygons
@@ -98,6 +100,22 @@ def main() -> int:
     encoded = json.dumps(record, indent=2, sort_keys=True)
     print(encoded, flush=True)
     args.output.write_text(encoded + "\n", encoding="utf-8")
+    return _verdict(record)
+
+
+def _verdict(record) -> int:
+    """Enforce the bitwise-or-bounded-at-1e-14 clause rather than report it."""
+    failed = []
+    for name, row in record["coil_sets"].items():
+        if row["bitwise_equal"]:
+            continue
+        if row["max_relative_difference"] <= RELATIVE_BOUND:
+            continue
+        failed.append(f"{name} max_relative={row['max_relative_difference']:.3e}")
+    if failed:
+        print(f"EQUIVALENCE_FAILED {' '.join(failed)}", flush=True)
+        return 1
+    print("EQUIVALENCE_OK", flush=True)
     return 0
 
 

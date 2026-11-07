@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -490,7 +490,10 @@
     <div class="r-comment-body"><p>Landed. `SheetFlux.antiderivative_closed` carries the sloped sheet's antiderivative in closed form, and `closed=True` on `flux` and `sheet_flux` selects it beside the graded route. The arsinh block is reduced by parts: the oscillatory part of the weight has an antiderivative vanishing at both ends, so no boundary term survives and the derivative of arsinh(beta_1) is rational over B_1^2 D. The quartic bracket divided by the quadratic denominator gives a quadratic quotient integrated through the complete K and E moments plus a linear remainder over B_1^2, whose two roots in y = sn^2 u are the paper's own characteristics and each contributes a complete third-kind integral. The one smooth arsinh remainder stays on the graded rule, as the paper and the plan leave it. Measured: worst relative deviation 7.7e-12 against scripts/edge_sheet/reference.py over the twelve-target set at pi/8, pi/4 and 3pi/8, and 7.4e-12 between the closed form and the graded route; the by-parts identity itself holds to 2.4e-15 and 1.9e-15 at the two segment ends. The negative control (one edge's sheet current flipped) fails 72 tests through pytest.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261107T185206900262-review-of-icm-closed-field-b7de63499f6e" data-who="reckon-build" data-when="2026-11-07T19:10:09.923Z">
-    <div class="r-comment-body"><p>review-records/r-20261107T112011334527-icm-closed-field.json under the reviewed run&#x27;s directory scores goal_fidelity 18, evidence 17, scope_discipline 17, durability 13, fit 14, reuse 17 at base e64fafe02 head b7de63499, with 0 added failures and 6 non-blocking findings.</p></div>
+    <div class="r-comment-body"><p>review-records/r-20261107T112011334527-icm-closed-field.json under the reviewed run's directory scores goal_fidelity 18, evidence 17, scope_discipline 17, durability 13, fit 14, reuse 17 at base e64fafe02 head b7de63499, with 0 added failures and 6 non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261107T112011334527-icm-closed-field" data-who="reckon-build" data-when="2026-11-07T18:50:59Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/iron-core-magnetisation/icm-closed-field.html</p></div>
 </div>
 </section>
 </main>

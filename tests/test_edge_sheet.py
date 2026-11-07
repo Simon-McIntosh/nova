@@ -17,7 +17,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from nova.biot.sheet import SheetFlux, sheet_flux
+from nova.biot.completeelliptic import complete_kind, complete_pole
+from nova.biot.sheet import MU0, SheetFlux, sheet_field, sheet_flux
 
 REFERENCE_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "edge_sheet" / "reference.py"
@@ -139,3 +140,106 @@ def test_segment_order_does_not_change_the_flux(angle):
     forward = sheet_flux(1.4, 0.3, start, end)
     backward = sheet_flux(1.4, 0.3, end, start)
     assert backward == pytest.approx(forward, rel=1e-14)
+
+
+def measured_field(angle, target):
+    """The closed-form field and the reference at one fixed target."""
+    start, end, _ = frame(angle)
+    converged = reference.sheet_reference(target, start, end)
+    assert converged.converged
+    return sheet_field(target.r, target.z, start, end), (converged.br, converged.bz)
+
+
+def field_relative(angle, target):
+    """The largest component error, as a fraction of the larger component.
+
+    A component the symmetry extinguishes is held out: the axisymmetric sheet
+    puts no radial field on the mid-plane, so there the reference returns a
+    rounding residual rather than a value to divide by.
+    """
+    (got_r, got_z), (ref_r, ref_z) = measured_field(angle, target)
+    scale = max(abs(ref_r), abs(ref_z))
+    worst = 0.0
+    for got, expected in ((got_r, ref_r), (got_z, ref_z)):
+        if abs(expected) <= reference.DEGENERATE * scale:
+            assert abs(got) <= reference.DEGENERATE * scale
+            continue
+        worst = max(worst, abs(got - expected) / abs(expected))
+    return worst
+
+
+def snow_end(r, z, rp, zz):
+    """Part II eq (25): one end of the thin sheet cylinder, per unit length."""
+    gamma = zz - z
+    a = np.sqrt((r + rp) ** 2 + gamma**2)
+    complement = 1.0 - 4.0 * r * rp / a**2
+    first, second = complete_kind(complement)
+    pole = (r - rp) ** 2 / (r + rp) ** 2
+    through = complete_pole(pole, complement)
+    radial = a / (2.0 * r) * ((1.0 + complement) * first - 2.0 * second)
+    height = gamma / a * (first + (rp - r) / (rp + r) * through)
+    return radial, height
+
+
+def snow_cylinder(r, z, start, end):
+    """Part II eq (25): the thin sheet cylinder's field at ``(r, z)``."""
+    scale = MU0 / (2.0 * np.pi)
+    far = snow_end(r, z, float(end[0]), float(end[1]))
+    near = snow_end(r, z, float(start[0]), float(start[1]))
+    return scale * (far[0] - near[0]), scale * (far[1] - near[1])
+
+
+@pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
+def test_sloped_field_matches_reference(angle, station, distance):
+    """A sloped segment's field against the ring reference at the floor."""
+    _, _, targets = frame(angle)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    relative = field_relative(angle, target)
+    assert relative <= TOLERANCE, (
+        f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
+    )
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
+def test_flat_pancake_field_matches_reference(station, distance):
+    """The flat annulus field at every standoff."""
+    _, _, targets = frame(0.0)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    assert field_relative(0.0, target) <= TOLERANCE
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
+def test_cylinder_field_matches_snow_form(station, distance):
+    """The ``b_1 = 0`` field against Part II eq (25), an independent anchor."""
+    start, end, targets = frame(np.pi / 2)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    got = sheet_field(target.r, target.z, start, end)
+    expected = snow_cylinder(target.r, target.z, start, end)
+    for value, reference_value in zip(got, expected, strict=True):
+        assert value == pytest.approx(reference_value, rel=TOLERANCE, abs=1e-18)
+
+
+@pytest.mark.parametrize("angle", SLOPES)
+def test_flipped_sheet_current_fails_the_field_comparison(angle):
+    """Negative control: a flipped sheet current misses reference and eq (25)."""
+    start, end, targets = frame(angle)
+    target = next(
+        t for t in targets if t.distance == FAR[0] and t.station == TARGET_STATION
+    )
+    converged = reference.sheet_reference(target, start, end)
+    expected = (converged.br, converged.bz)
+    flipped = sheet_field(target.r, target.z, start, end, sheet_current=-1.0)
+    scale = max(abs(component) for component in expected)
+    for value, reference_value in zip(flipped, expected, strict=True):
+        if abs(reference_value) <= reference.DEGENERATE * scale:
+            continue
+        assert abs(value - reference_value) > TOLERANCE * abs(reference_value)
+    if angle == np.pi / 2:
+        snow = snow_cylinder(target.r, target.z, start, end)
+        snow_scale = max(abs(component) for component in snow)
+        for value, snow_value in zip(flipped, snow, strict=True):
+            if abs(snow_value) <= reference.DEGENERATE * snow_scale:
+                continue
+            assert abs(value - snow_value) > TOLERANCE * abs(snow_value)

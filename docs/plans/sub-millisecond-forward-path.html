@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="213">
+<meta name="plan-version" content="214">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -734,6 +734,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T000449718404-review-of-bank-batch-width-847f48f10778" data-who="reckon-build" data-when="2026-11-07T00:17:41.093Z">
     <div class="r-comment-body"><p>Reviewed run r-20261106T225958281351-bank-batch-width at 847f48f107789c3120ea90acc79db5de9cbbd3ee against base 00c38a599e215bbe678cef8305b38bca898bf56f: scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 15, fit 19, reuse 20; one non-blocking finding on a derived capacity figure; no blocking findings; 0 added test failures (no suite armed).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T225958281351-bank-batch-width" data-who="reckon-build" data-when="2026-11-07T00:03:35Z">
+    <div class="r-comment-body"><p>[Converged width sweep](/nova/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html#bank-batch-width-landing): two fresh common-seed H200 processes per width 16/32/64/128; best 13.928235 ms/slice at 128 with four reads and three updates. All 480 lane results pass precision. No plateau through 128; width 256 requires 183.694 GB temporary memory and cannot fit. Inspected log-log figure; no product or test changes.</p></div>
 </div>
 </section>
 </main>

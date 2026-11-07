@@ -87,7 +87,9 @@ def main() -> int:
 
     field = np.asarray(seed).T
     levels = poloidal.contour_levels(field, 12)
-    poloidal.draw_flux_contours(axes, radius, height, field, levels)
+    poloidal.draw_flux_contours(
+        axes, radius, height, field, levels, color=DEFAULT_INK.flux_color
+    )
     poloidal.draw_wall(axes, radius=limiter[:, 0], height=limiter[:, 1])
 
     tally = poloidal.draw_nulls(

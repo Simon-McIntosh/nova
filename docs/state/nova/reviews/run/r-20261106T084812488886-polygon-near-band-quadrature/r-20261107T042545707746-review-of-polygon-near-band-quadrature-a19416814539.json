@@ -13,6 +13,13 @@
     }
   },
   "dispatched_at": "2026-11-07T04:26:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the refusal test passed at the reviewed head in a fresh process (1 passed); it guards a combination no caller reaches",
+      "recorded_at": "2026-11-07T04:40:53.990115+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/biot/test_edge_term_tangents.py",

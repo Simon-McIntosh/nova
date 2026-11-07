@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T20:01:37.723Z",
+  "dispatched_at": "2026-11-07T19:54:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 57,
+      "severity": "blocking",
+      "text": "The head commit relabels the table column to 'changed mask entries' and the prose to a changed-entry count, but the cells still carry boundary_set_size populations: trip-trajectory/trajectory-rows.json has no changed_mask_cells key on any row (keys are boundary_set_size and promotion_step_norm_wb only), and the values 27/39/0 and 24/20/9/9/0 match boundary_set_size exactly. A reader is told the run measured mask churn when it measured set populations, which is the opposite claim for frame 146 (populations 27->39 look like growth; changed entries at 39 would look like a large single-trip edit)."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 84,
+      "severity": "non-blocking",
+      "text": "The sentence '27, then 1, then 39 in the changed count it reports' contradicts the table directly above it, which reads 27, 39, 0; the '1' is the trip-3 boundary_set_size of a later row and the ordering is not chronological."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 1,
+      "severity": "blocking",
+      "text": "done_when item 3 requires a line-contour panel of each trip that matters carrying the real DIII-D limiter, both null sets, the bounding surface from host_boundary_read and the EFIT boundary; the fragment carries no panel per trip, only the terminal-state figures, and the manifest concedes the substitution under rubric.record."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T195226129286-review-of-diiid-frame-146-vertical-loss-00105c532e16",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "00105c532e165d5aac774ba2d17bd73f102a7981",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 3,
+    "evidence": 8,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:15:37.716127+00:00",
+  "total": 76
+}

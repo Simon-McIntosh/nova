@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_figure_count": 2,
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T19:55:25Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png"
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "id": "fae065c2b04",
+      "line": 813,
+      "severity": "non-blocking",
+      "summary": "The residual panel's x axis is drawn to active-set trip 15 while the plotted trajectory ends at trip 4 in frame 146 (and trip 12-13 in frame 137). Most of the panel is empty and the handful of real points are squeezed into its left third, halving the horizontal resolution a reader has for the trip-1 rise the frame-146 argument depends on."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The EFIT label flux contours are drawn in a very light grey, hard to follow against white and noticeably fainter than the blue solved flux. Where the two fields interleave in the poloidal panel, the reference field a reader must compare against is the harder one to trace."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
+      "id": "f787c8caf4f",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The EFIT label flux and the bounding-boundary reference are the lightest marks on the page while the caption's argument is a comparison against them; the recessive styling makes the reference reading effortful at the rendered size."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The poloidal panel occupies roughly a seventh of the canvas width, so the contours, limiter outline and null markers the figure exists to show are the smallest elements on the page, subordinate to the legend and to the largely empty residual axis."
+    }
+  ],
+  "notes": [
+    "Both figures were judged only from the rendered PNGs named in the node: image-0.png is frame 137 (the frame that holds its plasma) and image-1.png is frame 146 (the frame that loses it). No SVG was opened, read, listed, searched, rendered or diffed.",
+    "The reviewed head 00105c532e16 changes only docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html relative to its predecessor 4c40f2138e44; the two PNGs are unchanged by that commit, so the rendered images reviewed are the run's current artifacts.",
+    "Findings are anchored to the figure's repository path, or to the line of the drawing script the run reuses where the defect is in that script; no finding is anchored to SVG markup.",
+    "No blocking defect was found: no label is clipped or overlapping in either figure, and every caption, legend entry and axis label is readable at the rendered size.",
+    "This is a read-only figure review. No figure, caption or script was edited, created, moved, deleted or reformatted."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T195355767690-review-of-diiid-frame-146-vertical-loss-00105c532e16-figure",
+  "reviewed_base_sha": "c2ca81c4cdef3e08ba3832f44bfba078dec0643c",
+  "reviewed_head_sha": "00105c532e165d5aac774ba2d17bd73f102a7981",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png": {
+      "contrast": "states a defect \u2014 the grey EFIT label flux contours and the grey bounding-boundary dashes sit low against white and are noticeably fainter than the blue solved flux they are compared against.",
+      "data_ink": "states a defect \u2014 the residual panel's x axis runs to 15 while the trajectory stops at trip 12-13 and the plotted points occupy only the left third, leaving the majority of the panel empty.",
+      "decoration": "passes \u2014 no gradient, no background fill, no styled theme; the poloidal panel carries no axes or gridlines and the dotted lines are the grid-domain bound and the stated tolerance.",
+      "label_collision": "passes \u2014 the trip-count labels sit clear above their points and no text is clipped at a panel edge; the solved X-point and limiter-contact markers are close at the lower edge but remain distinguishable at the rendered scale.",
+      "legibility": "passes \u2014 the red bounding surface enclosing closed blue contours reads at a glance, and the caption's 234 closed core cells and 0.709x target agree with what the panel shows.",
+      "table_form": "passes \u2014 a spatial field panel and a trajectory plot against trip; nothing here is naturally a table."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png": {
+      "contrast": "states a defect \u2014 the grey EFIT label flux contours and the light grey 'tolerance 1e-5' text are faint against white, and the label contours are the harder of the two fields to follow where they interleave with the blue solved flux.",
+      "data_ink": "states a defect \u2014 the same over-wide residual axis: the trajectory ends at trip 4 and the axis runs to 15, so two thirds of the panel is blank and the trip-1 rise the frame-146 argument rests on is compressed into a few pixels.",
+      "decoration": "passes \u2014 no gradient or fill; the poloidal panel has no axes and the only dotted lines mark the grid-domain bound and the 1e-5 tolerance.",
+      "label_collision": "passes \u2014 the annotations 27, 40, 1, 0, 0 sit clear above their points, and no text is clipped; the left panel's blue contours run to the panel edge but do not overlap any label.",
+      "legibility": "passes \u2014 the red open 'solved axis (outside wall)' triangle above the black limiter, with the legend naming it in red, makes the failure the caption describes visible immediately.",
+      "table_form": "passes \u2014 a scalar-field panel and a trajectory plot; no table content is drawn as an image."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:02:25.745204+00:00",
+  "total": null
+}

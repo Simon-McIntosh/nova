@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "attachment_note": "Two attachments were named. .../docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png (1400x720 RGBA) and the review run's image-1.png. image-1.png is a re-encoded copy of the same 1400x720 picture (different SHA-256, identical panel titles, contours and null markers at identical positions), so both attachments are judged as the one figure and every verdict below describes that figure.",
-  "completed_at": "",
+  "completed_at": "2026-11-07T17:31:41.895Z",
   "dispatched_at": "2026-11-07T17:18:40Z",
   "figures_reviewed": [
     "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
@@ -55,6 +55,6 @@
   "rubric": "figure",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-07T17:31:51.925240+00:00",
+  "timestamp": "2026-11-07T17:35:37.475639+00:00",
   "total": null
 }

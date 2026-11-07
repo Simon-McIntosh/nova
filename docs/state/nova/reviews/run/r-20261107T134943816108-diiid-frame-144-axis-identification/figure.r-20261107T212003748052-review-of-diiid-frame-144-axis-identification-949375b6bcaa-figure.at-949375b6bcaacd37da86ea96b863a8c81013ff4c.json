@@ -4,6 +4,13 @@
   "completed_at": "2026-11-07T21:37:24.314Z",
   "dispatched_at": "2026-11-07T21:22:08Z",
   "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged only from the rendered PNG, image-0.png, 1400x720)",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "label contour colour on a root-cause panel; the caption states the coincidence numerically",
+      "recorded_at": "2026-11-07T21:55:50.842723+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "exempted: the label text is legible at 1400 px and the figure's claim is duplicated in the evidence fragment's prose; the contrast defect does not stop a reader reading the panel.",

@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/connectivity_boundary.py:2519 host_boundary_read",
+    "nova/equilibrium/boundary_comparison.py classify_boundary_mode",
+    "nova/equilibrium/domain.py PlasmaDomain.CORE",
+    "nova/equilibrium/observation.py MomentIntegralSupport.CONFINED_CORE",
+    "nova/media/poloidal.py draw_flux_contours, draw_nulls, draw_wall, inside_wall_units",
+    "benchmarks/diiid_forward_gs_match.py _registered_solve_request, build_profile, cold_seed_portfolio"
+  ],
+  "completed_at": "2026-11-07T11:23:28.166Z",
+  "dispatched_at": "2026-11-07T11:11:30Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+      "line": 102,
+      "severity": "non-blocking",
+      "text": "`_inner_step_counts` reads the solver's own promotion counts with `getattr(fixed_point, \"attempted_newton_promotions\", 0)` and the same for accepted, so an arm whose fixed-point result does not carry the attribute is recorded as a measured zero rather than as unmeasured. That is the exact failure shape the node spent a commit correcting (a plausible number standing in for a value that was never read), and it is unfalsifiable from the record: `promotion_counts_measured` is derived from the padding trace, not from the getattr succeeding. Repair: read the attributes with no default and let a missing one raise or record an explicit `None`, so the receipt distinguishes a refused step from an absent count. Every arm in this run reads 0 executed slots, so the new read path never produced a non-zero here and is untested against a real promotion count."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/boundary_readback.py",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "`_polyline_distance(point, polyline)` computes the distance from a point to a polyline's segments, which `boundary_competition._wall_distance(points, ring)` at boundary_competition.py:66 already computes in vectorised form in the same directory; the two differ only in that one takes one point and returns a scalar. The duplication is what lets the read-back check and the classification drift apart if either segmentation convention changes. Repair: import the existing helper and take the row minimum, or move one copy beside the other. No repository owner for point-to-segment distance exists, so this is an intra-node duplicate rather than a fork of a repo capability."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 75,
+      "severity": "non-blocking",
+      "text": "The cohort table's discriminating-measurement column still calls frame 137's diverted 6.237e-02 'smallest residual of the cohort', which its own rows falsify: line 71 gives 179's limited seed at 2.726e-02 and line 74 gives 146's diverted seed at 5.496e-02, both smaller. This is the residue of the superlative finding raised at review b1e7af97d, repaired on the 'largest' side (44 is now scoped to 'with the plasma fully confined') but not on this one. Repair: drop the superlative or scope it to the confined, non-lost arms and say so."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 262,
+      "severity": "non-blocking",
+      "text": "The boundary table's column headed 'closed core cells' carries the boundary read's `n_core_cells` (162 for 179 diverted), while the per-frame table and the panel captions at lines 349, 358, 366, 381 and the prose at 162 use the same phrase for the probe's `presence.closed_core_cells` (232 for the same arm). The two are different quantities \u2014 the domain partition's CORE label versus the flood read's core region \u2014 recorded under one name in one document, so a reader who checks 179 finds 162 in one table and 232 in another with no way to reconcile them. Repair: rename one of the columns to say which region it counts."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/rederive_promotions.py",
+      "line": 55,
+      "severity": "non-blocking",
+      "text": "`_repair` rewrites the withdrawn promotion counts across probe.json and its parts but leaves each arm's stored `terminal.class` untouched, so the probe artifact the manifest names carries the superseded classifier's reading: probe.json holds `\"class\": \"period-2 cycle\"` for frames 146 and 137's diverted default arms, which the current classifier reads as a contraction stall and which the committed receipt therefore records correctly by recomputing at build_receipt.py:54. The two artifacts disagree, and a reader who opens probe.json (listed under `artifacts` and `evidence_inputs`) sees the withdrawn reading with nothing marking it stale. Repair: re-derive `terminal` in the same pass that re-derives the counts."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T195054915900-diiid-forward-convergence/manifest.md",
+      "line": 49,
+      "severity": "non-blocking",
+      "text": "The manifest's `tests:` field is a prose description of six checks rather than the literal command a shell was handed, which is the shape promotion refuses when it fills its gate receipt. Every gate log does open with a `# command:` header and end with a bare `EXIT=` line, so the documented fallback resolves it and the gate receipt is reconstructible; the field itself is still the wrong shape."
+    }
+  ],
+  "justifications": {
+    "durability": "classifier_control.py:50-54 reddens if the level_gap condition at terminal_class.py:57-63 is removed and boundary_readback.py:72-76 reddens on the superseded receipt, so the two corrections are guarded; but the master negative control lives at /tmp/reckon-crew-scratch/.../run_negative_control.py and is not in the tree, so the boundary claims' control cannot be re-run from the delivered change.",
+    "evidence": "every gate log under the run's logs/ opens with a `# command:` header and closes with a bare `EXIT=` line, and the numbers quoted in the fragment reconcile with probe.json and boundary-competition.json, but the one measurement the done_when names and the node withdrew has no substitute and baseline_suite/after_suite were never armed.",
+    "fit": "the renderer draws through nova.media.poloidal and nova.media.ink and the trajectory panel despines its top and right axes at render_panels.py:815-816, matching the repository's figure rules; a dead `extent` assignment at render_panels.py:766 overwritten at 769 is the only idiom slip.",
+    "goal_fidelity": "measure_branches.py:559-646 solves both seeds per frame and build_receipt.py:99-152 turns them into the per-frame record, so the mechanism and the branch decision are delivered; the 'step acceptance' clause is withdrawn rather than answered, which costs the clause.",
+    "reuse": "boundary_competition.py:93-113 calls nova.equilibrium.connectivity_boundary.host_boundary_read and boundary_comparison.classify_boundary_mode rather than re-deriving the class, and the panels use the nova.media painters; the only duplication is the intra-node distance helper named in the finding.",
+    "scope_discipline": "all 21 paths in `git diff --name-only 8892f2c287..17d0ccc6f` lie inside the three declared write roots and nothing under nova/ or benchmarks/ changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261107T111109437388-review-of-diiid-forward-convergence-17d0ccc6fd02",
+  "reviewed_base_sha": "8892f2c287e1c3014a953d66b624a16129c3f060",
+  "reviewed_head_sha": "17d0ccc6fd02a1f9ff0da200446c27666cae524b",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T11:29:05.381529+00:00",
+  "total": 101,
+  "verdicts": [
+    "goal: the node's goal is a root-cause record of what stops the five DIII-D gate frames converging; scripts/prototypes/diiid_forward_convergence/measure_branches.py solves both seeds of every frame, docs/figures/diiid-forward-convergence/convergence-receipt.json carries a recomputed terminal class and the per-trip residual history for each arm, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html names the stationary-map-at-a-frozen-mask mechanism with a discriminating measurement per frame.",
+    "done_when: items 2 and 3 are met \u2014 the branch rule is cited at benchmarks/diiid_forward_gs_match.py:2381, :2406 and :2437 with both terminals' residuals in a table, and the record tables the mechanism per frame with five line-contour panels under docs/figures/diiid-forward-convergence/; item 1's clause 'with step acceptance and damping' is not met, because every arm's inner_step_trace reads 0 executed of 24 slots and attempted_promotions/accepted_promotions are null (see the finding on measure_branches.py:102), which the fragment states plainly at its '(dagger)' note rather than papering over.",
+    "write_paths: the manifest declares scripts/prototypes/diiid_forward_convergence/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html and docs/figures/diiid-forward-convergence/; `git diff --name-only 8892f2c287..17d0ccc6f` lists 21 paths, every one inside those three roots, and no path under nova/ or benchmarks/ is touched.",
+    "manifest: read; it reports status complete, names 37 commits, ten gate logs and a negative-control log, and records baseline_suite and after_suite as not armed on the ground that no product source is in scope \u2014 the correct call for a node fenced out of product code, though its `tests:` line is a prose description rather than the literal command (the logs carry `# command:` headers, which is the documented fallback).",
+    "diff: read commit by commit against 8892f2c287; the run adds thirteen prototype scripts, one evidence fragment, five SVGs and two JSON receipts, and the review round commits 3a4ffeb8a, e61b1a883, 773c72100, 2d2c80831, 6449aacc4, 776264d04 and 17d0ccc6f replace an argmax contact rule with the repository's axis-connected flood read, withdraw the padded-trace promotion counts, rank the recommended fix by the tabulated residuals, and withdraw the sixth panel rather than keep a premise the new read falsifies."
+  ]
+}

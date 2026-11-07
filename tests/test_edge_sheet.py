@@ -45,15 +45,59 @@ SLOPED = SLOPES[1:-1]
 STATIONS = ("middle", "start", "end")
 TARGET_STATION = "middle"
 
-SLOPED_CASES = tuple((distance, station) for distance in DISTANCES for station in ("middle", "start", "end"))
+MEASURED_MISSES = {
+    (np.pi / 8, "middle", 0.01): 9.20e-05,
+    (np.pi / 8, "start", 0.01): 2.82e-05,
+    (np.pi / 8, "end", 0.01): 3.18e-05,
+    (np.pi / 8, "middle", 0.02): 1.71e-06,
+    (np.pi / 8, "start", 0.02): 1.29e-06,
+    (np.pi / 8, "end", 0.02): 5.62e-07,
+    (np.pi / 8, "middle", 0.1): 2.72e-10,
+    (np.pi / 4, "middle", 0.01): 9.19e-05,
+    (np.pi / 4, "start", 0.01): 2.87e-05,
+    (np.pi / 4, "end", 0.01): 3.15e-05,
+    (np.pi / 4, "middle", 0.02): 1.90e-06,
+    (np.pi / 4, "start", 0.02): 1.24e-06,
+    (np.pi / 4, "end", 0.02): 6.86e-07,
+    (np.pi / 4, "middle", 0.1): 2.03e-10,
+    (3 * np.pi / 8, "middle", 0.01): 9.19e-05,
+    (3 * np.pi / 8, "start", 0.01): 2.95e-05,
+    (3 * np.pi / 8, "end", 0.01): 3.10e-05,
+    (3 * np.pi / 8, "middle", 0.02): 2.03e-06,
+    (3 * np.pi / 8, "start", 0.02): 1.15e-06,
+    (3 * np.pi / 8, "end", 0.02): 8.51e-07,
+    (3 * np.pi / 8, "middle", 0.1): 1.49e-10,
+}
+"""Targets where the fixed azimuthal rule measurably falls short of the floor.
 
-SWING = 1e-4
-"""How far short of the floor a target may fall before the case is recorded.
-
-Nothing is skipped silently: a case that misses calls :func:`pytest.xfail` with
-its measured relative error in the reason, so the gate reports it as a known
-shortfall rather than as a pass, and a case that comes back changes state.
+The entries carry the relative error measured at each case. They are marked
+``xfail(strict=True)`` rather than skipped, so a case that reaches the floor is
+an XPASS and fails the gate: the shortfall is a known defect of the rule, not a
+tolerance. Every other target of the fixed set asserts the floor outright.
 """
+
+SLOPED_PARAMS = tuple(
+    pytest.param(
+        angle,
+        station,
+        distance,
+        marks=(
+            pytest.mark.xfail(
+                strict=True,
+                reason=(
+                    f"fixed azimuthal rule measured "
+                    f"{MEASURED_MISSES[(angle, station, distance)]:.2e} against "
+                    f"the {TOLERANCE:.0e} floor at this standoff"
+                ),
+            )
+            if (angle, station, distance) in MEASURED_MISSES
+            else ()
+        ),
+    )
+    for angle in SLOPED
+    for distance in DISTANCES
+    for station in STATIONS
+)
 
 
 def frame(angle):
@@ -87,19 +131,16 @@ def holds_the_floor(angle, target):
     return abs(got - expected) <= TOLERANCE * abs(expected)
 
 
-@pytest.mark.parametrize(("distance", "station"), SLOPED_CASES)
-@pytest.mark.parametrize("angle", SLOPED)
+@pytest.mark.parametrize(("angle", "station", "distance"), SLOPED_PARAMS)
 def test_sloped_flux_matches_reference(angle, station, distance):
     """A sloped segment against the ring reference at the section's floor."""
     _, _, targets = frame(angle)
     target = next(t for t in targets if t.distance == distance and t.station == station)
     got, expected = measured(angle, target)
     relative = abs(got - expected) / abs(expected)
-    if relative > TOLERANCE:
-        pytest.xfail(
-            f"fixed azimuthal rule measured {relative:.2e} against the "
-            f"{TOLERANCE:.0e} floor at this standoff"
-        )
+    assert relative <= TOLERANCE, (
+        f"measured {relative:.2e} against the {TOLERANCE:.0e} floor at this standoff"
+    )
 
 
 @pytest.mark.parametrize("distance", DISTANCES)
@@ -124,7 +165,9 @@ def test_vertical_cylinder_form_matches_reference(station, distance):
 def test_flipped_sheet_current_fails_the_comparison(angle):
     """Negative control: the flux is linear in the sheet current's sign."""
     start, end, targets = frame(angle)
-    target = next(t for t in targets if t.distance == FAR[0] and t.station == TARGET_STATION)
+    target = next(
+        t for t in targets if t.distance == FAR[0] and t.station == TARGET_STATION
+    )
     converged = reference.sheet_reference(target, start, end)
     flipped = sheet_flux(target.r, target.z, start, end, sheet_current=-1.0)
     assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)

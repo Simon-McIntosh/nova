@@ -115,11 +115,13 @@
     reason.</p>
 
     <h2 id="icm-sheet-flux-negative-control">Negative control</h2>
-    <p>Flipping the sign of the closed form's sheet current fails
-    <code>65</code> of the <code>71</code> tests (<code>EXIT=1</code>): every
-    reference comparison, the flat pancake form and the flipped-current control.
-    The six that still pass are the linearity and segment-order identities, which
-    a global sign flip leaves true. The head arm passes all 71.</p>
+    <p>Flipping the sign of the closed form's sheet current leaves
+    <code>65</code> of the <code>71</code> tests not passing
+    (<code>29 failed</code>, <code>36 xfailed</code>, <code>EXIT=1</code>): every
+    reference comparison, the flat pancake form, the cylinder form and the
+    flipped-current control. The six that still pass are the linearity test and
+    the five segment-order tests, which a global sign flip leaves true. The head
+    arm passes <code>50</code> and xfails <code>21</code> at <code>EXIT=0</code>.</p>
   </main>
 </body>
 </html>

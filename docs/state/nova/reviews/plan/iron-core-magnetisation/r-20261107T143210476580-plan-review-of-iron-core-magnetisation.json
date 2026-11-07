@@ -1,0 +1,142 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-07T15:07:33.421Z",
+  "dispatched_at": "2026-11-07T14:58:25Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T143210476580-plan-review-of-iron-core-magnetisation/plan.html:417",
+      "id": "reasoning-1",
+      "reason": "a \u00a78 node building the arms from this rule gets a six-fold section mismatch at the limb joint, so the flux through the limb is not the flux the axisymmetric \u00a76 model carries and done-when (2)'s 2 % agreement with \u00a76 cannot be met for the stated reason; the decision must state one section rule for the arms (constant 0.800 x 1.200 m, or the taper honestly costed) before \u00a78 is dispatched.",
+      "text": "the rationale holds the toroidal width at 0.800 m outward while keeping the IDS vertical taper t(R) = 0.9169/R on the arms, so the discrete arm's conducting section is 0.800 x 0.9169/R and falls from 0.960 m\u00b2 at R_j = 0.764 m to about 0.153 m\u00b2 where it meets the limb (t = 0.9169/4.89 = 0.1875 m); the limb's section at that joint is 0.800 x 1.200 = 0.960 m\u00b2, so the circuit is about 6 times narrower in the arm than in the limb it feeds, and the check \"w x 1.2 m = 0.960 m\u00b2 ... so iron is conserved (six arms 5.76 m\u00b2)\" is an identity at R_j alone, not over the arm's radial run",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T143210476580-plan-review-of-iron-core-magnetisation/plan.html:417",
+      "id": "reasoning-2",
+      "reason": "the limb's radial depth is the single number \u00a78 turns on, and its two cited sources now give 0.1875 m (report, \"exact\") and 1.200 m (decision, \"derived\"); without a sentence saying which reading is overridden and why (the constant-width rule forces W = 0.800, hence D\u00b7W = 0.960 gives D = 1.200, whereas an exact 0.1875 m depth would require W = 5.12 m, i.e. no discreteness left to model) a \u00a78 node and any later reader cannot tell which to build.",
+      "text": "the rationale asserts \"The IDS limb's radial extent (R 4.7965 to 4.9840 m, 0.1875 m) is not a real dimension: it is the same smear\", but the search report it cites in the same paragraph (reports/nova/icm-limb-geometry/limb-geometry.html, \u00a73) states the opposite: \"The description gives one axisymmetric slab standing in for six discrete limbs. Its poloidal extent is exact; its toroidal width is precisely what the smear replaces.\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T143210476580-plan-review-of-iron-core-magnetisation/plan.html:327",
+      "id": "done_when-1",
+      "reason": "\u00a75 is the node that chooses the production formulation, and a convergence check alone does not fail a wrong formulation; naming a control (such as the analytic shell result it must miss when the surface terms are dropped) adds a clause the node must satisfy.",
+      "text": "\u00a75's three clauses (0.5 % on the \u03bcr = 1000 shell, < 1 % change under one refinement, a comparison table) contain no negative control, and \u00a76:346 and \u00a79:397 likewise declare none, so a route that silently computes the wrong shielding factor can still show convergence and be selected",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261107T143210476580-plan-review-of-iron-core-magnetisation/plan.html:333",
+      "id": "single_goal-1",
+      "reason": "the seam and the cross-code control have different owners, risks and failure modes, and one verdict cannot close both; splitting them lets the seam land without waiting on coordination with the imas-efit owners.",
+      "text": "\u00a76 carries two deliverables, the production CoilSet seam with its regenerated stray-field figure (clauses 1 and 3) and the imas-efit closed-shell control (clause 2), which its own heading names as two things",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "plan_fingerprint": "548b86bedbb52e762645a5f8795cd08a9315b7b3c59b4cc640eb9a551b6acb10",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 13,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "71ae7939359f9673c6ecf3e4c6a34568d3ef2645",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The IDS 1/R taper is now dropped from the discrete arms, not applied: each arm is 0.800 m by 1.200 m along its whole run, 0.960 m2 everywhere, continuous into the 0.800 m by 1.200 m limb (71ae79393).",
+      "reason": "",
+      "when": "2026-11-07T15:38:10.773659+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "71ae7939359f9673c6ecf3e4c6a34568d3ef2645",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The rationale states it overrides the search report's reading of the 0.1875 m limb extent as exact: that extent follows the same smear rule (0.9169/4.89), and a 0.1875 m deep limb at 0.800 m width would carry a sixth of the arm feeding it (71ae79393).",
+      "reason": "",
+      "when": "2026-11-07T15:38:53.041865+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Deferred to \u00a75's shaping, before its dispatch: \u00a75 is three sections from the work in flight, and editing its done-when now would hold \u00a72's queued nodes on a plan-wide review; the control to add is the analytic shell result the route must miss when its surface terms are dropped.",
+      "when": "2026-11-07T15:39:29.966785+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "Deferred to \u00a76's shaping, before its dispatch: the split into the CoilSet seam and the imas-efit closed-shell control is right, and lands as two sections when \u00a76 is next on the critical path; editing it now would hold \u00a72's queued nodes on a plan-wide review.",
+      "when": "2026-11-07T15:39:59.843570+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Deferred to \u00a75's shaping, before its dispatch: \u00a75 is three sections from the work in flight, and editing its done-when now would hold \u00a72's queued nodes on a plan-wide review; the control to add is the analytic shell result the route must miss when its surface terms are dropped.",
+      "when": "2026-11-07T15:39:29.966785+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "71ae7939359f9673c6ecf3e4c6a34568d3ef2645",
+      "commit_basis": "edit",
+      "note": "The IDS 1/R taper is now dropped from the discrete arms, not applied: each arm is 0.800 m by 1.200 m along its whole run, 0.960 m2 everywhere, continuous into the 0.800 m by 1.200 m limb (71ae79393).",
+      "reason": "",
+      "when": "2026-11-07T15:38:10.773659+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "71ae7939359f9673c6ecf3e4c6a34568d3ef2645",
+      "commit_basis": "edit",
+      "note": "The rationale states it overrides the search report's reading of the 0.1875 m limb extent as exact: that extent follows the same smear rule (0.9169/4.89), and a 0.1875 m deep limb at 0.800 m width would carry a sixth of the arm feeding it (71ae79393).",
+      "reason": "",
+      "when": "2026-11-07T15:38:53.041865+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Deferred to \u00a76's shaping, before its dispatch: the split into the CoilSet seam and the imas-efit closed-shell control is right, and lands as two sections when \u00a76 is next on the critical path; editing it now would hold \u00a72's queued nodes on a plan-wide review.",
+      "when": "2026-11-07T15:39:59.843570+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v13.at-5072b000-r-20261107T143210476580-plan-review-of-i.json",
+  "review_run_id": "r-20261107T143210476580-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "5072b000305d892f4f2e962bc7e88f91f1c2b69d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every named path exists (nova/biot/{polygonanalytic,completeelliptic,constants,incompleteelliptic,tiledassembly,toroidalaverage,sheet}.py, nova/equilibrium/{solve_request,reduced_newton}.py, nova/imas/machine.py, the four figures, docs/research/compile-cost-evidence.html, the attempt-1 receipt and the limb-geometry search report) and the symbols resolve (ForwardSolveRequest at nova/equilibrium/solve_request.py:559, ImasGeometryReader at nova/imas/machine.py:294, complete_kind, toroidal_points, average_toroidal_field).",
+    "done_when": "a finding \u2014 s5 measures and selects a formulation but declares no negative control (s6 and s9 declare none either).",
+    "evidence_paths": "pass \u2014 prototype and imas-efit receipts sit under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/ (present on disk), figures under docs/figures/, and no node writes to a scratchpad.",
+    "naming": "pass \u2014 the new symbols the plan names are mechanism names (sheet, magnetisation, the tile helpers); plan-section ids appear only in reckon data attributes.",
+    "reasoning": "a finding \u2014 the changed limb decision applies the constant-toroidal-width rule to the IDS 1/R taper and its conservation check holds only at one radius, and it states the IDS limb's radial extent is the smear where its cited search report says the poloidal extent is exact.",
+    "single_goal": "a finding \u2014 s6 carries two deliverables, a production field-source seam and an imas-efit representation control, as its own title says.",
+    "wiring": "pass \u2014 the depends-on map at plan.html:24 resolves: s4 now waits on s2 and s3 (its solve consumes \u00a73's G), s7 on forward-solve-api#s1 where ForwardSolveRequest landed, s9 on s6 and s8, and every named node exists."
+  },
+  "section_digests": {
+    "_document": "705cd0c04bf8cc5e8e53eae0921f7c7e2987f487f31e110abe7d90ae55033c91",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "4310e745a250a32efce7e2b04fdc26726e777eae35807f30ed6a2abfac33a9e2",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "f893da212ea4d5be0ca4ec47f070385bcbd8b864eb4d5aa2ec4acb2aabaec102",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:37:41.635941+00:00",
+  "total": null
+}

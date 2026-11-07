@@ -121,15 +121,16 @@ Z=&minus;0.361 m inside the limiter with 0.737&times;Ip confined.
 </figcaption>
 </figure>
 <p>
-The bounding surface in these panels is derived on the trip's own grid as the
-larger of the saddle flux and the flux the limiter carries. The host routine
-<code>host_boundary_read</code> takes an equilibrium grid and evaluates
-<code>wall_flux</code> on its wall nodes; the per-trip archives carry the flux
-array, the wall ring and the limiter but no such grid, so the reduced
-competition is drawn here rather than the host read. The saddle points marked
-are grid-level candidates (33&times;33 lattice), which is why more than one
-appears; the solved axis position is the measured one from the trajectory
-table.
+The bounding surface and the nulls come from the repository owners, not from
+reconstructions here. The surface is <code>host_boundary_read</code> on this
+trip's flux grid and the governed limiter units &mdash; the same call the
+root-cause node makes &mdash; and only the ring that encloses the measured axis
+is drawn, so a lobe bounding no plasma cannot be read as a boundary. The axis
+and X-point markers are polished by <code>polish_stationary_points</code> on the
+field's own tensor spline, so each drawn marker is a true stationary point
+rather than a grid cell; the grid-scale search supplies seeds only. The EFIT
+nulls are polished on the label's spline and drawn hollow, so the two sets are
+distinguishable where they coincide.
 </p>
 
 <h3>Where the two branches part at trip 2</h3>

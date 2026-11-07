@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T14:08:59Z",
+  "figures": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg",
+      "rendered": null
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg",
+      "id": "f58185a828a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The run committed only an SVG and produced no rendered PNG anywhere in its run directory or worktree, and the review dispatch named no PNG to judge: the source node's brief requires it to render each figure to PNG and look at it before committing, and the commit itself adds the 44-line SVG markup with no drawing script that a reviewer could trace to a render, so the figure has never been visually verified and this review cannot give a visual verdict on it. The defect does not hold the reviewed node, whose page renders the SVG directly, but the figure review it requested is unanswerable until a rendered PNG is attached."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "not assessable \u2014 no rendered PNG was attached or named, so text-to-background contrast cannot be judged.",
+    "data_ink": "not assessable \u2014 no rendered PNG was attached or named, so the balance of data against decorative ink cannot be judged.",
+    "decoration": "not assessable \u2014 no rendered PNG was attached or named, so gradients, fills and styling cannot be judged.",
+    "label_collision": "not assessable \u2014 no rendered PNG was attached or named, so clipped, overlapping or data-obscuring labels cannot be judged.",
+    "legibility": "not assessable \u2014 no rendered PNG was attached or named for this figure, and the only committed artifact is the SVG, which this review is forbidden to open or render; no visual verdict is invented.",
+    "table_form": "not assessable \u2014 no rendered PNG was attached or named; the evidence fragment carries the exact values in an HTML table beside the figure, but the picture's own form cannot be inspected."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: not assessable - no rendered PNG attached or named; only the SVG exists and this review may not open or render it.\nRUBRIC data_ink: not assessable - no rendered PNG attached or named.\nRUBRIC decoration: not assessable - no rendered PNG attached or named.\nRUBRIC contrast: not assessable - no rendered PNG attached or named.\nRUBRIC table_form: not assessable - no rendered PNG attached or named.\nRUBRIC label_collision: not assessable - no rendered PNG attached or named.\nFINDING (non-blocking) docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg - only SVG was committed and no rendered PNG was produced or named, so the figure was never visually verified and no visual verdict is possible.\n",
+  "review_run_id": "r-20261107T135232564725-review-of-bank-jacobian-assembly-b5fc7e6f095d-figure",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2",
+  "reviewed_run_id": "r-20261107T111124792754-bank-jacobian-assembly",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "not assessable \u2014 no rendered PNG was attached or named, so text-to-background contrast cannot be judged.",
+    "data_ink": "not assessable \u2014 no rendered PNG was attached or named, so the balance of data against decorative ink cannot be judged.",
+    "decoration": "not assessable \u2014 no rendered PNG was attached or named, so gradients, fills and styling cannot be judged.",
+    "label_collision": "not assessable \u2014 no rendered PNG was attached or named, so clipped, overlapping or data-obscuring labels cannot be judged.",
+    "legibility": "not assessable \u2014 no rendered PNG was attached or named for this figure, and the only committed artifact is the SVG, which this review is forbidden to open or render; no visual verdict is invented.",
+    "table_form": "not assessable \u2014 no rendered PNG was attached or named; the evidence fragment carries the exact values in an HTML table beside the figure, but the picture's own form cannot be inspected."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:16:00.000000+00:00",
+  "total": null
+}

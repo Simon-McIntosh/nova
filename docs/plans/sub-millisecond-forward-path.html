@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="230">
+<meta name="plan-version" content="231">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -785,6 +785,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T111056270825-bank-warm-start" data-who="reckon-build" data-when="2026-11-07T12:58:36Z">
     <div class="r-comment-body"><p>bank-warm-start measured 16 lanes x 8 slices at three profile-amplitude steps on the 550-cell diverted certificate; a warm slice takes 2 updates and 3 reads at a 1e-5 step (215 ms/slice against 304 ms cold), 4 updates and 6 reads at 1e-3, and stalls at the 60-update ceiling at 1e-2; the figure is docs/figures/sub-millisecond-forward-path/bank-warm-start/reads-per-slice.svg</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T134700025336-review-of-bank-jacobian-assembly-b5fc7e6f095d" data-who="reckon-build" data-when="2026-11-07T14:08:38.801Z">
+    <div class="r-comment-body"><p>review of bank-jacobian-assembly at b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2: the product change is reverted and the landed diff is documentation and prototype runners only, two blocking findings record that the fragment reports an attempted-and-failed 550-cell parity gate as never run and that the required table omits assembly device ms and launches per call.</p></div>
 </div>
 </section>
 </main>

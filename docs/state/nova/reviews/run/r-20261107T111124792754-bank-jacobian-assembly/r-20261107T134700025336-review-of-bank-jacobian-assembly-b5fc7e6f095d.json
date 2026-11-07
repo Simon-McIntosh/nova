@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/current.py:_conic_ring_tangents",
+    "nova/equilibrium/support_read.py:step_jacobian",
+    "tests/test_bank_step_booking_batch.py:test_certificate_jacobian_matches_base"
+  ],
+  "completed_at": "2026-11-07T14:08:38.801Z",
+  "dispatched_at": "2026-11-07T13:55:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html",
+      "line": 42,
+      "severity": "blocking",
+      "text": "The fragment states 'The four 550-cell H200 cases were never run' and the parity table at line 47 records 'not run / cut from the allocation', but logs/parity.log:1 names job 1307768 running tests/test_bank_step_booking_batch.py::test_shared_ring_geometry_matches_per_direction and its last lines read '4 failed in 722.95s' and 'EXIT=1': all four cases ran and failed, a ValueError in assert_peak_scaled_equal reshaping 1650x1650 into (1650,3,550,1650), which is the node's own helper. The record therefore reports an attempted-and-failed gate as never attempted, which is the one state a coordinator cannot audit."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html",
+      "line": 19,
+      "severity": "blocking",
+      "text": "The done_when requires the base-against-head table to carry assembly device ms per call and launches per call beside wall, reads, updates and peak memory; the timing table carries neither, and grep over the whole fragment finds no launch count and no assembly device time, because the stage split that would have produced them never ran. The figure at line 15 plots solve wall per slice against batch width, not the assembly device ms per stage at 16 and 128 slices the brief specifies."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "The precision sentence says 'the three geometry ratios at most 2.59e-5 against 1e-8 for flux and 5e-4 for the axis and the saddle', which reads as a 2.59e-5 value being compared against a 1e-8 bound; the instrument at scripts/prototypes/bank_batch_width/measure.py:154-167 measures axis, saddle and boundary only, so the flux-within-1e-8 lane of the locked budget is never computed and the 'every lane inside the budget' claim rests on three of four lanes."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_assembly/head_suites.sh",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "The job's final line is printf 'EXIT=%s\\n' \"$ROOT\", which prints the tree path where the exit code belongs; logs/head2-1307761.log holds the single line 'EXIT=/home/ITER/mcintos/Code/.reckon-worktrees/...', so the head suite job's overall status cannot be read from its log by the receipt reader the rest of the run's machinery assumes."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_assembly/suites.sh",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "This paired base/head suite runner duplicates the capability scripts/prototypes/../bank_matrix_free_step/suites.sh already owns (base and head arms, one fresh pytest process per file, separate basetemp, EXIT= last line), differing only in a hardcoded file list and an SBATCH header; it should have been extended rather than copied, and the copy is where the head arm's broken EXIT line above came from."
+    },
+    {
+      "file": "tests/test_bank_step_booking_batch.py",
+      "line": 284,
+      "severity": "non-blocking",
+      "text": "As added at 461641d1f the CPU parity test scaled by one global peak (peak = np.max(np.abs(rebuilt)); gap = max|shared-rebuilt| / peak) instead of the per-row peak_scaled_gap the brief names and that the same file's assert_peak_scaled_equal imports, so a small row's error is divided by the largest entry anywhere in the matrix; this weakens exactly the comparison the negative control was run against."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the eleven commits acff7939..b5fc7e6f0 commit by commit; the product commit 461641d1f and its test additions are undone by 3ff55a535, leaving docs/evidence, docs/figures and scripts/prototypes/bank_jacobian_assembly/split.py, suites.sh, head_suites.sh, h200_measure.sh and parity.sh.",
+    "done_when": "The done_when names an H200 stage split at 16 and 128 slices, a 1e-12 peak-scaled matrix parity at the four 550-cell states, and a three-width table carrying assembly device ms and launches per call; the fragment records the split as aborted (line 39), the 550-cell cases as never run (line 42) although logs/parity.log:354 shows four failures, and its timing table (line 19) carries neither assembly device ms nor launches.",
+    "goal": "The node's goal is to split the dense Jacobian assembly by stage and reduce its dominant stage; the landed tree carries neither: git diff acff793928732503a84525c3fe29ca260dbf9035 b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2 -- nova tests is empty, and the fragment at docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:39 records the stage split as not produced.",
+    "manifest": "Read the manifest; it records seven changed paths, a paired five-file sirius suite with one pre-existing failure at both arms, and three H200 timing arms, but its baseline_suite and after_suite fields carry only tests/test_bank_step_booking.py while the gate the brief names is five files.",
+    "write_paths": "Read the declared scope nova/equilibrium/current.py, nova/equilibrium/support_read.py, tests/test_bank_step_booking_batch.py, scripts/prototypes/bank_jacobian_assembly, the evidence fragment and the figure directory; every path in the base-to-head diff is inside that list."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to split the dense Jacobian assembly by stage and reduce its dominant stage; the landed diff acff793928732503a84525c3fe29ca260dbf9035..b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2 touches only docs and scripts/prototypes, and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:39 records the split as unproduced.\nVERDICT done_when: the done_when names an H200 stage split at 16 and 128 slices, a 1e-12 peak-scaled parity at the four 550-cell states and a table with assembly device ms and launches per call; the fragment at line 39 aborts the split, at line 42 misstates the 550-cell cases as never run against logs/parity.log:354, and at line 19 omits both assembly columns.\nVERDICT write_paths: the declared scope is nova/equilibrium/current.py, nova/equilibrium/support_read.py, tests/test_bank_step_booking_batch.py, scripts/prototypes/bank_jacobian_assembly, the evidence fragment and the figure directory; every path in the base-to-head diff is inside it.\nVERDICT manifest: read; it records seven changed paths and a five-file paired sirius suite with the same single pre-existing failure at both arms, but its baseline_suite and after_suite fields carry only tests/test_bank_step_booking.py of the five files the brief names.\nVERDICT diff: read all eleven commits commit by commit; 461641d1f's product change and its tests are removed by 3ff55a535, leaving seven files, all documentation and prototype runners.\nCALL_SITES: nova/equilibrium/current.py:_conic_ring_tangents, nova/equilibrium/support_read.py:step_jacobian, tests/test_bank_step_booking_batch.py:test_certificate_jacobian_matches_base\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: neither deliverable in the goal landed; git diff acff7939 b5fc7e6f0 -- nova tests is empty and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:39 states the split did not run.\nSCORE evidence: 5\nJUSTIFICATION evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:42 says the four 550-cell cases were never run while logs/parity.log:354 records four failures, and line 19 omits the assembly device ms and launches the done_when requires.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every file in the base-to-head diff sits under the manifest's declared write paths, and the stale split extractor was reported under outside_scope rather than repaired.\nSCORE durability: 8\nJUSTIFICATION durability: the only added assertion, tests/test_bank_step_booking_batch.py's 550-cell parity, was removed by 3ff55a535 and its reshape fix aa910cbda was never executed after it landed, so no landed test guards the measurement.\nSCORE fit: 16\nJUSTIFICATION fit: the prototype shell scripts follow the existing SBATCH-header and EXIT= idiom, but scripts/prototypes/bank_jacobian_assembly/head_suites.sh:26 writes the tree path into the job's exit line.\nSCORE reuse: 8\nJUSTIFICATION reuse: scripts/prototypes/bank_jacobian_assembly/suites.sh duplicates the paired base/head runner scripts/prototypes/bank_matrix_free_step/suites.sh already owns instead of extending it, and the CPU test duplicated the peak scaling the same file imports from tests/test_biotgeometryautograd.py:120.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:42 blocking: the fragment records the four 550-cell H200 parity cases as 'never run' and the table at line 47 as 'not run / cut from the allocation', while logs/parity.log records job 1307768 running all four and failing them with a ValueError in the node's own reshape helper (4 failed in 722.95s, EXIT=1).\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:19 blocking: the base-against-head table omits assembly device ms per call and launches per call, which the done_when requires, and the figure at line 15 plots solve wall per slice against width rather than assembly device ms per stage at 16 and 128 slices.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:30 non-blocking: the sentence compares 2.59e-5 against a 1e-8 flux bound, and scripts/prototypes/bank_batch_width/measure.py:154-167 measures only axis, saddle and boundary, so the flux-within-1e-8 lane is never computed.\nFINDING scripts/prototypes/bank_jacobian_assembly/head_suites.sh:26 non-blocking: printf 'EXIT=%s' \"$ROOT\" prints the tree path instead of the exit code, so logs/head2-1307761.log carries 'EXIT=/home/ITER/...' and the head suite job's status is unreadable.\nFINDING scripts/prototypes/bank_jacobian_assembly/suites.sh:1 non-blocking: the paired base/head suite runner duplicates scripts/prototypes/bank_matrix_free_step/suites.sh instead of extending it.\nFINDING tests/test_bank_step_booking_batch.py:284 non-blocking: the added CPU parity test scales by one global peak rather than the per-row peak_scaled_gap the brief names and the same file imports from tests/test_biotgeometryautograd.py:120.",
+  "review_run_id": "r-20261107T134700025336-review-of-bank-jacobian-assembly-b5fc7e6f095d",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2",
+  "reviewed_run_id": "r-20261107T111124792754-bank-jacobian-assembly",
+  "scores": {
+    "durability": 8,
+    "evidence": 5,
+    "fit": 16,
+    "goal_fidelity": 6,
+    "reuse": 8,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T14:25:26.318774+00:00",
+  "total": 61
+}

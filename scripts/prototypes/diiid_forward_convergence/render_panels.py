@@ -23,6 +23,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import RegularGridInterpolator
 from matplotlib.text import Text
 
 from benchmarks import diiid_forward_gs_match as bench
@@ -455,7 +456,10 @@ def _check_text_artists(figure, output: Path) -> list[str]:
             or box.x1 > canvas.x1 + 0.5
             or box.y1 > canvas.y1 + 0.5
         ):
-            problems.append(f"clipped: {label!r}")
+            problems.append(
+                f"clipped: {label!r} "
+                f"x=[{box.x0:.0f},{box.x1:.0f}] y=[{box.y0:.0f},{box.y1:.0f}]"
+            )
     for index, (first_label, first) in enumerate(boxes):
         for second_label, second in boxes[index + 1 :]:
             if first.overlaps(second):
@@ -465,25 +469,98 @@ def _check_text_artists(figure, output: Path) -> list[str]:
     return problems
 
 
+def _refined_field(radius, height, flux, padding=0.02):
+    """Interpolate the solved map onto a fine grid, once per panel."""
+
+    spline = RegularGridInterpolator(
+        (radius, height), flux, method="cubic", bounds_error=False, fill_value=np.nan
+    )
+    dense_r = np.linspace(radius[0] - padding, radius[-1] + padding, 601)
+    dense_z = np.linspace(height[0] - padding, height[-1] + padding, 601)
+    grid_r, grid_z = np.meshgrid(dense_r, dense_z, indexing="ij")
+    dense = spline((grid_r, grid_z))
+    return dense_r, dense_z, dense
+
+
+def _boundary_curve(dense_r, dense_z, dense, level, saddle, window=0.22):
+    """Return the level set, locally refined around the saddle where admitted.
+
+    A 33 x 33 lattice carries a level set through a saddle as one smooth curve:
+    at that resolution the four legs merge.  Contouring the same interpolant on a
+    dense grid restores the crossing, and the window keeps the cost local to the
+    region a reader looks at when judging an X-point.
+    """
+
+    fine_r = np.linspace(
+        max(saddle[0] - window, dense_r[0]), min(saddle[0] + window, dense_r[-1]), 241
+    )
+    fine_z = np.linspace(
+        max(saddle[1] - window, dense_z[0]), min(saddle[1] + window, dense_z[-1]), 241
+    )
+    grid_r, grid_z = np.meshgrid(fine_r, fine_z, indexing="ij")
+    spline = RegularGridInterpolator(
+        (dense_r, dense_z), dense, method="linear", bounds_error=False, fill_value=np.nan
+    )
+    local = spline((grid_r, grid_z))
+    return fine_r, fine_z, local
+
+
+def _draw_boundary(axes, dense_r, dense_z, dense, level, saddle, colour, width, refine):
+    """Draw the bounding surface, refined at the saddle when it passes through it.
+
+    Only a separatrix-bounded terminal has its bounding level at the saddle, so
+    only that case is contoured on the local window.  A limiter-bounded level
+    lies outside that window and would come back empty.
+    """
+
+    handles = []
+    if refine and saddle.size == 2 and np.isfinite(level):
+        fine_r, fine_z, local = _boundary_curve(dense_r, dense_z, dense, level, saddle)
+        used = axes.contour(
+            fine_r, fine_z, local, levels=[level], colors=[colour], linewidths=[width]
+        )
+    else:
+        used = axes.contour(
+            dense_r, dense_z, dense, levels=[level], colors=[colour], linewidths=[width]
+        )
+    handles.append(used)
+    return handles
+
+
+def _caption_lines(parts, width=110):
+    """Wrap the caption on its field separators, never inside one."""
+
+    lines = []
+    current = ""
+    for part in parts:
+        candidate = part if not current else f"{current}  |  {part}"
+        if len(candidate) > width and current:
+            lines.append(current)
+            current = part
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return "\n".join(lines)
+
+
 def render_measured_frame(
     frame: int,
     receipt_frame: dict,
     artifact: Path,
     output: Path,
+    boundary: dict | None = None,
 ) -> dict:
     """Draw one frame's MEASURED terminal state as line contours.
 
-    The solved field, the label field, the lattice and the wall all come from
-    the arm's own archive, so the panel is the state the solve reached rather
-    than a re-derivation of it.  Nulls are the measured ones from the receipt.
+    The solved field, the label field, the lattice, the limiter and the bounding
+    flux all come from the arm's own archive and its measured analysis, so the
+    panel is the state the solve reached rather than a re-derivation of it.
     """
 
+    boundary = boundary or {}
     grid = _artifact_grid(artifact)
     radius, height = grid["radius"], grid["height"]
-    # ``wall`` is the rectangular bound of the EFIT grid the solve was posed in;
-    # ``limiter`` is the governed DIII-D limiter ring from the machine
-    # description.  The physical claim ("the plasma is inside the vessel") is a
-    # statement about the limiter, and a rectangle cannot support it.
     wall = grid["wall"]
     limiter = grid["limiter"]
     flux, label = grid["flux"], grid["label"]
@@ -492,20 +569,21 @@ def render_measured_frame(
     converged = bool(receipt_frame.get("converged"))
     presence = measured.get("presence") or {}
     solved_axis = np.asarray(presence.get("axis_rz_m") or [], dtype=float)
-    solved_x = np.asarray(measured.get("x_point_rz_m") or [], dtype=float).reshape(
-        -1, 2
-    )
-    label_axis = np.asarray(
-        (receipt_frame.get("measured") or {}).get("label_axis_rz_m") or [],
-        dtype=float,
-    )
+    solved_x = np.asarray(measured.get("x_point_rz_m") or [], dtype=float).reshape(-1, 2)
+    labels = receipt_frame.get("measured") or {}
+    label_axis = np.asarray(labels.get("label_axis_rz_m") or [], dtype=float)
+    label_x = np.asarray(labels.get("label_saddle_rz_m") or [], dtype=float).reshape(-1)
     if label_axis.size != 2:
-        # The lattice extremum is a fallback only: on these fields it lands on an
-        # edge artefact, so the recorded EFIT axis is what the panel marks.
         label_axis = _lattice_extremum(radius, height, label, wall)
 
-    figure, axes = plt.subplots(figsize=(14.0, 7.2))
-    figure.subplots_adjust(left=0.03, right=0.97, top=0.85, bottom=0.13)
+    bounding_flux = boundary.get("bounding_flux")
+    bounds = boundary.get("bounds", "unknown")
+    contact = np.asarray(boundary.get("contact_rz_m") or [], dtype=float)
+
+    figure, (axes, trace) = plt.subplots(
+        1, 2, figsize=(14.0, 7.2), gridspec_kw={"width_ratios": [1.0, 1.15]}
+    )
+    figure.subplots_adjust(left=0.04, right=0.97, top=0.80, bottom=0.24, wspace=0.14)
     poloidal_axes(axes)
 
     solved_axis_value = _bilinear(radius, height, flux, solved_axis)
@@ -515,25 +593,9 @@ def render_measured_frame(
     levels = _shared_levels(
         [(solved_axis_value, solved_edge_value), (label_axis_value, label_edge_value)]
     )
-    draw_flux_contours(
-        axes, radius, height, flux, levels, color=DEFAULT_INK.flux_color, wall=wall
-    )
-    saddle_flux = (
-        _bilinear(radius, height, flux, np.asarray(solved_x, dtype=float)[0])
-        if solved_x.size
-        else float("nan")
-    )
-    if np.isfinite(saddle_flux):
-        draw_flux_contours(
-            axes,
-            radius,
-            height,
-            flux,
-            [saddle_flux],
-            color=DEFAULT_INK.separatrix_color,
-            linewidth=DEFAULT_INK.separatrix_linewidth,
-            wall=wall,
-        )
+
+    # The reference is drawn first and thin; the subject, the solved field, is
+    # drawn over it and heavier, because the solved state is the evidence.
     draw_flux_contours(
         axes,
         radius,
@@ -541,9 +603,61 @@ def render_measured_frame(
         label,
         levels,
         color=DEFAULT_INK.contour_color,
+        linewidth=0.7,
+        wall=wall,
+    )
+    draw_flux_contours(
+        axes,
+        radius,
+        height,
+        flux,
+        levels,
+        color=DEFAULT_INK.flux_color,
         linewidth=1.0,
         wall=wall,
     )
+
+    dense_r, dense_z, dense = _refined_field(radius, height, flux)
+    saddle_flux = (
+        _bilinear(radius, height, flux, solved_x[0]) if solved_x.size else float("nan")
+    )
+    if np.isfinite(bounding_flux):
+        _draw_boundary(
+            axes,
+            dense_r,
+            dense_z,
+            dense,
+            float(bounding_flux),
+            solved_x[0] if solved_x.size else np.zeros(0),
+            DEFAULT_INK.separatrix_color,
+            2.0,
+            bounds == "separatrix",
+        )
+    if bounds == "limiter" and np.isfinite(saddle_flux):
+        # The saddle level set is not the boundary here; it is drawn thin and
+        # dashed so a reader can see the surface that would have bounded the
+        # plasma had the limiter not reached it first.
+        axes.contour(
+            dense_r,
+            dense_z,
+            dense,
+            levels=[saddle_flux],
+            colors=[DEFAULT_INK.contour_color],
+            linewidths=[0.9],
+            linestyles=["dashed"],
+        )
+
+    if np.asarray(grid["label_boundary"]).size:
+        boundary_points = np.asarray(grid["label_boundary"], dtype=float)
+        axes.plot(
+            boundary_points[:, 0],
+            boundary_points[:, 1],
+            color=DEFAULT_INK.contour_color,
+            linewidth=0.8,
+            linestyle=(0, (4, 3)),
+            zorder=3,
+        )
+
     axis_inside = (
         bool(inside_wall_units(solved_axis[None, :], limiter)[0])
         if solved_axis.size
@@ -562,7 +676,56 @@ def render_measured_frame(
         contain=limiter,
         other_x_points=np.concatenate(others) if others else None,
     )
+    if solved_x.size:
+        axes.plot(
+            solved_x[inside, 0] if np.any(inside) else [],
+            solved_x[inside, 1] if np.any(inside) else [],
+            marker=DEFAULT_INK.xpoint_marker,
+            markerfacecolor=DEFAULT_INK.xpoint_color,
+            markeredgecolor="white",
+            markeredgewidth=1.4,
+            markersize=DEFAULT_INK.xpoint_markersize,
+            linestyle="none",
+            zorder=8,
+        )
+    if label_axis.size == 2:
+        axes.plot(
+            label_axis[0],
+            label_axis[1],
+            marker=DEFAULT_INK.axis_marker,
+            markerfacecolor="none",
+            markeredgecolor=DEFAULT_INK.contour_color,
+            markeredgewidth=1.6,
+            markersize=DEFAULT_INK.axis_markersize + 3.0,
+            linestyle="none",
+            zorder=7,
+        )
+    if label_x.size == 2 and np.all(np.isfinite(label_x)):
+        axes.plot(
+            label_x[0],
+            label_x[1],
+            marker=DEFAULT_INK.xpoint_marker,
+            markerfacecolor="none",
+            markeredgecolor=DEFAULT_INK.contour_color,
+            markeredgewidth=1.4,
+            markersize=DEFAULT_INK.xpoint_markersize + 3.0,
+            linestyle="none",
+            zorder=7,
+        )
+
     draw_wall(axes, limiter[:, 0], limiter[:, 1], close=True)
+    if contact.size == 2 and np.all(np.isfinite(contact)):
+        axes.plot(
+            contact[0],
+            contact[1],
+            marker=DEFAULT_INK.strike_marker,
+            markerfacecolor=DEFAULT_INK.strike_color,
+            markeredgecolor="white",
+            markeredgewidth=1.0,
+            markersize=DEFAULT_INK.strike_markersize + 2.0,
+            linestyle="none",
+            zorder=9,
+        )
     axes.plot(
         np.append(wall[:, 0], wall[0, 0]),
         np.append(wall[:, 1], wall[0, 1]),
@@ -571,80 +734,62 @@ def render_measured_frame(
         linestyle=(0, (2, 3)),
         zorder=2,
     )
-    axes.plot(
-        label_axis[0],
-        label_axis[1],
-        marker=DEFAULT_INK.axis_marker,
-        markerfacecolor="none",
-        markeredgecolor=DEFAULT_INK.contour_color,
-        markeredgewidth=DEFAULT_INK.xpoint_markeredgewidth,
-        markersize=DEFAULT_INK.axis_markersize,
-        linestyle="none",
-        zorder=6,
-    )
     extent = np.vstack([limiter, wall])
     axes.set_xlim(float(extent[:, 0].min()) - 0.05, float(extent[:, 0].max()) + 0.05)
     axes.set_ylim(float(extent[:, 1].min()) - 0.05, float(extent[:, 1].max()) + 0.05)
 
-    handles = [
-        plt.Line2D(
-            [], [], color=DEFAULT_INK.flux_color, lw=1.6, label="Nova solved flux"
-        ),
-        plt.Line2D(
-            [], [], color=DEFAULT_INK.contour_color, lw=1.2, label="EFIT label flux"
-        ),
-        _null_handle(
-            DEFAULT_INK.axis_marker, True, DEFAULT_INK.axis_color, "solved axis"
-        ),
-        _null_handle(
-            DEFAULT_INK.xpoint_marker, True, DEFAULT_INK.xpoint_color, "solved saddle"
-        ),
-        plt.Line2D(
-            [],
-            [],
-            color=DEFAULT_INK.separatrix_color,
-            lw=1.2,
-            label="solved separatrix",
-        ),
-        _null_handle(
-            DEFAULT_INK.axis_marker, False, DEFAULT_INK.contour_color, "label axis"
-        ),
-        plt.Line2D(
-            [],
-            [],
-            color=DEFAULT_INK.wall_color,
-            lw=1.4,
-            label="DIII-D limiter (wall)",
-        ),
-        plt.Line2D(
-            [],
-            [],
-            color="#929292",
-            lw=1.0,
-            ls=(0, (2, 3)),
-            label="grid domain bound",
-        ),
-    ]
-    if not axis_inside and solved_axis.size:
-        axes.plot(
-            solved_axis[0],
-            solved_axis[1],
-            marker=DEFAULT_INK.axis_marker,
-            markerfacecolor="none",
-            markeredgecolor=DEFAULT_INK.axis_color,
-            markeredgewidth=DEFAULT_INK.xpoint_markeredgewidth,
-            markersize=DEFAULT_INK.axis_markersize,
-            linestyle="none",
-            zorder=7,
-        )
-        handles.append(
-            _null_handle(
-                DEFAULT_INK.axis_marker,
-                False,
-                DEFAULT_INK.axis_color,
-                "solved axis (outside wall)",
+    # The band the map leaves empty carries the trajectory the brief asks for.
+    residual_history = np.asarray(measured.get("residual_history") or [], dtype=float)
+    trips = np.arange(residual_history.size)
+    trace.semilogy(
+        trips,
+        residual_history,
+        color=DEFAULT_INK.flux_color,
+        linewidth=1.6,
+        marker="o",
+        markersize=4,
+        markeredgecolor="white",
+        markeredgewidth=0.8,
+    )
+    trace.axhline(1e-5, color="#929292", linewidth=1.2, linestyle=(0, (1, 2)))
+    trace.annotate(
+        "tolerance 1e-5",
+        xy=(0.02, 1e-5),
+        xytext=(0.02, 1e-4),
+        fontsize=12,
+        color="#555555",
+        va="bottom",
+    )
+    mask_history = np.asarray(measured.get("mask_history") or [], dtype=float)
+    for trip, difference in enumerate(mask_history):
+        if trip < residual_history.size and np.isfinite(residual_history[trip]):
+            trace.annotate(
+                f"{int(difference)}",
+                (trip, residual_history[trip]),
+                textcoords="offset points",
+                xytext=(0, 10),
+                ha="center",
+                fontsize=11,
+                color="#555555",
             )
-        )
+    trace.set_xlabel("active-set trip", fontsize=16)
+    trace.set_ylabel("relative residual", fontsize=16)
+    trace.set_xticks(trips)
+    span = max(int(trips[-1]) if trips.size else 0, 1)
+    trace.set_xlim(-0.5, span + 0.5)
+    trace.tick_params(labelsize=14)
+    for side in ("top", "right"):
+        trace.spines[side].set_visible(False)
+    trace.text(
+        0.98,
+        0.95,
+        "mask difference above each point",
+        transform=trace.transAxes,
+        ha="right",
+        va="top",
+        fontsize=12,
+        color="#555555",
+    )
 
     cells = int(presence.get("closed_core_cells") or 0)
     ratio = presence.get("confined_to_target_ratio")
@@ -653,30 +798,105 @@ def render_measured_frame(
         f"diverted terminal residual {terminal_residual:.3e}",
         f"converged {str(converged).lower()}",
         f"axis R={solved_axis[0]:.3f} Z={solved_axis[1]:+.3f} m",
-        "axis inside limiter "
-        + ("yes" if axis_inside else "NO (plasma outside the vessel)"),
+        f"axis {'inside' if axis_inside else 'OUTSIDE'} the limiter",
+        f"bounded by the {bounds}",
         f"{cells} closed core cells",
-        f"confined current {ratio:.3f}x target"
-        if ratio is not None
-        else "no current read",
-        "tolerance 1e-5",
+        f"confined current {ratio:.3f}x target" if ratio is not None else "no current read",
     ]
     figure.text(
         0.5,
-        0.02,
-        textwrap.fill("  |  ".join(parts), width=150),
+        0.035,
+        _caption_lines(parts),
         ha="center",
         va="bottom",
-        fontsize=11,
+        fontsize=10.5,
         color="#333333",
     )
+
+    handles = [
+        plt.Line2D(
+            [], [], color=DEFAULT_INK.flux_color, lw=1.0, label="Nova solved flux"
+        ),
+        plt.Line2D(
+            [], [], color=DEFAULT_INK.contour_color, lw=0.7, label="EFIT label flux"
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.separatrix_color,
+            lw=2.0,
+            label=f"bounding {'limiter surface' if bounds == 'limiter' else 'separatrix'}",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.contour_color,
+            lw=0.8,
+            ls=(0, (4, 3)),
+            label="EFIT label boundary",
+        ),
+        _null_handle(
+            DEFAULT_INK.axis_marker, True, DEFAULT_INK.axis_color, "solved axis"
+        ),
+        _null_handle(
+            DEFAULT_INK.xpoint_marker,
+            True,
+            DEFAULT_INK.xpoint_color,
+            "solved X-point",
+        ),
+        _null_handle(
+            DEFAULT_INK.axis_marker, False, DEFAULT_INK.contour_color, "label axis"
+        ),
+        _null_handle(
+            DEFAULT_INK.xpoint_marker, False, DEFAULT_INK.contour_color, "label X-point"
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.strike_color,
+            marker=DEFAULT_INK.strike_marker,
+            markersize=DEFAULT_INK.strike_markersize + 2.0,
+            lw=0,
+            label="limiter contact",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.wall_color,
+            lw=1.0,
+            label="DIII-D limiter (wall)",
+        ),
+        plt.Line2D(
+            [], [], color="#929292", lw=1.0, ls=(0, (2, 3)), label="grid domain bound"
+        ),
+    ]
+    if bounds == "limiter":
+        handles.append(
+            plt.Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.contour_color,
+                lw=0.9,
+                ls="dashed",
+                label="saddle level (not bounding)",
+            )
+        )
+    if solved_x.size and not np.all(inside):
+        handles.append(
+            _null_handle(
+                DEFAULT_INK.axis_marker,
+                False,
+                DEFAULT_INK.axis_color,
+                "solved axis (outside wall)",
+            )
+        )
     figure.legend(
         handles=handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 1.0),
         ncol=6,
         frameon=False,
-        fontsize=11,
+        fontsize=10.5,
     )
     problems = _check_text_artists(figure, output)
     if problems:
@@ -697,6 +917,12 @@ def render_measured_frame(
         "solved_axis_inside_limiter": axis_inside,
         "closed_core_cells": cells,
         "confined_to_current_ratio": ratio,
+        "bounds": bounds,
+        "bounding_flux": bounding_flux,
+        "psi_saddle": boundary.get("psi_saddle"),
+        "psi_limiter": boundary.get("psi_limiter"),
+        "achieved_class": boundary.get("achieved_class"),
+        "contact_rz_m": boundary.get("contact_rz_m"),
         "flux_grid_key": str(grid["key"]),
         "levels": [float(value) for value in levels],
     }
@@ -715,6 +941,12 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--record", type=Path, required=True)
     parser.add_argument(
+        "--boundary",
+        type=Path,
+        default=None,
+        help="measured boundary competition per frame and branch",
+    )
+    parser.add_argument(
         "--artifact-dir",
         type=Path,
         default=None,
@@ -728,12 +960,20 @@ def main() -> None:
     receipt = json.loads(arguments.receipt.read_text())
     if arguments.artifact_dir is not None:
         rendered = []
+        analysis = {}
+        if arguments.boundary is not None and arguments.boundary.exists():
+            analysis = json.loads(arguments.boundary.read_text())["frames"]
         for frame in arguments.frames:
             archive = arguments.artifact_dir / f"frame-{frame}-diverted-default.npz"
             output = arguments.output_dir / f"frame-{frame}-flux-contours.svg"
+            measured = (analysis.get(str(frame)) or {}).get("diverted") or {}
             rendered.append(
                 render_measured_frame(
-                    frame, receipt["frames"][str(frame)], archive, output
+                    frame,
+                    receipt["frames"][str(frame)],
+                    archive,
+                    output,
+                    measured.get("default"),
                 )
             )
             print(json.dumps(rendered[-1], sort_keys=True, default=float), flush=True)

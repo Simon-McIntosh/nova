@@ -130,6 +130,7 @@ def build(
                 "shot": measured.get("shot"),
                 "lattice_shape": measured.get("lattice_shape"),
                 "label_axis_rz_m": measured.get("label_axis_rz_m"),
+                "label_saddle_rz_m": measured.get("label_saddle_rz_m"),
                 "target_current_a": measured.get("target_current_a"),
                 "branches": {},
             }

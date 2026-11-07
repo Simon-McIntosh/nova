@@ -1,0 +1,446 @@
+{
+  "frames": {
+    "137": {
+      "diverted": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-137-diverted-continued.npz",
+          "bounding_flux": 0.7311371687552783,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.401170015335083,
+            -1.2447700500488281
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.06559799522933596,
+          "psi_axis": 2.492502433939765,
+          "psi_limiter": 0.7311371687552783,
+          "psi_saddle": 0.6655391735259424,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.2651583546996066,
+            -1.3362867934446647
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-137-diverted-default.npz",
+          "bounding_flux": 0.7311371687552846,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.401170015335083,
+            -1.2447700500488281
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.06559799522933751,
+          "psi_axis": 2.4925024339397504,
+          "psi_limiter": 0.7311371687552846,
+          "psi_saddle": 0.665539173525947,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.2651583546996057,
+            -1.3362867934446663
+          ]
+        }
+      },
+      "limited": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-137-limited-continued.npz",
+          "bounding_flux": 0.2004800315584497,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.15475027268857716,
+          "psi_axis": 1.7730922386053278,
+          "psi_limiter": 0.2004800315584497,
+          "psi_saddle": 0.045729758869872544,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.3476505585751282,
+            -1.2648218001426834
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-137-limited-default.npz",
+          "bounding_flux": 0.2004800315584497,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.15475027268857716,
+          "psi_axis": 1.7730922386053278,
+          "psi_limiter": 0.2004800315584497,
+          "psi_saddle": 0.045729758869872544,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.3476505585751282,
+            -1.2648218001426834
+          ]
+        }
+      }
+    },
+    "144": {
+      "diverted": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-144-diverted-continued.npz",
+          "bounding_flux": 0.8402287880612967,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.3077288202234124,
+          "psi_axis": 1.4819633600848017,
+          "psi_limiter": 0.8402287880612967,
+          "psi_saddle": 0.5324999678378843,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.3818272352218621,
+            -1.0605466365814207
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-144-diverted-default.npz",
+          "bounding_flux": 0.8402287880612967,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.3077288202234124,
+          "psi_axis": 1.4819633600848017,
+          "psi_limiter": 0.8402287880612967,
+          "psi_saddle": 0.5324999678378843,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.3818272352218621,
+            -1.0605466365814207
+          ]
+        }
+      }
+    },
+    "146": {
+      "diverted": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-146-diverted-continued.npz",
+          "bounding_flux": 3.560302056733207,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.25,
+            1.3629900217056274
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 5.50068650146073,
+          "psi_axis": 6.4677956022348075,
+          "psi_limiter": 3.560302056733207,
+          "psi_saddle": -1.940384444727523,
+          "recorded_achieved_class": "limited",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": false,
+          "saddle_rz_m": [
+            0.9659008781186249,
+            -0.21651800635152724
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-146-diverted-default.npz",
+          "bounding_flux": 3.560302067600579,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.25,
+            1.3629900217056274
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 5.500686511951512,
+          "psi_axis": 6.467795600069267,
+          "psi_limiter": 3.560302067600579,
+          "psi_saddle": -1.9403844443509337,
+          "recorded_achieved_class": "limited",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": false,
+          "saddle_rz_m": [
+            0.9659008781854801,
+            -0.21651800656311115
+          ]
+        }
+      },
+      "limited": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-146-limited-continued.npz",
+          "bounding_flux": 0.05823757069719413,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.15581206095738961,
+          "psi_axis": 1.8631766146422155,
+          "psi_limiter": 0.05823757069719413,
+          "psi_saddle": -0.09757449026019549,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.353081165307548,
+            -1.2499318861226647
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-146-limited-default.npz",
+          "bounding_flux": 0.05823757069719413,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.15581206095738961,
+          "psi_axis": 1.8631766146422155,
+          "psi_limiter": 0.05823757069719413,
+          "psi_saddle": -0.09757449026019549,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.353081165307548,
+            -1.2499318861226647
+          ]
+        }
+      }
+    },
+    "179": {
+      "diverted": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-179-diverted-continued.npz",
+          "bounding_flux": -0.3076643397900342,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 1.0338937551360017,
+          "psi_axis": 0.03648926310745091,
+          "psi_limiter": -0.3076643397900342,
+          "psi_saddle": -1.341558094926036,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.4231192697567516,
+            -1.0952213561144473
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-179-diverted-default.npz",
+          "bounding_flux": -0.3076643397900342,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.161620020866394,
+            -1.3589400053024292
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 1.0338937551360017,
+          "psi_axis": 0.03648926310745091,
+          "psi_limiter": -0.3076643397900342,
+          "psi_saddle": -1.341558094926036,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.4231192697567516,
+            -1.0952213561144473
+          ]
+        }
+      },
+      "limited": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-179-limited-continued.npz",
+          "bounding_flux": -1.39058171645734,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.169819951057434,
+            1.3629900217056274
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.15698489871133714,
+          "psi_axis": -0.1831241368642303,
+          "psi_limiter": -1.39058171645734,
+          "psi_saddle": -1.547566615168677,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": false,
+          "saddle_rz_m": [
+            1.4234294847819955,
+            1.1722875773666088
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-179-limited-default.npz",
+          "bounding_flux": -1.39058171645734,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.169819951057434,
+            1.3629900217056274
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.15698489871133714,
+          "psi_axis": -0.1831241368642303,
+          "psi_limiter": -1.39058171645734,
+          "psi_saddle": -1.547566615168677,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": false,
+          "saddle_rz_m": [
+            1.4234294847819955,
+            1.1722875773666088
+          ]
+        }
+      }
+    },
+    "44": {
+      "diverted": {
+        "continued": {
+          "achieved_class": "limited",
+          "archive": "frame-44-diverted-continued.npz",
+          "bounding_flux": 0.3419070577144827,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.4277000427246094,
+            -1.3578200340270996
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.39170219284679164,
+          "psi_axis": 1.5380463394995416,
+          "psi_limiter": 0.3419070577144827,
+          "psi_saddle": -0.049795135132308904,
+          "recorded_achieved_class": "limited",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.5752974999992693,
+            -1.1513129555353323
+          ]
+        },
+        "default": {
+          "achieved_class": "limited",
+          "archive": "frame-44-diverted-default.npz",
+          "bounding_flux": 0.3419070577144827,
+          "bounds": "limiter",
+          "contact_rz_m": [
+            1.4277000427246094,
+            -1.3578200340270996
+          ],
+          "fraction_of_axis_flux": 1.0,
+          "limiter_points_sampled": 84,
+          "margin": 0.39170219284679164,
+          "psi_axis": 1.5380463394995416,
+          "psi_limiter": 0.3419070577144827,
+          "psi_saddle": -0.049795135132308904,
+          "recorded_achieved_class": "limited",
+          "requested_class": "diverted",
+          "saddle_inside_limiter": true,
+          "saddle_rz_m": [
+            1.5752974999992693,
+            -1.1513129555353323
+          ]
+        }
+      },
+      "limited": {
+        "continued": {
+          "achieved_class": "diverted",
+          "archive": "frame-44-limited-continued.npz",
+          "bounding_flux": 0.47904862050232916,
+          "bounds": "separatrix",
+          "contact_rz_m": [
+            1.169819951057434,
+            1.3629900217056274
+          ],
+          "fraction_of_axis_flux": 0.8285668653945204,
+          "limiter_points_sampled": 84,
+          "margin": 0.25057997068926086,
+          "psi_axis": 1.6901462377888263,
+          "psi_limiter": 0.22846864981306828,
+          "psi_saddle": 0.47904862050232916,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": false,
+          "saddle_rz_m": [
+            1.1050653234744223,
+            1.563153605653375
+          ]
+        },
+        "default": {
+          "achieved_class": "diverted",
+          "archive": "frame-44-limited-default.npz",
+          "bounding_flux": 0.47904862050232916,
+          "bounds": "separatrix",
+          "contact_rz_m": [
+            1.169819951057434,
+            1.3629900217056274
+          ],
+          "fraction_of_axis_flux": 0.8285668653945204,
+          "limiter_points_sampled": 84,
+          "margin": 0.25057997068926086,
+          "psi_axis": 1.6901462377888263,
+          "psi_limiter": 0.22846864981306828,
+          "psi_saddle": 0.47904862050232916,
+          "recorded_achieved_class": "diverted",
+          "requested_class": "limited",
+          "saddle_inside_limiter": false,
+          "saddle_rz_m": [
+            1.1050653234744223,
+            1.563153605653375
+          ]
+        }
+      }
+    }
+  }
+}

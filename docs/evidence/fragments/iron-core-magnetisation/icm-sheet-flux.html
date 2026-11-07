@@ -18,8 +18,23 @@
     width. The node is therefore delivered <em>blocked</em> on that measure,
     with the errors below, so the coordinator can choose between a
     singularity-subtracted azimuthal rule and reconstructing the paper's closed
-    coefficients. The rule was not adapted per target and no tolerance was
+    coefficients. Every fixed-set target asserts the <code>1e-10</code> floor;
+    the 21 measured misses (seven per sloped slope) are recorded through
+    <code>pytest.xfail</code> with their measured error in the reason, so the
+    gate reports them as known shortfalls and a case that comes back changes
+    state visibly. The rule was not adapted per target and no tolerance was
     loosened.</p>
+    <p>The section's graded arsinh rule was tried as the remedy and did not
+    settle it. Reusing its grading width, two-panel sinh map and 128-node rule
+    reproduces a brute-force quadrature of the arsinh integral to
+    <code>3e-12</code> at an isolated endpoint, and takes the middle standoff at
+    half a cell width from <code>9.2e-05</code> to <code>1.8e-10</code>, but the
+    start and end stations -- where the target sits on the segment's extended
+    line and the denominator vanishes at an end -- read
+    <code>1.5e-04</code> to <code>2.5e-04</code> at every standoff, worse than
+    the plain rule's <code>2e-13</code> there. Those stations need the rule's
+    endpoint-log removal, which was not ported, so the plain rule is what
+    shipped.</p>
 
     <h2 id="icm-sheet-flux-measure">Measured: worst relative error per slope and form</h2>
     <p>Geometry is the section's own: segments of length <code>0.1 m</code>

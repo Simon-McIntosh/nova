@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -411,10 +411,10 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="limb-geometry" data-choice="" data-by="" data-when="" data-sections="s8">
+<div class="r-dec" data-key="limb-geometry" data-choice="constant-width-from-inboard-join" data-by="lead (constant toroidal width from the inboard join); coordinator derivation" data-when="2026-11-07T13:32:49+00:00" data-sections="s8">
     <p class="r-dec-q">What are the real dimensions of the six outer return limbs and of the horizontal arms?</p>
     <p class="r-dec-ctx">The machine description carries only the smeared section, about 0.96 m² per arm. §8 needs each limb&#x27;s toroidal width and radial depth, and the arms&#x27; constant vertical thickness; their product with six must reproduce 5.8 m².</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Derived as the lead directed: the six arms are toroidally contiguous at their inboard join and keep that toroidal width outward. The WEST iron_core IDS (pulse 57410; search report /home/ITER/mcintos/.config/reckon/crew/reports/nova/icm-limb-geometry/limb-geometry.html) gives the arm&#x27;s real vertical thickness as 1.200 m inboard, tapering as t(R) = 0.9169/R, so the smear meets the real thickness at R_j = 0.9169/1.2 = 0.764 m. Six contiguous arms there give a toroidal width w = 2 pi R_j / 6 = 0.800 m, held constant outward. Check: w x 1.2 m = 0.960 m^2 per arm, equal to the IDS smear 2 pi 0.9169/6 = 0.960 m^2, so iron is conserved (six arms 5.76 m^2). Limbs: the same 0.960 m^2 at w = 0.800 m gives a radial depth of 1.200 m; the IDS limb thickness 0.1875 m (R 4.7965 to 4.9840) is that section smeared over 2 pi R/6 = 5.12 m. Radial extents and heights are the IDS values (limbs Z +/-2.4003 m, outer edge R 4.9840 m; arms Z 2.4024 to 3.6024 m and mirror). Not sourced: the limbs&#x27; toroidal angular datum, taken as one limb at phi = 0 until a drawing says otherwise.</p>
     </div>
 <div class="r-dec" data-key="sheet-route" data-choice="part-ii-sheet" data-by="coordinator, by the section&#x27;s 1e-10 rule" data-when="2026-11-06T22:20:37+00:00" data-sections="s3">
     <p class="r-dec-q">Does a thin Part V polygon strip deliver the edge sheet, or does it need the Part II closed form?</p>

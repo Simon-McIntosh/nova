@@ -5,6 +5,13 @@
   ],
   "added_failures_note": "Derived from the reviewed run's own arm logs, not its prose. baseline_suite and after_suite in manifest.md arm only tests/biot/test_edge_term_tangents.py: FAILED ids are 11 at base and 11 at head, head-only test_tangent_compiles_within_bound[second_residual] against base-only test_tangent_compiles_within_bound[channel_split]. The vertex arms are recorded in test_logs only; comparing gate/base-test_vertex_term_tangents.log and gate/head-test_vertex_term_tangents.log gives the same 5 ids in both arms and adds none. Ten of the eleven edge failures are shared, five of them test_tangent_compiles_within_bound timeouts on compile-bound rows.",
   "completed_at": "2026-11-07T03:02:12.296Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "the confinement half of the goal was measured on H200, titan and CPU and refuted; the node lands as the consolidation, recorded as such in its fragment",
+      "recorded_at": "2026-11-07T03:08:29.956430+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T02:52:53Z",
   "findings": [
     {

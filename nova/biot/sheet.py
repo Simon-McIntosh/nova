@@ -253,10 +253,9 @@ class SheetFlux:
         Gamma = a1sq * gamma + b1 * W
         arsinh = np.arcsinh(Gamma / np.sqrt(denominator))
         smear = r1 + b1 * b1 * r * cosine
-        # the numerator of d(arsinh beta_1)/dx, contracted so the target level
-        # with the segment end does not divide zero by zero; the derivative is
-        # this over ``B_1 E_1^2``, and ``E_1 = a_1 D``
-        pole_weight = 1.0 / (a1 * dense)
+        # the pole coefficient of d(arsinh beta_1)/dx, contracted so the target
+        # level with the segment end does not divide zero by zero; ``E_1`` is
+        # ``a_1 D``, so this over the shared azimuth scale is exact
         gamma_pole = a1sq * (W * (rp - r * cosine) + r * r * sine_sq) / denominator
         radial_pole = (
             -b1 * cosine * denominator
@@ -271,11 +270,11 @@ class SheetFlux:
         # the weighted flux integral cannot stand in for it here
         arsinh_plain = float(np.sum(rule * cosine * arsinh))
         arsinh_gamma = -b1 * arsinh_plain + float(
-            np.sum(rule * cosine * smear * gamma_pole * pole_weight)
+            np.sum(rule * cosine * smear * gamma_pole / (a1 * dense))
         )
         arsinh_radial = b1 * b1 * float(
             np.sum(rule * cosine * cosine * arsinh)
-        ) + float(np.sum(rule * cosine * smear * radial_pole * pole_weight))
+        ) + float(np.sum(rule * cosine * smear * radial_pole / (a1 * dense)))
 
         value = a1 * b1 * root + arsinh_term
         gamma_value = a1 * b1 * root_gamma + arsinh_gamma

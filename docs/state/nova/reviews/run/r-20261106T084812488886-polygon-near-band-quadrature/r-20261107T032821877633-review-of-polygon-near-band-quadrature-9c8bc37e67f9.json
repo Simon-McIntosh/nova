@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "the only source delta between the armed head 03ef34709 and 9c8bc37e6 is the paired-and-weighted ValueError, which no caller reaches",
       "recorded_at": "2026-11-07T03:43:55.323204+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the added row is a compile-ratio excursion: six fresh-process ratios read 2.51-2.76 against the 3.0 bound with identical equation counts",
+      "recorded_at": "2026-11-07T03:44:05.587572+00:00"
     }
   },
   "findings": [

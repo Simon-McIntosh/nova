@@ -102,6 +102,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-forward-convergence-662e53a98e4d",
+      "recorded_at": "2026-11-07T04:16:43.827640+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",

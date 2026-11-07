@@ -4,8 +4,10 @@ Two sources are read and nothing is re-solved here.  The banked partial receipt
 carries, for every gate frame, the executed branch trips of the branch the bank
 kept, both seeds' terminal residuals and each terminal's achieved topology.  The
 measurement file, when one is given, carries the both-branch descent this node
-ran: the per-promotion relative residual and mask difference, the accepted and
-attempted step counts, and the plasma-presence read of each arm.
+ran: the per-promotion relative residual and mask difference, the executed
+inner-step tally of each arm (the solver's own promotion counts are published on
+its fixed point result and are not in the stored record), and the
+plasma-presence read of each arm.
 
 Every number in the output is quoted with the path it came from, and a field the
 sources do not carry is left absent rather than filled with a plausible value.
@@ -40,6 +42,8 @@ def _arm_summary(arm: dict[str, Any]) -> dict[str, Any]:
         "mask_history": arm.get("mask_history"),
         "attempted_promotions": arm.get("attempted_promotions"),
         "accepted_promotions": arm.get("accepted_promotions"),
+        "promotion_counts_measured": arm.get("promotion_counts_measured"),
+        "inner_step_trace": arm.get("inner_step_trace"),
         "globalisation_factors": arm.get("globalisation_factors"),
         "termination_reason": arm.get("termination_reason"),
         "active_set_iterations": arm.get("active_set_iterations"),

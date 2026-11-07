@@ -77,6 +77,105 @@ def _wall_distance(boundary: np.ndarray, wall: np.ndarray) -> dict[str, Any]:
     }
 
 
+ACCEPTED_DECISIONS = frozenset({1, 2, 3, 4})
+REFUSED_DECISIONS = frozenset({5, 6})
+NOT_EXECUTED_DECISION = -1
+
+
+def _inner_step_counts(decisions, factors, fixed_point) -> dict[str, Any]:
+    """Return the solver's own promotion counts beside the executed-step tally.
+
+    ``receipt.globalisation_decisions`` is a fixed-shape trace padded with
+    ``InnerIterationDecision.NOT_EXECUTED`` and a nan applied factor, so its
+    length is the padding rather than the work done: counting it reports every
+    slot as an attempted and an accepted promotion whether the solve ran one
+    inner step or twenty-four. The solver accumulates the real counts while it
+    runs and publishes them on the fixed point result, so those are read
+    directly and the trace is tallied over its executed rows only, to
+    cross-check them and to report the damping that was applied.
+    """
+
+    codes = [int(value) for value in np.asarray(decisions).ravel()]
+    applied = np.asarray(factors, dtype=float).ravel()
+    executed = [code for code in codes if code != NOT_EXECUTED_DECISION]
+    return {
+        "attempted_promotions": int(
+            getattr(fixed_point, "attempted_newton_promotions", 0)
+        ),
+        "accepted_promotions": int(
+            getattr(fixed_point, "accepted_newton_promotions", 0)
+        ),
+        "inner_step_trace": {
+            "slots": len(codes),
+            "executed": len(executed),
+            "accepted": sum(code in ACCEPTED_DECISIONS for code in executed),
+            "refused": sum(code in REFUSED_DECISIONS for code in executed),
+            "damped": int(np.count_nonzero(np.isfinite(applied) & (applied != 1.0))),
+        },
+    }
+
+
+def _counters_self_check() -> int:
+    """Drive the promotion counter on traces whose answer is known by hand."""
+
+    class Stub:
+        attempted_newton_promotions = 2
+        accepted_newton_promotions = 2
+
+    nan = float("nan")
+    cases = (
+        ("padded only", [NOT_EXECUTED_DECISION] * 24, [nan] * 24, (0, 0, 0, 0)),
+        (
+            "two accepted",
+            [1, 2, NOT_EXECUTED_DECISION, NOT_EXECUTED_DECISION],
+            [1.0, 1.0, nan, nan],
+            (2, 2, 0, 0),
+        ),
+        (
+            "refused and damped",
+            [5, 1, NOT_EXECUTED_DECISION],
+            [0.25, 1.0, nan],
+            (2, 1, 1, 1),
+        ),
+    )
+    failures = []
+    for name, decisions, factors, wanted in cases:
+        counts = _inner_step_counts(decisions, factors, Stub())
+        trace = counts["inner_step_trace"]
+        reading = (
+            trace["executed"],
+            trace["accepted"],
+            trace["refused"],
+            trace["damped"],
+        )
+        verdict = "ok" if reading == wanted else f"FAIL expected {wanted}"
+        print(
+            f"{name:20s} executed={trace['executed']} accepted={trace['accepted']}"
+            f" refused={trace['refused']} damped={trace['damped']}"
+            f" solver=({counts['attempted_promotions']},"
+            f"{counts['accepted_promotions']}) {verdict}"
+        )
+        if reading != wanted:
+            failures.append(name)
+        elif (counts["attempted_promotions"], counts["accepted_promotions"]) != (2, 2):
+            print(f"{name:20s} FAIL the solver counts were not read")
+            failures.append(name + ":solver")
+    padding = [NOT_EXECUTED_DECISION] * 24
+    previous_attempted = len(padding)
+    previous_accepted = sum(1 for value in padding if value)
+    print(
+        f"the previous rule reads this all-padding trace as attempted="
+        f"{previous_attempted} accepted={previous_accepted}, which is the padding"
+    )
+    if previous_accepted == 0:
+        failures.append("padding")
+    if failures:
+        print(f"REFUSED {failures}")
+        return 1
+    print("COUNTERS SELF CHECK OK")
+    return 0
+
+
 def _prepare_frame(frame: int, expansion: float):
     """Return the frame's row, profile, seed portfolio and conductor current."""
 
@@ -261,10 +360,7 @@ def _record_receipt(receipt, wall_seconds, prepared, topology_class) -> dict[str
         "amplitude_history": _finite_list(receipt.amplitude_history),
         "globalisation_decisions": _finite_list(decisions),
         "globalisation_factors": _finite_list(factors),
-        "attempted_promotions": len(_finite_list(factors)),
-        "accepted_promotions": int(
-            sum(1 for value in _finite_list(decisions) if value)
-        ),
+        **_inner_step_counts(decisions, factors, equilibrium.fixed_point),
         "termination_reason": int(receipt.termination_reason),
         "qualified": bool(np.asarray(receipt.qualified)),
         "terminal_residual": terminal if np.isfinite(terminal) else None,
@@ -582,7 +678,7 @@ def main() -> None:
     arguments = parser.parse_args()
     if arguments.self_check:
         _self_check()
-        return
+        raise SystemExit(_counters_self_check())
     if not arguments.frames or arguments.output is None:
         parser.error("--frames and --output are required unless --self-check is given")
     configure_dtypes()

@@ -400,6 +400,7 @@ def _artifact_grid(archive: Path) -> dict[str, np.ndarray]:
             "height": height,
             "label": _oriented(np.asarray(data["label"], dtype=float), radius, height),
             "wall": np.asarray(data["wall"], dtype=float),
+            "limiter": np.asarray(data["limiter"], dtype=float),
             "label_boundary": np.asarray(data["label_boundary"], dtype=float),
             "key": np.asarray(keys[0]),
         }
@@ -479,7 +480,12 @@ def render_measured_frame(
 
     grid = _artifact_grid(artifact)
     radius, height = grid["radius"], grid["height"]
+    # ``wall`` is the rectangular bound of the EFIT grid the solve was posed in;
+    # ``limiter`` is the governed DIII-D limiter ring from the machine
+    # description.  The physical claim ("the plasma is inside the vessel") is a
+    # statement about the limiter, and a rectangle cannot support it.
     wall = grid["wall"]
+    limiter = grid["limiter"]
     flux, label = grid["flux"], grid["label"]
     measured = receipt_frame["measured"]["branches"]["diverted"]["arms"]["default"]
     terminal_residual = measured.get("terminal_residual")
@@ -489,7 +495,14 @@ def render_measured_frame(
     solved_x = np.asarray(measured.get("x_point_rz_m") or [], dtype=float).reshape(
         -1, 2
     )
-    label_axis = _lattice_extremum(radius, height, label, wall)
+    label_axis = np.asarray(
+        (receipt_frame.get("measured") or {}).get("label_axis_rz_m") or [],
+        dtype=float,
+    )
+    if label_axis.size != 2:
+        # The lattice extremum is a fallback only: on these fields it lands on an
+        # edge artefact, so the recorded EFIT axis is what the panel marks.
+        label_axis = _lattice_extremum(radius, height, label, wall)
 
     figure, axes = plt.subplots(figsize=(14.0, 7.2))
     figure.subplots_adjust(left=0.03, right=0.97, top=0.85, bottom=0.13)
@@ -532,12 +545,12 @@ def render_measured_frame(
         wall=wall,
     )
     axis_inside = (
-        bool(inside_wall_units(solved_axis[None, :], wall)[0])
+        bool(inside_wall_units(solved_axis[None, :], limiter)[0])
         if solved_axis.size
         else False
     )
     inside = (
-        np.asarray(inside_wall_units(solved_x, wall), dtype=bool)
+        np.asarray(inside_wall_units(solved_x, limiter), dtype=bool)
         if solved_x.size
         else np.zeros(0, dtype=bool)
     )
@@ -546,12 +559,32 @@ def render_measured_frame(
         axes,
         magnetic_axis=solved_axis if solved_axis.size else None,
         x_points=solved_x[inside] if solved_x.size else None,
-        contain=wall,
+        contain=limiter,
         other_x_points=np.concatenate(others) if others else None,
     )
-    draw_wall(axes, wall[:, 0], wall[:, 1], close=True)
-    axes.set_xlim(float(wall[:, 0].min()) - 0.15, float(wall[:, 0].max()) + 0.15)
-    axes.set_ylim(float(wall[:, 1].min()) - 0.15, float(wall[:, 1].max()) + 0.15)
+    draw_wall(axes, limiter[:, 0], limiter[:, 1], close=True)
+    axes.plot(
+        np.append(wall[:, 0], wall[0, 0]),
+        np.append(wall[:, 1], wall[0, 1]),
+        color="#929292",
+        linewidth=1.0,
+        linestyle=(0, (2, 3)),
+        zorder=2,
+    )
+    axes.plot(
+        label_axis[0],
+        label_axis[1],
+        marker=DEFAULT_INK.axis_marker,
+        markerfacecolor="none",
+        markeredgecolor=DEFAULT_INK.contour_color,
+        markeredgewidth=DEFAULT_INK.xpoint_markeredgewidth,
+        markersize=DEFAULT_INK.axis_markersize,
+        linestyle="none",
+        zorder=6,
+    )
+    extent = np.vstack([limiter, wall])
+    axes.set_xlim(float(extent[:, 0].min()) - 0.05, float(extent[:, 0].max()) + 0.05)
+    axes.set_ylim(float(extent[:, 1].min()) - 0.05, float(extent[:, 1].max()) + 0.05)
 
     handles = [
         plt.Line2D(
@@ -576,7 +609,21 @@ def render_measured_frame(
         _null_handle(
             DEFAULT_INK.axis_marker, False, DEFAULT_INK.contour_color, "label axis"
         ),
-        plt.Line2D([], [], color=DEFAULT_INK.wall_color, lw=1.4, label="first wall"),
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.wall_color,
+            lw=1.4,
+            label="DIII-D limiter (wall)",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color="#929292",
+            lw=1.0,
+            ls=(0, (2, 3)),
+            label="grid domain bound",
+        ),
     ]
     if not axis_inside and solved_axis.size:
         axes.plot(
@@ -606,6 +653,8 @@ def render_measured_frame(
         f"diverted terminal residual {terminal_residual:.3e}",
         f"converged {str(converged).lower()}",
         f"axis R={solved_axis[0]:.3f} Z={solved_axis[1]:+.3f} m",
+        "axis inside limiter "
+        + ("yes" if axis_inside else "NO (plasma outside the vessel)"),
         f"{cells} closed core cells",
         f"confined current {ratio:.3f}x target"
         if ratio is not None
@@ -645,7 +694,7 @@ def render_measured_frame(
         "terminal_residual": terminal_residual,
         "converged": converged,
         "solved_axis_rz_m": solved_axis.tolist(),
-        "solved_axis_inside_wall": axis_inside,
+        "solved_axis_inside_limiter": axis_inside,
         "closed_core_cells": cells,
         "confined_to_current_ratio": ratio,
         "flux_grid_key": str(grid["key"]),

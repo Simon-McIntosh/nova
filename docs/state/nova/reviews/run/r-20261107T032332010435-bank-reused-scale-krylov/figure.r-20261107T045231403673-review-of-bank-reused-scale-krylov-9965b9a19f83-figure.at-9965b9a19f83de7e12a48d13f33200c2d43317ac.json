@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_check": "The figcaption is not a restatement of the title: it names the log axis, the fact that the product never falls below one assembly, and the resulting 50-118 assembly range for forty products. No finding.",
+  "completed_at": "2026-11-07T05:00:37.132Z",
+  "dispatched_at": "2026-11-07T04:54:25Z",
+  "figures_reviewed": [
+    "image-0.png"
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/figure.py",
+      "id": "f89a8b4567b",
+      "line": 93,
+      "severity": "non-blocking",
+      "summary": "The legend is placed at loc='lower right' inside an axes that constrained layout drives to within 3-4 px of the canvas border, so in the rendered PNG the legend's rightmost glyph ends at column 1396 of 1400 - flush with the edge rather than clipped. A reader sees the legend touching the figure boundary, and any downstream crop or rescale of the image will cut it. The margin measured on the rendered PNG is 1396 of 1399 columns; nothing is lost today, but the placement has no slack."
+    },
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/figure.py",
+      "id": "fae2f10e8cf",
+      "line": 85,
+      "severity": "non-blocking",
+      "summary": "The bars are drawn on a logarithmic x-axis starting at 20 ms, so bar length encodes log(value/20) rather than the value: the 36 ms and 107 ms bars look about 60% apart although the ratio is 2.9, and the 1189 ms bar looks roughly twice the 36 ms bar although it is 32 times it. The numeric labels carry the true values, so the comparison the record turns on (product against assembly within a row) is still readable; but a reader who reads bar length rather than the labels will underestimate every ratio, and a horizontal bar chart is the one mark whose length normally means magnitude."
+    },
+    {
+      "file": "scripts/prototypes/bank_reused_scale_krylov/figure.py",
+      "id": "f12893a4d72",
+      "line": 42,
+      "severity": "non-blocking",
+      "summary": "The canvas is 14.0 x 5.2 in and the style is hand-rolled rcParams with two hardcoded hex fills, where the repository's figure standard declares one 14 x 7.2 in slide canvas and one shared data-ink style module holding the component colours. The rendered result is visually consistent with the rules, so nothing is unreadable; the cost is that this figure will not track a repository-wide restyle, and its colours name no role."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-reused-scale-krylov/break-even.svg",
+      "id": "ff7a66bdcef",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure does not carry the plot the section brief names - wall per slice against width, base against head, log-log, with the 1 ms target. It instead plots device ms per call for one assembly and one product, which is the quantity the refusal turns on. That substitution is defensible because the run implemented nothing and therefore has no head arm to compare, but a reader arriving from the brief will not find the 1 ms target or a base-versus-head series anywhere in the figure, and the two figures answer different questions."
+    }
+  ],
+  "notes": "Read only. The single attached PNG (image-0.png, 1400x520) was opened and inspected; no SVG, script output or other image was read for the verdict. Line anchors are to scripts/prototypes/bank_reused_scale_krylov/figure.py at the reviewed head.",
+  "project": "nova",
+  "review_run_id": "r-20261107T045231403673-review-of-bank-reused-scale-krylov-9965b9a19f83-figure",
+  "reviewed_base_sha": "83badf86af2072ec0d83497665410cc052692fa6",
+  "reviewed_head_sha": "9965b9a19f83de7e12a48d13f33200c2d43317ac",
+  "reviewed_run_id": "r-20261107T032332010435-bank-reused-scale-krylov",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass - value labels are dark grey (#3a3a3a) and the product annotations the same blue as their bar (#2e6f9e, about 5:1 against white), tick labels near-black; every text element reads clearly against the white canvas.",
+    "data_ink": "pass - the six bars are the only filled area and they are the measurement; the annotations and the single log axis scale are all the ink beyond them, with no gridlines or shading.",
+    "decoration": "pass - flat solid fills in two colours, no gradient, no background panel, top and right spines removed, no suptitle and no drop shadow.",
+    "label_collision": "pass - no label is clipped, and no two labels overlap; each value label starts about 17 px right of its own bar end and sits on its own row half, and the legend occupies empty space beyond the longest bar. The legend's text does, however, end 4 px from the canvas edge (see findings).",
+    "legibility": "pass - three rows, each labelled at the axis ('16 slices, fused', '16 slices, lane-sequential', '128 slices, lane-sequential'), two bars per row and a numeric device-time label beside every bar end; the reader gets each arm's value without measuring a bar.",
+    "table_form": "pass - the six numbers are also a table's worth of data, but the figure's job is the within-row ratio (product against assembly), which a log axis shows as a length difference and a table would not; the values are annotated for the reader who needs exact numbers."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T05:00:41.434395+00:00",
+  "total": null
+}

@@ -2460,6 +2460,12 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
     the file with one render's own keys drops all of that, so a key this path
     does not own is kept, and a mapping present on both sides is merged rather
     than overwritten.
+
+    The ``render`` block is the exception: it describes one run of one command,
+    so a re-render replaces it.  The block it displaces is kept once under
+    ``superseded`` with any ``superseded`` it already carried removed, because
+    merging the two as mappings would nest a predecessor under a predecessor
+    and a reader could no longer tell which run produced the file.
     """
     if not path.exists():
         return record
@@ -2472,6 +2478,15 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
     for key, value in existing.items():
         if key not in record:
             record[key] = value
+        elif (
+            key == "render"
+            and isinstance(value, dict)
+            and isinstance(record[key], dict)
+        ):
+            record[key] = {
+                **record[key],
+                "superseded": {k: v for k, v in value.items() if k != "superseded"},
+            }
         elif isinstance(value, dict) and isinstance(record[key], dict):
             record[key] = {**value, **record[key]}
     return record

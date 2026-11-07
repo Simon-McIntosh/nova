@@ -386,6 +386,41 @@ def test_the_label_check_measures_a_broken_figure():
     assert counts["clipped_labels"] >= 1
 
 
+def test_a_re_render_replaces_its_render_block_and_keeps_one_superseded(
+    tmp_path: Path,
+):
+    """A second render keeps the provenance and displaces one render block.
+
+    The receipt carries what a render cannot rediscover -- the state archive and
+    its digest -- so merging must not replace the file.  The ``render`` block
+    describes one run, so it is replaced rather than merged: merging it would
+    nest each predecessor inside the last and leave no way to tell which run
+    produced the figure.
+    """
+    import benchmarks.coil_edit_latency as renderer
+
+    path = tmp_path / "panel-receipt.json"
+    path.write_text(
+        json.dumps(
+            {
+                "state_archive": "panel-states.npz",
+                "state_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+                "render": {
+                    "job_id": "1308065",
+                    "superseded": {"job_id": "1308034", "superseded": {"job_id": "1"}},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    merged = renderer._merge_receipt(path, {"render": {"job_id": "1308093"}})
+    assert merged["state_archive"] == "panel-states.npz"
+    assert merged["state_archive_md5"] == "da0da1ec0d5515befa0bbd9e614e7fb0"
+    assert merged["render"]["job_id"] == "1308093"
+    assert merged["render"]["superseded"]["job_id"] == "1308065"
+    assert "superseded" not in merged["render"]["superseded"]
+
+
 def test_the_panel_map_reproduces_the_operator_raster_image():
     """A state's panel map equals the operator's own raster at the nodes."""
     profile, lattice = _profile()

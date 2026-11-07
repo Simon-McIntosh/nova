@@ -38,9 +38,57 @@ the rejected-arm record is in
 
 <p><code>graded_residual</code> now owns the weighted panel loop through its
 <code>weight</code> argument, and the duplicate weighted-residual implementation
-has been removed. Sirius job <code>1306798</code> ran the base suite with 82
-tests collected, then reached its 59-minute time limit during
-<code>test_edge_term_tangents.py</code>. Four failures were visible in progress
-output, but the suite did not reach a summary; the head arm did not start. The
-required base/head failure comparison is therefore incomplete.</p>
+in <code>_weighted_residual</code> has been removed.</p>
+
+<p>Sirius job <code>1307334</code> ran both arms, base
+<code>cb42f656f76a7d7e56da8a53d4754c22d131bdc0</code> and head
+<code>03ef347098ffcf16d0eecbc845bf82559b81f993</code>, with eight cores per
+step. Every step ran its file to a pytest summary line. Both arms report 16
+failures: 15 are common, and 15 of those are the 300-second pytest-timeout
+bound reached by compile-bound rows at eight cores, which is a pre-existing
+baseline condition present in both arms. One row is added at the head
+(<code>test_tangent_compiles_within_bound[second_residual]</code>, bound
+3.0, observed 3.070468781866385) and one removed
+(<code>test_tangent_compiles_within_bound[channel_split]</code>, which hit the
+timeout at base and passed at head).</p>
+
+<h3>Compile-ratio disposition for the added row</h3>
+
+<p>Three cold medians per arm, each from a fresh process spawning three
+compile probes, in one four-core <code>all_debug</code> job
+(<code>1307530</code>):</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Arm</th><th scope="col">Call 1</th><th scope="col">Call 2</th>
+    <th scope="col">Call 3</th><th scope="col">Tangent equations</th>
+    <th scope="col">Primal equations</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>base cb42f656f</td><td>2.711</td><td>2.510</td><td>2.731</td><td>15 569</td><td>5 437</td></tr>
+    <tr><td>head 03ef34709</td><td>2.757</td><td>2.754</td><td>2.761</td><td>15 569</td><td>5 437</td></tr>
+  </tbody>
+</table>
+
+<p>Both arms compile the same program: the equation counts are identical, and
+the tangent's compile CPU medians are indistinguishable (base 1.091–1.119 s
+against head 1.090–1.106 s). The ratio shift between the arms comes from the
+primal denominator, whose medians are 0.399–0.446 s at the base and
+0.395–0.402 s at the head: a marginally cheaper primal raises the ratio without
+the tangent costing more. The added row is therefore recorded as a sampling
+excursion of the estimator on an unchanged program, not a compile-cost increase
+from this change; none of the six medians is above the 3.0 bound. The bound's
+sensitivity to the host's core count is visible in the gate run itself, where
+the same program's primal compiled in 0.327 s under eight spun-up cores and
+3.07 was reported. Whether the bound or its repeat count should move is left to
+a node that owns that row; it was not widened here.</p>
+
+<h3>Negative control</h3>
+
+<p>Forcing the near-band selection to evaluate every target
+(<code>--force-all</code>, <code>all_debug</code> job <code>1307531</code>)
+reports <code>THROUGHPUT machine=MAST before_wall_ms=90.3142
+after_wall_ms=89.983 bound_ms=85.7985</code> and fails its own bound with
+<code>AssertionError</code> and <code>EXIT=1</code>, which is the refusal the
+check exists to produce.</p>
 </section>

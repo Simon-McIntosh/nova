@@ -17,27 +17,36 @@ TEST_FILES = (
 )
 
 
+def _is_summary(line: str) -> bool:
+    if line.startswith("no tests ran in "):
+        return True
+    return (
+        " in " in line
+        and bool(
+            re.search(
+                r"\b(?:passed|failed|errors?|skipped|xfailed|xpassed|deselected)\b",
+                line,
+            )
+        )
+        and (line.startswith("=") or bool(re.match(r"^\d+ ", line)))
+    )
+
+
 def _summary_reached(log_path: Path) -> bool:
+    """Return whether pytest reached its summary line before the step exited.
+
+    The step's own error line follows the summary rather than preceding it, and
+    a step can finish a whole file yet exit non-zero on the failures it
+    reported, so completion is the summary's presence and not the exit code.
+    """
     lines = [
         line.strip()
         for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines()
         if line.strip()
     ]
-    if len(lines) < 2 or not re.fullmatch(r"EXIT=-?\d+", lines[-1]):
+    if not lines or not re.fullmatch(r"EXIT=-?\d+", lines[-1]):
         return False
-    summary = lines[-2]
-    if summary.startswith("no tests ran in "):
-        return True
-    return (
-        " in " in summary
-        and bool(
-            re.search(
-                r"\b(?:passed|failed|errors?|skipped|xfailed|xpassed|deselected)\b",
-                summary,
-            )
-        )
-        and (summary.startswith("=") or bool(re.match(r"^\d+ ", summary)))
-    )
+    return any(_is_summary(line) for line in lines[-6:-1])
 
 
 def _failure_ids(log_path: Path) -> list[str]:
@@ -165,17 +174,55 @@ def _arm_receipt(revision: str, runs: list[dict]) -> dict:
     }
 
 
+def rebuild_receipts(log_root: Path) -> dict:
+    """Recompute both arm receipts from the per-file logs a completed job left."""
+    rebuilt = {}
+    for arm in ("base", "head"):
+        receipt_path = log_root / f"{arm}-receipts.json"
+        previous = json.loads(receipt_path.read_text(encoding="utf-8"))
+        runs = []
+        for item in previous["files"]:
+            log_path = Path(item["log_path"])
+            failure_ids = _failure_ids(log_path)
+            runs.append(
+                {
+                    **item,
+                    "completed": _summary_reached(log_path),
+                    "failure_count": len(failure_ids),
+                    "failure_ids": failure_ids,
+                }
+            )
+        receipt = _arm_receipt(previous["revision"], runs)
+        receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+        rebuilt[arm] = receipt
+        print(
+            f"{arm.upper()} {receipt['revision']} "
+            f"COMPLETED={receipt['completed']} "
+            f"FAILURES={receipt['failure_count']}",
+            flush=True,
+        )
+    return rebuilt
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-revision", required=True)
     parser.add_argument("--log-root", type=Path, required=True)
+    parser.add_argument(
+        "--rebuild-receipts",
+        action="store_true",
+        help="recompute both arm receipts from the per-file logs already on disk",
+    )
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     args.log_root.mkdir(parents=True, exist_ok=True)
+    if args.rebuild_receipts:
+        rebuilt = rebuild_receipts(args.log_root)
+        print(json.dumps(rebuilt, indent=2), flush=True)
+        return 0
     head_revision = subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip()
-    python = "/home/ITER/mcintos/Code/nova/.venv/bin/python"
     run_results: dict[str, dict] = {}
     with tempfile.TemporaryDirectory(
         prefix="polygon-gate-", dir=os.environ["TMPDIR"]
@@ -187,9 +234,7 @@ def main() -> int:
             env["JAX_PLATFORMS"] = "cpu"
             env["PYTHONUNBUFFERED"] = "1"
             env["PYTHONPATH"] = os.pathsep.join(
-                [str(base_overlay), str(root)]
-                if arm == "base"
-                else [str(root)]
+                [str(base_overlay), str(root)] if arm == "base" else [str(root)]
             )
             runs = []
             for test_file in TEST_FILES:

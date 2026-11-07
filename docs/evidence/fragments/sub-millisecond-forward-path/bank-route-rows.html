@@ -85,18 +85,24 @@ one they miss.</p>
 <p>That the boundary ratio is flat between 550 and 2000 cells is the informative
 part. A discretisation error would fall as the lattice refines, and this one does
 not move: 9.9 times its budget on both rows after nearly quadrupling the cell
-count, with both rows selecting the identical limiter contact at
-(7.8014, 1.1294e-1) m. What is measured is therefore not a bank resolution
-limit. Two readings are consistent with it and this instrument does not separate
-them: the route's boundary flux is the value its own terminal surface carries at
-the wall, which need not be the flux at the single wall node with the largest
-analytic value, and a one-node difference on a 60-segment wall is exactly the
-scale of 0.05 Wb seen here; or the read carries a boundary-flux offset that the
-axis point does not share. Resolving it needs the oracle to compare boundary
-fluxes at the route's own boundary point rather than at the argmax wall node,
-which is a change to this measurement and not to the route. Until that is
-measured, both limited rows are tabled as missing the boundary clause, and that
-is what the row says rather than a pass.</p>
+count. What is measured is therefore not a bank resolution limit, and the
+archived states say what it is. The oracle's contact is wall node 0 of 121 at
+(7.8014, 0.11294) m, carrying an analytic flux of &minus;0.049155 Wb. The
+route's own boundary point lies on the same wall at (7.8014, &minus;0.008344) m
+on the 550-cell row and at (7.8014, 2.433e-5) m on the 2000-cell row — 0.1213 m
+and 0.1129 m away along the wall, where the analytic flux is
+&minus;2.683e-4 Wb and &minus;2.281e-9 Wb. The difference between those two
+points is 0.0489 Wb and 0.0492 Wb, which is the 0.0496 and 0.0493 Wb the clause
+reports. So the gap is the flux drop along a twelve-centimetre stretch of wall,
+measured from the oracle's own flux maximum to the point the route calls its
+boundary: not error at a shared point, and not a single-node difference — the
+oracle's 121 wall samples are 0.225 m apart, so the route's point falls between
+two of them and is not one it could have matched. Which of the two points the
+limited row's boundary should be is a question about the topology's definition;
+this measurement reports both points and both fluxes and does not decide it.
+Both limited rows are therefore tabled as missing the boundary clause, which is
+what they miss, and the attribution above says where the difference lies
+without claiming which side is wrong.</p>
 
 <p><strong>The limited residuals sit at their own noise floor.</strong> Moving
 each converged moment by one to four representable steps, with the landed
@@ -104,11 +110,18 @@ noise-floor instrument's <code>nudged</code> imported unchanged and sixteen
 patterns per row, leaves the 550-cell fresh residual with a median of
 1.219e-10 and a maximum of 2.547e-10 against a converged baseline of
 9.641e-11, and the 2000-cell row with a median of 8.049e-11 and a maximum of
-1.201e-10 against 6.639e-11. Every perturbed read stayed valid. So the terminal
-residual is not evidence that either row stopped short of its attainable
-accuracy: a single rounding step in the converged state moves it further than
-the distance the route covered to reach its certificate, exactly as the diverted
-lanes behaved before the saddle-curvature repair. The 550-cell row's baseline of
+1.201e-10 against 6.639e-11. Every perturbed read stayed valid. Against the
+steps the routes actually recorded, the floor is comparable to the terminal
+residual but not larger than the last accepted gain: on the 550-cell row the last
+accepted step moved the residual from 6.039e-10 to 9.641e-11, a gain of
+5.07e-10, while the largest shift any single-rounding move produced is 1.58e-10
+— about a third of that gain. On the 2000-cell row the last accepted step moved
+9.177e-5 to 6.639e-11, six orders larger than its own 5.4e-11 noise span. So the
+terminal residuals are not evidence that either row stopped short of what the
+route can reach, and the noise is the same order as the certificate: a rounding
+step is worth about a third of the 550-cell row's final gain and lands inside
+the 1e-10 limit's neighbourhood, exactly as the diverted lanes behaved before the
+saddle-curvature repair. The 550-cell row's baseline of
 9.641e-11 lies between the smallest perturbed residual it produced (9.459e-11)
 and their median (1.219e-10), and its floor straddles 1e-10 — the residual limit
 stays inside this row's numerical noise, so the 9.64e-11 pass at 550 cells is a
@@ -144,12 +157,28 @@ for its own case rather than one this node can assemble from a stalled state.</p
 <figure>
 <img src="/nova/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg"
 alt="Fast-route flux contours against the analytic oracle on the diverted 550-cell row">
-<figcaption>Diverted certificate row at 550 cells. Solid: the fast route's
-converged flux. Dashed grey: the analytic oracle on shared levels. Both null
-sets are drawn — solid triangle is the fast axis, filled cross the fast X-point,
-hollow markers the oracle's — and the first wall is drawn from the case's own
-units. The two null sets sit within 7e-6 m and are drawn overlapping at this
-scale. Terminal fresh residual 1.208e-12 Wb, converged.</figcaption>
+<figcaption>Diverted certificate row at 550 cells. Solid blue: the fast route's
+converged flux. Dashed grey, drawn above it on a thinner line with a white
+casing: the analytic oracle on the same levels, so the two are distinguishable
+even where they agree to 1e-5 of the span. Both null sets are drawn — solid
+triangle is the fast axis, filled cross the fast X-point, hollow markers the
+oracle's — and the first wall is drawn from the case's own units. Axis and
+X-point sit within 7e-6 m, so each pair is drawn overlapping. Terminal fresh
+residual 1.59e-12, converged.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/sub-millisecond-forward-path/bank-route-rows/limited-550.svg"
+alt="Fast-route flux contours against the analytic oracle on the limited 550-cell row">
+<figcaption>Limited certificate row at 550 cells, same drawing convention: solid
+blue is the fast route, dashed grey above it is the analytic oracle on shared
+levels. A limited row has no X-point, so the second stationary point is drawn as
+a square — filled for the route's boundary point, hollow for the oracle's
+limiter contact — rather than with the saddle cross. The two squares overlap at
+this scale while sitting 0.121 m apart along the wall, which is the boundary
+difference the table reports. Terminal fresh residual 9.64e-11, converged, with
+the axis 1.16e-5 of the minor radius and the boundary flux 9.92e-4 of the span.
+</figcaption>
 </figure>
 
 <p><strong>The 2000-cell rows did build and converge; the 5000-cell row did
@@ -181,6 +210,8 @@ dropped.</p>
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-550.log</code> (the first limited fast route, which exits 1 at its oracle),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.log</code> and
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-2000.log</code> (the 2000-cell fast routes, two updates each),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/boundary-gap.json</code> (the two boundary points, their separation and their analytic fluxes),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-550-oracle.npz</code> and its 2000-cell equivalent (the archived limited states both panels and the boundary analysis are read from),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.npz</code> (the 2000-cell archived state; that run wrote its archive before its present arm died),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-550.npz</code> (the archived state the panel is drawn
 from), and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/final/</code> (the present arms attempted and their

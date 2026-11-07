@@ -2752,6 +2752,8 @@ class ForwardProfile:
             terminal_state=equilibrium,
             qualified=qualified,
             termination_reason=history.termination_reason,
+            attempted_newton_promotions=history.attempted_newton_promotions,
+            accepted_newton_promotions=history.accepted_newton_promotions,
             residual_history=residual_history,
             mask_history=mask_history,
             globalisation_decisions=(

@@ -348,6 +348,59 @@ class FixedPointTerminationReason(IntEnum):
     ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED = 8
     ACTIVE_SET_STAGNATED = 9
     ACTIVE_SET_SETTLED = 10
+    ACTIVE_SET_STATIONARY = 11
+    ACTIVE_SET_STEP_REFUSED = 12
+
+
+def active_set_stop_reason(
+    *,
+    converged: jax.Array | bool,
+    cycle_detected: jax.Array | bool,
+    nonfinite: jax.Array | bool,
+    stationary: jax.Array | bool,
+    step_refused: jax.Array | bool,
+    settled: jax.Array | bool,
+    stagnated: jax.Array | bool,
+) -> jax.Array:
+    """Name why the bounded active-set loop stopped.
+
+    A mask that has stopped changing does not by itself mean the fixed point
+    was reached.  ``stationary`` names a settlement whose terminal trip
+    proposed no Newton step at all, ``step_refused`` one whose terminal trip
+    proposed steps and had every one refused.  Both are reported with
+    ``converged`` false; only ``converged`` reports a state that met the
+    residual criterion.
+    """
+
+    return jnp.where(
+        converged,
+        FixedPointTerminationReason.CONVERGED,
+        jnp.where(
+            cycle_detected,
+            FixedPointTerminationReason.ACTIVE_SET_CYCLE_DETECTED,
+            jnp.where(
+                nonfinite,
+                FixedPointTerminationReason.NONFINITE_RESIDUAL,
+                jnp.where(
+                    stationary,
+                    FixedPointTerminationReason.ACTIVE_SET_STATIONARY,
+                    jnp.where(
+                        step_refused,
+                        FixedPointTerminationReason.ACTIVE_SET_STEP_REFUSED,
+                        jnp.where(
+                            settled,
+                            FixedPointTerminationReason.ACTIVE_SET_SETTLED,
+                            jnp.where(
+                                stagnated,
+                                FixedPointTerminationReason.ACTIVE_SET_STAGNATED,
+                                FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
 
 
 class FixedPointResult(NamedTuple):
@@ -630,6 +683,8 @@ class _ActiveSetIterationState(NamedTuple):
     nonfinite: jax.Array
     stagnated: jax.Array
     settled: jax.Array
+    stationary: jax.Array
+    step_refused: jax.Array
     presettlement: jax.Array
 
 
@@ -4770,6 +4825,17 @@ def _active_set_newton_krylov(
                 | (selected_residual <= convergence_tolerance)
             )
         )
+        # A settlement above tolerance names what the mask did rather than
+        # claiming the solve finished.  The terminal trip's own promotion
+        # counts separate a map that returned the state it was given without
+        # proposing a step from a step that was proposed and refused; the
+        # padded globalisation trace cannot, because its unused slots read as
+        # NOT_EXECUTED whatever the solve did.
+        terminal_attempts = jnp.asarray(
+            inner_result.attempted_newton_promotions, dtype=jnp.int32
+        )
+        stationary = settled & (terminal_attempts == 0)
+        step_refused = settled & (terminal_attempts > 0)
         if stream_active_set:
             jax.debug.callback(
                 _print_active_set_trip,
@@ -4804,6 +4870,8 @@ def _active_set_newton_krylov(
             ~selected_finite,
             stagnated,
             settled,
+            stationary,
+            step_refused,
             trajectory_state,
             continue_trajectory,
             inner_globalization,
@@ -4854,6 +4922,8 @@ def _active_set_newton_krylov(
         nonfinite=jnp.asarray(False),
         stagnated=jnp.asarray(False),
         settled=jnp.asarray(False),
+        stationary=jnp.asarray(False),
+        step_refused=jnp.asarray(False),
         presettlement=jnp.asarray(presettlement_incumbent_scoring),
     )
 
@@ -4886,6 +4956,8 @@ def _active_set_newton_krylov(
                 nonfinite,
                 stagnated,
                 settled,
+                stationary,
+                step_refused,
                 trajectory_state,
                 continue_trajectory,
                 globalization_state,
@@ -4958,6 +5030,8 @@ def _active_set_newton_krylov(
                 nonfinite=nonfinite,
                 stagnated=stagnated,
                 settled=settled,
+                stationary=stationary,
+                step_refused=step_refused,
                 presettlement=next_presettlement,
             )
 
@@ -4968,26 +5042,14 @@ def _active_set_newton_krylov(
         outer,
         jnp.arange(trip_limit),
     )
-    reason = jnp.where(
-        outer.converged,
-        FixedPointTerminationReason.CONVERGED,
-        jnp.where(
-            outer.cycle_detected,
-            FixedPointTerminationReason.ACTIVE_SET_CYCLE_DETECTED,
-            jnp.where(
-                outer.nonfinite,
-                FixedPointTerminationReason.NONFINITE_RESIDUAL,
-                jnp.where(
-                    outer.settled,
-                    FixedPointTerminationReason.ACTIVE_SET_SETTLED,
-                    jnp.where(
-                        outer.stagnated,
-                        FixedPointTerminationReason.ACTIVE_SET_STAGNATED,
-                        FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED,
-                    ),
-                ),
-            ),
-        ),
+    reason = active_set_stop_reason(
+        converged=outer.converged,
+        cycle_detected=outer.cycle_detected,
+        nonfinite=outer.nonfinite,
+        stationary=outer.stationary,
+        step_refused=outer.step_refused,
+        settled=outer.settled,
+        stagnated=outer.stagnated,
     )
     frozen_result = outer.result._replace(
         state=outer.state,

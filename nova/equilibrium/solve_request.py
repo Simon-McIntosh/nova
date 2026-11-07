@@ -739,6 +739,8 @@ class ForwardSolveReceipt:
     wall_seconds: float
     resolved_defaults: ResolvedForwardSolveDefaults
     seed_provenance: SolveSeedProvenance | None = None
+    attempted_newton_promotions: jax.Array | int = 0
+    accepted_newton_promotions: jax.Array | int = 0
 
     @property
     def equilibrium(self) -> ForwardEquilibrium:

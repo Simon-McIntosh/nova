@@ -205,7 +205,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     layout = figure.add_gridspec(2, 1, height_ratios=[6.4, 0.9], hspace=0.10)
     axes = figure.add_subplot(layout[0])
     strip = figure.add_subplot(layout[1])
-    figure.subplots_adjust(left=0.03, right=0.97, top=0.97, bottom=0.11)
+    figure.subplots_adjust(left=0.03, right=0.97, top=0.86, bottom=0.11)
     poloidal_axes(axes)
 
     draw_flux_contours(
@@ -286,7 +286,14 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         plt.Line2D([], [], marker="^", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT axis"),
         plt.Line2D([], [], marker="X", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT X-point"),
     ]
-    figure.legend(handles=handles, loc="upper center", ncol=5, frameon=False, fontsize=12)
+    figure.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.5, 0.0, 0.5),
+        ncol=5,
+        frameon=False,
+        fontsize=12,
+    )
 
     frame_rows = sorted([r for r in rows if r["frame"] == frame], key=lambda r: r["trip"])
     trips = [r["trip"] for r in frame_rows]

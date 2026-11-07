@@ -4,6 +4,13 @@
   "added_failures_note": "measured by this review: base arm b7d927c 392 passed EXIT=0, head arm 4c6e1f3d 416 passed EXIT=0, no failing id on either side",
   "completed_at": "2026-11-07T22:43:01.551Z",
   "dispatched_at": "2026-11-07T22:09:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "wording only: the control does redden on an add-the-ends regression (it returns minus the reference), only the docstring's stated mechanism is wrong; the next node that edits tests/test_edge_sheet.py corrects the docstring",
+      "recorded_at": "2026-11-07T22:57:57.606764+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_edge_sheet.py",

@@ -1,0 +1,36 @@
+{
+  "frame": 144,
+  "status": "refused: TracerArrayConversionError",
+  "detail": " requested_class, *rest\n    )\n  File \"<repository>/nova/equilibrium/topology.py\", line 1185, in read_qualification\n    (vmap_o, vmap_x), census = self.grid.read_census(null_flux)\n                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 1601, in read_census\n    census = self.candidate_census(psi)\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 1580, in candidate_census\n    return self._structured_census(psi)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 1265, in _structured_census\n    ring_mask, _seed_multiplicity = self._seed_representatives(\n                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        local_candidate, quadratic_mask, seed_uncertainty\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 1229, in _seed_representatives\n    _, representatives, multiplicities = jax.lax.while_loop(\n                                         ~~~~~~~~~~~~~~~~~~^\n        lambda state: jnp.any(state[0]),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        retain_one,\n        ^^^^^^^^^^^\n        (pending, representatives, multiplicities),\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"<repository>/nova/equilibrium/forward_operator.py\", line 1221, in retain_one\n    & (distance <= uncertainty + uncertainty[index])\n                                 ~~~~~~~~~~~^^^^^^^\njax.errors.TracerArrayConversionError: The numpy.ndarray conversion method __array__() was called on traced array with shape int32[]\nThe error occurred while tracing the function retain_one at <repository>/nova/equilibrium/forward_operator.py:1212 for while_body. This concrete value was not available in Python because it depends on the value of the argument state[0].\nSee https://docs.jax.dev/en/latest/errors.html#jax.errors.TracerArrayConversionError\n--------------------\nFor simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.\n",
+  "read_call_count": 3,
+  "calls": [
+    {
+      "call": 0,
+      "polarity": 1,
+      "requested_class": null,
+      "inside_material_cells": 1089,
+      "psi_shape": [
+        1221
+      ],
+      "psi_concrete": true
+    },
+    {
+      "call": 1,
+      "polarity": 1,
+      "requested_class": null,
+      "inside_material_cells": 1089,
+      "psi_shape": [
+        1221
+      ],
+      "psi_concrete": true
+    },
+    {
+      "call": 2,
+      "polarity": 1,
+      "requested_class": null,
+      "inside_material_cells": 1089,
+      "psi_shape": null,
+      "psi_concrete": false
+    }
+  ]
+}

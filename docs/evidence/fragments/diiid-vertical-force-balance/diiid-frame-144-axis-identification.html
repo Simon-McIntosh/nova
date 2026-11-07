@@ -1,0 +1,270 @@
+<h2>Frame 144: why the limited seed refuses at axis identification</h2>
+
+<p>Frame 144's limited-branch seed is the one refusal in the DIII-D cohort: it stops
+before any Newton promotion, while the diverted seed for the same frame reaches a
+terminal residual of <code>5.93</code> (5.927126420463732 from
+<code>probe.json</code>, <code>branches.diverted.arms.default.terminal_residual</code>). The question is whether the seed really has no
+admissible axis, or whether an axis is present and the identification rejected it.</p>
+
+<p><b>It is present.</b> The seed carries a flux maximum at
+R=1.7880&nbsp;m, Z=+0.0171&nbsp;m, <code>0.03</code>&nbsp;m from the EFIT label axis and
+<code>0.03</code>&nbsp;m from the diverted solution's axis at R=1.759, Z=+0.013, so a
+missing axis is not the explanation. Measured below, that maximum also passes every conjunct of
+the axis-admission test on the cached seed &mdash; which locates the defect in the record's
+provenance rather than in the threshold.</p>
+
+<h3>The refusal</h3>
+
+<p>Recorded in run <code>r-20261106T195054915900-diiid-forward-convergence</code>
+(<code>probe.json</code>, frame 144, <code>branches.limited</code>): <code>status: refused</code>,
+<code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>,
+with an empty <code>arms</code> map &mdash; no solve arm ran. The raising chain is</p>
+
+<figure>
+<img src="/nova/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg" alt="Frame 144 limited-branch seed flux in line contours inside the DIII-D limiter, with the six kept critical points and the EFIT label axis">
+<figcaption>Frame 144 limited-branch seed, poloidal flux in 12 line contours inside the DIII-D
+limiter. The red triangle is the flux maximum at R=1.7880&nbsp;m, Z=+0.0171&nbsp;m that the
+axis identification rejected, ringed in green; the green cross is the EFIT label axis from
+the boundary-competition receipt, 0.03&nbsp;m away. Filled crosses are the saddles that lie
+inside the limiter and hollow crosses are the four extrema and the one saddle outside it
+&mdash; all six points the local-index classification kept; every other candidate of the
+census returned index 0 and is not drawn. The six kept points sum
+to +2 against a boundary winding of 1.9994.</figcaption>
+</figure>
+
+<p>The raising call is not ambiguous: <code>forward_operator.py:3210</code> &rarr;
+<code>forward_operator.py:3182 require_qualified_axis(admitted)</code> &rarr;
+<code>topology.py:226</code> raising <code>NoQualifiedAxisError</code>.</p>
+
+<h3>The rejecting rule</h3>
+
+<p>The <code>admitted</code> bit is composed by <code>qualified_o_candidates.qualify</code>,
+<b>nova/equilibrium/topology.py:1080&ndash;1099</b>, and the comparison that rejected this
+candidate is the third conjunct at</p>
+
+<pre><code>governed_connection = governed_size &gt;= connection_floor   # topology.py:1097</code></pre>
+
+<p>The threshold is <b>nova/equilibrium/topology.py:1076&ndash;1078</b>,</p>
+
+<pre><code>connection_floor = jnp.maximum(jnp.floor(_MATERIAL_CONNECTED_FRACTION * material_cell_count), 1)</code></pre>
+
+<p>with <code>_MATERIAL_CONNECTED_FRACTION = 0.01</code> at <b>nova/equilibrium/topology.py:41</b>.
+A candidate is additionally screened at <code>topology.py:1081</code> (finite position and flux)
+and <code>topology.py:1082</code> (a resolved boundary).</p>
+
+<p><b>The values it read, measured.</b> The three conjuncts were evaluated on the cached seed
+by re-expressing the admission body once and mapping it over the whole candidate array with
+<code>jax.vmap</code>, the same way the product applies it (job <code>1308039</code>,
+<code>conjunct-144-limited-c.json</code>, script
+<code>scripts/prototypes/diiid_axis_identification/conjunct_probe.py</code>). At the candidate
+nearest the label axis the record reads</p>
+
+<table>
+<caption>Conjunct values, second qualification pass (class-aware wall data)</caption>
+<thead><tr><th>candidate (R, Z) [m]</th><th>&psi;</th><th>finite</th><th>resolved</th><th>data_b[2]</th><th>governed_size</th><th>all_open</th><th>admitted</th></tr></thead>
+<tbody>
+<tr><td>0.8987, 1.2801</td><td>0.4209</td><td>yes</td><td>yes</td><td>0.5162</td><td>1</td><td>748</td><td>no</td></tr>
+<tr><td>1.0391, &minus;1.5435</td><td>1.3028</td><td>yes</td><td>yes</td><td>0.5162</td><td>397</td><td>457</td><td><b>yes</b></td></tr>
+<tr><td>1.0048, 1.4840</td><td>0.4704</td><td>yes</td><td>yes</td><td>0.5162</td><td>1</td><td>748</td><td>no</td></tr>
+<tr><td><b>1.7868, 0.0180</b></td><td><b>1.4876</b></td><td>yes</td><td>yes</td><td>0.5162</td><td><b>397</b></td><td>457</td><td><b>yes</b></td></tr>
+<tr><td>2.4046, &minus;1.1159</td><td>&minus;2.3278</td><td>yes</td><td>yes</td><td>0.5162</td><td>1</td><td>748</td><td>no</td></tr>
+</tbody>
+</table>
+
+<p>with <code>material_cell_count = 1089</code> and therefore
+<code>connection_floor = 10</code>. Three values that settle the question:</p>
+
+<ul>
+<li><b>The candidate is admitted.</b> <code>governed_size = 397</code> against a floor of
+<code>10</code>, forty times the threshold, with a finite position and flux and a resolved
+boundary. All three conjuncts pass, in both qualification passes, and
+<code>read_qualification(&hellip;, requested_class=LIMITED)</code> returned without raising
+<code>NoQualifiedAxisError</code>.</li>
+<li><b>The closed mask is not what cuts the region.</b> Opening it takes the governed size from
+<code>397</code> to <code>457</code> cells, so the closed mask removes 60 cells and leaves the
+axis-connected region intact. The candidate is not the private well the threshold exists to
+refuse.</li>
+<li><b>The boundary the seed selects is an X-point.</b> <code>data_b[2] = 0.5162</code> equals
+the flux of the saddle at (1.3984, &minus;1.0138), which is <code>0.5164</code>; the boundary
+is therefore the separatrix the saddle defines, not a wall contact.</li>
+</ul>
+
+<p><b>The field the solve actually reads returns the same values.</b> The solve was then
+instrumented to save the field handed to <code>read_qualification</code>, and the probe was run
+on that saved field (job <code>1308066</code>, <code>conjunct-captured-field.json</code>). It
+reproduces the table above exactly: <code>requested_class</code> is <code>None</code> at that
+call site, <code>material_cell_count</code> is <code>1089</code>, the candidate at
+(1.7868, 0.0180) reads <code>governed_size = 397</code>, <code>all_open = 457</code>, and
+<code>read_qualification</code> returns without raising.</p>
+
+<p><b>What this means for the refusal, and what it does not.</b> The earlier draft of this
+fragment reported the third conjunct, <code>governed_connection</code>, as the comparison that
+rejected this axis, on the strength of <code>material_cell_count 1089</code> and a floor of
+<code>10</code>. That reading is <b>withdrawn</b>: by measurement the comparison passes
+comfortably, on the cached seed and on the field the solve reads. <b>The refusal recorded in
+<code>probe.json</code> is not reproduced by either.</b></p>
+
+<p><b>Where the instrumented reproduction stops.</b> The qualifying read is reached inside a traced solve:
+the capture records three calls, two on concrete arrays and a third on a traced one, and the
+trace then raises <code>TracerArrayConversionError</code> inside
+<code>grid.read_census</code> before any refusal can be observed. That is the instrument
+failing to follow the traced call, not a second product defect proven here &mdash; the traced
+path was never executed to completion. So the honest statement is: <b>on every field this
+investigation could capture, the axis at (1.7868, 0.0180) is admitted</b>, and the branch
+refusal record names no field from which its own refusal can be replayed.</p>
+
+
+<h3>Census</h3>
+
+<p>Located on the seed at a cubic-spline sampling of four nodes per lattice interval, classified by
+the eigenvalues of the local Hessian. Radial and vertical coordinates in metres.</p>
+
+<table>
+<caption>Census. The index column is the loop winding measured at one lattice spacing, 0.113 m; rows marked dropped read 0 there and are not part of the kept six.</caption>
+<thead><tr><th>#</th><th>kind</th><th>R [m]</th><th>Z [m]</th><th>&psi;</th><th>index</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>extremum, dropped</td><td>0.8819</td><td>1.2719</td><td>0.4216</td><td>0</td></tr>
+<tr><td>2</td><td>extremum, dropped</td><td>0.9200</td><td>1.3351</td><td>0.4160</td><td>0</td></tr>
+<tr><td>3</td><td>extremum</td><td>1.0030</td><td>1.5082</td><td>0.4683</td><td>+1</td></tr>
+<tr><td>4</td><td>extremum, dropped</td><td>1.0269</td><td>&minus;1.5422</td><td>1.2839</td><td>0</td></tr>
+<tr><td>5</td><td>extremum, dropped</td><td>1.1139</td><td>&minus;1.5810</td><td>1.2326</td><td>0</td></tr>
+<tr><td>6</td><td>saddle</td><td>1.1771</td><td>1.1581</td><td>0.3655</td><td>&minus;1</td></tr>
+<tr><td>7</td><td>saddle</td><td>1.3984</td><td>&minus;1.0138</td><td>0.5164</td><td>&minus;1</td></tr>
+<tr><td>8</td><td>saddle, dropped</td><td>1.6251</td><td>1.6058</td><td>0.2247</td><td>0</td></tr>
+<tr><td>9</td><td><b>extremum (the refused axis)</b></td><td><b>1.7880</b></td><td><b>0.0171</b></td><td>1.4870</td><td>+1</td></tr>
+<tr><td>10</td><td>extremum</td><td>2.4024</td><td>1.1143</td><td>&minus;1.5249</td><td>+1</td></tr>
+<tr><td>11</td><td>extremum</td><td>2.4061</td><td>&minus;1.1148</td><td>&minus;2.3279</td><td>+1</td></tr>
+</tbody>
+</table>
+
+<p><b>Coverage.</b> Each candidate was then classified by the winding of the gradient on a
+64-sample circle of <code>0.113</code>&nbsp;m &mdash; about one lattice spacing &mdash; around it,
+taken from the lattice central-difference gradient bilinearly interpolated between nodes, the
+same field the boundary winding is measured on. Six candidates return a nonzero index and five
+return <b>0</b>: they are zeros the refined sampling invented and are dropped.</p>
+
+<p>Kept: an extremum at (1.0030, 1.5082) <code>+1</code>, a saddle at (1.1771, 1.1581)
+<code>&minus;1</code>, a saddle at (1.3984, &minus;1.0138) <code>&minus;1</code>, the refused
+extremum at <b>(1.7880, 0.0171) <code>+1</code></b>, an extremum at (2.4024, 1.1143)
+<code>+1</code> and an extremum at (2.4061, &minus;1.1148) <code>+1</code> &mdash; sum
+<b>+2</b>. Dropped as index 0: (0.8819, 1.2719), (0.9200, 1.3351), (1.0269, &minus;1.5422),
+(1.1139, &minus;1.5810) and (1.6251, 1.6058).</p>
+
+<p><b>Coverage does not close, and the loop radius is why.</b> At the
+<code>0.113</code>&nbsp;m spacing the kept indices sum to <b>+2</b> against a
+<code>1.9994</code> boundary winding, a difference of zero. Repeated with the loop radius
+held at <code>0.018</code>&nbsp;m &mdash; below the <code>0.037</code>&nbsp;m closest
+separation of the two suspect pairs, so that a genuine pair would read as two points
+rather than none &mdash; the sum falls to <b>+1</b> against the same winding: difference
+<b>+1</b>, and the run exits nonzero. All four members of the two suspect pairs read
+<b>0</b> at that radius, and so does (1.0030, 1.5082), which reads <b>+1</b> at the
+spacing.</p>
+
+<p>A winding index is topological only while no other zero lies inside the loop, so a sum
+that changes with the loop radius is a statement about the sampling, not about the field.
+The honest reading is that the census closes at one lattice spacing and not at half of
+it, and that the difference is carried by candidates whose gradient zeros the
+bilinearly-interpolated lattice gradient does not resolve at the finer radius. The
+axis-rejection finding below does not rest on this account: it rests on the flux maximum
+at (1.7880, 0.0171), which every radius tested locates.</p>
+
+<p>The pairs are therefore <b>not</b> established as spline artefacts. What the finer
+radius shows is that the two members of each pair cannot be separated by a winding at
+this resolution at all &mdash; the classification is scale dependent and a resolution
+study, not a single radius, is what would settle them.</p>
+
+<p><b>Why the run jobs failed.</b> Job <code>1307827</code> failed after two minutes inside
+<code>census.py</code>: it reshaped the whole 1221-node state vector onto the 33&times;33 plasma
+lattice (1089 nodes), because the vector carries 132 wall nodes after the plasma nodes. Job
+<code>1307848</code> failed in seconds on a diagnostics line that named the prepared profile
+without binding it. Neither failure was in product code.</p>
+
+<h3>Does it still refuse? Yes, and this is where</h3>
+
+<p><b>The limited arm was re-run on today's code with no wrapper and no capture</b> &mdash; the
+original driver, <code>run_probe_frames.py --frames 144 --branches limited</code>, base revision
+<code>8130772bb</code>, one <code>all_debug</code> job (<code>1308081</code>, 1588&nbsp;s,
+12.2&nbsp;GB peak), reading the frame from scratch with no cached seed and no pre-built profile.
+It <b>refuses identically</b> to run <code>r-20261106T195054915900</code>:</p>
+
+<table>
+<caption>Replay against the original record</caption>
+<thead><tr><th></th><th>original, 554fcc237</th><th>replay, 8130772bb</th></tr></thead>
+<tbody>
+<tr><td>status</td><td>refused</td><td><b>refused</b></td></tr>
+<tr><td>type</td><td><code>NoQualifiedAxisError</code></td><td><code>NoQualifiedAxisError</code></td></tr>
+<tr><td>message</td><td colspan="2"><code>no qualified magnetic-axis candidate has a resolved component</code></td></tr>
+<tr><td>arms</td><td>{}</td><td>{}</td></tr>
+<tr><td>seed L2 from label</td><td>5.579888485784667</td><td>5.57988848578467</td></tr>
+</tbody>
+</table>
+
+<p>The raise site, read from the replay's own traceback (innermost frame last):</p>
+
+<pre><code>forward.py:1274            current_moment_observation
+forward.py:1447            _integral_state
+forward_operator.py:3211  read_with_current_moments
+forward_operator.py:3182  read
+topology.py:226            require_qualified_axis  -&gt; raise NoQualifiedAxisError</code></pre>
+
+<p><b>Why the instrumented probes saw an admitted axis and the product does not.</b> The refusal
+is reached through the <i>current-moment integral</i>: the constraint residual evaluates
+<code>current_moment_observation</code> at <code>forward.py:1274</code>, which integrates through
+<code>_integral_state</code> into <code>read_with_current_moments</code>, which calls
+<code>read</code> and from there <code>require_qualified_axis</code>. My probes evaluated
+<code>read_qualified_o_candidates</code> outside jit on the seed they had cached; the product
+evaluates it inside a traced solve on the field that the moment integral holds at that
+iteration. Both probes returned an admitted candidate and no raise, and the product raises &mdash;
+so the difference is the field and the path, not the comparison. The measured 397 against a
+floor of 10 stands for the field the probes held; it says nothing about the field the raise sees,
+because the raise's field was never observed outside the trace.</p>
+
+<p><b>The hook the fix node needs.</b> A host-side dump at the raise site, outside jit: at
+<code>forward_operator.py:3182</code>, before <code>require_qualified_axis(admitted)</code>, write
+the concrete <code>psi</code>, <code>polarity</code>, <code>inside_material</code> and
+<code>requested_class</code> to an npz, gated so it runs only in a diagnostic build or under an
+explicit environment flag, and never inside a traced region &mdash; a <code>jax.debug.callback</code>
+that saves the same fields is the alternative if the read must stay traced. With that dump the
+three conjuncts can be read on the actual refusing field, which is the one measurement this
+investigation could not obtain: the field lives inside the trace and the trace raises before any
+host code sees it.</p>
+
+<p><b>The receipts are committed with the source.</b> The replay record, the per-candidate conjunct
+values and the capture trace are stored under
+<code>scripts/prototypes/diiid_axis_identification/receipts/</code>, with a README naming the job
+and revision that produced each and the command that repeats it; a reader can check these claims
+after the crew run directory is collected.</p>
+
+<p><b>One landing touched the identification path in between.</b>
+<code>git log 554fcc237..8130772bb -- nova/equilibrium/topology.py</code> returns exactly one
+commit, <code>1af4c1b03</code> <i>retain bank precision through saddle curvature</i>. The replay
+refuses with the same type, message and seed distance, so that landing did not remove this
+refusal; the refusal is live on today's code.</p>
+
+<h3>Recommended fix</h3>
+
+<p><b>First, name the state.</b> The measurement above shows the threshold admitting a genuinely
+confined axis, so correcting the threshold would not have changed this refusal. What remains
+undetermined is which seed the refused limited branch held: the branch record
+(<code>probe.json</code>, frame 144, <code>branches.limited</code>) names a refusal with an
+empty <code>arms</code> map and no seed reference, and the cached cold seed reproduces the
+opposite outcome. Recording the seed on the refusal record &mdash; its flux vector or a
+content hash beside the status &mdash; is what makes a refusal reproducible from the record
+alone, and it is the fix this investigation asks for.</p>
+
+<p><b>On the threshold itself.</b> A fixed <code>_MATERIAL_CONNECTED_FRACTION</code> of the whole
+material cell count is still a coarse instrument: had this candidate's governed component been
+small, it would have been refused on a grid-size test rather than a topology test. Measuring the
+floor against the candidate's own governed component would be better, but it is a robustness
+change, not the repair for frame 144 &mdash; and it must not be landed as one.</p>
+
+<p><b>Test that would have caught the reporting defect.</b> A limited read whose only
+in-material extremum sits in a component smaller than the floor, asserting that the read admits
+the axis or raises naming <code>governed_connection</code> with the counts it compared. The
+existing <code>tests/test_oracle_axis_admission.py</code> and
+<code>tests/test_unqualified_axis_eager_routes.py</code> assert the admitted and refused outcomes
+but never which conjunct produced a refusal, which is why a seed can be recorded as having "no
+qualified axis" without the record distinguishing a missing axis from a rejected one.</p>
+
+<p><b>If a probe needs a hook in <code>nova/</code>:</b> none was needed: the probe wraps the
+public <code>qualified_o_candidates</code> and calls the operator's own helpers.</p>

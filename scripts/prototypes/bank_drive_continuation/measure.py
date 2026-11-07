@@ -86,8 +86,8 @@ def solve(drive, moments, seeds, previous, *, max_steps, tolerance, operands=Non
             profile,
             profile_fixture.gradient,
             machine.quadrature,
-            max_steps=jax.core.concrete_or_error(int, max_steps),
-            tolerance=jax.core.concrete_or_error(float, tolerance),
+            max_steps=int(max_steps),
+            tolerance=float(tolerance),
             reuse_factor=False,
             contraction_limit=0.5,
         )

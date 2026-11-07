@@ -1,0 +1,124 @@
+<section id="diiid-stopping-rule-fix">
+  <h2>What ends the DIII-D forward solve, and what converges</h2>
+
+  <p>
+    <strong>Nothing converges.</strong> Across fifteen measured solver runs on
+    four DIII-D gate frames and both topology branches, not one arm reaches the
+    solve tolerance of <code>1e-5</code>. Terminal relative residuals run from
+    0.027 to 5.93. The stopping rule no longer misreports that as convergence:
+    every arm ends with <code>converged</code> false and a termination reason
+    that says what actually stopped it.
+  </p>
+
+  <h3>Why the solve stops without stepping</h3>
+
+  <p>
+    On seven of the eight branch measurements the plasma-support mask falls to
+    <em>zero cells</em> on the first active-set trip and never changes again.
+    The residual is then flat to every printed digit for the rest of the trip
+    budget, including in the arm that disables the mask-stability exit and spends
+    all sixteen trips at the frozen mask. A reduce solve at an empty mask has no
+    free degrees of freedom: the direction it forms is zero, every backtracking
+    candidate scores the same merit, and the admission predicate
+    (<code>reduced_newton.py:1653-1671</code>, <code>found = jnp.any(valid)</code>
+    with <code>valid = isfinite(merit) &amp; (merit &lt; current)</code>) admits
+    nothing. No Newton promotion is proposed because none can be, and the
+    frozen-mask continuation added in this work therefore has nothing to run.
+  </p>
+
+  <p>
+    The gate is not suppressing a step that exists. What the fix node must add is
+    an answer to the mask collapse itself: either the mask read is wrong for
+    these seeds, or the reduced route needs a linearisation that is meaningful at
+    an empty support. Until one of those is resolved, no stopping rule and no
+    continuation can move these frames.
+  </p>
+
+  <table>
+    <caption>
+      Five-frame measurement, one H200 job, one fresh process per frame. Bounding
+      class is the probe's read of the terminal state against the governed wall:
+      the topology class the flux actually carried, whether that matched the
+      requested branch, and whether the axis lay inside the wall. Every panel
+      below draws the same state.
+    </caption>
+    <thead>
+      <tr>
+        <th>frame</th><th>branch</th><th>arm</th><th>terminal residual</th>
+        <th>reason</th><th>attempted</th><th>accepted</th><th>trips</th>
+        <th>bounding class</th><th>axis in wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>137</td><td>diverted</td><td>default</td><td>0.062369</td><td>11 stationary</td><td>72</td><td>62</td><td>5</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>137</td><td>diverted</td><td>continued</td><td>0.062369</td><td>8 budget</td><td>72</td><td>62</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>137</td><td>limited</td><td>default</td><td>0.056830</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>137</td><td>limited</td><td>continued</td><td>0.056830</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>144</td><td>diverted</td><td>default</td><td>5.927126</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>144</td><td>diverted</td><td>continued</td><td>5.927126</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>146</td><td>limited</td><td>default</td><td>0.063500</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>179</td><td>diverted</td><td>default</td><td>0.418096</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>179</td><td>diverted</td><td>continued</td><td>0.418096</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>179</td><td>limited</td><td>default</td><td>0.027262</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>179</td><td>limited</td><td>continued</td><td>0.027262</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>44</td><td>diverted</td><td>default</td><td>4.275696</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>limited (requested diverted)</td><td>yes</td></tr>
+      <tr><td>44</td><td>diverted</td><td>continued</td><td>4.275696</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>limited (requested diverted)</td><td>yes</td></tr>
+      <tr><td></td><td>44</td><td>limited</td><td>default</td><td>0.197003</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>44</td><td>limited</td><td>continued</td><td>0.197003</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Reason 11 is a stationary map at a frozen mask with no promotion proposed;
+    reason 8 is an exhausted trip budget. Outside 137 diverted, every arm
+    attempts zero promotions: the first trip empties the plasma-support mask and
+    no candidate direction can then be formed.
+  </p>
+
+  <h3>137 diverted: Newton runs and still stalls</h3>
+
+  <p>
+    137 diverted is the one arm where the solve performs real Newton work — 72
+    attempted and 62 accepted promotions across five trips — and it still ends at
+    0.0624. The residual descends 0.1299 &rarr; 0.1114 &rarr; 0.0670 &rarr;
+    0.0624 and then repeats the last value exactly for every remaining trip while
+    the mask empties 24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0. Accepted steps that
+    leave the residual unchanged, with the mask collapsing underneath them, mean
+    the accepted direction is being applied to a problem whose active set is
+    being removed as fast as the step is taken.
+  </p>
+
+  <h3>Terminal states</h3>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png" alt="Frame 179 limited terminal flux contours">
+    <figcaption>Frame 179, limited seed, terminal residual 0.0273: solved contours, the EFIT boundary dashed, the axis and the admitted saddle. The plasma core is displaced well inside the label boundary.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png" alt="Frame 44 limited terminal flux contours">
+    <figcaption>Frame 44, limited seed, terminal residual 0.197.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png" alt="Frame 144 diverted terminal flux contours">
+    <figcaption>Frame 144, diverted seed, terminal residual 5.93 — the worst arm, and the one whose contours sit furthest from the label boundary.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png" alt="Frame 137 diverted terminal flux contours">
+    <figcaption>Frame 137, diverted seed, terminal residual 0.0624 — the only arm where Newton promotions are accepted, and its terminal state is the closest to the label.</figcaption>
+  </figure>
+
+  <h3>What the stopping-rule change does and does not do</h3>
+
+  <p>
+    The rule now requires a Newton promotion to have been attempted and refused
+    at the frozen mask before a settlement may end the solve, and it reports that
+    ending as a stationary map with <code>converged</code> false, never as
+    convergence. On 137 diverted it publishes the real promotion history (72
+    attempted, 62 accepted) that the earlier receipt bridge discarded. It does
+    not converge anything, and it cannot: on seven of eight branches there is no
+    step to take.
+  </p>
+</section>

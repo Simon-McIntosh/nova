@@ -35,6 +35,7 @@ configure_dtypes()
 
 from nova.equilibrium import support_read  # noqa: E402
 from scripts.prototypes.bank_solve_profile import fixture  # noqa: E402
+from scripts.prototypes.bank_solve_trace.analyse import events as trace_events  # noqa: E402
 
 
 def _revision():
@@ -117,11 +118,52 @@ def _load_seeds(path, width):
 
 
 def _time(call, reps):
+    """Host wall per call, reported as both the median and the mean.
+
+    This is host wall around a synchronization, not device time: it includes
+    dispatch and any host-side work between kernels. The device-arm cost comes
+    from :func:`_trace`.
+    """
     jax.block_until_ready(call())
-    start = time.perf_counter()
+    samples = []
     for _ in range(reps):
+        start = time.perf_counter()
         jax.block_until_ready(call())
-    return (time.perf_counter() - start) / reps
+        samples.append(1e3 * (time.perf_counter() - start))
+    return float(np.median(samples)), float(np.mean(samples))
+
+
+def _trace(call, directory):
+    """Device time and kernel-launch count from one profiled call.
+
+    The warm call is outside the trace, so the recorded device events belong
+    to exactly one invocation of the arm. ``trace_events`` is the bank solve
+    trace's own reader of an XLA profile, so the device-ms and launch figures
+    here are the same quantities that record reports.
+    """
+    jax.block_until_ready(call())
+    options = jax.profiler.ProfileOptions()
+    options.python_tracer_level = 0
+    options.host_tracer_level = 1
+    options.enable_hlo_proto = False
+    options.raise_error_on_start_failure = True
+    with jax.profiler.trace(directory, profiler_options=options):
+        jax.block_until_ready(call())
+    device, _, _ = trace_events(directory)
+    return {
+        "device_ms": sum(event["duration"] for event in device) / 1e6,
+        "launches": len(device),
+    }
+
+
+def _trace_dir(args):
+    import pathlib
+
+    if not args.trace:
+        raise SystemExit("jacobian mode needs --trace <directory>")
+    directory = pathlib.Path(args.trace)
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
 
 
 def _memory_peak():
@@ -201,9 +243,26 @@ def run_jacobian(args):
         and len(applied) == 3
         and all(tuple(value.shape[-1:]) == (cells,) for value in applied)
     )
-    assemble_ms = _time(lambda: assemble(states, support), args.reps) * 1e3
-    product_ms = _time(lambda: product(states, direction, support), args.reps) * 1e3
-    break_even = assemble_ms / product_ms
+    # A false shape check means the arms did not measure the same system, so
+    # the run must not report a ratio at all.
+    assert shape_ok, (
+        f"shape mismatch: assembly {assembly.shape}, product components "
+        f"{tuple(value.shape for value in applied)}, cells {cells}"
+    )
+    wall_assemble_median, wall_assemble_mean = _time(
+        lambda: assemble(states, support), args.reps
+    )
+    wall_product_median, wall_product_mean = _time(
+        lambda: product(states, direction, support), args.reps
+    )
+    traced = _trace_dir(args)
+    assemble_device = _trace(
+        lambda: assemble(states, support), traced / "assemble"
+    )
+    product_device = _trace(
+        lambda: product(states, direction, support), traced / "product"
+    )
+    break_even_device = assemble_device["device_ms"] / product_device["device_ms"]
     return {
         "mode": "jacobian",
         "execution": args.execution,
@@ -211,13 +270,21 @@ def run_jacobian(args):
         "cells": int(cells),
         "matrix_dimension": int(assembly.shape[-1]),
         "shape_consistent": bool(shape_ok),
-        "assemble_ms": assemble_ms,
-        "product_ms": product_ms,
-        "assemble_per_lane_ms": assemble_ms / args.width,
-        "product_per_lane_ms": product_ms / args.width,
-        "break_even_iterations": break_even,
-        "forty_products_ms": 40.0 * product_ms,
-        "forty_products_cheaper": bool(40.0 * product_ms < assemble_ms),
+        "assemble_host_wall_ms_median": wall_assemble_median,
+        "assemble_host_wall_ms_mean": wall_assemble_mean,
+        "product_host_wall_ms_median": wall_product_median,
+        "product_host_wall_ms_mean": wall_product_mean,
+        "assemble_device_ms": assemble_device["device_ms"],
+        "product_device_ms": product_device["device_ms"],
+        "assemble_launches": assemble_device["launches"],
+        "product_launches": product_device["launches"],
+        "assemble_device_per_lane_ms": assemble_device["device_ms"] / args.width,
+        "product_device_per_lane_ms": product_device["device_ms"] / args.width,
+        "break_even_device_iterations": break_even_device,
+        "forty_products_device_ms": 40.0 * product_device["device_ms"],
+        "forty_products_cheaper": bool(
+            40.0 * product_device["device_ms"] < assemble_device["device_ms"]
+        ),
         "peak_device_bytes": _memory_peak(),
     }
 
@@ -229,6 +296,7 @@ def main():
     parser.add_argument("--seeds", default=None)
     parser.add_argument("--reps", type=int, default=5)
     parser.add_argument("--execution", choices=["vmap", "map"], default="vmap")
+    parser.add_argument("--trace", default=None)
     args = parser.parse_args()
     _header([f"--width={args.width}", f"--reps={args.reps}"])
     payload = {"seeds": build_seeds, "jacobian": run_jacobian}[args.mode](args)

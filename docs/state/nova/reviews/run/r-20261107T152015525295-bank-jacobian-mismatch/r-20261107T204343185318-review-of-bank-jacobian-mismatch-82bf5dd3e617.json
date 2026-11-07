@@ -8,6 +8,11 @@
       "kind": "exempted",
       "reason": "non-blocking wording in an evidence-only fragment; the table and figure carry the per-class values and the conclusion (no missing Jacobian term) does not depend on the headline range",
       "recorded_at": "2026-11-07T22:32:58.295339+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking: the committed log of the landed measurement ends in a bare EXIT=0; the signal-trap wording only matters on a wall-kill path this receipt did not take",
+      "recorded_at": "2026-11-07T22:33:09.548790+00:00"
     }
   },
   "findings": [

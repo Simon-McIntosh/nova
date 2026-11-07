@@ -56,7 +56,21 @@ def main() -> int:
         data_b = self.boundary(data_o, vmap_x, data_w, polarity)
         closed = self.psi_mask(polarity, psi_grid, data_b[2])
         seed_material = inside_material
-        candidates = []
+        shapes = {
+            "vmap_o": list(np.shape(vmap_o)),
+            "data_o": [list(np.shape(part)) for part in data_o],
+            "data_x": [list(np.shape(part)) for part in data_x],
+            "data_b": [list(np.shape(part)) for part in data_b],
+            "closed": list(np.shape(closed)),
+        }
+        entry = {
+            "shapes": shapes,
+            "material_cell_count": material_cell_count,
+            "connection_floor_cells": floor,
+            "candidates": [],
+        }
+        records.append(entry)
+        candidates = entry["candidates"]
         for index in range(np.asarray(vmap_o).shape[0]):
             row = {
                 "index": int(index),
@@ -92,13 +106,7 @@ def main() -> int:
                 row["governed_size_all_open"] = None
                 row["error"] = repr(error)[:400]
             candidates.append(row)
-        records.append(
-            {
-                "material_cell_count": material_cell_count,
-                "connection_floor_cells": floor,
-                "candidates": candidates,
-            }
-        )
+        entry["completed"] = True
         return original(
             self, vmap_o, vmap_x, data_w, polarity, psi_grid, inside_material, surface
         )

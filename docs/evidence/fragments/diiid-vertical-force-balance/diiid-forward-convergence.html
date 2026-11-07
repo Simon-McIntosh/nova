@@ -238,6 +238,8 @@ unconditionally, so the limited seed's equilibrium cannot reach the gate however
 </tbody>
 </table>
 
+<p>The table above reports the topology the solver recorded, which counts an admitted saddle. That field is not the same as which surface closes first; the next paragraph measures the latter, and on most of these arms the two disagree.</p>
+
 <p><b>Which surface bounds each terminal.</b> Two surfaces compete to bound a plasma: the separatrix through the admitted X-point, and the largest closed surface that clears the wall. The inner one wins, so the comparison is between two flux values read off the same solved map &mdash; &psi; at the admitted saddle, and the largest &psi; any node of the governed 84-point limiter ring carries (<code>boundary_competition.py</code>, one read per stored arm, no solve run; the values below are the committed <code>docs/figures/diiid-forward-convergence/boundary-competition.json</code>). The larger bounds. Frame 144's limited seed refuses at axis identification, so it has no terminal to classify and the table carries nine arms:</p>
 
 

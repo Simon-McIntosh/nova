@@ -118,34 +118,35 @@ def run_jacobian(args):
     batch, states, _, _ = _load_seeds(args.seeds)
     cells = states[0].shape[-1]
     direction = tuple(value * 0.5 for value in states)
-
-    def assemble():
-        return support_read.step_jacobian(
-            batch.operands,
-            states,
-            _read(batch, states),
-            batch.profile,
-            fixture.gradient,
-            batch.quadrature,
-            fresh_geometry=True,
-        )
-
     support = _read(batch, states)
 
-    def product():
-        return support_read.step_jacobian_vector(
+    # The read is hoisted out of both timings: this measures the assembly and
+    # the product against each other, not the read they share.
+    assemble = jax.jit(
+        lambda values, reading: support_read.step_jacobian(
             batch.operands,
-            states,
-            direction,
-            support,
+            values,
+            reading,
             batch.profile,
             fixture.gradient,
             batch.quadrature,
             fresh_geometry=True,
         )
-
-    assemble_ms = _time(lambda: jax.jit(assemble)(), args.reps) * 1e3
-    product_ms = _time(lambda: jax.jit(product)(), args.reps) * 1e3
+    )
+    product = jax.jit(
+        lambda values, change, reading: support_read.step_jacobian_vector(
+            batch.operands,
+            values,
+            change,
+            reading,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+            fresh_geometry=True,
+        )
+    )
+    assemble_ms = _time(lambda: assemble(states, support), args.reps) * 1e3
+    product_ms = _time(lambda: product(states, direction, support), args.reps) * 1e3
     return {
         "mode": "jacobian",
         "width": args.width,
@@ -172,16 +173,15 @@ def _update(batch, states, matrix_free):
         )
 
     support = _read(batch, states)
-    return jax.jit(lambda values, readings: jax.vmap(one)(values, readings))(
-        states, support
-    )
+    return jax.jit(lambda values, readings: jax.vmap(one)(values, readings)), support
 
 
 def run_update(args):
     batch, states, _, _ = _load_seeds(args.seeds)
-    step = _update(batch, states, bool(args.matrix_free))
-    iterations = np.asarray(jax.block_until_ready(step).krylov_iterations)
-    call = lambda: _update(batch, states, bool(args.matrix_free))  # noqa: E731
+    update, support = _update(batch, states, bool(args.matrix_free))
+    solved = jax.block_until_ready(update(states, support))
+    iterations = np.asarray(solved.krylov_iterations)
+    call = lambda: update(states, support)  # noqa: E731
     wall_ms = _time(call, args.reps) * 1e3
     return {
         "mode": "update",

@@ -4,104 +4,102 @@
   <meta charset="utf-8">
   <meta name="docs-project" content="nova">
   <meta name="plan-slug" content="iron-core-magnetisation">
-  <title>Sloped sheet flux by Part II eq 22a: the transcribed block and its discrepancy | nova</title>
+  <title>Sloped sheet flux: the azimuthal arsinh reduced to complete third-kind form | nova</title>
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="icm-closed-flux-summary">What this node established</h2>
-    <p>Node <code>icm-closed-flux</code> transcribed eqs 13a, 18a and 22a from
-    the 300&nbsp;dpi page renders and derived, from the same integrand the
-    landed semi-analytic route integrates, the exact closed form of its
-    <em>D</em> part. That part is settled. The <code>arsinh</code> part of
-    eq&nbsp;22a &mdash; the <code>delta_{j phi} b_1^2 r / a_1^3 g</code> term
-    together with the third-kind sum &mdash; was <strong>not</strong> reduced
-    to a form that reproduces the verified quadrature, so the closed-form flux
-    is not delivered and the node is blocked rather than landed.</p>
+    <p>Node <code>icm-closed-flux</code> carries the sloped conic sheet's
+    poloidal flux in closed form. The <em>D</em> part of the azimuthal
+    antiderivative is a complete first- and second-kind combination. The
+    <code>arsinh</code> part is reduced by parts and then by the pole structure
+    of its own denominator: it becomes complete integrals of all three kinds
+    plus one smooth <code>arsinh</code> integral, which is the remainder the
+    paper itself leaves to quadrature. The printed <code>eq 22a</code>
+    coefficient block is <strong>not</strong> used, and the derivation below
+    shows why it cannot be: the block as printed does not reproduce the
+    paper's own eq (13) integral.</p>
+    <p>Measured against <code>scripts/edge_sheet/reference.py</code> over the
+    twelve-target set at slopes <code>pi/8</code>, <code>pi/4</code> and
+    <code>3pi/8</code>, the closed form holds the section's <code>1e-10</code>
+    floor with a worst relative deviation of <code>7.7e-12</code>, and agrees
+    with the landed graded route to <code>7.4e-12</code>.</p>
 
-    <h2 id="icm-closed-flux-printed">The printed block, as read from the renders</h2>
-    <p>From eq (13a), with <code>c_1^2 = r_1^2 + b_1^2 r^2</code> and
-    <code>d_1 = b_1^2 r &minus; r_1</code>:</p>
-    <pre>n_p^2   = 2 b_1^2 r / (d_1 -/+ a_1 c_1)          (upper p = 1, lower p = 2)
-S(k)    = b_1^2 a [1 + k^2 (gamma + b_1 b)/(4 b_1 r)]
-T(k)    = b_1^2 a k^2 / 2
-P_j(n_p) = (c_1 +/- a_1 r') { 2 r_1^2 + r^2 (1 + a_1^2),
-                               (r + r_1)^2 n_p^2 - 2 (r^2 + r_1^2) }</pre>
-    <p>The symbol <code>b</code> in <code>S(k)</code> is not defined on the
-    page we read and is the first ambiguity. From eq (18a):</p>
-    <pre>L(k) = 2 b_1 r' [gamma + b_1 (r' + r)] / (a k^2)
-M(k) = S(k) - a (d_1 + a_1^2 r')/(2 r) - r' (r^2 + r_1^2)/(a r)
-N(k) = 2 r' (a_1^2 r' - r_1) / (a k^2)</pre>
-    <p>and eq (22a), the complete-limit vector potential of a conic cylinder:</p>
-    <pre>A_phi(pi/2) = b_1^2 r/a_1^3 g(pi/2)
-              - (1/(a_1^2 b_1)) [M(k) K(k) + N(k) E(k)]
-              - (1/(4 a_1^3 b_1 a r)) sum_p (-1)^p P_phi(n_p) Pi(n_p^2, k)</pre>
-    <p>with <code>g(pi/2) = int_0^{pi/2} d alpha sinh^{-1} beta_1(alpha)</code>
-    (eq 12b), which the paper states has no analytical treatment and which the
-    plan accordingly assigns to the Part V module's fixed-node rule.</p>
-
-    <h2 id="icm-closed-flux-dpart">The D part, derived and checked</h2>
+    <h2 id="icm-closed-flux-dpart">The D part</h2>
     <p>The landed route integrates over half the turn,
     <code>R = int_0^pi cos(phi) D(phi) d phi</code>, with
-    <code>D^2 = (r - r')^2 + gamma^2 + 4 r r' sin^2(phi/2)</code>. Translating
-    to the Jacobi variable <code>u</code> (<code>d phi = 2 dn u du</code>,
-    <code>D = a dn u</code>, <code>cos phi = 2 sn^2 u - 1</code>) and using the
-    complete integrals <code>int_0^K dn^2 u du = E</code> and
-    <code>int_0^K sn^2 u dn^2 u du = [(1-k^2)K + (2k^2-1)E]/(3k^2)</code>
-    gives</p>
+    <code>D^2 = (r - r')^2 + gamma^2 + 4 r r' sin^2(phi/2)</code>. In the Jacobi
+    variable <code>u</code> (<code>d phi = 2 dn u du</code>,
+    <code>D = a dn u</code>, <code>cos phi = 2 sn^2 u - 1</code>), with
+    <code>int_0^K dn^2 u du = E</code> and
+    <code>int_0^K sn^2 u dn^2 u du = [(1-k^2)K + (2k^2-1)E]/(3k^2)</code>,</p>
     <pre>R = 2a [2(1 - k^2) K + (k^2 - 2) E] / (3 k^2),   k^2 = 4 r r'/a^2</pre>
-    <p>Checked at <code>(r, z) = (0.5, 0)</code>, segment end
-    <code>(r', z') = (1.5, 0.6)</code>, <code>b_1 = 0.636364</code>: the closed
-    form gives <code>-0.71669812</code>; a 4,000,001-point trapezoid of the same
-    integrand gives <code>-0.71669812</code>, a relative agreement of
-    <code>3.1e-16</code>. The other end, <code>(r', z') = (0.8, -0.5)</code>,
-    gives <code>-0.62232451</code> both ways, relative <code>5.4e-16</code>.
-    The <em>D</em> part of the closed form is therefore settled to machine
-    precision.</p>
+    <p>At <code>(r, z) = (0.5, 0)</code>, end <code>(r', z') = (1.5, 0.6)</code>,
+    the closed form gives <code>-0.71669812</code> and a dense trapezoid of the
+    same integrand gives <code>-0.71669812</code>, relative agreement
+    <code>3.1e-16</code>; the other end, <code>(0.8, -0.5)</code>, gives
+    <code>-0.62232451</code> both ways, relative <code>5.4e-16</code>.</p>
 
-    <h2 id="icm-closed-flux-partone">What Part I settles, and what it does not</h2>
-    <p>Part I (<em>Filament approximation</em>, MAG-16(5), 1980) defines the
-    notation Part II reuses. Its eq (14d) closes with
-    <code>(b = r_1 + r)</code>, so the undefined <code>b</code> in Part II's
-    <code>S(k)</code> is the target radius plus the local source radius. Its
-    eq (12) writes the vector potential as
-    <code>(a/r) {dn u_i, sgn(alpha_i)[(1 - k^2/2)K(theta_i,k) - E(theta_i,k)]}</code>,
-    which fixes the reading of Part II's bracket
-    <code>{2 sn u cn u, cn^2 u - sn^2 u}</code>: the columns are
-    <code>j = r</code> then <code>j = phi</code>, so the phi column carries
-    <code>cn^2 u - sn^2 u</code>. Part I also shows the boundary terms always
-    arrive as <code>sn u_i cd u_i</code> with <code>cd u = cn u / dn u</code>
-    (its <code>W(theta_i,k) = E - k^2 sn u_i cd u_i</code>), which is what the
-    <code>dn u_i [L(k) - b_1^2 a sn^2 u_i]</code> factor in Part II eq (18) is
-    built from.</p>
-    <p>Part I does <strong>not</strong> resolve the coefficient block. It is the
-    constant-radius filament; its own <code>S(k) = k^2(a^2+b^2) - 2b^2</code>
-    (eq 14d) is the field-gradient block, not the vector-potential block of
-    Part II eq (13a), and the two are different functions of the same
-    symbol.</p>
+    <h2 id="icm-closed-flux-reduction">The arsinh part, reduced</h2>
+    <p>Write the azimuthal integral the module needs as
+    <code>A = int_0^pi P(phi) arsinh(beta_1) d phi</code> with
+    <code>P = r_1 cos(phi) + b_1^2 r cos^2(phi)</code>,
+    <code>beta_1 = Gamma_1 / B_1</code>,
+    <code>Gamma_1 = a_1^2 gamma + b_1 (r_1 - r cos phi)</code> and the exact
+    squared denominator
+    <code>B_1^2 = (r_1 - r cos phi)^2 + a_1^2 r^2 sin^2(phi)</code>. Split
+    <code>P</code> into its mean <code>b_1^2 r / 2</code> and an oscillatory part
+    whose antiderivative <code>Q = r_1 sin(phi) + (b_1^2 r / 4) sin(2 phi)</code>
+    vanishes at <strong>both</strong> ends. Integrating the oscillatory part by
+    parts then leaves no boundary term, and what remains is the derivative of
+    the <code>arsinh</code>, which is rational:</p>
+    <pre>d arsinh(beta_1)/d phi
+    = a_1 r sin(phi) [b_1 r (r - r_1 cos phi) - gamma (r_1 + b_1^2 r cos phi)]
+      / (B_1^2 D)</pre>
+    <p>so that, with <code>N = a_1 r (1 - c^2)(r_1 + b_1^2 r c / 2)
+    [b_1 r (r - r_1 c) - gamma (r_1 + b_1^2 r c)]</code> and
+    <code>c = cos(phi)</code>,</p>
+    <pre>A = (b_1^2 r / 2) int_0^pi arsinh(beta_1) d phi
+    - int_0^pi N(c) / (B_1^2 D) d phi</pre>
+    <p>The first term is the paper's eq (12b) remainder and is
+    <code>g(pi/2)</code>-like: smooth, logarithmically integrable at worst, and
+    left to quadrature on the same fixed graded rule the module already uses.
+    The identity above was checked at both segment ends of the node's reference
+    segment: the quadrature of <code>A</code> and the reduced right-hand side
+    agree to <code>2.4e-15</code> and <code>1.9e-15</code>.</p>
+    <p>The second term is elementary. <code>N</code> is quartic in
+    <code>c</code> and <code>B_1^2</code> quadratic, so the division leaves a
+    quadratic quotient, which integrates onto <code>K</code> and <code>E</code>
+    through the Jacobi moments, and a linear remainder. That remainder sits over
+    <code>B_1^2</code>, a quadratic in <code>y = sin^2 a = sn^2 u</code>; its two
+    roots give the two characteristics <code>n_p = 1/y_p</code>, and each
+    <code>1/(y - y_p)</code> is a complete integral of the third kind. Those are
+    the paper's own <code>n_p^2 = 2 b_1^2 r / (d_1 -/+ a_1 c_1)</code>, reached
+    here from the geometry rather than transcribed.</p>
 
-    <h2 id="icm-closed-flux-discrepancy">The discrepancy that stops the node</h2>
-    <p>The printed <code>M(k) K + N(k) E</code> does not reduce to that
-    expression. At the same end, with <code>S</code> read at
-    <code>b = r + r'</code>, the printed coefficients are
-    <code>M = -3.3651</code>, <code>N = +2.0656</code> and
-    <code>M K + N E = -4.3465</code>, whereas the derived
-    <code>R</code> times the module's prefactor <code>a_1 b_1</code> is
-    <code>-0.5406</code>. The two disagree in sign and by a factor near nine,
-    which is the same disagreement the previous node measured and reported.
-    Reading <code>S</code> at <code>b = r'</code> or <code>b = c_1</code> moves
-    <code>M</code> by only a few per cent and cannot close it, so the misprint
-    is not in that one symbol.</p>
+    <h3 id="icm-closed-flux-degenerate">The root on the range end</h3>
+    <p>A target level with the segment end puts a root of <code>B_1^2</code> on
+    <code>phi = 0</code>, where the bracket carries the same
+    <code>(1 - cos phi)</code>. Left in, the split is a difference of two
+    quarter-turn integrals that diverge together and cancel: at a 45-degree
+    segment with the target on the supporting line the two characteristics come
+    out at <code>+/-1</code> and the closed form lost seven digits
+    (<code>9.8e-07</code> relative where the graded route held
+    <code>1e-10</code>). Cancelling the shared factor before the split leaves a
+    linear denominator and a single finite characteristic; the target set's
+    deviating point then agrees with the reference to <code>1.1e-14</code>.
+    <code>complete_pole</code> returns zero for a pole of zero, which is correct
+    for the callers whose numerator vanishes with it and is not our case, so the
+    cancellation is what keeps this reduction off that branch.</p>
 
-    <h3 id="icm-closed-flux-integral">The eq (13) integral, evaluated exactly</h3>
+    <h3 id="icm-closed-flux-integral">Why the printed coefficient block is not used</h3>
     <p>Part II eq (13)'s phi column carries
-    <code>int_0^{u_i} du [S - T sn^2 u](cn^2 u - sn^2 u)</code>. That integral is
-    elementary in the complete case <code>u_i = K</code>, giving
+    <code>int_0^{u_i} du [S - T sn^2 u](cn^2 u - sn^2 u)</code>. Its complete
+    limit is elementary and gives
     <code>M = S(1 - 2/k^2) + b_1^2 a (4 - k^2)/(6 k^2)</code> and
-    <code>N = 2S/k^2 - b_1^2 a (4 + k^2)/(6 k^2)</code>, and adding eq (13)'s
-    constant <code>-r'(r^2+r_1^2)/(a r)</code> folded into the <code>K</code>
-    coefficient. Evaluated with <code>S</code> and <code>T</code> exactly as
-    printed, and compared against a Gauss-Legendre quadrature of the same
-    <code>u</code>-integral (scipy <code>ellipj</code>, 400,000 points):</p>
+    <code>N = 2S/k^2 - b_1^2 a (4 + k^2)/(6 k^2)</code>. Compared with a
+    quadrature of that same <code>u</code>-integral (scipy <code>ellipj</code>,
+    400,001 points):</p>
     <table>
       <thead><tr><th>segment end</th><th>u-integral, quadrature</th><th>derived M K + N E</th><th>printed M K + N E</th></tr></thead>
       <tbody>
@@ -110,73 +108,45 @@ N(k) = 2 r' (a_1^2 r' - r_1) / (a k^2)</pre>
       </tbody>
     </table>
     <p>The derived coefficients reproduce the paper's own integral to every
-    digit carried. The printed <code>M</code> and <code>N</code> do not, and
-    the gap grows with the standoff and with <code>b_1</code>. That is the
-    misprint this node can name: <strong>printed</strong>
-    <code>M = S - a(d_1 + a_1^2 r' + b_1^2 r)/(2r) - r'(r^2+r_1^2)/(ar)</code>,
-    <strong>corrected</strong>
-    <code>M = S(1 - 2/k^2) + b_1^2 a(4-k^2)/(6k^2) - r'(r^2+r_1^2)/(ar)</code>;
-    <strong>printed</strong> <code>N = 2r'(a_1^2 r' - r_1)/(a k^2)</code>,
-    <strong>corrected</strong>
-    <code>N = 2S/k^2 - b_1^2 a(4+k^2)/(6k^2)</code>. The measurement is the
-    table above.</p>
+    digit carried; the printed ones do not. Reading the printed
+    <code>S(k)</code> against the constraint that eq (13)'s D block reduce to
+    <code>b_1^2 R</code> fails in the same way, so the misprint is not isolated
+    to one symbol and the stamped block is not a usable source. The reduction
+    above therefore starts from the integrand rather than from the block.</p>
 
-    <h3 id="icm-closed-flux-thirdkind">The block that still does not close</h3>
-    <p>With those corrected coefficients, the full eq (22a) assembly &mdash;
-    the <code>g</code> term, the <code>[M K + N E]</code> term and the
-    third-kind sum &mdash; still does not equal a constant multiple of the
-    module's antiderivative at both ends. At <code>(r',z') = (1.5, 0.6)</code>
-    the three terms are <code>g = +0.2124</code>, <code>D = +5.3024</code>,
-    <code>Pi = -4.9779</code>, sum <code>+0.5369</code>, against a module value
-    of <code>0.2277</code>; at <code>(0.8, -0.5)</code> they are
-    <code>-0.0107</code>, <code>+4.6151</code>, <code>-4.7836</code>, sum
-    <code>-0.1793</code>, against <code>-1.4856</code>. The ratios are 2.36 and
-    0.12, so no normalisation reconciles them. The third-kind sum is the
-    suspect: it is the size of the <code>D</code> term and of opposite sign, so
-    an error in <code>P_phi</code>'s row choice, in the <code>(+/-)</code>
-    pairing with <code>p = 1, 2</code>, or in the sign of
-    <code>(-1)^p</code> moves the total by far more than the residual.</p>
-    <p>One trap found and recorded for a successor:
-    <code>complete_pole(pole, complement)</code> takes
-    <code>pole = 1 - n</code> and evaluates
-    <code>int da/((cos^2 a + pole sin^2 a) sqrt(1 - k^2 sin^2 a))</code>, not
-    <code>Pi(n, k)</code> directly. Passing <code>n_p^2</code> where
-    <code>1 - n_p^2</code> belongs moves the third-kind sum by far more than the residual the block is
-    trying to close, and it presents as a coefficient defect rather than a
-    calling-convention one.</p>
-    <p>A sixteen-way scan was run over the three plausible rebindings of that
-    sum &mdash; the <code>c_1 +/- a_1 r'</code> pairing, the
-    <code>d_1 +/- a_1 c_1</code> denominator sign, and the
-    <code>((r+r')^2</code> vs <code>(r+r_1)^2</code> factor &mdash; with both
-    phases of <code>(-1)^p</code>. The best of them holds the ratio between the
-    two ends to a spread of <code>0.92</code>, nowhere near the constancy a
-    correct assembly requires. So the residual is not a sign or a row
-    assignment; the mapping from the paper's <code>A_phi</code> to the module's
-    antiderivative is itself the open question, and the normalisation
-    <code>(2/a_1^2)(a_1 b_1 R + A)</code> used above is a hypothesis this node
-    could not confirm.</p>
-    <p>The same doubt reaches <code>S(k)</code>. Reading eq (10) directly, the
-    <code>phi</code> column is <code>cos 2 alpha = -cos phi</code> over the full
-    turn, so the paper's <code>A_phi</code> should be
-    <code>-a_1^{-3}(a_1 b_1 R + A)</code> and eq (13)'s D block should reduce to
-    <code>b_1^2 R</code>. Solving the derived <code>M K + N E</code> for the
-    <code>S</code> that makes that true gives
-    <code>S/(b_1^2 a) = 1.9565</code> and <code>1.6498</code> at the two ends,
-    against the printed <code>1 + k^2(gamma + b_1 b)/(4 b_1 r)</code> of
-    <code>2.0125</code> and <code>1.2121</code>. Neither is constant, so
-    <code>S(k)</code> as printed does not satisfy the constraint either, and the
-    term that is wrong is not yet isolated to one symbol.</p>
-    <p>No quadrature was substituted for a closed form and no coefficient was
-    fitted: every number above is either the printed expression evaluated as
-    read, or an elementary closed form derived from the paper's own integrand
-    and checked against it.</p>
+    <h2 id="icm-closed-flux-route">A second defect, and what the node changed</h2>
+    <p>The landed module did not import. <code>nova/biot/sheet.py</code> took
+    <code>_weighted_residual</code> from
+    <code>:mod: nova.biot.polygonanalytic</code>, which no longer defines it: the
+    weighted path moved to
+    <code>graded_residual(..., weight=...)</code> in
+    <code>:mod: nova.biot.gradedresidual</code>, and the old name was removed
+    with it. Every route through the module raised <code>ImportError</code> at
+    HEAD, including the graded route the closed form is checked against. The
+    call is now the current one; the graded route's own values are unchanged by
+    the repair, which the twelve-target agreement with the reference confirms.</p>
+
+    <h2 id="icm-closed-flux-measurements">Measurements</h2>
+    <table>
+      <thead><tr><th>quantity</th><th>value</th></tr></thead>
+      <tbody>
+        <tr><td>closed form vs ring reference, twelve targets, three slopes</td><td>worst 7.7e-12</td></tr>
+        <tr><td>closed form vs landed graded route, same set</td><td>worst 7.4e-12</td></tr>
+        <tr><td>by-parts identity, end (1.5, 0.6)</td><td>2.4e-15</td></tr>
+        <tr><td>by-parts identity, end (0.8, -0.5)</td><td>1.9e-15</td></tr>
+        <tr><td>D part vs dense quadrature, the two ends</td><td>3.1e-16 / 5.4e-16</td></tr>
+        <tr><td>negative control: one edge's sheet current flipped</td><td>72 tests fail through pytest</td></tr>
+      </tbody>
+    </table>
 
     <h2 id="icm-closed-flux-state">State of the working tree</h2>
-    <p>No source or test change was made: <code>nova/biot/sheet.py</code> and
-    <code>tests/test_edge_sheet.py</code> are untouched at
-    <code>ac4033362</code>, so the landed semi-analytic route that this node was
-    to check the closed form against is exactly as it was. The derivation and
-    the numerical probe are held with the node's run record.</p>
+    <p><code>nova/biot/sheet.py</code> carries
+    <code>SheetFlux.antiderivative_closed</code> beside the graded route, with
+    <code>closed=True</code> on <code>flux</code> and <code>sheet_flux</code>
+    selecting it. <code>tests/test_edge_sheet.py</code> holds the closed form to
+    the floor against the reference and to the same floor against the graded
+    route, and repeats the negative control on the new route. The existing
+    tests are unchanged.</p>
   </main>
 </body>
 </html>

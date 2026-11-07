@@ -34,12 +34,22 @@ vanishes, which is a target level with the segment end, and a grid across the
 section hits it by alignment.  It is therefore taken on the graded two-panel
 rule of :mod:`nova.biot.polygonanalytic`, which subtracts a model of the
 logarithm in closed form, grades each panel with a sinh map from its own end and
-integrates the bounded remainder: ``_weighted_residual`` carries the polynomial
-weight ``cos(phi) (r_1 + b_1^2 r cos(phi))`` the sheet's own integrand needs.
+integrates the bounded remainder, with the polynomial weight
+``cos(phi) (r_1 + b_1^2 r cos(phi))`` the sheet's own integrand needs.
 The ``D`` term is smooth but has a square-root layer of width ``D_0`` at
 ``phi = 0``, so it is integrated on a sinh map anchored there, which is exact for
 ``D = sqrt(D_0^2 + 4 r r_1 sin^2(phi/2))``.  The straight-cylinder limit
 ``b_1 = 0`` is eq (24) and is evaluated in closed form.
+
+That graded rule is not the only route.  :meth:`SheetFlux.antiderivative_closed`
+carries the same antiderivative with the ``arsinh`` block reduced by parts: the
+oscillatory part of the weight has an antiderivative vanishing at both ends, so
+the derivative of ``arsinh(beta_1)`` is what remains, and it is rational over
+``B_1^2 D``.  Splitting that bracket onto ``B_1^2``'s pole pair leaves complete
+integrals of the first, second and third kinds and one smooth ``arsinh``
+integral, the remainder the paper itself leaves to quadrature.  The two routes
+share no arithmetic, so they check each other; ``closed=True`` selects the
+reduction.
 
 Two printed coefficient blocks could not be reconstructed from the available
 copy of the paper: the block feeding eq (22a) (``S``, ``M``, ``N`` and ``P_phi``

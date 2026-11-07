@@ -92,10 +92,28 @@ extremum at <b>(1.7880, 0.0171) <code>+1</code></b>, an extremum at (2.4024, 1.1
 <b>+2</b>. Dropped as index 0: (0.8819, 1.2719), (0.9200, 1.3351), (1.0269, &minus;1.5422),
 (1.1139, &minus;1.5810) and (1.6251, 1.6058).</p>
 
-<p><b>Coverage closes.</b> Kept index sum <code>2</code> against boundary winding
-<code>1.9994</code>: difference <b>0</b>. The two pairs suspected of spline ringing were both
-artefacts, and dropping them and their neighbours is what closes the account. The census is
-complete.</p>
+<p><b>Coverage does not close, and the loop radius is why.</b> At the
+<code>0.113</code>&nbsp;m spacing the kept indices sum to <b>+2</b> against a
+<code>1.9994</code> boundary winding, a difference of zero. Repeated with the loop radius
+held at <code>0.018</code>&nbsp;m &mdash; below the <code>0.037</code>&nbsp;m closest
+separation of the two suspect pairs, so that a genuine pair would read as two points
+rather than none &mdash; the sum falls to <b>+1</b> against the same winding: difference
+<b>+1</b>, and the run exits nonzero. All four members of the two suspect pairs read
+<b>0</b> at that radius, and so does (1.0030, 1.5082), which reads <b>+1</b> at the
+spacing.</p>
+
+<p>A winding index is topological only while no other zero lies inside the loop, so a sum
+that changes with the loop radius is a statement about the sampling, not about the field.
+The honest reading is that the census closes at one lattice spacing and not at half of
+it, and that the difference is carried by candidates whose gradient zeros the
+bilinearly-interpolated lattice gradient does not resolve at the finer radius. The
+axis-rejection finding below does not rest on this account: it rests on the flux maximum
+at (1.7880, 0.0171), which every radius tested locates.</p>
+
+<p>The pairs are therefore <b>not</b> established as spline artefacts. What the finer
+radius shows is that the two members of each pair cannot be separated by a winding at
+this resolution at all &mdash; the classification is scale dependent and a resolution
+study, not a single radius, is what would settle them.</p>
 
 <p><b>Why the run jobs failed.</b> Job <code>1307827</code> failed after two minutes inside
 <code>census.py</code>: it reshaped the whole 1221-node state vector onto the 33&times;33 plasma

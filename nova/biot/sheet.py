@@ -213,7 +213,9 @@ class SheetFlux:
         rule = (half[:, None] * weight[None, :]).ravel() * width * np.cosh(stretch)
         return width * np.sinh(stretch), rule
 
-    def _gradients(self, gamma: float, r: float, rp: float) -> tuple[float, float, float]:
+    def _gradients(
+        self, gamma: float, r: float, rp: float
+    ) -> tuple[float, float, float]:
         """``(S, dS/dgamma, dS/dr)`` of the antiderivative's azimuthal integral.
 
         ``S = a_1 b_1 R + A`` is the bracket :meth:`antiderivative` carries, so
@@ -235,18 +237,30 @@ class SheetFlux:
         dense = np.sqrt(
             (r - rp) ** 2 + gamma**2 + 4.0 * r * rp * np.sin(0.5 * phi) ** 2
         )
-        # ``B_1^2 = W^2 + a_1^2 r^2 sin^2 phi`` is the exact squared denominator
-        W = r1 - r * cosine
+        # ``B_1^2 = W^2 + a_1^2 r^2 sin^2 phi`` is the exact squared denominator.
+        # ``W`` and ``Q`` both vanish with the standoff at the singular azimuth,
+        # so each is formed from positive terms: written as the difference of
+        # two O(r) values they lose every digit the grading buys there.
+        half_sine = np.sin(0.5 * phi) ** 2
+        # a target on the segment's supporting line stands off by rounding
+        # alone; taken at face value that standoff is what the graded nodes
+        # below it divide by, so the geometry is snapped to the line it is on
+        gap = r1 - r
+        if abs(gap) <= 1e-12 * r:
+            gap = 0.0
+        W = gap + 2.0 * r * half_sine
         denominator = W * W + a1sq * r * r * sine_sq
         Gamma = a1sq * gamma + b1 * W
         arsinh = np.arcsinh(Gamma / np.sqrt(denominator))
         smear = r1 + b1 * b1 * r * cosine
-        # the pole coefficient of d(arsinh beta_1)/dgamma, contracted so the
-        # target level with the segment end does not divide zero by zero
+        # the numerator of d(arsinh beta_1)/dx, contracted so the target level
+        # with the segment end does not divide zero by zero; the derivative is
+        # this over ``B_1 E_1^2``, and ``E_1 = a_1 D``
+        pole_weight = 1.0 / (a1 * dense)
         gamma_pole = a1sq * (W * (rp - r * cosine) + r * r * sine_sq) / denominator
         radial_pole = (
             -b1 * cosine * denominator
-            - Gamma * (-r1 * cosine + r * (1.0 + b1 * b1 * sine_sq))
+            - Gamma * (-gap + 2.0 * r1 * half_sine + r * b1 * b1 * sine_sq)
         ) / denominator
 
         root = self._root_term(gamma, r, rp)
@@ -257,11 +271,11 @@ class SheetFlux:
         # the weighted flux integral cannot stand in for it here
         arsinh_plain = float(np.sum(rule * cosine * arsinh))
         arsinh_gamma = -b1 * arsinh_plain + float(
-            np.sum(rule * cosine * smear * gamma_pole / (a1 * dense))
+            np.sum(rule * cosine * smear * gamma_pole * pole_weight)
         )
         arsinh_radial = b1 * b1 * float(
             np.sum(rule * cosine * cosine * arsinh)
-        ) + float(np.sum(rule * cosine * smear * radial_pole / (a1 * dense)))
+        ) + float(np.sum(rule * cosine * smear * radial_pole * pole_weight))
 
         value = a1 * b1 * root + arsinh_term
         gamma_value = a1 * b1 * root_gamma + arsinh_gamma
@@ -271,7 +285,9 @@ class SheetFlux:
     def _sloped_field(self, r: float, r_z: float) -> tuple[float, float]:
         """``(B_R, B_Z)`` from the gradient of the flux, exact in the closed form."""
         a1sq = 1.0 + self._slope**2
-        scale = MU0 / (2.0 * np.pi * r * a1sq)
+        # the antiderivative carries ``MU0 r / a_1^2`` and the field is
+        # ``(1 / 2 pi r)`` times the gradient of the flux, so the radius cancels
+        # in the height component and survives in the radial one
         b_r = b_z = 0.0
         ends = (
             (float(self.end[1]) - r_z, float(self.end[0]), 1.0),
@@ -281,7 +297,10 @@ class SheetFlux:
             value, gamma_value, radial_value = self._gradients(height, r, radius)
             b_r += sign * gamma_value
             b_z += sign * (value + r * radial_value)
-        return float(scale * b_r), float(scale * b_z)
+        return (
+            float(MU0 / (2.0 * np.pi * a1sq) * b_r),
+            float(MU0 / (2.0 * np.pi * r * a1sq) * b_z),
+        )
 
     def _flat_field(self, r: float, z: float) -> tuple[float, float]:
         """The surface-current integral of the ring field over a flat annulus."""

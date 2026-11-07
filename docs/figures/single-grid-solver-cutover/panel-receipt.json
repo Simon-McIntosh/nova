@@ -76,10 +76,10 @@
   "state_archive": "docs/figures/single-grid-solver-cutover/panel-states.npz",
   "state_archive_md5": "82a99c7036d06ca690faeda4552d7153",
   "visual_inspection": {
-    "assembled_lobe_and_legs_visible": true,
     "clipped_labels": 0,
-    "inspected_render": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
-    "overlapping_labels": 0,
-    "page_width_px": 900
+    "measured_from": "a render of docs/figures/single-grid-solver-cutover/panel-states.npz through _render_panel, whose save-time check draws the figure and reads every text artist s extent; not copied from another receipt",
+    "measurement_command": "python benchmarks/coil_edit_latency.py panel --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure <run>/single-grid-panel.png",
+    "measurement_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/label-measure-single-grid.log",
+    "overlapping_labels": 0
   }
 }

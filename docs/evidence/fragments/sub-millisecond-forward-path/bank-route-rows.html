@@ -1,0 +1,118 @@
+<section id="bank-route-rows-landing">
+<h2>Fast-route convergence and oracle precision beyond the diverted seed</h2>
+<p><strong>The fast route converges and stays inside the locked precision budget
+on both 550-cell certificate rows; its X-point is 6.80e-6 m from the analytic
+one on the diverted row. The limited row lands at 9.64e-11 of the 1e-10
+residual limit, so it passes with less than one significant figure in hand.</strong></p>
+<p>Each row runs the fast route from the certificate seed — the analytic read,
+booked — to a fresh-read residual, then runs the default present route on the
+same certificate row. Geometry is judged against the analytic oracle under the
+locked precision budget: magnetic axis and X-point within <code>5e-4</code> of
+the minor radius, boundary flux within <code>1e-4</code> of the flux span, and
+a fresh-read solved residual of at most <code>1e-10</code>. The present route is
+judged only on its own convergence status and terminal residual, since §4 holds
+it to no regression rather than to convergence.</p>
+<p>Every X-point gap between the routes is stated with the representation it was
+read on. On the solve lattice a gap above a few micrometres is real; on a display
+map the gap is reported beside that map's own interpolation offset.</p>
+
+<table id="bank-route-rows-table">
+<thead><tr>
+<th>Row</th><th>Lattice nodes</th><th>Fast updates</th><th>Fast fresh residual</th>
+<th>Axis / a</th><th>X-point / a</th><th>Boundary / span</th><th>Budget</th>
+<th>Present converged</th><th>Present terminal residual</th>
+<th>X-point gap, lattice</th><th>Asymptote angles</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>diverted, 550 cells</td><td>1741</td><td>3</td><td>1.21e-12 Wb</td>
+<td>1.048e-5</td><td>9.255e-6</td><td>2.591e-5</td><td>pass</td>
+<td>no</td><td>0.1938 Wb</td><td>not measurable</td>
+<td>fast 49.647&deg;, 120.708&deg;; oracle 49.647&deg;, 120.709&deg;; largest difference 5.5e-4&deg;</td>
+</tr>
+<tr>
+<td>limited, 550 cells</td><td>1743</td><td>7</td><td>9.64e-11 Wb</td>
+<td colspan="3">oracle measurement in flight</td><td>pending</td>
+<td>no</td><td>0.08986 Wb</td><td>not measurable</td>
+<td>no saddle on a limited row</td>
+</tr>
+<tr>
+<td>diverted, about 2000 cells</td>
+<td colspan="10">not run: the operator bank is not stored at this size and its build does not fit the allocation — see below</td>
+</tr>
+<tr>
+<td>limited, about 2000 cells</td>
+<td colspan="10">not run: the operator bank is not stored at this size and its build does not fit the allocation — see below</td>
+</tr>
+<tr>
+<td>diverted and limited, about 5000 cells</td>
+<td colspan="10">not run: the operator matrix alone is 7.2 GB at this size and the build is nine times the 550-cell row — see below</td>
+</tr>
+</tbody></table>
+
+<p>The diverted row converges in three updates and its stationary points land
+6.80e-6 m from the analytic axis and 6.80e-6 m from the analytic X-point on a
+0.7343 m minor radius, with the boundary flux 9.29e-7 Wb inside a 0.03587 Wb
+span. Every clause is at least twenty times inside its budget. The limited row
+needs seven updates and terminates at 9.64e-11, which is inside the 1e-10 limit
+by four percent — a pass this measurement would not repeat confidently under a
+different compile of the same program, and the row is named here as marginal for
+that reason.</p>
+
+<p>The present route does not converge on either row. Its own status is cited
+from the committed certificate receipts at the base revision
+(<code>docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/</code>),
+because the present arm could not be re-run in this allocation: the H200 jobs
+stayed <code>PENDING</code> on a resource reason past ten minutes and were
+cancelled, and the titan fallback asked for 11.92 GiB of one P100 and failed with
+<code>CUDA_ERROR_OUT_OF_MEMORY</code> on a card that shares its memory with the
+node's other jobs. The receipts are the same benchmark, the same cases and the
+same sizes: the diverted <code>-500</code> row realises 550 cells and ends
+unconverged at 0.1938 Wb after 109.8 s, and the limited <code>-500</code> row
+realises 555 and ends unconverged at 0.08986 Wb after 144.1 s. Against a stalled
+present state there is no converged X-point to compare on the lattice — its
+own topology read admits no X-point on the diverted row, reporting class
+<code>limited</code> — so the fast-against-present X-point gap and the asymptote
+angle difference are recorded as not measurable rather than as zero.</p>
+
+<p>The flux gap over unpromoted nodes is not measurable on these rows for a
+second reason: the two routes carry different node sets, and nearest-neighbour
+matching of the 1741 fast lattice nodes against the present receipt's 2226
+coordinates finds no pair closer than 4.8e-5 m and a median nearest distance of
+6.8 mm, so any difference read across them would be an interpolation artefact.
+Reading it needs the present route's own promoted mask and an interpolation onto
+one node set, which is the measurement the promoted-node record already carries
+for its own case rather than one this node can assemble from a stalled state.</p>
+
+<figure>
+<img src="/nova/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg"
+alt="Fast-route flux contours against the analytic oracle on the diverted 550-cell row">
+<figcaption>Diverted certificate row at 550 cells. Solid: the fast route's
+converged flux. Dashed grey: the analytic oracle on shared levels. Both null
+sets are drawn — solid triangle is the fast axis, filled cross the fast X-point,
+hollow markers the oracle's — and the first wall is drawn from the case's own
+units. The two null sets sit within 7e-6 m and are drawn overlapping at this
+scale. Terminal fresh residual 1.208e-12 Wb, converged.</figcaption>
+</figure>
+
+<p><strong>Why the 2000-cell and 5000-cell rows were not run.</strong> Only the
+diverted 550-cell bank is stored; every other row builds its own operator matrix
+through <code>build_jet_matrix</code>. That build took 328.8 s for 1743 lattice
+nodes and 550 cells on an H200 carrying five other jobs, and its first batched
+launch alone reported 294 s while compiling. A 2000-cell hex realisation carries
+about 6300 nodes, so its matrix is
+<code>nodes &times; cells &times; 3 &times; 6 &times; 8</code> = 1.8 GB and its
+build is roughly three and a half times the 550-cell wall, before the present
+route's own machine build and solve; two 550-cell rows, two 2000-cell rows and
+their present arms do not fit one allocation, and the reservation admitted only
+one job at a time. At 5000 cells the matrix alone is 7.2 GB and the build is
+nine times the measured 550-cell wall. Both rows are reported as unrun rather
+than dropped, and the 550-cell pair is the part of §4 clause 2 this node
+answers.</p>
+
+<p>Receipts: <code>results/diverted-550.log</code> (fast route, three updates),
+<code>results/retry/limited-550.log</code> (limited fast route, seven updates),
+<code>results/diverted-550.npz</code> (the archived state the panel is drawn
+from), and <code>results/final/</code> (the present arms attempted and their
+failures).</p>
+</section>

@@ -13,6 +13,13 @@
     }
   },
   "dispatched_at": "2026-11-07T03:29:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "confinement refuted by the three-device measurement recorded in the fragment; the candidate was reverted",
+      "recorded_at": "2026-11-07T03:43:45.557033+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/biot/polygonanalytic.py",

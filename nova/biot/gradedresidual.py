@@ -197,6 +197,10 @@ def graded_residual(
 ):
     """Return ``integral arsinh(N/W) da`` over two graded panels, log removed.
 
+    A weighted call returns one structure per target; ``paired`` asks for the
+    two-panel pairing instead, and the two describe different result shapes, so
+    asking for both is refused rather than silently resolved to one of them.
+
     Each entry of ``panels`` is ``(offset, end, scale, lower, upper)`` for one
     panel, in the offset ``b`` from the range end it is graded from: ``offset`` and
     ``end`` are the denominator's and the numerator's own values AT that end, whose
@@ -210,6 +214,8 @@ def graded_residual(
     far end.  The FIRST panel is graded from ``a = 0`` and the second from
     ``a = pi/2``.
     """
+    if paired and weight is not None:
+        raise ValueError("a paired call and a weighted call return different shapes")
     node, weights = _rule(2 * nodes if weight is not None else nodes)
     total = None if paired else 0.0
     for panel, (offset, end, scale, lower, upper) in enumerate(panels):

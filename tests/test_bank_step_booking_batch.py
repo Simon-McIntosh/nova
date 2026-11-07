@@ -232,9 +232,12 @@ def assert_peak_scaled_equal(actual, expected, label, tolerance=1e-12):
     actual, expected = np.asarray(actual), np.asarray(expected)
     assert actual.shape == expected.shape
     assert np.isfinite(actual).all() and np.isfinite(expected).all()
-    lanes, cells = actual.shape[0], actual.shape[-1] // 3
-    rows = (lanes, 3, cells, 3 * cells)
-    gap = peak_scaled_gap(actual.reshape(rows), expected.reshape(rows))
+    cells = actual.shape[-1] // 3
+    rows = (3, cells, 3 * cells)
+    gap = peak_scaled_gap(
+        actual.reshape(*actual.shape[:-2], *rows),
+        expected.reshape(*expected.shape[:-2], *rows),
+    )
     print("PEAK_SCALED_GAP", label, gap, flush=True)
     assert gap <= tolerance, (label, gap)
 

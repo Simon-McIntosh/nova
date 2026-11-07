@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=sirius
 #SBATCH --time=04:00:00
-#SBATCH --mem=64G
+#SBATCH --mem=200G
 #SBATCH --cpus-per-task=4
 #SBATCH --job-name=graded-residual-compile
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T134005364650-graded-residual-compile-recovery/gate/sirius-%j.log

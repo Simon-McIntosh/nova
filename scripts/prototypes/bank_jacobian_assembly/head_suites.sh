@@ -22,5 +22,5 @@ for f in $FILES; do
   printf 'EXIT=%s\n' "$code" >> "$log"
   [ "$code" -ne 0 ] && rc=1
 done
-printf 'EXIT=%s\n' "$ROOT"
+printf 'EXIT=%s\n' "$rc"
 exit "$rc"

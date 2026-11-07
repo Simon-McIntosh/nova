@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": "none",
   "completed_at": "2026-11-07T20:35:31.217Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T20:46:07.458702+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T20:29:19Z",
   "findings": [
     "scripts/prototypes/diiid_axis_identification/capture_refusal.py:86 non-blocking: the record's `status` field carries `refused: TracerArrayConversionError` for the instrument's own traced-call failure, the same field and the same word a product refusal would use, so the run behind the fragment's null result is indistinguishable from a genuine refusal to anything reading the JSON alone.",

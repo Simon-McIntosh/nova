@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": "none",
   "completed_at": "2026-11-07T21:37:18.581Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a root-cause record that changes no product code; the regression test belongs to the fix node this record recommends",
+      "recorded_at": "2026-11-07T21:55:23.437621+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T21:19:11Z",
   "findings": [
     {

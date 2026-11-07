@@ -10,19 +10,19 @@
 <section id="summary">
 <h2>Summary</h2>
 <p>
-Frame 146's diverted branch terminates with its axis at R=1.210 m, Z=+1.556 m
-&mdash; 0.19 m above the DIII-D limiter top at Z=+1.363 m &mdash; with no closed
-core cells and 0.046&times;Ip confined. Frames 137, 144, 179 and 44 keep their
+Frame 146's diverted branch terminates at trip 3 with its axis at R=1.2196 m,
+Z=+1.5631 m &mdash; 0.20 m above the DIII-D limiter top at Z=+1.363 m &mdash;
+0.0412&times;Ip confined and a terminal residual of 5.61e-2. The loss itself
+happens at trip 2. Frames 137, 144, 179 and 44 keep their
 plasma.
 </p>
 <p>
 The mechanism is the <em>second</em> active-set promotion. At trip 1 the two
 frames are indistinguishable: frame 146 holds 0.912&times;Ip at Z=&minus;0.346 m
 and frame 137 holds 0.920&times;Ip at Z=&minus;0.362 m, both inside the limiter,
-within 1% of each other on both measures. At trip 2 their promotion steps differ
-by 13.5&times; &mdash; 83.21 Wb against 6.156 Wb &mdash; and frame 146's
-boundary set <em>grows</em> from 27 to 39 cells where frame 137's contracts from
-24 to 20. That one step throws the axis to Z=+1.556 m, outside the limiter, and
+within 1% of each other on both measures. At trip 2 their promotion steps differ by 13.5&times;
+&mdash; 83.21 Wb against 6.156 Wb &mdash; and frame 146 changes 39 mask entries
+where frame 137 changes 20. That one step throws the axis to Z=+1.556 m, outside the limiter, and
 leaves 0.046&times;Ip confined.
 </p>
 <p>
@@ -44,7 +44,7 @@ exactly k promotions, so the state at trip k is a real solve state rather than a
 read of a terminal. Axis containment is judged with
 <code>inside_wall_units</code> against the governed 84-point DIII-D limiter,
 which spans Z &minus;1.359 to +1.363 m; the step norm is the norm of the
-difference between consecutive trip flux states.
+difference between consecutive trip flux states; trip 1 has no previous state, so its step norm is null by construction rather than missing.
 </p>
 <table>
 <caption>
@@ -54,18 +54,18 @@ is the flux change from the previous trip, so trip 1 has none.
 </caption>
 <thead>
 <tr><th>frame</th><th>trip</th><th>axis R [m]</th><th>axis Z [m]</th>
-<th>inside limiter</th><th>Iconf/Ip</th><th>boundary set</th>
+<th>inside limiter</th><th>Iconf/Ip</th><th>changed mask entries</th>
 <th>step norm [Wb]</th><th>residual</th></tr>
 </thead>
 <tbody>
 <tr><td>146</td><td>1</td><td>1.688</td><td>&minus;0.346</td><td>yes</td>
-<td>0.912</td><td>27</td><td>&mdash;</td><td>0.128</td></tr>
+<td>0.912</td><td>27</td><td>null</td><td>0.128</td></tr>
 <tr><td>146</td><td>2</td><td>1.211</td><td><b>+1.556</b></td><td><b>no</b></td>
 <td>0.046</td><td><b>39</b></td><td><b>83.21</b></td><td>0.221</td></tr>
 <tr><td>146</td><td>3</td><td>1.220</td><td>+1.563</td><td>no</td>
 <td>0.041</td><td>0</td><td>3.37</td><td>0.056</td></tr>
 <tr><td>137</td><td>1</td><td>1.611</td><td>&minus;0.362</td><td>yes</td>
-<td>0.920</td><td>24</td><td>&mdash;</td><td>0.130</td></tr>
+<td>0.920</td><td>24</td><td>null</td><td>0.130</td></tr>
 <tr><td>137</td><td>2</td><td>1.667</td><td>&minus;0.361</td><td>yes</td>
 <td>0.737</td><td><b>20</b></td><td><b>6.156</b></td><td>0.111</td></tr>
 <tr><td>137</td><td>3</td><td>1.700</td><td>&minus;0.239</td><td>yes</td>
@@ -79,10 +79,10 @@ is the flux change from the previous trip, so trip 1 has none.
 
 <h3>Where the two branches part at trip 2</h3>
 <p>
-Frame 137's promotion walks the boundary inward: 24 cells, then 20, then 9, and
-each step is a few walls of flux. Frame 146's promotion on the same trip adds
-cells &mdash; 27 to 39 &mdash; instead of removing them, and lands 83 Wb of
-column height on a seed that was 151 Wb from the label. The axis does not drift
+Frame 137's promotion changes fewer mask entries each trip: 24, then 20, then 9,
+and each step moves a few Wb of flux. Frame 146 changes more on its second trip
+than on its first &mdash; 27, then 1, then 39 in the changed count it reports
+&mdash; and lands 83 Wb of column height on a seed 151 Wb from the label. The axis does not drift
 upward over several trips; it is carried out of the vessel and left there in one
 step. After trip 3 the set is empty, the step falls to 3.37 Wb, and the residual
 plateaus at 5.6e-2 with nothing left to correct.
@@ -108,17 +108,17 @@ inside the limiter, from the same coils, profiles and target.</td></tr>
 <tr><td>The seed drives an n=0 displacement the fixed point does not restore</td><td>sustained, located at trip 2</td>
 <td>The seed distances are 151.05 Wb and 150.27 Wb for frames 146 and 137. Trip 1
 is healthy on both, so neither the seed nor the first promotion carries the
-displacement. Trip 2 does: 83.21 Wb against 6.156 Wb, with the boundary set
+displacement. Trip 2 does: 83.21 Wb against 6.156 Wb, changing more mask
 growing before it collapses.</td></tr>
 </tbody>
 </table>
 <p>
 <b>The mechanism.</b> The promotion executed on the second active-set trip of
-frame 146 is unbounded relative to the state it is applied to. It admits 12 more
-boundary cells than it started with, against a control that admits none, and it
+frame 146 is unbounded relative to the state it is applied to. It changes 39 mask entries
+where the control at the same trip changes 20, and it
 moves the flux by 83 Wb &mdash; more than half the seed's own 151 Wb distance
 from the label. The resulting state has its axis above the limiter and almost no
-confined current. Every later trip inherits that state with an empty boundary set
+confined current. Every later trip inherits that state with no mask changes left
 and cannot bring it back.
 </p>
 </section>
@@ -139,8 +139,8 @@ unless that trip reduced the residual.
 <b>The test that would have caught it.</b> A forward-solve test that runs frame
 146's diverted branch to the second trip and asserts two things: that the
 promotion step norm does not exceed the state's distance from the seed, and
-that a terminal with an empty boundary set cannot carry an axis outside the
-limiter. With an 83 Wb step on a 151 Wb seed, the first assertion fails at 55%
+that a terminal whose mask has stopped changing cannot carry an axis outside
+the limiter. With an 83 Wb step on a 151 Wb seed, the first assertion fails at 55%
 of the budget, which is the signature of a first-order method that has lost its
 trust region.
 </p>

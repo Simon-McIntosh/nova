@@ -4,6 +4,18 @@
   "completed_at": "2026-11-07T17:21:15.272Z",
   "dispatched_at": "2026-11-07T17:13:05Z",
   "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged from the rendered PNG, image-0.png, 1400x720)",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T17:42:41.996939+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-frame-144-axis-identification",
+      "recorded_at": "2026-11-07T17:41:39.802010+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",

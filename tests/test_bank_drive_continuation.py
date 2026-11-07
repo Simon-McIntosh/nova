@@ -24,7 +24,7 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-from nova.equilibrium import drive_continuation, support_read  # noqa: E402
+from nova.equilibrium import drive_continuation  # noqa: E402
 from nova.equilibrium.solve import _damped_scale  # noqa: E402
 
 pytestmark = pytest.mark.timeout(600)
@@ -140,14 +140,9 @@ def _toy_solve_batch(
 
 
 @pytest.fixture(name="toy")
-def fixture_toy(monkeypatch):
-    """Substitute the solve seam and hand back a caller.
-
-    The substitution is module-scoped to the driver's own import of
-    ``support_read`` so no other test in the session sees it.
-    """
+def fixture_toy():
+    """Substitute the solve seam and hand back a caller."""
     READS.clear()
-    monkeypatch.setattr(support_read, "solve_batch", _toy_solve_batch)
 
     def run(**overrides):
         state = jnp.asarray([[START_DRIVE], [START_DRIVE]])
@@ -155,6 +150,7 @@ def fixture_toy(monkeypatch):
             start_drive=START_DRIVE,
             target_drive=TARGET_DRIVE,
             profile_at=lambda drive: _Profile(drive, STIFFNESS),
+            solve=_toy_solve_batch,
         )
         arguments.update(overrides)
         return drive_continuation.advance_drive(

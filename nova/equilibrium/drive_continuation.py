@@ -120,6 +120,7 @@ def advance_drive(
     intermediate_tolerance: float = INTERMEDIATE_TOLERANCE,
     certification_tolerance: float = CERTIFICATION_TOLERANCE,
     max_substeps: int = 256,
+    solve: Callable | None = None,
     solve_options: dict | None = None,
 ) -> DriveContinuationResult:
     """Reach ``target_drive`` from lanes converged at ``start_drive``.
@@ -137,9 +138,12 @@ def advance_drive(
     is rejected: the drive does not advance, the sub-step is halved, and the
     same drive is retried. A sub-solve inside budget doubles the sub-step.
 
-    ``solve_options`` are passed through to
-    :func:`nova.equilibrium.support_read.solve_batch` unchanged.
+    ``solve`` is the solve the sub-steps call, defaulting to
+    :func:`nova.equilibrium.support_read.solve_batch`; it exists so a caller
+    can supply a version compiled for its own traced drive. ``solve_options``
+    are passed through to it unchanged.
     """
+    solve = solve or support_read.solve_batch
     options = dict(solve_options or {})
     span = abs(target_drive - start_drive)
     if span == 0:
@@ -164,7 +168,7 @@ def advance_drive(
         change = min(attempted, remaining)
         final = change >= remaining
         tolerance = certification_tolerance if final else intermediate_tolerance
-        attempt = support_read.solve_batch(
+        attempt = solve(
             operands,
             cache,
             state_moments,

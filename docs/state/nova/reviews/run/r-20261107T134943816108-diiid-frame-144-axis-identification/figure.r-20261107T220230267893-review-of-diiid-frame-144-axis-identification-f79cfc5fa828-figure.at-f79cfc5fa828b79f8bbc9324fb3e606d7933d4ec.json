@@ -4,6 +4,13 @@
   "completed_at": "2026-11-07T22:11:59.248Z",
   "dispatched_at": "2026-11-07T22:04:06Z",
   "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged only from the rendered PNG, image-0.png, 1400x720)",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "root-cause panel; the EFIT and rejected axes coincide by design and the caption states the 0.03 m separation numerically",
+      "recorded_at": "2026-11-07T22:20:05.866858+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: an axis-identification figure node should offset the EFIT axis mark, or draw it in a shape that survives the overlap (an open circle smaller than the O-point ring, or a markerfreed point marked only by its label), so the legend entry resolves to a visible glyph.",

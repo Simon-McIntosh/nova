@@ -12,6 +12,39 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def validate_text(fig, ax):
+    """Refuse clipped or colliding text before writing the figure."""
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    artists = [
+        *ax.get_xticklabels(),
+        *ax.get_yticklabels(),
+        ax.xaxis.label,
+        ax.yaxis.label,
+        *ax.texts,
+    ]
+    boxes = [
+        (artist.get_text(), artist.get_window_extent(renderer))
+        for artist in artists
+        if artist.get_visible() and artist.get_text()
+    ]
+    for name, box in boxes:
+        if not fig.bbox.contains(*box.get_points()[0]) or not fig.bbox.contains(
+            *box.get_points()[1]
+        ):
+            raise ValueError(f"clipped figure text: {name}")
+    for index, (name, box) in enumerate(boxes):
+        for other_name, other_box in boxes[index + 1 :]:
+            if box.overlaps(other_box):
+                raise ValueError(f"overlapping figure text: {name} / {other_name}")
+    for label in ax.texts:
+        box = label.get_window_extent(renderer)
+        for line in ax.lines:
+            path = line.get_path().transformed(line.get_transform())
+            if path.intersects_bbox(box, filled=False):
+                raise ValueError(f"figure label covers data: {label.get_text()}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("log", type=Path)
@@ -63,6 +96,7 @@ def main():
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.subplots_adjust(left=0.13, right=0.96, bottom=0.17, top=0.92)
+    validate_text(fig, ax)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.output, format="svg")
     image = args.output.read_text()

@@ -45,6 +45,36 @@ state ran 46 minutes at six cores and was stopped at the run budget without
 reaching its summary line, so this fragment records the negative control and
 not a passing head row.</p>
 
+<h3 id="bank-matrix-free-step-suites">The five bank suite files, base against head</h3>
+
+<p>One sirius allocation ran the base revision and the head revision over the
+five files that reach the bank step and the read it consumes, one fresh pytest
+process per file with its own base temp directory. Both arms exclude the slow
+marker, because the 550-cell equality case runs on the device lane; the default
+lane keeps a two-cell case that drives the same operator, product and cell
+blocks directly.</p>
+
+<table id="bank-matrix-free-step-suite-table">
+<caption>Paired suite runs, base <code>6d799fa8</code> against head, each arm in
+its own processes. The head file carries one more passing test because the
+two-cell operator case was added; no test that passed at the base failed at the
+head.</caption>
+<thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><td>test_bank_newton_step.py</td><td>16 passed, 2 deselected</td><td>17 passed, 4 deselected</td></tr>
+<tr><td>test_bank_solve_cycle.py</td><td>2 passed, 1 deselected</td><td>2 passed, 1 deselected</td></tr>
+<tr><td>test_bank_solve_driver.py</td><td>7 passed, 3 deselected</td><td>7 passed, 3 deselected</td></tr>
+<tr><td>test_support_read.py</td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td></tr>
+<tr><td>test_bank_step_booking_batch.py</td><td>1 passed, 1 skipped, 7 deselected</td><td>1 passed, 1 skipped, 7 deselected</td></tr>
+</tbody>
+</table>
+
+<p>All ten processes exited zero, and the allocation's own status was zero.
+The two skips in <code>test_support_read.py</code> are the limited states that
+have no saddle or X-point to mistake for the axis; the skip in
+<code>test_bank_step_booking_batch.py</code> is the paired device-timing case
+that the H200 lane owns.</p>
+
 <h3 id="bank-matrix-free-step-timing">Device timing: not measured</h3>
 
 <p>Two H200 allocations were taken for the base-against-head timing and neither

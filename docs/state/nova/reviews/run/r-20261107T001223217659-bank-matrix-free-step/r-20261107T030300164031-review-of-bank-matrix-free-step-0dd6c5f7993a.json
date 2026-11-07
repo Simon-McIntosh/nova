@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T03:12:44.234Z",
+  "dispatched_at": "2026-11-07T03:05:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The coordinator withdrew the step: it does not converge (400 iterations stalled at 1e-2 against 40 assembled). The node lands as a negative result, and its follow-up design is the reused-scale Krylov node.",
+      "recorded_at": "2026-11-07T03:16:35.626738+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "A timing table of a step that does not converge measures nothing. The record states that the product arm cost 44 s per width without converging. Negative result, coordinator-directed.",
+      "recorded_at": "2026-11-07T03:16:39.107463+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Nothing matrix-free remains to guard. The equality contract returns with the reused-scale Krylov node's test.",
+      "recorded_at": "2026-11-07T03:16:42.832812+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "bank-reused-scale-krylov",
+      "recorded_at": "2026-11-07T03:16:46.225699+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "The sbatch wrapper records the revision in each log. The worktree-gitdir parse is a prototype nit.",
+      "recorded_at": "2026-11-07T03:16:49.889640+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": 1,
+      "severity": "blocking",
+      "text": "the node goal is 'Solve the bank Newton step matrix-free inside GMRES instead of assembling the dense Jacobian', and the landed head carries no matrix-free step: the implementation added in c345dfd41 is reverted in 6dee6cb48, so `git diff --stat 6d799fa8c 0dd6c5f79 -- nova tests` is empty and the node ships no product source change at all."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-matrix-free-step.html",
+      "line": 173,
+      "severity": "blocking",
+      "text": "the done_when requires one H200 base-against-head allocation at 16, 64 and 128 slices tabling reads, updates, GMRES iterations, per-update ms, wall per slice and peak memory, plus a wall-per-slice figure, and neither the table nor the figure exists; the fragment states the table could not be produced, so the evidence gate asserts no part of that measure."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the dense-equality test the done_when names is absent at the landed head - it was added in 49bbc7b5d and deleted in 6dee6cb48 - so nothing in the landed tree guards the matrix-free/dense agreement contract, and the two-cell operator case the fragment cites at 3.4e-16 has no test behind it either."
+    },
+    {
+      "file": "scripts/prototypes/bank_matrix_free_step/diagnose.py",
+      "line": 184,
+      "severity": "non-blocking",
+      "text": "the diagnostic that carries the fragment's central equilibrations table calls `support_read._block_gmres_operator`, which exists only on the withdrawn revision d819e30ba; at the landed head the script reports the product arm cannot run, so the record's key result cannot be reproduced from the commit it lands at."
+    },
+    {
+      "file": "scripts/prototypes/bank_matrix_free_step/diagnose.py",
+      "line": 49,
+      "severity": "non-blocking",
+      "text": "`_revision()` reads `<tree>/.git/HEAD`, but a git worktree carries `.git` as a gitdir pointer file rather than a directory, so the OSError fallback fires and the script's own header line reads `# revision=unknown` in every diagnostic log (diagnose-trial.log line 7); provenance survives only because the sbatch wrapper writes its own revision line."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T030300164031-review-of-bank-matrix-free-step-0dd6c5f7993a",
+  "reviewed_base_sha": "6d799fa8c15dc683b3691f9b6ceef2d5871e0061",
+  "reviewed_head_sha": "0dd6c5f7993ac671c565a22a94776afb9d13e84f",
+  "reviewed_run_id": "r-20261107T001223217659-bank-matrix-free-step",
+  "scores": {
+    "durability": 2,
+    "evidence": 6,
+    "fit": 15,
+    "goal_fidelity": 4,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T03:17:35.711559+00:00",
+  "total": 61,
+  "verdicts": {
+    "diff": "read commit by commit from 6d799fa8c to 0dd6c5f79; twenty commits touch ten files, +1113 lines, all additive - seven prototype scripts, three sbatch/sh drivers and the evidence fragment - while the nova and tests deltas net to zero.",
+    "done_when": "the done_when requires a within-60-iteration product solve, a passing 1e-8 dense-equality test, and a 16/64/128-slice base-against-head H200 table with a figure; the equality gate failed by construction and none of the table, figure or surviving test exists.",
+    "goal": "the node goal is to solve the bank Newton step matrix-free inside GMRES; the landed tree has no matrix-free path and `nova/equilibrium/support_read.py` is byte-identical to the base after the revert in 6dee6cb48.",
+    "manifest": "the manifest reads complete, names the twenty commits, the suite logs, the negative-control log and its EXIT=1 with two failing ids, and states plainly that the step was withdrawn and the width table not produced.",
+    "write_paths": "all ten changed files sit inside the declared grants `scripts/prototypes/bank_matrix_free_step` and `docs/evidence/fragments/sub-millisecond-forward-path/bank-matrix-free-step.html`; no declared path is missing from the diff and no path outside them is touched."
+  }
+}

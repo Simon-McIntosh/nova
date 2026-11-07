@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="214">
+<meta name="plan-version" content="215">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -737,6 +737,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T225958281351-bank-batch-width" data-who="reckon-build" data-when="2026-11-07T00:03:35Z">
     <div class="r-comment-body"><p>[Converged width sweep](/nova/evidence/fragments/sub-millisecond-forward-path/bank-batch-width.html#bank-batch-width-landing): two fresh common-seed H200 processes per width 16/32/64/128; best 13.928235 ms/slice at 128 with four reads and three updates. All 480 lane results pass precision. No plateau through 128; width 256 requires 183.694 GB temporary memory and cannot fit. Inspected log-log figure; no product or test changes.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T030300164031-review-of-bank-matrix-free-step-0dd6c5f7993a" data-who="reckon-build" data-when="2026-11-07T03:12:44.234Z">
+    <div class="r-comment-body"><p>bank-matrix-free-step landed an honestly recorded negative result: the matrix-free Newton step was implemented, measured at 400 iterations and a 1e-2 residual against 40 iterations assembled at both 550-cell states and at 16 lanes, diagnosed to missing row and column equilibration, and reverted in 2 commits so nova and tests are byte-identical to base 6d799fa8c; the review scores goal_fidelity 4, evidence 6, durability 2 because the goal&#x27;s deliverable, its equality test and the required 16/64/128-slice base-against-head table and figure are all absent, and scope_discipline 18, fit 15, reuse 16.</p></div>
 </div>
 </section>
 </main>

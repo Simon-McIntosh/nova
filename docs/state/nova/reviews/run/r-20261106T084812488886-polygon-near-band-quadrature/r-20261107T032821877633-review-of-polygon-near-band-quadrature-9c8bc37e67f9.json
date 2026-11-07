@@ -28,6 +28,11 @@
       "kind": "exempted",
       "reason": "the added row is a compile-ratio excursion: six fresh-process ratios read 2.51-2.76 against the 3.0 bound with identical equation counts",
       "recorded_at": "2026-11-07T03:44:05.587572+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the refused combination has no caller; the guard only stops a silent behaviour change and carries no result",
+      "recorded_at": "2026-11-07T03:44:15.424351+00:00"
     }
   },
   "findings": [

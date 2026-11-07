@@ -63,7 +63,10 @@ def main():
     axes.set_xlabel("slice index")
     axes.set_ylabel("batch reads per slice [count]")
     axes.set_xticks(sorted({row["slice"] for row in arm if row["slice"] > 0}))
-    axes.set_ylim(0, max(row["reads_max"] for row in arm if row["slice"] > 0) + 1.5)
+    axes.set_yscale("log")
+    axes.set_yticks([3, 10, 30, 100, 500])
+    axes.set_yticklabels(["3", "10", "30", "100", "500"])
+    axes.set_ylim(2.4, 900)
     axes.legend(frameon=False, ncol=len(steps), loc="upper center", bbox_to_anchor=(0.5, 1.14))
     for side in ("top", "right"):
         axes.spines[side].set_visible(False)

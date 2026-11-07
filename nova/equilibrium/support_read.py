@@ -1135,9 +1135,11 @@ def _cell_diagonal_blocks(
             return jnp.concatenate(
                 (
                     jets[operands.sample_index[cell], 0],
-                    field.sampled_coefficient(operands.geometry)[cell],
-                    field.value(support.reading.axis).reshape(-1)[cell : cell + 1],
-                    field.value(support.reading.boundary).reshape(-1)[cell : cell + 1],
+                    jnp.reshape(
+                        field.sampled_coefficient(operands.geometry)[cell], (1,)
+                    ),
+                    jnp.reshape(field.value(support.reading.axis), (1,)),
+                    jnp.reshape(field.value(support.reading.boundary), (1,)),
                 )
             )
 

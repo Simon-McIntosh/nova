@@ -38,20 +38,18 @@ from scripts.prototypes.bank_solve_profile import fixture  # noqa: E402
 
 
 def _revision():
-    root = os.path.join(os.path.dirname(__file__), "..", "..", "..")
-    for directory in (".git", os.path.join("..", "..", "..", ".git")):
-        head = os.path.join(root, directory, "HEAD")
-        try:
-            with open(head, encoding="utf-8") as handle:
-                value = handle.read().strip()
-            if value.startswith("ref: "):
-                target = os.path.join(root, directory, value[5:])
-                with open(target, encoding="utf-8") as handle:
-                    return handle.read().strip()
-            return value
-        except OSError:
-            continue
-    return "unknown"
+    import subprocess
+
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    try:
+        return subprocess.run(
+            ["git", "-C", root, "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
 
 
 def _header(args):
@@ -153,31 +151,35 @@ def run_jacobian(args):
     support = _read(batch, states)
 
     assemble = jax.jit(
-        lambda values, reading: support_read.step_jacobian(
-            batch.operands,
-            values,
-            reading,
-            batch.profile,
-            fixture.gradient,
-            batch.quadrature,
-            fresh_geometry=True,
+        jax.vmap(
+            lambda values, reading: support_read.step_jacobian(
+                batch.operands,
+                values,
+                reading,
+                batch.profile,
+                fixture.gradient,
+                batch.quadrature,
+                fresh_geometry=True,
+            )
         )
     )
     product = jax.jit(
-        lambda values, change, reading: support_read.step_jacobian_vector(
-            batch.operands,
-            values,
-            change,
-            reading,
-            batch.profile,
-            fixture.gradient,
-            batch.quadrature,
-            fresh_geometry=True,
+        jax.vmap(
+            lambda values, change, reading: support_read.step_jacobian_vector(
+                batch.operands,
+                values,
+                change,
+                reading,
+                batch.profile,
+                fixture.gradient,
+                batch.quadrature,
+                fresh_geometry=True,
+            )
         )
     )
     assembly = jax.block_until_ready(assemble(states, support))
     applied = jax.block_until_ready(product(states, direction, support))
-    shape_ok = assembly.shape[-1] == applied[0].size
+    shape_ok = assembly.shape[-1] == 3 * cells == applied[0].shape[-1]
     assemble_ms = _time(lambda: assemble(states, support), args.reps) * 1e3
     product_ms = _time(lambda: product(states, direction, support), args.reps) * 1e3
     break_even = assemble_ms / product_ms

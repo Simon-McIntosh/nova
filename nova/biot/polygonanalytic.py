@@ -383,6 +383,19 @@ def _gather_targets(value, index, xp):
 def _confined_weighted_root(vertex, term, near, reduced):
     """Evaluate the graded quadrature on a static bucket of near-band targets.
 
+    A target array no larger than the bucket gains nothing from gathering -- it
+    would hold every target and pay the sort for no benefit -- so it takes the
+    whole-array path directly.
+    """
+    capacity = _bucket_capacity(vertex.xp)
+    if vertex.radius.shape[0] <= capacity:
+        return vertex.xp.where(near, _weighted_root(vertex, term), reduced)
+    return _bucketed_weighted_root(vertex, term, near, reduced)
+
+
+def _bucketed_weighted_root(vertex, term, near, reduced):
+    """Evaluate the graded quadrature on a static bucket of near-band targets.
+
     The near test is a function of the targets themselves, so its size is only
     known at run time while a traced program needs a static shape. A bucket of
     fixed capacity carries the selected targets and is scattered back over the

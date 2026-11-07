@@ -197,6 +197,14 @@ def main():
             machine.convention,
             machine.policy,
         )
+        residual = support_read.step_residual(
+            machine.operands,
+            one_state,
+            one_state,
+            support,
+            profile,
+            machine.quadrature,
+        )
         matrix = support_read.step_jacobian(
             machine.operands,
             one_state,
@@ -204,13 +212,25 @@ def main():
             profile,
             profile_fixture.gradient,
             machine.quadrature,
+            booked=residual.booked,
             fresh_geometry=True,
         )
+        balanced, _, _ = support_read._equilibrate(matrix, one_state, residual.booked)
         singular = jnp.linalg.svd(matrix, compute_uv=False)
-        return singular[0], singular[-1], support.valid
+        balanced_singular = jnp.linalg.svd(balanced, compute_uv=False)
+        return (
+            singular[0],
+            singular[-1],
+            balanced_singular[0],
+            balanced_singular[-1],
+            support.valid,
+        )
 
-    for accepted_drive, accepted_state in accepted_states[-3:]:
-        largest, smallest, valid = singular_values(
+    for accepted_drive, accepted_state in [
+        accepted_states[0],
+        *accepted_states[-3:],
+    ]:
+        largest, smallest, balanced_largest, balanced_smallest, valid = singular_values(
             tuple(value[0] for value in accepted_state),
             jnp.asarray(accepted_drive),
         )
@@ -220,6 +240,9 @@ def main():
             largest_singular=float(largest),
             smallest_singular=float(smallest),
             condition_number=float(largest / smallest),
+            balanced_largest_singular=float(balanced_largest),
+            balanced_smallest_singular=float(balanced_smallest),
+            balanced_condition_number=float(balanced_largest / balanced_smallest),
             valid=bool(valid),
         )
     emit("DONE", drive=drive)

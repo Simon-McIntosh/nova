@@ -74,6 +74,10 @@ def main() -> int:
         key=lambda p: float(np.hypot(p["r"] - label_axis[0], p["z"] - label_axis[1])),
     )
     other_extrema = [p for p in extrema if p is not rejected]
+    saddle_rz = np.asarray([(p["r"], p["z"]) for p in saddles], dtype=float)
+    inside = poloidal.inside_wall_units(saddle_rz, limiter)
+    contained_saddles = [p for p, flag in zip(saddles, inside, strict=True) if flag]
+    outside_saddles = [p for p, flag in zip(saddles, inside, strict=True) if not flag]
 
     if "data-ink" in plt.style.available:
         plt.style.use("data-ink")
@@ -89,9 +93,10 @@ def main() -> int:
     tally = poloidal.draw_nulls(
         axes,
         magnetic_axis=(rejected["r"], rejected["z"]),
-        x_points=np.asarray([(p["r"], p["z"]) for p in saddles]),
-        other_x_points=np.asarray([(p["r"], p["z"]) for p in other_extrema]),
-        contain=limiter,
+        x_points=np.asarray([(p["r"], p["z"]) for p in contained_saddles]),
+        other_x_points=np.asarray(
+            [(p["r"], p["z"]) for p in other_extrema + outside_saddles]
+        ),
     )
     axes.plot(
         rejected["r"],
@@ -134,12 +139,13 @@ def main() -> int:
         zorder=26,
     )
 
-    margin = 0.18
+    margin = 0.05
+    framed = np.vstack([limiter, np.asarray([(p["r"], p["z"]) for p in kept])])
     axes.set_xlim(
-        float(limiter[:, 0].min()) - margin, float(limiter[:, 0].max()) + margin
+        float(framed[:, 0].min()) - margin, float(framed[:, 0].max()) + margin
     )
     axes.set_ylim(
-        float(limiter[:, 1].min()) - margin, float(limiter[:, 1].max()) + margin
+        float(framed[:, 1].min()) - margin, float(framed[:, 1].max()) + margin
     )
 
     handles = [

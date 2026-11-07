@@ -54,13 +54,8 @@ from __future__ import annotations
 import numpy as np
 
 from nova.biot.completeelliptic import complete_kind, complete_pole
-from nova.biot.gradedresidual import QUARTER
+from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.greens import MU0, greens_bz_br, greens_psi
-
-# ``_weighted_residual`` is private to the Part V module, which owns the graded
-# rule and its endpoint-log removal.  Importing it keeps one implementation of
-# that machinery; copying it here would let the two drift.
-from nova.biot.polygonanalytic import _weighted_residual
 
 __all__ = ["SheetFlux", "sheet_field", "sheet_flux"]
 
@@ -71,6 +66,25 @@ _NODES = 16
 """Gauss-Legendre nodes per panel; the rule is fixed, never adapted."""
 
 _GAUSS = np.polynomial.legendre.leggauss(_NODES)
+
+
+def _divide(numerator, denominator):
+    """Quotient and remainder of two polynomials in ascending coefficients.
+
+    The bracketed weight ``N(cos phi)`` is quartic and the sheet's squared
+    denominator is quadratic in ``cos phi``, so splitting the integrand onto the
+    denominator leaves a quadratic quotient and a linear remainder.
+    """
+    rest = np.array(numerator, dtype=np.float64)
+    divisor = np.array(denominator, dtype=np.float64)
+    quotient = np.zeros(rest.size - divisor.size + 1)
+    for order in range(quotient.size - 1, -1, -1):
+        factor = rest[order + divisor.size - 1] / divisor[-1]
+        quotient[order] = factor
+        for index, coefficient in enumerate(divisor):
+            rest[order + index] -= factor * coefficient
+    return quotient, rest[: divisor.size - 1]
+
 
 _ARSINH_NODES = 128
 """Nodes of the graded arsinh rule, the Part V module's own count."""
@@ -150,6 +164,26 @@ class SheetFlux:
         in which the weight is a quadratic and the denominator is quadratic in
         ``c`` and in the panel's own ``sin^2``.
         """
+        panels, pieces = self._arsinh_rule(gamma, r, r1, b1)
+
+        # cos(phi) = -c and d phi = 2 da, so the weight is -2 r_1 c + 2 b_1^2 r c^2;
+        # the endpoint coefficients are its values at c = -1 and c = +1
+        weight = (
+            [-8.0 * b1 * b1 * r],
+            np.full(1, 2.0 * (r1 + b1 * b1 * r)),
+            np.full(1, 2.0 * (b1 * b1 * r - r1)),
+        )
+        value = graded_residual(panels, pieces, _ARSINH_NODES, np, weight=weight)
+        return float(np.asarray(value).sum())
+
+    def _arsinh_rule(self, gamma: float, r: float, r1: float, b1: float):
+        """The two graded panels and the integrand closures of the arsinh terms.
+
+        The azimuth halves at ``a = phi/2 = pi/4``, and each half is graded from
+        its own end: ``a = phi/2`` runs over the first half, and the offset
+        ``pi/2 - a`` over the second.  ``c = cos^2 a - sin^2 a`` is ``-cos(phi)``,
+        and both the numerator and the denominator are quadratic in it.
+        """
         a1sq = 1.0 + b1 * b1
         spread = r1 - r
         # the denominator's curvature at each graded end, read off the exact
@@ -171,15 +205,19 @@ class SheetFlux:
                 np.sqrt(spread**2 + 4.0 * r * r1 * y + 4.0 * r * r * b1 * b1 * x * y),
             )
 
-        # cos(phi) = -c and d phi = 2 da, so the weight is -2 r_1 c + 2 b_1^2 r c^2;
-        # the endpoint coefficients are its values at c = -1 and c = +1
-        weight = (
-            [-8.0 * b1 * b1 * r],
-            np.full(1, 2.0 * (r1 + b1 * b1 * r)),
-            np.full(1, 2.0 * (b1 * b1 * r - r1)),
-        )
-        value = _weighted_residual(panels, pieces, weight, _ARSINH_NODES, np)
-        return float(np.asarray(value).sum())
+        return panels, pieces
+
+    def _residual_arsinh(self, gamma: float, r: float, r1: float, b1: float) -> float:
+        """``int_0^pi arsinh(beta_1) d phi``: the paper's eq (12b) remainder.
+
+        This is the one piece of the arsinh block with no elementary form.  It is
+        smooth away from a target level with the segment end, where it is
+        logarithmically integrable, so it runs on the same graded rule.  The
+        factor of two is ``d phi = 2 da``.
+        """
+        panels, pieces = self._arsinh_rule(gamma, r, r1, b1)
+        value = graded_residual(panels, pieces, _ARSINH_NODES, np)
+        return 2.0 * float(np.asarray(value).sum())
 
     def antiderivative(self, gamma: float, r: float, rp: float) -> float:
         """The sloped-segment antiderivative, integrated over the azimuth.
@@ -194,6 +232,124 @@ class SheetFlux:
         r1 = rp - b1 * gamma
         total = np.sqrt(a1sq) * b1 * self._root_term(gamma, r, rp)
         total += self._arsinh_term(gamma, r, r1, b1)
+        return float(MU0 * r / a1sq * total)
+
+    def _arc_remainder(self, gamma, r, r1, b1, a, k2, K, E, complement):
+        """``int_0^pi N(cos phi) / (B_1^2 D) d phi``: the pole reduction's remainder.
+
+        Integrating the arsinh term by parts moves the derivative onto
+        ``arsinh(beta_1)``, and that derivative is rational:
+
+            d arsinh(beta_1)/d phi
+                = a_1 r sin(phi)
+                  [b_1 r (r - r_1 cos phi) - gamma (r_1 + b_1^2 r cos phi)]
+                  / (B_1^2 D).
+
+        The oscillatory part of the weight has an antiderivative that vanishes at
+        both ends of the half turn, so no boundary term survives and the whole
+        remainder is the bracket ``N`` above over ``B_1^2 D``.
+
+        ``N`` is quartic in ``cos phi`` and ``B_1^2`` is quadratic, so the
+        quotient integrates onto ``K`` and ``E`` through the Jacobi moments.  The
+        linear remainder sits over ``B_1^2``, which is a quadratic in
+        ``y = sin^2 a = sn^2 u``; its two roots are the paper's own characteristic
+        magnitudes, and each ``1/(y - y_p)`` is a complete third-kind integral of
+        characteristic ``n_p = 1/y_p``.
+        """
+        a1 = np.sqrt(1.0 + b1 * b1)
+        bracket = np.array([r1, 0.5 * b1 * b1 * r, -r1, -0.5 * b1 * b1 * r])
+        derivative = np.array(
+            [b1 * r * r - gamma * r1, -b1 * b1 * r * gamma - b1 * r * r1]
+        )
+        weight = a1 * r * np.convolve(bracket, derivative)
+        squared = np.array(
+            [r1 * r1 + (1.0 + b1 * b1) * r * r, -2.0 * r * r1, -b1 * b1 * r * r]
+        )
+        # A target level with the segment end puts a root of B_1^2 on phi = 0,
+        # where the bracket carries the same (1 - cos phi).  Cancelling it first
+        # keeps the split a difference of finite integrals: left in, the two
+        # quarter-turn integrals diverge together and lose every digit bought.
+        gap = r1 - r
+        if abs(gap) <= 1e-12 * r:
+            weight, _ = _divide(weight, np.array([1.0, -1.0]))
+            squared, _ = _divide(squared, np.array([1.0, -1.0]))
+        quotient, remainder = _divide(weight, squared)
+
+        polynomial = np.zeros(3)
+        polynomial[: quotient.size] = quotient
+        moment = K
+        square = (K - E) / k2
+        quartic = ((2.0 + k2) * K - 2.0 * (1.0 + k2) * E) / (3.0 * k2 * k2)
+        # cos(phi) = 2 sn^2 u - 1, so cos^2 = 4 sn^4 - 4 sn^2 + 1
+        folded = (
+            polynomial[2] * (4.0 * quartic - 4.0 * square + moment)
+            + polynomial[1] * (2.0 * square - moment)
+            + polynomial[0] * moment
+        )
+
+        if squared.size == 3:
+            leading = squared[2]
+            # roots in cos(phi), carried to y = sin^2 u = (1 + cos(phi))/2
+            centre_roots = -squared[1] / leading
+            product_roots = squared[0] / leading
+            discriminant = np.sqrt(0.25 * centre_roots * centre_roots - product_roots)
+            roots = np.array(
+                [
+                    0.5 * (1.0 + 0.5 * centre_roots - discriminant),
+                    0.5 * (1.0 + 0.5 * centre_roots + discriminant),
+                ]
+            )
+            offset = remainder[0] - remainder[1]
+            slope = 2.0 * remainder[1]
+            # cos(phi) = 2 y - 1, so the y-quadratic's leading coefficient is 4 x this
+            weights = (offset + slope * roots) / (4.0 * leading) / (roots[0] - roots[1])
+            weights[1] = (
+                (offset + slope * roots[1]) / (4.0 * leading) / (roots[1] - roots[0])
+            )
+            third = complete_pole(1.0 - 1.0 / roots, np.full(2, complement))
+            third_kind = float(np.sum(-(weights / roots) * third))
+        else:
+            # one factor cancelled, so the denominator is linear in cos(phi) and
+            # leaves a single characteristic
+            pole = (1.0 + (-squared[0] / squared[1])) / 2.0
+            third = complete_pole(
+                np.asarray([1.0 - 1.0 / pole]), np.asarray([complement])
+            )
+            third_kind = -remainder[0] / (2.0 * squared[1] * pole) * third[0]
+        return float(2.0 / a * (folded + third_kind))
+
+    def _arsinh_term_closed(self, gamma, r, r1, b1, a, k2, K, E, complement):
+        """The arsinh part of the antiderivative in closed form.
+
+        The part-integration leaves the paper's eq (12b) remainder multiplied by
+        the weight's mean and the rational pole reduction of
+        :meth:`_arc_remainder`.
+        """
+        mean = 0.5 * b1 * b1 * r * self._residual_arsinh(gamma, r, r1, b1)
+        return mean - self._arc_remainder(gamma, r, r1, b1, a, k2, K, E, complement)
+
+    def antiderivative_closed(self, gamma: float, r: float, rp: float) -> float:
+        """The sloped-segment antiderivative in closed form.
+
+        The ``D`` part is the complete first- and second-kind combination
+        ``2a[2(1 - k^2)K + (k^2 - 2)E]/(3k^2)``; the ``arsinh`` part is its
+        by-parts reduction, which leaves one smooth ``arsinh`` quadrature and
+        complete third-kind integrals at the two pole seeds.  A straight segment
+        (``b_1 = 0``) is eq (24) and must take the earlier route instead.
+        """
+        b1 = self._slope
+        a1sq = 1.0 + b1 * b1
+        r1 = rp - b1 * gamma
+        span = gamma * gamma + (r + rp) ** 2
+        a = np.sqrt(span)
+        k2 = 4.0 * r * rp / span
+        complement = (gamma * gamma + (r - rp) ** 2) / span
+        first, second = complete_kind(np.asarray([complement]))
+        K = float(first[0])
+        E = float(second[0])
+        root = 2.0 * a * (2.0 * (1.0 - k2) * K + (k2 - 2.0) * E) / (3.0 * k2)
+        total = np.sqrt(a1sq) * b1 * root
+        total += self._arsinh_term_closed(gamma, r, r1, b1, a, k2, K, E, complement)
         return float(MU0 * r / a1sq * total)
 
     def _azimuth_rule(self, width: float):
@@ -360,24 +516,30 @@ class SheetFlux:
             np.sum(w * greens_psi(np.full_like(rp, r), np.full_like(rp, z), rp, z0))
         )
 
-    def flux(self, r: float, z: float) -> float:
-        """Poloidal flux [Wb] at ``(r, z)``, per the sheet current set at build."""
+    def flux(self, r: float, z: float, *, closed: bool = False) -> float:
+        """Poloidal flux [Wb] at ``(r, z)``, per the sheet current set at build.
+
+        ``closed`` selects the pole reduction of the azimuthal integral in place
+        of the graded arsinh rule.  The two are independent evaluations of the
+        same antiderivative, so a disagreement between them is a defect in one.
+        """
         if self._flat:
             value = self._flat_flux(r, z)
         elif self._slope == 0.0:
             value = self._vertical_flux(r, z)
         else:
-            upper = self.antiderivative(float(self.end[1]) - z, r, float(self.end[0]))
-            lower = self.antiderivative(
-                float(self.start[1]) - z, r, float(self.start[0])
-            )
+            evaluate = self.antiderivative_closed if closed else self.antiderivative
+            upper = evaluate(float(self.end[1]) - z, r, float(self.end[0]))
+            lower = evaluate(float(self.start[1]) - z, r, float(self.start[0]))
             value = upper - lower
         return float(value * self.sheet_current)
 
 
-def sheet_flux(r: float, z: float, start, end, *, sheet_current: float = 1.0) -> float:
+def sheet_flux(
+    r: float, z: float, start, end, *, sheet_current: float = 1.0, closed: bool = False
+) -> float:
     """Poloidal flux [Wb] of a conic sheet at ``(r, z)``."""
-    return SheetFlux(start, end, sheet_current=sheet_current).flux(r, z)
+    return SheetFlux(start, end, sheet_current=sheet_current).flux(r, z, closed=closed)
 
 
 def sheet_field(

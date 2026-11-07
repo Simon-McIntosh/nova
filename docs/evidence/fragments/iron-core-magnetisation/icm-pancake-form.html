@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Snow's pancake form: the flat sheet in closed form | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-pancake-form-summary">What this node established</h2>
+    <p>Node <code>icm-pancake-form</code> transcribes Urankar Part II
+    (IEEE Trans. Magn. MAG-18(3), 911&ndash;917, 1982) eqs (26) and (27) into
+    <code>nova/biot/sheet.py</code> and makes them the <code>b_2 = 0</code>
+    (flat, "pancake") route for both the flux and the field. The panelised
+    surface-current integral the section already shipped is kept unchanged
+    behind <code>closed=True</code>, so the two routes remain independently
+    evaluable and one is held against the other at every target, as well as
+    each against <code>scripts/edge_sheet/reference.py</code>.</p>
+    <p>Over the section's twelve fixed targets the closed form meets the
+    <code>1e-10</code> floor with a worst relative deviation of
+    <code>2.84e-13</code> on the flux and <code>1.68e-12</code> on the field,
+    and agrees with the retained quadrature to <code>1.68e-12</code>. Both
+    worst cases are at the closest standoff, half a cell from the sheet's
+    edge, which is where the <code>arsinh</code> remainder is steepest.</p>
+
+    <h2 id="icm-pancake-form-transcription">The transcription</h2>
+    <p>With the paper's geometry &mdash; target at <code>(r, z)</code>, source
+    point at <code>(r', z')</code>, <code>gamma = z' - z</code> &mdash; and its
+    abbreviations</p>
+    <pre>c^2 = gamma^2 + r^2,   a^2 = gamma^2 + (r + r')^2,   k^2 = 4 r r' / a^2</pre>
+    <p>eq (26) for the flat annulus is</p>
+    <pre>A_phi0^(2)(pi/2) = r g_0^(2)(pi/2)
+    - (r' / (2 a r)) [ (r^2 - r'^2 - 3 gamma^2) K(k) + a^2 E(k) ]
+    - (c gamma^2 / (2 a r)) sum_{p=1,2} (-1)^p ((r' +- c) / (r -+ c)) Pi(n_p^2, k),
+
+n_p^2 = 2 r / (r -+ c),   upper sign for p = 1,  lower for p = 2,</pre>
+    <p>and eq (27) for the field is</p>
+    <pre>H_r = (gamma / (a r)) [ 2 r' K(k) - sum_p (-1)^p c ((r' +- c) / (r -+ c)) Pi(n_p^2, k) ]
+
+H_z = 2 g_0^(2)(pi/2) - (2 r' / a) K(k)</pre>
+    <p>The module's normalisation is <code>psi = mu_0 r A</code> and
+    <code>B = (mu_0 / 2 pi) H</code>, with the antiderivative differenced
+    between the segment's two ends. Both were confirmed against the reference
+    rather than assumed: the flux ratio is <code>1.000000</code> without any
+    further factor.</p>
+
+    <h3 id="icm-pancake-form-remainder">The one arsinh remainder</h3>
+    <p><code>g_0^(2)(pi/2)</code> is the arsinh integral the paper leaves
+    unreduced (its eq 12b remainder), here evaluated as</p>
+    <pre>g_0^(2)(pi/2) = (1/2) int_0^pi arsinh( (r' - r cos phi) / sqrt(gamma^2 + r^2 sin^2 phi) ) d phi</pre>
+    <p>The paper writes the integral over <code>alpha = phi/2</code> on
+    <code>[0, pi/2]</code>; the half-range factor of two is what reconciles the
+    two, and it is why the transcribed <code>r g</code> term carries no extra
+    constant. This is the only quadrature left in the closed form, and it is
+    not a substitute for the closed form: the <code>K</code>, <code>E</code>
+    and <code>Pi</code> structure of eqs (26) and (27) is evaluated in closed
+    form, and the remainder integral is the term the paper itself leaves open.</p>
+    <p>The target set places eight of its twelve points on the sheet's own
+    plane, at each end station, where <code>gamma = 0</code> exactly. Three
+    simplifications follow and all three are enforced in the code rather than
+    approached numerically: the <code>Pi</code> term of eq (26) is
+    <code>O(gamma^2)</code> and contributes zero; <code>H_r</code> is zero
+    (the axisymmetric sheet puts no radial field on its own mirror plane); and
+    the remainder's integrand becomes log-singular at <code>phi = 0</code>,
+    which is what the quadrature below is designed for.</p>
+
+    <h3 id="icm-pancake-form-rule">The remainder's quadrature</h3>
+    <p>A double-exponential (tanh-sinh) rule on <code>[0, pi]</code>:
+    <code>phi = (pi/2)(1 + tanh((pi/2) sinh t))</code>, step <code>0.05</code>,
+    nodes at <code>|t| &lt;= 3.0</code>. The reach is capped there because
+    <code>tanh</code> rounds to exactly <code>1.0</code> beyond it, which sends
+    the denominator <code>sqrt(gamma^2 + r^2 sin^2 phi)</code> to zero and the
+    integrand to infinity; at <code>|t| = 3.0</code> the nearest node sits
+    <code>3e-14</code> rad inside the interval, and 181 nodes then place the
+    clustering exactly where the logarithm is.</p>
+
+    <h2 id="icm-pancake-form-reading">The printed form that had to be read twice</h2>
+    <p>The second branch of eq (27) was first transcribed with the paper's
+    <code>A</code> symbol in place of a fraktur <code>g</code>:
+    <code>H_z = 2 A_phi0^(2)(pi/2) - 2 r' K / a</code>. It is wrong, and the
+    measurement says so unambiguously. With that reading, at the middle target
+    half a cell from the sheet, the vertical field came out
+    <strong>3.16 times</strong> the reference value, while <code>H_r</code>
+    &mdash; which shares the <code>K</code> term and nothing else &mdash; was
+    already exact. The vertical branch is <code>2 g_0^(2)(pi/2) - 2 r' K / a</code>:
+    the arsinh remainder appears itself, not the whole potential. The 300 dpi
+    page render cropped to the eq (27) region and re-rendered at 200&percnt;
+    resolved the glyph. No misprint is recorded here: the printed form is
+    consistent once the fraktur symbol is read as <code>g</code>, and the
+    discrepancy was in the reading.</p>
+
+    <h2 id="icm-pancake-form-measured">Measured</h2>
+    <p>Everything below is relative, against
+    <code>scripts/edge_sheet/reference.py</code> (Gauss&ndash;Legendre along the
+    segment, bisected to <code>1e-13</code>), over the twelve targets at
+    standoffs of half a cell, one cell, one segment and ten segments from the
+    middle and from each end.</p>
+    <table>
+      <thead><tr><th>comparison</th><th>worst relative</th><th>where</th></tr></thead>
+      <tbody>
+        <tr><td>flux, closed form vs reference</td><td><code>2.84e-13</code></td><td>half-cell, middle</td></tr>
+        <tr><td>field, closed form vs reference</td><td><code>1.68e-12</code></td><td>half-cell, middle</td></tr>
+        <tr><td>closed form vs retained quadrature</td><td><code>1.68e-12</code></td><td>half-cell, middle</td></tr>
+        <tr><td>section floor</td><td><code>1e-10</code></td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p>The retained quadrature is itself held to the reference at the same
+    floor, so the two routes are not merely mutually consistent.</p>
+
+    <h2 id="icm-pancake-form-control">The negative control</h2>
+    <p>The declared control is <em>flip the sheet current sign on one edge</em>:
+    the antiderivative is differenced between the ends, so adding the two ends
+    instead of subtracting them is exactly one edge's contribution reversed.
+    Applied to the implementation, both the pancake flux and the pancake field
+    comparisons fail through <code>pytest</code> over all twelve targets; the
+    failing test ids are in the run's <code>negative_control.log</code>.
+    The head arm passes the same comparison, so the gate is measuring the sign
+    and not a tolerance.</p>
+    <p>One property worth recording because it is easy to lose: a flat segment
+    has equal <code>z</code> at both ends, so the constructor's
+    higher-end-first reordering never fires, and the antiderivative is therefore
+    differenced in the <em>sorted</em> source radius. The sheet current runs
+    azimuthally, so the direction the endpoints were given in carries no sign;
+    ordering by endpoint instead produced a flux of the wrong sign on reversed
+    segments, which the section's existing order-invariance test caught.</p>
+  </main>
+</body>
+</html>

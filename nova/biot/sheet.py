@@ -51,12 +51,22 @@ integral, the remainder the paper itself leaves to quadrature.  The two routes
 share no arithmetic, so they check each other; ``closed=True`` selects the
 reduction.
 
-Two printed coefficient blocks could not be reconstructed from the available
-copy of the paper: the block feeding eq (22a) (``S``, ``M``, ``N`` and ``P_phi``
-of eqs 13a and 18a) and the flat-segment coefficients of eq (26).  Both are
-therefore not used; the sloped case is reduced as above, and the flat case
-evaluates the surface-current integral of the ring flux
-(:func:`nova.biot.greens.greens_psi`) on a fixed panelised rule.
+The flat sheet's own closed form is the paper's eqs (26) and (27), transcribed in
+:meth:`SheetFlux.pancake_antiderivative` and :meth:`SheetFlux._pancake_field`.
+They are the ``b_2 = 0`` case of the same antiderivative, carrying complete
+integrals of all three kinds plus the paper's one remaining ``arsinh`` integral
+``g_0^(2)(pi/2)``.  That integral is log-singular at the azimuth where the target
+is level with the sheet's plane, which is where eight of the section's twelve
+fixed targets sit, so it runs on a double-exponential rule: the map clusters
+nodes geometrically toward both ends and resolves the logarithm there without an
+adaptive decision.  The flat sheet's surface-current integral
+(:func:`nova.biot.greens.greens_psi` over the segment) is kept beside it as the
+independent check, taken by ``closed=True``.
+
+The block feeding eq (22a) (``S``, ``M``, ``N`` and ``P_phi`` of eqs 13a and 18a)
+could not be reconstructed from the available copy of the paper: assembled as
+read it disagrees with the verified azimuthal quadrature by a factor, not by
+rounding.  It is therefore not used; the sloped case is reduced as above.
 """
 
 from __future__ import annotations
@@ -138,6 +148,32 @@ _FIELD_RULE = np.polynomial.legendre.leggauss(_FIELD_NODES)
 _FLAT_PANELS = 64
 _FLAT_NODES = 32
 """The flat annulus's radial rule; its kernel varies on the standoff scale."""
+
+_PANCAKE_NODES = 90
+_PANCAKE_STEP = 0.05
+_PANCAKE_REACH = 3.0
+"""The flat sheet's arsinh remainder, on a double-exponential rule.
+
+``g_0^(2)(pi/2)`` is log-singular at the azimuth where the target is level with
+the sheet's plane, and the map ``phi = (pi/2)(1 + tanh((pi/2) sinh t))`` clusters
+nodes geometrically toward both ends, where the logarithm is.  The reach stops
+short of where the hyperbolic tangent saturates, so no node lands on an
+endpoint: at
+``|t| = 3`` the nearest node stands ``3e-14`` of a radian inside the range.
+"""
+
+
+def _double_exponential(nodes: int, step: float, reach: float):
+    """Nodes and weights on ``[0, pi]``, clustered toward both ends."""
+    index = np.arange(-nodes, nodes + 1) * step
+    stretch = 0.5 * np.pi * np.sinh(index)
+    nodes_at = 0.5 * np.pi * (1.0 + np.tanh(stretch))
+    weights = step * (0.5 * np.pi) ** 2 * np.cosh(index) / np.cosh(stretch) ** 2
+    live = np.abs(index) <= reach
+    return nodes_at[live], weights[live]
+
+
+_PANCAKE_RULE = _double_exponential(_PANCAKE_NODES, _PANCAKE_STEP, _PANCAKE_REACH)
 
 
 class SheetFlux:
@@ -568,6 +604,112 @@ class SheetFlux:
             float(MU0 / (2.0 * np.pi * r * a1sq) * b_z),
         )
 
+    def _pancake_remainder(self, gamma: float, r: float, rp: float) -> float:
+        """``g_0^(2)(pi/2)``: the paper's one numerical arsinh integral.
+
+        ``arsinh(beta_2)`` with ``beta_2 = (r' - r cos phi) / sqrt(gamma^2 +
+        r^2 sin^2 phi)``, over the half range the transformation ``phi = pi - 2
+        alpha`` maps to ``alpha`` in ``[0, pi/2]``, so the factor is one half of
+        the full turn's integral.  The denominator vanishes with the azimuth at a
+        target level with the sheet's plane, which is a logarithm, and the
+        double-exponential map resolves it.
+        """
+        phi, weights = _PANCAKE_RULE
+        denominator = np.sqrt(gamma**2 + r**2 * np.sin(phi) ** 2)
+        numerator = rp - r * np.cos(phi)
+        return 0.5 * float(np.sum(weights * np.arcsinh(numerator / denominator)))
+
+    def _pancake_terms(
+        self, gamma: float, r: float, rp: float
+    ) -> tuple[float, float, float]:
+        """``(A_phi, H_r, H_z)`` of eqs (26) and (27) at one segment end.
+
+        ``A_phi`` is the antiderivative of the flux, ``H_r`` and ``H_z`` the
+        paper's field kernels, whose difference between the two ends times
+        ``mu0 / 2 pi`` is the field.  A target level with the sheet's plane is the
+        one place the printed blocks need their limit taken rather than their
+        arithmetic: the third-kind sum carries ``1/(r - c)`` against a ``Pi`` that
+        falls off like ``r - c``, so the radial kernel's block cancels to zero and
+        the potential's third-kind term vanishes with ``gamma^2``.
+        """
+        span = gamma**2 + (r + rp) ** 2
+        a = np.sqrt(span)
+        complement = (gamma**2 + (r - rp) ** 2) / span
+        first, second = complete_kind(np.asarray([complement]))
+        big_k = float(np.ravel(first)[0])
+        big_e = float(np.ravel(second)[0])
+        c = np.sqrt(gamma**2 + r**2)
+        remainder = self._pancake_remainder(gamma, r, rp)
+        potential = -rp / (2.0 * a * r) * (
+            (r * r - rp * rp - 3.0 * gamma**2) * big_k + span * big_e
+        )
+        potential += r * remainder
+        height = 2.0 * remainder - 2.0 * rp / a * big_k
+        if abs(gamma) <= 1e-12 * r:
+            return potential, 0.0, height
+        third = 0.0
+        radial = 0.0
+        for order in (1, 2):
+            if order == 1:
+                ratio = (rp + c) / (r - c)
+                characteristic = 2.0 * r / (r - c)
+            else:
+                ratio = (rp - c) / (r + c)
+                characteristic = 2.0 * r / (r + c)
+            pole = float(
+                np.ravel(
+                    complete_pole(
+                        np.asarray([1.0 - characteristic]), np.asarray([complement])
+                    )
+                )[0]
+            )
+            third += (-1) ** order * ratio * pole
+            radial += (-1) ** order * c * ratio * pole
+        potential -= c * gamma**2 / (2.0 * a * r) * third
+        return potential, gamma / (a * r) * (2.0 * rp * big_k - radial), height
+
+    def pancake_antiderivative(self, gamma: float, r: float, rp: float) -> float:
+        """Eq (26): the flat sheet's antiderivative in the source radius ``r'``.
+
+        ``gamma = z' - z`` is the target's depth below the sheet's plane and
+        ``rp`` the source radius at this end.  The flux is ``mu0 r`` times the
+        difference between the two ends.
+        """
+        return self._pancake_terms(gamma, r, rp)[0]
+
+    def _pancake_ends(self) -> tuple[float, float]:
+        """The segment's two source radii, lower first.
+
+        A flat sheet's current runs azimuthally, so the antiderivative is
+        differenced in the source radius and the direction the endpoints were
+        given in carries no sign.
+        """
+        return tuple(sorted((float(self.start[0]), float(self.end[0]))))
+
+    def _pancake_flux(self, r: float, z: float) -> float:
+        """Eq (26) over the segment: ``mu0 r`` times the two ends' difference."""
+        gamma = float(self.start[1]) - z
+        lower, upper = self._pancake_ends()
+        return MU0 * r * (
+            self.pancake_antiderivative(gamma, r, upper)
+            - self.pancake_antiderivative(gamma, r, lower)
+        )
+
+    def _pancake_field(self, r: float, z: float) -> tuple[float, float]:
+        """``(B_R, B_Z)`` of eq (27) at ``(r, z)``."""
+        gamma = float(self.start[1]) - z
+        lower, upper = self._pancake_ends()
+        ends = ((upper, 1.0), (lower, -1.0))
+        radial = height = 0.0
+        for radius, sign in ends:
+            _, end_radial, end_height = self._pancake_terms(gamma, r, radius)
+            radial += sign * end_radial
+            height += sign * end_height
+        return (
+            float(MU0 / (2.0 * np.pi) * radial),
+            float(MU0 / (2.0 * np.pi) * height),
+        )
+
     def _flat_field(self, r: float, z: float) -> tuple[float, float]:
         """The surface-current integral of the ring field over a flat annulus."""
         z0 = float(self.start[1])
@@ -584,12 +726,16 @@ class SheetFlux:
     def field(self, r: float, z: float, *, closed: bool = False) -> tuple[float, float]:
         """``(B_R, B_Z)`` [T] at ``(r, z)``, per the sheet current set at build.
 
-        ``closed`` takes the field from the closed-form antiderivative's own
-        partial derivatives in place of the graded route's derivative kernels.
-        The two share no arithmetic in the ``D`` part, so they check each other.
+        ``closed`` takes the field from the surface-current integral of the ring
+        Green's function, in place of eq (27)'s closed form; on a sloped segment
+        it takes the closed-form antiderivative's own partial derivatives in
+        place of the graded route's derivative kernels.  The two routes of each
+        share no arithmetic, so they check each other.
         """
         if self._flat:
-            b_r, b_z = self._flat_field(r, z)
+            b_r, b_z = (
+                self._flat_field(r, z) if closed else self._pancake_field(r, z)
+            )
         elif closed:
             b_r, b_z = self._sloped_field_closed(r, z)
         else:
@@ -637,12 +783,14 @@ class SheetFlux:
     def flux(self, r: float, z: float, *, closed: bool = False) -> float:
         """Poloidal flux [Wb] at ``(r, z)``, per the sheet current set at build.
 
-        ``closed`` selects the pole reduction of the azimuthal integral in place
-        of the graded arsinh rule.  The two are independent evaluations of the
-        same antiderivative, so a disagreement between them is a defect in one.
+        ``closed`` selects the surface-current integral of the ring flux in place of
+        the flat sheet's eq (26), and the pole reduction of the azimuthal
+        integral in place of the graded arsinh rule on a sloped segment.  Each
+        pair is two independent evaluations of one antiderivative, so a
+        disagreement between them is a defect in one.
         """
         if self._flat:
-            value = self._flat_flux(r, z)
+            value = self._flat_flux(r, z) if closed else self._pancake_flux(r, z)
         elif self._slope == 0.0:
             value = self._vertical_flux(r, z)
         else:

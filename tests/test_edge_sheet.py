@@ -132,6 +132,85 @@ def test_flat_pancake_form_matches_reference(station, distance):
 
 @pytest.mark.parametrize("distance", DISTANCES)
 @pytest.mark.parametrize("station", STATIONS)
+def test_flat_pancake_quadrature_matches_reference(station, distance):
+    """The kept surface-current integral against the reference, as it landed.
+
+    ``closed=True`` on a flat sheet selects the panelised radial rule that the
+    section shipped before the closed form existed, so the closed form's default
+    route is held to it here as well as to the reference.
+    """
+    start, end, targets = frame(0.0)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    converged = reference.sheet_reference(target, start, end)
+    routed = sheet_flux(target.r, target.z, start, end, closed=True)
+    assert abs(routed - converged.psi) <= TOLERANCE * abs(converged.psi)
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
+def test_flat_pancake_closed_form_agrees_with_the_quadrature(station, distance):
+    """Snow's pancake form and the surface-current integral agree at the floor."""
+    start, end, targets = frame(0.0)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    closed_form = sheet_flux(target.r, target.z, start, end)
+    routed = sheet_flux(target.r, target.z, start, end, closed=True)
+    relative = abs(closed_form - routed) / abs(routed)
+    assert relative <= TOLERANCE, (
+        f"measured {relative:.2e} against the {TOLERANCE:.0e} floor"
+    )
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
+def test_flat_pancake_field_quadrature_matches_reference(station, distance):
+    """The kept surface-current integral's field against the reference."""
+    _, _, targets = frame(0.0)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    assert field_relative(0.0, target, closed=True) <= TOLERANCE
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
+def test_flat_pancake_field_agrees_with_the_quadrature(station, distance):
+    """Eq (27) and the surface-current integral agree on both components."""
+    start, end, targets = frame(0.0)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    closed_form = sheet_field(target.r, target.z, start, end)
+    routed = sheet_field(target.r, target.z, start, end, closed=True)
+    scale = max(abs(component) for component in routed)
+    for got, expected in zip(closed_form, routed, strict=True):
+        if abs(expected) <= reference.DEGENERATE * scale:
+            continue
+        relative = abs(got - expected) / abs(expected)
+        assert relative <= TOLERANCE, (
+            f"measured {relative:.2e} against the {TOLERANCE:.0e} floor"
+        )
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
+def test_one_edge_flipped_fails_the_pancake_comparison(station, distance):
+    """Negative control: the two ends' contributions carry opposite signs.
+
+    The sheet's current runs azimuthally, so reversing one edge's sign is the
+    mutation that must not reproduce the flux; the antiderivative is differenced
+    between the ends, and an implementation that adds them reads as the value
+    below instead.
+    """
+    start, end, targets = frame(0.0)
+    target = next(t for t in targets if t.distance == distance and t.station == station)
+    converged = reference.sheet_reference(target, start, end)
+    sheet = SheetFlux(start, end)
+    gamma = float(start[1]) - target.z
+    flipped = MU0 * target.r * (
+        sheet.pancake_antiderivative(gamma, target.r, float(end[0]))
+        + sheet.pancake_antiderivative(gamma, target.r, float(start[0]))
+    )
+    assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)
+
+
+@pytest.mark.parametrize("distance", DISTANCES)
+@pytest.mark.parametrize("station", STATIONS)
 def test_vertical_cylinder_form_matches_reference(station, distance):
     """The ``b_1 = 0`` Snow form, Part II eq (24), at every standoff."""
     _, _, targets = frame(np.pi / 2)

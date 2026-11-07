@@ -6,6 +6,13 @@
   ],
   "completed_at": "",
   "dispatched_at": "2026-11-07T13:51:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking record precision on a root-cause record; the result stands on the committed receipts",
+      "recorded_at": "2026-11-07T22:19:37.895201+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_axis_identification/receipts/README.md",

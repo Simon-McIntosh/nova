@@ -77,7 +77,10 @@ def load_seed(cache: Path, frame: int):
         return held["radius"], held["height"], held["seed"]
     import measure_branches
 
-    prepared = measure_branches._prepare_frame(frame, 1.0)
+    import benchmarks.diiid_forward_gs_match as bench
+
+    expansion = float(bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION)
+    prepared = measure_branches._prepare_frame(frame, expansion)
     lattice = prepared["profile"].lattice
     radius = np.asarray(lattice.radius, dtype=float)
     height = np.asarray(lattice.height, dtype=float)

@@ -56,9 +56,24 @@ def _default(value):
     raise TypeError(type(value))
 
 
-def solve(machine, moments, seeds, previous, amplitude):
-    """One batched slice at a traced drive amplitude."""
+_COMPILED = {}
 
+
+def solve(machine, moments, seeds, previous, amplitude):
+    """One batched slice at a traced drive amplitude.
+
+    The jitted callable is built once per machine: a fresh ``jax.jit`` wrapper
+    per call compiles a fresh program, which would time a compile per slice.
+    """
+
+    compiled = _COMPILED.get("solve")
+    if compiled is None:
+        compiled = jax.jit(_one(machine))
+        _COMPILED["solve"] = compiled
+    return compiled(moments, seeds, previous, amplitude)
+
+
+def _one(machine):
     def one(moments_leaf, seeds_leaf, previous_leaf, amplitude_leaf):
         profile_leaf = streams.scaled_profile(machine.profile, amplitude_leaf)
         return support_read.solve_batch(
@@ -78,7 +93,7 @@ def solve(machine, moments, seeds, previous, amplitude):
             tolerance=TOLERANCE,
         )
 
-    return jax.jit(one)(moments, seeds, previous, amplitude)
+    return one
 
 
 def _gradient(radius, flux):

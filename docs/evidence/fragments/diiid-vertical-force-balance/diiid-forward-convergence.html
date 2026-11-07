@@ -50,6 +50,25 @@ branch, so the descent is neither being damped nor rescued by damping. The resid
 tolerance at every terminal and none of the five satisfies the registered criterion.</p>
 
 
+<h3>The measured cohort at a glance</h3>
+
+<p>One row per frame, from that state's own measured terminal. The discriminating measurement is the one
+reading that separates the mechanism in that row from the alternatives.</p>
+
+<table>
+<thead><tr>
+<th>frame</th><th>branch measured</th><th>terminal class</th><th>terminal residual</th><th>trips (shipped / exits disabled)</th><th>presence</th><th>discriminating measurement</th>
+</tr></thead>
+<tbody>
+<tr><td>179</td><td>diverted</td><td>stall at a frozen mask</td><td><code>4.181e-01</code></td><td>2 / 16</td><td>confined: axis R=1.761 Z=&minus;0.264, 232 cells, <code>0.763</code>&times; current</td><td>residual bit-identical across all 16 trips while the mask difference is <code>0</code> and all 24 inner steps are accepted</td></tr>
+<tr><td>44</td><td>diverted</td><td>stall at a frozen mask</td><td><code>4.276e+00</code></td><td>2 / 16</td><td>confined: axis R=1.720 Z=&minus;0.141, 352 cells, <code>1.097</code>&times; current</td><td>largest residual of the cohort with the plasma fully confined, so the miss is not current loss; achieved class <i>limited</i></td></tr>
+<tr><td>144</td><td>diverted</td><td>stall at a frozen mask</td><td><code>5.927e+00</code></td><td>1 / 16</td><td>confined: axis R=1.759 Z=+0.013, 290 cells, <code>1.073</code>&times; current</td><td>mask difference <code>0</code> at the FIRST trip: the map is stationary before the loop starts</td></tr>
+<tr><td>144</td><td>limited (refused)</td><td>axis-identification refusal</td><td>&mdash;</td><td>0 / 0</td><td>no qualified axis, so no solve</td><td><code>NoQualifiedAxisError</code> raised upstream of the fixed point; no promotion runs</td></tr>
+<tr><td>146</td><td>diverted</td><td><b>vertical plasma loss</b></td><td><code>5.496e-02</code></td><td>5 / 16</td><td><b>lost</b>: axis R=1.234 Z=+1.563, 8 cells, <code>0.039</code>&times; current</td><td>the mask MOVES (27 &rarr; 40 &rarr; 1 &rarr; 0) with the residual, so the loop travels &mdash; to a state with no confined plasma left</td></tr>
+<tr><td>137</td><td>diverted</td><td>stall at a frozen mask</td><td><code>6.237e-02</code></td><td>5 / 16</td><td>confined: axis R=1.655 Z=&minus;0.442, 234 cells, <code>0.709</code>&times; current</td><td>smallest residual of the cohort and still two decades above tolerance, with a bit-identical tail</td></tr>
+</tbody>
+</table>
+
 <h3>Is the stall the mechanism, or the consequence of a plasma that left the vessel?</h3>
 
 <p>The frozen-mask terminal is established for four frames. Whether it is the <i>cause</i> of the
@@ -220,34 +239,50 @@ without converging anything; the mechanism above is what has to be fixed.</p>
 
 <h3>Panels</h3>
 
-<p>Each panel draws the bank's terminal diverted field as line contours and the EFIT label field at the
-same gauge-aligned levels, with both null sets (solid triangle: solved axis; filled cross: solved saddle;
-hollow markers: the label's own nulls) and the governed first wall. The caption carries the terminal
-residual and the converged flag.</p>
+<p>Each panel draws the frame's <b>measured</b> diverted terminal field as line contours, the EFIT label
+field on the same lattice at the same physical levels, the solved separatrix, the governed first wall, and
+the measured nulls: solid triangle for the solved axis, filled cross for the solved saddle, hollow triangle
+for the label axis. The caption carries the terminal residual, the converged flag and the presence read.
+The renderer refuses to write a panel whose text clips the canvas or overlaps another text artist, and all
+five were rendered to PNG and inspected before being recorded here.</p>
 
 <figure>
-<img src="/nova/figures/diiid-forward-convergence/frame-179-flux-contours.svg" alt="frame 179 terminal diverted flux contours against the EFIT label, residual 4.18e-1">
-<figcaption>Frame 179. The solved field (blue) is displaced inboard and its closed surfaces have left the column while the label field (grey) fills the vessel; diverted terminal residual <code>4.181e-01</code>, converged false.</figcaption>
+<img src="/nova/figures/diiid-forward-convergence/frame-179-flux-contours.svg" alt="frame 179 measured diverted terminal flux contours against the EFIT label, residual 4.181e-01">
+<figcaption>Frame 179. Measured diverted terminal: residual <code>4.181e-01</code>, converged false. The
+solved axis sits at R=1.761, Z=&minus;0.264 with <code>232</code> closed core cells and
+<code>0.763</code>&times; the target current: the plasma is confined and displaced low and inboard, and the
+residual is two decades above tolerance.</figcaption>
 </figure>
 
 <figure>
-<img src="/nova/figures/diiid-forward-convergence/frame-44-flux-contours.svg" alt="frame 44 terminal diverted flux contours against the EFIT label, residual 4.28e+0">
-<figcaption>Frame 44. The solved surfaces are shifted inward and the separatrix closes far short of the label boundary; diverted terminal residual <code>4.276e+00</code>, converged false, and the kept terminal achieved the <i>limited</i> topology, inconsistent with its diverted seed.</figcaption>
+<img src="/nova/figures/diiid-forward-convergence/frame-44-flux-contours.svg" alt="frame 44 measured diverted terminal flux contours against the EFIT label, residual 4.276e+00">
+<figcaption>Frame 44. Measured diverted terminal: residual <code>4.276e+00</code>, converged false, the
+largest of the cohort. The solved separatrix closes around a confined plasma &mdash; axis R=1.720,
+Z=&minus;0.141, <code>352</code> closed core cells, <code>1.097</code>&times; the target current &mdash; so
+the miss is not a lost plasma even though the achieved class is <i>limited</i>.</figcaption>
 </figure>
 
 <figure>
-<img src="/nova/figures/diiid-forward-convergence/frame-144-flux-contours.svg" alt="frame 144 EFIT label contours only, the solve refused before a topology read">
-<figcaption>Frame 144. No solved field exists to draw: the solve refuses at axis identification, so the panel carries the label contours, the label's magnetic axis and the wall only.</figcaption>
+<img src="/nova/figures/diiid-forward-convergence/frame-144-flux-contours.svg" alt="frame 144 measured diverted terminal flux contours against the EFIT label, residual 5.927e+00">
+<figcaption>Frame 144. Its limited seed refuses at axis identification; its diverted seed solves, and this is
+that measured terminal: residual <code>5.927e+00</code>, converged false, axis R=1.759, Z=+0.013,
+<code>290</code> closed core cells, <code>1.073</code>&times; the target current.</figcaption>
 </figure>
 
 <figure>
-<img src="/nova/figures/diiid-forward-convergence/frame-146-flux-contours.svg" alt="frame 146 terminal diverted flux contours against the EFIT label, residual 5.50e-2">
-<figcaption>Frame 146. Diverted terminal residual <code>5.496e-02</code>, converged false. The solved axis sits at R=1.234, Z=+1.563 m &mdash; 0.10 m below the top of the wall, at the very edge of the lattice &mdash; and the field closes around only 8 core cells (0.043 m&sup2;) carrying 3.9 % of the target current: the plasma has been displaced vertically out of its position, and the closed region left is a sliver against the top of the vessel.</figcaption>
+<img src="/nova/figures/diiid-forward-convergence/frame-146-flux-contours.svg" alt="frame 146 measured diverted terminal flux contours against the EFIT label, residual 5.496e-02">
+<figcaption>Frame 146 &mdash; the frame whose plasma is lost. Measured diverted terminal: residual
+<code>5.496e-02</code>, converged false. The solved axis is at the top edge of the vessel (R=1.234,
+Z=+1.563 m, 0.10 m below the wall), the closed core is <code>8</code> cells, and the confined current is
+<code>0.039</code>&times; the target. The separatrix runs up to the top wall instead of closing inside
+it.</figcaption>
 </figure>
 
 <figure>
-<img src="/nova/figures/diiid-forward-convergence/frame-137-flux-contours.svg" alt="frame 137 terminal diverted flux contours against the EFIT label, residual 6.24e-2">
-<figcaption>Frame 137. The closest of the cohort and still two decades above tolerance; diverted terminal residual <code>6.237e-02</code>, converged false.</figcaption>
+<img src="/nova/figures/diiid-forward-convergence/frame-137-flux-contours.svg" alt="frame 137 measured diverted terminal flux contours against the EFIT label, residual 6.237e-02">
+<figcaption>Frame 137. Measured diverted terminal: residual <code>6.237e-02</code>, converged false, the
+closest of the cohort. Axis R=1.655, Z=&minus;0.442, <code>234</code> closed core cells,
+<code>0.709</code>&times; the target current: confined, and stalled two decades above tolerance.</figcaption>
 </figure>
 
 <h3>Recommended fix</h3>
@@ -302,6 +337,16 @@ it. Each must carry the residual it stalled at, which the gate already reads.</l
 smallest residuals of the cohort (<code>6.24e-2</code> and &mdash; on its limited seed &mdash;
 <code>2.73e-2</code>) &mdash; then 44 and 146. Frame 144 is a separate defect upstream of the fixed point:
 its axis identification returns no qualified candidate, and no change to the active-set loop can help it.</p>
+
+<p><b>What frame 146 needs, which the stopping rule does not give it.</b> Relaxing the mask-stability
+exit cannot help frame 146: its loop travels, and it travels towards a state whose confined current is
+<code>3.9 %</code> of the target with the axis against the top plate. The residual there is
+<code>5.496e-02</code> &mdash; not the stationary-map plateau of the other frames. Recovering this frame
+needs a vertical-position response: either the equilibrium's vertical force balance tightened so the axis is
+held near the midplane, or a position constraint on the axis during the outer iteration, or a seed whose
+current profile does not drive the <code>n = 0</code> displacement. That is a separate node from the loop
+change, and it must be measured against this exact terminal &mdash; <code>Z = +1.563 m</code>,
+<code>8</code> closed core cells &mdash; or the fix cannot be told from a re-seed.</p>
 
 <p><b>Carried review findings.</b> Four findings from the separatrix-redraw review ride with this fix and
 are not addressed here (this node is read-only on the benchmark): the <code>cohort_match_summary.png</code>

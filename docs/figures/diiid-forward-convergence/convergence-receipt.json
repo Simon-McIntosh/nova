@@ -1856,16 +1856,18 @@
                   0
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7606860340136274,
                     -0.26408384149033787
                   ],
+                  "closed_core_cells": 232,
                   "confined_current_a": 976058.844605214,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 0.7627544780133083,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.2325000097230077,
                   "target_current_a": 1279650.1007080078
                 },
                 "residual_history": [
@@ -1962,16 +1964,18 @@
                   -1
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7606860340136274,
                     -0.26408384149033787
                   ],
+                  "closed_core_cells": 232,
                   "confined_current_a": 976058.844605214,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 0.7627544780133083,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.2325000097230077,
                   "target_current_a": 1279650.1007080078
                 },
                 "residual_history": [
@@ -2154,16 +2158,18 @@
                   0
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7599367115527405,
                     0.04271882147827272
                   ],
+                  "closed_core_cells": 345,
                   "confined_current_a": 1352083.7875179946,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 1.0566042911026308,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.8328125144587828,
                   "target_current_a": 1279650.1007080078
                 },
                 "residual_history": [
@@ -2259,16 +2265,18 @@
                   -1
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7599367115527405,
                     0.04271882147827272
                   ],
+                  "closed_core_cells": 345,
                   "confined_current_a": 1352083.7875179946,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 1.0566042911026308,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.8328125144587828,
                   "target_current_a": 1279650.1007080078
                 },
                 "residual_history": [
@@ -2526,16 +2534,18 @@
                   0
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7197394886941786,
                     -0.1411962142970118
                   ],
+                  "closed_core_cells": 352,
                   "confined_current_a": 1297781.9799366817,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 1.0972404357173007,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.8700000147521494,
                   "target_current_a": 1182769.0064013004
                 },
                 "residual_history": [
@@ -2631,16 +2641,18 @@
                   -1
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7197394886941786,
                     -0.1411962142970118
                   ],
+                  "closed_core_cells": 352,
                   "confined_current_a": 1297781.9799366817,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 1.0972404357173007,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.8700000147521494,
                   "target_current_a": 1182769.0064013004
                 },
                 "residual_history": [
@@ -2821,16 +2833,18 @@
                   0
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7725540046909127,
                     -0.10611579806768207
                   ],
+                  "closed_core_cells": 212,
                   "confined_current_a": 781948.1908616415,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 0.6611165719000377,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.1262500088848173,
                   "target_current_a": 1182769.0064013004
                 },
                 "residual_history": [
@@ -2926,16 +2940,18 @@
                   -1
                 ],
                 "presence": {
+                  "area_source": "re-derived from the saved grid by presence_control.py (CORE label of the domain partition)",
                   "axis_inside_wall": true,
                   "axis_rz_m": [
                     1.7725540046909127,
                     -0.10611579806768207
                   ],
+                  "closed_core_cells": 212,
                   "confined_current_a": 781948.1908616415,
                   "confined_current_error": null,
                   "confined_to_target_ratio": 0.6611165719000377,
                   "lattice_node_count": 1089,
-                  "plasma_area_m2": 0.0,
+                  "plasma_area_m2": 1.1262500088848173,
                   "target_current_a": 1182769.0064013004
                 },
                 "residual_history": [

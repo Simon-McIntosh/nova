@@ -120,7 +120,6 @@ def build(
             "solver_termination": record.get("solver_termination"),
             "residual_tolerance": record.get("residual_tolerance", DEFAULT_TOLERANCE),
             "banked_branches": {},
-            "measured_branches": {},
         }
         for name in ("diverted", "limited"):
             entry["banked_branches"][name] = _banked_branch(record, name)

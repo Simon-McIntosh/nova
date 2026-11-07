@@ -446,12 +446,20 @@ is a stationary map (<code>ACTIVE_SET_STATIONARY</code>); a stable mask with pro
 the carried counts a later frame whose step was <i>refused</i> would be indistinguishable from it. Each must carry the residual it stalled at, which the gate already reads.</li>
 </ol>
 
-<p><b>Frames it should converge:</b> 137, 179 and the diverted seed of 144 &mdash; the three whose
-plasma is confined and whose terminals are the smallest of the cohort (<code>6.24e-2</code>,
-<code>2.73e-2</code> on 179's limited seed, <code>5.93</code> on 144) &mdash; then 44, whose plasma is also
-confined but whose residual is the largest. Two frames are outside what this change can reach: 146's
-diverted seed is a vertically lost plasma (below), and 144's limited seed refuses at axis identification,
-a defect upstream of the fixed point that no change to the active-set loop can help.</p>
+<p><b>Frames it should converge</b>, listed by the terminal residual each one
+stalls at: 179's limited seed at <code>2.73e-2</code>, 146's limited seed at
+<code>5.50e-2</code>, 137's limited seed at <code>5.68e-2</code>, 137's diverted seed at
+<code>6.24e-2</code>, 44's limited seed at <code>1.97e-1</code>, 179's diverted seed at
+<code>4.18e-1</code>, 44's diverted seed at <code>4.28</code>, and 144's diverted seed at
+<code>5.93</code>. All eight carry a confined plasma at a frozen mask, so the stopping rule is the
+defect on all eight, and the order above is the order in which a reader should expect them to close
+once the residual enters the predicate. The two smallest are a confined plasma already inside the
+wall; <code>5.93</code> is the largest, not among the smallest &mdash; that arm's residual grew under
+a mask the loop had already frozen, so its recovery is the least certain of the eight and it should
+be measured last rather than ranked with the easy ones. Two terminals are outside what this change
+can reach: 146's diverted seed is a vertically lost plasma (below), and 144's limited seed refuses
+at axis identification, a defect upstream of the fixed point that no change to the active-set loop
+can help.</p>
 
 <p><b>What frame 146 needs, which the stopping rule does not give it.</b> Relaxing the mask-stability
 exit cannot help frame 146: its loop travels, and it travels towards a state whose confined current is

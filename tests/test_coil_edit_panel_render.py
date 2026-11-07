@@ -526,6 +526,13 @@ def _render_capturing(
         counts = measured(figure)
         captured["figure"] = figure
         captured["counts"] = counts
+        # ``_render_panel`` closes the figure after saving, which drops the Agg
+        # canvas the extents were measured through, so the renderer is kept
+        # here while it is still the one the saved PNG was drawn by.
+        captured["renderer"] = figure.canvas.get_renderer()
+        # Measured here, while the check has just drawn the figure and the Agg
+        # canvas is still attached: ``_render_panel`` closes it afterwards.
+        captured["independent"] = _measure_labels(figure)
         return counts
 
     monkeypatch.setattr(renderer, "_label_defects", capture)
@@ -550,13 +557,69 @@ def _null_markers(figure: Any, color: str) -> list[Any]:
     return found
 
 
+def _measure_labels(figure: Any) -> dict[str, int]:
+    """Count clipped and overlapping text artists on a drawn figure.
+
+    This is a second implementation of the renderer's save-time check, written
+    from the figure rather than from anything the renderer returns. The check
+    the receipt publishes is that function's own return value, so a test that
+    compared the receipt with it would compare a value with itself and hold
+    whatever the renderer did.
+    """
+    import matplotlib.text
+
+    renderer = figure.canvas.get_renderer()
+    canvas = figure.get_window_extent(renderer)
+    # A poloidal panel is drawn with its axis off; its tick and axis labels
+    # remain visible artists carrying no ink, so they are excluded by identity.
+    furniture: set[int] = set()
+    for axis in figure.axes:
+        if axis.axison:
+            continue
+        for label in (
+            *axis.get_xticklabels(),
+            *axis.get_yticklabels(),
+            axis.xaxis.label,
+            axis.yaxis.label,
+        ):
+            furniture.add(id(label))
+    boxes = []
+    for text in figure.findobj(matplotlib.text.Text):
+        if not text.get_visible() or not text.get_text().strip():
+            continue
+        if id(text) in furniture:
+            continue
+        boxes.append(text.get_window_extent(renderer))
+    clipped = sum(
+        1
+        for box in boxes
+        if box.x0 < canvas.x0
+        or box.y0 < canvas.y0
+        or box.x1 > canvas.x1
+        or box.y1 > canvas.y1
+    )
+    overlapping = sum(
+        1
+        for index, box in enumerate(boxes)
+        for other in boxes[index + 1 :]
+        if box.overlaps(other)
+    )
+    return {"clipped_labels": clipped, "overlapping_labels": overlapping}
+
+
 def test_a_rendered_panel_measures_no_clipped_or_overlapping_labels(
     tmp_path: Path, monkeypatch: Any
 ) -> None:
     """The published label counts are a measurement of the drawn panel."""
     panel, captured = _render_capturing(tmp_path, monkeypatch)
-    assert captured["counts"] == {"clipped_labels": 0, "overlapping_labels": 0}
-    assert panel["visual_inspection"] == captured["counts"]
+    assert panel["visual_inspection"] == {
+        "clipped_labels": 0,
+        "overlapping_labels": 0,
+    }
+    assert captured["independent"] == {
+        "clipped_labels": panel["visual_inspection"]["clipped_labels"],
+        "overlapping_labels": panel["visual_inspection"]["overlapping_labels"],
+    }
 
 
 def test_a_coincident_reference_null_stays_visible_under_the_solved_one(
@@ -593,6 +656,18 @@ def test_the_panel_title_defines_its_percentage_and_its_trips(
     tmp_path: Path, monkeypatch: Any
 ) -> None:
     """A bare percentage and a bare trip count leave both quantities undefined."""
+    import inspect
+
+    import benchmarks.coil_edit_latency as renderer
+
+    # The test feeds the context in, so it would stay green if the renderer
+    # stopped carrying the edit's identity out of the prepared case. Assert the
+    # population itself, in the block that builds it.
+    source = inspect.getsource(renderer._prepare_case)
+    block = source.split('"circuit_context": {', 1)[1].split("}", 1)[0]
+    assert '"family"' in block, "the prepared case must carry the circuit family"
+    assert '"circuit"' in block, "the prepared case must carry the circuit index"
+
     _, captured = _render_capturing(
         tmp_path,
         monkeypatch,
@@ -632,7 +707,8 @@ def test_the_panel_subcommand_persists_its_caption(
     renderer.main()
     written = json.loads(receipt.read_text())
     assert written["caption"].strip()
-    assert written["visual_inspection"] == {
-        "clipped_labels": 0,
-        "overlapping_labels": 0,
-    }
+    assert written["visual_inspection"]["clipped_labels"] == 0
+    assert written["visual_inspection"]["overlapping_labels"] == 0
+    assert written["visual_inspection"]["inspected_render"] == str(
+        tmp_path / "panel.png"
+    )

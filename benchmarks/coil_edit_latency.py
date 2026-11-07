@@ -40,6 +40,7 @@ import numpy as np
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
@@ -2076,13 +2077,19 @@ def _draw_null_set(
     saddle_index: int,
     color: str,
     wall: Any = None,
+    hollow: bool = False,
 ) -> dict[str, int]:
-    """Draw the admitted saddle filled and the other qualified nulls hollow.
+    """Draw the admitted saddle and the other qualified nulls of one set.
 
     The admitted saddle is the one the read selected onto the boundary flux and
     is the only member tested against the wall; the remaining qualified nulls
     are drawn hollow and unfiltered, so a set that carries a second saddle
     outside the vessel reads as two stationary points rather than one.
+
+    ``hollow`` draws the axis and the admitted saddle as an outline in the set's
+    colour instead of a fill. Two filled sets at one point read as whichever was
+    painted last, so the lower set is drawn hollow and slightly oversized and
+    the upper filled one sits inside its outline.
     """
     array = np.atleast_2d(np.asarray(x_points, dtype=float))
     if not 0 <= saddle_index < array.shape[0]:
@@ -2095,47 +2102,61 @@ def _draw_null_set(
         magnetic_axis=magnetic_axis,
         x_points=admitted,
         other_x_points=other,
-        style=DEFAULT_INK.variant(
-            axis_color=color,
-            xpoint_color=color,
-            axis_marker="^",
-            xpoint_marker="X",
-        ),
+        style=_null_style(color, hollow=hollow),
         contain=wall,
     )
 
 
-def _hollow_markers(axis: Any, first_child: int, scale: float = 1.7) -> None:
-    """Leave the markers ``draw_nulls`` just appended unfilled and oversized.
+#: The reference outline is drawn larger than the solved fill so the fill sits
+#: inside it where the two coincide.
+HOLLOW_NULL_SCALE = 1.7
 
-    ``draw_nulls`` fills both the magnetic-axis marker and the admitted saddle
-    in the series colour, so a second set drawn at the same point hides the
-    first wherever they coincide. An unfilled outline at a larger size keeps
-    the set beneath visible inside it. Only the artists added since
-    ``first_child`` are touched, and only marker artists.
+
+def _null_style(color: str, *, hollow: bool) -> Any:
+    """Return the ink variant one null set is drawn in.
+
+    The fill decision belongs with the colour and the marker shape, which is
+    what ``InkStyle.variant`` exists for, so a hollow set is a variant of the
+    house style rather than a pass over the artists a call appended.
     """
-    for artist in axis.lines[first_child:]:
-        if not hasattr(artist, "set_markerfacecolor"):
-            continue
-        if artist.get_marker() in (None, "", "None", " "):
-            continue
-        artist.set_markerfacecolor("none")
-        artist.set_markersize(artist.get_markersize() * scale)
-        artist.set_markeredgewidth(max(float(artist.get_markeredgewidth()), 1.7))
+    overrides = {
+        "axis_color": color,
+        "xpoint_color": color,
+        "axis_marker": "^",
+        "xpoint_marker": "X",
+    }
+    if hollow:
+        overrides["null_marker_facecolor"] = "none"
+        overrides["axis_markersize"] = DEFAULT_INK.axis_markersize * HOLLOW_NULL_SCALE
+        overrides["xpoint_markersize"] = (
+            DEFAULT_INK.xpoint_markersize * HOLLOW_NULL_SCALE
+        )
+        overrides["axis_markeredgewidth"] = 1.7
+        overrides["xpoint_markeredgewidth"] = 1.7
+    return DEFAULT_INK.variant(**overrides)
 
 
 def _set_zorder(axis: Any, first_child: int, zorder: int) -> None:
     """Set ``zorder`` on the artists ``draw_nulls`` added to ``axis``.
 
     The two null sets are drawn by one owner that takes no zorder, so the
-    layer is applied to the artists each call appended.  Where the reference
-    and the solved set coincide, the reference is drawn last and above, so the
-    shared marker is read as the reference rather than as whichever set
-    happened to be painted second.
+    layer is applied to the artists each call appended. Where the reference and
+    the solved set coincide, the reference outline is drawn first and beneath,
+    so the filled solved marker sits inside it and the shared point reads as
+    both sets rather than as whichever was painted second.
     """
     for artist in axis.lines[first_child:]:
         if hasattr(artist, "set_zorder"):
             artist.set_zorder(zorder)
+
+
+#: The reference field is the comparison the panel exists to make, so its grey
+#: reaches 3.18:1 on white and is stroked at the same weight as the solved set
+#: rather than thinned beneath it. A 0.35 pt stroke is 0.49 px at 100 dpi and so
+#: never covers a pixel, which renders the line paler than the colour asked for.
+REFERENCE_CONTOUR_COLOR = "#929292"
+SOLVED_CONTOUR_COLOR = "#cc7722"
+CONTOUR_LINEWIDTH = 0.7
 
 
 def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
@@ -2157,7 +2178,8 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         height,
         np.where(inside, loaded["reference"], np.nan),
         levels,
-        color="#9aa4b2",
+        color=REFERENCE_CONTOUR_COLOR,
+        linewidth=CONTOUR_LINEWIDTH,
     )
     display = panel.get("display")
     if display is None:
@@ -2167,7 +2189,8 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
             height,
             np.where(inside, panel["psi"], np.nan),
             levels,
-            color="#cc7722",
+            color=SOLVED_CONTOUR_COLOR,
+            linewidth=CONTOUR_LINEWIDTH,
         )
     else:
         poloidal.draw_flux_contours(
@@ -2180,7 +2203,8 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
                 np.nan,
             ),
             levels,
-            color="#cc7722",
+            color=SOLVED_CONTOUR_COLOR,
+            linewidth=CONTOUR_LINEWIDTH,
         )
     poloidal.draw_wall(axis, units=loaded["wall"])
 
@@ -2214,8 +2238,8 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         loaded["reference_saddle_index"],
         "#3366cc",
         loaded["wall"],
+        hollow=True,
     )
-    _hollow_markers(axis, reference_first)
     _set_zorder(axis, reference_first, 6)
     solved_first = len(axis.lines)
     _draw_null_set(
@@ -2417,6 +2441,32 @@ def _label_defects(figure: Any) -> dict[str, int]:
     return {"clipped_labels": clipped, "overlapping_labels": overlapping}
 
 
+def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
+    """Carry a receipt's existing keys forward and lay ``record`` over them.
+
+    A receipt accumulates provenance the render cannot rediscover: the state
+    archive and its digest, the solve and render commands that produced the
+    figure, the set it belongs to and the geometry the assembly drew. Replacing
+    the file with one render's own keys drops all of that, so a key this path
+    does not own is kept, and a mapping present on both sides is merged rather
+    than overwritten.
+    """
+    if not path.exists():
+        return record
+    try:
+        existing = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return record
+    if not isinstance(existing, dict):
+        return record
+    for key, value in existing.items():
+        if key not in record:
+            record[key] = value
+        elif isinstance(value, dict) and isinstance(record[key], dict):
+            record[key] = {**value, **record[key]}
+    return record
+
+
 def _render_panel(
     data_path: Path,
     figure_path: Path,
@@ -2468,6 +2518,34 @@ def _render_panel(
             ),
             fontsize=14,
         )
+
+    # The image names its own series. A reader can meet the PNG without the
+    # page beside it, and the encoding is otherwise stated only in the caption.
+    # One frameless legend for the figure, since both panels give the same
+    # colour to the same set.
+    figure.legend(
+        handles=[
+            Line2D(
+                [],
+                [],
+                color=REFERENCE_CONTOUR_COLOR,
+                linewidth=CONTOUR_LINEWIDTH,
+                label="reference (unedited equilibrium)",
+            ),
+            Line2D(
+                [],
+                [],
+                color=SOLVED_CONTOUR_COLOR,
+                linewidth=CONTOUR_LINEWIDTH,
+                label="solved (terminal currents)",
+            ),
+        ],
+        loc="outside lower center",
+        ncol=2,
+        frameon=False,
+        fontsize=13,
+        handlelength=2.2,
+    )
 
     reference_note = _saddle_note(
         loaded["reference_xpoints"], loaded["reference_saddle_index"]
@@ -3657,20 +3735,26 @@ def main() -> None:
             arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
             arguments.receipt.write_text(
                 json.dumps(
-                    {
-                        "schema": "nova.coil-edit-panel-render",
-                        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
-                        "scheduler": _scheduler(),
-                        "runtime": {
-                            "host": platform.node(),
-                            "device": jax.devices()[0].device_kind,
-                            "platform": jax.devices()[0].platform,
-                            "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+                    _merge_receipt(
+                        arguments.receipt,
+                        {
+                            "schema": "nova.coil-edit-panel-render",
+                            "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                            "scheduler": _scheduler(),
+                            "runtime": {
+                                "host": platform.node(),
+                                "device": jax.devices()[0].device_kind,
+                                "platform": jax.devices()[0].platform,
+                                "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+                            },
+                            "caption": panel["caption"],
+                            "visual_inspection": {
+                                **panel["visual_inspection"],
+                                "inspected_render": str(arguments.panel_figure),
+                            },
+                            "display_map": panel["display_map"],
                         },
-                        "caption": panel["caption"],
-                        "visual_inspection": panel["visual_inspection"],
-                        "display_map": panel["display_map"],
-                    },
+                    ),
                     indent=2,
                     sort_keys=True,
                     allow_nan=False,

@@ -81,6 +81,13 @@ class InkStyle:
     # x-point indistinguishable from the saddle the solve actually chose.
     axis_marker: str = "^"
     axis_markersize: float = 6.5
+    axis_markeredgewidth: float = 1.0
+    # Fill of the axis and admitted-saddle markers. ``None`` paints them in the
+    # series colour, which is the filled vocabulary. A variant that sets this
+    # to ``"none"`` draws the set as an outline, which is how two null sets are
+    # told apart where they coincide: the filled set sits inside the outline of
+    # the hollow one drawn beneath it.
+    null_marker_facecolor: str | None = None
     axis_color: str = "#cc0000"
     xpoint_marker: str = "X"
     xpoint_markersize: float = 7.5

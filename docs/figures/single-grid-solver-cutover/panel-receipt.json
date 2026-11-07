@@ -77,8 +77,9 @@
   "state_archive_md5": "82a99c7036d06ca690faeda4552d7153",
   "visual_inspection": {
     "clipped_labels": 0,
-    "measured_from": "a render of docs/figures/single-grid-solver-cutover/panel-states.npz through _render_panel, whose save-time check draws the figure and reads every text artist s extent; not copied from another receipt",
-    "measurement_command": "python benchmarks/coil_edit_latency.py panel --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure <run>/single-grid-panel.png",
+    "inspected_render": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "measured_from": "a render of docs/figures/single-grid-solver-cutover/panel-states.npz through _render_panel, whose save-time check draws the figure and reads every text artist's extent; the published PNG named by inspected_render is the same archive drawn by the same painters, so the counts describe that figure's text layout rather than being copied from another receipt",
+    "measurement_command": "python benchmarks/coil_edit_latency.py panel --panel-data docs/figures/single-grid-solver-cutover/panel-states.npz --panel-figure /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/single-grid-panel.png",
     "measurement_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/label-measure-single-grid.log",
     "overlapping_labels": 0
   }

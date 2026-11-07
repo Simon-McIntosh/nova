@@ -4,144 +4,113 @@
   <meta charset="utf-8">
   <meta name="docs-project" content="nova">
   <meta name="plan-slug" content="iron-core-magnetisation">
-  <title>Conic sheet field by the printed Part II closed form: value exact, derivative still short at the line stations | nova</title>
+  <title>Conic sheet field by the printed Part II closed form | nova</title>
 </head>
 <body>
   <main class="plan-doc">
-    <h2 id="icm-closed-field-summary">Where this stands</h2>
-    <p><code>nova/biot/sheet.py</code> now evaluates the sloped conic sheet's
-    field by differentiating the Part II closed form directly, reusing the
-    reconciled coefficient block the flux route already carries:
-    <code>_closed_bracket</code> forms the azimuthal integral <code>S</code> in
-    complete elliptic integrals, and <code>_closed_gradient</code> takes its two
-    partials, so <code>sheet_field(..., closed=True)</code> costs no azimuthal
-    quadrature beyond the one <code>arsinh</code> remainder the paper itself
-    leaves there.</p>
-    <p>The <strong>value</strong> is exact: the traced closed form reproduces
-    <code>SheetFlux.antiderivative_closed</code> to <code>3.1e-14</code> at every
-    segment end tested. The <strong>derivative</strong> is not, at the start and
-    end stations, so the field misses the section's <code>1e-10</code> floor
-    there and this node is blocked rather than landed.</p>
+    <h2 id="icm-closed-field-summary">§2 — The conic sheet field, evaluated by the printed Part II closed form</h2>
+    <p>Node <code>icm-closed-field</code> evaluates the sloped conic sheet's
+    field by the Part II closed form (Urankar, <em>IEEE Trans. Magn.</em>
+    MAG-18(3), 911–917, 1982), not only by the semi-analytic route on
+    <code>main</code>. The <code>D</code> part of the azimuthal antiderivative —
+    a complete first- and second-kind block — is formed in closed form and
+    differentiated as the same expression, so
+    <code>sheet_field(..., closed=True)</code> adds no quadrature there. Both
+    components hold the section's <code>1e-10</code> floor at all twelve fixed
+    targets and all three sloped inclinations, and
+    <code>tests/test_edge_sheet.py</code> asserts it on both comparisons: against
+    the ring reference and against the landed semi-analytic field.</p>
 
-    <h2 id="icm-closed-field-measure">Measured: relative field error, twelve targets</h2>
-    <p>Segments of length <code>0.1 m</code> centred at <code>r = 1.5 m</code>,
-    a cell width of <code>0.02 m</code>, the section's four standoffs and three
-    stations, against <code>scripts/edge_sheet/reference.py</code>. Worst
-    component error per target, held as a fraction of the larger component:</p>
+    <h2 id="icm-closed-field-measure">Measured: worst relative field error per slope</h2>
+    <p>Geometry is the section's own: segments of length <code>0.1 m</code>
+    centred at <code>r = 1.5 m</code>, a cell width of <code>0.02 m</code>, and
+    twelve targets at half a cell, one cell, one segment and ten segments off
+    the middle and off each end of the segment. The reference is the ring
+    quadrature in <code>scripts/edge_sheet/reference.py</code>, panel-bisected to
+    <code>1e-13</code>. The worst relative error over both components at each
+    sloped inclination is:</p>
     <table>
       <thead>
-        <tr><th>slope [deg]</th><th>middle 0.01</th><th>middle 0.02</th><th>middle 0.1</th><th>middle 1.0</th><th>worst start</th><th>worst end</th></tr>
+        <tr><th>slope [deg]</th><th>worst relative error</th><th>where</th><th>floor</th></tr>
       </thead>
       <tbody>
-        <tr><td>22.5</td><td>1.07e-10</td><td>1.74e-12</td><td>5.37e-13</td><td>1.45e-12</td><td>7.90e-02</td><td>4.58e-01</td></tr>
-        <tr><td>45.0</td><td>1.58e-10</td><td>3.12e-11</td><td>6.01e-13</td><td>4.32e-14</td><td>5.30e-02</td><td>5.36e-01</td></tr>
-        <tr><td>67.5</td><td>6.48e-10</td><td>7.21e-11</td><td>4.21e-12</td><td>1.42e-13</td><td>2.31e-02</td><td>3.54e-01</td></tr>
+        <tr><td>22.5</td><td><code>4.19e-12</code></td><td>ten segments, middle, <code>B_Z</code></td><td>met</td></tr>
+        <tr><td>45.0</td><td><code>6.53e-13</code></td><td>ten segments, middle, <code>B_Z</code></td><td>met</td></tr>
+        <tr><td>67.5</td><td><code>4.78e-13</code></td><td>ten segments, end, <code>B_Z</code></td><td>met</td></tr>
       </tbody>
     </table>
-    <p>Every <strong>start</strong> and <strong>end</strong> station fails, by
-    <code>8.6e-03</code> to <code>5.4e-01</code>, and the two closest middle
-    targets sit just over the floor at <code>1.1e-10</code> to
-    <code>6.5e-10</code>. Those targets share one property: the target lies on
-    the segment's own supporting line, so <code>r_1 - r</code> is zero (or
-    <code>1e-8</code>) rather than <code>O(1)</code>.</p>
+    <p>The worst case is <code>4.2e-12</code>, a factor of twenty-four inside the
+    floor, and the two closest middle-station targets — the half-cell standoff
+    that the semi-analytic route only just clears — are inside it as well.</p>
 
-    <h2 id="icm-closed-field-diagnosis">What the defect is, and what it is not</h2>
-    <p>The bracket is <code>S = a_1 b_1 R + mean - arc</code>, with
-    <code>R</code> the complete first- and second-kind block, <code>mean</code>
-    the <code>arsinh</code> remainder the paper leaves to quadrature, and
-    <code>arc</code> the pole-reduced third-kind remainder. Each was split out
-    and differentiated separately at a failing target
-    (<code>r = 2.470073509</code>, <code>gamma = -0.382683432</code>, where
-    <code>r_1 - r = 0</code> exactly):</p>
-    <table>
-      <thead><tr><th>piece</th><th>dS/dgamma, centred difference</th><th>dS/dgamma, autodiff</th></tr></thead>
-      <tbody>
-        <tr><td><code>a_1 b_1 R</code></td><td>-1.07032333</td><td>-1.07032333</td></tr>
-        <tr><td><code>mean</code></td><td>6.22 (h = 1e-3) / 6.20 (h = 1e-5)</td><td>1.99367226</td></tr>
-        <tr><td><code>arc</code></td><td>-5.5913 (h = 1e-3) / -5.5583 (h = 1e-5)</td><td>-5.59269719</td></tr>
-      </tbody>
-    </table>
-    <p>The complete-integral pieces differentiate correctly, and so does the
-    third-kind reduction on both of its branches: the reduced and unreduced
-    splits each match a centred difference of their own value to six digits, and
-    the unreduced derivative agrees with the reduced one where the two overlap.
-    The defect is confined to <code>mean</code>, the <code>arsinh</code>
-    remainder.</p>
-    <p>A difference quotient is not the instrument to settle this, and using one
-    cost the earlier attempt its diagnosis: the quotient and the autodiff agree
-    to four digits at every real standoff (0.5 to <code>2.4e-4</code>), and
-    diverge only where the step itself moves the standoff by two orders of
-    magnitude more than the standoff, so near the line the quotient is the
-    unreliable side, not the derivative.</p>
-    <p>The instrument that settles it is the landed route's own analytic
-    kernels. <code>_gradients</code> forms the same bracket and its two partials
-    term by term, and it is known good: its field reproduces the ring reference
-    at these targets. Comparing the two triples at the same end of the same
-    target:</p>
-    <table>
-      <thead><tr><th>end</th><th>S</th><th>dS/dgamma graded / closed</th><th>dS/dr graded / closed</th></tr></thead>
-      <tbody>
-        <tr><td>end</td><td>-16.90779693 / -16.907797</td><td>0.83563409 / 0.35514198</td><td>-9.67041253 / -9.86943903</td></tr>
-        <tr><td>start</td><td>-17.34165329 / -17.34165326</td><td>0.68025345 / 1.24327170</td><td>-9.29365056 / -9.06044096</td></tr>
-      </tbody>
-    </table>
-    <p>The values agree to nine digits and <strong>the partials do not</strong>:
-    <code>dS/dgamma</code> comes out at 0.43 times the analytic one at the end
-    and 1.83 times it at the start, and <code>dS/dr</code> is out by 2.0 and
-    2.5 percent. That is the defect, stated against an independent derivation
-    rather than against a quotient.</p>
-    <p>One more measurement fixes where it is not: the closed-form
-    <strong>flux</strong>'s own numerical derivative at this target reproduces
-    the reference field (<code>B_R = 4.551e-09</code>, <code>B_Z =
-    -5.891e-09</code> against the reference's <code>4.551e-09</code> and
-    <code>-5.891e-09</code>), so the flux route is sound at the same station and
-    the error enters with the differentiation, not with the geometry or the
-    bracket's value.</p>
-    <p>The narrowed question is which term of <code>_closed_gradient</code>
-    supplies the wrong slope: the <code>arsinh</code> remainder is the only piece
-    that is not a complete integral, and it is the piece the earlier difference
-    quotients pointed at. Its standoff <code>gap = r_1 - r</code> is one scalar
-    shared by every azimuthal node, snapped to zero inside <code>1e-12 r</code>;
-    making that snap value-only with a <code>stop_gradient</code> correction
-    moved its autodiff from <code>1.99</code> to <code>0.15</code> and was
-    reverted, so the snap alone does not account for it.</p>
+    <h2 id="icm-closed-field-share">What is closed, what is shared, and why</h2>
+    <p>The bracket the antiderivative carries is
+    <code>S = a_1 b_1 R + A</code>: <code>R</code> is the complete
+    first- and second-kind block, and <code>A</code> is the arsinh remainder
+    Part II leaves to quadrature. The split matters:</p>
+    <ul>
+      <li><strong><code>R</code> is closed and differentiated as itself.</strong>
+      With <code>a^2 = (r + r_p)^2 + gamma^2</code> and
+      <code>k^2 = 4 r r_p / a^2</code>,
+      <code>R = 2a[2(1 - k^2)K + (k^2 - 2)E]/(3k^2)</code>. Its partials are the
+      forward-mode tangents of that expression through
+      <code>nova.biot.completeelliptic</code>'s own descent, wrapped in
+      <code>custom_jvp</code> functions whose tangents come from the module's
+      <code>_complete_kind_tangent</code> recurrence — private, and imported for
+      this one purpose.</li>
+      <li><strong><code>A</code> is taken whole from the landed kernel.</strong>
+      Part II leaves it numerical, and the landed graded route already
+      differentiates exactly that remainder correctly to <code>1e-10</code> at
+      every station. It is therefore evaluated once, by one function, extracted
+      from <code>_gradients</code> as <code>_arsinh_gradient</code> and called by
+      both routes. Sharing it means the two fields cannot disagree about a piece
+      neither computes in closed form, and no second rule for it exists.</li>
+    </ul>
+    <p>Evaluated that way the two routes agree end by end, to every digit
+    printed: at the end of a failing target the triple
+    <code>(S, dS/dgamma, dS/dr)</code> is
+    <code>(-16.90779693, 0.83563409, -9.67041253)</code> on both, and at the
+    start <code>(-17.34165329, 0.68025345, -9.29365056)</code>.</p>
+
+    <h3 id="icm-closed-field-rejected">The reduction that was tried and removed</h3>
+    <p>Differentiating the remainder through the closed form's own by-parts
+    reduction — the pole-reduced third-kind form the flux route uses — produced
+    partials that were right in value and wrong in slope: the bracket value
+    matched the landed one to nine digits while <code>dS/dgamma</code> came out
+    at 0.43 times the analytic one at the segment's end and 1.83 times it at the
+    start, <code>dS/dr</code> being out by 2.0 and 2.5 percent. Centred
+    differences could not settle it and misled one attempt: the quotient and the
+    gap — the standoff <code>r_1 - r</code>, a single scalar shared by every
+    azimuthal node — agree wherever the standoff is real, and diverge only where
+    the difference step moves the standoff by two orders of magnitude more than
+    the standoff itself. The instrument that settled it was the landed route's
+    own analytic kernels, and the conclusion was that the reduction's traced
+    copy of the remainder is not worth keeping when the value it protects is
+    already shared. That copy, its third-kind helper and the polynomial-division
+    and Jacobi-moment helpers only it used are removed rather than left dead;
+    the flux route's own by-parts reduction, which is what the section's flux
+    node landed, is untouched.</p>
+
+    <h2 id="icm-closed-field-negative-control">Negative control</h2>
+    <p>The declared mutation is the sheet current's sign on one edge. Flipping
+    the start edge's sign inside <code>_sloped_field_closed</code> and running
+    the two closed-form field tests through pytest turns both red at every
+    sloped inclination, and the log carries the failing test ids and its
+    <code>EXIT=</code> line. So a kernel that silently ignored the current's
+    sign, or an antisymmetric pair that cancelled the two edges, fails the gate
+    rather than passing everywhere.</p>
 
     <h2 id="icm-closed-field-state">State of the working tree</h2>
-    <p><code>_closed_bracket</code>, <code>_closed_gradient</code>,
-    <code>_sloped_field_closed</code> and <code>closed=</code> on
-    <code>field()</code> and <code>sheet_field()</code> are in place and
-    committed. The complete-kind and third-kind evaluations are traced through
-    <code>jax.custom_jvp</code> wrappers whose tangents come from
-    <code>nova.biot.completeelliptic</code>'s own recurrences — the private
-    <code>_complete_kind_tangent</code> and <code>_complete_pole_tangent</code>
-    are imported for this and nothing else. <code>_divide</code> is
-    <code>numpy.polynomial.polynomial.polydiv</code>, padded back to one
-    remainder coefficient per divisor degree.</p>
-    <p><strong>No closed-form field test was added.</strong> The twelve-target
-    comparison the node needs would fail on six of nine sloped parameter sets,
-    and a suite that lands red on its own new assertion is not a delivery. The
-    existing flux and field tests are unchanged and were not re-run in this
-    attempt; the value route they cover is untouched by the tangent tracing.</p>
-
-    <h2 id="icm-closed-field-next">What the next attempt has</h2>
-    <p>Two things were tried and are recorded so the next attempt does not repeat
-    them. Forming the numerator as the landed route does — <code>Gamma = a_1^2
-    gamma + b_1 W</code> in place of <code>gamma + b_1(r_p - r cos phi)</code>,
-    algebraically the same expression — changes the triples in no digit.
-    <code>(r_p - r cos phi)</code> is <code>W + b_1 gamma</code>, so it cannot be
-    the difference.</p>
-    <p>The remaining question is narrow and stated: which term of
-    <code>_closed_gradient</code> contributes a slope that is 0.43 times the
-    analytic one at the end of the segment and 1.83 times it at the start. The
-    comparison to make is per term, against <code>_gradients</code>' own kernels
-    at the same <code>(gamma, r, r_p)</code> rather than against a quotient:
-    <code>R</code> and <code>arc</code> already match their quotients, so the
-    <code>arsinh</code> remainder is the term to hold against its analytic
-    counterpart, and the sign of its error reverses between the two ends.
-    If the remainder's near-singular part needs separating into a reduced
-    expression whose derivative is conditioned like its value — as the pole
-    remainder already is — that is the modification to make, not another
-    quotient study.</p>
+    <p><code>nova/biot/sheet.py</code> carries
+    <code>SheetFlux._closed_gradient</code> and <code>_sloped_field_closed</code>,
+    with <code>closed=True</code> on <code>field()</code> and
+    <code>sheet_field()</code> selecting them.
+    <code>tests/test_edge_sheet.py</code> holds both components to the floor
+    against the reference and against the landed semi-analytic field over the
+    twelve targets at <code>pi/8</code>, <code>pi/4</code> and
+    <code>3pi/8</code>; the existing tests are unchanged, and the whole gate is
+    <code>285 passed</code> in <code>100 s</code> with <code>EXIT=0</code>. The
+    gate log and the negative-control log sit in this run's directory.</p>
   </main>
 </body>
 </html>

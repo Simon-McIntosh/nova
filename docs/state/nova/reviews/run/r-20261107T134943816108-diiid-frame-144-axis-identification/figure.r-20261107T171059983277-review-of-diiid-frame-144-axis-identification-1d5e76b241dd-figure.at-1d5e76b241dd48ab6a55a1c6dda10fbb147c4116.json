@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-07T17:21:15.272Z",
   "dispatched_at": "2026-11-07T17:13:05Z",
   "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged from the rendered PNG, image-0.png, 1400x720)",
   "findings": [
@@ -36,7 +36,7 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-07T17:21:23.784912+00:00",
+  "timestamp": "2026-11-07T17:35:52.075525+00:00",
   "total": null,
   "verdicts": {
     "blocking": "No blocking finding: nothing is clipped, no label overlaps another label or the data, and the picture lets a reader see the seed contours, the limiter and every critical point it claims.",

@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 4,
+  "added_failure_ids": [
+    "tests/biot/test_edge_term_tangents.py::collection",
+    "tests/biot/test_vertex_term_tangents.py::collection",
+    "tests/biot/test_vertex_edge_tangent_recurrences.py::collection",
+    "tests/biot/test_graded_layer_near_corner.py::collection"
+  ],
+  "completed_at": "2026-11-07T19:21:29.868Z",
+  "dispatched_at": "2026-11-07T19:13:36Z",
+  "findings": [
+    {
+      "file": "gate/row-vertex-edge-regularised/compile-ratio-head.log",
+      "line": 9,
+      "severity": "blocking",
+      "text": "the regularised head arm reads 3.519 above the 3.0 bound the brief requires on every sample; the worker substituted a deterministic program-size argument for the stated measure rather than meeting it."
+    },
+    {
+      "file": "gate/pytest-base.log",
+      "line": 1,
+      "severity": "blocking",
+      "text": "the base suite arm died at collection with EXIT=2 and 8 errors in 3.93s, and gate/pytest-head.log carries no EXIT line and no summary, so done_when clause 3 (zero added failures) has no readable measurement in either arm."
+    },
+    {
+      "file": "nova/biot/gradedresidual.py",
+      "line": 240,
+      "severity": "non-blocking",
+      "text": "the change carries no test that reddens if the cosh Jacobian is rebuilt from sqrt(1+sinh^2) again; the bound test asserts a ratio, not the jacobian form, so a regression is caught only when it moves a timing value already measured as noise."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T191148129022-review-of-graded-residual-compile-recovery-642bf0f360b0",
+  "reviewed_base_sha": "1ad64b5fc4e6d37eca776269cb46e56b0d48aa1d",
+  "reviewed_head_sha": "642bf0f360b03bea8674e1c51d6c313f2a55ccc8",
+  "reviewed_run_id": "r-20261107T134005364650-graded-residual-compile-recovery",
+  "scores": {
+    "durability": 7,
+    "evidence": 9,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:30:10.961376+00:00",
+  "total": 88
+}

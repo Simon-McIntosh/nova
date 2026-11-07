@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Sloped conic sheet flux: the endpoint-log removal | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-sheet-sloped-summary">&sect;2 &mdash; The sloped sheet, held to the floor at the near standoffs</h2>
+    <p>Node <code>icm-sheet-sloped</code> takes the sloped conic sheet of
+    <code>nova/biot/sheet.py</code> to the section's <code>1e-10</code> relative
+    floor at every one of the fixed target set's near standoffs. The previous
+    precedent node measured the sloped form at <code>9.2e-05</code> at half a cell
+    width and declared twenty-one targets <code>xfail(strict=True)</code>; those
+    marks are gone and every sloped target now asserts the floor outright.</p>
+    <p>Two integrands needed the remedy, not one. The <code>arsinh</code> term is
+    log-singular where the denominator vanishes &mdash; a target level with a
+    segment end, which is exactly the &ldquo;start&rdquo; and &ldquo;end&rdquo;
+    stations &mdash; and the <code>D</code> term carries a square-root layer of
+    width <code>D_0 = hypot(gamma, r - r_p)</code> at the same azimuth. The
+    arsinh term now runs on the graded two-panel rule that
+    <code>nova.biot.polygonanalytic</code> already owns: each half of the turn is
+    stretched by a sinh map from its own end, a model of the logarithm is
+    subtracted in closed form, and the bounded remainder is integrated, with the
+    sheet's own polynomial weight carried through
+    <code>_weighted_residual</code>. That helper is private to the Part V module
+    and is imported rather than copied, so one implementation of the machinery
+    serves both. The <code>D</code> term gets the same map anchored at
+    <code>phi = 0</code>, which is exact for
+    <code>sqrt(D_0^2 + 4 r r_p sin^2(phi/2))</code>. Both squares are formed from
+    positive terms rather than by subtracting nearly equal radii; that change
+    alone is worth two further digits at the start and end stations, where the
+    difference of two antiderivatives is the whole answer.</p>
+
+    <h2 id="icm-sheet-sloped-measure">Measured: relative error before and after, per target</h2>
+    <p>Geometry is the section's own: segments of length <code>0.1 m</code>
+    centred at <code>(r, z) = (1.5, 0) m</code>, cell width <code>0.02 m</code>,
+    three stations per slope and four standoffs. Reference:
+    <code>scripts/edge_sheet/reference.py</code> <code>sheet_reference</code>,
+    converged at every target, checked stable at <code>4.8e-16</code> achieved
+    under a tightened tolerance and a second panel grading. Each cell reads the
+    error of the pre-change rule, then of this node's. Bold cells are the
+    twenty-one that were above the floor and are now below it.</p>
+    <table>
+      <thead><tr><th>slope</th><th>station</th><th>d = 0.01 m</th><th>d = 0.02 m</th><th>d = 0.1 m</th><th>d = 1.0 m</th></tr></thead>
+      <tbody>
+        <tr><td>pi/8</td><td>middle</td><td style="font-weight:600">9.2e-5 &rarr; 3.3e-13</td><td style="font-weight:600">1.7e-6 &rarr; 3.2e-13</td><td style="font-weight:600">2.7e-10 &rarr; 2.9e-13</td><td>1.7e-15 &rarr; 3.3e-13</td></tr>
+        <tr><td>pi/8</td><td>start</td><td style="font-weight:600">2.8e-5 &rarr; 1.1e-13</td><td style="font-weight:600">1.3e-6 &rarr; 8.5e-14</td><td>5.8e-11 &rarr; 2.0e-14</td><td>2.1e-13 &rarr; 4.8e-14</td></tr>
+        <tr><td>pi/8</td><td>end</td><td style="font-weight:600">3.2e-5 &rarr; 6.6e-14</td><td style="font-weight:600">5.6e-7 &rarr; 5.9e-14</td><td>7.0e-11 &rarr; 2.0e-15</td><td>3.4e-15 &rarr; 2.3e-13</td></tr>
+        <tr><td>pi/4</td><td>middle</td><td style="font-weight:600">9.2e-5 &rarr; 2.6e-13</td><td style="font-weight:600">1.9e-6 &rarr; 2.3e-13</td><td style="font-weight:600">2.0e-10 &rarr; 2.3e-13</td><td>3.9e-15 &rarr; 2.4e-13</td></tr>
+        <tr><td>pi/4</td><td>start</td><td style="font-weight:600">2.9e-5 &rarr; 8.5e-14</td><td style="font-weight:600">1.2e-6 &rarr; 6.7e-14</td><td>6.6e-11 &rarr; 8.5e-15</td><td>3.9e-15 &rarr; 1.4e-13</td></tr>
+        <tr><td>pi/4</td><td>end</td><td style="font-weight:600">3.1e-5 &rarr; 4.0e-14</td><td style="font-weight:600">6.9e-7 &rarr; 3.3e-14</td><td>8.1e-11 &rarr; 2.3e-14</td><td>7.5e-15 &rarr; 2.1e-13</td></tr>
+        <tr><td>3pi/8</td><td>middle</td><td style="font-weight:600">9.2e-5 &rarr; 2.0e-13</td><td style="font-weight:600">2.0e-6 &rarr; 1.9e-13</td><td style="font-weight:600">1.5e-10 &rarr; 1.8e-13</td><td>2.6e-15 &rarr; 2.5e-13</td></tr>
+        <tr><td>3pi/8</td><td>start</td><td style="font-weight:600">2.9e-5 &rarr; 7.9e-14</td><td style="font-weight:600">1.2e-6 &rarr; 4.9e-14</td><td>7.7e-11 &rarr; 7.4e-15</td><td>1.4e-15 &rarr; 1.4e-13</td></tr>
+        <tr><td>3pi/8</td><td>end</td><td style="font-weight:600">3.1e-5 &rarr; 4.5e-14</td><td style="font-weight:600">8.5e-7 &rarr; 2.9e-14</td><td>8.8e-11 &rarr; 1.1e-14</td><td>8.7e-16 &rarr; 1.3e-13</td></tr>
+      </tbody>
+    </table>
+    <p>Worst over the sloped targets: <code>9.2e-05</code> before,
+    <code>3.4e-13</code> after. Over the whole fixed set including the flat and
+    vertical forms &mdash; whose code paths did not change &mdash; the worst is
+    <code>6.9e-13</code>. The far standoffs move from about
+    <code>1e-15</code> to <code>3e-13</code>: three orders of margin to the floor
+    are given up there in exchange for six orders at the near standoffs, which is
+    the trade the section's production range asks for.</p>
+
+    <h2 id="icm-sheet-sloped-control">The negative control</h2>
+    <p>Flipping the sheet current's sign in <code>SheetFlux.flux</code> fails the
+    reference comparisons: the gate reads <code>65 failed, 6 passed</code> and
+    exits non-zero, against <code>71 passed</code> at the head. No tolerance was
+    changed and no case was dropped.</p>
+
+    <h2 id="icm-sheet-sloped-gate">The gate</h2>
+    <p><code>pytest tests/test_edge_sheet.py</code> at the landing revision:
+    <code>71 passed</code>, exit 0. The gate log and the control log are held with
+    the node's run record.</p>
+  </main>
+</body>
+</html>

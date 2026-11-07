@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Sloped sheet flux by Part II eq 22a: the transcribed block and its discrepancy | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-closed-flux-summary">What this node established</h2>
+    <p>Node <code>icm-closed-flux</code> transcribed eqs 13a, 18a and 22a from
+    the 300&nbsp;dpi page renders and derived, from the same integrand the
+    landed semi-analytic route integrates, the exact closed form of its
+    <em>D</em> part. That part is settled. The <code>arsinh</code> part of
+    eq&nbsp;22a &mdash; the <code>delta_{j phi} b_1^2 r / a_1^3 g</code> term
+    together with the third-kind sum &mdash; was <strong>not</strong> reduced
+    to a form that reproduces the verified quadrature, so the closed-form flux
+    is not delivered and the node is blocked rather than landed.</p>
+
+    <h2 id="icm-closed-flux-printed">The printed block, as read from the renders</h2>
+    <p>From eq (13a), with <code>c_1^2 = r_1^2 + b_1^2 r^2</code> and
+    <code>d_1 = b_1^2 r &minus; r_1</code>:</p>
+    <pre>n_p^2   = 2 b_1^2 r / (d_1 -/+ a_1 c_1)          (upper p = 1, lower p = 2)
+S(k)    = b_1^2 a [1 + k^2 (gamma + b_1 b)/(4 b_1 r)]
+T(k)    = b_1^2 a k^2 / 2
+P_j(n_p) = (c_1 +/- a_1 r') { 2 r_1^2 + r^2 (1 + a_1^2),
+                               (r + r_1)^2 n_p^2 - 2 (r^2 + r_1^2) }</pre>
+    <p>The symbol <code>b</code> in <code>S(k)</code> is not defined on the
+    page we read and is the first ambiguity. From eq (18a):</p>
+    <pre>L(k) = 2 b_1 r' [gamma + b_1 (r' + r)] / (a k^2)
+M(k) = S(k) - a (d_1 + a_1^2 r')/(2 r) - r' (r^2 + r_1^2)/(a r)
+N(k) = 2 r' (a_1^2 r' - r_1) / (a k^2)</pre>
+    <p>and eq (22a), the complete-limit vector potential of a conic cylinder:</p>
+    <pre>A_phi(pi/2) = b_1^2 r/a_1^3 g(pi/2)
+              - (1/(a_1^2 b_1)) [M(k) K(k) + N(k) E(k)]
+              - (1/(4 a_1^3 b_1 a r)) sum_p (-1)^p P_phi(n_p) Pi(n_p^2, k)</pre>
+    <p>with <code>g(pi/2) = int_0^{pi/2} d alpha sinh^{-1} beta_1(alpha)</code>
+    (eq 12b), which the paper states has no analytical treatment and which the
+    plan accordingly assigns to the Part V module's fixed-node rule.</p>
+
+    <h2 id="icm-closed-flux-dpart">The D part, derived and checked</h2>
+    <p>The landed route integrates over half the turn,
+    <code>R = int_0^pi cos(phi) D(phi) d phi</code>, with
+    <code>D^2 = (r - r')^2 + gamma^2 + 4 r r' sin^2(phi/2)</code>. Translating
+    to the Jacobi variable <code>u</code> (<code>d phi = 2 dn u du</code>,
+    <code>D = a dn u</code>, <code>cos phi = 2 sn^2 u - 1</code>) and using the
+    complete integrals <code>int_0^K dn^2 u du = E</code> and
+    <code>int_0^K sn^2 u dn^2 u du = [(1-k^2)K + (2k^2-1)E]/(3k^2)</code>
+    gives</p>
+    <pre>R = 2a [2(1 - k^2) K + (k^2 - 2) E] / (3 k^2),   k^2 = 4 r r'/a^2</pre>
+    <p>Checked at <code>(r, z) = (0.5, 0)</code>, segment end
+    <code>(r', z') = (1.5, 0.6)</code>, <code>b_1 = 0.636364</code>: the closed
+    form gives <code>-0.71669812</code>; a 4,000,001-point trapezoid of the same
+    integrand gives <code>-0.71669812</code>, a relative agreement of
+    <code>3.1e-16</code>. The other end, <code>(r', z') = (0.8, -0.5)</code>,
+    gives <code>-0.62232451</code> both ways, relative <code>5.4e-16</code>.
+    The <em>D</em> part of the closed form is therefore settled to machine
+    precision.</p>
+
+    <h2 id="icm-closed-flux-discrepancy">The discrepancy that stops the node</h2>
+    <p>The printed <code>M(k) K + N(k) E</code> does not reduce to that
+    expression. At the same end, with <code>S</code> read at
+    <code>b = r + r'</code>, the printed coefficients are
+    <code>M = -3.3651</code>, <code>N = +2.0656</code> and
+    <code>M K + N E = -4.3465</code>, whereas the derived
+    <code>R</code> times the module's prefactor <code>a_1 b_1</code> is
+    <code>-0.5406</code>. The two disagree in sign and by a factor near nine,
+    which is the same disagreement the previous node measured and reported.
+    Reading <code>S</code> at <code>b = r'</code> or <code>b = c_1</code> moves
+    <code>M</code> by only a few per cent and cannot close it, so the misprint
+    is not in that one symbol.</p>
+    <p>What this node did <strong>not</strong> resolve is whether the printed
+    <code>M</code>, <code>N</code> belong to the same quantity as the module's
+    <code>R</code>. Eq (13) is written after an integration by parts and its
+    <code>{2 sn u cn u, cn^2 u - sn^2 u}</code> bracket may carry a factor and
+    a boundary term that the module's <code>R</code> does not. Settling that,
+    and reducing the arsinh/third-kind block to a form that the verified flux
+    agrees with at 1e-10, is the remaining work. No quadrature was substituted
+    for a closed form and no coefficient was fitted.</p>
+
+    <h2 id="icm-closed-flux-state">State of the working tree</h2>
+    <p>No source or test change was made: <code>nova/biot/sheet.py</code> and
+    <code>tests/test_edge_sheet.py</code> are untouched at
+    <code>ac4033362</code>, so the landed semi-analytic route that this node was
+    to check the closed form against is exactly as it was. The derivation and
+    the numerical probe are held with the node's run record.</p>
+  </main>
+</body>
+</html>

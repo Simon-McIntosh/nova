@@ -6,7 +6,9 @@ relative residuals from <code>0.0273</code> to <code>4.28</code>. The banked rec
 to one mechanism on four frames and to a refusal upstream of the fixed point on the fifth. It is
 <b>not</b> an alternating-mask switch: the active set has stopped changing (mask difference zero) at the
 terminal promotion of every branch, and the relative residual is <i>bit-identical</i> across the last two
-promotions. The inner Newton&ndash;Krylov solve does keep accepting its steps &mdash; 24 of 24 attempted on the
+promotions. Nine of the ten seeds are measured below. Eight of them stall with the plasma still confined and
+carrying its current; one (frame 146's diverted seed) is a plasma driven to the top of the vessel and lost;
+one (frame 144's limited seed) refuses at axis identification before any promotion runs. The inner Newton&ndash;Krylov solve does keep accepting its steps &mdash; 24 of 24 attempted on the
 measured frame &mdash; and the promoted state reproduces the same residual to the bit, so the outer loop
 either stops on mask stability or spends its whole trip budget without moving. On the bank that is the
 outer active-set loop terminating on mask stability rather than on the residual criterion.</p>
@@ -35,7 +37,15 @@ number that separates the mechanism from the alternatives.</p>
 </tbody>
 </table>
 
-<p>No frame shows a period-2 cycle or a divergence. Cycle damping is <code>0</code> at every trip of every
+<p>No frame shows a period-2 cycle or a divergence. That reading required correcting the classifier twice.
+The earlier rule called an exactly flat tail a cycle (it tested the alternating pairs for <i>equality</i>);
+the replacement tested the half-to-half separation for <i>inequality</i>, which fires on any monotone tail
+and duly labelled frame 146's <code>0.128 &rarr; 0.222 &rarr; 0.065 &rarr; 0.055</code> a period-2 cycle.
+The rule now requires what a period-2 tail is — each half repeating the one before it,
+<code>[a, b, a, b]</code>, with the two levels separated — and the control drives all three inputs
+(<code>classifier_control.py</code>: a plateau and a monotone tail read as stalls, a true alternation reads
+as a cycle). The terminal class in the receipt is recomputed from each arm's recorded residual history, so
+no re-solve was needed to apply the correction. Cycle damping is <code>0</code> at every trip of every
 branch, so the descent is neither being damped nor rescued by damping. The residuals are strictly above
 tolerance at every terminal and none of the five satisfies the registered criterion.</p>
 
@@ -47,13 +57,18 @@ non-convergence or the <i>symptom</i> of a plasma that has lost its position or 
 question, and the banked record answers it only partly:</p>
 
 <ul>
-<li>Frame 146's kept terminal places its magnetic axis at <code>Z = +1.56 m</code>, above a vessel whose
-top is near <code>+0.6 m</code>, and its solved saddle outside the wall as well: the terminal state is not a
-confined plasma, and the residual it stalls at (<code>5.50e-2</code>) is the mismatch of a plasma that has
-left the machine rather than of a converged one.</li>
-<li>Frame 44's kept terminal achieves the <i>limited</i> topology at residual <code>4.28</code> — the largest
-of the cohort by two orders of magnitude — while its seed requested diverted. A terminal that changes
-topology and misses its current by that much is a lost plasma, not a slow contraction.</li>
+<li><b>Frame 146 — holds, measured below.</b> Its kept terminal places the magnetic axis at
+<code>Z = +1.56 m</code>, which is <code>0.10 m</code> below the top of the wall (the vessel spans
+<code>Z = &minus;1.664</code> to <code>+1.664 m</code>), with the closed core collapsed to
+<code>8</code> cells and <code>0.043 m&sup2;</code> against a confined current of <code>0.039</code>&times;
+the target. A column driven to the top of the vessel carrying four percent of its current is a plasma lost
+by vertical displacement, and the residual it stalls at is the mismatch that displacement leaves.</li>
+<li><b>Frame 44 — does not hold, measured below.</b> Its kept terminal does achieve the <i>limited</i>
+topology at residual <code>4.28</code>, the largest of the cohort, while its seed requested diverted. The
+inference drawn from that in the banked record — a lost plasma — is falsified by the re-solve: the confined
+core carries <code>1.097</code>&times; the target current with its axis inside the wall. A topology change
+alone does not establish plasma loss, because the achieved class is a property of the terminal state and the
+current is a separate measurement.</li>
 <li>Frames 179 and 137 terminate with the topology their seed asked for and residuals of
 <code>4.18e-1</code> and <code>6.24e-2</code>; 179's solved axis sits inside the wall but low and inboard of
 the label's, which is the displacement the vertical-force-balance plan already documents.</li>
@@ -113,6 +128,39 @@ accepted (24 of 24). The plasma is again present &mdash; axis at R=1.759, Z=+0.0
 asked for. A fixed-point map that begins already stationary explains all of these terminals at once: the
 residual the gate reads is set by the state the seed enters, and no promotion the loop can take moves it.</p>
 
+<p><b>Frame 137, limited seed.</b> The same mechanism, and the cleanest instance of it in the cohort: the
+mask difference is <code>11 &rarr; 0</code> and the residual repeats bit-identically from the first trip
+onward, the shipped policy settles at <code>ACTIVE_SET_SETTLED</code> after two trips at
+<code>5.683e-02</code>, the continued arm spends all sixteen trips at that same number, and all
+<code>24</code> inner steps are accepted. The plasma is present: axis at R=1.695, Z=&minus;0.136, inside the
+wall, confined current <code>1.091</code>&times; the target over <code>383</code> closed core cells
+(<code>2.035 m&sup2;</code>). Its achieved topology is the diverted one, against its limited seed. This frame
+is the one the banked trajectory put at <code>6.24e-2</code>, and the re-solve reaches a lower number
+(<code>5.68e-2</code>) at the same class, so the stall is not a seed that was warmed up differently.</p>
+
+<p><b>Frame 146 &mdash; the one frame where the plasma really is lost.</b> Nothing above applies to its
+diverted seed, and the record has to say so plainly rather than fold it into the fixed-mask finding. There
+the mask does <i>not</i> begin frozen: it moves <code>27 &rarr; 40 &rarr; 1 &rarr; 0</code> across four
+trips and the residual tracks it (<code>0.128 &rarr; 0.222 &rarr; 0.065 &rarr; 0.055</code>), so the loop
+<i>is</i> travelling. What it travels towards is a state with no plasma in the machine: the axis ends at
+R=1.234, Z=+1.563 m, which is <code>0.10 m</code> below the top of the wall, and the field closes around
+only <code>8</code> core cells totalling <code>0.043 m&sup2;</code> &mdash; a sliver against the top plate
+&mdash; carrying <code>0.039</code>&times; the target current. The residual then freezes at
+<code>5.496e-02</code>. This is vertical displacement to the point of plasma loss, and it is the only frame
+in the cohort whose non-convergence is explained that way. Its limited seed is a different story and
+belongs with 179, 44 and 137: the plasma is confined there (axis at R=1.725, Z=+0.027, <code>382</code>
+cells, <code>2.029 m&sup2;</code>, <code>1.134</code>&times; the target current) and the residual sits at
+<code>6.350e-02</code> beside a mask difference of <code>0</code> from the first trip. So the two seeds of
+frame 146 fail for two different reasons, and only the diverted one is a plasma loss.</p>
+
+<p><b>What the four present-plasma frames have in common.</b> On 179, 44, 137 and 144's diverted seed the
+fixed-point map is stationary from the state the seed enters: the mask difference reaches zero and stays
+there, every attempted inner step is accepted, and the outer promotion returns the state it was given. The
+residual the gate reads is therefore a property of the seed, not of a path the loop failed to walk, and
+continuing the loop cannot lower it. Frame 146's diverted seed is the counter-example that makes the point:
+where the mask <i>does</i> move, the residual moves with it, which is what a working promotion looks like.
+Its failure is upstream of that &mdash; it moves to a state with no confined plasma left to converge.</p>
+
 <p><b>The area, corrected.</b> The probe first reported a closed plasma area of <code>0.0 m&sup2;</code>
 on every arm beside a confined current of about <code>1 MA</code>. That was a defect in the measurement,
 not in the plasma: the area was counted from a mask attribute the domain partition does not carry, and the
@@ -125,13 +173,13 @@ is now the partition's own CORE label &mdash; the cells the field closes around 
 <code>presence_control.py</code>: the frame's own EFIT label field, a known closed plasma, must read a
 positive area, and the counting arithmetic must reproduce a disc of known area to within twenty percent.
 Both hold. The area now agrees with the current read, and both say the plasma is confined at every one of
-these terminals.</p>
+these terminals. Frames 137 and 146 are counted by the same code path in the probe itself
+(<code>_core_mask</code> over <code>PlasmaDomain.CORE</code>), which is the path the control exercises.</p>
 
-<p><b>Still running.</b> Frames 146 and 137 are measuring now (job <code>sched/1307525</code>, H200, one
-process per frame) and are ingested by the same merge step that produced this section, so the table grows
-without anything being re-solved. Frame 144's diverted seed is measured above; its limited seed refuses at
-axis identification before any promotion, which is the refusal the banked record carries and is upstream of
-the fixed point.</p>
+<p><b>Still unmeasured.</b> One branch remains: frame 137's diverted seed (job <code>sched/1307571</code>).
+Its limited seed is measured above, and the merge step ingests the diverted one without touching what is
+already here. Frame 144's limited seed refuses at axis identification before any promotion, which is the
+refusal the banked record carries and is upstream of the fixed point.</p>
 
 <h3>The branch decision on frames 179 and 44</h3>
 
@@ -150,17 +198,10 @@ unconditionally, so the limited seed's equilibrium cannot reach the gate however
 </ul>
 
 <table>
-<thead><tr><th>frame</th><th>diverted terminal</th><th>limited terminal</th><th>ratio</th><th>limited achieved topology</th><th>does the limited terminal touch the wall?</th><th>was the limited residual still falling?</th></tr></thead>
+<thead><tr><th>frame</th><th>kept (diverted-seed) terminal</th><th>discarded (limited-seed) terminal</th><th>ratio</th><th>discarded terminal's achieved topology</th><th>is the discarded plasma confined?</th><th>was the discarded residual still falling?</th></tr></thead>
 <tbody>
-<tr><td>179</td><td>diverted</td><td>bank cold portfolio</td><td>0.418096 &rarr; 0.418096</td><td>13 &rarr; 0</td><td>contraction stall (active-set stagnation at a frozen mask)</td><td>diverted, consistent with its seed</td><td>residual change over the terminal promotion is exactly <code>0.0</code> while the mask difference is <code>0</code>; the mask-switch hypothesis predicts a repeating non-zero mask difference and is falsified</td></tr>
-<tr><td>179</td><td>limited</td><td>bank cold portfolio</td><td>not banked (the bank returns only the diverted receipt)</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.027262</code>, 15.3&times; below the diverted terminal</td></tr>
-<tr><td>44</td><td>diverted</td><td>bank cold portfolio</td><td>4.275696 &rarr; 4.275696</td><td>75 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td><b>limited, inconsistent with its diverted seed</b></td><td>residual change <code>0.0</code> at mask difference <code>0</code>, from the largest seed mask disagreement of the cohort</td></tr>
-<tr><td>44</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.197003</code>, 21.7&times; below the diverted terminal</td></tr>
-<tr><td>144</td><td>both</td><td>bank cold portfolio</td><td>&mdash; (no promotion ran)</td><td>&mdash;</td><td>refusal</td><td>none: refused before a topology read</td><td><code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; the failure precedes any fixed-point promotion</td></tr>
-<tr><td>146</td><td>diverted</td><td>bank cold portfolio</td><td>0.128182 &rarr; 0.222019 &rarr; 0.065149 &rarr; 0.054962 &rarr; 0.054962</td><td>27 &rarr; 40 &rarr; 1 &rarr; 0 &rarr; 0</td><td>contraction stall (frozen-mask stagnation after the mask settles)</td><td><b>limited, inconsistent with its diverted seed</b></td><td>the mask settles (difference <code>1 &rarr; 0</code>) and the residual stops at <code>1e-17</code> of its previous value</td></tr>
-<tr><td>146</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.063500</code></td></tr>
-<tr><td>137</td><td>diverted</td><td>bank cold portfolio</td><td>0.129858 &rarr; 0.111397 &rarr; 0.067005 &rarr; 0.062369 &rarr; 0.062369</td><td>24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0</td><td>contraction stall (frozen-mask stagnation)</td><td>diverted, consistent with its seed</td><td>the mask difference falls to <code>0</code> and the residual repeats bit-identically; cycle damping was never activated (0 at every trip)</td></tr>
-<tr><td>137</td><td>limited</td><td>bank cold portfolio</td><td>not banked</td><td>&mdash;</td><td>terminal only</td><td>diverted, inconsistent with its limited seed</td><td>terminal <code>0.056830</code></td></tr>
+<tr><td>179</td><td>diverted, <code>4.181e-01</code></td><td>diverted, <code>2.726e-02</code></td><td>15.3&times;</td><td>diverted, against its limited seed</td><td>yes: axis at R=1.760, Z=+0.043 inside the wall, <code>1.057</code>&times; target current</td><td>no: bit-identical across all 16 trips at the frozen mask</td></tr>
+<tr><td>44</td><td>limited, <code>4.276e+00</code></td><td>diverted, <code>1.970e-01</code></td><td>21.7&times;</td><td>diverted, against its limited seed</td><td>yes: axis at R=1.773, Z=&minus;0.106 inside the wall, <code>0.661</code>&times; target current</td><td>no: mask difference <code>0</code> from the first trip, bit-identical across all 16</td></tr>
 </tbody>
 </table>
 
@@ -195,7 +236,7 @@ residual and the converged flag.</p>
 
 <figure>
 <img src="/nova/figures/diiid-forward-convergence/frame-146-flux-contours.svg" alt="frame 146 terminal diverted flux contours against the EFIT label, residual 5.50e-2">
-<figcaption>Frame 146. Diverted terminal residual <code>5.496e-02</code>, converged false. Both the solved axis and the solved saddle lie outside the wall: the markers are hollow because they are outside the containment polygon, and the state they mark is not a confined plasma.</figcaption>
+<figcaption>Frame 146. Diverted terminal residual <code>5.496e-02</code>, converged false. The solved axis sits at R=1.234, Z=+1.563 m &mdash; 0.10 m below the top of the wall, at the very edge of the lattice &mdash; and the field closes around only 8 core cells (0.043 m&sup2;) carrying 3.9 % of the target current: the plasma has been displaced vertically out of its position, and the closed region left is a sliver against the top of the vessel.</figcaption>
 </figure>
 
 <figure>
@@ -208,14 +249,31 @@ residual and the converged flag.</p>
 <p><b>Module:</b> <code>nova/equilibrium/fixed_point.py</code>, the active-set loop in
 <code>_active_set_newton_krylov</code> and its <code>reconcile</code> reduction.</p>
 
-<p><b>Change:</b> make the outer loop's terminal condition <i>fail closed</i> on the residual. Today
-<code>settled</code> and <code>stagnated</code> (the two conditions that stop the loop at a stable mask) are
-reachable while <code>selected_residual &gt; convergence_tolerance</code>, because both require only
-<code>selected_difference == 0</code>. The measured arms put that in the sharpest form: on frame 179
-<code>ACTIVE_SET_SETTLED</code> fires at a residual <code>2.7e-2</code> with 24 of 24 inner steps accepted,
-and with the exit removed the loop spends its full 16 trips at the same residual. A stable mask is
-therefore not evidence of a converged fixed point &mdash; it is evidence that the outer map stopped
-changing the state. Two edits, in this order:</p>
+<p><b>The stopping rule that has to change.</b> Two predicates in the active-set loop end the solve at a
+stable mask without consulting the residual, and both are in
+<code>nova/equilibrium/fixed_point.py</code>:</p>
+
+<ul>
+<li><code>stagnated</code> (lines 4750&ndash;4758) requires <code>selected_difference == 0</code> and
+<code>selected_residual == previous_live_residual</code> &mdash; the residual <i>repeating</i>, at any value
+&mdash; and reports <code>ACTIVE_SET_STAGNATED</code>.</li>
+<li><code>settled</code> (lines 4759&ndash;4772) requires <code>selected_difference == 0</code>,
+<code>accepted_newton_promotions == 0</code> on the terminal trip and
+<code>selected_state == state</code> &mdash; the promotion returning the state it was given &mdash; and
+reports <code>ACTIVE_SET_SETTLED</code>.</li>
+</ul>
+
+<p>Neither carries <code>selected_residual &lt;= convergence_tolerance</code> in the unfrozen case, and that
+is the defect measured here: the loop is correct to conclude that its map has stopped moving, and wrong to
+report that as its answer. The evidence is that the gate reads <code>ACTIVE_SET_SETTLED</code> at residuals
+from <code>2.7e-2</code> (frame 179) to <code>4.28</code> (frame 44) &mdash; two to five decades above the
+<code>1e-5</code> criterion &mdash; while the loop accepted <b>every</b> inner step it attempted across the
+run (24 of 24 on every measured arm) and the terminal trip accepted none because the map had become
+stationary. With the exits disabled the loop spends all sixteen trips at a bit-identical residual, so the
+omitted clause is the only thing standing between a stationary map and a falsely converged flag. Note the
+asymmetry at lines 4768&ndash;4771: the frozen-topology branch of the same predicate <i>does</i> require
+<code>selected_residual &lt;= convergence_tolerance</code>, so the guard exists in the file and is simply not
+applied when the topology is free. Two edits, in this order:</p>
 
 <ol>
 <li><b>Carry the inner step-acceptance receipt.</b> Publish
@@ -224,11 +282,14 @@ changing the state. Two edits, in this order:</p>
 record them; the probe reconstructs the counts from <code>globalisation_decisions</code> for one frame and
 cannot do so for the rest. A frozen mask with <i>every</i> step accepted is a different defect from a
 frozen mask with the step refused, and the receipt cannot currently tell them apart.</li>
-<li><b>Distinguish a refused step from a converged mask.</b> When a trip ends with
-<code>mask difference == 0</code>, zero accepted promotions and a residual above tolerance, return a
-distinct termination reason (<code>ACTIVE_SET_STEP_REFUSED</code>) and keep the loop alive to its trip
-budget rather than declaring settlement. A branch that exhausts the budget at a frozen mask must report
-the residual it stalled at, which is what the gate already reads.</li>
+<li><b>Separate the three endings at a frozen mask.</b> Once the residual is part of the predicate, the
+remaining states are distinguishable and should not collapse into one reason: a mask that is stable with
+the residual <i>at</i> tolerance is convergence; a stable mask with the promotion returning the same state
+is a stationary map (<code>ACTIVE_SET_STATIONARY</code>); a stable mask with promotions attempted and
+<b>refused</b> by globalisation is a different defect again
+(<code>ACTIVE_SET_STEP_REFUSED</code>). Today only the second can occur on these frames &mdash; the
+accepted count is 24 of 24 &mdash; so the receipt cannot report the third even if a later frame exhibits
+it. Each must carry the residual it stalled at, which the gate already reads.</li>
 </ol>
 
 <p><b>Frames it should converge:</b> 137 and 179 first &mdash; they are already diverted-consistent and the

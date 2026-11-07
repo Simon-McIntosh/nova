@@ -153,12 +153,37 @@ def measure_state(label, state, support, operands, cache, seeds, previous, conve
                   policy, profile, quadrature, gradient, axis_sign, count, rng):
     cells = int(state[0].size)
     scale = tuple(jnp.maximum(jnp.max(jnp.abs(value), axis=-1), 1e-30) for value in state)
-    matrix_full = support_read.step_jacobian(
-        operands, state, support, profile, gradient, quadrature, fresh_geometry=True
-    )
-    matrix_static = support_read.step_jacobian(
-        operands, state, support, profile, gradient, quadrature, fresh_geometry=False
-    )
+
+    @jax.jit
+    def assemble_fresh(moments_state, moments_support):
+        return support_read.step_jacobian(
+            operands, moments_state, moments_support, profile, gradient, quadrature,
+            fresh_geometry=True,
+        )
+
+    @jax.jit
+    def assemble_static(moments_state, moments_support):
+        return support_read.step_jacobian(
+            operands, moments_state, moments_support, profile, gradient, quadrature,
+            fresh_geometry=False,
+        )
+
+    @jax.jit
+    def read_one(one):
+        return read_at(
+            operands, cache, one, seeds, previous, convention, policy, axis_sign
+        )
+
+    @jax.jit
+    def residual_one(one, one_support):
+        return residual_vector(operands, one, one, one_support, profile, quadrature)
+
+    @jax.jit
+    def residual_frozen(one, one_support):
+        return residual_vector(operands, state, one, one_support, profile, quadrature)
+
+    matrix_full = assemble_fresh(state, support)
+    matrix_static = assemble_static(state, support)
     classify = class_cells(support.reading, np.asarray(operands.geometry.centre))
     picks = direction_list(classify, count, cells, rng)
     base_residual = residual_vector(operands, state, state, support, profile, quadrature)
@@ -172,15 +197,13 @@ def measure_state(label, state, support, operands, cache, seeds, previous, conve
         for eps in STEPS:
             plus = perturb(state, direction, scale, eps, 1.0)
             minus = perturb(state, direction, scale, eps, -1.0)
-            plus_support = read_at(operands, cache, plus, seeds, previous, convention, policy, axis_sign)
-            minus_support = read_at(operands, cache, minus, seeds, previous, convention, policy, axis_sign)
+            plus_support = read_one(plus)
+            minus_support = read_one(minus)
             fresh_cd = -(
-                residual_vector(operands, plus, plus, plus_support, profile, quadrature)
-                - residual_vector(operands, minus, minus, minus_support, profile, quadrature)
+                residual_one(plus, plus_support) - residual_one(minus, minus_support)
             ) / (2.0 * eps)
             frozen_cd = -(
-                residual_vector(operands, state, plus, support, profile, quadrature)
-                - residual_vector(operands, state, minus, support, profile, quadrature)
+                residual_frozen(plus, support) - residual_frozen(minus, support)
             ) / (2.0 * eps)
             refresh = fresh_cd - frozen_cd
             hybrids = {

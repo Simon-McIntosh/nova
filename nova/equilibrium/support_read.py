@@ -1087,7 +1087,7 @@ def _local_booking_sensitivities(
         * ((indices >= samples) & (indices < samples + 6))[:, None, None],
         (channels, cells, 6),
     )
-    return current.book_tangent_channels(
+    arguments = (
         psi,
         psi_direction,
         support.reading,
@@ -1100,8 +1100,10 @@ def _local_booking_sensitivities(
         quadrature,
         booked,
         jnp.concatenate((jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))),
-        shared_ring_geometry=shared_ring_geometry,
     )
+    if shared_ring_geometry:
+        return current.book_tangent_channels(*arguments)
+    return current.book_tangent_channels(*arguments, shared_ring_geometry=False)
 
 
 _FRESH_GEOMETRY_NODE_CAPACITY = 3
@@ -1148,7 +1150,15 @@ def step_jacobian(
         density_gradient,
         local_quadrature,
         local_booked,
-        shared_ring_geometry=shared_ring_geometry,
+    ) if shared_ring_geometry else _local_booking_sensitivities(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        local_quadrature,
+        local_booked,
+        shared_ring_geometry=False,
     )
     cells = moments[0].size
 

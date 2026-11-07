@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T20:21:03.651Z",
+  "dispatched_at": "2026-11-07T20:02:18Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 93,
+      "severity": "blocking",
+      "summary": "the added sentence justifies the 0.0496 Wb boundary gap as \"a one-node difference on a 60-segment wall\", but the wall the oracle reads is limiter_contour's WALL_POINT_COUNT = 121 points (scripts/analytic_oracle_fixtures/measure.py:60), and a direct evaluation of the analytic flux on those 121 points puts the wall node adjacent to the argmax contact 0.0189 Wb away, not 0.0496 and not the stated 60-segment scale, so the record's stated basis for reading the flat boundary ratio as a boundary-definition question rather than a bank limit is quantitatively wrong."
+    },
+    {
+      "file": "scripts/prototypes/bank_route_rows/limited_oracle.py",
+      "line": 104,
+      "severity": "non-blocking",
+      "summary": "the new driver repeats measure.py:436-448's seven-field savez archive block and measure.py:142-155's jitted read/residual closures nearly verbatim rather than extending the row-measurement function it already imports as `rows`, so the archive contract now has two owners that can drift apart."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 144,
+      "severity": "non-blocking",
+      "summary": "the fragment still carries one poloidal panel for the two 550-cell rows while the brief asks one panel per 550-cell row, and the delta's own results/limited-550-oracle.npz now holds nodes, solved_flux, solved_roots, analytic_roots and wall plus a limited-oracle.json row carrying kind, oracle and fast, which is exactly what render_panel.py consumes, so no rebuild stands in the way of the missing panel."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 109,
+      "severity": "non-blocking",
+      "summary": "the sentence says a single rounding step \"moves it further than the distance the route covered to reach its certificate\", but the last accepted step reduced the residual from 6.039e-10 to 9.641e-11 at 550 cells and from 9.177e-5 to 6.639e-11 at 2000 cells, both larger than the 1.219e-10 median perturbation, so the claim holds only if \"distance\" means the final residual itself and is false under the wording as written."
+    }
+  ],
+  "plan": "nova:sub-millisecond-forward-path",
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the run's goal is a measured convergence and oracle-precision table for the limited and diverted certificate rows, and the delta at 9d5a148c8 and 2ab0afa31 replaces the limited rows' \"not measured\" cells with oracle ratios and a residual floor, which I re-derived from results/limited-oracle.log (550: axis 1.158e-5, boundary 9.918e-4, floor median 1.219e-10 max 2.547e-10; 2000: axis 2.297e-6, boundary 9.856e-4, floor median 8.049e-11 max 1.201e-10) and they hold.\nVERDICT done_when: the brief's done_when asks the fast route's convergence, updates and residual, its axis, X-point and boundary ratios against the budget, the present status, the lattice gap, the unpromoted flux gap and the asymptote angles, plus one panel per 550-cell row; the delta supplies the limited ratios and floor that were missing and states the boundary miss plainly, but docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:144 still carries one figure for the two 550-cell rows, so that clause is unmet.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_route_rows, docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html and docs/figures/sub-millisecond-forward-path/bank-route-rows; the delta touches only the first two and every changed path is inside them.\nVERDICT manifest: read; it records the gate as BANK_ROUTE_MODULE=scripts.prototypes.bank_route_rows.limited_oracle bash run.sh ... --cells 550 2000, and results/limited-oracle.log carries the REVISION=9d5a148c8 header, sixteen PERTURB records per row and a final EXIT=0, which reconciles with the ORACLE and NOISE_FLOOR lines and with the fragment's table.\nVERDICT diff: read commit by commit from f57db2361 to 2ab0afa31; two commits, +231/-37, adding limited_oracle.py, a module-name override in run.sh (MODULE=${BANK_ROUTE_MODULE:-...measure}) and the fragment's limited-row table and floor paragraphs.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the delta closes the limited-row precision gap the previous review named (docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:37 now carries 1.158e-5 and 9.918e-4) while the per-row panel at line 144 and every present arm remain unmeasured.\nSCORE evidence: 16\nJUSTIFICATION evidence: results/limited-oracle.log's FINAL, ORACLE and NOISE_FLOOR records reproduce every number in the table and I reproduced each row's minimum, median and maximum exactly from the sixteen PERTURB records, though the record's interpretation of the boundary miss rests on the misstated wall at line 93.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --name-status f57db2361 2ab0afa31` lists exactly docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html, scripts/prototypes/bank_route_rows/limited_oracle.py and scripts/prototypes/bank_route_rows/run.sh, all inside the declared write paths, with no product code or test touched.\nSCORE durability: 6\nJUSTIFICATION durability: no test or assertion is added at scripts/prototypes/bank_route_rows/limited_oracle.py:30-81, so nothing fails if the driver stopped perturbing the moments or stopped reading a fresh residual, and the fragment's floor claim would then silently agree with a no-op.\nSCORE fit: 16\nJUSTIFICATION fit: limited_oracle.py:9-25 follows measure.py's dtype-first, `# ruff: noqa: E402` layout and emits through rows.emit, and run.sh:8-13 keeps one recipe through an environment-selected module.\nSCORE reuse: 13\nJUSTIFICATION reuse: limited_oracle.py:24 imports the landed `nudged` and reuses rows.build, rows.fast_route and rows.row_oracle rather than re-implementing the row measurement, but limited_oracle.py:41-49 and 104-115 duplicate measure.py's inline closures and archive block instead of extending that module.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:93 blocking: the added sentence calls the compared wall a 60-segment wall and claims a one-node difference is the scale of the 0.0496 Wb boundary gap, but the wall is limiter_contour's 121 points (scripts/analytic_oracle_fixtures/measure.py:60) and the analytic flux at the node next to the argmax contact is 0.0189 Wb away, so the stated basis for reading the flat ratio as a boundary-definition question is wrong.\nFINDING scripts/prototypes/bank_route_rows/limited_oracle.py:104 non-blocking: the archive savez block and the jitted read/residual closures repeat measure.py:436-448 and measure.py:142-155 rather than extending the row-measurement owner.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:144 non-blocking: one poloidal panel still serves the two 550-cell rows although the brief asks one per row, and results/limited-550-oracle.npz together with limited-oracle.json now carries everything render_panel.py needs to draw the limited row.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:109 non-blocking: the claim that one rounding step moves the residual further than the distance the route covered is false against the recorded residual traces, which fall by 5.08e-10 and 9.18e-5 on the last accepted step, the wording holds only for the final residual itself.\n",
+  "review_run_id": "r-20261107T195936049434-review-of-bank-route-rows-2ab0afa314d9",
+  "reviewed_base_sha": "f57db23618f24f13bb866b5c6d53f1ca9be7ec61",
+  "reviewed_head_sha": "2ab0afa314d93327fbbb3a37ce4f083af3047770",
+  "reviewed_run_id": "r-20261107T111216113482-bank-route-rows",
+  "reviewed_run_node": "bank-route-rows",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "section": "3",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:32:14.702226+00:00",
+  "total": 86
+}

@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T20:07:08Z",
+  "figures_reviewed": [
+    "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg",
+      "id": "f6b75b9ddb3",
+      "line": null,
+      "severity": "blocking",
+      "summary": "the analytic-oracle flux contours are not visible: render_panel.py:97-119 draws the oracle at zorder=3 under the fast-route contours at zorder=4 on the same nine levels, and the two fields agree to 1e-5 of the span, so the delivered render shows one contour set. Measured on the PNG, blue fast-route ink is 18,539 px in the plot body against about 1,100 non-marker grey px, and the grey survives only as 706 fragments none larger than 50 px outside the two null glyphs. A reader therefore cannot see the oracle field beside the fast one, cannot distinguish perfect agreement from a series that was never drawn, and has to take the fragment's figcaption on trust for the panel's central claim."
+    },
+    {
+      "file": "scripts/prototypes/bank_route_rows/render_panel.py",
+      "id": "f690021bba9",
+      "line": 153,
+      "severity": "non-blocking",
+      "summary": "the delivered PNG predates the caption code at the reviewed head: the rendered caption reads 'terminal fresh residual 1.208e-12 Wb, ... boundary 2.59e-05 a', while render_panel.py:154-156 at 2ab0afa3 emits no 'Wb' and writes 'boundary ... span'. The panel was therefore not re-rendered after that fix, and the caption a reader sees still labels the boundary-flux error (a fraction of the flux span) with the minor-radius unit 'a', restating a headline precision number in the wrong normalisation."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg",
+      "id": "f6b75b9ddb3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the outermost contour level is drawn as seven detached blue fragments rather than a closed curve: components of 157, 156, 103, 68, 45 and 24 px at x=844-861 in the upper right and around y=527-624 below the X-point, plus two grey vertical slivers at x=537-539 and x=861-863. At a glance these read as stray marks near the vessel edge rather than as part of a level, which costs the reader contour count and makes the already-hidden oracle slivers harder to tell apart from them."
+    }
+  ],
+  "plan": "nova:sub-millisecond-forward-path",
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: the wall, six nested blue flux contours, the axis marker and the X-point marker are readable at a glance, but the analytic-oracle contour set the panel exists to compare against is not visible as a set: only isolated grey slivers survive over zorder=4 fast-route contours, so a reader sees one field where the caption promises two.\nRUBRIC data_ink: pass: 18,539 blue ink pixels against 745 grey pixels in the two null markers and 3,530 dark pixels over the whole canvas, and the wall is a thin unfilled outline; the contours, markers and wall carry the weight and nothing else is drawn.\nRUBRIC decoration: pass: no gradient, background fill, shading or styled theme; the canvas is white, the wall is a thin black line, and the legend is frameless.\nRUBRIC contrast: pass: the caption and legend text are near-black on white, and the neutral grey legend entry (#676767) clears roughly 5:1 against white.\nRUBRIC table_form: pass: the panel is a poloidal line-contour map of poloidal flux with the wall and both null sets, which is spatial information and not something naturally a table.\nRUBRIC label_collision: pass: the legend sits above the plotted field (blue data ink starts at y=129, the legend ends at y=118) and the caption occupies its own band at y=678-696 with no plotted ink in it; the fast and oracle null markers are concentric at the axis and the X-point, which the fragment's figcaption explains is the expected rendering when the two null sets agree to about 7e-6 m at this scale.\n\nFINDING docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg:None blocking: the analytic-oracle flux contours are not visible: render_panel.py:97-119 draws the oracle at zorder=3 under the fast-route contours at zorder=4 on the same nine levels, and the two fields agree to 1e-5 of the span, so the delivered render shows one contour set. Measured on the PNG, blue fast-route ink is 18,539 px in the plot body against about 1,100 non-marker grey px, and the grey survives only as 706 fragments none larger than 50 px outside the two null glyphs. A reader therefore cannot see the oracle field beside the fast one, cannot distinguish perfect agreement from a series that was never drawn, and has to take the fragment's figcaption on trust for the panel's central claim.\nFINDING scripts/prototypes/bank_route_rows/render_panel.py:153 non-blocking: the delivered PNG predates the caption code at the reviewed head: the rendered caption reads 'terminal fresh residual 1.208e-12 Wb, ... boundary 2.59e-05 a', while render_panel.py:154-156 at 2ab0afa3 emits no 'Wb' and writes 'boundary ... span'. The panel was therefore not re-rendered after that fix, and the caption a reader sees still labels the boundary-flux error (a fraction of the flux span) with the minor-radius unit 'a', restating a headline precision number in the wrong normalisation.\nFINDING docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg:None non-blocking: the outermost contour level is drawn as seven detached blue fragments rather than a closed curve: components of 157, 156, 103, 68, 45 and 24 px at x=844-861 in the upper right and around y=527-624 below the X-point, plus two grey vertical slivers at x=537-539 and x=861-863. At a glance these read as stray marks near the vessel edge rather than as part of a level, which costs the reader contour count and makes the already-hidden oracle slivers harder to tell apart from them.\n\nVERDICT artefact: one PNG reviewed (image-0.png, 1400x720) and judged only as a rendered picture; the figure is docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg, drawn by render_panel.py at the reviewed head. No SVG was opened, listed, searched or rendered, and no image other than the named PNG was viewed; ink counts were measured from that PNG's pixels.\nVERDICT scope: read-only. No file was created, edited, moved or deleted outside the declared review-record write paths.\n",
+  "review_run_id": "r-20261107T200251907606-review-of-bank-route-rows-2ab0afa314d9-figure",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "2ab0afa314d93327fbbb3a37ce4f083af3047770",
+  "reviewed_run_id": "r-20261107T111216113482-bank-route-rows",
+  "reviewed_run_node": "bank-route-rows",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass: the caption and legend text are near-black on white, and the neutral grey legend entry (#676767) clears roughly 5:1 against white.",
+    "data_ink": "pass: 18,539 blue ink pixels against 745 grey pixels in the two null markers and 3,530 dark pixels over the whole canvas, and the wall is a thin unfilled outline; the contours, markers and wall carry the weight and nothing else is drawn.",
+    "decoration": "pass: no gradient, background fill, shading or styled theme; the canvas is white, the wall is a thin black line, and the legend is frameless.",
+    "label_collision": "pass: the legend sits above the plotted field (blue data ink starts at y=129, the legend ends at y=118) and the caption occupies its own band at y=678-696 with no plotted ink in it; the fast and oracle null markers are concentric at the axis and the X-point, which the fragment's figcaption explains is the expected rendering when the two null sets agree to about 7e-6 m at this scale.",
+    "legibility": "the wall, six nested blue flux contours, the axis marker and the X-point marker are readable at a glance, but the analytic-oracle contour set the panel exists to compare against is not visible as a set: only isolated grey slivers survive over zorder=4 fast-route contours, so a reader sees one field where the caption promises two.",
+    "table_form": "pass: the panel is a poloidal line-contour map of poloidal flux with the wall and both null sets, which is spatial information and not something naturally a table."
+  },
+  "section": "3",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:22:16.508682+00:00",
+  "total": null
+}

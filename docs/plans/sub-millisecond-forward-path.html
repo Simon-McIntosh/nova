@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="234">
+<meta name="plan-version" content="235">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -797,6 +797,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T190115545235-review-of-bank-jacobian-mismatch-1af9c7e75d08" data-who="reckon-build" data-when="2026-11-07T19:18:37.033Z">
     <div class="r-comment-body"><p>review of run r-20261107T152015525295-bank-jacobian-mismatch at 1af9c7e75d082d97b0c681cdfb0e20abae2b45c4: scored 14/6/18/7/15/14 with three blocking findings (a false 1e-6 ceiling claim in the fragment, the certificate-state half of the done-when absent, and a gate log with no EXIT= line whose revision header predates the code that produced it).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T195936049434-review-of-bank-route-rows-2ab0afa314d9" data-who="reckon-build" data-when="2026-11-07T20:21:03.651Z">
+    <div class="r-comment-body"><p>Independent review of the two commits gained since f57db2361: the limited-row oracle ratios and residual floor reconcile exactly against results/limited-oracle.log, with one blocking finding (the fragment&#x27;s &quot;60-segment wall&quot; justification for the boundary miss is wrong: the compared wall is limiter_contour&#x27;s 121 points and the neighbouring wall node is 0.0189 Wb away) and three non-blocking findings (duplicated archive block in the new driver, the missing limited 550-cell panel, and the residual-floor wording).</p></div>
 </div>
 </section>
 </main>

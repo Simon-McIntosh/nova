@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:3380 (_render_panel from the run subcommand)",
+    "benchmarks/coil_edit_latency.py:3789 (_render_panel from the panel subcommand)",
+    "benchmarks/coil_edit_latency.py:3800 (_merge_receipt at the panel receipt write)",
+    "benchmarks/coil_edit_latency.py:2663 (_label_defects inside _render_panel)",
+    "nova/media/poloidal.py:draw_nulls (reached unchanged via _draw_null_set at benchmarks/coil_edit_latency.py:2105)"
+  ],
+  "completed_at": "2026-11-07T23:24:57.333Z",
+  "dispatched_at": "2026-11-07T22:56:29Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "17",
+      "severity": "blocking",
+      "text": "blocking: after_suite and the checkpoint record the head suite arm as run \"at c47e5090e\", but h200-head-arm.log:6 records SOURCE_REVISION=b22b7868571497d8ebe28f7896870a7da1873131, and c47e5090e was committed at 22:25:19 while that arm ran 22:14:10-22:29:56, so the arm collected before the last code commit landed."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "line": "86",
+      "severity": "non-blocking",
+      "text": "non-blocking: measurement_log_note states the cited log's render block names this job, this log and this figure, but typography-redraw-titan.log is 250 bytes of PREPARED/RENDERED/PUBLISHED lines with no render block and no label counts, and the receipt still carries schema nova.coil-edit-panel-receipt rather than nova.coil-edit-panel-render, so the 0/0 counts remain the copied values the brief asked to replace with a measurement."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "2454",
+      "severity": "non-blocking",
+      "text": "non-blocking: _merge_receipt carries no assertion; the only test that writes a receipt targets a fresh tmp path where the function returns the record unchanged, so a regression to a plain overwrite would stay green, and its one-level dict merge nests the previous render block as render.superseded.superseded, now visible in the committed receipt."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "650",
+      "severity": "non-blocking",
+      "text": "non-blocking: the title assertions compare the drawn title against the circuit_context the test itself supplied, so they redden only on the rendering transform; the population they depend on is guarded separately by the inspect.getsource assertion on _prepare_case at tests/test_coil_edit_panel_render.py:660."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to re-render the coil-edit panels and make every embedding caption describe them; benchmarks/coil_edit_latency.py:2660 titles each panel \"edit 12  P4-UPPER circuit 8 current +6% of the seed ... 3 active-set iterations\" at 14 pt, benchmarks/coil_edit_latency.py:2247 draws the reference nulls 1.8x and beneath the solved ones, and the committed PNG at docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png shows both defined titles, the eight-entry frameless legend, the oversized blue reference markers visible around the filled orange ones at each axis and saddle, and the drawn wall.\nVERDICT done_when: clause 1 is met (titles defined at benchmarks/coil_edit_latency.py:2306, nulls separated at :2115, caption persisted at :3800); clause 2 is met (the page caption at docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:187 and the five archive figcaptions at docs/evidence/archive/forward-solve-api-landed.html:331,431,498,699,910 all quote edit 12 at 5.730e-09 Wb and edit 9 at 6.612e-03 Wb with three active-set iterations, and every number reconciles with display_map in the receipt); clause 3 is only partly met because the head suite arm gated b22b78685 rather than the delivered revision.\nVERDICT write_paths: the five declared paths are benchmarks/coil_edit_latency.py, docs/figures/forward-solve-api/coil-edit-nonconvergence/, docs/evidence/archive/forward-solve-api-landed.html, docs/figures/single-grid-solver-cutover/panel-receipt.json and tests/test_coil_edit_panel_render.py; all nine files changed between fb6f1726a and 915189466 lie inside them and nova/media carries no net change.\nVERDICT manifest: read; status complete, twelve commits 792beb13d..915189466, after_suite job 1308091 11 collected 11 passed and baseline_suite job 1308098 7 collected 7 passed, added-failure count 0, negative control mutation-control-aca80277e.log 3 failed EXIT=1, one rubric line per dimension, though its head-arm revision claim is contradicted by h200-head-arm.log:6.\nVERDICT diff: read all twelve commits against fb6f1726a; the code commits add _null_style and BENEATH_NULL_SCALE at benchmarks/coil_edit_latency.py:2115, _edit_quantity_note at :2306, the furniture filter in _label_defects at :2406, _merge_receipt at :2454, the figure legend at :2528 and the four tests at tests/test_coil_edit_panel_render.py:610; the docs commits splice five archive figcaptions and rewrite the page caption; the last two commits carry only the redraw's PNG, SVG and receipt.\nCALL_SITES: benchmarks/coil_edit_latency.py:3380 (_render_panel from the run subcommand), benchmarks/coil_edit_latency.py:3789 (_render_panel from the panel subcommand), benchmarks/coil_edit_latency.py:3800 (_merge_receipt at the panel receipt write), benchmarks/coil_edit_latency.py:2663 (_label_defects inside _render_panel), nova/media/poloidal.py:draw_nulls (reached unchanged via _draw_null_set at benchmarks/coil_edit_latency.py:2105)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the committed PNG and panel-receipt.json carry the defined titles, the two separated null sets and a caption whose every quoted number matches display_map, though the single-grid receipt's label counts remain copied rather than measured.\nSCORE evidence: 13\nJUSTIFICATION evidence: h200-base-arm.log and h200-head-arm.log record 7 passed and 11 passed with zero failures, but h200-head-arm.log:6 shows SOURCE_REVISION=b22b78685, so the manifest's claim that the head arm ran at c47e5090e is wrong and the delivered renderer was never suite-gated; I re-ran the four added tests at 915189466 myself (4 passed, review-added-tests.log plus review-label-test.log).\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every file changed between fb6f1726a and 915189466 is inside the five declared write paths, and the archive splice deletes 14 lines at docs/evidence/archive/forward-solve-api-landed.html, all of them figure or figcaption text.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:625 reddens on a mutation that flattens the reference marker size or inverts the zorder and :610 reddens on forced overlap, both shown by mutation-control-aca80277e.log, but the new _merge_receipt at benchmarks/coil_edit_latency.py:2454 has no failing condition on record.\nSCORE fit: 18\nJUSTIFICATION fit: the added constants and private helpers at benchmarks/coil_edit_latency.py:2112-2144 follow the file's named-constant and leading-underscore idiom and carry no plan, ticket, version or author reference.\nSCORE reuse: 16\nJUSTIFICATION reuse: _null_style at benchmarks/coil_edit_latency.py:2115 extends DEFAULT_INK.variant and the furniture filter extends the existing _label_defects at :2401, while no owner for receipt merging exists in nova/ or benchmarks/; the test's _measure_labels at tests/test_coil_edit_panel_render.py:560 near-restates _label_defects deliberately, as an independent oracle.\nFINDING manifest.md:17 blocking: after_suite and the checkpoint record the head suite arm as run \"at c47e5090e\", but h200-head-arm.log:6 records SOURCE_REVISION=b22b7868571497d8ebe28f7896870a7da1873131, and c47e5090e was committed at 22:25:19 while that arm ran 22:14:10-22:29:56, so the arm collected before the last code commit landed.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:86 non-blocking: measurement_log_note states the cited log's render block names this job, this log and this figure, but typography-redraw-titan.log is 250 bytes of PREPARED/RENDERED/PUBLISHED lines with no render block and no label counts, and the receipt still carries schema nova.coil-edit-panel-receipt rather than nova.coil-edit-panel-render, so the 0/0 counts remain the copied values the brief asked to replace with a measurement.\nFINDING benchmarks/coil_edit_latency.py:2454 non-blocking: _merge_receipt carries no assertion; the only test that writes a receipt targets a fresh tmp path where the function returns the record unchanged, so a regression to a plain overwrite would stay green, and its one-level dict merge nests the previous render block as render.superseded.superseded, now visible in the committed receipt.\nFINDING tests/test_coil_edit_panel_render.py:650 non-blocking: the title assertions compare the drawn title against the circuit_context the test itself supplied, so they redden only on the rendering transform; the population they depend on is guarded separately by the inspect.getsource assertion on _prepare_case at tests/test_coil_edit_panel_render.py:660.",
+  "review_run_id": "r-20261107T220241316580-review-of-coil-edit-panel-captions-915189466a5a",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "915189466a5ab0291396f18815cdf5a3e1fdc1f0",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T23:37:50.205137+00:00",
+  "total": 96
+}

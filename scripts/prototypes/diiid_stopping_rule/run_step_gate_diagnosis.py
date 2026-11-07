@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -25,15 +26,34 @@ def main() -> None:
     steps = [
         (
             "179_limited",
-            [str(diagnosis), "--frame", "179", "--branch", "limited", "--trips", "2"],
+            [
+                sys.executable,
+                str(diagnosis),
+                "--frame",
+                "179",
+                "--branch",
+                "limited",
+                "--trips",
+                "2",
+            ],
         ),
         (
             "44_limited",
-            [str(diagnosis), "--frame", "44", "--branch", "limited", "--trips", "2"],
+            [
+                sys.executable,
+                str(diagnosis),
+                "--frame",
+                "44",
+                "--branch",
+                "limited",
+                "--trips",
+                "2",
+            ],
         ),
         (
             "146_diverted",
             [
+                sys.executable,
                 str(probe),
                 "--frames",
                 "146",

@@ -351,6 +351,70 @@ def test_dense_newton_step_solves_scaled_residual(monkeypatch):
     assert bool(step.converged)
 
 
+def test_matrix_free_step_solves_the_same_system(monkeypatch):
+    """The product path reaches the assembled system's update on two cells.
+
+    The operator, its cell blocks and the product are supplied directly, so
+    this pins the product path's plumbing in the default lane: same right-hand
+    side, same stop, and a different preconditioner must not move the update.
+    """
+    cells = 2
+    matrix = jnp.asarray(
+        [
+            [2.0, 0.3, 0.1, 0.05, 0.0, 0.0],
+            [0.2, 3.0, 0.1, 0.0, 0.04, 0.0],
+            [0.0, 0.1, 4.0, 0.0, 0.0, 0.02],
+            [0.03, 0.0, 0.0, 2.5, 0.2, 0.1],
+            [0.0, 0.05, 0.0, 0.1, 3.5, 0.15],
+            [0.0, 0.0, 0.04, 0.0, 0.1, 4.5],
+        ]
+    )
+    moments = tuple(jnp.asarray([1.0, 2.0]) for _ in range(3))
+    residual = tuple(
+        jnp.asarray(values) for values in ([1e-3, 2e-3], [1e-2, 3e-2], [2e-2, 1e-2])
+    )
+    booked = current.Booking(*moments, jnp.asarray(1.0), jnp.asarray(1.0), True)
+    boundaries = (cells, 2 * cells)
+
+    def product(operands, values, direction, *args, **kwargs):
+        return tuple(jnp.split(matrix @ jnp.concatenate(direction), boundaries))
+
+    indices = support_read._cell_block_indices(cells)
+    blocks = matrix[indices[:, :, None], indices[:, None, :]]
+
+    monkeypatch.setattr(
+        support_read,
+        "step_residual",
+        lambda *args: support_read.StepResidual(residual, booked, None, True),
+    )
+    monkeypatch.setattr(support_read, "step_jacobian", lambda *args, **kwargs: matrix)
+    monkeypatch.setattr(support_read, "step_jacobian_vector", product)
+    monkeypatch.setattr(
+        support_read, "_cell_diagonal_blocks", lambda *args, **kwargs: blocks
+    )
+    dense = support_read.newton_step(None, moments, None, None, None, None)
+    free = support_read.newton_step(
+        None, moments, None, None, None, None, matrix_free=True
+    )
+    expected = jnp.concatenate(dense.update)
+    actual = jnp.concatenate(free.update)
+    error = float(jnp.linalg.norm(actual - expected) / jnp.linalg.norm(expected))
+    print(
+        "SMALL_MATRIX_FREE",
+        "relative_error",
+        error,
+        "dense_iterations",
+        int(dense.krylov_iterations),
+        "free_iterations",
+        int(free.krylov_iterations),
+        flush=True,
+    )
+    assert error <= 1e-8
+    assert int(free.krylov_iterations) <= 60
+    assert float(free.krylov_condition * free.krylov_residual) <= 1e-8
+    assert bool(free.converged)
+
+
 @pytest.fixture(scope="module")
 def diverted_linear_states():
     from scripts.prototypes.bank_solve_profile import fixture

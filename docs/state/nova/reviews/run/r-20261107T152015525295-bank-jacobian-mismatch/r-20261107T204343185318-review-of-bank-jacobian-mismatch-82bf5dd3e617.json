@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T21:12:26.946Z",
+  "dispatched_at": "2026-11-07T20:46:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "the headline states the mismatch is between 6e-8 and 6e-7 at the two larger steps in every direction class, but the fragment's own table gives 1.1e-8 and 3.0e-9 in the normal-form class and 2.1e-8 and 1.1e-9 in the saddle class at those steps, so the stated floor sits far above the data it summarizes and contradicts the figure alt text at :153 which gives 1e-9 to 1e-6; the same overgeneralization recurs at :84 for the 1e-7 step, where the normal-form and saddle classes are 8.8e-8 and 9.3e-9. The error is conservative so the accept verdict survives, but the record states a range its own receipt does not support."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_mismatch/run_h200.sh",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "the TERM and INT trap appends the line \"EXIT=130 (terminated by signal before the status line)\", which is not a bare EXIT=<code> line, so on the wall-kill path the trap exists for the gate status is still unreadable to whoever parses the log's last line, and it departs from the sibling convention at scripts/prototypes/bank_warm_start/run_h200.sh:43; the committed log ends in a bare EXIT=0 so this run is unaffected, but the guard the commit added does not do the job it claims."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_mismatch/receipts/mismatch.log",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "the committed gate log's HEADER records devices as [\"cuda:0\"] and no chip name, and the committed receipt carries no device key, so the evidence committed to git cannot show that the measurement ran on a Tesla P100 (titan job 1308060) rather than the H200 the brief requires; a reader holding receipts/ alone cannot tell which."
+    },
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "the tests line names a direct measure.py invocation writing titan2/mismatch.json while the committed gate log the test_logs line points at is job 1308060 writing titan3/mismatch.json through run_h200.sh, so the recorded gate command reproduces neither the committed receipt nor its log header."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to name the Jacobian term that disagrees with the fresh residual at the stalled 1e-2 state, and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:54-107 now measures the certificate state beside the stalled one and concludes no term disagrees, the stall being residual curvature over a unit step.\nVERDICT done_when: the done_when asks for the stalled and certificate states on one H200 with tables and a figure, and the fragment at :60-67 carries both states and scripts/prototypes/bank_jacobian_mismatch/receipts/mismatch.log:12-13 records both STATE lines, but the committed HEADER names no device and the manifest's evidence_inputs says the run was a Tesla P100.\nVERDICT write_paths: the manifest declares three paths (scripts/prototypes/bank_jacobian_mismatch, the fragment, docs/figures/sub-millisecond-forward-path/bank-jacobian-mismatch) and all five changed files sit inside them.\nVERDICT manifest: read; status is complete with all three blocking findings from the prior review listed as acted, and it concedes the negative control was not run because two of the answers are GPU measurements that could not be re-taken in the repair window.\nVERDICT diff: read all four commits 1af9c7e75..82bf5dd3e; they add the driver sha256 and tree-dirty header plus a TERM trap to run_h200.sh, the two-state table and the corrected range to the fragment, the regenerated figure, and the committed receipt and gate log, with no product code and no test touched.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: fragment:89-107 switches only the booking sensitivity and the moving-geometry term of the six the brief names to their own difference, so the goal is answered by exclusion rather than by the requested per-term split.\nSCORE evidence: 15\nJUSTIFICATION evidence: all 36 cells of the table at fragment:60-67 reproduce from the committed receipt's per-class medians and the driver sha256 at mismatch.log:4 matches measure.py at 197974d3c, yet the headline at fragment:13 states a range its own table contradicts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the four commits touch exactly the five files inside the three declared write paths, and nothing under nova/ or tests/.\nSCORE durability: 10\nJUSTIFICATION durability: the only guard is measure.py:145's positive control, which builds its quotient inline from matrix @ plus minus matrix @ minus and so cannot redden on a regression in the fresh_cd path at measure.py:250.\nSCORE fit: 15\nJUSTIFICATION fit: run_h200.sh:21-22 extends the sibling header convention at scripts/prototypes/bank_warm_start/run_h200.sh:16, but the trap at run_h200.sh:26 writes a status line that is not bare.\nSCORE reuse: 17\nJUSTIFICATION reuse: the only added code is the launcher header and trap at run_h200.sh:21-26, which follows the existing prototype-launcher convention, while measure.py's central-difference plumbing duplicates scripts/prototypes/bank_newton_converge/directional.py only in code that predates this increment.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:13 non-blocking: the headline states the mismatch is between 6e-8 and 6e-7 at the two larger steps in every direction class, but the fragment's own table gives 1.1e-8 and 3.0e-9 in the normal-form class and 2.1e-8 and 1.1e-9 in the saddle class at those steps, so the stated floor sits far above the data it summarizes and contradicts the figure alt text at :153 which gives 1e-9 to 1e-6; the same overgeneralization recurs at :84 for the 1e-7 step, where the normal-form and saddle classes are 8.8e-8 and 9.3e-9. The error is conservative so the accept verdict survives, but the record states a range its own receipt does not support.\nFINDING scripts/prototypes/bank_jacobian_mismatch/run_h200.sh:26 non-blocking: the TERM and INT trap appends the line \"EXIT=130 (terminated by signal before the status line)\", which is not a bare EXIT=<code> line, so on the wall-kill path the trap exists for the gate status is still unreadable to whoever parses the log's last line, and it departs from the sibling convention at scripts/prototypes/bank_warm_start/run_h200.sh:43; the committed log ends in a bare EXIT=0 so this run is unaffected, but the guard the commit added does not do the job it claims.\nFINDING scripts/prototypes/bank_jacobian_mismatch/receipts/mismatch.log:6 non-blocking: the committed gate log's HEADER records devices as [\"cuda:0\"] and no chip name, and the committed receipt carries no device key, so the evidence committed to git cannot show that the measurement ran on a Tesla P100 (titan job 1308060) rather than the H200 the brief requires; a reader holding receipts/ alone cannot tell which.\nFINDING manifest.md:11 non-blocking: the tests line names a direct measure.py invocation writing titan2/mismatch.json while the committed gate log the test_logs line points at is job 1308060 writing titan3/mismatch.json through run_h200.sh, so the recorded gate command reproduces neither the committed receipt nor its log header.\n",
+  "review_run_id": "r-20261107T204343185318-review-of-bank-jacobian-mismatch-82bf5dd3e617",
+  "reviewed_base_sha": "1af9c7e75d082d97b0c681cdfb0e20abae2b45c4",
+  "reviewed_head_sha": "82bf5dd3e617f7e9b4b3ca47e55127bdfcded119",
+  "reviewed_run_id": "r-20261107T152015525295-bank-jacobian-mismatch",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:22:03.959880+00:00",
+  "total": 91
+}

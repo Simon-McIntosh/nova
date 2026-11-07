@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="241">
-<meta name="plan-modified" content="2026-11-07">
+<meta name="plan-version" content="242">
+<meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
   <main class="plan-doc">
@@ -817,7 +817,10 @@
     <div class="r-comment-body"><p>figure review of r-20261107T111124792754-bank-jacobian-assembly at b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2 is recorded as parsed with all six rubric items, but it is a null visual review: the run committed only an SVG and no rendered PNG exists or was named, so no reader-facing visual verdict could be formed and a re-dispatch with the rendered PNG is required for a real one.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T155315425239-review-of-bank-warm-stall-22ca7d05a9ab-figure" data-who="reckon-build" data-when="2026-11-07T16:16:48.584Z">
-    <div class="r-comment-body"><p>figure review of run r-20261107T133413665344-bank-warm-stall at head 22ca7d05a9ab — the record is at review-records/r-20261107T133413665344-bank-warm-stall.figure.json (and its at-sha copy). Verdict: parsed, one blocking finding (the cold arm is hidden under the warm arm for updates 0-9) and three non-blocking findings (a ten-decade ordinate leaving ~92 percent of the panel empty, a caption that describes only the warm arm&#x27;s first ten updates, and a plot.py that reads a key the committed record does not carry).</p></div>
+    <div class="r-comment-body"><p>figure review of run r-20261107T133413665344-bank-warm-stall at head 22ca7d05a9ab — the record is at review-records/r-20261107T133413665344-bank-warm-stall.figure.json (and its at-sha copy). Verdict: parsed, one blocking finding (the cold arm is hidden under the warm arm for updates 0-9) and three non-blocking findings (a ten-decade ordinate leaving ~92 percent of the panel empty, a caption that describes only the warm arm's first ten updates, and a plot.py that reads a key the committed record does not carry).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T200251907606-review-of-bank-route-rows-2ab0afa314d9-figure" data-who="reckon-build" data-when="2026-11-07T20:22:14.417Z">
+    <div class="r-comment-body"><p>the diverted 550-cell panel passes data_ink, decoration, contrast, table_form and label_collision, but blocks on legibility because the analytic-oracle contour set is drawn under the fast-route contours on the same nine levels and survives only as 706 grey fragments against 18,539 blue pixels, so the picture shows one field where the caption promises two; the delivered PNG also predates the caption fix at head and still reads &quot;boundary 2.59e-05 a&quot; where the head script emits &quot;span&quot;</p></div>
 </div>
 </section>
 </main>

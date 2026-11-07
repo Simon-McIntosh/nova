@@ -11,6 +11,7 @@ import argparse
 import concurrent.futures
 import json
 import os
+import re
 from pathlib import Path
 import shlex
 import subprocess
@@ -44,10 +45,11 @@ def _run(name, command, env, root, log_path, scratch):
         log.write(f"EXIT={result.returncode}\n")
     rows = {}
     for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
-        stripped = line.strip()
-        if stripped.startswith(("PASSED ", "FAILED ", "ERROR ")):
-            status, rest = stripped.split(" ", 1)
-            rows[rest.split(" ")[0]] = status.lower()
+        match = re.match(
+            r"^(tests/\S+::\S+) (PASSED|FAILED|ERROR|SKIPPED)\b", line.strip()
+        )
+        if match:
+            rows[match.group(1)] = match.group(2).lower()
     return name, {
         "command": shlex.join(command),
         "exit_status": result.returncode,

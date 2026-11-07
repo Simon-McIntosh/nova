@@ -12,3 +12,10 @@ review:
       - bash
       - scripts/nova_lane/standing_suite.sh
     budget: 3h
+# The paired suite each worker runs at its base and at its head, scoped to the
+# node's own test files. The lander lands a complete, reviewed run only when
+# the head arm adds no failure over the base arm. The interpreter is named
+# directly because compute nodes cannot invoke uv, and the CPU pin makes both
+# arms the same numerical measurement wherever they run.
+gates:
+  suite_command: "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q {node_test_files}"

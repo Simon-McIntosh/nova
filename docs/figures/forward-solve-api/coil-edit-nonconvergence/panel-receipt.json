@@ -21,7 +21,7 @@
         "max_solved_node_mismatch_wb": 7.468330148752145e-09,
         "nearest_promoted_to_xpoint_m": 0.05621806020455789,
         "promoted_node_count": 46,
-        "reproduction_relative_error": 6.780338952939717e-12,
+        "reproduction_relative_error": 6.780338952939716e-12,
         "saddle_converged": true,
         "spacing_m": 0.01
       },
@@ -30,7 +30,7 @@
         "max_solved_node_mismatch_wb": 0.0006432119436612788,
         "nearest_promoted_to_xpoint_m": 2.4511931712191113,
         "promoted_node_count": 25,
-        "reproduction_relative_error": 7.1967910519175814e-12,
+        "reproduction_relative_error": 7.1967014727409325e-12,
         "saddle_converged": true,
         "spacing_m": 0.01
       }
@@ -48,7 +48,7 @@
     "command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --receipt docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
     "device": "NVIDIA H200 NVL",
     "host": "98dci4-gpu-0003.iter.org",
-    "job_id": "1308065",
+    "job_id": "1308093",
     "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/render-panel-h200.log",
     "partition": "betelgeuse",
     "platform": "gpu",
@@ -58,20 +58,34 @@
     "read_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
     "receipt": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
     "superseded": {
-      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography_redraw.py",
-      "copied_from": null,
+      "command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --receipt docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
       "device": "NVIDIA H200 NVL",
       "host": "98dci4-gpu-0003.iter.org",
-      "job_id": "1306658",
-      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-redraw.log",
+      "job_id": "1308065",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/render-panel-h200.log",
       "partition": "betelgeuse",
       "platform": "gpu",
-      "published_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
       "published_figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+      "published_vector": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.svg",
       "read_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
       "read_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
-      "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
-      "source_revision": "5fb1848fd91ce376ebca8ab25139793cb65ecc4f"
+      "receipt": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json",
+      "superseded": {
+        "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography_redraw.py",
+        "copied_from": null,
+        "device": "NVIDIA H200 NVL",
+        "host": "98dci4-gpu-0003.iter.org",
+        "job_id": "1306658",
+        "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/typography-redraw.log",
+        "partition": "betelgeuse",
+        "platform": "gpu",
+        "published_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        "published_figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+        "read_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+        "read_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+        "receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T160605201635-coil-edit-panels-on-solve-currents/render-h200.json",
+        "source_revision": "5fb1848fd91ce376ebca8ab25139793cb65ecc4f"
+      }
     }
   },
   "runtime": {
@@ -83,7 +97,7 @@
   "scheduler": {
     "accepted_time_limit": "00:40:00",
     "cpus_per_task": "8",
-    "job_id": "1308065",
+    "job_id": "1308093",
     "job_name": "coil-edit-panel-render",
     "node": "98dci4-gpu-0003.iter.org",
     "partition": "betelgeuse",

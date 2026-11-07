@@ -497,3 +497,142 @@ def test_committed_converged_panel_uses_its_terminal_currents():
         )
         <= 1.0e-12
     )
+
+
+PANEL_ARCHIVE = Path(
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+)
+
+#: The colours the panel paints its two null sets in.
+REFERENCE_NULL_COLOR = "#3366cc"
+SOLVED_NULL_COLOR = "#cc7722"
+
+
+def _render_capturing(
+    tmp_path: Path, monkeypatch: Any, **kwargs: Any
+) -> tuple[Any, Any]:
+    """Render the panel and keep the figure the save-time check measured.
+
+    ``_render_panel`` closes its figure after saving, so the artists are only
+    reachable from inside the label check. Wrapping that check captures the
+    drawn figure without changing what is measured.
+    """
+    import benchmarks.coil_edit_latency as renderer
+
+    captured: dict[str, Any] = {}
+    measured = renderer._label_defects
+
+    def capture(figure: Any) -> dict[str, int]:
+        counts = measured(figure)
+        captured["figure"] = figure
+        captured["counts"] = counts
+        return counts
+
+    monkeypatch.setattr(renderer, "_label_defects", capture)
+    panel = _render_panel(PANEL_ARCHIVE, tmp_path / "panel.png", **kwargs)
+    return panel, captured
+
+
+def _null_markers(figure: Any, color: str) -> list[Any]:
+    """Return the drawn marker artists of one null set."""
+    from matplotlib.colors import to_hex
+
+    found = []
+    for axis in figure.axes:
+        for artist in axis.get_children():
+            if not hasattr(artist, "get_marker"):
+                continue
+            if artist.get_marker() not in ("^", "X"):
+                continue
+            if to_hex(artist.get_color()).lower() != color.lower():
+                continue
+            found.append(artist)
+    return found
+
+
+def test_a_rendered_panel_measures_no_clipped_or_overlapping_labels(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The published label counts are a measurement of the drawn panel."""
+    panel, captured = _render_capturing(tmp_path, monkeypatch)
+    assert captured["counts"] == {"clipped_labels": 0, "overlapping_labels": 0}
+    assert panel["visual_inspection"] == captured["counts"]
+
+
+def test_a_coincident_reference_null_stays_visible_under_the_solved_one(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The reference marker is hollow, larger and drawn beneath the solved one.
+
+    At the magnetic axis the two sets sit within a few centimetres, so two
+    filled markers at one point read as whichever was painted last. An unfilled
+    outline at a larger size keeps the lower set visible inside the upper one.
+    """
+    from matplotlib.colors import to_rgba
+
+    _, captured = _render_capturing(tmp_path, monkeypatch)
+    figure = captured["figure"]
+    reference = _null_markers(figure, REFERENCE_NULL_COLOR)
+    solved = _null_markers(figure, SOLVED_NULL_COLOR)
+    assert reference and solved, "both null sets must be drawn"
+
+    for artist in reference:
+        assert to_rgba(artist.get_markerfacecolor())[3] == 0.0, (
+            "a filled reference marker hides the set beneath it"
+        )
+    assert max(a.get_markersize() for a in reference) > max(
+        a.get_markersize() for a in solved
+    )
+    reference_axes = [a for a in reference if a.get_marker() == "^"]
+    solved_axes = [a for a in solved if a.get_marker() == "^"]
+    assert reference_axes and solved_axes, "neither set drew its magnetic axis"
+    assert reference_axes[0].get_zorder() < solved_axes[0].get_zorder()
+
+
+def test_the_panel_title_defines_its_percentage_and_its_trips(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """A bare percentage and a bare trip count leave both quantities undefined."""
+    _, captured = _render_capturing(
+        tmp_path,
+        monkeypatch,
+        circuit_context={"family": "p4_upper", "circuit": 8, "group": "g", "row": {}},
+    )
+    titles = [axis.get_title() for axis in captured["figure"].axes]
+    assert titles
+    for title in titles:
+        assert "P4-UPPER circuit 8 current" in title
+        assert "of the seed" in title
+        assert "active-set iterations" in title
+
+
+def test_the_panel_subcommand_persists_its_caption(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The receipt the panel path writes carries the caption it measured."""
+    import sys
+
+    import benchmarks.coil_edit_latency as renderer
+
+    receipt = tmp_path / "panel-receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "coil_edit_latency.py",
+            "panel",
+            "--panel-data",
+            str(PANEL_ARCHIVE),
+            "--panel-figure",
+            str(tmp_path / "panel.png"),
+            "--receipt",
+            str(receipt),
+        ],
+    )
+    renderer.main()
+    written = json.loads(receipt.read_text())
+    assert written["caption"].strip()
+    assert written["visual_inspection"] == {
+        "clipped_labels": 0,
+        "overlapping_labels": 0,
+    }

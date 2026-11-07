@@ -761,7 +761,12 @@ def _prepare_case(
         },
         "reference": case["reference"],
         "policy": policy,
-        "circuit_context": {"group": context["group"], "row": context["row"]},
+        "circuit_context": {
+            "group": context["group"],
+            "row": context["row"],
+            "family": selected_coil["family"],
+            "circuit": circuit_index,
+        },
     }
     return profile, prepared, carrier
 
@@ -2100,6 +2105,25 @@ def _draw_null_set(
     )
 
 
+def _hollow_markers(axis: Any, first_child: int, scale: float = 1.7) -> None:
+    """Leave the markers ``draw_nulls`` just appended unfilled and oversized.
+
+    ``draw_nulls`` fills both the magnetic-axis marker and the admitted saddle
+    in the series colour, so a second set drawn at the same point hides the
+    first wherever they coincide. An unfilled outline at a larger size keeps
+    the set beneath visible inside it. Only the artists added since
+    ``first_child`` are touched, and only marker artists.
+    """
+    for artist in axis.lines[first_child:]:
+        if not hasattr(artist, "set_markerfacecolor"):
+            continue
+        if artist.get_marker() in (None, "", "None", " "):
+            continue
+        artist.set_markerfacecolor("none")
+        artist.set_markersize(artist.get_markersize() * scale)
+        artist.set_markeredgewidth(max(float(artist.get_markeredgewidth()), 1.7))
+
+
 def _set_zorder(axis: Any, first_child: int, zorder: int) -> None:
     """Set ``zorder`` on the artists ``draw_nulls`` added to ``axis``.
 
@@ -2109,7 +2133,7 @@ def _set_zorder(axis: Any, first_child: int, zorder: int) -> None:
     shared marker is read as the reference rather than as whichever set
     happened to be painted second.
     """
-    for artist in axis.get_children()[first_child:]:
+    for artist in axis.lines[first_child:]:
         if hasattr(artist, "set_zorder"):
             artist.set_zorder(zorder)
 
@@ -2178,17 +2202,11 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         and 0 <= saddle_index < len(drawn_xpoints)
     ):
         drawn_xpoints[saddle_index] = display.saddle_rz
-    solved_first = len(axis.get_children())
-    _draw_null_set(
-        axis,
-        panel["axis"],
-        drawn_xpoints,
-        saddle_index,
-        "#cc7722",
-        loaded["wall"],
-    )
-    _set_zorder(axis, solved_first, 6)
-    reference_first = len(axis.get_children())
+    # The reference set is drawn first, hollow and slightly oversized, so the
+    # filled solved marker sits inside its outline where the two coincide. Two
+    # filled sets at one point read as whichever was painted last, and the
+    # caption promises both.
+    reference_first = len(axis.lines)
     _draw_null_set(
         axis,
         loaded["reference_axis"],
@@ -2197,7 +2215,18 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
         "#3366cc",
         loaded["wall"],
     )
-    _set_zorder(axis, reference_first, 7)
+    _hollow_markers(axis, reference_first)
+    _set_zorder(axis, reference_first, 6)
+    solved_first = len(axis.lines)
+    _draw_null_set(
+        axis,
+        panel["axis"],
+        drawn_xpoints,
+        saddle_index,
+        "#cc7722",
+        loaded["wall"],
+    )
+    _set_zorder(axis, solved_first, 7)
     poloidal_axes(axis)
 
 
@@ -2238,6 +2267,19 @@ def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
         "branches_drawn": dict(panel.get("branches_drawn", {})),
         "branches": _branch_terms(panel.get("branches")),
     }
+
+
+def _edit_quantity_note(circuit_context: dict[str, Any] | None) -> str:
+    """Name the current an edit scales, so a title's percentage has a base."""
+    if not circuit_context:
+        return "boundary-circuit current"
+    family = str(circuit_context.get("family") or "").replace("_", "-").upper()
+    circuit = circuit_context.get("circuit")
+    if family and circuit is not None:
+        return "%s circuit %d current" % (family, int(circuit))
+    if family:
+        return "%s circuit current" % family
+    return "boundary-circuit current"
 
 
 def _saddle_note(x_points: Any, saddle_index: int) -> str:
@@ -2335,8 +2377,25 @@ def _label_defects(figure: Any) -> dict[str, int]:
     canvas = figure.bbox
     boxes = []
     clipped = 0
+    # A poloidal panel is drawn with its axis off, and its tick and axis labels
+    # stay attached to the axes as visible artists while carrying no ink. Their
+    # Text objects are not reachable through ``Text.axes``, so the furniture is
+    # collected from each axis that is switched off and matched by identity.
+    furniture: set[int] = set()
+    for axis in figure.axes:
+        if axis.axison:
+            continue
+        for label in (
+            *axis.get_xticklabels(),
+            *axis.get_yticklabels(),
+            axis.xaxis.label,
+            axis.yaxis.label,
+        ):
+            furniture.add(id(label))
     for text in figure.findobj(matplotlib.text.Text):
         if not text.get_visible() or not text.get_text().strip():
+            continue
+        if id(text) in furniture:
             continue
         box = text.get_window_extent(renderer)
         if box.width <= 0.0 or box.height <= 0.0:
@@ -2397,15 +2456,17 @@ def _render_panel(
         panel = loaded[label]
         _paint_panel(axis, loaded, panel)
         axis.set_title(
-            "edit %d  fraction %+d%%  %s\nresidual %.3e Wb  %d active-set trips"
+            "edit %d  %s %+d%% of the seed  %s\n"
+            "residual %.3e Wb  %d active-set iterations"
             % (
                 panel["edit_index"],
+                _edit_quantity_note(circuit_context),
                 round(100.0 * panel["fraction"]),
                 "converged" if panel["converged"] else "not converged",
                 panel["residual"],
                 panel["trips"],
             ),
-            fontsize=20,
+            fontsize=14,
         )
 
     reference_note = _saddle_note(
@@ -2434,7 +2495,9 @@ def _render_panel(
         "vertical current-centre row %s  |  reference is the unedited "
         "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
         "solved sets orange: %s, admitted %s %s in the converged panel "
-        "and %s %s in the failed panel  |  other qualified nulls hollow  |  "
+        "and %s %s in the failed panel  |  the reference nulls are hollow and "
+        "drawn beneath the filled solved nulls, so a coincident axis or saddle "
+        "reads as both  |  other qualified nulls hollow in both sets  |  "
         "wall drawn"
         % (
             loaded["reference_axis_flux"],

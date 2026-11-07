@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T19:10:09.923Z",
+  "dispatched_at": "2026-11-07T18:54:38Z",
+  "findings": [
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": "243",
+      "severity": "non-blocking",
+      "text": "no assertion distinguishes the closed route from the routed one: both new parametrisations compare values only, and replacing _sloped_field_closed's body with _sloped_field's leaves the gate green at 285 passed, because the two routes agree to 1e-10 by design; the node's deliverable is not the agreement but the closed evaluation of R, so guard it by making SheetFlux._root_term or _azimuth_rule raise and requiring closed=True to still return the reference values."
+    },
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": "254",
+      "severity": "non-blocking",
+      "text": "the agreement assertion is circular for the A term: sheet.py:509 and :416 both call _arsinh_gradient, so the comparison can only detect a discrepancy in the R block, while the fragment at docs/evidence/fragments/iron-core-magnetisation/icm-closed-field.html presents the end-by-end triple agreement as the evidence that the split is right; say in the test's docstring that A is shared by construction so the agreement is R's alone."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "520",
+      "severity": "non-blocking",
+      "text": "_closed_gradient re-imports jax and jax.numpy at :520 and :526 although both are already bound at module scope (:520 imports jax and .numpy as jnp at :66-67); only nova.jax.config has an import-cycle reason to be local, so the other two lines are noise that reads as if the module could be imported without jax."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "108",
+      "severity": "non-blocking",
+      "text": "_complete_kind_traced is a jax-differentiability adapter for nova.biot.completeelliptic.complete_kind placed in sheet.py rather than beside its owner, so a second consumer needing a traced complete kind must either import it from a private name in an unrelated module or fork it; move it to completeelliptic.py next to complete_kind and _complete_kind_tangent."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "593",
+      "severity": "non-blocking",
+      "text": "closed=True is silently ignored on a flat sheet because the flat branch is tested first; a caller using the flag as an independent check on a flat conic gets the graded route back with no indication, so either refuse the combination or document it in field()'s docstring."
+    },
+    {
+      "file": "nova/biot/sheet.py",
+      "line": "524",
+      "severity": "non-blocking",
+      "text": "each closed evaluation calls configure_dtypes and runs jax.value_and_grad over an un-jitted descent, costing about 1.2 s per field evaluation against the routed route's tens of milliseconds, which is what took the gate from 6.7 s to 97.9 s; acceptable for a verification route but it makes closed=True unusable for anything but spot checks, so record the cost beside the flag."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112011334527-icm-closed-field/gate-final.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112011334527-icm-closed-field/regression-existing.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112011334527-icm-closed-field/negative-control.log"
+  },
+  "item_verdicts": {
+    "diff": "read commit by commit from e64fafe02 to b7de63499: two wip commits build and then a feat commit converges the closed-form path (20ee343c9), with three docs commits recording the diagnosis and one commit recording the landed result; the net change is +182/-41 in sheet.py, +39 in tests, and the fragment.",
+    "done_when": "the done_when asks for B_R and B_Z within 1e-10 of the reference over the twelve fixed targets at pi/8, pi/4 and 3pi/8 and agreement with the semi-analytic field to 1e-10; tests/test_edge_sheet.py:49 SLOPED_PARAMS is 3 slopes x 4 distances x 3 stations = 12 targets per slope, and :243 / :254 assert exactly that measure at the gate's log.",
+    "goal": "the node goal asks for the sloped field H_l of Part II (eqs 19 and 23a) in closed form beside the landed semi-analytic field; sheet.py:509-570 lands it as a new evaluation path with closed=True on field() and sheet_field(), and the landed route is left intact rather than replaced.",
+    "manifest": "read; it names the seven commits, records the gate as 285 passed EXIT=0, the baseline arm as 213 passed, the declared mutation and its red log at negative-control.log, and names the gate-final.log on disk.",
+    "write_paths": "the reviewed manifest declares nova/biot/sheet.py, tests/test_edge_sheet.py, docs/evidence/fragments/.../icm-closed-field.html and the figures directory; every path in the diff is inside that set and the untouched figures path carries no requirement this node's goal implies"
+  },
+  "justifications": {
+    "durability": "tests/test_edge_sheet.py:243 and :254 both redden under the declared sign flip (negative-control.log, 72 failed EXIT=1), but neither can redden if the closed route is replaced by the routed one, so the 'closed form' property the node exists to deliver has no guard.",
+    "evidence": "gate-final.log ends '285 passed' EXIT=0 at revision 20ee343c9, whose sheet.py is byte-identical to the reviewed head, and regression-existing.log ends '213 passed' EXIT=0; the per-slope worst errors quoted in the fragment are recorded verbatim in probe/field2.log.",
+    "fit": "nova/biot/sheet.py:520-526 re-imports jax and jax.numpy already bound at :66-67, and :552 repeats the ends tuple and MU0 scaling of :484 verbatim, against the module family's practice of a lazy jax import inside the function (nova/biot/greens.py:158).",
+    "goal_fidelity": "nova/biot/sheet.py:552 _sloped_field_closed evaluates the sloped sheet field from the closed-form R block and its own forward-mode tangents, reachable via field(closed=True) at :593 and sheet_field(closed=True) at :707, beside the untouched graded route.",
+    "reuse": "the addition extends the owner: R is formed by completeelliptic.complete_kind and differentiated by completeelliptic._complete_kind_tangent (:589), the same private recurrence nova/biot/elliptic.py:1313 already imports, and no existing jax-differentiable wrapper for the complete kinds exists in the repository.",
+    "scope_discipline": "the diff over e64fafe02..b7de63499 touches only nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-closed-field.html, all inside the declared write paths, and the _divide rewrite is consumed by the reduction at sheet.py:313 rather than left standing."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal asks for the sloped field H_l of Part II (eqs 19 and 23a) in closed form beside the landed semi-analytic field; nova/biot/sheet.py:552 lands _sloped_field_closed with closed=True on field() at :593 and sheet_field() at :707, and the graded route is left intact.\nVERDICT done_when: the done_when asks for B_R and B_Z within 1e-10\n\n5e-10 over the twelve fixed targets at pi/8, pi/4 and 3pi/8; tests/test_edge_sheet.py:49 builds 3 slopes x 4 distances x 3 stations and :243 / :254 assert it, with gate-final.log recording 285 passed EXIT=0.\nVERDICT write_paths: read the manifest's four declared paths; the diff over e64fafe02..b7de63499 touches three files, all inside them, and the fourth is the figures directory the goal does not require.\nVERDICT manifest: read; it names seven commits, the 285-passed gate, the 213-passed baseline arm, the declared sign-flip mutation and its red log, and cites gate-final.log on disk.\nVERDICT diff: read commit by commit; two wip commits build the by-parts route, 20ee343c9 replaces it with the shared arsinh kernel plus elliptic tangents, and three docs commits record the diagnosis and the landed measurement, net +182/-41 in sheet.py.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:552 _sloped_field_closed evaluates the field from the closed-form R block and its own tangents, reachable through field(closed=True) at :593 beside the untouched graded route at :487.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-final.log ends '285 passed' EXIT=0 at revision 20ee343c9, whose sheet.py is byte-identical to the reviewed head, regression-existing.log ends '213 passed' EXIT=0, and probe/field2.log records the per-slope worst errors the fragment quotes.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: the diff touches only nova/biot/sheet.py, tests/test_edge_sheet.py and the evidence fragment, all declared, and the _divide rewrite at :88 is consumed by the reduction at :313 rather than left standing.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_edge_sheet.py:243 and :254 redden under the declared sign flip but neither can redden if _sloped_field_closed at sheet.py:552 is replaced by the routed route, so the closed-form property has no guard.\nSCORE fit: 14\nJUSTIFICATION fit: nova/biot/sheet.py:520-526 re-imports jax and jax.numpy already bound at :66-67, and :552 repeats the ends tuple and MU0 scaling of :484 verbatim.\nSCORE reuse: 17\nJUSTIFICATION reuse: the addition extends the owner, forming R with completeelliptic.complete_kind and differentiating it with completeelliptic._complete_kind_tangent (:589), the recurrence nova/biot/elliptic.py:1313 already imports.\nFINDING tests/test_edge_sheet.py:243 non-blocking: no assertion distinguishes the closed route from the routed one, so replacing the closed body with a copy of _sloped_field leaves the gate green.\nFINDING tests/test_edge_sheet.py:254 non-blocking: the agreement assertion is circular for the shared arsinh remainder, so it can only detect a discrepancy in the R block.\nFINDING nova/biot/sheet.py:520 non-blocking: _closed_gradient re-imports jax and jax.numpy already bound at module scope.\nFINDING nova/biot/sheet.py:108 non-blocking: _complete_kind_traced is a jax adapter for completeelliptic.complete_kind placed away from its owner.\nFINDING nova/biot/sheet.py:593 non-blocking: closed=True is silently ignored on a flat sheet because the flat branch is tested first.\nFINDING nova/biot/sheet.py:524 non-blocking: each closed evaluation calls configure_dtypes and runs an un-jitted value_and_grad, about 1.2 s per field against tens of milliseconds on the routed route.\n",
+  "review_run_id": "r-20261107T185206900262-review-of-icm-closed-field-b7de63499f6e",
+  "reviewed_base_sha": "e64fafe02b9eac809568f52703eaf0f607aa0642",
+  "reviewed_head_sha": "b7de63499f6e55afe099d58d0e362861c640c0ce",
+  "reviewed_run_id": "r-20261107T112011334527-icm-closed-field",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:18:22.285114+00:00",
+  "total": 96
+}

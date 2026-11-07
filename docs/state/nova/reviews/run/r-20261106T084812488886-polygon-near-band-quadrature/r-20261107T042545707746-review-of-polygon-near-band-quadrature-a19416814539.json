@@ -28,6 +28,11 @@
       "kind": "exempted",
       "reason": "prototype runner; the cited measurement is the two fresh-process logs, not this script's single-process form",
       "recorded_at": "2026-11-07T04:41:11.109621+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "a one-sample attribution slip between 3.04 and 3.05 in prose; both samples are over the 3.0 bound and the conclusion is unchanged",
+      "recorded_at": "2026-11-07T04:41:18.717656+00:00"
     }
   },
   "findings": [

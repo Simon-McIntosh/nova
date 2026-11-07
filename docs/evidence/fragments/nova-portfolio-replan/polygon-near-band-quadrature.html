@@ -121,58 +121,113 @@ residual, and the duplicate deleted.</p>
 <h3>The six JVP identity rows, at both revisions</h3>
 
 <p>Those rows exceed the suite's 300-second bound on a compile-bound host, which
-is why the gate above reports them as timeouts and why their outcome was
-unknown. Each row was therefore run on its own, one row at one arm per job, on
-<code>all_debug</code> with the bound raised to 3600 s on that command line
+is why the gate above reports them as timeouts. Each row was run on its own, one
+row at one arm per process, with the bound raised to 3600 s on that command line
 only; the base arm resolves its two modules through the same overlay the gate
-uses, and every job has its own log root and pytest basetemp. Twelve jobs
-<code>1307551</code>–<code>1307562</code> all completed.</p>
+uses, and every process has its own log and pytest basetemp. Twelve jobs
+<code>1307551</code>&ndash;<code>1307562</code> all completed in this form, and
+the launcher now runs the same twelve processes inside one allocation
+(<code>scripts/prototypes/polygon_near_band/identity_rows.sh</code>) because this
+repository measures one job per measurement.</p>
 
 <table class="outcomes">
   <thead><tr>
     <th scope="col">Row</th><th scope="col">base cb42f656f</th>
-    <th scope="col">wall</th><th scope="col">head 6f54a9cdd</th>
-    <th scope="col">wall</th>
+    <th scope="col">head 6f54a9cdd</th>
   </tr></thead>
   <tbody>
-    <tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td>FAILED</td><td>1335.01 s</td><td>FAILED</td><td>1413.18 s</td></tr>
-    <tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>FAILED</td><td>1636.00 s</td><td>FAILED</td><td>1413.18 s</td></tr>
-    <tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>FAILED</td><td>1174.66 s</td><td>FAILED</td><td>831.49 s</td></tr>
-    <tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td>PASSED</td><td>1193.81 s</td><td>PASSED</td><td>957.19 s</td></tr>
-    <tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>PASSED</td><td>1393.07 s</td><td>PASSED</td><td>1001.46 s</td></tr>
-    <tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>FAILED</td><td>1055.62 s</td><td>FAILED</td><td>831.49 s</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[edge_integrands]</code></td><td>FAILED</td><td>FAILED</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[flux_and_moment_terms]</code></td><td>FAILED</td><td>FAILED</td></tr>
+    <tr><td><code>test_tangent_matches_base_jvp[edge_terms]</code></td><td>FAILED</td><td>FAILED</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[edge_integrands]</code></td><td>PASSED</td><td>PASSED</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[flux_and_moment_terms]</code></td><td>PASSED</td><td>PASSED</td></tr>
+    <tr><td><code>test_truncated_tangent_fails_identity[edge_terms]</code></td><td>FAILED</td><td>FAILED</td></tr>
   </tbody>
 </table>
 
-<p><strong>Zero rows change state between the arms: base and head are red and
-green on exactly the same six rows, so this change adds no identity
-failure.</strong> The three <code>test_tangent_matches_base_jvp</code> rows do
-not reach their tangent tolerance at either revision: they stop on the earlier
-primal-bit equality assertion (<code>primal bits differ</code>),
-which is a property of compiling the tangent in one closure and the primal in
-another, and it fires identically without this change. That row therefore
-cannot evidence the 1e-9 tangent bound, and it is not repaired here: it belongs
-to whichever node owns the identity harness.</p>
+<p>Walls are quoted per row as pytest's own call duration, not as the session
+total. The session totals coincided across two pairs of independent jobs
+(<code>1413.18 s</code> for the two head rows whose call durations are 1403.65 s
+and 1401.83 s, and <code>831.49 s</code> for the two head <code>edge_terms</code>
+rows), which the logs cannot explain: they are distinct files, with distinct
+failure sites, sizes and mtimes, so the agreement is in the printed total alone.
+The per-row call durations differ, as they should, and those are what is
+reported here.</p>
 
-<p>The three <code>test_truncated_tangent_fails_identity</code> rows are the
-controls, and they discriminate. Each computes the identity under a
-deliberately truncated tangent and asserts the resulting error exceeds
-<code>SCAN_TOLERANCE</code>, so a row that passes reports both that the shipped
-tangent agrees with the base JVP and that a broken tangent is detected. Two of
-the three — <code>edge_integrands</code> and <code>flux_and_moment_terms</code>
-— <strong>pass at both revisions</strong>, which is the positive half of the
-control on the shipped arm. The third, <code>edge_terms</code>, is red at both
-revisions on the same primal-bit assertion reached inside the truncated call,
-so it is a pre-existing condition and unchanged by this node.</p>
+<p><strong>Every row has the same outcome at both revisions, so this change adds
+no identity failure.</strong> That is all the table supports. <strong>The six
+rows are red at the base revision too, so they do not evidence the 1e-9
+identities at either arm, and no claim that those identities hold is made
+here.</strong></p>
 
-<p>A separate run of one row under <code>NOVA_TANGENT_TRUNCATION=1</code> (job
-<code>1307547</code>, <code>test_tangent_matches_base_jvp[edge_terms]</code>)
-also fails — with the identical <code>primal bits differ</code> assertion and
-not on the tangent error. Because the unmutated head arm fails that row for the
-same reason, <strong>that run does not discriminate</strong> and is recorded as
-such rather than as a passing control; the discriminating control is the two
-passing truncation rows above. The first forced-full-band control used earlier
-was replaced for the same defect.</p>
+<p>What each failure is. For <code>edge_terms</code> the comparison stops one
+assertion earlier: <code>AssertionError: edge_terms: primal bits differ</code>
+(<code>tests/biot/test_edge_term_tangents.py:267</code>), raised inside
+<code>_identity</code> before the tangent is compared, in both arms. For the
+other two rows the comparison reaches the tangent bound and fails there, at
+<code>tests/biot/tangent_identity.py:142</code>:</p>
+
+<pre>assert primal == 0.0
+assert tangent &lt;= bound          # AssertionError</pre>
+
+<p>The magnitudes those rows print are identical at both revisions:
+<code>edge_integrands primal_max_relative=0.000e+00
+tangent_max_relative=2.383e-02 bound=1e-09 covered_fraction=0.9570</code> and
+<code>flux_and_moment_terms primal_max_relative=0.000e+00
+tangent_max_relative=3.723e-02 bound=1e-09 covered_fraction=0.9576</code>. The
+primal agrees exactly and the tangent does not, by the same 2.4e-2 and 3.7e-2
+at both revisions, so the discrepancy predates this change and is unchanged by
+it; it is not repaired here, and it belongs to whichever node owns the identity
+harness.</p>
+
+<h3>What the identity evidence does and does not show</h3>
+
+<p><strong>The passing guard for the weight branch is the vertex primal-JVP row
+<code>tests/biot/test_vertex_term_tangents.py::test_tangent_matches_primal_jvp</code>,
+which passes at both arms in the gate above.</strong> The two passing
+<code>test_truncated_tangent_fails_identity</code> rows show something narrower:
+each computes the identity under a deliberately truncated tangent and asserts
+the resulting error exceeds <code>SCAN_TOLERANCE</code>, so a pass shows that a
+broken tangent is <em>caught</em> by the comparison. It does <em>not</em> show
+that the shipped tangent agrees with the base JVP, because the row that would
+show that (<code>test_tangent_matches_base_jvp</code>) fails at both revisions.</p>
+
+<p>A run of <code>test_tangent_matches_base_jvp[edge_terms]</code> under
+<code>NOVA_TANGENT_TRUNCATION=1</code> (job <code>1307547</code>) failed with
+<code>EXIT=1</code> and the same <code>primal bits differ</code> assertion. Since
+that row already fails at the base revision on the same assertion, the mutation
+run <strong>cannot discriminate</strong> and is recorded as such. The control
+that does discriminate is the vertex primal-JVP row under the same mutation: the
+shipped head passes it, so the mutated head must fail it. That run is submitted
+with the gate job <code>1307573</code>.</p>
+
+<h3>The Jacobian form, measured on CPU x64</h3>
+
+<p>The merged tangent helper takes its panel Jacobian as
+<code>sqrt(1 + s^2)</code> (<code>nova/biot/gradedresidual.py:414</code>) where
+the deleted weighted residual used <code>cosh(stretch)</code>. The two are equal
+analytically and need not agree in floating point, so the packed analytic
+moments were evaluated at both revisions for both packaged coil sets on CPU x64,
+with <code>configure_dtypes()</code> called before any array is built and
+<code>jax_enable_x64</code> asserted, through the same overlay the gate uses
+(job <code>1307574</code>, <code>gate/jacobian-equivalence.json</code>):</p>
+
+<table class="outcomes">
+  <thead><tr>
+    <th scope="col">Coil set</th><th scope="col">Sections</th>
+    <th scope="col">Near-band targets</th>
+    <th scope="col">Bitwise identical</th>
+    <th scope="col">Max relative difference</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>MAST</td><td>13</td><td>1/13</td><td>yes, all three output leaves</td><td>0.000e+00</td></tr>
+    <tr><td>DIII-D</td><td>140</td><td>1/140</td><td>yes, all three output leaves</td><td>0.000e+00</td></tr>
+  </tbody>
+</table>
+
+<p>The forward result is <strong>bitwise unchanged</strong>, the stronger limb of
+the done-when, and the near-band branch was selected in both cases, so the
+weighted quadrature was exercised rather than bypassed.</p>
 
 <h3>Before and after walls, and the negative control</h3>
 

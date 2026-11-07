@@ -201,8 +201,19 @@ def main() -> int:
     # plasma flux is the leading slice rather than the whole array.
     seed = np.reshape(seed[:node_count], (radius.size, height.size), order="C")
 
-    points = _critical_points(seed, radius, height)
-    winding = _boundary_winding(seed, radius, height)
+    # A critical point whose cell corner signs agree in both components is
+    # invisible to a corner-only scan, so the field is read on a refined
+    # sampling before the zeros are located.
+    from scipy.interpolate import RectBivariateSpline
+
+    spline = RectBivariateSpline(radius, height, seed, kx=3, kz=3)
+    refine = 4
+    fine_radius = np.linspace(radius[0], radius[-1], (radius.size - 1) * refine + 1)
+    fine_height = np.linspace(height[0], height[-1], (height.size - 1) * refine + 1)
+    fine = spline(fine_radius, fine_height)
+
+    points = _critical_points(fine, fine_radius, fine_height)
+    winding = _boundary_winding(fine, fine_radius, fine_height)
     index_sum = int(sum(point["morse_index"] for point in points))
     residual = int(round(winding)) - index_sum
 
@@ -217,6 +228,7 @@ def main() -> int:
         "extremum_count": sum(point["kind"] == "extremum" for point in points),
         "saddle_count": sum(point["kind"] == "saddle" for point in points),
         "census_index_sum": index_sum,
+        "refine_factor": refine,
         "boundary_winding": winding,
         "winding_minus_index_sum": residual,
         "coverage_ok": residual == 0,

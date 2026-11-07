@@ -15,6 +15,13 @@
   "figures_reviewed": [
     "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panel-captions",
+      "recorded_at": "2026-11-07T19:55:31.680482+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded into the caption-repair node for the archive record: replace each block's opening clause with the rendition it embeds, keep the historical sentence as the history it is",

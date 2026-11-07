@@ -19,11 +19,11 @@
     with the errors below, so the coordinator can choose between a
     singularity-subtracted azimuthal rule and reconstructing the paper's closed
     coefficients. Every fixed-set target asserts the <code>1e-10</code> floor;
-    the 21 measured misses (seven per sloped slope) are recorded through
-    <code>pytest.xfail</code> with their measured error in the reason, so the
-    gate reports them as known shortfalls and a case that comes back changes
-    state visibly. The rule was not adapted per target and no tolerance was
-    loosened.</p>
+    the 21 measured misses (seven per sloped slope) are declared
+    <code>xfail(strict=True)</code> with the relative error measured at that
+    target in the reason, so a case that reaches the floor is an XPASS and fails
+    the gate rather than passing quietly. The rule was not adapted per target and
+    no tolerance was loosened.</p>
     <p>The section's graded arsinh rule was tried as the remedy and did not
     settle it. Reusing its grading width, two-panel sinh map and 128-node rule
     reproduces a brute-force quadrature of the arsinh integral to
@@ -117,7 +117,7 @@
     <h2 id="icm-sheet-flux-negative-control">Negative control</h2>
     <p>Flipping the sign of the closed form's sheet current leaves
     <code>65</code> of the <code>71</code> tests not passing
-    (<code>29 failed</code>, <code>36 xfailed</code>, <code>EXIT=1</code>): every
+    (<code>44 failed</code>, <code>21 xfailed</code>, <code>EXIT=1</code>): every
     reference comparison, the flat pancake form, the cylinder form and the
     flipped-current control. The six that still pass are the linearity test and
     the five segment-order tests, which a global sign flip leaves true. The head

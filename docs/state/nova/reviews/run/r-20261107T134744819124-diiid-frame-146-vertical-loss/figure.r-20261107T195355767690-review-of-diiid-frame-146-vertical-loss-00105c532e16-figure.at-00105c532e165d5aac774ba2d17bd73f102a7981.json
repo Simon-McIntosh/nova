@@ -8,6 +8,13 @@
     "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
     "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-vertical-loss",
+      "recorded_at": "2026-11-07T20:23:18.444022+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",

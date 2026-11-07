@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -468,7 +468,10 @@
     <div class="r-comment-body"><p>Landed the conic sheet flux in nova/biot/sheet.py for every inclination of the section's slope set, but the fixed panel rule does not hold the 1e-10 floor at the section's near standoffs for a sloped sheet, so the node's measure is not met.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261107T004533680767-review-of-icm-sheet-flux-156040975d13" data-who="reckon-build" data-when="2026-11-07T01:19:09.319Z">
-    <div class="r-comment-body"><p>Independent review of r-20261106T222233476179-icm-sheet-flux at head 156040975 filed parsed, scoring goal_fidelity 10 / evidence 15 / scope_discipline 20 / durability 13 / fit 15 / reuse 12 (total 85), with two blocking findings (the strict-xfail set absorbs any regression at the 21 near-standoff targets, and the flat case is a quadrature rather than Snow&#x27;s eq (26) pancake closed form) and five non-blocking findings.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261106T222233476179-icm-sheet-flux at head 156040975 filed parsed, scoring goal_fidelity 10 / evidence 15 / scope_discipline 20 / durability 13 / fit 15 / reuse 12 (total 85), with two blocking findings (the strict-xfail set absorbs any regression at the 21 near-standoff targets, and the flat case is a quadrature rather than Snow's eq (26) pancake closed form) and five non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261107T011700572225-review-of-icm-sheet-sloped-f598eb5bdb55" data-who="reckon-build" data-when="2026-11-07T01:29:09.592Z">
+    <div class="r-comment-body"><p>§2 sloped sheet reviewed at f598eb5bdb55debbf63a8aa9e609b6dc91128cb2 against base 590c627a8836cbbfc74849d58069db83d65c114d: the goal holds (71 passed, 0 xfail, worst sloped 3.4e-13, worst over the fixed set 6.9e-13), the negative control refuses (65 failed, 6 passed, EXIT=1); two non-blocking findings (stale claim in icm-sheet-flux.html:36, no assertion guarding the by-import requirement).</p></div>
 </div>
 </section>
 </main>

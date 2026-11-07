@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is an implement node and declares no baseline_suite or after_suite block (its manifest.md carries neither key, and its live pointer records suite_gate null), so the pair is derived from its own gate logs. gate-edge-sheet.log:1-9 is the after arm at revision 7754fc7f1 and reads '71 passed', EXIT=0, so its failure set is empty. gate-head.log is the base arm, but it carries only header lines and no test summary, so the base arm is unreadable and contributes no ids. With a readable head arm and zero failures on it, added_failure_count is 0 and added_failure_ids is empty.",
+  "assertion_analysis": [
+    {
+      "assertion": "tests/test_edge_sheet.py:74 assert relative <= TOLERANCE",
+      "independent": "true: 'got' comes from nova.biot.sheet.sheet_flux and 'expected' from the separately implemented scripts/edge_sheet/reference.py converged by panel bisection",
+      "would_fail_if": "the sloped antiderivative regressed to the base's uniform azimuthal rule, which gate-head's base tree reproduces at 9.2e-5, 2.8e-5 and 3.2e-5 on the near standoffs"
+    },
+    {
+      "assertion": "tests/test_edge_sheet.py:125 assert flipped != pytest.approx(converged.psi, rel=TOLERANCE)",
+      "independent": "true: the flipped current is applied through sheet_flux and compared against the reference's converged value",
+      "would_fail_if": "sheet_current were ignored or the flux lost its odd dependence, so the sign flip reproduced the reference"
+    }
+  ],
+  "base_log_revision": null,
+  "call_sites": [
+    "nova/biot/sheet.py:SheetFlux.flux",
+    "nova/biot/sheet.py:sheet_flux"
+  ],
+  "completed_at": "2026-11-07T01:29:09.592Z",
+  "dispatched_at": "2026-11-07T01:19:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html",
+      "line": 36,
+      "severity": "non-blocking",
+      "summary": "This fragment still states that the graded rule's 'endpoint-log removal, which was not ported, so the plain rule is what' the sloped term uses. That is now false: nova/biot/sheet.py:165 calls _weighted_residual by import, which carries exactly that removal, and the 21 targets the fragment records as misses now pass at 3.4e-13. The brief pointed a reader at this file for the per-target table, but the update landed in the sibling icm-sheet-sloped.html, so a reader following the old pointer reads a live defect claim about code that no longer has it. The node was fenced out of this path; the coordinator should update or annotate it."
+    },
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": 68,
+      "severity": "non-blocking",
+      "summary": "No assertion guards done_when (2)'s 'by import, not by copy' requirement. A vendored copy of the graded rule and its endpoint-log removal inside nova/biot/sheet.py would satisfy all 71 assertions at 1e-10, so the reuse requirement rests on a reading of the source and would not survive a later refactor that inlined the machinery. The behavioural floor is well guarded; the structural requirement is not."
+    }
+  ],
+  "head_log_revision": "7754fc7f1508e8645aef9bd755aebff766151483",
+  "item_verdicts": {
+    "diff": "Read commit by commit against 590c627a8: 7754fc7f1 rewrites the sloped azimuthal quadrature onto the graded arsinh rule and removes the 21 strict xfail marks (+107/-66 across nova/biot/sheet.py and tests/test_edge_sheet.py); f598eb5bd adds only the 80-line evidence fragment. Nothing else changed.",
+    "done_when": "done_when (1): gate-edge-sheet.log:8 '71 passed in 9.01s' with 0 xfail and TOLERANCE unchanged at tests/test_edge_sheet.py:33, against 50 passed + 21 xfail at the base; (2): nova/biot/sheet.py:62 imports _weighted_residual from nova.biot.polygonanalytic rather than copying it, and negative-control.log:4-5 records 65 failed, 6 passed, EXIT=1 against the head arm's 71 passed; (3): the per-target before/after table is at docs/evidence/fragments/iron-core-magnetisation/icm-sheet-sloped.html:33-50 and the landing line is manifest.md:15.",
+    "goal": "The source goal is 'Hold the sloped sheet flux to 1e-10 at the near standoffs'; nova/biot/sheet.py:169-182 routes the sloped antiderivative through _root_term (nova/biot/sheet.py:108-127) and _arsinh_term (nova/biot/sheet.py:129-167), and the gate at gate-edge-sheet.log:7-9 records 71 passed, 0 xfail, EXIT=0 on the fixed target set.",
+    "manifest": "Read; it records commits 7754fc7f1 and f598eb5bd, the gate command and its log, the negative-control log with its 65 failed / 6 passed / EXIT=1, the before/after numbers (worst sloped 9.2e-5 to 3.4e-13), and it is honest that the D-term grading was a second defect found beyond the brief.",
+    "write_paths": "The diff touches exactly nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-sloped.html, all three inside the declared write paths; docs/figures/iron-core-magnetisation/icm-sheet-sloped was declared and is unused."
+  },
+  "justifications": {
+    "durability": "tests/test_edge_sheet.py:68-77 asserts each sloped target against scripts/edge_sheet/reference.py, an independent converged reference, and reinstating the uniform rule reddens it; no new assertion was added and nothing tests the by-import requirement.",
+    "evidence": "gate-edge-sheet.log:1-9 names revision 7754fc7f1 and ends EXIT=0 after '71 passed', negative-control.log ends '65 failed, 6 passed' with EXIT=1, and both logs are on disk at the paths manifest.md:18-19 names.",
+    "fit": "nova/biot/sheet.py:108-167 follows the module's numpy/float style and the graded-rule naming of nova/biot/gradedresidual.py, and no plan, sprint or ticket identifier appears in the code or comments.",
+    "goal_fidelity": "nova/biot/sheet.py:169-182 plus gate-edge-sheet.log:8 lifts every sloped near standoff from 9.2e-5 to 3.4e-13 and removes all 21 xfail marks, so the stated goal is met; the deduction is for the stale sibling fragment a reader is pointed at.",
+    "reuse": "nova/biot/sheet.py:62 and :165 extend the owner of the graded arsinh rule by importing _weighted_residual from nova/biot/polygonanalytic.py rather than copying it, but the D-term sinh map at nova/biot/sheet.py:118-126 is a third inline construction of a map primitive that gradedresidual.py and polygonanalytic.py already carry privately.",
+    "scope_discipline": "git diff --stat 590c627a8..f598eb5bd lists only nova/biot/sheet.py, tests/test_edge_sheet.py and the declared new fragment; nova/biot/polygonanalytic.py was imported from as the brief allowed and not modified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is 'Hold the sloped sheet flux to 1e-10 at the near standoffs'; nova/biot/sheet.py:169-182 routes the sloped antiderivative through _root_term and _arsinh_term and gate-edge-sheet.log:8 records all 71 fixed-set targets passing.\nVERDICT done_when: (1) gate-edge-sheet.log:8 reads '71 passed' with 0 xfail and TOLERANCE unchanged at tests/test_edge_sheet.py:33; (2) nova/biot/sheet.py:62 imports _weighted_residual from nova.biot.polygonanalytic rather than copying it, and negative-control.log:5 reads '65 failed, 6 passed' with EXIT=1; (3) the per-target before/after table is at docs/evidence/fragments/iron-core-magnetisation/icm-sheet-sloped.html:33-50 with the landing line at manifest.md:15.\nVERDICT write_paths: the diff touches nova/biot/sheet.py, tests/test_edge_sheet.py and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-sloped.html, all inside the declared paths; docs/figures/iron-core-magnetisation/icm-sheet-sloped is declared and unused.\nVERDICT manifest: read; it records commits 7754fc7f1 and f598eb5bd, the gate command and log, the negative control's 65 failed and EXIT=1, and the before/after numbers (worst sloped 9.2e-5 to 3.4e-13).\nVERDICT diff: read commit by commit against 590c627a8; 7754fc7f1 rewrites the sloped azimuthal quadrature and removes the 21 strict xfail marks (+107/-66), f598eb5bd adds only the evidence fragment.\nCALL_SITES: nova/biot/sheet.py:SheetFlux.flux, nova/biot/sheet.py:sheet_flux\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:169-182 plus gate-edge-sheet.log:8 lifts every sloped near standoff from 9.2e-5 to 3.4e-13 and removes all 21 xfail marks, so the goal is met; the deduction is the stale sibling fragment.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-edge-sheet.log:1-9 names revision 7754fc7f1 and ends EXIT=0 after '71 passed', and negative-control.log ends '65 failed, 6 passed' with EXIT=1, both on disk at manifest.md:18-19.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 590c627a8..f598eb5bd lists only nova/biot/sheet.py, tests/test_edge_sheet.py and the declared new fragment; nova/biot/polygonanalytic.py is imported from and not modified.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_edge_sheet.py:68-77 asserts each sloped target against the independent scripts/edge_sheet/reference.py and reddens if landed at the base's uniform rule, but no assertion guards the by-import requirement.\nSCORE fit: 18\nJUSTIFICATION fit: nova/biot/sheet.py:108-167 follows the module's numpy style and graded-rule naming, and carries no plan, sprint or ticket identifier.\nSCORE reuse: 17\nJUSTIFICATION reuse: nova/biot/sheet.py:62 and :165 extend the owner of the graded arsinh rule by importing _weighted_residual from nova/biot/polygonanalytic.py, though the D-term sinh map at :118-126 is a third inline construction of that map primitive.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-sheet-flux.html:36 non-blocking: it still claims the endpoint-log removal 'was not ported', which nova/biot/sheet.py:165 now does by import, so a reader following the brief's pointer reads a false defect claim while the update landed in the sibling fragment.\nFINDING tests/test_edge_sheet.py:68 non-blocking: no assertion guards done_when (2)'s by-import requirement, so a vendored copy of the graded rule would pass all 71 assertions and the structural requirement rests on reading alone.",
+  "review_run_id": "r-20261107T011700572225-review-of-icm-sheet-sloped-f598eb5bdb55",
+  "reviewed_base_sha": "590c627a8836cbbfc74849d58069db83d65c114d",
+  "reviewed_commits": [
+    "7754fc7f1",
+    "f598eb5bd"
+  ],
+  "reviewed_head_sha": "f598eb5bdb55debbf63a8aa9e609b6dc91128cb2",
+  "reviewed_run_id": "r-20261107T003956760144-icm-sheet-sloped",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T02:35:00Z",
+  "total": 107
+}

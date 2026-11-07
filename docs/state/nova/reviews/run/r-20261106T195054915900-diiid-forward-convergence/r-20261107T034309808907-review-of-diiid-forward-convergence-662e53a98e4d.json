@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T03:53:15.851Z",
+  "dispatched_at": "2026-11-07T03:43:43Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+      "line": 264,
+      "severity": "blocking",
+      "text": "attempted_promotions and accepted_promotions do not measure promotions. receipt.globalisation_decisions returns the solver's fixed-shape inner-iteration trace, padded to `step_slots = newton_steps` with InnerIterationDecision.NOT_EXECUTED = -1 in every decision slot and nan in every applied factor (nova/equilibrium/fixed_point.py:235-255), and the registered request pins newton_steps to REGISTERED_ACCELERATED_NEWTON_STEPS = 24 (benchmarks/diiid_forward_gs_match.py:227). measure_branches.py:264 counts `len(_finite_list(factors))`, which is the padded length, and :265 counts every truthy decision, which includes both the -1 padding sentinel and the refused codes 5 and 6. The result is identical on every arm of every seed: the recorded probe (probe.json) carries decisions [-1.0] x 24, factors all null, attempted 24 and accepted 24 on all 18 solved arm records across the five frames. Read back, every inner iteration in the record is NOT_EXECUTED, which is the opposite of the '24 of 24 accepted' the fragment reports, and no refused step could ever have been distinguished from an accepted one. The fragment's headline mechanism sentence (diiid-forward-convergence.html:11, :138, :145, :313, :333) and the recommended fix's items 1 and 2 rest on this number, and the manifest's checkpoint states it as measured. Damping is also unrecorded: applied_factors are nan on every step, so the done-when's 'with step acceptance and damping' is unmet on both halves. The counts must be taken from the solver's own per-trip accepted_newton_promotions (which fixed_point.py already computes, since ACTIVE_SET_SETTLED is conditioned on it) or from decisions restricted to the accepted codes with the -1 padding excluded."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html",
+      "line": 11,
+      "severity": "blocking",
+      "text": "The record's central discriminator is stated as a measurement that was not made: 'The inner Newton-Krylov solve does keep accepting its steps - 24 of 24 attempted', repeated at :138, :145, :313 ('24 of 24 on every measured arm') and :333. Those counts are the padded trace length and the NOT_EXECUTED sentinel, not accepted steps (see measure_branches.py:264). The document also contradicts itself: the recommended fix at :324-325 says the probe 'reconstructs the counts from globalisation_decisions for one frame and cannot do so for the rest', while :313 asserts the same count on every measured arm. As written the fragment tells a reader that the frozen-mask stall was separated from a refused-step stall by evidence, when the probe cannot separate them. The mask-difference-to-zero and bit-identical-residual evidence at :30-44 stands on its own and is not affected; the acceptance sentence and the two recommended-fix items built on it have to be rewritten around what the probe actually records (or re-derived from the solver's per-trip counts) before the node lands."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "line": 433,
+      "severity": "non-blocking",
+      "text": "The text-clipping and overlap check is presented as a gate ('the renderer refuses to write a panel whose text clips the canvas or overlaps another text artist', fragment :240) but its firing is never demonstrated: gate-render.log carries five panels, no REFUSED line, and EXIT=0, so the record shows only that the guard stayed silent. A guard that has never been shown to fire is not evidence for its own claims; the node's other three controls (classifier_control.py, measure_branches._self_check, presence_control.py) all drive a failing input, and this one should too - draw a caption that overruns the canvas and record the refusal."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/merge_probe.py",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "peak_rss_kb_by_frame is destroyed on every merge: `peak` is re-initialised from target frames to -1, only newly added frames are given a value at :39, and :59 writes the whole dict back. The merged probe.json therefore carries {'137': -1, '144': -1, '146': -1, '179': -1, '44': -1}, and no frame record carries peak_rss_kb at all, even though the manifest's resume brief tells a reader to take per-frame peak RSS from the parts. A uniform -1 column is the tell that the field is not being populated; the one number the node's own OOM retry needs is the one the merge drops."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "The module docstring still describes the staged arm as 'the registered request capped at k active-set trips, for every k up to the default arm's trip count', which the shipped code no longer does: :438 stages only sorted({1, staged_steps}) and defaults staged_steps to 1, so one extra trip count is run. The docstring is the contract: a reader who takes it at face value expects an intermediate state per trip and will look for one in the receipt that is not there."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/render_panels.py",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "The module docstring states 'Frame 144 has no solved field: the solve refuses before a topology read', which is true of frame 144's limited seed only; its diverted seed solves at residual 5.927 and render_measured_frame (:475 onward) draws it, so the asset the docstring describes and the asset the code writes are different frames' stories."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T034309808907-review-of-diiid-forward-convergence-662e53a98e4d",
+  "reviewed_base_sha": "554fcc237908745e87adeafcaff82d5f901f671d",
+  "reviewed_head_sha": "662e53a98e4d63fe106e219530687649308009e9",
+  "reviewed_run_id": "r-20261106T195054915900-diiid-forward-convergence",
+  "scores": {
+    "durability": 11,
+    "evidence": 9,
+    "fit": 14,
+    "goal_fidelity": 13,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T03:56:13.456683+00:00",
+  "total": 83,
+  "verdicts": [
+    "goal: the source brief's deliverable is a per-frame mechanism, the branch decision on 179 and 44, a checkable record and a recommended fix; the fragment (docs/evidence/fragments/diiid-vertical-force-balance/diiid-forward-convergence.html:30-44) names one measured mechanism per frame and :196-214 answers the branch question with file:line, but the discriminator at :11 rests on a counter that is array padding.",
+    "done_when: the brief's done-when asks a per-promotion relative-residual trajectory on both branches with step acceptance and damping; scripts/prototypes/diiid_forward_convergence/measure_branches.py:264 derives acceptance from a fixed-shape padded array and :263 records no damping at all, so no gate asserts that half of the measure.",
+    "write_paths: the manifest declares scripts/prototypes/diiid_forward_convergence/, the evidence fragment and docs/figures/diiid-forward-convergence/; all 15 paths in `git diff --name-only 554fcc237 662e53a98` lie inside those three roots.",
+    "manifest: read; it names five gate logs (classifier control, probe self-check, presence control, receipt build, panel render), each ending EXIT=0, and its checkpoint repeats '24 of 24' inner steps accepted as a measured fact.",
+    "diff: read the 19 commits from 554fcc237 to 662e53a98 commit by commit; the change consolidates two divergent terminal classifiers into terminal_class.py, adds a per-frame both-branch probe with per-arm persistence and two controls, re-renders five panels from the measured arms, and rewrites the fragment; no product source is touched.",
+    "call_sites: no production call site reaches any changed path - the affected modules live under scripts/prototypes/ and are imported only by each other and by their own control scripts."
+  ]
+}

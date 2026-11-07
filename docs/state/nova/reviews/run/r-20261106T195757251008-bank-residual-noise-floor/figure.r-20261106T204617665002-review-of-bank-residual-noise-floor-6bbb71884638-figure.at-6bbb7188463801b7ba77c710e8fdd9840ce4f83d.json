@@ -6,7 +6,7 @@
     "image-0.png (1399x720 RGB, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-residual-noise-floor/stage-spread.svg"
   },
   "attachment_note": "The single attached raster was opened with Read and judged directly; every claim below is measured on that image, never on SVG markup. No SVG was opened, read or re-rendered for this review. The figure is the only file the reviewed head adds under docs/figures (`git show --stat 6bbb71884` lists stage-spread.svg, 998 insertions, as the whole of that commit's figure change), and it is drawn by scripts/prototypes/bank_residual_noise_floor/report.py, which the same run's diff adds. The attached PNG measures 1399x720, one pixel narrower than the 1400x720 canvas the script constructs (figsize 14x7.2 at dpi 100) and that the fragment's caption names; the shortfall is one pixel of canvas, not a clipped label, since the outermost ink sits at x=178 and x=1332 of 1399.",
-  "completed_at": "",
+  "completed_at": "2026-11-06T20:59:45.561Z",
   "dispatched_at": "2026-11-06T20:47:52Z",
   "figure_checks": {
     "clipping": "No ink touches the canvas edge. The outermost non-white pixels are x=178 (the 'moments' row label) and x=1332 (the red marker's right edge), on a 1399 px canvas, and y=16 (legend text) and y=683 (x axis title) on a 720 px canvas.",

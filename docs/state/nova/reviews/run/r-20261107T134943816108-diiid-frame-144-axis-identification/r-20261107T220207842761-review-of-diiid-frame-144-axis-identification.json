@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "none"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T13:51:46Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_axis_identification/receipts/README.md",
+      "id": "f530a643cd4",
+      "line": 18,
+      "severity": "non-blocking",
+      "summary": "the reproduce command is a template with unsubstituted PROBE.json/PARTS/ARTIFACTS placeholders, so a reader cannot run it verbatim; every other receipt names its job id and revision, and this one names neither for the four receipts as a set"
+    },
+    {
+      "file": "scripts/prototypes/diiid_axis_identification/receipts/conjunct-captured-field.json",
+      "id": "f5b0cdf5576",
+      "line": 3,
+      "severity": "non-blocking",
+      "summary": "field_source names 'refusal-144-limited-b.npz', which is not committed under receipts/; the capture record the conjuncts rest on cannot be reopened from the repository, only the JSON summary of it"
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html",
+      "id": "f5a8d6a1754",
+      "line": 232,
+      "severity": "non-blocking",
+      "summary": "the added paragraph claims a reader can check the claims after the run directory is collected, but two of the four receipts point at an uncommitted npz, so only the summarised values are checkable"
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T220207842761-review-of-diiid-frame-144-axis-identification",
+  "reviewed_base_sha": "949375b6bcaacd37da86ea96b863a8c81013ff4c",
+  "reviewed_head_sha": "f79cfc5fa828b79f8bbc9324fb3e606d7933d4ec",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T22:13:24.509785+00:00",
+  "total": 100,
+  "verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit by commit from 949375b6b: 370280887 adds five files under receipts/ (README plus four JSON receipts) and f79cfc5fa adds six lines to the fragment, all evidence, no product source.",
+    "done_when": "The done_when asks for reproduction, a named defect with a critical-point census and a coverage winding-number check, and the fragment with a contour panel; the fragment records the census index column aligned to the coverage result and the replay receipt records the live refusal at nova/equilibrium/topology.py:226.",
+    "goal": "The node goal is to explain why frame 144's limited seed refuses at axis identification and record it in the fragment; the committed receipts and the fragment paragraph now make that record self-contained at scripts/prototypes/diiid_axis_identification/receipts/.",
+    "manifest": "The reviewed run's manifest.md status reads complete and the tests line records the conjunct job 1308039 as PASSED producing the governed_size 397 against floor 10 record.",
+    "write_paths": "The declared write paths are scripts/prototypes/diiid_axis_identification/, the fragment and docs/figures/diiid-frame-144-axis-identification/; the six changed paths in this diff are inside them."
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T22:04:06Z",
+  "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged only from the rendered PNG, image-0.png, 1400x720)",
+  "findings": [
+    {
+      "disposition": "folded: an axis-identification figure node should offset the EFIT axis mark, or draw it in a shape that survives the overlap (an open circle smaller than the O-point ring, or a markerfreed point marked only by its label), so the legend entry resolves to a visible glyph.",
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend declares 'EFIT label axis' with a green plus, but no green plus is findable in the panel: the script draws the plus at the same coordinates as the rejected O-point, where the red triangle and the green ring cover it, from which 'EFIT axis' does not stand out at all, so a reader cannot locate what the legend promises."
+    },
+    {
+      "disposition": "exempted: the drawing site is the cause but the correction is a figure-design decision that belongs with the axis-identification evidence, which is folded above; this review is read only and does not edit the script.",
+      "file": "scripts/prototypes/diiid_axis_identification/render_seed_panel.py",
+      "id": "fcfbeb225c6",
+      "line": 117,
+      "severity": "non-blocking",
+      "summary": "The EFIT label axis marker is plotted at size 13 with marker='+' at the rejected maximum's own coordinates, so it is buried under the red O-point triangle drawn at the same point; this is the mechanism behind the panel's missing legend glyph and the reason the two axes read as one point in the figure."
+    },
+    {
+      "disposition": "exempted: the labels remain readable at 1400 px and the contour crossing passes between words rather than through letterforms; refolding it into a node is not worth a figure regeneration on its own.",
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Both direct labels sit on plotted data: 'EFIT axis' crosses a blue contour between its two words, and 'rejected axis' crosses the near-vertical black limiter behind its right end. The text stays legible over the line in each case, so this does not stop a reader, but it is the collision the repo's own figure rule forbids."
+    },
+    {
+      "disposition": "folded: the axis-identification evidence fragment should state the measured separation between the EFIT label axis and the rejected flux maximum in its caption, since the axis-free poloidal style will never show it.",
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure asserts that the EFIT label axis and the flux O-point are different points but draws them within a few pixels of each other inside the innermost contour loop, with no coordinate scale, so a reader cannot tell whether the two axes are near-coincident or merely both near the flux maximum. The recorded seed distance from the label is not visible anywhere in the panel."
+    },
+    {
+      "disposition": "exempted: the panel is readable at its rendered size and the layout wastes space rather than hiding data; a regeneration for canvas economy alone is not justified.",
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "On a 1400 px-wide canvas the flux panel occupies about 410 px of the left edge and the legend column ends near x=1050, leaving roughly 320 px of empty canvas at the right and about 170 px between panel and legend. The contours, which are the figure's data, are compressed into the smallest region of the canvas while the surrounding white space carries nothing."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T220230267893-review-of-diiid-frame-144-axis-identification-f79cfc5fa828-figure",
+  "reviewed_base_sha": "3702808874a7009cab144b7c06a39d49d99bf6d5",
+  "reviewed_head_sha": "f79cfc5fa828b79f8bbc9324fb3e606d7933d4ec",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass: the legend and marker text is near-black on white; the two green direct labels (about #2ca02c, roughly 3:1 on white) are the lightest text on the canvas and still read at their rendered size.",
+    "data_ink": "pass: contour lines, the limiter and the null markers carry the ink; no fills, no shading. Roughly forty percent of the canvas width holds the data and the rest is the four-row legend, which is text naming the marks rather than decoration.",
+    "decoration": "pass: no gradient, no background fill, no gridlines, no frame; the marks are contours, the limiter, the nulls, two leader lines and their labels.",
+    "label_collision": "fail: both direct labels are drawn across plotted data - 'EFIT axis' spans roughly x=231-318 px with blue contours crossing the text block between the two words, and 'rejected axis' spans roughly x=400-525 px over the near-vertical black limiter - and the legend's green plus has no findable counterpart in the panel because the plus is drawn at the same point as the rejected O-point and is covered by the red triangle and ring. Nothing is clipped and no text overlaps another text.",
+    "legibility": "pass: at 1400 px the seed's blue flux contours, the black limiter, the four red null marker styles and both green direct labels are readable at a glance; the panel carries no coordinate scale or R/Z labels, so a reader reads topology and not dimensions.",
+    "table_form": "pass: the image is a poloidal map whose content is the spatial relation between the seed's flux extrema and the EFIT label axis; nothing here is naturally a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T22:12:00.170523+00:00",
+  "total": null
+}

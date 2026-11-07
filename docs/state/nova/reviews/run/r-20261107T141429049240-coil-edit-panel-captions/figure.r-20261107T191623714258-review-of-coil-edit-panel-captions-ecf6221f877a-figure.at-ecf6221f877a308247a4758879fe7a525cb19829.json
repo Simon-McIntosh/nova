@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "attachment_note": "Two attachments were named: docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png (1400x720 RGBA) and the review run's image-1.png. Both were opened. A pixel difference of the two images has a null bounding box - every pixel of image-1.png equals the repository PNG - so the two attachments are the one 1400x720 figure and every verdict below describes that figure.",
-  "completed_at": "",
+  "completed_at": "2026-11-07T19:31:15.947Z",
   "dispatched_at": "2026-11-07T19:17:33Z",
   "fields": {
     "RUBRIC contrast": "pass - title and legend text 21.0:1 on white; wall black; the reference contour stroke renders at 2.81:1 and is recorded as finding 4.",
@@ -93,6 +93,6 @@
   "rubric": "figure",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-07T19:31:18.887254+00:00",
+  "timestamp": "2026-11-07T19:46:54.914224+00:00",
   "total": null
 }

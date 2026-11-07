@@ -333,10 +333,12 @@ accepted count is 24 of 24 &mdash; so the receipt cannot report the third even i
 it. Each must carry the residual it stalled at, which the gate already reads.</li>
 </ol>
 
-<p><b>Frames it should converge:</b> 137 and 179 first &mdash; they are already diverted-consistent and the
-smallest residuals of the cohort (<code>6.24e-2</code> and &mdash; on its limited seed &mdash;
-<code>2.73e-2</code>) &mdash; then 44 and 146. Frame 144 is a separate defect upstream of the fixed point:
-its axis identification returns no qualified candidate, and no change to the active-set loop can help it.</p>
+<p><b>Frames it should converge:</b> 137, 179 and the diverted seed of 144 &mdash; the three whose
+plasma is confined and whose terminals are the smallest of the cohort (<code>6.24e-2</code>,
+<code>2.73e-2</code> on 179's limited seed, <code>5.93</code> on 144) &mdash; then 44, whose plasma is also
+confined but whose residual is the largest. Two frames are outside what this change can reach: 146's
+diverted seed is a vertically lost plasma (below), and 144's limited seed refuses at axis identification,
+a defect upstream of the fixed point that no change to the active-set loop can help.</p>
 
 <p><b>What frame 146 needs, which the stopping rule does not give it.</b> Relaxing the mask-stability
 exit cannot help frame 146: its loop travels, and it travels towards a state whose confined current is

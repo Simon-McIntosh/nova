@@ -10,9 +10,10 @@
 <p>The engaged forward step solves a linear model it assembles itself,
 <code>I - d(booked)/du</code>. Compared with central differences of the full
 fresh-read residual, that matrix is correct at the state where the 1e-2 drive
-stalls: the relative mismatch is 10<sup>&minus;7</sup> to
-10<sup>&minus;9</sup> across every direction class, and it scales with the step
-the way truncation and roundoff do rather than the way a missing term would.
+stalls: the relative mismatch is between 6&thinsp;&times;&thinsp;10<sup>&minus;8</sup>
+and 6&thinsp;&times;&thinsp;10<sup>&minus;7</sup> at the two larger steps in
+every direction class, and it moves with the step the way roundoff does rather
+than the way a missing term would.
 What stalls the solve is not the matrix. A unit Newton step, which the linear
 model predicts will annihilate the residual, leaves
 <strong>93.9&nbsp;%</strong> of it standing: the fresh residual is strongly
@@ -67,8 +68,12 @@ which is the signature of a fixed absolute error in the residual divided by a
 shrinking step, not of a term the matrix is missing: a missing term would grow
 with the step, not shrink. The normal-form and saddle cells come in one to two
 decades lower than the rest, so the moving saddle term is the best-behaved part
-of the assembly, not the matrix's worst. And every class lands below 1e-6 at
-every step, which is the stated acceptance floor.</p>
+of the assembly, not the matrix's worst. Every class is below 1e-6 at 1e-5 and
+at 1e-6, which is where the plateau sits. At 1e-7 the quotient's own roundoff
+takes over and the mismatch rises to between 2.4&thinsp;&times;&thinsp;10<sup>&minus;6</sup>
+and 4.8&thinsp;&times;&thinsp;10<sup>&minus;6</sup>; that is a floor on the step
+size one can difference at, not a property of the matrix, and it is why the
+acceptance reading is taken at 1e-6.</p>
 
 <h2 id="bank-jacobian-mismatch-terms">Splitting the mismatch by term</h2>
 

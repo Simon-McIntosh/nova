@@ -15,6 +15,13 @@
     }
   },
   "dispatched_at": "2026-11-07T19:54:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-vertical-loss",
+      "recorded_at": "2026-11-07T20:22:38.358136+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",

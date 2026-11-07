@@ -1,0 +1,94 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T21:28:27.397Z",
+  "dispatched_at": "2026-11-07T20:59:07Z",
+  "figures_reviewed": [
+    "docs/figures/sub-millisecond-forward-path/bank-jacobian-mismatch/mismatch-by-direction-class.svg"
+  ],
+  "findings": [
+    {
+      "disposition": "folded",
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "folded_into": "the node that next redraws this figure; it is a one-string change at plot.py:52",
+      "id": "fdd93c8d7db",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The right panel title reads 'geometry term to central difference' and drops the words 'replaced by'. As rendered, the headline states a comparison of the caption's second treatment rather than the same comparison with the moving-geometry term substituted by its own central difference; the caption at docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:156-157 disambiguates, but a reader taking the panel title alone is told something the panel does not show."
+    },
+    {
+      "disposition": "exempted",
+      "exempted_reason": "colour is one constant and the bars remain fully legible; the next redraw that touches this figure picks the feature colour under the rule then",
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "id": "f4a442d7709",
+      "line": 27,
+      "severity": "non-blocking",
+      "summary": "The stalled-state bars are drawn in #c0392b, a saturated red, although every bar in both panels sits below the dotted 1e-6 acceptance floor. The repository's plotting rules reserve red for a limit being broken, so the colour signals a failure the rendered data do not show: the figure's message is that the assembled Jacobian is inside the floor across every class at both states."
+    },
+    {
+      "disposition": "folded",
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "folded_into": "the same redraw node; a direct label on one panel's rule is the one-line change",
+      "id": "f0d33ebb3d5",
+      "line": 71,
+      "severity": "non-blocking",
+      "summary": "The dotted acceptance-floor rule at 1e-6 carries no label in the figure itself, so a reader of the image alone cannot tell what the line marks and must reach the caption at docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:157-158 to learn it is the acceptance floor. A threshold is meant to be named on the threshold it marks."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-mismatch/mismatch-by-direction-class.svg",
+      "folded_into": "the same redraw node, where the two states take lightness steps of one hue rather than two hues",
+      "id": "fc2290a6318",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two states are distinguished by red against green, a pair commonly confused by colour-blind readers, and no second cue separates them beyond the fixed left-right bar order within each class. The repository's plotting rules require a colour-blind delta-E of at least 8 for any two colours in one figure, or a second cue such as a dash pattern; the paired ordering is a weak substitute because it does not survive a reader describing the figure from memory of colour."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",
+      "folded_into": "the node that corrects the fragment's alt text; one sentence, no figure change",
+      "id": "f14fda19ca0",
+      "line": 153,
+      "severity": "non-blocking",
+      "summary": "The figure's alt text states that every class sits between 1e-9 and 1e-6, but in the rendered right panel both saddle bars sit at about 1.3e-10, an order of magnitude below the stated lower bound; the left panel's saddle sits only just above 1e-9. A screen-reader reader therefore receives a range the picture contradicts, on the class the right panel is most striking about."
+    }
+  ],
+  "project": "nova",
+  "review": {
+    "classes": [
+      "cut",
+      "normal form",
+      "whole",
+      "axis",
+      "saddle",
+      "random"
+    ],
+    "note": "Read-only figure review. This dispatch carried no rendered PNG: the review node declared no figure image; the run directory holds no image-0.png and the prompt carries no figure listing. The figure was therefore rasterised at the reviewed head with the same call dispatch uses (reckon.figures.rasterise_svg, width 1400) from the reviewed worktree, which is clean at 82bf5dd3, and the verdict was formed from that rendered PNG opened with the Read tool. No SVG markup was read for any verdict; the drawing script was read only to anchor findings. No file in the reviewed tree was edited, created, redrawn, relabelled or reformatted.",
+    "panels": [
+      "Jacobian as assembled",
+      "geometry term to central difference"
+    ],
+    "rendered_artifact": "image-0.png, 1400x720 px",
+    "states": [
+      "stalled 1e-2",
+      "certificate"
+    ]
+  },
+  "review_run_id": "r-20261107T204721210689-review-of-bank-jacobian-mismatch-82bf5dd3e617-figure",
+  "reviewed_base_sha": "1af9c7e75d082d97b0c681cdfb0e20abae2b45c4",
+  "reviewed_head_sha": "82bf5dd3e617f7e9b4b3ca47e55127bdfcded119",
+  "reviewed_run_id": "r-20261107T152015525295-bank-jacobian-mismatch",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Every text element clears its background: near-black titles, tick labels and the ordinate label on white, and the caption line beneath is dark on white. The red and green bars both read cleanly against white at their full height, including the shortest saddle bars, which remain distinguishable as marks above the axis.",
+    "data_ink": "The data carry the visual weight: twelve paired bars over six direction classes across two panels, one dotted acceptance-floor rule at 1e-6, no gradients, shadows or decorative fills. The two-entry legend is frameless and sits in clear space above both panels.",
+    "decoration": "No gradient, no background fill and no gridlines; top and right spines are removed on both panels and the only added rule is the dotted 1e-6 acceptance floor, whose extent is itself data and which the caption names.",
+    "label_collision": "No label is clipped, overlapping another, or overlapping the bars: the panel titles and the figure legend sit in clear space above the axes, the ordinate label clears the tick labels, the two-line 'normal form' tick wraps with clear space on both sides, and every x tick label is fully visible in both panels; the tallest bars sit clear of the dotted 1e-6 rule.",
+    "legibility": "Readable at a glance: two side-by-side panels at 1400x720 px on the declared 14x7.2 in canvas, 14 pt panel titles and tick labels, one shared ordinate label 'relative mismatch at step 1e-6' on a log axis spanning 1e-10 to 1e-6. Both states the section asks for are present as paired bars, red 'stalled 1e-2' and green 'certificate', so the stalled-versus-certificate comparison the figure exists for can be made. One exception: the right panel's title is 'geometry term to central difference' and omits the words 'replaced by', so read alone it states a comparison rather than the same assembly with that term substituted (see finding).",
+    "table_form": "The image does not depict a table in picture form: six direction classes compared across two states and two treatments on a log ordinate is a magnitude comparison the eye does better than a column of numbers, and the fragment carries the tables beside the figure rather than instead of them."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:28:31.994884+00:00",
+  "total": null
+}

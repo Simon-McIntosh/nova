@@ -13,6 +13,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib import patheffects  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.text import Text  # noqa: E402
 import numpy as np  # noqa: E402
@@ -71,13 +72,20 @@ def outline(axes, point, marker, size, color, zorder):
     )
 
 
-def render(state_path, row_path, output_path, preview_path, title):
+def render(state_path, row_path, output_path, preview_path, title, cells=None):
     import jax
     from tests.equilibrium import test_topology_read as fixture
 
     with np.load(state_path, allow_pickle=False) as archive:
         data = {name: np.asarray(archive[name]) for name in archive.files}
     row = json.loads(Path(row_path).read_text())
+    if "rows" in row:
+        matches = [
+            item for item in row["rows"] if cells is None or item["cells"] == cells
+        ]
+        if len(matches) != 1:
+            raise ValueError(f"no single row for cells={cells}")
+        row = matches[0]
     kind = row["kind"]
     _, analytic, wall, _, _ = fixture._analytic_inputs(kind)
     coordinates = data["nodes"]
@@ -94,18 +102,6 @@ def render(state_path, row_path, output_path, preview_path, title):
     feature = DEFAULT_INK.flux_color
     figure, axes = plt.subplots(figsize=CANVAS_INCHES, dpi=100)
     poloidal_axes(axes)
-    reference = draw_scattered_contours(
-        axes,
-        coordinates[:, 0],
-        coordinates[:, 1],
-        analytic_flux,
-        levels,
-        wall,
-        color=NEUTRAL,
-        linewidth=2.6,
-        zorder=3,
-    )
-    reference.set_linestyle("dashed")
     draw_scattered_contours(
         axes,
         coordinates[:, 0],
@@ -117,13 +113,37 @@ def render(state_path, row_path, output_path, preview_path, title):
         linewidth=3.0,
         zorder=4,
     )
+    # The two fields agree to about 1e-5 of the span, so the oracle is drawn
+    # above the route on a thinner dashed line rather than beneath it.
+    reference = draw_scattered_contours(
+        axes,
+        coordinates[:, 0],
+        coordinates[:, 1],
+        analytic_flux,
+        levels,
+        wall,
+        color=NEUTRAL,
+        linewidth=1.6,
+        zorder=6,
+    )
+    reference.set_linestyle((0, (4, 2.6)))
+    # A white casing keeps the dashes legible where they run along the route.
+    reference.set_path_effects(
+        [patheffects.withStroke(linewidth=3.4, foreground="white")]
+    )
     draw_wall(axes, wall[:, 0], wall[:, 1])
+    oracle = row["oracle"]
+    saddle = oracle.get("saddle_ratio")
+    # A limited row has no X-point; its second stationary point is the limiter
+    # contact, which must not be drawn with the saddle marker.
+    boundary_marker = "X" if saddle is not None else "s"
+    boundary_label = "X-point" if saddle is not None else "boundary"
     oracle_style = DEFAULT_INK.variant(
         axis_color=NEUTRAL,
         xpoint_color=NEUTRAL,
         axis_marker="^",
         axis_markersize=22,
-        xpoint_marker="X",
+        xpoint_marker=boundary_marker,
         xpoint_markersize=22,
     )
     draw_nulls(
@@ -131,11 +151,12 @@ def render(state_path, row_path, output_path, preview_path, title):
     )
     outline(axes, analytic_roots[0], "^", 16, NEUTRAL, 8)
     if len(analytic_roots) > 1:
-        outline(axes, analytic_roots[1], "X", 16, NEUTRAL, 8)
+        outline(axes, analytic_roots[1], boundary_marker, 16, NEUTRAL, 8)
     solved_style = DEFAULT_INK.variant(
         axis_color=feature,
         xpoint_color=feature,
         axis_markersize=12,
+        xpoint_marker=boundary_marker,
         xpoint_markersize=12,
         zorder_markers=9,
     )
@@ -147,13 +168,12 @@ def render(state_path, row_path, output_path, preview_path, title):
     margin = 0.04 * (upper - lower)
     axes.set_xlim(lower[0] - margin[0], upper[0] + margin[0])
     axes.set_ylim(lower[1] - margin[1], upper[1] + margin[1])
-    oracle = row["oracle"]
-    saddle = oracle.get("saddle_ratio")
-    xpoint = "n/a" if saddle is None else f"{saddle:.2e} a"
+    xpoint = "n/a" if saddle is None else f"{saddle:.2e}"
     caption = (
-        f"{title}   terminal fresh residual {row['fast']['fresh_residual']:.3e}, "
-        f"converged {row['fast']['converged']}; axis {oracle['axis_ratio']:.2e} a, "
-        f"X-point {xpoint}, boundary {oracle['boundary_ratio']:.2e} span"
+        f"{title}: residual {row['fast']['fresh_residual']:.2e}, converged "
+        f"{row['fast']['converged']}; errors axis {oracle['axis_ratio']:.2e}, "
+        f"X-point {xpoint}, boundary {oracle['boundary_ratio']:.2e}\n"
+        f"budgets 5e-4 for axis and X-point, 1e-4 for boundary"
     )
     handles = [
         Line2D([], [], color=feature, lw=3, label="fast-route flux"),
@@ -170,12 +190,12 @@ def render(state_path, row_path, output_path, preview_path, title):
             [],
             [],
             color=feature,
-            marker="X",
+            marker=boundary_marker,
             markersize=10,
             linestyle="none",
-            label="fast X-point",
+            label=f"fast {boundary_label}",
         ),
-        Line2D([], [], color=NEUTRAL, lw=2.6, ls="--", label="oracle flux"),
+        Line2D([], [], color=NEUTRAL, lw=1.6, ls="--", label="oracle flux"),
         Line2D(
             [],
             [],
@@ -190,11 +210,11 @@ def render(state_path, row_path, output_path, preview_path, title):
             [],
             [],
             color=NEUTRAL,
-            marker="X",
+            marker=boundary_marker,
             markersize=14,
             markerfacecolor="white",
             linestyle="none",
-            label="oracle X-point",
+            label=f"oracle {boundary_label}",
         ),
         Line2D(
             [],
@@ -212,8 +232,10 @@ def render(state_path, row_path, output_path, preview_path, title):
         frameon=False,
         fontsize=14,
     )
-    figure.text(0.5, 0.045, caption, ha="center", va="center", fontsize=14)
-    figure.subplots_adjust(left=0.02, right=0.98, top=0.87, bottom=0.1)
+    figure.text(
+        0.5, 0.055, caption, ha="center", va="center", fontsize=14, linespacing=1.35
+    )
+    figure.subplots_adjust(left=0.02, right=0.98, top=0.87, bottom=0.15)
     check_text(figure)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     preview_path.parent.mkdir(parents=True, exist_ok=True)
@@ -240,5 +262,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--preview", type=Path, required=True)
     parser.add_argument("--title", default="")
+    parser.add_argument("--cells", type=int)
     args = parser.parse_args()
-    render(args.state, args.row, args.output, args.preview, args.title)
+    render(args.state, args.row, args.output, args.preview, args.title, args.cells)

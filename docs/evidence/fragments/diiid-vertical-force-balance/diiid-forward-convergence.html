@@ -84,8 +84,8 @@ question, and the banked record answers it only partly:</p>
 
 <ul>
 <li><b>Frame 146 — holds, measured below.</b> Its kept terminal places the magnetic axis at
-<code>Z = +1.56 m</code>, which is <b>above</b> the top of the DIII-D limiter (the limiter spans
-<code>Z = &minus;1.664</code> to <code>+1.664 m</code>), with the closed core collapsed to
+<code>Z = +1.56 m</code>, which is <b>above</b> the top of the DIII-D limiter (the limiter ring spans
+<code>Z = &minus;1.359</code> to <code>+1.363 m</code>; the &plusmn;1.664 m figure is the solve grid's bounding box, not the wall), with the closed core collapsed to
 <code>8</code> cells and <code>0.043 m&sup2;</code> against a confined current of <code>0.039</code>&times;
 the target. A column driven to the top of the vessel carrying four percent of its current is a plasma lost
 by vertical displacement, and the residual it stalls at is the mismatch that displacement leaves.</li>
@@ -158,8 +158,7 @@ residual the gate reads is set by the state the seed enters, and no promotion th
 <p><b>Frame 137, limited seed.</b> The same mechanism, and the cleanest instance of it in the cohort: the
 mask difference is <code>11 &rarr; 0</code> and the residual repeats bit-identically from the first trip
 onward, the shipped policy settles at <code>ACTIVE_SET_SETTLED</code> after two trips at
-<code>5.683e-02</code>, the continued arm spends all sixteen trips at that same number, and all
-<code>24</code> inner steps are accepted. The plasma is present: axis at R=1.695, Z=&minus;0.136, inside the
+<code>5.683e-02</code>, and the continued arm spends all sixteen trips at that same number. Whether any inner step was attempted is not recorded: every stored arm's trace is padding, so the evidence that the map is stationary is the zero mask difference and the bit-identical residual, not a step count. The plasma is present: axis at R=1.695, Z=&minus;0.136, inside the
 wall, confined current <code>1.091</code>&times; the target over <code>383</code> closed core cells
 (<code>2.035 m&sup2;</code>). Its achieved topology is the diverted one, against its limited seed. This frame
 is the one the banked trajectory put at <code>6.24e-2</code>, and the re-solve reaches a lower number
@@ -183,7 +182,7 @@ frame 146 fail for two different reasons, and only the diverted one is a plasma 
 
 <p><b>What the four present-plasma frames have in common.</b> On 179, 44, 137 and 144's diverted seed the
 fixed-point map is stationary from the state the seed enters: the mask difference reaches zero and stays
-there, every attempted inner step is accepted, and the outer promotion returns the state it was given. The
+there, and the outer promotion returns the state it was given. The
 residual the gate reads is therefore a property of the seed, not of a path the loop failed to walk, and
 continuing the loop cannot lower it. Frame 146's diverted seed is the counter-example that makes the point:
 where the mask <i>does</i> move, the residual moves with it, which is what a working promotion looks like.
@@ -208,7 +207,7 @@ these terminals. Frames 137 and 146 are counted by the same code path in the pro
 <code>31.2 GB</code>). It reproduces the banked terminal to every printed digit &mdash;
 <code>6.2369e-2</code> &mdash; so the re-solve is the same state, and it shows the same structure: the mask
 moves <code>24 &rarr; 20 &rarr; 9 &rarr; 0</code>, the shipped policy settles at <code>5</code> trips, the
-continued arm spends sixteen at the identical residual, and all <code>24</code> inner steps are accepted.
+continued arm spends sixteen at the identical residual. No inner step count is claimed, for the reason given above.
 Its plasma is the weakest of the present-plasma set &mdash; axis at R=1.655, Z=&minus;0.442, 234 core cells,
 <code>0.709</code>&times; the target current &mdash; and it is confined, so this frame belongs with 179, 44,
 137's limited seed and 144's diverted seed, not with 146. With this arm every seed in the cohort is measured.
@@ -239,21 +238,44 @@ unconditionally, so the limited seed's equilibrium cannot reach the gate however
 </tbody>
 </table>
 
-<p><b>Verdict.</b> The limited state is <i>not</i> a distinct limited root the bank should have preferred:
-on both frames the limited seed's own terminal topology is <i>diverted</i>. What the bank discards is a
-lower-residual <i>diverted</i> terminal reached from the limited seed, at 15.3&times; and 21.7&times; below the
-terminal it keeps. It is a lower stall of the same topology, not a root of the other branch, and it is
-itself above the <code>1e-5</code> criterion on both frames. Preferring it would improve the residual
-without converging anything; the mechanism above is what has to be fixed.</p>
+<p><b>Which surface bounds each terminal.</b> Two surfaces compete to bound a plasma: the separatrix through the admitted X-point, and the largest closed surface that clears the wall. The inner one wins, so the comparison is between two flux values read off the same solved map &mdash; &psi; at the admitted saddle, and the largest &psi; any node of the governed 84-point limiter ring carries (<code>boundary_competition.py</code>, one read per stored arm, no solve run; the values below are the committed <code>docs/figures/diiid-forward-convergence/boundary-competition.json</code>). The larger bounds. Frame 144's limited seed refuses at axis identification, so it has no terminal to classify and the table carries nine arms:</p>
+
+
+<table>
+<thead><tr><th>frame</th><th>seed</th><th>&psi; at the axis</th><th>&psi; at the admitted saddle</th><th>&psi; at the limiter contact</th><th>bounding surface</th><th>measured class</th><th>contact point (R, Z) m</th><th>saddle inside the limiter?</th></tr></thead>
+<tbody>
+<tr><td>179</td><td>diverted</td><td><code>+0.0365</code></td><td><code>-1.3416</code></td><td><code>-0.3077</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
+<tr><td>179</td><td>limited</td><td><code>-0.1831</code></td><td><code>-1.5476</code></td><td><code>-1.3906</code></td><td>limiter</td><td><b>limited</b></td><td>(1.170, +1.363)</td><td>no</td></tr>
+<tr><td>44</td><td>diverted</td><td><code>+1.5380</code></td><td><code>-0.0498</code></td><td><code>+0.3419</code></td><td>limiter</td><td><b>limited</b></td><td>(1.428, -1.358)</td><td>yes</td></tr>
+<tr><td>44</td><td>limited</td><td><code>+1.6901</code></td><td><code>+0.4790</code></td><td><code>+0.2285</code></td><td>separatrix</td><td><b>diverted</b></td><td>(1.170, +1.363)</td><td>no</td></tr>
+<tr><td>137</td><td>diverted</td><td><code>+2.4925</code></td><td><code>+0.6655</code></td><td><code>+0.7311</code></td><td>limiter</td><td><b>limited</b></td><td>(1.401, -1.245)</td><td>yes</td></tr>
+<tr><td>137</td><td>limited</td><td><code>+1.7731</code></td><td><code>+0.0457</code></td><td><code>+0.2005</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
+<tr><td>144</td><td>diverted</td><td><code>+1.4820</code></td><td><code>+0.5325</code></td><td><code>+0.8402</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
+<tr><td>146</td><td>diverted</td><td><code>+6.4678</code></td><td><code>-1.9404</code></td><td><code>+3.5603</code></td><td>limiter</td><td><b>limited</b></td><td>(1.250, +1.363)</td><td>no</td></tr>
+<tr><td>146</td><td>limited</td><td><code>+1.8632</code></td><td><code>-0.0976</code></td><td><code>+0.0582</code></td><td>limiter</td><td><b>limited</b></td><td>(1.162, -1.359)</td><td>yes</td></tr>
+</tbody>
+</table>
+
+<p><b>Every terminal but one is bounded by the limiter.</b> The limiter ring carries more flux than the admitted saddle on eight of the nine arms, so the surface that closes first is the limiter-contact surface, and these are <b>limited</b> states. The solver's recorded <code>topology</code> class is a different quantity: it counts an admitted saddle and says nothing about which surface closes inside the other. The single diverted-bounding terminal is frame 44's limited seed, the only arm whose separatrix closes before the wall does.</p>
+
+<p><b>Verdict, re-derived from the bounding surface.</b> On <b>179 both terminals are limited</b> states: each is bounded by its limiter-contact surface, and the kept diverted-seed terminal is the worse of the two (<code>4.181e-01</code> against <code>2.726e-02</code>). The question the branch rule asks &mdash; diverted or limited &mdash; therefore has the same answer on both branches, so the bank's choice was between two limited stalls, and the 15.3&times; larger residual is a stall that a confined plasma sat at, not a topology it lost. On <b>44 the choice is inverted</b>: the kept terminal is limited (<code>4.276e+00</code>) and the discarded one is the cohort's only <b>diverted</b> terminal (<code>1.970e-01</code>), so the rule kept the wrong class as well as the worse residual, at 21.7&times;. Neither terminal is a root of the other branch, and neither is below <code>1e-5</code>, so preferring the discarded one would still converge nothing &mdash; but on 44 the bank's selection and the physics disagree, and a reader of the banked table would not know it.</p>
+
+<p><b>Resolution caveat.</b> The contact flux is sampled at the ring nodes through the solved 33&times;33 map, and the bounding level set is contoured on a cubic interpolant of that same field. The drawn surface can therefore close a grid cell or two from the marked contact node; the classification above rests on the sampled values, not on the drawn curve.</p>
+
+
 
 <h3>Panels</h3>
 
 <p>Each panel draws the frame's <b>measured</b> diverted terminal field as line contours, the EFIT label
-field on the same lattice at the same physical levels, the solved separatrix, the governed <b>DIII-D
+field on the same lattice at the same physical levels, the <b>bounding flux surface</b> &mdash; the limiter-contact level where the wall closes first and the
+separatrix level where it does not &mdash; with the saddle level set drawn thin and dashed on the arms where
+it is not the boundary, the governed <b>DIII-D
 limiter ring</b> read from the machine description (<code>description_2d[0].limiter.unit[0].outline</code>,
 84 points, R 1.017&ndash;2.351, Z &plusmn;1.36), the rectangular bound of the grid the solve was posed in
 (dotted, labelled "grid domain bound"), and the measured nulls: solid triangle for the solved axis, filled
-cross for the solved saddle, hollow triangle for the label axis. Inside-the-vessel claims are checked
+cross for the solved saddle, hollow triangle for the label axis and hollow cross for the label X-point,
+and a filled circle where the limiter contact was sampled. A second panel carries the arm's per-trip
+residual trajectory, with the mask difference annotated above each trip. Inside-the-vessel claims are checked
 against the limiter, never against the rectangle &mdash; a rectangle cannot support them. The caption carries the terminal residual, the converged flag and the presence read.
 The renderer refuses to write a panel whose text clips the canvas or overlaps another text artist. Each
 panel was rendered to PNG and inspected during this node's review; only the SVG is published, so the two
@@ -345,7 +367,7 @@ applied when the topology is free. Two edits, in this order:</p>
 <li><b>Carry the inner step-acceptance receipt.</b> Publish
 <code>attempted_newton_promotions</code> and <code>accepted_newton_promotions</code> per trip on
 <code>FixedPointResult</code> and through <code>ForwardSolveReceipt</code>. The counts are already
-accumulated on the solver's fixed point result (<code>fixed_point.py:4996-4997</code>), so this is a
+accumulated on the solver's fixed point result (<code>fixed_point.py:4995-4996</code>), so this is a
 carry-through on the receipt rather than a new measurement; the probe now reads them there. They must
 <b>not</b> be reconstructed from <code>globalisation_decisions</code>: that trace is a fixed-shape record
 padded with <code>NOT_EXECUTED</code> and nan, so its length is the padding and it reads 24 of 24 on an

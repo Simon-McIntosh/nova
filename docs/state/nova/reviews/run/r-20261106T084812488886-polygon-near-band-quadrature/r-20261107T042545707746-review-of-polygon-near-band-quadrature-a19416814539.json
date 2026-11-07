@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[second_residual]"
+  ],
+  "added_failures_note": "Derived from the reviewed run's baseline_suite and after_suite arm records in manifest.md and the logs they cite, not from prose. Edge arm: 11 FAILED ids at base and 11 at head, differing by exactly one row - head-only test_tangent_compiles_within_bound[second_residual] against base-only test_tangent_compiles_within_bound[channel_split]. Vertex arm: the same five ids in both arms. tests/biot/test_graded_layer_near_corner.py: 0 failures in both arms. tests/biot/test_vertex_edge_tangent_recurrences.py: the same two compile-ratio ids in both arms (2 failed each). The after_suite is at revision 03ef34709, before the reviewed head a1941681; the run's later head rerun at 7c3754325 reports a third recurrences failure, [regularised], recorded in the fragment line 258 but not in the after_suite arm, and that row is named in a finding rather than added here because the derivation is from the two armed records.",
+  "completed_at": "2026-11-07T04:34:30.749Z",
+  "dispatched_at": "2026-11-07T04:26:24Z",
+  "findings": [
+    {
+      "file": "tests/biot/test_edge_term_tangents.py",
+      "line": 241,
+      "severity": "non-blocking",
+      "text": "the new refusal test is run only in the worker's session transcript (resume-6.jsonl: 1 passed in 5.44 s) and in no committed gate log, because the manifest's after_suite arm is fixed at 03ef34709 which predates both this test and the reviewed head, so the gate receipt does not cover the added test."
+    },
+    {
+      "file": "scripts/prototypes/polygon_near_band/head_weighted_files.sh",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "the '# command:' header records a command that is not the one the script executes (it omits UV_PROJECT_ENVIRONMENT, the absolute interpreter and --basetemp) and never names the tree, and the file's only recorded execution (gate/head-weighted-files-at-7c3754325.log) truncated at 21 of 25 tests with no EXIT line."
+    },
+    {
+      "file": "scripts/prototypes/polygon_near_band/head_weighted_files.sh",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "the runner executes both merged-residual files in one pytest process sharing one basetemp, while the evidence the fragment cites came from two separate fresh processes, and the recurrences rows are compile-ratio medians measured with hits=0, so the committed runner does not regenerate the measurement it exists for."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html",
+      "line": 267,
+      "severity": "non-blocking",
+      "text": "the paragraph says the 3.05 head reading was taken in 125.02 s, but 3.05 comes from the 843.57 s recurrences run and the 125.02 s repeat reads 3.04, so the pacing comparison attributes a duration to the wrong sample."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html",
+      "line": 258,
+      "severity": "non-blocking",
+      "text": "the reviewed-head paragraph records a third added failure (test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[regularised]) that the run's after_suite arm does not carry because that arm is fixed at 03ef34709, so the run's recorded arms understate the head's failure delta by one."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to confine the polygon near-band quadrature to the targets that select it; at the reviewed head a1941681 nova/biot/polygonanalytic.py:730 still evaluates _weighted_root over the whole target array before xp.where selects the near band, and this delta's five commits add a refusal test, an equivalence verdict and documentation rather than any confinement.\nVERDICT done_when: the done_when asks for measured walls and near-band fractions, one owner of the weighted residual, and a base/head gate with zero added failures; the delta strengthens the gate with an enforced 1e-14 equivalence verdict (scripts/prototypes/polygon_near_band/jacobian_equivalence.py:104-121) and records the head rerun, but the armed after_suite remains at revision 03ef34709 and the head rerun reports 3 failed against a base arm's 2, so zero added failures is not asserted.\nVERDICT write_paths: read the reviewed manifest's declared set; all four paths in the delta (docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html, scripts/prototypes/polygon_near_band/head_weighted_files.sh, scripts/prototypes/polygon_near_band/jacobian_equivalence.py, tests/biot/test_edge_term_tangents.py) are inside it.\nVERDICT manifest: read; it records status complete, a baseline_suite at cb42f656 and an after_suite at 03ef34709, the three-device refutation of the confined bucket, and the head rerun whose recurrences arm adds a third failure; its after_suite arms were never re-measured at the reviewed head a1941681.\nVERDICT diff: read commit by commit from 9c8bc37e6 to a1941681; five commits touch exactly the four declared files (d4db07665 adds the paired+weight refusal test, a71807ee4 makes the equivalence harness exit nonzero, 7c3754325 corrects the H200 paragraph, a8936f089 adds the rerun runner, a19416814 records the head rerun) with 66 insertions and 1 deletion.\nCALL_SITES: nova/biot/polygonanalytic.py:765, nova/biot/polygonanalytic.py:1040, nova/biot/polygonarc.py:290\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:730 still evaluates _weighted_root over the whole target array before xp.where selects the near band, so the confinement the goal names is absent from the landed tree and the delta adds only evidence around the refutation.\nSCORE evidence: 13\nJUSTIFICATION evidence: scripts/prototypes/polygon_near_band/jacobian_equivalence.py:104-121 now enforces the bitwise-or-1e-14 clause and was exercised on all three branches, but the manifest's baseline_suite/after_suite pair sits at 03ef34709 and predates the reviewed head, and tests/biot/test_edge_term_tangents.py:241 runs only in the worker's session transcript, not in any committed gate log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all four delta paths (the fragment, head_weighted_files.sh, jacobian_equivalence.py and test_edge_term_tangents.py) are inside the manifest's declared write set with nothing added outside it.\nSCORE durability: 17\nJUSTIFICATION durability: tests/biot/test_edge_term_tangents.py:241 fails when the guard at nova/biot/gradedresidual.py:217 is removed (1 failed, AssertionError at line 244 in the recorded control) and passes with it restored, so it is an independent guard rather than a value compared against itself.\nSCORE fit: 17\nJUSTIFICATION fit: the added test follows the neighbouring tests/biot/test_edge_term_tangents.py:230 refusal-case idiom and jacobian_equivalence.py:104 follows the module's existing helper style, though head_weighted_files.sh:3 records a command that is not the one it runs.\nSCORE reuse: 20\nJUSTIFICATION reuse: the test exercises the existing owner nova/biot/gradedresidual.py:195, the equivalence harness reuses scripts/prototypes/polygon_near_band/measure.py, and the search over nova/ and scripts/ found no other owner of a bitwise-or-relative equivalence verdict.\nFINDING tests/biot/test_edge_term_tangents.py:241 non-blocking: the new refusal test is run only in the worker's session transcript (resume-6.jsonl: 1 passed in 5.44 s) and in no committed gate log, because the manifest's after_suite arm is fixed at 03ef34709 which predates both this test and the reviewed head, so the gate receipt does not cover the added test.\nFINDING scripts/prototypes/polygon_near_band/head_weighted_files.sh:3 non-blocking: the \"# command:\" header records a command that is not the one the script executes (it omits UV_PROJECT_ENVIRONMENT, the absolute interpreter and --basetemp) and never names the tree, and the file's only recorded execution (gate/head-weighted-files-at-7c3754325.log) truncated at 21 of 25 tests with no EXIT line.\nFINDING scripts/prototypes/polygon_near_band/head_weighted_files.sh:10 non-blocking: the runner executes both merged-residual files in one pytest process sharing one basetemp, while the evidence the fragment cites came from two separate fresh processes, and the recurrences rows are compile-ratio medians measured with hits=0, so the committed runner does not regenerate the measurement it exists for.\nFINDING docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html:267 non-blocking: the paragraph says the 3.05 head reading was taken in 125.02 s, but 3.05 comes from the 843.57 s recurrences run and the 125.02 s repeat reads 3.04, so the pacing comparison attributes a duration to the wrong sample.\nFINDING docs/evidence/fragments/nova-portfolio-replan/polygon-near-band-quadrature.html:258 non-blocking: the reviewed-head paragraph records a third added failure (test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[regularised]) that the run's after_suite arm does not carry because that arm is fixed at 03ef34709, so the run's recorded arms understate the head's failure delta by one.\n",
+  "review_run_id": "r-20261107T042545707746-review-of-polygon-near-band-quadrature-a19416814539",
+  "reviewed_base_sha": "9c8bc37e67f9a4d373effc3859768f74aa87d3c6",
+  "reviewed_head_sha": "a194168145399fccdfb09cdc94f6dc3272cc3046",
+  "reviewed_items": {
+    "call_sites": "nova/biot/polygonanalytic.py:765, nova/biot/polygonanalytic.py:1040, nova/biot/polygonarc.py:290",
+    "diff": "read commit by commit from 9c8bc37e6 to a1941681: five commits touch exactly the four declared files with 66 insertions and 1 deletion.",
+    "done_when": "the done_when asks for measured walls and near-band fractions, one owner of the weighted residual, and a base/head gate with zero added failures; the delta strengthens the gate with an enforced 1e-14 equivalence verdict and records the head rerun, but the armed after_suite remains at 03ef34709 and the head rerun reports 3 failed against a base arm's 2, so zero added failures is not asserted.",
+    "goal": "the node goal is to confine the polygon near-band quadrature to the targets that select it; at the reviewed head a1941681 nova/biot/polygonanalytic.py:730 still evaluates _weighted_root over the whole target array before xp.where selects the near band, and this delta adds a refusal test, an equivalence verdict and documentation rather than any confinement.",
+    "manifest": "it records status complete, a baseline_suite at cb42f656 and an after_suite at 03ef34709, the three-device refutation of the confined bucket, and the head rerun whose recurrences arm adds a third failure; its after_suite arms were never re-measured at the reviewed head a1941681.",
+    "write_paths": "all four delta paths (the fragment, head_weighted_files.sh, jacobian_equivalence.py and test_edge_term_tangents.py) are inside the declared write set."
+  },
+  "reviewed_run_id": "r-20261106T084812488886-polygon-near-band-quadrature",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T04:32:26+00:00",
+  "total": 96
+}

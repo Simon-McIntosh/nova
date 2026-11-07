@@ -466,6 +466,10 @@ def run_frame(
     receipt: dict[str, Any],
     output: Path,
     staged_steps: int,
+    branches: tuple[TopologyClass, ...] = (
+        TopologyClass.LIMITED,
+        TopologyClass.DIVERTED,
+    ),
 ) -> dict[str, Any]:
     started = time.perf_counter()
     prepared = _prepare_frame(frame, expansion)
@@ -493,7 +497,7 @@ def run_frame(
     }
     receipt["frames"][str(frame)] = frame_record
 
-    for topology_class in (TopologyClass.LIMITED, TopologyClass.DIVERTED):
+    for topology_class in branches:
         branch_name = topology_class.name.lower()
 
         def persist(arm_name, arm_record, _branch=branch_name):
@@ -552,6 +556,16 @@ def main() -> None:
     parser.add_argument("--artifact-dir", type=Path)
     parser.add_argument("--self-check", action="store_true")
     parser.add_argument(
+        "--branches",
+        nargs="+",
+        choices=("limited", "diverted"),
+        default=["limited", "diverted"],
+        help=(
+            "the topology branches to measure; a frame whose other branch is "
+            "already in the receipt can be completed without re-solving it"
+        ),
+    )
+    parser.add_argument(
         "--staged-steps",
         type=int,
         default=1,
@@ -572,6 +586,9 @@ def main() -> None:
     if not arguments.frames or arguments.output is None:
         parser.error("--frames and --output are required unless --self-check is given")
     configure_dtypes()
+    arguments.branch_classes = [
+        TopologyClass[name.upper()] for name in arguments.branches
+    ]
     output = arguments.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     receipt: dict[str, Any] = {
@@ -592,6 +609,7 @@ def main() -> None:
             receipt,
             output,
             arguments.staged_steps,
+            tuple(arguments.branch_classes),
         )
         receipt["frames"][str(frame)] = record
         receipt["peak_rss_kb"] = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)

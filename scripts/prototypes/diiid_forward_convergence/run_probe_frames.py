@@ -29,6 +29,13 @@ def main() -> None:
     parser.add_argument("--part-dir", type=Path, required=True)
     parser.add_argument("--artifact-dir", type=Path, required=True)
     parser.add_argument("--repository-root", type=Path, required=True)
+    parser.add_argument(
+        "--branches",
+        nargs="+",
+        choices=("limited", "diverted"),
+        default=None,
+        help="the branches to measure; the rest of the frame is left alone",
+    )
     arguments = parser.parse_args()
     arguments.part_dir.mkdir(parents=True, exist_ok=True)
     outcomes: list[dict[str, object]] = []
@@ -51,6 +58,8 @@ def main() -> None:
             "--artifact-dir",
             str(arguments.artifact_dir),
         ]
+        if arguments.branches:
+            command.extend(["--branches", *arguments.branches])
         started = time.perf_counter()
         completed = subprocess.run(
             command, cwd=arguments.repository_root, env=environment

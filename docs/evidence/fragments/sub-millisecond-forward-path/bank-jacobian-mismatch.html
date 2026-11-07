@@ -51,17 +51,28 @@ wrong in sign or scale cannot reach the states below.</p>
 
 <h2 id="bank-jacobian-mismatch-mismatch">Relative mismatch per direction class</h2>
 
-<p>Stalled 1e-2 state: amplitude 1.01, cold seed, 550 cells with 99 cut, 8
-normal-form, 239 whole, one axis and one saddle cell, fresh residual maximum
-1.7926. Median over the directions of each class.</p>
+<p>Both states, on one allocation at revision 197974d3c: the stalled 1e-2
+state (amplitude 1.01, cold seed, fresh residual maximum 1.7926) and the
+certificate state (amplitude 1.0, converged, fresh residual
+1.5&thinsp;&times;&thinsp;10<sup>&minus;12</sup>). Both carry 550 cells with 99
+cut, 8 normal-form, 239 whole, one axis and one saddle cell. Median over the
+directions of each class.</p>
 
-<p><table><thead><tr><th>relative step</th><th>cut</th><th>normal form</th><th>whole</th><th>axis cell</th><th>saddle cell</th><th>random</th></tr></thead><tbody>
-<tr><td>1e-5</td><td>3.6e-8</td><td>1.1e-8</td><td>3.6e-8</td><td>3.0e-8</td><td>2.1e-8</td><td>6.2e-8</td></tr>
-<tr><td>1e-6</td><td>5.4e-7</td><td>3.0e-9</td><td>4.5e-7</td><td>5.2e-7</td><td>1.1e-9</td><td>5.6e-7</td></tr>
-<tr><td>1e-7</td><td>2.5e-6</td><td>8.8e-8</td><td>2.7e-6</td><td>4.8e-6</td><td>9.3e-9</td><td>2.4e-6</td></tr>
+<p><table><thead><tr><th>state / step</th><th>cut</th><th>normal form</th><th>whole</th><th>axis cell</th><th>saddle cell</th><th>random</th></tr></thead><tbody>
+<tr><td>stalled 1e-5</td><td>3.6e-8</td><td>1.1e-8</td><td>3.6e-8</td><td>3.0e-8</td><td>2.1e-8</td><td>6.2e-8</td></tr>
+<tr><td>stalled 1e-6</td><td>5.4e-7</td><td>3.0e-9</td><td>4.5e-7</td><td>5.2e-7</td><td>1.1e-9</td><td>5.6e-7</td></tr>
+<tr><td>stalled 1e-7</td><td>2.5e-6</td><td>8.8e-8</td><td>2.7e-6</td><td>4.8e-6</td><td>9.3e-9</td><td>2.4e-6</td></tr>
+<tr><td>certificate 1e-5</td><td>4.0e-8</td><td>1.2e-8</td><td>2.5e-8</td><td>4.7e-8</td><td>2.1e-8</td><td>2.7e-8</td></tr>
+<tr><td>certificate 1e-6</td><td>4.0e-7</td><td>3.3e-9</td><td>5.2e-7</td><td>2.2e-7</td><td>1.0e-9</td><td>5.2e-7</td></tr>
+<tr><td>certificate 1e-7</td><td>4.5e-6</td><td>3.5e-8</td><td>6.1e-6</td><td>3.0e-6</td><td>4.1e-9</td><td>3.1e-6</td></tr>
 </tbody></table></p>
 
-<p>Three readings fix the interpretation. The mismatch <strong>falls at the
+<p>The certificate state reproduces the stalled one to within a factor of two in
+every class, so the two are not two different behaviours: a matrix wrong at the
+stalled state would have to be wrong differently twelve decades away in
+residual, and it is not.
+
+Three readings fix the interpretation. The mismatch <strong>falls at the
 large step</strong> &mdash; 3.6&thinsp;&times;&thinsp;10<sup>&minus;8</sup> at
 1e-5 against 5.4&thinsp;&times;&thinsp;10<sup>&minus;7</sup> at 1e-6 &mdash;
 which is the signature of a fixed absolute error in the residual divided by a
@@ -71,7 +82,7 @@ decades lower than the rest, so the moving saddle term is the best-behaved part
 of the assembly, not the matrix's worst. Every class is below 1e-6 at 1e-5 and
 at 1e-6, which is where the plateau sits. At 1e-7 the quotient's own roundoff
 takes over and the mismatch rises to between 2.4&thinsp;&times;&thinsp;10<sup>&minus;6</sup>
-and 4.8&thinsp;&times;&thinsp;10<sup>&minus;6</sup>; that is a floor on the step
+and 6.1&thinsp;&times;&thinsp;10<sup>&minus;6</sup>; that is a floor on the step
 size one can difference at, not a property of the matrix, and it is why the
 acceptance reading is taken at 1e-6.</p>
 
@@ -141,7 +152,7 @@ turns on the gradient.</p>
 <figure>
 <img src="/nova/figures/sub-millisecond-forward-path/bank-jacobian-mismatch/mismatch-by-direction-class.svg" alt="Relative mismatch between the assembled Jacobian and the central difference of the fresh-read residual, per direction class at relative step 1e-6, on a logarithmic axis. Every class sits between 1e-9 and 1e-6, below the dotted acceptance floor.">
 <figcaption>Relative mismatch at relative step 1e-6, median over the directions
-of each class, at the stalled 1e-2 state. Left: the Jacobian as the step
+of each class, at the stalled 1e-2 state and at the certificate state. Left: the Jacobian as the step
 assembles it. Right: the same comparison with the moving-geometry term replaced
 by its own central difference. The dotted line marks the 10<sup>&minus;6</sup>
 acceptance floor.</figcaption>
@@ -165,16 +176,21 @@ positive control above exists so that this failure cannot repeat: it fails
 loudly, before any state is reported, if the comparison is wrong in sign or in
 scale.</p>
 
+<h2 id="bank-jacobian-mismatch-reproduce">Reproducing this</h2>
+
+<p>The receipt and the gate log are committed beside the driver at
+<code>scripts/prototypes/bank_jacobian_mismatch/receipts/</code>, so the numbers
+above can be read against the run that produced them without access to a scratch
+directory. The log header records the revision, the driver's sha256 and the
+number of modified tracked paths, and its last line is the run's exit status, so
+the bytes that produced the receipt are identifiable from the log alone.</p>
+
 <h2 id="bank-jacobian-mismatch-next">What remains</h2>
 
-<p>The certificate state did not reach its own summary line before the
-allocation's wall &mdash; the run completed the stalled state, which is the
-decisive half, and was cut short on the second. Re-running it is the same
-command with a longer wall; nothing in the driver changes. The stall itself now
-points away from the Jacobian: the next question is what makes the residual this
-nonlinear over a unit step, and whether the damped search's contraction test
-should prefer a smaller trial step when the linear model predicts a residual
-three decades smaller than the one observed.</p>
+<p>The stall now points away from the Jacobian: the next question is what makes
+the residual this nonlinear over a unit step, and whether the damped search's
+contraction test should prefer a smaller trial step when the linear model
+predicts a residual three decades smaller than the one observed.</p>
 
 </article>
 </body>

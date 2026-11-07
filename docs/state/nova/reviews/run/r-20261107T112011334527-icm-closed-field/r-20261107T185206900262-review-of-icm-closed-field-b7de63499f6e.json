@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-07T19:10:09.923Z",
   "dispatched_at": "2026-11-07T18:54:38Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-sheet-tidy",
+      "recorded_at": "2026-11-07T19:24:23.931352+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_edge_sheet.py",

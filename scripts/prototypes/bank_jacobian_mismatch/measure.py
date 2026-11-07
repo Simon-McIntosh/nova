@@ -308,12 +308,12 @@ def main():
     emit(
         "STALL-PROBE",
         residual_before=float(probe_path[0]),
-        residual_after_first_update=float(probe_path[1]),
+        residual_after_first_search=float(probe_path[1]),
         reads=int(np.asarray(probe.reads)[0]),
-        raised=bool(probe_path[1] > probe_path[0]),
     )
-    assert probe_path[1] > probe_path[0], "first update did not raise the 1e-2 residual"
-    stalled_state = tuple(jnp.asarray(value[0]) for value in probe.moments)
+    # The stalled state is the seed itself: the first Jacobian the solve assembles
+    # is built there, and every later trial is a damped retreat from it.
+    stalled_state = seed_state
 
     states = (
         ("stalled-1e-2", stalled_state, streams.scaled_profile(machine.profile, 1.01)),

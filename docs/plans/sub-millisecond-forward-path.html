@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="220">
+<meta name="plan-version" content="221">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -754,7 +754,10 @@
     <div class="r-comment-body"><p>One batched step_jacobian_vector costs 107.29-107.41 ms of device time against 36.46-36.48 ms for one batched step_jacobian at 16 slices (break-even 0.34 iterations, forty products about 4292-4296 ms, 118 assemblies), and 1483.89-1484.29 ms against 1189.41-1190.02 ms lane-sequential at 128 slices (break-even 0.802), so the dense block is what the measurement favours and solve_batch/newton_step are unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261106T190602310356-review-of-bank-read-count-sensitivity-d23b1641d115-figure" data-who="reckon-build" data-when="2026-11-06T19:22:12.125Z">
-    <div class="r-comment-body"><p>[Figure review](/nova/figures/sub-millisecond-forward-path/bank-read-count-sensitivity/residual-history.svg) of the residual-history PNG: all six rubric items pass, no blocking finding, two non-blocking findings — the right-panel y limit 4e-11..2e-10 clips head&#x27;s update-2 residual (1.6897e-9) with no off-scale marker, and the left panel labels alternate decades only so its 1.15e-1 first point has no 10^-1 reference.</p></div>
+    <div class="r-comment-body"><p>[Figure review](/nova/figures/sub-millisecond-forward-path/bank-read-count-sensitivity/residual-history.svg) of the residual-history PNG: all six rubric items pass, no blocking finding, two non-blocking findings — the right-panel y limit 4e-11..2e-10 clips head's update-2 residual (1.6897e-9) with no off-scale marker, and the left panel labels alternate decades only so its 1.15e-1 first point has no 10^-1 reference.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261106T200806614152-review-of-bank-near-root-polish-ec674641d1b0-figure" data-who="reckon-build" data-when="2026-11-06T20:18:15.037Z">
+    <div class="r-comment-body"><p>[Figure review of r-20261106T190538050441-bank-near-root-polish at ec674641d1b075ab160e86d776d3ebc840852b80](/nova/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg): parsed read-only rubric record at both declared paths, all six items pass on the rendered 1399x720 PNG (text 7.94:1, grey mark 3.11:1, blue 5.37:1, zero clipped text, 85 px minimum x-label gap), and the plotted markers reproduce the run&#x27;s measured reads (base 8,8,7,15,9,8; head 20 on all six). Two non-blocking findings, both exempted: the nominal seed sets are joined by a continuous line that implies an ordering and a trend the independent perturbations do not have, and the y axis says &quot;Fresh batch reads&quot; without the sixteen-lane normalisation that the caption supplies. No blocking finding; no file was edited.</p></div>
 </div>
 </section>
 </main>

@@ -6,7 +6,7 @@
     "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/sub-millisecond-forward-path/bank-near-root-polish/batch-reads.svg (the inspected raster is the run's batch-reads.png render, written by report.py from the same figure object that save_checked publishes as the SVG)"
   },
   "attachment_note": "The single attached image-0.png was opened with Read and judged as a picture at its native 1399x720 and in 2x crops of the legend strip, the x tick-label band, the y axis and the right edge of the canvas. No vector source was opened, read, listed, searched, rendered or shown. The drawing script scripts/prototypes/bank_near_root_polish/report.py at the reviewed head ec674641 was read only for line anchors and to confirm which figure produced this raster; the caption was read from the run's evidence fragment at that head.",
-  "completed_at": "",
+  "completed_at": "2026-11-06T20:18:15.037Z",
   "dispatched_at": "2026-11-06T20:09:18Z",
   "figure_checks": {
     "caption_independence": "The caption is not a restatement of a title, because the figure carries no title; identity comes from the path and the caption. It states the sixteen-lane normalisation, the 1e-14 relative perturbation scale, the series encoding ('grey dashed is base; blue solid is the rejected fixed polish'), and that repeats appear only where counts differ. It is accurate about the drawing, with one nominal detail: it says the inspected rendering is '1400 by 720' while the delivered raster is 1399x720, a one-pixel difference in the canvas size that changes nothing a reader sees. The caption also correctly reports that only the SVG is committed.",

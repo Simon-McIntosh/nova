@@ -6,9 +6,9 @@ null sets are drawn in the ``nova.media`` vocabulary, the first wall is drawn
 from the governed limiter ring, and the caption carries the terminal residual
 and the converged flag.
 
-Frame 144 has no solved field: the solve refuses before a topology read.  Its
-panel shows the EFIT label contours and nulls with the wall, which is what that
-frame's evidence is.
+Frame 144's limited seed has no solved field: it refuses at axis identification,
+before any topology read, so that seed has no panel.  Frame 144's diverted seed
+solves and is drawn like every other frame.
 """
 
 from __future__ import annotations

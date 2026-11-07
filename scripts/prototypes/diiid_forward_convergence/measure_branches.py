@@ -15,10 +15,11 @@ Three arms run per branch:
 ``continued``     the same request with the mask-stability exits disabled, so the
                   loop spends its whole trip budget at a frozen mask instead of
                   declaring settlement.
-``staged``        the registered request capped at ``k`` active-set trips, for
-                  every ``k`` up to the default arm's trip count, which is how a
-                  per-promotion state is obtained at all: the public receipt
-                  persists the terminal state only.
+``staged``        the registered request capped at one active-set trip and at the
+                  default arm's own count, which is how a state at a promotion
+                  boundary is obtained at all: the public receipt persists the
+                  terminal state only.  Intermediate counts are not re-run; the
+                  default arm's history already carries them.
 
 The measurement is read-only: it imports the benchmark's builders and the public
 solver, and it writes nothing into the repository.  A frame that fails before a

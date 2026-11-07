@@ -81,10 +81,14 @@ def analyse(archive: Path, axis: np.ndarray, saddle: np.ndarray) -> dict[str, An
     psi_limiter = float(np.max(ring_flux))
 
     psi_axis = float(_sample(flux, axis[None, :])[0])
-    psi_saddle = float(_sample(flux, saddle[None, :])[0]) if saddle.size == 2 else float("nan")
+    psi_saddle = (
+        float(_sample(flux, saddle[None, :])[0]) if saddle.size == 2 else float("nan")
+    )
 
     saddle_inside = (
-        bool(inside_wall_units(saddle[None, :], limiter)[0]) if saddle.size == 2 else False
+        bool(inside_wall_units(saddle[None, :], limiter)[0])
+        if saddle.size == 2
+        else False
     )
     bounds_limiter = psi_limiter >= psi_saddle
     boundary_flux = psi_limiter if bounds_limiter else psi_saddle
@@ -124,10 +128,14 @@ def main() -> int:
                     continue
                 presence = arm.get("presence") or {}
                 axis = np.asarray(presence.get("axis_rz_m") or [], dtype=float)
-                saddle = np.asarray(arm.get("x_point_rz_m") or [], dtype=float).reshape(-1)
+                saddle = np.asarray(arm.get("x_point_rz_m") or [], dtype=float).reshape(
+                    -1
+                )
                 if axis.size != 2:
                     continue
-                archive = arguments.artifact_dir / pathlib_name(frame, branch_name, arm_name)
+                archive = arguments.artifact_dir / pathlib_name(
+                    frame, branch_name, arm_name
+                )
                 if not archive.exists():
                     continue
                 entry = analyse(archive, axis, saddle)
@@ -138,8 +146,10 @@ def main() -> int:
                 ] = entry
                 print(
                     f"frame {frame:>3s} {branch_name:8s} {arm_name:8s} "
-                    f"psi_axis={entry['psi_axis']:+.4f} psi_saddle={entry['psi_saddle']:+.4f} "
-                    f"psi_lim={entry['psi_limiter']:+.4f} bounds={entry['bounds']:10s} "
+                    f"psi_axis={entry['psi_axis']:+.4f} "
+                    f"psi_saddle={entry['psi_saddle']:+.4f} "
+                    f"psi_lim={entry['psi_limiter']:+.4f} "
+                    f"bounds={entry['bounds']:10s} "
                     f"class={entry['achieved_class']:8s} "
                     f"contact=({entry['contact_rz_m'][0]:.3f},{entry['contact_rz_m'][1]:+.3f})"
                 )

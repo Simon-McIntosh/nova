@@ -28,7 +28,12 @@ def merge(target_path: Path, parts: list[Path]) -> tuple[dict[str, Any], list[st
     target.setdefault("frames", {})
     notes: list[str] = []
     refused: list[str] = []
-    peak: dict[str, int] = dict.fromkeys(target["frames"], -1)
+    peak: dict[str, int] = {
+        frame: int(value)
+        for frame, value in (target.get("peak_rss_kb_by_frame") or {}).items()
+    }
+    for frame in target["frames"]:
+        peak.setdefault(frame, -1)
     for part_path in parts:
         part = _load(part_path)
         for frame, record in part.get("frames", {}).items():

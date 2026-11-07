@@ -206,7 +206,7 @@ def main() -> int:
     # sampling before the zeros are located.
     from scipy.interpolate import RectBivariateSpline
 
-    spline = RectBivariateSpline(radius, height, seed, kx=3, kz=3)
+    spline = RectBivariateSpline(radius, height, seed, kx=3, ky=3)
     refine = 4
     fine_radius = np.linspace(radius[0], radius[-1], (radius.size - 1) * refine + 1)
     fine_height = np.linspace(height[0], height[-1], (height.size - 1) * refine + 1)

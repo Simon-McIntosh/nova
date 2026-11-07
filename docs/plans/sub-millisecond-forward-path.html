@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="226">
+<meta name="plan-version" content="227">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -772,7 +772,10 @@
     <div class="r-comment-body"><p>[Figure review of the batch-width sweep](/nova/figures/sub-millisecond-forward-path/bank-batch-width/wall-per-slice.svg): read-only figure rubric all 6 items pass; two non-blocking findings, the two process series drawn in one colour and coinciding so only one trace is visible, and a y-axis spanning 0.8-26.6 ms that compresses the width trend into about 9 percent of the panel; neither blocks the figure's reading of 13.93 ms per slice at width 128 against the 1 ms target.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T045231403673-review-of-bank-reused-scale-krylov-9965b9a19f83-figure" data-who="reckon-build" data-when="2026-11-07T05:00:37.132Z">
-    <div class="r-comment-body"><p>figure review of r-20261107T032332010435-bank-reused-scale-krylov at 9965b9a19f83d: read-only rubric parsed, all six items pass, four non-blocking findings (tight legend margin, log-axis bar length, style canvas deviation, figure does not carry the brief&#x27;s base-versus-head 1 ms-target plot); no blocking defect.</p></div>
+    <div class="r-comment-body"><p>figure review of r-20261107T032332010435-bank-reused-scale-krylov at 9965b9a19f83d: read-only rubric parsed, all six items pass, four non-blocking findings (tight legend margin, log-axis bar length, style canvas deviation, figure does not carry the brief's base-versus-head 1 ms-target plot); no blocking defect.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T120426012019-review-of-bank-route-rows-f57db23618f2" data-who="reckon-build" data-when="2026-11-07T12:19:54.890Z">
+    <div class="r-comment-body"><p>review of bank-route-rows at f57db2361 scores goal_fidelity 13, evidence 13, scope_discipline 20, durability 8, fit 16, reuse 15 (total 85), with one blocking finding — the committed diverted-550.svg caption prints the boundary ratio in the wrong unit and the figure is stale against the head script that emits span — and two non-blocking findings (no limited 550-cell panel; gate receipt predates the head by two evidence commits)</p></div>
 </div>
 </section>
 </main>

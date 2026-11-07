@@ -1,0 +1,50 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T12:19:54.890Z",
+  "dispatched_at": "2026-11-07T12:06:29Z",
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg",
+      "line": 1996,
+      "severity": "blocking",
+      "summary": "the committed caption reads \"boundary 2.59e-05 a\" while boundary_ratio is the boundary-flux error over the flux span and render_panel.py:156 at this head already emits \"span\", so the figure is stale relative to its own generator and mislabels the unit of a precision claim the table prints as \"Boundary / span\"."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 113,
+      "severity": "non-blocking",
+      "summary": "the fragment carries one figure for the two 550-cell rows, and the done_when asks one panel per 550-cell row; the limited 550-cell row converged in seven updates but its archive was never written because the run raised at the oracle first, so no panel could be drawn without rebuilding a 329 s operator bank."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "the manifest's declared gate ran at 432c449be and the reviewed head is f57db2361, two evidence commits later, so the gate does not exercise the edits that state the diverted boundary margin and correct why the present arm did not re-run."
+    }
+  ],
+  "plan": "nova:sub-millisecond-forward-path",
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is fast-route convergence and oracle precision on the limited and diverted certificate rows beyond the diverted 550-cell seed; all four rows converge at head's logs (diverted-550 3 updates, diverted-2000 2, limited-550 7, limited-2000 2) and both diverted rows carry oracle ratios, but neither limited row carries any, so half of the goal's precision content is unmet.\nVERDICT done_when: done_when names the table of fast convergence and residual, oracle axis/X-point/boundary ratios against the budget, present status, lattice X-point gap, unpromoted flux gap and asymptote difference, plus one panel per 550-cell row; every number I re-derived from results/*.log and the cited present receipts holds exactly (diverted-550 axis 1.047e-5, X 9.255e-6, boundary 2.591e-5; diverted-2000 axis 2.083e-6, X 2.662e-6, boundary 3.721e-6; present 0.1938 Wb at realised 550 and 0.08986 Wb at realised 555; flux-gap matching minimum 4.8e-5 m, median 6.8 mm), but the limited rows carry no oracle ratios and the fragment carries one figure for two 550-cell rows.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_route_rows, docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html and docs/figures/sub-millisecond-forward-path/bank-route-rows; all six added files lie inside them and nothing else was touched.\nVERDICT manifest: read; it records the gate as results/gate-diverted-550.log ending EXIT=0 at revision 432c449be, names five measurement logs, and its artifacts line reconciles with that log's FINAL and ORACLE records; it declares no baseline_suite or after_suite arm, consistent with a node that changes no product code and no tests.\nVERDICT diff: read commit by commit from acff7939 to f57db2361; eleven commits, 4067 insertions and zero deletions across measure.py, render_panel.py, run.sh, job.sh, the evidence fragment and diverted-550.svg.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: measure.py:291 row_oracle returns saddle_ratio None for a limited row and no limited run archived one, so the fragment's two limited rows read \"not measured\" in the X-point column.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate at results/gate-diverted-550.log re-runs only the diverted 550-cell row and asserts nothing about scripts/prototypes/bank_route_rows/measure.py's table, leaving the other four rows resting on archived logs I verified separately.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --name-status acff7939 f57db2361` lists six added paths, every one inside the three declared write paths, with no product code or test file touched.\nSCORE durability: 8\nJUSTIFICATION durability: nothing in scripts/prototypes/bank_route_rows fails if support_read's convergence regresses; render_panel.py:33 check_text is the only guard that fires, and it guards layout rather than the measurement.\nSCORE fit: 16\nJUSTIFICATION fit: render_panel.py:20-25 draws through nova.media.ink and nova.media.poloidal and measure.py:30-31 imports the oracle and seed builders rather than copying them, though the landed diverted-550.svg carries a caption unit the head script no longer emits.\nSCORE reuse: 15\nJUSTIFICATION reuse: measure.py:298-330 re-derives the limited boundary by wall-flux argmax where the analytic read already produces it, and render_panel.py:33 repeats the per-prototype text check that no nova.media owner holds.\nFINDING docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg:1996 blocking: the committed caption reads \"boundary 2.59e-05 a\" while boundary_ratio is the boundary-flux error over the flux span and render_panel.py:156 at this head already emits \"span\", so the figure is stale relative to its own generator and mislabels the unit of a precision claim the table prints as \"Boundary / span\".\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:113 non-blocking: the fragment carries one figure for the two 550-cell rows, and the done_when asks one poloidal line-contour panel per 550-cell row; the limited 550-cell row converged in seven updates but its archive was never written because the run raised at the oracle first, so no panel could be drawn without rebuilding a 329 s operator bank.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:1 non-blocking: the manifest's declared gate ran at 432c449be and the reviewed head is f57db2361, two evidence commits later, so the gate does not exercise the edits that state the diverted boundary margin and correct why the present arm did not re-run.\n",
+  "review_run_id": "r-20261107T120426012019-review-of-bank-route-rows-f57db23618f2",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "f57db23618f24f13bb866b5c6d53f1ca9be7ec61",
+  "reviewed_run_id": "r-20261107T111216113482-bank-route-rows",
+  "reviewed_run_node": "bank-route-rows",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "section": "3",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T12:33:35.709042+00:00",
+  "total": 85
+}

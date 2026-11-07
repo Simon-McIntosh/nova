@@ -3,6 +3,11 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-07T19:18:37.033Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-bank-jacobian-mismatch-1af9c7e75d08",
+      "recorded_at": "2026-11-07T20:36:35.534801+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "repair-of-bank-jacobian-mismatch-1af9c7e75d08",

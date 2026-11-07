@@ -34,6 +34,9 @@ CASES = {
     "diverted": "diverted-single-null",
     "limited": "weak-rotation-reactor-static",
 }
+# The present route publishes only these certificate sizes; each fast-route
+# cell target maps to the nearest published row.
+PRESENT_CELLS = {550: -500, 1000: -1000, 2000: -2500, 2500: -2500}
 ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -213,11 +216,11 @@ def fast_route(built, max_steps=12):
     )
 
 
-def present_route(kind, cells, requested_cells=None):
+def present_route(kind, cells, requested_cells=None, root=None):
     """Run the certificate row through the default present route in-process."""
     import benchmarks.solovev_certificate as certificate
 
-    root = Path(sys.argv[0]).resolve().parent / "present"
+    root = root or Path("present")
     certificate.PART_ROOT = root / "parts"
     certificate.FIGURE_ROOT = root / "figures"
     certificate.DIAGNOSTIC_ROOT = root / "diagnostics"
@@ -229,7 +232,7 @@ def present_route(kind, cells, requested_cells=None):
         "--case",
         CASES[kind],
         "--requested-cells",
-        str(requested_cells or -cells),
+        str(requested_cells or PRESENT_CELLS[cells]),
     ]
     started = perf_counter()
     try:
@@ -237,7 +240,7 @@ def present_route(kind, cells, requested_cells=None):
     finally:
         sys.argv = saved
     part = json.loads(
-        certificate._part_path(CASES[kind], requested_cells or -cells).read_text()
+        certificate._part_path(CASES[kind], requested_cells or PRESENT_CELLS[cells]).read_text()
     )
     solver = part["solver"]
     render = part.get("render_data") or {}
@@ -261,7 +264,7 @@ def present_route(kind, cells, requested_cells=None):
         coordinates=np.asarray(render["coordinates_rz_m"]) if render else None,
         flux=np.asarray(render["terminal_flux_wb"]) if render else None,
         wall_units=render.get("wall_units_rz_m"),
-        part_path=str(certificate._part_path(CASES[kind], requested_cells or -cells)),
+        part_path=str(certificate._part_path(CASES[kind], requested_cells or PRESENT_CELLS[cells])),
     )
 
 
@@ -362,7 +365,12 @@ def main():
         "metric_path": str(metric_path),
     }
     if args.present:
-        present = present_route(args.kind, args.cells, args.present_cells)
+        present = present_route(
+            args.kind,
+            args.cells,
+            args.present_cells or PRESENT_CELLS[args.cells],
+            args.output.parent / "present",
+        )
         row["present"] = {k: v for k, v in present.items() if k not in ("coordinates", "flux")}
         topology_res = present.get("topology") or {}
         x_point = topology_res.get("x_point_rz_m")

@@ -118,40 +118,30 @@ def _conic_rings(
     return rings, jnp.where(live, rings.shape[1], 0), fragments.valid
 
 
-class _ConicRingGeometry(NamedTuple):
-    """Direction-independent conic ring geometry shared by every direction."""
-
-    local: jax.Array
-    count: jax.Array
-    slot: jax.Array
-    pitch: jax.Array
-    coefficient: jax.Array
-    parameter: jax.Array
-    interval_x: jax.Array
-    edge: jax.Array
-    edge_slope: jax.Array
-    live_edge: jax.Array
-    edge_y: jax.Array
-    lower_y: jax.Array
-    upper_y: jax.Array
-    polygon_lower: jax.Array
-    polygon_upper: jax.Array
-    bottom: jax.Array
-    top: jax.Array
-    live: jax.Array
-
-
-
-def _conic_ring_geometry(vertices, count, centre, pitch, coefficient, selected, segments):
-    """Assemble the ring geometry that no tangent direction changes."""
+def _conic_ring_tangents(
+    vertices,
+    count,
+    centre,
+    pitch,
+    coefficient,
+    tangent,
+    selected,
+    segments,
+):
+    """Move each sampled conic ring vertex by the implicit root rule."""
     local = (vertices - centre) / pitch
     fragments = topology.quadratic_cell_fragments(
         local, count, coefficient, selected.shape[0]
     )
+    _, break_speed = topology.quadratic_slice_break_tangent(
+        local, count, coefficient, tangent
+    )
     left, right = fragments.slice_breaks[:-1], fragments.slice_breaks[1:]
+    left_speed, right_speed = break_speed[:-1], break_speed[1:]
     parameter = 0.5 * (1 - jnp.cos(jnp.linspace(0.0, jnp.pi, segments + 1)))
     x = left[:, None] + (right - left)[:, None] * parameter
     interval_x = _inward_interval_points(x, left, right)
+    x_speed = left_speed[:, None] + (right_speed - left_speed)[:, None] * parameter
     bottom, top, _ = topology._positive_vertical_intervals(
         local, count, coefficient, interval_x
     )
@@ -174,46 +164,6 @@ def _conic_ring_geometry(vertices, count, centre, pitch, coefficient, selected, 
     edge_slope = edge[:, 1] / jnp.where(edge[:, 0] != 0, edge[:, 0], 1)
     lower_y = jnp.min(jnp.where(live_edge, edge_y, jnp.inf), axis=-1)
     upper_y = jnp.max(jnp.where(live_edge, edge_y, -jnp.inf), axis=-1)
-    labels = fragments.slice_labels
-    live = (labels >= 0) & selected[jnp.maximum(labels, 0)]
-    live &= (right > left)[:, None]
-    return _ConicRingGeometry(
-        local=local,
-        count=count,
-        slot=slot,
-        pitch=pitch,
-        coefficient=coefficient,
-        parameter=parameter,
-        interval_x=interval_x,
-        edge=edge,
-        edge_slope=edge_slope,
-        live_edge=live_edge,
-        edge_y=edge_y,
-        lower_y=lower_y,
-        upper_y=upper_y,
-        polygon_lower=polygon_lower,
-        polygon_upper=polygon_upper,
-        bottom=bottom,
-        top=top,
-        live=live,
-    )
-
-
-def _conic_ring_velocity(geometry, tangent):
-    """Move each sampled conic ring vertex by the implicit root rule."""
-    local = geometry.local
-    count = geometry.count
-    edge = geometry.edge
-    slot = geometry.slot
-    interval_x = geometry.interval_x
-    coefficient = geometry.coefficient
-    _, break_speed = topology.quadratic_slice_break_tangent(
-        local, count, coefficient, tangent
-    )
-    left_speed, right_speed = break_speed[:-1], break_speed[1:]
-    x_speed = (
-        left_speed[:, None] + (right_speed - left_speed)[:, None] * geometry.parameter
-    )
     probe = interval_x + 1e-9 * jnp.sign(x_speed)
     probe_fraction = (probe[..., None] - local[:, 0]) / jnp.where(
         edge[:, 0] != 0, edge[:, 0], 1
@@ -226,19 +176,17 @@ def _conic_ring_velocity(geometry, tangent):
     )
 
     def owning_edge(bound):
-        near = geometry.live_edge & (
-            jnp.abs(geometry.edge_y - bound[..., None]) < 1e-8
-        )
+        near = live_edge & (jnp.abs(edge_y - bound[..., None]) < 1e-8)
         moving = near & forward_edge
         candidates = jnp.where(jnp.any(moving, axis=-1, keepdims=True), moving, near)
-        return jnp.argmin(
-            jnp.where(candidates, jnp.abs(geometry.edge_slope), jnp.inf), axis=-1
-        )
+        return jnp.argmin(jnp.where(candidates, jnp.abs(edge_slope), jnp.inf), axis=-1)
 
     # At a polygon vertex, use the edge entered as the slice moves. Two edges
     # share the same height there, so a raw argmin/argmax can flip on roundoff.
-    lower_speed = geometry.edge_slope[owning_edge(geometry.lower_y)] * x_speed
-    upper_speed = geometry.edge_slope[owning_edge(geometry.upper_y)] * x_speed
+    lower_edge = owning_edge(lower_y)
+    upper_edge = owning_edge(upper_y)
+    lower_speed = edge_slope[lower_edge] * x_speed
+    upper_speed = edge_slope[upper_edge] * x_speed
 
     def vertical_speed(y):
         x_cell = interval_x[..., None]
@@ -262,8 +210,8 @@ def _conic_ring_velocity(geometry, tangent):
         )
         # A conic root at a polygon vertex belongs to the polygon edge. The
         # two interval evaluations can differ at this degenerate endpoint.
-        on_lower = jnp.abs(y - geometry.polygon_lower[..., None]) < 1e-8
-        on_upper = jnp.abs(y - geometry.polygon_upper[..., None]) < 1e-8
+        on_lower = jnp.abs(y - polygon_lower[..., None]) < 1e-8
+        on_upper = jnp.abs(y - polygon_upper[..., None]) < 1e-8
         return jnp.where(
             on_lower,
             lower_speed[..., None],
@@ -271,43 +219,21 @@ def _conic_ring_velocity(geometry, tangent):
         )
 
     lower_velocity = jnp.stack(
-        (
-            jnp.broadcast_to(x_speed[..., None], geometry.bottom.shape),
-            vertical_speed(geometry.bottom),
-        ),
+        (jnp.broadcast_to(x_speed[..., None], bottom.shape), vertical_speed(bottom)),
         axis=-1,
     )
     upper_velocity = jnp.stack(
-        (
-            jnp.broadcast_to(x_speed[..., None], geometry.top.shape),
-            vertical_speed(geometry.top),
-        ),
+        (jnp.broadcast_to(x_speed[..., None], top.shape), vertical_speed(top)),
         axis=-1,
     )
     velocity = jnp.transpose(
         jnp.concatenate((lower_velocity, upper_velocity[:, ::-1]), axis=1),
         (0, 2, 1, 3),
-    ).reshape(-1, 2 * (geometry.parameter.shape[0]), 2)
-    return jnp.where(
-        geometry.live.reshape(-1, 1, 1), geometry.pitch * velocity, 0.0
-    )
-
-
-def _conic_ring_tangents(
-    vertices,
-    count,
-    centre,
-    pitch,
-    coefficient,
-    tangent,
-    selected,
-    segments,
-):
-    """Move each sampled conic ring vertex by the implicit root rule."""
-    geometry = _conic_ring_geometry(
-        vertices, count, centre, pitch, coefficient, selected, segments
-    )
-    return _conic_ring_velocity(geometry, tangent)
+    ).reshape(-1, 2 * (segments + 1), 2)
+    labels = fragments.slice_labels
+    live = (labels >= 0) & selected[jnp.maximum(labels, 0)]
+    live &= (right > left)[:, None]
+    return jnp.where(live.reshape(-1, 1, 1), pitch * velocity, 0.0)
 
 
 def _closed_normal_rings(loop, vertices, count):
@@ -748,15 +674,8 @@ def book_tangent_channels(
     quadrature,
     booked,
     boundary_channels,
-    *,
-    shared_ring_geometry=True,
 ):
-    """Evaluate every local booking channel over shared cell polygons.
-
-    ``shared_ring_geometry`` builds each cut cell's conic ring geometry once and
-    reuses it for every channel direction. Passing it false rebuilds that
-    geometry per direction, which is the reference the shared form matches.
-    """
+    """Evaluate every local booking channel over shared cell polygons."""
     cells, samples = psi.shape
     channels = psi_tangent.shape[0]
     if psi_tangent.shape != (channels, cells, samples):
@@ -856,32 +775,18 @@ def book_tangent_channels(
                 read.fragment_selected[index],
                 quadrature.segments,
             )
-            if shared_ring_geometry:
-                ring_geometry = _conic_ring_geometry(
+            velocity = jax.vmap(
+                lambda direction: _conic_ring_tangents(
                     vertices,
                     count,
                     centre,
                     geometry.pitch[index],
                     signed[index],
+                    direction,
                     read.fragment_selected[index],
                     quadrature.segments,
                 )
-                velocity = jax.vmap(
-                    lambda direction: _conic_ring_velocity(ring_geometry, direction)
-                )(signed_rate[boundary_channels, index])
-            else:
-                velocity = jax.vmap(
-                    lambda direction: _conic_ring_tangents(
-                        vertices,
-                        count,
-                        centre,
-                        geometry.pitch[index],
-                        signed[index],
-                        direction,
-                        read.fragment_selected[index],
-                        quadrature.segments,
-                    )
-                )(signed_rate[boundary_channels, index])
+            )(signed_rate[boundary_channels, index])
             with xla_metadata.set_xla_metadata(tangent_site="interior:conic"):
                 value = live_rings(index, rings, counts, velocity)
             return jnp.where(valid, value, jnp.nan)

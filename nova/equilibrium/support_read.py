@@ -1060,15 +1060,7 @@ class NewtonStep(NamedTuple):
 
 
 def _local_booking_sensitivities(
-    operands,
-    moments,
-    support,
-    profile,
-    density_gradient,
-    quadrature,
-    booked,
-    *,
-    shared_ring_geometry=True,
+    operands, moments, support, profile, density_gradient, quadrature, booked
 ):
     """Differentiate one booking against its local flux and level inputs."""
     cells, samples = operands.sample_index.shape
@@ -1087,7 +1079,7 @@ def _local_booking_sensitivities(
         * ((indices >= samples) & (indices < samples + 6))[:, None, None],
         (channels, cells, 6),
     )
-    arguments = (
+    return current.book_tangent_channels(
         psi,
         psi_direction,
         support.reading,
@@ -1101,9 +1093,6 @@ def _local_booking_sensitivities(
         booked,
         jnp.concatenate((jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))),
     )
-    if shared_ring_geometry:
-        return current.book_tangent_channels(*arguments)
-    return current.book_tangent_channels(*arguments, shared_ring_geometry=False)
 
 
 _FRESH_GEOMETRY_NODE_CAPACITY = 3
@@ -1119,7 +1108,6 @@ def step_jacobian(
     booked=None,
     *,
     fresh_geometry: bool = False,
-    shared_ring_geometry: bool = True,
 ):
     """Compose the bank with closed-form cell-local booking sensitivities.
 
@@ -1150,15 +1138,6 @@ def step_jacobian(
         density_gradient,
         local_quadrature,
         local_booked,
-    ) if shared_ring_geometry else _local_booking_sensitivities(
-        operands,
-        moments,
-        support,
-        profile,
-        density_gradient,
-        local_quadrature,
-        local_booked,
-        shared_ring_geometry=False,
     )
     cells = moments[0].size
 

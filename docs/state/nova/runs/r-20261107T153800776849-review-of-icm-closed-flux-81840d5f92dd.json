@@ -302,6 +302,44 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "71ae7939359f9673c6ecf3e4c6a34568d3ef2645",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 504,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261107T153800776849-review-of-icm-closed-flux-81840d5f92dd",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 504,
+        "path": "/tmp/reckon-crew-scratch/r-20261107T153800776849-review-of-icm-closed-flux-81840d5f92dd"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/review-of-icm-closed-flux-81840d5f92dd",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

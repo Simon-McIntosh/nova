@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="233">
+<meta name="plan-version" content="234">
 <meta name="plan-modified" content="2026-11-07">
 </head>
 <body>
@@ -793,7 +793,10 @@
     <div class="r-comment-body"><p>sub-millisecond-forward-path §3 — independent review of run r-20261107T133413665344-bank-warm-stall at base 5f34f03c / head 9eb880bfeea6d2a30d4d96946407c96221311c83: scores goal_fidelity 17, evidence 10, scope_discipline 18, durability 7, fit 15, reuse 11 (total 78); 8 findings, 3 blocking (the fragment's 7-20x per-update trial ratio is contradicted by its own table's 1.30-25.94x range; the figure's tolerance label is clipped out of the rendered canvas by plot.py:57; the manifest's tests line carries unsubstituted &lt;run&gt;/&lt;worktree&gt; placeholders).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T154619090298-review-of-bank-warm-stall-22ca7d05a9ab" data-who="reckon-build" data-when="2026-11-07T16:14:45.260Z">
-    <div class="r-comment-body"><p>independent review of r-20261107T133413665344-bank-warm-stall scored over base 9eb880bfeea6d2a30d4d96946407c96221311c83..head 22ca7d05a9abdef7369b69fa856f976bbfe4d1db; two blocking findings on the fragment&#x27;s warm-against-cold claims and two non-blocking.</p></div>
+    <div class="r-comment-body"><p>independent review of r-20261107T133413665344-bank-warm-stall scored over base 9eb880bfeea6d2a30d4d96946407c96221311c83..head 22ca7d05a9abdef7369b69fa856f976bbfe4d1db; two blocking findings on the fragment's warm-against-cold claims and two non-blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T190115545235-review-of-bank-jacobian-mismatch-1af9c7e75d08" data-who="reckon-build" data-when="2026-11-07T19:18:37.033Z">
+    <div class="r-comment-body"><p>review of run r-20261107T152015525295-bank-jacobian-mismatch at 1af9c7e75d082d97b0c681cdfb0e20abae2b45c4: scored 14/6/18/7/15/14 with three blocking findings (a false 1e-6 ceiling claim in the fragment, the certificate-state half of the done-when absent, and a gate log with no EXIT= line whose revision header predates the code that produced it).</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T19:08:40Z",
+  "figures_reviewed": [
+    "docs/figures/sub-millisecond-forward-path/bank-jacobian-mismatch/mismatch-by-direction-class.svg"
+  ],
+  "findings": [
+    {
+      "disposition": "folded",
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "folded_into": "the follow-on node that re-runs the certificate-state half; the title is a one-line string change there",
+      "id": "fdd93c8d7db",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The right panel title is 'geometry term to central difference', which omits 'replaced by'. As rendered, a reader sees a headline that reads as a comparison of the geometry term against a central difference, not as the same assembly with that term substituted by its own central difference. The caption disambiguates, but the panel title alone misstates what the panel shows."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-mismatch/mismatch-by-direction-class.svg",
+      "folded_into": "the follow-on node that re-runs the certificate-state half of bank-jacobian-mismatch with a longer wall (same command, no driver change), after which the same plot draws both states from the colour map that already defines 'certificate'",
+      "id": "fc2290a6318",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure carries one state only. The section 3 brief asks for relative mismatch per direction class at the stalled and the certificate state, and the rendered PNG shows a single bar per class in each panel, under a one-entry legend reading 'stalled 1e-2'. The certificate state is absent because its measurement was cut short by the allocation wall, and the caption and fragment say so honestly; the consequence is that the reader cannot see the stalled-versus-certificate comparison the figure was commissioned for."
+    },
+    {
+      "disposition": "exempted",
+      "exempted_reason": "colour is a one-line change in one constant and does not affect whether the figure can be read; the next node that redraws this figure to add the certificate state picks the feature colour under the rule then",
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "id": "f4a442d7709",
+      "line": 27,
+      "severity": "non-blocking",
+      "summary": "The stalled-state bars are drawn in #c0392b, a saturated red, while every bar in both panels sits below the acceptance floor of 1e-6. The repository's plotting rules reserve red for a limit being broken, so the colour signals a failure the data do not show: the panels' message is that the assembled Jacobian is inside the floor across every class."
+    },
+    {
+      "disposition": "folded",
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "folded_into": "the same follow-on node that redraws the figure with the certificate state, at which point the legend has two entries and earns its place",
+      "id": "ff027bb3076",
+      "line": 74,
+      "severity": "non-blocking",
+      "summary": "The figure-level legend carries a single entry, 'stalled 1e-2', which duplicates what the caption already states and spends the top margin on a distinction with nothing to distinguish. With one series the state could be named in the caption alone, or directly on the panel, freeing the space and removing the implication that a second series was meant to be there."
+    }
+  ],
+  "project": "nova",
+  "review": {
+    "classes": [
+      "cut",
+      "normal form",
+      "whole",
+      "axis",
+      "saddle",
+      "random"
+    ],
+    "note": "Read-only figure review. Judged only from the rendered PNG named in the review brief; the drawing script was read for anchoring only. No file was edited, redrawn or relabelled.",
+    "panels": [
+      "Jacobian as assembled",
+      "geometry term to central difference"
+    ],
+    "rendered_artifact": "image-0.png, 1400x720 px"
+  },
+  "review_run_id": "r-20261107T190541640120-review-of-bank-jacobian-mismatch-1af9c7e75d08-figure",
+  "reviewed_base_sha": "e4d38036794fac0279f86d64fbf09ecb95db1e74",
+  "reviewed_head_sha": "1af9c7e75d082d97b0c681cdfb0e20abae2b45c4",
+  "reviewed_run_id": "r-20261107T152015525295-bank-jacobian-mismatch",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Text clears its background: near-black tick and axis labels on white, and the dark-red bars read cleanly against white at their full height. No label is greyed or washed out.",
+    "data_ink": "The data carry the weight: twelve solid bars over six direction classes and two panels, one dotted acceptance-floor line at 1e-6, no gradients, shadows or decorative fills. The only redundancy is a one-entry legend, which the caption already supplies (see finding).",
+    "decoration": "No gradient, no background fill, no gridlines; top and right spines are removed and the only added rule is the dotted 1e-6 acceptance floor, whose extent is itself data and which the caption names.",
+    "label_collision": "No label is clipped, overlapping another, or over the bars: panel titles and the figure legend sit in clear space above the axes, the ordinate label clears the tick labels, the two-line 'normal form' tick wraps with clear space beneath it, and the x tick labels are fully visible in both panels.",
+    "legibility": "Readable at a glance: two panels at 1400x720 px, 14 pt panel titles and tick labels, 16 pt shared ordinate label, log ordinate spanning 1e-10 to just above 1e-6. One exception: the right panel's headline, 'geometry term to central difference', drops the words 'replaced by' and so reads as a comparison of the geometry term against a central difference rather than as the same comparison with that term substituted (see finding).",
+    "table_form": "The image does not depict a table in picture form: six direction classes compared across two treatments on a log ordinate is a magnitude comparison the eye does better than a column of numbers, and the brief asks for this figure beside the tables rather than instead of them."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:19:30.061685+00:00",
+  "total": null
+}

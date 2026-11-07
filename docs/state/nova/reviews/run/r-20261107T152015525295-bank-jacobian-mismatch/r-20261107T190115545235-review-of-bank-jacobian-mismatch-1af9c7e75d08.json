@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T19:18:37.033Z",
+  "dispatched_at": "2026-11-07T19:05:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",
+      "line": "70",
+      "severity": "blocking",
+      "text": "the fragment states every class lands below 1e-6 at every step, but its own receipt gives 2.45e-6 (cut), 2.69e-6 (whole), 4.77e-6 (axis) and 2.65e-6 (random) at relative step 1e-7, and the headline at line 13 saying 1e-7 to 1e-9 is two decades below that maximum, so the record's accept verdict rests on numbers it contradicts."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",
+      "line": "165",
+      "severity": "blocking",
+      "text": "the done-when requires the certificate state beside the stalled one, but titan2/mismatch.json holds one state and titan2/measure.log stops at the stalled STATE line, so half the required comparison, its table and its half of the figure are absent."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_mismatch/run_h200.sh",
+      "line": "22",
+      "severity": "blocking",
+      "text": "the gate log titan2/measure.log has no EXIT= line because the run died before this echo, so the gate status is unread; and its revision header reads 869f1fd81 while the POSITIVE_CONTROL line it carries is produced by code first added in 1af9c7e75, so the log cannot be tied to the reviewed head."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_mismatch/measure.py",
+      "line": "145",
+      "severity": "non-blocking",
+      "text": "positive_control computes its own quotient as matrix @ plus minus matrix @ minus and never calls the fresh_cd construction at measure.py:250, so the negation and step-scale defects it claims to guard would have passed it."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_mismatch/measure.py",
+      "line": "257",
+      "severity": "non-blocking",
+      "text": "the term split switches only the booking and moving-geometry contributions, leaving the bank operator, edge intervals, boundary and axis flux and current normalisation that the brief names never individually differentiated."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html",
+      "line": "174",
+      "severity": "non-blocking",
+      "text": "the fragment closes an article tag it never opens, which breaks the composed record's markup."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_mismatch/plot.py",
+      "line": "68",
+      "severity": "non-blocking",
+      "text": "each panel is titled inline where the figure caption is meant to carry that identity, and the stalled series is drawn in red, which the style reserves for a limit being broken."
+    },
+    {
+      "file": "manifest.md",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "status reads complete while the checkpoint on the same line says the certificate half is the only remaining work, and tests names a direct measure.py invocation where the log header records run_h200.sh, so the recorded gate cannot be re-run as written."
+    },
+    {
+      "file": "manifest.md",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "the done-when specifies one H200 and the sole measurement ran on a Tesla P100 (titan job 1308028); the receipt discloses the device, but the evidence does not meet the done-when's own wording."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to name the Jacobian term that disagrees with the fresh residual at the stalled 1e-2 state; scripts/prototypes/bank_jacobian_mismatch/measure.py:250 and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:8 conclude that no term disagrees (1e-7 to 1e-9) and that the stall is residual curvature over a unit step.\nVERDICT done_when: the done_when requires tables and a figure at both the stalled and the certificate state on one H200; titan2/mismatch.json carries a single state, stalled-1e-2, measured on a P100, the figure draws one series, and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:165 concedes the certificate half did not run.\nVERDICT write_paths: read the manifest's three declared paths; all six changed files (measure.py, report.py, plot.py, run_h200.sh, the fragment, the svg) sit inside them and nothing else is touched.\nVERDICT manifest: read; it records status complete beside a checkpoint saying the certificate half remains, names tests as a direct python invocation the log header contradicts, and its test_logs file ends without an EXIT= line.\nVERDICT diff: read all ten commits against e4d3803; six files, 2838 insertions, every hunk inside the declared scope, and the head commit adds the positive control and the corrected quotient that the 19:43 receipt predates.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: measure.py:250 finds the assembled matrix correct to 1e-7..1e-9 and names no disagreeing term, which answers the goal by exclusion rather than by the per-term split the brief asked for.\nSCORE evidence: 6\nJUSTIFICATION evidence: titan2/mismatch.json holds one state of the two the done-when names, and docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:70 asserts a 1e-6 ceiling its own table breaks at 1e-7.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the six files in the diff all sit under the three paths declared at manifest.md:3 and no product code or test is touched.\nSCORE durability: 7\nJUSTIFICATION durability: measure.py:145 positive_control rebuilds the quotient inline instead of calling the measurement path, so it cannot redden on a regression in measure.py:250.\nSCORE fit: 15\nJUSTIFICATION fit: measure.py follows the surrounding prototype convention (configure_dtypes first, emit/HEADER, ruff noqa E402) but the fragment closes an unopened article at bank-jacobian-mismatch.html:174.\nSCORE reuse: 14\nJUSTIFICATION reuse: scripts/prototypes/bank_newton_converge/directional.py already central-difference the fresh-read residual and the new driver re-implements that plumbing rather than importing it.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:70 blocking: the fragment states every class lands below 1e-6 at every step, but its own receipt gives 2.45e-6 (cut), 2.69e-6 (whole), 4.77e-6 (axis) and 2.65e-6 (random) at relative step 1e-7, and the headline at line 13 saying 1e-7 to 1e-9 is two decades below that maximum, so the record's accept verdict rests on numbers it contradicts.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:165 blocking: the done-when requires the certificate state beside the stalled one, but titan2/mismatch.json holds one state and titan2/measure.log stops at the stalled STATE line, so half the required comparison, its table and its half of the figure are absent.\nFINDING scripts/prototypes/bank_jacobian_mismatch/run_h200.sh:22 blocking: the gate log titan2/measure.log has no EXIT= line because the run died before this echo, so the gate status is unread; and its revision header reads 869f1fd81 while the POSITIVE_CONTROL line it carries is produced by code first added in 1af9c7e75, so the log cannot be tied to the reviewed head.\nFINDING scripts/prototypes/bank_jacobian_mismatch/measure.py:145 non-blocking: positive_control computes its own quotient as matrix @ plus minus matrix @ minus and never calls the fresh_cd construction at measure.py:250, so the negation and step-scale defects it claims to guard would have passed it.\nFINDING scripts/prototypes/bank_jacobian_mismatch/measure.py:257 non-blocking: the term split switches only the booking and moving-geometry contributions, leaving the bank operator, edge intervals, boundary and axis flux and current normalisation that the brief names never individually differentiated.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-mismatch.html:174 non-blocking: the fragment closes an article tag it never opens, which breaks the composed record's markup.\nFINDING scripts/prototypes/bank_jacobian_mismatch/plot.py:68 non-blocking: each panel is titled inline where the figure caption is meant to carry that identity, and the stalled series is drawn in red, which the style reserves for a limit being broken.\nFINDING manifest.md:5 non-blocking: status reads complete while the checkpoint on the same line says the certificate half is the only remaining work, and tests names a direct measure.py invocation where the log header records run_h200.sh, so the recorded gate cannot be re-run as written.\nFINDING manifest.md:14 non-blocking: the done-when specifies one H200 and the sole measurement ran on a Tesla P100 (titan job 1308028); the receipt discloses the device, but the evidence does not meet the done-when's own wording.\n",
+  "review_run_id": "r-20261107T190115545235-review-of-bank-jacobian-mismatch-1af9c7e75d08",
+  "reviewed_base_sha": "e4d38036794fac0279f86d64fbf09ecb95db1e74",
+  "reviewed_head_sha": "1af9c7e75d082d97b0c681cdfb0e20abae2b45c4",
+  "reviewed_run_id": "r-20261107T152015525295-bank-jacobian-mismatch",
+  "scores": {
+    "durability": 7,
+    "evidence": 6,
+    "fit": 15,
+    "goal_fidelity": 14,
+    "reuse": 14,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T19:45:38.375186+00:00",
+  "total": 74
+}

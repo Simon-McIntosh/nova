@@ -101,17 +101,20 @@ def _memory_peak():
 
 
 def _read(batch, moments):
-    return jax.jit(
-        lambda bank, cache, values: support_read.read_batch(
-            bank,
-            cache,
+    # The read is per-lane: it refines a lane's own stationary points, so the
+    # batch is a vmap over lanes and every arm passes the same shared seeds.
+    def one(values):
+        return support_read.read(
+            batch.operands,
+            batch.cache,
             values,
-            batch.seeds_batch,
-            batch.previous_batch,
+            batch.seeds,
+            batch.roots,
             batch.convention,
             batch.policy,
         )
-    )(batch.operands, batch.cache, moments)
+
+    return jax.jit(jax.vmap(one))(moments)
 
 
 def run_jacobian(args):

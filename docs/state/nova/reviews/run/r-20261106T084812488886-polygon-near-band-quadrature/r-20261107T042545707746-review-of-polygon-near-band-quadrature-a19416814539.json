@@ -5,6 +5,13 @@
   ],
   "added_failures_note": "Derived from the reviewed run's baseline_suite and after_suite arm records in manifest.md and the logs they cite, not from prose. Edge arm: 11 FAILED ids at base and 11 at head, differing by exactly one row - head-only test_tangent_compiles_within_bound[second_residual] against base-only test_tangent_compiles_within_bound[channel_split]. Vertex arm: the same five ids in both arms. tests/biot/test_graded_layer_near_corner.py: 0 failures in both arms. tests/biot/test_vertex_edge_tangent_recurrences.py: the same two compile-ratio ids in both arms (2 failed each). The after_suite is at revision 03ef34709, before the reviewed head a1941681; the run's later head rerun at 7c3754325 reports a third recurrences failure, [regularised], recorded in the fragment line 258 but not in the after_suite arm, and that row is named in a finding rather than added here because the derivation is from the two armed records.",
   "completed_at": "2026-11-07T04:34:30.749Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "the confinement was measured on H200, titan and CPU and refuted; the node lands as the consolidation, as its fragment states",
+      "recorded_at": "2026-11-07T04:40:46.879540+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T04:26:24Z",
   "findings": [
     {

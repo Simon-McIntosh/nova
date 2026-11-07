@@ -104,7 +104,7 @@ rejected this axis, on the strength of <code>material_cell_count 1089</code> and
 comfortably, on the cached seed and on the field the solve reads. <b>The refusal recorded in
 <code>probe.json</code> is not reproduced by either.</b></p>
 
-<p><b>Where the reproduction stops.</b> The qualifying read is reached inside a traced solve:
+<p><b>Where the instrumented reproduction stops.</b> The qualifying read is reached inside a traced solve:
 the capture records three calls, two on concrete arrays and a third on a traced one, and the
 trace then raises <code>TracerArrayConversionError</code> inside
 <code>grid.read_census</code> before any refusal can be observed. That is the instrument
@@ -178,6 +178,62 @@ study, not a single radius, is what would settle them.</p>
 lattice (1089 nodes), because the vector carries 132 wall nodes after the plasma nodes. Job
 <code>1307848</code> failed in seconds on a diagnostics line that named the prepared profile
 without binding it. Neither failure was in product code.</p>
+
+<h3>Does it still refuse? Yes, and this is where</h3>
+
+<p><b>The limited arm was re-run on today's code with no wrapper and no capture</b> &mdash; the
+original driver, <code>run_probe_frames.py --frames 144 --branches limited</code>, base revision
+<code>8130772bb</code>, one <code>all_debug</code> job (<code>1308081</code>, 1588&nbsp;s,
+12.2&nbsp;GB peak), reading the frame from scratch with no cached seed and no pre-built profile.
+It <b>refuses identically</b> to run <code>r-20261106T195054915900</code>:</p>
+
+<table>
+<caption>Replay against the original record</caption>
+<thead><tr><th></th><th>original, 554fcc237</th><th>replay, 8130772bb</th></tr></thead>
+<tbody>
+<tr><td>status</td><td>refused</td><td><b>refused</b></td></tr>
+<tr><td>type</td><td><code>NoQualifiedAxisError</code></td><td><code>NoQualifiedAxisError</code></td></tr>
+<tr><td>message</td><td colspan="2"><code>no qualified magnetic-axis candidate has a resolved component</code></td></tr>
+<tr><td>arms</td><td>{}</td><td>{}</td></tr>
+<tr><td>seed L2 from label</td><td>5.579888485784667</td><td>5.57988848578467</td></tr>
+</tbody>
+</table>
+
+<p>The raise site, read from the replay's own traceback (innermost frame last):</p>
+
+<pre><code>forward.py:1274            current_moment_observation
+forward.py:1447            _integral_state
+forward_operator.py:3211  read_with_current_moments
+forward_operator.py:3182  read
+topology.py:226            require_qualified_axis  -&gt; raise NoQualifiedAxisError</code></pre>
+
+<p><b>Why the instrumented probes saw an admitted axis and the product does not.</b> The refusal
+is reached through the <i>current-moment integral</i>: the constraint residual evaluates
+<code>current_moment_observation</code> at <code>forward.py:1274</code>, which integrates through
+<code>_integral_state</code> into <code>read_with_current_moments</code>, which calls
+<code>read</code> and from there <code>require_qualified_axis</code>. My probes evaluated
+<code>read_qualified_o_candidates</code> outside jit on the seed they had cached; the product
+evaluates it inside a traced solve on the field that the moment integral holds at that
+iteration. Both probes returned an admitted candidate and no raise, and the product raises &mdash;
+so the difference is the field and the path, not the comparison. The measured 397 against a
+floor of 10 stands for the field the probes held; it says nothing about the field the raise sees,
+because the raise's field was never observed outside the trace.</p>
+
+<p><b>The hook the fix node needs.</b> A host-side dump at the raise site, outside jit: at
+<code>forward_operator.py:3182</code>, before <code>require_qualified_axis(admitted)</code>, write
+the concrete <code>psi</code>, <code>polarity</code>, <code>inside_material</code> and
+<code>requested_class</code> to an npz, gated so it runs only in a diagnostic build or under an
+explicit environment flag, and never inside a traced region &mdash; a <code>jax.debug.callback</code>
+that saves the same fields is the alternative if the read must stay traced. With that dump the
+three conjuncts can be read on the actual refusing field, which is the one measurement this
+investigation could not obtain: the field lives inside the trace and the trace raises before any
+host code sees it.</p>
+
+<p><b>One landing touched the identification path in between.</b>
+<code>git log 554fcc237..8130772bb -- nova/equilibrium/topology.py</code> returns exactly one
+commit, <code>1af4c1b03</code> <i>retain bank precision through saddle curvature</i>. The replay
+refuses with the same type, message and seed distance, so that landing did not remove this
+refusal; the refusal is live on today's code.</p>
 
 <h3>Recommended fix</h3>
 

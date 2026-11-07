@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "the refusal test passed at the reviewed head in a fresh process (1 passed); it guards a combination no caller reaches",
       "recorded_at": "2026-11-07T04:40:53.990115+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prototype runner header; the measurement it cites comes from the two fresh-process logs the fragment names",
+      "recorded_at": "2026-11-07T04:41:02.130224+00:00"
     }
   },
   "findings": [

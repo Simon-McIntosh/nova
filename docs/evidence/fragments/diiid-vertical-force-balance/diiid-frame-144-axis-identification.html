@@ -6,10 +6,12 @@ terminal residual of <code>5.93</code> (5.927126420463732 from
 <code>probe.json</code>, <code>branches.diverted.arms.default.terminal_residual</code>). The question is whether the seed really has no
 admissible axis, or whether an axis is present and the identification rejected it.</p>
 
-<p><b>It is present and was rejected.</b> The seed carries a flux maximum at
+<p><b>It is present.</b> The seed carries a flux maximum at
 R=1.7880&nbsp;m, Z=+0.0171&nbsp;m, <code>0.03</code>&nbsp;m from the EFIT label axis and
-<code>0.03</code>&nbsp;m from the diverted solution's axis at R=1.759, Z=+0.013. A
-missing axis is therefore not the explanation.</p>
+<code>0.03</code>&nbsp;m from the diverted solution's axis at R=1.759, Z=+0.013, so a
+missing axis is not the explanation. Measured below, that maximum also passes every conjunct of
+the axis-admission test on the cached seed &mdash; which locates the defect in the record's
+provenance rather than in the threshold.</p>
 
 <h3>The refusal</h3>
 
@@ -50,11 +52,52 @@ candidate is the third conjunct at</p>
 A candidate is additionally screened at <code>topology.py:1081</code> (finite position and flux)
 and <code>topology.py:1082</code> (a resolved boundary).</p>
 
-<p><b>The values it read for this point</b>, from the census diagnostics: material cell count
-<code>1089</code>, so <code>connection_floor = 10</code> cells; the lattice node at the axis is
-<code>(1.7871, 0.0166)</code> and reads <code>axis_node_inside_material = True</code>. The candidate
-therefore lies inside the material and had to own at least ten governed connected cells to be
-admitted. Its position and flux are finite, so the first conjunct does not exclude it.</p>
+<p><b>The values it read, measured.</b> The three conjuncts were evaluated on the cached seed
+by re-expressing the admission body once and mapping it over the whole candidate array with
+<code>jax.vmap</code>, the same way the product applies it (job <code>1308039</code>,
+<code>conjunct-144-limited-c.json</code>, script
+<code>scripts/prototypes/diiid_axis_identification/conjunct_probe.py</code>). At the candidate
+nearest the label axis the record reads</p>
+
+<table>
+<caption>Conjunct values, second qualification pass (class-aware wall data)</caption>
+<thead><tr><th>candidate (R, Z) [m]</th><th>&psi;</th><th>finite</th><th>resolved</th><th>data_b[2]</th><th>governed_size</th><th>all_open</th><th>admitted</th></tr></thead>
+<tbody>
+<tr><td>0.8987, 1.2801</td><td>0.4209</td><td>yes</td><td>yes</td><td>0.5162</td><td>1</td><td>748</td><td>no</td></tr>
+<tr><td>1.0391, &minus;1.5435</td><td>1.3028</td><td>yes</td><td>yes</td><td>0.5162</td><td>397</td><td>457</td><td><b>yes</b></td></tr>
+<tr><td>1.0048, 1.4840</td><td>0.4704</td><td>yes</td><td>yes</td><td>0.5162</td><td>1</td><td>748</td><td>no</td></tr>
+<tr><td><b>1.7868, 0.0180</b></td><td><b>1.4876</b></td><td>yes</td><td>yes</td><td>0.5162</td><td><b>397</b></td><td>457</td><td><b>yes</b></td></tr>
+<tr><td>2.4046, &minus;1.1159</td><td>&minus;2.3278</td><td>yes</td><td>yes</td><td>0.5162</td><td>1</td><td>748</td><td>no</td></tr>
+</tbody>
+</table>
+
+<p>with <code>material_cell_count = 1089</code> and therefore
+<code>connection_floor = 10</code>. Three values that settle the question:</p>
+
+<ul>
+<li><b>The candidate is admitted.</b> <code>governed_size = 397</code> against a floor of
+<code>10</code>, forty times the threshold, with a finite position and flux and a resolved
+boundary. All three conjuncts pass, in both qualification passes, and
+<code>read_qualification(&hellip;, requested_class=LIMITED)</code> returned without raising
+<code>NoQualifiedAxisError</code>.</li>
+<li><b>The closed mask is not what cuts the region.</b> Opening it takes the governed size from
+<code>397</code> to <code>457</code> cells, so the closed mask removes 60 cells and leaves the
+axis-connected region intact. The candidate is not the private well the threshold exists to
+refuse.</li>
+<li><b>The boundary the seed selects is an X-point.</b> <code>data_b[2] = 0.5162</code> equals
+the flux of the saddle at (1.3984, &minus;1.0138), which is <code>0.5164</code>; the boundary
+is therefore the separatrix the saddle defines, not a wall contact.</li>
+</ul>
+
+<p><b>What this means for the refusal, and what it does not.</b> The earlier draft of this
+fragment reported the third conjunct, <code>governed_connection</code>, as the comparison that
+rejected this axis, on the strength of <code>material_cell_count 1089</code> and a floor of
+<code>10</code>. That reading is <b>withdrawn</b>: by measurement the comparison passes
+comfortably. The refusal recorded in <code>probe.json</code> below is therefore <b>not
+reproduced</b> from the state this probe reads (<code>prepared["cold"].branches.flux[0]</code>),
+and the seed that the refused limited branch actually held is the open question. The
+identification is not refusing a qualified axis on the evidence measured here; on this seed it
+finds one.</p>
 
 <h3>Census</h3>
 
@@ -123,23 +166,28 @@ without binding it. Neither failure was in product code.</p>
 
 <h3>Recommended fix</h3>
 
-<p><b>Admitted.</b> The rejection is a threshold, not a physics result: a fixed
-<code>0.01</code> of the whole material cell count is applied to every candidate, so a genuinely
-confined axis in a small closed component is refused whenever the grid is large. Change
-<code>topology.py:1076&ndash;1078</code> so the floor is measured against the candidate's own
-governed component rather than the total material count, and have <code>qualify</code> return the
-three conjuncts alongside the admitted bit so <code>NoQualifiedAxisError</code> names which one
-failed.</p>
+<p><b>First, name the state.</b> The measurement above shows the threshold admitting a genuinely
+confined axis, so correcting the threshold would not have changed this refusal. What remains
+undetermined is which seed the refused limited branch held: the branch record
+(<code>probe.json</code>, frame 144, <code>branches.limited</code>) names a refusal with an
+empty <code>arms</code> map and no seed reference, and the cached cold seed reproduces the
+opposite outcome. Recording the seed on the refusal record &mdash; its flux vector or a
+content hash beside the status &mdash; is what makes a refusal reproducible from the record
+alone, and it is the fix this investigation asks for.</p>
 
-<p><b>Test that would have caught it.</b> A limited read seeded with a map whose only extremum
-inside the material sits in a component smaller than <code>_MATERIAL_CONNECTED_FRACTION</code> of
-the full material count, asserting that the read admits the axis (or raises naming
-<code>governed_connection</code> with the counts it compared). The existing
-<code>tests/test_oracle_axis_admission.py</code> and
+<p><b>On the threshold itself.</b> A fixed <code>_MATERIAL_CONNECTED_FRACTION</code> of the whole
+material cell count is still a coarse instrument: had this candidate's governed component been
+small, it would have been refused on a grid-size test rather than a topology test. Measuring the
+floor against the candidate's own governed component would be better, but it is a robustness
+change, not the repair for frame 144 &mdash; and it must not be landed as one.</p>
+
+<p><b>Test that would have caught the reporting defect.</b> A limited read whose only
+in-material extremum sits in a component smaller than the floor, asserting that the read admits
+the axis or raises naming <code>governed_connection</code> with the counts it compared. The
+existing <code>tests/test_oracle_axis_admission.py</code> and
 <code>tests/test_unqualified_axis_eager_routes.py</code> assert the admitted and refused outcomes
 but never which conjunct produced a refusal, which is why a seed can be recorded as having "no
 qualified axis" without the record distinguishing a missing axis from a rejected one.</p>
 
-<p><b>If a probe needs a hook in <code>nova/</code>:</b> none was needed. The census reads the
-benchmark's public seed portfolio and the operator's <code>inside_material</code>, both already
-exposed.</p>
+<p><b>If a probe needs a hook in <code>nova/</code>:</b> none was needed: the probe wraps the
+public <code>qualified_o_candidates</code> and calls the operator's own helpers.</p>

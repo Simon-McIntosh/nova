@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T17:13:05Z",
+  "figure": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg (judged from the rendered PNG, image-0.png, 1400x720)",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The flux contours are the palest ink on the canvas (light blue, about 1.4:1 on white) while the figure's subject is that seed field; a reader's eye goes to the black limiter and the red markers first, and on a projector or in print the contours that carry the argument thin out. Darkening the contour stroke, or drawing a lighter contour set beneath a darker one, restores the data's weight without adding ink."
+    },
+    {
+      "file": "docs/figures/diiid-frame-144-axis-identification/frame-144-limited-seed-nulls.svg",
+      "id": "fe092bc119c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The right half of the canvas prints the six-row critical-point census and the coverage account as monospace text inside the image. That is tabular information, and the fragment already carries the same census as an HTML table beside the panel, so the in-figure copy is redundancy that spends canvas and cannot be sorted, searched or read by a screen reader."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T171059983277-review-of-diiid-frame-144-axis-identification-1d5e76b241dd-figure",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "1d5e76b241dd48ab6a55a1c6dda10fbb147c4116",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass: all text is black or the dark green of the direct labels on white, well above 4.5:1; legend glyph colours match the panel markers.",
+    "data_ink": "fail (non-blocking): the flux contours, which are the data the figure exists to show, are drawn in the palest ink on the canvas (light blue near #9db6e0, roughly 1.4:1 against white), so the black limiter and the red markers carry the visual weight and the seed field recedes.",
+    "decoration": "pass: no gradient, no background fill, no gridlines, no frame; the only marks are contours, the limiter, the nulls, two straight leader lines and their labels.",
+    "label_collision": "pass: 'rejected axis' and 'EFIT axis' sit in clear space with leader lines to the marker, neither clipped at the canvas edge nor over the markers or the limiter; the filled saddle marker lies on the limiter at the X-point, which is where that critical point is and not a collision.",
+    "legibility": "pass: at 1400 px the seed's flux contours, the black limiter, all six nulls in their four legend styles, the two green direct labels and the monospace census all read without effort; the filled saddle and the hollow extremum are distinguishable at their rendered size (about 12 px).",
+    "table_form": "fail (non-blocking): the right half prints a six-row critical-point census with its index sum, boundary winding and difference as monospace text - tabular information carried inside the image, duplicated by the fragment's own table beside the panel."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T17:21:23.784912+00:00",
+  "total": null,
+  "verdicts": {
+    "blocking": "No blocking finding: nothing is clipped, no label overlaps another label or the data, and the picture lets a reader see the seed contours, the limiter and every critical point it claims.",
+    "figure_reviewed": "One attached figure (image-0.png), rendered from frame-144-limited-seed-nulls.svg; opened and inspected at full size and in three enlarged crops (the two direct labels, the upper null field, the lower limiter nulls)."
+  }
+}

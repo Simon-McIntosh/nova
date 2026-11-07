@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "scripts/prototypes/diiid_axis_identification/census.py, scripts/prototypes/diiid_axis_identification/local_index.py, scripts/prototypes/diiid_axis_identification/render_seed_panel.py",
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T13:51:46Z",
+  "findings": [
+    {
+      "id": "f8ae4186009",
+      "text": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:5 blocking: the fragment's opening paragraph ships an unsubstituted placeholder (`terminal residual of <code>...</code>`) where the diverted seed's residual belongs; the value 5.93 is stated in the node brief, so the deliverable carries a visible gap in its own comparison."
+    },
+    {
+      "id": "fbbfbe9f92d",
+      "text": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html:39 non-blocking: the fragment names the third conjunct (`governed_connection = governed_size >= connection_floor`, topology.py:1097) as the rule that rejected the candidate, but `governed_size` is never measured anywhere in the run; the run's own manifest evidence_inputs says 'Which conjunct failed is not yet measured', so the identification rests on the two conjuncts being excluded by plausibility rather than on the deciding comparison."
+    },
+    {
+      "id": "fcec21105d3",
+      "text": "scripts/prototypes/diiid_axis_identification/local_index.py:109 non-blocking: the classification of the five dropped candidates is not independent of the other candidates. The ring radius is one lattice spacing (0.1132 m) while the pair (0.8819, 1.2719) and (0.9200, 1.3351) sit 0.0738 m apart, so a +1/-1 pair enclosed by a single ring reads index 0 and is reported as 'a zero the refinement invented'; the fragment's claim that both suspected pairs are artefacts is therefore unfalsified by this instrument."
+    },
+    {
+      "id": "facf7c84601",
+      "text": "scripts/prototypes/diiid_axis_identification/local_index.py:150 non-blocking: `main` returns 0 unconditionally, so the script that closes the coverage account has no failing gate; census.py:269 does gate on `residual == 0` and its gate demonstrably fired (census-144-limited.json records coverage_ok false), but a regression that broke the local-index coverage would still exit 0 and be recorded as a pass."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T170712010748-review-of-diiid-frame-144-axis-identification",
+  "reviewed_base_sha": "5f34f03c4a850904ec0432db511adf5ba3ac0133",
+  "reviewed_head_sha": "1d5e76b241dd48ab6a55a1c6dda10fbb147c4116",
+  "reviewed_run_id": "r-20261107T134943816108-diiid-frame-144-axis-identification",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T17:29:48.063442+00:00",
+  "total": 94,
+  "verdicts": {
+    "diff": "Read commit by commit (20 commits, 5 files, 3402 insertions, no deletions): three prototype modules, one SVG panel and one evidence fragment, nothing outside the declared scope.",
+    "done_when": "The done_when's coverage clause (boundary winding equals the index sum) is measured and recorded: local-index-144-limited.log records kept_index_sum 2, boundary_winding 1.9993990196626144, difference 0, EXIT=0.",
+    "goal": "The node goal is to explain why frame 144's limited seed refuses at axis identification, by critical-point census, rule citation and a recorded fragment; census.py, local_index.py, render_seed_panel.py and the fragment deliver all three.",
+    "manifest": "Read; it records the census job, the local-index log, the four attributed scaffolding failures, and per-rubric answers, but carries no baseline_suite/after_suite arms, and names the deciding conjunct as unmeasured in evidence_inputs.",
+    "write_paths": "Manifest declares scripts/prototypes/diiid_axis_identification, the fragment and docs/figures/diiid-frame-144-axis-identification; the diff's five paths all sit inside them and no nova/ file is touched."
+  }
+}

@@ -13,6 +13,36 @@ from types import SimpleNamespace
 import numpy as np
 
 
+def physical_centroid_translates(source: Path) -> bool:
+    """Rigidly translated uniform-current cells move their centroid by dz."""
+    function = next(
+        node
+        for node in ast.parse(source.read_text()).body
+        if isinstance(node, ast.FunctionDef) and node.name == "centroid"
+    )
+    program = ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[]))
+    scope = dict(jnp=np)
+    exec(compile(program, str(source), "exec"), scope)
+    state = (np.ones(3), np.zeros(3), np.zeros(3))
+    centres = np.array([-0.2, 0.1, 0.4])
+    dz = 0.037
+
+    def height(centres):
+        args = (state, centres) if len(function.args.args) == 2 else (state,)
+        return float(scope["centroid"](*args))
+
+    before, after = height(centres), height(centres + dz)
+    passed = np.isclose(before, centres.mean(), atol=1e-14) and np.isclose(
+        after - before, dz, atol=1e-14
+    )
+    print(
+        f"CENTROID_TRANSLATION before={before:.12g} after={after:.12g} "
+        f"observed_dz={after - before:.12g} expected_dz={dz} passed={bool(passed)}",
+        flush=True,
+    )
+    return bool(passed)
+
+
 def sixth_update_is_checked(source: Path) -> bool:
     """Run the actual continuation loop with a root reached on update six."""
     tree = ast.parse(source.read_text())
@@ -78,15 +108,20 @@ def sixth_update_is_checked(source: Path) -> bool:
 def centroid_row_is_live(source: Path) -> bool:
     """Exercise the actual bordered update on a one-cell synthetic state."""
     tree = ast.parse(source.read_text())
-    function = next(
-        node
-        for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == "pinned_step"
+    program = ast.fix_missing_locations(
+        ast.Module(
+            body=[
+                node
+                for node in tree.body
+                if isinstance(node, ast.FunctionDef)
+                and node.name in ("centroid", "centroid_gradient", "pinned_step")
+            ],
+            type_ignores=[],
+        )
     )
-    program = ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[]))
 
     def shifted(_machine, field):
-        return SimpleNamespace(field=field), None
+        return SimpleNamespace(field=field, geometry=_machine.operands.geometry), None
 
     def residual(operator, *_args):
         return SimpleNamespace(
@@ -110,10 +145,16 @@ def centroid_row_is_live(source: Path) -> bool:
     exec(compile(program, str(source), "exec"), scope)
     state = (np.array([1.0]), np.array([0.0]), np.array([0.1]))
     machine = SimpleNamespace(
-        profile=None, convention=None, policy=None, quadrature=None
+        profile=None,
+        convention=None,
+        policy=None,
+        quadrature=None,
+        operands=SimpleNamespace(
+            geometry=SimpleNamespace(centre=np.array([[1.0, 0.25]]))
+        ),
     )
     updates, field_update, valid, row_present = scope["pinned_step"](
-        machine, state, None, 1.0, 0.0, 0.0, True
+        machine, state, None, 1.0, 0.0, 0.25, True
     )
     after = tuple(part + delta for part, delta in zip(state, updates, strict=True))
     return bool(
@@ -121,6 +162,35 @@ def centroid_row_is_live(source: Path) -> bool:
         and row_present
         and np.isclose(after[2][0] / after[0][0], 0.0, atol=1e-12)
         and np.isclose(field_update, 0.1, atol=1e-12)
+    )
+
+
+def centroid_row_matches_difference(source: Path) -> bool:
+    """Differentiate height while unequal currents occupy distinct heights."""
+    functions = [
+        node
+        for node in ast.parse(source.read_text()).body
+        if isinstance(node, ast.FunctionDef)
+        and node.name in ("centroid", "centroid_gradient")
+    ]
+    scope = dict(jnp=np)
+    program = ast.fix_missing_locations(ast.Module(body=functions, type_ignores=[]))
+    exec(compile(program, str(source), "exec"), scope)
+    state = (np.array([1.0, 2.0]), np.zeros(2), np.array([0.03, -0.02]))
+    centres = np.array([-0.2, 0.4])
+    flat = np.concatenate(state)
+    numerical = []
+    for direction in np.eye(flat.size):
+        plus = tuple(np.split(flat + 1e-6 * direction, 3))
+        minus = tuple(np.split(flat - 1e-6 * direction, 3))
+        numerical.append(
+            (scope["centroid"](plus, centres) - scope["centroid"](minus, centres))
+            / 2e-6
+        )
+    return bool(
+        np.allclose(
+            scope["centroid_gradient"](state, centres), numerical, rtol=1e-8, atol=1e-10
+        )
     )
 
 
@@ -227,8 +297,10 @@ def main() -> None:
     folder = args.tree / "scripts/prototypes/bank_fold_vertical"
     args.scratch.mkdir(parents=True, exist_ok=True)
     results = dict(
+        physical_centroid=physical_centroid_translates(folder / "measure.py"),
         terminal_update=sixth_update_is_checked(folder / "measure.py"),
         centroid_row=centroid_row_is_live(folder / "measure.py"),
+        centroid_derivative=centroid_row_matches_difference(folder / "measure.py"),
         product_row_probe=product_row_probe_is_sensitive(folder / "measure.py"),
         shared_acceptance=both_arms_share_acceptance(folder / "measure.py"),
         paired_spectra=paired_spectra_are_required(folder / "compare.py", args.scratch),

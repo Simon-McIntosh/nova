@@ -1,0 +1,74 @@
+<section data-reckon="evidence" id="bank-jacobian-assembly-landing" data-plan="sub-millisecond-forward-path" data-node="bank-jacobian-assembly">
+<h2 id="bank-jacobian-assembly-heading">Sharing the cut-cell conic ring geometry across booking channels is neutral, and was reverted</h2>
+
+<p id="bank-jacobian-assembly-summary">This is a negative result. The dense assembly's dominant stage is the local booking sensitivities, and inside it the cut-cell conic tangent rebuilt its ring geometry once per direction inside the channel <code>vmap</code> — fragment breaks, positive vertical intervals, the vertical polygon interval and the edge table, none of which depends on the direction. Assembling that geometry once per cell instead is algebraically exact, and it was measured on the H200 at three widths. It buys no measurable time: base and head agree within 0.3% of wall per slice at every width. The product change and the tests added for it have been reverted; what this record keeps is the measurement and the instrument defect that stopped the stage split.</p>
+
+<h3 id="bank-jacobian-assembly-dominant">Which stage was targeted, and what it scales with</h3>
+<p id="bank-jacobian-assembly-dominant-body">The existing split of the production Jacobian (<a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-step-jacobian-split.html#bank-step-jacobian-split-landing">bank-step-jacobian-split</a>) puts <code>_local_booking_sensitivities</code> at 13.343 ms of an 18.617 ms whole call at one slice and 215.842 ms of 291.947 ms at sixteen, about 74% and the worst scaling at 16.18×. Its cost is set by cut cells: it is per-cell ring integration with the geometry held once and every channel contracted through one <code>einsum</code>, so it grows with the cell population and not with the channel count. That record is why the conic tangent was the place to try.</p>
+
+<h3 id="bank-jacobian-assembly-change">What was tried, and that it is no longer in the tree</h3>
+<p id="bank-jacobian-assembly-change-body">The change split <code>current._conic_ring_tangents</code> into <code>_conic_ring_geometry</code>, which assembled the direction-independent ring geometry once, and <code>_conic_ring_velocity</code>, which evaluated the implicit-root velocity for one direction from it, with the original function kept as their composition. A keyword-only <code>shared_ring_geometry</code> selected between the shared form and the per-direction rebuild, threaded through <code>_local_booking_sensitivities</code> and <code>step_jacobian</code>. Because the timing below says it buys nothing, the product files and the added tests were returned to their pre-change state in one revert commit: <code>git diff &lt;base&gt; HEAD -- nova tests</code> is empty. The prototype runners and this record stay, so a next attempt starts from the measurement rather than from the idea.</p>
+
+<h3 id="bank-jacobian-assembly-timing">The measurement: paired timing, base against head</h3>
+<p id="bank-jacobian-assembly-timing-body">The pairing follows the paired-timing rule: each arm has its own compilation cache, each cache is warmed once, and three fresh processes per arm and width then measure from it with <code>XLA_FLAGS</code> unset. Both arms load the same common seed arrays, built once at the base revision and copied into the head arm's directory. Every process ran the same 4 bank reads and 3 Newton steps, so the arms are compared at equal reads per slice; the table gives the median of the three processes.</p>
+<figure id="bank-jacobian-assembly-timing-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg" alt="Solve wall per slice against batch width, base and head">
+<figcaption>Single H200 card, warm compilation cache, median of three fresh processes per arm and width. The hoisted geometry does not move the total wall: the two arms agree within 0.3% at every width.</figcaption>
+</figure>
+<table id="bank-jacobian-assembly-timing-table">
+<thead><tr><th>Slices</th><th>Arm</th><th>Wall [ms]</th><th>Wall per slice [ms]</th><th>Reads</th><th>Updates</th><th>Peak memory [GiB]</th><th>Max fresh residual</th></tr></thead>
+<tbody>
+<tr><td>16</td><td>base</td><td>302.8</td><td>18.925</td><td>4</td><td>3</td><td>15.0</td><td>7.01e-12</td></tr>
+<tr><td>16</td><td>head</td><td>303.3</td><td>18.955</td><td>4</td><td>3</td><td>15.0</td><td>3.99e-12</td></tr>
+<tr><td>64</td><td>base</td><td>926.2</td><td>14.471</td><td>4</td><td>3</td><td>59.3</td><td>8.97e-12</td></tr>
+<tr><td>64</td><td>head</td><td>926.4</td><td>14.474</td><td>4</td><td>3</td><td>59.3</td><td>6.68e-12</td></tr>
+<tr><td>128</td><td>base</td><td>1783.9</td><td>13.937</td><td>4</td><td>3</td><td>86.5</td><td>8.64e-12</td></tr>
+<tr><td>128</td><td>head</td><td>1783.2</td><td>13.931</td><td>4</td><td>3</td><td>86.5</td><td>7.30e-12</td></tr>
+</tbody>
+</table>
+<p id="bank-jacobian-assembly-timing-reading">Read this as a null result, and read it carefully. The reduction removes recomputed geometry from one stage of the assembly, and the total wall does not respond at any of the three widths: base and head agree to within 0.3%, which is inside the process-to-process spread of a single arm. Two explanations are consistent with the numbers, and the stage split that would separate them did not run. Either the stage's share of the solve is smaller at these widths than the committed 16-slice record suggested, or the geometry it recomputes is cheap beside the ring integration that dominates the same stage — in which case hoisting it is algebraically free but not where the time goes. What the table does establish is that the change cost nothing while it was in the tree: no width regressed, peak memory is identical, the read and update counts are unchanged, and the precision lanes are at least as good in the head arm.</p>
+<p id="bank-jacobian-assembly-timing-precision">Every lane the instrument records sits inside its own bound, at every width and in every process: the fresh residual reaches 8.97e-12 against a 1e-10 bound, the axis 1.05e-5 of minor radius against a 5e-4 bound, the saddle (X-point) 9.25e-6 against 5e-4, and the boundary flux 2.59e-5 of span against 1e-4. The brief's separate flux-to-span bound of 1e-8 has no lane in this instrument's precision map, so it is not reported as measured here. The 256-slice width was not measured; at 128 slices peak memory reads 86.5 GiB of the card's 141.</p>
+
+<h3 id="bank-jacobian-assembly-split-heading">Why the stage split was not produced, and the anchor that must be fixed</h3>
+<p id="bank-jacobian-assembly-split-gap">The single H200 allocation (<code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, one card, four cores, 96 GB) started within a minute of submission. Its first stage was the fresh split of one batched <code>step_jacobian</code> at 16 and 128 slices with the <code>bank_solve_trace_four_read</code> instrument, and it exited on <code>AssertionError</code> at <code>bank_step_jacobian_split/measure.py:34</code> before timing anything.</p>
+<p id="bank-jacobian-assembly-split-anchor">The cause is an instrument defect, and it is exact. <code>parts()</code> extracts contiguous regions of <code>step_jacobian</code> by locating their source text, and two of its regions end at the literal <code>"        matrix = matrix - response"</code> — the <code>matrix</code> region and the <code>closing</code> region both use it. That line no longer exists: the production code now reads</p>
+<pre id="bank-jacobian-assembly-split-anchor-code"><code>        matrix = jnp.where(
+            count &lt;= _FRESH_GEOMETRY_NODE_CAPACITY, matrix - response, jnp.nan
+        )</code></pre>
+<p id="bank-jacobian-assembly-split-anchor-fix">so <code>region()</code>'s single-occurrence assertion fails and the split measure aborts. The fix belongs in the extractor: anchor that region on the <code>matrix = jnp.where(</code> line and treat the response subtraction as its interior, or terminate the region on the dedented <code>return matrix</code> that follows the block. Until then the stage ranking in this record is the committed split's, not a fresh measurement.</p>
+<p id="bank-jacobian-assembly-split-cut">The 256-slice width was cut from that allocation and is not reported here. The four 550-cell parity cases were not cut: they ran in a separate allocation, job 1307768, and their outcome is in the parity table above.</p>
+
+<h3 id="bank-jacobian-assembly-stage-table-heading">The stage split table, and why its columns are empty</h3>
+<p id="bank-jacobian-assembly-stage-table-body">The brief asked for device milliseconds, launches and peak memory per stage of one batched <code>step_jacobian</code> at 16 and 128 slices. None of those figures exists for this revision, because the instrument that produces them aborts before it times anything. The table carries the rows the split would have filled, with each cell stating why it is empty rather than omitting the column.</p>
+<table id="bank-jacobian-assembly-stage-table">
+<thead><tr><th>Stage</th><th>Device ms per call, 16 slices</th><th>Device ms per call, 128 slices</th><th>Launches per call</th><th>Peak memory</th></tr></thead>
+<tbody>
+<tr><td>per-cut-cell geometry and ring integration</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td></tr>
+<tr><td>conic strip propagation</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td></tr>
+<tr><td>moving-saddle geometry terms</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td></tr>
+<tr><td>contraction against the bank operator</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td></tr>
+<tr><td>equilibration</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td><td>not measured: stage split instrument anchor broken</td></tr>
+</tbody>
+</table>
+<p id="bank-jacobian-assembly-stage-table-dominant">The dominant stage is therefore named from the committed split record (<code>_local_booking_sensitivities</code>, 215.842 ms of 291.947 ms at sixteen slices) and not from a fresh measurement. The parity work above shows the two arms assemble the same matrix; the missing table is what would have said where the time goes, and its absence is why the negative result above says <em>that</em> the hoist is neutral without saying <em>why</em>.</p>
+
+<h3 id="bank-jacobian-assembly-parity">Equality of the assembled matrix, while the change was in the tree</h3>
+<p id="bank-jacobian-assembly-parity-body">Two comparisons stand behind this section and they do not carry the same weight. The light CPU conic case compared the shared and rebuilt tangent channels as <code>max|shared - rebuilt| / max|rebuilt|</code> — a <strong>single global peak</strong>, not the per-row <code>peak_scaled_gap</code> from <code>tests/test_biotgeometryautograd.py</code> that the brief named — and passed at a 1e-12 tolerance. No gap figure for it reached the run directory: the only <code>PEAK_SCALED_GAP</code> line on disk is the negative control's 1.0.</p>
+<p id="bank-jacobian-assembly-parity-gpu">The four 550-cell cases did run, in job 1307768 at revision <code>48226b3fd</code>, and all four assembled both forms. The comparison then raised inside its reshape before producing any gap, so no case reports a number and the run exits 1. Each failed at <code>tests/test_bank_step_booking_batch.py:237</code> with <code>ValueError: cannot reshape array of size 2722500 into shape (1650,3,550,1650)</code>: the helper read <code>actual.shape[0]</code> as a lane axis on a matrix that carried none, so a 1650×1650 Jacobian was reshaped as 1650 lanes of 550 cells. The assemblies themselves completed — the log shows both operands at 1650×1650 — so what failed is the comparison, not the equality it was meant to test. Four failed in 722.95 s, <code>EXIT=1</code>.</p>
+<table id="bank-jacobian-assembly-parity-table">
+<thead><tr><th>Case</th><th>Backend</th><th>Both forms assembled</th><th>Gap reported</th><th>Outcome</th></tr></thead>
+<tbody>
+<tr><td>conic-small-shared</td><td>CPU</td><td>yes</td><td>&le; 1e-12, global peak</td><td>passed</td></tr>
+<tr><td>limited 550, trial</td><td>H200</td><td>yes</td><td>none</td><td>failed: comparison raised</td></tr>
+<tr><td>limited 550, converged</td><td>H200</td><td>yes</td><td>none</td><td>failed: comparison raised</td></tr>
+<tr><td>diverted 550, trial</td><td>H200</td><td>yes</td><td>none</td><td>failed: comparison raised</td></tr>
+<tr><td>diverted 550, converged</td><td>H200</td><td>yes</td><td>none</td><td>failed: comparison raised</td></tr>
+</tbody>
+</table>
+
+<h3 id="bank-jacobian-assembly-control">Negative control</h3>
+<p id="bank-jacobian-assembly-control-body">Dropping the conic stage's contribution in a scratch copy (the shared branch's velocity zeroed) made the same comparison fail with a peak-scaled gap of 1.0 and <code>EXIT=1</code>, the failing id being <code>tests/test_bank_step_booking_batch.py::test_shared_ring_geometry_matches_per_direction_cpu</code>. That test was added with the change and has been removed by the revert; the log stays in the run directory as the record that the comparison could see an omission.</p>
+
+<h3 id="bank-jacobian-assembly-suites">Paired suites</h3>
+<p id="bank-jacobian-assembly-suites-body">Five test files ran base against head on <code>sirius</code>, one fresh process per file with its own basetemp. The base arm failed <code>tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments</code> at the base revision, and the head arm failed exactly that one and no other, so no failure was added. The head-arm driver's last line printed the tree path where <code>EXIT=&lt;code&gt;</code> belongs, so the arm's overall status could not be read from its own output; it prints the exit code now, and the per-file <code>EXIT=</code> lines in each log remain the primary record.</p>
+</section>

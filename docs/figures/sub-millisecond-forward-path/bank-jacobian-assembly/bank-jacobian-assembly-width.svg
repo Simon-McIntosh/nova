@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="31.1cm" height="16cm" viewBox="0 0 1400 720" font-family="DejaVu Sans, sans-serif">
+<rect width="1400" height="720" fill="#ffffff"/>
+<text x="60" y="46" font-size="16" fill="#1a1a1a">solve wall per slice, single H200 card, warm compilation cache</text>
+<g stroke="#1a1a1a" stroke-width="1.2">
+<line x1="150" y1="640" x2="1340" y2="640"/>
+<line x1="150" y1="640" x2="150" y2="120"/>
+</g>
+<g font-size="14" fill="#1a1a1a">
+<text x="86" y="645">0</text>
+<text x="86" y="581">5</text>
+<text x="86" y="516">10</text>
+<text x="86" y="452">15</text>
+<text x="86" y="388">20</text>
+<text x="150" y="676">16</text>
+<text x="497" y="676">64</text>
+<text x="843" y="676">128</text>
+<text x="1190" y="676" font-size="16">slices</text>
+<text x="40" y="392" font-size="16" transform="rotate(-90 40 392)">wall per slice [ms]</text>
+</g>
+<!-- gridline-free. scale: 0 ms at y=640, 25 ms at y=320 -->
+<!-- 16: base 18.925 -> y=640-18.925*12.8=397.8 ; head 18.955 -> 397.4 -->
+<rect x="300" y="397.8" width="46" height="242.2" fill="#4a6fa5"/>
+<rect x="354" y="397.4" width="46" height="242.6" fill="#2e8b57"/>
+<!-- 64: base 14.471 -> 454.8 ; head 14.474 -> 454.7 -->
+<rect x="647" y="454.8" width="46" height="185.2" fill="#4a6fa5"/>
+<rect x="701" y="454.7" width="46" height="185.3" fill="#2e8b57"/>
+<!-- 128: base 13.937 -> 461.6 ; head 13.931 -> 461.7 -->
+<rect x="993" y="461.6" width="46" height="178.4" fill="#4a6fa5"/>
+<rect x="1047" y="461.7" width="46" height="178.3" fill="#2e8b57"/>
+<g font-size="14" fill="#1a1a1a">
+<text x="300" y="388" text-anchor="middle">18.93</text>
+<text x="354" y="388" text-anchor="middle">18.96</text>
+<text x="647" y="445" text-anchor="middle">14.47</text>
+<text x="701" y="445" text-anchor="middle">14.47</text>
+<text x="993" y="452" text-anchor="middle">13.94</text>
+<text x="1047" y="452" text-anchor="middle">13.93</text>
+</g>
+<g font-size="14">
+<rect x="640" y="86" width="26" height="12" fill="#4a6fa5"/>
+<text x="676" y="97" fill="#1a1a1a">base</text>
+<rect x="760" y="86" width="26" height="12" fill="#2e8b57"/>
+<text x="796" y="97" fill="#1a1a1a">head</text>
+</g>
+</svg>

@@ -181,32 +181,61 @@ confined current. Every later trip inherits that state with no mask changes left
 and cannot bring it back.
 </p>
 <p>
-<b>The trip-1 field already carries a higher maximum than the axis the solver
-reported, and the trip-2 state lands on a minimum instead.</b> A census of every
-polished extremum (script <code>maxima_census.py</code>, receipt
-<code>trip-trajectory/maxima-census.json</code>) finds, on frame 146's trip-1
-grid, a maximum of <b>1.958 Wb at R=1.584 m, Z=0.000 m</b> inside the limiter,
-against <b>1.761 Wb</b> at the axis the solve reports (R=1.688 m,
-Z=&minus;0.346 m). The interior saddle at R=1.540 m, Z=&minus;0.040 m (Hessian
-determinant &minus;6.65, eigenvalues &minus;1.0 and +6.5, winding index
-&minus;1) separates those two maxima, so trip 1 is already a two-lobed field and
-the solver's axis selection picks the lower lobe. Frame 137 shows the same
-structure at trip 1 (maximum 2.003 Wb at R=1.531 m, Z=0.000 m against a reported
-axis flux of 1.883 Wb), so axis selection below the field maximum is not by
-itself the discriminator.
-
-What separates the frames is where the next trip goes. At trip 2 frame 146's
-reported axis (R=1.211 m, Z=+1.556 m) sits at <b>&minus;5.28 Wb</b>, while the
-field's maximum inside the limiter is 1.211 Wb at R=2.013 m, Z=&minus;0.400 m
-and the nearest polished extremum is a minimum at R=1.102 m, Z=+1.347 m
-(&minus;6.34 Wb). The step did not hand the plasma to the upper lobe; it moved
-the axis onto a low-flux extremum above the limiter. Frame 137's trip 2 keeps
-its axis at 1.973 Wb on a field whose maximum is 2.383 Wb.
-
-So <b>axis misidentification across a saddle is present at trip 1 on both
-frames, and the trip-2 step makes it terminal on frame 146</b>: the promotion
-moves the axis to a lower extremum rather than to the field's maximum, which
-leaves 0.046&times;Ip confined. Both findings belong to the same mechanism.
+<b>The trip-1 field carries a true second maximum inside the limiter, and the
+axis the solve reports is not a stationary point.</b> Every candidate below was
+seeded and then moved by <code>polish_stationary_points</code> on the field's own
+spline; the index is the winding index of the gradient on a loop around the
+polished point, so only the indices are read here.
+</p>
+<table>
+<caption>
+Frame 146 trip 1, polished points (receipt
+<code>trip-trajectory/polish-axis-check.json</code>). Shift is the distance from
+the seed to where the polish converged.
+</caption>
+<thead><tr><th>seed</th><th>polished R [m]</th><th>polished Z [m]</th>
+<th>flux [Wb]</th><th>index</th><th>converged</th></tr></thead>
+<tbody>
+<tr><td>grid argmax inside limiter</td><td>1.585</td><td>&minus;0.034</td>
+<td>1.959</td><td><b>+1</b></td><td>yes</td></tr>
+<tr><td>solver's reported axis (1.688, &minus;0.346)</td><td>1.585</td>
+<td>&minus;0.034</td><td>1.9588</td><td>+1</td><td>yes, 0.328 m away</td></tr>
+<tr><td>interior saddle</td><td>1.544</td><td>&minus;0.038</td>
+<td>1.957</td><td><b>&minus;1</b></td><td>yes</td></tr>
+</tbody>
+</table>
+<p>
+Three facts follow, each from the index rather than from a grid sample. There
+<em>is</em> a second +1 maximum inside the limiter, at R=1.585 m, Z=&minus;0.034 m,
+0.04 m from the &minus;1 saddle: the trip-1 field is genuinely two-lobed, and the
+grid argmax at Z=0.000 was pointing at it. The solver's reported axis is
+<em>not</em> a stationary point: polishing from (1.688, &minus;0.346) travels
+0.328 m and converges onto that same +1 maximum, so the reported axis is 0.33 m
+below the field's own maximum at the same flux level. And a &minus;1 saddle with
+flux above the reported axis is therefore fully explained &mdash; the reported
+axis is simply not the field's maximum.
+</p>
+<p>
+At trip 2 the reported axis (R=1.211 m, Z=+1.556 m) does not converge to any
+stationary point either (shift 0.073 m, converged false), while the field's
+maximum inside the limiter is 1.211 Wb at R=2.3275 m, Z=&minus;0.400 m and the
+nearest polished extremum is a minimum at R=1.102 m, Z=+1.347 m
+(&minus;6.34 Wb). The step did not hand the plasma to the upper lobe; it left the
+axis on a non-stationary point above the limiter.
+</p>
+<p>
+Frame 137's trip-1 argmax is R=1.531 m, not R=0.531 m: the census mask is the
+limiter interior, and R=1.531 m is inboard of the DIII-D limiter's outer wall but
+well outside its inner wall near R=1.0, so the mask is correct. Frame 137's trip
+2 does carry a true +1 maximum at R=1.498 m, Z=&minus;0.043 m (2.393 Wb), and its
+reported axis holds 1.973 Wb.
+</p>
+<p>
+<b>So the mechanism is axis identification, and it is what the trip-2 step
+makes terminal.</b> On frame 146 the axis moving 0.33 m onto a non-stationary
+point at trip 1 precedes the promotion that leaves the reported axis above the
+limiter and 0.046&times;Ip confined. Frame 137 keeps a genuine extremum near its
+reported axis. Both findings belong to the same mechanism.
 </p>
 </section>
 

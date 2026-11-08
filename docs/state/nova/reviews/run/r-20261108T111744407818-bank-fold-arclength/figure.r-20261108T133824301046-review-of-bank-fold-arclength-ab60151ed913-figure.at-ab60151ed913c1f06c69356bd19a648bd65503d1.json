@@ -6,6 +6,13 @@
   "call_sites": [],
   "completed_at": "",
   "dispatched_at": "2026-11-08T13:40:57Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-fold-arclength-ab60151ed913",
+      "recorded_at": "2026-11-08T14:31:38.755483+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_fold_arclength/plot.py",

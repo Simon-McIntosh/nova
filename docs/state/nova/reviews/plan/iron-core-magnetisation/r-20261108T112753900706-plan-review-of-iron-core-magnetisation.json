@@ -1,0 +1,152 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T11:44:44.891Z",
+  "dispatched_at": "2026-11-08T11:32:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T112753900706-plan-review-of-iron-core-magnetisation/plan.html:404",
+      "id": "wiring-1",
+      "reason": "dropping s6 (and arguably s5) from the declaration lets the falsification run before the production seam exists, which is the order \u00a71's untested hypothesis calls for.",
+      "text": "\u00a76b declares depends-on s5 and s6 in plan-section-depends-on (plan.html:24), yet the section itself says \"It is a cross-code comparison with its own owners, so it lands separately from the \u00a76 seam\", so a control that needs only the analytic S of \u00a71 and its own imas-efit run is held behind the whole production path it is meant to inform",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T112753900706-plan-review-of-iron-core-magnetisation/plan.html:320",
+      "id": "single_goal-1",
+      "reason": "the two halves fail independently (a missing third reader never shows up in a convergence test, and a Newton that will not converge says nothing about the read), so splitting them with a depends-on gives each its own reviewable gate.",
+      "text": "\u00a74 binds the iron_core read in nova/imas/machine.py with the retirement of both script readers (done-when 3) to the magnetisation module, the B-H fit and the Newton solve (done-when 1 and 2), so one verdict must cover a refactor and a solver",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T112753900706-plan-review-of-iron-core-magnetisation/plan.html:348",
+      "id": "evidence_paths-1",
+      "reason": "an unnamed evidence location is the failure mode where a node produces the measurement and no later reader can find it, and naming one line per section costs nothing.",
+      "text": "\u00a75's done-when places the candidate comparison table \"in the plan's evidence record\" and \u00a77, \u00a78 and \u00a79 name no receipt location at all, while \u00a71, \u00a76b and \u00a73 do name one (the GPFS evidence root, the ledger), so a worker on four of the seven implementable sections has to invent where its evidence lands",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T112753900706-plan-review-of-iron-core-magnetisation/plan.html:448",
+      "id": "reasoning-1",
+      "reason": "the node needs the source element that gives a limb its 0.800 m toroidal width (the arc/extruded-section family beside polysection) named before it can build the geometry at all, and the plan's \"no new 3D or averaging code is written\" claim rests on that element existing.",
+      "text": "\u00a78 calls nova/biot/toroidalaverage.py \"nova's existing 3D route\", but that module is only a Cartesian point evaluator (frame_magnetic_field) plus a toroidal-ring averager (toroidal_points, average_toroidal_field) over whatever source frame it is handed; it carries no geometry with finite toroidal extent, so with six axisymmetric frames as the source there is no behind-versus-between difference to report and done-when (1) cannot be produced",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T112753900706-plan-review-of-iron-core-magnetisation/plan.html:430",
+      "id": "reasoning-2",
+      "reason": "a node dispatched on this text will try to thread a state-dependent iron source through the request and find no path, then either block or reach past its declared seam into the solve, and naming the modified Newton loop as the caller costs one line.",
+      "text": "\u00a77 says the iron coupling enters \"through the public forward-solve seam (ForwardSolveRequest in nova/equilibrium/solve_request.py, landed as forward-solve-api \u00a71, which this section waits on)\", but that section is already declared done and the landed request is a frozen dataclass carrying a fixed source_profile and no hook for a plasma-state-dependent external source, while the mechanism \u00a77 describes (dM/d\u03c8 and dM/dI_coil blocks inside the Grad-Shafranov Jacobian) lives in the Newton loop the request is handed to",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0a9c97ee868a3c66fb5c6d55f3789824c127b7c9",
+  "plan_fingerprint": "78f33c742d0db716fc51f57b9776f99f558188bb8e558674a479bebaab470b5d",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 27,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "Deferred to \u00a76b's shaping: its wait narrows to s5 (or none), since it needs only the analytic S and its own imas-efit run; applied when \u00a76b is next shaped so this edit does not re-hold \u00a73's queued nodes.",
+      "when": "2026-11-08T11:58:06.270862+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "Deferred to \u00a74's shaping, which follows \u00a73: \u00a74 splits into the iron_core reader migration (nova/imas/machine.py, retiring the two script readers) and the magnetisation module with its Newton solve, as two nodes or sections.",
+      "when": "2026-11-08T11:58:17.063562+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "Deferred to each section's shaping: \u00a75, \u00a77, \u00a78 and \u00a79 each get a receipt path under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/<section-topic>/ and an evidence fragment under docs/evidence/fragments/iron-core-magnetisation/, as \u00a71 and \u00a76b already do.",
+      "when": "2026-11-08T11:58:28.989374+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Accepted as a mechanism gap, deferred to \u00a78's shaping: \u00a78 needs a source with finite toroidal extent (six limb blocks of the decided 0.800 m width, e.g. as 3D polyhedral or finite-arc segments, magnetised from the axisymmetric field) before toroidalaverage.py's evaluator and averager can show a behind-versus-between difference; \u00a78 is rewritten then.",
+      "when": "2026-11-08T11:58:40.418277+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "Accepted as a mechanism gap, deferred to \u00a77's shaping: the frozen ForwardSolveRequest has no hook for a plasma-state-dependent external source, so \u00a77 must name the extension (a coupled-source term in the forward solve, owned by forward-solve-api or added beside it) before dispatch; \u00a77 is rewritten then.",
+      "when": "2026-11-08T11:58:52.498795+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Deferred to each section's shaping: \u00a75, \u00a77, \u00a78 and \u00a79 each get a receipt path under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/<section-topic>/ and an evidence fragment under docs/evidence/fragments/iron-core-magnetisation/, as \u00a71 and \u00a76b already do.",
+      "when": "2026-11-08T11:58:28.989374+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted as a mechanism gap, deferred to \u00a78's shaping: \u00a78 needs a source with finite toroidal extent (six limb blocks of the decided 0.800 m width, e.g. as 3D polyhedral or finite-arc segments, magnetised from the axisymmetric field) before toroidalaverage.py's evaluator and averager can show a behind-versus-between difference; \u00a78 is rewritten then.",
+      "when": "2026-11-08T11:58:40.418277+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted as a mechanism gap, deferred to \u00a77's shaping: the frozen ForwardSolveRequest has no hook for a plasma-state-dependent external source, so \u00a77 must name the extension (a coupled-source term in the forward solve, owned by forward-solve-api or added beside it) before dispatch; \u00a77 is rewritten then.",
+      "when": "2026-11-08T11:58:52.498795+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Deferred to \u00a74's shaping, which follows \u00a73: \u00a74 splits into the iron_core reader migration (nova/imas/machine.py, retiring the two script readers) and the magnetisation module with its Newton solve, as two nodes or sections.",
+      "when": "2026-11-08T11:58:17.063562+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Deferred to \u00a76b's shaping: its wait narrows to s5 (or none), since it needs only the analytic S and its own imas-efit run; applied when \u00a76b is next shaped so this edit does not re-hold \u00a73's queued nodes.",
+      "when": "2026-11-08T11:58:06.270862+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v27.json",
+  "review_run_id": "r-20261108T112753900706-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "0907f1174ce7ba09d85a1d7e2b648572dac80da3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited repository file (nova/biot/{sheet,polygonanalytic,completeelliptic,incompleteelliptic,constants,zeta,tiledassembly,toroidalaverage,greens}.py, nova/imas/machine.py, nova/equilibrium/{reduced_newton,solve_request}.py, scripts/prototypes/iron_magnetisation/*, scripts/west_stray_field/solve.py, docs/research/compile-cost-evidence.html), every named symbol (greens_bz_br, greens_psi, complete_kind, complete_pole, incomplete_pole, zeta, sheet_flux, sheet_field, _fill_tile, _fill_moment_tile, _fill_arc_tile, ImasGeometryReader, StaticMachineDescription, ForwardSolveRequest, toroidal_points, frame_magnetic_field, average_toroidal_field), every GPFS receipt path, every imas-efit source path, and forward-solve-api#s1 all resolve; the 60 s / 50 MB / 64 GB bounds do appear in docs/plans/kernel-compile-barrier.html.",
+    "done_when": "pass \u2014 every implementable section declares a measurable measure and a control that can fail (s3 reversed edge normals, s4 frozen-permeability Picard, s5 under-resolved arm, s6 zero magnetisation, s7 frozen-magnetisation arm, s8 axisymmetric smear, s9 permuted probe positions, s10 the a/b = 0.5 arm), and each names a threshold (1e-13, 60 s and 50 MB, 0.5 %, 1 %, 2 %, 1e-6).",
+    "evidence_paths": "a finding \u2014 \u00a75, \u00a77, \u00a78 and \u00a79 name no durable receipt path, and \u00a75's done-when sends its comparison table to \"the plan's evidence record\", which is a description rather than a path a later reader can open.",
+    "naming": "pass \u2014 the proposed modules and symbols (nova/biot/sheet.py, nova/biot/magnetisation.py, sheet_flux, sheet_field, SheetFlux) carry no plan label, stage name, ticket number or version tag, and the section prose states mechanisms rather than changelog.",
+    "reasoning": "a finding \u2014 \u00a78's mechanism names an evaluator and averager but no source geometry with finite toroidal extent, so the mechanism cannot produce the \u03c6-resolved variation its done-when requires.",
+    "single_goal": "a finding \u2014 \u00a74 carries both the machine-description iron read (extending nova/imas/machine.py and retiring the two script readers) and the magnetisation module with its Newton material solve, and its gate proves them separately.",
+    "wiring": "a finding \u2014 the \u00a76b section's declared depends-on names iron-core-magnetisation#s6 while the same section states it lands separately from that seam."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:58:02.633995+00:00",
+  "total": null
+}

@@ -1,0 +1,144 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; no test file lies in this node's write scope.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+    "image-1.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+    "image-2.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+  },
+  "attachment_note": "Three rendered PNGs (1400x720 each) were handed to this node and every verdict below is about what those PNGs show; no SVG was opened, rendered or read. The three-to-figure mapping is inferred from the run's own diff (exactly these three SVGs changed between base and head) and from two facts visible in the images that the record's own table fixes: the residual strip in image-0 carries five trips and frame 137 has five active-set trips while the strips in image-1 and image-2 carry three and frame 146 has three, and the highlighted 'this trip' point sits at trip 2 in image-0 and image-2 and at trip 1 in image-1. Cross-checked against the run's receipts: image-2's solved-axis marker stands above the limiter top, matching the reported (1.2106, +1.5560) trip-2 axis, and image-0's stands about 0.3 m below the label axis inside the limiter, matching (1.6670, -0.3611). The PNG twin of each SVG is written by render_trip_panels.py:327 as <stem>.check.png.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T09:08:22Z",
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "render": "image-0.png (1400x720)",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "defect (non-blocking): panel occupies 17% of canvas width",
+        "decoration": "pass",
+        "label_collision": "defect: strip y label clipped off canvas",
+        "legibility": "defect: strip y-axis quantity unnamed; panel readable",
+        "table_form": "pass"
+      }
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "render": "image-1.png (1400x720)",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "defect (non-blocking): panel occupies 17% of canvas width",
+        "decoration": "pass",
+        "label_collision": "defect: strip y label clipped; solved X-point marker overlaps solved axis marker",
+        "legibility": "defect: strip unlabelled; solved axis and X-point markers coincide",
+        "table_form": "pass"
+      }
+    },
+    {
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "render": "image-2.png (1400x720)",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "defect (non-blocking): panel occupies 16% of canvas width; label levels dense",
+        "decoration": "pass",
+        "label_collision": "defect: strip y label clipped off canvas; y tick labels cut by left edge",
+        "legibility": "defect: strip unlabelled and its tick labels clipped",
+        "table_form": "pass"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "ffa46edf5fc",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The residual strip's y-axis label, 'relative residual' (set at scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:315), does not appear anywhere in the rendered image: figure.subplots_adjust(left=0.03) at render_trip_panels.py:208 leaves about 24 px of a 1400 px canvas to the left of the strip's axes, which the tick labels alone consume, so the label is drawn off the canvas. A reader is corrected by nothing: the strip's left edge shows two bare numbers and the panel gives no clue that the strip measures relative residual, which is the quantity the record's own convergence argument rests on."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "ff16f6ec1a5",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The residual strip's y-axis label, 'relative residual' (render_trip_panels.py:315), is clipped off the left canvas edge by the same subplots_adjust(left=0.03) at render_trip_panels.py:208, and here the clipping has also eaten the tick labels: the top tick reads '0.25' with its leading character cut by the canvas, and the bottom reads '0.00' with its leading character cut, so the strip's numbers are partly unreadable as well as unnamed."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "id": "f9a4ac1b1a5",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The residual strip's y-axis label, 'relative residual' (render_trip_panels.py:315), is clipped entirely off the left canvas edge by render_trip_panels.py:208 (left=0.03 of a 1400 px canvas), so the strip shows '0.0' and '0.1' with no quantity named; the tick labels themselves fit in this one because its only labels are short."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "id": "fa7f8680248",
+      "line": 204,
+      "severity": "non-blocking",
+      "summary": "The canvas is fixed at 14.0 x 7.2 in (line 204) while the poloidal panel is forced to equal aspect over the full radius/height grid (lines 321-323), so the panel that carries the entire physical result occupies only 240 px of the 1400 px width (measured on all three PNGs: content columns 580-819 of 1400 for the two frame-146 panels and 580-793 for frame 137). For frame-146 trip 2 the label's nine levels are then packed within two or three pixels of each other near the core and the closed field reads as a dense grey band at native resolution. A narrower canvas, or a data extent cropped to the vessel, would spend the width on the data instead of on white margin."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "ffa46edf5fc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The solved X-point marker (red X) is drawn on top of the solved axis marker (red triangle) - their glyphs touch and read as a single red mark - because render_trip_panels.py:236-240 draws the axis and the solved saddles in one draw_nulls call and the trip's interior saddle lies only centimetres above the axis. The record's paragraph says that saddle is genuine, but as drawn the reader cannot separate the axis marker from it, and cannot read the axis position to better than about 0.05 m, on the one panel whose point is where the axis is."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "ff16f6ec1a5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend advertises a 'bounding surface' series that the panel does not show: no violet ring is drawn, because the trip-2 axis lies outside the limiter so the bounding-surface read returns nothing, and the only violet pixels in the whole image (108, against 883 and 889 in the other two panels) are the legend swatch itself. A key entry with no data teaches the reader to look for a curve that is not there; drop it, or mark it as absent, on this panel."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "id": "facaa93d7ad",
+      "line": 92,
+      "severity": "non-blocking",
+      "summary": "The paragraph introducing all three panels says 'the thick red curve is the bounding surface', but in the figure every red mark is a null marker (the solved axis triangle and the solved X-point X) and the bounding surface is the violet curve the legend itself labels 'bounding surface' (#6a4c93, render_trip_panels.py:224). A reader following the caption looks for a red boundary curve and finds red markers inside the plasma instead."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "id": "f5e644d4966",
+      "line": 103,
+      "severity": "non-blocking",
+      "summary": "The caption under the regenerated frame-146 trip-1 panel still states the retracted claim: 'the polish moves it 0.328 m to the field's true maximum at Z=-0.034 m'. The panel now beneath that caption shows the axis triangle at the centre of its own closed contours, i.e. a maximum with no 0.328 m displacement, so the picture contradicts its own caption. The append rule keeps the original text and the new correction section does precede this paragraph, which is why this is not called blocking - but a reader arriving at the figure is told a number that the figure no longer shows, and one line pointing forward to the correction would cost nothing."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T090625746759-review-of-diiid-frame-146-orientation-correction-2e72f2e452a5-figure",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_figures": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+  ],
+  "reviewed_head_sha": "2e72f2e452a5c64e514866fb826dfe6da9e0b5e6",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC frame-137-trip-2-flux-contours legibility: defect. The poloidal panel is readable - the solved axis (red triangle) sits ~0.3 m below the hollow label axis inside the limiter with the closed blue ring around it - but the residual strip beneath it carries an unlabelled pair of numbers (0.0, 0.1) with no quantity named anywhere on the canvas, so nothing tells the reader what the strip measures.",
+    "RUBRIC frame-137-trip-2-flux-contours data_ink: defect, non-blocking. The panel's drawn content spans columns 580-819 of the 1400 px canvas (measured on the rendered PNG), so the flux map - the figure's subject - occupies 17% of the width and the remaining 83% carries no data.",
+    "RUBRIC frame-137-trip-2-flux-contours decoration: pass. No gradient, background fill, span or shading; the only non-data marks are the limiter outline and the legend swatches.",
+    "RUBRIC frame-137-trip-2-flux-contours contrast: pass. Every text artist is near-black (#1a1a1a) on white and the swept y tick labels of the strip are not clipped here.",
+    "RUBRIC frame-137-trip-2-flux-contours table_form: pass. A spatial field plus its nulls is not information that is naturally a table.",
+    "RUBRIC frame-137-trip-2-flux-contours label_collision: defect. The strip's y-axis label is clipped entirely off the left canvas edge, and no label overlaps another or the data in the panel.",
+    "RUBRIC frame-146-trip-1-flux-contours legibility: defect. The panel shows the reported axis at the centre of the closed contours, which is the corrected result the node exists to show, but the strip's y quantity is unnamed and the solved X-point marker sits on the solved axis marker so the axis position is hard to read.",
+    "RUBRIC frame-146-trip-1-flux-contours data_ink: defect, non-blocking. Panel content spans columns 580-819 of 1400 px; the solved and label contour families are separated by colour and weight and both are visible, but they are compressed into 17% of the canvas.",
+    "RUBRIC frame-146-trip-1-flux-contours decoration: pass. No gradient, band or decorative fill.",
+    "RUBRIC frame-146-trip-1-flux-contours contrast: pass. All text is near-black on white; the EFIT flux series is the repository's light grey and is reported as a separate non-blocking finding rather than as a text-contrast failure.",
+    "RUBRIC frame-146-trip-1-flux-contours table_form: pass. The poloidal field and its stationary points are inherently spatial.",
+    "RUBRIC frame-146-trip-1-flux-contours label_collision: defect. The y-axis label is clipped off the canvas, and the solved X-point marker overlaps the solved axis marker so the two read as one mark.",
+    "RUBRIC frame-146-trip-2-flux-contours legibility: defect. The panel does the job the brief asks of it - the axis triangle stands above the limiter top outside the vessel, with the label's closed rings inside - but the strip is unlabelled and two of its y tick labels lose their leading digit to the canvas edge.",
+    "RUBRIC frame-146-trip-2-flux-contours data_ink: defect, non-blocking. Panel content spans columns 580-793 of 1400 px, and the label's nine contour levels are packed within a few pixels of each other near the core, so the closed field reads as a dense grey band at native resolution rather than as separate levels.",
+    "RUBRIC frame-146-trip-2-flux-contours decoration: pass. No gradient, fill or styling that is not data.",
+    "RUBRIC frame-146-trip-2-flux-contours contrast: pass. All text is near-black on white.",
+    "RUBRIC frame-146-trip-2-flux-contours table_form: pass. A flux map with both null sets is not a table's content.",
+    "RUBRIC frame-146-trip-2-flux-contours label_collision: defect. The strip's y-axis label is clipped off the canvas and the '0.25' and '0.00' tick labels are cut by the left edge; no in-panel label overlaps data."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:25:29.209876+00:00",
+  "total": null
+}

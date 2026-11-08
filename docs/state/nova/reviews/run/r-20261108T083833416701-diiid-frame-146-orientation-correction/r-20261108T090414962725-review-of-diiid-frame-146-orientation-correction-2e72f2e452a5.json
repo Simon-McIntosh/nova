@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed node's write paths hold no test file, so its dispatch armed no suite pair: its manifest carries no baseline_suite or after_suite block and there is no base/head gate log to reduce. The zero is the unarmed-suite state, not a measured delta; the reviewed node's own gate is orientation-gate.log at EXIT=0 beside a negative control at EXIT=1.",
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/diiid_vertical_loss/check_orientation.py:36 analysis_field",
+    "scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:43 analysis_field",
+    "scripts/prototypes/diiid_vertical_loss/maxima_census.py:31 analysis_field",
+    "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:72 analysis_field",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:139 analysis_field for flux, :140 for label"
+  ],
+  "completed_at": "2026-11-08T09:23:19.354Z",
+  "dispatched_at": "2026-11-08T09:06:06Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/check_orientation.py",
+      "line": "69",
+      "severity": "non-blocking",
+      "text": "non-blocking: the guard is a standalone script invoked with a caller-supplied --axis and is not collected by any test suite, so a future edit that reintroduces a shape-based binding in one of the four readers reddens nothing until someone reruns this command by hand; wiring it into a test that reads the axis from the archive's own row would make the regression automatic."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": "279",
+      "severity": "non-blocking",
+      "text": "non-blocking: the diff bundles unrelated ruff re-wrapping with the semantic change - the legend handles block at :279-340, the gradient expression at core_stationary_probe.py:104-125 and argument rewrapping in maxima_census.py:112-140 - so the orientation edit cannot be read on its own in review."
+    }
+  ],
+  "gate_sources": {
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/orientation-negative-control.log",
+    "node_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/orientation-gate.log"
+  },
+  "item_verdicts": {
+    "diff": "Read both commits against 737f6953: 6f10bb038 adds flux_orientation.py and check_orientation.py, replaces the duplicated _oriented helper in the four readers with analysis_field, and re-renders three trip panels plus per-trip-panels.json; 2e72f2e45 appends 199 lines to the fragment with no deletions, so the original text survives.",
+    "done_when": "The done_when asks for one shared binding helper, an assertion (test or gate script) that refuses a square archive read the wrong way with a transposed-field negative control, regenerated receipts and panels, and an appended correction auditing the record's surviving claims; orientation-gate.log records the native shift 3.4e-9 m at EXIT=0 and the transposed control 0.3284652 m at EXIT=1, regenerated/polish-axis-check.json, maxima-census.json and core-stationary.json cover frames 146 and 137 at trips 1-2, render.log names the three re-rendered panels, and the appended section carries the claim-by-claim table.",
+    "goal": "The goal is to correct a record whose frame-146 trip-1 flux map was read with R and Z swapped by replacing a shape-based orientation guess with one declared-order helper, regenerating the receipts and figures and appending a dated correction; flux_orientation.analysis_field at scripts/prototypes/diiid_vertical_loss/flux_orientation.py:32 is imported by all four readers and the correction is section id=correction in docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:294.",
+    "manifest": "The manifest names commits 6f10bb038 and 2e72f2e45, changed paths all inside the grant, the gate command with its log, the transposed control log, the regenerated receipt paths and measurement module/cwd; its claims match the logs I opened, and it discloses the sibling renderer under outside_scope rather than claiming it.",
+    "write_paths": "The source brief grants scripts/prototypes/diiid_vertical_loss/, docs/figures/diiid-frame-146-vertical-loss/ and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html; git diff 737f6953..2e72f2e45 changes only files under those three paths, and no test file or product source under nova/ is touched."
+  },
+  "justifications": {
+    "durability": "check_orientation.py:69 asserts shift_m < one_lattice_spacing_m against a threshold and seed the code under test does not supply, and the logged --transpose arm shows it reddening on the reinstated misread, but nothing in the repository's suite re-runs it, so a later edit that restores a shape guess in any reader would pass unnoticed.",
+    "evidence": "orientation-gate.log's first line names revision 2e72f2e452a5, its native arm prints shift_m 3.398e-09 with EXIT=0 and its transposed arm prints 0.3284652 with TRANSPOSED_EXIT=1, so the recorded result is the gate's own output rather than a claim about it.",
+    "fit": "flux_orientation.py:32-51 follows the sibling-import idiom already used by polish_axis_check.py:24 and core_stationary_probe.py:24, and the added names flux_orientation, analysis_field, ARCHIVE_STORAGE_ORDER and READER_ORDER describe mechanism with no version, plan or author label.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:294-490 names the withdrawn 0.328 m polish and the transposed-storage cause, quotes the 3.4e-9 m native shift and separates the receipt-history claims that survive from the ones withdrawn.",
+    "reuse": "A search over nova/equilibrium/conservation.py, nova/equilibrium/map_extraction.py, nova/media/sources/pulse_forward.py and nova/media/poloidal.py found the storage order declared and validated but no owner that converts a saved lattice map to the plotting order; draw_flux_contours raises on a wrong shape rather than rebinding it, so analysis_field is the first owner of the conversion and duplicates nothing.",
+    "scope_discipline": "Every changed path in git diff 737f6953..2e72f2e45 sits inside the three granted paths, but scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:279-360 and core_stationary_probe.py:104-125 also carry unrelated ruff re-wrapping that the orientation fix does not need."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to stop the frame-146 trip readers guessing a flux map's axis order from its shape; scripts/prototypes/diiid_vertical_loss/flux_orientation.py:32 provides analysis_field and all four readers in scripts/prototypes/diiid_vertical_loss/ import it.\nVERDICT done_when: The done_when asks for one shared helper, a gate assertion with a transposed-field negative control, regenerated receipts and panels, and an appended correction; orientation-gate.log records the native shift 3.4e-9 m at EXIT=0 and the transposed control 0.3284652 m at EXIT=1, and regenerated/ holds the rebuilt receipts.\nVERDICT write_paths: Read the brief's three granted paths and git diff 737f6953..2e72f2e45; every changed file sits under scripts/prototypes/diiid_vertical_loss/, docs/figures/diiid-frame-146-vertical-loss/ or the frame-146 fragment, and no product source or test file is touched.\nVERDICT manifest: Read the delivered manifest; it names commits 6f10bb038 and 2e72f2e45, the gate and negative-control logs, the regenerated receipt paths and measurement module/cwd, and it discloses the untouched sibling renderer under outside_scope.\nVERDICT diff: Read both commits from 737f6953; 6f10bb038 adds the helper and check and rewires the four readers while re-rendering three trip panels, and 2e72f2e45 appends 199 lines of correction to docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html with no deletions.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/check_orientation.py:36 analysis_field, scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:43 analysis_field, scripts/prototypes/diiid_vertical_loss/maxima_census.py:31 analysis_field, scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:72 analysis_field, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:139 analysis_field for flux and :140 for label\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:294-490 names the withdrawn 0.328 m polish and the transposed-storage cause, quoting the 3.4e-9 m native shift and separating surviving from withdrawn claims.\nSCORE evidence: 18\nJUSTIFICATION evidence: orientation-gate.log names revision 2e72f2e452a5 and carries the gate's own native EXIT=0 and transposed EXIT=1, so the measure is recorded rather than claimed.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every changed path is inside the three granted paths, but render_trip_panels.py:279-360 and core_stationary_probe.py:104-125 bundle unrelated ruff re-wrapping with the fix.\nSCORE durability: 15\nJUSTIFICATION durability: check_orientation.py:69 fails on a reinstated misread as the logged transposed arm shows, but the guard is a standalone script no suite collects, so a later regression in any reader reddens nothing automatically.\nSCORE fit: 18\nJUSTIFICATION fit: flux_orientation.py:32-51 follows the sibling-import idiom used at polish_axis_check.py:24 and names mechanism rather than plan, version or author.\nSCORE reuse: 19\nJUSTIFICATION reuse: a search of nova/equilibrium/conservation.py, nova/equilibrium/map_extraction.py, nova/media/sources/pulse_forward.py and nova/media/poloidal.py found the storage order declared and shape-validated but no owner converting a saved map to plotting order, so analysis_field duplicates nothing.\nFINDING scripts/prototypes/diiid_vertical_loss/check_orientation.py:69 non-blocking: the guard is a standalone script invoked with a caller-supplied --axis and is collected by no test suite, so a future shape-based regression reddens nothing until the command is rerun by hand.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:279 non-blocking: the diff bundles unrelated ruff re-wrapping (legend handles, gradient expression, argument wrapping) with the semantic fix, so the orientation change cannot be read on its own.\n",
+  "review_run_id": "r-20261108T090414962725-review-of-diiid-frame-146-orientation-correction-2e72f2e452a5",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "2e72f2e452a5c64e514866fb826dfe6da9e0b5e6",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:39:53.987318+00:00",
+  "total": 105
+}

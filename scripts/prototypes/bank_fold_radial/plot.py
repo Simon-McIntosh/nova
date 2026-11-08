@@ -8,6 +8,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 
 from scripts.prototypes.bank_fold_vertical.plot import checked_save
 
@@ -67,6 +68,22 @@ def main():
         fontsize=14,
     )
     fig.subplots_adjust(left=0.10, right=0.97, bottom=0.17, top=0.84, wspace=0.45)
+    fig.canvas.draw()
+    terminal = receipt["condition"]["pinned"][-2:]
+    coordinates = np.array([(r["drive"], r["smallest"]) for r in terminal])
+    projected = axes[1].transData.transform(coordinates)
+    diameter = axes[1].lines[0].get_markersize() * fig.dpi / 72
+    if len(terminal) == 2 and np.linalg.norm(projected[1] - projected[0]) < diameter:
+        axes[1].annotate(
+            f"{len(terminal)} states",
+            xy=coordinates[-1],
+            xytext=(14, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            color="#2e6fa8",
+            fontsize=14,
+        )
     checked_save(fig, args.output)
     fig.savefig(args.png, dpi=100)
     print("RENDER canvas=1400x720 text_bounds=pass text_collisions=pass markers_only=1")

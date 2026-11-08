@@ -47,6 +47,16 @@ def _shared_palette(frames: Sequence[PIL.Image.Image]) -> list[PIL.Image.Image]:
     """
     from PIL import Image
 
+    # Pillow maps colours onto a palette at reduced precision, so a pure white
+    # page lands on a near-white entry and comes back off-white. Pixels within
+    # fifteen levels of white in every channel are set to exact white first,
+    # which leaves no near-white entry for the lookup to land on.
+    def snapped(frame):
+        array = np.asarray(frame).copy()
+        array[np.all(array >= 240, axis=2)] = 255
+        return Image.fromarray(array)
+
+    frames = [snapped(frame) for frame in frames]
     chosen = np.unique(np.linspace(0, len(frames) - 1, min(8, len(frames))).astype(int))
     width, height = frames[0].size
     strip = Image.new("RGB", (width, height * len(chosen)))

@@ -49,8 +49,8 @@ _QUANTITIES = {
 FLUX_SPACING = 0.04
 
 #: Thin flux contours, in the ink style's grey for vacuum and blue for plasma.
-CONTOUR_LINEWIDTH = 0.8
-BOUNDARY_LINEWIDTH = 1.6
+CONTOUR_LINEWIDTH = 1.2
+BOUNDARY_LINEWIDTH = 2.4
 
 #: The figure on a widescreen page: full slide width, 0.9 in short of the
 #: 16:9 height so the slide keeps a footer band below it.
@@ -61,46 +61,53 @@ SLIDE_HEIGHT = 6.6
 SLIDE_FONTSIZE = 18.0
 SLIDE_TICK_FONTSIZE = 16.0
 
+#: Margin around the first wall in the cropped poloidal panel, in metres.
+WALL_MARGIN = 0.03
+
+#: Width of the graph relative to the machine panel: the machine leads.
+GRAPH_TO_MACHINE = 1.4
+
 #: Room above the graph column for the slide title, in inches.
 TITLE_ROOM = 1.5
 
 
 def slide_view(extent, style):
-    """Return the poloidal panel full height beside a graph column on a slide.
+    """Return the graph on the left and the machine full height on the right.
 
-    The poloidal panel runs the full page height at the machine's aspect. The
-    two graphs take the rest of the width and stop short of the top, leaving
-    the space above them, to the right of the machine, for the slide title.
+    The machine is the subject: its panel runs the full figure height at the
+    extent's aspect, on the right, and the graph to its left is held to
+    ``GRAPH_TO_MACHINE`` of the panel width, stopping short of the top to
+    leave room for the slide title.
     """
     import matplotlib.figure
 
     from nova.media.layout import ThreeView
 
     r_min, r_max, z_min, z_max = (float(value) for value in extent)
-    inset, gap, right, bottom = 0.1, 1.5, 0.3, 0.9
+    inset, gap, left, bottom = 0.1, 0.35, 1.4, 0.9
     panel_height = SLIDE_HEIGHT - 2 * inset
     panel_width = panel_height * (r_max - r_min) / (z_max - z_min)
+    column_width = GRAPH_TO_MACHINE * panel_width
+    width = left + column_width + gap + panel_width + inset
     figure = matplotlib.figure.Figure(
-        figsize=(SLIDE_WIDTH, SLIDE_HEIGHT),
+        figsize=(width, SLIDE_HEIGHT),
         dpi=style.figure_dpi,
         facecolor=style.figure_facecolor,
     )
     poloidal = figure.add_axes(
         (
-            inset / SLIDE_WIDTH,
+            (width - inset - panel_width) / width,
             inset / SLIDE_HEIGHT,
-            panel_width / SLIDE_WIDTH,
+            panel_width / width,
             panel_height / SLIDE_HEIGHT,
         )
     )
-    column_left = inset + panel_width + gap
-    column_width = SLIDE_WIDTH - column_left - right
     graph_height = SLIDE_HEIGHT - TITLE_ROOM - bottom
     upper = figure.add_axes(
         (
-            column_left / SLIDE_WIDTH,
+            left / width,
             bottom / SLIDE_HEIGHT,
-            column_width / SLIDE_WIDTH,
+            column_width / width,
             graph_height / SLIDE_HEIGHT,
         )
     )
@@ -256,7 +263,19 @@ def render_thomson(
         )
         measured_edges.append(None if fit is None else fit.edge)
 
-    view = slide_view(machine.bounds(), style)
+    # The poloidal panel is cropped to the first wall, so the wall fills the
+    # panel height and the plasma is drawn as large as the slide allows.
+    wall_min = machine.limiter.min(axis=0)
+    wall_max = machine.limiter.max(axis=0)
+    view = slide_view(
+        (
+            wall_min[0] - WALL_MARGIN,
+            wall_max[0] + WALL_MARGIN,
+            wall_min[1] - WALL_MARGIN,
+            wall_max[1] + WALL_MARGIN,
+        ),
+        style,
+    )
     nulls: list[dict[str, int]] = []
     # The plasma cells are a hexagonal tessellation of the wall, each cell cut
     # at the solved boundary, so the drawn domain ends exactly on the boundary
@@ -364,20 +383,20 @@ def render_thomson(
                 values,
                 color=colour[string.name],
                 style=style,
-                markersize=5.0,
+                markersize=7.0,
             )
         scale.apply(axes)
         tr.label_axes(axes, "major radius  [m]", f"{label}  [{unit}]", style=style)
         if solved_edge:
             for crossing in chord_crossings(frame.boundary, strings[0].positions[0, 1]):
                 axes.axvline(
-                    crossing, color=style.separatrix_color, linewidth=1.6, zorder=1
+                    crossing, color=style.separatrix_color, linewidth=2.4, zorder=1
                 )
         if measured_edges[index] is not None:
             axes.axvline(
                 measured_edges[index],
                 color=MEASURED_EDGE_COLOR,
-                linewidth=1.6,
+                linewidth=2.4,
                 linestyle="--",
                 zorder=1,
             )

@@ -1,0 +1,155 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T08:43:04.566Z",
+  "dispatched_at": "2026-11-08T08:34:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T083143906430-plan-review-of-iron-core-magnetisation/plan.html:379",
+      "id": "reasoning-1",
+      "reason": "the done-when's convergence precondition is the clause that stops a miss being read as a representation defect, and as written it can pass without any refinement happening, so the plan must name `ironBoundary/knotSet` and `ironBoundary/observationPoints` instead.",
+      "text": "s10 says imas-efit's \"boundary resolution (knot and observation-point counts, `internalResolution`) is refined until S changes by under 0.5 %\", but `internalResolution` is a `<ironModel>` attribute of type `SingleValue<double>` (src/efitIronModel.h:33) that appears nowhere in `configuration/` and is required only when `internalIronCurrents` are configured (src/efitIronModel.cpp:110-113), while the knob is consumed only by `InternalIronCurrents::computeResponses(resolution, ...)` (src/internalIronCurrents.cpp:313) \u2014 the knot and observation-point counts are instead attributes of `ironBoundary/knotSet` (`knotCount`, `basisFunctionCount`, `normalizedDistance`, `mu`, `tknot`) and `ironBoundary/observationPoints` (src/ironBoundary.cpp:150-190, enforced by checkData at 195-199) \u2014 so a worker following the sentence refines a scalar that changes nothing for a boundary-only configuration, S never moves, and the \"under 0.5 % under one further refinement\" precondition is satisfied vacuously on the first attempt, declaring the control converged while its discretisation is untouched.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T083143906430-plan-review-of-iron-core-magnetisation/plan.html:393",
+      "id": "done_when-1",
+      "reason": "a cross-code deliverable ran against an unspecified configuration and an unspecified quantity cannot be judged reproducing or missing anything, so the node's receipt would record a number no reviewer can score.",
+      "text": "clause (3) requires \"the iron contribution at the WEST in-vessel probes and flux loops is tabulated beside \u00a76's\", but the section's mechanism configures imas-efit with the iron_core IDS withheld and a constant permeability (plan.html:375-378) precisely so the linear exact S is the right reference, and at WEST the iron saturates (nova's prototype reports \u03bcr 216-1667), so that tabulation needs a second imas-efit run with the IDS present and a B-H table \u2014 which the mechanism never authorises and for which it specifies no configuration \u2014 and the clause names no permeability for the constant-\u03bc variant and no comparison target (\"beside \u00a76's\" leaves open whether the scored quantity is the field, the difference from air-core, or the share of air-core).",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T083143906430-plan-review-of-iron-core-magnetisation/plan.html:389",
+      "id": "single_goal-1",
+      "reason": "a node that can only half-satisfy its done-when is reported blocked or promoted on a partial measure, and the WEST tabulation is the half that carries the \u00a71 disagreement the whole control exists to interpret.",
+      "text": "s10's done-when joins two independent deliverable under one verdict: the closed-shell control at \u03bcr = 1000 and a/b = 0.9 with its \u03bcr = 1 wiring control (clauses 1-2), and a WEST probe/flux-loop tabulation (clause 3) that needs a different imas-efit configuration and measures a different quantity on a different body, so a receipt that reproduces S on the shell but cannot run the WEST configuration has no status the done-when can express, and the section that the earlier split created to carry one deliverable still carries two.",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T083143906430-plan-review-of-iron-core-magnetisation/plan.html:375",
+      "id": "anchors_resolve-1",
+      "reason": "naming src/ironBoundary.cpp is the difference between a worker deriving the element from the source that parses it and a worker discovering the required attribute set one thrown BadInputData at a time inside a 3.0 h section.",
+      "text": "s10 proposes to author \"a new `ironBoundaries` element\" and cites only the two readers of the IDS/XML choice (src/ironCoreBuilder.cpp, src/tokamakData.cpp), but no `<ironBoundary>` or `<ironBoundaries>` element exists anywhere under imas-efit's `configuration/` to copy, and the reader that defines what such an element must contain \u2014 src/ironBoundary.cpp, whose checkData throws unless `geometry/category`, `knotSet/normalizedDistance|mu|tknot`, `observationPoints/normalizedDistance|angle` and the rest are all present \u2014 is not cited, so the node is asked to author roughly twenty required attributes of a schema it is given no pointer to.",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+  "plan_fingerprint": "e2ced478a0ec77761ee23aa381090a938bc6f091e24472b8b31438b508b226dd",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 23,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a76b converges imas-efit through the knotSet and observationPoints counts of the iron-boundary element, not internalResolution (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:56:26.349798+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The WEST probe tabulation is removed from \u00a76b; it needs a different imas-efit configuration and is covered by \u00a76's seam tabulation and \u00a79's model comparison (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:56:40.151724+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "\u00a76b now carries the closed-shell control alone (shell result, mu_r = 1 wiring control, verdict and report); the WEST tabulation clause is gone (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:56:52.116479+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a76b cites src/ironBoundary.cpp checkData as the definition of the iron-boundary element's required fields (geometry/category, knotSet, observationPoints), since no instance exists under configuration/ (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:57:06.796630+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "note": "\u00a76b cites src/ironBoundary.cpp checkData as the definition of the iron-boundary element's required fields (geometry/category, knotSet, observationPoints), since no instance exists under configuration/ (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:57:06.796630+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "note": "The WEST probe tabulation is removed from \u00a76b; it needs a different imas-efit configuration and is covered by \u00a76's seam tabulation and \u00a79's model comparison (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:56:40.151724+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "note": "\u00a76b converges imas-efit through the knotSet and observationPoints counts of the iron-boundary element, not internalResolution (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:56:26.349798+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c0fee85e21232371b254228e09c783c1909016cd",
+      "commit_basis": "edit",
+      "note": "\u00a76b now carries the closed-shell control alone (shell result, mu_r = 1 wiring control, verdict and report); the WEST tabulation clause is gone (c0fee85e2).",
+      "reason": "",
+      "when": "2026-11-08T08:56:52.116479+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v23.at-386d74f0-r-20261108T083143906430-plan-review-of-i.json",
+  "review_run_id": "r-20261108T083143906430-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "386d74f058953b99c8dec45e0fa5ecef8609bce2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 every path s10 names resolves, but the element it proposes to author has no in-tree instance and the source that defines its required attributes is not cited.",
+    "done_when": "a finding \u2014 clause (3) (plan.html:393-397) asks for a WEST probe/flux-loop tabulation whose imas-efit configuration, permeability and comparison target the section never states, so the clause cannot fail determinately.",
+    "evidence_paths": "pass \u2014 the receipt and the message copy are placed under `/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/` (plan.html:386-387), under the same durable evidence root the section's sibling receipts already use, and that directory's parent exists.",
+    "naming": "pass \u2014 s10 introduces no code symbols, comments or file names, so no plan label, stage name or ticket number can reach source through it.",
+    "reasoning": "a finding \u2014 the convergence clause's named knob, `internalResolution`, is not the iron-boundary resolution parameter, so the mechanism does not produce the convergence precondition the done-when rests on.",
+    "single_goal": "a finding \u2014 s10 carries the spherical closed-shell control (clauses 1-2) and a separate WEST iron-contribution tabulation (clause 3) that requires a different imas-efit configuration, so one verdict cannot close both.",
+    "wiring": "pass \u2014 s10 is declared to depend on s5 and s6 (plan.html:24), s9 is declared to depend on s10, and the section's own clause (3) writes the one-directional verdict into the plan for s9 to read, so the earlier wiring gap on this control is closed."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "6aabe2add421eeb2a535e031cffc75c183c77de861a0f735b4c6b1c0d887c579",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0e968df67c572dad4921d3c80db60349fef2aeaf97a4e88ea0544111dc4254cb",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T08:56:16.453844+00:00",
+  "total": null
+}

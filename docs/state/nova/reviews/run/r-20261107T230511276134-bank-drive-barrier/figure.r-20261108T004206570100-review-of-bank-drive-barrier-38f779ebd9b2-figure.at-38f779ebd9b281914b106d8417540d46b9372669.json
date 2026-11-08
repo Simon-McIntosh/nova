@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This figure review ran no suite, so the count is the neutral value the record shape requires and not a measurement; no base/head gate pair was read and no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720)": "docs/figures/sub-millisecond-forward-path/bank-drive-barrier/residual-vs-drive.svg"
+  },
+  "attachment_note": "One attachment was supplied and opened: image-0.png, 1399x720 px. It is the only image this review looked at. It is matched to the reviewed figure by content, not by byte identity: its six markers on logarithmic axes, its axis titles 'drive perturbation' and 'fresh residual norm', and its 14 x 7.2 in aspect (1399x720 against the drawing script's figsize of 14 by 7.2) are what scripts/prototypes/bank_drive_barrier/plot.py draws, and the reviewed manifest records that the SVG was rendered to residual-vs-drive-reviewed.png and inspected. No SVG was opened, read, rendered or git-shown, and no image other than the named PNG was opened, so the SVG markup and the run's separate render were not consulted. The reviewed base ed18332e6eff is confirmed an ancestor of the reviewed head 38f779ebd (git merge-base --is-ancestor exit 0, 7 commits between).",
+  "completed_at": "2026-11-08T01:02:31.173Z",
+  "dispatched_at": "2026-11-08T00:45:38Z",
+  "figure_checks": {
+    "caption": "The fragment's caption is substantive rather than a restatement of identity: it names the fixed last-accepted state, the sixteen lanes on an H200, why the zero-perturbation row sits at 1e-13, and that no decision flips at any perturbation. It agrees with the reviewed manifest's fixed-state residual values (8.899e-7, 8.901e-7, 9.079e-7, 2.686e-6, 1.805e-4, 1.796e-2), which are the six plotted points.",
+    "clipping": "Zero non-white pixels in the outer 2 px frame, and the ink bounding box stops 55 px from the right edge, 56 px from the top, 64 px from the bottom and 95 px from the left, so no tick, axis title or label reaches the canvas edge.",
+    "flip_annotations": "None drawn, and none owed: the reviewed measurement reports zero membership, cut-set, normal-form, fragment, class, qualification and X-point flips at every epsilon, so the drawing script's per-row flip list is empty at all six points. The figure therefore reads as an unlabelled smooth curve, and the caption is the only place on the page that states the no-flip result.",
+    "rendered_artifact": "Read from the named PNG at native resolution, with pixel measurements taken on it: canvas size, ink bounding box, outer-frame ink, series extent and the colour of each text class."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-drive-barrier/residual-vs-drive.svg",
+      "render_check": {
+        "blank_axes_band_above_highest_datum": "about 25 percent of the axes height, rows 39 to 179 of an axes whose x spine sits at row 597",
+        "canvas": "1399x720 (image-0.png)",
+        "ink_bbox": "(95,56)-(1344,656)",
+        "outer_frame_non_white_px": 0,
+        "series_bbox": "(212,179)-(1292,561)",
+        "series_px": 4269
+      },
+      "rubric": {
+        "contrast": "pass. Series about 5.3:1, axis titles about 19:1, tick labels about 7.7:1 against white.",
+        "data_ink": "pass. A single line and its markers on a white field; the axes carry the scales and nothing else competes with the data.",
+        "decoration": "pass. No gridlines, fills, bands or shadows; despined to the two scales that carry meaning.",
+        "label_collision": "pass. Zero frame ink, no overlapping text, no label over data, and no direct labels because no decision flips.",
+        "legibility": "pass. One series, six sampled epsilon values, a residual floor near 1e-6 turning upward to about 1.8e-2 at epsilon 1e-4; readable without zooming.",
+        "table_form": "pass. A curve whose shape is the argument; the numbers are tabled in the fragment, so the figure carries what a table could not."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted: the headroom is the annotation guard this script needs on any run of this measurement that does record a flip, and the figure is regenerated per run, so removing the padding would clip a label on the run that has one.",
+      "evidence": "plot.py lines 79-92; measured on image-0.png: series bbox y 179-561, x-axis spine at row 597, axes top near row 39, so about 140 px of the 558 px axes height (25 percent) sits above the highest datum.",
+      "file": "scripts/prototypes/bank_drive_barrier/plot.py",
+      "id": "fe5c38bcdf3",
+      "line": 92,
+      "severity": "non-blocking",
+      "summary": "The vertical limit is set to thirty times the largest residual (ax.set_ylim from min/3 to max*30), which reserves headroom for the flip annotations line 79 places 24 pt above a point. In this figure no decision flips, so no annotation is drawn and about a quarter of the panel above the highest datum is empty: the highest point sits at row 179 of an axes whose bottom spine is at row 597, and the only mark in that band is the 10^-1 tick label. A reader sees a plot that looks like it is waiting for a label that never comes, and the curve is compressed into the lower three quarters of the panel for no reason the picture shows. It does not block reading; the shape and the axis scales remain correct."
+    },
+    {
+      "disposition": "exempted: the caption states the substitution, and the alternative (dropping the row would lose the zero-perturbation baseline the fixed-state claim is relative to).",
+      "evidence": "plot.py lines 61 and 93; image-0.png carries the six x tick labels 0, 10^-12, 10^-10, 10^-8, 10^-6, 10^-4, and the leftmost marker sits at x=212, inside the log axis.",
+      "file": "scripts/prototypes/bank_drive_barrier/plot.py",
+      "id": "f3e7cfadc89",
+      "line": 93,
+      "severity": "non-blocking",
+      "summary": "The x tick for the zero-perturbation sample is labelled '0' while its datum is drawn at 1e-13 (line 61 substitutes 1e-13 for an epsilon of zero so the row can appear on a logarithmic axis). The figure alone therefore shows a point labelled 0 on an axis that cannot contain zero. The fragment's caption explains the substitution, so a reader of the page is served, but the image travels without that caption wherever a reader takes the picture alone, and this tick is the one place on the plot that states a value the axis cannot represent."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The fragment's caption is not a repeat of the figure's identity: it names the fixed state, the sixteen lanes and the device, explains the 1e-13 placement of the zero row, and states the no-flip result an unlabelled curve cannot show by itself. No caption finding is raised.",
+    "finding_materiality": "Two findings, both non-blocking. Nothing is clipped, no text overlaps another or the data, no text is unreadable, and the image is not tabular, so none of the blocking categories is met. Neither stops the figure carrying the claim its evidence record rests on: the fixed-state residual is continuous in the drive across 0 to 1e-4.",
+    "rendered_artifact": "Every verdict here is read from image-0.png opened at native resolution (1399x720), with counts taken with PIL: 4269 blue series pixels, zero outer-frame pixels, ink bbox (95,56)-(1344,656). The SVG and the run's own render were not opened, as the brief forbids both, so nothing here is inferred from markup; the attachment is matched by content and aspect, and that limit is stated in attachment_note.",
+    "scope": "Read only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "evidence": "Pixel counts and bounding boxes measured with PIL on the named attachment; the base/head relationship confirmed with git merge-base --is-ancestor.",
+    "legibility_note": "Judged from the rendered pixels, not from the drawing code.",
+    "scope_discipline": "No figure, caption or source was changed; both findings are recorded here for the coordinator to fold or exempt."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T004206570100-review-of-bank-drive-barrier-38f779ebd9b2-figure",
+  "reviewed_base_sha": "ed18332e6effa22632baea949c22e5374ad7c759",
+  "reviewed_figures": [
+    "docs/figures/sub-millisecond-forward-path/bank-drive-barrier/residual-vs-drive.svg"
+  ],
+  "reviewed_head_sha": "38f779ebd9b281914b106d8417540d46b9372669",
+  "reviewed_run_id": "r-20261107T230511276134-bank-drive-barrier",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. One blue line with six markers on logarithmic axes, titled 'drive perturbation' and 'fresh residual norm', with power-of-ten y ticks and x ticks reading 0, 10^-12, 10^-10, 10^-8, 10^-6, 10^-4. The rise from a floor near 1e-6 to about 1.8e-2 is visible at a glance and the flat-then-steepening shape reads without zooming.",
+    "RUBRIC data_ink: pass. The series is the only data ink: 4269 blue px (#2e6fa8) on a 991641 px white field, a 3 pt line with 8 px markers, no second series and no legend. The one dilution is the roughly quarter of the axes height left blank above the highest datum, recorded as finding 1; it is headroom reserved for flip annotations this figure has none of, not decoration.",
+    "RUBRIC decoration: pass. No gridlines, no background fill, no band or shading, no gradient, no drop shadow and no title. The top and right spines are absent, only the left and bottom axes carry a scale, and the minor tick marks on both are the only other furniture.",
+    "RUBRIC contrast: pass. The series blue #2e6fa8 measures about 5.3:1 on white; the axis titles are #0b0b0b at about 19:1; the tick labels are #52514e at about 7.7:1. Every text artist clears 3:1 and the line clears the 3:1 graphics floor.",
+    "RUBRIC table_form: pass. The artifact is one continuous relationship, residual norm against additive drive perturbation, whose shape is the claim: a flat floor, then a rising branch. The six rows already appear as a table in the evidence fragment; the plot is what makes the continuity visible, so the image is not a picture of a table.",
+    "RUBRIC label_collision: pass. No text is clipped: the ink bounding box is (95,56)-(1344,656) inside a 1399x720 canvas and the outer 2 px frame carries zero non-white pixels. No text artist overlaps another, none sits over the line, and there are no direct labels at all because the drawing script annotates only where a membership, cut-set, normal-form, fragment, topology, qualification or X-point decision flips, and the reviewed measurement records zero flips at every epsilon."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:02:34.362316+00:00",
+  "total": null
+}

@@ -75,6 +75,8 @@ class ThomsonString:
     temperature: np.ndarray
     density: np.ndarray
     provenance: dict = field(default_factory=dict)
+    temperature_error: np.ndarray | None = None
+    density_error: np.ndarray | None = None
 
     def __len__(self) -> int:
         """Return the admitted time-row count."""
@@ -92,6 +94,37 @@ class ThomsonString:
             return empty, empty
         row = int(np.argmin(np.abs(self.time - float(time))))
         return self.temperature[row], self.density[row]
+
+    def resolved(
+        self, time: float, quantity: str, signal_to_noise: float = 2.0
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return the radius, value and sigma of the channels resolving ``quantity``.
+
+        ``quantity`` is ``"temperature"`` or ``"density"``. A sample is kept
+        only when its value is at least ``signal_to_noise`` times its own
+        stored one-sigma uncertainty. A fit whose uncertainty exceeds half its
+        value has not measured the quantity, and those are the samples that
+        put kilo-electronvolt points in a cold edge: on shot 27079 the core
+        samples above 800 eV carry a median relative uncertainty of 8 and the
+        edge ones 1.4. A string without stored uncertainties is refused
+        rather than passed through unscreened.
+        """
+        error = (
+            self.temperature_error if quantity == "temperature" else self.density_error
+        )
+        if error is None:
+            raise ValueError(f"the {self.name} string stores no {quantity} uncertainty")
+        row = int(np.argmin(np.abs(self.time - float(time))))
+        value = (self.temperature if quantity == "temperature" else self.density)[row]
+        sigma = error[row]
+        keep = (
+            np.isfinite(value)
+            & (value > 0.0)
+            & np.isfinite(sigma)
+            & (value >= signal_to_noise * sigma)
+            & np.isfinite(self.positions[:, 0])
+        )
+        return self.positions[keep, 0], value[keep], sigma[keep]
 
     def finite(self, time: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return the radius, temperature and density of the usable channels.
@@ -159,6 +192,11 @@ def read_string(
     )
     temperature = np.asarray(group["te"], dtype=float)[admitted]
     density = np.asarray(group["ne"], dtype=float)[admitted]
+    errors = {
+        name: np.asarray(group[name], dtype=float)[admitted]
+        for name in ("te_error", "ne_error")
+        if name in group
+    }
     usable = np.isfinite(temperature) & (temperature > 0.0)
     return ThomsonString(
         name=name,
@@ -174,6 +212,8 @@ def read_string(
             "height_m": _MIDPLANE_HEIGHT,
             "height_source": "both systems view the midplane; no stored Z leaf",
         },
+        temperature_error=errors.get("te_error"),
+        density_error=errors.get("ne_error"),
     )
 
 

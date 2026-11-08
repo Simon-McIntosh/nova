@@ -1,43 +1,42 @@
-"""Animate Nova's solved surfaces beside the Thomson profiles they sample.
+"""Animate Nova's solved equilibria beside the Thomson profiles they sample.
 
-Left: the wall-clipped hexagonal plasma mesh in light purple, cut to each
-frame's solved boundary, under Nova's nested flux surfaces at their own
-absolute flux with the boundary, divertor legs and topology points, and the
-Thomson scattering volumes overlaid and coloured by system. Right: that
-system's measured profiles as the pulse steps, core above and edge below.
+Left: one free-boundary forward solve per EFIT slice, from
+``scripts/media/mast_pulse_forward.py``. It shows the grid cells that carry
+plasma current, nested flux surfaces at stated normalised flux, the boundary,
+the magnetic axis and the saddle the solve's own topology read selected, all
+inside the limiter, with the Thomson scattering volumes overlaid by system.
+EFIT's boundary is drawn dashed for reference. Right: that system's measured
+profile at the nearest laser pulse, core above and edge below.
 
-Both right-hand panels hold limits measured once over the whole pulse, so a
-channel that heats looks like a channel that heats rather than a still curve
-under moving axes. Temperature is drawn on a logarithmic axis: core electron
-temperature on this shot runs from a few hundred eV to 6.9 keV, so a fixed
-linear axis would either clip the hot frames or flatten every other one.
+The boundary is the edge of the axis-connected region below normalised flux
+one inside the limiter (``nova.media.sources.pulse_forward``). A limited
+plasma's edge therefore runs along the limiter where it touches it, and a
+diverted plasma's edge passes through its X-point. Each frame's
+boundary-to-limiter gap goes into the receipt by class, because a limited
+frame with a gap above the solve pitch is a defect, not a standoff.
+
+Only Thomson samples that resolve their quantity are drawn: a value at least
+twice its own stored uncertainty (``ThomsonString.resolved``). Both right-hand
+panels hold limits measured once over the whole pulse on those samples, on a
+logarithmic axis, so a channel that heats looks like a channel that heats.
 
 MAST's two Thomson systems both view the midplane, so the figure separates
-them by system rather than by sightline orientation -- there is no vertical
-string on this machine to contrast with.
-
-The machine outline comes from the shot's own EFIT record, which is the same
-geometry the labelled solve was driven from.
-
-Only free solves are drawn. A slice the labeller conditioned on the reference
-current centroid is not something Nova found unaided, so presenting one as
-"nova solve" would credit it with a position it was handed; those slices are
-excluded and the counts recorded. Pass ``--include-conditioned`` to draw them,
-in which case each such frame is labelled in the figure itself.
+them by system rather than by sightline orientation.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
 
 from nova.media import gif, poloidal as pol, traces as tr
-from nova.media.poloidal import boundary_wall_gap, chord_crossings
 from nova.media.ink import DEFAULT_INK
 from nova.media.layout import three_view
+from nova.media.poloidal import chord_crossings
 
 DEFAULT_OUTPUT = Path("docs/figures/presentation-media")
 
@@ -46,6 +45,12 @@ _QUANTITIES = {
     "te": ("temperature", "$T_e$", "eV"),
     "ne": ("density", "$n_e$", "m$^{-3}$"),
 }
+
+#: Line colour of the edge inferred from the Thomson profile alone.
+MEASURED_EDGE_COLOR = "#222222"
+
+#: A Thomson sample is drawn when its value is at least this many sigma.
+SIGNAL_TO_NOISE = 2.0
 
 
 def _gap_summary(gaps: np.ndarray) -> dict[str, float] | None:
@@ -60,119 +65,66 @@ def _gap_summary(gaps: np.ndarray) -> dict[str, float] | None:
     }
 
 
-def _admit_by_area(frames, reference, floor: float | None) -> dict[str, object]:
-    """Return which frames carry a plasma area worth drawing, and what dropped.
-
-    The criterion is the drawn boundary area against the reconstruction own
-    boundary area at the nearest slice. Wall contact is the wrong instrument
-    here even though the defect is a boundary standing off the wall: a
-    diverted boundary is bounded by the separatrix rather than by contact and
-    correctly stands about 100 mm off, so a standoff threshold fires on the
-    healthy population as well as the defective one and selects for nothing.
-
-    The floor is stated rather than tuned. The two populations sit either
-    side of half the reference area -- diverted frames do not fall below
-    about 0.69, and the frames that collapse fall to 0.04 -- so a floor at
-    one half lies in the gap between them rather than among the samples.
-
-    Nothing here repairs anything: the corpus is unchanged and the frames are
-    selected. Both counts and every dropped ratio are returned so the
-    selection appears in the receipt instead of as a shorter animation.
-    """
-    from shapely.geometry import Polygon
-
-    stored = np.array([frame.time for frame in reference])
-    areas = np.array([Polygon(frame.boundary).area for frame in reference])
-    ratios = np.array(
-        [
-            Polygon(frame.boundary).area
-            / areas[int(np.argmin(np.abs(stored - frame.time)))]
-            for frame in frames
-        ]
-    )
-    keep = np.ones(len(frames), dtype=bool) if floor is None else ratios >= floor
-    return {
-        "rule": (
-            "drawn boundary area at least this fraction of the reconstruction "
-            "boundary area on the nearest slice"
-        ),
-        "floor": floor,
-        "floor_basis": (
-            "one half, lying in the gap between the two populations rather "
-            "than among the samples: diverted frames stay above about 0.69 "
-            "and collapsed frames fall to 0.04"
-        ),
-        "wall_contact_rejected_as_instrument": (
-            "a standoff threshold fires on the healthy population too, since "
-            "a diverted boundary correctly stands about 100 mm off the wall"
-        ),
-        "corpus": (
-            "unrepaired; these frames were selected, not fixed, and the "
-            "limited class still fails wall contact where it is drawn"
-        ),
-        "keep": keep,
-        "admitted_frame_count": int(keep.sum()),
-        "dropped_frame_count": int((~keep).sum()),
-        "dropped": [
-            {"time_s": float(frame.time), "area_ratio": float(ratio)}
-            for frame, ratio, ok in zip(frames, ratios, keep)
-            if not ok
-        ],
-        "admitted_area_ratio_range": (
-            [float(ratios[keep].min()), float(ratios[keep].max())]
-            if keep.any()
-            else None
-        ),
-    }
+def _cell_outlines(centres: np.ndarray, pitch: tuple[float, float]) -> list:
+    """Return each current-carrying grid cell as its rectangle outline."""
+    half = 0.5 * np.asarray(pitch)
+    corners = np.array([[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]]) * half
+    return [centre + corners for centre in centres]
 
 
 def render_thomson(
     shot: int,
+    stack: list[Path],
     path: Path,
     duration: float = 10.0,
     height: float = 6.5,
     quantile: float | None = 0.98,
-    include_conditioned: bool = False,
-    cells: int = 1200,
     quantity: str = "te",
-    session: Path | None = None,
-    min_area_fraction: float | None = None,
+    solved_edge: bool = True,
 ) -> dict[str, object]:
-    """Write the surfaces-and-Thomson animation and return its receipt.
+    """Write the solved-equilibria-and-Thomson animation and return its receipt.
 
-    ``session`` names the labeller session root to read. It is worth being an
-    argument rather than a module constant: a corpus relabelled after a solver
-    repair is written to a NEW root so the earlier artefact survives, and a
-    figure that could only read one root could not be regenerated against the
-    repair. The root reached is recorded in the receipt's label provenance, so
-    two receipts can be told apart by what they read rather than by their
-    timestamps.
+    Every frame marks the edge the Thomson profile itself implies, dashed.
+    ``solved_edge`` adds the solved boundary's chord crossing, solid, so the
+    two can be compared; without it the profile panels carry the measurement
+    and its own edge only.
     """
+    from nova.diagnostics.thomson_edge import SEPARATRIX_TEMPERATURE, outboard_edge
     from nova.media.sources.mast_efit import read_pulse
     from nova.media.sources.mast_thomson import read_thomson
-    from nova.media.sources.nova_labels import read_labels
-    from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
+    from nova.media.sources.pulse_forward import SURFACE_LEVELS, read_pulse_forward
 
     style = DEFAULT_INK
-    keywords = {} if session is None else {"dirname": session}
-    frames, labels = read_labels(shot, free_only=not include_conditioned, **keywords)
+    if quantity not in _QUANTITIES:
+        raise ValueError(
+            f"unknown quantity {quantity!r}, not one of {list(_QUANTITIES)}"
+        )
+    column, label, unit = _QUANTITIES[quantity]
+    pulse = read_pulse_forward(stack)
+    # A boundary held by neither the X-point nor the wall is not a plasma
+    # state, so it is never drawn: one solve pitch is the tolerance, the
+    # resolution the boundary itself is known to.
+    tolerance = max(pulse.pitch)
+    frames = tuple(item for item in pulse.slices if item.bounded(tolerance))
+    unbounded = [
+        {
+            "time_s": item.time,
+            "class": "diverted" if item.diverted else "limited",
+            "x_point_gap_mm": 1e3 * item.x_point_gap,
+            "wall_gap_mm": 1e3 * item.wall_gap,
+            "qualified": item.qualified,
+        }
+        for item in pulse.slices
+        if not item.bounded(tolerance)
+    ]
+    if not frames:
+        raise ValueError(f"the forward stack {stack} carries no bounded slice")
     strings = read_thomson(shot)
     if not strings:
         raise ValueError(f"MAST {shot} carries no Thomson system")
     reference = read_pulse(shot)
     machine = reference.geometry
-    admission = _admit_by_area(frames, reference.frames, min_area_fraction)
-    frames = [frame for frame, keep in zip(frames, admission["keep"]) if keep]
-    if not frames:
-        raise ValueError(
-            f"no frame of MAST {shot} carries a plasma area at least "
-            f"{min_area_fraction} of the reconstruction, so there is nothing "
-            "to animate; the corpus is unrepaired and this is a result"
-        )
-    # Built once: the tessellation is a property of the wall, and only the
-    # boundary cut changes between frames.
-    mesh, mesh_provenance = hex_mesh(machine.limiter, cells=cells)
-    clipped = [clip_to_boundary(mesh, frame.boundary) for frame in frames]
+    reference_time = np.array([frame.time for frame in reference.frames])
 
     palette = (style.thomson_primary_color, style.thomson_secondary_color)
     colour = {
@@ -184,61 +136,91 @@ def render_thomson(
         [[string.name] * string.positions.shape[0] for string in strings]
     )
 
-    if quantity not in _QUANTITIES:
-        raise ValueError(
-            f"unknown quantity {quantity!r}, not one of {list(_QUANTITIES)}"
+    # One scale per system over every drawn frame's resolved samples, so the
+    # panels never move. Each frame is its own series so the quantile covers
+    # measurements rather than pooled samples.
+    resolved = {
+        string.name: [
+            string.resolved(frame.time, column, SIGNAL_TO_NOISE) for frame in frames
+        ]
+        for string in strings
+    }
+    scales = {
+        name: tr.TraceScale.over(
+            [sample[0] for sample in samples],
+            [sample[1] for sample in samples],
+            quantile=quantile,
+            log=True,
         )
-    column, label, unit = _QUANTITIES[quantity]
+        for name, samples in resolved.items()
+    }
 
-    # One scale per system over every admitted row, so the panels never move.
-    # Each row is passed as its own series, because the quantile must cover a
-    # fraction of the MEASUREMENTS rather than of the pooled samples: pooling
-    # lets one hot row set the axis for the whole pulse.
-    scales = {}
-    for string in strings:
-        stored = getattr(string, column)
-        usable = np.isfinite(stored) & (stored > 0.0)
-        rows = list(np.where(usable, stored, np.nan))
-        scales[string.name] = tr.TraceScale.over(
-            [string.positions[:, 0]], rows, quantile=quantile, log=True
+    # Headroom above the core profile for the frame annotation, so the text
+    # never sits on a measurement: two decades on the logarithmic axis.
+    core = strings[0].name
+    lower, upper = scales[core].y_limit
+    scales[core] = replace(scales[core], y_limit=(lower, upper * 100.0))
+
+    # The measured edge comes from the electron temperature of every system
+    # pooled, whichever quantity the panels show: it is one physical edge.
+    measured_edges = []
+    for frame in frames:
+        parts = [
+            string.resolved(frame.time, "temperature", SIGNAL_TO_NOISE)
+            for string in strings
+        ]
+        fit = outboard_edge(
+            *(np.concatenate([part[k] for part in parts]) for k in range(3))
         )
+        measured_edges.append(None if fit is None else fit.edge)
 
     view = three_view(extent=machine.bounds(), height=height, style=style)
     nulls: list[dict[str, int]] = []
 
-    # A limited boundary must touch its limiter. Reporting the standoff per
-    # class turns a boundary that has collapsed inward into a receipt number
-    # rather than something a reader has to catch in the animation.
-    gaps = np.array(
-        [boundary_wall_gap(frame.boundary, machine.limiter) for frame in frames]
-    )
-    limited = np.array([frame.diverted is False for frame in frames])
-
     def render(index: int) -> None:
         frame = frames[index]
         view.clear()
-        pol.draw_plasma_cells(view.poloidal, clipped[index])
+        pol.draw_plasma_cells(
+            view.poloidal, _cell_outlines(frame.current_cells, pulse.pitch)
+        )
         pol.draw_surfaces(view.poloidal, frame.surfaces)
         pol.draw_coils(view.poloidal, machine.coils)
         pol.draw_wall(view.poloidal, *machine.limiter.T)
-        pol.draw_legs(view.poloidal, frame.legs)
+        nearest = reference.frames[int(np.argmin(np.abs(reference_time - frame.time)))]
+        view.poloidal.plot(
+            *nearest.boundary.T,
+            color=style.wall_color,
+            linewidth=0.8,
+            linestyle="--",
+            zorder=style.zorder_markers - 1,
+        )
         pol.draw_boundary(view.poloidal, *frame.boundary.T)
-        # Strike points are not drawn: the brief asks for the O-point and the
-        # X-points, and a strike point's containment against a 36-point
-        # limiter is unresolved, so drawing one would put an unsettled
-        # quantity on the slide.
+        # The solve's selected saddle is the boundary's X-point only on a
+        # diverted slice; on a limited slice it is a qualified null the
+        # boundary does not pass through, drawn hollow.
+        admitted = frame.x_point[None, :] if frame.diverted else None
+        other = None if frame.diverted else frame.x_point[None, :]
         nulls.append(
             pol.draw_nulls(
                 view.poloidal,
                 magnetic_axis=frame.magnetic_axis,
-                x_points=frame.x_points,
+                x_points=admitted,
                 contain=machine.limiter,
+                other_x_points=other,
             )
         )
         pol.draw_thomson(view.poloidal, positions, group, chords=False)
+        if measured_edges[index] is not None:
+            view.poloidal.plot(
+                [measured_edges[index]] * 2,
+                [-0.12, 0.12],
+                color=MEASURED_EDGE_COLOR,
+                linewidth=1.6,
+                linestyle="--",
+                zorder=style.zorder_markers,
+            )
         for axes, string in zip((view.upper, view.lower), strings):
-            radius, temperature, density = string.finite(frame.time)
-            values = temperature if column == "temperature" else density
+            radius, values, _sigma = resolved[string.name][index]
             tr.draw_samples(
                 axes,
                 radius,
@@ -253,21 +235,34 @@ def render_thomson(
                 "major radius  [m]" if axes is view.lower else None,
                 f"{string.name} {label}  [{unit}]",
             )
-            # The boundary is the thing the profile is meant to reveal, so mark
-            # where the solved separatrix crosses this string's own chord.
-            for crossing in chord_crossings(frame.boundary, string.positions[0, 1]):
+            if solved_edge:
+                # Where the solved boundary crosses this string's own chord.
+                for crossing in chord_crossings(frame.boundary, string.positions[0, 1]):
+                    axes.axvline(
+                        crossing,
+                        color=style.separatrix_color,
+                        linewidth=1.2,
+                        zorder=1,
+                    )
+            if measured_edges[index] is not None:
                 axes.axvline(
-                    crossing,
-                    color=style.separatrix_color,
-                    linewidth=0.8,
-                    alpha=0.7,
+                    measured_edges[index],
+                    color=MEASURED_EDGE_COLOR,
+                    linewidth=1.2,
+                    linestyle="--",
+                    zorder=1,
                 )
-        conditioning = (
-            "\ncentroid pinned to EFIT" if frame.conditioned else "\nfree solve"
+        state = "converged" if frame.qualified else f"residual {frame.residual:.1e}"
+        topology = "diverted" if frame.diverted else "limited"
+        legend = (
+            "solid: solved edge   dashed: Thomson edge"
+            if solved_edge
+            else "dashed: Thomson edge"
         )
         tr.annotate_time(
             view.upper,
-            f"MAST {shot}  nova{conditioning}\nt = {1e3 * frame.time:.0f} ms",
+            f"MAST {shot}  nova forward\n{topology}, {state}\n"
+            f"t = {1e3 * frame.time:.0f} ms\n{legend}",
         )
 
     receipt = gif.animate(
@@ -278,38 +273,63 @@ def render_thomson(
         duration=duration,
         contact_sheet=Path(path).with_name(f"{Path(path).stem}-frames.png"),
     )
+    gaps = np.array([frame.wall_gap for frame in frames])
+    limited = np.array([not frame.diverted for frame in frames])
+    current_ratio = np.array(
+        [frame.plasma_current / frame.target_current for frame in frames]
+    )
     receipt |= {
         "machine": "MAST",
         "pulse": str(shot),
-        "left_panel": "nova nested flux surfaces over the clipped hex mesh",
-        "plasma_mesh": mesh_provenance
-        | {
-            "boundary_clip": "geometric intersection with the solved boundary "
-            "polygon; a rasterless session carries no flux field to cut at",
-            "clipped_cell_count_range": [
-                min(len(item) for item in clipped),
-                max(len(item) for item in clipped),
-            ],
-        },
-        "conditioned_frames_drawn": sum(1 for f in frames if f.conditioned),
-        "x_points_drawn": sum(item["x_points_drawn"] for item in nulls),
-        "x_points_dropped_outside_wall": sum(
-            item["x_points_dropped_outside_wall"] for item in nulls
+        "left_panel": (
+            "free-boundary forward solve per EFIT slice: current-carrying grid "
+            "cells, nested surfaces, boundary, axis and selected saddle; EFIT "
+            "boundary dashed for reference"
         ),
-        "strike_points_drawn": "none; outside the brief and containment unresolved",
-        "profile_limits_fixed": True,
-        "profile_limit_quantile": quantile,
+        "forward_stack": pulse.provenance,
+        "solve_pitch_m": list(pulse.pitch),
+        "surface_levels_psi_norm": [float(level) for level in SURFACE_LEVELS],
+        "frames_drawn": len(frames),
+        "boundary_hold_tolerance_m": tolerance,
+        "frames_dropped_unbounded": unbounded,
+        "frames_converged": int(sum(frame.qualified for frame in frames)),
+        "frames_limited": int(limited.sum()),
+        "frames_diverted": int((~limited).sum()),
+        "plasma_current_ratio_range": [
+            float(current_ratio.min()),
+            float(current_ratio.max()),
+        ],
+        "x_points_drawn": sum(item["x_points_drawn"] for item in nulls),
+        "other_x_points_drawn": sum(item["other_x_points_drawn"] for item in nulls),
         "quantity": quantity,
         "quantity_label": f"{label} [{unit}]",
+        "thomson_screen": (
+            f"value at least {SIGNAL_TO_NOISE:g} times its stored one-sigma uncertainty"
+        ),
         "profile_axis": "logarithmic, fixed over the pulse",
-        "separatrix_crossing_marked": True,
+        "solved_edge_drawn": solved_edge,
+        "thomson_edge": {
+            "model": (
+                "uncertainty-weighted mtanh fit of the outboard electron "
+                "temperature of every system pooled; edge where the fit falls "
+                f"through {SEPARATRIX_TEMPERATURE:g} eV, the two-point-model "
+                "upstream separatrix temperature"
+            ),
+            "frames_resolved": int(sum(edge is not None for edge in measured_edges)),
+            "solved_minus_thomson_m": [
+                float(crossing[-1] - edge)
+                for frame, edge in zip(frames, measured_edges)
+                if edge is not None
+                and (crossing := chord_crossings(frame.boundary, 0.0))
+            ],
+        },
+        "profile_limit_quantile": quantile,
         "boundary_wall_gap_mm": {
             "limited": _gap_summary(gaps[limited]),
             "diverted": _gap_summary(gaps[~limited]),
             "note": (
-                "a limited boundary must touch its limiter, so a non-zero "
-                "limited gap is a solve defect rather than a standoff; the "
-                "diverted gap is expected"
+                "a limited boundary must touch its limiter, so a limited gap "
+                "above the solve pitch is a defect; the diverted gap is expected"
             ),
         },
         "thomson_systems": [
@@ -319,41 +339,40 @@ def render_thomson(
                 "rows": len(string),
                 "colour": colour[string.name],
                 "value_limit": list(scales[string.name].y_limit),
+                "resolved_samples_drawn": int(
+                    sum(len(sample[1]) for sample in resolved[string.name])
+                ),
                 "provenance": string.provenance,
             }
             for string in strings
         ],
-        "orientation_note": (
-            "both MAST systems view the midplane, so the split is core "
-            "against edge rather than vertical against horizontal"
-        ),
         "time_span_s": [float(frames[0].time), float(frames[-1].time)],
-        "frame_admission": {
-            key: value for key, value in admission.items() if key != "keep"
-        },
-        "labels": labels,
     }
     return receipt
 
 
 def main(argv: list[str] | None = None) -> int:
     """Render the Nova-plus-Thomson animation from the command line."""
+    from nova.database.filepath import derived_cache_root
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--shot", type=int, default=27079)
+    parser.add_argument(
+        "--stack",
+        type=Path,
+        nargs="+",
+        default=None,
+        help="forward stacks written by mast_pulse_forward.py, one per shard; "
+        "defaults to the shot's 40 mm shards under the derived cache root",
+    )
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--height", type=float, default=6.5)
     parser.add_argument("--quantile", type=float, default=0.98)
-    parser.add_argument("--cells", type=int, default=1200)
     parser.add_argument(
         "--quantity",
         choices=tuple(_QUANTITIES),
         default="te",
         help="which measured profile the right-hand panels carry",
-    )
-    parser.add_argument(
-        "--include-conditioned",
-        action="store_true",
-        help="also draw slices pinned to the reference current centroid",
     )
     parser.add_argument(
         "--label",
@@ -362,38 +381,32 @@ def main(argv: list[str] | None = None) -> int:
         "default rather than superseding it",
     )
     parser.add_argument(
-        "--min-area-fraction",
-        type=float,
-        default=None,
-        help="drop a frame whose boundary area falls below this fraction of "
-        "the reconstruction area on the nearest slice; selects frames, "
-        "repairs nothing",
-    )
-    parser.add_argument(
-        "--session",
-        type=Path,
-        default=None,
-        help="labeller session root to read; defaults to the root the source "
-        "module names, and a corpus relabelled after a solver repair lands in "
-        "a new one",
+        "--thomson-edge-only",
+        action="store_true",
+        help="mark only the edge the Thomson profile implies, not the solved one",
     )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args(argv)
 
+    stack = arguments.stack or sorted(
+        (derived_cache_root() / "pulse-forward").glob(
+            f"{arguments.shot}-pitch40mm-shard*.npz"
+        )
+    )
     suffix = "" if arguments.quantity == "te" else f"-{arguments.quantity}"
     label = f"-{arguments.label}" if arguments.label else ""
+    if arguments.thomson_edge_only:
+        label = f"-thomson-edge{label}"
     name = f"mast-{arguments.shot}-nova-thomson{suffix}{label}"
     receipt = render_thomson(
         arguments.shot,
+        stack,
         arguments.output / f"{name}.gif",
         duration=arguments.duration,
         height=arguments.height,
         quantile=arguments.quantile,
-        include_conditioned=arguments.include_conditioned,
-        cells=arguments.cells,
         quantity=arguments.quantity,
-        session=arguments.session,
-        min_area_fraction=arguments.min_area_fraction,
+        solved_edge=not arguments.thomson_edge_only,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

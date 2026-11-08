@@ -35,6 +35,20 @@ SURFACE_LEVELS = np.linspace(0.1, 0.9, 9)
 #: Spline refinement of the solved map before the region is traced.
 REFINE = 4
 
+#: Normalised flux of the traced edge: the boundary level itself.
+EDGE_LEVEL = 1.0 - 1.0e-6
+
+#: Radius, in refined grid pitches, of the cut made at a diverted slice's
+#: X-point. At the boundary level the sub-boundary region touches the saddle
+#: cell and connects through it into the divertor; removing a disk this size
+#: around the saddle breaks that connection, so the axis region ends at the
+#: X-point rather than continuing down the legs.
+SADDLE_CUT_PITCHES = 1.5
+
+#: A cell carries plasma current when it holds at least this fraction of the
+#: largest cell current; below it the cell is numerical residue.
+CURRENT_FLOOR = 1.0e-3
+
 
 @dataclass(frozen=True)
 class ForwardSlice:
@@ -94,6 +108,7 @@ def trace_slice(
     axis: np.ndarray,
     axis_flux: float,
     boundary_flux: float,
+    x_point: np.ndarray | None = None,
 ) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
     """Return the boundary ring and nested surfaces of one solved map.
 
@@ -113,7 +128,12 @@ def trace_slice(
     psi_norm = (spline(fine_r, fine_z) - axis_flux) / (boundary_flux - axis_flux)
     if material.shape != psi_norm.shape:
         raise ValueError("the material flags are not on the refined lattice")
-    region = (psi_norm < 1.0) & material
+    region = (psi_norm < EDGE_LEVEL) & material
+    if x_point is not None and np.all(np.isfinite(x_point)):
+        pitch = max(fine_r[1] - fine_r[0], fine_z[1] - fine_z[0])
+        rr, zz = np.meshgrid(fine_r, fine_z, indexing="ij")
+        cut = np.hypot(rr - x_point[0], zz - x_point[1]) <= SADDLE_CUT_PITCHES * pitch
+        region &= ~cut
     labels, _count = label(region)
     ia = int(np.argmin(np.abs(fine_r - axis[0])))
     ja = int(np.argmin(np.abs(fine_z - axis[1])))
@@ -126,7 +146,7 @@ def trace_slice(
     # the contour at one is the region's own edge.
     masked = np.where(connected, psi_norm, 2.0)
     generator = contour_generator(fine_r, fine_z, masked.T)
-    edge = _closed_rings(generator, 1.0 - 1.0e-6)
+    edge = _closed_rings(generator, EDGE_LEVEL)
     if not edge:
         raise ValueError("the plasma region has no closed edge")
     boundary = max(edge, key=len)
@@ -170,14 +190,17 @@ def _merged(paths: list[Path]) -> dict[str, np.ndarray]:
             if not np.array_equal(part[name], parts[0][name]):
                 raise ValueError(f"the shard stacks disagree on {name}")
     data = {name: parts[0][name] for name in shared}
-    for name in parts[0]:
+    # Only fields every shard carries are merged; a field a later writer added
+    # is dropped rather than padded, so no row reports a value it never had.
+    common = [name for name in parts[0] if all(name in part for part in parts)]
+    for name in common:
         if name not in shared:
             data[name] = np.concatenate([part[name] for part in parts])
     # One slice per time: a row solved by two shards is kept once, from the
     # first stack named.
     _, first = np.unique(data["time_s"], return_index=True)
     order = np.sort(first)[np.argsort(data["time_s"][np.sort(first)], kind="stable")]
-    for name in parts[0]:
+    for name in common:
         if name not in shared:
             data[name] = data[name][order]
     return data
@@ -208,12 +231,13 @@ def read_pulse_forward(paths: Path | str | list) -> ForwardPulse:
                 data["axis"][index],
                 float(data["axis_flux"][index]),
                 float(data["boundary_flux"][index]),
+                data["x_point"][index] if bool(data["diverted"][index]) else None,
             )
         except ValueError as error:
             refused.append({"row": int(data["row"][index]), "reason": str(error)})
             continue
         current = data["cell_current"][index]
-        carrying = np.abs(current) > 1.0e-6 * np.abs(current).max()
+        carrying = np.abs(current) > CURRENT_FLOOR * np.abs(current).max()
         slices.append(
             ForwardSlice(
                 time=float(data["time_s"][index]),

@@ -1,11 +1,11 @@
 """Animate Nova's solved equilibria beside the Thomson profiles they sample.
 
 Left: one free-boundary forward solve per EFIT slice, from
-``scripts/media/mast_pulse_forward.py``. It shows the grid cells that carry
-plasma current, nested flux surfaces at stated normalised flux, the boundary,
-the magnetic axis and the saddle the solve's own topology read selected, all
-inside the limiter, with the Thomson scattering volumes overlaid by system.
-EFIT's boundary is drawn dashed for reference. Right: that system's measured
+``scripts/media/mast_pulse_forward.py``. It shows the hexagonal plasma cells
+of the wall cut at the solved boundary, nested flux surfaces at stated
+normalised flux, the boundary, the magnetic axis and the saddle the solve's own
+topology read selected, with the Thomson scattering volumes overlaid by system.
+Right: that system's measured
 profile at the nearest laser pulse, core above and edge below.
 
 The boundary is the edge of the axis-connected region below normalised flux
@@ -65,13 +65,6 @@ def _gap_summary(gaps: np.ndarray) -> dict[str, float] | None:
     }
 
 
-def _cell_outlines(centres: np.ndarray, pitch: tuple[float, float]) -> list:
-    """Return each current-carrying grid cell as its rectangle outline."""
-    half = 0.5 * np.asarray(pitch)
-    corners = np.array([[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]]) * half
-    return [centre + corners for centre in centres]
-
-
 def render_thomson(
     shot: int,
     stack: list[Path],
@@ -81,6 +74,7 @@ def render_thomson(
     quantile: float | None = 0.98,
     quantity: str = "te",
     solved_edge: bool = True,
+    cells: int = 4000,
 ) -> dict[str, object]:
     """Write the solved-equilibria-and-Thomson animation and return its receipt.
 
@@ -91,6 +85,7 @@ def render_thomson(
     """
     from nova.diagnostics.thomson_edge import SEPARATRIX_TEMPERATURE, outboard_edge
     from nova.media.sources.mast_efit import read_pulse
+    from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
     from nova.media.sources.mast_thomson import read_thomson
     from nova.media.sources.pulse_forward import SURFACE_LEVELS, read_pulse_forward
 
@@ -124,7 +119,6 @@ def render_thomson(
         raise ValueError(f"MAST {shot} carries no Thomson system")
     reference = read_pulse(shot)
     machine = reference.geometry
-    reference_time = np.array([frame.time for frame in reference.frames])
 
     palette = (style.thomson_primary_color, style.thomson_secondary_color)
     colour = {
@@ -145,15 +139,23 @@ def render_thomson(
         ]
         for string in strings
     }
-    scales = {
-        name: tr.TraceScale.over(
+
+    # Each system's scale is measured over its resolved samples at every laser
+    # pulse of the shot, not only the drawn frames, so a system with no
+    # resolved sample in the drawn frames still holds a pulse-wide axis.
+    def pulse_scale(string):
+        samples = [
+            string.resolved(time, column, SIGNAL_TO_NOISE) for time in string.time
+        ]
+        samples = [sample for sample in samples if sample[0].size]
+        return tr.TraceScale.over(
             [sample[0] for sample in samples],
             [sample[1] for sample in samples],
             quantile=quantile,
             log=True,
         )
-        for name, samples in resolved.items()
-    }
+
+    scales = {string.name: pulse_scale(string) for string in strings}
 
     # Headroom above the core profile for the frame annotation, so the text
     # never sits on a measurement: two decades on the logarithmic axis.
@@ -176,24 +178,20 @@ def render_thomson(
 
     view = three_view(extent=machine.bounds(), height=height, style=style)
     nulls: list[dict[str, int]] = []
+    # The plasma cells are a hexagonal tessellation of the wall, each cell cut
+    # at the solved boundary, so the drawn domain ends exactly on the boundary
+    # with no stair-step. The tessellation is a property of the wall and is
+    # built once; only the cut changes between frames.
+    mesh, mesh_provenance = hex_mesh(machine.limiter, cells=cells)
+    clipped = [clip_to_boundary(mesh, frame.boundary) for frame in frames]
 
     def render(index: int) -> None:
         frame = frames[index]
         view.clear()
-        pol.draw_plasma_cells(
-            view.poloidal, _cell_outlines(frame.current_cells, pulse.pitch)
-        )
+        pol.draw_plasma_cells(view.poloidal, clipped[index])
         pol.draw_surfaces(view.poloidal, frame.surfaces)
         pol.draw_coils(view.poloidal, machine.coils)
         pol.draw_wall(view.poloidal, *machine.limiter.T)
-        nearest = reference.frames[int(np.argmin(np.abs(reference_time - frame.time)))]
-        view.poloidal.plot(
-            *nearest.boundary.T,
-            color=style.wall_color,
-            linewidth=0.8,
-            linestyle="--",
-            zorder=style.zorder_markers - 1,
-        )
         pol.draw_boundary(view.poloidal, *frame.boundary.T)
         # The solve's selected saddle is the boundary's X-point only on a
         # diverted slice; on a limited slice it is a qualified null the
@@ -282,12 +280,18 @@ def render_thomson(
         "machine": "MAST",
         "pulse": str(shot),
         "left_panel": (
-            "free-boundary forward solve per EFIT slice: current-carrying grid "
-            "cells, nested surfaces, boundary, axis and selected saddle; EFIT "
-            "boundary dashed for reference"
+            "free-boundary forward solve per EFIT slice: hex plasma cells cut "
+            "at the solved boundary, nested surfaces, boundary, axis and "
+            "selected saddle"
         ),
         "forward_stack": pulse.provenance,
         "solve_pitch_m": list(pulse.pitch),
+        "solve_grid": "rectangular lattice at solve_pitch_m; current on its nodes",
+        "plasma_mesh": mesh_provenance
+        | {
+            "role": "display tessellation of the wall, each cell cut at the "
+            "solved boundary",
+        },
         "surface_levels_psi_norm": [float(level) for level in SURFACE_LEVELS],
         "frames_drawn": len(frames),
         "boundary_hold_tolerance_m": tolerance,

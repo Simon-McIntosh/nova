@@ -301,8 +301,53 @@ def pulse_profile(machine: PulseMachine, group, rows: list[int]):
     )
 
 
+#: Interval of the soft centroid pins, in metres.
+CENTROID_PIN_INTERVAL = 0.01
+
+
+def centroid_pins(group, row: int):
+    """Return soft radial and vertical current-centroid pins for one slice.
+
+    The targets are the current centroid stored in the shot's own EFIT record,
+    used only as a position hint for a plausible state, each with a 1 cm
+    deterministic interval. They hold the plasma where the shot put it when
+    the unconstrained solve selects a saddle that does not bound the plasma.
+    """
+    from nova.equilibrium.observation import (
+        ConstraintPinSet,
+        MomentIntegralSupport,
+        MomentPin,
+        PinUncertainty,
+    )
+
+    interval = PinUncertainty(
+        CENTROID_PIN_INTERVAL,
+        "m",
+        "EFIT current centroid of the slice, a soft position hint",
+    )
+    return ConstraintPinSet(
+        moments=tuple(
+            MomentPin(
+                name,
+                float(group[leaf][row]),
+                interval,
+                MomentIntegralSupport.CONFINED_CORE,
+            )
+            for name, leaf in (
+                ("centroid_r", "current_centrd_r"),
+                ("centroid_z", "current_centrd_z"),
+            )
+        )
+    )
+
+
 def solve_row(
-    machine: PulseMachine, profile, group, shot: int, row: int
+    machine: PulseMachine,
+    profile,
+    group,
+    shot: int,
+    row: int,
+    pin_centroid: bool = False,
 ) -> dict[str, object]:
     """Solve one EFIT slice on the pulse profile and return its terminal state."""
     from dataclasses import replace
@@ -343,6 +388,7 @@ def solve_row(
         # jitted program taking the operator as an argument, compiled once
         # for the pulse.
         vertical_pin="omit",
+        constraint_pins=centroid_pins(group, row) if pin_centroid else None,
     )
     started = time.perf_counter()
     receipt = profile.solve(request)
@@ -388,6 +434,7 @@ SCALARS = (
     "plasma_current",
     "target_current",
     "wall_seconds",
+    "centroid_pinned",
 )
 
 
@@ -430,6 +477,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--rows", type=int, nargs="*", default=None)
     parser.add_argument("--stride", type=int, default=1)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--pin-centroid",
+        action="store_true",
+        help="hold each slice with soft radial and vertical current-centroid pins",
+    )
     arguments = parser.parse_args(argv)
 
     configure_dtypes()
@@ -451,7 +503,15 @@ def main(argv: list[str] | None = None) -> int:
     solved = []
     for row in rows:
         try:
-            result = solve_row(machine, profile, group, arguments.shot, row)
+            result = solve_row(
+                machine,
+                profile,
+                group,
+                arguments.shot,
+                row,
+                pin_centroid=arguments.pin_centroid,
+            )
+            result["centroid_pinned"] = bool(arguments.pin_centroid)
         except Exception as error:  # a refused slice is a row of the receipt
             print(json.dumps({"row": row, "error": repr(error)}), flush=True)
             continue

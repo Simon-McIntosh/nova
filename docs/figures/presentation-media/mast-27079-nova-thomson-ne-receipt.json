@@ -1,22 +1,22 @@
 {
-  "achieved_seconds": 9.88,
+  "achieved_seconds": 8.04,
+  "boundary_hold_tolerance_m": 0.03968085207837693,
   "boundary_wall_gap_mm": {
     "diverted": {
-      "count": 53,
-      "max_mm": 125.63513562098633,
-      "median_mm": 103.6599786469005
+      "count": 4,
+      "max_mm": 108.67835068507925,
+      "median_mm": 44.233058664695164
     },
     "limited": {
-      "count": 23,
-      "max_mm": 228.25995318738012,
-      "median_mm": 121.10418331478333
+      "count": 8,
+      "max_mm": 9.474634809566757,
+      "median_mm": 9.420199225201667
     },
-    "note": "a limited boundary must touch its limiter, so a non-zero limited gap is a solve defect rather than a standoff; the diverted gap is expected"
+    "note": "a limited boundary must touch its limiter, so a limited gap above the solve pitch is a defect; the diverted gap is expected"
   },
-  "bytes": 2265204,
-  "conditioned_frames_drawn": 0,
+  "bytes": 465094,
   "contact_sheet": {
-    "bytes": 420121,
+    "bytes": 459204,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-ne-frames.png",
     "rows": 2,
@@ -26,102 +26,139 @@
     ],
     "tile_indices": [
       0,
-      15,
-      30,
-      45,
-      60,
-      75
+      2,
+      4,
+      7,
+      9,
+      11
     ],
     "tiles": 6
   },
-  "frame_admission": {
-    "admitted_area_ratio_range": [
-      0.5077384248292631,
-      1.1534021170633577
+  "forward_stack": {
+    "refused_slices": [],
+    "stacks": [
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard0.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard1.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard2.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard3.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard4.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard5.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard6.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard7.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard8.npz"
     ],
-    "admitted_frame_count": 76,
-    "corpus": "unrepaired; these frames were selected, not fixed, and the limited class still fails wall contact where it is drawn",
-    "dropped": [
-      {
-        "area_ratio": 0.041845760131095144,
-        "time_s": 0.029999999329447746
-      },
-      {
-        "area_ratio": 0.33535931681622844,
-        "time_s": 0.03500000014901161
-      },
-      {
-        "area_ratio": 0.4763995106184187,
-        "time_s": 0.1550000011920929
-      },
-      {
-        "area_ratio": 0.43663489458582677,
-        "time_s": 0.1599999964237213
-      },
-      {
-        "area_ratio": 0.4011963192549758,
-        "time_s": 0.16499999165534973
-      }
-    ],
-    "dropped_frame_count": 5,
-    "floor": 0.5,
-    "floor_basis": "one half, lying in the gap between the two populations rather than among the samples: diverted frames stay above about 0.69 and collapsed frames fall to 0.04",
-    "rule": "drawn boundary area at least this fraction of the reconstruction boundary area on the nearest slice",
-    "wall_contact_rejected_as_instrument": "a standoff threshold fires on the healthy population too, since a diverted boundary correctly stands about 100 mm off the wall"
+    "trace": "edge of the axis-connected region below normalised flux one inside the limiter, on a 4x bicubic refinement"
   },
-  "frame_milliseconds": 130,
-  "frames": 76,
-  "labels": {
-    "admission": "branch_guard_ok, not conditioned on the reference centroid",
-    "boundary_source": "stored lcfs polyline",
-    "cocos": 17,
-    "conditioned_frame_count": 23,
-    "conditioning_source": "27079.npz companion, aligned by time",
-    "flux_unit": "Wb",
-    "free_guarded_frame_count": 81,
-    "guarded_frame_count": 102,
-    "p_prime_source": "efm",
-    "raster": "absent; the session records nested surfaces, not a map",
-    "selected_frame_count": 81,
-    "session": "/work/projects/imas_gpu/sophelio/labeller_sessions/boundary-repair-validation-20260907T1124Z",
-    "shot": 27079,
-    "stored_frame_count": 114,
-    "surface_count": 11
-  },
-  "left_panel": "nova nested flux surfaces over the clipped hex mesh",
+  "frame_milliseconds": 670,
+  "frames": 12,
+  "frames_converged": 3,
+  "frames_diverted": 4,
+  "frames_drawn": 12,
+  "frames_dropped_unbounded": [
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5149999856948853,
+      "wall_gap_mm": 98.76178597767816,
+      "x_point_gap_mm": 65.9420979752571
+    },
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5299999713897705,
+      "wall_gap_mm": 178.06554547365593,
+      "x_point_gap_mm": 401.58247862150574
+    },
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5449999570846558,
+      "wall_gap_mm": 227.06316925882513,
+      "x_point_gap_mm": 574.5474552128189
+    },
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5600000023841858,
+      "wall_gap_mm": 138.45393276448186,
+      "x_point_gap_mm": 192.59717816756603
+    },
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.574999988079071,
+      "wall_gap_mm": 175.61838611169205,
+      "x_point_gap_mm": 355.001124230381
+    }
+  ],
+  "frames_limited": 8,
+  "left_panel": "free-boundary forward solve per EFIT slice: hex plasma cells cut at the solved boundary, nested surfaces, boundary, axis and selected saddle",
   "machine": "MAST",
-  "orientation_note": "both MAST systems view the midplane, so the split is core against edge rather than vertical against horizontal",
+  "other_x_points_drawn": 8,
   "path": "docs/figures/presentation-media/mast-27079-nova-thomson-ne.gif",
+  "plasma_current_ratio_range": [
+    0.9999999999999999,
+    1.0000000000000002
+  ],
   "plasma_mesh": {
-    "boundary_clip": "geometric intersection with the solved boundary polygon; a rasterless session carries no flux field to cut at",
-    "clipped_cell_count_range": [
-      151,
-      455
-    ],
     "coupling": "none; cell geometry only, no Biot build",
-    "delivered_cells": 1324,
-    "requested_cells": 1200,
+    "delivered_cells": 4286,
+    "requested_cells": 4000,
+    "role": "display tessellation of the wall, each cell cut at the solved boundary",
     "source": "nova.frame.firstwall.PlasmaGrid.insert",
     "turn": "hex",
     "vertex_count_range": [
       4,
-      28
+      29
     ],
-    "wall_clipped": true
+    "wall_clipped": true,
+    "wall_unit_count": 1
   },
   "profile_axis": "logarithmic, fixed over the pulse",
   "profile_limit_quantile": 0.98,
-  "profile_limits_fixed": true,
   "pulse": "27079",
   "quantity": "ne",
   "quantity_label": "$n_e$ [m$^{-3}$]",
-  "requested_seconds": 10.0,
-  "separatrix_crossing_marked": true,
+  "requested_seconds": 8.0,
   "size": [
     953,
     780
   ],
-  "strike_points_drawn": "none; outside the brief and containment unresolved",
+  "solve_grid": "rectangular lattice at solve_pitch_m; current on its nodes",
+  "solve_pitch_m": [
+    0.03966123498810662,
+    0.03968085207837693
+  ],
+  "solved_edge_drawn": true,
+  "surface_levels_psi_norm": [
+    0.1,
+    0.2,
+    0.30000000000000004,
+    0.4,
+    0.5,
+    0.6,
+    0.7000000000000001,
+    0.8,
+    0.9
+  ],
+  "thomson_edge": {
+    "frames_resolved": 11,
+    "model": "uncertainty-weighted mtanh fit of the outboard electron temperature of every system pooled; edge where the fit falls through 40 eV, the two-point-model upstream separatrix temperature",
+    "solved_minus_thomson_m": [
+      0.08527890524064785,
+      0.033045358614083864,
+      0.03815041341271441,
+      0.03163018472014745,
+      0.011964393960562258,
+      0.03147640332672896,
+      0.0008229744277465922,
+      0.013601886665299823,
+      0.06270472586314813,
+      0.039794608707948154,
+      0.03911289735361301
+    ]
+  },
+  "thomson_screen": "value at least 2 times its stored one-sigma uncertainty",
   "thomson_systems": [
     {
       "channels": 131,
@@ -142,10 +179,11 @@
         "stored_row_count": 141,
         "usable_sample_fraction": 0.9065562232689081
       },
+      "resolved_samples_drawn": 1321,
       "rows": 141,
       "value_limit": [
-        2.2512966153168496e+17,
-        5.500401387988497e+19
+        5.268932477048586e+17,
+        5.500401387988497e+21
       ]
     },
     {
@@ -167,17 +205,17 @@
         "stored_row_count": 282,
         "usable_sample_fraction": 0.9521276595744681
       },
+      "resolved_samples_drawn": 68,
       "rows": 141,
       "value_limit": [
-        1.7794781971050662e+17,
-        2.5597296101470224e+19
+        1.929127792421215e+18,
+        2.573008234394594e+19
       ]
     }
   ],
   "time_span_s": [
-    0.03999999910593033,
-    0.574999988079071
+    0.009999999776482582,
+    0.5
   ],
-  "x_points_drawn": 146,
-  "x_points_dropped_outside_wall": 0
+  "x_points_drawn": 4
 }

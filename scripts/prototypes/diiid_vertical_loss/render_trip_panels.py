@@ -26,6 +26,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.text
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
@@ -45,6 +46,84 @@ from nova.media.poloidal import (
 from flux_orientation import analysis_field
 
 LEVEL_COUNT = 9
+
+NULL_CLEARANCE = 0.14
+"""Separation [m] a solved X-point keeps from the solved axis when they touch."""
+
+
+def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> None:
+    """Draw each solved X-point, stepping clear of the axis with a leader.
+
+    A saddle can sit within a marker width of the axis, and two filled markers
+    then read as one blob.  A marker that would crowd the axis is drawn smaller
+    at a callout position clear of it, joined by a thin leader to a hollow dot
+    at the position the solve actually returned.
+    """
+    points = np.asarray(x_points, dtype=float).reshape(-1, 2)
+    anchor = None if axis is None else np.asarray(axis, dtype=float)
+    for point in points:
+        if not np.all(np.isfinite(point)):
+            continue
+        drawn = point
+        callout = False
+        if anchor is not None:
+            offset = point - anchor
+            distance = float(np.hypot(*offset))
+            if distance < NULL_CLEARANCE:
+                direction = (
+                    offset / distance if distance > 1e-9 else np.array([0.0, 1.0])
+                )
+                drawn = point + direction * (NULL_CLEARANCE - distance)
+                callout = True
+                axes.plot(
+                    [point[0], drawn[0]],
+                    [point[1], drawn[1]],
+                    color=style.xpoint_color,
+                    linewidth=0.8,
+                    solid_capstyle="butt",
+                    zorder=style.zorder_markers - 1,
+                )
+                axes.plot(
+                    point[0],
+                    point[1],
+                    marker="o",
+                    markersize=2.4,
+                    markerfacecolor="none",
+                    markeredgecolor=style.xpoint_color,
+                    markeredgewidth=0.8,
+                    linestyle="none",
+                    zorder=style.zorder_markers - 1,
+                )
+        axes.plot(
+            drawn[0],
+            drawn[1],
+            marker=style.xpoint_marker,
+            markersize=style.xpoint_markersize * (0.7 if callout else 1.0),
+            markeredgewidth=style.xpoint_markeredgewidth,
+            color=style.xpoint_color,
+            linestyle="none",
+            zorder=style.zorder_markers,
+        )
+
+
+def _assert_text_on_canvas(figure) -> None:
+    """Refuse to write a figure whose text is clipped by its own canvas."""
+    figure.canvas.draw()
+    canvas = figure.bbox
+    offenders = []
+    for artist in figure.findobj(matplotlib.text.Text):
+        if not artist.get_visible() or not artist.get_text().strip():
+            continue
+        box = artist.get_window_extent(figure.canvas.get_renderer())
+        if (
+            box.x0 < canvas.x0
+            or box.y0 < canvas.y0
+            or box.x1 > canvas.x1
+            or box.y1 > canvas.y1
+        ):
+            offenders.append(artist.get_text())
+    if offenders:
+        raise ValueError(f"text extends beyond the canvas: {offenders}")
 
 
 def _point_flux(radius, height, flux) -> RegularGridInterpolator:
@@ -207,7 +286,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     layout = figure.add_gridspec(2, 1, height_ratios=[6.4, 0.9], hspace=0.10)
     axes = figure.add_subplot(layout[0])
     strip = figure.add_subplot(layout[1])
-    figure.subplots_adjust(left=0.03, right=0.97, top=0.86, bottom=0.11)
+    figure.subplots_adjust(left=0.09, right=0.97, top=0.86, bottom=0.11)
     poloidal_axes(axes)
 
     draw_flux_contours(
@@ -235,11 +314,9 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         axis_marker="o",
         xpoint_marker="o",
     )
-    draw_nulls(
-        axes,
-        magnetic_axis=axis,
-        x_points=saddles if len(saddles) else None,
-    )
+    draw_nulls(axes, magnetic_axis=axis)
+    if len(saddles):
+        _draw_x_points(axes, axis, saddles)
     if len(label_axis_points):
         draw_nulls(
             axes,
@@ -282,7 +359,15 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
             [], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"
         ),
         plt.Line2D([], [], color="#9a9a9a", linewidth=2.0, label="EFIT flux"),
-        plt.Line2D([], [], color="#6a4c93", linewidth=2.6, label="bounding surface"),
+        *(
+            [
+                plt.Line2D(
+                    [], [], color="#6a4c93", linewidth=2.6, label="bounding surface"
+                )
+            ]
+            if np.isfinite(bounding)
+            else []
+        ),
         plt.Line2D([], [], color="black", linewidth=2.0, label="limiter"),
         plt.Line2D(
             [],
@@ -382,6 +467,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
 
     out.parent.mkdir(parents=True, exist_ok=True)
+    _assert_text_on_canvas(figure)
     figure.savefig(out, format="svg")
     figure.savefig(out.with_suffix(".check.png"), dpi=110)
     plt.close(figure)

@@ -89,11 +89,12 @@ populated at <code>nova/equilibrium/forward.py:2738</code>, where
 Each panel below is drawn from that trip's own solved flux grid, saved by the
 trajectory job as <code>frame-&lt;n&gt;-trip-&lt;k&gt;.npz</code>. Blue contours are
 the trip's solved field, grey contours the EFIT label at the same physical
-levels; the thick red curve is the bounding surface read on that trip's grid,
-the black outline the governed limiter, the dashed grey curve the EFIT label
-boundary, and the markers the solved and label nulls. The strip under each
-panel carries the residual at every trip the frame reached, sized to the trips
-present.
+levels; the thick violet curve is the bounding surface read on that trip's
+grid, the black outline the governed limiter, the dashed grey curve the EFIT
+label boundary, and the markers the solved and label nulls &mdash; every red
+mark on these panels is a null, and the violet curve is the only boundary the
+figure draws in violet. The strip under each panel carries the residual at
+every trip the frame reached, sized to the trips present.
 </p>
 <figure>
 <img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg"
@@ -101,7 +102,11 @@ present.
 <figcaption>
 Frame 146, trip 1. The reported axis (triangle) sits at Z=&minus;0.346 m with
 0.912&times;Ip confined, and the polish moves it 0.328 m to the field's true
-maximum at Z=&minus;0.034 m. Mask entries changed on this trip: 27.
+maximum at Z=&minus;0.034 m
+<b>[withdrawn 2026-11-08, see <a href="#correction">Correction</a>: the axis is
+itself a stationary maximum and the polish moves it 3.4e&minus;9 m; the panel
+above is regenerated with the field read in its declared storage order].</b>
+Mask entries changed on this trip: 27.
 </figcaption>
 </figure>
 <figure>
@@ -485,7 +490,10 @@ Hessian determinant, eigenvalues and the gradient at each point.</li>
 <li>The three trip panels are re-rendered from the corrected binding and
 inspected: the plasma now sits inside the limiter where the limiter puts it,
 with the trip-1 axis at the centre of the closed contours rather than 0.33 m
-below them.</li>
+below them. A panel whose axis lies outside the limiter draws no bounding
+surface and carries no such legend entry, and a solved X-point that would crowd
+the axis is drawn as a smaller callout joined by a leader to a hollow dot at
+the position the solve returned, so the axis and the saddle both read.</li>
 </ul>
 
 </section>

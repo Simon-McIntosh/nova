@@ -1,0 +1,60 @@
+{
+  "added_failure_basis": "the reviewed run's manifest records no baseline_suite or after_suite arm (its promotion measures no suite pair), so no gate log carries a failing id to attribute.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-11-08T00:03:29.036Z",
+  "dispatched_at": "2026-11-07T23:54:37Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py",
+      "line": 127,
+      "severity": "non-blocking",
+      "text": "the frame == 146 ternary selects between f\"frame-146-trip-{trip}.npz\" and f\"frame-{frame}-trip-{trip}.npz\", which are the same string for frame 146, so the special case is dead and hides that the two branches are identical."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py",
+      "line": 66,
+      "severity": "non-blocking",
+      "text": "the loop closure adds (phase[1] - phase[0]), the first step, instead of the step from the last sample back to the first, so a gradient field whose unwrap crosses the branch cut near the sampled start can report a winding index off by one."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py",
+      "line": 100,
+      "severity": "non-blocking",
+      "text": "report() emits out-of-grid polished points with NaN determinant and NaN winding index into trip-trajectory/core-stationary.json, which is not strict JSON and makes the receipt's 'falls outside the flux grid' reading a property a consumer must infer rather than a recorded flag."
+    }
+  ],
+  "justifications": {
+    "durability": "core_stationary_probe.py adds no assertion and no test file exists under the node's write scope, so nothing reddens if the winding index at line 66 or the Hessian classification regresses.",
+    "evidence": "The probe's result is on disk at trip-trajectory/core-stationary.json with the Hessian determinant -34.71 and winding index 0 for the frame 146 trip-1 artefact, so the reading is recorded rather than claimed, but the gate at trip-trajectory/gate.log:last is the trajectory driver's EXIT=0 and asserts nothing about this commit.",
+    "fit": "core_stationary_probe.py:127 inlines a frame==146 ternary whose two branches build the same path, against the surrounding scripts' plain composition, though the module docstring and naming follow scripts/prototypes/diiid_vertical_loss/render_trip_panels.py conventions.",
+    "goal_fidelity": "render_trip_panels.py:208 and core_stationary_probe.py:84 each advance one clause of the source goal, but the fragment the goal's third clause names is untouched at cfc176dcd, so the deliverable is partial.",
+    "reuse": "core_stationary_probe.py:84 and :97 call the owners nova/equilibrium/flux_surface_connectivity.py:916 polish_stationary_points and nova/linalg/tensor_spline.py:325 fit_tensor_spline, but :28 _seeds and :40 _hessian re-derive a grid seed scan and a finite-difference Hessian that nova/equilibrium/topology.py:1598 stationary_read and the returned hessian_type already carry, so two of four local helpers fork an owned capability.",
+    "scope_discipline": "git diff --stat 8e4814cf1 cfc176dcd lists only the three docs/figures/diiid-frame-146-vertical-loss SVGs and the two scripts/prototypes/diiid_vertical_loss modules, all inside the declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261107T222735423454-review-of-diiid-frame-146-vertical-loss-cfc176dcdfca",
+  "reviewed_base_sha": "8e4814cf14e863c6ed80e366f0a61c593d268bcb",
+  "reviewed_head_sha": "cfc176dcdfca872630453c896faef94a4116e244",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 2,
+    "evidence": 12,
+    "fit": 14,
+    "goal_fidelity": 13,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:16:44.520130+00:00",
+  "total": 75,
+  "verdicts": {
+    "diff": "Read commit by commit against base 8e4814cf1: one commit, five files, three SVGs re-rendered with the legend above the poloidal axes, render_trip_panels.py changing only the top margin and the legend anchor, and core_stationary_probe.py added as a 134-line standalone probe.",
+    "done_when": "The done_when's third clause requires the fragment to carry a line-contour panel of each trip that matters; render_trip_panels.py:208-216 moves the figure legend clear of the contours so the shipped panels are readable, and the probe at core_stationary_probe.py:84 exercises the null set the clause names, but no command in this commit asserts the done_when as a measure.",
+    "goal": "The source goal is to explain frame 146's vertical loss with per-trip line-contour panels and a named mechanism; commit cfc176dcd advances the panel legibility and the mechanism reading, and scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:1 adds a probe whose receipt rules out a spurious saddle, but the fragment is not updated this round and the manifest's checkpoint says so.",
+    "manifest": "Read the manifest; it records status complete, the probe receipt at trip-trajectory/core-stationary.json, the active-set trajectory corrected to 27, 39, 0, and states plainly that the fragment is not updated this round and the artefact markers remain in the drawn null set.",
+    "write_paths": "The source write paths are scripts/prototypes/diiid_vertical_loss/, the fragment and docs/figures/diiid-frame-146-vertical-loss/; all five files in git diff 8e4814cf1..cfc176dcd are inside them and no product source is touched."
+  }
+}

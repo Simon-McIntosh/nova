@@ -1,0 +1,102 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T00:00:09Z",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "ffa46edf5fc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The trajectory strip under each trip panel carries numeric ticks (0.00, 0.25) but no axis label, so a reader cannot tell what the blue trace measures \u2014 confined current, residual, or axis position. The same omission recurs on frame-146-trip-2 and frame-137-trip-2. Adding a one-line y label naming the quantity and unit would make the strip readable without the page caption."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "ffa46edf5fc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The filled red dot on the trajectory strip marks the trip whose panel is drawn, but no legend entry explains it, and red already carries 'bounding surface' and 'solved axis' in the same legend. A reader who has not read the drawing script cannot know what the coloured point means."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "id": "f947a909eb3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The text 'mask difference above each point' floats in the upper right of the residual pane, far from the data it describes, and the bare numerals printed above the curve (27, 40, 1, 0, 0 on frame 146; 24, 20, 9, 9, 0 on frame 137) are given no key inside the figure. The annotation reads as a stray title for data that is not in that corner. frame-137-flux-contours carries the same text."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg",
+      "id": "f947a909eb3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Two legend entries are drawn in near-identical red \u2014 'no bounding surface (read refused)' as a line and 'solved axis (outside wall)' as a marker \u2014 and a third red marker ('limiter contact') appears in frame-137's legend. One hue carries three meanings, so the legend cannot be resolved by colour alone; a distinct hue or dash for the refusal marker would separate them."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg",
+      "id": "fc66039c621",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The poloidal panel occupies roughly a fifth of the canvas width while the residual pane holds ten mostly empty trips, so the field this figure exists to show is small on the page. It remains readable, but the allocation favours empty axis over the data."
+    }
+  ],
+  "images_judged": [
+    "panels/frame-146-trip-1-flux-contours.check.png",
+    "panels/frame-146-trip-2-flux-contours.check.png",
+    "panels/frame-137-trip-2-flux-contours.check.png",
+    "rendered/frame-146-flux-contours.png",
+    "rendered/frame-137-flux-contours.png"
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261107T222816555161-review-of-diiid-frame-146-vertical-loss-cfc176dcdfca-figure",
+  "reviewed_base_sha": "8e4814cf14e863c6ed80e366f0a61c593d268bcb",
+  "reviewed_head_sha": "cfc176dcdfca872630453c896faef94a4116e244",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.svg": {
+      "contrast": "pass.",
+      "data_ink": "pass \u2014 contours and one trace.",
+      "decoration": "pass \u2014 no fill or gradient.",
+      "label_collision": "pass \u2014 no overlap or clipping.",
+      "legibility": "pass with defect \u2014 the same unexplained annotation, and the poloidal panel is squeezed into a narrow column beside a wide, mostly empty residual pane.",
+      "table_form": "pass."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg": {
+      "contrast": "pass \u2014 text clears the background.",
+      "data_ink": "pass \u2014 contours only.",
+      "decoration": "pass \u2014 no fill, no gradient, no grid.",
+      "label_collision": "pass \u2014 legend above the axes, no overlap.",
+      "legibility": "pass with defect \u2014 the holding trip is clearly contrasted with frame 146 (closed red bounding surface, axis inside), but the trajectory strip's vertical quantity is unidentifiable.",
+      "table_form": "pass."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg": {
+      "contrast": "pass \u2014 black/grey text on white.",
+      "data_ink": "pass \u2014 contour lines and one thin residual trace.",
+      "decoration": "pass \u2014 no fill, no gradient; the tolerance line is data, not decoration.",
+      "label_collision": "pass \u2014 no clipped or overlapping text; the caption sits below the panels and wraps inside the canvas.",
+      "legibility": "pass with defect \u2014 the two-pane layout (poloidal panel beside the residual history) reads, but the floating annotation 'mask difference above each point' and its bare numerals are unexplained.",
+      "table_form": "pass \u2014 the per-trip residual is naturally plotted as a history and is plotted, not tabulated."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg": {
+      "contrast": "pass \u2014 legend and axis text is near-black on white and clears contrast.",
+      "data_ink": "pass \u2014 line contours carry the weight; no fills, no gradient, no shading.",
+      "decoration": "pass \u2014 white background, despined poloidal panel, no decorative styling.",
+      "label_collision": "pass \u2014 the legend sits above the poloidal axes and touches neither the contours nor the trajectory strip; no text overlaps text or data.",
+      "legibility": "pass \u2014 the poloidal panel reads at a glance: solved contours, the red bounding surface, the black limiter and the EFIT dashed boundary are each distinguishable, and the axis markers sit where the receipt says.",
+      "table_form": "pass \u2014 a spatial flux map, not a table."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg": {
+      "contrast": "pass \u2014 text clears the background.",
+      "data_ink": "pass \u2014 contours only.",
+      "decoration": "pass \u2014 no fill or gradient.",
+      "label_collision": "pass \u2014 no clipped or overlapping label; the solved-axis triangle at the top sits clear of the contours and of the canvas edge.",
+      "legibility": "pass with defect \u2014 the losing trip reads correctly (solved axis above the limiter, no red bounding surface, confined region collapsed to a thin band), but the trajectory strip's vertical quantity is unidentifiable.",
+      "table_form": "pass \u2014 spatial field, not a table."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:08:02.304468+00:00",
+  "total": null
+}

@@ -64,6 +64,7 @@ def write_gif(
     duration: float = 10.0,
     loop: int = 0,
     fps: float | None = None,
+    durations: Sequence[int] | None = None,
 ) -> dict[str, object]:
     """Write ``frames`` as a GIF lasting ``duration`` seconds.
 
@@ -72,7 +73,9 @@ def write_gif(
     GIF stores that delay in hundredths of a second, so it is rounded to at
     least one tick and the achieved duration is reported rather than assumed.
     ``fps``, when given, sets the frame rate instead and the duration follows
-    from the frame count.
+    from the frame count. ``durations`` gives each frame its own hold in
+    milliseconds, which is how a sequence sampled unevenly in time still plays
+    at a uniform rate of its own time.
     """
     if not frames:
         raise ValueError("a GIF needs at least one frame")
@@ -85,6 +88,10 @@ def write_gif(
             raise ValueError("the requested frame rate must be positive")
         duration = len(frames) / fps
     milliseconds = max(10, int(round(1000.0 * duration / len(frames) / 10.0) * 10))
+    if durations is not None:
+        if len(durations) != len(frames):
+            raise ValueError("durations must give one hold per frame")
+        milliseconds = [max(10, int(round(hold / 10.0)) * 10) for hold in durations]
     indexed = _shared_palette(frames)
     indexed[0].save(
         target,
@@ -94,7 +101,9 @@ def write_gif(
         loop=loop,
         optimize=True,
     )
-    achieved = milliseconds * len(frames) / 1000.0
+    achieved = (
+        sum(milliseconds) if durations is not None else milliseconds * len(frames)
+    ) / 1000.0
     return {
         "path": str(target),
         "frames": len(frames),
@@ -171,6 +180,7 @@ def animate(
     sheet_count: int = 6,
     fps: float | None = None,
     dpi: float | None = None,
+    durations: Sequence[int] | None = None,
 ) -> dict[str, object]:
     """Render every step into ``figure`` and write the result as a GIF.
 
@@ -187,7 +197,7 @@ def animate(
     for step in steps:
         render(step)
         frames.append(figure_frame(figure))
-    receipt = write_gif(frames, path, duration=duration, fps=fps)
+    receipt = write_gif(frames, path, duration=duration, fps=fps, durations=durations)
     if contact_sheet is not None:
         receipt["contact_sheet"] = write_contact_sheet(
             frames, contact_sheet, columns=sheet_columns, count=sheet_count

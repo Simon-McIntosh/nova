@@ -46,6 +46,42 @@ _QUANTITIES = {
     "ne": ("density", "$n_e$", "m$^{-3}$"),
 }
 
+#: Poloidal flux contour spacing over the whole vessel, in Wb (total flux).
+FLUX_SPACING = 0.04
+
+#: Thin flux contours, in the ink style's grey for vacuum and blue for plasma.
+CONTOUR_LINEWIDTH = 0.5
+BOUNDARY_LINEWIDTH = 1.0
+
+#: The slide canvas: 14 by 7.2 inches with room above the panels for a title.
+SLIDE_WIDTH = 14.0
+SLIDE_HEIGHT = 7.2
+TITLE_ROOM = 0.9
+
+
+def slide_view(extent, style):
+    """Return the three-view layout on the slide canvas, title room above.
+
+    The poloidal panel keeps the machine's aspect at the panel height the
+    slide leaves, and the trace column takes the remaining width, so the
+    figure is exactly the slide canvas rather than whatever width the machine
+    implies.
+    """
+    left, right, bottom, gap = 0.12, 0.35, 0.6, 0.95
+    r_min, r_max, z_min, z_max = extent
+    panel_height = SLIDE_HEIGHT - bottom - TITLE_ROOM
+    panel_width = panel_height * (r_max - r_min) / (z_max - z_min)
+    trace_width = SLIDE_WIDTH - left - panel_width - gap - right
+    return three_view(
+        extent=extent,
+        height=SLIDE_HEIGHT,
+        trace_width=trace_width,
+        style=style,
+        margins=(left, right, bottom, TITLE_ROOM),
+        gap=gap,
+    )
+
+
 #: Line colour of the edge inferred from the Thomson profile alone.
 MEASURED_EDGE_COLOR = "#222222"
 
@@ -69,14 +105,12 @@ def render_thomson(
     shot: int,
     stack: list[Path],
     path: Path,
-    duration: float = 10.0,
-    height: float = 6.5,
     quantile: float | None = 0.98,
     quantity: str = "te",
     solved_edge: bool = True,
     cells: int = 4000,
-    fps: float = 20.0,
-    dpi: float = 200.0,
+    slowdown: float = 10.0,
+    dpi: float = 150.0,
 ) -> dict[str, object]:
     """Write the solved-equilibria-and-Thomson animation and return its receipt.
 
@@ -89,7 +123,10 @@ def render_thomson(
     from nova.media.sources.mast_efit import read_pulse
     from nova.media.sources.plasma_mesh import clip_to_boundary, hex_mesh
     from nova.media.sources.mast_thomson import read_thomson
-    from nova.media.sources.pulse_forward import SURFACE_LEVELS, read_pulse_forward
+    from contourpy import contour_generator
+    from matplotlib.path import Path as MplPath
+
+    from nova.media.sources.pulse_forward import read_pulse_forward
 
     style = DEFAULT_INK
     if quantity not in _QUANTITIES:
@@ -160,10 +197,10 @@ def render_thomson(
     scales = {string.name: pulse_scale(string) for string in strings}
 
     # Headroom above the core profile for the frame annotation, so the text
-    # never sits on a measurement: two decades on the logarithmic axis.
+    # never sits on a measurement: a factor of twenty on the logarithmic axis.
     core = strings[0].name
     lower, upper = scales[core].y_limit
-    scales[core] = replace(scales[core], y_limit=(lower, upper * 100.0))
+    scales[core] = replace(scales[core], y_limit=(lower, upper * 20.0))
 
     # The measured edge comes from the electron temperature of every system
     # pooled, whichever quantity the panels show: it is one physical edge.
@@ -178,7 +215,7 @@ def render_thomson(
         )
         measured_edges.append(None if fit is None else fit.edge)
 
-    view = three_view(extent=machine.bounds(), height=height, style=style)
+    view = slide_view(machine.bounds(), style)
     nulls: list[dict[str, int]] = []
     # The plasma cells are a hexagonal tessellation of the wall, each cell cut
     # at the solved boundary, so the drawn domain ends exactly on the boundary
@@ -187,14 +224,68 @@ def render_thomson(
     mesh, mesh_provenance = hex_mesh(machine.limiter, cells=cells)
     clipped = [clip_to_boundary(mesh, frame.boundary) for frame in frames]
 
+    # Flux is contoured over the whole vessel at one fixed spacing, anchored on
+    # each frame's boundary flux, so the boundary is itself a contour and the
+    # plasma and vacuum families meet without a gap. Every level is drawn grey
+    # over the vessel; the closed plasma surfaces are redrawn blue on top from
+    # the same field and the same levels.
+    fine_r, fine_z, _ = frames[0].field
+    rr, zz = np.meshgrid(fine_r, fine_z, indexing="ij")
+    inside = (
+        MplPath(machine.limiter)
+        .contains_points(np.column_stack([rr.ravel(), zz.ravel()]))
+        .reshape(rr.shape)
+    )
+
+    def draw_flux(frame) -> int:
+        _r, _z, psi = frame.field
+        psi = np.asarray(psi, dtype=float)
+        vessel = np.where(inside, psi, np.nan)
+        lowest = np.floor((np.nanmin(vessel) - frame.boundary_flux) / FLUX_SPACING)
+        highest = np.ceil((np.nanmax(vessel) - frame.boundary_flux) / FLUX_SPACING)
+        levels = frame.boundary_flux + FLUX_SPACING * np.arange(lowest, highest + 1)
+        view.poloidal.contour(
+            fine_r,
+            fine_z,
+            vessel.T,
+            levels=levels,
+            colors=style.contour_color,
+            linewidths=CONTOUR_LINEWIDTH,
+            negative_linestyles="solid",
+            zorder=2,
+        )
+        span = frame.boundary_flux - frame.axis_flux
+        generator = contour_generator(fine_r, fine_z, psi.T)
+        axis = frame.magnetic_axis
+        drawn = 0
+        for level in levels:
+            fraction = (level - frame.axis_flux) / span
+            if not 0.0 < fraction < 1.0 - 1e-9:
+                continue
+            for ring in generator.lines(float(level)):
+                closed = np.allclose(ring[0], ring[-1])
+                if closed and MplPath(ring).contains_point(axis):
+                    view.poloidal.plot(
+                        *ring.T,
+                        color=style.flux_color,
+                        linewidth=CONTOUR_LINEWIDTH,
+                        zorder=3,
+                    )
+                    drawn += 1
+        return drawn
+
+    plasma_contours: list[int] = []
+
     def render(index: int) -> None:
         frame = frames[index]
         view.clear()
         pol.draw_plasma_cells(view.poloidal, clipped[index])
-        pol.draw_surfaces(view.poloidal, frame.surfaces)
+        plasma_contours.append(draw_flux(frame))
         pol.draw_coils(view.poloidal, machine.coils)
         pol.draw_wall(view.poloidal, *machine.limiter.T)
-        pol.draw_boundary(view.poloidal, *frame.boundary.T)
+        pol.draw_boundary(
+            view.poloidal, *frame.boundary.T, linewidth=BOUNDARY_LINEWIDTH
+        )
         # The solve's selected saddle is the boundary's X-point only on a
         # diverted slice; on a limited slice it is a qualified null the
         # boundary does not pass through, drawn hollow.
@@ -265,13 +356,20 @@ def render_thomson(
             f"t = {1e3 * frame.time:.0f} ms\n{legend}",
         )
 
+    # Equal pulse time per unit of animation time: each frame is held for the
+    # gap to the next solved slice, scaled by the slowdown, so a missing slice
+    # is a held frame rather than a jump. The last frame is held for the
+    # median gap.
+    times = np.array([frame.time for frame in frames])
+    gaps_s = np.diff(times)
+    hold = np.append(gaps_s, np.median(gaps_s) if gaps_s.size else 0.005)
+    durations = [max(10, int(round(1e3 * slowdown * gap / 10.0)) * 10) for gap in hold]
     receipt = gif.animate(
         view.figure,
         range(len(frames)),
         render,
         path,
-        duration=duration,
-        fps=fps,
+        durations=durations,
         dpi=dpi,
         contact_sheet=Path(path).with_name(f"{Path(path).stem}-frames.png"),
     )
@@ -296,7 +394,17 @@ def render_thomson(
             "role": "display tessellation of the wall, each cell cut at the "
             "solved boundary",
         },
-        "surface_levels_psi_norm": [float(level) for level in SURFACE_LEVELS],
+        "flux_contour_spacing_wb": FLUX_SPACING,
+        "flux_contours": (
+            "whole vessel at fixed spacing anchored on the boundary flux; grey "
+            "for every level, blue over the closed surfaces enclosing the axis"
+        ),
+        "plasma_contours_per_frame": [min(plasma_contours), max(plasma_contours)],
+        "timing": {
+            "rule": "each frame held for the pulse-time gap to the next slice",
+            "slowdown": slowdown,
+            "frame_milliseconds_range": [min(durations), max(durations)],
+        },
         "frames_drawn": len(frames),
         "boundary_hold_tolerance_m": tolerance,
         "frames_dropped_unbounded": unbounded,
@@ -373,21 +481,19 @@ def main(argv: list[str] | None = None) -> int:
         help="forward stacks written by mast_pulse_forward.py, one per shard; "
         "defaults to the shot's vertically pinned 40 mm shards",
     )
-    parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument(
-        "--fps",
+        "--slowdown",
         type=float,
-        default=20.0,
-        help="frame rate; one frame per solved slice, so the pulse plays at "
-        "fps times the slice spacing",
+        default=10.0,
+        help="animation time per unit of pulse time; frames are held for their "
+        "own pulse-time gap, so playback is uniform in pulse time",
     )
     parser.add_argument(
         "--dpi",
         type=float,
-        default=200.0,
-        help="rasterisation resolution of every frame",
+        default=150.0,
+        help="rasterisation resolution; 150 gives 2100x1080 on the slide canvas",
     )
-    parser.add_argument("--height", type=float, default=6.5)
     parser.add_argument("--quantile", type=float, default=0.98)
     parser.add_argument(
         "--quantity",
@@ -423,12 +529,10 @@ def main(argv: list[str] | None = None) -> int:
         arguments.shot,
         stack,
         arguments.output / f"{name}.gif",
-        duration=arguments.duration,
-        height=arguments.height,
         quantile=arguments.quantile,
         quantity=arguments.quantity,
         solved_edge=not arguments.thomson_edge_only,
-        fps=arguments.fps,
+        slowdown=arguments.slowdown,
         dpi=arguments.dpi,
     )
     (arguments.output / f"{name}-receipt.json").write_text(

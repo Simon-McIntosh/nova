@@ -29,14 +29,17 @@ from pathlib import Path
 
 import numpy as np
 
-#: Normalised flux of the drawn nested surfaces, axis outward.
-SURFACE_LEVELS = np.linspace(0.1, 0.9, 9)
+#: Spline refinement of the solved map before it is traced and contoured.
+REFINE = 8
 
-#: Spline refinement of the solved map before the region is traced.
-REFINE = 4
-
-#: Normalised flux of the traced edge: the boundary level itself.
+#: Normalised flux of the connected-region mask: the boundary level itself.
 EDGE_LEVEL = 1.0 - 1.0e-6
+
+#: Normalised flux of the drawn boundary, a hair inside the boundary level so
+#: the level set closes around the axis rather than running through the
+#: X-point into the legs. At this offset the curve lies within a millimetre
+#: or two of the separatrix or the wall contact.
+SMOOTH_LEVEL = 1.0 - 1.0e-4
 
 #: Radius, in refined grid pitches, of the cut made at a diverted slice's
 #: X-point. At the boundary level the sub-boundary region touches the saddle
@@ -57,7 +60,10 @@ class ForwardSlice:
     time: float
     row: int
     boundary: np.ndarray
-    surfaces: tuple[np.ndarray, ...]
+    field: tuple[np.ndarray, np.ndarray, np.ndarray]
+    """Refined radius, height and absolute flux ``(R, Z)`` the frame is drawn from."""
+    axis_flux: float
+    boundary_flux: float
     magnetic_axis: np.ndarray
     x_point: np.ndarray
     diverted: bool
@@ -100,6 +106,36 @@ def _closed_rings(generator, level: float) -> list[np.ndarray]:
     return [line for line in generator.lines(level) if np.allclose(line[0], line[-1])]
 
 
+def _smooth_boundary(fine_r, fine_z, psi_norm, axis, limiter) -> np.ndarray | None:
+    """Return the level set enclosing the axis just inside the boundary level.
+
+    The curve is a contour of the bicubic flux field, so it is smooth at a
+    fraction of the solve pitch rather than following refined cells. It is
+    clipped to the limiter: a limited boundary then rests exactly on the wall
+    at its contact instead of crossing it by the spline's few millimetres.
+    ``None`` when no closed level set encloses the axis inside the wall.
+    """
+    import shapely
+    from contourpy import contour_generator
+
+    generator = contour_generator(fine_r, fine_z, psi_norm.T)
+    point = shapely.Point(float(axis[0]), float(axis[1]))
+    wall = shapely.Polygon(limiter).buffer(0)
+    for ring in sorted(_closed_rings(generator, SMOOTH_LEVEL), key=len):
+        polygon = shapely.Polygon(ring).buffer(0)
+        if not polygon.contains(point):
+            continue
+        inside = polygon.intersection(wall)
+        if inside.is_empty:
+            continue
+        if inside.geom_type == "MultiPolygon":
+            inside = max(inside.geoms, key=lambda part: part.area)
+        if not inside.contains(point):
+            continue
+        return np.asarray(inside.exterior.coords)
+    return None
+
+
 def trace_slice(
     radius: np.ndarray,
     height: np.ndarray,
@@ -109,23 +145,27 @@ def trace_slice(
     axis_flux: float,
     boundary_flux: float,
     x_point: np.ndarray | None = None,
-) -> tuple[np.ndarray, tuple[np.ndarray, ...]]:
-    """Return the boundary ring and nested surfaces of one solved map.
+    limiter: np.ndarray | None = None,
+) -> tuple[np.ndarray, tuple[np.ndarray, np.ndarray, np.ndarray], str]:
+    """Return the boundary of one solved map, its refined field and the route.
 
     ``flux`` is radius-major on the solve lattice; ``material`` holds the
-    limiter-interior flags on the refined lattice. The returned rings are
-    ``(n, 2)`` arrays of ``(R, Z)``.
+    limiter-interior flags on the refined lattice. The boundary is the smooth
+    level set enclosing the axis (``_smooth_boundary``) when one closes inside
+    the wall. Otherwise it is the edge of the axis-connected region below the
+    boundary level, cut at a diverted slice's X-point, which is exact in
+    topology but follows the refined lattice. The route taken is returned so a
+    receipt can count it.
     """
     from contourpy import contour_generator
     from scipy.interpolate import RectBivariateSpline
     from scipy.ndimage import label
 
-    from nova.equilibrium.wall_mask import inside_polygon
-
     fine_r = np.linspace(radius[0], radius[-1], REFINE * (radius.size - 1) + 1)
     fine_z = np.linspace(height[0], height[-1], REFINE * (height.size - 1) + 1)
     spline = RectBivariateSpline(radius, height, flux, kx=3, ky=3, s=0.0)
-    psi_norm = (spline(fine_r, fine_z) - axis_flux) / (boundary_flux - axis_flux)
+    psi = spline(fine_r, fine_z)
+    psi_norm = (psi - axis_flux) / (boundary_flux - axis_flux)
     if material.shape != psi_norm.shape:
         raise ValueError("the material flags are not on the refined lattice")
     region = (psi_norm < EDGE_LEVEL) & material
@@ -140,27 +180,18 @@ def trace_slice(
     seed = labels[ia, ja]
     if seed == 0:
         raise ValueError("the magnetic axis does not lie in a sub-boundary region")
-    connected = labels == seed
+    field = (fine_r, fine_z, psi.astype(np.float32))
+    if limiter is not None:
+        smooth = _smooth_boundary(fine_r, fine_z, psi_norm, axis, limiter)
+        if smooth is not None:
+            return smooth, field, "smooth level set"
     # Outside the connected region the field is replaced by a value above one,
-    # so every closed contour below one is a nested surface of the plasma and
-    # the contour at one is the region's own edge.
-    masked = np.where(connected, psi_norm, 2.0)
-    generator = contour_generator(fine_r, fine_z, masked.T)
-    edge = _closed_rings(generator, EDGE_LEVEL)
+    # so the contour at one is the region's own edge.
+    masked = np.where(labels == seed, psi_norm, 2.0)
+    edge = _closed_rings(contour_generator(fine_r, fine_z, masked.T), EDGE_LEVEL)
     if not edge:
         raise ValueError("the plasma region has no closed edge")
-    boundary = max(edge, key=len)
-    surfaces = []
-    for level in SURFACE_LEVELS:
-        rings = _closed_rings(generator, float(level))
-        enclosing = [
-            ring
-            for ring in rings
-            if inside_polygon(np.array([axis[0]]), np.array([axis[1]]), *ring.T)[0]
-        ]
-        if enclosing:
-            surfaces.append(max(enclosing, key=len))
-    return boundary, tuple(surfaces)
+    return max(edge, key=len), field, "connected region edge"
 
 
 def _material_on(radius, height, limiter, refine: int) -> np.ndarray:
@@ -221,9 +252,10 @@ def read_pulse_forward(paths: Path | str | list) -> ForwardPulse:
     centres = np.column_stack([rr.ravel(), zz.ravel()])
     slices = []
     refused = []
+    routes = []
     for index in range(data["flux"].shape[0]):
         try:
-            boundary, surfaces = trace_slice(
+            boundary, field, route = trace_slice(
                 radius,
                 height,
                 data["flux"][index],
@@ -232,18 +264,22 @@ def read_pulse_forward(paths: Path | str | list) -> ForwardPulse:
                 float(data["axis_flux"][index]),
                 float(data["boundary_flux"][index]),
                 data["x_point"][index] if bool(data["diverted"][index]) else None,
+                limiter,
             )
         except ValueError as error:
             refused.append({"row": int(data["row"][index]), "reason": str(error)})
             continue
         current = data["cell_current"][index]
         carrying = np.abs(current) > CURRENT_FLOOR * np.abs(current).max()
+        routes.append(route)
         slices.append(
             ForwardSlice(
                 time=float(data["time_s"][index]),
                 row=int(data["row"][index]),
                 boundary=boundary,
-                surfaces=surfaces,
+                field=field,
+                axis_flux=float(data["axis_flux"][index]),
+                boundary_flux=float(data["boundary_flux"][index]),
                 magnetic_axis=data["axis"][index],
                 x_point=data["x_point"][index],
                 diverted=bool(data["diverted"][index]),
@@ -263,9 +299,11 @@ def read_pulse_forward(paths: Path | str | list) -> ForwardPulse:
         "stacks": [str(item) for item in paths],
         "refused_slices": refused,
         "trace": (
-            "edge of the axis-connected region below normalised flux one "
-            f"inside the limiter, on a {REFINE}x bicubic refinement"
+            f"level set at normalised flux {SMOOTH_LEVEL} enclosing the axis on a "
+            f"{REFINE}x bicubic refinement, clipped to the limiter; where none "
+            "closes inside the wall, the edge of the axis-connected region"
         ),
+        "trace_routes": {name: routes.count(name) for name in sorted(set(routes))},
     }
     if receipt_path.exists():
         import json

@@ -39,10 +39,18 @@ def test_limited_boundary_runs_along_the_wall_it_touches():
     flux = (rr - axis[0]) ** 2 + zz**2
     material = _material_on(RADIUS, HEIGHT, WALL, REFINE)
     # The boundary level reaches R = 0.25, past the inboard wall at R = 0.3.
-    boundary, surfaces = trace_slice(RADIUS, HEIGHT, flux, material, axis, 0.0, 0.35**2)
+    boundary, field, route = trace_slice(
+        RADIUS, HEIGHT, flux, material, axis, 0.0, 0.35**2, limiter=WALL
+    )
     assert boundary_wall_gap(boundary, WALL) < PITCH / REFINE
     assert np.min(boundary[:, 0]) >= 0.3 - PITCH / REFINE
-    assert len(surfaces) > 0
+    assert route == "smooth level set"
+    assert field[2].shape == (field[0].size, field[1].size)
+    # The smooth boundary is the level set clipped to the wall: it runs along
+    # the inboard wall where the level would cross it and is round elsewhere.
+    on_wall = np.isclose(boundary[:, 0], 0.3, atol=1e-6)
+    assert on_wall.any()
+    assert np.all(boundary[:, 0] >= 0.3 - 1e-9)
     # Negative control: the bare contour at the same level leaves the wall.
     angle = np.linspace(0, 2 * np.pi, 200)
     bare = axis + 0.35 * np.column_stack([np.cos(angle), np.sin(angle)])
@@ -63,9 +71,10 @@ def test_diverted_boundary_excludes_the_basin_beyond_the_saddle():
     saddle_flux = float(np.max(column[between]))
     saddle_z = float(HEIGHT[between][np.argmax(column[between])])
     material = _material_on(RADIUS, HEIGHT, WALL, REFINE)
-    boundary, _ = trace_slice(
-        RADIUS, HEIGHT, flux, material, axis, axis_flux, saddle_flux
+    boundary, _, route = trace_slice(
+        RADIUS, HEIGHT, flux, material, axis, axis_flux, saddle_flux, limiter=WALL
     )
+    assert route == "smooth level set"
     assert np.min(boundary[:, 1]) > -0.55
     distance = np.hypot(boundary[:, 0] - 0.9, boundary[:, 1] - saddle_z)
     assert np.min(distance) < 2 * PITCH

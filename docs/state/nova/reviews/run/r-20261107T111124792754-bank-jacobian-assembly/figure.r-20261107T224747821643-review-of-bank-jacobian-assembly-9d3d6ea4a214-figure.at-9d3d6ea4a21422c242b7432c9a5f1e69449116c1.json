@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T23:10:38.237Z",
+  "dispatched_at": "2026-11-07T22:56:17Z",
+  "figures": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg",
+      "rendered": "image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg",
+      "id": "f58185a828a",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The rendered figure plots total solve wall per slice against batch width (16, 64, 128) for base against head, not the figure the section's brief asks for, which is assembly device ms per stage, base against head at 16 and 128 slices. No per-stage assembly cost appears anywhere in the picture, so a reader cannot see which assembly stage the change touched or what it cost: the stage dimension the figure was commissioned to show is absent from it. The gap is not a drawing fault and cannot be closed in the drawing alone \u2014 the reviewed run records that the stage split never ran because its extractor anchors on a source line step_jacobian no longer contains, and the evidence fragment's split table reads 'not measured' in every cell, which is why a different measurement was drawn in its place."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg",
+      "id": "f58185a828a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The plotted data occupy roughly the lower quarter of the canvas: the tallest bar reaches 18.96 against an axis top near 40.5 ms, so 53% of the plot height above the data is empty and the upper half of the y axis carries no tick at all. At this scale the base and head bars of every pair are indistinguishable (their tops sit one pixel apart, inside antialiasing), so the axis choice both spends more than half the figure on nothing and compresses the very comparison into a sub-pixel difference."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg",
+      "id": "f58185a828a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The x axis unit 'slices' is placed on the category-label baseline rather than below it, at almost the fourth-category position in the 346 px pitch of 16, 64 and 128. A reader scanning the axis can take 'slices' for a fourth width category, so the unit reads as data."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "passes \u2014 all text is near-black on white and legible, and both bar colours separate cleanly from the background.",
+    "data_ink": "defect \u2014 the y axis runs from 0 to about 40.5 ms while the tallest bar reaches only 18.96, so 53% of the plot height above the tallest bar is empty and no tick exists above 20 to give that space a scale; the base and head bars of each pair differ by 0.01 to 0.03 ms, about 0.1 to 0.4 px at this axis scale, so the comparison the figure exists to show is a sub-pixel difference carried only by the printed numbers.",
+    "decoration": "passes \u2014 solid bars in two flat colours, no gradient, no background fill, no gridlines, and the top and right spines removed; nothing decorative competes with the data.",
+    "label_collision": "defect \u2014 the axis unit word 'slices' is drawn on the same baseline row as the category labels (x 1191-1232, y 664-675), at almost exactly the position a fourth category label would occupy given the 346 px pitch of the labels at 159, 505 and 855; nothing is clipped or overlapping, but 'slices' reads as a fourth width category rather than as the axis title.",
+    "legibility": "passes \u2014 three grouped bar pairs at 16, 64 and 128 slices, each bar carrying its value (18.93/18.96, 14.47/14.47, 13.94/13.93), and a frameless legend naming base and head; the figure reads at a glance.",
+    "table_form": "passes \u2014 the falling wall per slice across 16, 64 and 128 slices is a genuine visual relationship that the adjacent table states less immediately, so the picture is not a depiction of a table; its base-against-head dimension, however, adds no visual information beyond the six printed numbers."
+  },
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: passes - three grouped bar pairs at 16, 64 and 128 slices with value labels on every bar and a frameless base/head legend; readable at a glance.\nRUBRIC data_ink: defect - y axis runs 0 to about 40.5 ms against a tallest bar of 18.96, so 53% of the plot height above the data is empty with no tick above 20; base and head differ by 0.1 to 0.4 px, so the comparison is carried only by the printed numbers.\nRUBRIC decoration: passes - solid bars, no gradients, no background fill, no gridlines, top and right spines removed.\nRUBRIC contrast: passes - near-black text on white; both bar colours separate cleanly from the background.\nRUBRIC table_form: passes - the falling wall per slice across width is a real visual relationship, though the base/head dimension adds nothing visually beyond the six printed values.\nRUBRIC label_collision: defect - the unit word 'slices' sits on the category-label row at x 1191-1232, near where a fourth category label would fall at the 346 px pitch, so it reads as a fourth category; nothing is clipped or overlapping.\nFINDING (blocking) docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg - the figure plots total solve wall per slice, not assembly device ms per stage as the brief requires; no per-stage assembly cost is visible anywhere, and the cause is the unproduced stage split, not the drawing.\nFINDING (non-blocking) docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg - axis spans 0 to about 40.5 ms against 18.96 ms of data, leaving 53% of the plot empty with no tick above 20 and the base/head difference at one pixel.\nFINDING (non-blocking) docs/figures/sub-millisecond-forward-path/bank-jacobian-assembly/bank-jacobian-assembly-width.svg - the axis unit 'slices' is drawn on the category-label baseline at the fourth-category position and reads as data.\n",
+  "review_run_id": "r-20261107T224747821643-review-of-bank-jacobian-assembly-9d3d6ea4a214-figure",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "9d3d6ea4a21422c242b7432c9a5f1e69449116c1",
+  "reviewed_run_id": "r-20261107T111124792754-bank-jacobian-assembly",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "passes \u2014 all text is near-black on white and legible, and both bar colours separate cleanly from the background.",
+    "data_ink": "defect \u2014 the y axis runs from 0 to about 40.5 ms while the tallest bar reaches only 18.96, so 53% of the plot height above the tallest bar is empty and no tick exists above 20 to give that space a scale; the base and head bars of each pair differ by 0.01 to 0.03 ms, about 0.1 to 0.4 px at this axis scale, so the comparison the figure exists to show is a sub-pixel difference carried only by the printed numbers.",
+    "decoration": "passes \u2014 solid bars in two flat colours, no gradient, no background fill, no gridlines, and the top and right spines removed; nothing decorative competes with the data.",
+    "label_collision": "defect \u2014 the axis unit word 'slices' is drawn on the same baseline row as the category labels (x 1191-1232, y 664-675), at almost exactly the position a fourth category label would occupy given the 346 px pitch of the labels at 159, 505 and 855; nothing is clipped or overlapping, but 'slices' reads as a fourth width category rather than as the axis title.",
+    "legibility": "passes \u2014 three grouped bar pairs at 16, 64 and 128 slices, each bar carrying its value (18.93/18.96, 14.47/14.47, 13.94/13.93), and a frameless legend naming base and head; the figure reads at a glance.",
+    "table_form": "passes \u2014 the falling wall per slice across 16, 64 and 128 slices is a genuine visual relationship that the adjacent table states less immediately, so the picture is not a depiction of a table; its base-against-head dimension, however, adds no visual information beyond the six printed numbers."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:12:00.000000+00:00",
+  "total": null
+}

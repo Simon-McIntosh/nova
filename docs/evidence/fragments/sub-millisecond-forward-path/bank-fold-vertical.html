@@ -1,19 +1,20 @@
 <section id="bank-fold-vertical-record">
   <h3>Drive fold and centroid constraint</h3>
-  <p id="bank-fold-vertical-repair-note"><strong>Correction in progress.</strong>
-  The first pinned stopping drive below was computed using the residual from
-  before the sixth Newton update, so it is withdrawn until a fresh terminal
-  read establishes the accepted state. The singular-value figure below used
-  a separate one-lane job; the repaired gate measures both spectra in each
-  fresh process of the same job. Its device-qualified receipt will replace
-  these first-pass claims.</p>
-  <p id="bank-fold-vertical-regression-controls">The repair's executable
+  <p id="bank-fold-vertical-repair-note">Both arms now use the same
+  fresh-read acceptance predicate in
+  <code>scripts/prototypes/bank_fold_vertical/measure.py:38-43</code>. The
+  scratch arm reads again after its sixth update before deciding acceptance or
+  reporting a residual (<code>measure.py:316-370</code>). The conditioning
+  series is measured inside each process of the one-job H200 run.</p>
+  <p id="bank-fold-vertical-regression-controls">The executable
   contract checks the actual continuation loop with a synthetic state that
   reaches zero residual on its sixth update, and checks the bordered step on
   a one-cell state whose centroid requires a nonzero radial-field correction.
   A receipt pair with no conditioning rows is refused. The pre-repair source
   fails the first and third checks; a scratch mutation that removes the
-  centroid correction fails the second. These controls make the assertions
+  centroid correction fails the second. A known extra bank row changes the
+  product pin-status probe from <code>absent</code> to <code>true</code>, while
+  a hardcoded-absent mutant fails it. These controls make the assertions
   independent of two processes agreeing on the same result.</p>
   <p><strong>Product pin status: absent in the bank solve.</strong>
   <code>nova/equilibrium/support_read.py:1587-1607</code> declares only the three
@@ -25,10 +26,14 @@
   Newton–Krylov request, and returns no pin for other default routes.
   <code>VerticalPositionPin</code> in
   <code>nova/equilibrium/constraint.py:479-533</code> defines a centroid-height
-  row and a uniform radial-field unknown when active. The H200 log prints
-  <code>PIN_ACTIVE=absent</code> for the bank route; the scratch probe prints
-  <code>SCRATCH_PIN_ACTIVE=true</code>. The lead's requested active product pin
-  is therefore not present.</p>
+  row and a uniform radial-field unknown when active. The H200 run assembles
+  the bank residual at the supplied state and counts zero rows beyond the
+  three moment blocks (<code>measure.py:46-64</code>), printing
+  <code>PIN_ACTIVE=absent</code>. The scratch probe tests the centroid row and
+  radial-field column actually used by its bordered update
+  (<code>measure.py:235-253</code>) and prints
+  <code>SCRATCH_PIN_ACTIVE=true</code>. The requested active product pin is
+  absent.</p>
 
   <figure id="bank-fold-vertical-null-figure">
     <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/null-flux-contours.svg"
@@ -59,12 +64,13 @@
   uniform radial-field unknown and a declared row scale of 1e-3; its log
   prints <code>SCRATCH_PIN_ACTIVE=true</code>. The row scale cancels from its
   exact Schur-complement Newton update, while it remains explicit in the
-  bordered spectrum below. It reaches only
-  <strong>1.001552137374879</strong>, using 158 attempted sub-steps, 833
-  updates and 7566 fresh reads. The last accepted intermediate residual is
-  8.993e-7 with a maximum radial field of 8.157 µT; the next 1.907e-9 drive
-  increment is rejected at 1.164e-6 after six updates. The maximum centroid
-  height error at that rejection is 2.372e-20 m. It does not certify drive
+  bordered spectrum below. With the corrected post-update read, it reaches
+  <strong>1.0015521373748786</strong>, using 138 attempted sub-steps, 739
+  updates and 6789 fresh reads. The last accepted intermediate residual is
+  8.993137e-7 with a maximum radial field of 8.157 µT; the next 1.907e-9
+  drive increment is rejected at a <em>post-update</em> residual of
+  1.164290e-6 after six updates. The maximum centroid height error at that
+  rejection is 3.896e-20 m. It does not certify drive
   1.01 at the required
   1e-10 fresh-read tolerance. The unpinned arm reaches about 0.00738 more
   drive than this scratch pinned arm. The scratch implementation uses its own
@@ -75,36 +81,31 @@
     <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg"
          alt="Smallest balanced singular value against drive for the pinned and unpinned branches">
     <figcaption>Smallest singular value versus drive for lane 0. Grey is the
-    unpinned branch from the prior barrier's four H200 condition rows; blue is
-    the centroid-bordered matrix at five states retained by the separate
-    one-lane active-pin diagnostic. The underlying bank, constraint and
-    continuation source files are identical between the two base revisions.
+    unpinned branch at four retained states; blue is the centroid-bordered
+    matrix at six retained pinned states. Both series come from the same
+    sixteen-lane H200 process, which samples lane 0 for conditioning.
     The bordered matrix includes a centroid row scaled by 1e-3 and a radial
     field column scaled by 1e-3 T, so the two matrices have different
     sizes and balancing conventions; their vertical gap is not a measure of physical
     improvement. The arms stop at different drives, as the plot shows.</figcaption>
   </figure>
 
-  <p>The one-lane pinned diagnostic reaches drive 1.00155 under the
+  <p>The corrected pinned diagnostic reaches drive 1.00155 under the
   intermediate 1e-6 fresh-residual tolerance. Its bordered smallest singular
-  value is 4.033e-8 at drive 1.0, 3.683e-8 at 1.0000625,
-  3.310e-8 at 1.00038671875, 1.104e-7 at 1.00091015625, and
-  7.256e-8 at 1.00155. All five fresh reads are valid. The unpinned branch
+  value is 4.033e-8 at drive 1.0, 3.299e-8 at 1.000125,
+  4.266e-8 at 1.000515625, 4.487e-8 at 1.000984375, and
+  7.269e-8 at the last two retained states near 1.001552137. All six
+  fresh reads are valid. The unpinned branch
   falls from 6.273e-4 at drive 1.001 to 1.124e-6 at 1.0089341297149657.
   These spectra show no singular-value rescue by the tested weak row; the
   direct continuation outcome is the stronger negative evidence.</p>
 
-  <p>Provenance: H200 job 1308276 on 98dci4-gpu-0003 ran sixteen lanes in two
-  fresh processes. Both printed <code>PIN_ACTIVE=absent</code> for the product
-  route and <code>SCRATCH_PIN_ACTIVE=true</code> for the probe. Their null
-  singular values are 1.124236704e-6 and 1.124236685e-6; their absolute
-  vertical and radial flux-image cosines agree within 4e-11. Both reach the
-  same unpinned and pinned drives with exactly the same read and update counts.
-  Its <code>h200-retry-job.log</code> ends <code>AGREE null=1 unpinned=1
-  pinned=1</code> and <code>EXIT=0</code>. H200 conditioning job 1308285
-  records its five valid bordered spectra in <code>condition-job.log</code>,
-  ending <code>EXIT=0</code>. Full numerical receipts reside in the worker run
-  directory as <code>first.json</code>, <code>second.json</code> and
-  <code>condition.json</code>. The two figures were rendered to PNG and
-  inspected before committing only their SVGs.</p>
+  <p>Provenance: H200 job 1308355 on 98dci4-gpu-0003 uses one card, four
+  CPUs, 64 GB and sixteen lanes. Its two fresh processes write
+  <code>repair-first.json</code> and <code>repair-second.json</code> in the
+  worker run directory; <code>compare.py</code> checks their null projection,
+  branch reach, reads, updates and both singular-value series. The plotted
+  SVGs were rendered to PNG and visually inspected before committing only
+  the SVGs. The job's <code>h200-repair-final-job.log</code> records the
+  assembled product and scratch pin status and the per-step fresh residuals.</p>
 </section>

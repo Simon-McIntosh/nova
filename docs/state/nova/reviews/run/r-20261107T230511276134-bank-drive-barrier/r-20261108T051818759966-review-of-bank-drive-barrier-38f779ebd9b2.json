@@ -1,0 +1,102 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed manifest records no baseline_suite or after_suite pair; 0 is the schema's neutral value, not a measured suite delta. The diagnostic gate recorded EXIT=0 and no failure IDs.",
+  "assertion_analysis": [
+    "measure.py:39 fails if JAX x64 is disabled; measure.py:107 fails if continuation accepts no state.",
+    "compare.py:20-36 fails when a quantitative row is absent, a label or key differs, or the two processes disagree on a value; both processes can agree on a wrong mechanism.",
+    "plot.py:57 fails unless six PROBE rows are present; plot.py:31-45 fails for clipped or colliding text and direct labels over plotted data.",
+    "No added assertion compares its output with the same supplied value, but none independently pins zero flips, continuity, or conditioning growth."
+  ],
+  "call_sites": [],
+  "completed_at": "2026-11-08T05:36:15Z",
+  "dispatched_at": "2026-11-08T05:24:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "resolved by landing order: the prototype imports nova.equilibrium.drive_continuation and scripts.prototypes.bank_drive_continuation by module name, both now on main from the bank-drive-continuation merge at source revision b818dab4, which is the exact revision the H200 job measured; the merged tree imports them",
+      "recorded_at": "2026-11-08T05:40:56.487141+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking: the agreement gate checks reproducibility; the conclusion is read from the tabled rows in the fragment",
+      "recorded_at": "2026-11-08T05:41:06.314095+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking: prototype-local plotting helper; consolidation is not worth a node",
+      "recorded_at": "2026-11-08T05:41:17.271660+00:00"
+    }
+  },
+  "findings": [
+    {
+      "evidence": "git ls-tree at reviewed head returned neither dependency; git merge-base --is-ancestor b818dab4 reviewed head exited 1; h200-final-job.log:1 identifies the separate source tree.",
+      "file": "scripts/prototypes/bank_drive_barrier/measure.py",
+      "line": 22,
+      "severity": "blocking",
+      "summary": "The reviewed head lacks both drive_continuation.py and bank_drive_continuation/measure.py, so the prototype cannot import from that revision; the H200 job measured a separate b818dab4 source tree."
+    },
+    {
+      "disposition": "exempted: this diagnostic is fixed evidence with raw receipts, not an ongoing product regression guard.",
+      "file": "scripts/prototypes/bank_drive_barrier/compare.py",
+      "line": 20,
+      "severity": "non-blocking",
+      "summary": "The two-process agreement gate does not independently assert the diagnostic conclusion, so matching wrong rows can pass."
+    },
+    {
+      "disposition": "exempted: both are one-off prototype figures; importing the other figure script would couple unrelated reports.",
+      "file": "scripts/prototypes/bank_drive_barrier/plot.py",
+      "line": 15,
+      "severity": "non-blocking",
+      "summary": "The local text validator duplicates the clipping and collision capability in scripts/prototypes/bank_step_booking/plot.py:30-48."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "CALL_SITES: none",
+    "diff": "VERDICT diff: seven commits from ed18332e6effa22632baea949c22e5374ad7c759 to 38f779ebd9b281914b106d8417540d46b9372669 add four prototype files, one evidence fragment and one SVG; measure.py:22-23 requires code absent at the reviewed head.",
+    "done_when": "VERDICT done_when: brief.txt requires two agreeing fresh H200 processes, an EXIT=0 receipt, a residual-and-decision table and an SVG; h200-final-job.log:2-3 records agreement and exit, and bank-drive-barrier.html:25-66 and residual-vs-drive.svg contain the table and figure, though the job loaded source revision b818dab4 outside the reviewed head.",
+    "goal": "VERDICT goal: brief.txt asks for a reproducible drive-barrier diagnosis; scripts/prototypes/bank_drive_barrier/measure.py:151 probes it, but line 23 imports a predecessor absent from the reviewed head.",
+    "manifest": "VERDICT manifest: manifest.md reports seven commits, the H200 command and h200-final-job.log; that log ends EXIT=0 and its receipt agrees with balanced-first.jsonl and balanced-second.jsonl, while baseline_suite and after_suite are absent.",
+    "write_paths": "VERDICT write_paths: manifest.md declares only scripts/prototypes/bank_drive_barrier, bank-drive-barrier.html and the bank-drive-barrier figure directory; git diff ed18332e..38f779eb changes six files inside those paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T051818759966-review-of-bank-drive-barrier-38f779ebd9b2",
+  "reviewed_base_sha": "ed18332e6effa22632baea949c22e5374ad7c759",
+  "reviewed_head_sha": "38f779ebd9b281914b106d8417540d46b9372669",
+  "reviewed_run_id": "r-20261107T230511276134-bank-drive-barrier",
+  "rubric_lines": [
+    "VERDICT goal: brief.txt asks for a reproducible drive-barrier diagnosis; scripts/prototypes/bank_drive_barrier/measure.py:151 probes it, but line 23 imports a predecessor absent from the reviewed head.",
+    "VERDICT done_when: brief.txt requires two agreeing fresh H200 processes, an EXIT=0 receipt, a residual-and-decision table and an SVG; h200-final-job.log:2-3 records agreement and exit, and bank-drive-barrier.html:25-66 and residual-vs-drive.svg contain the table and figure, though the job loaded source revision b818dab4 outside the reviewed head.",
+    "VERDICT write_paths: manifest.md declares only scripts/prototypes/bank_drive_barrier, bank-drive-barrier.html and the bank-drive-barrier figure directory; git diff ed18332e..38f779eb changes six files inside those paths.",
+    "VERDICT manifest: manifest.md reports seven commits, the H200 command and h200-final-job.log; that log ends EXIT=0 and its receipt agrees with balanced-first.jsonl and balanced-second.jsonl, while baseline_suite and after_suite are absent.",
+    "VERDICT diff: seven commits from ed18332e6effa22632baea949c22e5374ad7c759 to 38f779ebd9b281914b106d8417540d46b9372669 add four prototype files, one evidence fragment and one SVG; measure.py:22-23 requires code absent at the reviewed head.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 12",
+    "JUSTIFICATION goal_fidelity: scripts/prototypes/bank_drive_barrier/measure.py:151-247 implements the requested probe and conditioning measurement, but its imports at lines 22-23 prevent the reviewed revision from reproducing it alone.",
+    "SCORE evidence: 15",
+    "JUSTIFICATION evidence: h200-final-job.log:2-3 records two-process agreement and EXIT=0, while its line 1 and balanced-first.jsonl:1 show the measured product source was b818dab4 rather than the reviewed head.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff ed18332e..38f779eb changes only the three paths named in the reviewed manifest's orientation_write_paths.",
+    "SCORE durability: 8",
+    "JUSTIFICATION durability: scripts/prototypes/bank_drive_barrier/compare.py:20-36 rejects missing or disagreeing rows, but two processes producing the same incorrect flip counts or conditioning trend still pass.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: scripts/prototypes/bank_drive_barrier/measure.py:8-10 configures dtypes before arrays and line 39 asserts x64, following the prototype's device idiom with descriptive names.",
+    "SCORE reuse: 5",
+    "JUSTIFICATION reuse: scripts/prototypes/bank_drive_barrier/plot.py:15-45 duplicates the figure text clipping and collision check already owned by scripts/prototypes/bank_step_booking/plot.py:30-48, while measure.py:65-90 wraps the existing continuation solve.",
+    "FINDING scripts/prototypes/bank_drive_barrier/measure.py:22 blocking: the reviewed head has neither nova/equilibrium/drive_continuation.py nor scripts/prototypes/bank_drive_continuation/measure.py, so the committed prototype cannot import its dependencies or reproduce the H200 result from that revision; the job instead used a separate b818dab4 source tree.",
+    "FINDING scripts/prototypes/bank_drive_barrier/compare.py:20 non-blocking: the agreement gate checks row count and equality between processes but never requires zero decision flips, a continuous residual response or rising conditioning, so the scientific conclusion has no regression assertion; exempted because this is a fixed diagnostic artifact with retained raw receipts rather than a reusable product guard.",
+    "FINDING scripts/prototypes/bank_drive_barrier/plot.py:15 non-blocking: validate_text reimplements clipping and collision checks in scripts/prototypes/bank_step_booking/plot.py:30 instead of extending the existing owner; exempted for this one-off figure because coupling unrelated prototype scripts would be a worse maintenance boundary."
+  ],
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T05:54:22.568466+00:00",
+  "total": 78
+}

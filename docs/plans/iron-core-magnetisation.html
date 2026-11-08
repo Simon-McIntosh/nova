@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -584,6 +584,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261108T095259306723-review-of-icm-sheet-domain-a4a388ab3c16" data-who="reckon-build" data-when="2026-11-08T10:03:13.715Z">
     <div class="r-comment-body"><p>Reviewed r-20261108T085119449166-icm-sheet-domain at e5d1ecdc361234c658ded22e908991e8821e497e..a4a388ab3c16908dbeb826d69c328ab8838dac56: the NaN repair is right and gated (654 passed EXIT=0, negative control 2 failed EXIT=1), four non-blocking findings - the beyond-end set never enters the failing region, an unused helper, a negative-control note that misdescribes its own log, and a baseline arm that imported the head module.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261108T085119449166-icm-sheet-domain" data-who="reckon-build" data-when="2026-11-08T10:52:44Z">
+    <div class="r-comment-body"><p>The closed form is now finite beyond a sloped edge&#x27;s ends: the phi=0 curvature scale and both panel offsets enter the log model as magnitudes, and the field&#x27;s arsinh gradient grades whichever end is nearer the ring confluence (r_1 = -r), which took the box grid from 16 % field error to 8.7e-12; tests add beyond-end and far-side targets plus a 7x9 box grid per slope, 654 passed, and restoring the unguarded root fails two by NaN.</p></div>
 </div>
 </section>
 </main>

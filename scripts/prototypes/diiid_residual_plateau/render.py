@@ -14,7 +14,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 import numpy as np
+
+from style import BOUNDARY, FLUX, NEGATIVE, POSITIVE, validate_palette
 
 from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
 from nova.jax.config import configure_dtypes
@@ -86,22 +89,41 @@ def render(source, output, preview):
     extent = float(np.max(np.abs(residual)))
     display_scale, display_unit = (1e3, "mWb") if extent > 1e-6 else (1e18, "aWb")
     residual_levels = extent * np.array([-0.8, -0.5, -0.2, 0.2, 0.5, 0.8])
+    axis_separation = float(np.linalg.norm(data["axis"][:2] - points[0]))
+    print(
+        f"DISPLAY {source.name}: max|r|={extent:.12g} Wb; "
+        f"levels={residual_levels.tolist()}; axis separation={axis_separation:.9g} m"
+    )
     plt.rcParams["svg.fonttype"] = "none"
     figure, axes = plt.subplots(1, 3, figsize=(14, 7.2), dpi=100)
     figure.subplots_adjust(left=0.03, right=0.97, bottom=0.17, top=0.79, wspace=0.15)
     notes = []
-    reference_style = replace(DEFAULT_INK, axis_color="#929292", xpoint_color="#929292")
+    reference_style = replace(
+        DEFAULT_INK, axis_color=FLUX, xpoint_color=FLUX, axis_markersize=9
+    )
     for ax, (name, region) in zip(axes, regions, strict=True):
         poloidal_axes(ax)
         ax.set_aspect("equal")
         ax.set_xlim(radius[0], radius[-1])
         ax.set_ylim(height[0], height[-1])
+        ax.add_patch(
+            Rectangle(
+                (radius[0], height[0]),
+                radius[-1] - radius[0],
+                height[-1] - height[0],
+                fill=False,
+                edgecolor=FLUX,
+                linewidth=0.7,
+                clip_on=False,
+                zorder=0,
+            )
+        )
         ax.contour(
             radius,
             height,
             label.T,
             levels=flux_levels,
-            colors="#929292",
+            colors=FLUX,
             linewidths=0.75,
             linestyles="dashed",
             zorder=1,
@@ -111,7 +133,7 @@ def render(source, output, preview):
             height,
             flux.T,
             levels=flux_levels,
-            colors="#929292",
+            colors=FLUX,
             linewidths=1.0,
             linestyles="solid",
             zorder=2,
@@ -121,8 +143,9 @@ def render(source, output, preview):
             height,
             np.ma.masked_where(~region, residual).T,
             levels=residual_levels,
-            colors=DEFAULT_INK.flux_color,
+            colors=[NEGATIVE] * 3 + [POSITIVE] * 3,
             linewidths=2.0,
+            linestyles="solid",
             zorder=4,
         )
         ax.contour(
@@ -130,7 +153,7 @@ def render(source, output, preview):
             height,
             region.T.astype(float),
             levels=[0.5],
-            colors="#666666",
+            colors=BOUNDARY,
             linewidths=0.7,
             linestyles="dotted",
             zorder=3,
@@ -140,7 +163,7 @@ def render(source, output, preview):
         ax.plot(
             boundary[:, 0],
             boundary[:, 1],
-            color="#666666",
+            color=BOUNDARY,
             linestyle="--",
             linewidth=1.8,
         )
@@ -172,9 +195,14 @@ def render(source, output, preview):
             )
         )
     handles = [
-        Line2D([], [], color=DEFAULT_INK.flux_color, lw=2, label="residual"),
-        Line2D([], [], color="#929292", lw=1, label="solved flux"),
-        Line2D([], [], color="#929292", lw=1, ls="--", label="EFIT flux / boundary"),
+        Line2D([], [], color=POSITIVE, lw=2, label="residual > 0"),
+        Line2D([], [], color=NEGATIVE, lw=2, label="residual < 0"),
+        Line2D([], [], color=FLUX, lw=1, label="solved flux"),
+        Line2D([], [], color=FLUX, lw=0.75, ls="--", label="EFIT flux"),
+        Line2D([], [], color=BOUNDARY, lw=1.8, ls="--", label="EFIT boundary"),
+        Line2D([], [], color=DEFAULT_INK.wall_color, lw=1.4, label="limiter"),
+        Line2D([], [], color=BOUNDARY, lw=0.7, ls=":", label="region edge"),
+        Line2D([], [], color=FLUX, lw=0.7, label="grid boundary"),
         Line2D(
             [],
             [],
@@ -195,20 +223,49 @@ def render(source, output, preview):
         Line2D(
             [],
             [],
-            color="#929292",
+            color=FLUX,
             marker="^",
             mfc="none",
             ls="none",
-            label="EFIT nulls",
+            label="EFIT axis",
+            markersize=9,
+        ),
+        Line2D(
+            [],
+            [],
+            color=FLUX,
+            marker="X",
+            mfc="none",
+            ls="none",
+            label="EFIT X-point",
         ),
     ]
     figure.legend(
         handles=handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.98),
-        ncol=3,
+        ncol=4,
         frameon=False,
         fontsize=14,
+    )
+    notes.extend(
+        [
+            figure.text(
+                0.5,
+                0.055,
+                "residual levels: ±{0.2, 0.5, 0.8} × max|r|; "
+                f"max|r| = {extent:.6g} Wb",
+                ha="center",
+                fontsize=14,
+            ),
+            figure.text(
+                0.5,
+                0.02,
+                f"solved–EFIT axis separation = {axis_separation:.6g} m",
+                ha="center",
+                fontsize=14,
+            ),
+        ]
     )
     save(figure, axes, notes, output, preview)
     plt.close(figure)
@@ -221,6 +278,7 @@ def main():
     parser.add_argument("--previews", type=Path, required=True)
     args = parser.parse_args()
     configure_dtypes()
+    validate_palette()
     for source in sorted(args.input.glob("*/receipt.json")):
         name = source.parent.name
         render(

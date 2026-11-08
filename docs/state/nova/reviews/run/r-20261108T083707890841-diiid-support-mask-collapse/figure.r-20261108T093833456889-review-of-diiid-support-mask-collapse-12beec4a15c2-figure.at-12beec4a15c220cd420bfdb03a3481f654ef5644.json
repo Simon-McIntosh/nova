@@ -1,0 +1,105 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no suite; no test was executed and no failure count was measured",
+  "blocking_finding_count": 0,
+  "completed_at": "2026-11-08T09:52:00Z",
+  "dispatched_at": "2026-11-08T09:43:16Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-support-mask-collapse/frame-137-diverted-trip-1.svg",
+    "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-3.svg",
+    "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-4.svg",
+    "docs/figures/diiid-support-mask-collapse/frame-179-limited-trip-1.svg"
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_support_mask/render_support.py",
+      "id": "fig-legend-weight",
+      "line": 162,
+      "severity": "non-blocking",
+      "summary": "The legend draws every series with a swatch heavier than the line it names: 'cell outline' at lw=1.5 against the 0.45 pt mask outline at line 98, 'solved flux' at 2.6 against 0.9, 'EFIT flux' at 2.6 against 0.7 and 'boundary level' at 2.4 against 1.5. Measured on the rendered PNG, the solved-flux swatch is a 3 px solid bar while the drawn contours run 1-2 px, and the cell-outline swatch reads as a bold purple rule while the mask outlines are sub-pixel (their pixels average 52/255 of ink). The repository plotting rule asks for legend entries as thick as the lines, and a reader who calibrates the picture from the legend over-estimates every series, most damagingly the support mask, which is the subject of all four figures."
+    },
+    {
+      "file": "docs/figures/diiid-support-mask-collapse/frame-137-diverted-trip-1.svg",
+      "id": "fig-render-provenance",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The attached PNGs are not provably the rendering of the reviewed head. The only recorded render in the run, render-final.log, ran at revision afda54a04 and wrote the preview PNGs at 10:26 (the attached images match those previews' dimensions). The reviewed head 12beec4a1 was committed at 10:27 and changes all four SVGs (numstat 1/1, 1/1, 2/0, 1/1) with no later render log and no newer preview. A reader therefore cannot tell that the picture reviewed here is the picture the head serves, and this review is barred from inspecting SVG content to find what changed between the two renditions."
+    },
+    {
+      "file": "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-3.svg",
+      "id": "fig-146-trip3-mask-visibility",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In panels 2-4 the 10-cell support occupies about 26x22 px of a 316x468 px panel and is drawn with 0.45 pt outlines at zorder 1, beneath the solved-flux contours and the boundary level, which are stacked on the same spot. Only about 96 cell-outline pixels survive in each panel against roughly 250 that the same mask would produce from panel 1's per-cell density, the rest being overdrawn or blended away. The reader sees a pale speck near the X-point rather than the support the figure exists to show, and cannot check the caption's '10 cells' against the picture."
+    },
+    {
+      "file": "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-4.svg",
+      "id": "fig-146-trip4-mask-visibility",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 8-cell support has the same problem as the trip-3 figure and, at these weights, the two images are visually indistinguishable: 8 and 10 cells both render as an identical pale speck of about 22 and 14 surviving outline pixels respectively. The evidence fragment presents the two figures side by side as distinct states, but a reader comparing them can only find the difference in the printed counts, not in the marks."
+    }
+  ],
+  "findings_note": "no finding blocks: every label is placed and readable, no text is clipped or overlapping, and each figure's central spatial claim (the support region and its position relative to the limiter and the reference field) is visible in the picture. The four recorded defects are weight, provenance and small-mask visibility, not readability of the figures themselves.",
+  "image_to_figure": {
+    "image-0.png": "docs/figures/diiid-support-mask-collapse/frame-137-diverted-trip-1.svg",
+    "image-1.png": "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-3.svg",
+    "image-2.png": "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-4.svg",
+    "image-3.png": "docs/figures/diiid-support-mask-collapse/frame-179-limited-trip-1.svg"
+  },
+  "images_reviewed": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure/image-0.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure/image-1.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure/image-2.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure/image-3.png"
+  ],
+  "method": "each figure judged only from its attached rendered PNG at 1400x721 px (100 dpi), matched to its repository path by the stage counts printed under its panels (1089/319/319/298 = frame 137; 1089/10/10/10 = 146 trip 3; 1089/8/8/8 = 146 trip 4; 1089/401/401/345 = 179 limited); ink extents, per-panel cell-outline pixel counts, line thicknesses and text placement were measured on the PNG pixels with PIL before any verdict was written; no SVG was opened, read, rendered or diffed for content",
+  "node": "review-of-diiid-support-mask-collapse-12beec4a15c2-figure",
+  "non_blocking_finding_count": 4,
+  "project": "nova",
+  "review_run_id": "r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "12beec4a15c220cd420bfdb03a3481f654ef5644",
+  "reviewed_run_id": "r-20261108T083707890841-diiid-support-mask-collapse",
+  "reviewer": "review-of-diiid-support-mask-collapse-12beec4a15c2-figure",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-support-mask-collapse/frame-137-diverted-trip-1.svg": {
+      "contrast": "passes: panel captions and legend text are black on white; the #929292 reference contours sit at roughly 3:1 against white, the floor for a reference series but readable",
+      "data_ink": "passes: the solved-flux and reference-flux contours, the cell outlines and the red boundary level carry essentially all the ink; there is no fill or shading anywhere",
+      "decoration": "passes: axes are off and there is no grid, gradient, drop shadow or background fill; the dense lavender grid in panel 1 is the 1089-cell material mask, which is data rather than a lattice decoration",
+      "label_collision": "passes: no label is clipped or overlaps another label or the data; the legend sits above the panels and the captions below them in clear space, and the renderer's text-bounds and overlap guard passed on this render",
+      "legibility": "passes at native size: four stages read left to right with a caption under each; the 319-then-298-cell support renders as a pale lavender cell field whose hue separates it from the blue solved contours, and the plasma shape, the red boundary level, the limiter and both null sets are each recognisable",
+      "table_form": "passes: four poloidal R-Z panels with contours and masks; the per-stage cell counts are figure labels and the numeric comparison belongs to the evidence fragment's table, not to this image"
+    },
+    "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-3.svg": {
+      "contrast": "passes: black caption and legend text on white; the grey reference contours and hollow EFIT markers are legible as reference ink",
+      "data_ink": "passes for the flux contours, which carry the weight; the support mask, which is the figure's subject, is the faintest ink on the page, because it is the thinnest line drawn and it is drawn underneath every other series",
+      "decoration": "passes: axes off, no grid, gradient or fill; the lavender cell field in panel 1 is the material mask and is data",
+      "label_collision": "passes: nothing clipped or overlapping; captions and legend occupy clear space outside the axes and the text guard passed on this render",
+      "legibility": "defect for its subject: the 10-cell support is drawn as a cluster of sub-pixel purple hairlines occupying about 26x22 px of a 316x468 px panel at the top of the vessel, interleaved with the dense solved-flux contours, so a reader sees a pale speck and takes the '10 cells' caption on trust; the displaced solved axis above the limiter and the reference field centred inside the vessel remain readable",
+      "table_form": "passes: spatial poloidal panels, not a table"
+    },
+    "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-4.svg": {
+      "contrast": "passes: black caption and legend text on white; reference contours and markers remain legible",
+      "data_ink": "passes for the flux contours; the support mask is the faintest ink on the page and lies beneath every other series",
+      "decoration": "passes: axes off, no grid, gradient or fill; the lavender cell field in panel 1 is the material mask and is data",
+      "label_collision": "passes: nothing clipped or overlapping; captions and legend occupy clear space outside the axes and the text guard passed on this render",
+      "legibility": "defect for its subject: the 8-cell support is the same pale hairline speck as the trip-3 figure and the two images cannot be told apart at a glance, since 8 and 10 cells render at the same visual weight; the caption carries the only readable difference",
+      "table_form": "passes: spatial poloidal panels, not a table"
+    },
+    "docs/figures/diiid-support-mask-collapse/frame-179-limited-trip-1.svg": {
+      "contrast": "passes: black caption and legend text on white; the grey reference contours are at roughly 3:1 and readable",
+      "data_ink": "passes: contours, cell outlines and the boundary level carry the weight; no fill or shading",
+      "decoration": "passes: axes off, no grid, gradient or background fill",
+      "label_collision": "passes: no label clipped or overlapping; the panel captions sit below the axes and the legend above them",
+      "legibility": "passes at native size: the 401-then-345-cell support reads as a lavender cell field across the confined region, and the change between the material-and-closed panel and the axis-component panel is visible without close inspection; the limited boundary, the limiter, both null sets and the retained central component are all distinguishable",
+      "table_form": "passes: four poloidal R-Z panels; no table-shaped content is drawn as a picture"
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:52:00+00:00",
+  "total": null
+}

@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: the source manifest baseline_suite and after_suite fields are empty and the source live node records both as null; the source brief explicitly left its suite unarmed. No baseline/head suite logs exist from which to derive a numeric delta. This is not a measured zero.",
+  "after_suite": null,
+  "assertion_analysis": {
+    "check_capture.py:27": "Recomputed array counts differing from separately stored JSON counts fail; this guards archive consistency, not independently the physical correctness of either capture.",
+    "check_capture.py:28": "Zeroing a connected mask AND its recorded count defeats only the consistency assertion, then fails the positive-stage check; source negative-control.log demonstrates this exact case with EXIT=1.",
+    "check_capture.py:29": "A connected cell outside material intersected with closed fails the subset assertion.",
+    "check_capture.py:30": "A recorded polish shift at least one lattice spacing fails; the gate trusts this archived metadata rather than recomputing polish.",
+    "check_capture.py:31-32": "Axis-cell flags disagreeing with saved material/closed arrays fail; these are consistency assertions rather than independent admission truth tests.",
+    "check_capture.py:33": "Passing only a lattice-sized state or metadata saying so fails; actual state size is not recomputed by this gate.",
+    "check_capture.py:34": "A nonsquare transpose or reshape inconsistent with the saved axes fails; a square transpose alone is not detected by shape, and the independent polisher check is in the producer.",
+    "check_capture.py:57-62": "Replacing the receipt assignment with support cardinality rather than active_set_mask_differences fails the source AST provenance assertion.",
+    "check_capture.py:82": "An SVG of 300000 bytes or more fails.",
+    "check_capture.py:86": "A missing count label fails; it checks presence anywhere in SVG text rather than stage-label correspondence.",
+    "render_support.py:211": "Clipped or overlapping text fails via the existing render_panels checker.",
+    "render_support.py:240": "Single-precision rendering/polishing fails the x64 check.",
+    "render_support.py:42": "A saved field shape inconsistent with radius-height axes fails.",
+    "trace_support.py:176": "A production connected mask with zero cells fails after operands have been archived.",
+    "trace_support.py:58": "Two host return captures are required; removing either original-material or rescue read would fail this assertion.",
+    "trace_support.py:64": "Disabling double precision before measurement makes this fail.",
+    "trace_support.py:96": "A nonconverged stationary polish or axis displacement of at least one lattice pitch fails; this guards a repeated field-orientation mistake."
+  },
+  "assertion_independence": "No assertion calls a function with an expected return value and then compares the return to that same supplied value. Several assertions compare two archived representations of the same measurement; these are explicitly credited only as consistency checks. Main evidence is the production capture, receipt wiring, retained raw arrays and a control that changes both mask and count.",
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "No application production caller invokes these new standalone prototype scripts; their CLI main functions invoke the production seams listed separately.",
+  "completed_at": "2026-11-08T09:47:18Z",
+  "dispatched_at": "2026-11-08T09:38:14Z",
+  "figure_review": {
+    "files": [
+      "frame-179-limited-trip-1.svg",
+      "frame-146-diverted-trip-3.svg",
+      "frame-146-diverted-trip-4.svg",
+      "frame-137-diverted-trip-1.svg"
+    ],
+    "method": "Exact committed SVG blobs rendered with ImageMagick convert at density 140 to 1400-pixel PNGs and visually inspected. Labels are readable and do not collide; nonempty displaced support on 146 remains visible above limiter.",
+    "preview_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T093619398661-review-of-diiid-support-mask-collapse-12beec4a15c2/figure-review",
+    "revision": "12beec4a15c220cd420bfdb03a3481f654ef5644"
+  },
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all nine commits from 737f6953759c77bf2e5ceccd0b51c8d2849dd199 through 12beec4a15c220cd420bfdb03a3481f654ef5644; the diff adds three standalone diagnostic scripts, one evidence fragment and four SVGs without modifying production code.",
+    "done_when": "The source brief.md requires stage counts, operands, a second case, a Newton control and panels; the evidence fragment:26-108 supplies all of them, including the fourth executed trip corresponding to historical slot 3, and gate-final.log records four successful capture checks.",
+    "goal": "The source brief.md goal asks for the emptying step; docs/evidence/fragments/diiid-vertical-force-balance/diiid-support-mask-collapse.html:3 correctly falsifies that premise using nonempty production masks and identifies the receipt-count misinterpretation.",
+    "manifest": "The source manifest.md names nine commits, raw captures, final-head gate-final.log EXIT=0 and negative-control.log EXIT=1; baseline_suite and after_suite are empty and no suite delta can be measured.",
+    "write_paths": "The source manifest.md declares three directory/file grants and all eight paths in the base-to-head diff lie within those grants."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_support_mask/check_capture.py:16-88 rejects empty or inconsistent archived masks and changed receipt wiring, including a demonstrated zero-mask refusal, but the gate does not rerun the capture or solve and therefore cannot detect every future capture-seam regression.",
+    "evidence": "scripts/prototypes/diiid_support_mask/trace_support.py:27-176 captures production locals and full states, while the source gate-final.log and negative-control.log record matching counts and an intentional empty-stage refusal.",
+    "fit": "scripts/prototypes/diiid_support_mask/render_support.py:22-32 reuses the repository plotting, lattice, polishing and text-check owners and the four inspected SVGs have readable separated labels, although its save sequence remains local to the prototype renderer.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-support-mask-collapse.html:3-24 answers the actual investigation by demonstrating that zero counts changed entries and no captured support-construction stage empties.",
+    "reuse": "Capability searches across scripts/prototypes/diiid_forward_convergence, scripts/prototypes/diiid_stopping_rule, scripts/prototypes/diiid_axis_selection and nova/media found no host-local support-stage dump or capture validator; trace_support.py:27 wraps the production owner and render_support.py:22-32 reuses existing geometry, plotting and text-validation mechanisms.",
+    "scope_discipline": "All eight paths in the reviewed diff fall under the three grants listed in source manifest.md:3 and add only diagnostic evidence implied by the goal."
+  },
+  "production_seams_examined": [
+    "nova/equilibrium/forward_operator.py:2993-3026 _fixed_design_read invokes both production reads",
+    "nova/equilibrium/topology.py:1334-1352 psi_mask and axis_component",
+    "nova/equilibrium/forward.py:2745-2748 mask_history assignment",
+    "nova/equilibrium/fixed_point.py:4646-4657 partition_difference"
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.md goal asks for the emptying step; docs/evidence/fragments/diiid-vertical-force-balance/diiid-support-mask-collapse.html:3 correctly falsifies that premise using nonempty production masks and identifies the receipt-count misinterpretation.\nVERDICT done_when: The source brief.md requires stage counts, operands, a second case, a Newton control and panels; the evidence fragment:26-108 supplies all of them, including the fourth executed trip corresponding to historical slot 3, and gate-final.log records four successful capture checks.\nVERDICT write_paths: The source manifest.md declares three directory/file grants and all eight paths in the base-to-head diff lie within those grants.\nVERDICT manifest: The source manifest.md names nine commits, raw captures, final-head gate-final.log EXIT=0 and negative-control.log EXIT=1; baseline_suite and after_suite are empty and no suite delta can be measured.\nVERDICT diff: Read all nine commits from 737f6953759c77bf2e5ceccd0b51c8d2849dd199 through 12beec4a15c220cd420bfdb03a3481f654ef5644; the diff adds three standalone diagnostic scripts, one evidence fragment and four SVGs without modifying production code.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-support-mask-collapse.html:3-24 answers the actual investigation by demonstrating that zero counts changed entries and no captured support-construction stage empties.\nSCORE evidence: 20\nJUSTIFICATION evidence: scripts/prototypes/diiid_support_mask/trace_support.py:27-176 captures production locals and full states, while the source gate-final.log and negative-control.log record matching counts and an intentional empty-stage refusal.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All eight paths in the reviewed diff fall under the three grants listed in source manifest.md:3 and add only diagnostic evidence implied by the goal.\nSCORE durability: 17\nJUSTIFICATION durability: scripts/prototypes/diiid_support_mask/check_capture.py:16-88 rejects empty or inconsistent archived masks and changed receipt wiring, including a demonstrated zero-mask refusal, but the gate does not rerun the capture or solve and therefore cannot detect every future capture-seam regression.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/diiid_support_mask/render_support.py:22-32 reuses the repository plotting, lattice, polishing and text-check owners and the four inspected SVGs have readable separated labels, although its save sequence remains local to the prototype renderer.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches across scripts/prototypes/diiid_forward_convergence, scripts/prototypes/diiid_stopping_rule, scripts/prototypes/diiid_axis_selection and nova/media found no host-local support-stage dump or capture validator; trace_support.py:27 wraps the production owner and render_support.py:22-32 reuses existing geometry, plotting and text-validation mechanisms.\n",
+  "review_run_id": "r-20261108T093619398661-review-of-diiid-support-mask-collapse-12beec4a15c2",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "12beec4a15c220cd420bfdb03a3481f654ef5644",
+  "reviewed_run_id": "r-20261108T083707890841-diiid-support-mask-collapse",
+  "scores": {
+    "durability": 17,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:20:30.992045+00:00",
+  "total": 116
+}

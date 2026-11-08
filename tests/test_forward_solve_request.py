@@ -63,6 +63,8 @@ RECEIPT_FIELDS = (
     "wall_seconds",
     "resolved_defaults",
     "seed_provenance",
+    "attempted_newton_promotions",
+    "accepted_newton_promotions",
 )
 
 

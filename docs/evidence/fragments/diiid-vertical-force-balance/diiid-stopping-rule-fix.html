@@ -1,0 +1,230 @@
+<section id="diiid-stopping-rule-fix">
+  <h2>What ends the DIII-D forward solve, and what converges</h2>
+
+  <p>
+    <strong>Nothing converges.</strong> Across sixteen measured solver runs on
+    five DIII-D gate frames and both topology branches, not one arm reaches the
+    solve tolerance of <code>1e-5</code>. Terminal relative residuals run from
+    0.027 to 5.93. The stopping rule no longer misreports that as convergence:
+    every arm ends with <code>converged</code> false and a termination reason
+    that says what actually stopped it.
+  </p>
+
+  <h3>Why the solve stops without stepping</h3>
+
+  <p>
+    On seven of the eight branch measurements the plasma-support mask falls to
+    <em>zero cells</em> on the first active-set trip and never changes again.
+    The residual is then flat to every printed digit for the rest of the trip
+    budget, including in the arm that disables the mask-stability exit and spends
+    all sixteen trips at the frozen mask. A reduce solve at an empty mask has no
+    free degrees of freedom: the direction it forms is zero, every backtracking
+    candidate scores the same merit, and the admission predicate
+    (<code>reduced_newton.py:1653-1671</code>, <code>found = jnp.any(valid)</code>
+    with <code>valid = isfinite(merit) &amp; (merit &lt; current)</code>) admits
+    nothing. No Newton promotion is proposed because none can be, and the
+    frozen-mask continuation added in this work therefore has nothing to run.
+  </p>
+
+  <p>
+    The mask history is what makes this concrete. On every branch except 146
+    diverted the support empties on the first trip: 179 limited 25 &rarr; 0,
+    179 diverted 13 &rarr; 0, 44 diverted 75 &rarr; 0, 146 limited 9 &rarr; 0,
+    137 limited 11 &rarr; 0, and 44 diverted and 44 limited start at zero. The
+    two arms that do run Newton — 137 diverted (mask 24, 20, 9, 9, 0) and 146
+    diverted (27, 40, 1, 0) — both freeze at exactly the trip that takes the
+    mask to zero, having descended steadily until then.
+  </p>
+
+  <p>
+    A re-run of 179 limited and 44 limited with the direction and score kernels
+    wrapped in a debug print produced no output at all, so no candidate was
+    formed in those solves. That wrap did not reach the executed path, so it is
+    an instrument defect and is not quoted as evidence about the solver; the
+    mask history above is the evidence, and the two are consistent.
+  </p>
+
+  <p>
+    The gate is not suppressing a step that exists. What the fix node must add is
+    an answer to the mask collapse itself: either the mask read is wrong for
+    these seeds, or the reduced route needs a linearisation that is meaningful at
+    an empty support. Until one of those is resolved, no stopping rule and no
+    continuation can move these frames.
+  </p>
+
+  <table>
+    <caption>
+      Five-frame measurement, one fresh process per frame. The 146 diverted row
+      is from the follow-up job that ran the arm cut by the first job's wall. Bounding
+      class is the probe's read of the terminal state against the governed wall:
+      the topology class the flux actually carried, whether that matched the
+      requested branch, and whether the axis lay inside the wall. Every panel
+      below draws the same state.
+    </caption>
+    <thead>
+      <tr>
+        <th>frame</th><th>branch</th><th>arm</th><th>terminal residual</th>
+        <th>reason</th><th>attempted</th><th>accepted</th><th>trips</th>
+        <th>bounding class</th><th>axis in wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>137</td><td>diverted</td><td>default</td><td>0.062369</td><td>11 stationary</td><td>72</td><td>62</td><td>5</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>137</td><td>diverted</td><td>continued</td><td>0.062369</td><td>8 budget</td><td>72</td><td>62</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>137</td><td>limited</td><td>default</td><td>0.056830</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>137</td><td>limited</td><td>continued</td><td>0.056830</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>144</td><td>diverted</td><td>default</td><td>5.927126</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>144</td><td>diverted</td><td>continued</td><td>5.927126</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>146</td><td>limited</td><td>default</td><td>0.063500</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>146</td><td>diverted</td><td>default</td><td>0.054962</td><td>11 stationary</td><td>48</td><td>48</td><td>4</td><td>limited (requested diverted)</td><td>yes</td></tr>
+      <tr><td>179</td><td>diverted</td><td>default</td><td>0.418096</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>179</td><td>diverted</td><td>continued</td><td>0.418096</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
+      <tr><td>179</td><td>limited</td><td>default</td><td>0.027262</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>179</td><td>limited</td><td>continued</td><td>0.027262</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>44</td><td>diverted</td><td>default</td><td>4.275696</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>limited (requested diverted)</td><td>yes</td></tr>
+      <tr><td>44</td><td>diverted</td><td>continued</td><td>4.275696</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>limited (requested diverted)</td><td>yes</td></tr>
+      <tr><td>44</td><td>limited</td><td>default</td><td>0.197003</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>44</td><td>limited</td><td>continued</td><td>0.197003</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Reason 11 is a stationary map at a frozen mask with no promotion proposed;
+    reason 8 is an exhausted trip budget. Outside 137 diverted, every arm
+    attempts zero promotions: the first trip empties the plasma-support mask and
+    no candidate direction can then be formed.
+  </p>
+
+  <h3>137 diverted: Newton runs and still stalls</h3>
+
+  <p>
+    137 diverted is the one arm where the solve performs real Newton work — 72
+    attempted and 62 accepted promotions across five trips — and it still ends at
+    0.0624. The residual descends 0.1299 &rarr; 0.1114 &rarr; 0.0670 &rarr;
+    0.0624 and then repeats the last value exactly for every remaining trip while
+    the mask empties 24 &rarr; 20 &rarr; 9 &rarr; 9 &rarr; 0. Accepted steps that
+    leave the residual unchanged, with the mask collapsing underneath them, mean
+    the accepted direction is being applied to a problem whose active set is
+    being removed as fast as the step is taken.
+  </p>
+
+  <h3>Terminal states</h3>
+
+  <p>
+    Each panel draws the terminal flux on seven solid levels, the governed
+    DIII-D limiter ring read from the machine description (84 points, R
+    1.017–2.351 m, Z −1.359 to +1.363 m), the EFIT boundary of the frame dashed,
+    the bounding surface the host boundary read traces, and both null sets. The
+    flux grid extends beyond the wall, so the outermost contours leave the vessel
+    outline. The limiter is the scale: the panels carry no axes, so the vessel
+    outline is what maps a position on the page to a place in the machine. The
+    axis coordinates are written in the margin below the panel, joined to the
+    marker by a leader line, so no label sits on the contours; the renderer
+    refuses a figure whose notes enter the poloidal field or overlap one another.
+  </p>
+
+  <p>
+    The nulls are drawn in four distinct marks, each named in the legend. The
+    solved arm contributes its magnetic axis (filled red triangle) and the
+    X-point it recorded (hollow red cross). The reference contributes the axis
+    of the frame's own EFIT label field (hollow grey circle) and the low point of
+    its EFIT contour (hollow grey cross). The solved X-point is recorded but
+    <em>not admitted</em>: <code>qualified</code> is false on all four arms, so
+    the mark is hollow and its legend entry says so. On frame 44 that candidate
+    lies above the limiter's upper shelf, outside the drawn field, so the panel
+    carries neither the mark nor a legend entry for it.
+  </p>
+
+  <p>
+    The measured wall relation is what the panels are checked against, and it
+    contradicts any reading of these states as wall-bounded. Where the framework
+    traces a terminal boundary at all — 144 diverted (665 nodes) and 137 diverted
+    (585 nodes) — its closest approach to the wall is 0.162 m and 0.329 m, with
+    <em>zero</em> nodes within 1 cm of the wall. On 179 limited and 44 limited the
+    read returns no boundary nodes at all. The magnetic axis sits 0.56–0.59 m
+    inside the limiter on all four — 0.589 m (179 limited), 0.577 m (44
+    limited), 0.591 m (144 diverted) and 0.559 m (137 diverted) — at Z of
+    +0.04 m (179 limited), −0.11 m (44 limited), +0.01 m (144 diverted) and
+    −0.44 m (137 diverted), while the limiter's upper shelf is at Z near
+    +1.36 m. No terminal in this table touches the upper limiter shelf, and the
+    panels show no contact.
+  </p>
+
+  <p>
+    The bounding surface traced from each terminal flux by
+    <code>host_boundary_read</code> is recorded with the geometry every panel
+    reads, and is drawn as a solid grey ring on all four. It is an eight-vertex
+    polygon: that is what the read returns on this lattice, and the panel says
+    so in its margin note — <em>8 vertices, class margin −0.021</em> on 137
+    diverted, and <em>class margin undefined</em> on the other three, where the
+    read reports <code>-inf</code>. Its closest approach to the governed limiter
+    is 0.043 m (179 limited), 0.061 m (44 limited), 0.048 m (144 diverted) and
+    0.006 m (137 diverted), so on 137 diverted the traced surface comes within
+    6 mm of the wall while the axis stays 0.56 m inside it. A read that returns
+    nothing writes <em>no bounding surface</em> with its reason into the same
+    margin note; none of these four takes that branch.
+  </p>
+
+  <p>
+    The panels are reproduced rather than transcribed. Every field a panel draws
+    is written by
+    <code>scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py</code>
+    from the frame's own artifact and receipt, and
+    <code>run_geometry_dump.py</code> rewrites those files on every run, so a
+    panel cannot be drawn from geometry older than the recorder. Two contracts
+    behind the panels are pinned by
+    <code>scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py</code>:
+    that the recorder writes every field a panel reads, and that the renderer
+    refuses a note placed inside the poloidal field or two notes that overlap.
+    Neither contract is visible in a finished PNG, which is why each is tested
+    rather than checked by eye. The panel constructor reuses the probe's own
+    text-artist check, its null-handle vocabulary and its wall-distance routine,
+    so a panel here and a panel elsewhere in the probe reject a bad label and
+    measure a gap the same way.
+  </p>
+
+  <p>
+    The two null sets are what the diverted panels exist to compare. On 137
+    diverted the solved X-point sits at R 1.265 m, Z −1.336 m while the EFIT
+    contour's own low point is at R 1.290 m, Z −1.188 m, a 0.15 m vertical
+    separation the panel shows as two distinct markers. On 144 diverted the two
+    coincide to the millimetre — R 1.382 m, Z −1.061 m for both — so the panel
+    draws them on top of each other, which is itself the reading. The axes
+    disagree more than the saddles: the reference axis is at R 1.743 m, Z 0.000 m
+    on 144 diverted and 137 diverted, 1.743 m, −0.100 m on 44 limited and
+    1.796 m, 0.000 m on 179 limited, against solved axes of 1.759 m, 0.013 m;
+    1.655 m, −0.442 m; 1.773 m, −0.106 m and 1.760 m, 0.043 m respectively.
+  </p>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png" alt="Frame 179 limited terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 179, limited seed, terminal residual 0.0273. Solved contours inside the governed limiter, with the EFIT boundary dashed and both null sets: the solved axis at R 1.76 m, Z 0.04 m and its recorded X-point near the top of the field, against the EFIT axis at R 1.80 m, Z 0.00 m and the EFIT X-point at R 1.53 m, Z −0.95 m. The bounding surface is the eight-vertex ring the read traced, meeting the limiter no closer than 0.043 m. The closed cores sit well inside the vessel outline; the contours leave it where the grid does.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png" alt="Frame 44 limited terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 44, limited seed, terminal residual 0.197, on the same limiter and levels. The solved axis at R 1.77 m, Z −0.11 m sits inside the EFIT axis ring at R 1.74 m, Z −0.10 m; the recorded solved X-point lies above the upper shelf, outside the field drawn here, so this panel carries no mark or legend entry for it. The eight-vertex bounding surface approaches the limiter to 0.061 m.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png" alt="Frame 144 diverted terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 144, diverted seed, terminal residual 5.93 — the worst arm, and the one whose recorded boundary comes nearest the wall at 0.162 m. The solved and EFIT X-points coincide at R 1.38 m, Z −1.06 m, drawn one over the other; the solved axis at R 1.76 m, Z 0.01 m lies within the EFIT axis ring at R 1.74 m, Z 0.00 m. The eight-vertex bounding surface approaches the limiter to 0.048 m.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png" alt="Frame 137 diverted terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 137, diverted seed, terminal residual 0.0624 — the only arm where Newton promotions are accepted, with its recorded boundary 0.329 m from the wall. The solved axis (filled triangle) at R 1.66 m, Z −0.44 m sits well below the EFIT axis ring at R 1.74 m, Z 0.00 m, and the solved X-point (hollow red cross) at R 1.27 m, Z −1.34 m sits 0.15 m below the EFIT X-point (hollow grey cross) — the only panel where the two null sets separate. Its eight-vertex bounding surface comes within 0.006 m of the limiter.</figcaption>
+  </figure>
+
+  <h3>What the stopping-rule change does and does not do</h3>
+
+  <p>
+    The rule now requires a Newton promotion to have been attempted and refused
+    at the frozen mask before a settlement may end the solve, and it reports that
+    ending as a stationary map with <code>converged</code> false, never as
+    convergence. On 137 diverted it publishes the real promotion history (72
+    attempted, 62 accepted) that the earlier receipt bridge discarded. It does
+    not converge anything, and it cannot: on seven of eight branches there is no
+    step to take.
+  </p>
+</section>

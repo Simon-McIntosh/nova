@@ -1,0 +1,2008 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/brief.md",
+    "sha256": "c1817561399f19f030e919c738aa14441e9e404257c05aec1b482275f57c039a"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 32782592,
+      "cached_input_tokens_cumulative": 32782592,
+      "input_tokens": 33262412,
+      "input_tokens_cumulative": 33262412,
+      "output_tokens": 137055,
+      "output_tokens_cumulative": 137055,
+      "reasoning_output_tokens": 60574,
+      "reasoning_output_tokens_cumulative": 60574
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 16030,
+    "files": 10,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_the_document_covers_every_measured_kind",
+        "path": "tests/calibrate/test_correction_instances.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "pulse_record",
+        "path": "tests/calibrate/test_sweep.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_committed_receipt_reports_qualified_relations_and_failed_closure",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_diiid_tiers_carry_fit_once_values_and_relation_uncertainty",
+        "path": "tests/imas/test_diiid_current.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_committed_receipt_banks_full_grid_fits_and_contours",
+        "path": "tests/imas/test_diiid_grid_residual_current_regression.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_a_pair_with_stage_evidence_on_both_sides_is_compared",
+        "path": "tests/test_bank_drift_support_audit.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "test_inside_every_limit_passes_and_reports_zero_gaps",
+        "path": "tests/test_bank_report_precision.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 423,
+        "name": "test_structured_reduced_basis_matches_the_diagonal_reduction",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "test_coarse_mesh_criteria_equal_peer_geometric_means",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_three_spacing_refresh_values",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_ohmic_circuit_connections_wire_supply_to_recorded_scale_coils",
+        "path": "tests/test_diiid_pf_active_circuits.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 236,
+        "name": "test_flood_seed_outside_vessel_carries_position_and_grid_index",
+        "path": "tests/test_equilibrium_moment.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "_pulse_evidence",
+        "path": "tests/test_filepath_data_roots.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 663,
+        "name": "test_shot_log_entry_carries_per_shot_rates",
+        "path": "tests/test_labeller_parallel.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 676,
+        "name": "test_cumulative_log_entry_carries_aggregate_and_per_device_rates",
+        "path": "tests/test_labeller_parallel.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_ledger_round_trips_through_canonical_json",
+        "path": "tests/test_mast_evidence.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_attribute_places_efit_and_names_the_closing_reading",
+        "path": "tests/test_shafranov_combination_discriminator.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_control_points_build_the_bounding_box_from_the_shape_figures",
+        "path": "tests/test_shape_constraints.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_marker_census_report_tables_both_counts_and_the_decision",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "_plot_record",
+        "path": "tests/test_topology_visual_generator.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "__init__",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 39
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 415,
+        "name": "main",
+        "path": "scripts/prototypes/diiid_residual_plateau/measure.py"
+      },
+      "window_line": 443
+    },
+    {
+      "existing_function": {
+        "line": 978,
+        "name": "test_arc_same_ring_excluded_span_matches_the_closed_elementary_limit",
+        "path": "tests/test_biotsavart.py"
+      },
+      "run_function": {
+        "line": 41,
+        "name": "lab",
+        "path": "scripts/prototypes/diiid_residual_plateau/style.py"
+      },
+      "window_line": 47
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "3cbebffc55f51cbe18e99a1f5007881db9aa3da2",
+    "b808534902351541f9cbfd16887a50d3235fec3c",
+    "619156e5b75ef6bd855b5c63b53a13dcfcc7f911",
+    "4b6baa3deb301763d790746af63936634fff413f",
+    "c27710c64c36af5f530e397af8994499d2eed12d",
+    "256f274b0454e180956f0ba2deaf6ab39bd11720"
+  ],
+  "completed_at": "2026-11-08T15:05:50Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-08T11:25:29Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/diiid_residual_plateau/check_capture.py --input /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/trace-sized",
+    "exit_status": 0,
+    "log_digest": "df58f7e61487961494a942bcec255f3e89a9d2eb4667b7f3c7cc571695be8f3c",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/gate-final.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.612235798977331,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-10T20:05:15Z, which is after this node's 3600s horizon ending 2026-11-08T12:24:27.152657+00:00",
+    "horizon_ends_at": "2026-11-08T12:24:27.152657+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-08T11:24:25Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-10T20:05:15Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 533027,
+    "state": "quiet",
+    "utilisation_pct": 31.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-08T11:24:25Z",
+    "read_at": "2026-11-08T11:24:27Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 31.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-08T15:05:50Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-08T15:05:50Z",
+        "resets_at": 1794670093,
+        "used_percent": 37.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/manifest.md",
+  "member": "disposable-r-20261108T112423346430-diiid-residual-plateau",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "diiid-residual-plateau",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/briefs/nova-diiid-residual-plateau.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/brief.md",
+    "brief_sha256": "c1817561399f19f030e919c738aa14441e9e404257c05aec1b482275f57c039a",
+    "capability": null,
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 7273,
+          "cached_input_tokens": 398737,
+          "input_tokens": 406012,
+          "output_tokens": 179,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 406191,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "session_id": "35a66cc6-f4f1-4358-8dbb-99c9333c7249"
+    },
+    "done_when": "a region and block decomposition of the terminal residual on frames 179 limited and 137 diverted names where the norm lives, a hooked reduced-kernel trace with a call count gives the last step direction and merit, and the record names the stopping mechanism at file:line against MAST 21978",
+    "estimated_hours": null,
+    "goal": "name the mechanism that holds the DIII-D forward residual on a plateau with a stable support",
+    "id": "diiid-residual-plateau",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-08T11:24:25Z",
+      "read_at": "2026-11-08T11:24:27Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 31.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/manifest.md",
+    "negative_control": "",
+    "over_fence_reason": "",
+    "plan": "",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/diiid_residual_plateau",
+      "docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html",
+      "docs/figures/diiid-residual-plateau"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "named the DIII-D residual plateau: an unchecked warmup carries a NaN map, Newton attempts no step from a nonfinite linearisation, and the outer loop settles on ACTIVE_SET_STATIONARY rather than converging; frame 179 0.0273 on 345 cells, frame 137 0.0624 on 234; MAST 21978 reaches 3.3e-16 from an EFIT seed; remedy named, not written",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 2.6959026495835245,
+      "derived": 0.13056851294477514,
+      "drain_hours": 168.0,
+      "effective_limit": 0.13056851294477514,
+      "elapsed_fraction": 0.11869864813161375,
+      "elapsed_hours": 19.94137288611111,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 250519.05761,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-08T11:24:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.6799999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.32,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.241664,
+      "decided_by": "window",
+      "margin": 0.570836,
+      "name": "diiid-residual-plateau",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.32
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.94239,
+        "observed_at": "2026-11-08T11:24:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.32,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "diiid-residual-plateau",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-08T11:24:41.942390+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead directive 2026-11-07: difficult work to codex sol; DIII-D X-point and wall geometry is the lead priority",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.556,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_link": "diiid-vertical-force-balance",
+  "promoted_by": null,
+  "promoted_revision": "256f274b0454e180956f0ba2deaf6ab39bd11720",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+    "reviewed_head_sha": "256f274b0454e180956f0ba2deaf6ab39bd11720",
+    "scores": {
+      "durability": 18,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 116
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261108T112423346430-diiid-residual-plateau",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+  "session_harness": "codex",
+  "session_id": "01a1bae8-e023-7cb1-aa34-8fd32eb7734e",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 32782592,
+    "cumulative_input_tokens": 66045004,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 197629
+  },
+  "time_budget": "60m",
+  "tool_steps": 258.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 421,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T09:15:31Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-08T09:08:41Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 65214732,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/codex-home/cache"
+            },
+            {
+              "bytes": 28836794,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261108T073038010130-diiid-axis-selection-fix",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 377,
+          "worker_pid": 1098421
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T09:15:31Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 7748,
+        "log_fresh": false,
+        "manifest_commits": [
+          "a226220f3aab8c87793cb8bd44929f25f5f51aa8",
+          "d79deae4dc1fabc5f913e60a730af206219b01ff"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "7bb9eb95ebfa82d6b225ef68d2a4a2ce461a8225285d8d89e41b642fde1053b5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261108T073038010130-diiid-axis-selection-fix --gate <verdict> --commit a226220f3aab8c87793cb8bd44929f25f5f51aa8 --commit d79deae4dc1fabc5f913e60a730af206219b01ff",
+        "node": "diiid-axis-selection-fix",
+        "phase": "complete",
+        "plan": "",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": "parsed",
+        "run_id": "r-20261108T073038010130-diiid-axis-selection-fix",
+        "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 7758,
+        "terminal_at": "2026-11-08T09:15:15Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-axis-selection-fix"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 6382,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 9982,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T09:32:34Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-08T08:38:32Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 65205294,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083707890841-diiid-support-mask-collapse/codex-home/cache"
+            },
+            {
+              "bytes": 28836794,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083707890841-diiid-support-mask-collapse/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261108T083707890841-diiid-support-mask-collapse",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 901,
+          "worker_pid": 871858
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T09:32:34Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 6727,
+        "log_fresh": false,
+        "manifest_commits": [
+          "12beec4a15c220cd420bfdb03a3481f654ef5644",
+          "afda54a04b8b478b8f17ffdf2f2ae9f3a601a04e",
+          "06ad123841d72f018b15750025910c736458fa8a",
+          "ab7071d57f3c2b741bed426fe3ef1d02e9a29427",
+          "c8e7ad46f6c2ff7aa31fb0c0ca795aa8ed2f994c",
+          "106b451c4b93e604f324feb78bf6adbb7398233a",
+          "5705753a0d8b8bab8a21f56c55ae6b5440a05c83",
+          "6b12d457cbd37206a0da42425a2640910a1cb040",
+          "5f88dc6f21340ad24fc73f306e5cb1eeb00e3d0d"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "2511b226257f236adf339fd0181565c778e2fcc80e565c42a6917523dcaccea4",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083707890841-diiid-support-mask-collapse/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261108T083707890841-diiid-support-mask-collapse --gate <verdict> --commit 12beec4a15c220cd420bfdb03a3481f654ef5644 --commit afda54a04b8b478b8f17ffdf2f2ae9f3a601a04e --commit 06ad123841d72f018b15750025910c736458fa8a --commit ab7071d57f3c2b741bed426fe3ef1d02e9a29427 --commit c8e7ad46f6c2ff7aa31fb0c0ca795aa8ed2f994c --commit 106b451c4b93e604f324feb78bf6adbb7398233a --commit 5705753a0d8b8bab8a21f56c55ae6b5440a05c83 --commit 6b12d457cbd37206a0da42425a2640910a1cb040 --commit 5f88dc6f21340ad24fc73f306e5cb1eeb00e3d0d",
+        "node": "diiid-support-mask-collapse",
+        "phase": "complete",
+        "plan": "",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": "parsed",
+        "run_id": "r-20261108T083707890841-diiid-support-mask-collapse",
+        "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 6807,
+        "terminal_at": "2026-11-08T09:31:08Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-support-mask-collapse"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion and its review is in flight as r-20261108T101408329308-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9 (phase: starting); the run is not promotable until that review files its record",
+        "effective_phase": "complete",
+        "elapsed_seconds": 1023,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [
+            1545510,
+            1545711,
+            1545752,
+            1545710,
+            1545779
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T10:10:01Z",
+          "last_record_type": "user",
+          "launched_at": "2026-11-08T09:53:36Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 9701,
+          "worker_pid": 1544475
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T10:10:01Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4482,
+        "log_fresh": false,
+        "manifest_commits": [
+          "6f10bb038",
+          "2e72f2e45",
+          "9ac1b1124",
+          "5c04a6919"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "373dd5d8699ac64ba13a3dc0d39914a25391fd663da65b37e9c8890e6612c7b8",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "the review for r-20261108T083833416701-diiid-frame-146-orientation-correction is in flight as r-20261108T101408329308-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9 (phase: starting); read it with `reckon crew observe --run r-20261108T101408329308-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9`",
+        "node": "diiid-frame-146-orientation-correction",
+        "phase": "complete",
+        "plan": "",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": "r-20261108T101408329308-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9",
+        "review_run_phase": "starting",
+        "review_status": null,
+        "run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+        "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 4779,
+        "terminal_at": "2026-11-08T10:04:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-frame-146-orientation-correction"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 2481,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 6081,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T09:55:38Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T09:44:07Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 9240,
+          "worker_pid": 1445301
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T09:55:38Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 5342,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "428fe01848c7b43265b237f6b05222ca36425ce73331cde47a2d7736ed2d9ad3",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-diiid-support-mask-collapse-12beec4a15c2-figure",
+        "phase": "complete",
+        "plan": "",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T093833456889-review-of-diiid-support-mask-collapse-12beec4a15c2-figure",
+        "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 5455,
+        "terminal_at": "2026-11-08T09:53:41Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-support-mask-collapse-12beec4a15c2-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3553,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T10:47:15Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T10:25:57Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T102226568683-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 9562,
+          "worker_pid": 1756473
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T10:47:15Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2245,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — this node's deliverable is a review record outside git"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "659f429d35ec2175a915679a3b450eca5a234fef45013312afec6931a7876b2c",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T102226568683-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-diiid-frame-146-orientation-correction-5c04a6919ff9-figure",
+        "phase": "complete",
+        "plan": "",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T102226568683-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9-figure",
+        "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 2269,
+        "terminal_at": "2026-11-08T10:46:47Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-frame-146-orientation-correction-5c04a6919ff9-figure"
+      }
+    ]
+  },
+  "wall_seconds": 13221,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-08T15:05:55Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-08T14:44:40Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 65276480,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/codex-home/cache"
+      },
+      {
+        "bytes": 28836794,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261108T112423346430-diiid-residual-plateau",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1118,
+    "worker_pid": 3750965
+  },
+  "worker_seconds": 13163,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

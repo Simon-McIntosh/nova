@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>icm-sheet-tile-measure — the per-end denominator and the packed-kernel port</title>
+</head>
+<body>
+<article data-reckon="evidence" data-plan="iron-core-magnetisation" data-node="icm-sheet-tile-measure">
+
+<h1 id="icm-sheet-tile-measure-title">The per-end denominator, and why the gate is still unmeasured</h1>
+
+<p id="icm-sheet-tile-measure-outcome">
+The agreement gate now divides each entry by the absolute sum of that entry's per-end
+antiderivative terms, which is the denominator the section specifies, and the packed
+closed form no longer returns <code>NaN</code> beyond a sloped edge's end. Both changes are
+committed and the fast lane is green. The gate itself is <strong>not measured</strong>: at the
+measured cost a 1696-target run is about 46 minutes of compute on eight cores across its
+three passes, and it did not return inside this node's fence.
+</p>
+
+<h2 id="icm-sheet-tile-measure-cost">The fence is a cost bound, and it is measured</h2>
+<table id="icm-sheet-tile-measure-cost-table">
+  <thead><tr><th>quantity</th><th>measured</th></tr></thead>
+  <tbody>
+    <tr><td>cells / unique edges, prototype WEST mesh</td><td>1696 / 3744</td></tr>
+    <tr><td>warm <code>packed_sheet_field</code>, this CPU node</td><td>1.17 ms/pair</td></tr>
+    <tr><td>pairs, whole mesh</td><td>6.35&times;10<sup>6</sup></td></tr>
+    <tr><td>passes of the gate</td><td>3 (tile, unbatched reference, per-end scale)</td></tr>
+    <tr><td>whole-mesh wall, 8 workers</td><td>about 46 min</td></tr>
+    <tr><td>fast lane with both changes</td><td>12 passed, 3 deselected, EXIT=0</td></tr>
+  </tbody>
+</table>
+
+<p id="icm-sheet-tile-measure-cost-text">
+The 46 minutes is pure compute. Import and JIT compile are paid again by every spawned
+shard, and the two suite arms are outside it, so the whole-mesh run does not fit a 60-minute
+CPU lane. The section already routes heavy gates to <code>betelgeuse</code> under
+<code>gpu_0003_grpA</code>, which is where this one belongs; the gate was re-run there by
+nothing yet.
+</p>
+
+<h2 id="icm-sheet-tile-measure-nan">The finiteness clause was failing in this node's own scope</h2>
+
+<p id="icm-sheet-tile-measure-nan-text">
+<code>nova/biot/sheet.py</code> was fixed to take the <code>phi = 0</code> curvature argument
+and the <code>r<sub>1</sub> + r</code> panel centre as magnitudes, because a target beyond a
+sloped segment's ends or on the far side of its line puts <code>r<sub>1</sub> + r b<sub>1</sub><sup>2</sup></code>
+below zero and the square root returns an imaginary. The tile does not call that code: it
+evaluates a packed transcription of the same closed form in
+<code>nova/biot/tiledassembly.py</code>, which still carried the pre-fix signed forms. So the
+tile and its own reference both returned <code>NaN</code> for a whole field component on
+targets beyond an edge end — the two sides agreeing perfectly on an undefined value while the
+gate failed on finiteness rather than on agreement. Both terms are magnitudes now, and
+<code>_sheet_arsinh_gradient</code> grades the end nearer the azimuth where its arsinh
+denominator vanishes, mirroring the host route. The packed form evaluates a block at once, so
+that end selection is broadcast over the rule's node axis rather than applied to a scalar.
+</p>
+
+<h2 id="icm-sheet-tile-measure-denominator">The denominator</h2>
+
+<p id="icm-sheet-tile-measure-denominator-text">
+<code>packed_sheet_end_scale</code> returns, per pair and per component, the sum of the
+absolute values of the two segment-end terms that <code>packed_sheet_field</code> subtracts.
+It mirrors the field's branch structure — the sloped route's two end gradients, the flat
+route's two pancake ends — so a block mixing flat and sloped edges remains one program, and
+it reuses the same <code>_sheet_closed_gradient</code> and <code>_sheet_pancake_terms</code>
+rather than re-deriving the closed form. The tests contract it against the cell incidence
+exactly as they contract the field, so the gate and its negative control share one
+denominator.
+</p>
+
+<h2 id="icm-sheet-tile-measure-open">What remains</h2>
+<ul id="icm-sheet-tile-measure-remaining">
+  <li>Run the gate on the H200 rung over the whole mesh: every entry finite, worst entry
+      within 1e-13 of the per-end scale, with the distribution recorded here.</li>
+  <li>Run the negative control there too. It is wired — setting
+      <code>NOVA_SHEET_TILE_REVERSE_NORMALS=0</code> reverses one cell's edge normals in the
+      device build and drives the same gate test — but no red log was produced inside this
+      fence, so the declared mutation is unproven.</li>
+  <li>The denominator does not by itself close the gate. A read-only attempt measured the
+      worst finite entry at about 1e-8 under the per-end scale across eleven target rows,
+      against 0.077 to 1.67 under the per-edge one, so the residual is a disagreement between
+      the padded tile and the flat walk and not an artefact of a cancelling sum. It needs a
+      pair-level comparison on the pairs that carry it.</li>
+</ul>
+
+</article>
+</body>
+</html>

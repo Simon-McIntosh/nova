@@ -8,7 +8,7 @@
     "image-2.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
   },
   "attachment_note": "Three rendered PNGs (1400x720 each) were handed to this node and every verdict below is about what those PNGs show; no SVG was opened, rendered or read. The three-to-figure mapping is inferred from the run's own diff (exactly these three SVGs changed between base and head) and from two facts visible in the images that the record's own table fixes: the residual strip in image-0 carries five trips and frame 137 has five active-set trips while the strips in image-1 and image-2 carry three and frame 146 has three, and the highlighted 'this trip' point sits at trip 2 in image-0 and image-2 and at trip 1 in image-1. Cross-checked against the run's receipts: image-2's solved-axis marker stands above the limiter top, matching the reported (1.2106, +1.5560) trip-2 axis, and image-0's stands about 0.3 m below the label axis inside the limiter, matching (1.6670, -0.3611). The PNG twin of each SVG is written by render_trip_panels.py:327 as <stem>.check.png.",
-  "completed_at": "",
+  "completed_at": "2026-11-08T09:25:27.566Z",
   "dispatched_at": "2026-11-08T09:08:22Z",
   "figure_verdicts": [
     {
@@ -139,6 +139,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-08T09:25:29.209876+00:00",
+  "timestamp": "2026-11-08T09:42:21.760997+00:00",
   "total": null
 }

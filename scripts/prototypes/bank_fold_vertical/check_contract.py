@@ -2,6 +2,8 @@
 
 import argparse
 import ast
+import contextlib
+import io
 import json
 import subprocess
 import sys
@@ -122,6 +124,61 @@ def centroid_row_is_live(source: Path) -> bool:
     )
 
 
+def product_row_probe_is_sensitive(source: Path) -> bool:
+    """A known extra assembled row must change the printed product status."""
+    tree = ast.parse(source.read_text())
+    function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "bank_pin_status"
+    )
+    program = ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[]))
+    machine = SimpleNamespace(
+        operands=None,
+        cache=None,
+        convention=None,
+        policy=None,
+        profile=None,
+        quadrature=None,
+    )
+    moments = tuple(np.ones((1, 1)) for _ in range(3))
+    rows = []
+
+    def residual(*_args):
+        return SimpleNamespace(residual=tuple(np.zeros(1) for _ in rows))
+
+    scope = dict(
+        jnp=np,
+        support_read=SimpleNamespace(read=lambda *_args: None, step_residual=residual),
+        streams=SimpleNamespace(scaled_profile=lambda *_args: None),
+        emit=lambda *_args, **_kwargs: None,
+    )
+    exec(compile(program, str(source), "exec"), scope)
+    outputs = []
+    for count in (3, 4):
+        rows[:] = range(count)
+        stream = io.StringIO()
+        with contextlib.redirect_stdout(stream):
+            scope["bank_pin_status"](machine, moments, np.zeros((1, 1)))
+        outputs.append(stream.getvalue().strip())
+    return outputs == ["PIN_ACTIVE=absent", "PIN_ACTIVE=true"]
+
+
+def both_arms_share_acceptance(source: Path) -> bool:
+    tree = ast.parse(source.read_text())
+    calls = {}
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        calls[node.name] = sum(
+            isinstance(child, ast.Call)
+            and isinstance(child.func, ast.Name)
+            and child.func.id == "accepted_read"
+            for child in ast.walk(node)
+        )
+    return calls.get("run_unpinned", 0) >= 1 and calls.get("pinned_measure", 0) >= 2
+
+
 def paired_spectra_are_required(compare: Path, scratch: Path) -> bool:
     """A missing conditioning arm must make an otherwise matching pair red."""
     base = dict(
@@ -172,6 +229,8 @@ def main() -> None:
     results = dict(
         terminal_update=sixth_update_is_checked(folder / "measure.py"),
         centroid_row=centroid_row_is_live(folder / "measure.py"),
+        product_row_probe=product_row_probe_is_sensitive(folder / "measure.py"),
+        shared_acceptance=both_arms_share_acceptance(folder / "measure.py"),
         paired_spectra=paired_spectra_are_required(folder / "compare.py", args.scratch),
         shared_condition=(
             "condition_rows(" in (folder / "measure.py").read_text()

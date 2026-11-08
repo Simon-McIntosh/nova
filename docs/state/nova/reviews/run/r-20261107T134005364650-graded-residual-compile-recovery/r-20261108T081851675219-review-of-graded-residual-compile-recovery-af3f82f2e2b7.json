@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-08T08:34:13.158Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the duplicated jaxpr walk lives in a prototype measurement script; the product change is one closed-form derivative in nova/biot/gradedresidual.py",
+      "recorded_at": "2026-11-08T08:49:11.687405+00:00"
+    }
+  },
   "dispatched_at": "2026-11-08T08:23:47Z",
   "findings": [
     {

@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_check": "Pass - none of the three captions merely repeats its figure title. Each carries the terminal residual, converged flag, support size, measurement revision, the shared flux level list, the residual level rule with its max |r|, and the solved-EFIT axis separation; the MAST caption additionally states that its residual contours are floating-point roundoff. No caption finding recorded.",
+  "completed_at": "2026-11-08T15:27:51.750Z",
+  "dispatched_at": "2026-11-08T15:19:35Z",
+  "figures_reviewed": [
+    {
+      "figure": "docs/figures/diiid-residual-plateau/frame-179-limited.svg",
+      "identified_by": "rendered captions read 281/133/675 nodes and 126.61/126.92/127.30 mWb with shared max|r| = 0.127295 Wb and axis separation 0.074821 m, which match the frame-179-limited row of the decomposition record",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/previews-reviewed/frame-179-limited.png"
+    },
+    {
+      "figure": "docs/figures/diiid-residual-plateau/frame-137-diverted.svg",
+      "identified_by": "rendered captions read 185/102/802 nodes and 204.33/208.86/224.73 mWb with shared max|r| = 0.22473 Wb and axis separation 0.449295 m, which match the frame-137-diverted row",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/previews-reviewed/frame-137-diverted.png"
+    },
+    {
+      "figure": "docs/figures/diiid-residual-plateau/mast-21978-35.svg",
+      "identified_by": "rendered captions read 195/100/794 nodes in attowebers (287.96/277.56/333.07 aWb) with shared max|r| = 3.33067e-16 Wb, isolating the converged MAST case",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/previews-reviewed/mast-21978-35.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_residual_plateau/render.py",
+      "id": "fbe480be8ee",
+      "line": 91,
+      "severity": "non-blocking",
+      "summary": "The residual level set is rescaled to each case's own max |r| with no absolute floor (render.py:91) and then drawn at the same 2.0 pt weight as the physical DIII-D residual (render.py:141-150), so the MAST-21978-35 figure spends its heaviest ink on a 3.33e-16 Wb roundoff field contoured at +/-{0.2, 0.5, 0.8} x that maximum. In the rendered PNG the support-interior panel fills with tangled loops across the plasma core and the outside-plasma panel fills its outboard region, so those residual contours read as structure rather than as roundoff and partly cover the solved-flux contours beneath them. The reading is recoverable because the caption states the contours are floating-point roundoff and the maxima are labelled in aWb, which is why this does not block; a floor on drawn residual amplitude would remove the ambiguity."
+    }
+  ],
+  "notes": "Read-only review. No file outside the two declared record paths was written, and no figure, caption or script was edited, redrawn, relabelled or reformatted. Every verdict was formed from the three named rendered PNGs at 1400x720 opened directly; no SVG and no other image was opened, read, listed, searched, rendered or git-shown, and the figure-to-path mapping was established from the regional node counts and maxima printed in the rendered captions. The reviewed head's figure records, palette log and drawing script were read as text for anchoring and for the caption check, not for the visual verdict.",
+  "project": "nova",
+  "review_run_id": "r-20261108T150937553980-review-of-diiid-residual-plateau-256f274b0454-figure",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "256f274b0454e180956f0ba2deaf6ab39bd11720",
+  "reviewed_run_id": "r-20261108T112423346430-diiid-residual-plateau",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass for frame-179-limited - three titled panels, residual contours distinct over the flux field, captions in clear space",
+    "RUBRIC data_ink: pass for frame-179-limited - 2.0 pt residual heaviest over 1.0/0.75 pt grey references, no fills",
+    "RUBRIC decoration: pass for frame-179-limited - no gradient, fill, gridline, shading or spine",
+    "RUBRIC contrast: pass for frame-179-limited - near-black text on white, 3:1 reference greys",
+    "RUBRIC table_form: pass for frame-179-limited - spatial field, not a tabulated quantity",
+    "RUBRIC label_collision: pass for frame-179-limited - no clipped or overlapping text and no label over data; the two axis triangles stay separable",
+    "RUBRIC legibility: pass for frame-137-diverted - three titled panels, solid sign-coloured residual segments readable in every region",
+    "RUBRIC data_ink: pass for frame-137-diverted - residual heaviest, grey references subordinate, no fills",
+    "RUBRIC decoration: pass for frame-137-diverted - no gradient, fill, gridline, shading or spine",
+    "RUBRIC contrast: pass for frame-137-diverted - near-black text on white and 3:1 greys",
+    "RUBRIC table_form: pass for frame-137-diverted - spatial field",
+    "RUBRIC label_collision: pass for frame-137-diverted - no clipped or overlapping text, no label over data",
+    "RUBRIC legibility: defect for mast-21978-35 - roundoff-field residual contours render as tangled textures the reader cannot follow as lines",
+    "RUBRIC data_ink: defect for mast-21978-35 - the heaviest ink in the figure is 2.0 pt saturated purple spent on a 3.3e-16 Wb roundoff field",
+    "RUBRIC decoration: pass for mast-21978-35 - no gradient, fill, shading, gridline or spine",
+    "RUBRIC contrast: pass for mast-21978-35 - near-black text on white and 3:1 greys",
+    "RUBRIC table_form: pass for mast-21978-35 - spatial field, adds a reading a table cannot",
+    "RUBRIC label_collision: pass for mast-21978-35 - no clipped or overlapping text and no label over data"
+  ],
+  "rubric_verdicts": {
+    "docs/figures/diiid-residual-plateau/frame-137-diverted.svg": {
+      "contrast": "pass - near-black text on white, 3:1 reference greys, saturated green and purple well above 4:1 against white",
+      "data_ink": "pass - residual heaviest at 2.0 pt against subordinate grey references, no fills",
+      "decoration": "pass - no gradient, background fill, gridline, shading or spine; only the keyed grid-boundary rectangle",
+      "label_collision": "pass - no clipped or overlapping text and no label over data; the filled and hollow axis triangles are about 0.45 m apart here and clearly distinct, and the recorded saddle sits clear of the limiter",
+      "legibility": "pass - same three-panel structure and legend; residual contours are short solid segments because the region mask breaks them, and the green/purple sign split is readable in every panel",
+      "table_form": "pass - spatial field"
+    },
+    "docs/figures/diiid-residual-plateau/frame-179-limited.svg": {
+      "contrast": "pass - all text is near-black on white; the reference greys are #929292 (about 3:1) and #666666; the green #2e8b57 and purple #7954ad clear white comfortably",
+      "data_ink": "pass - the 2.0 pt green/purple residual is the heaviest line, over 1.0 pt solid solved flux and 0.75 pt dashed EFIT flux, over 1.8 pt dashed EFIT boundary and 1.4 pt limiter; no fills, no gradients, and the residual is drawn on top",
+      "decoration": "pass - white ground, no background fill, no gridlines, no spines, no shading; the only furniture is the legend and the keyed 0.7 pt grid-boundary rectangle",
+      "label_collision": "pass - no text is clipped at the canvas edge, no two text artists overlap, and no label sits over plotted data; the filled solved-axis triangle and the hollow EFIT axis triangle sit about 25 px apart in all three panels and stay separable, and the recorded-saddle cross is legible at the top of each panel",
+      "legibility": "pass - three titled panels ('support interior', 'boundary band', 'outside plasma') over one frameless legend; residual contours read as distinct green and purple lines over the grey flux field, and each panel's node count and max |r| sit in clear space beneath it",
+      "table_form": "pass - two spatial fields overlaid in space; the numeric decomposition belongs to the record's tables, not to this image"
+    },
+    "docs/figures/diiid-residual-plateau/mast-21978-35.svg": {
+      "contrast": "pass - near-black text on white and reference greys at about 3:1",
+      "data_ink": "defect - the heaviest ink in the figure (2.0 pt saturated purple) is spent on that roundoff field, so a field fifteen orders of magnitude below the DIII-D residual carries the same visual weight as physical structure, and it partly covers the solved-flux contours it is meant to sit over",
+      "decoration": "pass - no gradient, fill, shading, gridline or spine",
+      "label_collision": "pass - no clipped or overlapping text and no label over data",
+      "legibility": "defect - the residual contours are roundoff noise (max |r| = 3.33e-16 Wb) drawn at full contour structure, so they render as dozens of tangled short loops across the plasma core in the support-interior panel and across the outboard region in the outside-plasma panel; a reader cannot follow an individual residual contour and reads a texture instead",
+      "table_form": "pass - spatial field, and the figure does add a spatial reading the numeric table cannot"
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T15:31:14.051806+00:00",
+  "total": null
+}

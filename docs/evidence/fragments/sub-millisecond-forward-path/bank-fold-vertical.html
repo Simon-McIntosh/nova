@@ -72,8 +72,9 @@
   1.164290e-6 after six updates. The maximum centroid height error at that
   rejection is 3.896e-20 m. It does not certify drive
   1.01 at the required
-  1e-10 fresh-read tolerance. The unpinned arm reaches about 0.00738 more
-  drive than this scratch pinned arm. The scratch implementation uses its own
+  1e-10 fresh-read tolerance. The unpinned arm reaches
+  <strong>0.00738199234</strong> more drive than this scratch pinned arm. The
+  scratch implementation uses its own
   bordered Newton solve and line search; this negative result does not prove
   that a production pin using a different globalization would fail.</p>
 
@@ -107,5 +108,15 @@
   branch reach, reads, updates and both singular-value series. The plotted
   SVGs were rendered to PNG and visually inspected before committing only
   the SVGs. The job's <code>h200-repair-final-job.log</code> records the
-  assembled product and scratch pin status and the per-step fresh residuals.</p>
+  assembled product and scratch pin status and the per-step fresh residuals.
+  Both processes reach the same unpinned and pinned drives with identical
+  read and update counts; all four unpinned and six pinned conditioning reads
+  in each process are valid. The log ends
+  <code>AGREE null=1 unpinned=1 pinned=1 condition=1</code> and
+  <code>EXIT=0</code>. Their header revisions differ only by a commit to the
+  contract-check script; <code>measure.py</code>, <code>condition.py</code>,
+  <code>compare.py</code> and the job runner are identical at both revisions,
+  as <code>process-source-identity.log</code> verifies. The separate
+  <code>contract-final.log</code> checks both receipts and ends
+  <code>EXIT=0</code>.</p>
 </section>

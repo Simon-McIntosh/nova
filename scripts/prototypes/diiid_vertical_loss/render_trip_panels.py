@@ -285,12 +285,21 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         plt.Line2D([], [], marker="X", linestyle="none", color=DEFAULT_INK.xpoint_color, markersize=7, label="solved X-point"),
         plt.Line2D([], [], marker="^", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT axis"),
         plt.Line2D([], [], marker="X", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT X-point"),
+        plt.Line2D(
+            [],
+            [],
+            marker="o",
+            linestyle="none",
+            color=DEFAULT_INK.separatrix_color,
+            markersize=8,
+            label="this trip",
+        )
     ]
     figure.legend(
         handles=handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.5, 0.0, 0.5),
-        ncol=5,
+        ncol=4,
         frameon=False,
         fontsize=12,
     )

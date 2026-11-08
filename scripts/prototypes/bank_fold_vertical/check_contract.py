@@ -6,6 +6,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -67,6 +68,54 @@ def sixth_update_is_checked(source: Path) -> bool:
     return bool(scope["accepted"] and scope["norms"][0] == 0 and scope["updates"] == 6)
 
 
+def centroid_row_is_live(source: Path) -> bool:
+    """Exercise the actual bordered update on a one-cell synthetic state."""
+    tree = ast.parse(source.read_text())
+    function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "pinned_step"
+    )
+    program = ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[]))
+
+    def shifted(_machine, field):
+        return SimpleNamespace(field=field), None
+
+    def residual(operator, *_args):
+        return SimpleNamespace(
+            residual=(np.zeros(1), np.zeros(1), np.array([operator.field])),
+            booked=None,
+        )
+
+    reader = SimpleNamespace(
+        read=lambda *_args: SimpleNamespace(valid=True),
+        step_residual=residual,
+        step_jacobian=lambda *_args, **_kwargs: np.eye(3),
+        _equilibrate=lambda *_args: (np.eye(3), np.ones(3), np.ones(3)),
+    )
+    scope = dict(
+        jnp=np,
+        shifted=shifted,
+        streams=SimpleNamespace(scaled_profile=lambda *_args: None),
+        support_read=reader,
+        profile_fixture=SimpleNamespace(gradient=None),
+    )
+    exec(compile(program, str(source), "exec"), scope)
+    state = (np.array([1.0]), np.array([0.0]), np.array([0.1]))
+    machine = SimpleNamespace(
+        profile=None, convention=None, policy=None, quadrature=None
+    )
+    updates, field_update, valid = scope["pinned_step"](
+        machine, state, None, 1.0, 0.0, 0.0
+    )
+    after = tuple(part + delta for part, delta in zip(state, updates, strict=True))
+    return bool(
+        valid
+        and np.isclose(after[2][0] / after[0][0], 0.0, atol=1e-12)
+        and np.isclose(field_update, 0.1, atol=1e-12)
+    )
+
+
 def paired_spectra_are_required(compare: Path, scratch: Path) -> bool:
     """A missing conditioning arm must make an otherwise matching pair red."""
     base = dict(
@@ -116,6 +165,7 @@ def main() -> None:
     args.scratch.mkdir(parents=True, exist_ok=True)
     results = dict(
         terminal_update=sixth_update_is_checked(folder / "measure.py"),
+        centroid_row=centroid_row_is_live(folder / "measure.py"),
         paired_spectra=paired_spectra_are_required(folder / "compare.py", args.scratch),
         shared_condition=(
             "condition_rows(" in (folder / "measure.py").read_text()

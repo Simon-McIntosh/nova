@@ -78,4 +78,18 @@
   falls from 6.273e-4 at drive 1.001 to 1.124e-6 at 1.0089341297149657.
   These spectra show no singular-value rescue by the tested weak row; the
   direct continuation outcome is the stronger negative evidence.</p>
+
+  <p>Provenance: H200 job 1308276 on 98dci4-gpu-0003 ran sixteen lanes in two
+  fresh processes. Both printed <code>PIN_ACTIVE=absent</code> for the product
+  route and <code>SCRATCH_PIN_ACTIVE=true</code> for the probe. Their null
+  singular values are 1.124236704e-6 and 1.124236685e-6; their absolute
+  vertical and radial flux-image cosines agree within 4e-11. Both reach the
+  same unpinned and pinned drives with exactly the same read and update counts.
+  Its <code>h200-retry-job.log</code> ends <code>AGREE null=1 unpinned=1
+  pinned=1</code> and <code>EXIT=0</code>. H200 conditioning job 1308285
+  records its five valid bordered spectra in <code>condition-job.log</code>,
+  ending <code>EXIT=0</code>. Full numerical receipts reside in the worker run
+  directory as <code>first.json</code>, <code>second.json</code> and
+  <code>condition.json</code>. The two figures were rendered to PNG and
+  inspected before committing only their SVGs.</p>
 </section>

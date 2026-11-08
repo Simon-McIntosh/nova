@@ -59,12 +59,17 @@ from typing import Iterator
 import numpy as np
 import zarr
 
-from nova.biot.completeelliptic import complete_kind_traced
+from nova.biot.completeelliptic import (
+    complete_kind,
+    complete_kind_traced,
+    complete_pole,
+)
 from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.greens import MU0
 from nova.biot.polygon import _BLOCK, _held_edge, _phi_rule, pad_batch
 from nova.biot.polygonanalytic import packed_analytic_greens, packed_analytic_moments
 from nova.biot.polygonarc import packed_arc_greens
+from nova.biot.zeta import traced_zeta
 from nova.jax.config import Precision, resolve_precision
 
 COMPONENTS = ("Psi", "Br", "Bz")
@@ -551,15 +556,76 @@ def _sheet_closed_gradient(xp, gamma, radius, source, b1):
     )
 
 
+def _sheet_pancake_terms(xp, gamma, radius, source):
+    """``(A_phi, H_r, H_z)`` of Snow's eqs (26) and (27) at one flat-sheet end.
+
+    The flat sheet's remainder is the paper's ``g_0^(2)(pi/2)``, taken through
+    :func:`nova.biot.zeta.traced_zeta` so the same rule serves a block of pairs.
+    A target level with the sheet's plane is the one place the printed blocks
+    need their limit taken rather than their arithmetic, and it is selected
+    arithmetically rather than by a branch.
+    """
+    span = gamma**2 + (radius + source) ** 2
+    a = xp.sqrt(span)
+    complement = (gamma**2 + (radius - source) ** 2) / span
+    first, second = complete_kind(complement, xp=xp)
+    c = xp.sqrt(gamma**2 + radius**2)
+    remainder = traced_zeta(xp, source, radius, gamma, np.pi / 2)
+    potential = (
+        -source / (2.0 * a * radius)
+    ) * ((radius**2 - source**2 - 3.0 * gamma**2) * first + span * second)
+    potential = potential + radius * remainder
+    height = 2.0 * remainder - 2.0 * source / a * first
+    level = xp.abs(gamma) <= 1e-12 * radius
+    # a target level with the plane puts the first pole on the range end; the
+    # block cancels to zero there, so the characteristic is held off the pole
+    # and the term is zeroed rather than divided by zero
+    held = xp.where(level, radius + radius, c)
+    third = 0.0
+    radial = 0.0
+    for order in (1, 2):
+        if order == 1:
+            ratio = (source + c) / (radius - held)
+            characteristic = 2.0 * radius / (radius - held)
+        else:
+            ratio = (source - c) / (radius + c)
+            characteristic = 2.0 * radius / (radius + held)
+        pole = complete_pole(
+            xp.asarray(1.0 - characteristic), xp.asarray(complement), xp=xp
+        )
+        third = third + (-1) ** order * ratio * pole
+        radial = radial + (-1) ** order * c * ratio * pole
+    potential = potential - xp.where(
+        level, 0.0, c * gamma**2 / (2.0 * a * radius) * third
+    )
+    radial = xp.where(level, 0.0, gamma / (a * radius) * (2.0 * source * first - radial))
+    return potential, radial, height
+
+
+def _sheet_pancake_field(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """``(B_R, B_Z)`` [T per A/m] of a flat edge, eq (27) over the segment."""
+    gamma = xp.asarray(start_z) - target_z
+    lower = xp.minimum(xp.asarray(start_r), xp.asarray(end_r))
+    upper = xp.maximum(xp.asarray(start_r), xp.asarray(end_r))
+    radial = 0.0
+    height = 0.0
+    for source, sign in ((upper, 1.0), (lower, -1.0)):
+        _, end_radial, end_height = _sheet_pancake_terms(xp, gamma, target_r, source)
+        radial = radial + sign * end_radial
+        height = height + sign * end_height
+    return MU0 / (2.0 * np.pi) * radial, MU0 / (2.0 * np.pi) * height
+
+
 def packed_sheet_field(
     xp, target_r, target_z, start_r, start_z, end_r, end_z
 ):
     """Return ``(B_R, B_Z)`` [T per A/m] per pair from the edge-sheet closed form.
 
-    The packed transcription of :meth:`nova.biot.sheet.SheetFlux._sloped_field_closed`:
-    one call evaluates a whole block of (target, edge) pairs, each pair against its
-    own segment, with no branch on a value. A horizontal edge has no slope in this
-    parameterisation and is refused rather than silently reduced to a limit.
+    The packed transcription of :meth:`nova.biot.sheet.SheetFlux._sloped_field_closed`
+    and, for a horizontal edge, of :meth:`_pancake_field`: one call evaluates a
+    whole block of (target, edge) pairs, each pair against its own segment, with
+    no branch on a value. An edge's own slope selects its route arithmetically, so
+    a tile mixing sloped and horizontal edges is one program.
     """
     target_r = xp.asarray(target_r)
     target_z = xp.asarray(target_z)
@@ -577,7 +643,8 @@ def packed_sheet_field(
     upper_z = xp.where(swap, start_z, end_z)
     drop_r = upper_r - lower_r
     drop_z = upper_z - lower_z
-    held_z = xp.where(drop_z != 0.0, drop_z, xp.ones_like(drop_z))
+    flat = drop_z == 0.0
+    held_z = xp.where(flat, xp.ones_like(drop_z), drop_z)
     b1 = drop_r / held_z
     a1sq = 1.0 + b1 * b1
     radial = height = 0.0
@@ -589,9 +656,16 @@ def packed_sheet_field(
         )
         radial = radial + sign * gamma_value
         height = height + sign * (value + target_r * radial_value)
-    return (
+    sloped = (
         MU0 / (2.0 * np.pi * a1sq) * radial,
         MU0 / (2.0 * np.pi * target_r * a1sq) * height,
+    )
+    pancake = _sheet_pancake_field(
+        xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
+    return (
+        xp.where(flat, pancake[0], sloped[0]),
+        xp.where(flat, pancake[1], sloped[1]),
     )
 
 
@@ -700,8 +774,6 @@ def sheet_edge_field(
         np.ascontiguousarray(value, dtype=np.float64).reshape(-1)
         for value in (start_r, start_z, end_r, end_z)
     )
-    if np.any(geometry[3] == geometry[1]):
-        raise ValueError("a horizontal edge has no slope in the closed form")
     shape = (target_r.size, geometry[0].size)
     evaluator = _warm_sheet_evaluator(
         plan,
@@ -760,8 +832,6 @@ def cell_edges(polygons) -> CellEdges:
             length = float(np.hypot(*step))
             if length == 0.0:
                 continue
-            if step[1] == 0.0:
-                raise ValueError("a horizontal edge has no slope in the closed form")
             outward = np.array([step[1], -step[0]]) / length
             first, second = tuple(np.round(a, 9)), tuple(np.round(b, 9))
             key = (first, second) if first <= second else (second, first)

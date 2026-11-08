@@ -1,0 +1,155 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T09:42:30.155Z",
+  "dispatched_at": "2026-11-08T09:30:58Z",
+  "findings": [
+    {
+      "anchor": "plan.html:379",
+      "id": "reasoning-1",
+      "reason": "the miss would be attributed to imas-efit's representation, which is exactly the false implication the section's one-directional rule exists to prevent.",
+      "text": "\u00a76b says \"the shell geometry is authored as a new iron-boundary element\" (singular), but imas-efit's `IronBoundary` is \"a single closed-path iron-air interface\" (`src/ironBoundary.h:30-34`), and its own orientation rule \u2014 \"the inner boundary of the transformer must be defined in a CLOCKWISE direction, whereas the outer boundary must be defined in an ANTI-CLOCKWISE direction\" \u2014 shows a body with a cavity needs two elements of opposite orientation; one closed contour at radius b is a solid iron sphere of &mu;<sub>r</sub> = 1000, whose shielding is nowhere near the shell's exact S = 61.10, so a worker following the section literally scores a \"miss\" for the wrong body",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:399",
+      "id": "done_when-1",
+      "reason": "the section's whole verdict hangs on the geometry having been read as intended, and the named control is exactly the one that cannot see a geometry defect, so a mis-wiring and a representation error are indistinguishable in the result.",
+      "text": "clause (2) offers &mu;<sub>r</sub> = 1 returning S = 1 as \"the control that its shell configuration is wired\", but at &mu;<sub>r</sub> = 1 the exact S is 1 for every geometry, so a boundary authored at the wrong radius, or as a solid body rather than a shell, or read as the wrong material still returns 1 to precision and the control cannot fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:386",
+      "id": "reasoning-2",
+      "reason": "the \"a miss cannot be under-resolution\" guarantee would be false without an iteration-convergence clause, and an unconverged iron solve would be read as a representation miss.",
+      "text": "\u00a76b calls `relativeError` \"its iteration tolerance ... 1e-2 by default\" and tightens it to 1e-6, but the parameter's documented criterion is `2(I_i \u2212 I_{i\u22121})(I_i + I_{i\u22121}) < relativeError` (`usermanual/xml/ironModel.xml:76-80`), an absolute threshold on the squared change of the summed segment currents and not a relative accuracy, and the shipped `configuration/machines/_common/solver/iron-solver.xml` also caps the solve at `maximumIterationCount=\"100\"` with `relaxFactor=\"0.5\"`; the section states no evidence that 1e-6 is reachable inside that cap, and its only convergence evidence \u2014 S moving under 0.5 % under one further refinement \u2014 tests resolution, not iteration, so an inner solve that hit the iteration cap is recorded, in the plan's own words, as \"converged\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:387",
+      "id": "anchors_resolve-1",
+      "reason": "the file is found by one search and its content is as the section describes, so the pointer is mis-pathed but not misleading about the mechanism.",
+      "text": "the section cites the tolerance default at `_common/solver/iron-solver.xml`, which exists at neither that path nor any path under `configuration/` other than `configuration/machines/_common/solver/iron-solver.xml` (WEST's `iron.xml` includes it as `${EFIT_CONFIG_DIR}/machines/_common/solver/iron-solver.xml`), so the one pointer a worker needs in order to change the value does not resolve as written",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "c0fee85e21232371b254228e09c783c1909016cd",
+  "plan_fingerprint": "a6bab8a8239aaa2a8bfde8b26f521952f73dcce1734a5d812b1206801a5d693e",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 24,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a76b authors the shell as two iron-boundary elements, outer anticlockwise and inner clockwise, per IronBoundary being one closed interface (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:51:53.829579+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The mu_r = 1 control is replaced by a second shell at a/b = 0.5 that must reproduce its exact S = 195.1 to 2 %, which a solid body, wrong radius or wrong orientation would miss (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:52:05.676708+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a76b now describes relativeError as an absolute threshold on the squared current change, capped at 100 iterations, and shows convergence by S moving under 0.5 % when it is lowered a hundredfold with the cap raised (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:52:18.521691+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The citation is now configuration/machines/_common/solver/iron-solver.xml (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:52:33.751488+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "note": "The citation is now configuration/machines/_common/solver/iron-solver.xml (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:52:33.751488+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "note": "The mu_r = 1 control is replaced by a second shell at a/b = 0.5 that must reproduce its exact S = 195.1 to 2 %, which a solid body, wrong radius or wrong orientation would miss (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:52:05.676708+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "note": "\u00a76b authors the shell as two iron-boundary elements, outer anticlockwise and inner clockwise, per IronBoundary being one closed interface (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:51:53.829579+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "ba05458a7b90599b36b062df80ac34133d34151b",
+      "commit_basis": "edit",
+      "note": "\u00a76b now describes relativeError as an absolute threshold on the squared current change, capped at 100 iterations, and shows convergence by S moving under 0.5 % when it is lowered a hundredfold with the cap raised (ba05458a7).",
+      "reason": "",
+      "when": "2026-11-08T09:52:18.521691+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v24.json",
+  "review_run_id": "r-20261108T090328881403-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "8161564b8470efd2a4bd5900bf447fd56467e7fb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a76b cites `_common/solver/iron-solver.xml`, which resolves at no such path; the file is `configuration/machines/_common/solver/iron-solver.xml`.",
+    "done_when": "a finding \u2014 \u00a76b's clause (2) wiring control at &mu;<sub>r</sub> = 1 cannot fail for the geometry it is claimed to check.",
+    "evidence_paths": "pass \u2014 \u00a76b's receipt and the message copy are named under the GPFS evidence root at plan.html:393-394, and s3's compile rows go to `docs/research/compile-cost-evidence.html` (plan.html:276-281), both durable and openable.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach any symbol or comment in the changed units; \u00a76b's citations name mechanisms and files.",
+    "reasoning": "two findings \u2014 the shell is specified as one iron-boundary element but a shell is two, and the convergence claim rests on a knob whose semantics are not the ones the sentence states.",
+    "single_goal": "pass \u2014 after the s6/s10 split each section carries one deliverable and one verdict (plan.html:371-404).",
+    "wiring": "pass \u2014 `s9` now depends on `s10` and `s10` on `s5`/`s6` (plan-section-depends-on, plan.html:24), so the earlier wiring-1 gap is closed; every depends-on in the table resolves to a node that exists."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "91d8744eb2e1c6ac99e4cdc8e9687f3dc74ae70b16dbfcd11c1e15c52d8e9544",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:51:47.091055+00:00",
+  "total": null
+}

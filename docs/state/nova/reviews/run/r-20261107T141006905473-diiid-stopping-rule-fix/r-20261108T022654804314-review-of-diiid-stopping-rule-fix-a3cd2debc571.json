@@ -15,6 +15,13 @@
     }
   },
   "dispatched_at": "2026-11-08T02:30:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-stopping-rule-fix",
+      "recorded_at": "2026-11-08T05:10:02.135643+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",

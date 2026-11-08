@@ -31,6 +31,7 @@ PROBE = Path(__file__).resolve().parent.parent / "diiid_forward_convergence"
 sys.path.insert(0, str(PROBE))
 
 from boundary_competition import _wall_distance  # noqa: E402
+from render_panels import _check_text_artists, _null_handle  # noqa: E402
 
 LIMITER = "#1f1f1f"
 REFERENCE = "#929292"
@@ -59,39 +60,27 @@ def _gap(points: np.ndarray, ring: np.ndarray) -> float:
     return float(distances.min())
 
 
-def _text_boxes(figure, artists) -> list[tuple[str, object]]:
-    renderer = figure.canvas.get_renderer()
-    return [(name, artist.get_window_extent(renderer)) for name, artist in artists]
+def _refuse_bad_labels(figure, axes, notes, output: Path) -> list[str]:
+    """Refuse a figure whose notes enter the field or collide with any text.
 
-
-def _check_layout(figure, axes, artists) -> list[str]:
-    """Refuse a figure whose labels sit on the field or on each other."""
-
+    Collision and clipping are the shared renderer's own check, so a panel here
+    and a panel elsewhere in the probe reject a label the same way.  What this
+    adds is the rule the poloidal panels need on top of it: a note may not sit
+    the field, because a coordinate written over the contours cannot be read.
+    """
+    problems = _check_text_artists(figure, output)
     figure.canvas.draw()
-    boxes = _text_boxes(figure, artists)
-    axes_box = axes.get_window_extent(figure.canvas.get_renderer())
-    report = []
-    for name, box in boxes:
-        outside = not (
-            box.x0 < axes_box.x1
-            and box.x1 > axes_box.x0
-            and box.y0 < axes_box.y1
-            and box.y1 > axes_box.y0
-        )
+    renderer = figure.canvas.get_renderer()
+    axes_box = axes.get_window_extent(renderer)
+    report = [f"text_problems={len(problems)}"]
+    for name, note in notes:
+        box = note.get_window_extent(renderer)
+        outside = not box.overlaps(axes_box)
         report.append(f"{name}_outside_field={outside}")
         if not outside:
-            raise SystemExit(f"label {name} lies inside the poloidal field")
-    for index, (name, box) in enumerate(boxes):
-        for other_name, other in boxes[index + 1 :]:
-            overlap = not (
-                box.x1 <= other.x0
-                or other.x1 <= box.x0
-                or box.y1 <= other.y0
-                or other.y1 <= box.y0
-            )
-            report.append(f"{name}_overlaps_{other_name}={overlap}")
-            if overlap:
-                raise SystemExit(f"labels {name} and {other_name} overlap")
+            problems.append(f"inside field: {name!r}")
+    if problems:
+        raise SystemExit(f"refusing {output.name}: " + "; ".join(problems))
     return report
 
 
@@ -236,7 +225,7 @@ def main() -> None:
     axis_fraction = (axis[0] - x_lower) / (x_upper - x_lower)
     axis_note = axes.text(
         axis_fraction,
-        -0.115,
+        -0.075,
         f"axis R={axis[0]:.2f} m, Z={axis[1]:.2f} m",
         transform=axes.transAxes,
         fontsize=14,
@@ -249,7 +238,7 @@ def main() -> None:
     axes.annotate(
         "",
         xy=(axis[0], axis[1]),
-        xytext=(axis_fraction, -0.09),
+        xytext=(axis_fraction, -0.05),
         textcoords="axes fraction",
         zorder=8,
         arrowprops={
@@ -280,53 +269,26 @@ def main() -> None:
         Line2D([], [], color=LIMITER, lw=2.2, label="limiter"),
         Line2D([], [], color=REFERENCE, lw=1.6, label="bounding surface"),
         Line2D([], [], color=REFERENCE, ls="--", lw=2.4, label="EFIT boundary"),
-        Line2D(
-            [],
-            [],
-            color=DEFAULT_INK.axis_color,
-            marker=DEFAULT_INK.axis_marker,
-            markersize=DEFAULT_INK.axis_markersize,
-            linestyle="none",
-            label="solved axis",
+        _null_handle(
+            DEFAULT_INK.axis_marker, True, DEFAULT_INK.axis_color, "solved axis"
         ),
     ]
     if solved_visible:
         handles.append(
-            Line2D(
-                [],
-                [],
-                color=DEFAULT_INK.xpoint_color,
-                marker=DEFAULT_INK.xpoint_marker,
-                markersize=DEFAULT_INK.xpoint_markersize,
-                markerfacecolor="none",
-                linestyle="none",
-                label="solved X-point" if qualified else "solved X-point (unqualified)",
+            _null_handle(
+                DEFAULT_INK.xpoint_marker,
+                qualified,
+                DEFAULT_INK.xpoint_color,
+                "solved X-point" if qualified else "solved X-point (unqualified)",
             )
         )
     handles += [
-        Line2D(
-            [],
-            [],
-            color=REFERENCE,
-            marker="o",
-            markersize=15,
-            markerfacecolor="none",
-            markeredgewidth=2.0,
-            linestyle="none",
-            label="EFIT axis",
-        ),
-        Line2D(
-            [],
-            [],
-            color=REFERENCE,
-            marker="X",
-            markersize=12,
-            markerfacecolor="none",
-            markeredgewidth=2.2,
-            linestyle="none",
-            label="EFIT X-point",
-        ),
+        _null_handle("o", False, REFERENCE, "EFIT axis"),
+        _null_handle("X", False, REFERENCE, "EFIT X-point"),
     ]
+    # The reference axis ring has to read around the solved marker where the two
+    # coincide, which the shared handle size cannot do.
+    handles[-2].set_markersize(15)
     axes.legend(
         handles=handles,
         loc="upper left",
@@ -353,14 +315,11 @@ def main() -> None:
         wrap=True,
         zorder=8,
     )
-    report = _check_layout(
+    report = _refuse_bad_labels(
         figure,
         axes,
-        [
-            ("axis_note", axis_note),
-            ("surface_note", surface_note),
-            ("legend", legend),
-        ],
+        [("axis_note", axis_note), ("surface_note", surface_note)],
+        arguments.output,
     )
     report.append(f"legend_entries={len(handles)}")
 

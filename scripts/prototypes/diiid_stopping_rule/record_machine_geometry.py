@@ -24,6 +24,7 @@ from pathlib import Path
 import numpy as np
 
 from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_read
+from nova.media.poloidal import inside_wall_units
 
 PROBE = Path(__file__).resolve().parent.parent / "diiid_forward_convergence"
 sys.path.insert(0, str(PROBE))
@@ -69,14 +70,13 @@ def _efit_axis(
     over 1.7 m), which is why the panels report it to the centimetre.
     """
 
-    from matplotlib.path import Path  # noqa: PLC0415
-
     grid_radius, grid_height = np.meshgrid(radius, height, indexing="ij")
-    inside = (
-        Path(boundary)
-        .contains_points(np.column_stack((grid_radius.ravel(), grid_height.ravel())))
-        .reshape(label.shape)
-    )
+    inside = np.asarray(
+        inside_wall_units(
+            np.column_stack((grid_radius.ravel(), grid_height.ravel())), boundary
+        ),
+        dtype=bool,
+    ).reshape(label.shape)
     if not inside.any():
         raise SystemExit("the EFIT contour encloses no lattice node")
     masked = np.where(inside, label, np.nan)
@@ -113,6 +113,9 @@ def main() -> None:
         "default"
     ]
     axis = tuple(float(value) for value in arm["presence"]["axis_rz_m"])
+    # The read returns one radius per angle of its own LCFS_ANGLES set, which is
+    # eight; the probe's finer SURFACE_ANGLES is for its own diagrid read and
+    # does not describe this one.
     angles = np.asarray(LCFS_ANGLES, dtype=float)
     try:
         boundary = host_boundary_read(flux, grid, axis)

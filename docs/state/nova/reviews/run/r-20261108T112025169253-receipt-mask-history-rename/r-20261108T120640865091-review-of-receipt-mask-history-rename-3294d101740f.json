@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (708079d2e5c7, tests/test_forward_solve_request.py) completed with failure_count 0 and after_suite (3294d1017, tests/test_forward_solve_request.py tests/test_receipt_support_count.py) completed with failure_count 0, so the head adds no failures over the base.",
+  "call_site_count": 5,
+  "call_sites": [
+    "apps/playable/session.py:432",
+    "scripts/labeller_batch/shard.py:354",
+    "scripts/prototypes/diiid_forward_convergence/measure_branches.py:351",
+    "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102",
+    "nova/equilibrium/forward.py:2765"
+  ],
+  "completed_at": "2026-11-08T12:20:16.893Z",
+  "dispatched_at": "2026-11-08T12:10:25Z",
+  "findings": [
+    {
+      "file": "apps/playable/session.py",
+      "line": "432",
+      "severity": "blocking",
+      "text": "blocking: the receipt wrapper still constructs ForwardSolveReceipt with mask_history=mask_history and passes no support_cell_count, but solve_request.py:733-734 renamed the field and made support_cell_count required, so every receipt this runtime app builds raises TypeError; the done_when requires every reader updated and this one is neither changed nor named in outside_scope."
+    },
+    {
+      "file": "scripts/labeller_batch/shard.py",
+      "line": "354",
+      "severity": "blocking",
+      "text": "blocking: the labeller batch shard builds ForwardSolveReceipt(mask_history=differences) with no support_cell_count, so every sharded receipt raises TypeError at construction; the path is outside the write fence but is not recorded under outside_scope, so the widen request the brief demands was never raised for it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+      "line": "351",
+      "severity": "non-blocking",
+      "text": "non-blocking: measure_branches reads receipt.mask_history, an attribute that no longer exists, so the measurement path raises AttributeError; it is unnamed in outside_scope and needs the same mechanical rename to changed_mask_entries."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py",
+      "line": "102",
+      "severity": "non-blocking",
+      "text": "non-blocking: the diagnostic prints receipt.mask_history, which the rename removed, so it raises AttributeError on any run; it is unnamed in outside_scope."
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "2753",
+      "severity": "blocking",
+      "text": "blocking: nothing asserts the receipt's new fields, so a regression that published changed_mask_entries as support_cell_count at forward.py:2753-2774 - the exact confusion the node exists to end - would leave tests/test_forward_solve_request.py:142 (name tuple only) and tests/test_receipt_support_count.py:100 (FixedPointResult, not the receipt) green; the negative control mutated the loop, not this publication."
+    },
+    {
+      "file": "tests/test_receipt_support_count.py",
+      "line": "103",
+      "severity": "non-blocking",
+      "text": "non-blocking: the expected value is built from SUPPORT_CELLS, the same constant that constructs the input labels at line 36, so the assertion compares the count of CORE labels handed to the solver against a number derived from those labels rather than an independent source; negative-control.log shows it nevertheless reddens on the targeted mutation, so it is a real guard for this defect but a weak one for any other count that happens to equal the CORE population."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "four production readers were checked: apps/playable/session.py:432 and scripts/labeller_batch/shard.py:354 construct the receipt, scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102 read the removed attribute; nova/equilibrium/forward.py:2765 is the only producer and was updated.",
+    "diff": "read the single commit 3294d101740f against 708079d2e5c7; six files changed, 225 insertions and 6 deletions, all inside the declared scope, covering the loop carry, the receipt fields, the pin, the new test module and the dated correction.",
+    "done_when": "the done_when requires a test asserting support_cell_count > 0 while changed_mask_entries reaches 0, a red negative control, and a dated correction in the stopping-rule fragment; tests/test_receipt_support_count.py:95-104 asserts the pair on FixedPointResult rather than on ForwardSolveReceipt, negative-control.log records the red run, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:231-266 carries the correction.",
+    "goal": "the node's goal is to stop the receipt's change count being read as a support size by renaming it and publishing the support population; nova/equilibrium/solve_request.py:733-734 carries both fields and nova/equilibrium/fixed_point.py:4652-4661 counts CORE label cells per trip, but four non-test readers still use the removed name.",
+    "manifest": "read; status complete, commits 3294d1017, gate 8 passed EXIT=0, both suite arms complete with 0 failures, negative control logged; outside_scope names six test modules and one fragment but omits apps/playable/session.py:432, scripts/labeller_batch/shard.py:354, scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102.",
+    "write_paths": "read the manifest's six declared paths; all six files in git diff --name-only 708079d2e5c785d2d2b6fe67be128632c9852043 3294d101740f2939900ad7c3b4f168258bdf49ae are inside them."
+  },
+  "justifications": {
+    "durability": "the negative control proves tests/test_receipt_support_count.py:103 reddens when the loop publishes the change count, but no test reads receipt.support_cell_count or receipt.changed_mask_entries, so swapping the two arrays at nova/equilibrium/forward.py:2753-2774 leaves the suite green.",
+    "evidence": "gate-final.log and after-suite.log both record 8 passed EXIT=0 at 3294d1017 and negative-control.log records 3 failed EXIT=1 with three named ids, but the assertions at tests/test_receipt_support_count.py:100-103 read FixedPointResult.active_set_support_cells rather than the receipt field the goal names, so the forward.py:2753-2774 publication is not what the gate measures.",
+    "fit": "the added names changed_mask_entries, support_cell_count and active_set_support_cells describe the quantity and the helpers at nova/equilibrium/fixed_point.py:4652-4661 follow the adjacent partition_difference idiom, with no plan or ticket labels.",
+    "goal_fidelity": "nova/equilibrium/solve_request.py:733-734 renames the field and adds support_cell_count, and nova/equilibrium/forward.py:2745-2774 populates both from the loop, but the done_when's 'update every reader in the repository' is unmet: apps/playable/session.py:432 and scripts/labeller_batch/shard.py:354 still construct ForwardSolveReceipt with mask_history= and no support_cell_count, and scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 reads receipt.mask_history.",
+    "reuse": "no owner for a per-trip axis-connected support count exists in nova/equilibrium/domain.py; the addition reads _FrozenTopologyPartition.label (nova/equilibrium/forward_operator.py:801) the same way nova/equilibrium/forward.py:1632 already selects CORE.",
+    "scope_discipline": "git diff --name-only 708079d2e5c7..3294d101740f lists exactly the six declared write paths and no others; the omitted readers are a goal gap recorded at apps/playable/session.py:432, not an out-of-scope edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to stop the receipt's change count being read as a support size by renaming it and publishing the support population; nova/equilibrium/solve_request.py:733-734 carries both fields and nova/equilibrium/fixed_point.py:4652-4661 counts CORE label cells per trip, but four non-test readers still use the removed name.\nVERDICT done_when: the done_when requires a test asserting support_cell_count > 0 while changed_mask_entries reaches 0, a red negative control, and a dated correction in the stopping-rule fragment; tests/test_receipt_support_count.py:95-104 asserts the pair on FixedPointResult rather than on ForwardSolveReceipt, negative-control.log records the red run with 3 failing ids, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:231-266 carries the correction with the original text retained.\nVERDICT write_paths: read the manifest's six declared paths; all six files in git diff --name-only 708079d2e5c785d2d2b6fe67be128632c9852043 3294d101740f2939900ad7c3b4f168258bdf49ae are inside them.\nVERDICT manifest: read; status complete, commits 3294d1017, gate 8 passed EXIT=0, both suite arms complete with 0 failures, negative control logged; outside_scope names six test modules and one fragment but omits apps/playable/session.py:432, scripts/labeller_batch/shard.py:354, scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102.\nVERDICT diff: read the single commit 3294d101740f against 708079d2e5c7; six files changed, 225 insertions and 6 deletions, all inside the declared scope, covering the loop carry, the receipt fields, the RECEIPT_FIELDS pin, the new test module and the dated correction.\nCALL_SITES: apps/playable/session.py:432, scripts/labeller_batch/shard.py:354, scripts/prototypes/diiid_forward_convergence/measure_branches.py:351, scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102, nova/equilibrium/forward.py:2765\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve_request.py:733-734 renames the field and adds support_cell_count, but the done_when's 'update every reader in the repository' is unmet: apps/playable/session.py:432 and scripts/labeller_batch/shard.py:354 still construct ForwardSolveReceipt with mask_history= and no support_cell_count.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-final.log and after-suite.log record 8 passed EXIT=0 at 3294d1017 and negative-control.log records 3 failed EXIT=1, but tests/test_receipt_support_count.py:100 asserts on FixedPointResult.active_set_support_cells rather than the receipt field the goal names.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --name-only 708079d2e5c7..3294d101740f lists exactly the six declared write paths and no others.\nSCORE durability: 10\nJUSTIFICATION durability: the negative control reddens tests/test_receipt_support_count.py:103, but no test reads receipt.support_cell_count, so swapping the two arrays at nova/equilibrium/forward.py:2753-2774 leaves the suite green.\nSCORE fit: 17\nJUSTIFICATION fit: the added names changed_mask_entries, support_cell_count and active_set_support_cells describe the quantity and the helper at nova/equilibrium/fixed_point.py:4652-4661 follows the adjacent partition_difference idiom.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner for a per-trip support count exists in nova/equilibrium/domain.py, and the addition reads _FrozenTopologyPartition.label (nova/equilibrium/forward_operator.py:801) as nova/equilibrium/forward.py:1632 already does.\nFINDING apps/playable/session.py:432 blocking: the receipt wrapper constructs ForwardSolveReceipt with mask_history=mask_history and passes no support_cell_count, so every receipt this runtime app builds raises TypeError.\nFINDING scripts/labeller_batch/shard.py:354 blocking: the labeller batch shard builds ForwardSolveReceipt(mask_history=differences) with no support_cell_count, so every sharded receipt raises TypeError, and the path is not recorded under outside_scope.\nFINDING scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 non-blocking: measure_branches reads receipt.mask_history, which no longer exists, and needs the rename to changed_mask_entries.\nFINDING scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102 non-blocking: the diagnostic prints receipt.mask_history, which the rename removed, so it raises AttributeError on any run.\nFINDING nova/equilibrium/forward.py:2753 blocking: nothing asserts the receipt's new fields, so publishing changed_mask_entries as support_cell_count here would leave tests/test_forward_solve_request.py:142 and tests/test_receipt_support_count.py:100 green.\nFINDING tests/test_receipt_support_count.py:103 non-blocking: the expected value is built from SUPPORT_CELLS, the same constant that constructs the input labels at line 36, so it is a weak guard for any other count that happens to equal the CORE population.\n",
+  "review_run_id": "r-20261108T120640865091-review-of-receipt-mask-history-rename-3294d101740f",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "3294d101740f2939900ad7c3b4f168258bdf49ae",
+  "reviewed_run_id": "r-20261108T112025169253-receipt-mask-history-rename",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T12:32:45.971436+00:00",
+  "total": 89
+}

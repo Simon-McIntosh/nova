@@ -230,15 +230,17 @@ def graded_residual(
         stretched = xp.sinh(stretch)
         panel_offset = held * stretched
         # the panel never reaches a quarter turn, so the complement is a subtraction
-        # rather than a second transcendental, and the map's own jacobian follows
-        # from the sinh it has already taken
+        # rather than a second transcendental, and the map's own jacobian is the
+        # map's cosh at the same node, taken directly rather than rebuilt from the
+        # sinh as sqrt(1 + sinh^2)
+        hyperbolic = xp.cosh(stretch)
         near = xp.sin(panel_offset) ** 2
         x, y = (1.0 - near, near) if panel else (near, 1.0 - near)
         numerator, denominator = pieces(x, y)
         sign = xp.sign(end)[:, None]
         scaled = scale[:, None] * panel_offset
         model = xp.sqrt(offset[:, None] ** 2 + scaled * scaled)
-        jacobian = 0.5 * span * held * xp.sqrt(1.0 + stretched * stretched)
+        jacobian = 0.5 * span * held * hyperbolic
         bounded = _regularised(numerator, denominator, model, sign, xp)
         model_integral = xp.sign(end) * _model_integral(offset, scale, lower, upper, xp)
         if weight is None:
@@ -417,11 +419,11 @@ def _graded_residual_tangent(
             d_offset[:, None] * (2.0 * offset[:, None])
             + _product_tangent(scaled, d_scaled, scaled, d_scaled)
         ) * (0.5 / model)
-        cosine = xp.sqrt(1.0 + stretched * stretched)
-        d_cosine = (2.0 * stretched * d_stretched) * (0.5 / cosine)
-        jacobian = half_span * held * cosine
+        hyperbolic = xp.cosh(stretch)
+        d_hyperbolic = d_stretch * stretched
+        jacobian = half_span * held * hyperbolic
         d_jacobian = _product_tangent(
-            half_span * held, 0.5 * d_span * held, cosine, d_cosine
+            half_span * held, 0.5 * d_span * held, hyperbolic, d_hyperbolic
         )
         bounded, d_bounded = _regularised_tangent(
             numerator, d_numerator, denominator, d_denominator, model, d_model,

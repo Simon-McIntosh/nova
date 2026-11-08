@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T13:40:57Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_fold_arclength/plot.py",
+      "id": "f0134bd86f8",
+      "line": 285,
+      "severity": "blocking",
+      "summary": "The poloidal figure's upper right-hand axis close-up (docs/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg) renders no flux field at all: measured on the delivered PNG, the 644x259 panel contains 181 non-white pixels and every one of them belongs to one of the two triangle null markers, against 51653 pixels in the full-view panel. The cause is the line anchored here: draw_flux_contours is handed the global twelve-level array data[\"levels\"] for every panel, and inside the axis zoom every sampled field value lies between the axis flux and the lowest of those levels, so no level is crossed and no contour is drawn. The caption states that the right-hand panels enlarge the axes and saddles, so the panel promises a comparison it does not deliver: a reader sees two triangles about 15 px apart in a 644 px wide frame and cannot see the flux surfaces, the local scale, or whether that offset is small against them."
+    },
+    {
+      "file": "scripts/prototypes/bank_fold_arclength/plot.py",
+      "id": "f0134bd86f8",
+      "line": 285,
+      "severity": "non-blocking",
+      "summary": "In the same figure the lower right-hand saddle close-up shows only the continued state: the analytic seed's dashed contours are absent, with 92 dark pixels in the whole 644x259 panel against 9490 in the full-view panel, so the 92 are the filled-cross null marker alone. The panel that exists to compare the two fields at the saddle therefore shows one field and lets a reader take the single drawn X as the comparison. Same root cause as the axis close-up: the shared global levels do not cross the seed's local saddle flux either. A per-panel level set spanning the local flux range of each close-up would restore both."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-fold-arclength/branch.svg",
+      "id": "f950cde6ce2",
+      "line": 101,
+      "severity": "non-blocking",
+      "summary": "The two smallest-singular-value panels are logarithmic but carry no decade tick and no minor ticks; their three y tick labels are decimal fractions (0.00003, 0.0001, 0.0003 and 0.0002, 0.0004, 0.0007), which sit at unequal spacings that read as a linear axis with irregular ticks. A reader therefore cannot read the dip's magnitude off the axis: the bank panel falls to about 2.9e-5 against a top tick of 3e-4 without a labelled decade to anchor that factor of ten. The caption does state that both spectra panels use separate logarithmic scales, so the information is recoverable from the text but not from the figure; decade ticks or a 'log' axis note would fix it in the figure."
+    }
+  ],
+  "justifications": {},
+  "project": "nova",
+  "raw_text": "RUBRIC branch.svg legibility: pass; data_ink: pass; decoration: pass; contrast: pass; table_form: pass; label_collision: pass.\nRUBRIC poloidal.svg legibility: defect - the axis close-up panel holds only the two triangle markers (181 non-white px in 644x259) and no contours; data_ink: defect - the close-ups carry 0.11% and 1.5% ink across more than half the canvas width; decoration: pass; contrast: pass; table_form: pass; label_collision: pass.\nFINDING scripts/prototypes/bank_fold_arclength/plot.py:285 blocking: the poloidal figure's axis close-up renders no flux field, because the global twelve-level array data[\"levels\"] is applied to the zoomed grids and no level crosses the local flux range; the panel shows two triangles on blank canvas.\nFINDING scripts/prototypes/bank_fold_arclength/plot.py:285 non-blocking: the saddle close-up draws no dashed analytic-seed contour (92 dark px against 9490 in the full view, all marker ink), so the two-field comparison at the saddle is not visible; same root cause.\nFINDING docs/figures/sub-millisecond-forward-path/bank-fold-arclength/branch.svg:101 non-blocking: the two logarithmic sigma-min panels carry no decade ticks and label their axes in decimal fractions at unequal spacings, so the dip's magnitude cannot be read from the axis; the caption states the scales are logarithmic.\n",
+  "review_run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/bank_fold_arclength/plot.py",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-fold-arclength/branch.svg",
+      "reviewed_image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure/image-0.png"
+    },
+    {
+      "drawing_script": "scripts/prototypes/bank_fold_arclength/plot.py",
+      "figure": "docs/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg",
+      "reviewed_image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure/image-1.png"
+    }
+  ],
+  "reviewed_head_sha": "ab60151ed913c1f06c69356bd19a648bd65503d1",
+  "reviewed_run_id": "r-20261108T111744407818-bank-fold-arclength",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/sub-millisecond-forward-path/bank-fold-arclength/branch.svg": {
+      "contrast": "pass - black axis text on white and the #2e6fa8 series on white both exceed 3:1; the grey dotted rule at #777777 reads as a locator rather than as a series.",
+      "data_ink": "pass - the 22 accepted states and the segments joining them carry the weight; the marker series is 3.0 pt over a 2.4 pt dotted reference line, and no panel carries a fill or a second decorative element.",
+      "decoration": "pass - white background, no gridlines, no shading, top and right spines removed; the only non-data ink is the single dotted vertical rule locating the highest sampled drive, which is data.",
+      "label_collision": "pass - no text is clipped at the canvas edge and no labels overlap: the four panel titles, tick labels and the two-entry figure legend sit in clear space, and the dotted rule passes between markers rather than through a label.",
+      "legibility": "pass - four despined panels read at a glance: drive against arclength (full and zoomed), and bank and augmented smallest singular values; every axis is labelled with its quantity, the y tick labels carry values at 1.0, 1.004, 1.008 and the zoom at 1.0087-1.0089, and the two logarithmically spaced spectra panels are titled 'bank sigma-min' and 'augmented sigma-min' in legible 14 pt text.",
+      "table_form": "pass - nothing here is naturally a table; a reader needs the shape of the drive reversal against arclength, which the two plotted panels give."
+    },
+    "docs/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg": {
+      "contrast": "pass - the #2e6fa8 continued contours and the #303030 dashed seed contours both clear 3:1 against white, the grey wall reads as a reference, and the three legend entries are legible at 14 pt.",
+      "data_ink": "defect - the field ink sits entirely in the left panel (51653 non-white pixels over 616x597); the axis close-up carries 0.11 percent ink and the saddle close-up 1.5 percent, so more than half the canvas width renders one X and two markers.",
+      "decoration": "pass - no gradients, no background fill, no shading and no grid; the wall is drawn once per panel in flat grey and the legend is frameless.",
+      "label_collision": "pass - axes are off by design, the three-entry legend sits above the panels in clear space, and no text is clipped or overlapping.",
+      "legibility": "defect - the left full-view panel is legible (dashed seed contours, solid continued contours, grey wall, both null sets, no axes and no grid, scale from the machine geometry), but the upper right-hand axis close-up is not a readable map: its 644x259 panel holds 181 non-white pixels, all of them the two triangle null markers, so the panel shows two triangles on blank canvas with no flux surface, no wall and no scale reference.",
+      "table_form": "pass - the flux topology and the null positions are a spatial comparison, not information that is naturally a table."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T13:57:58.617877+00:00",
+  "total": null
+}

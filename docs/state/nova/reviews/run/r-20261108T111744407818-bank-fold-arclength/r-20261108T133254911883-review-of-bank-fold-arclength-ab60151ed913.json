@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_measured": false,
+  "added_failures_note": "Suite pair explicitly unarmed in source prompt.txt:138-139; source manifest baseline_suite and after_suite are blank, so 0 is the empty set of recorded added failure IDs, not a measured suite pass.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T13:45:12Z",
+  "dispatched_at": "2026-11-08T13:35:38Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_fold_arclength/plot.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: checked_save duplicates the canvas-bounds, text-collision, SVG-write and centimetre-size capability already owned by scripts/prototypes/bank_fold_vertical/plot.py:34 and reused by bank_fold_radial/plot.py:13; it adds broader text enumeration and a PNG preview locally rather than extending or wrapping that owner, leaving two save policies to maintain; proposed disposition exempted for this frozen scratch measurement, whose two delivered artifacts were independently inspected."
+    },
+    {
+      "file": "scripts/prototypes/bank_fold_arclength/measure.py",
+      "line": "173",
+      "severity": "non-blocking",
+      "text": "non-blocking: No added regression test exercises invalid-read or arclength refusal, or convergence reached on the final allowed update; dropping the valid/arc terms in accepted or moving the fresh evaluation before the last update need not fail compare.py's normal receipts, and refused-residual.log mutates receipt data only; proposed disposition exempted for the bounded scratch experiment, with the present acceptance implementation verified by reading rather than claimed as protected by that control."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read 1be09d68a4a6bab99ea2727c57b1a8ba57bb35f9 (probe, comparator and launcher), 90f26089c59162081895f7026955e2ad5479ece0 (renderer) and ab60151ed913c1f06c69356bd19a648bd65503d1 (fragment and SVGs) individually against base 708079d2e5c785d2d2b6fe67be128632c9852043; no product source changes, with two non-blocking durability and reuse findings.",
+    "done_when": "The three clauses in the reviewed run's brief.txt are met by h200-job.log's two fresh process HEADER and REPLAY records, 22 POINT rows per process, AGREE and FOLD_VERDICT ending EXIT=0, the 22-row evidence fragment, and the two exact committed SVGs rendered and inspected during this review.",
+    "goal": "The goal in the reviewed run's prompt.txt:38 is to distinguish a branch turning point from a stall, and scripts/prototypes/bank_fold_arclength/measure.py:241-280 follows accepted states through a positive-to-negative drive secant while the fragment explicitly limits the conclusion to this connected discretised branch.",
+    "manifest": "The reviewed run's manifest.md names all three commits, the literal H200 submission, complete gate and refusal logs and the sampled-peak caveat; baseline_suite and after_suite are empty consistently with prompt.txt:138-139 declaring the suite pair unarmed.",
+    "write_paths": "The reviewed run's prompt.txt:105-108 declares one prototype directory, one fragment and one figure directory, and git diff 708079d2e5c785d2d2b6fe67be128632c9852043 ab60151ed913c1f06c69356bd19a648bd65503d1 names seven files entirely inside those grants."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_fold_arclength/compare.py:8-34 independently thresholds residuals and fold conditions and refused-residual.log demonstrates the 1.01e-10 receipt refusal, but no added test reinstates an invalid-read, arclength, or post-last-update acceptance regression in measure.py:173-201.",
+    "evidence": "h200-job.log records two process revisions at 1be09d68a4a6bab99ea2727c57b1a8ba57bb35f9, the reproduced 1.0089341297149657 stall, agreeing certified branch points and a final EXIT=0, while the fragment's sampled maximum and independent render receipt avoid claiming an exact fold solve or a suite result.",
+    "fit": "scripts/prototypes/bank_fold_arclength/measure.py:7-10 configures precision before JAX work, plot.py:23-26 uses nova's poloidal drawing owners, and the exact head SVGs are legible, despined and free of label collisions, with capability names rather than forbidden plan labels.",
+    "goal_fidelity": "scripts/prototypes/bank_fold_arclength/measure.py:112-169 augments the existing fresh-geometry bank Jacobian with the drive derivative and secant row, and lines 215-280 record physical centroids and follow six accepted decreasing-drive points past the sampled maximum.",
+    "reuse": "scripts/prototypes/bank_fold_arclength/plot.py:32 duplicates checked_save owned by scripts/prototypes/bank_fold_vertical/plot.py:34 instead of extending it, although the novel drive-bordered solve appropriately consumes support_read and the plots reuse nova.media.poloidal.",
+    "scope_discipline": "The seven changed files listed by the exact base-to-head diff all fall under the three grants at the reviewed run's prompt.txt:105-108 and implement only its experiment, evidence and figures."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal in the reviewed run's prompt.txt:38 is to distinguish a branch turning point from a stall, and scripts/prototypes/bank_fold_arclength/measure.py:241-280 follows accepted states through a positive-to-negative drive secant while the fragment explicitly limits the conclusion to this connected discretised branch.\nVERDICT done_when: The three clauses in the reviewed run's brief.txt are met by h200-job.log's two fresh process HEADER and REPLAY records, 22 POINT rows per process, AGREE and FOLD_VERDICT ending EXIT=0, the 22-row evidence fragment, and the two exact committed SVGs rendered and inspected during this review.\nVERDICT write_paths: The reviewed run's prompt.txt:105-108 declares one prototype directory, one fragment and one figure directory, and git diff 708079d2e5c785d2d2b6fe67be128632c9852043 ab60151ed913c1f06c69356bd19a648bd65503d1 names seven files entirely inside those grants.\nVERDICT manifest: The reviewed run's manifest.md names all three commits, the literal H200 submission, complete gate and refusal logs and the sampled-peak caveat; baseline_suite and after_suite are empty consistently with prompt.txt:138-139 declaring the suite pair unarmed.\nVERDICT diff: Read 1be09d68a4a6bab99ea2727c57b1a8ba57bb35f9 (probe, comparator and launcher), 90f26089c59162081895f7026955e2ad5479ece0 (renderer) and ab60151ed913c1f06c69356bd19a648bd65503d1 (fragment and SVGs) individually against base 708079d2e5c785d2d2b6fe67be128632c9852043; no product source changes, with two non-blocking durability and reuse findings.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_fold_arclength/measure.py:112-169 augments the existing fresh-geometry bank Jacobian with the drive derivative and secant row, and lines 215-280 record physical centroids and follow six accepted decreasing-drive points past the sampled maximum.\nSCORE evidence: 19\nJUSTIFICATION evidence: h200-job.log records two process revisions at 1be09d68a4a6bab99ea2727c57b1a8ba57bb35f9, the reproduced 1.0089341297149657 stall, agreeing certified branch points and a final EXIT=0, while the fragment's sampled maximum and independent render receipt avoid claiming an exact fold solve or a suite result.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The seven changed files listed by the exact base-to-head diff all fall under the three grants at the reviewed run's prompt.txt:105-108 and implement only its experiment, evidence and figures.\nSCORE durability: 14\nJUSTIFICATION durability: scripts/prototypes/bank_fold_arclength/compare.py:8-34 independently thresholds residuals and fold conditions and refused-residual.log demonstrates the 1.01e-10 receipt refusal, but no added test reinstates an invalid-read, arclength, or post-last-update acceptance regression in measure.py:173-201.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/bank_fold_arclength/measure.py:7-10 configures precision before JAX work, plot.py:23-26 uses nova's poloidal drawing owners, and the exact head SVGs are legible, despined and free of label collisions, with capability names rather than forbidden plan labels.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_fold_arclength/plot.py:32 duplicates checked_save owned by scripts/prototypes/bank_fold_vertical/plot.py:34 instead of extending it, although the novel drive-bordered solve appropriately consumes support_read and the plots reuse nova.media.poloidal.\nFINDING scripts/prototypes/bank_fold_arclength/plot.py:32 non-blocking: checked_save duplicates the canvas-bounds, text-collision, SVG-write and centimetre-size capability already owned by scripts/prototypes/bank_fold_vertical/plot.py:34 and reused by bank_fold_radial/plot.py:13; it adds broader text enumeration and a PNG preview locally rather than extending or wrapping that owner, leaving two save policies to maintain; proposed disposition exempted for this frozen scratch measurement, whose two delivered artifacts were independently inspected.\nFINDING scripts/prototypes/bank_fold_arclength/measure.py:173 non-blocking: No added regression test exercises invalid-read or arclength refusal, or convergence reached on the final allowed update; dropping the valid/arc terms in accepted or moving the fresh evaluation before the last update need not fail compare.py's normal receipts, and refused-residual.log mutates receipt data only; proposed disposition exempted for the bounded scratch experiment, with the present acceptance implementation verified by reading rather than claimed as protected by that control.\n",
+  "review_run_id": "r-20261108T133254911883-review-of-bank-fold-arclength-ab60151ed913",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "ab60151ed913c1f06c69356bd19a648bd65503d1",
+  "reviewed_run_id": "r-20261108T111744407818-bank-fold-arclength",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T14:18:37.420923+00:00",
+  "total": 97
+}

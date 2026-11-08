@@ -1,0 +1,145 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_check": "Pass - none of the three captions repeats its figure's title or panel titles. Each carries the terminal residual, the converged flag, the support size, the measurement revision and the shared flux levels, and the MAST caption states that its residual contours are roundoff. No caption finding recorded.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T14:25:51Z",
+  "figures_reviewed": [
+    {
+      "figure": "docs/figures/diiid-residual-plateau/frame-137-diverted.svg",
+      "identified_by": "regional node counts 185/102/802 and maxima 204.33/208.86/224.73 mWb match the frame-137-diverted decomposition table in docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html at the reviewed head",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T142452190871-review-of-diiid-residual-plateau-c27710c64c36-figure/image-0.png"
+    },
+    {
+      "figure": "docs/figures/diiid-residual-plateau/frame-179-limited.svg",
+      "identified_by": "regional node counts 281/133/675 and maxima 126.61/126.92/127.30 mWb match the frame-179-limited decomposition table",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T142452190871-review-of-diiid-residual-plateau-c27710c64c36-figure/image-1.png"
+    },
+    {
+      "figure": "docs/figures/diiid-residual-plateau/mast-21978-35.svg",
+      "identified_by": "regional node counts 195/100/794 and attoweber scale (max 287.96/277.56/333.07 aWb) isolate the MAST case, whose residual the record gives as 3.31e-16 Wb",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T142452190871-review-of-diiid-residual-plateau-c27710c64c36-figure/image-2.png"
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-residual-plateau",
+      "recorded_at": "2026-11-08T14:42:25.012418+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-residual-plateau",
+      "recorded_at": "2026-11-08T14:42:39.764262+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "diiid-residual-plateau",
+      "recorded_at": "2026-11-08T14:42:50.949129+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "diiid-residual-plateau",
+      "recorded_at": "2026-11-08T14:42:57.787581+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "diiid-residual-plateau",
+      "recorded_at": "2026-11-08T14:43:05.885505+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_residual_plateau/render.py",
+      "id": "fcd6303beff",
+      "line": 119,
+      "severity": "blocking",
+      "summary": "The residual contour call passes no linestyles, so matplotlib applies its default negative-contour dash: negative residual levels render dashed and positive levels solid, and the legend keys only one solid blue 'residual' swatch (render.py:175). A reader therefore cannot tell a positive residual from a negative one, which is the quantity the record itself reports sign-first (frame-137 sup +224.73 mWb, frame-179 sup -127.30 mWb, and the sign differs between the two cases). The damage is worse than an absent key: in the boundary-band panel the region mask already breaks every contour into fragments, so 'dash means negative level' and 'gap means the contour left the band' look identical. Applies to all three figures. Verified rather than inferred: a contour of a bipolar field with these levels, drawn with this call's arguments under the same matplotlib 3.11.1, renders the three negative levels with a dash gap and the three positive levels continuous at the same scan row (positive-control pixels read 3 at both scan positions, negative read 3 then 0)."
+    },
+    {
+      "file": "docs/figures/diiid-residual-plateau/mast-21978-35.svg",
+      "id": "fa041fb05b9",
+      "line": 87,
+      "severity": "non-blocking",
+      "summary": "The residual level set is rescaled to each case's own max |r| (render.py:86-88) and drawn at one weight (render.py:119-127), so a 3.3e-16 Wb roundoff field receives exactly the treatment given to a 0.22 Wb physical residual. In the outside-plasma panel this produces roughly fifty nested loops and short segments that outweigh the solved-flux contours, and a reader moving between the three figures sees comparable residual structure where the magnitudes differ by fifteen orders. The caption does state that these contours are roundoff, so the reading is recoverable, but the picture's visual weight contradicts the caption."
+    },
+    {
+      "file": "scripts/prototypes/diiid_residual_plateau/render.py",
+      "id": "f5a72273543",
+      "line": 177,
+      "severity": "non-blocking",
+      "summary": "Two distinct objects share the single legend entry 'EFIT flux / boundary': the 0.75 pt dashed EFIT flux contours (render.py:99-108) and the 1.8 pt dashed EFIT boundary polygon (render.py:139-146), which are different features at different weights. Separately, the grey reference null set is drawn (render.py:148-155) but the legend keyed for hollow marks is a triangle only ('EFIT nulls', render.py:195-203), leaving the grey reference cross in the lower left of each panel unkeyed. A reader can see these marks and cannot identify them."
+    },
+    {
+      "file": "docs/figures/diiid-residual-plateau/frame-179-limited.svg",
+      "id": "fb29613c5fa",
+      "line": 157,
+      "severity": "non-blocking",
+      "summary": "The filled red solved-axis triangle and the hollow grey EFIT-null triangle abut in the boundary-band and outside-plasma panels, so the two glyphs merge into one mark and the reader cannot see whether the solved axis and the reference axis actually differ. Neither the caption nor the legend separates them. The renderer's text guard (render_panels.py:435, called at render.py:32) checks text artists against the canvas and against each other only, and render.py:34-37 checks text against the axes box, so no guard covers marker-against-marker collisions."
+    },
+    {
+      "file": "scripts/prototypes/diiid_residual_plateau/render.py",
+      "id": "f87d6a8177a",
+      "line": 97,
+      "severity": "non-blocking",
+      "summary": "The axes limits are set to the data extent and the spines are removed by the house style, so residual contours that reach the edge of the grid stop in mid-air with nothing to say so. In the outside-plasma panels of all three figures the outermost blue contour ends against blank space, which reads as a truncated line rather than as a contour leaving the domain; the same is true of the outer grey flux contours."
+    }
+  ],
+  "notes": "Read-only review. No file outside the two declared record paths was written, and no figure, caption or script was edited. Judged only from the three named PNGs; no SVG was opened, read or rendered, and the figure-to-path mapping was established from the fragment's regional decomposition tables, not from the images' own filenames. The one instrument check run was a bare matplotlib contour of a bipolar synthetic field in a scratch directory, with the positive levels as its positive control; it produced no image file and wrote nothing into the repository.",
+  "project": "nova",
+  "review_run_id": "r-20261108T142452190871-review-of-diiid-residual-plateau-c27710c64c36-figure",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "c27710c64c36af5f530e397af8994499d2eed12d",
+  "reviewed_run_id": "r-20261108T112423346430-diiid-residual-plateau",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass for frame-137-diverted - three titled panels, captions with node count and max |r|, residual heaviest",
+    "RUBRIC data_ink: pass for frame-137-diverted - 2.0 pt residual over 1.0/0.75 pt grey references, no fills",
+    "RUBRIC decoration: pass for frame-137-diverted - no gradient, fill, gridline or frame",
+    "RUBRIC contrast: pass for frame-137-diverted - black text and 3:1 greys on white",
+    "RUBRIC table_form: pass for frame-137-diverted - spatial field, not a tabulated quantity",
+    "RUBRIC label_collision: pass for frame-137-diverted - no clipped or overlapping text, no label over data",
+    "RUBRIC legibility: pass for frame-179-limited - three titled panels, captions with node count and max |r|, residual heaviest",
+    "RUBRIC data_ink: pass for frame-179-limited - residual dominates, grey references subordinate",
+    "RUBRIC decoration: pass for frame-179-limited - no gradient, fill, gridline or frame",
+    "RUBRIC contrast: pass for frame-179-limited - black text and 3:1 greys on white",
+    "RUBRIC table_form: pass for frame-179-limited - spatial field, not a tabulated quantity",
+    "RUBRIC label_collision: defect for frame-179-limited - no text collision, but the filled red solved-axis triangle and the hollow EFIT-null triangle abut in the boundary-band and outside-plasma panels",
+    "RUBRIC legibility: defect for mast-21978-35 - individual residual contours cannot be followed in the outside-plasma panel, which reads as a loop texture across its right half",
+    "RUBRIC data_ink: defect for mast-21978-35 - 2.0 pt continuous blue spent on a 3.3e-16 Wb roundoff field outweighs the flux contours it is set against",
+    "RUBRIC decoration: pass for mast-21978-35 - no gradient, fill, gridline or frame",
+    "RUBRIC contrast: pass for mast-21978-35 - black text and 3:1 greys on white",
+    "RUBRIC table_form: pass for mast-21978-35 - spatial field, and it adds a reading the numeric table cannot",
+    "RUBRIC label_collision: pass for mast-21978-35 - no clipped or overlapping text"
+  ],
+  "rubric_verdicts": {
+    "docs/figures/diiid-residual-plateau/frame-137-diverted.svg": {
+      "contrast": "pass - text near-black on white; the #929292 reference greys read about 3:1 against white and the #666666 band outline darker still",
+      "data_ink": "pass - 2.0 pt residual over 1.0 pt solved flux and 0.75 pt EFIT flux, no fills, so the residual carries the weight and the references recede",
+      "decoration": "pass - no gradient, no background fill, no gridlines, spines absent, frameless legend",
+      "label_collision": "pass - no text is clipped or overlapping, and no label sits on data; the recorded-saddle cross and the reference cross sit close at the lower left of each panel but stay separable",
+      "legibility": "pass - three titled panels, captions carry node count and max |r| with units, and the residual is the heaviest line so the eye finds it first; the solid/dashed split inside the blue is unkeyed (see findings)",
+      "table_form": "pass - these are spatial fields with a spatial relationship; the numeric decomposition lives in the fragment's tables, not here"
+    },
+    "docs/figures/diiid-residual-plateau/frame-179-limited.svg": {
+      "contrast": "pass - black text and 3:1 greys on white",
+      "data_ink": "pass - the residual dominates and the grey references stay subordinate",
+      "decoration": "pass - no gradient, fill, gridline or frame",
+      "label_collision": "defect - no text is clipped or overlapping, but the filled red solved-axis triangle and the hollow EFIT-null triangle abut with no clear separation in the boundary-band and outside-plasma panels, so two distinct marker meanings read as one glyph",
+      "legibility": "pass - same panel and caption structure, readable at a glance; the solid/dashed split inside the blue is unkeyed (see findings)",
+      "table_form": "pass - spatial field, not a tabulated quantity"
+    },
+    "docs/figures/diiid-residual-plateau/mast-21978-35.svg": {
+      "contrast": "pass - black text and 3:1 greys on white",
+      "data_ink": "defect - the heaviest ink in the figure (2.0 pt continuous blue) is spent on a 3.3e-16 Wb roundoff field drawn at the same level set weight as the 0.22 Wb DIII-D residual, so roundoff carries the visual weight",
+      "decoration": "pass - no gradient, fill, gridline or frame",
+      "label_collision": "pass - no clipped or overlapping text; the outer residual contours stop at the plot limit with no frame around them, which is recorded as a finding but is not a label defect",
+      "legibility": "defect - individual residual contours cannot be followed in the outside-plasma panel: roughly fifty nested loops and short segments fill the right half of the panel and the support-interior loops crowd the core, so the eye reads a texture rather than lines",
+      "table_form": "pass - the roundoff result is also stated numerically in the fragment, but the figure contributes a spatial reading the table cannot"
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T14:41:23.878526+00:00",
+  "total": null
+}

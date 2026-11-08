@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: source baseline_suite and after_suite are empty; source prompt explicitly unarms the pair. This review requires a number derived from those missing logs, so zero cannot be asserted.",
+  "assertion_analysis": {
+    "analyze.py:25-41": "Fails when ladder counts or promotion totals differ from receipts, finite flags differ from actual NPZ operands, or independent residual calculation disagrees with the recorded stage residual.",
+    "analyze.py:51-68": "Fails for nonfinite retained inner operands, a normalized state not reconstructible as the physical terminal state by one flux scale, or disagreement between actual constraint operands and receipt.",
+    "check_capture.py:15-18": "Fails for zero executed inner callbacks; recorded missing-calls control reinstates the wrong-seam symptom and fails at line 16.",
+    "check_capture.py:34-36,48,54": "Fails for wrong route, empty support, wrong declared orientation, disagreement between saved support mask and receipt, or missing effective constraint row. Orientation declaration alone is not an independent proof.",
+    "check_capture.py:42-47": "Fails when saved state/image operands disagree with the separately saved residual or its recomputation; consistency checks over frozen data do not prove that a changed capture producer still computes the correct residual.",
+    "check_capture.py:49-53": "Fails for wrong aggregate coverage count or norm shares not totaling one; swapping correct-looking regional rows remains green (finding).",
+    "check_capture.py:56-67": "Fails for dominant constraint residual or mismatched callback/inner/stage counts.",
+    "check_capture.py:69-77": "Fails if saved DIII-D evidence converges, has no invalid image, has a finite terminal trajectory, attempts Newton, loses final mask stability, or has a different terminal inner reason.",
+    "check_capture.py:79-87": "Fails if MAST loses convergence/finite warmup/accepted promotions, frame 179 gains an attempt/ladder, or frame 137 last ladder accepts, trusts its model, or contains a decreasing merit.",
+    "measure.py:267,411-412; render.py:51,61-64; analyze.py:111": "Fail for disabled x64, absent executed inner seam, empty support, oversized SVG or wrong orientation/shape; the save wrapper raises for clipping/collision/data overlap.",
+    "negative_controls": "Restoring wrong-seam instrumentation yields zero inner counts and require_calls fails, as the existing negative-control receipt proves. Restoring an incorrect per-region assignment need not fail, as noted in finding. No test-input echo tautology was found; consistency and frozen-input limitations are the durability gap."
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T14:36:52Z",
+  "dispatched_at": "2026-11-08T14:24:19Z",
+  "figure_review": "All three exact-head SVGs extracted and rasterized with librsvg, and producer previews inspected; text coordinates lie inside canvas. ImageMagick reported temporary delegate refusal, and raster output inconsistencies were treated as instrument limitations rather than confirmed SVG defects.",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_residual_plateau/check_capture.py",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: Regional checks validate aggregate counts and squared-norm shares only, so swapping interior and exterior row identities or values preserves the assertions and leaves incorrect per-region tables undetected."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the five commits in order; scripts/prototypes/diiid_residual_plateau adds instrumentation, analysis, archived revaluation and rendering, followed by the evidence fragment and three SVGs, without product changes.",
+    "done_when": "Source prompt.txt:155-159 measure is covered by capture-head.log and the tables at docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:9-115, with positive executed inner counts replacing the disproved reduced-kernel premise.",
+    "goal": "Source brief.md requires a diagnostic record without product changes; docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:3 delivers both decompositions, stopping sequences and the MAST comparison.",
+    "manifest": "Source manifest.md names five commits, a final-head capture pass and an intentional missing-call refusal, but lines 21-22 leave both suite arms empty consistently with prompt.txt:158-159 explicitly unarming the pair.",
+    "write_paths": "All nine paths in git diff 708079d2e5c785d2d2b6fe67be128632c9852043..c27710c64c36af5f530e397af8994499d2eed12d fall within source brief.md's three declared write roots."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_residual_plateau/check_capture.py:15-18 refuses an unobserved executed seam and analyze.py:31-68 reconciles independent saved operands, but check_capture.py:49-53 cannot detect reassigned per-region measurements.",
+    "evidence": "capture-head.log records positive callback counts and EXIT=0 at c27710c64c36af5f530e397af8994499d2eed12d and capture-missing-calls.log records AssertionError and EXIT=1, but manifest.md:21-22 supplies no pair for measuring added failures.",
+    "fit": "scripts/prototypes/diiid_residual_plateau/render.py:23-51 reuses Nova drawing and the existing collision checker and the record preserves native radius-height storage, although several plotting weights are local literals rather than InkStyle fields.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:69-118 identifies unchecked warmup propagation, the existing finite-residual refusal, retained finite best state and name-only correction with explicit limits.",
+    "reuse": "scripts/prototypes/diiid_residual_plateau/measure.py:241-264 wraps existing MAST builders, analyze.py:13 imports the production merit and render.py:27 reuses render_panels.py:435; capability searches in scripts/prototypes, nova/equilibrium and nova/media found no existing owner for this executed-operand capture and regional decomposition.",
+    "scope_discipline": "All nine diff paths are inside the source brief's write roots and scripts/prototypes/diiid_residual_plateau/measure.py:47-124 wraps the actual solver without replacing its expressions."
+  },
+  "production_reachability": "No production runtime caller imports the new standalone prototype modules. Their CLI invokes ForwardProfile.solve and wraps forward.assemble_augmented_system, fixed_point._newton_krylov_inner/_relative_residual/_backtracking_scores and Topology.read_qualification; those relevant unchanged implementations were examined at reviewed head.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Source brief.md requires a diagnostic record without product changes; docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:3 delivers both decompositions, stopping sequences and the MAST comparison.\nVERDICT done_when: Source prompt.txt:155-159 measure is covered by capture-head.log and the tables at docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:9-115, with positive executed inner counts replacing the disproved reduced-kernel premise.\nVERDICT write_paths: All nine paths in git diff 708079d2e5c785d2d2b6fe67be128632c9852043..c27710c64c36af5f530e397af8994499d2eed12d fall within source brief.md's three declared write roots.\nVERDICT manifest: Source manifest.md names five commits, a final-head capture pass and an intentional missing-call refusal, but lines 21-22 leave both suite arms empty consistently with prompt.txt:158-159 explicitly unarming the pair.\nVERDICT diff: Read the five commits in order; scripts/prototypes/diiid_residual_plateau adds instrumentation, analysis, archived revaluation and rendering, followed by the evidence fragment and three SVGs, without product changes.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:69-118 identifies unchecked warmup propagation, the existing finite-residual refusal, retained finite best state and name-only correction with explicit limits.\nSCORE evidence: 18\nJUSTIFICATION evidence: capture-head.log records positive callback counts and EXIT=0 at c27710c64c36af5f530e397af8994499d2eed12d and capture-missing-calls.log records AssertionError and EXIT=1, but manifest.md:21-22 supplies no pair for measuring added failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All nine diff paths are inside the source brief's write roots and scripts/prototypes/diiid_residual_plateau/measure.py:47-124 wraps the actual solver without replacing its expressions.\nSCORE durability: 15\nJUSTIFICATION durability: scripts/prototypes/diiid_residual_plateau/check_capture.py:15-18 refuses an unobserved executed seam and analyze.py:31-68 reconciles independent saved operands, but check_capture.py:49-53 cannot detect reassigned per-region measurements.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/diiid_residual_plateau/render.py:23-51 reuses Nova drawing and the existing collision checker and the record preserves native radius-height storage, although several plotting weights are local literals rather than InkStyle fields.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/prototypes/diiid_residual_plateau/measure.py:241-264 wraps existing MAST builders, analyze.py:13 imports the production merit and render.py:27 reuses render_panels.py:435; capability searches in scripts/prototypes, nova/equilibrium and nova/media found no existing owner for this executed-operand capture and regional decomposition.\nFINDING scripts/prototypes/diiid_residual_plateau/check_capture.py:49 non-blocking: Regional checks validate aggregate counts and squared-norm shares only, so swapping interior and exterior row identities or values preserves the assertions and leaves incorrect per-region tables undetected.\n",
+  "review_blocker": "A numeric added-failure count cannot be derived from the absent source baseline_suite and after_suite logs. Coordinator must reconcile the review contract with the source explicitly unarmed pair.",
+  "review_run_id": "r-20261108T142325225650-review-of-diiid-residual-plateau-c27710c64c36",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "c27710c64c36af5f530e397af8994499d2eed12d",
+  "reviewed_run_id": "r-20261108T112423346430-diiid-residual-plateau",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T14:49:01.563985+00:00",
+  "total": 111
+}

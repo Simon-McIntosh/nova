@@ -30,6 +30,11 @@
       "kind": "exempted",
       "reason": "the millimetre phrasing overstates the grid; non-blocking record precision",
       "recorded_at": "2026-11-08T05:58:31.801294+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the canvas-edge check belongs in the repository save function, not this prototype; non-blocking",
+      "recorded_at": "2026-11-08T05:58:46.075354+00:00"
     }
   },
   "findings": [

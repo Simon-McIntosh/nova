@@ -3,9 +3,9 @@
   "boundary_hold_tolerance_m": 0.03968085207837693,
   "boundary_wall_gap_mm": {
     "diverted": {
-      "count": 70,
+      "count": 72,
       "max_mm": 160.28176511670566,
-      "median_mm": 79.5931079542267
+      "median_mm": 79.3625775391261
     },
     "limited": {
       "count": 27,
@@ -14,23 +14,23 @@
     },
     "note": "a limited boundary must touch its limiter, so a limited gap above the solve pitch is a defect; the diverted gap is expected"
   },
-  "bytes": 6970652,
+  "bytes": 7725037,
   "contact_sheet": {
-    "bytes": 1452753,
+    "bytes": 1535211,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
     "rows": 2,
     "size": [
-      3970,
+      5773,
       1908
     ],
     "tile_indices": [
       0,
-      19,
-      38,
-      58,
-      77,
-      96
+      20,
+      39,
+      59,
+      78,
+      98
     ],
     "tiles": 6
   },
@@ -57,7 +57,7 @@
     ],
     "trace": "level set at normalised flux 0.9999 enclosing the axis on a 8x bicubic refinement, clipped to the limiter; where none closes inside the wall, the edge of the axis-connected region",
     "trace_routes": {
-      "smooth level set": 101
+      "smooth level set": 103
     }
   },
   "frame_milliseconds": [
@@ -95,16 +95,6 @@
     100,
     50,
     50,
-    100,
-    50,
-    50,
-    50,
-    50,
-    100,
-    50,
-    50,
-    50,
-    50,
     50,
     50,
     50,
@@ -116,7 +106,19 @@
     50,
     50,
     50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
     100,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
     100,
     50,
     50,
@@ -159,10 +161,10 @@
     100,
     50
   ],
-  "frames": 97,
-  "frames_converged": 64,
-  "frames_diverted": 70,
-  "frames_drawn": 97,
+  "frames": 99,
+  "frames_converged": 65,
+  "frames_diverted": 72,
+  "frames_drawn": 99,
   "frames_dropped_unbounded": [
     {
       "class": "diverted",
@@ -227,7 +229,7 @@
   "quantity_label": "$T_e$ [eV]",
   "requested_seconds": 10.0,
   "size": [
-    1318,
+    1919,
     950
   ],
   "solve_grid": "rectangular lattice at solve_pitch_m; current on its nodes",
@@ -237,7 +239,7 @@
   ],
   "solved_edge_drawn": true,
   "thomson_edge": {
-    "frames_resolved": 86,
+    "frames_resolved": 88,
     "model": "uncertainty-weighted mtanh fit of the outboard electron temperature of every system pooled; edge where the fit falls through 40 eV, the two-point-model upstream separatrix temperature",
     "solved_minus_thomson_m": [
       0.1265787848476947,
@@ -272,6 +274,7 @@
       0.05471788138033329,
       0.04164204406368599,
       0.05378604115095098,
+      0.04914361133692524,
       0.0583198398518594,
       0.06242044762431931,
       0.034729533182993544,
@@ -292,6 +295,7 @@
       0.03144917942273917,
       0.038730679210556174,
       0.01367393600602318,
+      0.01919500166215582,
       0.03573775527764145,
       0.03448239868524672,
       0.02751711314628391,
@@ -349,7 +353,7 @@
         "stored_row_count": 141,
         "usable_sample_fraction": 0.9065562232689081
       },
-      "resolved_samples_drawn": 10627,
+      "resolved_samples_drawn": 10864,
       "rows": 141,
       "value_limit": [
         2.5580186247825623,
@@ -375,7 +379,7 @@
         "stored_row_count": 282,
         "usable_sample_fraction": 0.9521276595744681
       },
-      "resolved_samples_drawn": 362,
+      "resolved_samples_drawn": 378,
       "rows": 141,
       "value_limit": [
         17.843132853507996,
@@ -395,5 +399,5 @@
     "rule": "each frame held for the pulse-time gap to the next slice",
     "slowdown": 10.0
   },
-  "x_points_drawn": 70
+  "x_points_drawn": 72
 }

@@ -64,9 +64,6 @@ SLIDE_TICK_FONTSIZE = 16.0
 #: Margin around the first wall in the cropped poloidal panel, in metres.
 WALL_MARGIN = 0.03
 
-#: Width of the graph relative to the machine panel: the machine leads.
-GRAPH_TO_MACHINE = 1.4
-
 #: Room above the graph column for the slide title, in inches.
 TITLE_ROOM = 1.5
 
@@ -74,10 +71,10 @@ TITLE_ROOM = 1.5
 def slide_view(extent, style):
     """Return the graph on the left and the machine full height on the right.
 
-    The machine is the subject: its panel runs the full figure height at the
-    extent's aspect, on the right, and the graph to its left is held to
-    ``GRAPH_TO_MACHINE`` of the panel width, stopping short of the top to
-    leave room for the slide title.
+    The figure is the full slide width. The machine's panel runs the full
+    figure height at the extent's aspect, on the right, and the graph takes
+    the rest of the width to its left, stopping short of the top to leave
+    room for the slide title.
     """
     import matplotlib.figure
 
@@ -87,8 +84,8 @@ def slide_view(extent, style):
     inset, gap, left, bottom = 0.1, 0.35, 1.4, 0.9
     panel_height = SLIDE_HEIGHT - 2 * inset
     panel_width = panel_height * (r_max - r_min) / (z_max - z_min)
-    column_width = GRAPH_TO_MACHINE * panel_width
-    width = left + column_width + gap + panel_width + inset
+    width = SLIDE_WIDTH
+    column_width = width - left - gap - panel_width - inset
     figure = matplotlib.figure.Figure(
         figsize=(width, SLIDE_HEIGHT),
         dpi=style.figure_dpi,

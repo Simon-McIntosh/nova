@@ -27,7 +27,8 @@ three passes, and it did not return inside this node's fence.
     <tr><td>pairs, whole mesh</td><td>6.35&times;10<sup>6</sup></td></tr>
     <tr><td>passes of the gate</td><td>3 (tile, unbatched reference, per-end scale)</td></tr>
     <tr><td>whole-mesh wall, 8 workers</td><td>about 46 min</td></tr>
-    <tr><td>fast lane with both changes</td><td>12 passed, 3 deselected, EXIT=0</td></tr>
+    <tr><td>default lane, base revision</td><td>12 passed, 3 deselected, EXIT=0</td></tr>
+    <tr><td>default lane, at HEAD</td><td>12 passed, 4 deselected, EXIT=0</td></tr>
   </tbody>
 </table>
 
@@ -69,19 +70,43 @@ exactly as they contract the field, so the gate and its negative control share o
 denominator.
 </p>
 
+<h2 id="icm-sheet-tile-measure-independent">The reference that is independent of the code under test</h2>
+
+<p id="icm-sheet-tile-measure-independent-text">
+Comparing the tile with an unbatched evaluation of the same traced closed form measures the
+tile's batching and padding and nothing else: both sides read their edge directions, normals
+and shared-edge signs from the same <code>cell_edges</code> coefficients, so a sign or
+deduplication defect there is invisible to it by construction. A second test therefore builds
+the same interaction matrix from the prototype's own edge-ring quadrature and exact ring
+Green's function (<code>scripts/prototypes/iron_magnetisation/magnetisation.py</code>), which
+derives its own edge directions, outward normals and shared-edge sum from the polygons. Its
+bound is the quadrature's convergence rather than the tile's rounding, so it is stated at
+1e-8 and is a defect detector: a wrong sign in <code>K<sub>phi</sub></code>, or a shared-edge
+pair collapsed the wrong way, is O(1) there.
+</p>
+
 <h2 id="icm-sheet-tile-measure-open">What remains</h2>
 <ul id="icm-sheet-tile-measure-remaining">
   <li>Run the gate on the H200 rung over the whole mesh: every entry finite, worst entry
-      within 1e-13 of the per-end scale, with the distribution recorded here.</li>
+      within 1e-13 of the per-end scale, with the distribution recorded here. The job is
+      submitted — <code>betelgeuse</code>, <code>gpu_0003_grpA</code>, one card, eight cores,
+      45 minutes — and was still pending on resources at this fence's end, so the gate is
+      submitted and unmeasured rather than measured and failing.</li>
   <li>Run the negative control there too. It is wired — setting
       <code>NOVA_SHEET_TILE_REVERSE_NORMALS=0</code> reverses one cell's edge normals in the
-      device build and drives the same gate test — but no red log was produced inside this
-      fence, so the declared mutation is unproven.</li>
+      device build — and it is now a test that fails with its own id, driven as the second
+      run of the same job so it writes a log closing with its <code>EXIT=</code> line. No red
+      log exists yet, so the declared mutation is still unproven.</li>
   <li>The denominator does not by itself close the gate. A read-only attempt measured the
       worst finite entry at about 1e-8 under the per-end scale across eleven target rows,
       against 0.077 to 1.67 under the per-edge one, so the residual is a disagreement between
-      the padded tile and the flat walk and not an artefact of a cancelling sum. It needs a
-      pair-level comparison on the pairs that carry it.</li>
+      the padded tile and the flat walk and not an artefact of a cancelling sum. The
+      independent reference is what tells whether that residual lives in the coefficients or
+      in the padding.</li>
+  <li>Naming test files on the command line clears pytest's inherited <code>-m 'not slow'</code>
+      filter, so a suite arm written that way runs the 1500 s and 1200 s gates and reads as a
+      hang rather than as work. Both arms here pass <code>-m 'not slow'</code> explicitly and
+      report their deselected count beside their result.</li>
 </ul>
 
 </article>

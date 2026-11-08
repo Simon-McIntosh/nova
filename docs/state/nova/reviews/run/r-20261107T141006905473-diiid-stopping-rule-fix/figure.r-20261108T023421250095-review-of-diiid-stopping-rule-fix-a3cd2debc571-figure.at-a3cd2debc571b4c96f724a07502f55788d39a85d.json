@@ -1,0 +1,173 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite delta is claimed.",
+  "completed_at": "2026-11-08T02:51:06.220Z",
+  "dispatched_at": "2026-11-08T02:37:45Z",
+  "figure_checks": {
+    "clipping": "Non-white pixels in the outer 2 px frame of each 512x574 render: 0 on all four. Ink bounding boxes are x 10-493, y 10-563, so nothing is clipped at the canvas edge.",
+    "colour_inventory": "White background; blue #3366cc contours; near-black #1f1f1f legend and tick-free text; grey #929292 dashed EFIT boundary; black #000000 limiter outline and legend swatch; dark red #cc0000 null markers and axis annotation. Contrast against white: #1f1f1f 16.5:1, #cc0000 5.9:1, #3366cc 5.4:1, #929292 3.1:1.",
+    "label_geometry": "The red annotation's bounding box was measured by colour mask: 137 at x 62-351, y 364-540 (290x177 px); 144 at x 84-363, y 280-489 (280x210 px); 179 at x 155-364, y 274-301 (210x28 px); 44 at x 157-373, y 302-328 (217x27 px). Blue contour pixels inside those boxes are 2,555, 2,259, 352 and 416 respectively. The frames where the box is tall are the ones whose red band also contains the saddle marker, which is why their boxes are larger.",
+    "missing_elements": "The legend carries three entries in every panel (solved flux, limiter, EFIT boundary); the required bounding surface has no entry because len(surface) is false, and no reference null marker is drawn anywhere. The script confirms both omissions at lines 112-115 and 125.",
+    "render_provenance": "Each of the four named PNGs was opened with Read directly from the reviewed head's worktree (frames 179, 44, 144, 137) and judged at its delivered 512x574 px. No SVG, and no other image, was opened, searched or rendered. Pixel counts, colour values and contrast ratios below were measured from those same PNGs."
+  },
+  "figures": [
+    {
+      "delivered_size": "512x574 px, RGB",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+      "rubric": {
+        "contrast": "pass - legend text #1f1f1f at 16.5:1, red annotation #cc0000 at 5.9:1, blue contours #3366cc at 5.4:1, grey reference #929292 at 3.1:1 against white",
+        "data_ink": "pass - blue contour strokes, one black wall outline, one grey reference curve and two small red marks on white; no fills, gradients or shading",
+        "decoration": "pass - axes are off (no spines, ticks, tick labels or gridlines) and the legend is frameless; nothing on the canvas is stylisation",
+        "label_collision": "fail - the red axis annotation is drawn straight through the solved-flux contours: 352 blue contour pixels fall inside its 210x28 px bounding box (x 155-364, y 274-301), and a contour crosses the digits and unit",
+        "legibility": "pass - the nested closed-core contours, the governed limiter outline, the grey dashed EFIT boundary and the red axis triangle read at a glance at 512x574 px",
+        "table_form": "pass - a poloidal flux map is a spatial relationship, not a table"
+      }
+    },
+    {
+      "delivered_size": "512x574 px, RGB",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+      "rubric": {
+        "contrast": "pass - same measured values as frame 179 (text 16.5:1, red 5.9:1, blue 5.4:1, grey 3.1:1)",
+        "data_ink": "pass - contour strokes and one reference curve carry the weight; no fills or shading",
+        "decoration": "pass - no gradient, background fill, gridline or tick furniture",
+        "label_collision": "fail - the red axis annotation sits on the contour field: 416 blue contour pixels inside its 217x27 px bounding box (x 157-373, y 302-328), with a contour running through the label text",
+        "legibility": "pass - the elongated nested contours, the limiter outline, the near-circular grey EFIT boundary and the red axis marker read at a glance",
+        "table_form": "pass - spatial field, not a table"
+      }
+    },
+    {
+      "delivered_size": "512x574 px, RGB",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+      "rubric": {
+        "contrast": "pass - same measured values as frame 179",
+        "data_ink": "pass - contours, one wall outline and one reference curve; no fills",
+        "decoration": "pass - no gradient, shading or background fill",
+        "label_collision": "fail - the red axis annotation is drawn across the densest part of the contour field: 2,259 blue contour pixels inside its 280x210 px bounding box (x 84-363, y 280-489); the text and the saddle marker both sit on top of contours",
+        "legibility": "pass - the vertically elongated core, the grey EFIT oval and the red saddle cross near the lower wall are readable, though the contour levels crowd the right-hand side",
+        "table_form": "pass - a spatial field, not a table"
+      }
+    },
+    {
+      "delivered_size": "512x574 px, RGB",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png",
+      "rubric": {
+        "contrast": "pass - same measured values as frame 179",
+        "data_ink": "pass - line contours carry the weight; no fills or shading",
+        "decoration": "pass - no gradient, background fill or shading",
+        "label_collision": "fail - the red axis annotation lies on the contour field: 2,555 blue contour pixels inside its 290x177 px bounding box (x 62-351, y 364-540); contours cross the label text",
+        "legibility": "pass - the four nested core contours, the outer solved contour, the limiter outline, the grey EFIT boundary and both red markers read at a glance",
+        "table_form": "pass - spatial data, not a table"
+      }
+    }
+  ],
+  "figures_reviewed": [
+    "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png"
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f8b32b7b922",
+      "line": 126,
+      "severity": "blocking",
+      "summary": "The axis annotation is placed with a fixed offset (12, -14 points) from the magnetic axis and given no background patch, so in every one of the four panels it lands inside the plasma on top of the solved-flux contours. Measured on the delivered PNGs, blue contour pixels inside the annotation's bounding box: 2,555 of 512x574 in frame 137, 2,259 in frame 144, 416 in frame 44 and 352 in frame 179; in each panel a contour stroke runs through the digits and the unit. The label is therefore partly illegible and it obscures the very data it annotates, which is the label-over-data case a reader cannot work around. A placement in clear space, or a white background patch behind the text, would fix it without changing the annotation's content."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f7b4e554945",
+      "line": 112,
+      "severity": "blocking",
+      "summary": "The host_boundary_read bounding surface the brief requires is absent from all four panels, and the script drops it silently: the draw call is guarded by `if len(surface)` and the render log records `surface_points=0` for frames 179, 44, 144 and 137, so neither the curve nor the 'bounding surface' legend entry is drawn and nothing on the page says a required element is missing. A reader therefore cannot see the recorded boundary, while the captions for frames 137 and 144 cite it numerically ('recorded boundary 0.329 m from the wall', '0.162 m') in prose the picture does not support. The legend reading 'solved flux / limiter / EFIT boundary' looks complete, so the omission is invisible rather than merely absent. Either the arm must record a boundary surface or the panel must say in the caption that none was recorded."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "fe7780114d3",
+      "line": 125,
+      "severity": "blocking",
+      "summary": "Only one null set is drawn. draw_nulls receives the solved arm's own axis and admitted saddles and nothing from the reference, so the EFIT X-point is never plotted in any panel. In the two diverted panels, whose purpose is to show the solved terminal against the reference topology, the reader sees a single X marker near the lower wall and no reference X to compare it with; the grey dashed EFIT boundary carries the reference shape but not its null. The brief required both null sets and the EFIT X-point explicitly, and the comparison the panels exist to support is exactly the one their null marking cannot make."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "fe7780114d3",
+      "line": 125,
+      "severity": "non-blocking",
+      "summary": "Neither null marker is identified. Both are drawn in the same #cc0000 with no legend entry and no direct label: the filled triangle and the filled cross cannot be told apart as 'axis' and 'saddle' by a reader, and the legend offers only 'solved flux', 'limiter' and 'EFIT boundary'. Only frame 179's caption names 'the axis and the admitted saddle' in prose, and the other three captions do not mention the markers at all. The red axis annotation is the only clue, and it labels the triangle with coordinates rather than naming the mark. The markers are legible; their meaning is not."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f37ea0e1e56",
+      "line": 127,
+      "severity": "non-blocking",
+      "summary": "The annotation text reads 'axis 1.66 m, -0.44 m' and names no coordinate: a reader must guess that the first number is R and the second Z, because neither is labelled and the panel has no axes or scale to fall back on. The repository's figure rules ask that a label name the quantity and its unit, so 'axis R=1.66 m, Z=-0.44 m' is what the text should carry. The values themselves are consistent with the drawn marker in every panel."
+    },
+    {
+      "file": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+      "id": "fa5767727a8",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "This panel's caption asserts 'the axis and the admitted saddle', but the panel draws no saddle marker. All red ink in this 512x574 render lies in a single band at y 274-301 (the axis triangle and its annotation); there is no second red mark anywhere near the wall or elsewhere, which matches a limited topology with no admitted saddle. A reader who reads the caption first looks for a mark that is not on the page. The caption is not changed by this review."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "fb05688bb34",
+      "line": 100,
+      "severity": "non-blocking",
+      "summary": "Every panel is drawn on a 14x7.2 in canvas but holds a portrait poloidal drawing, so bbox_inches='tight' crops the deliverable to 512x574 px and most of the right-hand side is empty: below the legend row (y > 95) the region x > 320 is 99.4 percent blank in frames 137, 144, 179 and 44, and the data panel occupies only the left two fifths of the width. The delivered raster is 512 px wide against the 1400 px house canvas, so the composition is a portrait panel with a floating legend rather than the declared slide canvas. It costs no legibility at the delivered size and is recorded for composition rather than as a reading defect."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "No caption merely repeats a title: the panels carry no title, identity is in the file name and the caption, and each caption adds the terminal residual (0.0273, 0.197, 5.93, 0.0624) and a topology or boundary statement. Frame 44's caption is the thinnest ('drawn on the same limiter and levels') but still states its residual. Frame 179's caption claims a saddle the panel does not draw, recorded as a finding.",
+    "verdict_basis": "Every verdict was read from the attached 512x574 PNGs. No verdict is derived from SVG text, glyph coordinates or markup."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "The label-over-data and layout claims are pixel measurements on the delivered PNGs; the missing-elements claims are confirmed both on the rasters (no bounding-surface legend entry, no second null marker) and by the render log's own `surface_points=0` lines for all four frames.",
+    "legibility": "Read from the delivered rasters at native size, with the coordinate and colour masks described above as the measurement.",
+    "scope_discipline": "Read-only. No figure, caption, script or other repository file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "prior_records": {
+    "note": "An earlier figure review of these files at head da9c18d8 raised one blocking finding, that no machine geometry was drawn at all (the wall array was the flux-grid bounding box rendered as a plain rectangle). That finding is repaired at the head under review by commit 442d5453e, and the current renders show the real governed limiter outline in every panel, so it is not restated here. Two of its non-blocking findings remain open at this head and are restated: the null markers are drawn but never identified, and the composed canvases are mostly blank. The prior record's line-style finding (negative levels drawn dashed by matplotlib) is not reproduced: the contour call at line 102-111 now passes linestyles='solid', and every contour in all four current renders is a solid stroke.",
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/review-records/r-20261107T141006905473-diiid-stopping-rule-fix.figure.at-da9c18d8f93c39042708c4e986c2757231b4857d.json",
+    "reviewed_head_sha": "da9c18d8f93c39042708c4e986c2757231b4857d"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T023421250095-review-of-diiid-stopping-rule-fix-a3cd2debc571-figure",
+  "reviewed_base_sha": "6f20bafbc29d57d8ed6938df2ce5c6621dd89b43",
+  "reviewed_head_sha": "a3cd2debc571b4c96f724a07502f55788d39a85d",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "rubric": "figure",
+  "rubric_lines": [
+    "figure frame-179-limited-terminal.png / RUBRIC legibility: pass - the nested closed-core contours, the governed limiter outline, the grey dashed EFIT boundary and the red axis triangle read at a glance at 512x574 px",
+    "figure frame-179-limited-terminal.png / RUBRIC data_ink: pass - blue contour strokes, one black wall outline, one grey reference curve and two small red marks on white; no fills, gradients or shading",
+    "figure frame-179-limited-terminal.png / RUBRIC decoration: pass - axes are off (no spines, ticks, tick labels or gridlines) and the legend is frameless; nothing on the canvas is stylisation",
+    "figure frame-179-limited-terminal.png / RUBRIC contrast: pass - legend text #1f1f1f at 16.5:1, red annotation #cc0000 at 5.9:1, blue contours #3366cc at 5.4:1, grey reference #929292 at 3.1:1 against white",
+    "figure frame-179-limited-terminal.png / RUBRIC table_form: pass - a poloidal flux map is a spatial relationship, not a table",
+    "figure frame-179-limited-terminal.png / RUBRIC label_collision: fail - the red axis annotation is drawn straight through the solved-flux contours: 352 blue contour pixels fall inside its 210x28 px bounding box (x 155-364, y 274-301), and a contour crosses the digits and unit",
+    "figure frame-44-limited-terminal.png / RUBRIC legibility: pass - the elongated nested contours, the limiter outline, the near-circular grey EFIT boundary and the red axis marker read at a glance",
+    "figure frame-44-limited-terminal.png / RUBRIC data_ink: pass - contour strokes and one reference curve carry the weight; no fills or shading",
+    "figure frame-44-limited-terminal.png / RUBRIC decoration: pass - no gradient, background fill, gridline or tick furniture",
+    "figure frame-44-limited-terminal.png / RUBRIC contrast: pass - same measured values as frame 179 (text 16.5:1, red 5.9:1, blue 5.4:1, grey 3.1:1)",
+    "figure frame-44-limited-terminal.png / RUBRIC table_form: pass - spatial field, not a table",
+    "figure frame-44-limited-terminal.png / RUBRIC label_collision: fail - the red axis annotation sits on the contour field: 416 blue contour pixels inside its 217x27 px bounding box (x 157-373, y 302-328), with a contour running through the label text",
+    "figure frame-144-diverted-terminal.png / RUBRIC legibility: pass - the vertically elongated core, the grey EFIT oval and the red saddle cross near the lower wall are readable, though the contour levels crowd the right-hand side",
+    "figure frame-144-diverted-terminal.png / RUBRIC data_ink: pass - contours, one wall outline and one reference curve; no fills",
+    "figure frame-144-diverted-terminal.png / RUBRIC decoration: pass - no gradient, shading or background fill",
+    "figure frame-144-diverted-terminal.png / RUBRIC contrast: pass - same measured values as frame 179",
+    "figure frame-144-diverted-terminal.png / RUBRIC table_form: pass - a spatial field, not a table",
+    "figure frame-144-diverted-terminal.png / RUBRIC label_collision: fail - the red axis annotation is drawn across the densest part of the contour field: 2,259 blue contour pixels inside its 280x210 px bounding box (x 84-363, y 280-489); the text and the saddle marker both sit on top of contours",
+    "figure frame-137-diverted-terminal.png / RUBRIC legibility: pass - the four nested core contours, the outer solved contour, the limiter outline, the grey EFIT boundary and both red markers read at a glance",
+    "figure frame-137-diverted-terminal.png / RUBRIC data_ink: pass - line contours carry the weight; no fills or shading",
+    "figure frame-137-diverted-terminal.png / RUBRIC decoration: pass - no gradient, background fill or shading",
+    "figure frame-137-diverted-terminal.png / RUBRIC contrast: pass - same measured values as frame 179",
+    "figure frame-137-diverted-terminal.png / RUBRIC table_form: pass - spatial data, not a table",
+    "figure frame-137-diverted-terminal.png / RUBRIC label_collision: fail - the red axis annotation lies on the contour field: 2,555 blue contour pixels inside its 290x177 px bounding box (x 62-351, y 364-540); contours cross the label text"
+  ],
+  "scope_note": "Judged only from the four PNGs this node attached, opened with Read at their delivered 512x574 px. No SVG was opened, read, searched or rendered, and no image other than the four named PNGs was opened. Supporting counts come from those same PNGs read as rasters. The reviewed base is confirmed an ancestor of the reviewed head (git merge-base --is-ancestor, exit 0).",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T05:19:35.772222+00:00",
+  "total": null
+}

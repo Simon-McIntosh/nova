@@ -13,9 +13,11 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.collections import LineCollection
+from matplotlib.collections import PolyCollection
 from matplotlib.lines import Line2D
 
+from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.forward import _lattice_cells
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_nulls, draw_wall
 
@@ -31,6 +33,7 @@ def render(archive, output, previews):
     radius, height = arrays["radius"], arrays["height"]
     flux = arrays["flux"]
     assert flux.shape == (radius.size, height.size)
+    cells = np.asarray(_lattice_cells(FluxLattice(radius, height)))
     material, closed = arrays["inside_material"], arrays["closed"]
     stages = (
         ("material", material),
@@ -48,11 +51,11 @@ def render(archive, output, previews):
         poloidal_axes(ax)
         ax.set_xlim(radius[0], radius[-1])
         ax.set_ylim(height[0], height[-1])
-        edges = arrays["shared_edges"][mask, 1:]
         ax.add_collection(
-            LineCollection(
-                edges.reshape((-1, 2, 2)),
-                colors=style.plasma_edgecolor,
+            PolyCollection(
+                cells[mask],
+                facecolors="none",
+                edgecolors=style.plasma_edgecolor,
                 linewidths=0.45,
                 zorder=1,
             )
@@ -73,6 +76,7 @@ def render(archive, output, previews):
             flux.T,
             levels=levels,
             colors=style.flux_color,
+            linestyles="solid",
             linewidths=0.9,
             zorder=3,
         )
@@ -82,6 +86,7 @@ def render(archive, output, previews):
             flux.T,
             levels=[record["boundary_flux_wb"]],
             colors=style.separatrix_color,
+            linestyles="solid",
             linewidths=1.5,
             zorder=4,
         )
@@ -98,7 +103,12 @@ def render(archive, output, previews):
         draw_nulls(
             ax,
             magnetic_axis=arrays["data_o"][:2],
-            other_x_points=arrays["data_x"][:2][None],
+            x_points=(
+                arrays["data_x"][:2][None] if record["boundary_is_xpoint"] else None
+            ),
+            other_x_points=(
+                None if record["boundary_is_xpoint"] else arrays["data_x"][:2][None]
+            ),
         )
         box = ax.get_position()
         figure.text(
@@ -123,9 +133,11 @@ def render(archive, output, previews):
             [],
             color=style.xpoint_color,
             marker="X",
-            mfc="none",
+            mfc=(style.xpoint_color if record["boundary_is_xpoint"] else "none"),
             ls="none",
-            label="recorded saddle",
+            label=(
+                "admitted saddle" if record["boundary_is_xpoint"] else "recorded saddle"
+            ),
         ),
         Line2D(
             [],

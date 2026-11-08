@@ -10,6 +10,7 @@ different formulations of the same physics.
 from __future__ import annotations
 
 from functools import lru_cache
+import multiprocessing
 import os
 import pickle
 
@@ -146,9 +147,11 @@ def interaction():
     if WORKERS == 1:
         built = [build_slice(bound) for bound in bounds]
     else:
-        import multiprocessing
-
-        with multiprocessing.get_context("fork").Pool(WORKERS) as pool:
+        # A fork taken after JAX has initialised its thread pools hands the child
+        # inherited mutexes it can never acquire: every worker wedges in
+        # futex_wait. Each shard is a fresh interpreter instead.
+        context = multiprocessing.get_context("spawn")
+        with context.Pool(WORKERS) as pool:
             built = pool.map(build_slice, bounds)
     tiled = np.concatenate([item[2] for item in built], axis=0)
     reference = np.concatenate([item[3] for item in built], axis=0)

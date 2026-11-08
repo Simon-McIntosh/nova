@@ -26,6 +26,13 @@
   ],
   "completed_at": "2026-11-08T08:47:15Z",
   "dispatched_at": "2026-11-08T08:38:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the lead accepted the falsification as this node's deliverable on 2026-11-08 and chose to run the record correction and the support-mask investigation as two follow-up nodes",
+      "recorded_at": "2026-11-08T09:02:45.723755+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html",

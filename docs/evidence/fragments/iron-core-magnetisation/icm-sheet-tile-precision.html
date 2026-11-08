@@ -144,11 +144,10 @@ closed form this node did not reach inside its budget.
 <code>repro.log</code>), pair (0,1129), 2 targets, 3744 edges.</li>
 <li>Shape bisect of the arsinh gradient and the closed gradient:
 <code>bisect.py</code> (log <code>bisect.log</code>).</li>
-<li>Pancake route bisect, ingredient by ingredient: <code>bisect2.py</code>
-(log <code>bisect2.log</code>).</li>
-<li>Minimal batch-size sweep: <code>minimal.py</code> (log
-<code>minimal.log</code>), and the instruction-set run
-<code>minimal-sse42.log</code>.</li>
+<li>Pancake route bisect, ingredient by ingredient: <code>bisect2.py</code>,
+whose output is quoted above entry by entry.</li>
+<li>Minimal batch-size sweep: <code>minimal.py</code>, and the same sweep under
+<code>XLA_FLAGS=--xla_cpu_max_isa=SSE4_2</code>; both are quoted above.</li>
 <li>CPU gate log: <code>gate-cpu.log</code>; negative control:
 <code>negative-control.log</code>.</li>
 </ul>

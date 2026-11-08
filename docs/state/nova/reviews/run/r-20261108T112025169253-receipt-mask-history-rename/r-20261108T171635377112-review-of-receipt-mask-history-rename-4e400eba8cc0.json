@@ -1,0 +1,163 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "fails_if": "No support slots are populated; CORE count is replaced by mask changes; settled support is zero; or the synthetic solve never settles after changing its mask.",
+      "path": "tests/test_receipt_support_count.py:118-122"
+    },
+    {
+      "fails_if": "Any non-CORE label is counted, or per-trip support is replaced by the change history: expected values are independently fixed at [1,1].",
+      "path": "tests/test_receipt_support_count.py:140"
+    },
+    {
+      "fails_if": "An executed empty-support slot contains a positive change count, or the synthetic mask no longer changes then settles; support equality alone is vacuous if no slots are recorded, with population coverage supplied by the other two loop tests.",
+      "path": "tests/test_receipt_support_count.py:154-156"
+    },
+    {
+      "fails_if": "The production publication swaps/drops the histories or routes support to the change field; literal expected values 345 and 0 are distinct and the logged mutation fails.",
+      "path": "tests/test_receipt_support_count.py:248-250"
+    },
+    {
+      "fails_if": "A plain route publishes active-set counters, loses its scalar change count 7, or publishes support slots instead of an empty history.",
+      "path": "tests/test_receipt_support_count.py:258-259"
+    },
+    {
+      "fails_if": "Publication no longer copies the stored history; does not fail if that source never records population, since both sides share its default -1.",
+      "path": "tests/test_reduced_newton_constraints.py:1076-1079"
+    },
+    {
+      "fails_if": "The pinned dataclass field schema retains the old field or omits either new field.",
+      "path": "tests/test_forward_solve_request.py:54"
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+    "nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request",
+    "nova/equilibrium/forward.py:ForwardProfile._solve_constrained_reduced",
+    "apps/playable/session.py:equilibrium_frame_receipt",
+    "scripts/labeller_batch/shard.py:_forward_receipt"
+  ],
+  "completed_at": "2026-11-08T17:26:53Z",
+  "dispatched_at": "2026-11-08T17:17:25Z",
+  "failure_delta_evidence": {
+    "after_suite": {
+      "failure_ids": [
+        "tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current",
+        "tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current",
+        "tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate",
+        "tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field",
+        "tests/test_steering_frames.py::test_legacy_copied_ring_reads_as_a_flagged_unknown_reference",
+        "tests/test_steering_frames.py::test_rasterless_solovev_session_wall_reference_round_trips"
+      ],
+      "logs": [
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_equilibrium_constraint_protocol",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_fixed_point",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_fixed_point_stationary_mask",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_fixed_points",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_forward_parity_constrained_arm",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_forward_profile_corsica",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_forward_solve_request",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_receipt_support_count",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_reduced_newton_constraints",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_reduced_newton_termination",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_route_solve_requests",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_steering_frames",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-arm.log.test_transport_coupled_window",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-forward-solve.log"
+      ],
+      "revision": "4e400eba8cc0bc6fdb19e94cd239191c2bf071c6"
+    },
+    "baseline_suite": {
+      "failure_ids": [
+        "tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current",
+        "tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current",
+        "tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate",
+        "tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field",
+        "tests/test_steering_frames.py::test_legacy_copied_ring_reads_as_a_flagged_unknown_reference",
+        "tests/test_steering_frames.py::test_rasterless_solovev_session_wall_reference_round_trips"
+      ],
+      "logs": [
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_equilibrium_constraint_protocol",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_fixed_point",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_fixed_point_stationary_mask",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_fixed_points",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_forward_parity_constrained_arm",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_forward_profile_corsica",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_forward_solve_request",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_reduced_newton_constraints",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_reduced_newton_termination",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_route_solve_requests",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_steering_frames",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-arm.log.test_transport_coupled_window",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-forward-solve.log",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-steering.log.test_steering_frames"
+      ],
+      "revision": "708079d2e5c785d2d2b6fe67be128632c9852043"
+    },
+    "coverage": "Observed completed summaries only; 6 identical failure ids including H200 forward solve. Reduced-constraints aborted on both arms before its summary, so zero is the observed delta, not proof of complete regression coverage."
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "227",
+      "severity": "blocking",
+      "text": "blocking: reduced_newton is selected as an active-set route, but _solve_constrained_reduced at lines 2407-2430 never sets active_set_support_cells, so support_cell_count becomes the scalar default -1 from fixed_point.py:524 rather than a per-trip population or the explicit empty history used for unavailable routes; downstream indexing of this advertised history fails and its values cannot describe support."
+    },
+    {
+      "file": "tests/test_reduced_newton_constraints.py",
+      "line": "1076",
+      "severity": "blocking",
+      "text": "blocking: the added support assertion compares receipt.support_cell_count with receipt.equilibrium.fixed_point.active_set_support_cells, the same source the publication copies, so the existing missing-count defect leaves both sides equal to -1; removing support collection still passes this assertion, which therefore does not protect reduced-route support measurement."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md",
+      "line": "21",
+      "severity": "blocking",
+      "text": "blocking: baseline_suite and after_suite declare completed=true although both reduced-constraints processes aborted before the summary and yielded no failing test ids; equal exit 134 codes do not establish equal failures, so the asserted complete zero-added-failures measure needs completed evidence or an explicit unresolved gate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read 3294d101740f2939900ad7c3b4f168258bdf49ae, 0b810e963b856f9e74b43386cee2990b7247249c and 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 against 708079d2e5c785d2d2b6fe67be128632c9852043; they add the loop counter, migrate constructors/readers, append the correction and replace test-side publication with the real request seam.",
+    "done_when": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log records 10 passed at 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 and negative-control-publication.log records 2 failed under swapped publication keywords, but base-arm.log and head-arm.log include an aborted reduced-constraints file and cannot establish complete zero-added-failures coverage.",
+    "goal": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/brief.md requires renamed change history and a separate per-trip support population; nova/equilibrium/fixed_point.py:5127 and forward.py:2778-2779 deliver the Krylov path, but reduced requests still publish the default scalar -1.",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md records both arms and their failure ids, but marks them completed despite the missing reduced-constraints summary and retains stale commits, gate revision and owed-work statements.",
+    "write_paths": "the live run's node.write_paths authorizes all 15 files in the base-to-head diff, including the widened app, shard, benchmark and six reader tests."
+  },
+  "justifications": {
+    "durability": "tests/test_receipt_support_count.py:118-155 would fail if the loop published change counts as support and lines 248-259 catch publication swaps, but tests/test_reduced_newton_constraints.py:1076 compares two copies of the same unpopulated default rather than an independently measured population.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log and negative-control-publication.log substantiate publication protection, while the reduced-constraints entry in both arm logs exits 134 without a summary, leaving the full regression measure unproved.",
+    "fit": "nova/equilibrium/fixed_point.py:4955 and 5038 extend the existing fixed-shape carry and forward.py:207 extracts the existing selection at its owner without introducing a forbidden name, although the reduced-route availability statement at line 210 is inaccurate.",
+    "goal_fidelity": "nova/equilibrium/forward.py:227 publishes a per-trip support array for Krylov but a default scalar -1 for reduced requests because its reduced adapter at line 2407 never fills the new history field.",
+    "reuse": "capability searches for core-population counting, route-history selection, recorded histories and raster fixtures found no reusable per-trip counter or recorded-publication owner; domain.py:89 owns the CORE mask and flux_surface_connectivity.py:620-633 counts a different postprocessing mask, while forward.py:207 extends the existing publication owner.",
+    "scope_discipline": "all 15 changed files are inside node.write_paths in the source run's live record, and the added app/shard/benchmark changes follow directly from the receipt and carry schema changes."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/brief.md requires renamed change history and a separate per-trip support population; nova/equilibrium/fixed_point.py:5127 and forward.py:2778-2779 deliver the Krylov path, but reduced requests still publish the default scalar -1.\nVERDICT done_when: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log records 10 passed at 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 and negative-control-publication.log records 2 failed under swapped publication keywords, but base-arm.log and head-arm.log include an aborted reduced-constraints file and cannot establish complete zero-added-failures coverage.\nVERDICT write_paths: the live run's node.write_paths authorizes all 15 files in the base-to-head diff, including the widened app, shard, benchmark and six reader tests.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md records both arms and their failure ids, but marks them completed despite the missing reduced-constraints summary and retains stale commits, gate revision and owed-work statements.\nVERDICT diff: read 3294d101740f2939900ad7c3b4f168258bdf49ae, 0b810e963b856f9e74b43386cee2990b7247249c and 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 against 708079d2e5c785d2d2b6fe67be128632c9852043; they add the loop counter, migrate constructors/readers, append the correction and replace test-side publication with the real request seam.\nCALL_SITES: nova/equilibrium/fixed_point.py:_active_set_newton_krylov, nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request, nova/equilibrium/forward.py:ForwardProfile._solve_constrained_reduced, apps/playable/session.py:equilibrium_frame_receipt, scripts/labeller_batch/shard.py:_forward_receipt\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward.py:227 publishes a per-trip support array for Krylov but a default scalar -1 for reduced requests because its reduced adapter at line 2407 never fills the new history field.\nSCORE evidence: 10\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log and negative-control-publication.log substantiate publication protection, while the reduced-constraints entry in both arm logs exits 134 without a summary, leaving the full regression measure unproved.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all 15 changed files are inside node.write_paths in the source run's live record, and the added app/shard/benchmark changes follow directly from the receipt and carry schema changes.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_receipt_support_count.py:118-155 would fail if the loop published change counts as support and lines 248-259 catch publication swaps, but tests/test_reduced_newton_constraints.py:1076 compares two copies of the same unpopulated default rather than an independently measured population.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/fixed_point.py:4955 and 5038 extend the existing fixed-shape carry and forward.py:207 extracts the existing selection at its owner without introducing a forbidden name, although the reduced-route availability statement at line 210 is inaccurate.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches for core-population counting, route-history selection, recorded histories and raster fixtures found no reusable per-trip counter or recorded-publication owner; domain.py:89 owns the CORE mask and flux_surface_connectivity.py:620-633 counts a different postprocessing mask, while forward.py:207 extends the existing publication owner.\nFINDING nova/equilibrium/forward.py:227 blocking: reduced_newton is selected as an active-set route, but _solve_constrained_reduced at lines 2407-2430 never sets active_set_support_cells, so support_cell_count becomes the scalar default -1 from fixed_point.py:524 rather than a per-trip population or the explicit empty history used for unavailable routes; downstream indexing of this advertised history fails and its values cannot describe support.\nFINDING tests/test_reduced_newton_constraints.py:1076 blocking: the added support assertion compares receipt.support_cell_count with receipt.equilibrium.fixed_point.active_set_support_cells, the same source the publication copies, so the existing missing-count defect leaves both sides equal to -1; removing support collection still passes this assertion, which therefore does not protect reduced-route support measurement.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:21 blocking: baseline_suite and after_suite declare completed=true although both reduced-constraints processes aborted before the summary and yielded no failing test ids; equal exit 134 codes do not establish equal failures, so the asserted complete zero-added-failures measure needs completed evidence or an explicit unresolved gate.\n",
+  "review_run_id": "r-20261108T171635377112-review-of-receipt-mask-history-rename-4e400eba8cc0",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_commits": [
+    "3294d101740f2939900ad7c3b4f168258bdf49ae",
+    "0b810e963b856f9e74b43386cee2990b7247249c",
+    "4e400eba8cc0bc6fdb19e94cd239191c2bf071c6"
+  ],
+  "reviewed_head_sha": "4e400eba8cc0bc6fdb19e94cd239191c2bf071c6",
+  "reviewed_run_id": "r-20261108T112025169253-receipt-mask-history-rename",
+  "scores": {
+    "durability": 16,
+    "evidence": 10,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T17:35:16.730869+00:00",
+  "total": 101
+}

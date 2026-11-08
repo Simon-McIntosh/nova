@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -601,6 +601,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261108T145642954226-review-of-icm-sheet-tile-measure-36ef6849bf87" data-who="reckon-build" data-when="2026-11-08T15:36:19.567Z">
     <div class="r-comment-body"><p>review of icm-sheet-tile-measure at 36ef6849b: goal_fidelity 11, evidence 8, scope_discipline 18, durability 8, fit 15, reuse 14, two blocking findings (the B_R denominator is built from the wrong per-end derivative, and the recorded gate does not reproduce on CPU) and three non-blocking</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261108T100626702282-icm-sheet-tile-measure" data-who="reckon-build" data-when="2026-11-08T16:47:32Z">
+    <div class="r-comment-body"><p>the per-end denominator, the packed-kernel finiteness port and a reference independent of the code under test all stand; the whole-mesh gate closes at a worst entry of 2.083e-15 with every entry finite, and the reversed-normal control is red through pytest with a test id and a nonzero exit status</p></div>
 </div>
 </section>
 </main>

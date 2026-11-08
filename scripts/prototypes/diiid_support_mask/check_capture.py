@@ -1,6 +1,7 @@
 """Refuse missing, inconsistent or empty captured support evidence."""
 
 import argparse
+import ast
 import inspect
 import json
 from pathlib import Path
@@ -40,8 +41,22 @@ def main():
     args = parser.parse_args()
     print(f"measurement_module={inspect.getfile(Topology)}", flush=True)
     print(f"measurement_cwd={Path.cwd().resolve()}", flush=True)
-    source = inspect.getsource(ForwardProfile.solve)
-    assert "history.active_set_mask_differences" in source
+    source = Path(inspect.getfile(ForwardProfile)).read_text()
+    assignments = [
+        node.value
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "mask_history"
+            for target in node.targets
+        )
+    ]
+    assert any(
+        isinstance(value, ast.IfExp)
+        and isinstance(value.body, ast.Attribute)
+        and value.body.attr == "active_set_mask_differences"
+        for value in assignments
+    ), "receipt mask-history provenance changed"
     print(
         "PROVENANCE: receipt mask_history reads active_set_mask_differences", flush=True
     )

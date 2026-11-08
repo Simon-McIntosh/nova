@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "non-blocking hygiene in prototype launchers and the prototype regression check; the product change is gated by bitwise packed moments and paired suite arms",
       "recorded_at": "2026-11-08T08:49:50.876419+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking hygiene in prototype launchers and the prototype regression check; the product change is gated by bitwise packed moments and paired suite arms",
+      "recorded_at": "2026-11-08T08:50:10.621175+00:00"
     }
   },
   "findings": [

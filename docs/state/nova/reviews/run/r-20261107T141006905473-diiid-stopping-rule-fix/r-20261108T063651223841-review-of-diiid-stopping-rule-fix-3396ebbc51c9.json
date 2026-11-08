@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-08T06:51:33.898Z",
   "dispatched_at": "2026-11-08T06:38:38Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking polish on prototype panels and their pinning test; the product change is gated by the stationary-mask tests",
+      "recorded_at": "2026-11-08T07:09:10.800952+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",

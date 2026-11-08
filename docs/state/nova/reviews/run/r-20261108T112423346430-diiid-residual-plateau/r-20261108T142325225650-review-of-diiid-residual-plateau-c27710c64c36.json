@@ -22,6 +22,13 @@
   "completed_at": "2026-11-08T14:36:52Z",
   "dispatched_at": "2026-11-08T14:24:19Z",
   "figure_review": "All three exact-head SVGs extracted and rasterized with librsvg, and producer previews inspected; text coordinates lie inside canvas. ImageMagick reported temporary delegate refusal, and raster output inconsistencies were treated as instrument limitations rather than confirmed SVG defects.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-residual-plateau",
+      "recorded_at": "2026-11-08T14:52:56.006663+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_residual_plateau/check_capture.py",

@@ -71,6 +71,13 @@
     "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
     "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-stopping-rule-fix",
+      "recorded_at": "2026-11-08T01:58:20.129256+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",

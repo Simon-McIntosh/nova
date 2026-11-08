@@ -67,16 +67,19 @@ GATE = 1e-13
 
 #: Targets and quadrature order of the independent ring reference. The bound is
 #: the measured difference between the two formulations, not the tile's error:
-#: the disagreement is 3.0518099e-8 at order 32 and moves only in the eighth
-#: digit at orders 64 and 128, so the quadrature has converged and what remains
-#: is how closely a ring sum of the ring Green's function reproduces a closed
-#: form edge integral. The tile is not in that gap: this same closed form agrees
-#: with its own flat walk to 2e-15 across the whole mesh. A bound far above the
-#: floor is still a defect detector, because a sign error in K_phi or a
+#: the disagreement is 3.7868e-8 at order 32, 3.7869e-8 at order 64 and
+#: 3.7869e-8 at order 128, so the quadrature has converged and what remains is
+#: how closely a ring sum of the ring Green's function reproduces a closed form
+#: edge integral. It is not a precision defect on either side: the same closed
+#: form matches its own packed walk bit for bit, and its per-end terms carry
+#: double-precision rounding. The floor sits on a horizontal (flat) edge of a
+#: far target, where the sheet's two components cancel and the flat route's own
+#: accuracy, not the tile's, is what the entry measures. A bound just above the
+#: measured floor is still a defect detector, because a sign error in K_phi or a
 #: shared-edge pair collapsed the wrong way moves an O(1) fraction of the entry.
 REFERENCE_TARGETS = 8
 REFERENCE_ORDER = int(os.environ.get("NOVA_SHEET_TILE_REFERENCE_ORDER", "32"))
-REFERENCE_GATE = 1e-6
+REFERENCE_GATE = 1e-7
 
 
 @lru_cache(maxsize=None)
@@ -247,7 +250,7 @@ def interaction():
 
 
 def test_west_mesh_is_the_prototype_mesh():
-    """The fixture is the 1696-cell WEST mesh the plan measures on."""
+    """The fixture is the 1696-cell prototype WEST iron mesh."""
     polygons, centroids = west_mesh()
     assert len(polygons) == 1696
     assert centroids.shape == (1696, 2)

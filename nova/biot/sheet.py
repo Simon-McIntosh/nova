@@ -72,6 +72,7 @@ rounding.  It is therefore not used; the sloped case is reduced as above.
 
 from __future__ import annotations
 
+import functools
 from functools import lru_cache
 
 import numpy as np
@@ -86,10 +87,17 @@ from nova.biot.completeelliptic import (
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.greens import MU0, greens_bz_br, greens_psi
-from nova.biot.zeta import zeta
+from nova.biot.zeta import traced_zeta, zeta
 from nova.jax.config import configure_dtypes
 
-__all__ = ["ROUTES", "SheetFlux", "sheet_field", "sheet_flux"]
+__all__ = [
+    "ROUTES",
+    "SheetFlux",
+    "packed_sheet_end_scale",
+    "packed_sheet_field",
+    "sheet_field",
+    "sheet_flux",
+]
 
 # The closed form is built from jitted programs, and a compiled program cannot
 # carry single precision past the geometry it was traced on.  Enabling x64 once,
@@ -838,3 +846,361 @@ def sheet_field(
 ) -> tuple[float, float]:
     """``(B_R, B_Z)`` [T] of a conic sheet at ``(r, z)``."""
     return SheetFlux(start, end, sheet_current=sheet_current).field(r, z, route=route)
+
+
+# --- the batched edge-sheet closed form -------------------------------
+# Every helper below evaluates one whole block of (target, edge) pairs, so the
+# tile route and the scalar route above are one implementation rather than two.
+# The scalar class is the reference the packed form is checked against; the
+# packed form is what the tiled build launches.
+_SHEET_ARSINH_NODES = 128
+_SHEET_FIELD_PANELS = 140
+_SHEET_FIELD_RATIO = 1.25
+_SHEET_FIELD_NODES = 24
+
+
+@functools.lru_cache(maxsize=None)
+def _sheet_graded_rule() -> tuple:
+    """Return the graded arsinh rule's nodes and its azimuthal rule's nodes."""
+    return np.polynomial.legendre.leggauss(64), np.polynomial.legendre.leggauss(
+        _SHEET_FIELD_NODES
+    )
+
+
+def _sheet_root(gamma, radius, source):
+    """``R``: the closed form's complete first- and second-kind ``D`` block.
+
+    The same expression :func:`nova.biot.sheet` carries, written against the
+    traced elliptic descent so one call evaluates a whole block of pairs.
+    """
+    span = gamma * gamma + (radius + source) ** 2
+    k2 = 4.0 * radius * source / span
+    complement = (gamma * gamma + (radius - source) ** 2) / span
+    first, second = complete_kind_traced(complement)
+    return (
+        2.0 * span**0.5
+        * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second)
+        / (3.0 * k2)
+    )
+
+
+def _sheet_root_gradient(gamma, radius, source):
+    """Return ``(R, dR/dgamma, dR/dradius)`` per pair.
+
+    Each pair's ``R`` depends only on its own geometry, so the elementwise
+    derivative is a ``vmap`` of JAX's own ``value_and_grad`` over the traced
+    elliptic descent rather than a full Jacobian.
+    """
+    import jax
+
+    value, gradient = jax.vmap(
+        jax.value_and_grad(_sheet_root, argnums=(0, 1)), in_axes=(0, 0, 0)
+    )(gamma, radius, source)
+    return value, gradient
+
+
+def _sheet_azimuth_rule(xp, width):
+    """Return the field kernels' azimuth nodes and weights, shape ``(pairs, nodes)``.
+
+    The rule is graded geometrically toward the singular azimuth and its width
+    follows the target's own standoff, so it is a function of the traced geometry
+    rather than a constant. The node count is fixed, which is what keeps the
+    program one shape.
+    """
+    _, (node, weight) = _sheet_graded_rule()
+    node = xp.asarray(node)
+    weight = xp.asarray(weight)
+    span = xp.arcsinh(np.pi / width)
+    index = np.arange(_SHEET_FIELD_PANELS + 1)
+    edges = (
+        span[:, None]
+        * (_SHEET_FIELD_RATIO**index - 1.0)
+        / (_SHEET_FIELD_RATIO**_SHEET_FIELD_PANELS - 1.0)
+    )
+    half = 0.5 * (edges[:, 1:] - edges[:, :-1])
+    centre = 0.5 * (edges[:, 1:] + edges[:, :-1])
+    stretch = (centre[:, :, None] + half[:, :, None] * node[None, None, :]).reshape(
+        width.shape[0], -1
+    )
+    rule = (half[:, :, None] * weight[None, None, :]).reshape(width.shape[0], -1)
+    rule = rule * width[:, None] * xp.cosh(stretch)
+    return width[:, None] * xp.sinh(stretch), rule
+
+
+def _sheet_arsinh_rule(xp, gamma, radius, r1, b1):
+    """Return the two graded panels and the integrand closure of the arsinh term."""
+    a1sq = 1.0 + b1 * b1
+    spread = r1 - radius
+    upper = 2.0 * xp.sqrt(radius * xp.abs(r1 - radius * b1 * b1))
+    # a target beyond the segment's ends or on the far side of its line puts
+    # r_1 below -r, where the phi = 0 curvature is negative and r_1 + r is
+    # negative; both enter the log model as magnitudes, the model being the
+    # square root of a squared term, so they are taken unsigned rather than
+    # left to an imaginary square root
+    lower = 2.0 * xp.sqrt(radius * xp.abs(r1 + radius * b1 * b1))
+    far = a1sq * gamma + b1 * (r1 + radius)
+    near = a1sq * gamma + b1 * spread
+    zero = xp.zeros_like(radius)
+    panels = (
+        (xp.abs(r1 + radius), far, upper, zero, QUARTER),
+        (xp.abs(spread), near, lower, zero, QUARTER),
+    )
+
+    def pieces(x, y):
+        return (
+            near[:, None] + 2.0 * b1[:, None] * radius[:, None] * y,
+            xp.sqrt(
+                spread[:, None] ** 2
+                + 4.0 * radius[:, None] * r1[:, None] * y
+                + 4.0 * radius[:, None] ** 2 * b1[:, None] ** 2 * x * y
+            ),
+        )
+
+    return panels, pieces
+
+
+def _sheet_arsinh_term(xp, gamma, radius, r1, b1):
+    """``int cos(phi) (r_1 + b_1^2 r cos phi) arsinh d phi``, log removed."""
+    panels, pieces = _sheet_arsinh_rule(xp, gamma, radius, r1, b1)
+    weight = (
+        [-8.0 * b1 * b1 * radius],
+        xp.asarray(2.0 * (r1 + b1 * b1 * radius)),
+        xp.asarray(2.0 * (b1 * b1 * radius - r1)),
+    )
+    return graded_residual(panels, pieces, _SHEET_ARSINH_NODES, xp, weight=weight)
+
+
+def _sheet_arsinh_gradient(xp, gamma, radius, source, b1):
+    """Return ``(A, dA/dgamma, dA/dradius)`` of the arsinh remainder per pair."""
+    a1sq = 1.0 + b1 * b1
+    a1 = xp.asarray(1.0 + b1 * b1) ** 0.5
+    r1 = source - b1 * gamma
+    width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
+    width = xp.where(width > 0.0, width, 1.0)
+    # The arsinh argument's denominator vanishes at the azimuth where the source
+    # ring passes through the target, which is phi = 0 when r_1 = r and
+    # phi = pi when r_1 = -r. The rule grades only one end, so it is placed at
+    # whichever end is nearer that confluence: a target on the far side of the
+    # line puts r_1 below -r, and the end carrying the logarithmic layer is
+    # then the far one.
+    phi, rule = _sheet_azimuth_rule(xp, width)
+    phi = xp.where(
+        (xp.abs(r1 + radius) < xp.abs(r1 - radius))[:, None], np.pi - phi, phi
+    )
+    cosine = xp.cos(phi)
+    sine_sq = xp.sin(phi) ** 2
+    dense = xp.sqrt(
+        (radius - source)[:, None] ** 2
+        + gamma[:, None] ** 2
+        + 4.0 * radius[:, None] * source[:, None] * xp.sin(0.5 * phi) ** 2
+    )
+    half_sine = xp.sin(0.5 * phi) ** 2
+    gap = r1 - radius
+    gap = xp.where(xp.abs(gap) <= 1e-12 * radius, 0.0, gap)
+    W = gap[:, None] + 2.0 * radius[:, None] * half_sine
+    denominator = W * W + a1sq[:, None] * radius[:, None] ** 2 * sine_sq
+    gamma_bracket = a1sq[:, None] * gamma[:, None] + b1[:, None] * W
+    arsinh = xp.arcsinh(gamma_bracket / xp.sqrt(denominator))
+    smear = r1[:, None] + b1[:, None] ** 2 * radius[:, None] * cosine
+    gamma_pole = (
+        a1sq[:, None]
+        * (
+            W * (source[:, None] - radius[:, None] * cosine)
+            + radius[:, None] ** 2 * sine_sq
+        )
+        / denominator
+    )
+    radial_pole = (
+        -b1[:, None] * cosine * denominator
+        - gamma_bracket
+        * (
+            -gap[:, None]
+            + 2.0 * r1[:, None] * half_sine
+            + radius[:, None] * b1[:, None] ** 2 * sine_sq
+        )
+    ) / denominator
+    arsinh_plain = xp.sum(rule * cosine * arsinh, axis=1)
+    gamma_value = -b1 * arsinh_plain + xp.sum(
+        rule * cosine * smear * gamma_pole / (a1[:, None] * dense), axis=1
+    )
+    radial_value = b1 * b1 * xp.sum(rule * cosine * cosine * arsinh, axis=1) + xp.sum(
+        rule * cosine * smear * radial_pole / (a1[:, None] * dense), axis=1
+    )
+    return _sheet_arsinh_term(xp, gamma, radius, r1, b1), gamma_value, radial_value
+
+
+def _sheet_closed_gradient(xp, gamma, radius, source, b1):
+    """Return ``(S, dS/dgamma, dS/dradius)`` of the closed-form antiderivative."""
+    a1 = xp.sqrt(1.0 + b1 * b1)
+    root, gradient = _sheet_root_gradient(gamma, radius, source)
+    value, gamma_value, radial_value = _sheet_arsinh_gradient(
+        xp, gamma, radius, source, b1
+    )
+    return (
+        a1 * b1 * root + value,
+        a1 * b1 * gradient[0] + gamma_value,
+        a1 * b1 * gradient[1] + radial_value,
+    )
+
+
+def _sheet_pancake_terms(xp, gamma, radius, source):
+    """``(A_phi, H_r, H_z)`` of Snow's eqs (26) and (27) at one flat-sheet end.
+
+    The flat sheet's remainder is the paper's ``g_0^(2)(pi/2)``, taken through
+    :func:`nova.biot.zeta.traced_zeta` so the same rule serves a block of pairs.
+    A target level with the sheet's plane is the one place the printed blocks
+    need their limit taken rather than their arithmetic, and it is selected
+    arithmetically rather than by a branch.
+    """
+    span = gamma**2 + (radius + source) ** 2
+    a = xp.sqrt(span)
+    complement = (gamma**2 + (radius - source) ** 2) / span
+    first, second = complete_kind(complement, xp=xp)
+    c = xp.sqrt(gamma**2 + radius**2)
+    remainder = traced_zeta(xp, source, radius, gamma, np.pi / 2)
+    potential = (
+        -source / (2.0 * a * radius)
+    ) * ((radius**2 - source**2 - 3.0 * gamma**2) * first + span * second)
+    potential = potential + radius * remainder
+    height = 2.0 * remainder - 2.0 * source / a * first
+    level = xp.abs(gamma) <= 1e-12 * radius
+    # a target level with the plane puts the first pole on the range end; the
+    # block cancels to zero there, so the characteristic is held off the pole
+    # and the term is zeroed rather than divided by zero
+    held = xp.where(level, radius + radius, c)
+    third = 0.0
+    radial = 0.0
+    for order in (1, 2):
+        if order == 1:
+            ratio = (source + c) / (radius - held)
+            characteristic = 2.0 * radius / (radius - held)
+        else:
+            ratio = (source - c) / (radius + c)
+            characteristic = 2.0 * radius / (radius + held)
+        pole = complete_pole(
+            xp.asarray(1.0 - characteristic), xp.asarray(complement), xp=xp
+        )
+        third = third + (-1) ** order * ratio * pole
+        radial = radial + (-1) ** order * c * ratio * pole
+    potential = potential - xp.where(
+        level, 0.0, c * gamma**2 / (2.0 * a * radius) * third
+    )
+    radial = xp.where(
+        level, 0.0, gamma / (a * radius) * (2.0 * source * first - radial)
+    )
+    return potential, radial, height
+
+
+def _sheet_pancake_field(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """``(B_R, B_Z)`` [T per A/m] of a flat edge, eq (27) over the segment."""
+    gamma = xp.asarray(start_z) - target_z
+    lower = xp.minimum(xp.asarray(start_r), xp.asarray(end_r))
+    upper = xp.maximum(xp.asarray(start_r), xp.asarray(end_r))
+    radial = 0.0
+    height = 0.0
+    for source, sign in ((upper, 1.0), (lower, -1.0)):
+        _, end_radial, end_height = _sheet_pancake_terms(xp, gamma, target_r, source)
+        radial = radial + sign * end_radial
+        height = height + sign * end_height
+    return MU0 / (2.0 * np.pi) * radial, MU0 / (2.0 * np.pi) * height
+
+
+def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """Return the per-end field terms of both the sloped and the flat route.
+
+    Each component of :func:`packed_sheet_field` is a signed difference of two
+    segment-end terms, so the terms themselves are what both the value and its
+    rounding scale are built from. Returning them from one place is what keeps
+    the two from drifting: the value is their signed sum and the scale is their
+    absolute sum, per component, and neither restates the branch structure.
+
+    The flat route's ends sit at the segment's radial extremes, the sloped
+    route's at its ordered endpoints. ``flat`` selects between them.
+    """
+    target_r = xp.asarray(target_r)
+    target_z = xp.asarray(target_z)
+    start_r = xp.asarray(start_r)
+    start_z = xp.asarray(start_z)
+    end_r = xp.asarray(end_r)
+    end_z = xp.asarray(end_z)
+    # The sheet current is an azimuthal density, so the field depends on the
+    # segment and the sign of K alone. Ordering the endpoints by height makes
+    # that independence arithmetic rather than a convention on the caller.
+    swap = start_z > end_z
+    lower_r = xp.where(swap, end_r, start_r)
+    lower_z = xp.where(swap, end_z, start_z)
+    upper_r = xp.where(swap, start_r, end_r)
+    upper_z = xp.where(swap, start_z, end_z)
+    drop_r = upper_r - lower_r
+    drop_z = upper_z - lower_z
+    flat = drop_z == 0.0
+    held_z = xp.where(flat, xp.ones_like(drop_z), drop_z)
+    b1 = drop_r / held_z
+    a1sq = 1.0 + b1 * b1
+    radial_scale = MU0 / (2.0 * np.pi * a1sq)
+    height_scale = MU0 / (2.0 * np.pi * target_r * a1sq)
+    sloped_radial = []
+    sloped_height = []
+    for start in (1.0, 0.0):
+        gamma = (upper_z if start else lower_z) - target_z
+        source = (upper_r if start else lower_r) + xp.zeros_like(target_z)
+        value, gamma_value, radial_value = _sheet_closed_gradient(
+            xp, gamma, target_r, source, b1
+        )
+        sloped_radial.append(radial_scale * gamma_value)
+        sloped_height.append(height_scale * (value + target_r * radial_value))
+    # A flat sheet's two ends are its radial extremes; its antiderivative is the
+    # same difference, taken at those ends with the target's own height offset.
+    gamma = start_z - target_z
+    lower = xp.minimum(start_r, end_r)
+    upper = xp.maximum(start_r, end_r)
+    pancake_radial = []
+    pancake_height = []
+    for source in (upper, lower):
+        _, end_radial, end_height = _sheet_pancake_terms(
+            xp, gamma, target_r, source
+        )
+        pancake_radial.append(MU0 / (2.0 * np.pi) * end_radial)
+        pancake_height.append(MU0 / (2.0 * np.pi) * end_height)
+    return sloped_radial, sloped_height, pancake_radial, pancake_height, flat
+
+
+def packed_sheet_field(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """Return ``(B_R, B_Z)`` [T per A/m] per pair from the edge-sheet closed form.
+
+    The packed transcription of :meth:`SheetFlux._sloped_field_closed` and, for a
+    horizontal edge, of :meth:`SheetFlux._pancake_field`: one call evaluates a
+    whole block of (target, edge) pairs, each pair against its own segment, with
+    no branch on a value. An edge's own slope selects its route arithmetically, so
+    a tile mixing sloped and horizontal edges is one program.
+    """
+    sloped_radial, sloped_height, pancake_radial, pancake_height, flat = (
+        _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z)
+    )
+    return (
+        xp.where(flat, pancake_radial[0] - pancake_radial[1],
+                 sloped_radial[0] - sloped_radial[1]),
+        xp.where(flat, pancake_height[0] - pancake_height[1],
+                 sloped_height[0] - sloped_height[1]),
+    )
+
+
+def packed_sheet_end_scale(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """Return the absolute per-end scale of each field component, per pair.
+
+    Two correctly rounded evaluations of a component disagree by at most the
+    last bits of the terms it is summed from, so the largest disagreement either
+    can carry is the absolute sum of those terms rather than the net value,
+    which cancellation can leave orders of magnitude smaller. The terms are the
+    ones :func:`packed_sheet_field` sums, taken from the same helper, so a
+    component's scale can never be built from another component's terms.
+    """
+    sloped_radial, sloped_height, pancake_radial, pancake_height, flat = (
+        _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z)
+    )
+    return (
+        xp.where(flat, xp.abs(pancake_radial[0]) + xp.abs(pancake_radial[1]),
+                 xp.abs(sloped_radial[0]) + xp.abs(sloped_radial[1])),
+        xp.where(flat, xp.abs(pancake_height[0]) + xp.abs(pancake_height[1]),
+                 xp.abs(sloped_height[0]) + xp.abs(sloped_height[1])),
+    )

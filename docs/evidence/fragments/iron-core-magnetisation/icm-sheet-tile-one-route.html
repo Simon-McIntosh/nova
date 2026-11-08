@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>One owner for the edge-sheet closed form</title>
+<meta name="plan-id" content="iron-core-magnetisation">
+<meta name="plan-section" content="s3">
+<meta name="node-id" content="icm-sheet-tile-one-route">
+</head>
+<body>
+<article>
+<h1 id="icm-sheet-tile-one-route-title">One owner for the edge-sheet closed form</h1>
+
+<section id="icm-sheet-tile-one-route-what">
+<h2>What changed</h2>
+<p>
+The sheet tile no longer carries its own transcription of the Part II closed form.
+<code>nova/biot/tiledassembly.py</code> held a second copy of the sloped
+antiderivative, the graded arsinh rule, the flat pancake route and the azimuthal
+rule — the nine <code>_sheet_*</code> helpers plus <code>packed_sheet_field</code>
+and <code>packed_sheet_end_scale</code> — alongside the scalar owner in
+<code>nova/biot/sheet.py</code>. The batched, padded entry point the tile needs now
+lives in <code>sheet.py</code>, beside <code>SheetFlux</code>, <code>sheet_flux</code>
+and <code>sheet_field</code>, and <code>tiledassembly</code> imports it. The tile
+and the host route are one implementation, so a repair applied to one is applied to
+both.
+</p>
+<p>
+<code>_sheet_graded_rule</code>, the quadrature-only helper the tile carried and no
+route called, is deleted with the rest of the copy.
+</p>
+</section>
+
+<section id="icm-sheet-tile-one-route-scale">
+<h2>The per-end scale now comes from the terms it scales</h2>
+<p>
+The measure node's blocking finding reproduces: <code>packed_sheet_end_scale</code>
+built the <em>B<sub>R</sub></em> scale from the derivative of the antiderivative in
+radius, while <code>packed_sheet_field</code> builds <em>B<sub>R</sub></em> from its
+derivative in height. The gate therefore divided the B<sub>R</sub> half by the wrong
+term sum.
+</p>
+<p>
+The repair is structural rather than a second transcription of the branch
+structure: one helper, <code>_sheet_end_terms</code>, returns the two per-end field
+terms of each component for both the sloped and the flat route, already in field
+units. <code>packed_sheet_field</code> is the signed sum of those terms;
+<code>packed_sheet_end_scale</code> is their absolute sum. Neither can restate the
+branch structure independently, so a component's scale cannot be built from another
+component's terms again.
+</p>
+</section>
+
+<section id="icm-sheet-tile-one-route-reference">
+<h2>The independent ring reference floor is a formulation gap, not a precision defect</h2>
+<p>
+The measure node recorded a <code>3.0518e-8</code> disagreement between the tile and
+the prototype's ring-quadrature reference, flat across orders 32, 64 and 128, and
+read it as a single-precision path in the reference loader. Measurement rejects
+that reading.
+</p>
+<ul>
+<li>The prototype (<code>scripts/prototypes/iron_magnetisation/magnetisation.py</code>)
+is pure <code>numpy</code> float64: <code>np.polynomial.legendre.leggauss</code> nodes,
+<code>nova.biot.greens.greens_bz_br</code> cast to float64 on entry, no
+<code>jax</code>, no float32 constant anywhere in <code>edge_rings</code>,
+<code>ring_field</code> or <code>interaction</code>.</li>
+<li>Single-cell check at order 32/128/512/2048 against
+<code>sheet_field</code>: the four edges of cell 0 agree to
+2.3e-15, 3.0e-15, 2.3e-15 and 4.6e-14 (edge 1) and 3.1e-15, 4.2e-15, 3.6e-15,
+4.3e-14 (edge 3) — the closed form and the ring integral agree to double-precision
+rounding, so no single-precision array is in the path.</li>
+<li>The flat worst entry is cell 432, a horizontal edge from
+<code>(0.05, 3.5224)</code> to <code>(0.13, 3.5224)</code>, seen by a target at
+<code>(0.09, -0.834)</code>. The closed form returns
+<code>B_R = -1.622552985639e-13</code>, the ring quadrature
+<code>-1.622552963224e-13</code> at order 32 and identically at order 512; the
+difference is <code>2.24e-21</code>, and <code>B_Z</code> agrees to every printed
+digit. It is flat in order because the quadrature has converged: what the entry
+measures is the flat route's own accuracy where the two components cancel, not a
+refinement of either.</li>
+</ul>
+<p>
+The per-end terms of that pair are <code>1.82e-13</code> for B<sub>R</sub> against a
+net <code>-1.62e-13</code>, so the gap is <code>1.2e-8</code> of the scale the gate
+divides by. With the corrected scale the worst over eight targets is
+<code>3.7868e-8</code>, unchanged from the wrong scale to three digits — the
+reference floor is therefore independent of the B<sub>R</sub> scale defect.
+<code>REFERENCE_GATE</code> is set to <code>1e-7</code>, just above the measured
+floor and tighter than the <code>1e-6</code> it replaces.
+</p>
+</section>
+
+<section id="icm-sheet-tile-one-route-cpu">
+<h2>The tile gate still fails on CPU — the dedup is landed, the gate is not met on that backend</h2>
+<p>
+With the tile and the host route now the same function, the gate that compares
+them measures the tile's batching and padding alone, and on CPU it does not hold.
+Eight targets, two workers, <code>NOVA_SHEET_TILE_TARGETS=8
+NOVA_SHEET_TILE_WORKERS=2</code>: worst entry <code>6.258e-9</code> at
+(8,&nbsp;425), <code>2051</code> of <code>54272</code> entries above <code>1e-13</code>;
+percentiles <code>p50=0.000e+00 p90=1.886e-16 p99=0.610e-12 p99.9=1.023e-09
+p100=6.258e-09</code>. Most entries are bit-*identical* between the tiled
+(<code>vmap</code> over pair blocks) and unbatched (flat chunk) launches, which
+rules out a systematic formulation difference and points at a subset of pairs.
+</p>
+<p>
+Chasing it to the component: on the same pairs, the <em>B<sub>Z</sub></em> rows
+agree bit for bit and only the <em>B<sub>R</sub></em> rows differ, by e.g.
+<code>5.85e-21</code> on a value of <code>-5.465e-12</code> whose per-end terms are
+of order <code>1e-13</code> — about <code>6e-8</code> of the scale, far above
+double-precision rounding of those terms. The packed function's own gradient
+(<code>_sheet_closed_gradient</code>, all three returned components) is
+bit-identical between the flat and blocked launches in isolation, so the
+difference is introduced by the surrounding program rather than by the closed
+form's arithmetic.
+</p>
+<p>
+This node does not resolve it. It is reported blocked on clause (2) rather than
+loosened: the gate stays at <code>1e-13</code> and the tile's agreement with the
+closed form on CPU is the open item, alongside the H200 run that clause (2)
+requires and which this node did not reach.
+</p>
+</section>
+
+<section id="icm-sheet-tile-one-route-evidence">
+<h2>Evidence</h2>
+<ul>
+<li>CPU gate log: <code>logs/gate-cpu.log</code> in the run directory.</li>
+<li>Negative control log: <code>logs/negative-control.log</code>.</li>
+<li>Reproduction and diagnosis scripts: <code>diag2.py</code> (blocked vs flat
+launch), <code>diag5.py</code> (scale comparison), <code>diag7.py</code> (per-edge
+convergence), <code>diag8.py</code> (worst entry) in the run's scratch directory.</li>
+</ul>
+</section>
+</article>
+</body>
+</html>

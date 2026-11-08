@@ -1,0 +1,176 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "failure_condition": "Precision configuration leaves JAX x64 disabled.",
+      "location": "tests/test_material_mask_limiter.py:14"
+    },
+    {
+      "failure_condition": "The governed fixture includes no cells or excludes no cells; this is a nonempty-domain positive control.",
+      "location": "tests/test_material_mask_limiter.py:105"
+    },
+    {
+      "failure_condition": "Restore the prepared-frame pseudo-wall default: material flags become true outside the independently selected physical polygon. The recorded mutation produces this failure.",
+      "location": "tests/test_material_mask_limiter.py:106"
+    },
+    {
+      "failure_condition": "The governed ring or raster no longer yields the independently pinned 527-cell count on this grid.",
+      "location": "tests/test_material_mask_limiter.py:112"
+    },
+    {
+      "failure_condition": "Restore the pseudo-wall default: the prepared material count becomes 1089 while the physical-route count remains 527. This is not self-equality: the reference builder is called explicitly with None, independent of the caller default being tested.",
+      "location": "tests/test_material_mask_limiter.py:113"
+    },
+    {
+      "failure_condition": "Explicit expansion=0.02 no longer selects the all-grid control; this deliberately tests the retained control, not limiter exclusion.",
+      "location": "tests/test_material_mask_limiter.py:118"
+    },
+    {
+      "failure_condition": "Stopping-rule CLI drops the frame, forces a wall choice, discards the explicit flag or fails to reach the captured preparation seam; expected selection comes independently from argv and the parametrized fixture.",
+      "location": "tests/test_material_mask_limiter.py:129,138-139"
+    },
+    {
+      "failure_condition": "Serialization _self_check raises on its known nonfinite/list inputs, or _counters_self_check returns 1 after miscounting padded, accepted, refused or damped events against its hand-enumerated expected tuples.",
+      "location": "tests/test_material_mask_limiter.py:143-145"
+    },
+    {
+      "failure_condition": "Convergence CLI drops frame 179, forces pseudo-wall use, loses explicit expansion, or fails to reach captured run_frame; this tests parsed forwarding rather than asserting an input against itself.",
+      "location": "tests/test_material_mask_limiter.py:155,165-166"
+    },
+    {
+      "failure_condition": "A receipt is refused, tensor orientation/shape differs, saved flat state differs from its flux array, mask counts disagree with JSON, or an arm misses the pinned 527/1089 material count; serialized-state equality checks consistency and is not evidence of solver correctness by itself.",
+      "location": "scripts/prototypes/diiid_material_mask/check_measurement.py:25-39"
+    },
+    {
+      "failure_condition": "Wall-distance positive control fails on wall points; domain is empty/all-grid; polygon-recomputed support containment disagrees with JSON; a physical mask differs from the limiter polygon; physical support escapes; a physical axis is outside; or saved axis coordinates/containment disagree with JSON.",
+      "location": "scripts/prototypes/diiid_material_mask/check_measurement.py:44-71"
+    },
+    {
+      "failure_condition": "The cohort is not twelve rows, any of six subprocess receipts is missing/nonzero/duplicated, the H200 success receipt is absent, or all supports are empty.",
+      "location": "scripts/prototypes/diiid_material_mask/check_measurement.py:74-85"
+    },
+    {
+      "failure_condition": "Reference polishing runs without x64, fails to converge, or returns a Hessian classification other than the independently expected extremum and saddle.",
+      "location": "scripts/prototypes/diiid_material_mask/render.py:47,55-56"
+    },
+    {
+      "failure_condition": "The reused text checker detects overlap/clipping or a margin-label anchor lies in a plot axes; actual committed output was also visually inspected.",
+      "location": "scripts/prototypes/diiid_material_mask/render.py:66-71"
+    }
+  ],
+  "assertion_independence": "No added regression assertion compares a returned value solely with the same value the test supplied to make that return happen; paired serialization equality assertions are identified as consistency checks, not physical validation. The prepared-frame fixture replaces expensive build_profile operands, so this review credits protection of the changed caller-selection contract rather than a new integration guarantee for untouched product construction.",
+  "authority": {
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111844665111-diiid-material-mask-limiter/brief.md",
+    "interpretation": "The accepted locate result explicitly changes the fix and its tests: caller physical-route selection, rather than modification of the product missing-mask default. The original outside-axis test and MAST rerun are not treated as unsatisfied obligations of the replacement contract; product and MAST callers are unchanged.",
+    "live_plan": "nova/diiid-vertical-force-balance version 65",
+    "revised_contract": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111844665111-diiid-material-mask-limiter/resume-1-advice.txt"
+  },
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/diiid_forward_convergence/measure_branches.py:572",
+    "scripts/prototypes/diiid_forward_convergence/measure_branches.py:main",
+    "scripts/prototypes/diiid_forward_convergence/run_probe_frames.py:52-70",
+    "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:85",
+    "scripts/prototypes/diiid_stopping_rule/run_step_gate_diagnosis.py:24-62",
+    "scripts/prototypes/diiid_material_mask/measure.py:30"
+  ],
+  "completed_at": "2026-11-08T20:44:02Z",
+  "dispatched_at": "2026-11-08T20:34:59Z",
+  "figure_inspection": {
+    "method": "Extracted each SVG from the reviewed git object, rasterized with installed ImageMagick convert, opened both resulting 1400px PNGs with view_image.",
+    "paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T203311711187-review-of-diiid-material-mask-limiter-bbda569dea75/frame-146-limited.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T203311711187-review-of-diiid-material-mask-limiter-bbda569dea75/frame-146-diverted.png"
+    ],
+    "renderer_caveat": "System Python lacks cairosvg, so ImageMagick was used; its optional delegate reported a read-only /tmp temporary path, but both output images were produced and directly inspected.",
+    "result": "Both legible; no text overlap or clipping; margin labels clear; paired support cells, limiter, terminal/reference contours and null markers visible; diverted control visibly above the limiter.",
+    "revision": "bbda569dea757dbe4ccb834dab87ba2cd216df00"
+  },
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "Read all five commits from 04d969738a47a2d5bc31544c03980d1e4afcd94c to bbda569dea757dbe4ccb834dab87ba2cd216df00, including the caller defaults, explicit control forwarding, terminal measurement/refusal handling, guards, verifier, renderer and evidence; both committed SVGs were rasterized and visually inspected without clipped or colliding text.",
+    "done_when": "The revised measure in resume-1-advice.txt requires two prepared-frame mask guards, a failing pseudo-wall control, twelve paired H200 rows, figures and complete suite arms; tests/test_material_mask_limiter.py:102-166 and the recorded baseline, final-head, negative-control and measurement-verification logs supply those results.",
+    "goal": "The goal in the source prompt is to confine the DIII-D forward-solve material mask to the governed limiter; measure_branches.py:180 selects the existing physical route, as explicitly directed by resume-1-advice.txt:1-8 after the original operator-default hypothesis was disproved.",
+    "manifest": "The source manifest.md reports five commits and ten changed paths with complete base/head suite arms, and its 4-pass baseline, 12-pass final head and 2-failure negative control reconcile with the actual named logs; its MAST and nonconvergence caveats are explicit.",
+    "write_paths": "The original prompt scope was widened explicitly in resume-1-advice.txt:3 to include the convergence and stopping-rule prototype directories, and all ten paths in the five-commit diff fall within that revised scope."
+  },
+  "justifications": {
+    "durability": "Restoring expansion=0.02 at measure_branches.py:180 makes the independent exclusion and pinned 527-cell assertions at tests/test_material_mask_limiter.py:106,112-113 fail as negative-control.log records, while the parametrized CLI tests fail on dropped or forced surface selection.",
+    "evidence": "tests/test_material_mask_limiter.py:102-166 is backed by final-measured-head-gate.log at the reviewed head, negative-control.log explicitly fails both limiter guards, and check_measurement.py:20-83 verifies twelve saved states and six successful H200 subprocesses against their receipts.",
+    "fit": "measure_branches.py:180 extends its existing preparation seam, the CLIs name the pseudo-wall control explicitly, and diiid_material_mask/render.py:20-31 uses the repository's precision, ink, poloidal painter and text-check owners without introducing prohibited source names.",
+    "goal_fidelity": "scripts/prototypes/diiid_forward_convergence/measure_branches.py:180,206 and diagnose_step_gate.py:85 select the governed route that benchmarks/diiid_forward_gs_match.py:1047-1079 rasterizes into 527 material cells, with all six measured physical supports inside the limiter.",
+    "reuse": "Searches for material rasterization, terminal measurement, contour rendering, stationary-point polishing and text checking found the owners in wall_mask.py:70, diiid_forward_gs_match.py:1020, measure_branches.py:180 and _solve, flux_surface_connectivity.py:polish_stationary_points, poloidal.py:draw_flux_contours/draw_nulls/draw_wall and render_panels.py:435, which the added experiment wrappers call rather than replacing their mechanisms.",
+    "scope_discipline": "The ten changed paths match the original source prompt plus resume-1-advice.txt:3's explicit prototype-directory grant, and no product default or benchmark baseline was changed."
+  },
+  "limitations": [
+    "No suite rerun: the review reads the source node's completed logs as instructed.",
+    "This review is of the specified base/head pair, not the newer orientation checkout HEAD.",
+    "All twelve measured arms remain nonconverged; this is reported evidence, not a convergence repair. The stored evidence retains native contour and EFIT wall-gap caveats."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal in the source prompt is to confine the DIII-D forward-solve material mask to the governed limiter; measure_branches.py:180 selects the existing physical route, as explicitly directed by resume-1-advice.txt:1-8 after the original operator-default hypothesis was disproved.\nVERDICT done_when: The revised measure in resume-1-advice.txt requires two prepared-frame mask guards, a failing pseudo-wall control, twelve paired H200 rows, figures and complete suite arms; tests/test_material_mask_limiter.py:102-166 and the recorded baseline, final-head, negative-control and measurement-verification logs supply those results.\nVERDICT write_paths: The original prompt scope was widened explicitly in resume-1-advice.txt:3 to include the convergence and stopping-rule prototype directories, and all ten paths in the five-commit diff fall within that revised scope.\nVERDICT manifest: The source manifest.md reports five commits and ten changed paths with complete base/head suite arms, and its 4-pass baseline, 12-pass final head and 2-failure negative control reconcile with the actual named logs; its MAST and nonconvergence caveats are explicit.\nVERDICT diff: Read all five commits from 04d969738a47a2d5bc31544c03980d1e4afcd94c to bbda569dea757dbe4ccb834dab87ba2cd216df00, including the caller defaults, explicit control forwarding, terminal measurement/refusal handling, guards, verifier, renderer and evidence; both committed SVGs were rasterized and visually inspected without clipped or colliding text.\nCALL_SITES: scripts/prototypes/diiid_forward_convergence/measure_branches.py:572, scripts/prototypes/diiid_forward_convergence/measure_branches.py:main, scripts/prototypes/diiid_forward_convergence/run_probe_frames.py:52-70, scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:85, scripts/prototypes/diiid_stopping_rule/run_step_gate_diagnosis.py:24-62, scripts/prototypes/diiid_material_mask/measure.py:30\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_forward_convergence/measure_branches.py:180,206 and diagnose_step_gate.py:85 select the governed route that benchmarks/diiid_forward_gs_match.py:1047-1079 rasterizes into 527 material cells, with all six measured physical supports inside the limiter.\nSCORE evidence: 20\nJUSTIFICATION evidence: tests/test_material_mask_limiter.py:102-166 is backed by final-measured-head-gate.log at the reviewed head, negative-control.log explicitly fails both limiter guards, and check_measurement.py:20-83 verifies twelve saved states and six successful H200 subprocesses against their receipts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The ten changed paths match the original source prompt plus resume-1-advice.txt:3's explicit prototype-directory grant, and no product default or benchmark baseline was changed.\nSCORE durability: 20\nJUSTIFICATION durability: Restoring expansion=0.02 at measure_branches.py:180 makes the independent exclusion and pinned 527-cell assertions at tests/test_material_mask_limiter.py:106,112-113 fail as negative-control.log records, while the parametrized CLI tests fail on dropped or forced surface selection.\nSCORE fit: 20\nJUSTIFICATION fit: measure_branches.py:180 extends its existing preparation seam, the CLIs name the pseudo-wall control explicitly, and diiid_material_mask/render.py:20-31 uses the repository's precision, ink, poloidal painter and text-check owners without introducing prohibited source names.\nSCORE reuse: 20\nJUSTIFICATION reuse: Searches for material rasterization, terminal measurement, contour rendering, stationary-point polishing and text checking found the owners in wall_mask.py:70, diiid_forward_gs_match.py:1020, measure_branches.py:180 and _solve, flux_surface_connectivity.py:polish_stationary_points, poloidal.py:draw_flux_contours/draw_nulls/draw_wall and render_panels.py:435, which the added experiment wrappers call rather than replacing their mechanisms.\n",
+  "recommendation": "accept under the revised coordinator contract; no findings",
+  "reuse_search": {
+    "assessment": "Added measure.run_frame wraps the existing preparation and solve with paired limiter-specific observations; check.check supplies the new JSON/NPZ cohort consistency contract for those artifacts; reference_nulls wraps the existing tensor-spline/polisher owners; render/save compose existing painters and text checks for this paired layout; main functions only expose these wrappers. Test fixtures and capture helpers are local test seams, with no production owner duplicated.",
+    "capabilities": [
+      "limiter inclusion/raster",
+      "prepared frame and forward solve",
+      "fresh-process frame launch",
+      "terminal-state measurement and receipt consistency",
+      "poloidal contour and null rendering",
+      "stationary-point polishing",
+      "text bounding checks"
+    ],
+    "owners_opened": [
+      "nova/equilibrium/wall_mask.py:70",
+      "benchmarks/diiid_forward_gs_match.py:1020",
+      "scripts/prototypes/diiid_forward_convergence/measure_branches.py:180,559",
+      "scripts/prototypes/diiid_forward_convergence/run_probe_frames.py:25",
+      "scripts/prototypes/diiid_forward_convergence/render_panels.py:435,559",
+      "nova/media/poloidal.py:540"
+    ]
+  },
+  "review_run_id": "r-20261108T203311711187-review-of-diiid-material-mask-limiter-bbda569dea75",
+  "reviewed_base_sha": "04d969738a47a2d5bc31544c03980d1e4afcd94c",
+  "reviewed_head_sha": "bbda569dea757dbe4ccb834dab87ba2cd216df00",
+  "reviewed_run_id": "r-20261108T111844665111-diiid-material-mask-limiter",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_material_mask_limiter.py scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111844665111-diiid-material-mask-limiter/final-measured-head-gate.log",
+      "observed_failure_ids": [],
+      "revision": "bbda569dea757dbe4ccb834dab87ba2cd216df00"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111844665111-diiid-material-mask-limiter/baseline-suite.log",
+      "observed_failure_ids": [],
+      "revision": "04d969738a47a2d5bc31544c03980d1e4afcd94c"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T20:49:35.541904+00:00",
+  "total": 120
+}

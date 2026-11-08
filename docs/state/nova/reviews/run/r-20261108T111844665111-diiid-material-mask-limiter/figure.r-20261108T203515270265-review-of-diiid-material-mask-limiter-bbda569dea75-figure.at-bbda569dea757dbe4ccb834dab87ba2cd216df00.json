@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T20:36:47Z",
+  "figures": [
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/diiid-material-mask-limiter/frame-146-limited.svg",
+      "identification": "Frame 146 limited seed. Left panel reads support 382 cells, material 1089 cells, axis R=1.725 m Z=+0.027 m, residual 0.0635, host class limited; right panel reads support 212 cells, material 527 cells, axis R=1.795 m Z=+0.242 m, residual 0.017, host class limited. These match the limited-seed rows of the run's twelve-arm table.",
+      "rubric": {
+        "contrast": "pass: black text on white for both titles, both stat blocks and all nine legend entries; the grey reference series is a data line, not text.",
+        "data_ink": "pass: thick terminal contours, outlined support polygons and the two null sets carry the ink; no decorative fill.",
+        "decoration": "pass: unfilled line contours only, axes off, no gradient, shading, grid or background fill.",
+        "label_collision": "pass: no label is clipped at the canvas edge and none overlaps another label or the plotted data; panel titles, stat blocks and the two-row legend all sit in clear margin space.",
+        "legibility": "pass: both panels, their six-line stat blocks and the legend read at a glance; the only crowding is the contour core recorded as finding 3.",
+        "table_form": "pass: the panels are a spatial before/after comparison; the adjacent numeric readout annotates each panel rather than replacing a table."
+      }
+    },
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/diiid-material-mask-limiter/frame-146-diverted.svg",
+      "identification": "Frame 146 diverted seed. Left panel reads support 8 cells, material 1089 cells, axis R=1.234 m Z=+1.563 m, residual 0.055, host class refused; right panel reads support 262 cells, material 527 cells, axis R=1.718 m Z=-0.001 m, residual 6.87, host class limited. These match the diverted-seed rows of the run's twelve-arm table.",
+      "rubric": {
+        "contrast": "pass: black text on white for titles, stat blocks and legend; the grey reference series is a data line, not text.",
+        "data_ink": "pass: the terminal contour family, the outlined support cells and both null sets carry the ink; no decorative fill.",
+        "decoration": "pass: unfilled line contours only, axes off, no gradient, shading, grid or background fill.",
+        "label_collision": "pass: no clipped or overlapping label, and no label over the plotted field; the eight support cells and the hollow terminal axis at the top are clear of the stat block.",
+        "legibility": "pass: both panels read at a glance and the left panel's out-of-vessel axis is shown hollow as the caption states; the flat edge across the pseudo panel's contour family is recorded as finding 1.",
+        "table_form": "pass: the panels are a spatial comparison of one frame under two wall treatments; the stat blocks annotate the panels."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The cut is the measured grid boundary rather than a plotting clip, and the caption already states that this arm's axis lies above the limiter, so a redraw is not worth the node.",
+      "file": "docs/figures/diiid-material-mask-limiter/frame-146-diverted.svg",
+      "id": "fc31bb64140",
+      "line": 205,
+      "severity": "non-blocking",
+      "summary": "In the pseudo-wall control panel the terminal flux contours end along a flat horizontal edge at the lattice top (Z=+1.6 m) while the eight support cells and the hollow terminal axis continue above that edge; the abrupt straight cut reads as the field terminating where it is only the data grid ending, and the caption never says the lattice stops there."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The fragment is real solved field drawn deliberately, and clipping it would hide measured data; it is small and clear of the support polygons.",
+      "file": "docs/figures/diiid-material-mask-limiter/frame-146-limited.svg",
+      "id": "ff6bea7c547",
+      "line": 141,
+      "severity": "non-blocking",
+      "summary": "The terminal flux is drawn without the wall clip, so a detached blue contour fragment floats outside the limiter at the bottom left of every panel; in a figure whose claim is that the support is now confined to the limiter, a reader can mistake that fragment for plasma outside the wall."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The closed topology and both null sets stay discernible, and the shared level array is what makes the two panels comparable, so thinning the core would cost more than it gains.",
+      "file": "docs/figures/diiid-material-mask-limiter/frame-146-limited.svg",
+      "id": "f5cd5632b93",
+      "line": 107,
+      "severity": "non-blocking",
+      "summary": "In the physical limited panel the eleven shared contour levels crowd so tightly around the core that the innermost lines merge into a solid blue mass, and the terminal axis triangle uses the solved-field colour, so only the grey EFIT-axis outline beneath it separates the two markers."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T203515270265-review-of-diiid-material-mask-limiter-bbda569dea75-figure",
+  "reviewed_base_sha": "04d969738a47a2d5bc31544c03980d1e4afcd94c",
+  "reviewed_head_sha": "bbda569dea757dbe4ccb834dab87ba2cd216df00",
+  "reviewed_run_id": "r-20261108T111844665111-diiid-material-mask-limiter",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T20:45:53.171189+00:00",
+  "total": null
+}

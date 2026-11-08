@@ -1,0 +1,113 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_measured": false,
+  "added_failures_note": "Source manifest baseline_suite and after_suite are empty and explicitly unarmed; no suite logs exist from which to derive a measured delta. Zero is the neutral schema value, not an observed passing suite. The separate repair inverse failures are deliberate controls, not added suite failures.",
+  "assertion_review": {
+    "check_contract.py:101": "Returning no current increment or reversing its sign fails the independently known 1.05 current for residual -0.05 and identity Jacobian.",
+    "check_contract.py:102-103": "Restoring -radius/total instead of (centres-radius)/total gives radial-moment change 0.105 rather than 0.005, physical radius about 2.195238 rather than 2.1 and field -0.105 rather than -0.005, so both assertions fail.",
+    "check_contract.py:109": "Treating a disconnected payload as an active row/column makes absent true and fails this assertion.",
+    "check_contract.py:32-33": "Removing the final evaluate after update six leaves the residual from state five, so accepted becomes false and residual remains one; altered update/read counts also fail the fixed 6 and 55 expectations.",
+    "check_contract.py:35-36": "Wrong uniform-Bz radial derivative or nonzero vertical/mixed Hessian terms fail independent analytic jet expectations; inherited assertions remain.",
+    "check_contract.py:91-95": "Disconnected row/column, missing cell-centre contribution, wrong field sign/scale or spurious vertical update violate independently calculated radius, field and vertical moment expectations.",
+    "check_plot.py:31": "Removing the terminal count annotation leaves the actual projected separation 1.442114 px below the 11.111111 px marker diameter and reddens this assertion; repair-plot-inverse.log shows that exact refusal with EXIT=1. It checks annotation text existence, while independent visual inspection confirms its placement.",
+    "check_repairs.py:37": "Unexpected positive or inverse process status fails the expected-exit assertion; this alone would accept unrelated inverse errors, but the opened logs name the intended annotation and ownership assertions.",
+    "check_repairs.py:63": "A failed reverse application refuses the inverse setup rather than continuing with an unmodified tree.",
+    "check_reuse.py:28-30": "Replacing an imported acceptance/probe/emitter with any local implementation fails object identity; inverse log demonstrates acceptance owner was forked, EXIT=1.",
+    "check_reuse.py:45-48": "Bypassing shared.run_unpinned fails the mock call/sentinel checks, while returning its deliberately wrong centroid 999 instead of adapting the physical radius fails independent expected radius 2.1.",
+    "check_reuse.py:63-65": "Different requested drives, advancing a rejected field as warm start or changing the intermediate update/tolerance budget fails against the saved 256-decision trace and the independently tracked last accepted index.",
+    "check_reuse.py:97-103": "Bypassing advance_drive, truncating the trace, changing acceptance/scheduling, corrupting read/update aggregation or returning the rejected final field fails the owner count, trace comparisons, controlled independent sums or last accepted index. Counter expectations intentionally measure aggregation, not recorded numerical work.",
+    "input_echo_review": "No assertion compares a returned value to the same object merely supplied as an expected answer. Controlled callback counters are independent expectations for aggregation; they do not establish physics equivalence and are scored accordingly."
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/bank_fold_radial/run_h200.sh:22",
+    "scripts/prototypes/bank_fold_radial/run_h200.sh:25",
+    "scripts/prototypes/bank_fold_radial/measure.py:388",
+    "scripts/prototypes/bank_fold_radial/condition.py:16"
+  ],
+  "commit_review": [
+    {
+      "result": "Read four-file diff and rendered the exact head SVG: close terminal pair annotated without moving coordinates.",
+      "sha": "65838ae9657dac988c71688c3a935ce30409c408"
+    },
+    {
+      "result": "Read six-file diff; scheduling and common helpers reused, radial assembly consolidated, focused checks inspected; inner corrector duplication remains.",
+      "sha": "dab5c5352b2376a3c814e47593478df4db02bf40"
+    }
+  ],
+  "completed_at": "2026-11-08T12:21:56Z",
+  "dispatched_at": "2026-11-08T12:12:16Z",
+  "evidence_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T092804002487-bank-fold-radial/repair-gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T092804002487-bank-fold-radial/repair-plot-check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T092804002487-bank-fold-radial/repair-reuse-check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T092804002487-bank-fold-radial/repair-contract-check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T092804002487-bank-fold-radial/repair-plot-inverse.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T092804002487-bank-fold-radial/repair-reuse-inverse.log"
+  ],
+  "figure_review": "Extracted the exact reviewed-head SVG via git show, rendered at 1400 px with convert and inspected reviewed-figure.png: terminal pair visibly labelled 2 states, all labels readable with no clipping/collision, both arms use only measured markers and separate logarithmic matrix scales.",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "Frozen scratch experiment explicitly requests a scratch harness; remaining corrector duplication preserves the measured algorithm and does not invalidate the frozen evidence.",
+      "file": "scripts/prototypes/bank_fold_radial/measure.py",
+      "line": "163",
+      "severity": "non-blocking",
+      "text": "non-blocking: correct_pinned duplicates the Newton correction, eight-divisor line search and terminal fresh-read mechanism owned by scripts/prototypes/bank_fold_vertical/measure.py:316-365; it extracts the radial copy rather than extending or wrapping the owner, so future corrector repairs can still diverge. Exempted for this frozen scratch experiment because the brief requests a scratch copy of the corrected harness and the repair does preserve the measured algorithm; this remaining duplication does not invalidate the frozen evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/prototypes/bank_fold_radial/run_h200.sh:22, scripts/prototypes/bank_fold_radial/run_h200.sh:25, scripts/prototypes/bank_fold_radial/measure.py:388, scripts/prototypes/bank_fold_radial/condition.py:16",
+    "diff": "Read 65838ae9657dac988c71688c3a935ce30409c408 and dab5c5352b2376a3c814e47593478df4db02bf40 individually against 714f29cfa2895b064144c70d16a13365d68ec389; plot.py:73 annotates the close pair, measure.py:229 delegates scheduling, and check_contract.py:96 adds a coupled-current case.",
+    "done_when": "Read the three clauses in brief.txt; repair-gate.log records three passing focused checks and two refused commit inverses, while docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:123 explicitly retains the original paired H200 receipts rather than claiming a new head measurement.",
+    "goal": "Read the weak-radius-pin experiment in brief.txt and live plan sub-millisecond-forward-path.html#s3; the two gained commits preserve its bounded outcome and repair visible sample multiplicity plus harness reuse in docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:114.",
+    "manifest": "Read source manifest.md and repair-gate.log through EXIT=0; both answering commits exist, the negative-control logs fail for the stated defects, and baseline_suite/after_suite are empty for the unarmed suite pair.",
+    "write_paths": "Read source manifest.md orientation_write_paths and the gained-commit file list; all nine changed paths are within scripts/prototypes/bank_fold_radial and the declared radial fragment and figure directories."
+  },
+  "justifications": {
+    "durability": "check_contract.py:32 fails if the sixth-update fresh read is removed, :102-103 fail for the erroneous current derivative, and check_plot.py:31 refuses the inverse plot, although check_reuse.py:83 mocks numerical correction.",
+    "evidence": "repair-gate.log records three head checks and two inverses with actual refusal tracebacks, but check_reuse.py:83 replaces the physics corrector and therefore verifies scheduling rather than a fresh H200 reproduction of the refactored head.",
+    "fit": "plot.py:13 uses the existing checked_save and the inspected SVG shows the 2 states annotation without clipping; measure.py:40 and :105 consolidate the radial derivative and field linearization under descriptive names.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:114 accurately distinguishes reproduction repairs from frozen numerical evidence, and plot.py:73 preserves both measured terminal coordinates.",
+    "reuse": "measure.py:163 extracts a second Newton and line-search corrector duplicating bank_fold_vertical/measure.py:316-365 rather than extending that owner, despite now wrapping its acceptance, probe, emitter and unpinned replay and delegating scheduling to drive_continuation.advance_drive.",
+    "scope_discipline": "All nine paths in 714f29cfa2895b064144c70d16a13365d68ec389..dab5c5352b2376a3c814e47593478df4db02bf40 stay within source manifest.md orientation_write_paths and no product source changes."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the weak-radius-pin experiment in brief.txt and live plan sub-millisecond-forward-path.html#s3; the two gained commits preserve its bounded outcome and repair visible sample multiplicity plus harness reuse in docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:114.\nVERDICT done_when: Read the three clauses in brief.txt; repair-gate.log records three passing focused checks and two refused commit inverses, while docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:123 explicitly retains the original paired H200 receipts rather than claiming a new head measurement.\nVERDICT write_paths: Read source manifest.md orientation_write_paths and the gained-commit file list; all nine changed paths are within scripts/prototypes/bank_fold_radial and the declared radial fragment and figure directories.\nVERDICT manifest: Read source manifest.md and repair-gate.log through EXIT=0; both answering commits exist, the negative-control logs fail for the stated defects, and baseline_suite/after_suite are empty for the unarmed suite pair.\nVERDICT diff: Read 65838ae9657dac988c71688c3a935ce30409c408 and dab5c5352b2376a3c814e47593478df4db02bf40 individually against 714f29cfa2895b064144c70d16a13365d68ec389; plot.py:73 annotates the close pair, measure.py:229 delegates scheduling, and check_contract.py:96 adds a coupled-current case.\nCALL_SITES: scripts/prototypes/bank_fold_radial/run_h200.sh:22, scripts/prototypes/bank_fold_radial/run_h200.sh:25, scripts/prototypes/bank_fold_radial/measure.py:388, scripts/prototypes/bank_fold_radial/condition.py:16\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:114 accurately distinguishes reproduction repairs from frozen numerical evidence, and plot.py:73 preserves both measured terminal coordinates.\nSCORE evidence: 18\nJUSTIFICATION evidence: repair-gate.log records three head checks and two inverses with actual refusal tracebacks, but check_reuse.py:83 replaces the physics corrector and therefore verifies scheduling rather than a fresh H200 reproduction of the refactored head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All nine paths in 714f29cfa2895b064144c70d16a13365d68ec389..dab5c5352b2376a3c814e47593478df4db02bf40 stay within source manifest.md orientation_write_paths and no product source changes.\nSCORE durability: 18\nJUSTIFICATION durability: check_contract.py:32 fails if the sixth-update fresh read is removed, :102-103 fail for the erroneous current derivative, and check_plot.py:31 refuses the inverse plot, although check_reuse.py:83 mocks numerical correction.\nSCORE fit: 19\nJUSTIFICATION fit: plot.py:13 uses the existing checked_save and the inspected SVG shows the 2 states annotation without clipping; measure.py:40 and :105 consolidate the radial derivative and field linearization under descriptive names.\nSCORE reuse: 5\nJUSTIFICATION reuse: measure.py:163 extracts a second Newton and line-search corrector duplicating bank_fold_vertical/measure.py:316-365 rather than extending that owner, despite now wrapping its acceptance, probe, emitter and unpinned replay and delegating scheduling to drive_continuation.advance_drive.\nFINDING scripts/prototypes/bank_fold_radial/measure.py:163 non-blocking: correct_pinned duplicates the Newton correction, eight-divisor line search and terminal fresh-read mechanism owned by scripts/prototypes/bank_fold_vertical/measure.py:316-365; it extracts the radial copy rather than extending or wrapping the owner, so future corrector repairs can still diverge. Exempted for this frozen scratch experiment because the brief requests a scratch copy of the corrected harness and the repair does preserve the measured algorithm; this remaining duplication does not invalidate the frozen evidence.\n",
+  "reuse_search": {
+    "owners_opened": [
+      "nova/equilibrium/drive_continuation.py",
+      "scripts/prototypes/bank_fold_vertical/measure.py",
+      "scripts/prototypes/bank_fold_vertical/plot.py",
+      "scripts/prototypes/bank_fold_vertical/check_contract.py"
+    ],
+    "results": "advance_pinned wraps the production scheduling owner; radial run_unpinned wraps vertical replay; centroid_row and linearized_system consolidate the radial owner and are called by both update and spectrum. correct_pinned retains a duplicate of the existing vertical inner corrector. New check/load/execute/inverse helpers compose source-specific regression probes; capability search found no existing inverse repair checker in these prototype owners.",
+    "searched_capabilities": [
+      "centroid derivatives and bordered field assembly",
+      "adaptive scheduling and acceptance",
+      "Newton correction and divisor line search",
+      "checked plotting and close-marker inspection",
+      "isolated inverse-commit regression checks"
+    ]
+  },
+  "review_run_id": "r-20261108T120703392650-review-of-bank-fold-radial-dab5c5352b23",
+  "reviewed_base_sha": "714f29cfa2895b064144c70d16a13365d68ec389",
+  "reviewed_head_sha": "dab5c5352b2376a3c814e47593478df4db02bf40",
+  "reviewed_run_id": "r-20261108T092804002487-bank-fold-radial",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T12:31:45.095755+00:00",
+  "total": 99
+}

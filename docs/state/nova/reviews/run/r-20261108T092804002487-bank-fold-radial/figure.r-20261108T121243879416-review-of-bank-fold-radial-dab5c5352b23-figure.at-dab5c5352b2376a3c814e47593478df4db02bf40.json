@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T12:20:16Z",
+  "figures": [
+    {
+      "caption": "docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html lines 58-71",
+      "path": "docs/figures/sub-millisecond-forward-path/bank-fold-radial/smallest-singular-vs-drive.svg",
+      "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure/image-0.png",
+      "rendered_pixels": "1399x720",
+      "rubric_lines": [
+        "RUBRIC legibility: pass \u2014 panel titles, axis labels and decade log ticks all read at 1399x720; the pinned marks sit in the left quarter of their panel but remain distinguishable.",
+        "RUBRIC data_ink: pass \u2014 markers only, no line across an unsampled drive gap, no fills; the empty right-hand span records the pinned arm's measured reach.",
+        "RUBRIC decoration: pass \u2014 no gridlines, no shading, no background fill; top and right spines removed.",
+        "RUBRIC contrast: pass \u2014 near-black text on white, grey marks about 3.1:1 and the blue marks and annotation about 5.3:1.",
+        "RUBRIC table_form: pass \u2014 the values are also tabulated, but the figure shows where each arm stops on one shared drive axis and the pinned spectrum's fall-and-recover shape, which the table does not.",
+        "RUBRIC label_collision: pass \u2014 no label clipped, overlapping another label, or sitting on the data; the coincident marks at the pinned terminal carry their count annotation in clear space."
+      ],
+      "rubric_verdicts": {
+        "contrast": "pass \u2014 near-black text on white; the grey marks (#929292, about 3.1:1) and the blue marks and annotation (#2e6fa8, about 5.3:1) both clear the background.",
+        "data_ink": "pass \u2014 marks only, no connecting line drawn across an unsampled drive gap, no fills; the empty right-hand span of the pinned panel is the measured reach (1.0023 against the 1.01 target), not padding.",
+        "decoration": "pass \u2014 no gridlines, no shading, no background fill; the top and right spines are removed and only the two metric spines carry a scale.",
+        "label_collision": "pass \u2014 no axis label, tick label, panel title or annotation is clipped, overlaps another label, or sits on the data; the '2 states' annotation sits 19 px right of the terminal pair with clear space around it.",
+        "legibility": "pass \u2014 two side-by-side panels read at a glance on a 1399x720 canvas: both panel titles, both y-axis labels, the shared drive axis and two sets of decade log ticks are legible; the pinned marks compress into the left quarter of their panel under the shared 0.9995-1.0105 drive axis, but every mark separates.",
+        "table_form": "pass \u2014 the same ten values are tabulated in the fragment's spectra table, but the figure carries what the table does not: on one shared drive axis, where each arm stops and that the pinned spectrum falls and recovers rather than approaching zero."
+      }
+    }
+  ],
+  "findings": [],
+  "project": "nova",
+  "review_run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+  "reviewed_base_sha": "714f29cfa2895b064144c70d16a13365d68ec389",
+  "reviewed_head_sha": "dab5c5352b2376a3c814e47593478df4db02bf40",
+  "reviewed_run_id": "r-20261108T092804002487-bank-fold-radial",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T12:28:22.450155+00:00",
+  "total": null
+}

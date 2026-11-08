@@ -1,0 +1,17 @@
+#!/bin/bash
+# Replay one saved stream twice in separate processes on one device.
+set -euo pipefail
+trap 'status=$?; echo "EXIT=$status"' EXIT
+export TMPDIR=/tmp
+export PYTHONPATH="${SOURCE_TREE:-$TREE}"
+unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
+PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PREFIX=${PREFIX:-measure}
+printf '# revision=%s tree=%s command=%s\n' \
+    "$(git -C "${SOURCE_TREE:-$TREE}" rev-parse HEAD)" "${SOURCE_TREE:-$TREE}" "$0"
+"$PY" "$TREE/scripts/prototypes/bank_drive_barrier/measure.py" \
+    --streams "$STREAMS" --lanes "${LANES:-16}" > "$RUN_DIR/$PREFIX-first.jsonl" 2> "$RUN_DIR/$PREFIX-first.stderr"
+"$PY" "$TREE/scripts/prototypes/bank_drive_barrier/measure.py" \
+    --streams "$STREAMS" --lanes "${LANES:-16}" > "$RUN_DIR/$PREFIX-second.jsonl" 2> "$RUN_DIR/$PREFIX-second.stderr"
+"$PY" "$TREE/scripts/prototypes/bank_drive_barrier/compare.py" \
+    "$RUN_DIR/$PREFIX-first.jsonl" "$RUN_DIR/$PREFIX-second.jsonl"

@@ -1,0 +1,97 @@
+<figure id="bank-drive-barrier-residual-figure">
+  <img src="/nova/figures/sub-millisecond-forward-path/bank-drive-barrier/residual-vs-drive.svg"
+       alt="Fresh residual norm rises smoothly with additive drive perturbation, with no support-decision flips">
+  <figcaption>Fresh residual of one fixed, last accepted state across sixteen lanes on an
+  H200. The zero-perturbation baseline is placed at 1e-13 solely so it appears on the
+  logarithmic horizontal axis. No membership, booked cut-set, fragment, topology or
+  boundary-point decision flips at any perturbation, so there are no flip labels.</figcaption>
+</figure>
+
+## Fixed-state drive probe
+
+The saved diverted warm-start slice was replayed with the committed
+`drive_continuation.advance_drive` driver to drive **1.0089341297149657**.
+Two fresh H200 processes reached the same state after 52 attempted sub-steps,
+277 updates and 1253 reads. The last accepted state's worst fresh residual
+was **8.899458237010549e-7**; the next 1.9073486328125e-9 sub-step was
+rejected after six updates at **1.3502936013765066e-6**.
+
+The table varies the drive by additive ε while keeping all moments fixed.
+“Δ residual” is the largest per-lane change from ε = 0, so the near-zero
+slope can be checked independently of changes in which lane has the worst norm.
+Membership and cut counts include all sixteen lanes. Every difference column
+is measured against ε = 0.
+
+| ε | worst fresh residual | Δ residual | membership count / flips | cut count / flips | normal-form / fragment flips | topology class / qualification / X-point flips | boundary-point displacement |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 8.899458237e-7 | 0 | 5360 / 0 | 1888 / 0 | 0 / 0 | 0 / 0 / 0 | 0 m |
+| 1e-12 | 8.901254773e-7 | 1.796536253e-10 | 5360 / 0 | 1888 / 0 | 0 / 0 | 0 / 0 / 0 | 0 m |
+| 1e-10 | 9.079077188e-7 | 1.796189508e-8 | 5360 / 0 | 1888 / 0 | 0 / 0 | 0 / 0 / 0 | 0 m |
+| 1e-8 | 2.686133854e-6 | 1.796188030e-6 | 5360 / 0 | 1888 / 0 | 0 / 0 | 0 / 0 / 0 | 0 m |
+| 1e-6 | 1.805087470e-4 | 1.796188012e-4 | 5360 / 0 | 1888 / 0 | 0 / 0 | 0 / 0 / 0 | 0 m |
+| 1e-4 | 1.796277007e-2 | 1.796188012e-2 | 5360 / 0 | 1888 / 0 | 0 / 0 | 0 / 0 / 0 | 0 m |
+
+The response is continuous in drive at this state. Its near-zero norm
+increment is approximately **179.6 × ε**: the measured increments at
+1e-12 and 1e-10 follow that slope, and every support decision stays fixed.
+The drive scales the plasma profile passed into `current.book`; with moments
+fixed, `support_read.read_batch` receives the same flux field at every ε.
+`topology._read_at_nulls` owns the boundary class and connected membership
+decision, and `topology._support_at_level` owns fragment selection. Neither
+switches in this probe.
+
+The continuation refusal is therefore the numerical acceptance rule in
+`nova/equilibrium/drive_continuation.py::advance_drive`: an intermediate
+`solve_batch` must have all lanes converged within six updates and worst fresh
+residual at most 1e-6. At the last state, the baseline residual has only
+1.100541763e-7 of margin to that tolerance; the rejected floor attempt reports
+1.350293601e-6. The driver then halves below its minimum relative step of
+1e-9 and stops. `support_read.solve_batch` owns the six-update Newton solve,
+its fresh-read line search and its reported residual.
+
+## Conditioning at the last accepted states
+
+The full fresh-geometry Newton matrix was assembled for lane 0 at the first
+accepted drive and the last three accepted drives. Its singular values were
+measured directly on the H200, with the read rebuilt at each state. The
+balanced matrix uses the same physical moment scaling and three row/column
+balancing passes as `support_read.newton_step`; this separates a branch
+effect from the large unit scales of the raw matrix.
+
+| accepted drive | raw smallest singular value | raw condition | balanced smallest singular value | balanced condition |
+| --- | ---: | ---: | ---: | ---: |
+| 1.001 | 6.213737e-8 | 1.668266e15 | 6.272526e-4 | 1.697375e4 |
+| 1.0089341125488278 | 7.211899e-10 | 1.123206e17 | 4.668192e-6 | 2.240178e6 |
+| 1.0089341278076170 | 2.464766e-10 | 3.286778e17 | 1.595890e-6 | 6.553929e6 |
+| 1.0089341297149657 | 1.736230e-10 | 4.665998e17 | 1.124237e-6 | 9.303750e6 |
+
+The balanced smallest singular value falls by a factor of **558** from drive
+1.001 to the barrier, and by **4.15** over the last 1.71661379e-8 of
+accepted drive. The balanced largest singular value stays near 10.5, so its
+condition number rises from 1.70e4 to 9.30e6. This is an approaching
+**numerical limit point** in the branch seen by the Newton solve: the residual
+is continuous, but the local inverse becomes increasingly ill-conditioned
+until the six-update sub-solve cannot get back under 1e-6 before the step
+floor. The balanced smallest singular value is still finite at the last
+accepted state, so these data locate the conditioning barrier but do not
+establish the drive of an exact mathematical fold. The raw smallest singular
+values are below the raw matrix's double-precision error scale and are
+reported for provenance, not used alone to infer the fold.
+
+## Provenance
+
+H200 jobs 1308201 (probe) and 1308206 (probe and conditioning), each with
+one card on 98dci4-gpu-0003, four cores, 64 GB and sixteen lanes; source
+revision b818dab4d60ff8048ccfc03cd9ecb04d1286d3f9.
+The saved seed is the diverted certificate's slice-0
+`warm-start-streams.npz` from run r-20261107T111056270825-bank-warm-start.
+The two independent probe receipts are `first.jsonl` and `second.jsonl` in
+run r-20261107T230511276134-bank-drive-barrier. Their quantitative rows agree
+exactly, and `h200-job.log` ends `EXIT=0`. The final conditioning receipts
+are `balanced-first.jsonl` and `balanced-second.jsonl` in the same run:
+the replay and all six probe rows agree exactly, and the largest relative
+difference across the singular-value and condition rows is 3.29e-7.
+`h200-final-job.log` prints the `AGREE` receipt and ends `EXIT=0`.
+An exploratory raw-only conditioning job ended `EXIT=1` because its
+comparison helper required bitwise equality for the SVD; the final job uses
+a 1e-6 relative agreement bound for these floating measurements.

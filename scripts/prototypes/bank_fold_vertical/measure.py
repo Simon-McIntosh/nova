@@ -35,6 +35,35 @@ def centroid(state):
     return jnp.sum(state[2], axis=-1) / jnp.sum(state[0], axis=-1)
 
 
+def accepted_read(valid, residual, tolerance, *, height=None):
+    """Apply the same fresh-read acceptance predicate to either branch."""
+    accepted = np.asarray(valid, dtype=bool) & (np.asarray(residual) <= tolerance)
+    if height is not None:
+        accepted &= np.abs(np.asarray(height)) <= 1e-6
+    return bool(np.all(accepted))
+
+
+def bank_pin_status(machine, moments, seeds):
+    """Count the rows assembled by the bank route at the supplied state."""
+    one = tuple(part[0] for part in moments)
+    op = machine.operands
+    support = support_read.read(
+        op, machine.cache, one, seeds[0], seeds[0], machine.convention, machine.policy
+    )
+    profile = streams.scaled_profile(machine.profile, jnp.asarray(1.0))
+    residual = support_read.step_residual(
+        op, one, one, support, profile, machine.quadrature
+    )
+    state_count = sum(part.size for part in one)
+    row_count = sum(part.size for part in residual.residual)
+    extra_rows = row_count - state_count
+    if extra_rows not in (0, 1):
+        raise ValueError(f"unexpected bank constraint row count: {extra_rows}")
+    status = "true" if extra_rows else "absent"
+    print(f"PIN_ACTIVE={status}", flush=True)
+    emit("PIN_CONFIG", value=status, bank_row_count=extra_rows)
+
+
 def shifted(machine, field):
     operands = replace(
         machine.operands,
@@ -73,10 +102,7 @@ def run_unpinned(machine, moments, seeds):
         attempt = predecessor.solve(
             drive, state, seed, warm, max_steps=max_steps, tolerance=tolerance
         )
-        if (
-            bool(jnp.all(attempt.converged))
-            and float(jnp.max(attempt.residual)) <= tolerance
-        ):
+        if accepted_read(attempt.converged, attempt.residual, tolerance):
             accepted.append((float(drive), attempt.moments, centroid(attempt.moments)))
         return attempt
 
@@ -175,7 +201,7 @@ def inspect_null(machine, state, seeds, drive):
     )
 
 
-def pinned_step(machine, state, seed, drive, field, target):
+def pinned_step(machine, state, seed, drive, field, target, payload):
     op, cache = shifted(machine, field)
     profile = streams.scaled_profile(machine.profile, drive)
     support = support_read.read(
@@ -208,6 +234,7 @@ def pinned_step(machine, state, seed, drive, field, target):
 
     rhs = -flat(residual.residual)
     field_column = (flat(residual_plus.residual) + rhs) / field_delta
+    field_column = field_column * jnp.asarray(payload)
     balanced, row, column = support_read._equilibrate(matrix, state, residual.booked)
     both = jnp.linalg.solve(
         balanced, jnp.stack((rhs, field_column), axis=-1) / row[:, None]
@@ -218,11 +245,12 @@ def pinned_step(machine, state, seed, drive, field, target):
     n = state[0].size
     g = jnp.concatenate(
         (jnp.full(n, -zc / total), jnp.zeros(n), jnp.full(n, 1 / total))
-    )
+    ) * jnp.asarray(payload)
     field_update = (-jnp.dot(g, u) - (zc - target)) / -jnp.dot(g, v)
     updates = u - v * field_update
     pieces = jnp.split(updates, (n, 2 * n), axis=-1)
-    return tuple(pieces), field_update, support.valid
+    row_present = jnp.any(g != 0) & jnp.any(field_column != 0)
+    return tuple(pieces), field_update, support.valid, row_present
 
 
 def pinned_measure(
@@ -238,11 +266,8 @@ def pinned_measure(
     pin = VerticalPositionPin(
         targets, source_scale=1e-3, row_scale=1e-3, tolerance=1e-6, active=True
     )
-    assert pin.active
-    print("SCRATCH_PIN_ACTIVE=true", flush=True)
     emit(
         "PIN_CONFIG",
-        value="true",
         row_scale=float(pin.row_scale),
         source_scale=float(pin.source_scale),
         target=np.asarray(targets).tolist(),
@@ -252,7 +277,7 @@ def pinned_measure(
     def step(state, field, drive):
         return jax.vmap(
             lambda one, seed, strength, target: pinned_step(
-                machine, one, seed, drive, strength, target
+                machine, one, seed, drive, strength, target, pin.active
             )
         )(state, seeds, field, targets)
 
@@ -280,6 +305,7 @@ def pinned_measure(
     rows = []
     accepted_states = []
     reads = updates = 0
+    pin_reported = False
     for _ in range(256):
         if drive >= target_drive:
             break
@@ -291,11 +317,22 @@ def pinned_measure(
             norms, heights, valid = evaluate(trial_state, trial_field, requested)
             reads += 1
             norms, heights, valid = map(np.asarray, (norms, heights, valid))
-            if np.all(valid & (norms <= tolerance) & (np.abs(heights) <= 1e-6)):
+            if accepted_read(valid, norms, tolerance, height=heights):
                 break
-            direction, field_direction, step_valid = step(
+            direction, field_direction, step_valid, row_present = step(
                 trial_state, trial_field, requested
             )
+            if not pin_reported:
+                active = bool(np.all(np.asarray(row_present)))
+                print(f"SCRATCH_PIN_ACTIVE={str(active).lower()}", flush=True)
+                emit(
+                    "PIN_CONFIG",
+                    value=str(active).lower(),
+                    row_count=1 if active else 0,
+                )
+                if not active:
+                    raise AssertionError("centroid row or radial-field column absent")
+                pin_reported = True
             updates += 1
             best_score = np.maximum(norms / tolerance, np.abs(heights) / 1e-6)
             best_state, best_field = trial_state, trial_field
@@ -325,9 +362,7 @@ def pinned_measure(
             norms, heights, valid = evaluate(trial_state, trial_field, requested)
             reads += 1
             norms, heights, valid = map(np.asarray, (norms, heights, valid))
-        accepted = bool(
-            np.all(valid & (norms <= tolerance) & (np.abs(heights) <= 1e-6))
-        )
+        accepted = accepted_read(valid, norms, tolerance, height=heights)
         rows.append(
             dict(
                 drive=requested,
@@ -415,8 +450,6 @@ def main():
         x64=bool(jax.config.jax_enable_x64),
         lanes=args.lanes,
     )
-    print("PIN_ACTIVE=absent", flush=True)
-    emit("PIN_CONFIG", value="absent", forward_default="false", bank_row_count=0)
     machine = streams.build()
     with np.load(args.streams) as archive:
         moments = tuple(
@@ -424,6 +457,7 @@ def main():
         )
         seeds = jnp.asarray(archive["stationary"][: args.lanes])
     target = centroid(moments)
+    bank_pin_status(machine, moments, seeds)
     unpinned, accepted = run_unpinned(machine, moments, seeds)
     emit(
         "UNPINNED",

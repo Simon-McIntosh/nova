@@ -50,11 +50,15 @@ def sixth_update_is_checked(source: Path) -> bool:
 
     def step(state, field, drive):
         del state, field, drive
-        return (np.ones((1, 1)),), np.zeros(1), np.ones(1, bool)
+        return (np.ones((1, 1)),), np.zeros(1), np.ones(1, bool), np.ones(1, bool)
 
     scope = dict(
         np=np,
         jnp=np,
+        accepted_read=lambda valid, residual, tolerance, *, height=None: bool(
+            np.all(np.asarray(valid) & (np.asarray(residual) <= tolerance))
+            and (height is None or np.all(np.abs(height) <= 1e-6))
+        ),
         evaluate=evaluate,
         step=step,
         trial_state=(np.zeros((1, 1)),),
@@ -63,6 +67,7 @@ def sixth_update_is_checked(source: Path) -> bool:
         tolerance=1e-10,
         reads=0,
         updates=0,
+        pin_reported=True,
     )
     exec(compile(program, str(source), "exec"), scope)
     return bool(scope["accepted"] and scope["norms"][0] == 0 and scope["updates"] == 6)
@@ -105,12 +110,13 @@ def centroid_row_is_live(source: Path) -> bool:
     machine = SimpleNamespace(
         profile=None, convention=None, policy=None, quadrature=None
     )
-    updates, field_update, valid = scope["pinned_step"](
-        machine, state, None, 1.0, 0.0, 0.0
+    updates, field_update, valid, row_present = scope["pinned_step"](
+        machine, state, None, 1.0, 0.0, 0.0, True
     )
     after = tuple(part + delta for part, delta in zip(state, updates, strict=True))
     return bool(
         valid
+        and row_present
         and np.isclose(after[2][0] / after[0][0], 0.0, atol=1e-12)
         and np.isclose(field_update, 0.1, atol=1e-12)
     )

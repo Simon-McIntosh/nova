@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-08T06:57:13.133Z",
   "dispatched_at": "2026-11-08T06:40:27Z",
   "figure_checks": {
     "clipping": "Non-white pixel counts in the outer 1 px, 2 px and 3 px frame of every delivered raster: 0, 0 and 0 on all four. Ink bounding boxes: 137 x 10-723 y 10-623 of 735x635; 144 and 179 and 44 x 10-754 y 10-623 of 766x635. Nothing is clipped at the canvas edge, and no text artist is truncated.",
@@ -190,6 +190,6 @@
   "scope_note": "Judged only from the four rendered PNGs named in the dispatch, opened with Read as rasters at their delivered size (frame-137 735x635 px, the other three 766x635 px, PNG RGBA). Each file on disk was matched byte for byte to the reviewed head's blob (git rev-parse 3396ebbc5:docs/figures/... equals git hash-object on the file for all four), so the pictures judged are the head's. No SVG and no other image was opened, listed, searched or rendered. Zoomed views were 2x-10x crops taken from those same PNGs.",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-08T06:57:14.684715+00:00",
+  "timestamp": "2026-11-08T07:03:51.553594+00:00",
   "total": null
 }

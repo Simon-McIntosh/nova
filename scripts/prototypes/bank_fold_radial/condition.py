@@ -48,10 +48,11 @@ def condition(machine, state, seed, field, drive):
     field_column = (flat(residual_plus.residual) - flat(residual.residual)) / 1e-6
     cells = state[0].size
     total = jnp.sum(state[0])
-    radius = centroid(state)
+    centres = op.geometry.centre[:, 0]
+    radius = centroid(state, centres)
     radius_row = jnp.concatenate(
         (
-            jnp.full(cells, -radius / total),
+            (centres - radius) / total,
             jnp.full(cells, 1 / total),
             jnp.zeros(cells),
         )

@@ -30,8 +30,9 @@ def emit(label, **values):
     print(label + " " + json.dumps(values, sort_keys=True), flush=True)
 
 
-def centroid(state):
-    return jnp.sum(state[1], axis=-1) / jnp.sum(state[0], axis=-1)
+def centroid(state, centres):
+    """Major-radius centroid from cell current and cell-relative first moments."""
+    return jnp.sum(state[0] * centres + state[1], axis=-1) / jnp.sum(state[0], axis=-1)
 
 
 def accepted_read(valid, residual, tolerance, *, height=None):
@@ -134,7 +135,13 @@ def run_unpinned(machine, moments, seeds):
             drive, state, seed, warm, max_steps=max_steps, tolerance=tolerance
         )
         if accepted_read(attempt.converged, attempt.residual, tolerance):
-            accepted.append((float(drive), attempt.moments, centroid(attempt.moments)))
+            accepted.append(
+                (
+                    float(drive),
+                    attempt.moments,
+                    centroid(attempt.moments, machine.operands.geometry.centre[:, 0]),
+                )
+            )
         return attempt
 
     result = drive_continuation.advance_drive(
@@ -195,12 +202,11 @@ def pinned_step(machine, state, seed, drive, field, target, payload):
     )
     u, v = column * both[:, 0], column * both[:, 1]
     total = jnp.sum(state[0])
-    zc = jnp.sum(state[1]) / total
+    centres = machine.operands.geometry.centre[:, 0]
+    zc = centroid(state, centres)
     n = state[0].size
     g = (
-        jnp.concatenate(
-            (jnp.full(n, -zc / total), jnp.full(n, 1 / total), jnp.zeros(n))
-        )
+        jnp.concatenate(((centres - zc) / total, jnp.full(n, 1 / total), jnp.zeros(n)))
         * jnp.asarray(payload)
         * ROW_SCALE
     )
@@ -252,7 +258,11 @@ def pinned_measure(
                 op, one_state, one_state, support, profile, machine.quadrature
             )
             norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
-            return norm, centroid(one_state) - target, support.valid
+            return (
+                norm,
+                centroid(one_state, machine.operands.geometry.centre[:, 0]) - target,
+                support.valid,
+            )
 
         return jax.vmap(one)(state, seeds, field, targets)
 
@@ -423,7 +433,7 @@ def main():
             jnp.asarray(archive[name][: args.lanes]) for name in ("m0", "m1", "m2")
         )
         seeds = jnp.asarray(archive["stationary"][: args.lanes])
-    target = centroid(moments)
+    target = centroid(moments, machine.operands.geometry.centre[:, 0])
     bank_pin_status(machine, moments, seeds)
     unpinned, accepted = run_unpinned(machine, moments, seeds)
     emit(

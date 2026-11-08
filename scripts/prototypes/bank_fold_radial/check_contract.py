@@ -28,6 +28,9 @@ def main():
         if isinstance(n, ast.FunctionDef) and n.name == "pinned_step"
     )
     scope = dict(
+        centroid=lambda state, centres: (
+            np.sum(state[0] * centres + state[1]) / np.sum(state[0])
+        ),
         jnp=np,
         ROW_SCALE=measure.ROW_SCALE,
         SOURCE_SCALE=measure.SOURCE_SCALE,
@@ -51,16 +54,23 @@ def main():
         ),
         scope,
     )
-    state = (np.array([1.0]), np.array([2.1]), np.array([0.3]))
+    state = (np.array([1.0]), np.array([0.1]), np.array([0.3]))
     machine = SimpleNamespace(
-        profile=None, convention=None, policy=None, quadrature=None
+        profile=None,
+        convention=None,
+        policy=None,
+        quadrature=None,
+        operands=SimpleNamespace(
+            geometry=SimpleNamespace(centre=np.array([[2.0, 0.0]]))
+        ),
     )
     updates, field, valid, present = scope["pinned_step"](
         machine, state, None, 1.0, 0.0, 2.0, True
     )
     after = tuple(a + b for a, b in zip(state, updates, strict=True))
     assert valid and present
-    assert np.isclose(after[1][0] / after[0][0], 2.0)
+    assert np.isclose((2.0 * after[0][0] + after[1][0]) / after[0][0], 2.0)
+    assert np.isclose(measure.centroid(state, np.array([2.0])), 2.1)
     assert np.isclose(field, 0.1)
     assert np.isclose(after[2][0], 0.3)
     # A disconnected actuator must not be accepted as an active pin.
@@ -71,7 +81,7 @@ def main():
     assert not absent
     print(
         "CONTRACT terminal_update=1 shared_acceptance=1 radius_row=1 "
-        "vertical_field=1 disconnected_pin_refused=1",
+        "vertical_field=1 physical_centroid=1 disconnected_pin_refused=1",
         flush=True,
     )
 

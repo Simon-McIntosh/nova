@@ -371,7 +371,7 @@ def main(argv: list[str] | None = None) -> int:
         nargs="+",
         default=None,
         help="forward stacks written by mast_pulse_forward.py, one per shard; "
-        "defaults to the shot's 40 mm shards under the derived cache root",
+        "defaults to the shot's vertically pinned 40 mm shards",
     )
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument(
@@ -411,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
 
     stack = arguments.stack or sorted(
         (derived_cache_root() / "pulse-forward").glob(
-            f"{arguments.shot}-pitch40mm-shard*.npz"
+            f"{arguments.shot}-pitch40mm-shard-pinned*.npz"
         )
     )
     suffix = "" if arguments.quantity == "te" else f"-{arguments.quantity}"

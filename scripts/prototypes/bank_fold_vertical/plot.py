@@ -133,13 +133,13 @@ def singular_figure(receipt, output):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("receipt", type=Path)
-    parser.add_argument("conditioning", type=Path)
     parser.add_argument("output_dir", type=Path)
     args = parser.parse_args()
     receipt = json.loads(args.receipt.read_text())
     null_figure(receipt["null"], args.output_dir / "null-flux-contours.svg")
-    conditioning = json.loads(args.conditioning.read_text())
-    singular_figure(conditioning, args.output_dir / "smallest-singular-vs-drive.svg")
+    singular_figure(
+        receipt["condition"], args.output_dir / "smallest-singular-vs-drive.svg"
+    )
 
 
 if __name__ == "__main__":

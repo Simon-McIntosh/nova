@@ -320,6 +320,11 @@ def pinned_measure(
                 )
                 best_field = jnp.where(improve, candidate_field, best_field)
             trial_state, trial_field = best_state, best_field
+        else:
+            # The last update must receive the same fresh read as earlier ones.
+            norms, heights, valid = evaluate(trial_state, trial_field, requested)
+            reads += 1
+            norms, heights, valid = map(np.asarray, (norms, heights, valid))
         accepted = bool(
             np.all(valid & (norms <= tolerance) & (np.abs(heights) <= 1e-6))
         )
@@ -362,6 +367,31 @@ def pinned_measure(
     if return_state:
         return outcome, state, field, accepted_states
     return outcome
+
+
+def condition_rows(machine, seeds, states, arm):
+    """Measure both balanced matrices at retained states of one branch."""
+    from scripts.prototypes.bank_fold_vertical.condition import condition
+
+    measure = jax.jit(
+        lambda one, field, drive: condition(machine, one, seeds[0], field, drive)
+    )
+    rows = []
+    for drive, batch, fields in states:
+        one = tuple(part[0] for part in batch)
+        bordered, original, valid = measure(one, fields[0], jnp.asarray(drive))
+        row = dict(
+            drive=float(drive),
+            smallest=float(bordered if arm == "pinned" else original),
+            original=float(original),
+            bordered=float(bordered),
+            valid=bool(valid),
+        )
+        if not row["valid"] or not np.isfinite(row["smallest"]):
+            raise ValueError(f"invalid {arm} conditioning at drive {drive}")
+        rows.append(row)
+        emit("SINGULAR", arm=arm, **row)
+    return rows
 
 
 def main():
@@ -419,8 +449,26 @@ def main():
         ),
     )
     args.output.write_text(json.dumps(receipt, sort_keys=True))
-    pinned = pinned_measure(machine, moments, seeds, target)
+    unpinned_states = [
+        (drive, state, jnp.zeros(args.lanes, dtype=moments[0].dtype))
+        for drive, state, _ in [accepted[0], *accepted[-3:]]
+    ]
+    receipt["condition"] = dict(
+        unpinned=condition_rows(machine, seeds, unpinned_states, "unpinned")
+    )
+    args.output.write_text(json.dumps(receipt, sort_keys=True))
+    pinned, _, _, pinned_states = pinned_measure(
+        machine, moments, seeds, target, return_state=True
+    )
     receipt["pinned"] = pinned
+    args.output.write_text(json.dumps(receipt, sort_keys=True))
+    selected = [
+        (1.0, moments, jnp.zeros(args.lanes, dtype=moments[0].dtype)),
+        *pinned_states[:: max(1, len(pinned_states) // 3)],
+    ]
+    if pinned_states and selected[-1][0] != pinned_states[-1][0]:
+        selected.append(pinned_states[-1])
+    receipt["condition"]["pinned"] = condition_rows(machine, seeds, selected, "pinned")
     args.output.write_text(json.dumps(receipt, sort_keys=True))
     emit("DONE", output=str(args.output))
 

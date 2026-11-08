@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "caption_check": "Pass - none of the three captions repeats its figure's title or panel titles. Each carries the terminal residual, the converged flag, the support size, the measurement revision and the shared flux levels, and the MAST caption states that its residual contours are roundoff. No caption finding recorded.",
-  "completed_at": "",
+  "completed_at": "2026-11-08T14:41:13.694Z",
   "dispatched_at": "2026-11-08T14:25:51Z",
   "figures_reviewed": [
     {
@@ -140,6 +140,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-08T14:41:23.878526+00:00",
+  "timestamp": "2026-11-08T14:56:04.611464+00:00",
   "total": null
 }

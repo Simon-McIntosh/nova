@@ -730,7 +730,8 @@ class ForwardSolveReceipt:
     qualified: jax.Array | bool
     termination_reason: jax.Array | int
     residual_history: jax.Array
-    mask_history: jax.Array
+    changed_mask_entries: jax.Array
+    support_cell_count: jax.Array
     globalisation_decisions: tuple[jax.Array, jax.Array]
     amplitude_history: jax.Array
     topology_read: ForwardTopologyState | None

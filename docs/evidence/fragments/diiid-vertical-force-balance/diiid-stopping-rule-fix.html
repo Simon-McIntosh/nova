@@ -227,4 +227,43 @@
     not converge anything, and it cannot: on seven of eight branches there is no
     step to take.
   </p>
+
+  <h3>Correction, 2026-11-08: the mask does not empty</h3>
+
+  <p>
+    <strong>Withdrawn:</strong> the conclusion above that the plasma-support
+    mask "falls to zero cells on the first active-set trip", and every count
+    quoted from it (25 &rarr; 0, 13 &rarr; 0, 0, 0, 9 &rarr; 0, 11 &rarr; 0, 24,
+    20, 9, 9, 0, 27, 40, 1, 0). The numbers are real; the reading of them was
+    wrong. <code>ForwardSolveReceipt.mask_history</code> was assigned from
+    <code>history.active_set_mask_differences</code>, which counts the cells
+    whose label or support membership <em>changed</em> between trips. A settled
+    mask changes nothing, so a settled trip reports zero whatever its size. The
+    column never measured a population, and a zero in it says the mask stopped
+    moving, not that it stopped holding cells.
+  </p>
+
+  <p>
+    <strong>The support is populated.</strong> The support-mask trace
+    (<a href="/nova/evidence/diiid-support-mask-collapse">diiid-support-mask-collapse</a>)
+    read the axis-connected flood at the same production seam and kept 345,
+    298, 10 and 8 connected cells on the 179 limited, 137 diverted, 146
+    diverted (trip 3) and 146 diverted (history slot 3) arms respectively,
+    against change counts that had settled at zero. The archived default
+    receipt carries <code>mask_history=[25, 0]</code> beside
+    <code>closed_core_cells=345</code> — both correct, one measuring movement
+    and the other measuring population, and the report above conflated them.
+  </p>
+
+  <p>
+    <strong>What the receipt publishes now.</strong> The change history is
+    <code>changed_mask_entries</code>, carrying exactly the values this record
+    quoted, and the population is a separate <code>support_cell_count</code>
+    holding the per-trip axis-connected support size. Read together, a
+    <code>changed_mask_entries</code> that reaches zero beside a positive
+    <code>support_cell_count</code> is a settled mask over a populated support.
+    The mechanism this record identified — a settled mask above tolerance
+    ending the solve — stands; only the empty-support cause is withdrawn, and
+    the nonconverged residual plateau remains unexplained here.
+  </p>
 </section>

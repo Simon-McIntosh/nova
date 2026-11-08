@@ -2742,10 +2742,18 @@ class ForwardProfile:
         residual_history = (
             history.active_set_residuals if reduced_or_krylov else history.trace
         )
-        mask_history = (
+        changed_mask_entries = (
             history.active_set_mask_differences
             if reduced_or_krylov
             else history.shadow_mask_changes
+        )
+        # The support size is the population the mask selects, which the
+        # change count above does not measure. Routes without per-trip
+        # active-set partitions publish no support history.
+        support_cell_count = (
+            history.active_set_support_cells
+            if reduced_or_krylov
+            else jnp.empty((0,), dtype=jnp.int32)
         )
         amplitude = getattr(
             getattr(equilibrium, "normalisation", None), "amplitude", None
@@ -2762,7 +2770,8 @@ class ForwardProfile:
             attempted_newton_promotions=history.attempted_newton_promotions,
             accepted_newton_promotions=history.accepted_newton_promotions,
             residual_history=residual_history,
-            mask_history=mask_history,
+            changed_mask_entries=changed_mask_entries,
+            support_cell_count=support_cell_count,
             globalisation_decisions=(
                 history.inner_iteration_decisions,
                 history.inner_iteration_applied_factors,

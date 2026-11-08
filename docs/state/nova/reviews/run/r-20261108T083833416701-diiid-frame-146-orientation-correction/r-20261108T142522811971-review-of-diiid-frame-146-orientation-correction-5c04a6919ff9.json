@@ -1,0 +1,105 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Source prompt.txt explicitly says FENCE \u2014 SUITE (unarmed for this node); manifest.md contains neither baseline_suite nor after_suite, and no suite log pair exists in the run directory. Zero is the unarmed-suite convention, not a measured absence of regressions. Focused gate native EXIT=0 and transposed negative control EXIT=1 are recorded independently.",
+  "assertion_review": [
+    {
+      "failure_condition": "Restoring the original height-first shape branch in analysis_field returns the unchanged square archive, making the archive-derived polished point move 0.328465 m from the independently recorded solver axis against an archive-derived 0.053125 m spacing; the native CLI exits 1. The comparison is not a pass-through equality: the archived field independently controls the polish.",
+      "path": "scripts/prototypes/diiid_vertical_loss/check_orientation.py:85"
+    },
+    {
+      "failure_condition": "A field whose shape matches neither axis extent raises ValueError; no dedicated invalid-shape test was added.",
+      "path": "scripts/prototypes/diiid_vertical_loss/flux_orientation.py:47"
+    },
+    {
+      "failure_condition": "A visible nonempty text artist extending outside the canvas raises ValueError before saving; removing this check would permit the previously clipped strip label, but no recorded negative-control test exercises this guard. In-canvas text collisions are not checked.",
+      "path": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:118"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check",
+    "scripts/prototypes/diiid_vertical_loss/maxima_census.py:census",
+    "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip"
+  ],
+  "completed_at": "2026-11-08T14:40:12Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-08T14:45:38.532859+00:00"
+    },
+    "fit": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-08T14:45:45.013680+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-08T14:26:11Z",
+  "figure_review": {
+    "rendered_and_inspected": [
+      "frame-146-trip-1-flux-contours.svg",
+      "frame-146-trip-2-flux-contours.svg",
+      "frame-137-trip-2-flux-contours.svg"
+    ],
+    "result": "No clipped or overlapping text observed in the three delivered figures; residual labels fit, trip-1 callout is distinct, trip-2 axis is above the limiter, and the absent bounding surface has no legend entry.",
+    "revision": "5c04a6919ff9dcafa3eb5600ef8e8b19112ac8ac"
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-08T14:45:28.591810+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 109,
+      "severity": "blocking",
+      "text": "The newly added save guard checks each text box only against the canvas; it never checks pairs of text boxes or labels against plotted data, so figure.savefig at line 471 still accepts those collisions despite the mandatory mechanical figure-save requirement; add those checks and demonstrate their refusal with colliding text before accepting this node."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/orientation-negative-control.log",
+    "node_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/orientation-gate.log",
+    "regeneration": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/regenerated/regenerate.log",
+    "rendering": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/regenerated/render.log"
+  },
+  "item_verdicts": {
+    "diff": "Read commits 6f10bb0382ca52aeeeaa165a042dd86a9844d994, 2e72f2e452a5c64e514866fb826dfe6da9e0b5e6, 9ac1b11245460b93f3a1314a39dc5d2de9f7506f and 5c04a6919ff9dcafa3eb5600ef8e8b19112ac8ac separately against base 737f6953759c77bf2e5ceccd0b51c8d2849dd199; they fix binding, append the correction, repair layout/captions and refresh SVG metadata, with an incomplete save guard at render_trip_panels.py:109.",
+    "done_when": "Read all three clauses in brief.md; orientation-gate.log records native shift 3.398096975e-9 m below 0.053125 m and a transposed shift 0.328465227 m at EXIT=1, regenerated/regenerate.log records all three diagnostics over four fields, and all three changed SVGs were independently rendered and inspected.",
+    "goal": "Read brief.md's binding-and-correction goal; scripts/prototypes/diiid_vertical_loss/flux_orientation.py:41 fixes the square-map binding and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the dated correction.",
+    "manifest": "Read manifest.md at status complete and opened all four named logs; its native/control results, regenerated receipts and three rendered panels are recorded, while its dispatch explicitly arms no baseline_suite/after_suite pair.",
+    "write_paths": "Read the three paths declared in brief.md and manifest.md; all eleven paths changed between the reviewed base and head are within the two prototype/figure directories and the named evidence fragment."
+  },
+  "justifications": {
+    "durability": "check_orientation.py:85 would fail if flux_orientation.py:41 again returned the unchanged square field, as the logged transposed control demonstrates; the new render_trip_panels.py:109 guard has no recorded failing control and does not cover text collisions.",
+    "evidence": "orientation-gate.log at the reviewed head records native EXIT=0 and transposed EXIT=1, while regenerated/regenerate.log and regenerated/render.log record successful regeneration; the source dispatch arms no suite pair, so added_failure_count=0 denotes an unarmed gate rather than a measured suite delta.",
+    "fit": "The readers retain their existing spline and media APIs, but render_trip_panels.py:109 checks only canvas bounds instead of the mandatory bounds, text-overlap and label-over-data refusal specified by the user figure-save rules.",
+    "goal_fidelity": "scripts/prototypes/diiid_vertical_loss/flux_orientation.py:41 supplies the declared radius-height conversion to all four readers, and the evidence fragment:299 preserves the original account while correcting its mechanism and auditing the surviving receipt claims.",
+    "reuse": "Capability searches at the reviewed head found no archive-binding or text-validation owner in nova/media; FluxLattice in nova/equilibrium/conservation.py:135 owns storage geometry, nova/media/sources/diiid_efit.py:100 owns a different IMAS reader, and nova/media/poloidal.py:540 lacks the new X-point callout capability, so the additions adapt these owners and reuse polish_stationary_points rather than fork a solver.",
+    "scope_discipline": "The eleven changed paths in git diff 737f6953759c77bf2e5ceccd0b51c8d2849dd199..5c04a6919ff9dcafa3eb5600ef8e8b19112ac8ac remain under the exact three write paths in brief.md, with no product source changes."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read brief.md's binding-and-correction goal; scripts/prototypes/diiid_vertical_loss/flux_orientation.py:41 fixes the square-map binding and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the dated correction.\nVERDICT done_when: Read all three clauses in brief.md; orientation-gate.log records native shift 3.398096975e-9 m below 0.053125 m and a transposed shift 0.328465227 m at EXIT=1, regenerated/regenerate.log records all three diagnostics over four fields, and all three changed SVGs were independently rendered and inspected.\nVERDICT write_paths: Read the three paths declared in brief.md and manifest.md; all eleven paths changed between the reviewed base and head are within the two prototype/figure directories and the named evidence fragment.\nVERDICT manifest: Read manifest.md at status complete and opened all four named logs; its native/control results, regenerated receipts and three rendered panels are recorded, while its dispatch explicitly arms no baseline_suite/after_suite pair.\nVERDICT diff: Read commits 6f10bb0382ca52aeeeaa165a042dd86a9844d994, 2e72f2e452a5c64e514866fb826dfe6da9e0b5e6, 9ac1b11245460b93f3a1314a39dc5d2de9f7506f and 5c04a6919ff9dcafa3eb5600ef8e8b19112ac8ac separately against base 737f6953759c77bf2e5ceccd0b51c8d2849dd199; they fix binding, append the correction, repair layout/captions and refresh SVG metadata, with an incomplete save guard at render_trip_panels.py:109.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check, scripts/prototypes/diiid_vertical_loss/maxima_census.py:census, scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_vertical_loss/flux_orientation.py:41 supplies the declared radius-height conversion to all four readers, and the evidence fragment:299 preserves the original account while correcting its mechanism and auditing the surviving receipt claims.\nSCORE evidence: 19\nJUSTIFICATION evidence: orientation-gate.log at the reviewed head records native EXIT=0 and transposed EXIT=1, while regenerated/regenerate.log and regenerated/render.log record successful regeneration; the source dispatch arms no suite pair, so added_failure_count=0 denotes an unarmed gate rather than a measured suite delta.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eleven changed paths in git diff 737f6953759c77bf2e5ceccd0b51c8d2849dd199..5c04a6919ff9dcafa3eb5600ef8e8b19112ac8ac remain under the exact three write paths in brief.md, with no product source changes.\nSCORE durability: 17\nJUSTIFICATION durability: check_orientation.py:85 would fail if flux_orientation.py:41 again returned the unchanged square field, as the logged transposed control demonstrates; the new render_trip_panels.py:109 guard has no recorded failing control and does not cover text collisions.\nSCORE fit: 17\nJUSTIFICATION fit: The readers retain their existing spline and media APIs, but render_trip_panels.py:109 checks only canvas bounds instead of the mandatory bounds, text-overlap and label-over-data refusal specified by the user figure-save rules.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches at the reviewed head found no archive-binding or text-validation owner in nova/media; FluxLattice in nova/equilibrium/conservation.py:135 owns storage geometry, nova/media/sources/diiid_efit.py:100 owns a different IMAS reader, and nova/media/poloidal.py:540 lacks the new X-point callout capability, so the additions adapt these owners and reuse polish_stationary_points rather than fork a solver.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:109 blocking: The newly added save guard checks each text box only against the canvas; it never checks pairs of text boxes or labels against plotted data, so figure.savefig at line 471 still accepts those collisions despite the mandatory mechanical figure-save requirement; add those checks and demonstrate their refusal with colliding text before accepting this node.\n",
+  "review_run_id": "r-20261108T142522811971-review-of-diiid-frame-146-orientation-correction-5c04a6919ff9",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "5c04a6919ff9dcafa3eb5600ef8e8b19112ac8ac",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T14:48:12.913015+00:00",
+  "total": 113
+}

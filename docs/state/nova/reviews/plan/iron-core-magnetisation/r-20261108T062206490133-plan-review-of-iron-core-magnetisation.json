@@ -1,0 +1,131 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T06:40:31.093Z",
+  "dispatched_at": "2026-11-08T06:26:08Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:387",
+      "id": "reasoning-1",
+      "reason": "a node implementing the printed formula builds the wrong Jacobian; the finite-difference clause (3) would catch it, but at the cost of a failed 6-hour node and a re-derivation, and the one-line correction is to write dM = \u2212(\u2202F/\u2202M)^-1 \u2202F/\u2202B_ext with F as \u00a74 defines it.",
+      "text": "\u00a77 writes the iron Jacobian block as dM = (I \u2212 \u2202F/\u2202M)^-1 \u2202F/\u2202B dB_ext, but \u00a74 (line 295) defines F(M) = M \u2212 c(|B|)B = 0, so its Jacobian \u2202F/\u2202M is already (I \u2212 \u2202(cB)/\u2202M) \u2014 the \u00a74 Newton factor the parenthetical says is being reused; read literally the expression inverts (I \u2212 (I \u2212 \u2202(cB)/\u2202M)) = \u2202(cB)/\u2202M instead, and drops the minus sign that the implicit-function step carries",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:365",
+      "id": "wiring-1",
+      "reason": "without a consumer or a decision the one experiment the plan names as deciding the representation can falsify the plan and change nothing, and the split that created \u00a76b is exactly what removed it from the section whose result it qualifies.",
+      "text": "\u00a76b is declared to depend on `s5` and `s6` and its done-when sends the result to the imas-efit owners, but no section depends on `s10`, no decision records its verdict, and no followup carries it, although \u00a71 (line 170) states that this control \"says which of the two WEST answers in \u00a71 is the representation and which is the physics\" \u2014 a verdict that nova's representation is the wrong one leaves \u00a7\u00a77\u20139 resting on a refuted model with nowhere in the plan state to record that",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:337",
+      "id": "done_when-1",
+      "reason": "a chosen route with no fiducial arm leaves clause (1)'s 0.5 % assertion unfalsifiable for one of the three candidates the section exists to compare, and the fix is to state the control per candidate (panel density on the surfaces for the surface route).",
+      "text": "\u00a75's negative control is \"uniform cells at twice the chosen size through the shell\", but the same done-when must accept the surface formulation (\"a boundary formulation in the reduced scalar potential that keeps unknowns on the iron surfaces only\", line 331-333), which has no cells through the shell, so for that candidate the control has no arm and the measure cannot be shown able to fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:13",
+      "id": "wiring-2",
+      "reason": "the header total is what a roadmap and sprint capacity sum, so the plan now understates its own work by three hours and the error propagates to any plan-level effort roll-up.",
+      "text": "`plan-effort-hours` still reads 43.0 while the section hours now sum to 46.0: s2 6.0 + s3 5.0 + s4 6.0 + s5 6.0 + s6 4.0 + s10 3.0 + s7 6.0 + s8 6.0 + s9 4.0 = 46.0; splitting the old 4.0 h \u00a76 into \u00a76 (4.0) and \u00a76b (3.0) added 3.0 h and the header total was not updated",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9e5f1fb9c677b5c1b7d49a4b1a7587651bccbdad",
+  "plan_fingerprint": "0df2a79b874ab7d6c3a0921cc8c974d09c9e8d472ccd559f15c1022cf19cf929",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 23,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Accepted, scheduled for the edit made once \u00a73's first node is running (so this fix does not re-hold it): \u00a77 will read dM = -(dF/dM)^-1 dF/dB_ext with F as \u00a74 defines it, dF/dM being the \u00a74 Newton factor.",
+      "when": "2026-11-08T06:45:51.709410+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "Accepted, scheduled for the same edit: s9 will wait on s10 so the validation reads the cross-code representation verdict, and s10's done-when records that verdict in the plan.",
+      "when": "2026-11-08T06:45:58.977866+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Accepted, scheduled for the same edit: \u00a75's negative control is stated per candidate (twice the cell size through the shell for the volume routes, half the panel density on the surfaces for the surface route).",
+      "when": "2026-11-08T06:46:06.044818+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "Accepted, scheduled for the same edit: plan-effort-hours becomes 46.0, the sum of the section hours.",
+      "when": "2026-11-08T06:46:10.763569+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted, scheduled for the same edit: \u00a75's negative control is stated per candidate (twice the cell size through the shell for the volume routes, half the panel density on the surfaces for the surface route).",
+      "when": "2026-11-08T06:46:06.044818+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted, scheduled for the edit made once \u00a73's first node is running (so this fix does not re-hold it): \u00a77 will read dM = -(dF/dM)^-1 dF/dB_ext with F as \u00a74 defines it, dF/dM being the \u00a74 Newton factor.",
+      "when": "2026-11-08T06:45:51.709410+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted, scheduled for the same edit: s9 will wait on s10 so the validation reads the cross-code representation verdict, and s10's done-when records that verdict in the plan.",
+      "when": "2026-11-08T06:45:58.977866+00:00"
+    },
+    "wiring-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted, scheduled for the same edit: plan-effort-hours becomes 46.0, the sum of the section hours.",
+      "when": "2026-11-08T06:46:10.763569+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v23.json",
+  "review_run_id": "r-20261108T062206490133-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "db89da58e1753c1360f6e9d0ba95791c7549b581",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every file, symbol and plan anchor named by the changed units exists in the tree, and the plan's `depends-on` targets `#s2`\u2013`#s10` and `forward-solve-api#s1` all resolve.",
+    "done_when": "a finding \u2014 \u00a75's new negative control is expressed in cells, so it has no arm for the surface-formulation candidate the same section is allowed to choose.",
+    "evidence_paths": "pass \u2014 \u00a76 writes `docs/figures/west-stray-field/` (committed), \u00a74/\u00a77/\u00a78 state their receipts, and \u00a75's \"plan's evidence record\" reads as this plan's committed evidence fragment directory, which is durable.",
+    "naming": "pass \u2014 the new section id `s10` heads as \"\u00a76b\" but carries no ticket, stage or version label into code, and no changed unit introduces changelog prose.",
+    "reasoning": "a finding \u2014 \u00a77's implicit-differentiation expression uses the symbol `\u2202F/\u2202M` that \u00a74 has already bound to the Newton Jacobian, so read literally it inverts the wrong operator.",
+    "single_goal": "pass \u2014 the former two-deliverable \u00a76 is now one seam (`s6`) and one cross-code control (`s10`), each with its own done-when.",
+    "wiring": "a finding \u2014 \u00a76b (`s10`) is wired to its inputs (`s5`, `s6`) but no section, decision or followup consumes its verdict, which is the test that decides whether \u00a76's representation is the right one."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "d492cff51b173e917acab1b00532cfdd2eaba5cf6c0131157f7cae8e52cc6ef4",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0e968df67c572dad4921d3c80db60349fef2aeaf97a4e88ea0544111dc4254cb",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "77b155296f5255b70f9542e1e6579be0aa127b0630a7a82cda83dafd7baf0b61",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "a91c0a900c7666ccfa0037517fc931c9bc1556a10181bc2577699d2496c8ab01",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:45:49.820967+00:00",
+  "total": null
+}

@@ -11,7 +11,11 @@ R=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T134005364650-graded-res
 G=$R/gate
 mkdir -p "$G" "$R/scratch"
 export TMPDIR=$R/scratch
-W=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+W=${SLURM_SUBMIT_DIR:-$PWD}
+if ! git -C "$W" rev-parse --git-dir > /dev/null 2>&1; then
+  echo "submit directory $W is not a repository" >> "$R/gate/submit-dir.log"
+  exit 1
+fi
 BASE=cb42f656f76a7d7e56da8a53d4754c22d131bdc0
 cd "$W" || exit 1
 HEAD=$(git rev-parse HEAD)

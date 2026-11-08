@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: the source manifest leaves baseline_suite and after_suite empty; neither arm has a completed suite gate log. Unknown is not zero.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "configure_dtypes fails to enable x64; this assertion does not test axis selection or field orientation.",
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "independence": "configuration assertion; no input/output self-comparison",
+      "line": 19
+    },
+    {
+      "failure_condition": "No physical assertion exists; swapping stored.T and stored changes output but does not cause refusal.",
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "independence": "No circular physical assertion was added, because no physical assertion was added at all.",
+      "line": 70
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "git grep found only README invocation of the added main; product seam was read at reviewed head but calls none of the added code.",
+  "commits_read": [
+    "a226220f3aab8c87793cb8bd44929f25f5f51aa8"
+  ],
+  "completed_at": "2026-11-08T08:47:15Z",
+  "dispatched_at": "2026-11-08T08:38:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html",
+      "line": "3",
+      "severity": "blocking",
+      "text": "blocking: This is a useful premise-falsification result, not completion of the dispatched solver fix; the coordinator must explicitly accept a changed deliverable or correct the target before accepting the original done_when, whose fixture guard, ten-arm mask table, MAST check and solve figures are absent."
+    },
+    {
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "line": "70",
+      "severity": "blocking",
+      "text": "blocking: Successful exit only requires printing JSON; no assertion checks native stationarity, negative Hessian eigenvalues or the transposed displacement, and reinstating the wrong binding at line 29 still exits zero, leaving the diagnostic conclusion without a regression guard."
+    },
+    {
+      "file": "manifest.md",
+      "line": "19",
+      "severity": "blocking",
+      "text": "blocking: The reviewed run records neither baseline_suite nor after_suite, so the required added-failure count is unmeasured; the diagnostic logs and removed transposed-field temporary test cannot establish zero added failures."
+    }
+  ],
+  "fixture_provenance": {
+    "identical_to_cited_archive": true,
+    "sha256": "340fd7cfa87cd53c618e99ebd6944dbe4a60733994d8eea12f6774398debe26e"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the single commit a226220f3aab against parent c251bc96a70b9f37bfd373ab58792945d6cdc954; the 84-line diagnostic reuses spline and polish owners and adds an identical archived fixture, README and 41-line evidence fragment, with no product code or test.",
+    "done_when": "The source brief requires a fixture regression, negative control, ten-arm replay and zero added covering-test failures, whereas gate-final.log records only the orientation diagnostic and none of those completion measures.",
+    "goal": "The source prompt's goal is a polished stationary axis in the forward solve; commit a226220f3aab changes only diagnostic evidence and docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html:3 explicitly leaves product work blocked after falsifying its coordinate premise.",
+    "manifest": "The source manifest accurately names the diagnostic and unfinished work, but manifest.md:19-20 leave baseline_suite and after_suite empty so no measured failure delta can be extracted.",
+    "write_paths": "All four files in c251bc96a70b9f37bfd373ab58792945d6cdc954..a226220f3aab8c87793cb8bd44929f25f5f51aa8 fall within the source manifest's declared prototype and evidence-fragment paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:19 fails only when double precision is disabled, while lines 28-79 merely print the physical results and cannot fail if native and transposed bindings are exchanged.",
+    "evidence": "gate-final.log records native shift 0 m and transposed shift 0.3284664244578514 m at the reviewed head, but source manifest.md:19-20 contain no suite pair and the source brief's ten-arm and MAST measures were not run.",
+    "fit": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:10-14 uses repository lattice, spline and stationary-polish APIs with descriptive names, but the evidence fragment's geometry claim has no figure as required by the source brief.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html:3 supports stopping on a false premise but leaves the original axis-selection goal and mask replay unfulfilled.",
+    "reuse": "The capability search found scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:26-54 and nova/equilibrium/flux_surface_connectivity.py:916; the added main wraps the existing polish owner for an explicit two-orientation comparison rather than implementing another finder or modifying the fenced-out faulty reader.",
+    "scope_discipline": "The four files in commit a226220f3aab are inside scripts/prototypes/diiid_axis_selection/ and the explicitly granted docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html path."
+  },
+  "production_path_examination": [
+    "nova/equilibrium/topology.py:1205 qualified O selection",
+    "nova/equilibrium/topology.py:1300-1317 stationary polish publication",
+    "nova/equilibrium/topology.py:1340-1360 axis-connected support and reported state"
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt's goal is a polished stationary axis in the forward solve; commit a226220f3aab changes only diagnostic evidence and docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html:3 explicitly leaves product work blocked after falsifying its coordinate premise.\nVERDICT done_when: The source brief requires a fixture regression, negative control, ten-arm replay and zero added covering-test failures, whereas gate-final.log records only the orientation diagnostic and none of those completion measures.\nVERDICT write_paths: All four files in c251bc96a70b9f37bfd373ab58792945d6cdc954..a226220f3aab8c87793cb8bd44929f25f5f51aa8 fall within the source manifest's declared prototype and evidence-fragment paths.\nVERDICT manifest: The source manifest accurately names the diagnostic and unfinished work, but manifest.md:19-20 leave baseline_suite and after_suite empty so no measured failure delta can be extracted.\nVERDICT diff: Read the single commit a226220f3aab against parent c251bc96a70b9f37bfd373ab58792945d6cdc954; the 84-line diagnostic reuses spline and polish owners and adds an identical archived fixture, README and 41-line evidence fragment, with no product code or test.\nCALL_SITES: none\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html:3 supports stopping on a false premise but leaves the original axis-selection goal and mask replay unfulfilled.\nSCORE evidence: 9\nJUSTIFICATION evidence: gate-final.log records native shift 0 m and transposed shift 0.3284664244578514 m at the reviewed head, but source manifest.md:19-20 contain no suite pair and the source brief's ten-arm and MAST measures were not run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The four files in commit a226220f3aab are inside scripts/prototypes/diiid_axis_selection/ and the explicitly granted docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html path.\nSCORE durability: 2\nJUSTIFICATION durability: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:19 fails only when double precision is disabled, while lines 28-79 merely print the physical results and cannot fail if native and transposed bindings are exchanged.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:10-14 uses repository lattice, spline and stationary-polish APIs with descriptive names, but the evidence fragment's geometry claim has no figure as required by the source brief.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search found scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:26-54 and nova/equilibrium/flux_surface_connectivity.py:916; the added main wraps the existing polish owner for an explicit two-orientation comparison rather than implementing another finder or modifying the fenced-out faulty reader.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html:3 blocking: This is a useful premise-falsification result, not completion of the dispatched solver fix; the coordinator must explicitly accept a changed deliverable or correct the target before accepting the original done_when, whose fixture guard, ten-arm mask table, MAST check and solve figures are absent.\nFINDING scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70 blocking: Successful exit only requires printing JSON; no assertion checks native stationarity, negative Hessian eigenvalues or the transposed displacement, and reinstating the wrong binding at line 29 still exits zero, leaving the diagnostic conclusion without a regression guard.\nFINDING manifest.md:19 blocking: The reviewed run records neither baseline_suite nor after_suite, so the required added-failure count is unmeasured; the diagnostic logs and removed transposed-field temporary test cannot establish zero added failures.\n",
+  "review_run_id": "r-20261108T083640705509-review-of-diiid-axis-selection-fix-a226220f3aab",
+  "reviewed_base_sha": "c251bc96a70b9f37bfd373ab58792945d6cdc954",
+  "reviewed_head_sha": "a226220f3aab8c87793cb8bd44929f25f5f51aa8",
+  "reviewed_run_id": "r-20261108T073038010130-diiid-axis-selection-fix",
+  "scores": {
+    "durability": 2,
+    "evidence": 9,
+    "fit": 18,
+    "goal_fidelity": 7,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:01:47.272531+00:00",
+  "total": 76
+}

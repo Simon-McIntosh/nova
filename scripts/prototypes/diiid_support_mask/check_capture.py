@@ -48,6 +48,7 @@ def main():
     for frame, branch, trips in (
         (179, "limited", 1),
         (146, "diverted", 3),
+        (146, "diverted", 4),
         (137, "diverted", 1),
     ):
         stem = f"frame-{frame}-{branch}-trip-{trips}"
@@ -59,7 +60,7 @@ def main():
             record["counts"]["axis_connected"] = 0
         counts = require_support(record, arrays)
         print(f"{stem}: {counts}; axis-cell comparison passes", flush=True)
-    print("CAPTURE CHECK OK: three nonempty production support reads", flush=True)
+    print("CAPTURE CHECK OK: four nonempty production support reads", flush=True)
 
 
 if __name__ == "__main__":

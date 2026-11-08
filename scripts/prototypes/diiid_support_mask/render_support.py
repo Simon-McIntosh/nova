@@ -16,6 +16,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path as PlotPath
+from scipy.interpolate import RegularGridInterpolator
 
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.forward import _lattice_cells
@@ -48,7 +49,17 @@ def render(archive, output, previews):
     style = DEFAULT_INK
     reference = replace(style, axis_color="#929292", xpoint_color="#929292")
     low, high = sorted((record["axis_flux_wb"], record["boundary_flux_wb"]))
-    levels = np.linspace(low, high, 9)[1:-1]
+    reference_values = RegularGridInterpolator((radius, height), arrays["label"])(
+        np.vstack((arrays["reference_axis"], arrays["reference_saddle"]))
+    )
+    levels = np.unique(
+        np.concatenate(
+            (
+                np.linspace(low, high, 7)[1:-1],
+                np.linspace(*np.sort(reference_values), 7)[1:-1],
+            )
+        )
+    )
     for ax, (name, mask) in zip(axes, stages, strict=True):
         poloidal_axes(ax)
         ax.set_xlim(radius[0], radius[-1])

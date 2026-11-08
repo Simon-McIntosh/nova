@@ -72,6 +72,13 @@
     "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
     "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking presentation on prototype panels; the record's numbers stand on the receipts",
+      "recorded_at": "2026-11-08T07:11:23.321564+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: terminal-panel capture scripts and the evidence fragment (scripts/prototypes/diiid_stopping_rule/, docs/evidence/fragments/diiid-vertical-force-balance/)",

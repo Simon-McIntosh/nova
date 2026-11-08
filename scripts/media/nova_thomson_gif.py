@@ -64,6 +64,10 @@ SLIDE_TICK_FONTSIZE = 16.0
 #: Margin around the first wall in the cropped poloidal panel, in metres.
 WALL_MARGIN = 0.03
 
+#: Height of the graph as a fraction of the column below the title room; the
+#: graph keeps its bottom edge and the space it gives up opens above it.
+GRAPH_HEIGHT_FRACTION = 0.75
+
 #: Room above the graph column for the slide title, in inches.
 TITLE_ROOM = 1.5
 
@@ -99,7 +103,7 @@ def slide_view(extent, style):
             panel_height / SLIDE_HEIGHT,
         )
     )
-    graph_height = SLIDE_HEIGHT - TITLE_ROOM - bottom
+    graph_height = GRAPH_HEIGHT_FRACTION * (SLIDE_HEIGHT - TITLE_ROOM - bottom)
     upper = figure.add_axes(
         (
             left / width,

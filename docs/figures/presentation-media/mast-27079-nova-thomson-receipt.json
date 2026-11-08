@@ -3,9 +3,9 @@
   "boundary_hold_tolerance_m": 0.03968085207837693,
   "boundary_wall_gap_mm": {
     "diverted": {
-      "count": 72,
+      "count": 73,
       "max_mm": 160.28176511670566,
-      "median_mm": 79.3625775391261
+      "median_mm": 79.25699364171412
     },
     "limited": {
       "count": 27,
@@ -14,9 +14,9 @@
     },
     "note": "a limited boundary must touch its limiter, so a limited gap above the solve pitch is a defect; the diverted gap is expected"
   },
-  "bytes": 7725037,
+  "bytes": 7488834,
   "contact_sheet": {
-    "bytes": 1535211,
+    "bytes": 1522387,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
     "rows": 2,
@@ -27,10 +27,10 @@
     "tile_indices": [
       0,
       20,
-      39,
+      40,
       59,
-      78,
-      98
+      79,
+      99
     ],
     "tiles": 6
   },
@@ -57,7 +57,7 @@
     ],
     "trace": "level set at normalised flux 0.9999 enclosing the axis on a 8x bicubic refinement, clipped to the limiter; where none closes inside the wall, the edge of the axis-connected region",
     "trace_routes": {
-      "smooth level set": 103
+      "smooth level set": 104
     }
   },
   "frame_milliseconds": [
@@ -101,7 +101,8 @@
     50,
     50,
     50,
-    100,
+    50,
+    50,
     50,
     50,
     50,
@@ -161,10 +162,10 @@
     100,
     50
   ],
-  "frames": 99,
+  "frames": 100,
   "frames_converged": 65,
-  "frames_diverted": 72,
-  "frames_drawn": 99,
+  "frames_diverted": 73,
+  "frames_drawn": 100,
   "frames_dropped_unbounded": [
     {
       "class": "diverted",
@@ -239,7 +240,7 @@
   ],
   "solved_edge_drawn": true,
   "thomson_edge": {
-    "frames_resolved": 88,
+    "frames_resolved": 89,
     "model": "uncertainty-weighted mtanh fit of the outboard electron temperature of every system pooled; edge where the fit falls through 40 eV, the two-point-model upstream separatrix temperature",
     "solved_minus_thomson_m": [
       0.1265787848476947,
@@ -279,6 +280,7 @@
       0.06242044762431931,
       0.034729533182993544,
       0.04294996255734196,
+      0.029001821963040575,
       0.044773481288088446,
       0.0507603822481133,
       0.037194333910961275,
@@ -353,7 +355,7 @@
         "stored_row_count": 141,
         "usable_sample_fraction": 0.9065562232689081
       },
-      "resolved_samples_drawn": 10864,
+      "resolved_samples_drawn": 10977,
       "rows": 141,
       "value_limit": [
         2.5580186247825623,
@@ -379,7 +381,7 @@
         "stored_row_count": 282,
         "usable_sample_fraction": 0.9521276595744681
       },
-      "resolved_samples_drawn": 378,
+      "resolved_samples_drawn": 382,
       "rows": 141,
       "value_limit": [
         17.843132853507996,
@@ -399,5 +401,5 @@
     "rule": "each frame held for the pulse-time gap to the next slice",
     "slowdown": 10.0
   },
-  "x_points_drawn": 72
+  "x_points_drawn": 73
 }

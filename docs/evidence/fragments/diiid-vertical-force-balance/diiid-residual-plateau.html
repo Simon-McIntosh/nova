@@ -1,0 +1,45 @@
+<section id="diiid-residual-plateau">
+  <h2>DIII-D residual plateau: the residual is real; its stopping mechanism remains unmeasured</h2>
+  <p><strong>Partial evidence, not a completed root cause.</strong> Revaluing the archived frame 179 limited state with the current production maps reproduces a relative sup residual of <code>0.027261760833028243</code>. The live map, the frozen-shadow map and the map after re-reading the shadow agree exactly. The support contains 345 cells. A fresh instrumented solve was killed by SIGKILL during compilation, before producing any runtime callback. Consequently this record makes no claim about its last Newton direction, refused step or warmup trajectory. Frame 137 and the MAST control still require the queued measurement.</p>
+
+  <h3>What was reproduced</h3>
+  <p>The product base is <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>. The relevant equilibrium source and DIII-D builder have zero diff against today's main at <code>ec901e1af</code>. The full 1221-entry physical state comes from the previous support trace, <code>frame-179-limited-trip-1.npz</code>; that trace verified its grid was bit-identical to the earlier default terminal grid. Here it is passed back to the existing production map expressions, with the recorded currents and target current. No solver or map is reimplemented, and no product source is changed.</p>
+  <p>The reproduction reads <code>live_residual = frozen_residual = reconciled_residual = 0.027261760833028243</code>, <code>map_difference = 0 Wb</code>, <code>support = 345</code>, <code>shadow = 67</code> and <code>changed_shadow = 0</code>. Every shadowed entry has exactly zero residual. The historical 0 in mask history counts changed entries; it is not a support cardinality.</p>
+
+  <table>
+    <caption>Frame 179 limited, current-map revaluation of the archived terminal state. Each row uses product base 708079d2e5c785d2d2b6fe67be128632c9852043, CPU x64. Relative sup is max |mapped − state| / max |mapped|; its denominator is 4.669367262083 Wb.</caption>
+    <thead><tr><th>base</th><th>map</th><th>relative sup residual</th><th>difference from live image [Wb]</th></tr></thead>
+    <tbody>
+      <tr><td>708079d2e</td><td>live</td><td>0.027261760833028243</td><td>0</td></tr>
+      <tr><td>708079d2e</td><td>frozen shadow</td><td>0.027261760833028243</td><td>0</td></tr>
+      <tr><td>708079d2e</td><td>re-read shadow</td><td>0.027261760833028243</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Where the residual lives</h3>
+  <p>The grid is partitioned into three disjoint regions. The boundary band is a one-cell, four-neighbour dilation minus erosion of the connected support; the support interior excludes that band, and outside plasma excludes both the connected support and the band. The remaining 132 entries are wall-flux evaluation rows. These are flux equations at wall sample positions, not coil-current equations. Coil currents are prescribed inputs. There are no direct pre-clip sample rows in this state.</p>
+  <p>The sup norm is attained outside the plasma, at grid index 1006: R = 2.433750 m, Z = 0 m, residual −127.295174 mWb. The squared L2 norm is distributed: 52.94% in the support interior, 14.27% in its boundary band, 28.03% outside and 4.76% on wall-flux rows. Thus neither a boundary-only nor a constraint-only explanation is established by this decomposition. The percentages below describe squared L2 contributions, not the smooth eighth-norm merit used for admission.</p>
+  <table>
+    <caption>Frame 179 limited decomposition; product base 708079d2e5c785d2d2b6fe67be128632c9852043 in every row. The regions and wall block cover all 1221 physical flux entries exactly once.</caption>
+    <thead><tr><th>base</th><th>equation block / region</th><th>entries</th><th>max |residual| [mWb]</th><th>relative sup</th><th>squared L2 fraction [%]</th></tr></thead>
+    <tbody>
+      <tr><td>708079d2e</td><td>grid / support interior</td><td>281</td><td>126.605362</td><td>0.027114029549</td><td>52.941297</td></tr>
+      <tr><td>708079d2e</td><td>grid / boundary band</td><td>133</td><td>126.918781</td><td>0.027181151880</td><td>14.273232</td></tr>
+      <tr><td>708079d2e</td><td>grid / outside plasma</td><td>675</td><td>127.295174</td><td>0.027261760833</td><td>28.027520</td></tr>
+      <tr><td>708079d2e</td><td>wall-flux rows</td><td>132</td><td>104.222994</td><td>0.022320581900</td><td>4.757952</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/diiid-residual-plateau/frame-179-limited.svg" alt="Frame 179 limited residual contours in support interior, boundary band and exterior over the native solved and EFIT flux contours">
+    <figcaption>Revaluated archived frame 179 limited terminal: residual 0.0272617608330, converged false. Blue lines are residual contours at ±20%, ±50% and ±80% of the full grid residual maximum, restricted to the named region; negative levels are dashed. Grey solid and dashed lines are solved and EFIT flux on the same nine physical levels, with the EFIT boundary drawn heavier and dashed. The dotted outline marks the region. Every panel carries the physical limiter, the solved axis and recorded unadmitted saddle, and both EFIT nulls polished on the native label field. EFIT polishing converges for both marks, at (1.773652, −0.030834) m and (1.210417, −1.214214) m. Storage is explicitly radius-height, per <code>nova/equilibrium/conservation.py:138</code>; only the plotting interface transposes. All labels lie in the margin. The producer inspected the rendered 1400-pixel preview; the save check reports zero text collisions and zero labels over data.</figcaption>
+  </figure>
+
+  <h3>The instrument must follow the public request</h3>
+  <p>The registered request resolves to <code>newton_krylov</code>, with 24 Newton steps, 24 Krylov iterations, eight warmup sweeps and 16 active-set trips. The default is declared at <code>nova/equilibrium/solve_request.py:313</code>. <code>nova/equilibrium/forward.py:2652</code> adds one inactive vertical-position row, and <code>forward.py:2232</code> assembles the augmented map and calls the fixed-point solver. A wrapper around <code>reduced_newton._reduced_kernels</code> cannot observe this request. This corrects the route premise; it does not infer a zero direction from an empty print stream.</p>
+  <p>The committed prototype instead wraps the actual <code>fixed_point._newton_krylov_inner</code> seam (<code>fixed_point.py:3659</code>), its warmup and linearisation residual evaluations, and <code>_backtracking_scores</code> (<code>fixed_point.py:1350</code>). Host callbacks persist each runtime call and its arrays incrementally. The terminal decomposition reconstructs the actual augmented map from the system assembled by the public solve, including the effective inactive row. The guard accepts a known one-call input and refuses a known zero-call input with <code>AssertionError: the executed fixed-point seam was not observed</code>, EXIT=1. The actual fresh-solve call count is still pending, rather than reported as zero.</p>
+
+  <h3>What remains</h3>
+  <p>The first fresh in-place CPU batch ended when its frame-179 child received SIGKILL during compilation, before any runtime callback and before frame 137 or MAST started. The signal alone does not establish an out-of-memory cause. The remaining full batch is queued as a separate explicitly sized job. It must supply both DIII-D terminal decompositions, runtime call counts, the last direction and admission scores, and the MAST 21978/35 comparison. No stopping mechanism or corrective product change is named before those observations exist. A stable terminal support by itself establishes none of them.</p>
+  <p>Durable inputs and outputs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/</code>: <code>archived-179/revaluation.json</code>, <code>archived-179/revaluation.npz</code>, <code>archived-179/decomposition.json</code>, <code>archived-179.log</code>, <code>render-control.log</code>, <code>call-guard-positive.log</code>, <code>call-guard-negative.log</code> and <code>measure-in-place.log</code>. The run's landing record and manifest carry the queued job identity and continuation instructions.</p>
+</section>

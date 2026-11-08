@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: source manifest has no baseline_suite or after_suite; source prompt.txt:164 explicitly declares the suite pair unarmed; no zero is inferred from absent logs.",
+  "assertion_audit": [
+    {
+      "fails_when": "Restoring the original height-radius-first shape guess leaves the square archived array untransposed; polish moves the independent reported axis 0.328465 m, above the 0.053125 m threshold.",
+      "independent": true,
+      "limit": "Does not assert convergence or Hessian sign, or independently pin each caller import.",
+      "path": "scripts/prototypes/diiid_vertical_loss/check_orientation.py:85"
+    },
+    {
+      "fails_when": "Removing the reused text check causes the logged off-canvas and colliding-label controls to write rather than refuse.",
+      "independent": true,
+      "path": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:194"
+    },
+    {
+      "fails_when": "Removing the vertex-coverage check causes the logged dense over-contour control to write rather than refuse.",
+      "independent": true,
+      "limit": "The control covers many vertices and does not exercise crossings between vertices.",
+      "path": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:170"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check",
+    "scripts/prototypes/diiid_vertical_loss/maxima_census.py:census",
+    "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip"
+  ],
+  "completed_at": "2026-11-08T17:22:25Z",
+  "dispatched_at": "2026-11-08T17:15:45Z",
+  "figure_review": {
+    "inspected": [
+      "frame-146-trip-1-flux-contours.svg",
+      "frame-146-trip-2-flux-contours.svg",
+      "frame-137-trip-2-flux-contours.svg"
+    ],
+    "result": "Exact git-object SVGs rasterized at 1400 px and all three PNGs inspected; labels fit, legend entries read, trip-1 geometry inside limiter, trip-2 axis above limiter.",
+    "revision": "48fcbac8fa7e255b584daf2135b1156114df70f9"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": "170",
+      "severity": "blocking",
+      "text": "blocking: the label-over-data refusal only checks whether stored vertices lie in the text box; a limiter, leader or contour segment can cross the box with both endpoints outside it, so check_panel accepts a label drawn over that line despite the mandatory save-time overlap refusal; test segment-box intersection using the actual artist transform and add a control crossing a box between vertices."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all six commit patches and the aggregate twelve-file diff through 48fcbac8fa7e255b584daf2135b1156114df70f9; four readers share analysis_field, three SVGs are regenerated, the correction preserves the original account, and the final trip-driver change is formatting only.",
+    "done_when": "brief.md requires the native displacement below one spacing, a red transpose, four-field regeneration and inspected figures; gate-final.log records 3.398096975e-9 m versus 0.053125 m and transposed EXIT=1, and regenerated/regenerate.log records all four fields while the new save guard retains a segment-intersection gap.",
+    "goal": "the source brief.md goal and prompt.txt:38 require declared-order binding and an appended correction; flux_orientation.py:33 and the evidence fragment's correction section deliver both.",
+    "manifest": "source manifest.md identifies six commits, native and red-control receipts, regeneration and panel controls; its baseline_suite and after_suite are absent because prompt.txt:164 explicitly leaves the suite pair unarmed, so an added-failure delta is unmeasured.",
+    "write_paths": "source brief.md declares the prototype directory, figure directory and one evidence fragment; all twelve paths in 737f6953759c77bf2e5ceccd0b51c8d2849dd199..48fcbac8fa7e255b584daf2135b1156114df70f9 are within those grants."
+  },
+  "justifications": {
+    "durability": "check_orientation.py:85 fails if analysis_field restores the original square-array identity branch because the independent archived field moves the supplied axis 0.328465 m, but render_trip_panels.py:170 tests vertices rather than intersecting line segments and the four caller bindings have no independent regression assertions.",
+    "evidence": "gate-final.log names reviewed head 48fcbac8fa7e255b584daf2135b1156114df70f9 and records native EXIT=0 and TRANSPOSED_EXIT=1, regenerated/regenerate.log completes the three analyses, and the three exact-head SVGs were independently rendered and inspected, but no baseline_suite/after_suite delta exists.",
+    "fit": "render_trip_panels.py:194 reuses the sibling renderer's text checker and the four readers keep their existing CLI idiom, while the initial functional diff includes incidental formatter changes subsequently acknowledged in manifest.md.",
+    "goal_fidelity": "scripts/prototypes/diiid_vertical_loss/flux_orientation.py:43 transposes square radius-major archives for all four callers and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the corrected mechanism and audits the surviving history claims.",
+    "reuse": "searches across nova/media, nova/linalg and the three relevant prototype directories found the shared text owner render_panels.py:435, which check_panel wraps, the spline/polish owners which measure wraps to exercise analysis_field, and draw_nulls which lacks clearance callouts; analysis_field consolidates four local adapters and no existing owner provides the added vertex-label check or X-point callout capability.",
+    "scope_discipline": "the twelve paths in the reviewed diff stay inside source brief.md's three grants, with only harmless trip_trajectory.py formatting beyond the binding, correction and figure work."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source brief.md goal and prompt.txt:38 require declared-order binding and an appended correction; flux_orientation.py:33 and the evidence fragment's correction section deliver both.\nVERDICT done_when: brief.md requires the native displacement below one spacing, a red transpose, four-field regeneration and inspected figures; gate-final.log records 3.398096975e-9 m versus 0.053125 m and transposed EXIT=1, and regenerated/regenerate.log records all four fields while the new save guard retains a segment-intersection gap.\nVERDICT write_paths: source brief.md declares the prototype directory, figure directory and one evidence fragment; all twelve paths in 737f6953759c77bf2e5ceccd0b51c8d2849dd199..48fcbac8fa7e255b584daf2135b1156114df70f9 are within those grants.\nVERDICT manifest: source manifest.md identifies six commits, native and red-control receipts, regeneration and panel controls; its baseline_suite and after_suite are absent because prompt.txt:164 explicitly leaves the suite pair unarmed, so an added-failure delta is unmeasured.\nVERDICT diff: read all six commit patches and the aggregate twelve-file diff through 48fcbac8fa7e255b584daf2135b1156114df70f9; four readers share analysis_field, three SVGs are regenerated, the correction preserves the original account, and the final trip-driver change is formatting only.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check, scripts/prototypes/diiid_vertical_loss/maxima_census.py:census, scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_vertical_loss/flux_orientation.py:43 transposes square radius-major archives for all four callers and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the corrected mechanism and audits the surviving history claims.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-final.log names reviewed head 48fcbac8fa7e255b584daf2135b1156114df70f9 and records native EXIT=0 and TRANSPOSED_EXIT=1, regenerated/regenerate.log completes the three analyses, and the three exact-head SVGs were independently rendered and inspected, but no baseline_suite/after_suite delta exists.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the twelve paths in the reviewed diff stay inside source brief.md's three grants, with only harmless trip_trajectory.py formatting beyond the binding, correction and figure work.\nSCORE durability: 16\nJUSTIFICATION durability: check_orientation.py:85 fails if analysis_field restores the original square-array identity branch because the independent archived field moves the supplied axis 0.328465 m, but render_trip_panels.py:170 tests vertices rather than intersecting line segments and the four caller bindings have no independent regression assertions.\nSCORE fit: 18\nJUSTIFICATION fit: render_trip_panels.py:194 reuses the sibling renderer's text checker and the four readers keep their existing CLI idiom, while the initial functional diff includes incidental formatter changes subsequently acknowledged in manifest.md.\nSCORE reuse: 20\nJUSTIFICATION reuse: searches across nova/media, nova/linalg and the three relevant prototype directories found the shared text owner render_panels.py:435, which check_panel wraps, the spline/polish owners which measure wraps to exercise analysis_field, and draw_nulls which lacks clearance callouts; analysis_field consolidates four local adapters and no existing owner provides the added vertex-label check or X-point callout capability.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:170 blocking: the label-over-data refusal only checks whether stored vertices lie in the text box; a limiter, leader or contour segment can cross the box with both endpoints outside it, so check_panel accepts a label drawn over that line despite the mandatory save-time overlap refusal; test segment-box intersection using the actual artist transform and add a control crossing a box between vertices.\n",
+  "review_run_id": "r-20261108T171444409418-review-of-diiid-frame-146-orientation-correction-48fcbac8fa7e",
+  "review_text": "VERDICT goal: the source brief.md goal and prompt.txt:38 require declared-order binding and an appended correction; flux_orientation.py:33 and the evidence fragment's correction section deliver both.\nVERDICT done_when: brief.md requires the native displacement below one spacing, a red transpose, four-field regeneration and inspected figures; gate-final.log records 3.398096975e-9 m versus 0.053125 m and transposed EXIT=1, and regenerated/regenerate.log records all four fields while the new save guard retains a segment-intersection gap.\nVERDICT write_paths: source brief.md declares the prototype directory, figure directory and one evidence fragment; all twelve paths in 737f6953759c77bf2e5ceccd0b51c8d2849dd199..48fcbac8fa7e255b584daf2135b1156114df70f9 are within those grants.\nVERDICT manifest: source manifest.md identifies six commits, native and red-control receipts, regeneration and panel controls; its baseline_suite and after_suite are absent because prompt.txt:164 explicitly leaves the suite pair unarmed, so an added-failure delta is unmeasured.\nVERDICT diff: read all six commit patches and the aggregate twelve-file diff through 48fcbac8fa7e255b584daf2135b1156114df70f9; four readers share analysis_field, three SVGs are regenerated, the correction preserves the original account, and the final trip-driver change is formatting only.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check, scripts/prototypes/diiid_vertical_loss/maxima_census.py:census, scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_vertical_loss/flux_orientation.py:43 transposes square radius-major archives for all four callers and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the corrected mechanism and audits the surviving history claims.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-final.log names reviewed head 48fcbac8fa7e255b584daf2135b1156114df70f9 and records native EXIT=0 and TRANSPOSED_EXIT=1, regenerated/regenerate.log completes the three analyses, and the three exact-head SVGs were independently rendered and inspected, but no baseline_suite/after_suite delta exists.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the twelve paths in the reviewed diff stay inside source brief.md's three grants, with only harmless trip_trajectory.py formatting beyond the binding, correction and figure work.\nSCORE durability: 16\nJUSTIFICATION durability: check_orientation.py:85 fails if analysis_field restores the original square-array identity branch because the independent archived field moves the supplied axis 0.328465 m, but render_trip_panels.py:170 tests vertices rather than intersecting line segments and the four caller bindings have no independent regression assertions.\nSCORE fit: 18\nJUSTIFICATION fit: render_trip_panels.py:194 reuses the sibling renderer's text checker and the four readers keep their existing CLI idiom, while the initial functional diff includes incidental formatter changes subsequently acknowledged in manifest.md.\nSCORE reuse: 20\nJUSTIFICATION reuse: searches across nova/media, nova/linalg and the three relevant prototype directories found the shared text owner render_panels.py:435, which check_panel wraps, the spline/polish owners which measure wraps to exercise analysis_field, and draw_nulls which lacks clearance callouts; analysis_field consolidates four local adapters and no existing owner provides the added vertex-label check or X-point callout capability.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:170 blocking: the label-over-data refusal only checks whether stored vertices lie in the text box; a limiter, leader or contour segment can cross the box with both endpoints outside it, so check_panel accepts a label drawn over that line despite the mandatory save-time overlap refusal; test segment-box intersection using the actual artist transform and add a control crossing a box between vertices.\n",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "48fcbac8fa7e255b584daf2135b1156114df70f9",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "revision_note": "Review worktree HEAD is 09308337730b354897466e8f959d6770e6402398; all changed source and figures were read from the explicitly reviewed git objects, not assumed from that checkout.",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T17:26:33.766027+00:00",
+  "total": 110
+}

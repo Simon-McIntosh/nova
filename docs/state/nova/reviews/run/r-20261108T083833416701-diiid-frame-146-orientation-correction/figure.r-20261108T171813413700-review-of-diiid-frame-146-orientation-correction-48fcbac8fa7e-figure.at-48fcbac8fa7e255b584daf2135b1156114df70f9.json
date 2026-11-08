@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "blocker": "The exact review contract allows inspection only of explicitly named PNGs, but node.images and node.inputs are empty and neither the brief nor the prompt names a PNG. Supply the three rendered PNG attachments for the reviewed head and resume this review.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T17:19:24Z",
+  "evidence": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/live/r-20261108T171813413700-review-of-diiid-frame-146-orientation-correction-48fcbac8fa7e-figure.json",
+      "observation": "run_id matches this review; node.id matches the assigned node; node.images=[], node.inputs=[], node.anchor_paths=[]. These explicit fields are present, rather than a parser returning no records."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T171813413700-review-of-diiid-frame-146-orientation-correction-48fcbac8fa7e-figure/brief.md",
+      "observation": "Requires judging only the rendered PNGs named in the review, but names no PNG paths."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T171813413700-review-of-diiid-frame-146-orientation-correction-48fcbac8fa7e-figure/prompt.txt",
+      "observation": "No PNG attachment paths are named."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/manifest.md",
+      "observation": "Reports three rendered panels inspected by the producer, but does not supply named PNG attachments to this review."
+    }
+  ],
+  "findings": [],
+  "limitations": [
+    "No images were opened. No SVG was opened, listed, searched, rendered or read. No figure or caption was changed. No suite was run; required added_failure fields are placeholders mandated for a figure record, not a suite-delta measurement."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T171813413700-review-of-diiid-frame-146-orientation-correction-48fcbac8fa7e-figure",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "48fcbac8fa7e255b584daf2135b1156114df70f9",
+  "reviewed_pngs": [],
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "rubric": "figure",
+  "rubric_verdicts": [],
+  "status": "unparsed",
+  "summary": "Visual review could not be performed: the dispatch names no rendered PNG attachments. No visual verdict is asserted; empty findings do not constitute approval.",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T17:24:25.544471+00:00",
+  "total": null
+}

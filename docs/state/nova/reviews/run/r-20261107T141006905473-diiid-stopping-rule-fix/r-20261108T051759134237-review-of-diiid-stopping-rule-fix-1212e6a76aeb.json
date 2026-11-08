@@ -14,9 +14,9 @@
       "recorded_at": "2026-11-08T06:40:54.444174+00:00"
     },
     "reuse": {
-      "kind": "exempted",
-      "reason": "the duplicated EFIT-axis and wall-distance helpers live in prototype scripts, not product source; the axis-selection fix node owns magnetic_axis_subgrid reuse",
-      "recorded_at": "2026-11-08T05:58:09.088712+00:00"
+      "kind": "folded",
+      "node": "repair-of-diiid-stopping-rule-fix-1212e6a76aeb",
+      "recorded_at": "2026-11-08T06:41:09.891991+00:00"
     }
   },
   "dispatched_at": "2026-11-08T05:20:25Z",

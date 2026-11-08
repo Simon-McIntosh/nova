@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-08T09:23:19.354Z",
   "dispatched_at": "2026-11-08T09:06:06Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the node's write paths exclude tests/; the support-mask node binds fields through the same declared order and asserts the polish before use",
+      "recorded_at": "2026-11-08T09:49:50.245279+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_vertical_loss/check_orientation.py",

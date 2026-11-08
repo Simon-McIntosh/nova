@@ -52,12 +52,17 @@ FLUX_SPACING = 0.04
 CONTOUR_LINEWIDTH = 0.8
 BOUNDARY_LINEWIDTH = 1.6
 
-#: The widescreen presentation page, 16:9.
+#: The figure on a widescreen page: full slide width, 0.9 in short of the
+#: 16:9 height so the slide keeps a footer band below it.
 SLIDE_WIDTH = 13.333
-SLIDE_HEIGHT = 7.5
+SLIDE_HEIGHT = 6.6
+
+#: Text size on the slide, in points: legible from the back of a room.
+SLIDE_FONTSIZE = 18.0
+SLIDE_TICK_FONTSIZE = 16.0
 
 #: Room above the graph column for the slide title, in inches.
-TITLE_ROOM = 1.2
+TITLE_ROOM = 1.5
 
 
 def slide_view(extent, style):
@@ -72,7 +77,7 @@ def slide_view(extent, style):
     from nova.media.layout import ThreeView
 
     r_min, r_max, z_min, z_max = (float(value) for value in extent)
-    inset, gap, right, bottom, between = 0.1, 1.0, 0.3, 0.7, 0.75
+    inset, gap, right, bottom, between = 0.1, 1.5, 0.3, 0.9, 0.55
     panel_height = SLIDE_HEIGHT - 2 * inset
     panel_width = panel_height * (r_max - r_min) / (z_max - z_min)
     figure = matplotlib.figure.Figure(
@@ -162,7 +167,7 @@ def render_thomson(
 
     from nova.media.sources.pulse_forward import read_pulse_forward
 
-    style = DEFAULT_INK
+    style = replace(DEFAULT_INK, label_fontsize=SLIDE_FONTSIZE)
     if quantity not in _QUANTITIES:
         raise ValueError(
             f"unknown quantity {quantity!r}, not one of {list(_QUANTITIES)}"
@@ -229,12 +234,6 @@ def render_thomson(
         )
 
     scales = {string.name: pulse_scale(string) for string in strings}
-
-    # Headroom above the core profile for the frame annotation, so the text
-    # never sits on a measurement: a factor of twenty on the logarithmic axis.
-    core = strings[0].name
-    lower, upper = scales[core].y_limit
-    scales[core] = replace(scales[core], y_limit=(lower, upper * 20.0))
 
     # The measured edge comes from the electron temperature of every system
     # pooled, whichever quantity the panels show: it is one physical edge.
@@ -313,6 +312,8 @@ def render_thomson(
     def render(index: int) -> None:
         frame = frames[index]
         view.clear()
+        for axes in (view.upper, view.lower):
+            axes.tick_params(labelsize=SLIDE_TICK_FONTSIZE)
         pol.draw_plasma_cells(view.poloidal, clipped[index])
         plasma_contours.append(draw_flux(frame))
         pol.draw_coils(view.poloidal, machine.coils)
@@ -352,13 +353,14 @@ def render_thomson(
                 values,
                 color=colour[string.name],
                 style=style,
-                markersize=2.5,
+                markersize=5.0,
             )
             scales[string.name].apply(axes)
             tr.label_axes(
                 axes,
                 "major radius  [m]" if axes is view.lower else None,
                 f"{string.name} {label}  [{unit}]",
+                style=style,
             )
             if solved_edge:
                 # Where the solved boundary crosses this string's own chord.
@@ -377,18 +379,6 @@ def render_thomson(
                     linestyle="--",
                     zorder=1,
                 )
-        state = "converged" if frame.qualified else f"residual {frame.residual:.1e}"
-        topology = "diverted" if frame.diverted else "limited"
-        legend = (
-            "solid: solved edge   dashed: Thomson edge"
-            if solved_edge
-            else "dashed: Thomson edge"
-        )
-        tr.annotate_time(
-            view.upper,
-            f"MAST {shot}  nova forward\n{topology}, {state}\n"
-            f"t = {1e3 * frame.time:.0f} ms\n{legend}",
-        )
 
     # Equal pulse time per unit of animation time: each frame is held for the
     # gap to the next solved slice, scaled by the slowdown, so a missing slice

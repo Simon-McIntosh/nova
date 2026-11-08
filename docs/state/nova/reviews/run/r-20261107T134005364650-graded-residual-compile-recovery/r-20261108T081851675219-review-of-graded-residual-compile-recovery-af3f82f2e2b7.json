@@ -10,6 +10,13 @@
     }
   },
   "dispatched_at": "2026-11-08T08:23:47Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking hygiene in prototype launchers and the prototype regression check; the product change is gated by bitwise packed moments and paired suite arms",
+      "recorded_at": "2026-11-08T08:49:30.183897+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/graded_residual_compile/run_gate.sh",

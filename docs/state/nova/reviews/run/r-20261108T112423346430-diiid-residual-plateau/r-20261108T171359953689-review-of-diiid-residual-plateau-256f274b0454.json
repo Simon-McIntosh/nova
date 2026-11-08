@@ -35,6 +35,13 @@
     "render_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T171359953689-review-of-diiid-residual-plateau-256f274b0454/figure-render.log",
     "verdict": "All three exact-head SVGs rendered and visually inspected; margin labels readable, sign keys distinct, no clipped or colliding text."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a redundant self-comparison in a prototype palette helper; the black/white check, distance thresholds and the rejected-palette red control carry the palette evidence",
+      "recorded_at": "2026-11-08T17:30:14.354418+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_residual_plateau/style.py",

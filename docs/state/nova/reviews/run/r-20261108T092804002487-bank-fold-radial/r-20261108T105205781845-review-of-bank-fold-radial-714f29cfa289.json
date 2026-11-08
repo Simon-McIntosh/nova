@@ -33,6 +33,13 @@
     "714f29cfa2895b064144c70d16a13365d68ec389: completed paired provenance read"
   ],
   "completed_at": "2026-11-08T11:05:17Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-bank-fold-radial-714f29cfa289",
+      "recorded_at": "2026-11-08T11:46:53.980051+00:00"
+    }
+  },
   "dispatched_at": "2026-11-08T10:56:53Z",
   "figure_review": "Rendered explicit reviewed-head SVG with convert and visually inspected reviewed-figure.png; legible labels, separate logarithmic scales, no clipping or overlaps, only measured markers; no product call sites found by git grep at explicit head, with positive matches in the executable prototype launcher.",
   "findings": [

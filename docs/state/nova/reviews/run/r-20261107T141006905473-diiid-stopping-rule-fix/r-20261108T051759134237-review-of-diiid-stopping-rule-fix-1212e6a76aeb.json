@@ -20,6 +20,13 @@
     }
   },
   "dispatched_at": "2026-11-08T05:20:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "caption wording on a prototype figure: the marked point is the EFIT contour's lowest vertex; non-blocking",
+      "recorded_at": "2026-11-08T05:58:19.681616+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",

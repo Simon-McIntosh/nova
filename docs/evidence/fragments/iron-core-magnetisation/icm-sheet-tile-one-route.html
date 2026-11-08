@@ -91,13 +91,46 @@ floor and tighter than the <code>1e-6</code> it replaces.
 </p>
 </section>
 
+<section id="icm-sheet-tile-one-route-cpu">
+<h2>The tile gate still fails on CPU — the dedup is landed, the gate is not met on that backend</h2>
+<p>
+With the tile and the host route now the same function, the gate that compares
+them measures the tile's batching and padding alone, and on CPU it does not hold.
+Eight targets, two workers, <code>NOVA_SHEET_TILE_TARGETS=8
+NOVA_SHEET_TILE_WORKERS=2</code>: worst entry <code>6.258e-9</code> at
+(8,&nbsp;425), <code>2051</code> of <code>54272</code> entries above <code>1e-13</code>;
+percentiles <code>p50=0.000e+00 p90=1.886e-16 p99=0.610e-12 p99.9=1.023e-09
+p100=6.258e-09</code>. Most entries are bit-*identical* between the tiled
+(<code>vmap</code> over pair blocks) and unbatched (flat chunk) launches, which
+rules out a systematic formulation difference and points at a subset of pairs.
+</p>
+<p>
+Chasing it to the component: on the same pairs, the <em>B<sub>Z</sub></em> rows
+agree bit for bit and only the <em>B<sub>R</sub></em> rows differ, by e.g.
+<code>5.85e-21</code> on a value of <code>-5.465e-12</code> whose per-end terms are
+of order <code>1e-13</code> — about <code>6e-8</code> of the scale, far above
+double-precision rounding of those terms. The packed function's own gradient
+(<code>_sheet_closed_gradient</code>, all three returned components) is
+bit-identical between the flat and blocked launches in isolation, so the
+difference is introduced by the surrounding program rather than by the closed
+form's arithmetic.
+</p>
+<p>
+This node does not resolve it. It is reported blocked on clause (2) rather than
+loosened: the gate stays at <code>1e-13</code> and the tile's agreement with the
+closed form on CPU is the open item, alongside the H200 run that clause (2)
+requires and which this node did not reach.
+</p>
+</section>
+
 <section id="icm-sheet-tile-one-route-evidence">
 <h2>Evidence</h2>
 <ul>
 <li>CPU gate log: <code>logs/gate-cpu.log</code> in the run directory.</li>
-<li>Reproduction and diagnosis scripts: <code>diag5.py</code> (scale comparison),
-<code>diag7.py</code> (per-edge convergence), <code>diag8.py</code> (worst entry)
-in the run's scratch directory.</li>
+<li>Negative control log: <code>logs/negative-control.log</code>.</li>
+<li>Reproduction and diagnosis scripts: <code>diag2.py</code> (blocked vs flat
+launch), <code>diag5.py</code> (scale comparison), <code>diag7.py</code> (per-edge
+convergence), <code>diag8.py</code> (worst entry) in the run's scratch directory.</li>
 </ul>
 </section>
 </article>

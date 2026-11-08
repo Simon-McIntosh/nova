@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:3795 (_render_panel from the panel subcommand)",
+    "benchmarks/coil_edit_latency.py:3815 (_merge_receipt at the panel receipt write)",
+    "benchmarks/coil_edit_latency.py:2401 (_label_defects inside _render_panel)",
+    "benchmarks/coil_edit_latency.py:2170 (_paint_panel)",
+    "nova/media/poloidal.py:draw_nulls (reached unchanged via _draw_null_set)"
+  ],
+  "completed_at": "2026-11-08T00:55:23.264Z",
+  "dispatched_at": "2026-11-08T00:38:24Z",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/forward-solve-api-landed.html",
+      "line": "437",
+      "severity": "non-blocking",
+      "text": "non-blocking: the block this diff re-captioned still quotes \"the axis flux 0.341217 Wb and the boundary flux -0.122930 Wb\", which is the base rendition's level_band in converged-vs-nonconverged.json, while the drawn level array at head runs -0.122367 to 0.341576 Wb as the page caption and panel-receipt.json both state, so one sentence in a caption the node rewrote still describes the earlier rendition."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/panel-receipt.json",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "non-blocking: clipped_labels and overlapping_labels still publish 0 beside measured_from declaring them copied, so a reader parsing visual_inspection[\"clipped_labels\"] gets an unmeasured value while the brief asked for the counts to be measured rather than copied into the receipt; dropping the two fields or measuring them would satisfy it."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to re-render the coil-edit panels from the solve currents with titles that define their quantities and null sets that stay distinguishable, and to make every caption embedding the PNG describe that rendition; benchmarks/coil_edit_latency.py:2306 _edit_quantity_note and the 14 pt title at benchmarks/coil_edit_latency.py:2532 now draw \"edit 12 ... P4-UPPER circuit 8 current +6% of the seed ... three active-set iterations\" beside edit 9 at +0%, and the reference nulls are drawn 1.8 times the solved size at zorder 6 beneath the solved set at zorder 7 (benchmarks/coil_edit_latency.py:2115, :2246).\nVERDICT done_when: the done_when's clauses each land on a gate that asserts them - h200-base-arm.log reports 7 passed in 904.06s (EXIT_STATUS=0, zero failure ids), h200-head-arm-0ce664c8e.log reports 12 passed in 901.77s at SOURCE_REVISION=0ce664c8e (EXIT_STATUS=0, zero failure ids, no -k), mutation-control-aca80277e.log reddens three tests with EXIT=1, and tests/test_coil_edit_panel_render.py:592 re-measures the label counts independently of the renderer's return value; I read the logs, not the manifest's summary of them.\nVERDICT write_paths: every path in the diff sits inside the five declared write paths - benchmarks/coil_edit_latency.py, docs/figures/forward-solve-api/coil-edit-nonconvergence/ (png, svg, converged-vs-nonconverged.json, panel-receipt.json, the page html), docs/evidence/archive/forward-solve-api-landed.html, docs/figures/single-grid-solver-cutover/panel-receipt.json and tests/test_coil_edit_panel_render.py - and no nova/ file survives in the net diff, so the earlier painter edit is fully reverted.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141429049240-coil-edit-panel-captions/manifest.md ; its baseline_suite (job 1308098, 7 passed) and after_suite (job 1308209, 12 collected 12 passed, EXIT_STATUS=0) match those logs' own summary lines, and the base tree at /home/ITER/mcintos/.cache/nova-coil-edit-base-arm carries the same tests/test_coil_edit_panel_render.py bytes (sha1 2f97bf536b7503250f72094e0d63dcefb9cf03ba) as fb6f1726a, so its synthetic commit e8f972a84 stands for the base revision.\nVERDICT diff: read all fourteen commits against fb6f1726a; the landed change adds _null_style, _edit_quantity_note and _merge_receipt, draws the reference nulls oversized beneath the solved set, filters axis-off furniture out of the label measurement, persists caption and visual_inspection on the panel path, and rewrites the page caption and five archive captions - and one sentence inside a block it rewrote still quotes the base level band.\nCALL_SITES: benchmarks/coil_edit_latency.py:3795 (_render_panel from the panel subcommand), benchmarks/coil_edit_latency.py:3815 (_merge_receipt at the panel receipt write), benchmarks/coil_edit_latency.py:2401 (_label_defects inside _render_panel), benchmarks/coil_edit_latency.py:2170 (_paint_panel), nova/media/poloidal.py:draw_nulls (reached unchanged via _draw_null_set)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:2246 draws the reference markers oversized beneath the solved set and :2306 defines the title's base, but the archive block at docs/evidence/archive/forward-solve-api-landed.html:437 still quotes the previous rendition's level band.\nSCORE evidence: 18\nJUSTIFICATION evidence: h200-head-arm-0ce664c8e.log:6 records SOURCE_REVISION=0ce664c8ec635f622ce9e7193611853c31422b0a and line 49 reports 12 passed against the base arm's 7, both EXIT_STATUS=0 with zero failure ids.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the 9-file diff lies inside the five declared write paths and the archive edit removes 14 lines across five caption blocks, all inside the figure blocks it re-captions.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:592 compares the receipt's label counts against a second measurement taken from the drawn figure and reddens under mutation-control-aca80277e.log, but nothing fails if the page or archive caption drifts from the receipt again.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py:2115 takes the larger marker through DEFAULT_INK.variant rather than a new style field, and the added names describe the mechanism with no plan or version label.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/media/ink.py:142 InkStyle.variant already owns the restyle capability and is extended rather than forked, and a search over benchmarks/ and nova/ for a receipt-merge owner found only benchmarks/solve_program_size_gate.py:1977, which merges certificate rows into a gate receipt and is a different capability.\nFINDING docs/evidence/archive/forward-solve-api-landed.html:437 non-blocking: the block this diff re-captioned still quotes \"the axis flux 0.341217 Wb and the boundary flux -0.122930 Wb\", which is the base rendition's level_band in converged-vs-nonconverged.json, while the drawn level array at head runs -0.122367 to 0.341576 Wb as the page caption and panel-receipt.json both state, so one sentence in a caption the node rewrote still describes the earlier rendition.\nFINDING docs/figures/single-grid-solver-cutover/panel-receipt.json:81 non-blocking: clipped_labels and overlapping_labels still publish 0 beside measured_from declaring them copied, so a reader parsing visual_inspection[\"clipped_labels\"] gets an unmeasured value while the brief asked for the counts to be measured rather than copied into the receipt; dropping the two fields or measuring them would satisfy it.",
+  "review_run_id": "r-20261108T003025776733-review-of-coil-edit-panel-captions-0ce664c8ec63",
+  "reviewed_base_sha": "fb6f1726a33a5b8edebccc09850bf8200fbbf170",
+  "reviewed_head_sha": "0ce664c8ec635f622ce9e7193611853c31422b0a",
+  "reviewed_run_id": "r-20261107T141429049240-coil-edit-panel-captions",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:06:34.925363+00:00",
+  "total": 110
+}

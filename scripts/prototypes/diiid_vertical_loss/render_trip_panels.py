@@ -221,7 +221,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         flux,
         bounding,
         axis,
-        DEFAULT_INK.separatrix_color,
+        "#6a4c93",
         DEFAULT_INK.separatrix_linewidth,
     )
     draw_wall(axes, radius=limiter[:, 0], height=limiter[:, 1], close=True)
@@ -278,7 +278,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     handles = [
         plt.Line2D([], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"),
         plt.Line2D([], [], color="#9a9a9a", linewidth=2.0, label="EFIT flux"),
-        plt.Line2D([], [], color=DEFAULT_INK.separatrix_color, linewidth=2.6, label="bounding surface"),
+        plt.Line2D([], [], color="#6a4c93", linewidth=2.6, label="bounding surface"),
         plt.Line2D([], [], color="black", linewidth=2.0, label="limiter"),
         plt.Line2D([], [], color="#606060", linewidth=1.6, linestyle="--", label="EFIT boundary"),
         plt.Line2D([], [], marker="^", linestyle="none", color=DEFAULT_INK.axis_color, markersize=7, label="solved axis"),

@@ -21,6 +21,13 @@
       "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/previews-reviewed/mast-21978-35.png"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the MAST panel is the converged control; its caption names the contours as floating-point roundoff and each panel labels max|r| in aWb, so the reading is unambiguous; a drawing floor changes no conclusion",
+      "recorded_at": "2026-11-08T15:34:40.773343+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_residual_plateau/render.py",

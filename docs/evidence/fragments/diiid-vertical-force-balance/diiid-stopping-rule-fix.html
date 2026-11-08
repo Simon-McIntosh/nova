@@ -83,7 +83,7 @@
       <tr><td>179</td><td>limited</td><td>continued</td><td>0.027262</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
       <tr><td>44</td><td>diverted</td><td>default</td><td>4.275696</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>limited (requested diverted)</td><td>yes</td></tr>
       <tr><td>44</td><td>diverted</td><td>continued</td><td>4.275696</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>limited (requested diverted)</td><td>yes</td></tr>
-      <tr><td></td><td>44</td><td>limited</td><td>default</td><td>0.197003</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>44</td><td>limited</td><td>default</td><td>0.197003</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
       <tr><td>44</td><td>limited</td><td>continued</td><td>0.197003</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested limited)</td><td>yes</td></tr>
     </tbody>
   </table>
@@ -110,24 +110,56 @@
 
   <h3>Terminal states</h3>
 
+  <p>
+    Each panel draws the terminal flux on seven levels, the governed DIII-D
+    limiter ring read from the machine description (84 points, R 1.017–2.351 m,
+    Z −1.359 to +1.363 m), the EFIT boundary of the frame dashed, and the nulls
+    the arm recorded; levels of the opposite sign are dashed. The flux grid
+    extends beyond the wall, so the outermost contours leave the vessel outline.
+    The limiter is the scale: the panels carry no axes, so the
+    vessel outline is what maps a position on the page to a place in the machine,
+    and the magnetic axis is labelled in metres beside its marker.
+  </p>
+
+  <p>
+    The measured wall relation is what the panels are checked against, and it
+    contradicts any reading of these states as wall-bounded. Where the framework
+    traces a terminal boundary at all — 144 diverted (665 nodes) and 137 diverted
+    (585 nodes) — its closest approach to the wall is 0.162 m and 0.329 m, with
+    <em>zero</em> nodes within 1 cm of the wall. On 179 limited and 44 limited the
+    read returns no boundary nodes at all. The magnetic axis sits 0.58–0.59 m
+    inside the limiter on all four, at Z between −0.14 and +0.04 m, while the
+    limiter's upper shelf is at Z near +1.36 m. No terminal in this table touches
+    the upper limiter shelf, and nothing in the figures shows contact.
+  </p>
+
+  <p>
+    A bounding surface traced from each terminal flux by
+    <code>host_boundary_read</code> is <em>not</em> drawn on these panels. Run
+    against the artifact lattice alone, the read resolves only 8 of its ray radii
+    and reports a class margin of <code>-inf</code>, so the curve it returns is a
+    fragment rather than a surface and drawing it would misstate the state. The
+    numeric wall relation above carries that evidence instead.
+  </p>
+
   <figure>
-    <img src="/nova/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png" alt="Frame 179 limited terminal flux contours">
-    <figcaption>Frame 179, limited seed, terminal residual 0.0273: solved contours, the EFIT boundary dashed, the axis and the admitted saddle. The plasma core is displaced well inside the label boundary.</figcaption>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png" alt="Frame 179 limited terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 179, limited seed, terminal residual 0.0273: solved contours, the governed limiter, the EFIT boundary dashed, the axis and the admitted saddle. The closed cores sit well inside the vessel outline; the outermost dashed contours leave it where the grid does.</figcaption>
   </figure>
 
   <figure>
-    <img src="/nova/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png" alt="Frame 44 limited terminal flux contours">
-    <figcaption>Frame 44, limited seed, terminal residual 0.197.</figcaption>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png" alt="Frame 44 limited terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 44, limited seed, terminal residual 0.197, drawn on the same limiter and levels.</figcaption>
   </figure>
 
   <figure>
-    <img src="/nova/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png" alt="Frame 144 diverted terminal flux contours">
-    <figcaption>Frame 144, diverted seed, terminal residual 5.93 — the worst arm, and the one whose contours sit furthest from the label boundary.</figcaption>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png" alt="Frame 144 diverted terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 144, diverted seed, terminal residual 5.93 — the worst arm, and the one whose recorded boundary comes nearest the wall at 0.162 m.</figcaption>
   </figure>
 
   <figure>
-    <img src="/nova/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png" alt="Frame 137 diverted terminal flux contours">
-    <figcaption>Frame 137, diverted seed, terminal residual 0.0624 — the only arm where Newton promotions are accepted, and its terminal state is the closest to the label.</figcaption>
+    <img src="/nova/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png" alt="Frame 137 diverted terminal flux contours inside the governed DIII-D limiter">
+    <figcaption>Frame 137, diverted seed, terminal residual 0.0624 — the only arm where Newton promotions are accepted, with its recorded boundary 0.329 m from the wall.</figcaption>
   </figure>
 
   <h3>What the stopping-rule change does and does not do</h3>

@@ -35,6 +35,11 @@
       "kind": "exempted",
       "reason": "the canvas-edge check belongs in the repository save function, not this prototype; non-blocking",
       "recorded_at": "2026-11-08T05:58:46.075354+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "prototype duplicate of magnetic_axis_subgrid; the axis-selection fix node uses the owner",
+      "recorded_at": "2026-11-08T05:59:02.323616+00:00"
     }
   },
   "findings": [

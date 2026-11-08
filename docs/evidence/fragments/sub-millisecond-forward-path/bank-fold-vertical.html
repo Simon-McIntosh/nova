@@ -7,6 +7,14 @@
   a separate one-lane job; the repaired gate measures both spectra in each
   fresh process of the same job. Its device-qualified receipt will replace
   these first-pass claims.</p>
+  <p id="bank-fold-vertical-regression-controls">The repair's executable
+  contract checks the actual continuation loop with a synthetic state that
+  reaches zero residual on its sixth update, and checks the bordered step on
+  a one-cell state whose centroid requires a nonzero radial-field correction.
+  A receipt pair with no conditioning rows is refused. The pre-repair source
+  fails the first and third checks; a scratch mutation that removes the
+  centroid correction fails the second. These controls make the assertions
+  independent of two processes agreeing on the same result.</p>
   <p><strong>Product pin status: absent in the bank solve.</strong>
   <code>nova/equilibrium/support_read.py:1587-1607</code> declares only the three
   moment state blocks and takes no vertical-position or centroid row;

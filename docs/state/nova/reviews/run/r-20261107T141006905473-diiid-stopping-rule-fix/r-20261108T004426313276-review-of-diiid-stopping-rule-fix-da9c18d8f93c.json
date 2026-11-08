@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table"
+  ],
+  "added_failures_note": "derived from the reviewed run's own arms, baseline_suite log gate_base.log and after_suite log gate_head2.log. Base failures across the completed files: tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate. Head failures: that id plus tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table. tests/test_equilibrium_forward_solve.py was cut at EXIT=124 on both arms so it contributes no ids; the run's separate h200/titan rerun of that file reports the same two ids on both arms (h200_base.log, h200_head.log: two failed, twenty-eight passed), so no added failure is attributed to it.",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2758",
+    "nova/equilibrium/batched_labeller.py:135",
+    "nova/equilibrium/reduced_newton.py:1578"
+  ],
+  "completed_at": "2026-11-08T01:10:15.547Z",
+  "dispatched_at": "2026-11-08T00:46:05Z",
+  "findings": [
+    {
+      "file": "tests/test_forward_solve_request.py",
+      "line": "139",
+      "severity": "blocking",
+      "text": "the diff adds attempted_newton_promotions and accepted_newton_promotions to ForwardSolveReceipt (nova/equilibrium/solve_request.py:742-743) without updating the pinned RECEIPT_FIELDS tuple at tests/test_forward_solve_request.py:52, so test_default_request_schema_resolves_from_the_installed_version_table fails at head (gate_head2.log:73-74, one failed and four passed) and passed at base (gate_base.log:50-51, five passed): a real added failure in one of the five files the done-when requires to stay green, in a file outside the node's write fence, which should have been a blocker or an outside_scope entry rather than a complete record."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/manifest.md",
+      "line": "1",
+      "severity": "blocking",
+      "text": "the reviewed manifest's after_suite and baseline_suite entries both set completed: true and carry one failure id, but the logs they name end tests/test_equilibrium_forward_solve.py with EXIT=124 (gate_head2.log:78, gate_base.log:56) and gate_head2.log:73-74 holds a second head failure the record omits, so the gate receipt claims a completeness and a failure set its own log does not support."
+    },
+    {
+      "file": "nova/equilibrium/reduced_newton.py",
+      "line": "1577",
+      "severity": "non-blocking",
+      "text": "the reduced route still ends its own active-set loop on a zero mask difference with FixedPointTerminationReason.ACTIVE_SET_SETTLED while nova/equilibrium/fixed_point.py:4850-4853 now requires an attempted-and-refused promotion before settlement ends the solve, so the two routes disagree about what a settled mask means and the new vocabulary reaches only one of them."
+    },
+    {
+      "file": "tests/test_fixed_point_stationary_mask.py",
+      "line": "91",
+      "severity": "non-blocking",
+      "text": "test_forward_receipt_publishes_the_promotion_counts asserts only that the two field names exist on the dataclass, so the nova/equilibrium/forward.py:2389-2395 threading that populates them can be reverted without reddening any test, and the negative control recorded at negative_control.log reddened only the pure-predicate case while the four loop-level tests passed."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+      "line": "84",
+      "severity": "non-blocking",
+      "text": "the frame 44 limited table row opens with an extra empty cell, shifting every value in that row one column right against the header row."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/h200_base.log",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "the base heavy-file arm's header names SOURCE_REVISION=cdf606e39453b0aa143ec3e674fa12c164210255, which resolves to no object in this repository and is the empty scratch-base marker commit in base-tree, so that arm cannot be tied to 6f20bafbc, and the log omits the module.__file__ and resolved working directory the manifest contract requires of a scratch-tree arm."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/forward.py:2758; nova/equilibrium/batched_labeller.py:135; nova/equilibrium/reduced_newton.py:1578",
+    "diff": "read all seven commits against 6f20bafbc commit by commit: 9d3759f94 and a5e0f8151 carry the stopping rule and the receipt threading in nova/equilibrium/fixed_point.py, forward.py and solve_request.py; f1d5ee78e, 9947a46d5, b22368262 and 177bcdf2c add the measurement scripts and the evidence fragment; da9c18d8f records the measurement.",
+    "done_when": "read the done-when's three clauses against tests/test_fixed_point_stationary_mask.py and the five-file suite pair; the hooks and their negative control are satisfied, but clause 3's zero-added-failures measure fails on tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table, and clause 2's required host_boundary_read bounding class never appears in the probe.",
+    "goal": "the node goal is to stop the DIII-D forward solve on convergence rather than on a settled mask; nova/equilibrium/fixed_point.py:4850-4853 and :5064-5081 implement that rule at the active-set loop, and every probe arm now reports reason 11 (stationary) with converged false rather than 10.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/manifest.md; status complete, seven commits, baseline_suite and after_suite both recorded completed: true carrying only tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate as a failure id, which its own cited log contradicts.",
+    "write_paths": "read the manifest's seven declared paths; the diff 6f20bafbc..da9c18d8f places all twelve changed files (three nova modules, the new test, three scripts, one fragment, four PNGs) inside them, so the diff itself is in scope."
+  },
+  "justifications": {
+    "durability": "tests/test_fixed_point_stationary_mask.py:91 asserts only that the two receipt fields exist in dataclasses.fields, so reverting the nova/equilibrium/forward.py:2389-2395 threading leaves the suite green, and the negative_control.log mutation reddened only the pure-predicate test while the four loop-level tests passed.",
+    "evidence": "the reviewed run's own after_suite log gate_head2.log:73-74 records FAILED tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table, which gate_base.log:50-51 reports as five passed at base, so the head arm carries an added failure the manifest omits; the same log ends its last file with EXIT=124 (gate_head2.log:78, gate_base.log:56) while both suite records claim completed: true.",
+    "fit": "nova/equilibrium/fixed_point.py:369-419 follows the surrounding jnp.where reason-mapping idiom and the added names (active_set_settles_as_stall, active_set_stop_reason, ACTIVE_SET_STATIONARY, ACTIVE_SET_STEP_REFUSED) carry no plan, ticket or version label; the only blemish is the reassignment of the name reason at fixed_point.py:5064 and :5075.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:4850-4853 makes a settled mask continue the loop until a promotion is attempted, and nova/equilibrium/fixed_point.py:389-419 separates ACTIVE_SET_STATIONARY (11) from ACTIVE_SET_STEP_REFUSED (12) with converged false, so a settled mask above tolerance no longer ends the solve as converged; the measurement half of the done-when is weaker, because scripts/prototypes/diiid_forward_convergence/run_probe_frames.py never calls host_boundary_read, so the per-arm bounding class the done-when requires is replaced in the evidence fragment by achieved_class against the requested class.",
+    "reuse": "the search for a second owner of active-set stop-reason mapping found only the simple inline nonfinite/converged mapping blocks at nova/equilibrium/fixed_point.py:3969 and :3357, which this extends rather than duplicates, but nova/equilibrium/reduced_newton.py:1573-1580 still ends its own loop on a zero mask difference with ACTIVE_SET_SETTLED, so the same capability now has two owners that disagree.",
+    "scope_discipline": "the diff 6f20bafbc..da9c18d8f touches only the seven declared write paths, but the committed receipt fields break tests/test_forward_solve_request.py:139, which is outside the fence, and the manifest reports neither a blocker nor an outside_scope entry for it."
+  },
+  "node": "review-of-diiid-stopping-rule-fix-da9c18d8f93c",
+  "node:reviewed": "diiid-stopping-rule-fix",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to stop the DIII-D forward solve on convergence rather than on a settled mask; nova/equilibrium/fixed_point.py:4850-4853 and :5064-5081 implement that rule at the active-set loop, and every probe arm now reports reason 11 (stationary) with converged false rather than 10.\nVERDICT done_when: read the done-when's three clauses against tests/test_fixed_point_stationary_mask.py and the five-file suite pair; the hooks and their negative control are satisfied, but clause 3's zero-added-failures measure fails on tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table, and clause 2's required host_boundary_read bounding class never appears in the probe.\nVERDICT write_paths: read the manifest's seven declared paths; the diff 6f20bafbc..da9c18d8f places all twelve changed files (three nova modules, the new test, three scripts, one fragment, four PNGs) inside them, so the diff itself is in scope.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/manifest.md; status complete, seven commits, baseline_suite and after_suite both recorded completed: true carrying only tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate as a failure id, which its own cited log contradicts.\nVERDICT diff: read all seven commits against 6f20bafbc commit by commit: 9d3759f94 and a5e0f8151 carry the stopping rule and the receipt threading in nova/equilibrium/fixed_point.py, forward.py and solve_request.py; f1d5ee78e, 9947a46d5, b22368262 and 177bcdf2c add the measurement scripts and the evidence fragment; da9c18d8f records the measurement.\nCALL_SITES: nova/equilibrium/forward.py:2758, nova/equilibrium/batched_labeller.py:135, nova/equilibrium/reduced_newton.py:1578\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:4850-4853 makes a settled mask continue the loop until a promotion is attempted, and nova/equilibrium/fixed_point.py:389-419 separates ACTIVE_SET_STATIONARY (11) from ACTIVE_SET_STEP_REFUSED (12) with converged false, so a settled mask above tolerance no longer ends the solve as converged; the measurement half of the done-when is weaker, because scripts/prototypes/diiid_forward_convergence/run_probe_frames.py never calls host_boundary_read, so the per-arm bounding class the done-when requires is replaced in the evidence fragment by achieved_class against the requested class.\nSCORE evidence: 9\nJUSTIFICATION evidence: the reviewed run's own after_suite log gate_head2.log:73-74 records FAILED tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table, which gate_base.log:50-51 reports as five passed at base, so the head arm carries an added failure the manifest omits; the same log ends its last file with EXIT=124 (gate_head2.log:78, gate_base.log:56) while both suite records claim completed: true.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: the diff 6f20bafbc..da9c18d8f touches only the seven declared write paths, but the committed receipt fields break tests/test_forward_solve_request.py:139, which is outside the fence, and the manifest reports neither a blocker nor an outside_scope entry for it.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_fixed_point_stationary_mask.py:91 asserts only that the two receipt fields exist in dataclasses.fields, so reverting the nova/equilibrium/forward.py:2389-2395 threading leaves the suite green, and the negative_control.log mutation reddened only the pure-predicate test while the four loop-level tests passed.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/fixed_point.py:369-419 follows the surrounding jnp.where reason-mapping idiom and the added names (active_set_settles_as_stall, active_set_stop_reason, ACTIVE_SET_STATIONARY, ACTIVE_SET_STEP_REFUSED) carry no plan, ticket or version label; the only blemish is the reassignment of the name reason at fixed_point.py:5064 and :5075.\nSCORE reuse: 13\nJUSTIFICATION reuse: the search for a second owner of active-set stop-reason mapping found only the simple inline nonfinite/converged mapping blocks at nova/equilibrium/fixed_point.py:3969 and :3357, which this extends rather than duplicates, but nova/equilibrium/reduced_newton.py:1573-1580 still ends its own loop on a zero mask difference with ACTIVE_SET_SETTLED, so the same capability now has two owners that disagree.\nFINDING tests/test_forward_solve_request.py:139 blocking: the diff adds attempted_newton_promotions and accepted_newton_promotions to ForwardSolveReceipt (nova/equilibrium/solve_request.py:742-743) without updating the pinned RECEIPT_FIELDS tuple at tests/test_forward_solve_request.py:52, so test_default_request_schema_resolves_from_the_installed_version_table fails at head (gate_head2.log:73-74, one failed and four passed) and passed at base (gate_base.log:50-51, five passed): a real added failure in one of the five files the done-when requires to stay green, in a file outside the node's write fence, which should have been a blocker or an outside_scope entry rather than a complete record.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/manifest.md:1 blocking: the reviewed manifest's after_suite and baseline_suite entries both set completed: true and carry one failure id, but the logs they name end tests/test_equilibrium_forward_solve.py with EXIT=124 (gate_head2.log:78, gate_base.log:56) and gate_head2.log:73-74 holds a second head failure the record omits, so the gate receipt claims a completeness and a failure set its own log does not support.\nFINDING nova/equilibrium/reduced_newton.py:1577 non-blocking: the reduced route still ends its own active-set loop on a zero mask difference with FixedPointTerminationReason.ACTIVE_SET_SETTLED while nova/equilibrium/fixed_point.py:4850-4853 now requires an attempted-and-refused promotion before settlement ends the solve, so the two routes disagree about what a settled mask means and the new vocabulary reaches only one of them.\nFINDING tests/test_fixed_point_stationary_mask.py:91 non-blocking: test_forward_receipt_publishes_the_promotion_counts asserts only that the two field names exist on the dataclass, so the nova/equilibrium/forward.py:2389-2395 threading that populates them can be reverted without reddening any test, and the negative control recorded at negative_control.log reddened only the pure-predicate case while the four loop-level tests passed.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:84 non-blocking: the frame 44 limited table row opens with an extra empty cell, shifting every value in that row one column right against the header row.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141006905473-diiid-stopping-rule-fix/h200_base.log:5 non-blocking: the base heavy-file arm's header names SOURCE_REVISION=cdf606e39453b0aa143ec3e674fa12c164210255, which resolves to no object in this repository and is the empty scratch-base marker commit in base-tree, so that arm cannot be tied to 6f20bafbc, and the log omits the module.__file__ and resolved working directory the manifest contract requires of a scratch-tree arm.",
+  "review_run_id": "r-20261108T004426313276-review-of-diiid-stopping-rule-fix-da9c18d8f93c",
+  "reviewed_base_sha": "6f20bafbc29d57d8ed6938df2ce5c6621dd89b43",
+  "reviewed_head_sha": "da9c18d8f93c39042708c4e986c2757231b4857d",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "scores": {
+    "durability": 12,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 13,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:10:00+00:00",
+  "total": 79
+}

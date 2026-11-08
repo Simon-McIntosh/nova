@@ -1,0 +1,129 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T00:58:57Z",
+  "figures": [
+    {
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+      "rubric": {
+        "contrast": "pass \u2014 black legend text and blue lines on white; the grey #929292 reference line holds about three to one",
+        "data_ink": "pass \u2014 blue contour lines and one grey reference line, no filled regions. About five percent of the panel is grey/blue mark and the rest is white",
+        "decoration": "pass \u2014 no gradient, no background fill, no shading, no gridlines or tick labels",
+        "label_collision": "pass \u2014 the legend sits outside the panel in clear white space, and the ink bounding box (x 25-516, y 27-535 of 535x574) sits inside the canvas, so nothing is clipped",
+        "legibility": "pass \u2014 the closed core contours and the grey EFIT boundary are distinguishable at the delivered size; the dashed/solid blue mix is recorded as a separate finding",
+        "table_form": "pass \u2014 a poloidal flux map is spatial and could not be given as a table"
+      },
+      "verdicts": "pass \u2014 readable, but the panel carries no machine geometry: the only straight outline is the recorded wall rectangle and the real DIII-D limiter is absent"
+    },
+    {
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+      "rubric": {
+        "contrast": "pass \u2014 black legend text on white",
+        "data_ink": "pass \u2014 contour lines carry the weight; no fills, gradients or shading",
+        "decoration": "pass \u2014 nothing ornamental on the panel",
+        "label_collision": "pass \u2014 the admitted saddle marker clears the panel top edge by ten pixels without being clipped, and the legend clears the data",
+        "legibility": "pass \u2014 the nested closed contours and the near-circular EFIT boundary read at a glance",
+        "table_form": "pass \u2014 spatial data, not a table"
+      },
+      "verdicts": "pass \u2014 readable; the same missing limiter applies, and the ten-pixel margin above the saddle marker is the tightest in the set but not a clip"
+    },
+    {
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+      "rubric": {
+        "contrast": "pass \u2014 black text on white",
+        "data_ink": "pass \u2014 contours and one reference line; no fills",
+        "decoration": "pass \u2014 no gradient, background fill or shading",
+        "label_collision": "pass \u2014 legend outside the panel, markers clear of the edges, nothing clipped",
+        "legibility": "pass \u2014 the vertically elongated core and the dashed EFIT oval are readable, though five contours on the right side sit close together",
+        "table_form": "pass \u2014 a spatial field, not a table"
+      },
+      "verdicts": "pass \u2014 readable; the worst-residual arm is visibly the one whose contours sit furthest from the EFIT boundary, as its caption says"
+    },
+    {
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png",
+      "rubric": {
+        "contrast": "pass \u2014 black text on white",
+        "data_ink": "pass \u2014 line contours carry the weight",
+        "decoration": "pass \u2014 no gradient, fill or shading",
+        "label_collision": "pass \u2014 the saddle marker sits eighty-four pixels above the bottom edge and the legend is clear of the data",
+        "legibility": "pass \u2014 the core contours, the EFIT boundary and both null markers read at a glance",
+        "table_form": "pass \u2014 spatial data, not a table"
+      },
+      "verdicts": "pass \u2014 readable; the same missing limiter applies"
+    }
+  ],
+  "figures_reviewed": [
+    "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png"
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f32819706d3",
+      "line": 72,
+      "severity": "blocking",
+      "summary": "No machine geometry is drawn on any of the four panels, so a reader cannot see where the plasma sat relative to the wall. draw_wall is handed the artifact's `wall` array, and that array is the flux-grid bounding box, not the DIII-D limiter: all 132 points lie on its bounding rectangle (R 0.806-2.574, Z -1.664-1.664) against a grid of R 0.84-2.54, Z -1.6-1.6. The rendered result is a plain black rectangle inset in each panel that reads as a plot frame. The real limiter and the host_boundary_read bounding surface the brief required are absent, and because there are no axis labels either, nothing in the image maps a position to R or Z. The record this illustrates claims the terminals touch the upper limiter shelf near R=1.65 m, Z=+1.07 m, and the figure cannot show that."
+    },
+    {
+      "file": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+      "id": "fa5767727a8",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The blue contours are drawn in two line styles with no stated meaning: about half are dashed and half solid. Matplotlib dashes contours at negative levels by default, and the level sign here carries no physical distinction a reader would know. The legend offers one solid blue entry, 'solved flux', so the dashed curves are a visible mark style the key does not describe. The same applies to all four panels."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f908d015099",
+      "line": 44,
+      "severity": "non-blocking",
+      "summary": "The two null markers are drawn but never identified. Each panel carries one filled red triangle (axis) and one filled red cross (admitted saddle), with no legend entry, and only the frame-179 caption names them: the captions for frames 44, 144 and 137 do not. A reader therefore cannot tell the solved axis and saddle from the EFIT X-point, and the brief asked for both null sets to be shown while only one set is drawn."
+    },
+    {
+      "file": "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+      "id": "f72b287e9d0",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "More than half of each delivered image is empty white space: the data panel occupies x 26-289 of a 535-pixel-wide canvas, and the figure is a portrait panel in a landscape-sized canvas. The quoted-panel content is a small part of what the evidence page displays. This is layout waste rather than a reading defect, and it applies to all four panels."
+    }
+  ],
+  "item_verdicts": {
+    "frame-137-diverted-terminal.png:contrast": "pass \u2014 black text on white",
+    "frame-137-diverted-terminal.png:data_ink": "pass \u2014 line contours carry the weight",
+    "frame-137-diverted-terminal.png:decoration": "pass \u2014 no gradient, fill or shading",
+    "frame-137-diverted-terminal.png:label_collision": "pass \u2014 saddle marker and legend both clear of the data",
+    "frame-137-diverted-terminal.png:legibility": "pass \u2014 core contours, EFIT boundary and both markers read at a glance",
+    "frame-137-diverted-terminal.png:table_form": "pass \u2014 spatial data, not a table",
+    "frame-144-diverted-terminal.png:contrast": "pass \u2014 black text on white",
+    "frame-144-diverted-terminal.png:data_ink": "pass \u2014 contours and one reference line, no fills",
+    "frame-144-diverted-terminal.png:decoration": "pass \u2014 no gradient, fill or shading",
+    "frame-144-diverted-terminal.png:label_collision": "pass \u2014 legend outside the panel, markers clear of the edges",
+    "frame-144-diverted-terminal.png:legibility": "pass \u2014 elongated core and dashed EFIT oval readable",
+    "frame-144-diverted-terminal.png:table_form": "pass \u2014 spatial field, not a table",
+    "frame-179-limited-terminal.png:contrast": "pass \u2014 black text on white, grey reference line above three to one",
+    "frame-179-limited-terminal.png:data_ink": "pass \u2014 blue contours carry the weight with no filled regions",
+    "frame-179-limited-terminal.png:decoration": "pass \u2014 no gradient, fill, shading or gridlines",
+    "frame-179-limited-terminal.png:label_collision": "pass \u2014 legend clear of data and nothing clipped",
+    "frame-179-limited-terminal.png:legibility": "pass \u2014 closed core contours and the EFIT boundary are distinguishable at the delivered size",
+    "frame-179-limited-terminal.png:table_form": "pass \u2014 a spatial flux map, not a table",
+    "frame-44-limited-terminal.png:contrast": "pass \u2014 black text on white",
+    "frame-44-limited-terminal.png:data_ink": "pass \u2014 contour lines carry the weight",
+    "frame-44-limited-terminal.png:decoration": "pass \u2014 nothing ornamental on the panel",
+    "frame-44-limited-terminal.png:label_collision": "pass \u2014 saddle marker clears the panel edge by ten pixels without clipping",
+    "frame-44-limited-terminal.png:legibility": "pass \u2014 nested contours and the EFIT boundary read at a glance",
+    "frame-44-limited-terminal.png:table_form": "pass \u2014 spatial data, not a table"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T004720072344-review-of-diiid-stopping-rule-fix-da9c18d8f93c-figure",
+  "reviewed_base_sha": "6f20bafbc29d57d8ed6938df2ce5c6621dd89b43",
+  "reviewed_head_sha": "da9c18d8f93c39042708c4e986c2757231b4857d",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "rubric": "figure",
+  "scope_note": "Judged from the four rendered PNGs the evidence fragment embeds at docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:114-130, opened as rasters at their delivered size (535x574 px, 100 dpi). No SVG, and no other image, was opened. panel-test.png in the run directory is an unreferenced scratch render and was not read.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:16:38.987065+00:00",
+  "total": null
+}

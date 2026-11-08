@@ -1,0 +1,148 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-08T02:36:12.015Z",
+  "dispatched_at": "2026-11-08T02:24:42Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking layout on root-cause panels; the record's numbers stand on the committed receipts and the fix node redraws the forward-state panels",
+      "recorded_at": "2026-11-08T03:23:47.730467+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking layout on root-cause panels; the record's numbers stand on the committed receipts and the fix node redraws the forward-state panels",
+      "recorded_at": "2026-11-08T03:26:20.077165+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking layout on root-cause panels; the record's numbers stand on the committed receipts and the fix node redraws the forward-state panels",
+      "recorded_at": "2026-11-08T03:28:34.583994+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking layout on root-cause panels; the record's numbers stand on the committed receipts and the fix node redraws the forward-state panels",
+      "recorded_at": "2026-11-08T03:30:39.513125+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "non-blocking layout on root-cause panels; the record's numbers stand on the committed receipts and the fix node redraws the forward-state panels",
+      "recorded_at": "2026-11-08T03:33:18.086012+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "non-blocking layout on root-cause panels; the record's numbers stand on the committed receipts and the fix node redraws the forward-state panels",
+      "recorded_at": "2026-11-08T03:35:45.190844+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "id": "f6a42003dcb",
+      "line": 281,
+      "severity": "non-blocking",
+      "summary": "The bounding-surface colour is now a hardcoded hex literal '#6a4c93' in both the draw call (line 224) and the legend handle (line 281), replacing the named ink role DEFAULT_INK.separatrix_color. The rendered per-trip sheets are correct and the violet separates cleanly from the red axis, which is the defect the commit set out to fix; but nova's plotting rules require a figure colour to be a named role in the style module so the same component reads the same way across figures, and a literal in a prototype script silently diverges from that owner. This is the same finding the previous figure review recorded at this line and it is still open. The repair belongs in nova/media/ink.py (a named role, e.g. bounding-surface violet), outside this node's fence."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "id": "f6a42003dcb",
+      "line": 281,
+      "severity": "non-blocking",
+      "summary": "The commit states 'the legend no longer carries two red entries', and the per-trip sheets carry that; the two summary sheets (frame-137-flux-contours.png and frame-146-flux-contours.png) still do not. Their legends carry 'bounding surface (limited)' / 'no bounding surface (read refused)' as a red line beside the red 'solved axis' triangle and the red 'limiter contact' dot, so a reader of the summary sheet still has to hold the legend open to tell which red mark is which. The two sheets also still run their residual x-axis to trip 15 while the series stops at trip 4, so the 'residual axis sized to the trips run' half of the commit does not reach them either. Either the summary sheets are drawn by a path that does not apply the same colour and axis changes a reader sees on the per-trip sheets, or they were not re-rendered with this change."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.png",
+      "id": "f4f6d713fac",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The lower pane's y-axis carries only the tick values 0.00 and 0.25 and no axis label, so the figure does not name what the trace measures or in what unit. The x-axis is labelled 'active-set trip' and the poloidal panel is fully explained by its legend, so the lower pane is the one element a reader must guess at; the same is true of frame-146-trip-2 and frame-137-trip-2. An axis label naming the quantity beside its unit, as the library's own 'relative residual' label does on the summary sheets, would close it. Non-blocking because every per-trip sheet carries the same missing label rather than one sheet clipping it."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.png",
+      "id": "f4cce3d2319",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The lower pane marks the trip a sheet is about with a red dot, and immediately above that dot a small triangular glyph is drawn so close to the pane's top edge that it reads as a clipped marker rather than as a label. On frame-146-trip-1 and frame-146-trip-2 the same mark sits partly outside the plotting area. The mark carries no text, so a reader cannot tell whether it is an annotation of the highlighted trip or a stray artist; either place it inside the pane with clear space, or label it. Non-blocking because the highlighted trip is also the red dot and its identity is not lost."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The text 'mask difference above each point' floats in the upper right of the residual pane, far from the curve in the upper left, and the bare numerals printed above the curve (27, 40, 1, 0, 0 here; 24, 20, 9, 9, 0 on the frame-137 summary) are given no key inside the figure. Nothing ties the phrase to the numerals but their position, so a reader meets a title for data that is not in that corner and cannot confirm the numerals are mask entries changed. The commit states 'each caption now states the mask entries changed on its trip', which fixes this for the per-trip sheets; the summary sheets still carry the unkeyed form."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.png",
+      "id": "f13bde0b959",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The poloidal panel occupies roughly a third of the canvas width and is centred, so the sheet spends most of its ink on white margin at the left and right while the flux field the page exists to show is drawn small. The contours near the top of the panel are cut off where the grid domain bound ends, which is faithful to the data, but at this panel size the cut reads as a cropping of the figure rather than as the domain edge. A larger poloidal panel on a narrower canvas would let a reader see the escape and the closed-cell count the caption claims. Non-blocking: the caption states the count and the axis position, so the information is not lost, only harder to see."
+    }
+  ],
+  "image_map": {
+    "image-0.png": "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png (summary sheet: poloidal panel + residual pane, caption 'frame 137 | diverted terminal residual 6.237e-02 | converged false | axis R=1.655 Z=-0.442 m')",
+    "image-1.png": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.png (per-trip sheet, 5 trips)",
+    "image-2.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png (summary sheet: 'frame 146 | diverted terminal residual 5.496e-02 | converged false | axis R=1.234 Z=+1.563 m ... 8 closed core cells')",
+    "image-3.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.png (per-trip sheet, 3 trips)",
+    "image-4.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.png (per-trip sheet, 3 trips)"
+  },
+  "images_judged": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.png",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.png",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.png",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png"
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T022248917056-review-of-diiid-frame-146-vertical-loss-48021da93284-figure",
+  "reviewed_base_sha": "ece4f8e45a68c2a37e3c4c6104436f1d3f7ca1be",
+  "reviewed_head_sha": "48021da93284537c427e871ef2a2a5936f0d7353",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png": {
+      "contrast": "pass \u2014 legend, caption, axis and tick labels are dark on white and read without effort.",
+      "data_ink": "pass with a caveat \u2014 contours and one trace carry the weight and no fill is used anywhere; the caveat is that the residual pane's axis still runs to trip 15 while the series stops at trip 4, so about two-thirds of the pane is empty (see findings) \u2014 the commit's stated 'residual axis sized to the trips run' is not what this sheet shows.",
+      "decoration": "pass \u2014 white background, no gradient, no shading, no decorative fill; the poloidal panel carries no frame and the residual pane keeps only the spines that hold a scale.",
+      "label_collision": "pass with a caveat \u2014 nothing is clipped at the canvas edge and the numerals above the curve (24, 20, 9, 9, 0) are separated enough to read individually; but the legend still draws the bounding surface in red beside the red solved-axis triangle and the red limiter-contact dot (see findings).",
+      "legibility": "pass \u2014 the poloidal panel reads at a glance: blue solved contours nested about the axis; the red bounding-surface contour closed inside the black limiter; the grey EFIT label flux beneath it. The residual pane beside it is one blue trace on a log axis.",
+      "table_form": "pass \u2014 a spatial field and a short series, both naturally drawn; the caption carries the scalar facts as text rather than as a pictured table."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.png": {
+      "contrast": "pass \u2014 legend, ticks and labels are dark on white; the violet bounding surface holds against white and against the grey EFIT contours.",
+      "data_ink": "pass with a caveat \u2014 uncontested by fill elements; but the poloidal field sits in a small panel with wide empty margins left and right, and the lower pane carries only 5 points across the full width (see findings).",
+      "decoration": "pass \u2014 axes off on the poloidal panel, no shading, no gradient, no filled contours.",
+      "label_collision": "pass with a caveat \u2014 no text overlaps text or data; but a small triangular glyph appears clipped above the highlighted trip-2 point at trip 2 in the lower pane (see findings).",
+      "legibility": "pass \u2014 the per-trip sheet now draws the bounding surface in violet, clearly distinct from the red solved axis, the red solved X-points and the red 'this trip' dot; the poloidal panel shows the solved contours, limiter, EFIT boundary and both null sets, and the lower pane charts the trip sequence.",
+      "table_form": "pass \u2014 spatial field plus a short series, both appropriately pictured."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png": {
+      "contrast": "pass \u2014 all text dark on white; the grey 'tolerance 1e-5' annotation is lighter but legible.",
+      "data_ink": "pass with a caveat \u2014 line contours carry the weight, no fill; the residual pane runs to trip 15 with the series stopping at trip 4, leaving two-thirds of the pane empty (see findings).",
+      "decoration": "pass \u2014 no gradient, no shading, no decorative fill; only scale-carrying spines remain.",
+      "label_collision": "pass with a caveat \u2014 no clipped or overlapping label; the legend again carries two entries in the same red family (the refused bounding surface as a red line and the escaped axis as a red triangle), see findings.",
+      "legibility": "pass \u2014 the sheet shows the defect the page is about: the solved axis (red triangle, legend 'solved axis (outside wall)') stands at the top of the domain above the black limiter, the solved contours are open and non-nested, and the caption states 8 closed core cells and 0.039x target current. The reader can see the escape.",
+      "table_form": "pass \u2014 a spatial field and a short series; the scalar facts sit in the caption as prose, not as a pictured table."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.png": {
+      "contrast": "pass \u2014 all text and marks read against white.",
+      "data_ink": "pass with a caveat \u2014 no fill, no decoration; the poloidal panel is small against a wide canvas and the lower pane plots three points (see findings).",
+      "decoration": "pass \u2014 no gradient, background fill or decorative styling.",
+      "label_collision": "fail \u2014 the lower pane's y-axis carries only two unlabelled ticks (0.00, 0.25) and no axis label naming the quantity or its unit, so the trace cannot be identified from the figure; a small triangular glyph is also clipped above the highlighted point at trip 2. See findings.",
+      "legibility": "pass \u2014 the violet bounding surface and red axis markers separate cleanly; the lower pane shows only 3 trips on a 1-3 axis, so the axis is now sized to the data, which is the improvement the commit claims.",
+      "table_form": "pass \u2014 a field and a series."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.png": {
+      "contrast": "pass \u2014 text and marks read against white.",
+      "data_ink": "pass with a caveat \u2014 the flux contours are drawn as line contours with no fill; but the panel is small in a large white canvas and the lower pane plots 3 points.",
+      "decoration": "pass \u2014 no gradient, shading or decorative fill.",
+      "label_collision": "pass with a caveat \u2014 no label is clipped at the canvas edge and no labels overlap; a small triangular glyph sits above the highlighted trip-2 point close to the pane's top edge (see findings).",
+      "legibility": "pass with a caveat \u2014 the poloidal panel shows the escaped axis at the top edge with the solved contours sweeping up out of the domain; the reader sees the loss. The lower pane is unlabelled on y, and its single trace spans a narrow band so the shape carries little information (see findings).",
+      "table_form": "pass \u2014 a spatial field and a short series."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T05:09:06.080801+00:00",
+  "total": null
+}

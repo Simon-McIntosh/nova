@@ -1,0 +1,184 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Observed recorded failure-id difference is 0: both arms name tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate; their seven mutually completed files also have the same 12 Corsica setup-error ids. Both arms explicitly have completed:false, so the complete required-suite delta is unknown and is blocking finding 1. The count must not be read as a completed zero-added-failures gate.",
+  "assertion_review": [
+    {
+      "fails_if": "Restoring mask_history or removing either new dataclass field changes the actual field tuple away from the independent RECEIPT_FIELDS pin.",
+      "path": "tests/test_forward_solve_request.py:142"
+    },
+    {
+      "fails_if": "Removing support telemetry empties the executed history; using change counts yields [1,0] instead of five support cells; failure to settle or a fixture that never changes fails the two change assertions.",
+      "path": "tests/test_receipt_support_count.py:109-113"
+    },
+    {
+      "fails_if": "Counting all labels rather than CORE yields four instead of one; using changes produces [1,0] rather than [1,1].",
+      "path": "tests/test_receipt_support_count.py:131"
+    },
+    {
+      "fails_if": "Counting excluded/common-SOL cells or publishing changes makes a nonzero support value fail the all-zero comparison; lack of a changing then settled trip fails the change assertions. zeros_like derives only expected shape, not expected values; missing support could make this comparison vacuous but the positive-support test independently refuses that regression.",
+      "path": "tests/test_receipt_support_count.py:145-147"
+    },
+    {
+      "fails_if": "Swapping the helper output produces 0 support versus the independent literal 345 and 345 changes versus literal 0; aliasing the outputs fails their inequality. Swapping only the production constructor keywords is missed, as finding 2 states.",
+      "path": "tests/test_receipt_support_count.py:184-186"
+    },
+    {
+      "fails_if": "Routing picard through active-set selection fails or loses its independent literal seven; returning a populated support array fails the zero-size assertion.",
+      "path": "tests/test_receipt_support_count.py:195-196"
+    },
+    {
+      "fails_if": "Publishing change counts or dropping the support history fails equality against the independently obtained solver history when their arrays differ; this only guards transport, not the numerical correctness of a shared sentinel.",
+      "path": "tests/test_reduced_newton_constraints.py:1077"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request:2762",
+    "nova/equilibrium/fixed_point.py:_active_set_newton_krylov:4895",
+    "apps/playable/session.py:equilibrium_frame_receipt:435",
+    "scripts/labeller_batch/shard.py:_forward_receipt:354"
+  ],
+  "completed_at": "2026-11-08T14:40:06Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "receipt-mask-history-rename",
+      "recorded_at": "2026-11-08T14:54:01.437042+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "receipt-mask-history-rename",
+      "recorded_at": "2026-11-08T14:53:57.313305+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-08T14:29:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "receipt-mask-history-rename",
+      "recorded_at": "2026-11-08T14:53:49.458634+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "receipt-mask-history-rename",
+      "recorded_at": "2026-11-08T14:53:53.862777+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 21,
+      "severity": "blocking",
+      "text": "blocking: baseline_suite and after_suite both have completed:false, with reduced-newton, steering, transport and other required coverage unfinished and no completed equilibrium-forward-solve pair; the required zero-added-failures result is therefore unproved despite a complete delivery status."
+    },
+    {
+      "file": "tests/test_receipt_support_count.py",
+      "line": "150",
+      "severity": "blocking",
+      "text": "blocking: _published_receipt constructs its own ForwardSolveReceipt after calling only receipt_history_fields, so swapping changed_mask_entries and support_cell_count at the actual production constructor in nova/equilibrium/forward.py:2778-2779 leaves all new assertions green; exercise ForwardProfile._solve_imposed_request with a stubbed history or a small solve and apply the negative control there as the resume advice requires."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "inspected 3294d101740f2939900ad7c3b4f168258bdf49ae and 0b810e963b856f9e74b43386cee2990b7247249c against 708079d2e5c785d2d2b6fe67be128632c9852043; the first adds telemetry and correction, the second migrates authorized readers and extracts receipt selection.",
+    "done_when": "brief.md and resume-1-advice.txt require completed base/head coverage and real receipt-publication assertions; gate-final.log records 10 passed at the head but manifest.md marks both broader arms completed:false and tests/test_receipt_support_count.py:150 reconstructs the receipt in test code.",
+    "goal": "brief.md requires separate change and support populations; nova/equilibrium/solve_request.py:733-734 and fixed_point.py:5127 implement them, and the stopping-rule fragment:231 appends the correction while the resume advice explicitly hands off two remaining readers.",
+    "manifest": "manifest.md identifies both commits and the focused/negative-control logs accurately, but its complete status does not satisfy the unfinished regression evidence it explicitly reports.",
+    "write_paths": "all 15 changed paths are within the six original paths in prompt.txt plus the explicit reader/benchmark widening in resume-1-advice.txt:1-14."
+  },
+  "justifications": {
+    "durability": "tests/test_receipt_support_count.py:110,131,145 fail when changes replace support and :184 fails on a selection swap, but the test-owned receipt constructor at :150 bypasses forward.py:2778-2779 and leaves a production keyword swap unguarded.",
+    "evidence": "gate-final.log ends with 10 passed in 17.94s and EXIT=0, and negative-control-publication.log names its failing test, but manifest.md baseline_suite and after_suite both declare completed:false.",
+    "fit": "fixed_point.py:4955,5041,5127 extend the existing fixed-shape telemetry carry and solve_request.py:733-734 uses semantic field names without compatibility aliases or forbidden source labels.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:4894-4898 counts carried CORE labels without another topology read and forward.py:2778-2779 publishes both populations, while the required evidence remains unfinished.",
+    "reuse": "capability searches over nova/equilibrium found domain.py:DomainMasks.core and cell_count as the domain-population owners and forward.py's existing route selection as the receipt owner; fixed_point.py:4652 adapts those existing labels to its distinct frozen-partition protocol while receipt_history_fields extends the existing publication selection without duplicating connectivity.",
+    "scope_discipline": "the 15 paths in the diff match prompt.txt's original scope and resume-1-advice.txt's explicit reader widening, including benchmarks/scanned_trip_loop_prototype.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.md requires separate change and support populations; nova/equilibrium/solve_request.py:733-734 and fixed_point.py:5127 implement them, and the stopping-rule fragment:231 appends the correction while the resume advice explicitly hands off two remaining readers.\nVERDICT done_when: brief.md and resume-1-advice.txt require completed base/head coverage and real receipt-publication assertions; gate-final.log records 10 passed at the head but manifest.md marks both broader arms completed:false and tests/test_receipt_support_count.py:150 reconstructs the receipt in test code.\nVERDICT write_paths: all 15 changed paths are within the six original paths in prompt.txt plus the explicit reader/benchmark widening in resume-1-advice.txt:1-14.\nVERDICT manifest: manifest.md identifies both commits and the focused/negative-control logs accurately, but its complete status does not satisfy the unfinished regression evidence it explicitly reports.\nVERDICT diff: inspected 3294d101740f2939900ad7c3b4f168258bdf49ae and 0b810e963b856f9e74b43386cee2990b7247249c against 708079d2e5c785d2d2b6fe67be128632c9852043; the first adds telemetry and correction, the second migrates authorized readers and extracts receipt selection.\nCALL_SITES: nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request:2762, nova/equilibrium/fixed_point.py:_active_set_newton_krylov:4895, apps/playable/session.py:equilibrium_frame_receipt:435, scripts/labeller_batch/shard.py:_forward_receipt:354\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:4894-4898 counts carried CORE labels without another topology read and forward.py:2778-2779 publishes both populations, while the required evidence remains unfinished.\nSCORE evidence: 8\nJUSTIFICATION evidence: gate-final.log ends with 10 passed in 17.94s and EXIT=0, and negative-control-publication.log names its failing test, but manifest.md baseline_suite and after_suite both declare completed:false.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the 15 paths in the diff match prompt.txt's original scope and resume-1-advice.txt's explicit reader widening, including benchmarks/scanned_trip_loop_prototype.py.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_receipt_support_count.py:110,131,145 fail when changes replace support and :184 fails on a selection swap, but the test-owned receipt constructor at :150 bypasses forward.py:2778-2779 and leaves a production keyword swap unguarded.\nSCORE fit: 20\nJUSTIFICATION fit: fixed_point.py:4955,5041,5127 extend the existing fixed-shape telemetry carry and solve_request.py:733-734 uses semantic field names without compatibility aliases or forbidden source labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches over nova/equilibrium found domain.py:DomainMasks.core and cell_count as the domain-population owners and forward.py's existing route selection as the receipt owner; fixed_point.py:4652 adapts those existing labels to its distinct frozen-partition protocol while receipt_history_fields extends the existing publication selection without duplicating connectivity.\nFINDING manifest.md:21 blocking: baseline_suite and after_suite both have completed:false, with reduced-newton, steering, transport and other required coverage unfinished and no completed equilibrium-forward-solve pair; the required zero-added-failures result is therefore unproved despite a complete delivery status.\nFINDING tests/test_receipt_support_count.py:150 blocking: _published_receipt constructs its own ForwardSolveReceipt after calling only receipt_history_fields, so swapping changed_mask_entries and support_cell_count at the actual production constructor in nova/equilibrium/forward.py:2778-2779 leaves all new assertions green; exercise ForwardProfile._solve_imposed_request with a stubbed history or a small solve and apply the negative control there as the resume advice requires.\n",
+  "reuse_search": "Searched support/count and receipt-history capabilities in nova/equilibrium at the reviewed head; opened domain.py (core, mask, cell_count), forward_operator.py (_FrozenTopologyPartition), and the existing forward.py route selector. The synthetic labels, partition, settling map, executed-slot filter and test receipt builder form a focused fixture, not a second solver implementation; new tests invoke newton_krylov. No existing per-trip support telemetry owner exists outside fixed_point.py.",
+  "review_run_id": "r-20261108T142702004947-review-of-receipt-mask-history-rename-0b810e963b85",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "0b810e963b856f9e74b43386cee2990b7247249c",
+  "reviewed_run_id": "r-20261108T112025169253-receipt-mask-history-rename",
+  "scores": {
+    "durability": 14,
+    "evidence": 8,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "arm": "head",
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --basetemp=<arm scratch> <one file per process>",
+      "completed": false,
+      "error_count": 12,
+      "error_ids": "12 setup errors in tests/test_forward_profile_corsica.py, all nova.database.layer_fetch.LayerRegistryCredentialError (registry credentials rejected for ghcr.io/iterorganization/efitpp-test-data)",
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate"
+      ],
+      "files_pending": [
+        "tests/test_reduced_newton_constraints.py",
+        "tests/test_steering_frames.py",
+        "tests/test_transport_coupled_window.py",
+        "tests/test_forward_solve_request.py",
+        "tests/test_receipt_support_count.py"
+      ],
+      "files_run": {
+        "tests/test_equilibrium_constraint_protocol.py": "18 passed",
+        "tests/test_fixed_point.py": "45 passed",
+        "tests/test_fixed_point_stationary_mask.py": "5 passed",
+        "tests/test_fixed_points.py": "19 passed",
+        "tests/test_forward_parity_constrained_arm.py": "5 passed",
+        "tests/test_forward_profile_corsica.py": "12 errors",
+        "tests/test_reduced_newton_termination.py": "1 failed, 1 passed"
+      },
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/head-perfile.log",
+      "revision": "0b810e963b856f9e74b43386cee2990b7247249c",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/receipt-mask-history-rename"
+    },
+    "baseline_suite": {
+      "arm": "base",
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --basetemp=<arm scratch> <one file per process>",
+      "completed": false,
+      "error_count": 12,
+      "error_ids": "12 setup errors in tests/test_forward_profile_corsica.py, all nova.database.layer_fetch.LayerRegistryCredentialError (registry credentials rejected for ghcr.io/iterorganization/efitpp-test-data)",
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate"
+      ],
+      "files_pending": [
+        "tests/test_steering_frames.py",
+        "tests/test_transport_coupled_window.py",
+        "tests/test_forward_solve_request.py"
+      ],
+      "files_run": {
+        "tests/test_equilibrium_constraint_protocol.py": "18 passed",
+        "tests/test_fixed_point.py": "45 passed",
+        "tests/test_fixed_point_stationary_mask.py": "5 passed",
+        "tests/test_fixed_points.py": "19 passed",
+        "tests/test_forward_parity_constrained_arm.py": "5 passed",
+        "tests/test_forward_profile_corsica.py": "12 errors",
+        "tests/test_reduced_newton_constraints.py": "20 setup errors, every one Failed: Timeout (>300.0s) from pytest-timeout inside the module fixture that runs the free reduced-newton solve while the head arm ran the same heavy file",
+        "tests/test_reduced_newton_termination.py": "1 failed, 1 passed"
+      },
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/base-perfile.log",
+      "revision": "708079d2e5c785d2d2b6fe67be128632c9852043",
+      "tree": "/tmp/reckon-crew-scratch/r-20261108T112025169253-receipt-mask-history-rename/base-tree"
+    },
+    "completed": false
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T14:54:16.236400+00:00",
+  "total": 100
+}

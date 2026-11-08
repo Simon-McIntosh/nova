@@ -73,7 +73,9 @@ def report(archive: Path, label: str) -> dict:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
         flux = _oriented(data["flux"], radius, height)
-    surface = fit_tensor_spline(jnp.asarray(radius), jnp.asarray(height), jnp.asarray(flux))
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(flux)
+    )
     seeds = _seeds(radius, height, flux)
     polished = polish_stationary_points(
         surface, jnp.asarray(seeds), jnp.ones((len(seeds),), dtype=bool)

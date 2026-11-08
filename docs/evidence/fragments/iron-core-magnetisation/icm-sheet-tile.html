@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>icm-sheet-tile — sheet tile and the cell interaction matrix</title>
+</head>
+<body>
+<article data-reckon="evidence" data-plan="iron-core-magnetisation" data-node="icm-sheet-tile">
+
+<h1 id="icm-sheet-tile-title">The edge-sheet tile and G</h1>
+
+<p id="icm-sheet-tile-outcome">
+The sheet tile is built and the mechanism works; the node's numeric gate is not
+met. <code>nova/biot/tiledassembly.py</code> now carries a sheet tile beside the
+polygon, moment and arc tiles — <code>packed_sheet_field</code>,
+<code>_fill_sheet_tile</code>, <code>_warm_sheet_evaluator</code>,
+<code>sheet_edge_field</code>, <code>cell_edges</code> and
+<code>cell_interaction</code> — so <em>G</em> is built through the tile plan,
+padded to the plan's one (block, nodes) shape and scanned over blocks.
+</p>
+
+<h2 id="icm-sheet-tile-measure">What was measured</h2>
+<table id="icm-sheet-tile-table">
+  <thead><tr><th>check</th><th>result</th><th>gate</th></tr></thead>
+  <tbody>
+    <tr><td>packed kernel versus host closed form, one pair at a time</td>
+        <td>1.6e-13 relative to |B|</td><td>agree</td></tr>
+    <tr><td>whole G, rotated cell mesh, entry by entry against the absolute
+        sum of each entry's edge-sheet contributions</td>
+        <td>4.06e-13 worst entry</td><td><strong>1e-13 — not met</strong></td></tr>
+    <tr><td>negative control: one cell's edge normals reversed</td>
+        <td>worst entry 2.00 (a full sign reversal), EXIT=1</td>
+        <td>must fail — does</td></tr>
+  </tbody>
+</table>
+
+<p id="icm-sheet-tile-shortfall">
+The 4.06e-13 is roughly two orders of magnitude above pure round-off and is not
+absorbed by widening the tolerance. The batched path takes the elliptic block's
+derivative through a <code>vmap</code> of <code>value_and_grad</code> where the
+host route calls its jitted scalar form once per end, so the two order the
+<code>R</code> block differently; <code>B_Z</code> then carries
+<code>value + r dS/dr</code>, a difference of two order-<code>r</code>
+quantities, which is where the cancellation is amplified. Settling it needs the
+per-entry error map over the axes and a fixed order on both sides.
+</p>
+
+<h2 id="icm-sheet-tile-open">What remains</h2>
+<ul id="icm-sheet-tile-remaining">
+  <li>The 1696-cell prototype WEST mesh is not built here: the prototype reads
+      the WEST <code>iron_core</code> IDS at import, so the gate ran on a rotated
+      square cell mesh instead and the 1696-cell measurement is outstanding.</li>
+  <li>Horizontal cell edges have no slope in this parameterisation and are
+      refused; the flat-sheet (Snow pancake) branch of the closed form is not
+      transcribed into the traced kernel.</li>
+  <li>The 1e-13 agreement above is the remaining defect, then the H200 compile
+      measurement of the next node.</li>
+</ul>
+
+</article>
+</body>
+</html>

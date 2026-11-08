@@ -36,11 +36,34 @@ def figure_frame(figure: matplotlib.figure.Figure) -> PIL.Image.Image:
     return Image.fromarray(np.asarray(canvas.buffer_rgba())).convert("RGB")
 
 
+def _shared_palette(frames: Sequence[PIL.Image.Image]) -> list[PIL.Image.Image]:
+    """Return every frame mapped onto one palette, without dithering.
+
+    Pillow otherwise builds a separate adaptive palette per frame and
+    error-diffuses into it, which speckles thin lines and text and makes a
+    frame flicker against the next. Figures are drawn in a few flat colours,
+    so one palette taken from a strip of evenly spaced frames holds them all,
+    and nearest-colour mapping keeps every edge crisp.
+    """
+    from PIL import Image
+
+    chosen = np.unique(np.linspace(0, len(frames) - 1, min(8, len(frames))).astype(int))
+    width, height = frames[0].size
+    strip = Image.new("RGB", (width, height * len(chosen)))
+    for position, index in enumerate(chosen):
+        strip.paste(frames[index], (0, position * height))
+    palette = strip.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
+    return [
+        frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames
+    ]
+
+
 def write_gif(
     frames: Sequence[PIL.Image.Image],
     path: str | Path,
     duration: float = 10.0,
     loop: int = 0,
+    fps: float | None = None,
 ) -> dict[str, object]:
     """Write ``frames`` as a GIF lasting ``duration`` seconds.
 
@@ -48,6 +71,8 @@ def write_gif(
     count, so the length of the animation is the thing the caller controls.
     GIF stores that delay in hundredths of a second, so it is rounded to at
     least one tick and the achieved duration is reported rather than assumed.
+    ``fps``, when given, sets the frame rate instead and the duration follows
+    from the frame count.
     """
     if not frames:
         raise ValueError("a GIF needs at least one frame")
@@ -55,11 +80,16 @@ def write_gif(
         raise ValueError("the requested duration must be positive")
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
+    if fps is not None:
+        if fps <= 0.0:
+            raise ValueError("the requested frame rate must be positive")
+        duration = len(frames) / fps
     milliseconds = max(10, int(round(1000.0 * duration / len(frames) / 10.0) * 10))
-    frames[0].save(
+    indexed = _shared_palette(frames)
+    indexed[0].save(
         target,
         save_all=True,
-        append_images=list(frames[1:]),
+        append_images=indexed[1:],
         duration=milliseconds,
         loop=loop,
         optimize=True,
@@ -139,19 +169,25 @@ def animate(
     contact_sheet: str | Path | None = None,
     sheet_columns: int = 3,
     sheet_count: int = 6,
+    fps: float | None = None,
+    dpi: float | None = None,
 ) -> dict[str, object]:
     """Render every step into ``figure`` and write the result as a GIF.
 
     ``render`` draws one step and is responsible for clearing what it needs;
     :meth:`nova.media.layout.ThreeView.clear` is the usual first call. When
     ``contact_sheet`` is given, a still sheet of evenly spaced frames is
-    written beside the animation from the frames already in hand.
+    written beside the animation from the frames already in hand. ``dpi``
+    rasterises at that resolution instead of the figure's own, which is how a
+    frame stays sharp when it is shown larger than the figure was drawn.
     """
+    if dpi is not None:
+        figure.set_dpi(dpi)
     frames = []
     for step in steps:
         render(step)
         frames.append(figure_frame(figure))
-    receipt = write_gif(frames, path, duration=duration)
+    receipt = write_gif(frames, path, duration=duration, fps=fps)
     if contact_sheet is not None:
         receipt["contact_sheet"] = write_contact_sheet(
             frames, contact_sheet, columns=sheet_columns, count=sheet_count

@@ -75,6 +75,8 @@ def render_thomson(
     quantity: str = "te",
     solved_edge: bool = True,
     cells: int = 4000,
+    fps: float = 20.0,
+    dpi: float = 200.0,
 ) -> dict[str, object]:
     """Write the solved-equilibria-and-Thomson animation and return its receipt.
 
@@ -269,6 +271,8 @@ def render_thomson(
         render,
         path,
         duration=duration,
+        fps=fps,
+        dpi=dpi,
         contact_sheet=Path(path).with_name(f"{Path(path).stem}-frames.png"),
     )
     gaps = np.array([frame.wall_gap for frame in frames])
@@ -370,6 +374,19 @@ def main(argv: list[str] | None = None) -> int:
         "defaults to the shot's 40 mm shards under the derived cache root",
     )
     parser.add_argument("--duration", type=float, default=10.0)
+    parser.add_argument(
+        "--fps",
+        type=float,
+        default=20.0,
+        help="frame rate; one frame per solved slice, so the pulse plays at "
+        "fps times the slice spacing",
+    )
+    parser.add_argument(
+        "--dpi",
+        type=float,
+        default=200.0,
+        help="rasterisation resolution of every frame",
+    )
     parser.add_argument("--height", type=float, default=6.5)
     parser.add_argument("--quantile", type=float, default=0.98)
     parser.add_argument(
@@ -411,6 +428,8 @@ def main(argv: list[str] | None = None) -> int:
         quantile=arguments.quantile,
         quantity=arguments.quantity,
         solved_edge=not arguments.thomson_edge_only,
+        fps=arguments.fps,
+        dpi=arguments.dpi,
     )
     (arguments.output / f"{name}-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True, default=str)

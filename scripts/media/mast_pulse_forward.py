@@ -301,44 +301,19 @@ def pulse_profile(machine: PulseMachine, group, rows: list[int]):
     )
 
 
-#: Interval of the soft centroid pins, in metres.
-CENTROID_PIN_INTERVAL = 0.01
+def vertical_pin(group, row: int):
+    """Return an active vertical pin at the slice's recorded current centroid.
 
-
-def centroid_pins(group, row: int):
-    """Return soft radial and vertical current-centroid pins for one slice.
-
-    The targets are the current centroid stored in the shot's own EFIT record,
-    used only as a position hint for a plausible state, each with a 1 cm
-    deterministic interval. They hold the plasma where the shot put it when
-    the unconstrained solve selects a saddle that does not bound the plasma.
+    The pin holds the current-centroid height with a compensating uniform
+    radial field carried as one more Newton unknown. Elongated plasmas are
+    vertically degenerate in a forward solve, so without it a slice can drift
+    onto a saddle that does not bound the plasma. The target is the centroid
+    height in the shot's own EFIT record, used only to place the plasma where
+    the shot held it. There is no radial counterpart on the solve seam.
     """
-    from nova.equilibrium.observation import (
-        ConstraintPinSet,
-        MomentIntegralSupport,
-        MomentPin,
-        PinUncertainty,
-    )
+    from nova.equilibrium.constraint import VerticalPositionPin
 
-    interval = PinUncertainty(
-        CENTROID_PIN_INTERVAL,
-        "m",
-        "EFIT current centroid of the slice, a soft position hint",
-    )
-    return ConstraintPinSet(
-        moments=tuple(
-            MomentPin(
-                name,
-                float(group[leaf][row]),
-                interval,
-                MomentIntegralSupport.CONFINED_CORE,
-            )
-            for name, leaf in (
-                ("centroid_r", "current_centrd_r"),
-                ("centroid_z", "current_centrd_z"),
-            )
-        )
-    )
+    return VerticalPositionPin(float(group["current_centrd_z"][row]))
 
 
 def solve_row(
@@ -347,7 +322,7 @@ def solve_row(
     group,
     shot: int,
     row: int,
-    pin_centroid: bool = False,
+    pin_vertical: bool = False,
 ) -> dict[str, object]:
     """Solve one EFIT slice on the pulse profile and return its terminal state."""
     from dataclasses import replace
@@ -380,15 +355,14 @@ def solve_row(
             target_current=target_current,
         ),
         prescribed_current=jnp.asarray(np.asarray(group["fcoil_c"][row], dtype=float)),
-        # The default request appends an INACTIVE vertical pin. Any constraint
+        # Unpinned, a default request appends an INACTIVE vertical pin. Any constraint
         # pair routes the solve through the augmented-constraint path, whose
         # outer scan runs eagerly with the operator closed in, so every slice
         # compiles its own program with the Green blocks as constants. With
         # the inactive pin omitted the same Newton-Krylov route runs as one
         # jitted program taking the operator as an argument, compiled once
         # for the pulse.
-        vertical_pin="omit",
-        constraint_pins=centroid_pins(group, row) if pin_centroid else None,
+        vertical_pin=vertical_pin(group, row) if pin_vertical else "omit",
     )
     started = time.perf_counter()
     receipt = profile.solve(request)
@@ -434,7 +408,7 @@ SCALARS = (
     "plasma_current",
     "target_current",
     "wall_seconds",
-    "centroid_pinned",
+    "vertical_pinned",
 )
 
 
@@ -478,9 +452,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stride", type=int, default=1)
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument(
-        "--pin-centroid",
+        "--pin-vertical",
         action="store_true",
-        help="hold each slice with soft radial and vertical current-centroid pins",
+        help="hold each slice's current-centroid height with an active vertical "
+        "pin; the solve then compiles per slice",
     )
     arguments = parser.parse_args(argv)
 
@@ -509,9 +484,9 @@ def main(argv: list[str] | None = None) -> int:
                 group,
                 arguments.shot,
                 row,
-                pin_centroid=arguments.pin_centroid,
+                pin_vertical=arguments.pin_vertical,
             )
-            result["centroid_pinned"] = bool(arguments.pin_centroid)
+            result["vertical_pinned"] = bool(arguments.pin_vertical)
         except Exception as error:  # a refused slice is a row of the receipt
             print(json.dumps({"row": row, "error": repr(error)}), flush=True)
             continue

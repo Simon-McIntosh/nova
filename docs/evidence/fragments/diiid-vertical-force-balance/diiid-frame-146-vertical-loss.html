@@ -130,7 +130,10 @@ and X-point markers are polished by <code>polish_stationary_points</code> on the
 field's own tensor spline, so each drawn marker is a true stationary point
 rather than a grid cell; the grid-scale search supplies seeds only. The EFIT
 nulls are polished on the label's spline and drawn hollow, so the two sets are
-distinguishable where they coincide.
+distinguishable where they coincide. Each drawn stationary point carries a
+winding index of magnitude 1 on a loop around it; the interior trip-1 saddle is
+a genuine stationary point that sits above the axis flux and so outside the
+closed surfaces.
 </p>
 
 <h3>Where the two branches part at trip 2</h3>
@@ -176,6 +179,18 @@ moves the flux by 83 Wb &mdash; more than half the seed's own 151 Wb distance
 from the label. The resulting state has its axis above the limiter and almost no
 confined current. Every later trip inherits that state with no mask changes left
 and cannot bring it back.
+</p>
+<p>
+<b>The interior saddle the trip-1 panel draws is real, and it is not a second
+lobe.</b> The polished point at R=1.540 m, Z=&minus;0.040 m has a Hessian
+determinant of &minus;6.65 (eigenvalues &minus;1.0 and +6.5) and a winding index
+of &minus;1 on a loop around it, so it is a stationary saddle of the field and
+not a polish artefact. It lies at a flux of 1.957 Wb, <em>above</em> the solved
+axis at 1.761 Wb and above the bounding flux of 0.413 Wb the connectivity read
+returns, so it sits outside the closed surfaces that bound this plasma: the
+confined region still has one extremum, the field is not two-lobed at trip 1,
+and the trip-2 jump is not a transfer between lobes. The winding test is
+validated against known fields (a pure maximum reads +1, a pure saddle &minus;1).
 </p>
 </section>
 

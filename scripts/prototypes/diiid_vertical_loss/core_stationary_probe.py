@@ -63,7 +63,8 @@ def _winding(interp, point, radius=0.02, samples=32):
         dz = (interp([[r, z + delta]])[0] - interp([[r, z - delta]])[0]) / (2 * delta)
         gradients[index] = (dr, dz)
     phase = np.unwrap(np.arctan2(gradients[:, 1], gradients[:, 0]))
-    total = (phase[-1] - phase[0]) + (phase[1] - phase[0])
+    closure = float(np.angle(np.exp(1j * (phase[0] - phase[-1]))))
+    total = (phase[-1] - phase[0]) + closure
     return float(total / (2 * np.pi))
 
 
@@ -82,12 +83,16 @@ def report(archive: Path, label: str) -> dict:
     converged = np.asarray(polished["converged"], dtype=bool).reshape(-1)
     kind = np.asarray(polished["hessian_type"]).reshape(-1)
     interp = RegularGridInterpolator(
-        (height, radius), flux, method="cubic", bounds_error=False, fill_value=np.nan
+        (radius, height), flux.T, method="cubic", bounds_error=False, fill_value=np.nan
     )
     points = []
     for index in range(len(position)):
         if not converged[index]:
             continue
+        inside = bool(
+            radius[0] < position[index][0] < radius[-1]
+            and height[0] < position[index][1] < height[-1]
+        )
         matrix, determinant, eigenvalues = _hessian(interp, position[index])
         points.append(
             {
@@ -96,7 +101,8 @@ def report(archive: Path, label: str) -> dict:
                 "hessian_type": int(kind[index]),
                 "hessian_determinant": float(determinant),
                 "hessian_eigenvalues": eigenvalues.tolist(),
-                "winding_index": _winding(interp, position[index]),
+                "inside_grid": inside,
+                "winding_index": _winding(interp, position[index]) if inside else None,
                 "gradient_at_point": [
                     float(
                         (interp([[position[index][0] + 1e-4, position[index][1]]])[0]
@@ -124,7 +130,10 @@ def main():
     for item in arguments.panels:
         frame, trip = (int(part) for part in item.split(":"))
         records.append(
-            report(arguments.run_dir / f"frame-146-trip-{trip}.npz" if frame == 146 else arguments.run_dir / f"frame-{frame}-trip-{trip}.npz", f"frame {frame} trip {trip}")
+            report(
+                arguments.run_dir / f"frame-{frame}-trip-{trip}.npz",
+                f"frame {frame} trip {trip}",
+            )
         )
     arguments.out.write_text(json.dumps({"fields": records}, indent=2) + "\n")
     print(json.dumps(records, indent=1))

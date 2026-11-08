@@ -1,0 +1,155 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T07:17:14.133Z",
+  "dispatched_at": "2026-11-08T07:04:58Z",
+  "findings": [
+    {
+      "anchor": "iron-core-magnetisation.html:371",
+      "id": "reasoning-1",
+      "reason": "clause (3) as written sends a node to write a verdict that a passing imas-efit result does not supply, and the node then has to either invent the \"physics\" branch or park the node as blocked after the cross-code run is already done.",
+      "text": "s10 asserts a two-way verdict the control cannot return: if imas-efit reproduces the exact closed-shell factor it has shown its representation sound on that body, and the 8 %-versus-65 % WEST gap in \u00a71 is left unexplained, so the required verdict has no determined content on that branch",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html:370",
+      "id": "reasoning-2",
+      "reason": "a node following the section as written configures geometry only, keeps WEST's nonlinear B-H table, and compares a saturated result against a linear exact value, which measures nothing; naming the configuration/machines/WEST/iron.xml magneticPermeabilities path (linear entry, used only when the iron_core IDS is absent) and one linear \u03bcr per material id is what makes clause (1) meaningful.",
+      "text": "the mechanism names no imas-efit entry point and no material mode: \"with its boundary geometry set to the shell\" leaves out that imas-efit's iron geometry is read from the iron_core IDS through IronCoreBuilder or from the XML ironBoundaries fallback (imas-efit src/tokamakData.cpp:128-135), and that with the IDS present the material carries a B-H curve (imas-efit src/ironCoreBuilder.cpp:296-360), whereas the exact S of \u00a71 is a linear-\u03bc result \u2014 so the plan's own comparison in clause (1) is against the wrong reference unless the shell carries a linear permeability",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html:376",
+      "id": "evidence_paths-1",
+      "reason": "one sentence naming the receipt path (nova's evidence record beside \u00a71's prototype receipts, or the imas-efit tree) is what lets \u00a79's reader find the numbers the verdict rests on.",
+      "text": "s10 requires the imas-efit shell result and a message to the imas-efit owners to be produced and \"recorded\", and names no path for either, so a cross-code deliverable that lands in another repository's tree has no declared home a later reader or \u00a79 can open",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html:337",
+      "id": "done_when-1",
+      "reason": "either reading yields an arm whose error is above 0.5 % for a first- or second-order route, so the control still shows the measure can fail; only the recorded wording of the arm would change, not what the node proves.",
+      "text": "the amended control defines its under-resolved arm as \"uniform cells at twice the chosen size through the shell for the volume routes\", and the graded-volume candidate has no single chosen size, so \"the same route, deliberately under-resolved\" is either a repudiation of the grading (a uniform arm at 2\u00d7 the coarse size) or a doubling of the size field, and the two arms differ in whether they test the route that would be chosen",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "ad3269bd227d519b9963814ec03bd43a44a234a5",
+  "plan_fingerprint": "da223c9de3efded529527bbe0d5d997db10f9e05d3a9f8478969b1434587febc",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 23,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a76b now states the control falsifies in one direction: a miss implicates imas-efit's representation, a match leaves the \u00a71 WEST disagreement unexplained for \u00a79 to carry; the done-when records that one-directional verdict (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:37:40.507518+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a76b names imas-efit's entry points (IronCoreBuilder from the iron_core IDS, or the XML ironBoundaries fallback in configuration/machines/WEST/iron.xml) and requires a constant permeability with no B-H table, so it compares against the linear exact S (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:38:29.242635+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a76b's receipt and the message copy go under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/ (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:39:07.703372+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75's under-resolved arm now doubles the cell-size field everywhere through the shell, for graded and uniform volume routes alike (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:40:04.093167+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "note": "\u00a75's under-resolved arm now doubles the cell-size field everywhere through the shell, for graded and uniform volume routes alike (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:40:04.093167+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "note": "\u00a76b's receipt and the message copy go under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/ (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:39:07.703372+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "note": "\u00a76b now states the control falsifies in one direction: a miss implicates imas-efit's representation, a match leaves the \u00a71 WEST disagreement unexplained for \u00a79 to carry; the done-when records that one-directional verdict (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:37:40.507518+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+      "commit_basis": "edit",
+      "note": "\u00a76b names imas-efit's entry points (IronCoreBuilder from the iron_core IDS, or the XML ironBoundaries fallback in configuration/machines/WEST/iron.xml) and requires a constant permeability with no B-H table, so it compares against the linear exact S (2fa0063d3).",
+      "reason": "",
+      "when": "2026-11-08T07:38:29.242635+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v23.at-d37bbae1-r-20261108T070235083689-plan-review-of-i.json",
+  "review_run_id": "r-20261108T070235083689-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "d37bbae1bef2c41bf57ca54c89a88ce3bb0100ed",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a71, \u00a76 and \u00a79 all resolve, \"the formulation decision below\" resolves to the r-dec with data-key=\"formulation\", \u00a76's done-when (2) carries the probe/flux-loop tabulation s10 clause (3) sits beside, and the exact factor S in \u00a71 evaluates to the table's own values at a/b = 0.9 (1.000, 1.488, 6.902, 61.10 for \u03bcr = 1, 10, 100, 1000), so clause (2)'s \u03bcr = 1 control is consistent with it.",
+    "done_when": "a finding \u2014 s5's per-candidate control names \"twice the chosen size\" for the graded-volume candidate, which has no single chosen cell size.",
+    "evidence_paths": "a finding \u2014 s10 declares no durable path for the imas-efit shell receipt or for the message it requires to be \"recorded\".",
+    "naming": "pass \u2014 neither unit introduces a symbol, comment or filename, and neither carries a ticket number, version tag or changelog prose; \"\u00a76b\" is a heading on a section whose id is s10, which resolves either way and is not a code name.",
+    "reasoning": "a finding \u2014 s10 states that the closed-shell control \"says which of the two WEST answers in \u00a71 is the representation and which is the physics\", a two-way verdict, while \u00a71 (line 171) says the same control \"tests that hypothesis\", which is falsification in one direction only.",
+    "single_goal": "pass \u2014 s10 is one deliverable, the imas-efit closed-shell comparison, since the CoilSet seam it used to share a section with is now \u00a76's alone.",
+    "wiring": "pass \u2014 s10's verdict is now carried: plan-section-depends-on gives s9 the waits [s6, s8, s10] (snapshot line 24) and s10's done-when (3) writes the verdict into the plan for \u00a79 to read, closing the earlier \"no section depends on s10\" gap; plan-effort-hours 46.0 (line 13) equals the section sum 6+5+6+6+4+3+6+6+4 = 46.0, and s10 is declared implementable."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "be1a71b629eea2b24663b422f94798a286b4a92f68327cee74dbf5965f17a915",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0e968df67c572dad4921d3c80db60349fef2aeaf97a4e88ea0544111dc4254cb",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "ff6bfc991010e3a673c38a1c65b8f7cc98f49938fc481d0d9db9a134a4dd2d69",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T07:36:28.936876+00:00",
+  "total": null
+}

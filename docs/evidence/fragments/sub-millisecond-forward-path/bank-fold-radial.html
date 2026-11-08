@@ -90,16 +90,24 @@
   from the terminal residual alone. The unpinned arm reproduces the
   recorded conditioning barrier and its reach, counts and residuals.</p>
 
-  <p id="bank-fold-radial-provenance">Provisional provenance pending the
-  second process: H200 job 1308409, one NVIDIA H200 NVL on 98dci4-gpu-0003,
-  four CPUs, 64 GB, one-hour limit, sixteen lanes, GPU backend and x64
-  asserted. The first process runs revision
-  <code>6a57ed4753d1937cdfcd148a41e4c55b44669db4</code> and writes
-  <code>first.json</code> in worker run
-  <code>r-20261108T092804002487-bank-fold-radial</code>. The saved input is
-  <code>warm-start-streams.npz</code> from run
-  <code>r-20261107T111056270825-bank-warm-start</code>. The prototype is under
-  <code>scripts/prototypes/bank_fold_radial/</code>; the job log is
-  <code>h200-job.log</code>. The spectrum SVG is rendered to PNG for inspection;
-  only the SVG is committed.</p>
+  <p id="bank-fold-radial-provenance">H200 job 1308409 completed in
+  49 min 28 s with one NVIDIA H200 NVL on 98dci4-gpu-0003, four CPUs,
+  64 GB, a one-hour limit and sixteen lanes. Both fresh processes report
+  the GPU backend and asserted x64 at revision
+  <code>6a57ed4753d1937cdfcd148a41e4c55b44669db4</code>. They write
+  <code>first.json</code> and <code>second.json</code> in worker run
+  <code>r-20261108T092804002487-bank-fold-radial</code>. Their reach,
+  certification flags, attempted sub-steps, updates and read counts agree
+  exactly for both arms. All four unpinned and six pinned spectrum reads in
+  each process are valid; the largest relative singular-value difference is
+  3.252e-7. Tables and figure use the first receipt. The assembled bank
+  prints <code>BANK_PIN_ACTIVE=absent</code>, and each assembled scratch
+  bordered update prints <code>PIN_ACTIVE=true</code>, derived from its live
+  centroid row and field column. The job log <code>h200-job.log</code>
+  records <code>AGREE unpinned=1 pinned=1 condition=1</code> and ends with
+  <code>EXIT=0</code>. The saved input is <code>warm-start-streams.npz</code>
+  from run <code>r-20261107T111056270825-bank-warm-start</code>. Reproduction
+  scripts are under <code>scripts/prototypes/bank_fold_radial/</code>.
+  The spectrum SVG passed text-bound and collision checks, was rendered to
+  a 1400 × 720 PNG and visually inspected. Only the SVG is committed.</p>
 </section>

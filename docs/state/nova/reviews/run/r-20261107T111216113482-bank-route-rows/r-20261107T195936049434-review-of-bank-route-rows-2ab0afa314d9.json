@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-07T20:21:03.651Z",
   "dispatched_at": "2026-11-07T20:02:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-route-rows",
+      "recorded_at": "2026-11-08T05:51:25.342660+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",

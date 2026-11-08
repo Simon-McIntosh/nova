@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-08T08:34:13.158Z",
+  "dispatched_at": "2026-11-08T08:23:47Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/graded_residual_compile/run_gate.sh",
+      "line": 35,
+      "severity": "non-blocking",
+      "text": "the eight backgrounded srun arms are joined with a bare `wait`, so no arm's exit status reaches the script's own exit and a run in which every arm died still ends with ALLDONE and exit 0; gate failure is readable only from the per-arm EXIT= lines, not from the launcher. On the recorded run this is exactly what happened to the head edge-term CPU arm, whose log ends EXIT=137 with no pytest summary."
+    },
+    {
+      "file": "scripts/prototypes/graded_residual_compile/test_graded_map_jacobian.py",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "`_count` re-implements the jaxpr equation walk that scripts/prototypes/graded_residual_compile/count_graph.py:33 already owns verbatim in its CHILD string; the new copy is a narrowed variant (no list/tuple traversal, no `.eqns` fallback), so the two now disagree on any jaxpr that carries a nested scope and neither is the owner."
+    },
+    {
+      "file": "scripts/prototypes/graded_residual_compile/test_graded_map_jacobian.py",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "PANELS carries two identical (offset, end, scale) tuples, so the traced program has one distinct panel repeated twice rather than the two-panel shape the plural name and the 402-equation golden imply; the count is pinned to a narrower program than a reader is told it measures, and a later edit meant to make the panels distinct will move the golden for a reason unrelated to the Jacobian form."
+    },
+    {
+      "file": "scripts/prototypes/graded_residual_compile/test_graded_map_jacobian.py",
+      "line": 44,
+      "severity": "non-blocking",
+      "text": "the file is the change's only regression guard for the cosh Jacobian and it lives under scripts/prototypes/graded_residual_compile/, which the repository's default `pytest tests/` lane never collects, so nothing fails on a regression to sqrt(1 + sinh^2) unless a human runs this path by hand. The brief's write paths excluded tests/, so the placement is forced rather than chosen, and the gap belongs to whoever owns that lane."
+    },
+    {
+      "file": "scripts/prototypes/graded_residual_compile/run_arm.sh",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "the module line is appended straight after pytest's own output with no preceding newline, so the progress line and the `# module=` line fuse on one line whenever pytest ends without a summary (visible in gate/pytest-head-test_edge_term_tangents.log); the header a later reader parses for the imported module is then not on a line of its own."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T081851675219-review-of-graded-residual-compile-recovery-af3f82f2e2b7",
+  "reviewed_base_sha": "642bf0f360b03bea8674e1c51d6c313f2a55ccc8",
+  "reviewed_head_sha": "af3f82f2e2b7aded1508ce478a4eda0fc2c35959",
+  "reviewed_run_id": "r-20261107T134005364650-graded-residual-compile-recovery",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T08:46:05.163878+00:00",
+  "total": 83
+}

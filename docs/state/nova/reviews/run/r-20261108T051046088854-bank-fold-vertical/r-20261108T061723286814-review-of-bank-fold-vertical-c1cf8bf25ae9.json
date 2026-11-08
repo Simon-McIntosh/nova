@@ -27,6 +27,11 @@
       "kind": "folded",
       "node": "bank-fold-vertical",
       "recorded_at": "2026-11-08T06:54:40.460754+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "prototype-local plotting helper; consolidating it is not worth a node",
+      "recorded_at": "2026-11-08T06:54:56.401900+00:00"
     }
   },
   "findings": [

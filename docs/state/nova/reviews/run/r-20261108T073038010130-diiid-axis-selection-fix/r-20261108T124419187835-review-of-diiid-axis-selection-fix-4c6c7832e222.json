@@ -1,0 +1,126 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by set difference of FAILED ids in the source baseline/after logs, cross-checked against manifest receipts; baseline is the authorized missing-test empty run (EXIT=4), so zero added failing ids does not assert solver-suite coverage.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "The configuration leaves jax_enable_x64 false; disabling x64 and bypassing configuration would redden this assertion before array creation.",
+      "file": "tests/test_axis_selection_stationary.py",
+      "independence": "Reads JAX runtime configuration, not an input echoed back by the receipt.",
+      "line": 13
+    },
+    {
+      "failure_condition": "Native polishing moves at least min(radial_step, vertical_step), or yields NaN; replacing stored.T with stored at check_field_orientation.py:30 produces the recorded False and FAILED id.",
+      "file": "tests/test_axis_selection_stationary.py",
+      "independence": "Distance computed from polish output is compared with independently derived grid spacing, not with the same supplied seed value.",
+      "line": 18
+    },
+    {
+      "failure_condition": "Either native polished Hessian eigenvalue becomes nonnegative or NaN; returning a minimum or saddle Hessian instead of the measured maximum makes check_field_orientation.py:77 false.",
+      "file": "tests/test_axis_selection_stationary.py",
+      "independence": "Measured eigenvalues are compared with the fixed zero bound for a strict maximum.",
+      "line": 19
+    },
+    {
+      "failure_condition": "Transposed displacement becomes at most 0.1 m or NaN; reverting check_field_orientation.py:31 from stored to stored.T gives the native zero displacement and makes this assertion false.",
+      "file": "tests/test_axis_selection_stationary.py",
+      "independence": "Measured displacement is compared with the independent fixed 0.1 m threshold.",
+      "line": 20
+    }
+  ],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:main:91",
+    "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:__main__:100"
+  ],
+  "call_sites_note": "Standalone main at line 91 is the runtime caller of the extracted receipt, reached through the __main__ guard at line 100. Revision-specific search found no solver/application caller of this diagnostic; the test caller was excluded from CALL_SITES.",
+  "commits_read": [
+    "4c6c7832e2224e61bf1db374d568bce14e218d65"
+  ],
+  "completed_at": "2026-11-08T13:00:01Z",
+  "dispatched_at": "2026-11-08T12:46:41Z",
+  "evidence_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/baseline-arm.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/after-arm.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/gate-final.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/negative-control.log"
+  ],
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read the sole new commit 4c6c7832e2224e61bf1db374d568bce14e218d65 against the previously reviewed d79deae4dc1fabc5f913e60a730af206219b01ff; it extracts the existing measurement into field_orientation_receipt and adds the 20-line CPU test, with no product edits or new figures.",
+    "done_when": "resume-5-advice.txt requires an imported three-predicate test, a failing native-transposition control, empty base and final-head pytest receipts; baseline-arm.log, after-arm.log, gate-final.log and negative-control.log record exactly these outcomes.",
+    "goal": "Read brief.md, live diiid-vertical-force-balance plan version 65 and resume-1-advice.txt; the accepted diagnostic deliverable is extended into a collected CPU test by resume-5-advice.txt:1-18, without changing solver selection.",
+    "manifest": "Source manifest.md names the reviewed head, exact pytest command, baseline EXIT=4 with absent test, head EXIT=0 with one pass and negative-control EXIT=1 with the failing test id, consistent with the four logs read.",
+    "write_paths": "The source manifest grants the prototype directory and tests/test_axis_selection_stationary.py, and both incremental paths in commit 4c6c7832e2224e61bf1db374d568bce14e218d65 are inside that scope."
+  },
+  "justifications": {
+    "durability": "tests/test_axis_selection_stationary.py:18-20 consumes independent numerical comparisons at check_field_orientation.py:75-79, and negative-control.log demonstrates that restoring the transposed native binding at line 30 reddens the collected test at line 18.",
+    "evidence": "gate-final.log records the exact reviewed revision and 1 passed in 8.89s with EXIT=0, negative-control.log records the native-binding assertion failure with EXIT=1, and baseline-arm.log records the explicitly authorized absent-file baseline with EXIT=4.",
+    "fit": "check_field_orientation.py:17-19 extracts the existing diagnostic under a descriptive name and tests/test_axis_selection_stationary.py:12-15 configures precision before measurement and explicitly places arrays on CPU, with no forbidden added names or comments.",
+    "goal_fidelity": "tests/test_axis_selection_stationary.py:11-20 imports the shared measurement and asserts each predicate required by resume-5-advice.txt, while check_field_orientation.py:90-96 preserves the standalone diagnostic behavior.",
+    "reuse": "The capability search found and opened nova/equilibrium/flux_surface_connectivity.py:916-935 as the stationary-polishing owner, which check_field_orientation.py:36 already wraps, and the new pytest caller reuses that diagnostic through field_orientation_receipt rather than copying its measurement.",
+    "scope_discipline": "The two-file diff in commit 4c6c7832e2224e61bf1db374d568bce14e218d65 changes only the prototype measurement interface and tests/test_axis_selection_stationary.py, both explicitly granted by the source manifest and resume-5-advice.txt."
+  },
+  "plan_read": {
+    "method": "offline fallback after read_plan storage-slow response",
+    "path": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html",
+    "project": "nova",
+    "slug": "diiid-vertical-force-balance",
+    "version": 65
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read brief.md, live diiid-vertical-force-balance plan version 65 and resume-1-advice.txt; the accepted diagnostic deliverable is extended into a collected CPU test by resume-5-advice.txt:1-18, without changing solver selection.\nVERDICT done_when: resume-5-advice.txt requires an imported three-predicate test, a failing native-transposition control, empty base and final-head pytest receipts; baseline-arm.log, after-arm.log, gate-final.log and negative-control.log record exactly these outcomes.\nVERDICT write_paths: The source manifest grants the prototype directory and tests/test_axis_selection_stationary.py, and both incremental paths in commit 4c6c7832e2224e61bf1db374d568bce14e218d65 are inside that scope.\nVERDICT manifest: Source manifest.md names the reviewed head, exact pytest command, baseline EXIT=4 with absent test, head EXIT=0 with one pass and negative-control EXIT=1 with the failing test id, consistent with the four logs read.\nVERDICT diff: Read the sole new commit 4c6c7832e2224e61bf1db374d568bce14e218d65 against the previously reviewed d79deae4dc1fabc5f913e60a730af206219b01ff; it extracts the existing measurement into field_orientation_receipt and adds the 20-line CPU test, with no product edits or new figures.\nCALL_SITES: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:main:91, scripts/prototypes/diiid_axis_selection/check_field_orientation.py:__main__:100\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/test_axis_selection_stationary.py:11-20 imports the shared measurement and asserts each predicate required by resume-5-advice.txt, while check_field_orientation.py:90-96 preserves the standalone diagnostic behavior.\nSCORE evidence: 20\nJUSTIFICATION evidence: gate-final.log records the exact reviewed revision and 1 passed in 8.89s with EXIT=0, negative-control.log records the native-binding assertion failure with EXIT=1, and baseline-arm.log records the explicitly authorized absent-file baseline with EXIT=4.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The two-file diff in commit 4c6c7832e2224e61bf1db374d568bce14e218d65 changes only the prototype measurement interface and tests/test_axis_selection_stationary.py, both explicitly granted by the source manifest and resume-5-advice.txt.\nSCORE durability: 20\nJUSTIFICATION durability: tests/test_axis_selection_stationary.py:18-20 consumes independent numerical comparisons at check_field_orientation.py:75-79, and negative-control.log demonstrates that restoring the transposed native binding at line 30 reddens the collected test at line 18.\nSCORE fit: 20\nJUSTIFICATION fit: check_field_orientation.py:17-19 extracts the existing diagnostic under a descriptive name and tests/test_axis_selection_stationary.py:12-15 configures precision before measurement and explicitly places arrays on CPU, with no forbidden added names or comments.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search found and opened nova/equilibrium/flux_surface_connectivity.py:916-935 as the stationary-polishing owner, which check_field_orientation.py:36 already wraps, and the new pytest caller reuses that diagnostic through field_orientation_receipt rather than copying its measurement.\n",
+  "reuse_search": "Searched revision-specific nova/equilibrium and scripts/prototypes for polishing, Hessian-eigenvalue and coordinate-binding capability; opened flux_surface_connectivity.py:916-935. The newly named receipt extracts the pre-existing main body in the same diagnostic owner; main and pytest share it. The new test introduces no separate measurement implementation.",
+  "review_run_id": "r-20261108T124419187835-review-of-diiid-axis-selection-fix-4c6c7832e222",
+  "review_scope": "Incremental only: d79deae4dc1fabc5f913e60a730af206219b01ff..4c6c7832e2224e61bf1db374d568bce14e218d65; source suite baseline c251bc96a70b9f37bfd373ab58792945d6cdc954 is intentionally distinct from the incremental diff base.",
+  "reviewed_base_sha": "d79deae4dc1fabc5f913e60a730af206219b01ff",
+  "reviewed_head_sha": "4c6c7832e2224e61bf1db374d568bce14e218d65",
+  "reviewed_run_id": "r-20261108T073038010130-diiid-axis-selection-fix",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/after-arm.log",
+      "revision": "4c6c7832e2224e61bf1db374d568bce14e218d65",
+      "summary": [
+        "1 passed in 8.89s"
+      ]
+    },
+    "baseline_suite": {
+      "exit_status": 4,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/baseline-arm.log",
+      "revision": "c251bc96a70b9f37bfd373ab58792945d6cdc954",
+      "summary": [
+        "no tests ran in 0.00s"
+      ]
+    },
+    "negative_control": {
+      "exit_status": 1,
+      "failure_ids": [
+        "tests/test_axis_selection_stationary.py::test_native_axis_binding_preserves_stationary_maximum"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/negative-control.log",
+      "revision": "4c6c7832e2224e61bf1db374d568bce14e218d65",
+      "summary": [
+        "1 failed in 10.71s"
+      ]
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T13:10:37.359905+00:00",
+  "total": 120
+}

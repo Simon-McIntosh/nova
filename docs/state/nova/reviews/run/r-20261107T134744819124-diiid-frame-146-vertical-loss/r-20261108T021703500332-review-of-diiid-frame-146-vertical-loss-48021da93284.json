@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-08T02:33:07.897Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a root-cause record that changes no product code; the regression test belongs to the axis-identification fix node",
+      "recorded_at": "2026-11-08T03:16:59.946568+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-08T02:22:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype script colour; a named bounding-surface ink role in nova/media/ink.py is outside this node and goes with the fix node",
+      "recorded_at": "2026-11-08T03:19:01.878516+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "trailing newline in a prototype script; cosmetic",
+      "recorded_at": "2026-11-08T03:20:59.304499+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": 224,
+      "severity": "non-blocking",
+      "text": "the bounding-surface stroke is now a hardcoded hex literal, replacing the named ink role DEFAULT_INK.separatrix_color, in both the draw call and the legend handle at line 281; nova's plotting rules require a figure colour to be a named role in the style module so a reader recognises the component across figures, and the literal now silently diverges from that owner. The correct repair is a named role in nova/media/ink.py, outside this node's fence."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/polish_axis_check.py",
+      "line": 133,
+      "severity": "non-blocking",
+      "text": "the new module ends without a trailing newline, so the file's last line is unterminated and a diff against the next edit shows a spurious no-newline marker."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T021703500332-review-of-diiid-frame-146-vertical-loss-48021da93284",
+  "reviewed_base_sha": "be811296d6344a9b9aecfbe78a3235bcd88759fc",
+  "reviewed_head_sha": "48021da93284537c427e871ef2a2a5936f0d7353",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 12,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T02:50:10.887001+00:00",
+  "total": 86
+}

@@ -1,0 +1,101 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T10:55:42.107Z",
+  "dispatched_at": "2026-11-08T10:46:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T104204894784-plan-review-of-iron-core-magnetisation/plan.html:379",
+      "id": "reasoning-1",
+      "reason": "the section's whole verdict is \"imas-efit misses S \u21d2 its representation is implicated\", so a worker who renders the shell as a torus, or who is defeated by the axis segment, records a miss against imas-efit's representation when the authored geometry was the defect, and that verdict is written into the plan for \u00a79 and sent to another team.",
+      "text": "s10 authors the shell as \"two new iron-boundary elements \u2026 the outer surface anticlockwise and the inner surface clockwise\", but imas-efit's IronBoundary is a CLOSED path in (R,Z) with R >= 0 (`src/ironBoundary.h:30-34`), and a spherical shell's poloidal cross-section is a half-annulus whose two arcs close only along the axis R = 0 (the prototype does exactly this at `scripts/prototypes/iron_magnetisation/shell.py:47-50`: `buffer(B).difference(buffer(A)).intersection(half)`). Two concentric closed circles, the natural reading of \"outer surface / inner surface\", are a torus of revolution, whose exact shielding factor is not the sphere formula of \u00a71; and a contour closed along R = 0 puts a segment through the iron that carries a degenerate (zero-circumference) ring current, which the plan neither states nor justifies. The section therefore does not determine the body it measures.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T104204894784-plan-review-of-iron-core-magnetisation/plan.html:386",
+      "id": "reasoning-2",
+      "reason": "a worker following the stated field list either lands on the file's existing 215 and scores a value the exact S does not describe, or refuses to start on an unset material2Id, and the missing step is one the plan's own done-when depends on.",
+      "text": "\"the iron_core IDS is withheld, and the permeability is constant\" does not by itself produce the mu_r = 1000 the done-when scores. With the IDS withheld, `magneticPermeabilities.readXml` is read from the same XML document (`src/tokamakData.cpp:135-136`), and WEST/iron.xml defines one entry, `id=\"1\" relativePermeability=\"215\"`; `IronBoundary::checkData` requires a selectable permeability for BOTH `materialId` and `material2Id` (`src/ironBoundary.cpp:238-247`), and `MagneticPermeabilities::selectMagneticPermeability` throws for an undefined id (`src/magneticPermeabilities.cpp:86`). So the run needs an authored entry at 1000 for the iron side and a second entry for the vacuum side, and the section's list of required fields (\"geometry/category, the knotSet and the observationPoints blocks\") omits exactly the two material ids that carry this.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "60bd9551793b7d635df174ff420d11e4c91ab754",
+  "plan_fingerprint": "834ef89d85dede561865d193deb620101a8f92a6ae773fb0851b66ee4b7f6e81",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 26,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a9c97ee868a3c66fb5c6d55f3789824c127b7c9",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a76b now authors the shell as one closed half-annulus contour in (R, Z) with R >= 0 (outer arc, axis segment, inner arc reversed, axis segment), as the prototype's shell.py builds it, instead of two oppositely oriented boundaries (0a9c97ee8).",
+      "reason": "",
+      "when": "2026-11-08T11:18:29.124602+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a9c97ee868a3c66fb5c6d55f3789824c127b7c9",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a76b adds a magneticPermeabilities entry at 1000 for the boundary's material to select, since with the IDS withheld imas-efit reads permeabilities from the XML and WEST iron.xml defines only id 1 at 215 (0a9c97ee8).",
+      "reason": "",
+      "when": "2026-11-08T11:18:43.374981+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a9c97ee868a3c66fb5c6d55f3789824c127b7c9",
+      "commit_basis": "edit",
+      "note": "\u00a76b now authors the shell as one closed half-annulus contour in (R, Z) with R >= 0 (outer arc, axis segment, inner arc reversed, axis segment), as the prototype's shell.py builds it, instead of two oppositely oriented boundaries (0a9c97ee8).",
+      "reason": "",
+      "when": "2026-11-08T11:18:29.124602+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a9c97ee868a3c66fb5c6d55f3789824c127b7c9",
+      "commit_basis": "edit",
+      "note": "\u00a76b adds a magneticPermeabilities entry at 1000 for the boundary's material to select, since with the IDS withheld imas-efit reads permeabilities from the XML and WEST iron.xml defines only id 1 at 215 (0a9c97ee8).",
+      "reason": "",
+      "when": "2026-11-08T11:18:43.374981+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v26.json",
+  "review_run_id": "r-20261108T104204894784-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "4b6d415e69705bbfc1c4d3fd6b3fbd51b5f552f7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 each cited path resolves in ~/Code/imas-efit: src/ironCoreBuilder.cpp, src/tokamakData.cpp (readImas falls back to `ironBoundaries` from the efitOptions document, which WEST/efitOptions.xml includes from WEST/iron.xml), configuration/machines/WEST/iron.xml (one `magneticPermeability id=\"1\" relativePermeability=\"215\"`, no boundary), src/ironBoundary.h (\"single closed-path iron-air interface\", inner CLOCKWISE / outer ANTI-CLOCKWISE), src/ironBoundary.cpp checkData, configuration/machines/_common/solver/iron-solver.xml (relativeError 1e-2, maximumIterationCount 100, relaxFactor 0.5) and usermanual/xml/ironModel.xml (the `2(I_i\u2212I_{i\u22121})(I_i+I_{i\u22121}) < relativeError` criterion).",
+    "done_when": "pass \u2014 clause (1) scores a converged shielding factor against a stated exact value (61.10) with a stated tolerance, and clause (2) supplies a control that can fail (a/b = 0.5, exact S = 195.1), which is not satisfied by a solid body, a wrong radius or a mis-oriented contour.",
+    "evidence_paths": "pass \u2014 the receipt and the message copy are written under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/, on GPFS and outside the run's scratch.",
+    "naming": "pass \u2014 the section adds no symbol, filename or comment; its labels are document cross-references (\u00a71, \u00a76, \u00a79), not plan or ticket identifiers.",
+    "reasoning": "a finding \u2014 the section's exact reference S is a spherical shell's, but the mechanism never states the R-Z geometry that reproduces a sphere, so the body imas-efit is configured with is not determined by the text.",
+    "single_goal": "pass \u2014 after the WEST probe tabulation was removed, the section carries one deliverable: the imas-efit closed-shell control and the message reporting it.",
+    "wiring": "pass \u2014 s10 declares `depends-on` s5 and s6, both of which exist and are implementable, and s9's `depends-on` names s10, so the verdict this section writes has a consumer."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "3d13ac2b5c4e323e237f14cb534509e563baa4507294f9ae957b98504904d7c2",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:18:19.521645+00:00",
+  "total": null
+}

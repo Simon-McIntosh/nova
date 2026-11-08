@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms. baseline_suite (gate_base.log, revision 6f20bafbc) records one failing id, tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate, with tests/test_forward_solve_request.py clean (gate_base.log:50-52, 5 passed); after_suite (gate_head2.log, revision 9d3759f94) adds tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table at gate_head2.log:73-74, which 5f675d25e repairs inside the range, and both declared arms cut tests/test_equilibrium_forward_solve.py at EXIT=124 (completed: false), so that file is read from the completed unbounded pair instead: h200_base.log (job 1308096, titan) 2 failed/28 passed and h200_head.log (job 1307982, h200) 2 failed/28 passed, the same two differentiability ids on both. tests/test_forward_solve_request.py is 5 passed at the reviewed head in focused_gate_head.log. Added failures at the reviewed head are therefore zero, and the reviewed delta touches no nova/ module and no test under tests/, so it cannot add one.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/diiid_stopping_rule/run_geometry_dump.py:38",
+    "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:87"
+  ],
+  "completed_at": "2026-11-08T06:51:33.898Z",
+  "dispatched_at": "2026-11-08T06:38:38Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "line": "291",
+      "severity": "non-blocking",
+      "text": "non-blocking: only the EFIT axis legend handle restores its drawn size, so the EFIT X-point handle keeps _null_handle's 6.5 pt marker while the marker plotted at :219 is 12 pt and the legend no longer matches the panel."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "line": "69",
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring reads \"a note may not sit the field\", which drops the preposition and leaves the one prose statement of the rule the function adds ungrammatical."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py",
+      "line": "135",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion compares the recorded axis with [1.70, 0.00], the value the test itself wrote into the record, so it holds for any recorder that echoes its input and cannot catch a wrongly computed axis."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the file lies outside testpaths (pyproject.toml:289) so no default suite or recorded gate runs it, and the manifest records no command or log naming its four passes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both commits against 1212e6a76; 8 files, +236/-101. The recorder's point-in-polygon test now calls nova.media.poloidal.inside_wall_units, the renderer's local _text_boxes and _check_layout are replaced by the probe's _check_text_artists behind a new _refuse_bad_labels, the four null legend handles come from _null_handle, the axis note moves from -0.115 to -0.075 axes fraction to stay inside the canvas, one paragraph is added to the fragment, one test file is added, and the four PNGs are re-rendered.",
+    "done_when": "the done-when asks each terminal state drawn as a line-contour panel with the real limiter, both null sets, the bounding surface and the EFIT boundary and X-point; the delta keeps all five and gate-logs/render-panels-round4.log records text_problems=0, axis_note_outside_field=True and surface_note_outside_field=True with EXIT_<FRAME>=0 on all four panels, though that log carries no revision and no command header.",
+    "goal": "the source node's goal is a stopping rule that ends the solve on convergence rather than on a settled mask; the two commits gained since the last review (2603714ae, 3396ebbc5) do not touch that rule or the equilibrium modules, and instead answer the standing terminal-panel findings and add a reproduction paragraph to docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:168-183.",
+    "manifest": "read; its round-four entries name both commits, the round-four render log and the new test, and its two mutant controls are specific, but its \"4 passed\" for the new test file names no command and no log path, and its claim that no bespoke duplicate of an existing helper remains is contradicted by _efit_axis at scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py:61, which the delta edits without adopting nova/equilibrium/stencil_nulls.py:1891.",
+    "write_paths": "the source node's declared paths cover scripts/prototypes/diiid_stopping_rule/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html and docs/figures/diiid-stopping-rule-fix/; all eight paths in the diff sit inside them and nothing else is touched."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py:147 and :161 redden if the inside-field or overlap rule is removed, and :132 reddens on a dropped recorded field, but :135 asserts an axis the test itself wrote, and the file sits outside the repo's testpaths at pyproject.toml:289.",
+    "evidence": "gate-logs/render-panels-round4.log records text_problems=0 and EXIT_<FRAME>=0 for all four panels and the four committed PNGs match its printed metrics, but the new test's \"4 passed\" is claimed at manifest.md:17 with no command and no log on disk.",
+    "fit": "the additions follow the prototype scripts' idiom and the shared helpers, but render_terminal_panels.py:69 states its rule as \"a note may not sit the field\" and :291 restores one legend marker size by list position.",
+    "goal_fidelity": "the delta leaves the stopping rule untouched, as the goal's figure clause allows, and its landed content is the panel reproduction and the tests named at docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:169-183.",
+    "reuse": "the delta replaces two forks with the probe's own owners (render_panels.py:435 _check_text_artists and :135 _null_handle) and adopts nova/media/sources/frame.py:56 inside_wall_units, leaving only the pre-existing _efit_axis axis search at record_machine_geometry.py:61 unextended.",
+    "scope_discipline": "every path in the diff is inside the source node's declared write paths, including the new scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py."
+  },
+  "node": "review-of-diiid-stopping-rule-fix-3396ebbc51c9",
+  "node:reviewed": "diiid-stopping-rule-fix",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is a stopping rule that ends the solve on convergence rather than on a settled mask; the two commits gained since the last review (2603714ae, 3396ebbc5) do not touch that rule or the equilibrium modules, and instead answer the standing terminal-panel findings and add a reproduction paragraph to docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:168-183.\nVERDICT done_when: the done-when asks each terminal state drawn as a line-contour panel with the real limiter, both null sets, the bounding surface and the EFIT boundary and X-point; the delta keeps all five and gate-logs/render-panels-round4.log records text_problems=0, axis_note_outside_field=True and surface_note_outside_field=True with EXIT_<FRAME>=0 on all four panels, though that log carries no revision and no command header.\nVERDICT write_paths: the source node's declared paths cover scripts/prototypes/diiid_stopping_rule/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html and docs/figures/diiid-stopping-rule-fix/; all eight paths in the diff sit inside them and nothing else is touched.\nVERDICT manifest: read; its round-four entries name both commits, the round-four render log and the new test, and its two mutant controls are specific, but its \"4 passed\" for the new test file names no command and no log path, and its claim that no bespoke duplicate of an existing helper remains is contradicted by _efit_axis at scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py:61, which the delta edits without adopting nova/equilibrium/stencil_nulls.py:1891.\nVERDICT diff: read both commits against 1212e6a76; 8 files, +236/-101. The recorder's point-in-polygon test now calls nova.media.poloidal.inside_wall_units, the renderer's local _text_boxes and _check_layout are replaced by the probe's _check_text_artists behind a new _refuse_bad_labels, the four null legend handles come from _null_handle, the axis note moves from -0.115 to -0.075 axes fraction to stay inside the canvas, one paragraph is added to the fragment, one test file is added, and the four PNGs are re-rendered.\nCALL_SITES: scripts/prototypes/diiid_stopping_rule/run_geometry_dump.py:38, scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:87\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the delta leaves the stopping rule untouched, as the goal's figure clause allows, and its landed content is the panel reproduction and the tests named at docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:169-183.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-logs/render-panels-round4.log records text_problems=0 and EXIT_<FRAME>=0 for all four panels and the four committed PNGs match its printed metrics, but the new test's \"4 passed\" is claimed at manifest.md:17 with no command and no log on disk.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is inside the source node's declared write paths, including the new scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py.\nSCORE durability: 15\nJUSTIFICATION durability: scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py:147 and :161 redden if the inside-field or overlap rule is removed, and :132 reddens on a dropped recorded field, but :135 asserts an axis the test itself wrote, and the file sits outside the repo's testpaths at pyproject.toml:289.\nSCORE fit: 16\nJUSTIFICATION fit: the additions follow the prototype scripts' idiom and the shared helpers, but render_terminal_panels.py:69 states its rule as \"a note may not sit the field\" and :291 restores one legend marker size by list position.\nSCORE reuse: 17\nJUSTIFICATION reuse: the delta replaces two forks with the probe's own owners (render_panels.py:435 _check_text_artists and :135 _null_handle) and adopts nova/media/sources/frame.py:56 inside_wall_units, leaving only the pre-existing _efit_axis axis search at record_machine_geometry.py:61 unextended.\nFINDING scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:291 non-blocking: only the EFIT axis legend handle restores its drawn size, so the EFIT X-point handle keeps _null_handle's 6.5 pt marker while the marker plotted at :219 is 12 pt and the legend no longer matches the panel.\nFINDING scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:69 non-blocking: the docstring reads \"a note may not sit the field\", which drops the preposition and leaves the one prose statement of the rule the function adds ungrammatical.\nFINDING scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py:135 non-blocking: the assertion compares the recorded axis with [1.70, 0.00], the value the test itself wrote into the record, so it holds for any recorder that echoes its input and cannot catch a wrongly computed axis.\nFINDING scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py:1 non-blocking: the file lies outside testpaths (pyproject.toml:289) so no default suite or recorded gate runs it, and the manifest records no command or log naming its four passes.\n",
+  "review_run_id": "r-20261108T063651223841-review-of-diiid-stopping-rule-fix-3396ebbc51c9",
+  "reviewed_base_sha": "1212e6a76aeba170079abfa2d55144472c138163",
+  "reviewed_head_sha": "3396ebbc51c90f74a84f9493b03ee61c006411fc",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:48:01+00:00",
+  "total": 98
+}

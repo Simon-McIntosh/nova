@@ -1,0 +1,195 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T06:40:27Z",
+  "figure_checks": {
+    "clipping": "Non-white pixel counts in the outer 1 px, 2 px and 3 px frame of every delivered raster: 0, 0 and 0 on all four. Ink bounding boxes: 137 x 10-723 y 10-623 of 735x635; 144 and 179 and 44 x 10-754 y 10-623 of 766x635. Nothing is clipped at the canvas edge, and no text artist is truncated.",
+    "colour_inventory": "Quantised colours on every panel: white ground; blue #3366cc contours (6,872-11,613 core pixels); grey #929292 reference marks and notelines (5,107-5,638); near-black #202020 limiter polyline and legend text (3,612-3,723); mid-grey antialias. Red #cc0000 carries the solved axis and the solved X-point only. No gradient, fill or shading exists on any panel.",
+    "encoding": "Contour levels are linspace(min + 0.1*span, max - 0.1*span, 7) over each frame's own finite flux grid (render_terminal_panels.py:130), so the level set is per panel. Measured level ranges: 179 -4.199 to -0.630; 44 -1.492 to +1.335. All contours render solid on all four panels, confirmed both by the script's linestyles='solid' (line 141) and on the raster (longest continuous vertical blue run 100, 107, 152 and 109 px for 179, 44, 144, 137 - no dash pattern, including on frame 179 where every level is negative and matplotlib's default would dash them).",
+    "layout": "Panel share of the delivered canvas: 260x614 of 766x635 on 44, 144 and 179 (34%) and of 735x635 on 137 (33%). Overall ink coverage 7.0-8.5% of the image. The blank region is the right-hand column below the legend note and the right margin beside the panel.",
+    "legend": "One frameless legend per panel, outside the axes to the right at bbox_to_anchor (1.01, 1.0), fontsize 13, in clear white space: 8 entries on 137, 144 and 179 ('solved flux', 'limiter', 'bounding surface', 'EFIT boundary', 'solved axis', 'solved X-point (unqualified)', 'EFIT axis', 'EFIT X-point') and 7 on frame 44, which correctly omits the solved X-point row because that arm records none inside the drawn field. Legend ink spans x 270-594, y 26-365 of the canvas, and the nearest contour in any panel is 18 px to its left.",
+    "panel_checks": "The four panels carry the machine wall as a polyline rather than a rectangle (the previously recorded defect of a flux-grid bounding box drawn as the wall is no longer present at this head), the eight-vertex bounding surface, the dashed EFIT boundary, and both null sets, each in its own mark: this is the reading the brief's figure specification asks for. Axes are off on every panel, so scale comes from the limiter geometry, and each panel states its axis position in the margin.",
+    "render_provenance": "Each of the four named PNGs was opened with Read from the reviewed run's worktree at its head (diiid-stopping-rule-fix/docs/figures/diiid-stopping-rule-fix/), and each file was then confirmed byte-identical to the reviewed head's blob: git rev-parse 3396ebbc5:docs/figures/... returned 3f07a7b6a58a (137), 763e65cbc586 (144), 438a5d90561d (179) and 941f749c95cf (44), and git hash-object on each file returned the same four values. The reviewed run's worktree HEAD is 3396ebbc5."
+  },
+  "figures": [
+    {
+      "delivered_size": "766x635 px, RGBA",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+      "rubric": {
+        "contrast": "defect - the margin note 'bounding surface: 8 vertices, class margin undefined' is #929292 on white, measured 3.11:1, below the 4.5:1 that 13 pt text needs; legend text is black on white and the blue #3366cc contours are about 5.4:1",
+        "data_ink": "defect - the poloidal panel is 260x614 px on a 766x635 canvas (34% of the image); about 40% of the canvas is blank white to the right of and below the legend, and the delivered raster is 54% of the 1400 px house canvas, so the cross-section renders small in a page column",
+        "decoration": "pass - axes off, no spines, ticks, gridlines, gradient, background fill or shading; the only straight ink is the limiter polyline and the reference ring",
+        "label_collision": "pass - ink bounding box x 10-754, y 10-623, so nothing is clipped (0 non-white pixels in the outer 3 px frame); the legend and its note sit in clear white space with the rightmost contour about 18 px from the first legend handle; no two text artists overlap",
+        "legibility": "pass - the closed core contours, the governed limiter polyline, the solid grey bounding ring, the dashed grey EFIT boundary and all four null marks read at native size; the red solved X-point marker at the top of the field sits on the limiter and is discernible as a red hollow cross against black",
+        "table_form": "pass - a poloidal flux map is a spatial relationship and is not tabulable"
+      },
+      "verdicts": "pass - a readable, honest picture of the terminal state: the real limiter, both null sets, the bounding ring and the EFIT boundary are all drawn and named in the legend, and the contour style is solid throughout as the drawing script's linestyles='solid' now requires. Four non-blocking findings remain, none of which stops a reader reading the panel."
+    },
+    {
+      "delivered_size": "766x635 px, RGBA",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+      "rubric": {
+        "contrast": "defect - the margin note is #929292 on white at 3.11:1",
+        "data_ink": "defect - panel 260x614 px of a 766x635 canvas (34%), with the same large blank right-hand and lower-right region as the other three panels",
+        "decoration": "pass - axes off, no grid, gradient, fill or shading",
+        "label_collision": "pass - nothing clipped; legend entries end at x 502 and the contours stop at x 281; the axis note and its leader line clear each other",
+        "legibility": "pass - the nested closed core contours, the limiter, the eight-vertex bounding ring and the grey EFIT oval read at a glance; the legend correctly carries no 'solved X-point' entry because this arm records none inside the drawn field",
+        "table_form": "pass - spatial field, not a table"
+      },
+      "verdicts": "pass - the panel shows the limited terminal against wall and reference cleanly. Its caption's claim that it sits 'on the same limiter and levels' as frame 179 is not what the renderer produced; the levels are disjoint and a reader comparing the two panels is comparing contours of different values."
+    },
+    {
+      "delivered_size": "766x635 px, RGBA",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+      "rubric": {
+        "contrast": "defect - the margin note is #929292 on white at 3.11:1",
+        "data_ink": "defect - panel 260x614 px of a 766x635 canvas (34%); ink covers 7.0% of the image",
+        "decoration": "pass - axes off, no grid, gradient, fill or shading",
+        "label_collision": "pass - nothing clipped; three near-vertical contours reach x 281 and the legend handles begin at x 299, so the gap is tight but no mark touches text",
+        "legibility": "pass - the elongated core, the outer contours running off the grid, the limiter, the bounding ring and the EFIT boundary read at a glance; the coincident solved and EFIT X-points are drawn as a red hollow cross inside a larger grey one, which a reader can resolve at native size",
+        "table_form": "pass - a spatial flux map, not a table"
+      },
+      "verdicts": "pass - the worst-residual arm is legible and the wall-relative position it exists to show is visible."
+    },
+    {
+      "delivered_size": "735x635 px, RGBA",
+      "path": "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png",
+      "rubric": {
+        "contrast": "defect - the margin note is #929292 on white at 3.11:1; this panel's note carries the only numeric margin in the set (-0.021) and is the faintest text on the figure",
+        "data_ink": "defect - panel 260x614 px of a 735x635 canvas (33%); the lower-right half of the image below the legend is blank",
+        "decoration": "pass - axes off, no grid, gradient, fill or shading",
+        "label_collision": "pass - nothing clipped (outer 3 px frame empty); the red axis note and its leader line are separated by about 10 px; the solved X-point marker sits on the limiter line but is legible against it",
+        "legibility": "defect - the EFIT X-point marker near R 1.27 m, Z -1.34 m is a grey hollow cross bisected by a 2.6 pt solved-flux contour and set against the grey dashed EFIT boundary, so at native size the symbol reads as a grey smudge rather than a mark; this is the one comparison the caption asks for ('the only panel where the two null sets separate')",
+        "table_form": "pass - spatial data, not a table"
+      },
+      "verdicts": "pass - the panel carries the arm the evidence page cites and its two null sets are visibly separated as the caption claims; the grey reference marker's readability is the main defect."
+    }
+  ],
+  "figures_reviewed": [
+    "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+    "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png"
+  ],
+  "findings": [
+    {
+      "disposition": "folded: terminal-panel capture scripts and the evidence fragment (scripts/prototypes/diiid_stopping_rule/, docs/evidence/fragments/diiid-vertical-force-balance/)",
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+      "id": "fdcf2b0016b",
+      "line": 206,
+      "severity": "non-blocking",
+      "summary": "Frame 44's caption places the panel 'on the same limiter and levels' as frame 179, but the renderer derives each panel's seven contour levels from that frame's own flux grid (render_terminal_panels.py:130, linspace over that frame's finite min and span), and the two level sets share no value. Measured from the run's own artifacts: frame 179 limited flux spans -4.64467 to -0.18370 giving levels -4.199 to -0.630, while frame 44 limited spans -1.84483 to +1.68838 giving levels -1.492 to +1.335. Every contour on the frame-44 panel therefore sits at a flux value no contour on the frame-179 panel has, and since the panels carry no colourbar or level labels a reader has no way to see that. The sentence invites a like-for-like comparison of contour shapes that the figure does not support; it should say the panels share the limiter and the level rule, not the levels. The caption is not changed by this review."
+    },
+    {
+      "disposition": "folded: terminal-panel renderer (scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py)",
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f7e285ad50b",
+      "line": 311,
+      "severity": "non-blocking",
+      "summary": "The margin note under the legend is drawn in REFERENCE (#929292) at 13 pt, measured 3.11:1 against the note's white background, below the 4.5:1 that text of that size needs and below the 4.5:1 that the same figure's black legend text clears easily. It is the only text on the panels that states a wall-relative number, and on frame 137 it carries the set's only quantitative margin ('class margin -0.021'), so the least legible text holds the most load-bearing content. Fix is one colour argument at the note's construction, not a redraw."
+    },
+    {
+      "disposition": "folded: terminal-panel renderer (scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py)",
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f0ab1cdd07c",
+      "line": 327,
+      "severity": "non-blocking",
+      "summary": "Each panel is drawn on the declared 14 x 7.2 in, 100 dpi canvas (line 132) but bbox_inches='tight' then crops the saved raster to 735-766 x 635 px, and because the equal-aspect axes occupies only the left third of the figure the delivered image is 33-34% data and about 40% blank white to the right of and below the legend. At the page column width the poloidal cross-section renders roughly 260-300 px wide, which is small for a panel whose purpose is to be compared with its neighbours, and the four panels do not agree on canvas width (frame 137 is 31 px narrower because its note text is shorter), so they do not scale identically beside one another. A panel that fills more of its canvas, or a legend placed under the axes, would deliver the same information at a larger scale."
+    },
+    {
+      "disposition": "folded: terminal-panel renderer (scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py)",
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "id": "f72eb883571",
+      "line": 260,
+      "severity": "non-blocking",
+      "summary": "Three of the four panels print 'bounding surface: N vertices, class margin undefined' in the margin, so the only quantitative content in the image is empty on those three, while the captions carry the same measurement as a distance to the wall (0.043 m for frame 179, 0.061 m for 44, 0.048 m for 144). The renderer takes surface_class_margin from the geometry record and substitutes prose when it is not finite, which leaves the figure unable to distinguish a bounding ring that nearly touches the wall from one far inside it without reference to a caption. The value that does exist - the surface-to-limiter gap, which the script already computes for its report line - would make the three panels self-describing."
+    },
+    {
+      "disposition": "folded: terminal-panel renderer (scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py)",
+      "file": "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png",
+      "id": "f4c3cd7369d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "On frame 137 the EFIT X-point marker at R 1.27 m, Z -1.34 m is drawn in REFERENCE grey as a hollow cross inside a rotated square, and a 2.6 pt solved-flux contour runs horizontally through the middle of it while the grey dashed EFIT boundary passes just above, so at the delivered size the three grey-blue elements merge and the symbol is hard to identify without the legend. This is the marker the caption asks the reader to compare with the red solved X-point, in the one panel where the two null sets separate. It does not hide the separation (the red mark sits about 25 px below and is unmistakable), but the reference mark itself reads as a smudge at 1:1."
+    },
+    {
+      "disposition": "exempted: the marks are plotted at their true coordinates and the size difference keeps the outer one visible; the caption states the coincidence, and separating them would falsify the geometry",
+      "file": "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
+      "id": "f096da82e9c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Frame 144's solved X-point and EFIT X-point coincide at R 1.38 m, Z -1.06 m, so the red hollow cross is drawn over the grey one and the EFIT mark survives only as a grey halo around the red. The renderer anticipates this (render_terminal_panels.py:289-291 sizes the reference ring up so it reads around the solved marker) and the caption states that the two are drawn one over the other, so a reader who reads the caption is not misled and can see that both sets are present. Recorded because the panel alone does not let a reader count two marks, and any later re-render should keep the size difference."
+    }
+  ],
+  "item_verdicts": {
+    "frame-137-diverted-terminal.png:contrast": "defect - margin note 3.11:1 on white",
+    "frame-137-diverted-terminal.png:data_ink": "defect - 33% panel share; lower-right of the canvas blank",
+    "frame-137-diverted-terminal.png:decoration": "pass - axes off; no ornament",
+    "frame-137-diverted-terminal.png:label_collision": "pass - note, leader line and markers all clear of each other and of text",
+    "frame-137-diverted-terminal.png:legibility": "defect - the EFIT X-point marker is bisected by a solved-flux contour and reads poorly at native size",
+    "frame-137-diverted-terminal.png:table_form": "pass - spatial data",
+    "frame-144-diverted-terminal.png:contrast": "defect - margin note 3.11:1 on white",
+    "frame-144-diverted-terminal.png:data_ink": "defect - 34% panel share, 7.0% ink coverage",
+    "frame-144-diverted-terminal.png:decoration": "pass - axes off; no gradient, fill or shading",
+    "frame-144-diverted-terminal.png:label_collision": "pass - contours and legend close but not touching; nothing clipped",
+    "frame-144-diverted-terminal.png:legibility": "pass - elongated core and outer contours readable; coincident nulls resolvable as nested marks",
+    "frame-144-diverted-terminal.png:table_form": "pass - spatial flux map",
+    "frame-179-limited-terminal.png:contrast": "defect - margin note #929292 at 3.11:1; black legend text and blue contours pass",
+    "frame-179-limited-terminal.png:data_ink": "defect - 34% of the canvas is the panel; the rest is legend plus blank white",
+    "frame-179-limited-terminal.png:decoration": "pass - axes off; no gradient, fill, shading or gridline",
+    "frame-179-limited-terminal.png:label_collision": "pass - nothing clipped, no text over text or over data",
+    "frame-179-limited-terminal.png:legibility": "pass - contours, limiter, reference ring, EFIT boundary and four named null marks readable at native size",
+    "frame-179-limited-terminal.png:table_form": "pass - a poloidal flux map is not tabulable",
+    "frame-44-limited-terminal.png:contrast": "defect - margin note 3.11:1 on white",
+    "frame-44-limited-terminal.png:data_ink": "defect - 34% panel share, same blank right-hand region",
+    "frame-44-limited-terminal.png:decoration": "pass - nothing ornamental on the panel",
+    "frame-44-limited-terminal.png:label_collision": "pass - nothing clipped; legend clear of the contours",
+    "frame-44-limited-terminal.png:legibility": "pass - nested cores, limiter, bounding ring and EFIT oval read at a glance",
+    "frame-44-limited-terminal.png:table_form": "pass - spatial data, not a table"
+  },
+  "justifications": {
+    "durability": "This record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "The level-sharing finding is measured from the run's own artifacts rather than inferred from the drawing code: the flux grids were loaded from probe-artifacts*/frame-44-limited-*.npz and frame-179-limited-*.npz and the script's own linspace formula applied, giving disjoint level sets. The contrast finding is a WCAG relative-luminance computation on the sampled note colour (#929292) against white. The clipping claim is the outer-frame pixel count, and the layout claim is a measured bounding box, not an impression.",
+    "legibility": "Every verdict was read from the delivered raster at native size, with 2x-10x crops of the legend, the null markers and the margin notes taken from the same PNGs to resolve marks that are a few pixels across.",
+    "previously_recorded_findings": "The earlier figure review of this run at head da9c18d8f recorded a blocking finding (no machine geometry drawn; the wall was the flux-grid bounding box), and further findings on dashed contours whose style carried no meaning, unidentified null markers, and only one null set plotted. At this head all four are answered on the picture: the real limiter polyline is drawn, all contours are solid, four null marks are named in the legend, and both null sets are plotted. The blocking finding is therefore resolved, which is why this review records no blocking finding.",
+    "scope_discipline": "This review is read-only. No figure, caption, script or other repository file was edited, created, moved or reformatted; scratch crops were written only under the run's scratch directory. The only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T063856893789-review-of-diiid-stopping-rule-fix-3396ebbc51c9-figure",
+  "reviewed_base_sha": "6f20bafbc29d57d8ed6938df2ce5c6621dd89b43",
+  "reviewed_head_sha": "3396ebbc51c90f74a84f9493b03ee61c006411fc",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "rubric": "figure",
+  "rubric_lines": [
+    "figure frame-179-limited-terminal.png / RUBRIC legibility: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC data_ink: defect (non-blocking) - panel occupies 34% of the canvas, remainder legend plus blank",
+    "figure frame-179-limited-terminal.png / RUBRIC decoration: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC contrast: defect (non-blocking) - margin note 3.11:1 on white",
+    "figure frame-179-limited-terminal.png / RUBRIC table_form: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC label_collision: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC legibility: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC data_ink: defect (non-blocking) - panel occupies 34% of the canvas, remainder legend plus blank",
+    "figure frame-44-limited-terminal.png / RUBRIC decoration: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC contrast: defect (non-blocking) - margin note 3.11:1 on white",
+    "figure frame-44-limited-terminal.png / RUBRIC table_form: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC label_collision: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC legibility: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC data_ink: defect (non-blocking) - panel occupies 34% of the canvas, remainder legend plus blank",
+    "figure frame-144-diverted-terminal.png / RUBRIC decoration: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC contrast: defect (non-blocking) - margin note 3.11:1 on white",
+    "figure frame-144-diverted-terminal.png / RUBRIC table_form: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC label_collision: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC legibility: defect (non-blocking) - EFIT X-point marker bisected by a solved-flux contour",
+    "figure frame-137-diverted-terminal.png / RUBRIC data_ink: defect (non-blocking) - panel occupies 33% of the canvas, remainder legend plus blank",
+    "figure frame-137-diverted-terminal.png / RUBRIC decoration: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC contrast: defect (non-blocking) - margin note 3.11:1 on white",
+    "figure frame-137-diverted-terminal.png / RUBRIC table_form: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC label_collision: pass"
+  ],
+  "scope_note": "Judged only from the four rendered PNGs named in the dispatch, opened with Read as rasters at their delivered size (frame-137 735x635 px, the other three 766x635 px, PNG RGBA). Each file on disk was matched byte for byte to the reviewed head's blob (git rev-parse 3396ebbc5:docs/figures/... equals git hash-object on the file for all four), so the pictures judged are the head's. No SVG and no other image was opened, listed, searched or rendered. Zoomed views were 2x-10x crops taken from those same PNGs.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:57:14.684715+00:00",
+  "total": null
+}

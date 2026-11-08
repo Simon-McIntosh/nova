@@ -26,6 +26,11 @@
   ],
   "completed_at": "2026-11-08T08:47:15Z",
   "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-08T09:03:45.480416+00:00"
+    },
     "goal_fidelity": {
       "kind": "exempted",
       "reason": "the lead accepted the falsification as this node's deliverable on 2026-11-08 and chose to run the record correction and the support-mask investigation as two follow-up nodes",

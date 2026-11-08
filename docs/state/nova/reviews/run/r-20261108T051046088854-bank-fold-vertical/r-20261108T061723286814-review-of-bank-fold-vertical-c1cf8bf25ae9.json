@@ -1,0 +1,93 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed manifest has no baseline_suite or after_suite gate logs because its suite fence was unarmed; zero is a neutral schema value, not a measured suite delta. The two H200 diagnostic logs end EXIT=0.",
+  "assertion_analysis": [
+    "scripts/prototypes/bank_fold_vertical/compare.py:13-31 fails if two fresh receipts disagree on listed null, unpinned or pinned fields; matching wrong outcomes pass, and neither receipt is compared with an independent expected result.",
+    "scripts/prototypes/bank_fold_vertical/measure.py:373 and condition.py:96 fail if JAX x64 is disabled; these assertions independently check the runtime dtype configuration.",
+    "scripts/prototypes/bank_fold_vertical/measure.py:241 checks pin.active immediately after line 239 supplies active=True, so the two sides move together; removing the centroid row from pinned_step leaves this assertion green.",
+    "scripts/prototypes/bank_fold_vertical/plot.py:100-101 fails when either singular series is missing; checked_save at lines 34-63 fails for clipped or colliding text but is not an assertion about the physical result.",
+    "scripts/prototypes/bank_fold_vertical/measure.py:388 prints PIN_ACTIVE=absent as a literal; enabling a product pin without updating the diagnostic would leave its reported status unchanged."
+  ],
+  "call_sites": [],
+  "completed_at": "2026-11-08T06:33:36Z",
+  "dispatched_at": "2026-11-08T06:22:34Z",
+  "findings": [
+    {
+      "evidence": "Lines 291-293 read norms before step; line 322 installs the best candidate; line 323 decides acceptance without evaluating that candidate. first.json reports the last rejected step at 1.0015521392822277 with residual 1.1642900688002555e-6, only slightly over the 1e-6 intermediate threshold.",
+      "file": "scripts/prototypes/bank_fold_vertical/measure.py",
+      "line": 323,
+      "severity": "blocking",
+      "summary": "Pinned acceptance and the reported residual use the pre-update state after the sixth Newton update, so a converged final update can be rejected and the stopping drive is not established."
+    },
+    {
+      "evidence": "run_h200.sh:10-16 only runs measure.py and compare.py; run_condition.sh:11 invokes condition.py once; condition.py:100 selects archive[:1].",
+      "file": "scripts/prototypes/bank_fold_vertical/run_h200.sh",
+      "line": 10,
+      "severity": "blocking",
+      "summary": "The required one-job two-process reproduction omits the pinned singular-value series, which was measured by a separate one-lane job with no second-process comparison."
+    },
+    {
+      "disposition": "folded: the pinned-probe repair for the blocking measure.py:323 finding should derive status from the row and inspect the post-update fresh read.",
+      "file": "scripts/prototypes/bank_fold_vertical/measure.py",
+      "line": 238,
+      "severity": "non-blocking",
+      "summary": "The asserted scratch active flag is the same value supplied to the constructor, and the product PIN_ACTIVE line is a literal, so neither establishes a live pin connection."
+    },
+    {
+      "disposition": "exempted: the one-off figure has a rendered visual receipt, and importing a separate prototype would couple unrelated diagnostics.",
+      "file": "scripts/prototypes/bank_fold_vertical/plot.py",
+      "line": 34,
+      "severity": "non-blocking",
+      "summary": "The figure text validator duplicates the clipping and collision check in scripts/prototypes/bank_drive_barrier/plot.py:15-45."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "VERDICT diff: twelve commits from f2742b2c88ed6537684aefe70f7c0089dd6eff80 to c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb add six prototype files, one evidence fragment and two SVGs, with no product-source change; measure.py:323 retains a pre-update residual when deciding acceptance.",
+    "done_when": "VERDICT done_when: brief.txt requires one two-process H200 job reproducing all three items; h200-retry-job.log ends AGREE and EXIT=0 for two sixteen-lane solves, while condition-job.log supplies the pinned singular series from a separate one-lane process.",
+    "goal": "VERDICT goal: brief.txt asks for pin status, a physical null projection and a pinned continuation probe; scripts/prototypes/bank_fold_vertical/measure.py:367-425 produces them, but line 323 can falsely reject a pinned step.",
+    "manifest": "VERDICT manifest: manifest.md names twelve commits, nine changed paths and two H200 logs; h200-retry-job.log and condition-job.log end EXIT=0, while baseline_suite and after_suite are absent under the unarmed suite fence.",
+    "write_paths": "VERDICT write_paths: manifest.md grants scripts/prototypes/bank_fold_vertical, bank-fold-vertical.html and the bank-fold-vertical figure directory; all nine paths in git diff f2742b2c..c1cf8bf25 fall inside them."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T061723286814-review-of-bank-fold-vertical-c1cf8bf25ae9",
+  "reviewed_base_sha": "f2742b2c88ed6537684aefe70f7c0089dd6eff80",
+  "reviewed_head_sha": "c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb",
+  "reviewed_run_id": "r-20261108T051046088854-bank-fold-vertical",
+  "rubric_lines": [
+    "VERDICT goal: brief.txt asks for pin status, a physical null projection and a pinned continuation probe; scripts/prototypes/bank_fold_vertical/measure.py:367-425 produces them, but line 323 can falsely reject a pinned step.",
+    "VERDICT done_when: brief.txt requires one two-process H200 job reproducing all three items; h200-retry-job.log ends AGREE and EXIT=0 for two sixteen-lane solves, while condition-job.log supplies the pinned singular series from a separate one-lane process.",
+    "VERDICT write_paths: manifest.md grants scripts/prototypes/bank_fold_vertical, bank-fold-vertical.html and the bank-fold-vertical figure directory; all nine paths in git diff f2742b2c..c1cf8bf25 fall inside them.",
+    "VERDICT manifest: manifest.md names twelve commits, nine changed paths and two H200 logs; h200-retry-job.log and condition-job.log end EXIT=0, while baseline_suite and after_suite are absent under the unarmed suite fence.",
+    "VERDICT diff: twelve commits from f2742b2c88ed6537684aefe70f7c0089dd6eff80 to c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb add six prototype files, one evidence fragment and two SVGs, with no product-source change; measure.py:323 retains a pre-update residual when deciding acceptance.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 14",
+    "JUSTIFICATION goal_fidelity: scripts/prototypes/bank_fold_vertical/measure.py:367-425 covers the three scientific questions, but line 323 weakens the pinned outcome and run_h200.sh:10-16 omits the singular series.",
+    "SCORE evidence: 10",
+    "JUSTIFICATION evidence: h200-retry-job.log records two agreeing processes and EXIT=0, yet condition-job.log comes from a separate one-lane process and measure.py:323 can misclassify a final pinned update.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: every path in git diff f2742b2c..c1cf8bf25 is within the three declared write paths in the reviewed manifest.md.",
+    "SCORE durability: 6",
+    "JUSTIFICATION durability: scripts/prototypes/bank_fold_vertical/compare.py:13-31 detects disagreement between processes, but both can reproduce a wrong result and measure.py:241 checks the active flag supplied by that same function.",
+    "SCORE fit: 17",
+    "JUSTIFICATION fit: scripts/prototypes/bank_fold_vertical/measure.py:8-10 configures dtypes before arrays and plot.py:82 uses the repository's data-ink style with descriptive names.",
+    "SCORE reuse: 5",
+    "JUSTIFICATION reuse: scripts/prototypes/bank_fold_vertical/plot.py:34-63 duplicates text clipping and collision checks owned by scripts/prototypes/bank_drive_barrier/plot.py:15-45, while measure.py:38-53 wraps the existing radial-field helper in constraint.py:460.",
+    "FINDING scripts/prototypes/bank_fold_vertical/measure.py:323 blocking: after the sixth Newton update, acceptance and the reported residual use the preceding state's norms at lines 291-293; a converged sixth update is rejected, so the claimed pinned stopping drive and negative outcome need a fresh terminal read and rerun.",
+    "FINDING scripts/prototypes/bank_fold_vertical/run_h200.sh:10 blocking: this two-process job never runs condition.py, while the smallest-singular series in condition-job.log was measured once on one lane; the required one-job, two-process reproduction of all three brief items is incomplete.",
+    "FINDING scripts/prototypes/bank_fold_vertical/measure.py:238 non-blocking: the active=True constructor, assert pin.active and PIN_ACTIVE=absent literal at line 388 do not inspect whether the actual scratch row or product route uses a pin, so the status assertions can stay green after a common-mode regression; folded into the pinned-probe repair named by the blocking measure.py:323 finding.",
+    "FINDING scripts/prototypes/bank_fold_vertical/plot.py:34 non-blocking: checked_save duplicates clipping and collision checks already owned by scripts/prototypes/bank_drive_barrier/plot.py:15 rather than extending that owner; exempted because this fixed diagnostic figure has already been rendered and importing another prototype would couple unrelated reports."
+  ],
+  "scores": {
+    "durability": 6,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:40:51.102040+00:00",
+  "total": 72
+}

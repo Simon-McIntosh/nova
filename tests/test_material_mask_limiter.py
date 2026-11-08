@@ -140,3 +140,31 @@ def test_stopping_rule_forwards_the_explicit_surface_choice(monkeypatch, expansi
 def test_probe_serialization_and_counter_checks():
     probe._self_check()
     assert probe._counters_self_check() == 0
+
+
+@pytest.mark.parametrize("expansion", [None, 0.02])
+def test_convergence_cli_requires_an_explicit_pseudo_wall(
+    monkeypatch, tmp_path, expansion
+):
+    class Prepared(Exception):
+        pass
+
+    def capture(frame, selected, *args):
+        assert frame == 179 and selected == expansion
+        raise Prepared
+
+    argv = [
+        "measure_branches.py",
+        "--frames",
+        "179",
+        "--output",
+        str(tmp_path / "out.json"),
+        "--artifact-dir",
+        str(tmp_path / "arrays"),
+    ]
+    if expansion is not None:
+        argv.extend(["--pseudo-wall-expansion", str(expansion)])
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setattr(probe, "run_frame", capture)
+    with pytest.raises(Prepared):
+        probe.main()

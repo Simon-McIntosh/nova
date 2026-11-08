@@ -2,8 +2,8 @@
   <h2>What ends the DIII-D forward solve, and what converges</h2>
 
   <p>
-    <strong>Nothing converges.</strong> Across fifteen measured solver runs on
-    four DIII-D gate frames and both topology branches, not one arm reaches the
+    <strong>Nothing converges.</strong> Across sixteen measured solver runs on
+    five DIII-D gate frames and both topology branches, not one arm reaches the
     solve tolerance of <code>1e-5</code>. Terminal relative residuals run from
     0.027 to 5.93. The stopping rule no longer misreports that as convergence:
     every arm ends with <code>converged</code> false and a termination reason
@@ -27,6 +27,24 @@
   </p>
 
   <p>
+    The mask history is what makes this concrete. On every branch except 146
+    diverted the support empties on the first trip: 179 limited 25 &rarr; 0,
+    179 diverted 13 &rarr; 0, 44 diverted 75 &rarr; 0, 146 limited 9 &rarr; 0,
+    137 limited 11 &rarr; 0, and 44 diverted and 44 limited start at zero. The
+    two arms that do run Newton — 137 diverted (mask 24, 20, 9, 9, 0) and 146
+    diverted (27, 40, 1, 0) — both freeze at exactly the trip that takes the
+    mask to zero, having descended steadily until then.
+  </p>
+
+  <p>
+    A re-run of 179 limited and 44 limited with the direction and score kernels
+    wrapped in a debug print produced no output at all, so no candidate was
+    formed in those solves. That wrap did not reach the executed path, so it is
+    an instrument defect and is not quoted as evidence about the solver; the
+    mask history above is the evidence, and the two are consistent.
+  </p>
+
+  <p>
     The gate is not suppressing a step that exists. What the fix node must add is
     an answer to the mask collapse itself: either the mask read is wrong for
     these seeds, or the reduced route needs a linearisation that is meaningful at
@@ -36,7 +54,8 @@
 
   <table>
     <caption>
-      Five-frame measurement, one H200 job, one fresh process per frame. Bounding
+      Five-frame measurement, one fresh process per frame. The 146 diverted row
+      is from the follow-up job that ran the arm cut by the first job's wall. Bounding
       class is the probe's read of the terminal state against the governed wall:
       the topology class the flux actually carried, whether that matched the
       requested branch, and whether the axis lay inside the wall. Every panel
@@ -57,6 +76,7 @@
       <tr><td>144</td><td>diverted</td><td>default</td><td>5.927126</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested diverted)</td><td>yes</td></tr>
       <tr><td>144</td><td>diverted</td><td>continued</td><td>5.927126</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
       <tr><td>146</td><td>limited</td><td>default</td><td>0.063500</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>
+      <tr><td>146</td><td>diverted</td><td>default</td><td>0.054962</td><td>11 stationary</td><td>48</td><td>48</td><td>4</td><td>limited (requested diverted)</td><td>yes</td></tr>
       <tr><td>179</td><td>diverted</td><td>default</td><td>0.418096</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested diverted)</td><td>yes</td></tr>
       <tr><td>179</td><td>diverted</td><td>continued</td><td>0.418096</td><td>8 budget</td><td>0</td><td>0</td><td>16</td><td>diverted (requested diverted)</td><td>yes</td></tr>
       <tr><td>179</td><td>limited</td><td>default</td><td>0.027262</td><td>11 stationary</td><td>0</td><td>0</td><td>2</td><td>diverted (requested limited)</td><td>yes</td></tr>

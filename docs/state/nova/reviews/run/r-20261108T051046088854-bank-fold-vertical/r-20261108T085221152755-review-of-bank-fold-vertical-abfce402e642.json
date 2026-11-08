@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Source manifest has neither baseline_suite nor after_suite and declares an unarmed suite fence. Zero is a neutral schema value, not a measured suite delta; no paired suite log exists from which to derive a numeric delta.",
+  "assertion_analysis": [
+    "check_contract.py:75 fails when the sixth update is not freshly evaluated: reinstating the old pre-update acceptance leaves norms positive although the synthetic state reaches its independently defined root at six; negative-control.log records terminal_update=false and EXIT=1.",
+    "check_contract.py:119-124 compares a computed correction against an independently solved one-cell centroid target (height zero and field increment 0.1); removing the correction leaves height 0.1 and fails negative-control-centroid-row.log.",
+    "check_contract.py:164 observes both an absent and a known added residual row against literal expected output; hardcoding absent loses the true case, as negative-control-product-pin.log shows.",
+    "check_contract.py:179 fails if either prototype arm no longer calls accepted_read the required number of times; it checks syntax, not numerical predicate correctness, and negative-control-shared-acceptance.log records its refusal of the pre-shared-rule source.",
+    "check_contract.py:216-217 requires the actual compare.py to reject missing conditioning and accept a populated pair; removing the conditioning requirement makes the red pair pass and this control fail; the matching green pair proves only reproducibility, not physical correctness.",
+    "check_contract.py:235-237 checks the shared function string and removal of the old runner; it is structural evidence and by itself does not prove main calls the spectrum path.",
+    "check_contract.py:245-249 fails for durable receipts with fewer than two conditioning rows; it does not independently verify those rows numerically, which is the job of compare.py and the device receipt.",
+    "compare.py:34-44 refuses missing or unequal row counts, invalid conditioning reads or differing drive/singular values; changing one receipt would fail while matching common-mode numerical mistakes remain possible.",
+    "measure.py:63 refuses unexpected extra-row counts, measure.py:334 refuses an absent live scratch row or field column, and measure.py:426 refuses invalid or nonfinite selected singular values; each condition reads runtime results rather than its own constructor flag.",
+    "No added numerical correction assertion merely compares a value with the same target passed into the code: the one-cell height and field expectations are independent of the returned update; the shared acceptance substitution is the remaining coverage limitation."
+  ],
+  "call_site_note": "Exact-head git grep over nova and scripts found only the prototype driver run_h200.sh:13,16,19 and internal condition import measure.py:409; no production consumer of the changed prototype was found. The search also found existing production condition functions, supplying a positive search control.",
+  "call_sites": [],
+  "completed_at": "2026-11-08T09:06:28Z",
+  "dispatched_at": "2026-11-08T08:57:27Z",
+  "figure_review": {
+    "images": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085221152755-review-of-bank-fold-vertical-abfce402e642/null-review.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085221152755-review-of-bank-fold-vertical-abfce402e642/singular-review.png"
+    ],
+    "rendered_from": "exact abfce402e6429fca9bac8000265a19cf28b87889 SVG blobs",
+    "result": "Both inspected; wall and line contours visible, no axes on poloidal panel, readable singular plot, no clipped or colliding labels."
+  },
+  "findings": [
+    {
+      "disposition": "exempted: the focused controls establish the repaired sixth-update behavior and the current predicate is correct by inspection; direct invalid-read and over-tolerance predicate cases would improve future coverage without holding this measured diagnostic.",
+      "file": "scripts/prototypes/bank_fold_vertical/check_contract.py",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "The sixth-update harness injects its own accepted_read instead of extracting the new predicate, while both_arms_share_acceptance only counts calls; a regression in measure.py:38-43 that accepts invalid or over-tolerance reads can leave all contract checks green."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "VERDICT diff: read all eleven gained commits from c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb through abfce402e6429fca9bac8000265a19cf28b87889; they repair terminal acceptance, consolidate spectra, add controls and replace the evidence and SVGs, with no product-source edit.",
+    "done_when": "VERDICT done_when: brief.txt requires one H200 job with two agreeing fresh processes; h200-repair-final-job.log records sixteen lanes, four unpinned and six pinned valid spectra per process, AGREE null=1 unpinned=1 pinned=1 condition=1 and terminal EXIT=0.",
+    "goal": "VERDICT goal: brief.txt requests pin status, null-mode diagnosis and a pinned continuation experiment; measure.py:46-64,359-364,407-430 now inspect assembled rows, read the final update and measure both spectra without changing product source.",
+    "manifest": "VERDICT manifest: manifest.md records the gained commits, ten changed paths, exact H200 submission, contract-final.log and negative-control logs; its absent baseline_suite/after_suite fields agree with its unarmed suite fence.",
+    "write_paths": "VERDICT write_paths: manifest.md declares scripts/prototypes/bank_fold_vertical, bank-fold-vertical.html and its figure directory; every one of the ten gained diff paths is inside these grants."
+  },
+  "previous_findings": {
+    "measure.py:238": "resolved by assembled-row and live-column probes with positive and negative controls",
+    "measure.py:323": "resolved by fresh terminal evaluation and repeated H200 evidence",
+    "plot.py:34": "pre-existing unchanged validator duplication; outside this gained-diff verdict",
+    "run_h200.sh:10": "resolved by shared per-process spectra and comparison"
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T085221152755-review-of-bank-fold-vertical-abfce402e642",
+  "reviewed_base_sha": "c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb",
+  "reviewed_head_sha": "abfce402e6429fca9bac8000265a19cf28b87889",
+  "reviewed_run_id": "r-20261108T051046088854-bank-fold-vertical",
+  "rubric_lines": [
+    "VERDICT goal: brief.txt requests pin status, null-mode diagnosis and a pinned continuation experiment; measure.py:46-64,359-364,407-430 now inspect assembled rows, read the final update and measure both spectra without changing product source.",
+    "VERDICT done_when: brief.txt requires one H200 job with two agreeing fresh processes; h200-repair-final-job.log records sixteen lanes, four unpinned and six pinned valid spectra per process, AGREE null=1 unpinned=1 pinned=1 condition=1 and terminal EXIT=0.",
+    "VERDICT write_paths: manifest.md declares scripts/prototypes/bank_fold_vertical, bank-fold-vertical.html and its figure directory; every one of the ten gained diff paths is inside these grants.",
+    "VERDICT manifest: manifest.md records the gained commits, ten changed paths, exact H200 submission, contract-final.log and negative-control logs; its absent baseline_suite/after_suite fields agree with its unarmed suite fence.",
+    "VERDICT diff: read all eleven gained commits from c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb through abfce402e6429fca9bac8000265a19cf28b87889; they repair terminal acceptance, consolidate spectra, add controls and replace the evidence and SVGs, with no product-source edit.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 20",
+    "JUSTIFICATION goal_fidelity: measure.py:359-364 reads the sixth-update candidate before acceptance, and run_h200.sh:13-19 runs and compares two complete processes including condition_rows.",
+    "SCORE evidence: 19",
+    "JUSTIFICATION evidence: h200-repair-final-job.log and repair-first.json/repair-second.json agree on drives 1.0089341297149657 and 1.0015521373748786, while process-source-identity.log establishes identical measurement sources across the two logged revisions.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: all ten paths in git diff c1cf8bf25..abfce402e lie within the three grants recorded by manifest.md, including the deletion of run_condition.sh.",
+    "SCORE durability: 17",
+    "JUSTIFICATION durability: check_contract.py:16-217 independently checks the sixth update, centroid correction, row-probe sensitivity and missing-spectrum refusal, but lines 60-63 substitute accepted_read and leave that new predicate untested.",
+    "SCORE fit: 19",
+    "JUSTIFICATION fit: measure.py:359-364 uses a clear for-else terminal read and condition.py:11 reuses the existing spectrum implementation; both committed SVGs render legibly with unclipped text and the required wall contours.",
+    "SCORE reuse: 20",
+    "JUSTIFICATION reuse: capability searches over nova/equilibrium and scripts/prototypes found drive_continuation.py:191 as the existing continuation acceptance owner and constraint.py as the pin owner; the added predicate only adapts the prototype branches, condition_rows wraps the existing condition.py spectrum owner, and no existing AST regression harness or assembled-bank status probe was found.",
+    "FINDING scripts/prototypes/bank_fold_vertical/check_contract.py:60 non-blocking: The sixth-update harness injects its own accepted_read instead of extracting the new predicate, while both_arms_share_acceptance only counts calls; a regression in measure.py:38-43 that accepts invalid or over-tolerance reads can leave all contract checks green. exempted: the focused controls establish the repaired sixth-update behavior and the current predicate is correct by inspection; direct invalid-read and over-tolerance predicate cases would improve future coverage without holding this measured diagnostic."
+  ],
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:22:59.565526+00:00",
+  "total": 115
+}

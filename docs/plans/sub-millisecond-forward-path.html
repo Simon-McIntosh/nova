@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="249">
+<meta name="plan-version" content="250">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -842,6 +842,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T111124792754-bank-jacobian-assembly" data-who="reckon-build" data-when="2026-11-07T14:26:10Z">
     <div class="r-comment-body"><p>bank-jacobian-assembly: sharing the cut-cell conic ring geometry across booking channels is neutral -- base and head agree within 0.3% of wall per slice at 16, 64 and 128 slices at 4 reads and 3 updates each, identical peak memory and every precision lane inside its bound -- so the change and its tests were reverted in one commit and git diff acff793928732503a84525c3fe29ca260dbf9035 HEAD -- nova tests is empty, with the measurement kept as evidence and the stage split left unproduced because bank_step_jacobian_split/measure.py anchors on a source line that step_jacobian no longer contains.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T224036373308-review-of-bank-jacobian-assembly-9d3d6ea4a214" data-who="reckon-build" data-when="2026-11-07T23:54:49.621Z">
+    <div class="r-comment-body"><p>review-of-bank-jacobian-assembly at 9d3d6ea4a214: the gained commit&#x27;s record now reconciles with the run&#x27;s own logs (parity job 1307768, 4 failed in 722.95s EXIT=1, ValueError at tests/test_bank_step_booking_batch.py:237; timing precision ratios 1.2e-5/9.25e-6/2.59e-5 and residual 8.97e-12) and head_suites.sh prints the exit code, but the stage split its done_when requires is still disclosed as not measured and three non-blocking defects remain: two upward cross-references in the fragment and a repaired duplicate of suites.sh&#x27;s head arm.</p></div>
 </div>
 </section>
 </main>

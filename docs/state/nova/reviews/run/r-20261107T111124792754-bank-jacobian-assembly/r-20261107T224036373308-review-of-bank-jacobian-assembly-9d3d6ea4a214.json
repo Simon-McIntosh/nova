@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-07T23:54:49.621Z",
+  "dispatched_at": "2026-11-07T23:45:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "The added sentence 'their outcome is in the parity table above' points above, but the parity table it means is at lines 58-67, below this paragraph and below the new stage-table section; a reader following the reference upward lands on the timing table instead."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html",
+      "line": 53,
+      "severity": "non-blocking",
+      "text": "The added stage-table paragraph says 'The parity work above shows the two arms assemble the same matrix', but the parity section heading is at line 55 and its table at line 58, both below this line, so the cross-reference sends the reader the wrong way."
+    },
+    {
+      "file": "scripts/prototypes/bank_jacobian_assembly/head_suites.sh",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The commit repairs this head-only runner's EXIT line rather than retiring it, but scripts/prototypes/bank_jacobian_assembly/suites.sh:20-33 already runs the same head arm over the same five files with the correct printf 'EXIT=%s' \"$rc\"; fixing the duplicate leaves two runners to keep in step, which is how the broken EXIT line survived into the run's logs."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none: head_suites.sh is an orphan prototype driver that git grep finds no reference to anywhere in scripts, nova, tests or docs, and the fragment is a served static document rather than runtime code.",
+    "diff": "Read the single commit 9d3d6ea4a against b5fc7e6f095 commit by commit with git diff: 26 insertions and 8 deletions across the fragment and head_suites.sh, correcting the 550-cell parity outcome, the precision sentence, an empty stage table and the driver's EXIT line.",
+    "done_when": "The done_when requires device ms, launches and peak memory per stage at 16 and 128 slices plus a base-against-head assembly table; the fragment's new table at line 43-52 carries those columns with every cell reading 'not measured: stage split instrument anchor broken', and grep over the fragment finds no assembly device-ms or launch figure, so the measure is recorded as absent rather than measured.",
+    "goal": "The node's goal is to split one batched step_jacobian by stage on an H200, name and reduce the dominant stage, and record the paired timing in the evidence fragment; the gained commit 9d3d6ea4a touches only the fragment at docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html and scripts/prototypes/bank_jacobian_assembly/head_suites.sh, and the fragment at line 46-50 now states the stage split table as not measured rather than producing it.",
+    "manifest": "Read the manifest; it records twelve commits and seven changed paths, a baseline arm of one pre-existing failure tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments (exit 1, completed true) and a head arm failing exactly that id and no other, but its after_suite field concatenates two JSON objects, the second marked 'not run'.",
+    "write_paths": "The declared scope is nova/equilibrium/current.py, nova/equilibrium/support_read.py, tests/test_bank_step_booking_batch.py, scripts/prototypes/bank_jacobian_assembly, the evidence fragment and the figure directory; both paths in b5fc7e6f0..9d3d6ea4a sit inside that list."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a staged split and reduction of the dense Jacobian assembly; the gained commit 9d3d6ea4a changes only docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html and scripts/prototypes/bank_jacobian_assembly/head_suites.sh, and its stage table at lines 46-50 reads not measured.\nVERDICT done_when: the done_when names device ms, launches and peak memory per stage at 16 and 128 slices; docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:44 adds those columns and every cell states the figure is not measured, so the measure is recorded as absent, not produced.\nVERDICT write_paths: the declared scope covers scripts/prototypes/bank_jacobian_assembly and the evidence fragment; git diff b5fc7e6f0 9d3d6ea4a touches exactly those two files and nothing else.\nVERDICT manifest: read; it claims twelve commits and seven changed paths with a one-failure baseline arm, which the base and head2 logs confirm, but its after_suite field holds two concatenated JSON objects.\nVERDICT diff: read the single commit 9d3d6ea4a against b5fc7e6f095; the parity claims now reconcile with logs/parity.log (4 failed in 722.95 s, EXIT=1, ValueError at tests/test_bank_step_booking_batch.py:237), the precision ratios reconcile with logs/timing-summary.json, and head_suites.sh now prints \"$rc\".\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:42-52 replaced an omitted stage table with one whose twenty cells all read not measured, so the goal's stage split is disclosed rather than delivered.\nSCORE evidence: 13\nJUSTIFICATION evidence: every figure the commit adds reconciles with the run's own logs (logs/parity.log:354, logs/timing-summary.json) and the missing 1e-8 flux lane is now stated at line 30, but the done_when's central measurement is still absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat b5fc7e6f0 9d3d6ea4a lists only the evidence fragment and scripts/prototypes/bank_jacobian_assembly/head_suites.sh, both inside the declared write paths.\nSCORE durability: 4\nJUSTIFICATION durability: scripts/prototypes/bank_jacobian_assembly/head_suites.sh:25 was repaired with no test or check that fails if the EXIT line regresses, and the change adds no assertion anywhere.\nSCORE fit: 15\nJUSTIFICATION fit: the new section at docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:41 follows the fragment's heading, paragraph, table idiom, but its two new cross-references at lines 39 and 53 point upward to material that sits below them.\nSCORE reuse: 16\nJUSTIFICATION reuse: no new definition is added, but scripts/prototypes/bank_jacobian_assembly/head_suites.sh duplicates the head arm of scripts/prototypes/bank_jacobian_assembly/suites.sh:20-33 and the commit repairs the copy instead of retiring it.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:39 non-blocking: the added sentence says the parity table is above, but it is at lines 58-67 below the new stage-table section, so the reference points the wrong way.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-jacobian-assembly.html:53 non-blocking: 'The parity work above' names a section whose heading is at line 55 and whose table is at line 58, both below this paragraph.\nFINDING scripts/prototypes/bank_jacobian_assembly/head_suites.sh:1 non-blocking: the commit repairs this duplicate of the head arm already carried by scripts/prototypes/bank_jacobian_assembly/suites.sh:20-33 instead of retiring it, leaving two runners to keep in step.",
+  "review_run_id": "r-20261107T224036373308-review-of-bank-jacobian-assembly-9d3d6ea4a214",
+  "reviewed_base_sha": "b5fc7e6f095da3f8a6045fb4f8c6e4bdc23604f2",
+  "reviewed_head_sha": "9d3d6ea4a21422c242b7432c9a5f1e69449116c1",
+  "reviewed_run_id": "r-20261107T111124792754-bank-jacobian-assembly",
+  "scores": {
+    "durability": 4,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 10,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:28:42.302745+00:00",
+  "total": 78
+}

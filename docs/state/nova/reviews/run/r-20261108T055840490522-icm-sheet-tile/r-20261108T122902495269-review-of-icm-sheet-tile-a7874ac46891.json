@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Measured from the reviewed run's own arms: baseline-suite-sheet-tile.log at cadecf1d2 ends '2 passed, 2 deselected' with EXIT=0, and after-suite-sheet-tile.log at a7874ac46 ends '2 passed, 2 deselected' with EXIT=0, so the head arm adds no failure id over the base.",
+  "assertion_analysis": [
+    "tests/test_sheet_tile.py:191 fails only if the gate passes (an xpass under strict=True); because it is xfail it cannot fail when the tile regresses, so it guards the fix landing, not the tile.",
+    "tests/test_sheet_tile.py:133 and 134 build the reference matrix and its scale from the same cell_edges coefficients that cell_interaction consumes, so a wrong shared-edge dedup or a flipped K_phi sign moves both sides together and the assertion at line 191 stays true.",
+    "tests/test_sheet_tile.py:231 fails if the packed kernel diverges from sheet_field on 40 random pairs at 1e-11; it is an independent implementation on the other side and would redden on a physics regression in the transcription.",
+    "tests/test_sheet_tile.py:257 fails if reverse_normals stops flipping a cell, and tests/test_sheet_tile.py:259 fails if the flipped build still agrees; both would redden if the mutation path were dropped.",
+    "tests/test_sheet_tile.py:164 fails if the shipped fixture is not the 1696-cell prototype mesh; it reads the fixture rather than the code under test."
+  ],
+  "base_log_revision": "cadecf1d2",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T13:27:57.658Z",
+  "dispatched_at": "2026-11-08T13:14:36Z",
+  "findings": [
+    "tests/test_sheet_tile.py:171 blocking: the node's own 1e-13 agreement measure is marked xfail(strict=True), so the delivered suite is green while the done_when is unmet, and a regression that worsens the tile's error reports xfail rather than failing.",
+    "tests/test_sheet_tile.py:133 blocking: the reference matrix and its scale are assembled from the same cell_edges coefficients the code under test uses, so a defect in the shared-edge dedup or the K_phi sign is invisible to the assertion at line 191, and the independent prototype reference interaction() at scripts/prototypes/iron_magnetisation/magnetisation.py:133 is not used.",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/manifest.md:8 blocking: changed_paths names only tests/test_sheet_tile.py and commits names two of seven, while the landed change adds 538 lines to nova/biot/tiledassembly.py and an evidence fragment, so a coordinator auditing scope from this record sees a test-only change.",
+    "nova/biot/tiledassembly.py:619 non-blocking: packed_sheet_field and the nine _sheet_ helpers duplicate the closed form owned by nova/biot/sheet.py:603 and :709 rather than extending it, and the copy will not inherit the NaN-domain repair landing on main as c822ed667.",
+    "tests/test_sheet_tile.py:172 non-blocking: the xfail reason names the plan node id icm-sheet-tile-measure and the raw commit sha c822ed667 in source, which rot when the plan changes, and tests/test_sheet_tile.py:3 cites a plan section.",
+    "nova/biot/tiledassembly.py:397 non-blocking: _sheet_graded_rule computes and caches a 64-node Gauss-Legendre rule that no caller uses, since the only call site at line 440 discards it.",
+    "tests/test_sheet_tile.py:1 non-blocking: the brief's clause (3) asks for the reversed-normal control run through pytest with failing test ids; the recorded control is the standalone scripts/reversed_normals_agreement.py log, and the pytest carrier at line 259 asserts the opposite direction so it is green, though it is a real guard."
+  ],
+  "head_log_revision": "a7874ac46",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read all seven commits 98257ee91..a7874ac46: one product commit adds the sheet tile and the cell assembly, one adds the flat/pancake branch, two repair the test's sharding and reference scale, two land evidence fragments, and the last marks the heavy tests slow and the agreement xfails; nothing outside the declared scope.",
+    "done_when": "The source brief's clause (2) asks for entry-by-entry agreement against the host route sheet_field at 1e-13 over the 1696-cell mesh; tests/test_sheet_tile.py:171 marks that assertion xfail(strict=True) and tests/test_sheet_tile.py:133 builds the reference from the same packed kernel, so the measure the done_when names is neither met nor measured.",
+    "goal": "The node goal is to build G through a sheet tile in the tile assembly; nova/biot/tiledassembly.py:619-935 lands packed_sheet_field, _fill_sheet_tile, sheet_edge_field, cell_edges and cell_interaction, so the deliverable exists.",
+    "manifest": "The source manifest.md:7-8 names two commits and one changed path (tests/test_sheet_tile.py) and manifest.md:15-18 says no product code changed, while the landed diff is seven commits adding 538 lines to nova/biot/tiledassembly.py and 107 to the evidence fragment; the record misstates the change it delivers.",
+    "write_paths": "The base-to-head diff changes nova/biot/tiledassembly.py, tests/test_sheet_tile.py and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile.html; all three are inside the four paths the brief declares, and tests/test_biottiledassembly.py is untouched."
+  },
+  "justifications": {
+    "durability": "While tests/test_sheet_tile.py:171 keeps xfail(strict=True), a regression that worsens the tile's error still reports xfail and the suite stays green; the surviving guards are the pair-level cross-check at tests/test_sheet_tile.py:231 and the reversed-normal control at tests/test_sheet_tile.py:259.",
+    "evidence": "tests/test_sheet_tile.py:171 makes the 1e-13 assertion an expected failure and tests/test_sheet_tile.py:133 builds its reference from packed_sheet_field rather than the done_when's sheet_field, so the recorded green suite does not measure the measure the brief names.",
+    "fit": "nova/biot/tiledassembly.py:1063-1067 adds the sheet branch as a peer of the ring branch and the code names by mechanism, but the xfail reason at tests/test_sheet_tile.py:172-177 carries a plan node id and a raw commit sha and tests/test_sheet_tile.py:3 cites a plan section.",
+    "goal_fidelity": "nova/biot/tiledassembly.py:861 assembles G as signed sums of each cell's edge sheets through the tile plan, which is the goal, but the node's own agreement gate stays unmet and the brief's independent prototype reference at scripts/prototypes/iron_magnetisation/magnetisation.py:133 is never used.",
+    "reuse": "nova/biot/tiledassembly.py:619 re-implements the closed form that nova/biot/sheet.py:603 (_sloped_field_closed) and nova/biot/sheet.py:709 (_pancake_field) already own, and it does so inside tiledassembly.py rather than in a transcriber module beside the owner as nova/biot/polygonanalytic.py is beside nova/biot/polygon.py.",
+    "scope_discipline": "Every path in the diff from 972f7538ebf0c2d82c99124bd89987eb9b24466b to a7874ac4689130379dc0059c024af4069343e0ee lies inside the four declared write paths, and no product code outside them was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to build G through a sheet tile in the tile assembly; nova/biot/tiledassembly.py:619-935 lands packed_sheet_field, _fill_sheet_tile, sheet_edge_field, cell_edges and cell_interaction, so the deliverable exists.",
+  "raw_text_extra": "VERDICT done_when: The source brief's clause (2) asks for entry-by-entry agreement against the host route sheet_field at 1e-13 over the 1696-cell mesh; tests/test_sheet_tile.py:171 marks that assertion xfail(strict=True) and tests/test_sheet_tile.py:133 builds the reference from the same packed kernel, so the measure the done_when names is neither met nor measured.\nVERDICT write_paths: The base-to-head diff changes nova/biot/tiledassembly.py, tests/test_sheet_tile.py and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile.html; all three are inside the four paths the brief declares, and tests/test_biottiledassembly.py is untouched.\nVERDICT manifest: The source manifest.md:7-8 names two commits and one changed path (tests/test_sheet_tile.py) and manifest.md:15-18 says no product code changed, while the landed diff is seven commits adding 538 lines to nova/biot/tiledassembly.py and 107 to the evidence fragment; the record misstates the change it delivers.\nVERDICT diff: Read all seven commits 98257ee91..a7874ac46: one product commit adds the sheet tile and the cell assembly, one adds the flat/pancake branch, two repair the test's sharding and reference scale, two land evidence fragments, and the last marks the heavy tests slow and the agreement xfails; nothing outside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/biot/tiledassembly.py:861 assembles G as signed sums of each cell's edge sheets through the tile plan, which is the goal, but the node's own agreement gate stays unmet and the brief's independent prototype reference at scripts/prototypes/iron_magnetisation/magnetisation.py:133 is never used.\nSCORE evidence: 9\nJUSTIFICATION evidence: tests/test_sheet_tile.py:171 makes the 1e-13 assertion an expected failure and tests/test_sheet_tile.py:133 builds its reference from packed_sheet_field rather than the done_when's sheet_field, so the recorded green suite does not measure the measure the brief names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in the diff from 972f7538ebf0c2d82c99124bd89987eb9b24466b to a7874ac4689130379dc0059c024af4069343e0ee lies inside the four declared write paths, and no product code outside them was touched.\nSCORE durability: 8\nJUSTIFICATION durability: While tests/test_sheet_tile.py:171 keeps xfail(strict=True), a regression that worsens the tile's error still reports xfail and the suite stays green; the surviving guards are the pair-level cross-check at tests/test_sheet_tile.py:231 and the reversed-normal control at tests/test_sheet_tile.py:259.\nSCORE fit: 13\nJUSTIFICATION fit: nova/biot/tiledassembly.py:1063-1067 adds the sheet branch as a peer of the ring branch and the code names by mechanism, but the xfail reason at tests/test_sheet_tile.py:172-177 carries a plan node id and a raw commit sha and tests/test_sheet_tile.py:3 cites a plan section.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/biot/tiledassembly.py:619 re-implements the closed form that nova/biot/sheet.py:603 (_sloped_field_closed) and nova/biot/sheet.py:709 (_pancake_field) already own, and it does so inside tiledassembly.py rather than in a transcriber module beside the owner as nova/biot/polygonanalytic.py is beside nova/biot/polygon.py.\nFINDING tests/test_sheet_tile.py:171 blocking: the node's own 1e-13 agreement measure is marked xfail(strict=True), so the delivered suite is green while the done_when is unmet, and a regression that worsens the tile's error reports xfail rather than failing.\nFINDING tests/test_sheet_tile.py:133 blocking: the reference matrix and its scale are assembled from the same cell_edges coefficients the code under test uses, so a defect in the shared-edge dedup or the K_phi sign is invisible to the assertion at line 191, and the independent prototype reference interaction() at scripts/prototypes/iron_magnetisation/magnetisation.py:133 is not used.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/manifest.md:8 blocking: changed_paths names only tests/test_sheet_tile.py and commits names two of seven, while the landed change adds 538 lines to nova/biot/tiledassembly.py and an evidence fragment, so a coordinator auditing scope from this record sees a test-only change.\nFINDING nova/biot/tiledassembly.py:619 non-blocking: packed_sheet_field and the nine _sheet_ helpers duplicate the closed form owned by nova/biot/sheet.py:603 and :709 rather than extending it, and the copy will not inherit the NaN-domain repair landing on main as c822ed667.\nFINDING tests/test_sheet_tile.py:172 non-blocking: the xfail reason names the plan node id icm-sheet-tile-measure and the raw commit sha c822ed667 in source, which rot when the plan changes, and tests/test_sheet_tile.py:3 cites a plan section.\nFINDING nova/biot/tiledassembly.py:397 non-blocking: _sheet_graded_rule computes and caches a 64-node Gauss-Legendre rule that no caller uses, since the only call site at line 440 discards it.\nFINDING tests/test_sheet_tile.py:1 non-blocking: the brief's clause (3) asks for the reversed-normal control run through pytest with failing test ids; the recorded control is the standalone reversed_normals_agreement.py log, and the pytest carrier at line 259 asserts the opposite direction so it is green, though it is a real guard.\n",
+  "review_run_id": "r-20261108T122902495269-review-of-icm-sheet-tile-a7874ac46891",
+  "reviewed_base_sha": "972f7538ebf0c2d82c99124bd89987eb9b24466b",
+  "reviewed_commits": [
+    "98257ee91",
+    "b60e74297",
+    "fc95faa89",
+    "244b5ed48",
+    "4c25eb16a",
+    "cadecf1d2",
+    "a7874ac46"
+  ],
+  "reviewed_head_sha": "a7874ac4689130379dc0059c024af4069343e0ee",
+  "reviewed_run_id": "r-20261108T055840490522-icm-sheet-tile",
+  "rubric": {
+    "durability": "answered",
+    "evidence": "answered",
+    "fit": "answered",
+    "goal_fidelity": "answered",
+    "reuse": "answered",
+    "scope_discipline": "answered"
+  },
+  "scores": {
+    "durability": 8,
+    "evidence": 9,
+    "fit": 13,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [
+    "tests/test_sheet_tile.py:191 compares cell_interaction's output against a reference assembled at tests/test_sheet_tile.py:133 from the same cell_edges coefficients, so the edge-assembly half of the physics is on both sides of the assertion."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T13:38:00Z",
+  "total": 67
+}

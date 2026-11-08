@@ -5,6 +5,7 @@ import ast
 import inspect
 import json
 from pathlib import Path
+from xml.etree import ElementTree
 
 import numpy as np
 
@@ -74,7 +75,16 @@ def main():
             arrays["connected"] = np.zeros_like(arrays["connected"])
             record["counts"]["axis_connected"] = 0
         counts = require_support(record, arrays)
-        print(f"{stem}: {counts}; axis-cell comparison passes", flush=True)
+        figure = (
+            Path(__file__).resolve().parents[3] / "docs/figures/"
+            "diiid-support-mask-collapse" / f"{stem}.svg"
+        )
+        assert figure.stat().st_size < 300_000, "figure exceeds artifact size limit"
+        document = ElementTree.parse(figure)
+        labels = " ".join(document.getroot().itertext())
+        for count in counts.values():
+            assert f"{count} cells" in labels, "figure lost its measured cell count"
+        print(f"{stem}: {counts}; axis-cell comparison recorded", flush=True)
     print("CAPTURE CHECK OK: four nonempty production support reads", flush=True)
 
 

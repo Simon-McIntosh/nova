@@ -6,57 +6,19 @@ from nova.equilibrium import support_read
 from scripts.prototypes.bank_fold_radial.measure import (
     ROW_SCALE,
     SOURCE_SCALE,
-    centroid,
-    shifted,
+    centroid_row,
+    linearized_system,
 )
-from scripts.prototypes.bank_solve_profile import fixture as profile_fixture
-from scripts.prototypes.bank_warm_start import streams
 
 
 def condition(machine, state, seed, field, drive):
     """Return bordered and unpinned smallest singular values on a fresh read."""
-    op, cache = shifted(machine, field)
-    profile = streams.scaled_profile(machine.profile, drive)
-    support = support_read.read(
-        op, cache, state, seed, seed, machine.convention, machine.policy
+    matrix, booked, _, field_column, valid, field_valid = linearized_system(
+        machine, state, seed, drive, field
     )
-    residual = support_read.step_residual(
-        op, state, state, support, profile, machine.quadrature
-    )
-    matrix = support_read.step_jacobian(
-        op,
-        state,
-        support,
-        profile,
-        profile_fixture.gradient,
-        machine.quadrature,
-        booked=residual.booked,
-        fresh_geometry=True,
-    )
-    balanced, row, column = support_read._equilibrate(matrix, state, residual.booked)
-    op_plus, cache_plus = shifted(machine, field + 1e-6)
-    support_plus = support_read.read(
-        op_plus, cache_plus, state, seed, seed, machine.convention, machine.policy
-    )
-    residual_plus = support_read.step_residual(
-        op_plus, state, state, support_plus, profile, machine.quadrature
-    )
-
-    def flat(value):
-        return jnp.concatenate(value)
-
-    field_column = (flat(residual_plus.residual) - flat(residual.residual)) / 1e-6
-    cells = state[0].size
-    total = jnp.sum(state[0])
-    centres = op.geometry.centre[:, 0]
-    radius = centroid(state, centres)
-    radius_row = jnp.concatenate(
-        (
-            (centres - radius) / total,
-            jnp.full(cells, 1 / total),
-            jnp.zeros(cells),
-        )
-    )
+    balanced, row, column = support_read._equilibrate(matrix, state, booked)
+    centres = machine.operands.geometry.centre[:, 0]
+    radius_row = centroid_row(state, centres)
     bordered = jnp.block(
         [
             [balanced, (field_column * SOURCE_SCALE / row)[:, None]],
@@ -65,4 +27,4 @@ def condition(machine, state, seed, field, drive):
     )
     original = jnp.linalg.svd(balanced, compute_uv=False)
     pinned = jnp.linalg.svd(bordered, compute_uv=False)
-    return pinned[-1], original[-1], support.valid & support_plus.valid
+    return pinned[-1], original[-1], valid & field_valid

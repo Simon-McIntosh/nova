@@ -111,4 +111,15 @@
   scripts are under <code>scripts/prototypes/bank_fold_radial/</code>.
   The spectrum SVG passed text-bound and collision checks, was rendered to
   a 1400 × 720 PNG and visually inspected. Only the SVG is committed.</p>
+  <p id="bank-fold-radial-reproduction">The reproduction harness imports
+  acceptance, bank-row probing, emission and the unpinned replay from the
+  existing vertical-pin harness. Its pinned corrector delegates adaptive
+  scheduling to <code>drive_continuation.advance_drive</code>; the Newton
+  update and spectrum share one fresh field-column assembly and one physical
+  centroid derivative. A replay of the 256 saved drive/acceptance decisions
+  checks that scheduling and warm starts agree, using controlled counters
+  rather than claiming a second physics measurement. The synthetic corrector
+  checks the read after update six and a nonzero current-block derivative.
+  The paired H200 measurements above remain the frozen numerical evidence;
+  the refactor does not add a measured result.</p>
 </section>

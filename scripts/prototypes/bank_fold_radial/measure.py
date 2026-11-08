@@ -14,6 +14,7 @@ import json
 import subprocess
 from dataclasses import dataclass, replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
@@ -21,13 +22,14 @@ import numpy as np
 
 import nova
 from nova.equilibrium import drive_continuation, support_read
-from scripts.prototypes.bank_drive_continuation import measure as predecessor
+from scripts.prototypes.bank_fold_vertical import measure as shared
 from scripts.prototypes.bank_solve_profile import fixture as profile_fixture
 from scripts.prototypes.bank_warm_start import streams
 
 
-def emit(label, **values):
-    print(label + " " + json.dumps(values, sort_keys=True), flush=True)
+emit = shared.emit
+accepted_read = shared.accepted_read
+bank_pin_status = shared.bank_pin_status
 
 
 def centroid(state, centres):
@@ -35,33 +37,14 @@ def centroid(state, centres):
     return jnp.sum(state[0] * centres + state[1], axis=-1) / jnp.sum(state[0], axis=-1)
 
 
-def accepted_read(valid, residual, tolerance, *, height=None):
-    """Apply the same fresh-read acceptance predicate to either branch."""
-    accepted = np.asarray(valid, dtype=bool) & (np.asarray(residual) <= tolerance)
-    if height is not None:
-        accepted &= np.abs(np.asarray(height)) <= 1e-6
-    return bool(np.all(accepted))
-
-
-def bank_pin_status(machine, moments, seeds):
-    """Count the rows assembled by the bank route at the supplied state."""
-    one = tuple(part[0] for part in moments)
-    op = machine.operands
-    support = support_read.read(
-        op, machine.cache, one, seeds[0], seeds[0], machine.convention, machine.policy
+def centroid_row(state, centres):
+    """Differentiate physical radius with respect to the three moment blocks."""
+    total = jnp.sum(state[0])
+    radius = centroid(state, centres)
+    count = state[0].size
+    return jnp.concatenate(
+        ((centres - radius) / total, jnp.full(count, 1 / total), jnp.zeros(count))
     )
-    profile = streams.scaled_profile(machine.profile, jnp.asarray(1.0))
-    residual = support_read.step_residual(
-        op, one, one, support, profile, machine.quadrature
-    )
-    state_count = sum(part.size for part in one)
-    row_count = sum(part.size for part in residual.residual)
-    extra_rows = row_count - state_count
-    if extra_rows not in (0, 1):
-        raise ValueError(f"unexpected bank constraint row count: {extra_rows}")
-    status = "true" if extra_rows else "absent"
-    print(f"BANK_PIN_ACTIVE={status}", flush=True)
-    emit("PIN_CONFIG", value=status, bank_row_count=extra_rows)
 
 
 ROW_SCALE = 1e-3
@@ -111,58 +94,16 @@ def shifted(machine, field):
 
 
 def run_unpinned(machine, moments, seeds):
-    predecessor._MACHINE = machine
-    accepted = []
-
-    def solve(
-        _op,
-        _cache,
-        state,
-        seed,
-        warm,
-        _convention,
-        _policy,
-        drive,
-        _gradient,
-        _quadrature,
-        _axis_sign=-1.0,
-        *,
-        max_steps=60,
-        tolerance=1e-10,
-        **_options,
-    ):
-        attempt = predecessor.solve(
-            drive, state, seed, warm, max_steps=max_steps, tolerance=tolerance
-        )
-        if accepted_read(attempt.converged, attempt.residual, tolerance):
-            accepted.append(
-                (
-                    float(drive),
-                    attempt.moments,
-                    centroid(attempt.moments, machine.operands.geometry.centre[:, 0]),
-                )
-            )
-        return attempt
-
-    result = drive_continuation.advance_drive(
-        None,
-        None,
-        moments,
-        seeds,
-        seeds,
-        None,
-        None,
-        lambda drive: drive,
-        profile_fixture.gradient,
-        None,
-        start_drive=1.0,
-        target_drive=1.01,
-        solve=solve,
-    )
-    return result, accepted
+    """Reuse the bank replay, adapting only its recorded centroid coordinate."""
+    result, states = shared.run_unpinned(machine, moments, seeds)
+    centres = machine.operands.geometry.centre[:, 0]
+    return result, [
+        (drive, state, centroid(state, centres)) for drive, state, _ in states
+    ]
 
 
-def pinned_step(machine, state, seed, drive, field, target, payload):
+def linearized_system(machine, state, seed, drive, field):
+    """Assemble the fresh bank Jacobian and physical vertical-field column."""
     op, cache = shifted(machine, field)
     profile = streams.scaled_profile(machine.profile, drive)
     support = support_read.read(
@@ -195,26 +136,113 @@ def pinned_step(machine, state, seed, drive, field, target, payload):
 
     rhs = -flat(residual.residual)
     field_column = (flat(residual_plus.residual) + rhs) / field_delta
+    return matrix, residual.booked, rhs, field_column, support.valid, support_plus.valid
+
+
+def pinned_step(machine, state, seed, drive, field, target, payload):
+    matrix, booked, rhs, field_column, valid, _ = linearized_system(
+        machine, state, seed, drive, field
+    )
     field_column = field_column * jnp.asarray(payload) * SOURCE_SCALE
-    balanced, row, column = support_read._equilibrate(matrix, state, residual.booked)
+    balanced, row, column = support_read._equilibrate(matrix, state, booked)
     both = jnp.linalg.solve(
         balanced, jnp.stack((rhs, field_column), axis=-1) / row[:, None]
     )
     u, v = column * both[:, 0], column * both[:, 1]
-    total = jnp.sum(state[0])
     centres = machine.operands.geometry.centre[:, 0]
-    zc = centroid(state, centres)
+    radius = centroid(state, centres)
     n = state[0].size
-    g = (
-        jnp.concatenate(((centres - zc) / total, jnp.full(n, 1 / total), jnp.zeros(n)))
-        * jnp.asarray(payload)
-        * ROW_SCALE
-    )
-    field_update = (-jnp.dot(g, u) - ROW_SCALE * (zc - target)) / -jnp.dot(g, v)
+    g = centroid_row(state, centres) * jnp.asarray(payload) * ROW_SCALE
+    field_update = (-jnp.dot(g, u) - ROW_SCALE * (radius - target)) / -jnp.dot(g, v)
     updates = u - v * field_update
     pieces = jnp.split(updates, (n, 2 * n), axis=-1)
     row_present = jnp.any(g != 0) & jnp.any(field_column != 0)
-    return tuple(pieces), field_update * SOURCE_SCALE, support.valid, row_present
+    return tuple(pieces), field_update * SOURCE_SCALE, valid, row_present
+
+
+def correct_pinned(
+    step,
+    evaluate,
+    trial_state,
+    trial_field,
+    requested,
+    tolerance,
+    max_steps,
+    report_pin,
+):
+    """Correct one bordered sub-step, including the read after its final update."""
+    reads = updates = 0
+    for iteration in range(max_steps):
+        norms, heights, valid = evaluate(trial_state, trial_field, requested)
+        reads += 1
+        norms, heights, valid = map(np.asarray, (norms, heights, valid))
+        if accepted_read(valid, norms, tolerance, height=heights):
+            break
+        direction, field_direction, step_valid, row_present = step(
+            trial_state, trial_field, requested
+        )
+        report_pin(row_present)
+        updates += 1
+        best_score = np.maximum(norms / tolerance, np.abs(heights) / 1e-6)
+        best_state, best_field = trial_state, trial_field
+        for divisor in (1, 2, 4, 8, 16, 32, 64, 128):
+            candidate_state = tuple(
+                a + b / divisor for a, b in zip(trial_state, direction)
+            )
+            candidate_field = trial_field + field_direction / divisor
+            candidate_norms, candidate_heights, candidate_valid = evaluate(
+                candidate_state, candidate_field, requested
+            )
+            reads += 1
+            score = np.maximum(
+                np.asarray(candidate_norms) / tolerance,
+                np.abs(np.asarray(candidate_heights)) / 1e-6,
+            )
+            improve = np.asarray(candidate_valid) & (score < best_score)
+            best_score = np.where(improve, score, best_score)
+            best_state = tuple(
+                jnp.where(improve[:, None], a, b)
+                for a, b in zip(candidate_state, best_state)
+            )
+            best_field = jnp.where(improve, candidate_field, best_field)
+        trial_state, trial_field = best_state, best_field
+    else:
+        # The last update must receive the same fresh read as earlier ones.
+        norms, heights, valid = evaluate(trial_state, trial_field, requested)
+        reads += 1
+        norms, heights, valid = map(np.asarray, (norms, heights, valid))
+    accepted = accepted_read(valid, norms, tolerance, height=heights)
+    return SimpleNamespace(
+        state=trial_state,
+        field=trial_field,
+        residual=norms,
+        position_error=heights,
+        valid=valid,
+        accepted=accepted,
+        steps=updates,
+        reads=reads,
+        iteration=iteration + 1,
+    )
+
+
+def advance_pinned(initial, field, seeds, solve, target_drive, terminal_tolerance):
+    """Delegate adaptive drive scheduling to the bank continuation owner."""
+    return drive_continuation.advance_drive(
+        None,
+        None,
+        (initial, field),
+        seeds,
+        seeds,
+        None,
+        None,
+        lambda drive: drive,
+        profile_fixture.gradient,
+        None,
+        start_drive=1.0,
+        target_drive=target_drive,
+        certification_tolerance=terminal_tolerance,
+        solve=solve,
+    )
 
 
 def pinned_measure(
@@ -266,93 +294,69 @@ def pinned_measure(
 
         return jax.vmap(one)(state, seeds, field, targets)
 
-    state = initial
-    field = jnp.zeros(len(targets), dtype=initial[0].dtype)
-    drive = 1.0
-    sub_step = 1e-3
     rows = []
     accepted_states = []
-    reads = updates = 0
     pin_reported = False
-    for _ in range(256):
-        if drive >= target_drive:
-            break
-        change = min(sub_step, target_drive - drive)
-        requested = drive + change
-        tolerance = terminal_tolerance if requested >= target_drive else 1e-6
-        trial_state, trial_field = state, field
-        for iteration in range(6):
-            norms, heights, valid = evaluate(trial_state, trial_field, requested)
-            reads += 1
-            norms, heights, valid = map(np.asarray, (norms, heights, valid))
-            if accepted_read(valid, norms, tolerance, height=heights):
-                break
-            direction, field_direction, step_valid, row_present = step(
-                trial_state, trial_field, requested
-            )
-            if not pin_reported:
-                active = bool(np.all(np.asarray(row_present)))
-                print(f"PIN_ACTIVE={str(active).lower()}", flush=True)
-                emit(
-                    "PIN_CONFIG",
-                    value=str(active).lower(),
-                    row_count=1 if active else 0,
-                )
-                if not active:
-                    raise AssertionError(
-                        "centroid-radius row or vertical-field column absent"
-                    )
-                pin_reported = True
-            updates += 1
-            best_score = np.maximum(norms / tolerance, np.abs(heights) / 1e-6)
-            best_state, best_field = trial_state, trial_field
-            for divisor in (1, 2, 4, 8, 16, 32, 64, 128):
-                candidate_state = tuple(
-                    a + b / divisor for a, b in zip(trial_state, direction)
-                )
-                candidate_field = trial_field + field_direction / divisor
-                candidate_norms, candidate_heights, candidate_valid = evaluate(
-                    candidate_state, candidate_field, requested
-                )
-                reads += 1
-                score = np.maximum(
-                    np.asarray(candidate_norms) / tolerance,
-                    np.abs(np.asarray(candidate_heights)) / 1e-6,
-                )
-                improve = np.asarray(candidate_valid) & (score < best_score)
-                best_score = np.where(improve, score, best_score)
-                best_state = tuple(
-                    jnp.where(improve[:, None], a, b)
-                    for a, b in zip(candidate_state, best_state)
-                )
-                best_field = jnp.where(improve, candidate_field, best_field)
-            trial_state, trial_field = best_state, best_field
-        else:
-            # The last update must receive the same fresh read as earlier ones.
-            norms, heights, valid = evaluate(trial_state, trial_field, requested)
-            reads += 1
-            norms, heights, valid = map(np.asarray, (norms, heights, valid))
-        accepted = accepted_read(valid, norms, tolerance, height=heights)
+
+    def report_pin(row_present):
+        nonlocal pin_reported
+        if pin_reported:
+            return
+        active = bool(np.all(np.asarray(row_present)))
+        print(f"PIN_ACTIVE={str(active).lower()}", flush=True)
+        emit("PIN_CONFIG", value=str(active).lower(), row_count=int(active))
+        if not active:
+            raise AssertionError("centroid-radius row or vertical-field column absent")
+        pin_reported = True
+
+    def solve(
+        _op,
+        _cache,
+        current,
+        _seed,
+        _warm,
+        _convention,
+        _policy,
+        requested,
+        _gradient,
+        _quadrature,
+        _axis_sign=-1.0,
+        *,
+        max_steps,
+        tolerance,
+    ):
+        state, field = current
+        attempt = correct_pinned(
+            step, evaluate, state, field, requested, tolerance, max_steps, report_pin
+        )
         rows.append(
             dict(
                 drive=requested,
-                accepted=accepted,
-                residual_max=float(np.max(norms)),
-                radius_error_max=float(np.max(np.abs(heights))),
-                field_max=float(np.max(np.abs(np.asarray(trial_field)))),
-                iteration=iteration + 1,
+                accepted=attempt.accepted,
+                residual_max=float(np.max(attempt.residual)),
+                radius_error_max=float(np.max(np.abs(attempt.position_error))),
+                field_max=float(np.max(np.abs(np.asarray(attempt.field)))),
+                iteration=attempt.iteration,
             )
         )
         emit("PINNED_STEP", **rows[-1])
-        if accepted:
-            state, field, drive = trial_state, trial_field, requested
-            if return_state:
-                accepted_states.append((drive, state, field))
-            sub_step = min(sub_step * 2, 1.0)
-        else:
-            sub_step *= 0.5
-            if sub_step < 1e-9:
-                break
+        if attempt.accepted and return_state:
+            accepted_states.append((requested, attempt.state, attempt.field))
+        return SimpleNamespace(
+            moments=(attempt.state, attempt.field),
+            converged=attempt.accepted,
+            residual=attempt.residual,
+            steps=attempt.steps,
+            reads=attempt.reads,
+            support=SimpleNamespace(stationary=SimpleNamespace(position=seeds)),
+        )
+
+    field = jnp.zeros(len(targets), dtype=initial[0].dtype)
+    result = advance_pinned(
+        initial, field, seeds, solve, target_drive, terminal_tolerance
+    )
+    state, field = result.result.moments if result.result else (initial, field)
+    drive, reads, updates = result.drive, result.reads, result.updates
     outcome = dict(
         drive=drive,
         certified=drive >= target_drive,

@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;,&quot;iron-core-magnetisation#s6&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -581,6 +581,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261107T205044504786-icm-sheet-tidy" data-who="reckon-build" data-when="2026-11-07T22:02:26.243Z">
     <div class="r-comment-body"><p>icm-sheet-tidy closed all eight closed-form sheet review findings with no measured value changed: the route flag now selects the closed form at every slope by default (quadrature by an explicit option), the flat sheet's arsinh remainder calls nova.biot.zeta.zeta (equivalence reproduced at 1.5e-13 to 4.5e-13), _pancake_remainder and its private rule are deleted, complete_kind_traced lives in nova/biot/completeelliptic.py, no redundant local jax imports remain, every fixed rule is lazily built, and the closed field evaluation is jitted at 3.05 ms against 1259.9 ms before (413x); the closed route is guarded by spies that redden when it is replaced by the graded one (negative control 4 failed, 6 passed, exit 1), and the gate is 416 passed, exit 0.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261108T095259306723-review-of-icm-sheet-domain-a4a388ab3c16" data-who="reckon-build" data-when="2026-11-08T10:03:13.715Z">
+    <div class="r-comment-body"><p>Reviewed r-20261108T085119449166-icm-sheet-domain at e5d1ecdc361234c658ded22e908991e8821e497e..a4a388ab3c16908dbeb826d69c328ab8838dac56: the NaN repair is right and gated (654 passed EXIT=0, negative control 2 failed EXIT=1), four non-blocking findings - the beyond-end set never enters the failing region, an unused helper, a negative-control note that misdescribes its own log, and a baseline arm that imported the head module.</p></div>
 </div>
 </section>
 </main>

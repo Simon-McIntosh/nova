@@ -1,0 +1,125 @@
+<section id="bank-fold-radial-record">
+  <h3>Weak radius pin at the drive barrier</h3>
+  <p><strong>The tested weak radial pin does not deliver a certified drive
+  of 1.01.</strong> It reaches 1.0023388671875022 before the inherited
+  256-attempt ceiling, compared with 1.0089341297149657 unpinned. This is
+  a negative result for removal of the continuation barrier under the tested
+  recipe. The pinned run stops on an attempt budget rather than the minimum
+  step floor, so it does not establish that a mathematical fold remains in
+  the pinned branch.</p>
+
+  <p>The scratch constraint holds each lane's seed current-centroid major
+  radius, 1.7129363206624 m. Bank first moments are cell-relative: the
+  measured radius is <code>sum(Rcell * Icell + radial_moment) / sum(Icell)</code>,
+  and the current-block derivative is <code>(Rcell - Rcentroid) / sum(Icell)</code>.
+  The radial-moment-block derivative is <code>1 / sum(Icell)</code>; the
+  vertical-moment block is zero. A known-radius synthetic check passes, and
+  deliberately dropping the cell-centre term fails that check. The physical
+  unpinned radius drifts inward by 4.422758 mm at its last accepted state.</p>
+
+  <p>The additional source is a uniform vertical field, with
+  <code>psi = pi * Bz * R**2</code>, applied to both the bank and stationary-point
+  cache jets. No existing uniform vertical-field jet was found beside
+  <code>uniform_radial_field_jet</code>, so this jet is defined only in the
+  scratch prototype. The row scale is 1e-3 and source scale is 1 mT.
+  These are numerical scales of an exact centroid constraint, rather than
+  a soft compliance penalty: they cancel from an exact bordered update but
+  remain in the reported bordered spectrum. The field column uses the
+  inherited 1 µT forward difference. No product source changes.</p>
+
+  <table id="bank-fold-radial-outcome">
+    <thead><tr><th>Quantity, requested drive change 1e-2</th><th>Unpinned</th><th>Radius pin</th></tr></thead>
+    <tbody>
+      <tr><td>Last accepted drive</td><td>1.0089341297149657</td><td>1.0023388671875022</td></tr>
+      <tr><td>Drive 1.01 reached and certified at 1e-10</td><td>No</td><td>No</td></tr>
+      <tr><td>Attempted sub-steps</td><td>52</td><td>256</td></tr>
+      <tr><td>Updates</td><td>277</td><td>1373</td></tr>
+      <tr><td>Harness fresh-read count</td><td>1253</td><td>12613</td></tr>
+      <tr><td>Last accepted fresh residual</td><td>8.899458237e-7</td><td>1.246905867e-8</td></tr>
+      <tr><td>Stopping rule</td><td>Minimum relative step 1e-9</td><td>256-attempt ceiling</td></tr>
+      <tr><td>Bz at last accepted state</td><td>0 µT</td><td>−42.91194885 µT</td></tr>
+      <tr><td>Largest absolute Bz in any attempted state</td><td>0 µT</td><td>43.07384200 µT</td></tr>
+      <tr><td>Radius error at last accepted state</td><td>4.422758 mm</td><td>4.441e-16 m</td></tr>
+    </tbody>
+  </table>
+  <p>The pinned arm accepts 122 states and reaches 0.006595262527 less drive
+  than the unpinned arm. Its final rejected trial is at 1.0023393554687523;
+  its post-update residual is 1.833142306e-6 and its centroid error is
+  6.661e-16 m. The maximum centroid error across accepted pinned states is
+  8.882e-16 m. Both arms retain the corrected
+  fresh-read acceptance predicate: the sixth update receives a fresh read
+  before acceptance is decided. Intermediate residual tolerance is 1e-6;
+  only the requested target would use 1e-10, and neither arm reaches it.
+  Counts follow the inherited harness: pinned evaluation and line-search
+  reads are counted; its two derivative-probe reads per update and the
+  separate spectrum reads are excluded. These counts are not total internal
+  topology-call or kernel-launch counts.</p>
+
+  <figure id="bank-fold-radial-singular-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-radial/smallest-singular-vs-drive.svg"
+         alt="Sampled smallest singular values against drive in separate unpinned and radius-bordered matrix panels">
+    <figcaption>Lane 0 of the sixteen-lane H200 measurement. Grey marks four
+    retained unpinned states; blue marks the seed and five retained pinned
+    states. The terminal pair shares one marker labelled “2 states”, so both
+    samples remain countable at this display scale. Markers represent only measured states; there are no connecting
+    lines across unsampled gaps. The panels have independent logarithmic
+    vertical scales. The bank matrix uses balanced moment blocks; the
+    bordered matrix additionally has a radius row scaled by 1e-3 and a field
+    column scaled by 1 mT. Their magnitudes are incommensurable as measures
+    of physical improvement. The three final unpinned drives differ by less
+    than 1.8e-8 and are unresolved horizontally at this full drive scale.</figcaption>
+  </figure>
+
+  <table id="bank-fold-radial-spectra">
+    <thead><tr><th>Arm</th><th>Retained drive</th><th>Smallest singular value</th><th>Fresh read valid</th></tr></thead>
+    <tbody>
+      <tr><td>Unpinned, balanced</td><td>1.001</td><td>6.272526152e-4</td><td>Yes</td></tr>
+      <tr><td>Unpinned, balanced</td><td>1.0089341125488278</td><td>4.668192237e-6</td><td>Yes</td></tr>
+      <tr><td>Unpinned, balanced</td><td>1.008934127807617</td><td>1.595889546e-6</td><td>Yes</td></tr>
+      <tr><td>Unpinned, balanced</td><td>1.0089341297149657</td><td>1.124236721e-6</td><td>Yes</td></tr>
+      <tr><td>Radius pin, bordered</td><td>1.0</td><td>1.794210670e-5</td><td>Yes</td></tr>
+      <tr><td>Radius pin, bordered</td><td>1.0005</td><td>1.706677450e-5</td><td>Yes</td></tr>
+      <tr><td>Radius pin, bordered</td><td>1.0020703124999994</td><td>1.913488424e-6</td><td>Yes</td></tr>
+      <tr><td>Radius pin, bordered</td><td>1.0020971679687518</td><td>9.526580567e-7</td><td>Yes</td></tr>
+      <tr><td>Radius pin, bordered</td><td>1.002338378906252</td><td>6.411522806e-6</td><td>Yes</td></tr>
+      <tr><td>Radius pin, bordered</td><td>1.0023388671875022</td><td>6.486935716e-6</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+  <p>The pinned sampled spectrum decreases and then recovers; it does not
+  approach zero monotonically at the last retained states. This supports
+  reporting an exhausted continuation budget, without declaring a new fold
+  from the terminal residual alone. The unpinned arm reproduces the
+  recorded conditioning barrier and its reach, counts and residuals.</p>
+
+  <p id="bank-fold-radial-provenance">H200 job 1308409 completed in
+  49 min 28 s with one NVIDIA H200 NVL on 98dci4-gpu-0003, four CPUs,
+  64 GB, a one-hour limit and sixteen lanes. Both fresh processes report
+  the GPU backend and asserted x64 at revision
+  <code>6a57ed4753d1937cdfcd148a41e4c55b44669db4</code>. They write
+  <code>first.json</code> and <code>second.json</code> in worker run
+  <code>r-20261108T092804002487-bank-fold-radial</code>. Their reach,
+  certification flags, attempted sub-steps, updates and read counts agree
+  exactly for both arms. All four unpinned and six pinned spectrum reads in
+  each process are valid; the largest relative singular-value difference is
+  3.252e-7. Tables and figure use the first receipt. The assembled bank
+  prints <code>BANK_PIN_ACTIVE=absent</code>, and each assembled scratch
+  bordered update prints <code>PIN_ACTIVE=true</code>, derived from its live
+  centroid row and field column. The job log <code>h200-job.log</code>
+  records <code>AGREE unpinned=1 pinned=1 condition=1</code> and ends with
+  <code>EXIT=0</code>. The saved input is <code>warm-start-streams.npz</code>
+  from run <code>r-20261107T111056270825-bank-warm-start</code>. Reproduction
+  scripts are under <code>scripts/prototypes/bank_fold_radial/</code>.
+  The spectrum SVG passed text-bound and collision checks, was rendered to
+  a 1400 × 720 PNG and visually inspected. Only the SVG is committed.</p>
+  <p id="bank-fold-radial-reproduction">The reproduction harness imports
+  acceptance, bank-row probing, emission and the unpinned replay from the
+  existing vertical-pin harness. Its pinned corrector delegates adaptive
+  scheduling to <code>drive_continuation.advance_drive</code>; the Newton
+  update and spectrum share one fresh field-column assembly and one physical
+  centroid derivative. A replay of the 256 saved drive/acceptance decisions
+  checks that scheduling and warm starts agree, using controlled counters
+  rather than claiming a second physics measurement. The synthetic corrector
+  checks the read after update six and a nonzero current-block derivative.
+  The paired H200 measurements above remain the frozen numerical evidence;
+  the refactor does not add a measured result.</p>
+</section>

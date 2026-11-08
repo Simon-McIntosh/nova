@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; zero is the neutral value the figure rubric asks for, not a measured suite delta.",
+  "completed_at": "2026-11-08T06:49:55.679Z",
+  "dispatched_at": "2026-11-08T06:30:26Z",
+  "figures": [
+    {
+      "path": "docs/figures/sub-millisecond-forward-path/bank-fold-vertical/null-flux-contours.svg",
+      "rendered_image": "image-0.png, attached to run r-20261108T062255938887-review-of-bank-fold-vertical-c1cf8bf25ae9-figure",
+      "rubric": {
+        "contrast": "pass \u2014 no text is drawn; the #2e6fa8 contours and the #222222 wall both clear white by better than 4:1.",
+        "data_ink": "pass \u2014 the drawn contours and the wall are the only ink on the page (2.01 per cent of pixels); nothing competes with them. The subject fills 400 of 1399 px of canvas width, recorded below as a separate finding.",
+        "decoration": "pass \u2014 no gradient, fill, shading, grid, frame or tick furniture; the panel is drawn with the axis off, as the repository's poloidal convention requires.",
+        "label_collision": "pass \u2014 the panel carries no text at all, so nothing is clipped, overlapping, or drawn over the data.",
+        "legibility": "pass \u2014 the black vessel outline and the blue contour pattern read at a glance; the contours run predominantly vertically with a nested family on the outboard side, which is the radial-variation structure the record reports. The panel draws no text and needs none.",
+        "table_form": "pass \u2014 a spatial image of a perturbation over a poloidal cross-section; the match against a rigid radial displacement is a shape, not a table of values."
+      },
+      "subject": "line-contour poloidal panel of the soft Jacobian mode's flux image inside the vessel wall"
+    },
+    {
+      "path": "docs/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg",
+      "rendered_image": "image-1.png, attached to run r-20261108T062255938887-review-of-bank-fold-vertical-c1cf8bf25ae9-figure",
+      "rubric": {
+        "contrast": "pass \u2014 the text tone measures #52514e on white, about 7.5:1; both series colours clear 3:1 against white.",
+        "data_ink": "pass \u2014 two lines with markers carry the whole figure; the unpinned arm is drawn in the population grey #929292 and the pinned arm in the feature blue #2e6fa8, with no fill, grid or shadow.",
+        "decoration": "pass \u2014 top and right spines removed, no gridlines, no background shading, frameless legend, no title.",
+        "label_collision": "pass \u2014 ink runs from x=95 to x=1344 and y=56 to y=652 in a 1399x720 canvas, so no text meets an edge, and the tick labels, axis labels and legend occupy separate regions with no overlap.",
+        "legibility": "pass \u2014 both axes are labelled, the log ticks from 1e-8 to 1e-3 are legible, the five x ticks from 1.000 to 1.010 are legible, and the frameless legend names both arms.",
+        "table_form": "pass \u2014 nine measured values across two arms compared on a log scale; the ordering and the two-decade gap read from the picture faster than from a table of the same numbers."
+      },
+      "subject": "smallest singular value against drive for the unpinned and centroid-pinned arms"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "folded: a figure revision of the poloidal panel under sub-millisecond-forward-path section 3",
+      "file": "scripts/prototypes/bank_fold_vertical/plot.py",
+      "id": "f88aee4e0c9",
+      "line": 83,
+      "severity": "non-blocking",
+      "summary": "The null-flux panel is drawn on the default 14 x 7.2 in canvas with an equal aspect, so the tall portrait cross-section fills only 400 of the rendered 1399 px of width and roughly a third of the canvas is empty on each side. The mode's contour detail renders about a third of the width available and the figure spends most of its area on white; a canvas sized to the subject would draw the same contours markedly larger at the same page width."
+    },
+    {
+      "disposition": "exempted: the arms' ends are the measurement, the caption names the four condition rows and the stopping drives, and the picture misleads no reader who reads the caption beside it",
+      "file": "scripts/prototypes/bank_fold_vertical/plot.py",
+      "id": "f5c85f76afc",
+      "line": 108,
+      "severity": "non-blocking",
+      "summary": "The grey unpinned arm carries four rows at two well separated drives, about 1.001 and 1.0089, and they are joined by a single straight segment across the 0.0078 of drive between them. That segment is the most salient shape in the figure and reads as a measured smooth decay, where no state exists between the two clusters; the caption's four-row wording bounds it only for a reader who goes to the caption."
+    },
+    {
+      "disposition": "folded: a figure revision separating the arms into small multiples, or annotating the axis as not comparable, under sub-millisecond-forward-path section 3",
+      "file": "docs/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg",
+      "id": "f999df0802c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Both arms share one log axis, so their vertical separation of about two decades is the figure's dominant feature, while the caption states the two matrices differ in size and balancing conventions and that the gap is not a measure of physical improvement. A reader who takes the picture alone reads the pinned arm as a hundredfold conditioning loss, and the axis itself offers no cue that the two series are not commensurable."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 both figures put their marks and their text on white well above the required contrast; the poloidal panel draws no text.",
+    "data_ink": "pass \u2014 contours and wall, then two series and their labels, are the only ink in either figure; the poloidal panel spends 71 per cent of its width on white; recorded as a finding, not a hold.",
+    "decoration": "pass \u2014 neither figure carries a gradient, background fill, grid, frame or drop shadow.",
+    "label_collision": "pass \u2014 no text is clipped, no text overlaps another text block, and no label sits over the data in either rendered image.",
+    "legibility": "pass \u2014 both panels read at a glance: the poloidal panel reads as a radial-mode contour image beside its wall, and the singular-value panel reads as two labelled arms on a log scale.",
+    "table_form": "pass \u2014 neither image depicts information that is naturally a table: one is a spatial field, the other a nine-value log-scale comparison."
+  },
+  "project": "nova",
+  "readings": {
+    "captions": "Both captions in docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-vertical.html state what each figure shows and add material beyond the title, so neither is a title repeat.",
+    "image_0_blank_regions_are_not_missing_data": "Every vessel-interior sample point of a 200x300 grid lies inside the convex hull of the receipt's 1741 (r, z) nodes, so the white areas between the drawn levels inside the vessel are between-level areas and not interpolation gaps. This control is why no missing-data finding is recorded against the poloidal panel; checking the absence was what established it.",
+    "image_0_matches_the_recorded_state": "Recomputed the mode's contour set from the reviewed run's first.json null receipt at the same fifteen equally spaced levels over the same 240-point grid; after mapping wall data extremes onto the measured wall pixels (r 0.9656-2.4342 to x 503-901, z -1.2077-1.1147 to y 675-47), 91 per cent of 1597 predicted contour sample points fall within 3 px of drawn blue ink and the extents agree, so the rendered panel is the receipt's mode image rather than a stale drawing.",
+    "image_0_pixels": "1399x720; ink bounding box x 503-902, y 46-675; ink 2.01 per cent of the canvas; palette white 987058 px, #2e6fa8 8060 px, #222222 3821 px, the remainder antialiasing.",
+    "image_1_pixels": "1399x720; ink bounding box x 95-1344, y 56-652; ink 1.77 per cent of the canvas; palette white 989420 px, #929292 3309 px (unpinned), #52514e 2807 px (text) and #2e6fa8 882 px (pinned) with antialiasing.",
+    "image_1_values_match_the_record": "Grey markers sit at about 6.3e-4 at drive 1.001 and at about 5e-6, 1.6e-6 and 1.1e-6 at drive 1.0089, and the blue markers run from about 4e-8 down to 3.3e-8 then up to 1.1e-7 and back to 7.3e-8, which agree with the four unpinned condition rows and the five pinned rows the evidence fragment states.",
+    "images_judged": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T062255938887-review-of-bank-fold-vertical-c1cf8bf25ae9-figure/image-0.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T062255938887-review-of-bank-fold-vertical-c1cf8bf25ae9-figure/image-1.png"
+    ]
+  },
+  "review_run_id": "r-20261108T062255938887-review-of-bank-fold-vertical-c1cf8bf25ae9-figure",
+  "reviewed_base_sha": "f2742b2c88ed6537684aefe70f7c0089dd6eff80",
+  "reviewed_head_sha": "c1cf8bf25ae94cd37ebdcd19267a8a3ca8de5deb",
+  "reviewed_run_id": "r-20261108T051046088854-bank-fold-vertical",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:49:58.504274+00:00",
+  "total": null
+}

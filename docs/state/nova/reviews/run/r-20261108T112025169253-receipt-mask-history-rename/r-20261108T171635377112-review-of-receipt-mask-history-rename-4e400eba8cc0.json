@@ -42,6 +42,13 @@
     "scripts/labeller_batch/shard.py:_forward_receipt"
   ],
   "completed_at": "2026-11-08T17:26:53Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "receipt-mask-history-rename",
+      "recorded_at": "2026-11-08T17:37:14.077131+00:00"
+    }
+  },
   "dispatched_at": "2026-11-08T17:17:25Z",
   "failure_delta_evidence": {
     "after_suite": {

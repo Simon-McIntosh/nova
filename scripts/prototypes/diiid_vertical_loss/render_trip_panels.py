@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -26,8 +27,9 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.text
 import numpy as np
+from matplotlib.collections import Collection
+from matplotlib.text import Text
 from scipy.interpolate import RegularGridInterpolator
 
 import jax.numpy as jnp
@@ -44,6 +46,11 @@ from nova.media.poloidal import (
 )
 
 from flux_orientation import analysis_field
+
+SIBLING = Path(__file__).resolve().parent.parent / "diiid_forward_convergence"
+sys.path.insert(0, str(SIBLING))
+
+from render_panels import _check_text_artists  # noqa: E402
 
 LEVEL_COUNT = 9
 
@@ -106,24 +113,88 @@ def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> None:
         )
 
 
-def _assert_text_on_canvas(figure) -> None:
-    """Refuse to write a figure whose text is clipped by its own canvas."""
+LABEL_CLEARANCE = 1.5
+"""Distance [px] a text box keeps from any drawn vertex it is checked against."""
+
+
+def _drawn_vertices(axes) -> np.ndarray:
+    """Return every drawn data vertex in display coordinates.
+
+    The geometry a label must keep clear of is what the panel actually draws:
+    the lines (contours, the bounding surface, the limiter ring, leader lines)
+    and the collection paths (any contour set kept as a collection), plus the
+    markers, which carry their position as a one-point line.
+    """
+
+    transform = axes.transData.transform
+    blocks = []
+    for line in axes.lines:
+        if not line.get_visible():
+            continue
+        points = np.asarray(line.get_xydata(), dtype=float)
+        if len(points):
+            blocks.append(points)
+    for artist in axes.get_children():
+        if not isinstance(artist, Collection) or not artist.get_visible():
+            continue
+        for path in artist.get_paths():
+            vertices = np.asarray(path.vertices, dtype=float)
+            if len(vertices):
+                blocks.append(vertices)
+    if not blocks:
+        return np.empty((0, 2))
+    return transform(np.vstack(blocks))
+
+
+def _labels_over_data(figure, axes) -> list[str]:
+    """Name every text artist whose box covers a drawn vertex.
+
+    A panel carries no axes, so a coordinate written over the contours cannot
+    be read off a scale: a label belongs in clear space beside the field, never
+    on the data it describes.
+    """
+
     figure.canvas.draw()
-    canvas = figure.bbox
-    offenders = []
-    for artist in figure.findobj(matplotlib.text.Text):
+    renderer = figure.canvas.get_renderer()
+    vertices = _drawn_vertices(axes)
+    if not len(vertices):
+        return []
+    field = axes.get_window_extent(renderer)
+    problems = []
+    for artist in figure.findobj(Text):
         if not artist.get_visible() or not artist.get_text().strip():
             continue
-        box = artist.get_window_extent(figure.canvas.get_renderer())
-        if (
-            box.x0 < canvas.x0
-            or box.y0 < canvas.y0
-            or box.x1 > canvas.x1
-            or box.y1 > canvas.y1
-        ):
-            offenders.append(artist.get_text())
-    if offenders:
-        raise ValueError(f"text extends beyond the canvas: {offenders}")
+        box = artist.get_window_extent(renderer)
+        if not box.overlaps(field):
+            continue
+        covered = (
+            (vertices[:, 0] > box.x0 - LABEL_CLEARANCE)
+            & (vertices[:, 0] < box.x1 + LABEL_CLEARANCE)
+            & (vertices[:, 1] > box.y0 - LABEL_CLEARANCE)
+            & (vertices[:, 1] < box.y1 + LABEL_CLEARANCE)
+        )
+        if covered.any():
+            problems.append(
+                f"over data: {artist.get_text()[:40]!r} covers "
+                f"{int(covered.sum())} drawn vertices"
+            )
+    return problems
+
+
+def check_panel(figure, axes, output: Path) -> None:
+    """Refuse to write a panel whose text is clipped, crowded or on the data.
+
+    Bounds and text-against-text overlap are the shared renderer's own check,
+    so a panel here and a panel elsewhere in the prototype reject the same
+    faults the same way; the label-over-data rule is what the poloidal panels
+    need on top of it.  The refusal names the offending artists and exits
+    nonzero, so a control run cannot pass silently.
+    """
+
+    problems = _check_text_artists(figure, output)
+    problems += _labels_over_data(figure, axes)
+    if problems:
+        raise SystemExit(f"refusing {output.name}: " + "; ".join(problems))
 
 
 def _point_flux(radius, height, flux) -> RegularGridInterpolator:
@@ -211,7 +282,7 @@ def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
     return kept
 
 
-def render_trip(frame, trip, archive, rows, out) -> dict:
+def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
@@ -354,6 +425,9 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
             zorder=DEFAULT_INK.zorder_separatrix,
         )
 
+    for radius_label, height_label, note in overlays:
+        axes.text(radius_label, height_label, note, fontsize=14, color="#1f1f1f")
+
     handles = [
         plt.Line2D(
             [], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"
@@ -467,7 +541,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    _assert_text_on_canvas(figure)
+    check_panel(figure, axes, out)
     figure.savefig(out, format="svg")
     figure.savefig(out.with_suffix(".check.png"), dpi=110)
     plt.close(figure)
@@ -523,14 +597,26 @@ def main():
     parser.add_argument("--rows", type=Path, required=True)
     parser.add_argument("--figures", dest="figures", type=Path, required=True)
     parser.add_argument("--panels", nargs="+", default=["146:1", "146:2", "137:2"])
+    parser.add_argument(
+        "--overlay",
+        action="append",
+        default=[],
+        metavar="R,Z,TEXT",
+        help="Place a label at (R, Z) in data coordinates. Used to exercise the "
+        "save guard: every normal run passes no overlay.",
+    )
     arguments = parser.parse_args()
     rows = json.loads(arguments.rows.read_text())["rows"]
+    overlays = []
+    for item in arguments.overlay:
+        radius_label, height_label, note = item.split(",", 2)
+        overlays.append((float(radius_label), float(height_label), note))
     records = []
     for item in arguments.panels:
         frame, trip = (int(part) for part in item.split(":"))
         archive = arguments.run_dir / f"frame-{frame}-trip-{trip}.npz"
         out = arguments.figures / f"frame-{frame}-trip-{trip}-flux-contours.svg"
-        records.append(render_trip(frame, trip, archive, rows, out))
+        records.append(render_trip(frame, trip, archive, rows, out, overlays))
         print(json.dumps(records[-1]))
     (arguments.figures / "per-trip-panels.json").write_text(
         json.dumps({"panels": records}, indent=2) + "\n"

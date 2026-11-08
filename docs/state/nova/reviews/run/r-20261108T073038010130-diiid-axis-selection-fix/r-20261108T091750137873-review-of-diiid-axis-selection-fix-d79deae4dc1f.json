@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: source manifest baseline_suite and after_suite are empty, so neither suite log can be read. The resumed instruction supersedes product suites; unknown must not be recorded as zero.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "A native polished displacement at or above min(radial_step, vertical_step), or NaN, makes this false; replacing stored.T with stored at line 29 is the recorded failing mutation.",
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "independence": "Measured solver displacement is compared with the independent lattice spacing, not its own supplied seed.",
+      "line": 74
+    },
+    {
+      "failure_condition": "Either measured Hessian eigenvalue at or above zero, or NaN, makes this false; replacing the native maximum Hessian with a saddle or minimum would redden it.",
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "independence": "Measured Hessian eigenvalues are compared with the fixed mathematical maximum criterion.",
+      "line": 75
+    },
+    {
+      "failure_condition": "Transposed displacement at or below 0.1 m, or NaN, makes this false; restoring native stored.T in the transposed branch at line 30 would produce the recorded native zero displacement and redden it.",
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "independence": "Measured transposed displacement is compared with the explicitly requested fixed threshold.",
+      "line": 78
+    },
+    {
+      "failure_condition": "Any false predicate enters SystemExit at line 98; removing that refusal reinstates the print-only regression and would make the recorded negative control exit zero rather than one.",
+      "file": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py",
+      "line": 96
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "Revision-specific git grep across nova, scripts, tests and benchmarks found only the README shell invocation and the diagnostic itself; no production caller reaches the changed main block.",
+  "commits_read": [
+    "d79deae4dc1fabc5f913e60a730af206219b01ff"
+  ],
+  "completed_at": "2026-11-08T09:27:42Z",
+  "dispatched_at": "2026-11-08T09:19:46Z",
+  "evidence_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/gate-final.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T073038010130-diiid-axis-selection-fix/negative-control.log"
+  ],
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read the sole incremental commit d79deae4dc1fabc5f913e60a730af206219b01ff against a226220f3aab8c87793cb8bd44929f25f5f51aa8; its 16 added lines in scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 add exactly the required checks and refusal.",
+    "done_when": "resume-1-advice.txt:3-16 requires three predicates, a final-head gate and a failing native-transposition control; gate-final.log and negative-control.log record those measures with EXIT=0 and EXIT=1 respectively.",
+    "goal": "The original brief and live plan were read, and resume-1-advice.txt:1-16 explicitly replaces the solver-fix deliverable with three diagnostic checks implemented at scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99.",
+    "manifest": "Source manifest.md:7-20 records both commits, the final-head gate and the native-transposition negative control accurately, but leaves baseline_suite and after_suite empty so a suite failure delta is unmeasured.",
+    "write_paths": "The source manifest grants scripts/prototypes/diiid_axis_selection/ and the only incremental changed path is scripts/prototypes/diiid_axis_selection/check_field_orientation.py."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:74-78 compares measured displacements and Hessian eigenvalues to independent bounds, and negative-control.log shows reinstating stored rather than stored.T at line 29 fails native_shift_below_lattice_spacing.",
+    "evidence": "gate-final.log:1 records the reviewed head and ends EXIT=0, while negative-control.log ends EXIT=1 for the authorized mutation; source manifest.md:19-20 supplies no baseline/after suite pair from which to measure added failures.",
+    "fit": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 extends its existing JSON diagnostic using descriptive names, ordinary NumPy comparisons and SystemExit without adding forbidden identifiers or comments.",
+    "goal_fidelity": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 implements all three predicates and exits nonzero for any failed predicate as resume-1-advice.txt:3-8 requires.",
+    "reuse": "scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 adds no definitions or finder; the capability search for polishing, Hessian eigenvalues and displacement found nova/equilibrium/flux_surface_connectivity.py:916-935, whose existing polish owner this diagnostic already wraps.",
+    "scope_discipline": "The sole incremental path scripts/prototypes/diiid_axis_selection/check_field_orientation.py is within the source manifest orientation_write_paths prototype directory and every added line serves the resumed measure."
+  },
+  "plan_read": {
+    "project": "nova",
+    "slug": "diiid-vertical-force-balance",
+    "version": 65
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The original brief and live plan were read, and resume-1-advice.txt:1-16 explicitly replaces the solver-fix deliverable with three diagnostic checks implemented at scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99.\nVERDICT done_when: resume-1-advice.txt:3-16 requires three predicates, a final-head gate and a failing native-transposition control; gate-final.log and negative-control.log record those measures with EXIT=0 and EXIT=1 respectively.\nVERDICT write_paths: The source manifest grants scripts/prototypes/diiid_axis_selection/ and the only incremental changed path is scripts/prototypes/diiid_axis_selection/check_field_orientation.py.\nVERDICT manifest: Source manifest.md:7-20 records both commits, the final-head gate and the native-transposition negative control accurately, but leaves baseline_suite and after_suite empty so a suite failure delta is unmeasured.\nVERDICT diff: Read the sole incremental commit d79deae4dc1fabc5f913e60a730af206219b01ff against a226220f3aab8c87793cb8bd44929f25f5f51aa8; its 16 added lines in scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 add exactly the required checks and refusal.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 implements all three predicates and exits nonzero for any failed predicate as resume-1-advice.txt:3-8 requires.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate-final.log:1 records the reviewed head and ends EXIT=0, while negative-control.log ends EXIT=1 for the authorized mutation; source manifest.md:19-20 supplies no baseline/after suite pair from which to measure added failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The sole incremental path scripts/prototypes/diiid_axis_selection/check_field_orientation.py is within the source manifest orientation_write_paths prototype directory and every added line serves the resumed measure.\nSCORE durability: 20\nJUSTIFICATION durability: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:74-78 compares measured displacements and Hessian eigenvalues to independent bounds, and negative-control.log shows reinstating stored rather than stored.T at line 29 fails native_shift_below_lattice_spacing.\nSCORE fit: 20\nJUSTIFICATION fit: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 extends its existing JSON diagnostic using descriptive names, ordinary NumPy comparisons and SystemExit without adding forbidden identifiers or comments.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/prototypes/diiid_axis_selection/check_field_orientation.py:70-99 adds no definitions or finder; the capability search for polishing, Hessian eigenvalues and displacement found nova/equilibrium/flux_surface_connectivity.py:916-935, whose existing polish owner this diagnostic already wraps.\n",
+  "reuse_search": "No new module/function/class added; searched polishing, Hessian eigenvalues and displacement capabilities in the prototype and equilibrium owners and opened flux_surface_connectivity.py:916-935.",
+  "review_run_id": "r-20261108T091750137873-review-of-diiid-axis-selection-fix-d79deae4dc1f",
+  "reviewed_base_sha": "a226220f3aab8c87793cb8bd44929f25f5f51aa8",
+  "reviewed_head_sha": "d79deae4dc1fabc5f913e60a730af206219b01ff",
+  "reviewed_run_id": "r-20261108T073038010130-diiid-axis-selection-fix",
+  "scores": {
+    "durability": 20,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:37:16.620340+00:00",
+  "total": 119
+}

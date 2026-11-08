@@ -42,14 +42,9 @@ from nova.media.poloidal import (
     inside_wall_units,
 )
 
+from flux_orientation import analysis_field
+
 LEVEL_COUNT = 9
-
-
-def _oriented(flux: np.ndarray, radius: np.ndarray, height: np.ndarray) -> np.ndarray:
-    array = np.asarray(flux, dtype=float)
-    if array.shape == (len(height), len(radius)):
-        return array
-    return array.T
 
 
 def _point_flux(radius, height, flux) -> RegularGridInterpolator:
@@ -141,8 +136,8 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
-        flux = _oriented(np.asarray(data["flux"], dtype=float), radius, height)
-        label = _oriented(np.asarray(data["label"], dtype=float), radius, height)
+        flux = analysis_field(np.asarray(data["flux"], dtype=float), radius, height)
+        label = analysis_field(np.asarray(data["label"], dtype=float), radius, height)
         limiter = np.asarray(data["limiter"], dtype=float)
         wall = np.asarray(data["wall"], dtype=float)
         label_boundary = np.asarray(data["label_boundary"], dtype=float)
@@ -162,12 +157,17 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     )
 
     boundary = None
-    if axis is not None and inside[
-        int(np.argmin(np.abs(height - axis[1]))),
-        int(np.argmin(np.abs(radius - axis[0]))),
-    ]:
+    if (
+        axis is not None
+        and inside[
+            int(np.argmin(np.abs(height - axis[1]))),
+            int(np.argmin(np.abs(radius - axis[0]))),
+        ]
+    ):
         boundary = host_boundary_read(flux, grid, tuple(axis))
-    bounding = float(boundary.psi_bnd) if boundary is not None and boundary.found else np.nan
+    bounding = (
+        float(boundary.psi_bnd) if boundary is not None and boundary.found else np.nan
+    )
 
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(flux)
@@ -178,7 +178,9 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     label_surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(label)
     )
-    label_seeds = _candidates(_gradient_magnitude(radius, height, label), radius, height)
+    label_seeds = _candidates(
+        _gradient_magnitude(radius, height, label), radius, height
+    )
     label_saddles, _ = _stationary(label_surface, label_seeds, -1)
     label_axis = _extremum(label, radius, height, label_boundary)
     label_axis_points, _ = (
@@ -276,15 +278,58 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         )
 
     handles = [
-        plt.Line2D([], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"),
+        plt.Line2D(
+            [], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"
+        ),
         plt.Line2D([], [], color="#9a9a9a", linewidth=2.0, label="EFIT flux"),
         plt.Line2D([], [], color="#6a4c93", linewidth=2.6, label="bounding surface"),
         plt.Line2D([], [], color="black", linewidth=2.0, label="limiter"),
-        plt.Line2D([], [], color="#606060", linewidth=1.6, linestyle="--", label="EFIT boundary"),
-        plt.Line2D([], [], marker="^", linestyle="none", color=DEFAULT_INK.axis_color, markersize=7, label="solved axis"),
-        plt.Line2D([], [], marker="X", linestyle="none", color=DEFAULT_INK.xpoint_color, markersize=7, label="solved X-point"),
-        plt.Line2D([], [], marker="^", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT axis"),
-        plt.Line2D([], [], marker="X", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT X-point"),
+        plt.Line2D(
+            [],
+            [],
+            color="#606060",
+            linewidth=1.6,
+            linestyle="--",
+            label="EFIT boundary",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="^",
+            linestyle="none",
+            color=DEFAULT_INK.axis_color,
+            markersize=7,
+            label="solved axis",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="X",
+            linestyle="none",
+            color=DEFAULT_INK.xpoint_color,
+            markersize=7,
+            label="solved X-point",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="^",
+            linestyle="none",
+            markerfacecolor="none",
+            markeredgecolor="#606060",
+            markersize=7,
+            label="EFIT axis",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="X",
+            linestyle="none",
+            markerfacecolor="none",
+            markeredgecolor="#606060",
+            markersize=7,
+            label="EFIT X-point",
+        ),
         plt.Line2D(
             [],
             [],
@@ -293,7 +338,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
             color=DEFAULT_INK.separatrix_color,
             markersize=8,
             label="this trip",
-        )
+        ),
     ]
     figure.legend(
         handles=handles,
@@ -304,11 +349,25 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         fontsize=12,
     )
 
-    frame_rows = sorted([r for r in rows if r["frame"] == frame], key=lambda r: r["trip"])
+    frame_rows = sorted(
+        [r for r in rows if r["frame"] == frame], key=lambda r: r["trip"]
+    )
     trips = [r["trip"] for r in frame_rows]
     residuals = [r.get("residual", np.nan) for r in frame_rows]
-    strip.plot(trips, [r if r is not None else np.nan for r in residuals], marker="o", color=DEFAULT_INK.flux_color, linewidth=1.6)
-    strip.plot([trip], [row.get("residual", np.nan)], marker="o", markersize=8, color=DEFAULT_INK.separatrix_color)
+    strip.plot(
+        trips,
+        [r if r is not None else np.nan for r in residuals],
+        marker="o",
+        color=DEFAULT_INK.flux_color,
+        linewidth=1.6,
+    )
+    strip.plot(
+        [trip],
+        [row.get("residual", np.nan)],
+        marker="o",
+        markersize=8,
+        color=DEFAULT_INK.separatrix_color,
+    )
     strip.set_xlim(min(trips) - 0.3, max(trips) + 0.3)
     strip.set_xticks(trips)
     strip.set_xlabel("active-set trip", fontsize=14)

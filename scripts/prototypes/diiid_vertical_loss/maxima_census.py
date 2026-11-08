@@ -21,18 +21,14 @@ from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.media.poloidal import inside_wall_units
 
 from core_stationary_probe import _seeds, _winding
-
-
-def _oriented(flux, radius, height):
-    array = np.asarray(flux, dtype=float)
-    return array if array.shape == (len(height), len(radius)) else array.T
+from flux_orientation import analysis_field
 
 
 def census(archive: Path, axis, limiter, label: str) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
-        flux = _oriented(data["flux"], radius, height)
+        flux = analysis_field(data["flux"], radius, height)
     interp = RegularGridInterpolator(
         (radius, height), flux.T, method="cubic", bounds_error=False, fill_value=np.nan
     )
@@ -71,8 +67,12 @@ def census(archive: Path, axis, limiter, label: str) -> dict:
                 "flux": float(value[index]),
                 "hessian_type": int(kind[index]),
                 "inside_grid": inside_grid,
-                "inside_limiter": bool(inside_wall_units(position[index][None, :], limiter)[0]),
-                "winding_index": _winding(interp, position[index]) if inside_grid else None,
+                "inside_limiter": bool(
+                    inside_wall_units(position[index][None, :], limiter)[0]
+                ),
+                "winding_index": _winding(interp, position[index])
+                if inside_grid
+                else None,
             }
         )
     return {
@@ -112,7 +112,12 @@ def main():
     for record in records:
         print("==", record["label"])
         print("   global max inside limiter", record["global_maximum_inside_limiter"])
-        print("   reported axis", record["reported_axis_rz_m"], "flux", record["reported_axis_flux"])
+        print(
+            "   reported axis",
+            record["reported_axis_rz_m"],
+            "flux",
+            record["reported_axis_flux"],
+        )
         for point in record["extrema"]:
             print(
                 "   O R=%.3f Z=%+.3f type=%2d flux=%+.3f inside_grid=%s in_lim=%s idx=%s"

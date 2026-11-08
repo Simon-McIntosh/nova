@@ -21,11 +21,7 @@ from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.media.poloidal import inside_wall_units
 
 from core_stationary_probe import _seeds, _winding
-
-
-def _oriented(flux, radius, height):
-    array = np.asarray(flux, dtype=float)
-    return array if array.shape == (len(height), len(radius)) else array.T
+from flux_orientation import analysis_field
 
 
 def _polish(surface, seeds):
@@ -44,7 +40,7 @@ def check(archive: Path, axis, label: str) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
-        flux = _oriented(data["flux"], radius, height)
+        flux = analysis_field(data["flux"], radius, height)
         limiter = np.asarray(data["limiter"], dtype=float)
     interp = RegularGridInterpolator(
         (radius, height), flux.T, method="cubic", bounds_error=False, fill_value=np.nan
@@ -59,7 +55,9 @@ def check(archive: Path, axis, label: str) -> dict:
     masked.ravel()[~inside] = np.nan
     argmax = points[int(np.nanargmax(masked))]
 
-    seeds = np.vstack([argmax[None, :], np.asarray(axis)[None, :], _seeds(radius, height, flux, 32)])
+    seeds = np.vstack(
+        [argmax[None, :], np.asarray(axis)[None, :], _seeds(radius, height, flux, 32)]
+    )
     position, value, converged, kind = _polish(surface, seeds)
     rows = []
     seen = []
@@ -70,7 +68,9 @@ def check(archive: Path, axis, label: str) -> dict:
         if any(np.hypot(*(point - other)) < 0.02 for other in seen):
             continue
         seen.append(point)
-        in_grid = bool(radius[0] < point[0] < radius[-1] and height[0] < point[1] < height[-1])
+        in_grid = bool(
+            radius[0] < point[0] < radius[-1] and height[0] < point[1] < height[-1]
+        )
         rows.append(
             {
                 "position_rz": point.tolist(),
@@ -100,8 +100,9 @@ def main():
     records = []
     for frame, trip in ((146, 1), (146, 2), (137, 1), (137, 2)):
         axis = next(
-            r["axis_rz_m"] for r in rows if r["frame"] == frame and r["axis_rz_m"]
-            and r["trip"] == trip
+            r["axis_rz_m"]
+            for r in rows
+            if r["frame"] == frame and r["axis_rz_m"] and r["trip"] == trip
         )
         records.append(
             check(

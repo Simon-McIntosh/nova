@@ -1,0 +1,103 @@
+{
+  "panels": [
+    {
+      "frame": 146,
+      "trip": 1,
+      "axis_rz_m": [
+        1.6881330007253326,
+        -0.3458483185703583
+      ],
+      "axis_inside_limiter": true,
+      "bounding_flux": 0.43793288084698406,
+      "boundary_found": true,
+      "boundary_class": "limited",
+      "saddles_rz_m": [
+        [
+          1.6696818485472869,
+          -0.27551282603432425
+        ],
+        [
+          1.1980513536034967,
+          1.0615423350377973
+        ],
+        [
+          1.3671703266430002,
+          -1.1999425383277245
+        ],
+        [
+          1.1327496781248585,
+          -1.3168915451885161
+        ],
+        [
+          1.0061724746915275,
+          -1.392226732760774
+        ]
+      ],
+      "saddle_flux": [
+        1.9570138658891973,
+        -0.529986025661453,
+        0.40797027716209916,
+        -0.06937139524551658,
+        0.07427021326315475
+      ],
+      "residual": 0.12818185406206759,
+      "svg": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg"
+    },
+    {
+      "frame": 146,
+      "trip": 2,
+      "axis_rz_m": [
+        1.2105799918504065,
+        1.5559833265373695
+      ],
+      "axis_inside_limiter": false,
+      "bounding_flux": null,
+      "boundary_found": null,
+      "boundary_class": null,
+      "saddles_rz_m": [
+        [
+          0.9656126724844759,
+          -0.2121659303620766
+        ],
+        [
+          0.8704416666796383,
+          -1.3762292845240427
+        ]
+      ],
+      "saddle_flux": [
+        -1.9420929443378459,
+        -0.6333629791168518
+      ],
+      "residual": 0.22131891897748524,
+      "svg": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+    },
+    {
+      "frame": 137,
+      "trip": 2,
+      "axis_rz_m": [
+        1.6670065962466156,
+        -0.361069567148152
+      ],
+      "axis_inside_limiter": true,
+      "bounding_flux": 0.6593761081863064,
+      "boundary_found": true,
+      "boundary_class": "limited",
+      "saddles_rz_m": [
+        [
+          1.1894382192860895,
+          1.0085346464492169
+        ],
+        [
+          1.2885403466213459,
+          -1.3030214579755586
+        ]
+      ],
+      "saddle_flux": [
+        -0.47151102042636955,
+        0.5952032239168816
+      ],
+      "residual": 0.11139650269735817,
+      "svg": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg"
+    }
+  ]
+}

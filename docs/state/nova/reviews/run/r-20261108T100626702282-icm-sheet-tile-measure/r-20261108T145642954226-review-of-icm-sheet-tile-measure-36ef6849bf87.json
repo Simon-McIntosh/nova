@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-08T15:36:19.567Z",
+  "dispatched_at": "2026-11-08T15:14:31Z",
+  "findings": [
+    {
+      "file": "nova/biot/tiledassembly.py",
+      "line": 723,
+      "severity": "blocking",
+      "summary": "packed_sheet_end_scale accumulates the radial magnitude from |radial_value| (the dS/dradius return) while packed_sheet_field builds B_R at tiledassembly.py:671 from gamma_value (dS/dgamma), so the B_R half of the matrix is divided by a quantity that is not the sum of the terms that make up that entry; measured over 207 sloped WEST pairs the scale used runs 0.44x to 6.4e4x the true term sum (median 4.8x), so B_R errors are understated by up to four orders of magnitude."
+    },
+    {
+      "file": "tests/test_sheet_tile.py",
+      "line": 314,
+      "severity": "blocking",
+      "summary": "the gate the node reports as closed does not reproduce on CPU: the same named test at NOVA_SHEET_TILE_TARGETS=32 NOVA_SHEET_TILE_WORKERS=1 gives worst entry 1.089e-08 with 6835 of 217088 entries above 1e-13 (p99=5.041e-12, p99.9=6.494e-10), against the recorded 2.083e-15 and zero on titan, so the 1e-13 agreement is a property of one backend's code generation rather than of the implementation, and the measure is unmet on the platform the default lane runs and the repository's own tests use."
+    },
+    {
+      "file": "tests/test_sheet_tile.py",
+      "line": 79,
+      "severity": "non-blocking",
+      "summary": "REFERENCE_GATE was widened from 1e-8 to 1e-6 after the first run of the independent check failed at 3.052e-08 (titan-gate-xfail-run.log); the three-order convergence at 3.0518099689e-8 / 3.0518099493e-8 / 3.0518099360e-8 does justify a formulation-gap bound, but the change is a tolerance relaxation made to turn a red check green and it is recorded only in a code comment and the fragment."
+    },
+    {
+      "file": "nova/biot/tiledassembly.py",
+      "line": 686,
+      "severity": "non-blocking",
+      "summary": "packed_sheet_end_scale re-states the endpoint swap, slope, flat selection and per-component scaling of packed_sheet_field (tiledassembly.py:649-683) instead of factoring those steps, so the two branch structures can drift apart, and did: the radial term of the new function no longer matches the component it is supposed to scale."
+    },
+    {
+      "file": "tests/test_sheet_tile.py",
+      "line": 250,
+      "severity": "non-blocking",
+      "summary": "the docstring of test_west_mesh_is_the_prototype_mesh keeps the plan reference 'the plan measures on' in a file this node edited and whose module docstring it scrubbed of its section reference, so the same file now enforces the rule in one place and breaks it in another."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to re-measure the sheet tile against the fixed sheet route with the per-end tolerance; the landed change does re-measure and removes the strict xfail, but the B_R half is measured against a denominator that is not the per-end term sum, at nova/biot/tiledassembly.py:723.\nVERDICT done_when: the done_when's three clauses: the gate is asserted at tests/test_sheet_tile.py:314 against a scale built at nova/biot/tiledassembly.py:723 (wrong term for B_R, and it reproduces only on titan); the slow marks are in place at tests/test_sheet_tile.py:257 and :291; the reversed-normal control is red with its own test id and EXIT=1 in negative-control.log.\nVERDICT write_paths: the manifest declares five write paths and the diff touches three of them - nova/biot/tiledassembly.py, tests/test_sheet_tile.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-measure.html - with nothing outside the fence.\nVERDICT manifest: read; it states the gate result, the control's failing test id and EXIT=1, both suite arms with revision, command and EXIT=0, and its own rubric self-check lines.\nVERDICT diff: read commit by commit over the eight commits 66622b944..36ef6849b against base 57a72ac96: the abs() port in _sheet_arsinh_rule and the phi mirroring in _sheet_arsinh_gradient, the new packed_sheet_end_scale, the ring reference test and the evidence fragment, 395 insertions over three files.\nCALL_SITES: none\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/biot/tiledassembly.py:723 divides the B_R half by a magnitude drawn from the wrong derivative, so the re-measurement the goal names covers only the B_Z half.\nSCORE evidence: 8\nJUSTIFICATION evidence: the logged titan result at titan-gate.log:6 does not reproduce on CPU, where tests/test_sheet_tile.py:314 gives worst 1.089e-08 with 6835 entries above 1e-13 at 32 targets.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 57a72ac96 36ef6849b --stat touches only the three declared paths, with no plan edit and no peer path.\nSCORE durability: 8\nJUSTIFICATION durability: the reversed-normal control reddens tests/test_sheet_tile.py:314 as the negative-control log shows, but no assertion covers the scale built at nova/biot/tiledassembly.py:686, which is why the wrong B_R term passes.\nSCORE fit: 15\nJUSTIFICATION fit: the new function follows the xp-first idiom of nova/biot/tiledassembly.py:633 and its docstring states the mechanism, but tests/test_sheet_tile.py:250 keeps a plan reference in a file the node otherwise scrubbed.\nSCORE reuse: 14\nJUSTIFICATION reuse: packed_sheet_end_scale reuses _sheet_closed_gradient and _sheet_pancake_terms, and a search of nova/, scripts/ and tests/ for end_scale, absolute_contribut and per-end found no prior owner, but it restates the branch scaffold of packed_sheet_field at nova/biot/tiledassembly.py:649-683.\nFINDING nova/biot/tiledassembly.py:723 blocking: the radial per-end magnitude is taken from radial_value (dS/dradius) while packed_sheet_field builds B_R at tiledassembly.py:671 from gamma_value (dS/dgamma), so the B_R denominator is not the sum of the terms that make up the entry; measured over 207 sloped WEST pairs the scale used runs 0.44x to 6.4e4x the true term sum (median 4.8x), understating B_R error by up to four orders of magnitude.\nFINDING tests/test_sheet_tile.py:314 blocking: the recorded gate does not reproduce on CPU - the same named test at NOVA_SHEET_TILE_TARGETS=32 NOVA_SHEET_TILE_WORKERS=1 gives worst 1.089e-08 with 6835 of 217088 entries above 1e-13 against the recorded 2.083e-15 and zero, so the 1e-13 agreement is backend-specific and unmet on the platform the default lane runs.\nFINDING tests/test_sheet_tile.py:79 non-blocking: REFERENCE_GATE was widened from 1e-8 to 1e-6 after the first run failed at 3.052e-08; the convergence data justifies a formulation-gap bound, but the relaxation is recorded only in a code comment and the fragment.\nFINDING nova/biot/tiledassembly.py:686 non-blocking: packed_sheet_end_scale restates the endpoint swap, slope, flat selection and scaling of packed_sheet_field at tiledassembly.py:649-683 rather than factoring them, and the two branch structures have already drifted.\nFINDING tests/test_sheet_tile.py:250 non-blocking: a plan reference ('the plan measures on') survives in the docstring of a file this node edited and otherwise scrubbed of exactly that kind of reference.",
+  "review_run_id": "r-20261108T145642954226-review-of-icm-sheet-tile-measure-36ef6849bf87",
+  "reviewed_base_sha": "57a72ac965cf2b85d22783866ae1df581be6297d",
+  "reviewed_head_sha": "36ef6849bf879872a866af9d51ed665b9db14a00",
+  "reviewed_run_id": "r-20261108T100626702282-icm-sheet-tile-measure",
+  "scores": {
+    "durability": 8,
+    "evidence": 8,
+    "fit": 15,
+    "goal_fidelity": 11,
+    "reuse": 14,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T15:45:42.508971+00:00",
+  "total": 74,
+  "verdicts": {
+    "diff": "read commit by commit over the eight commits 66622b944..36ef6849b against base 57a72ac96: the abs() port in _sheet_arsinh_rule and the phi mirroring in _sheet_arsinh_gradient, the new packed_sheet_end_scale, the ring reference test and the evidence fragment, 395 insertions over three files.",
+    "done_when": "the done_when's three clauses: the gate is asserted at tests/test_sheet_tile.py:314 against a scale built at nova/biot/tiledassembly.py:723 (wrong term for B_R, and it reproduces only on titan); the slow marks are in place at tests/test_sheet_tile.py:257 and :291; the reversed-normal control is red with its own test id and EXIT=1 in negative-control.log.",
+    "goal": "the node goal is to re-measure the sheet tile against the fixed sheet route with the per-end tolerance; the landed change does re-measure and removes the strict xfail, but the B_R half is measured against a denominator that is not the per-end term sum, at nova/biot/tiledassembly.py:723.",
+    "manifest": "read; it states the gate result, the control's failing test id and EXIT=1, both suite arms with revision, command and EXIT=0, and its own rubric self-check lines.",
+    "write_paths": "the manifest declares five write paths and the diff touches three of them - nova/biot/tiledassembly.py, tests/test_sheet_tile.py, docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-measure.html - with nothing outside the fence."
+  }
+}

@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -598,6 +598,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261108T055840490522-icm-sheet-tile" data-who="reckon-build" data-when="2026-11-08T14:37:36Z">
     <div class="r-comment-body"><p>tests/test_sheet_tile.py is the only changed file. The prototype-mesh agreement test and its reversed-normal control carry pytest.mark.slow so the default fast lane skips them; the agreement test also carries xfail(strict=True) with the reason naming the base defect, the fix revision and the follow-on node that re-measures it. The control now reduces over finite entries, with an assertion that finite entries exist.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261108T145642954226-review-of-icm-sheet-tile-measure-36ef6849bf87" data-who="reckon-build" data-when="2026-11-08T15:36:19.567Z">
+    <div class="r-comment-body"><p>review of icm-sheet-tile-measure at 36ef6849b: goal_fidelity 11, evidence 8, scope_discipline 18, durability 8, fit 15, reuse 14, two blocking findings (the B_R denominator is built from the wrong per-end derivative, and the recorded gate does not reproduce on CPU) and three non-blocking</p></div>
 </div>
 </section>
 </main>

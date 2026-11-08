@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "added_failure_note": "This is a figure review and ran no suite. The count and the id list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read and no suite delta is claimed.",
-  "completed_at": "",
+  "completed_at": "2026-11-08T05:45:02.238Z",
   "dispatched_at": "2026-11-08T05:23:53Z",
   "figure_checks": {
     "clipping": "Non-white pixels in the outer 2 px frame of each render: 0 on all four. Ink bounding boxes are x 10-723 / x 10-754 and y 9-645 within 735x657 and 766x657 canvases, so nothing is clipped at an edge.",
@@ -149,6 +149,6 @@
   "scope_note": "Judged only from the four PNGs this node attached, each opened with Read at its delivered size (frame 137 735x657 px; frames 144, 179 and 44 766x657 px). No SVG was opened, read, listed, searched or rendered, and no image other than the four named PNGs was opened. Pixel counts, colour values and contrast ratios below were measured from those same PNGs read as rasters. The reviewed base 6f20bafbc is an ancestor of the reviewed head 1212e6a76 (git merge-base --is-ancestor, exit 0), and the four figure files are clean in the reviewed worktree at that head. Read-only: no figure, caption, script or other repository file was edited, created, moved, deleted, redrawn, relabelled or reformatted.",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-08T05:45:04.219895+00:00",
+  "timestamp": "2026-11-08T05:52:39.128157+00:00",
   "total": null
 }

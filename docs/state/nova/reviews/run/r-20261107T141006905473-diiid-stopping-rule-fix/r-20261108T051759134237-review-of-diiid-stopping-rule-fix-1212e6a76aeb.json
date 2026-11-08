@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms. baseline_suite (gate_base.log) records one failing id, tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate, with tests/test_forward_solve_request.py clean at :50-51. after_suite (gate_head2.log) is taken at a5e0f8151, inside the run but before the reviewed base, and adds tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table at :73-74, which 5f675d25e restores from inside the range but before a3cd2debc. Both arms cut tests/test_equilibrium_forward_solve.py at EXIT=124 (completed: false), so that file is read from the completed unbounded pair instead: h200_base.log (job 1308096) and h200_head.log (job 1307982) both record 2 failed, 28 passed with the same two differentiability ids. Added failures at the reviewed base are therefore zero, and the reviewed delta touches no test or production path that could add one.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T05:36:30.550Z",
+  "dispatched_at": "2026-11-08T05:20:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+      "line": "183",
+      "severity": "non-blocking",
+      "text": "the figcaptions (183, 188, 193, 198) and the panel legend at scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:327 name the EFIT contour's lowest vertex an \"EFIT X-point\", while the record's own body at :130 correctly calls it \"the low point of its EFIT contour\"; on 179 limited the marked point is R 1.53 m, Z -0.95 m, 0.25 m from the reference X-point near (1.3, -1.1) m the root-cause record gives, so the caption names a null the mark is not."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+      "line": "173",
+      "severity": "non-blocking",
+      "text": "\"the two coincide to the millimetre -- R 1.382 m, Z -1.061 m for both -- ... which is itself the reading\" reads exact equality of two float32-rounded coordinates as independent agreement; identity to eight significant figures is what one shared datum produces rather than two measurements agreeing, and the lattice under those numbers is 5.3 cm in R and 10 cm in Z (geometry-limiter-137-diverted.npz grid_r/grid_z), so a millimetre claim is an order of magnitude finer than the grid."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "line": "67",
+      "severity": "non-blocking",
+      "text": "_check_layout tests only whether a text artist lies inside the axes box and whether two text artists overlap, while the repository figure rule also requires refusing a text artist whose bounding box extends beyond the canvas; a label clipped off the edge passes this check silently, and no test or committed log records the check firing other than the conservative-smoke refusal quoted from resume-8.jsonl."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py",
+      "line": "61",
+      "severity": "non-blocking",
+      "text": "_efit_axis re-implements the capability nova/equilibrium/stencil_nulls.py:1891 magnetic_axis_subgrid owns -- \"return the resolved magnetic axis on a rectangular grid\" -- taking the same (field, rg, zg, inside) operands it takes, and neither extends nor wraps the owner; the recorder's docstring claims centimetre reporting over a lattice whose spacing is 5.3 cm in R and 10 cm in Z, so the duplicate is also the coarser of the two."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read both commits against a3cd2debc: 8 files, +417/-101, three prototype scripts rewritten, the fragment rewritten around the new marks, and the four PNGs re-rendered at 05:25 after the 05:23 render log.",
+    "done_when": "the done-when's figure clause asks each terminal state to be drawn as a line-contour panel with the real limiter, both null sets, the bounding surface from host_boundary_read and the EFIT boundary and X-point; all are drawn and gate-logs/render-panels-final-042359.log reports axis_note_outside_field=True, surface_note_outside_field=True and legend_outside_field=True on all four panels, though that log names no revision or command.",
+    "goal": "the source node's goal is a stopping rule that ends the solve on convergence rather than on a settled mask; commits a5f582675 and 1212e6a76 do not touch that rule and instead complete the done-when's figure clause, moving the axis coordinates out of the contour field into the margin and drawing both null sets and the bounded surface (docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:114-198).",
+    "manifest": "read; it records the round-three repairs, the geometry dump job 1308263 with EXIT=0 on four frames, and the three render logs, and its stated numbers reconcile exactly with geometry/*.npz and probe-parts2/*.json.",
+    "write_paths": "the source node's declared write paths include scripts/prototypes/diiid_stopping_rule/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html and docs/figures/diiid-stopping-rule-fix/; the diff touches exactly those and nothing else."
+  },
+  "justifications": {
+    "durability": "the only guard the delta adds is the SystemExit in scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:67, and no test file in the tree exercises it, so a regression that put a label back on the field would pass unnoticed.",
+    "evidence": "every number in the record's terminal paragraphs reconciles with geometry/geometry-limiter-137-diverted.npz and probe-parts2/probe-frame-137.json, but gate-logs/render-panels-final-042359.log carries no command or revision header, so the render step cannot be re-run from the record alone.",
+    "fit": "the panels reuse nova.media.poloidal.draw_wall and draw_nulls as the surrounding prototype renderers do, but render_terminal_panels.py:31 inserts a sibling prototype's path into sys.path at import and imports its private _wall_distance.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:156-176 now draws and annotates the bounding surface the previous review found missing, completing the done-when's figure clause for both null sets, the limiter and the EFIT reference.",
+    "reuse": "_wall_gap's duplication was repaired by wrapping boundary_competition._wall_distance, but record_machine_geometry.py:61 re-implements the magnetic-axis-on-a-grid capability that nova/equilibrium/stencil_nulls.py:1891 magnetic_axis_subgrid already owns, without extending or wrapping it.",
+    "scope_discipline": "all eight changed paths (three prototype scripts, the fragment, four PNGs) sit inside the source node's declared write paths, and no path outside them is touched."
+  },
+  "node": "review-of-diiid-stopping-rule-fix-1212e6a76aeb",
+  "node:reviewed": "diiid-stopping-rule-fix",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is a stopping rule that ends the solve on convergence rather than on a settled mask; a5f582675 and 1212e6a76 do not touch that rule and instead complete the done-when's figure clause, moving the axis coordinates out of the contour field into the margin and drawing both null sets and the bounding surface (docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:114-198).\nVERDICT done_when: the done-when's figure clause asks each terminal state to be drawn as a line-contour panel with the real limiter, both null sets, the bounding surface from host_boundary_read and the EFIT boundary and X-point; all four are drawn and gate-logs/render-panels-final-042359.log reports axis_note_outside_field=True, surface_note_outside_field=True and legend_outside_field=True with legend_entries 7 or 8 on every panel, though that log names no revision and no command.\nVERDICT write_paths: the source node's declared paths cover scripts/prototypes/diiid_stopping_rule/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html and docs/figures/diiid-stopping-rule-fix/; the diff touches exactly three of those prototype scripts, the fragment and the four PNGs, and nothing else.\nVERDICT manifest: read; it records the round-three repairs, geometry dump job 1308263 with EXIT=0 over four frames, and the render logs, and every number it states reconciles with geometry/*.npz and probe-parts2/*.json.\nVERDICT diff: read both commits against a3cd2debc; 8 files, +417/-101, the labels moved to the margin behind a layout guard, both null sets added, the bounding surface drawn and annotated, and the four PNGs re-rendered at 05:25 after the 05:23 render log.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:156-176 now draws and annotates the bounding surface the previous review found missing, completing the done-when's figure clause.\nSCORE evidence: 15\nJUSTIFICATION evidence: every number in the record's terminal paragraphs reconciles with geometry/geometry-limiter-137-diverted.npz and probe-parts2/probe-frame-137.json, but gate-logs/render-panels-final-042359.log carries no command or revision header.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is inside the source node's declared write paths.\nSCORE durability: 9\nJUSTIFICATION durability: the only guard the delta adds is the SystemExit in scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:67, and no test exercises it.\nSCORE fit: 15\nJUSTIFICATION fit: the panels reuse nova.media.poloidal.draw_wall and draw_nulls as the surrounding prototype renderers do, but render_terminal_panels.py:31 inserts a sibling prototype path into sys.path at import.\nSCORE reuse: 5\nJUSTIFICATION reuse: _wall_gap's duplication was repaired, but record_machine_geometry.py:61 re-implements the grid-magnetic-axis capability that nova/equilibrium/stencil_nulls.py:1891 magnetic_axis_subgrid owns without wrapping it.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:183 non-blocking: the figcaptions name the EFIT contour's lowest vertex an EFIT X-point while the body at :130 calls it the low point of the contour, and on 179 limited the mark is 0.25 m from the reference X-point.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:173 non-blocking: identical float32 coordinates are read as physical coincidence to the millimetre over a lattice spaced 5.3 cm in R and 10 cm in Z.\nFINDING scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:67 non-blocking: the layout check tests text-versus-axes and text-versus-text but not the canvas-bound refusal the repository figure rule requires.\nFINDING scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py:61 non-blocking: _efit_axis duplicates nova/equilibrium/stencil_nulls.py:1891 magnetic_axis_subgrid without extending or wrapping the owner.",
+  "review_run_id": "r-20261108T051759134237-review-of-diiid-stopping-rule-fix-1212e6a76aeb",
+  "reviewed_base_sha": "a3cd2debc571b4c96f724a07502f55788d39a85d",
+  "reviewed_head_sha": "1212e6a76aeba170079abfa2d55144472c138163",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:45:00+00:00",
+  "total": 80
+}

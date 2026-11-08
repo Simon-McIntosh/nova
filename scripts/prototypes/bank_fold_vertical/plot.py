@@ -116,6 +116,10 @@ def singular_figure(receipt, output):
             zorder=3 if label == "centroid pin" else 2,
         )
     ax.set_yscale("log")
+    ax.set_ylim(5e-9, 2e-3)
+    ax.set_yticks([1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3])
+    ax.set_xlim(0.9995, 1.0105)
+    ax.set_xticks([1.0, 1.002, 1.004, 1.006, 1.008, 1.01])
     ax.set_xlabel("drive")
     ax.set_ylabel("smallest balanced singular value")
     ax.legend(frameon=False, loc="upper right")

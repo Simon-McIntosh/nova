@@ -1,42 +1,48 @@
 {
-  "achieved_seconds": 1.5,
+  "achieved_seconds": 5.7,
   "boundary_hold_tolerance_m": 0.03968085207837693,
   "boundary_wall_gap_mm": {
     "diverted": {
-      "count": 14,
-      "max_mm": 88.822648568151,
-      "median_mm": 64.0730535252823
+      "count": 59,
+      "max_mm": 160.28176511670566,
+      "median_mm": 80.27394826425417
     },
     "limited": {
-      "count": 16,
-      "max_mm": 9.487048524335572,
-      "median_mm": 9.44381284178912
+      "count": 22,
+      "max_mm": 0.1026457433518091,
+      "median_mm": 0.04624750208290229
     },
     "note": "a limited boundary must touch its limiter, so a limited gap above the solve pitch is a defect; the diverted gap is expected"
   },
-  "bytes": 1346168,
+  "bytes": 5000205,
   "contact_sheet": {
-    "bytes": 982122,
+    "bytes": 1244361,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
     "rows": 2,
     "size": [
-      4783,
-      2608
+      5773,
+      2168
     ],
     "tile_indices": [
       0,
-      6,
-      12,
-      17,
-      23,
-      29
+      16,
+      32,
+      48,
+      64,
+      80
     ],
     "tiles": 6
   },
+  "flux_contour_spacing_wb": 0.04,
+  "flux_contours": "whole vessel at fixed spacing anchored on the boundary flux; grey for every level, blue over the closed surfaces enclosing the axis",
   "forward_stack": {
     "refused_slices": [],
     "stacks": [
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned-tail0.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned-tail1.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned-tail2.npz",
+      "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned-tail3.npz",
       "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned0.npz",
       "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned1.npz",
       "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned10.npz",
@@ -49,22 +55,133 @@
       "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned8.npz",
       "/home/ITER/mcintos/.cache/nova-mast/pulse-forward/27079-pitch40mm-shard-pinned9.npz"
     ],
-    "trace": "edge of the axis-connected region below normalised flux one inside the limiter, on a 4x bicubic refinement"
+    "trace": "level set at normalised flux 0.9999 enclosing the axis on a 8x bicubic refinement, clipped to the limiter; where none closes inside the wall, the edge of the axis-connected region",
+    "trace_routes": {
+      "smooth level set": 84
+    }
   },
-  "frame_milliseconds": 50,
-  "frames": 30,
-  "frames_converged": 22,
-  "frames_diverted": 14,
-  "frames_drawn": 30,
-  "frames_dropped_unbounded": [],
-  "frames_limited": 16,
+  "frame_milliseconds": [
+    100,
+    100,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    50,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    50,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    50,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    100,
+    100,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    50,
+    150,
+    100,
+    50
+  ],
+  "frames": 81,
+  "frames_converged": 52,
+  "frames_diverted": 59,
+  "frames_drawn": 81,
+  "frames_dropped_unbounded": [
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5349999666213989,
+      "wall_gap_mm": 99.31759767505066,
+      "x_point_gap_mm": 132.55589527552064
+    },
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5550000071525574,
+      "wall_gap_mm": 133.6770960068836,
+      "x_point_gap_mm": 174.98100428910976
+    },
+    {
+      "class": "diverted",
+      "qualified": false,
+      "time_s": 0.5699999928474426,
+      "wall_gap_mm": 164.17638103341847,
+      "x_point_gap_mm": 288.44021382453144
+    }
+  ],
+  "frames_limited": 22,
   "left_panel": "free-boundary forward solve per EFIT slice: hex plasma cells cut at the solved boundary, nested surfaces, boundary, axis and selected saddle",
   "machine": "MAST",
-  "other_x_points_drawn": 16,
+  "other_x_points_drawn": 22,
   "path": "docs/figures/presentation-media/mast-27079-nova-thomson.gif",
+  "plasma_contours_per_frame": [
+    1,
+    18
+  ],
   "plasma_current_ratio_range": [
-    0.9999999999999998,
-    1.0000000000000002
+    0.9999999999999997,
+    1.0000000000000004
   ],
   "plasma_mesh": {
     "coupling": "none; cell geometry only, no Biot build",
@@ -85,10 +202,10 @@
   "pulse": "27079",
   "quantity": "te",
   "quantity_label": "$T_e$ [eV]",
-  "requested_seconds": 1.5,
+  "requested_seconds": 10.0,
   "size": [
-    1589,
-    1300
+    1919,
+    1080
   ],
   "solve_grid": "rectangular lattice at solve_pitch_m; current on its nodes",
   "solve_pitch_m": [
@@ -96,47 +213,80 @@
     0.03968085207837693
   ],
   "solved_edge_drawn": true,
-  "surface_levels_psi_norm": [
-    0.1,
-    0.2,
-    0.30000000000000004,
-    0.4,
-    0.5,
-    0.6,
-    0.7000000000000001,
-    0.8,
-    0.9
-  ],
   "thomson_edge": {
-    "frames_resolved": 26,
+    "frames_resolved": 70,
     "model": "uncertainty-weighted mtanh fit of the outboard electron temperature of every system pooled; edge where the fit falls through 40 eV, the two-point-model upstream separatrix temperature",
     "solved_minus_thomson_m": [
-      0.1245371278352938,
-      0.04489086628184269,
-      0.09152444726263764,
-      0.038114051626771284,
-      0.016254223708579207,
-      0.024522507480267075,
-      0.012065977871062117,
-      0.03036081234829502,
-      0.027243060394783525,
-      0.010767916281928969,
-      -0.007570919442736912,
-      0.015835720962760647,
-      -0.03548275168705728,
-      0.0316784361053275,
-      0.03998793013667856,
-      0.07258058633768294,
-      0.04582762288345221,
-      0.0504486050552484,
-      0.05409503259044812,
-      0.039908463953088,
-      0.03271871822153072,
-      0.022839532647561223,
-      0.018672119374085527,
-      0.02243940447910786,
-      0.007208543318313332,
-      0.044549897813448425
+      0.1265787848476947,
+      0.04595872676737378,
+      0.09422153877915174,
+      0.05282203056759671,
+      0.04525665956225211,
+      0.021800112881201095,
+      0.022846243037709435,
+      0.03699311431103536,
+      0.033511639470339194,
+      0.010595232439241986,
+      0.01719389430127105,
+      0.029265441158688787,
+      0.03188294342225628,
+      0.033194662545707354,
+      0.04390303569440568,
+      0.016356715558618617,
+      -0.00026877410548142855,
+      0.01731947576476256,
+      -0.029829338747383805,
+      0.03734074122656983,
+      0.06366559019729667,
+      0.04681256741306683,
+      0.052360013788492754,
+      0.07961223563219044,
+      0.05471788138033329,
+      0.04164204406368599,
+      0.05378604115095098,
+      0.0583198398518594,
+      0.04294996255734196,
+      0.044773481288088446,
+      0.037194333910961275,
+      0.020743553500726097,
+      -0.0019148477854453727,
+      0.03199652206784043,
+      0.02336602689223244,
+      0.02126750917957909,
+      0.02763295589688064,
+      0.024360099826420845,
+      0.019726622809452365,
+      0.03144917942273917,
+      0.01367393600602318,
+      0.03573775527764145,
+      0.03448239868524672,
+      0.016610162874740375,
+      0.019259229721783955,
+      0.030800208319919253,
+      0.027310137668967505,
+      0.04655294046161562,
+      0.05538131041682659,
+      0.04344925413982348,
+      -0.003393344419152289,
+      0.03229461302811787,
+      0.04831784053728372,
+      0.03000716395861791,
+      0.046184424469769114,
+      0.01129826838541459,
+      0.0453226005220273,
+      0.02652027190967865,
+      0.023663939600379935,
+      0.04172052708370799,
+      -0.002792416661452357,
+      0.028533548497896355,
+      0.031314120319796857,
+      0.010931818524515524,
+      0.03028441992606168,
+      0.024719153956030526,
+      0.04285208746272451,
+      0.006406717478752766,
+      0.0389867645730535,
+      0.08581204932552122
     ]
   },
   "thomson_screen": "value at least 2 times its stored one-sigma uncertainty",
@@ -160,11 +310,11 @@
         "stored_row_count": 141,
         "usable_sample_fraction": 0.9065562232689081
       },
-      "resolved_samples_drawn": 3238,
+      "resolved_samples_drawn": 8798,
       "rows": 141,
       "value_limit": [
         2.5580186247825623,
-        114479.16210937499
+        22895.832421875
       ]
     },
     {
@@ -186,7 +336,7 @@
         "stored_row_count": 282,
         "usable_sample_fraction": 0.9521276595744681
       },
-      "resolved_samples_drawn": 71,
+      "resolved_samples_drawn": 300,
       "rows": 141,
       "value_limit": [
         17.843132853507996,
@@ -196,7 +346,15 @@
   ],
   "time_span_s": [
     0.009999999776482582,
-    0.4399999976158142
+    0.574999988079071
   ],
-  "x_points_drawn": 14
+  "timing": {
+    "frame_milliseconds_range": [
+      50,
+      150
+    ],
+    "rule": "each frame held for the pulse-time gap to the next slice",
+    "slowdown": 10.0
+  },
+  "x_points_drawn": 59
 }

@@ -35,7 +35,6 @@ import numpy as np
 
 from nova.media import gif, poloidal as pol, traces as tr
 from nova.media.ink import DEFAULT_INK
-from nova.media.layout import three_view
 from nova.media.poloidal import chord_crossings
 
 DEFAULT_OUTPUT = Path("docs/figures/presentation-media")
@@ -50,36 +49,71 @@ _QUANTITIES = {
 FLUX_SPACING = 0.04
 
 #: Thin flux contours, in the ink style's grey for vacuum and blue for plasma.
-CONTOUR_LINEWIDTH = 0.5
-BOUNDARY_LINEWIDTH = 1.0
+CONTOUR_LINEWIDTH = 0.8
+BOUNDARY_LINEWIDTH = 1.6
 
-#: The slide canvas: 14 by 7.2 inches with room above the panels for a title.
-SLIDE_WIDTH = 14.0
-SLIDE_HEIGHT = 7.2
-TITLE_ROOM = 0.9
+#: The widescreen presentation page, 16:9.
+SLIDE_WIDTH = 13.333
+SLIDE_HEIGHT = 7.5
+
+#: Room above the graph column for the slide title, in inches.
+TITLE_ROOM = 1.2
 
 
 def slide_view(extent, style):
-    """Return the three-view layout on the slide canvas, title room above.
+    """Return the poloidal panel full height beside a graph column on a slide.
 
-    The poloidal panel keeps the machine's aspect at the panel height the
-    slide leaves, and the trace column takes the remaining width, so the
-    figure is exactly the slide canvas rather than whatever width the machine
-    implies.
+    The poloidal panel runs the full page height at the machine's aspect. The
+    two graphs take the rest of the width and stop short of the top, leaving
+    the space above them, to the right of the machine, for the slide title.
     """
-    left, right, bottom, gap = 0.12, 0.35, 0.6, 0.95
-    r_min, r_max, z_min, z_max = extent
-    panel_height = SLIDE_HEIGHT - bottom - TITLE_ROOM
+    import matplotlib.figure
+
+    from nova.media.layout import ThreeView
+
+    r_min, r_max, z_min, z_max = (float(value) for value in extent)
+    inset, gap, right, bottom, between = 0.1, 1.0, 0.3, 0.7, 0.75
+    panel_height = SLIDE_HEIGHT - 2 * inset
     panel_width = panel_height * (r_max - r_min) / (z_max - z_min)
-    trace_width = SLIDE_WIDTH - left - panel_width - gap - right
-    return three_view(
-        extent=extent,
-        height=SLIDE_HEIGHT,
-        trace_width=trace_width,
-        style=style,
-        margins=(left, right, bottom, TITLE_ROOM),
-        gap=gap,
+    figure = matplotlib.figure.Figure(
+        figsize=(SLIDE_WIDTH, SLIDE_HEIGHT),
+        dpi=style.figure_dpi,
+        facecolor=style.figure_facecolor,
     )
+    poloidal = figure.add_axes(
+        (
+            inset / SLIDE_WIDTH,
+            inset / SLIDE_HEIGHT,
+            panel_width / SLIDE_WIDTH,
+            panel_height / SLIDE_HEIGHT,
+        )
+    )
+    column_left = inset + panel_width + gap
+    column_width = SLIDE_WIDTH - column_left - right
+    graph_height = (SLIDE_HEIGHT - TITLE_ROOM - bottom - between) / 2
+    lower = figure.add_axes(
+        (
+            column_left / SLIDE_WIDTH,
+            bottom / SLIDE_HEIGHT,
+            column_width / SLIDE_WIDTH,
+            graph_height / SLIDE_HEIGHT,
+        )
+    )
+    upper = figure.add_axes(
+        (
+            column_left / SLIDE_WIDTH,
+            (bottom + graph_height + between) / SLIDE_HEIGHT,
+            column_width / SLIDE_WIDTH,
+            graph_height / SLIDE_HEIGHT,
+        )
+    )
+    return ThreeView(
+        figure=figure,
+        poloidal=poloidal,
+        upper=upper,
+        lower=lower,
+        extent=(r_min, r_max, z_min, z_max),
+    ).clear()
 
 
 #: Line colour of the edge inferred from the Thomson profile alone.
@@ -110,7 +144,7 @@ def render_thomson(
     solved_edge: bool = True,
     cells: int = 4000,
     slowdown: float = 10.0,
-    dpi: float = 150.0,
+    dpi: float = 144.0,
 ) -> dict[str, object]:
     """Write the solved-equilibria-and-Thomson animation and return its receipt.
 
@@ -491,8 +525,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--dpi",
         type=float,
-        default=150.0,
-        help="rasterisation resolution; 150 gives 2100x1080 on the slide canvas",
+        default=144.0,
+        help="rasterisation resolution; 144 gives 1920x1080 on the 16:9 page",
     )
     parser.add_argument("--quantile", type=float, default=0.98)
     parser.add_argument(

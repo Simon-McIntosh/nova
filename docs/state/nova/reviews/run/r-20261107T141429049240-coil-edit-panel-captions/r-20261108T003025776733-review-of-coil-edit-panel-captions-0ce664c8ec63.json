@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-11-08T00:55:23.264Z",
   "dispatched_at": "2026-11-08T00:38:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the archive block quotes the base rendition's level band; the page caption and receipt carry the drawn band, a record-precision follow-up",
+      "recorded_at": "2026-11-08T01:16:57.780561+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/archive/forward-solve-api-landed.html",

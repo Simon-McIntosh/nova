@@ -335,8 +335,8 @@
     </p>
     <p>
       Done when (1) the chosen route reaches 0.5&nbsp;% on the &mu;<sub>r</sub> = 1000 shell, and a
-      deliberately under-resolved arm of the same route (uniform cells at twice the chosen size
-      through the shell for the volume routes, half the panel density on the iron surfaces for the
+      deliberately under-resolved arm of the same route (the cell-size field doubled everywhere
+      through the shell for the volume routes, graded or uniform, half the panel density on the iron surfaces for the
       surface route) misses 0.5&nbsp;%, so the measure can fail for whichever candidate is chosen;
       (2) the WEST
       midplane field at 1, 2 and 4&nbsp;m outside the coil edge changes by less than 1&nbsp;% under one
@@ -367,19 +367,28 @@
     <h2 id="s10">§6b — The imas-efit closed-shell control</h2>
 <section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Run the closed-shell control through imas-efit's iron model, with its boundary geometry set to
-      the shell, and report the result to the imas-efit owners: that test says which of the two WEST
-      answers in §1 is the representation and which is the physics. It is a cross-code comparison
-      with its own owners, so it lands separately from the §6 seam.
+      Run the closed-shell control through imas-efit's iron model and report the result to the
+      imas-efit owners. imas-efit reads its iron geometry through <code>IronCoreBuilder</code> from the
+      iron_core IDS, or from the XML <code>ironBoundaries</code> fallback
+      (<code>configuration/machines/WEST/iron.xml</code>; imas-efit <code>src/tokamakData.cpp</code>), and
+      with the IDS present it carries the B-H curve (<code>src/ironCoreBuilder.cpp</code>). The exact
+      shielding factor S of §1 is a linear-&mu; result, so the shell is configured through the XML
+      boundary with a constant permeability and no B-H table; a nonlinear run would be compared
+      against the wrong reference. The control falsifies in one direction: if imas-efit misses S, its
+      representation is implicated in the §1 WEST disagreement; if it reproduces S, its
+      representation is sound on that body and the disagreement stays unexplained, which §9 then
+      carries. It is a cross-code comparison with its own owners, so it lands separately from the §6
+      seam. The receipt, including a copy of the message sent, is written under
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/</code>.
     </p>
     <p>
       Done when (1) the imas-efit shell result is recorded with its shielding factor against the
       exact value, beside nova's; (2) imas-efit at &mu;<sub>r</sub> = 1 returns a shielding factor of 1
       to its own precision, the control that its shell configuration is wired; (3) the iron
       contribution at the WEST in-vessel probes and flux loops is tabulated beside §6's, and the
-      result is sent to the imas-efit owners with the message recorded, and the verdict (which of
-      the two §1 WEST answers is the representation and which the physics) is written into the plan
-      for §9 to read.
+      result is sent to the imas-efit owners with the message recorded in that receipt directory, and
+      the one-directional verdict (representation implicated, or disagreement unexplained) is written
+      into the plan for §9 to read.
     </p>
 
     <h2 id="s7">§7 — Iron inside the forward solve</h2>

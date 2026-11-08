@@ -43,7 +43,7 @@ def save(figure, axes, notes, output, preview):
     text = output.read_text().replace(
         'width="1008pt" height="518.4pt"', 'width="31.1cm" height="16cm"'
     )
-    output.write_text(text)
+    output.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
     figure.savefig(preview, dpi=100)
     print(
         f"FIGURE {output.name}: text collisions=0; labels over data=0; "
@@ -84,6 +84,7 @@ def render(source, output, preview):
     high = max(float(flux.max()), float(label.max()))
     flux_levels = np.linspace(low, high, 11)[1:-1]
     extent = float(np.max(np.abs(residual)))
+    display_scale, display_unit = (1e3, "mWb") if extent > 1e-6 else (1e18, "aWb")
     residual_levels = extent * np.array([-0.8, -0.5, -0.2, 0.2, 0.5, 0.8])
     plt.rcParams["svg.fonttype"] = "none"
     figure, axes = plt.subplots(1, 3, figsize=(14, 7.2), dpi=100)
@@ -164,7 +165,8 @@ def render(source, output, preview):
             figure.text(
                 (box.x0 + box.x1) / 2,
                 0.105,
-                f"{int(region.sum())} nodes; max |r| {maximum * 1000:.2f} mWb",
+                f"{int(region.sum())} nodes; "
+                f"max |r| {maximum * display_scale:.2f} {display_unit}",
                 ha="center",
                 fontsize=14,
             )

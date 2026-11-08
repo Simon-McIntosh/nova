@@ -8,6 +8,9 @@ from pathlib import Path
 
 import numpy as np
 
+from analyze import analyze
+from nova.jax.config import configure_dtypes
+
 
 def require_calls(record):
     assert record["counts"]["inner"] > 0, (
@@ -20,6 +23,7 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--missing-calls-control", action="store_true")
     args = parser.parse_args()
+    configure_dtypes()
     required = ("frame-179-limited", "frame-137-diverted", "mast-21978-35")
     for name in required:
         source = args.input / name
@@ -48,13 +52,37 @@ def main():
                 sum(row["squared_norm_fraction"] for row in rows), 1, rtol=1e-12
             )
         assert record["constraint_rows"] == 1
-        np.testing.assert_array_equal(record["constraint_residual"], [0])
+        summary = analyze(source)
+        assert summary["constraint_relative_sup"] < record["residual"]
         assert len(record["inner"]) == record["counts"]["inner"]
         stages = json.loads((source / "stages.json").read_text())
         assert (
             sum(row["stage"] == "warmup" for row in stages)
             == record["counts"]["warmup"]
         )
+        assert (
+            sum(row["stage"] == "linearization" for row in stages)
+            == record["counts"]["linearization"]
+        )
+        if record["machine"] == "diiid":
+            assert not record["converged"] and record["residual"] > 1e-5
+            assert summary["terminal_inner_reason"] == 3
+            assert summary["terminal_inner_attempted"] == 0
+            assert summary["invalid_images"]
+            assert not stages[-1]["finite_state"]
+            assert not stages[-1]["finite_image"]
+            assert record["changed_mask_entries"][record["counts"]["inner"] - 1] == 0
+        else:
+            assert record["converged"] and record["residual"] < 1e-5
+            assert summary["all_warmup_images_finite"]
+            assert record["accepted"] > 0
+            assert record["last_ladder"]["accepted"]
+        if name == "frame-179-limited":
+            assert record["attempted"] == record["counts"]["ladder"] == 0
+        elif name == "frame-137-diverted":
+            last = record["last_ladder"]
+            assert not last["accepted"] and last["distrusted"]
+            assert min(last["merits"]) > last["before"]
         print(
             f"CAPTURE {name}: inner={record['counts']['inner']} "
             f"ladder={record['counts']['ladder']} "

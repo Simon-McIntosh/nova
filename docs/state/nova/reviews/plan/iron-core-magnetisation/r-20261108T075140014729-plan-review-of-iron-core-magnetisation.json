@@ -1,0 +1,128 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T08:09:25.646Z",
+  "dispatched_at": "2026-11-08T07:58:22Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T075140014729-plan-review-of-iron-core-magnetisation/plan.html:385",
+      "id": "done_when-1",
+      "reason": "the whole section exists to emit that one verdict, and without a stated \u03bcr set and tolerance the verdict is not reproducible, so a node could report \"representation implicated\" for a solver artefact or \"sound\" for a 20 % miss.",
+      "text": "done-when (1) requires the imas-efit shielding factor to be \"recorded \u2026 against the exact value\" and clause (3) requires \"the one-directional verdict \u2026 written into the plan\", but neither names the relative permeability the comparison is made at (the exact S of \u00a71 is \u03bcr-dependent: 1.488, 6.902 and 61.10 at \u03bcr = 10, 100 and 1000) nor an acceptance tolerance, so any number satisfies clause (1) and either verdict satisfies clause (3); the node cannot fail and two readers can score the same run differently",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T075140014729-plan-review-of-iron-core-magnetisation/plan.html:377",
+      "id": "reasoning-1",
+      "reason": "the verdict is the node's only product, and without a convergence arm on the imas-efit side it would send the \u00a71 hypothesis (and \u00a79's follow-on) in a direction the evidence cannot support.",
+      "text": "the sentence \"if imas-efit misses S, its representation is implicated\" attributes a miss to the B-spline boundary-current representation, but nothing in the section requires imas-efit's own discretisation (its knot and observation-point counts, and the `internalResolution` and `responseTolerance` iron-model knobs) to be refined before the verdict is drawn, and imas-efit's iron iteration is configured to stop at `relativeError=\"1e-2\"` (imas-efit `configuration/machines/_common/solver/iron-solver.xml:15`), so a difference of a couple of per cent is inside imas-efit's own solve tolerance and a larger one is equally consistent with a coarse shell; the stated inference is not established by the mechanism as written",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261108T075140014729-plan-review-of-iron-core-magnetisation/plan.html:372",
+      "id": "anchors_resolve-1",
+      "reason": "the route itself resolves and is correct (iron.xml is included into `efitOptions.xml`, so an authored `<ironBoundaries>` there is read), and the \u03bcr = 1 arm fails loudly if the IDS leaks in, so the node corrects the detail in place rather than being sent down a wrong path.",
+      "text": "the section cites `configuration/machines/WEST/iron.xml` as the \"XML `ironBoundaries` fallback\", but that file contains only `<include \u2026iron-solver.xml/>` and a single `<magneticPermeabilities relativePermeability=\"215\">`, with no `<ironBoundaries>` element, and `src/tokamakData.cpp:129-137` reads the fallback geometry from the merged tokamakData document only when `imas.hasIronCore()` is false, so the shell geometry must be authored from scratch and the iron_core IDS must be suppressed, which \"configured through the XML boundary\" does not say",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "2fa0063d3c831ad5bca6cb117fa6b5e0b5104050",
+  "plan_fingerprint": "82658a535d095c089559b58b1ea08b163a8994d1821ab447636e5d57b6ddde2f",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 23,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a76b clause (1) now scores at mu_r = 1000, a/b = 0.9 (exact S = 61.10) with a 2 % tolerance, and clause (3) writes the verdict that rule gives (94dbaa095).",
+      "reason": "",
+      "when": "2026-11-08T08:16:35.669603+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a76b requires imas-efit's iron solve converged before any verdict: relativeError tightened to 1e-6 and boundary resolution refined until S moves under 0.5 % (94dbaa095).",
+      "reason": "",
+      "when": "2026-11-08T08:17:21.992271+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a76b now says WEST iron.xml holds only a constant permeability; the shell geometry is authored as a new ironBoundaries element with the iron_core IDS withheld, which is when tokamakData.cpp reads the fallback (94dbaa095).",
+      "reason": "",
+      "when": "2026-11-08T08:18:11.911483+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+      "commit_basis": "edit",
+      "note": "\u00a76b now says WEST iron.xml holds only a constant permeability; the shell geometry is authored as a new ironBoundaries element with the iron_core IDS withheld, which is when tokamakData.cpp reads the fallback (94dbaa095).",
+      "reason": "",
+      "when": "2026-11-08T08:18:11.911483+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+      "commit_basis": "edit",
+      "note": "\u00a76b clause (1) now scores at mu_r = 1000, a/b = 0.9 (exact S = 61.10) with a 2 % tolerance, and clause (3) writes the verdict that rule gives (94dbaa095).",
+      "reason": "",
+      "when": "2026-11-08T08:16:35.669603+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "94dbaa0954e2c93a9e6b68dc13ac77c46562cd50",
+      "commit_basis": "edit",
+      "note": "\u00a76b requires imas-efit's iron solve converged before any verdict: relativeError tightened to 1e-6 and boundary resolution refined until S moves under 0.5 % (94dbaa095).",
+      "reason": "",
+      "when": "2026-11-08T08:17:21.992271+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v23.at-90a06c0e-r-20261108T075140014729-plan-review-of-i.json",
+  "review_run_id": "r-20261108T075140014729-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "90a06c0e186fbf30afd74799174c4a5a9ec54385",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 all three cited imas-efit anchors resolve (`configuration/machines/WEST/iron.xml`, `src/tokamakData.cpp`, `src/ironCoreBuilder.cpp`), but iron.xml carries no `<ironBoundaries>` element, so the cited file is not the geometry fallback the sentence calls it.",
+    "done_when": "a finding \u2014 s10's done-when (1) and (3) record a measurement and a verdict with no agreement tolerance and no \u03bcr named for the comparison, so \"reproduces S\" versus \"misses S\" has no decision rule.",
+    "evidence_paths": "pass \u2014 the receipt and the message copy are written under `/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/`, a durable GPFS path of the same family the plan already cites for `magnetics-residuals.json`, and the verdict lands in the plan, which is versioned.",
+    "naming": "pass \u2014 the section introduces no code symbols, filenames or comments, and the plan-internal label \u00a76b names a plan section rather than a source identifier.",
+    "reasoning": "a finding \u2014 the one-directional inference \"if imas-efit misses S, its representation is implicated\" carries no requirement that imas-efit's own iron discretisation and iteration are converged, so a miss and under-resolution are indistinguishable.",
+    "single_goal": "pass \u2014 s10 delivers one cross-code comparison (the shell result and the WEST probe tabulation are two views of the same imas-efit-versus-nova comparison), with the \u00a76 seam explicitly out of scope.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s10 `[s5, s6]` and gives s9 `[s6, s8, s10]`, so the verdict s10 produces resolves to the section that consumes it, and every id resolves to a section that exists; \u00a71's pointer to \"the imas-efit closed-shell control (\u00a76b)\" resolves to the `s10` heading."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "92df7a27c4b281fe04ff7b7fc0f901869703dd8655b6070398655db636c4aaf6",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0e968df67c572dad4921d3c80db60349fef2aeaf97a4e88ea0544111dc4254cb",
+    "s4": "b8593807c80221d5f3f6797af34fed348452dff7e008a68138821b7ae5ab99e1",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T08:16:02.169995+00:00",
+  "total": null
+}

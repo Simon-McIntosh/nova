@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Model WEST-type iron cores as magnetised cells whose edge sheets use Urankar Part II closed forms, solve the B-H law by Newton, and correct for discrete limbs">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="43.0">
+  <meta name="plan-effort-hours" content="46.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -21,7 +21,7 @@
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;,&quot;iron-core-magnetisation#s6&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;,&quot;iron-core-magnetisation#s6&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -336,7 +336,9 @@
     <p>
       Done when (1) the chosen route reaches 0.5&nbsp;% on the &mu;<sub>r</sub> = 1000 shell, and a
       deliberately under-resolved arm of the same route (uniform cells at twice the chosen size
-      through the shell) misses 0.5&nbsp;%, so the measure can fail; (2) the WEST
+      through the shell for the volume routes, half the panel density on the iron surfaces for the
+      surface route) misses 0.5&nbsp;%, so the measure can fail for whichever candidate is chosen;
+      (2) the WEST
       midplane field at 1, 2 and 4&nbsp;m outside the coil edge changes by less than 1&nbsp;% under one
       further refinement; (3) the comparison table of the candidates, with their cost on one H200,
       is in the plan's evidence record.
@@ -375,7 +377,9 @@
       exact value, beside nova's; (2) imas-efit at &mu;<sub>r</sub> = 1 returns a shielding factor of 1
       to its own precision, the control that its shell configuration is wired; (3) the iron
       contribution at the WEST in-vessel probes and flux loops is tabulated beside §6's, and the
-      result is sent to the imas-efit owners with the message recorded.
+      result is sent to the imas-efit owners with the message recorded, and the verdict (which of
+      the two §1 WEST answers is the representation and which the physics) is written into the plan
+      for §9 to read.
     </p>
 
     <h2 id="s7">§7 — Iron inside the forward solve</h2>
@@ -385,8 +389,8 @@
       iron updates the magnetisation inside the Grad&ndash;Shafranov Newton step rather than once
       before it. The iron block of the Grad&ndash;Shafranov Jacobian, dM/d&psi; and dM/dI<sub>coil</sub>,
       is obtained by implicit differentiation at the material solve's fixed point
-      (dM = (I &minus; &part;F/&part;M)<sup>&minus;1</sup> &part;F/&part;B dB<sub>ext</sub>, reusing the §4
-      Newton factor), not by re-running the inner solve per outer iteration. Enter through the
+      (dM = &minus;(&part;F/&part;M)<sup>&minus;1</sup> &part;F/&part;B<sub>ext</sub> dB<sub>ext</sub> with F as §4
+      defines it, &part;F/&part;M being the §4 Newton factor that is reused), not by re-running the inner solve per outer iteration. Enter through the
       public forward-solve seam (<code>ForwardSolveRequest</code> in
       <code>nova/equilibrium/solve_request.py</code>, landed as forward-solve-api §1), which this
       section waits on.

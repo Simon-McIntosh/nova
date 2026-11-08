@@ -234,7 +234,12 @@
       persistent compilation cache in <code>nova/biot/tiledassembly.py</code>, never a bespoke
       driver. The sheet-route decision chose the Part II closed form, so a sheet tile evaluating
       <code>nova/biot/sheet.py</code> is added beside the polygon, moment and arc tiles
-      (<code>_fill_tile</code>, <code>_fill_moment_tile</code>, <code>_fill_arc_tile</code>). A cell's columns are
+      (<code>_fill_tile</code>, <code>_fill_moment_tile</code>, <code>_fill_arc_tile</code>). The tile wraps the
+      route §2 landed rather than re-deriving it: <code>sheet_flux</code> and <code>sheet_field</code> in
+      <code>nova/biot/sheet.py</code> evaluate the closed form by default at every slope (the
+      pole-reduced sloped form, Snow's pancake form through <code>nova.biot.zeta.zeta</code>, eq 25 for
+      the cylinder), traced in JAX and jitted at about 3&nbsp;ms per field evaluation, with the graded
+      quadrature kept as an explicit cross-check. A cell's columns are
       signed sums of its edge sheets, so a shared edge between two cells appears once with the net
       sheet (M<sub>1</sub> &minus; M<sub>2</sub>)&times;n. The same program, given a different target
       set, gives &psi; and B of the magnetised iron at any external points (the coils, the plasma

@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed node was suite-unarmed: baseline_suite and after_suite are empty, so zero denotes no comparable suite pair and is not a measured absence of added failures.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "A rotating case reaches the static polynomial edge calculation.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:52"
+    },
+    {
+      "failure_condition": "A saved wall differs from the independently regenerated limiter geometry by more than 2e-13 m.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:108"
+    },
+    {
+      "failure_condition": "The analytic edge maximum differs from the independently geometry-selected designed contact by more than 1e-10 m.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:116"
+    },
+    {
+      "failure_condition": "The wall scan has no flux range above 1 Wb, such as a uniform or zero instrument.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:117"
+    },
+    {
+      "failure_condition": "Flux at the known magnetic axis differs from the analytic axis parameter by at least 1e-12 Wb.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:118"
+    },
+    {
+      "failure_condition": "The computed maximum is farther than 1e-11 Wb from the absolute zero-flux contact.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:119"
+    },
+    {
+      "failure_condition": "Either 1 mm or 0.5 mm scan misses the polynomial maximum by at least 1e-6 Wb.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:120-121"
+    },
+    {
+      "failure_condition": "Any designed, extremal, saved-oracle or route point is more than 1e-10 m off the saved wall.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:131"
+    },
+    {
+      "failure_condition": "The saved oracle point ceases to be the best vertex or its flux is no longer below -0.049 Wb; this guards reproduction of the archived defect, not correctness of the analytic boundary.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:132-135"
+    },
+    {
+      "failure_condition": "The separately saved receipt and NPZ disagree about the oracle point, or the recorded ratio leaves the documented range; they can still agree if the same upstream selector changes both, so correctness rests on lines 116-121.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:167-170"
+    },
+    {
+      "failure_condition": "JAX x64 is off or a non-CPU backend is selected, invalidating the stated execution conditions.",
+      "line": "scripts/prototypes/bank_limited_contact/measure.py:198-199"
+    }
+  ],
+  "assertion_input_coupling": "No added assertion compares a returned value directly with the same value passed to that function. The receipt-versus-NPZ equality at lines 167-169 is cross-artifact consistency, not an independent analytic boundary oracle, and is not credited for durability.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-07T23:27:48Z",
+  "dispatched_at": "2026-11-07T23:17:30Z",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The worker host contract required in-place execution on the assigned compute allocation.",
+      "file": "scripts/prototypes/bank_limited_contact/run.sh",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "non-blocking: The recorded 15-second gate ran on the assigned compute allocation, so the brief's login-node timing is unverified; exempted because this dispatch explicitly requires CPU work to run in place on that allocation."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Commit 10f45b12d81f324714cedee88170c168771764d4 adds the CPU prototype and SVG; commit 0148a553720b5524128873565c81542028ca13e0 adds only the evidence fragment, which distinguishes the vertex-only saved oracle from the route contact.",
+    "done_when": "The source brief.txt names a sub-minute CPU reproduction, evidence fragment and SVG; gate.log records 15 seconds and EXIT=0, and the two committed artifact paths appear in the diff, although the timed run used the assigned compute allocation.",
+    "goal": "The source brief.txt asks which point defines the analytic limited boundary; scripts/prototypes/bank_limited_contact/measure.py:111 locates the wall maximum and docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html:2 identifies the midpoint.",
+    "manifest": "The source manifest.md reports status complete, both commit SHAs, the exact gate command, gate.log and the two saved-input digests, consistent with measurement.json and the committed files.",
+    "write_paths": "The source manifest.md declares the prototype, evidence fragment and figure directories; git diff from 5881cd475b806ec342184cf49f9bdee411f40f12 to 0148a553720b5524128873565c81542028ca13e0 changes five files only within them."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_limited_contact/measure.py:116-121 would fail if the analytic maximum moved from designed_contact, the wall flux became constant, or the scan missed the exact edge maximum; no standalone test file was added.",
+    "evidence": "gate.log records 18,704 samples with 0.999669 mm maximum spacing and a 15-second EXIT=0 run, but the source manifest.md states that the timing was taken in the compute allocation rather than on a login node.",
+    "fit": "scripts/prototypes/bank_limited_contact/plot.py:10-12 uses the shared data-ink style and save_checked, and the new source names describe their measurement without forbidden stage labels.",
+    "goal_fidelity": "scripts/prototypes/bank_limited_contact/measure.py:102-170 analyzes both saved rows, and docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html:2-4 states the requested correction.",
+    "reuse": "Search for wall sampling and stationary-edge maxima found no analytic quartic owner; scripts/analytic_oracle_fixtures/measure.py:272 owns designed_contact and scripts/prototypes/bank_solve_lanes/plot.py:74 owns save_checked, both reused here.",
+    "scope_discipline": "The five paths in the diff are confined to the three directories declared in source manifest.md:3, and no product source changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt asks which point defines the analytic limited boundary; scripts/prototypes/bank_limited_contact/measure.py:111 locates the wall maximum and docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html:2 identifies the midpoint.\nVERDICT done_when: The source brief.txt names a sub-minute CPU reproduction, evidence fragment and SVG; gate.log records 15 seconds and EXIT=0, and the two committed artifact paths appear in the diff, although the timed run used the assigned compute allocation.\nVERDICT write_paths: The source manifest.md declares the prototype, evidence fragment and figure directories; git diff from 5881cd475b806ec342184cf49f9bdee411f40f12 to 0148a553720b5524128873565c81542028ca13e0 changes five files only within them.\nVERDICT manifest: The source manifest.md reports status complete, both commit SHAs, the exact gate command, gate.log and the two saved-input digests, consistent with measurement.json and the committed files.\nVERDICT diff: Commit 10f45b12d81f324714cedee88170c168771764d4 adds the CPU prototype and SVG; commit 0148a553720b5524128873565c81542028ca13e0 adds only the evidence fragment, which distinguishes the vertex-only saved oracle from the route contact.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_limited_contact/measure.py:102-170 analyzes both saved rows, and docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html:2-4 states the requested correction.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate.log records 18,704 samples with 0.999669 mm maximum spacing and a 15-second EXIT=0 run, but the source manifest.md states that the timing was taken in the compute allocation rather than on a login node.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five paths in the diff are confined to the three directories declared in source manifest.md:3, and no product source changed.\nSCORE durability: 17\nJUSTIFICATION durability: scripts/prototypes/bank_limited_contact/measure.py:116-121 would fail if the analytic maximum moved from designed_contact, the wall flux became constant, or the scan missed the exact edge maximum; no standalone test file was added.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/bank_limited_contact/plot.py:10-12 uses the shared data-ink style and save_checked, and the new source names describe their measurement without forbidden stage labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: Search for wall sampling and stationary-edge maxima found no analytic quartic owner; scripts/analytic_oracle_fixtures/measure.py:272 owns designed_contact and scripts/prototypes/bank_solve_lanes/plot.py:74 owns save_checked, both reused here.\nFINDING scripts/prototypes/bank_limited_contact/run.sh:14 non-blocking: The recorded 15-second gate ran on the assigned compute allocation, so the brief's login-node timing is unverified; exempted because this dispatch explicitly requires CPU work to run in place on that allocation.\n",
+  "review_run_id": "r-20261107T231435569192-review-of-bank-limited-contact-0148a553720b",
+  "reviewed_base_sha": "5881cd475b806ec342184cf49f9bdee411f40f12",
+  "reviewed_head_sha": "0148a553720b5524128873565c81542028ca13e0",
+  "reviewed_run_id": "r-20261107T225042811649-bank-limited-contact",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:04:45.528542+00:00",
+  "total": 111
+}

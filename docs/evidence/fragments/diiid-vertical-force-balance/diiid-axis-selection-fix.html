@@ -1,0 +1,41 @@
+<section id="diiid-axis-selection-fix">
+<h2>The trip-1 axis defect is a transposed-field measurement</h2>
+<p>The product change is blocked on a correction to the target. On the archived
+frame 146 trip-1 field in its native storage order, the reported axis at
+R=1.6881330007253326 m, Z=−0.3458483185703583 m is already a stationary flux
+maximum. Polishing moves it 0 m; its gradient components are
+4.986×10<sup>−16</sup> and −1.309×10<sup>−16</sup>, and the Hessian eigenvalues
+are −7.39524 and −5.09543. The recorded 0.328 m displacement is reproduced by
+transposing the physical field.</p>
+<table>
+<caption>Same archived bytes, two explicit coordinate bindings, double precision.</caption>
+<thead><tr><th>Spline input</th><th>Reported-axis polish R, Z [m]</th>
+<th>Shift [m]</th><th>Converged</th></tr></thead>
+<tbody>
+<tr><td>Native radius-height array, transposed for spline</td>
+<td>1.688133, −0.345848</td><td>0</td><td>yes</td></tr>
+<tr><td>Stored array treated as height-radius</td>
+<td>1.584970, −0.034003</td><td>0.328466</td><td>no at the double-precision eight-update bound</td></tr>
+</tbody></table>
+<p>The target R=1.585 m, Z=−0.034 m has native-field gradient
+(0.492096, −0.352623); it is not stationary on that field. Seeded there, native
+polishing does not converge. On the transposed field that seed converges to
+(1.584969919, −0.034002964).</p>
+<p>The binding is explicit: <code>nova/equilibrium/conservation.py:138</code>
+defines radius-height flattening; <code>shape</code> at line 161 returns those
+axes in that order. <code>scripts/prototypes/diiid_vertical_loss/trip_trajectory.py:144</code>
+reshapes the solved vector using that shape and writes it at line 155.
+<code>polish_axis_check.py:27</code> instead infers height-radius order from
+shape. The 33×33 archive satisfies both shapes, so that check silently keeps
+the wrong orientation and fits it at line 52.</p>
+<p>The product seam is <code>nova/equilibrium/topology.py:1205</code> selecting
+the qualified O row, line 1312 publishing the stationary receipt's position,
+line 1340 flooding the component from that axis, and line 1359 constructing
+the reported topology state. This node changes none of those paths.</p>
+<p>The durable replay and unchanged 20,737-byte archive are under
+<code>scripts/prototypes/diiid_axis_selection/</code>. The run's
+<code>orientation-check.log</code> carries the numerical comparison and
+<code>EXIT=0</code>. No five-frame after table, product regression result,
+MAST convergence claim, or before/after solver panel is asserted: the axis
+replacement's prerequisite is disproven on its own cited field.</p>
+</section>

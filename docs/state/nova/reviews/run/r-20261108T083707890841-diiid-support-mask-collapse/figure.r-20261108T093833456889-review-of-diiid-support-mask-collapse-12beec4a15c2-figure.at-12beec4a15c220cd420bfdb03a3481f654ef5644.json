@@ -11,6 +11,13 @@
     "docs/figures/diiid-support-mask-collapse/frame-146-diverted-trip-4.svg",
     "docs/figures/diiid-support-mask-collapse/frame-179-limited-trip-1.svg"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking presentation on root-cause mask panels; the per-stage counts stand on the committed trace",
+      "recorded_at": "2026-11-08T11:29:28.689203+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_support_mask/render_support.py",

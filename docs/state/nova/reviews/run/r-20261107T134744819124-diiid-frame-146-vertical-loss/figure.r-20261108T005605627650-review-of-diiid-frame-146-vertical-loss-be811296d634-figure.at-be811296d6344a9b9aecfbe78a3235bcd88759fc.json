@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-08T01:11:53Z",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The residual pane's x-axis runs to active-set trip 15 while the plotted series stops at trip 4, so about two-thirds of the pane is empty. The five trips that ran are squeezed into the leftmost quarter of the axis, which costs resolution exactly where the residual settles, and the empty range can read as data the figure declined to show. Scaling the axis to the trips that actually ran, or stating in the caption that the run ended at trip 4 because the mask difference reached zero, would fix the reading. frame-137-flux-contours.png carries the same defect."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The text 'mask difference above each point' floats in the upper right of the residual pane, far from the curve in the upper left, and the bare numerals printed above the curve (27, 40, 1, 0, 0 on this sheet; 24, 20, 9, 9, 0 on frame 137) are given no key inside the figure. Nothing ties the phrase to the numerals except their position, so a reader meets an unlabelled title for data that is not in that corner. frame-137-flux-contours.png carries the same text."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The reference line at the bottom of the residual pane is annotated 'tolerance 1e-5' in linear notation while the axis ticks beside it are powers of ten (10^-1 through 10^-5). The two notations name the same value, and a reader has to convert to check that the dashed line is the 10^-5 tick. Writing the annotation as 10^-5 matches the axis. frame-137-flux-contours.png carries the same annotation."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png",
+      "id": "f5bd6db5a63",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Two legend entries are drawn in the same red family: 'no bounding surface (read refused)' as a red line and 'solved axis (outside wall)' as a red triangle. The pairing is meaningful here, because frame 146 has both by the same cause, but a reader has to hold the legend open to tell whether a red mark is the refused surface or the escaped axis. A dash pattern or a lighter red on one of the two would separate them without adding an ink."
+    }
+  ],
+  "images_judged": [
+    "rendered/frame-146-flux-contours.png",
+    "rendered/frame-137-flux-contours.png"
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261108T005605627650-review-of-diiid-frame-146-vertical-loss-be811296d634-figure",
+  "reviewed_base_sha": "a2c09e336581bae022bc7aebfb5ac1b258c687e7",
+  "reviewed_head_sha": "be811296d6344a9b9aecfbe78a3235bcd88759fc",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-flux-contours.png": {
+      "contrast": "pass \u2014 legend, caption, axis and tick labels are dark on white; the grey 'tolerance 1e-5' annotation is lighter but readable.",
+      "data_ink": "pass with a caveat \u2014 line contours and the red bounding surface carry the weight and no fill is used; the residual pane again stops at trip 4 on an axis running to 15, leaving two-thirds of it empty. See findings.",
+      "decoration": "pass \u2014 white background, no gradient, no shading, no decorative fill; the poloidal panel is unframed and the residual pane keeps only the spines that carry a scale.",
+      "label_collision": "pass \u2014 no clipped or overlapping label; the bare numerals above the curve (24, 20, 9, 9, 0) are separated enough to read individually.",
+      "legibility": "pass \u2014 the frame-137 sheet reads at a glance and forms a fair comparison with frame 146: the solved contours are closed and nested about the axis, the red bounding-surface contour is closed inside the limiter, the red dot marks limiter contact, and the grey label axis marker shows how far the solved axis has moved from the EFIT axis.",
+      "table_form": "pass \u2014 a spatial field and a short series, both naturally drawn."
+    },
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.png": {
+      "contrast": "pass \u2014 legend, caption, axis labels and tick labels are dark on white and read without effort; the grey 'tolerance 1e-5' annotation is lighter but still legible.",
+      "data_ink": "pass with a caveat \u2014 line contours and one trace carry the weight, no fill is used anywhere; the caveat is that the residual pane's x-axis runs to trip 15 while the series stops at trip 4, so roughly two-thirds of the pane is empty. See findings.",
+      "decoration": "pass \u2014 white background, no gradient, no shading, no decorative fill. Frames are removed on the poloidal panel; the residual pane keeps only left and bottom spines.",
+      "label_collision": "pass \u2014 no label is clipped at the canvas edge, no two labels overlap, and the axis markers (red triangle, grey triangle, red cross, hollow cross) sit clear of the text.",
+      "legibility": "pass \u2014 the frame-146 sheet reads at a glance: the poloidal panel shows the solved flux as blue line contours over the grey EFIT contours, the black DIII-D limiter, and the red filled triangle of the solved axis standing above the wall at the top of the domain, which is the point the page makes. The residual pane beside it is a single blue trace on a log axis.",
+      "table_form": "pass \u2014 the content is a spatial field plus a short series, both of which are naturally drawn; nothing here is a table rendered as a picture."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:18:59.806008+00:00",
+  "total": null
+}

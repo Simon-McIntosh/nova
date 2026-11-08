@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-08T01:12:59.647Z",
+  "dispatched_at": "2026-11-08T00:59:34Z",
+  "findings": [
+    {
+      "detail": "The census receipt trip-trajectory/maxima-census.json gives global_maximum_inside_limiter.position_rz = [2.3275, -0.4000] for frame 146 trip 2, and the source manifest's own checkpoint also reads R=2.327 m. The fragment's paragraph cites R=2.013 m for that same point, so a reader checking the cited evidence finds a different field maximum than the prose states; at R=2.013 m the census reports no extremum at all.",
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+      "line": 200,
+      "severity": "blocking",
+      "summary": "The fragment places the trip-2 global maximum at R=2.013 m while the cited receipt records R=2.327 m."
+    },
+    {
+      "detail": "maxima_census.py:56 takes np.nanargmax over the masked grid, which for both frame 146 and frame 137 trip 1 lands exactly on the Z=0.000 m grid row (R=1.584 and R=0.531). No polished extremum of type +1 is returned anywhere inside the limiter in either field, so the census cannot distinguish a true interior maximum from a grid clamp, and the fragment's 'two-lobed field' conclusion rests on that unverified point rather than on a stationary point.",
+      "file": "scripts/prototypes/diiid_vertical_loss/maxima_census.py",
+      "line": 56,
+      "severity": "non-blocking",
+      "summary": "The 'global maximum inside the limiter' is an unpolished grid argmax, and the fragment reports it as a field maximum."
+    },
+    {
+      "detail": "maxima-census.json lists the point at R=0.990 m, Z=-1.050 m three times for frame 137 trip 1 and the point at R=1.577 m, Z=-1.364 m twice for frame 146 trip 2, because distinct seeds converge to the same stationary point. A census that presents itself as one row per extremum overstates the count, and a future reader comparing extrema between fields will compare sets of unequal grid resolution.",
+      "file": "scripts/prototypes/diiid_vertical_loss/maxima_census.py",
+      "line": 64,
+      "severity": "non-blocking",
+      "summary": "Polished seed results are not deduplicated, so one extremum is reported several times."
+    }
+  ],
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_vertical_loss/maxima_census.py:96 returns a dict with no assertion and no test file is added or touched, so no test fails if the census or the fragment's numbers regress.",
+    "evidence": "trip-trajectory/maxima-census.json records the four censused fields and reproduces the trip-1 and trip-2 flux values, but the fragment's trip-2 position contradicts that receipt and the source manifest records no command or log for the census run.",
+    "fit": "maxima_census.py:19-25 imports the repository owners (nova.equilibrium.flux_surface_connectivity, nova.linalg.tensor_spline, nova.media.poloidal) and carries no plan or ticket identifiers in its names or docstring, matching the surrounding prototype idiom.",
+    "goal_fidelity": "The mechanism paragraph at docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:183 now states the census result and the axis-selection mechanism, but it places the trip-2 maximum at R=2.013 m against the receipt's R=2.327 m, so the deliverable states a number its own evidence does not carry.",
+    "reuse": "maxima_census.py:26-32 reuses polish_stationary_points, fit_tensor_spline and inside_wall_units rather than reimplementing them, and imports _seeds/_winding from the sibling core_stationary_probe.py rather than copying them, so every added definition extends an existing owner.",
+    "scope_discipline": "git diff --stat da28baf2d be811296d lists only docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html, the three docs/figures/diiid-frame-146-vertical-loss/*.svg files, scripts/prototypes/diiid_vertical_loss/maxima_census.py and render_trip_panels.py, all inside the declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T005242692813-review-of-diiid-frame-146-vertical-loss-be811296d634",
+  "reviewed_base_sha": "da28baf2d7f9a73618dd34fb40596a10bfd7f5b1",
+  "reviewed_head_sha": "be811296d6344a9b9aecfbe78a3235bcd88759fc",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 6,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:31:26.435450+00:00",
+  "total": 81,
+  "verdicts": {
+    "call_sites": "none",
+    "diff": "Read both commits against base da28baf2d: 102ad5b7f adds maxima_census.py (132 lines) and rewrites the mechanism paragraph in the fragment; be811296d adds a 'this trip' legend entry in render_trip_panels.py:288 and re-renders the three per-trip SVGs. No assertions are added and the SVGs carry no independently checkable content beyond the code that produced them.",
+    "done_when": "The done_when's mechanism clause asks for one discriminating measurement naming the mechanism; the delta adds scripts/prototypes/diiid_vertical_loss/maxima_census.py and cites its receipt, but no command or log for that run is recorded in the source manifest, whose tests/test_logs lines name only the earlier trip_trajectory lane job (trip-trajectory/gate.log, EXIT=0), so the census run itself is unrecorded evidence.",
+    "goal": "The source goal is to explain frame 146's vertical loss and end the fragment with a recommended fix; this delta (102ad5b7f, be811296d) replaces the trip-1 saddle paragraph at docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:183 with a census-based mechanism: trip 1 is already two-lobed (1.958 Wb grid maximum against the solver's 1.761 Wb axis), frame 137 shows the same, and the trip-2 promotion moves frame 146's axis onto a low-flux extremum above the limiter.",
+    "manifest": "Read the source manifest; it records status complete with a checkpoint naming the census figures (1.958 Wb at R=1.584 m, Z=0.000 m) \u2014 and that checkpoint states the trip-2 maximum at R=2.327 m, which disagrees with the fragment's R=2.013 m \u2014 with no baseline_suite or after_suite arm recorded.",
+    "write_paths": "The source write paths are scripts/prototypes/diiid_vertical_loss/, the fragment above and docs/figures/diiid-frame-146-vertical-loss/; git diff --stat da28baf2d be811296d lists exactly the fragment, the three per-trip SVGs, maxima_census.py and render_trip_panels.py, all inside them, and no product source is touched."
+  }
+}

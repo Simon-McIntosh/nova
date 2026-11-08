@@ -205,7 +205,7 @@ def test_one_edge_flipped_fails_the_pancake_comparison(station, distance, monkey
     antiderivative as ``_pancake_flux`` calls it, so the assembly under test is
     the module's own two-ends difference rather than a copy of it in this file:
     a regression that adds the ends instead of subtracting them turns this
-    control into the reference value and fails it.
+    control into minus the reference value and fails it.
     """
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
@@ -569,3 +569,151 @@ def test_closed_root_is_the_elliptic_block():
     )
     got = float(sheet_module._closed_root(height, radius, source))
     assert got == pytest.approx(expected, rel=1e-14)
+
+
+def beyond_targets(angle):
+    """Targets past each end of the segment and on either side of its line.
+
+    The extension stations of ``target_set`` lie ON the supporting line, where
+    the closed form's antiderivative is regular; the far side of that line is
+    where ``r_1 + r b_1^2`` turns over.  These offset the extension point
+    broadside by each of the section's standoffs in both directions, so the set
+    covers both sides of the line beyond both ends.
+    """
+    direction = np.array([np.cos(angle), np.sin(angle)])
+    normal = np.array([direction[1], -direction[0]])
+    start = CENTRE - 0.5 * LENGTH * direction
+    end = CENTRE + 0.5 * LENGTH * direction
+    targets = []
+    for distance in DISTANCES:
+        for lateral in (-distance, distance):
+            for anchor, sign in ((end, 1.0), (start, -1.0)):
+                point = anchor + sign * distance * direction + lateral * normal
+                targets.append(
+                    reference.Target(
+                        distance=float(distance),
+                        station="beyond",
+                        r=float(point[0]),
+                        z=float(point[1]),
+                        foot=0.5,
+                    )
+                )
+    return targets
+
+
+def sheet_pair(angle, target, order="forward", **kwargs):
+    """The closed-form flux and field at one target, in the given order."""
+    start, end, _ = frame(angle)
+    if order == "reversed":
+        start, end = end, start
+    return (
+        sheet_flux(target.r, target.z, start, end, **kwargs),
+        sheet_field(target.r, target.z, start, end, **kwargs),
+    )
+
+
+GRID_RADII = tuple(np.linspace(0.05, 3.0, 7))
+GRID_HEIGHTS = tuple(np.linspace(-1.0, 1.0, 9))
+"""A coarse box around the segment, reaching well past both of its ends."""
+
+GRID_PARAMS = tuple(
+    pytest.param(angle, float(r), float(z))
+    for angle in SLOPED
+    for r in GRID_RADII
+    for z in GRID_HEIGHTS
+)
+
+BEYOND_PARAMS = tuple(
+    pytest.param(angle, side, lateral, distance, order)
+    for angle in SLOPED
+    for side in ("end", "start")
+    for lateral in (-1.0, 1.0)
+    for distance in DISTANCES
+    for order in ("forward", "reversed")
+)
+"""Beyond an end on either side of the line, at every standoff and orientation."""
+
+NEAR_FIELD_FLOOR = 1e-9
+"""The closed route's floor at the half-cell standoff, where the two ends cancel."""
+
+
+def beyond_target(angle, side, lateral, distance):
+    """A target past one end, offset broadside by ``distance`` to either side."""
+    direction = np.array([np.cos(angle), np.sin(angle)])
+    normal = np.array([direction[1], -direction[0]])
+    start = CENTRE - 0.5 * LENGTH * direction
+    end = CENTRE + 0.5 * LENGTH * direction
+    anchor, sign = (end, 1.0) if side == "end" else (start, -1.0)
+    point = anchor + sign * distance * direction + lateral * distance * normal
+    return reference.Target(
+        distance=float(distance),
+        station="beyond",
+        r=float(point[0]),
+        z=float(point[1]),
+        foot=0.5,
+    )
+
+
+def assert_field_matches(got, expected):
+    """Both components at the floor, measured against the vector's own scale.
+
+    The field is one vector, so each component is held to ``TOLERANCE`` of the
+    larger one.  Dividing a component by itself instead would turn a
+    cancellation residue -- the radial component where it is a thousandth of
+    the vertical, or an exact symmetry zero -- into an unbounded relative
+    requirement on two independently rounded numbers.
+    """
+    scale = max(abs(component) for component in expected)
+    for value, reference_value in zip(got, expected, strict=True):
+        assert np.isfinite(value)
+        error = abs(value - reference_value)
+        assert error <= TOLERANCE * scale, (
+            f"measured {error / scale:.2e} of the field scale "
+            f"against the {TOLERANCE:.0e} floor"
+        )
+
+
+@pytest.mark.parametrize(
+    ("angle", "side", "lateral", "distance", "order"), BEYOND_PARAMS
+)
+def test_beyond_the_ends_matches_reference(angle, side, lateral, distance, order):
+    """Beyond an end, on either side of the line: finite and at the floor.
+
+    The fixed target set places its beyond-the-end targets ON the supporting
+    line, where the antiderivative is regular.  Off that line the phi = 0
+    curvature scale ``r (r_1 + r b_1^2)`` turns negative, and an unsigned
+    square root of it returns NaN for the whole target; the closed form must
+    stay finite and correct there on both parameterisations of the segment.
+    """
+    start, end, _ = frame(angle)
+    target = beyond_target(angle, side, lateral, distance)
+    converged = reference.sheet_reference(target, start, end)
+    assert converged.converged, "the reference did not converge at a beyond-end target"
+    flux, (b_r, b_z) = sheet_pair(angle, target, order)
+    assert np.isfinite(flux)
+    # The antiderivative is differenced between the two ends, and at the
+    # half-cell standoff that difference cancels five digits: the pole-reduced
+    # route then meets 1e-9 while the graded cross-check still meets 1e-10.
+    floor = TOLERANCE if distance > DISTANCES[0] else NEAR_FIELD_FLOOR
+    assert abs(flux - converged.psi) <= floor * abs(converged.psi)
+    assert_field_matches((b_r, b_z), (converged.br, converged.bz))
+
+
+@pytest.mark.parametrize(("angle", "r", "z"), GRID_PARAMS)
+def test_grid_matches_reference(angle, r, z):
+    """The closed form over a box around the segment: finite and at the floor.
+
+    The box reaches from just off the axis to three metres out and past both
+    ends of the segment on all four sides, so it crosses the region a cell
+    interaction matrix samples rather than only the section's twelve fixed
+    targets.
+    """
+    start, end, _ = frame(angle)
+    target = reference.Target(0.0, "grid", r, z, 0.5)
+    converged = reference.sheet_reference(target, start, end)
+    assert converged.converged, "the reference did not converge on the grid"
+    flux = sheet_flux(target.r, target.z, start, end)
+    field = sheet_field(target.r, target.z, start, end)
+    assert np.isfinite(flux)
+    assert abs(flux - converged.psi) <= TOLERANCE * abs(converged.psi)
+    assert_field_matches(field, (converged.br, converged.bz))

@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "the node's write paths exclude tests/; the support-mask node binds fields through the same declared order and asserts the polish before use",
       "recorded_at": "2026-11-08T09:49:50.245279+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "formatter re-wrapping on files the node had to touch; behaviour unchanged",
+      "recorded_at": "2026-11-08T09:50:08.830321+00:00"
     }
   },
   "findings": [

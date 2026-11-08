@@ -1,56 +1,68 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-08T01:22:14.403Z",
   "dispatched_at": "2026-11-08T00:58:57Z",
+  "figure_checks": {
+    "clipping": "Non-white pixels in the outer 1 px, 2 px and 3 px frame of each 535x574 render: 0, 0 and 0 on all four. Nothing is clipped at the canvas edge.",
+    "colour inventory": "Quantised colours present in every figure: white background, black (#000000, legend text plus the wall rectangle), blue #3366cc (contours), grey #929292 (EFIT boundary), dark red #cc0000 (the two null marks, 122 core pixels per figure) and antialias greys. There is no third data series and no fill.",
+    "encoding": "Contour levels are linspace(min + 0.1*span, max - 0.1*span, 7) over the finite flux grid, so the sign of the level decides the line style. Negative-level counts: frame 179 7 of 7, frame 44 4 of 7, frame 144 6 of 7, frame 137 4 of 7. Longest continuous vertical blue run, measured on the rasters: 179 13 px, 44 80 px, 144 115 px, 137 87 px - confirming that frame 179 is entirely dashed and the other three carry solid stretches.",
+    "legend": "One frameless legend per figure, positioned outside the panel to the right (ink rows y 27-75). It carries exactly two entries, 'solved flux' (solid #3366cc) and 'EFIT boundary' (dashed #929292) - line 79-89 of the drawing script builds the key and no other series is listed, so the wall and both null marks are unlabelled.",
+    "panel_geometry": "The only straight outline in each panel is the wall rectangle, located on the raster at x 26-289, y 39-534 (aspect 0.532). The artifact's wall array holds 132 points whose coordinates take 34 distinct R and 34 distinct Z values, all on the bounding rectangle R 0.806-2.574, Z -1.664-1.664.",
+    "render_provenance": "Each of the four named PNGs was extracted from the reviewed head (`git show da9c18d8f:docs/figures/diiid-stopping-rule-fix/<name>.png`) into the run scratch directory and opened with Read as an image. Files are PNG RGBA 535x574, consistent with the drawing script's figsize (14, 7.2), dpi=100 and bbox_inches='tight'. The reviewed run's record does not list the four PNGs among its artifacts and its landing.md states 'Figures are not written by this node'; the head tree carries them and the fragment embeds them, so the figures were reviewed from the head's committed blobs."
+  },
   "figures": [
     {
+      "delivered_size": "535x574 px, RGBA",
       "path": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
       "rubric": {
-        "contrast": "pass \u2014 black legend text and blue lines on white; the grey #929292 reference line holds about three to one",
-        "data_ink": "pass \u2014 blue contour lines and one grey reference line, no filled regions. About five percent of the panel is grey/blue mark and the rest is white",
-        "decoration": "pass \u2014 no gradient, no background fill, no shading, no gridlines or tick labels",
-        "label_collision": "pass \u2014 the legend sits outside the panel in clear white space, and the ink bounding box (x 25-516, y 27-535 of 535x574) sits inside the canvas, so nothing is clipped",
-        "legibility": "pass \u2014 the closed core contours and the grey EFIT boundary are distinguishable at the delivered size; the dashed/solid blue mix is recorded as a separate finding",
-        "table_form": "pass \u2014 a poloidal flux map is spatial and could not be given as a table"
+        "contrast": "pass - black legend text on white; the blue #3366cc strokes are about 5.9:1 and the grey #929292 reference about 3.0:1 against white",
+        "data_ink": "pass - blue contour strokes, one grey reference line and two small markers on white; no filled regions, gradients or shading",
+        "decoration": "pass - the axes are off (no spines, ticks, tick labels or gridlines); the only straight ink is the wall rectangle",
+        "label_collision": "pass - the legend sits in clear white space to the right of the panel (legend ink rows y 27-75, panel starts y 39), and the ink bounding box (x 25-516, y 27-535) is inside the 535x574 canvas",
+        "legibility": "pass - the closed core contours, the grey EFIT boundary and the red axis triangle and saddle asterisk read at the delivered size; the contour line-style mix is recorded as a separate finding",
+        "table_form": "pass - a poloidal flux map is a spatial relationship and is not tabulable"
       },
-      "verdicts": "pass \u2014 readable, but the panel carries no machine geometry: the only straight outline is the recorded wall rectangle and the real DIII-D limiter is absent"
+      "verdicts": "pass, with one blocking finding against the shared panel geometry: no machine geometry is drawn, so the reader cannot see where the terminal state sat relative to the limiter"
     },
     {
+      "delivered_size": "535x574 px, RGBA",
       "path": "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
       "rubric": {
-        "contrast": "pass \u2014 black legend text on white",
-        "data_ink": "pass \u2014 contour lines carry the weight; no fills, gradients or shading",
-        "decoration": "pass \u2014 nothing ornamental on the panel",
-        "label_collision": "pass \u2014 the admitted saddle marker clears the panel top edge by ten pixels without being clipped, and the legend clears the data",
-        "legibility": "pass \u2014 the nested closed contours and the near-circular EFIT boundary read at a glance",
-        "table_form": "pass \u2014 spatial data, not a table"
+        "contrast": "pass - black legend text on white, series colours as above",
+        "data_ink": "pass - contour strokes and one reference line carry the weight; no fills or shading",
+        "decoration": "pass - no gradient, background fill, gridline or tick furniture",
+        "label_collision": "pass - the saddle marker clears the panel top edge by about ten pixels without being clipped, and the legend clears the data",
+        "legibility": "pass - the nested closed core contours and the near-circular grey EFIT boundary read at a glance",
+        "table_form": "pass - spatial field, not a table"
       },
-      "verdicts": "pass \u2014 readable; the same missing limiter applies, and the ten-pixel margin above the saddle marker is the tightest in the set but not a clip"
+      "verdicts": "pass, with the same blocking finding on the absent limiter; this panel is the tightest of the four for marker margin but nothing is clipped"
     },
     {
+      "delivered_size": "535x574 px, RGBA",
       "path": "docs/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png",
       "rubric": {
-        "contrast": "pass \u2014 black text on white",
-        "data_ink": "pass \u2014 contours and one reference line; no fills",
-        "decoration": "pass \u2014 no gradient, background fill or shading",
-        "label_collision": "pass \u2014 legend outside the panel, markers clear of the edges, nothing clipped",
-        "legibility": "pass \u2014 the vertically elongated core and the dashed EFIT oval are readable, though five contours on the right side sit close together",
-        "table_form": "pass \u2014 a spatial field, not a table"
+        "contrast": "pass - black legend text on white",
+        "data_ink": "pass - contours and one reference line; no fills",
+        "decoration": "pass - no gradient, background fill or shading",
+        "label_collision": "pass - legend outside the panel, both markers clear of the edges, nothing clipped",
+        "legibility": "pass - the vertically elongated core contour and the grey EFIT oval are readable, though six of the seven contour levels fall in a dense band on the right side",
+        "table_form": "pass - a spatial field, not a table"
       },
-      "verdicts": "pass \u2014 readable; the worst-residual arm is visibly the one whose contours sit furthest from the EFIT boundary, as its caption says"
+      "verdicts": "pass, with the same blocking finding on the absent limiter; the worst-residual arm is visibly the one whose solved contour sits furthest from the EFIT boundary, as its caption states"
     },
     {
+      "delivered_size": "535x574 px, RGBA",
       "path": "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png",
       "rubric": {
-        "contrast": "pass \u2014 black text on white",
-        "data_ink": "pass \u2014 line contours carry the weight",
-        "decoration": "pass \u2014 no gradient, fill or shading",
-        "label_collision": "pass \u2014 the saddle marker sits eighty-four pixels above the bottom edge and the legend is clear of the data",
-        "legibility": "pass \u2014 the core contours, the EFIT boundary and both null markers read at a glance",
-        "table_form": "pass \u2014 spatial data, not a table"
+        "contrast": "pass - black legend text on white",
+        "data_ink": "pass - line contours carry the weight; no fills or shading",
+        "decoration": "pass - no gradient, background fill or shading",
+        "label_collision": "pass - the saddle marker sits about eighty-four pixels above the bottom edge and the legend is clear of the data",
+        "legibility": "pass - the four nested core contours, the outer solved contour, the grey EFIT boundary and both red null markers read at a glance",
+        "table_form": "pass - spatial data, not a table"
       },
-      "verdicts": "pass \u2014 readable; the same missing limiter applies"
+      "verdicts": "pass, with the same blocking finding on the absent limiter; this is the arm whose Newton history the evidence page cites, and its promotion counts are published in the run record"
     }
   ],
   "figures_reviewed": [
@@ -65,55 +77,68 @@
       "id": "f32819706d3",
       "line": 72,
       "severity": "blocking",
-      "summary": "No machine geometry is drawn on any of the four panels, so a reader cannot see where the plasma sat relative to the wall. draw_wall is handed the artifact's `wall` array, and that array is the flux-grid bounding box, not the DIII-D limiter: all 132 points lie on its bounding rectangle (R 0.806-2.574, Z -1.664-1.664) against a grid of R 0.84-2.54, Z -1.6-1.6. The rendered result is a plain black rectangle inset in each panel that reads as a plot frame. The real limiter and the host_boundary_read bounding surface the brief required are absent, and because there are no axis labels either, nothing in the image maps a position to R or Z. The record this illustrates claims the terminals touch the upper limiter shelf near R=1.65 m, Z=+1.07 m, and the figure cannot show that."
+      "summary": "No machine geometry is drawn on any of the four panels, so a reader cannot see where the plasma sat relative to the wall. draw_wall is handed the artifact's `wall` array, and that array is the flux-grid bounding box rather than the DIII-D limiter: all 132 points lie on the rectangle's boundary (34 distinct R values, 34 distinct Z values, corners at (0.806,-1.664), (2.574,-1.664), (2.574,1.664), (0.806,1.664)). The rendered result is a plain black rectangle inset in each panel (raster x 26-289, y 39-534, aspect 0.532 against the wall's R:Z aspect 0.531), which reads as a plot frame rather than a vessel. The real limiter and the host_boundary_read bounding surface the brief required are absent, and with the axes off and no scale annotation nothing in the image maps a position to R or Z. The record these figures illustrate claims the terminals touch the upper limiter shelf near R=1.65 m, Z=+1.07 m; the figure cannot show that, which is the one comparison the panels exist to support."
     },
     {
       "file": "docs/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png",
       "id": "fa5767727a8",
       "line": null,
       "severity": "non-blocking",
-      "summary": "The blue contours are drawn in two line styles with no stated meaning: about half are dashed and half solid. Matplotlib dashes contours at negative levels by default, and the level sign here carries no physical distinction a reader would know. The legend offers one solid blue entry, 'solved flux', so the dashed curves are a visible mark style the key does not describe. The same applies to all four panels."
+      "summary": "The blue contours are drawn in two line styles with no stated meaning, and in this panel the legend describes a style that is not present. Every contour here is dashed: all seven levels are negative (levels -4.199 to -0.630), and matplotlib dashes contours at negative levels by default, which the raster confirms (longest continuous vertical blue run 13 px, a dash length, against 80-115 px solid stretches in the other three panels). The legend offers a single solid blue 'solved flux' entry, so on this panel the key's blue sample has no counterpart in the plotted data and the dashed curves are a visible mark style the key never explains. Across the set (137 and 44 have four of seven levels negative, 144 has six) the solid-to-dashed switch runs through one field, so the style reads as an encoding but carries no meaning a reader can recover."
     },
     {
       "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
-      "id": "f908d015099",
-      "line": 44,
+      "id": "f248be178bc",
+      "line": 73,
       "severity": "non-blocking",
-      "summary": "The two null markers are drawn but never identified. Each panel carries one filled red triangle (axis) and one filled red cross (admitted saddle), with no legend entry, and only the frame-179 caption names them: the captions for frames 44, 144 and 137 do not. A reader therefore cannot tell the solved axis and saddle from the EFIT X-point, and the brief asked for both null sets to be shown while only one set is drawn."
+      "summary": "The two null markers are drawn but never identified, and only one null set is plotted. Each panel carries one filled red triangle and one filled red asterisk in the same #cc0000, with no legend entry, and only the frame-179 caption's prose mentions 'the axis and the admitted saddle' - without saying which mark is which. The captions for frames 44, 144 and 137 do not mention them at all. The brief asked for both null sets, and the EFIT X-point is absent entirely: draw_nulls receives only the solved arm's axis and saddle, so the solved (limited) and reference (diverted) topology cannot be compared at their nulls."
+    },
+    {
+      "file": "docs/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png",
+      "id": "f4c3cd7369d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "This figure's caption asserts 'the only arm where Newton promotions are accepted', which the run's own record contradicts at the same head: landing.md records frame 146 diverted with 48 attempted and 48 accepted promotions over four trips. The claim was true of the five-frame table it was written beside, before the 146 arm was recovered, and it was not updated when the fragment was revised. A reader who reaches the residual table after the figure meets a different count, and frame 44's caption ('Frame 44, limited seed, terminal residual 0.197.') is a bare residual line that also leaves the encoding unstated. The caption text is not changed by this review."
     },
     {
       "file": "docs/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png",
       "id": "f72b287e9d0",
       "line": null,
       "severity": "non-blocking",
-      "summary": "More than half of each delivered image is empty white space: the data panel occupies x 26-289 of a 535-pixel-wide canvas, and the figure is a portrait panel in a landscape-sized canvas. The quoted-panel content is a small part of what the evidence page displays. This is layout waste rather than a reading defect, and it applies to all four panels."
+      "summary": "More than half of each delivered image is empty white space: the data panel occupies x 26-289 of a 535-pixel-wide canvas, the legend ends by y 75, and about 92 percent of every row below the legend is blank. The figure is a portrait panel rendered into the landscape canvas declared in the drawing script (14 x 7.2 in), and bbox_inches='tight' then crops to 535x574 px, so the delivered raster is 27 percent of the 1400-pixel width the house style specifies. This is layout waste rather than a reading defect - the legend text at 14 pt is legible at the delivered size - and it applies to all four panels."
     }
   ],
   "item_verdicts": {
-    "frame-137-diverted-terminal.png:contrast": "pass \u2014 black text on white",
-    "frame-137-diverted-terminal.png:data_ink": "pass \u2014 line contours carry the weight",
-    "frame-137-diverted-terminal.png:decoration": "pass \u2014 no gradient, fill or shading",
-    "frame-137-diverted-terminal.png:label_collision": "pass \u2014 saddle marker and legend both clear of the data",
-    "frame-137-diverted-terminal.png:legibility": "pass \u2014 core contours, EFIT boundary and both markers read at a glance",
-    "frame-137-diverted-terminal.png:table_form": "pass \u2014 spatial data, not a table",
-    "frame-144-diverted-terminal.png:contrast": "pass \u2014 black text on white",
-    "frame-144-diverted-terminal.png:data_ink": "pass \u2014 contours and one reference line, no fills",
-    "frame-144-diverted-terminal.png:decoration": "pass \u2014 no gradient, fill or shading",
-    "frame-144-diverted-terminal.png:label_collision": "pass \u2014 legend outside the panel, markers clear of the edges",
-    "frame-144-diverted-terminal.png:legibility": "pass \u2014 elongated core and dashed EFIT oval readable",
-    "frame-144-diverted-terminal.png:table_form": "pass \u2014 spatial field, not a table",
-    "frame-179-limited-terminal.png:contrast": "pass \u2014 black text on white, grey reference line above three to one",
-    "frame-179-limited-terminal.png:data_ink": "pass \u2014 blue contours carry the weight with no filled regions",
-    "frame-179-limited-terminal.png:decoration": "pass \u2014 no gradient, fill, shading or gridlines",
-    "frame-179-limited-terminal.png:label_collision": "pass \u2014 legend clear of data and nothing clipped",
-    "frame-179-limited-terminal.png:legibility": "pass \u2014 closed core contours and the EFIT boundary are distinguishable at the delivered size",
-    "frame-179-limited-terminal.png:table_form": "pass \u2014 a spatial flux map, not a table",
-    "frame-44-limited-terminal.png:contrast": "pass \u2014 black text on white",
-    "frame-44-limited-terminal.png:data_ink": "pass \u2014 contour lines carry the weight",
-    "frame-44-limited-terminal.png:decoration": "pass \u2014 nothing ornamental on the panel",
-    "frame-44-limited-terminal.png:label_collision": "pass \u2014 saddle marker clears the panel edge by ten pixels without clipping",
-    "frame-44-limited-terminal.png:legibility": "pass \u2014 nested contours and the EFIT boundary read at a glance",
-    "frame-44-limited-terminal.png:table_form": "pass \u2014 spatial data, not a table"
+    "frame-137-diverted-terminal.png:contrast": "pass - black text on white",
+    "frame-137-diverted-terminal.png:data_ink": "pass - line contours carry the weight",
+    "frame-137-diverted-terminal.png:decoration": "pass - no gradient, fill or shading",
+    "frame-137-diverted-terminal.png:label_collision": "pass - saddle marker and legend both clear of the data",
+    "frame-137-diverted-terminal.png:legibility": "pass - core contours, EFIT boundary and both markers read at a glance",
+    "frame-137-diverted-terminal.png:table_form": "pass - spatial data, not a table",
+    "frame-144-diverted-terminal.png:contrast": "pass - black text on white",
+    "frame-144-diverted-terminal.png:data_ink": "pass - contours and one reference line, no fills",
+    "frame-144-diverted-terminal.png:decoration": "pass - no gradient, fill or shading",
+    "frame-144-diverted-terminal.png:label_collision": "pass - legend outside the panel, markers clear of the edges",
+    "frame-144-diverted-terminal.png:legibility": "pass - elongated core and grey EFIT oval readable",
+    "frame-144-diverted-terminal.png:table_form": "pass - spatial field, not a table",
+    "frame-179-limited-terminal.png:contrast": "pass - black text on white, grey reference line about 3:1",
+    "frame-179-limited-terminal.png:data_ink": "pass - blue contours carry the weight with no filled regions",
+    "frame-179-limited-terminal.png:decoration": "pass - no gradient, fill, shading or gridlines",
+    "frame-179-limited-terminal.png:label_collision": "pass - legend clear of data and nothing clipped",
+    "frame-179-limited-terminal.png:legibility": "pass - readable; all seven contour levels are negative, so every flux curve is dashed, while the legend's 'solved flux' swatch is a solid blue line with no dashed counterpart in the key",
+    "frame-179-limited-terminal.png:table_form": "pass - a spatial flux map, not a table",
+    "frame-44-limited-terminal.png:contrast": "pass - black text on white",
+    "frame-44-limited-terminal.png:data_ink": "pass - contour lines carry the weight",
+    "frame-44-limited-terminal.png:decoration": "pass - nothing ornamental on the panel",
+    "frame-44-limited-terminal.png:label_collision": "pass - saddle marker clears the panel edge by about ten pixels without clipping",
+    "frame-44-limited-terminal.png:legibility": "pass - nested contours and the EFIT boundary read at a glance",
+    "frame-44-limited-terminal.png:table_form": "pass - spatial data, not a table"
+  },
+  "justifications": {
+    "durability": "This record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "The blocking finding is measured from the artifact the script loads (wall array on its bounding rectangle) and confirmed on the raster (a plain rectangle as the only straight ink). The line-style finding is measured two independent ways - contour level signs and continuous blue run lengths - because a style claim read by eye alone could not distinguish a dash from an antialiased thin curve.",
+    "legibility": "Every verdict was read from the delivered 535x574 raster, at native size and in 3x nearest-neighbour crops of the panel interior, the markers and the legend.",
+    "scope_discipline": "This review is read-only. No figure, caption, script or other repository file was edited, created, moved or reformatted; the only writes are this record at its two declared paths and the run manifest."
   },
   "project": "nova",
   "review_run_id": "r-20261108T004720072344-review-of-diiid-stopping-rule-fix-da9c18d8f93c-figure",
@@ -121,9 +146,35 @@
   "reviewed_head_sha": "da9c18d8f93c39042708c4e986c2757231b4857d",
   "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
   "rubric": "figure",
-  "scope_note": "Judged from the four rendered PNGs the evidence fragment embeds at docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:114-130, opened as rasters at their delivered size (535x574 px, 100 dpi). No SVG, and no other image, was opened. panel-test.png in the run directory is an unreferenced scratch render and was not read.",
+  "rubric_lines": [
+    "figure frame-179-limited-terminal.png / RUBRIC legibility: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC data_ink: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC decoration: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC contrast: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC table_form: pass",
+    "figure frame-179-limited-terminal.png / RUBRIC label_collision: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC legibility: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC data_ink: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC decoration: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC contrast: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC table_form: pass",
+    "figure frame-44-limited-terminal.png / RUBRIC label_collision: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC legibility: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC data_ink: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC decoration: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC contrast: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC table_form: pass",
+    "figure frame-144-diverted-terminal.png / RUBRIC label_collision: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC legibility: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC data_ink: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC decoration: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC contrast: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC table_form: pass",
+    "figure frame-137-diverted-terminal.png / RUBRIC label_collision: pass"
+  ],
+  "scope_note": "Judged from the four rendered PNGs the evidence fragment embeds (docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:113-131), extracted from the reviewed head to a scratch directory and opened as rasters at their delivered size (535x574 px). No SVG and no other image was opened or rendered. panel-test.png in the run directory is an unreferenced scratch render and was not read.",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-08T01:16:38.987065+00:00",
+  "timestamp": "2026-11-08T01:43:24.400824+00:00",
   "total": null
 }

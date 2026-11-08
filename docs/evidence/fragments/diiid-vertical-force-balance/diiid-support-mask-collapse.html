@@ -1,0 +1,121 @@
+<section id="diiid-support-mask-collapse">
+<h2>The support does not empty: zero counts changes</h2>
+<p><strong>The alleged support-mask collapse does not reproduce.</strong>
+The fresh production reads below retain 345, 10 and 298 axis-connected cells.
+The sequence <code>25 → 0</code> is a history of changed entries, not a history
+of support sizes. At <code>nova/equilibrium/forward.py:2745–2748</code>, the
+receipt's <code>mask_history</code> is assigned from
+<code>history.active_set_mask_differences</code>. The active-set implementation
+counts changed labels and support memberships at
+<code>nova/equilibrium/fixed_point.py:4646–4657</code>. A zero therefore says
+that the partition stopped changing; it does not say that no cells remain.</p>
+
+<h3>The actual support construction</h3>
+<p>The diagnostic unwraps only the outer JIT of the production
+<code>Topology.read_qualification</code> and captures that function's local
+values on return with a host trace. Its subordinate product kernels execute
+normally. The operator performs both its original-material read and its rescue
+read; their material and connected counts agree in every measured case. No
+product source, comparison, boundary selector or flood was replaced.</p>
+<p>The closed-region test <em>is</em> the boundary-flux comparison:
+<code>closed = self.psi_mask(...)</code> at
+<code>nova/equilibrium/topology.py:1334–1339</code>. There is no intervening
+independent geometric closed-region test. The next stage intersects this result
+with material at <code>topology.py:945</code>, then grows the axis-connected
+component through the call at <code>topology.py:1340–1352</code>. None of these
+stages reaches zero.</p>
+<table>
+<caption>Full solver states, fresh H200 processes. Trips in this table count
+executed trips starting at one. The material mask is the actual product mask;
+the governed physical limiter is an additional geometric reference.</caption>
+<thead><tr><th>frame / seed / executed trips</th><th>material</th>
+<th>closed flux test</th><th>material ∩ closed</th><th>axis-connected flood</th>
+<th>connected centres inside physical limiter</th></tr></thead>
+<tbody>
+<tr><td>179 limited / 1</td><td>1089</td><td>401</td><td>401</td><td>345</td><td>343</td></tr>
+<tr><td>146 diverted / 3</td><td>1089</td><td>10</td><td>10</td><td>10</td><td>0</td></tr>
+<tr><td>137 diverted / 1</td><td>1089</td><td>319</td><td>319</td><td>298</td><td>293</td></tr>
+<!-- supplementary-count-row -->
+</tbody></table>
+<p>For 179, the new one-trip flux grid is bit-identical to both the archived
+one-trip staged grid and the archived two-trip default grid: maximum difference
+<strong>0 Wb</strong>. The archived default receipt carries
+<code>mask_history=[25,0]</code> beside <code>closed_core_cells=345</code>.
+That contradiction is present in the original evidence input itself.</p>
+
+<table>
+<caption>Operands captured at the same production seam. Flux values are Wb.
+All measured polarities are +1, so <code>psi_mask</code> requires
+<code>comparison_flux ≥ boundary_flux + uncertainty</code>
+(<code>topology.py:843–850</code>).</caption>
+<thead><tr><th>case</th><th>axis flux</th><th>boundary flux</th>
+<th>uncertainty</th><th>effective threshold</th>
+<th>comparison flux at axis cell</th><th>polarity</th><th>axis cell passes</th></tr></thead>
+<tbody>
+<tr><td>179 limited / 1</td><td>−0.183119575629</td><td>−1.547567575041</td><td>0.002263015472</td><td>−1.545304559570</td><td>−0.183796850866</td><td>+1</td><td>yes</td></tr>
+<tr><td>146 diverted / 3</td><td>6.410956859070</td><td>4.371725741073</td><td>0</td><td>4.371725741073</td><td>6.084928450792</td><td>+1</td><td>yes</td></tr>
+<tr><td>137 diverted / 1</td><td>2.009789955199</td><td>0.304144600320</td><td>0.026680020370</td><td>0.330824620690</td><td>1.995031827271</td><td>+1</td><td>yes</td></tr>
+<!-- supplementary-operand-row -->
+</tbody></table>
+
+<h3>What differs on 146, and what would fix the report</h3>
+<p>146 does lose its physical plasma location. Its reported axis at
+R = 1.2303 m, Z = 1.5595 m polishes with zero displacement, but lies above the
+physical limiter. All ten connected cell centres are outside that limiter.
+This is spatial displacement of a nonempty support. It is distinct from an
+empty flood. The one-trip Newton control, 137 diverted, retains 298 cells while
+attempting 24 and accepting 14 Newton promotions; 146 after three trips has
+attempted and accepted 48. Neither observation supports the claim that Newton
+stops because the support is empty.</p>
+<p><strong>The justified change is to the diagnostic interpretation:</strong>
+name the history column <code>changed_mask_entries</code> and publish a separate
+<code>support_cell_count = connected.sum()</code>. No support-construction
+repair is justified by these traces. The nonconverged residual plateau is real,
+but its cause is not established by this investigation.</p>
+<p>The historical phrase “146 trip 3, 1 → 0” mixes zero-based history slots with
+executed-trip counts: after three executed trips the history is
+<code>[27,40,1]</code>; slot 3 is the fourth executed trip. A supplementary
+full-state trace covers that settled slot explicitly.</p>
+
+<h3>Fields and masks</h3>
+<p>Each figure shows the actual captured masks as outlines of the product's
+rectangular control polygons. These are data, not decorative gridlines. Both
+fields use the same union of five physical contour levels from each field's
+axis-to-boundary interval; no gauge shift is applied. The table compares each
+solve with its own boundary anchors. The limiter is the governed DIII-D ring.
+Solved axes are solid triangles; an admitted solved saddle is a filled cross,
+and an unselected recorded saddle is hollow. Reference null markers are hollow and are polished from the native stored
+EFIT fields; all reference axis/saddle pairs qualify on those fields.
+All solver fields are explicitly bound to <code>FluxLattice</code>'s
+radius-height storage order. Every reported solver axis polishes with
+<strong>0 m</strong> displacement, below the 0.053125 m minimum lattice pitch.</p>
+<figure><img src="/nova/figures/diiid-support-mask-collapse/frame-179-limited-trip-1.svg" alt="Four support stages for frame 179 limited, retaining 345 cells">
+<figcaption>179 limited, one executed trip. 1089 → 401 → 401 → 345 cells;
+residual 0.0272618, converged false. The flood removes disconnected candidates
+while retaining the central component.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-support-mask-collapse/frame-146-diverted-trip-3.svg" alt="Frame 146 retains ten connected cells above the physical limiter">
+<figcaption>146 diverted, three executed trips. 1089 → 10 → 10 → 10 cells;
+residual 0.0651490, converged false. The support remains above the vessel while
+the reference field stays centred inside it.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-support-mask-collapse/frame-137-diverted-trip-1.svg" alt="Newton control frame 137 retains 298 axis-connected cells">
+<figcaption>137 diverted, one executed trip. 1089 → 319 → 319 → 298 cells;
+residual 0.129858, converged false; 24 attempted and 14 accepted Newton
+promotions. This is a capped intermediate state, not the default terminal.</figcaption></figure>
+<!-- supplementary-figure -->
+
+<h3>Reproduction and checks</h3>
+<p>Driver: <code>scripts/prototypes/diiid_support_mask/trace_support.py</code>;
+renderer: <code>render_support.py</code>; focused evidence gate:
+<code>check_capture.py</code>. Full-state NPZ files and JSON operands live in
+<code>~/.config/reckon/crew/runs/r-20261108T083707890841-diiid-support-mask-collapse/trace/</code>.
+The three-case batch is H200 job 1308370, completed with exit 0. It uses the
+stopping-rule probe's builder and public registered solve request, one fresh
+process per frame.</p>
+<p>The gate's empty-support control replaces the first captured connected mask
+and its recorded count with zeros in memory. It reaches the support check and
+refuses with <code>AssertionError: empty stage: ... axis_connected: 0</code>,
+exit 1. The initial control attempt stopped at a probe-only source-inspection
+error, before the support check; that log is preserved separately and is not
+counted as the negative control. The final gate and render logs are in the
+run-owned landing record.</p>
+</section>

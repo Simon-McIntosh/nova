@@ -8,6 +8,8 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
+import jax
+import jax.numpy as jnp
 import matplotlib
 
 matplotlib.use("Agg")
@@ -20,6 +22,9 @@ from scipy.interpolate import RegularGridInterpolator
 
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.forward import _lattice_cells
+from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+from nova.jax.config import configure_dtypes
+from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_nulls, draw_wall
 
@@ -36,6 +41,26 @@ def render(archive, output, previews):
     flux = arrays["flux"]
     assert flux.shape == (radius.size, height.size)
     cells = np.asarray(_lattice_cells(FluxLattice(radius, height)))
+    reference_surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(arrays["label"].T)
+    )
+    reference_roots = polish_stationary_points(
+        reference_surface,
+        jnp.asarray(np.vstack((arrays["reference_axis"], arrays["reference_saddle"]))),
+        jnp.ones(2, bool),
+    )
+    qualified = np.array(reference_roots["converged"], dtype=bool, copy=True)
+    qualified[1] &= int(reference_roots["hessian_type"][1]) < 0
+    reference_points = np.where(
+        qualified[:, None],
+        np.asarray(reference_roots["position_rz"]),
+        np.vstack((arrays["reference_axis"], arrays["reference_saddle"])),
+    )
+    print(
+        f"REFERENCE NULLS {archive.stem}: qualified={qualified.tolist()} "
+        f"positions={reference_points.tolist()}",
+        flush=True,
+    )
     material, closed = arrays["inside_material"], arrays["closed"]
     stages = (
         ("material", material),
@@ -108,8 +133,8 @@ def render(archive, output, previews):
         before = len(ax.lines)
         draw_nulls(
             ax,
-            magnetic_axis=arrays["reference_axis"],
-            other_x_points=arrays["reference_saddle"][None],
+            magnetic_axis=reference_points[0],
+            other_x_points=reference_points[1][None],
             style=reference,
         )
         for line in ax.lines[before:]:
@@ -169,7 +194,7 @@ def render(archive, output, previews):
             marker="X",
             mfc="none",
             ls="none",
-            label="EFIT boundary low point",
+            label=("EFIT saddle" if qualified[1] else "EFIT saddle seed"),
         ),
     ]
     figure.legend(
@@ -211,6 +236,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
     args = parser.parse_args()
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
     for archive in sorted(args.input.glob("frame-*.npz")):
         render(archive, args.output / archive.with_suffix(".svg").name, args.previews)
 

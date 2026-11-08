@@ -16,6 +16,13 @@
   "figures_reviewed": [
     "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panel-captions",
+      "recorded_at": "2026-11-08T00:29:12.193458+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: a caption repair on this run's record should replace the level band in this block with 0.341576 / -0.122368 Wb, read from converged-vs-nonconverged.json level_band.",

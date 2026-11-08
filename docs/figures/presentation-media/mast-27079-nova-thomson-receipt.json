@@ -3,20 +3,20 @@
   "boundary_hold_tolerance_m": 0.03968085207837693,
   "boundary_wall_gap_mm": {
     "diverted": {
-      "count": 63,
+      "count": 64,
       "max_mm": 160.28176511670566,
-      "median_mm": 80.27394826425417
+      "median_mm": 80.07544143500665
     },
     "limited": {
-      "count": 26,
+      "count": 27,
       "max_mm": 0.10501660024420102,
-      "median_mm": 0.06259302774828945
+      "median_mm": 0.07103489316789835
     },
     "note": "a limited boundary must touch its limiter, so a limited gap above the solve pitch is a defect; the diverted gap is expected"
   },
-  "bytes": 4921539,
+  "bytes": 5313595,
   "contact_sheet": {
-    "bytes": 1136238,
+    "bytes": 1115410,
     "columns": 3,
     "path": "docs/figures/presentation-media/mast-27079-nova-thomson-frames.png",
     "rows": 2,
@@ -27,10 +27,10 @@
     "tile_indices": [
       0,
       18,
-      35,
-      53,
-      70,
-      88
+      36,
+      54,
+      72,
+      90
     ],
     "tiles": 6
   },
@@ -57,7 +57,7 @@
     ],
     "trace": "level set at normalised flux 0.9999 enclosing the axis on a 8x bicubic refinement, clipped to the limiter; where none closes inside the wall, the edge of the axis-connected region",
     "trace_routes": {
-      "smooth level set": 93
+      "smooth level set": 95
     }
   },
   "frame_milliseconds": [
@@ -76,32 +76,18 @@
     100,
     50,
     50,
-    100,
-    50,
-    50,
-    100,
-    100,
-    50,
-    50,
-    50,
-    50,
-    50,
-    50,
     50,
     50,
     50,
     50,
     100,
-    50,
-    50,
-    100,
-    100,
-    100,
     100,
     50,
     50,
-    100,
-    100,
+    50,
+    50,
+    50,
+    50,
     50,
     50,
     50,
@@ -112,9 +98,25 @@
     100,
     100,
     100,
+    100,
     50,
     50,
     100,
+    100,
+    50,
+    50,
+    50,
+    50,
+    100,
+    50,
+    50,
+    100,
+    100,
+    100,
+    50,
+    50,
+    50,
+    50,
     100,
     50,
     50,
@@ -151,10 +153,10 @@
     100,
     50
   ],
-  "frames": 89,
-  "frames_converged": 60,
-  "frames_diverted": 63,
-  "frames_drawn": 89,
+  "frames": 91,
+  "frames_converged": 62,
+  "frames_diverted": 64,
+  "frames_drawn": 91,
   "frames_dropped_unbounded": [
     {
       "class": "diverted",
@@ -185,10 +187,10 @@
       "x_point_gap_mm": 288.44021382453144
     }
   ],
-  "frames_limited": 26,
+  "frames_limited": 27,
   "left_panel": "free-boundary forward solve per EFIT slice: hex plasma cells cut at the solved boundary, nested surfaces, boundary, axis and selected saddle",
   "machine": "MAST",
-  "other_x_points_drawn": 26,
+  "other_x_points_drawn": 27,
   "path": "docs/figures/presentation-media/mast-27079-nova-thomson.gif",
   "plasma_contours_per_frame": [
     1,
@@ -229,7 +231,7 @@
   ],
   "solved_edge_drawn": true,
   "thomson_edge": {
-    "frames_resolved": 78,
+    "frames_resolved": 80,
     "model": "uncertainty-weighted mtanh fit of the outboard electron temperature of every system pooled; edge where the fit falls through 40 eV, the two-point-model upstream separatrix temperature",
     "solved_minus_thomson_m": [
       0.1265787848476947,
@@ -248,6 +250,7 @@
       0.033194662545707354,
       0.04390303569440568,
       0.016356715558618617,
+      0.001153050189474758,
       -0.00026877410548142855,
       -0.017919768644116152,
       0.01731947576476256,
@@ -282,6 +285,7 @@
       0.03448239868524672,
       0.02751711314628391,
       0.016610162874740375,
+      0.013862054437966176,
       0.019259229721783955,
       0.030800208319919253,
       0.027310137668967505,
@@ -333,7 +337,7 @@
         "stored_row_count": 141,
         "usable_sample_fraction": 0.9065562232689081
       },
-      "resolved_samples_drawn": 9718,
+      "resolved_samples_drawn": 9945,
       "rows": 141,
       "value_limit": [
         2.5580186247825623,
@@ -359,7 +363,7 @@
         "stored_row_count": 282,
         "usable_sample_fraction": 0.9521276595744681
       },
-      "resolved_samples_drawn": 328,
+      "resolved_samples_drawn": 333,
       "rows": 141,
       "value_limit": [
         17.843132853507996,
@@ -379,5 +383,5 @@
     "rule": "each frame held for the pulse-time gap to the next slice",
     "slowdown": 10.0
   },
-  "x_points_drawn": 63
+  "x_points_drawn": 64
 }

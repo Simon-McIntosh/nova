@@ -77,7 +77,7 @@ def slide_view(extent, style):
     from nova.media.layout import ThreeView
 
     r_min, r_max, z_min, z_max = (float(value) for value in extent)
-    inset, gap, right, bottom, between = 0.1, 1.5, 0.3, 0.9, 0.55
+    inset, gap, right, bottom = 0.1, 1.5, 0.3, 0.9
     panel_height = SLIDE_HEIGHT - 2 * inset
     panel_width = panel_height * (r_max - r_min) / (z_max - z_min)
     figure = matplotlib.figure.Figure(
@@ -95,8 +95,8 @@ def slide_view(extent, style):
     )
     column_left = inset + panel_width + gap
     column_width = SLIDE_WIDTH - column_left - right
-    graph_height = (SLIDE_HEIGHT - TITLE_ROOM - bottom - between) / 2
-    lower = figure.add_axes(
+    graph_height = SLIDE_HEIGHT - TITLE_ROOM - bottom
+    upper = figure.add_axes(
         (
             column_left / SLIDE_WIDTH,
             bottom / SLIDE_HEIGHT,
@@ -104,14 +104,9 @@ def slide_view(extent, style):
             graph_height / SLIDE_HEIGHT,
         )
     )
-    upper = figure.add_axes(
-        (
-            column_left / SLIDE_WIDTH,
-            (bottom + graph_height + between) / SLIDE_HEIGHT,
-            column_width / SLIDE_WIDTH,
-            graph_height / SLIDE_HEIGHT,
-        )
-    )
+    # ThreeView carries a second graph; this slide has one, so the second is
+    # a hidden placeholder that is never drawn.
+    lower = figure.add_axes((0.0, 0.0, 1e-3, 1e-3))
     return ThreeView(
         figure=figure,
         poloidal=poloidal,
@@ -234,6 +229,19 @@ def render_thomson(
         )
 
     scales = {string.name: pulse_scale(string) for string in strings}
+    # The one panel's scale covers every system: the wider radial span and the
+    # wider value range of the per-system scales.
+    scale = replace(
+        scales[strings[0].name],
+        x_limit=(
+            min(item.x_limit[0] for item in scales.values()),
+            max(item.x_limit[1] for item in scales.values()),
+        ),
+        y_limit=(
+            min(item.y_limit[0] for item in scales.values()),
+            max(item.y_limit[1] for item in scales.values()),
+        ),
+    )
 
     # The measured edge comes from the electron temperature of every system
     # pooled, whichever quantity the panels show: it is one physical edge.
@@ -312,8 +320,8 @@ def render_thomson(
     def render(index: int) -> None:
         frame = frames[index]
         view.clear()
-        for axes in (view.upper, view.lower):
-            axes.tick_params(labelsize=SLIDE_TICK_FONTSIZE)
+        view.lower.set_visible(False)
+        view.upper.tick_params(labelsize=SLIDE_TICK_FONTSIZE)
         pol.draw_plasma_cells(view.poloidal, clipped[index])
         plasma_contours.append(draw_flux(frame))
         pol.draw_coils(view.poloidal, machine.coils)
@@ -345,7 +353,10 @@ def render_thomson(
                 linestyle="--",
                 zorder=style.zorder_markers,
             )
-        for axes, string in zip((view.upper, view.lower), strings):
+        # One Thomson panel: every system on the same axes, core blue and
+        # edge orange, with the solved and measured edges across both.
+        axes = view.upper
+        for string in strings:
             radius, values, _sigma = resolved[string.name][index]
             tr.draw_samples(
                 axes,
@@ -355,30 +366,21 @@ def render_thomson(
                 style=style,
                 markersize=5.0,
             )
-            scales[string.name].apply(axes)
-            tr.label_axes(
-                axes,
-                "major radius  [m]" if axes is view.lower else None,
-                f"{string.name} {label}  [{unit}]",
-                style=style,
-            )
-            if solved_edge:
-                # Where the solved boundary crosses this string's own chord.
-                for crossing in chord_crossings(frame.boundary, string.positions[0, 1]):
-                    axes.axvline(
-                        crossing,
-                        color=style.separatrix_color,
-                        linewidth=1.2,
-                        zorder=1,
-                    )
-            if measured_edges[index] is not None:
+        scale.apply(axes)
+        tr.label_axes(axes, "major radius  [m]", f"{label}  [{unit}]", style=style)
+        if solved_edge:
+            for crossing in chord_crossings(frame.boundary, strings[0].positions[0, 1]):
                 axes.axvline(
-                    measured_edges[index],
-                    color=MEASURED_EDGE_COLOR,
-                    linewidth=1.2,
-                    linestyle="--",
-                    zorder=1,
+                    crossing, color=style.separatrix_color, linewidth=1.6, zorder=1
                 )
+        if measured_edges[index] is not None:
+            axes.axvline(
+                measured_edges[index],
+                color=MEASURED_EDGE_COLOR,
+                linewidth=1.6,
+                linestyle="--",
+                zorder=1,
+            )
 
     # Equal pulse time per unit of animation time: each frame is held for the
     # gap to the next solved slice, scaled by the slowdown, so a missing slice

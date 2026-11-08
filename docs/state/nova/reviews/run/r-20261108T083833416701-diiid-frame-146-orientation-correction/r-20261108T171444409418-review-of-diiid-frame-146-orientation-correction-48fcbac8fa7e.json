@@ -41,6 +41,13 @@
     "result": "Exact git-object SVGs rasterized at 1400 px and all three PNGs inspected; labels fit, legend entries read, trip-1 geometry inside limiter, trip-2 axis above limiter.",
     "revision": "48fcbac8fa7e255b584daf2135b1156114df70f9"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-08T17:27:22.473370+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",

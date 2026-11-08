@@ -1,0 +1,107 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_measured": false,
+  "added_failures_note": "Source manifest baseline_suite and after_suite are blank; source prompt declares the pair unarmed. Zero is the empty set of recorded added failures, not a measured suite pass. No suite was rerun.",
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T143739949582-review-of-bank-fold-arclength-e9afe4af1cfd/reviewed-poloidal.svg",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T143739949582-review-of-bank-fold-arclength-e9afe4af1cfd/reviewed-poloidal.png"
+  ],
+  "assertion_independence": "No added assertion compares an input supplied by the check to the same supplied value returned unchanged; physical levels are constructed by plot.py and checked at the rendered collections, and contour counts and pixel thresholds use independent requirements.",
+  "assertion_review": [
+    {
+      "fails_when": "The instrument sees fewer than four full-view contour paths in either field; this positive control prevents treating a broken detector as measured absence.",
+      "line": 27,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The axis panel contains a different number of contour collections than the two compared fields.",
+      "line": 30,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The renderer draws the two fields using different physical level arrays; the check does not supply those levels itself.",
+      "line": 31,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "Restoring the global levels in the axis panel yields [0,0] nonempty paths, as recorded in repair-revert-axis.log.",
+      "line": 52,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The panel contains only a blue null marker or otherwise less than 1000 blue pixels; the parent renderer has 60, independent of the threshold.",
+      "line": 55,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The module no longer imports the established save function; the parent-source reuse log demonstrates this refusal.",
+      "line": 63,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The wrapper fails to call the save owner exactly once, even if it leaves the import present.",
+      "line": 69,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The refused save emits a ValueError with no outside-canvas diagnostic.",
+      "line": 77,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    },
+    {
+      "fails_when": "The deliberately out-of-canvas artist is accepted rather than refused; the else branch raises AssertionError.",
+      "line": 80,
+      "path": "scripts/prototypes/bank_fold_arclength/check_plot.py"
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T14:50:15Z",
+  "dispatched_at": "2026-11-08T14:41:14Z",
+  "findings": [],
+  "incremental_scope": [
+    "docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html",
+    "docs/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg",
+    "scripts/prototypes/bank_fold_arclength/check_plot.py",
+    "scripts/prototypes/bank_fold_arclength/plot.py"
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production runtime call site found in nova/equilibrium or nova/media; plot.py:338-361 is a prototype CLI and check_plot.py is its test harness.",
+    "diff": "Read the sole gained commit e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2 against ab60151ed913c1f06c69356bd19a648bd65503d1: the diff updates docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html, poloidal.svg and plot.py, and adds check_plot.py, with no product source or numerical continuation changes.",
+    "done_when": "The source brief.txt third clause requires inspected SVGs, and docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html:95-108 now describes the visible shared absolute local levels and 10 mm scale verified in the exact-head raster; repair-final-axis.log and repair-final-reuse.log end EXIT=0.",
+    "goal": "The source brief.txt asks for a certified branch experiment with a readable poloidal comparison; the gained commit repairs the comparison in scripts/prototypes/bank_fold_arclength/plot.py:41 and leaves the previously reviewed numerical experiment unchanged.",
+    "manifest": "The source manifest.md names the answering commit, final check commands and receipts, both failing parent-source controls, inspected raster and unchanged branch receipts; baseline_suite and after_suite are blank because its suite pair is unarmed.",
+    "write_paths": "The source manifest.md grants the prototype directory, fragment and figure directory; all four files in ab60151ed913c1f06c69356bd19a648bd65503d1..e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2 fall within those grants and the incremental review target."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_fold_arclength/check_plot.py:27-56 fails on missing families, unequal levels or marker-only content, and :63-81 fails on bypassed ownership or accepted clipping; repair-revert-axis.log and repair-revert-reuse.log demonstrate the parent-source refusals with EXIT=1.",
+    "evidence": "repair-final-axis.log records head e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2, [4,4] nonempty paths and 4290 blue pixels, and repair-final-reuse.log records actual shared-owner invocation and clipped-text refusal, while this review independently renders the committed SVG.",
+    "fit": "scripts/prototypes/bank_fold_arclength/plot.py:34-38 wraps the established save policy, :310-324 uses Matplotlib's scale-bar owner, and the exact-head poloidal.svg raster is legible with no text clipping or collisions and no forbidden identifiers added.",
+    "goal_fidelity": "scripts/prototypes/bank_fold_arclength/plot.py:41-53 and :263-273 supply the same union of physical local levels to both fields, restoring the empty axis panel required by the source brief's figure clause.",
+    "reuse": "scripts/prototypes/bank_fold_arclength/plot.py:28,34-38 wraps scripts/prototypes/bank_solve_profile/plot.py:45 instead of duplicating its policy; capability searches and opened nova/media/poloidal.py:748 and the DIII-D shared-level helpers find range-spanning levels rather than this disjoint-range local union, and the new checks are scene-specific.",
+    "scope_discipline": "The four exact diff paths are docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html, docs/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg, scripts/prototypes/bank_fold_arclength/plot.py and scripts/prototypes/bank_fold_arclength/check_plot.py, all covered by the source manifest.md grants."
+  },
+  "prior_findings_note": "This increment resolves the save-owner duplication and the axis-rendering defect. Earlier numerical-acceptance coverage was not changed and is outside this incremental review.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt asks for a certified branch experiment with a readable poloidal comparison; the gained commit repairs the comparison in scripts/prototypes/bank_fold_arclength/plot.py:41 and leaves the previously reviewed numerical experiment unchanged.\nVERDICT done_when: The source brief.txt third clause requires inspected SVGs, and docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html:95-108 now describes the visible shared absolute local levels and 10 mm scale verified in the exact-head raster; repair-final-axis.log and repair-final-reuse.log end EXIT=0.\nVERDICT write_paths: The source manifest.md grants the prototype directory, fragment and figure directory; all four files in ab60151ed913c1f06c69356bd19a648bd65503d1..e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2 fall within those grants and the incremental review target.\nVERDICT manifest: The source manifest.md names the answering commit, final check commands and receipts, both failing parent-source controls, inspected raster and unchanged branch receipts; baseline_suite and after_suite are blank because its suite pair is unarmed.\nVERDICT diff: Read the sole gained commit e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2 against ab60151ed913c1f06c69356bd19a648bd65503d1: the diff updates docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html, poloidal.svg and plot.py, and adds check_plot.py, with no product source or numerical continuation changes.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_fold_arclength/plot.py:41-53 and :263-273 supply the same union of physical local levels to both fields, restoring the empty axis panel required by the source brief's figure clause.\nSCORE evidence: 19\nJUSTIFICATION evidence: repair-final-axis.log records head e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2, [4,4] nonempty paths and 4290 blue pixels, and repair-final-reuse.log records actual shared-owner invocation and clipped-text refusal, while this review independently renders the committed SVG.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The four exact diff paths are docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-arclength.html, docs/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg, scripts/prototypes/bank_fold_arclength/plot.py and scripts/prototypes/bank_fold_arclength/check_plot.py, all covered by the source manifest.md grants.\nSCORE durability: 19\nJUSTIFICATION durability: scripts/prototypes/bank_fold_arclength/check_plot.py:27-56 fails on missing families, unequal levels or marker-only content, and :63-81 fails on bypassed ownership or accepted clipping; repair-revert-axis.log and repair-revert-reuse.log demonstrate the parent-source refusals with EXIT=1.\nSCORE fit: 20\nJUSTIFICATION fit: scripts/prototypes/bank_fold_arclength/plot.py:34-38 wraps the established save policy, :310-324 uses Matplotlib's scale-bar owner, and the exact-head poloidal.svg raster is legible with no text clipping or collisions and no forbidden identifiers added.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/prototypes/bank_fold_arclength/plot.py:28,34-38 wraps scripts/prototypes/bank_solve_profile/plot.py:45 instead of duplicating its policy; capability searches and opened nova/media/poloidal.py:748 and the DIII-D shared-level helpers find range-spanning levels rather than this disjoint-range local union, and the new checks are scene-specific.\n",
+  "review_run_id": "r-20261108T143739949582-review-of-bank-fold-arclength-e9afe4af1cfd",
+  "reviewed_base_sha": "ab60151ed913c1f06c69356bd19a648bd65503d1",
+  "reviewed_head_sha": "e9afe4af1cfdc8d4f6c60b753b0272ae87669ea2",
+  "reviewed_run_id": "r-20261108T111744407818-bank-fold-arclength",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T15:00:36.736459+00:00",
+  "total": 118
+}

@@ -14,7 +14,8 @@ from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.media.poloidal import inside_wall_units
 
 
-def main():
+def field_orientation_receipt():
+    """Measure both coordinate bindings on the archived trip field."""
     configure_dtypes()
     assert jax.config.jax_enable_x64
     archive = Path(__file__).with_name("stationary-field.npz")
@@ -77,20 +78,19 @@ def main():
         ),
         "transposed_shift_above_0_1_m": transposed_axis["shift_m"] > 0.1,
     }
-    print(
-        json.dumps(
-            {
-                "x64": bool(jax.config.jax_enable_x64),
-                "lattice_shape": lattice.shape,
-                "lattice_spacing_m": lattice_spacing,
-                "records": records,
-                "checks": checks,
-            },
-            indent=2,
-        ),
-        flush=True,
-    )
-    failed = [name for name, passed in checks.items() if not passed]
+    return {
+        "x64": bool(jax.config.jax_enable_x64),
+        "lattice_shape": lattice.shape,
+        "lattice_spacing_m": lattice_spacing,
+        "records": records,
+        "checks": checks,
+    }
+
+
+def main():
+    receipt = field_orientation_receipt()
+    print(json.dumps(receipt, indent=2), flush=True)
+    failed = [name for name, passed in receipt["checks"].items() if not passed]
     if failed:
         raise SystemExit("FIELD_ORIENTATION_CHECK=FAIL: " + ", ".join(failed))
     print("FIELD_ORIENTATION_CHECK=PASS", flush=True)

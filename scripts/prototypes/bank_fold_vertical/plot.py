@@ -95,8 +95,8 @@ def null_figure(null, output):
 
 
 def singular_figure(receipt, output):
-    pinned = receipt["pinned"].get("singular", [])
-    unpinned = receipt["unpinned"].get("singular", [])
+    pinned = receipt["pinned"]
+    unpinned = receipt["unpinned"]
     if not pinned or not unpinned:
         raise ValueError("both arms must supply singular-value rows")
     plt.style.use("data-ink")
@@ -129,11 +129,13 @@ def singular_figure(receipt, output):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("receipt", type=Path)
+    parser.add_argument("conditioning", type=Path)
     parser.add_argument("output_dir", type=Path)
     args = parser.parse_args()
     receipt = json.loads(args.receipt.read_text())
     null_figure(receipt["null"], args.output_dir / "null-flux-contours.svg")
-    singular_figure(receipt, args.output_dir / "smallest-singular-vs-drive.svg")
+    conditioning = json.loads(args.conditioning.read_text())
+    singular_figure(conditioning, args.output_dir / "smallest-singular-vs-drive.svg")
 
 
 if __name__ == "__main__":

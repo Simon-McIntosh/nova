@@ -143,22 +143,35 @@ def inspect_null(machine, state, seeds, drive):
         b = b - b.mean()
         return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
 
+    def state_cosine(a, b):
+        return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+
     payload = dict(
         drive=drive,
         singular=float(singular[-1]),
         cosine_vertical=cosine(psi, vertical),
         cosine_radial=cosine(psi, radial),
+        cosine_state_vertical=state_cosine(
+            np.asarray(null_state),
+            np.concatenate((np.zeros(2 * cells), np.asarray(one[0]))),
+        ),
+        cosine_state_radial=state_cosine(
+            np.asarray(null_state),
+            np.concatenate((np.zeros(cells), np.asarray(one[0]), np.zeros(cells))),
+        ),
         centroid=float(centroid(one)),
     )
     emit("NULL", **payload)
+    wall = np.asarray(op.geometry.wall_points)
+    _, wall_counts = np.unique(np.asarray(op.geometry.wall_unit), return_counts=True)
     return dict(
         payload,
         r=r.tolist(),
         z=z.tolist(),
         flux=psi.tolist(),
-        wall=np.asarray(op.geometry.wall.coordinate).tolist(),
-        wall_offsets=np.asarray(op.geometry.wall_unit_offsets).tolist(),
-        wall_closed=np.asarray(op.geometry.wall_unit_closed).tolist(),
+        wall=wall.tolist(),
+        wall_offsets=np.r_[0, np.cumsum(wall_counts)].tolist(),
+        wall_closed=[True] * len(wall_counts),
     )
 
 

@@ -376,17 +376,24 @@
       iron_core IDS, with its B-H curve (<code>src/ironCoreBuilder.cpp</code>), and falls back to an
       XML <code>ironBoundaries</code> element only when the IDS carries no iron core
       (<code>src/tokamakData.cpp</code>); WEST's <code>configuration/machines/WEST/iron.xml</code> holds only
-      a constant <code>relativePermeability</code> and no boundary. So the shell geometry is authored as a
-      new iron-boundary element, whose required fields (<code>geometry/category</code>, the
+      a constant <code>relativePermeability</code> and no boundary. So the shell geometry is authored as two
+      new iron-boundary elements, since imas-efit's <code>IronBoundary</code> is a single closed iron-air
+      interface (<code>src/ironBoundary.h</code>): the outer surface anticlockwise and the inner surface
+      clockwise, as its orientation rule requires for a body with a cavity (one contour alone would
+      be a solid iron sphere). Their required fields (<code>geometry/category</code>, the
       <code>knotSet</code> and the <code>observationPoints</code> blocks) are those
       <code>checkData</code> in imas-efit <code>src/ironBoundary.cpp</code> enforces, since no instance exists
       under <code>configuration/</code> to copy; the iron_core IDS is withheld, and the permeability is
       constant: the exact shielding factor S of §1 is a linear-&mu; result, and a run with a B-H table
       would be compared against the wrong reference. imas-efit's own iron solve is converged before
-      any verdict is drawn: its iteration tolerance (<code>relativeError</code>, 1e-2 by default in
-      <code>_common/solver/iron-solver.xml</code>) is tightened to 1e-6 and its boundary resolution (the
-      <code>knotSet</code> and <code>observationPoints</code> counts of that iron-boundary element) is refined
-      until S changes by under 0.5&nbsp;% under one further refinement, so a miss cannot be under-resolution. The control falsifies in one direction: if imas-efit misses S, its
+      any verdict is drawn. Its <code>relativeError</code> (1e-2 in
+      <code>configuration/machines/_common/solver/iron-solver.xml</code>) is an absolute threshold on the
+      squared change of the summed boundary currents (<code>usermanual/xml/ironModel.xml</code>), capped by
+      <code>maximumIterationCount</code> = 100 at <code>relaxFactor</code> 0.5, so convergence is shown by the
+      result rather than by the setting: lowering <code>relativeError</code> a hundredfold, with the iteration
+      cap raised until the solve reports converged, must move S by under 0.5&nbsp;%, and so must one
+      further refinement of the boundary resolution (the <code>knotSet</code> and
+      <code>observationPoints</code> counts of both elements), so a miss cannot be under-resolution. The control falsifies in one direction: if imas-efit misses S, its
       representation is implicated in the §1 WEST disagreement; if it reproduces S, its
       representation is sound on that body and the disagreement stays unexplained, which §9 then
       carries. It is a cross-code comparison with its own owners, so it lands separately from the §6
@@ -396,8 +403,10 @@
     <p>
       Done when (1) at &mu;<sub>r</sub> = 1000 and a/b = 0.9, where the exact S is 61.10, the converged
       imas-efit shielding factor is recorded beside nova's, and it is scored as reproducing S if within
-      2&nbsp;% of 61.10 and as missing S otherwise; (2) imas-efit at &mu;<sub>r</sub> = 1 returns a shielding factor of 1
-      to its own precision, the control that its shell configuration is wired; (3) the result is
+      2&nbsp;% of 61.10 and as missing S otherwise; (2) the same configuration at a/b = 0.5, where the exact S is 195.1,
+      reproduces that value to the same 2&nbsp;%, the control that the shell geometry is read as
+      intended (a solid body, a wrong radius or a wrong orientation moves S with a/b; &mu;<sub>r</sub> = 1
+      would not, since S = 1 for every geometry there); (3) the result is
       sent to the imas-efit owners with the message recorded in that receipt directory, and the
       one-directional verdict that rule gives (a miss implicates the representation; a
       reproduction leaves the §1 disagreement unexplained) is written into the plan for §9 to read.

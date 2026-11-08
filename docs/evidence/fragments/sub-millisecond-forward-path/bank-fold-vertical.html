@@ -42,7 +42,9 @@
 
   <p>The scratch pinned arm holds each lane's seed centroid height with a
   uniform radial-field unknown and a declared row scale of 1e-3; its log
-  prints <code>SCRATCH_PIN_ACTIVE=true</code>. It reaches only
+  prints <code>SCRATCH_PIN_ACTIVE=true</code>. The row scale cancels from its
+  exact Schur-complement Newton update, while it remains explicit in the
+  bordered spectrum below. It reaches only
   <strong>1.001552137374879</strong>, using 158 attempted sub-steps, 833
   updates and 7566 fresh reads. The last accepted intermediate residual is
   8.993e-7 with a maximum radial field of 8.157 µT; the next 1.907e-9 drive
@@ -53,4 +55,27 @@
   drive than this scratch pinned arm. The scratch implementation uses its own
   bordered Newton solve and line search; this negative result does not prove
   that a production pin using a different globalization would fail.</p>
+
+  <figure id="bank-fold-vertical-singular-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg"
+         alt="Smallest balanced singular value against drive for the pinned and unpinned branches">
+    <figcaption>Smallest singular value versus drive for lane 0. Grey is the
+    unpinned branch from the prior barrier's four H200 condition rows; blue is
+    the centroid-bordered matrix at five states retained by the separate
+    one-lane active-pin diagnostic. The underlying bank, constraint and
+    continuation source files are identical between the two base revisions.
+    The bordered matrix includes a centroid row scaled by 1e-3 and a radial
+    field column scaled by 1e-3 T, so the two matrices have different
+    sizes and balancing conventions; their vertical gap is not a measure of physical
+    improvement. The arms stop at different drives, as the plot shows.</figcaption>
+  </figure>
+
+  <p>The one-lane pinned diagnostic reaches drive 1.00155 under the
+  intermediate 1e-6 fresh-residual tolerance. Its bordered smallest singular
+  value is 4.033e-8 at drive 1.0, 3.683e-8 at 1.0000625,
+  3.310e-8 at 1.00038671875, 1.104e-7 at 1.00091015625, and
+  7.256e-8 at 1.00155. All five fresh reads are valid. The unpinned branch
+  falls from 6.273e-4 at drive 1.001 to 1.124e-6 at 1.0089341297149657.
+  These spectra show no singular-value rescue by the tested weak row; the
+  direct continuation outcome is the stronger negative evidence.</p>
 </section>

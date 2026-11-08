@@ -67,17 +67,33 @@ def main():
                 }
             )
         records.append(record)
+    native_axis = records[0]["seeds"][0]
+    transposed_axis = records[1]["seeds"][0]
+    lattice_spacing = min(lattice.radial_step, lattice.vertical_step)
+    checks = {
+        "native_shift_below_lattice_spacing": native_axis["shift_m"] < lattice_spacing,
+        "native_hessian_negative": bool(
+            np.all(np.asarray(native_axis["hessian_eigenvalues"]) < 0.0)
+        ),
+        "transposed_shift_above_0_1_m": transposed_axis["shift_m"] > 0.1,
+    }
     print(
         json.dumps(
             {
                 "x64": bool(jax.config.jax_enable_x64),
                 "lattice_shape": lattice.shape,
+                "lattice_spacing_m": lattice_spacing,
                 "records": records,
+                "checks": checks,
             },
             indent=2,
         ),
         flush=True,
     )
+    failed = [name for name, passed in checks.items() if not passed]
+    if failed:
+        raise SystemExit("FIELD_ORIENTATION_CHECK=FAIL: " + ", ".join(failed))
+    print("FIELD_ORIENTATION_CHECK=PASS", flush=True)
 
 
 if __name__ == "__main__":

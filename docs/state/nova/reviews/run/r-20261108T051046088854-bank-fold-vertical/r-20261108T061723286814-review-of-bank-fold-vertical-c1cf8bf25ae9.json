@@ -12,6 +12,13 @@
   "call_sites": [],
   "completed_at": "2026-11-08T06:33:36Z",
   "dispatched_at": "2026-11-08T06:22:34Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-fold-vertical",
+      "recorded_at": "2026-11-08T06:54:18.023500+00:00"
+    }
+  },
   "findings": [
     {
       "evidence": "Lines 291-293 read norms before step; line 322 installs the best candidate; line 323 decides acceptance without evaluating that candidate. first.json reports the last rejected step at 1.0015521392822277 with residual 1.1642900688002555e-6, only slightly over the 1e-6 intermediate threshold.",

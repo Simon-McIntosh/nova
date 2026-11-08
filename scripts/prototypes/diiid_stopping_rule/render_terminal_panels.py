@@ -1,18 +1,23 @@
 """Draw a measured terminal state as a line-contour poloidal panel.
 
-The panel carries the governed limiter, the EFIT label boundary with its own
-X-point, the terminal flux contours on stated levels and both null sets — the
-solved arm's axis and admitted saddle, and the reference X-point — so a reader
-can compare the solved topology against the reference one and see where the
-state sat in the machine.  The limiter supplies the scale: the poloidal panels
-carry no axes, and the wall is what maps a position on the page to a place in
-the vessel.
+The panel carries the governed limiter, the frame's EFIT label boundary with its
+own axis and X-point, the terminal flux contours on stated levels, and both null
+sets -- the solved arm's axis and its recorded X-point, and the reference axis
+and X-point -- so a reader can compare the solved topology against the reference
+one and see where the state sat in the machine.  The limiter supplies the scale:
+the poloidal panels carry no axes, and the wall is what maps a position on the
+page to a place in the vessel.
+
+Every figure is checked before it is written.  The margin notes must lie outside
+the poloidal field, no two text artists may overlap, and the axis note names the
+coordinates it marks, so a label never sits on the data it describes.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -22,8 +27,13 @@ from matplotlib.lines import Line2D
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_nulls, draw_wall
 
+PROBE = Path(__file__).resolve().parent.parent / "diiid_forward_convergence"
+sys.path.insert(0, str(PROBE))
+
+from boundary_competition import _wall_distance  # noqa: E402
+
 LIMITER = "#1f1f1f"
-BOUNDING = "#929292"
+REFERENCE = "#929292"
 
 
 def _on_bounding_box(ring: np.ndarray, tolerance: float = 1.0e-6) -> int:
@@ -40,97 +50,49 @@ def _on_bounding_box(ring: np.ndarray, tolerance: float = 1.0e-6) -> int:
     return int(np.count_nonzero(on_edge.any(axis=1)))
 
 
-def _wall_gap(points: np.ndarray, ring: np.ndarray) -> float:
-    """Shortest distance from points to the limiter's segments [m].
+def _gap(points: np.ndarray, ring: np.ndarray) -> float:
+    """Shortest distance from points to the limiter's segments [m]."""
 
-    Measured to the outline's segments rather than its vertices, since the ring
-    spans up to a metre of wall between vertices.
-    """
-
-    start = ring
-    edge = np.roll(ring, -1, axis=0) - start
-    length2 = np.einsum("ij,ij->i", edge, edge)
-    safe = np.where(length2 > 0.0, length2, 1.0)
-    offset = points[:, None, :] - start[None, :, :]
-    fraction = np.clip(np.einsum("ijk,jk->ij", offset, edge) / safe[None, :], 0.0, 1.0)
-    onto = start[None, :, :] + fraction[..., None] * edge[None, :, :]
-    return float(np.min(np.linalg.norm(points[:, None, :] - onto, axis=2)))
-
-
-def _contour_vertices(contours) -> np.ndarray:
-    """Return every vertex of the drawn contours as one ``(n, 2)`` array."""
-
-    segments = [
-        np.asarray(segment, dtype=float)
-        for collection in contours.allsegs
-        for segment in collection
-        if len(segment)
-    ]
-    if not segments:
-        return np.zeros((0, 2))
-    return np.concatenate(segments, axis=0)
-
-
-def _place_axis_label(axes, axis, text, contours):
-    """Put the axis label in the empty cell nearest the axis, over white space.
-
-    The panels carry no axes and the flux contours cover most of one, so a fixed
-    offset lands the label on the data.  The panel is divided into cells, each
-    cell is scored by the contour vertices inside it, and the emptiest cell
-    within reach of the axis takes the label, joined to the marker by a leader
-    line and drawn over an opaque patch so nothing shows through the text.
-    """
-
-    vertices = _contour_vertices(contours)
-    x0, x1 = axes.get_xlim()
-    y0, y1 = axes.get_ylim()
-    diagonal = float(np.hypot(x1 - x0, y1 - y0))
-    best = None
-    for cells in (4, 6, 8):
-        x_edges = np.linspace(x0, x1, cells + 1)
-        y_edges = np.linspace(y0, y1, cells + 1)
-        for i in range(cells):
-            for j in range(cells):
-                centre = np.array(
-                    [
-                        0.5 * (x_edges[i] + x_edges[i + 1]),
-                        0.5 * (y_edges[j] + y_edges[j + 1]),
-                    ]
-                )
-                inside = (
-                    (vertices[:, 0] >= x_edges[i])
-                    & (vertices[:, 0] < x_edges[i + 1])
-                    & (vertices[:, 1] >= y_edges[j])
-                    & (vertices[:, 1] < y_edges[j + 1])
-                )
-                occupied = int(np.count_nonzero(inside))
-                distance = float(np.hypot(*(centre - axis)))
-                score = occupied + 2.0 * distance / diagonal
-                if best is None or score < best[0]:
-                    best = (score, centre, occupied)
-        if best[2] == 0:
-            break
-    _score, centre, occupied = best
-    axes.annotate(
-        text,
-        xy=(axis[0], axis[1]),
-        xytext=centre,
-        textcoords="data",
-        fontsize=14,
-        color=DEFAULT_INK.axis_color,
-        ha="center",
-        va="center",
-        zorder=8,
-        bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "edgecolor": "none"},
-        arrowprops={
-            "arrowstyle": "-",
-            "color": DEFAULT_INK.axis_color,
-            "linewidth": 1.4,
-            "shrinkA": 6,
-            "shrinkB": 8,
-        },
+    distances, _onto = _wall_distance(
+        np.atleast_2d(np.asarray(points, dtype=float)), ring
     )
-    return occupied
+    return float(distances.min())
+
+
+def _text_boxes(figure, artists) -> list[tuple[str, object]]:
+    renderer = figure.canvas.get_renderer()
+    return [(name, artist.get_window_extent(renderer)) for name, artist in artists]
+
+
+def _check_layout(figure, axes, artists) -> list[str]:
+    """Refuse a figure whose labels sit on the field or on each other."""
+
+    figure.canvas.draw()
+    boxes = _text_boxes(figure, artists)
+    axes_box = axes.get_window_extent(figure.canvas.get_renderer())
+    report = []
+    for name, box in boxes:
+        outside = not (
+            box.x0 < axes_box.x1
+            and box.x1 > axes_box.x0
+            and box.y0 < axes_box.y1
+            and box.y1 > axes_box.y0
+        )
+        report.append(f"{name}_outside_field={outside}")
+        if not outside:
+            raise SystemExit(f"label {name} lies inside the poloidal field")
+    for index, (name, box) in enumerate(boxes):
+        for other_name, other in boxes[index + 1 :]:
+            overlap = not (
+                box.x1 <= other.x0
+                or other.x1 <= box.x0
+                or box.y1 <= other.y0
+                or other.y1 <= box.y0
+            )
+            report.append(f"{name}_overlaps_{other_name}={overlap}")
+            if overlap:
+                raise SystemExit(f"labels {name} and {other_name} overlap")
+    return report
 
 
 def main() -> None:
@@ -142,6 +104,7 @@ def main() -> None:
     parser.add_argument("--branch", required=True)
     parser.add_argument("--arm", default="default")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--branch-label", default="")
     arguments = parser.parse_args()
 
     data = np.load(arguments.artifact)
@@ -150,19 +113,22 @@ def main() -> None:
         f".arms.{arguments.arm}._flux_grid"
     ]
     radius, height = data["radius"], data["height"]
-    label_boundary = np.asarray(data["label_boundary"], dtype=float)
     geometry = np.load(arguments.geometry)
     limiter = geometry["limiter"]
     surface = geometry["surface"]
+    surface_found = bool(geometry["surface_found"])
+    surface_margin = float(geometry["surface_class_margin"])
+    surface_refusal = str(geometry["surface_refusal"])
+    efit_boundary = geometry["efit_boundary"]
+    efit_axis = np.asarray(geometry["efit_axis"], dtype=float)
+    efit_x_point = np.asarray(geometry["efit_x_point"], dtype=float)
     record = json.loads(arguments.record.read_text())
     arm = record["frames"][str(arguments.frame)]["branches"][arguments.branch]["arms"][
         arguments.arm
     ]
     axis = np.asarray(arm["presence"]["axis_rz_m"], dtype=float)
-    saddle = arm.get("x_point_rz_m")
-    saddles = (
-        np.asarray(saddle, dtype=float).reshape(1, 2) if saddle else np.zeros((0, 2))
-    )
+    solved_x_point = arm.get("x_point_rz_m")
+    qualified = bool(arm.get("qualified"))
     frame_edge_points = _on_bounding_box(limiter)
     if frame_edge_points == len(limiter):
         raise SystemExit(
@@ -176,7 +142,7 @@ def main() -> None:
 
     figure, axes = plt.subplots(figsize=(14, 7.2), dpi=100)
     poloidal_axes(axes)
-    contours = axes.contour(
+    axes.contour(
         radius,
         height,
         flux,
@@ -187,85 +153,229 @@ def main() -> None:
         zorder=4,
     )
     if len(surface):
-        axes.plot(surface[:, 0], surface[:, 1], color=BOUNDING, linewidth=1.6, zorder=3)
+        ring = np.vstack((surface, surface[:1])) if surface_found else surface
+        axes.plot(
+            ring[:, 0],
+            ring[:, 1],
+            color=REFERENCE,
+            linewidth=1.6,
+            linestyle="-" if surface_found else "--",
+            zorder=3,
+        )
     axes.plot(
-        label_boundary[:, 0],
-        label_boundary[:, 1],
-        color=BOUNDING,
+        efit_boundary[:, 0],
+        efit_boundary[:, 1],
+        color=REFERENCE,
         linestyle="--",
         linewidth=2.4,
         zorder=3,
     )
     draw_wall(axes, limiter[:, 0], limiter[:, 1], color=LIMITER, linewidth=2.2)
-    draw_nulls(axes, axis, saddles, style=DEFAULT_INK, contain=limiter)
-    reference_saddle = label_boundary[int(np.argmin(label_boundary[:, 1]))]
-    axes.plot(
-        reference_saddle[0],
-        reference_saddle[1],
-        marker="X",
-        markersize=11,
-        markerfacecolor="none",
-        markeredgecolor=BOUNDING,
-        markeredgewidth=2.2,
-        linestyle="none",
-        zorder=6,
-    )
     axes.set_aspect("equal")
-    lower, upper = limiter.min(axis=0), limiter.max(axis=0)
+    lower, upper = limiter.min(axis=0).astype(float), limiter.max(axis=0).astype(float)
     margin = 0.05 * (upper - lower)
     axes.set_xlim(lower[0] - margin[0], upper[0] + margin[0])
     axes.set_ylim(lower[1] - margin[1], upper[1] + margin[1])
-    occupied = _place_axis_label(
-        axes, axis, f"axis {axis[0]:.2f} m, {axis[1]:.2f} m", contours
+    x_lower, x_upper = axes.get_xlim()
+    y_lower, y_upper = axes.get_ylim()
+
+    def _inside(point: np.ndarray | None) -> bool:
+        if point is None:
+            return False
+        return bool(x_lower <= point[0] <= x_upper and y_lower <= point[1] <= y_upper)
+
+    solved_point = (
+        None if solved_x_point is None else np.asarray(solved_x_point, dtype=float)
     )
+    solved_visible = _inside(solved_point)
+    if solved_visible and not qualified:
+        draw_nulls(
+            axes,
+            axis,
+            None,
+            other_x_points=solved_point.reshape(1, 2),
+            style=DEFAULT_INK,
+            contain=limiter,
+        )
+    else:
+        draw_nulls(axes, axis, None, style=DEFAULT_INK, contain=limiter)
+    if solved_visible and qualified:
+        axes.plot(
+            solved_point[0],
+            solved_point[1],
+            marker=DEFAULT_INK.xpoint_marker,
+            markersize=DEFAULT_INK.xpoint_markersize,
+            color=DEFAULT_INK.xpoint_color,
+            linestyle="none",
+            zorder=7,
+        )
+
+    axes.plot(
+        efit_axis[0],
+        efit_axis[1],
+        marker="o",
+        markersize=15,
+        markerfacecolor="none",
+        markeredgecolor=REFERENCE,
+        markeredgewidth=2.0,
+        linestyle="none",
+        zorder=5,
+    )
+    axes.plot(
+        efit_x_point[0],
+        efit_x_point[1],
+        marker="X",
+        markersize=12,
+        markerfacecolor="none",
+        markeredgecolor=REFERENCE,
+        markeredgewidth=2.2,
+        linestyle="none",
+        zorder=5,
+    )
+
+    axis_fraction = (axis[0] - x_lower) / (x_upper - x_lower)
+    axis_note = axes.text(
+        axis_fraction,
+        -0.115,
+        f"axis R={axis[0]:.2f} m, Z={axis[1]:.2f} m",
+        transform=axes.transAxes,
+        fontsize=14,
+        color=DEFAULT_INK.axis_color,
+        ha="center",
+        va="top",
+        clip_on=False,
+        zorder=8,
+    )
+    axes.annotate(
+        "",
+        xy=(axis[0], axis[1]),
+        xytext=(axis_fraction, -0.09),
+        textcoords="axes fraction",
+        zorder=8,
+        arrowprops={
+            "arrowstyle": "-",
+            "color": DEFAULT_INK.axis_color,
+            "linewidth": 1.4,
+            "shrinkA": 0,
+            "shrinkB": 8,
+        },
+    )
+    if surface_found and len(surface):
+        if np.isfinite(surface_margin):
+            surface_text = (
+                f"bounding surface: {len(surface)} vertices, "
+                f"class margin {surface_margin:.3f}"
+            )
+        else:
+            surface_text = (
+                f"bounding surface: {len(surface)} vertices, class margin undefined"
+            )
+    else:
+        surface_text = (
+            f"no bounding surface: {surface_refusal or 'the read returned none'}"
+        )
+
     handles = [
         Line2D([], [], color=DEFAULT_INK.flux_color, lw=2.6, label="solved flux"),
-        Line2D([], [], color=LIMITER, lw=1.4, label="limiter"),
-    ]
-    if len(surface):
-        handles.append(Line2D([], [], color=BOUNDING, lw=1.6, label="bounding surface"))
-    handles += [
-        Line2D([], [], color=BOUNDING, ls="--", lw=2.4, label="EFIT boundary"),
+        Line2D([], [], color=LIMITER, lw=2.2, label="limiter"),
+        Line2D([], [], color=REFERENCE, lw=1.6, label="bounding surface"),
+        Line2D([], [], color=REFERENCE, ls="--", lw=2.4, label="EFIT boundary"),
         Line2D(
             [],
             [],
-            color=BOUNDING,
+            color=DEFAULT_INK.axis_color,
+            marker=DEFAULT_INK.axis_marker,
+            markersize=DEFAULT_INK.axis_markersize,
+            linestyle="none",
+            label="solved axis",
+        ),
+    ]
+    if solved_visible:
+        handles.append(
+            Line2D(
+                [],
+                [],
+                color=DEFAULT_INK.xpoint_color,
+                marker=DEFAULT_INK.xpoint_marker,
+                markersize=DEFAULT_INK.xpoint_markersize,
+                markerfacecolor="none",
+                linestyle="none",
+                label="solved X-point" if qualified else "solved X-point (unqualified)",
+            )
+        )
+    handles += [
+        Line2D(
+            [],
+            [],
+            color=REFERENCE,
+            marker="o",
+            markersize=15,
+            markerfacecolor="none",
+            markeredgewidth=2.0,
+            linestyle="none",
+            label="EFIT axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=REFERENCE,
             marker="X",
-            markersize=11,
+            markersize=12,
             markerfacecolor="none",
             markeredgewidth=2.2,
             linestyle="none",
             label="EFIT X-point",
         ),
     ]
-    if not len(surface):
-        handles.append(
-            Line2D(
-                [],
-                [],
-                color=BOUNDING,
-                ls="none",
-                label="bounding surface: not recorded",
-            )
-        )
     axes.legend(
         handles=handles,
         loc="upper left",
         bbox_to_anchor=(1.01, 1.0),
         frameon=False,
-        fontsize=14,
+        fontsize=13,
     )
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    legend = axes.get_legend()
+    legend_box = legend.get_window_extent(renderer)
+    axes_box = axes.get_window_extent(renderer)
+    legend_bottom = (legend_box.y0 - axes_box.y0) / axes_box.height
+    surface_note = axes.text(
+        1.01,
+        legend_bottom - 0.07,
+        surface_text,
+        transform=axes.transAxes,
+        fontsize=13,
+        color=REFERENCE,
+        ha="left",
+        va="top",
+        clip_on=False,
+        wrap=True,
+        zorder=8,
+    )
+    report = _check_layout(
+        figure,
+        axes,
+        [
+            ("axis_note", axis_note),
+            ("surface_note", surface_note),
+            ("legend", legend),
+        ],
+    )
+    report.append(f"legend_entries={len(handles)}")
+
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(arguments.output, bbox_inches="tight")
     print(
         f"WROTE {arguments.output} residual={arm['terminal_residual']:.6g} "
         f"limiter_points={len(limiter)} on_bounding_box={frame_edge_points} "
-        f"surface_points={len(surface)} "
+        f"surface_points={len(surface)} surface_found={surface_found} "
+        f"axis_gap_m={_gap(axis[None, :], limiter):.4f} "
         f"surface_gap_m="
-        f"{_wall_gap(surface, limiter) if len(surface) else float('nan'):.4f} "
-        f"axis_gap_m={_wall_gap(axis[None, :], limiter):.4f} "
-        f"label_cell_contour_vertices={occupied} "
-        f"ef_xpoint={reference_saddle[0]:.3f},{reference_saddle[1]:.3f}"
+        f"{_gap(surface, limiter) if len(surface) else float('nan'):.4f} "
+        f"efit_axis={efit_axis[0]:.3f},{efit_axis[1]:.3f} "
+        f"ef_xpoint={efit_x_point[0]:.3f},{efit_x_point[1]:.3f} "
+        f"surface_note={surface_text!r} " + " ".join(report)
     )
 
 

@@ -2,7 +2,9 @@
 
 One fresh interpreter per frame keeps the profile builders from accumulating
 across frames, and each frame prints its own exit status so a partial run is
-readable on its own.
+readable on its own.  The geometry a panel draws is produced here and nowhere
+else: a file that a render already found on disk is rewritten, so what the
+figure draws cannot predate the recorder.
 """
 
 from __future__ import annotations
@@ -11,6 +13,8 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
+
+FRAMES = ((179, "limited"), (44, "limited"), (144, "diverted"), (137, "diverted"))
 
 
 def main() -> None:
@@ -21,13 +25,12 @@ def main() -> None:
 
     target = arguments.repository_root
     run_root = arguments.run_root
-    recorder = target / "scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py"
-    frames = [(179, "limited"), (44, "limited"), (144, "diverted"), (137, "diverted")]
-    for frame, branch in frames:
-        output = run_root / "geometry" / f"geometry-{frame}-{branch}.npz"
-        if output.exists():
-            print(f"=== {frame} {branch} skipped", flush=True)
-            continue
+    recorder = (
+        target / "scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py"
+    )
+    for frame, branch in FRAMES:
+        output = run_root / "geometry" / f"geometry-limiter-{frame}-{branch}.npz"
+        output.parent.mkdir(parents=True, exist_ok=True)
         print(f"=== {frame} {branch}", flush=True)
         completed = subprocess.run(
             [

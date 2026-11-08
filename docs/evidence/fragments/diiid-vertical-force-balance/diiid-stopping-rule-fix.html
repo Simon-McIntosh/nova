@@ -111,16 +111,28 @@
   <h3>Terminal states</h3>
 
   <p>
-    Each panel draws the terminal flux on seven levels, the governed DIII-D
-    limiter ring read from the machine description (84 points, R 1.017–2.351 m,
-    Z −1.359 to +1.363 m), the EFIT boundary of the frame dashed, and the nulls
-    the arm recorded; levels of the opposite sign are dashed. The flux grid
-    extends beyond the wall, so the outermost contours leave the vessel outline.
-    The limiter is the scale: the panels carry no axes, so the
-    vessel outline is what maps a position on the page to a place in the machine,
-    and the magnetic axis is labelled in metres beside its marker, placed by the
-    renderer in the panel cell carrying the fewest contour vertices (zero on all
-    four) and drawn over an opaque white patch with a leader line to the axis.
+    Each panel draws the terminal flux on seven solid levels, the governed
+    DIII-D limiter ring read from the machine description (84 points, R
+    1.017–2.351 m, Z −1.359 to +1.363 m), the EFIT boundary of the frame dashed,
+    the bounding surface the host boundary read traces, and both null sets. The
+    flux grid extends beyond the wall, so the outermost contours leave the vessel
+    outline. The limiter is the scale: the panels carry no axes, so the vessel
+    outline is what maps a position on the page to a place in the machine. The
+    axis coordinates are written in the margin below the panel, joined to the
+    marker by a leader line, so no label sits on the contours; the renderer
+    refuses a figure whose notes enter the poloidal field or overlap one another.
+  </p>
+
+  <p>
+    The nulls are drawn in four distinct marks, each named in the legend. The
+    solved arm contributes its magnetic axis (filled red triangle) and the
+    X-point it recorded (hollow red cross). The reference contributes the axis
+    of the frame's own EFIT label field (hollow grey circle) and the low point of
+    its EFIT contour (hollow grey cross). The solved X-point is recorded but
+    <em>not admitted</em>: <code>qualified</code> is false on all four arms, so
+    the mark is hollow and its legend entry says so. On frame 44 that candidate
+    lies above the limiter's upper shelf, outside the drawn field, so the panel
+    carries neither the mark nor a legend entry for it.
   </p>
 
   <p>
@@ -131,55 +143,59 @@
     <em>zero</em> nodes within 1 cm of the wall. On 179 limited and 44 limited the
     read returns no boundary nodes at all. The magnetic axis sits 0.56–0.59 m
     inside the limiter on all four — 0.589 m (179 limited), 0.577 m (44
-    limited), 0.591 m (144 diverted) and 0.559 m (137 diverted) — at Z between
-    −0.44 m (137 diverted) and +0.04 m (179 limited), while the limiter's upper
-    shelf is at Z near +1.36 m. No terminal in this table touches the upper
-    limiter shelf, and nothing in the figures shows contact.
+    limited), 0.591 m (144 diverted) and 0.559 m (137 diverted) — at Z of
+    +0.04 m (179 limited), −0.11 m (44 limited), +0.01 m (144 diverted) and
+    −0.44 m (137 diverted), while the limiter's upper shelf is at Z near
+    +1.36 m. No terminal in this table touches the upper limiter shelf, and the
+    panels show no contact.
   </p>
 
   <p>
-    A bounding surface traced from each terminal flux by
-    <code>host_boundary_read</code> is <strong>not recorded</strong> on these
-    panels, and every panel says so: its legend carries the entry
-    <em>bounding surface: not recorded</em> beside the curves that are drawn. Run
-    against the artifact lattice alone, the read resolves only 8 of its ray radii
-    and reports a class margin of <code>-inf</code>, so the curve it returns is a
-    fragment rather than a surface and drawing it would misstate the state. The
-    numeric wall relation above carries that evidence instead.
+    The bounding surface traced from each terminal flux by
+    <code>host_boundary_read</code> is recorded with the geometry every panel
+    reads, and is drawn as a solid grey ring on all four. It is an eight-vertex
+    polygon: that is what the read returns on this lattice, and the panel says
+    so in its margin note — <em>8 vertices, class margin −0.021</em> on 137
+    diverted, and <em>class margin undefined</em> on the other three, where the
+    read reports <code>-inf</code>. Its closest approach to the governed limiter
+    is 0.043 m (179 limited), 0.061 m (44 limited), 0.048 m (144 diverted) and
+    0.006 m (137 diverted), so on 137 diverted the traced surface comes within
+    6 mm of the wall while the axis stays 0.56 m inside it. A read that returns
+    nothing writes <em>no bounding surface</em> with its reason into the same
+    margin note; none of these four takes that branch.
   </p>
 
   <p>
-    Both null sets are drawn. The solved arm contributes its axis (filled
-    triangle) and its admitted saddle (filled cross) in the ink colour; the
-    reference contributes the EFIT X-point, the lowest point of the frame's EFIT
-    contour, as a hollow cross in grey. In the two diverted panels the two
-    saddles are what the comparison is for. On 137 diverted the solved X-point
-    sits at R 1.265 m, Z −1.336 m while the EFIT contour's own low point is at
-    R 1.290 m, Z −1.188 m, a 0.15 m vertical separation the panel shows as two
-    distinct markers. On 144 diverted the two coincide to the millimetre —
-    R 1.382 m, Z −1.061 m for both — so the panel draws them on top of each
-    other, which is itself the reading: the solved saddle reproduces the
-    reference X-point there.
+    The two null sets are what the diverted panels exist to compare. On 137
+    diverted the solved X-point sits at R 1.265 m, Z −1.336 m while the EFIT
+    contour's own low point is at R 1.290 m, Z −1.188 m, a 0.15 m vertical
+    separation the panel shows as two distinct markers. On 144 diverted the two
+    coincide to the millimetre — R 1.382 m, Z −1.061 m for both — so the panel
+    draws them on top of each other, which is itself the reading. The axes
+    disagree more than the saddles: the reference axis is at R 1.743 m, Z 0.000 m
+    on 144 diverted and 137 diverted, 1.743 m, −0.100 m on 44 limited and
+    1.796 m, 0.000 m on 179 limited, against solved axes of 1.759 m, 0.013 m;
+    1.655 m, −0.442 m; 1.773 m, −0.106 m and 1.760 m, 0.043 m respectively.
   </p>
 
   <figure>
     <img src="/nova/figures/diiid-stopping-rule-fix/frame-179-limited-terminal.png" alt="Frame 179 limited terminal flux contours inside the governed DIII-D limiter">
-    <figcaption>Frame 179, limited seed, terminal residual 0.0273: solved contours, the governed limiter, the EFIT boundary dashed, the axis and the admitted saddle. The closed cores sit well inside the vessel outline; the outermost dashed contours leave it where the grid does. No bounding surface was recorded for this arm, and the legend says so.</figcaption>
+    <figcaption>Frame 179, limited seed, terminal residual 0.0273. Solved contours inside the governed limiter, with the EFIT boundary dashed and both null sets: the solved axis at R 1.76 m, Z 0.04 m and its recorded X-point near the top of the field, against the EFIT axis at R 1.80 m, Z 0.00 m and the EFIT X-point at R 1.53 m, Z −0.95 m. The bounding surface is the eight-vertex ring the read traced, meeting the limiter no closer than 0.043 m. The closed cores sit well inside the vessel outline; the contours leave it where the grid does.</figcaption>
   </figure>
 
   <figure>
     <img src="/nova/figures/diiid-stopping-rule-fix/frame-44-limited-terminal.png" alt="Frame 44 limited terminal flux contours inside the governed DIII-D limiter">
-    <figcaption>Frame 44, limited seed, terminal residual 0.197, drawn on the same limiter and levels. No bounding surface was recorded for this arm, and the legend says so.</figcaption>
+    <figcaption>Frame 44, limited seed, terminal residual 0.197, on the same limiter and levels. The solved axis at R 1.77 m, Z −0.11 m sits inside the EFIT axis ring at R 1.74 m, Z −0.10 m; the recorded solved X-point lies above the upper shelf, outside the field drawn here, so this panel carries no mark or legend entry for it. The eight-vertex bounding surface approaches the limiter to 0.061 m.</figcaption>
   </figure>
 
   <figure>
     <img src="/nova/figures/diiid-stopping-rule-fix/frame-144-diverted-terminal.png" alt="Frame 144 diverted terminal flux contours inside the governed DIII-D limiter">
-    <figcaption>Frame 144, diverted seed, terminal residual 5.93 — the worst arm, and the one whose recorded boundary comes nearest the wall at 0.162 m. No bounding surface was recorded for this arm, and the legend says so.</figcaption>
+    <figcaption>Frame 144, diverted seed, terminal residual 5.93 — the worst arm, and the one whose recorded boundary comes nearest the wall at 0.162 m. The solved and EFIT X-points coincide at R 1.38 m, Z −1.06 m, drawn one over the other; the solved axis at R 1.76 m, Z 0.01 m lies within the EFIT axis ring at R 1.74 m, Z 0.00 m. The eight-vertex bounding surface approaches the limiter to 0.048 m.</figcaption>
   </figure>
 
   <figure>
     <img src="/nova/figures/diiid-stopping-rule-fix/frame-137-diverted-terminal.png" alt="Frame 137 diverted terminal flux contours inside the governed DIII-D limiter">
-    <figcaption>Frame 137, diverted seed, terminal residual 0.0624 — the only arm where Newton promotions are accepted, with its recorded boundary 0.329 m from the wall; its solved X-point (filled cross) sits 0.15 m below the EFIT X-point (hollow cross) — the only panel where the two null sets separate. No bounding surface was recorded for this arm, and the legend says so.</figcaption>
+    <figcaption>Frame 137, diverted seed, terminal residual 0.0624 — the only arm where Newton promotions are accepted, with its recorded boundary 0.329 m from the wall. The solved axis (filled triangle) at R 1.66 m, Z −0.44 m sits well below the EFIT axis ring at R 1.74 m, Z 0.00 m, and the solved X-point (hollow red cross) at R 1.27 m, Z −1.34 m sits 0.15 m below the EFIT X-point (hollow grey cross) — the only panel where the two null sets separate. Its eight-vertex bounding surface comes within 0.006 m of the limiter.</figcaption>
   </figure>
 
   <h3>What the stopping-rule change does and does not do</h3>

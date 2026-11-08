@@ -63,18 +63,26 @@ def run_frame(frame, root, expansion):
             )
             field = state[: lattice.node_count].reshape(lattice.shape)
             axis = np.asarray(topology.axis)
-            boundary = host_boundary_read(
-                field.T,
-                Grid(lattice.radius, lattice.height, limiter),
-                tuple(axis),
-            )
-            surface, _ = probe.bench._assembled_boundary_geometry(
-                field,
-                lattice.radius,
-                lattice.height,
-                float(topology.boundary_flux),
-                axis,
-            )
+            try:
+                boundary = host_boundary_read(
+                    field.T,
+                    Grid(lattice.radius, lattice.height, limiter),
+                    tuple(axis),
+                )
+            except (ValueError, RuntimeError) as error:
+                boundary = None
+                record["host_boundary_refusal"] = str(error)
+            try:
+                surface, _ = probe.bench._assembled_boundary_geometry(
+                    field,
+                    lattice.radius,
+                    lattice.height,
+                    float(topology.boundary_flux),
+                    axis,
+                )
+            except (ValueError, RuntimeError) as error:
+                surface = np.empty((0, 2))
+                record["surface_refusal"] = str(error)
             gap = _wall_distance(surface, limiter)[0] if len(surface) else np.array([])
             record.update(
                 status="solved",
@@ -100,11 +108,17 @@ def run_frame(frame, root, expansion):
                 termination_reason=int(receipt.termination_reason),
                 residual_history=probe._finite_list(receipt.residual_history),
                 changed_mask_entries=probe._int_list(receipt.mask_history),
-                host_boundary_read_class="diverted"
-                if boundary.is_diverted
-                else "limited",
-                host_boundary_found=bool(boundary.found),
-                host_boundary_class_margin=float(boundary.class_margin),
+                host_boundary_read_class=(
+                    "refused"
+                    if boundary is None
+                    else "diverted"
+                    if boundary.is_diverted
+                    else "limited"
+                ),
+                host_boundary_found=bool(boundary is not None and boundary.found),
+                host_boundary_class_margin=(
+                    None if boundary is None else float(boundary.class_margin)
+                ),
                 wall_gap_m=float(np.min(gap)) if gap.size else None,
                 x_point_rz_m=np.asarray(topology.x_point).tolist(),
             )

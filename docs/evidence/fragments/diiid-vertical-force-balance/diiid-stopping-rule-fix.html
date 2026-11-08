@@ -166,6 +166,24 @@
   </p>
 
   <p>
+    The panels are reproduced rather than transcribed. Every field a panel draws
+    is written by
+    <code>scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py</code>
+    from the frame's own artifact and receipt, and
+    <code>run_geometry_dump.py</code> rewrites those files on every run, so a
+    panel cannot be drawn from geometry older than the recorder. Two contracts
+    behind the panels are pinned by
+    <code>scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py</code>:
+    that the recorder writes every field a panel reads, and that the renderer
+    refuses a note placed inside the poloidal field or two notes that overlap.
+    Neither contract is visible in a finished PNG, which is why each is tested
+    rather than checked by eye. The panel constructor reuses the probe's own
+    text-artist check, its null-handle vocabulary and its wall-distance routine,
+    so a panel here and a panel elsewhere in the probe reject a bad label and
+    measure a gap the same way.
+  </p>
+
+  <p>
     The two null sets are what the diverted panels exist to compare. On 137
     diverted the solved X-point sits at R 1.265 m, Z −1.336 m while the EFIT
     contour's own low point is at R 1.290 m, Z −1.188 m, a 0.15 m vertical

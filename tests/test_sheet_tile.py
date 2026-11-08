@@ -25,6 +25,7 @@ from nova.biot.tiledassembly import (
     TilePlan,
     cell_edges,
     cell_interaction,
+    packed_sheet_end_scale,
     packed_sheet_field,
 )
 from nova.jax.config import configure_dtypes
@@ -44,7 +45,17 @@ WEST_MESH = os.environ.get(
 PAIR_BLOCK = 4096
 
 #: Processes the build is sharded over; the allocation is one compute node.
-WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "12"))
+WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "8"))
+
+#: Targets measured, counted from the first cell; 0 measures the whole mesh.
+#: A subset is how the gate is exercised on a fence too short for all 1696
+#: targets, and the run says which subset it measured.
+TARGETS = int(os.environ.get("NOVA_SHEET_TILE_TARGETS", "0"))
+
+#: Cell whose edge normals are reversed in the device build. Unset in a normal
+#: run; set it to re-run the same gate against the mutated build, which is the
+#: negative control.
+REVERSE = os.environ.get("NOVA_SHEET_TILE_REVERSE_NORMALS")
 
 GATE = 1e-13
 
@@ -74,7 +85,15 @@ def assemble(radial, height, edges):
 
 
 def absolute_contributions(edges, radial, height):
-    """Return the absolute sum of each entry's edge-sheet contributions."""
+    """Return the absolute sum of each entry's edge-sheet contributions.
+
+    ``radial`` and ``height`` are the per-pair magnitudes to contract, so the
+    caller chooses whether the sum carries the net edge fields or the per-end
+    antiderivative terms that make them up. The gate uses the latter: an entry's
+    four edge sheets nearly cancel at a distant target, and each edge's own
+    contribution is itself a difference of two end terms, so only the end-term
+    magnitudes bound what two correctly rounded evaluations can differ by.
+    """
     count = edges.coefficient_r.shape[0]
     rows = radial.shape[0]
     scale = np.empty((2 * rows, 2 * count))
@@ -83,6 +102,30 @@ def absolute_contributions(edges, radial, height):
     scale[:rows, count:] = np.abs(radial) @ np.abs(edges.coefficient_z).T
     scale[rows:, count:] = np.abs(height) @ np.abs(edges.coefficient_z).T
     return scale
+
+
+def unbatched_end_scale(target_r, target_z, edges):
+    """Evaluate the per-end antiderivative magnitudes, one pair chunk at a time."""
+    kernel = jax.jit(lambda *values: packed_sheet_end_scale(jnp, *values))
+    targets = target_r.size
+    sources = edges.start_r.size
+    radial = np.empty((targets, sources))
+    height = np.empty((targets, sources))
+    for start in range(0, targets * sources, PAIR_BLOCK):
+        stop = min(start + PAIR_BLOCK, targets * sources)
+        flat = np.arange(start, stop)
+        rows, columns = np.divmod(flat, sources)
+        out = kernel(
+            jnp.asarray(target_r[rows]),
+            jnp.asarray(target_z[rows]),
+            jnp.asarray(edges.start_r[columns]),
+            jnp.asarray(edges.start_z[columns]),
+            jnp.asarray(edges.end_r[columns]),
+            jnp.asarray(edges.end_z[columns]),
+        )
+        radial[rows, columns] = np.asarray(out[0])
+        height[rows, columns] = np.asarray(out[1])
+    return radial, height
 
 
 def unbatched_edge_field(target_r, target_z, edges):
@@ -129,9 +172,18 @@ def build_slice(bounds):
         n_nodes=48,
     )
     tiled = cell_interaction(polygons, target_r, target_z, plan=plan)
+    if REVERSE is not None:
+        tiled = cell_interaction(
+            polygons,
+            target_r,
+            target_z,
+            plan=plan,
+            reverse_normals=int(REVERSE),
+        )
     radial, height = unbatched_edge_field(target_r, target_z, edges)
     reference = assemble(radial, height, edges)
-    scale = absolute_contributions(edges, radial, height)
+    radial_scale, height_scale = unbatched_end_scale(target_r, target_z, edges)
+    scale = absolute_contributions(edges, radial_scale, height_scale)
     return lower, upper, tiled, reference, scale
 
 
@@ -139,10 +191,10 @@ def build_slice(bounds):
 def interaction():
     """Return ``G`` built through the tile and by the unbatched host route."""
     _, centroids = west_mesh()
-    step = (centroids.shape[0] + WORKERS - 1) // WORKERS
+    count = TARGETS or centroids.shape[0]
+    step = (count + WORKERS - 1) // WORKERS
     bounds = [
-        (start, min(start + step, centroids.shape[0]))
-        for start in range(0, centroids.shape[0], step)
+        (start, min(start + step, count)) for start in range(0, count, step)
     ]
     if WORKERS == 1:
         built = [build_slice(bound) for bound in bounds]
@@ -168,29 +220,28 @@ def test_west_mesh_is_the_prototype_mesh():
 
 @pytest.mark.slow
 @pytest.mark.timeout(1500)
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "nova/biot/sheet.py returned NaN beyond a sloped edge start at this base; "
-        "fixed on main at c822ed667 and re-measured against the per-end tolerance "
-        "by icm-sheet-tile-measure"
-    ),
-)
 def test_tile_agrees_with_the_unbatched_closed_form(interaction):
     """Every entry of the tiled build matches the unbatched host evaluation."""
     tiled, reference, scale = interaction
+    assert np.all(np.isfinite(tiled)), "the tiled build left an entry undefined"
+    assert np.all(np.isfinite(reference)), "the host evaluation left an entry undefined"
     error = np.abs(tiled - reference) / scale
     worst = float(np.max(error))
     row, column = np.unravel_index(int(np.argmax(error)), error.shape)
     counts = int(np.sum(error > GATE))
+    distribution = " ".join(
+        f"p{level}={np.percentile(error, level):.3e}"
+        for level in (50, 90, 99, 99.9, 100)
+    )
     print(
-        f"\nsheet tile: worst entry {worst:.3e} at ({row}, {column}); "
-        f"entries above {GATE:.0e}: {counts} of {error.size}; "
-        f"median {np.median(error):.3e}, 99th {np.percentile(error, 99):.3e}"
+        f"\nsheet tile: {tiled.shape[0]} targets x {tiled.shape[1] // 2} cells, "
+        f"worst entry {worst:.3e} at ({row}, {column}); "
+        f"entries above {GATE:.0e}: {counts} of {error.size}; {distribution}"
     )
     assert worst <= GATE, (
-        f"worst entry error {worst:.3e} relative to the absolute edge-sheet "
-        f"contributions, at ({row}, {column}); {counts} entries above the gate"
+        f"worst entry error {worst:.3e} relative to the absolute per-end "
+        f"antiderivative terms, at ({row}, {column}); {counts} entries above "
+        f"the gate"
     )
 
 
@@ -246,7 +297,8 @@ def test_reversed_edge_normals_break_the_agreement():
     )
     radial, height = unbatched_edge_field(target_r, target_z, edges)
     reference = assemble(radial, height, edges)
-    scale = absolute_contributions(edges, radial, height)
+    radial_scale, height_scale = unbatched_end_scale(target_r, target_z, edges)
+    scale = absolute_contributions(edges, radial_scale, height_scale)
     with np.errstate(invalid="ignore", divide="ignore"):
         error = np.abs(flipped - reference) / scale
     # Entries the closed form leaves undefined on both sides carry no agreement

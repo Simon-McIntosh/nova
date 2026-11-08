@@ -181,16 +181,32 @@ confined current. Every later trip inherits that state with no mask changes left
 and cannot bring it back.
 </p>
 <p>
-<b>The interior saddle the trip-1 panel draws is real, and it is not a second
-lobe.</b> The polished point at R=1.540 m, Z=&minus;0.040 m has a Hessian
-determinant of &minus;6.65 (eigenvalues &minus;1.0 and +6.5) and a winding index
-of &minus;1 on a loop around it, so it is a stationary saddle of the field and
-not a polish artefact. It lies at a flux of 1.957 Wb, <em>above</em> the solved
-axis at 1.761 Wb and above the bounding flux of 0.413 Wb the connectivity read
-returns, so it sits outside the closed surfaces that bound this plasma: the
-confined region still has one extremum, the field is not two-lobed at trip 1,
-and the trip-2 jump is not a transfer between lobes. The winding test is
-validated against known fields (a pure maximum reads +1, a pure saddle &minus;1).
+<b>The trip-1 field already carries a higher maximum than the axis the solver
+reported, and the trip-2 state lands on a minimum instead.</b> A census of every
+polished extremum (script <code>maxima_census.py</code>, receipt
+<code>trip-trajectory/maxima-census.json</code>) finds, on frame 146's trip-1
+grid, a maximum of <b>1.958 Wb at R=1.584 m, Z=0.000 m</b> inside the limiter,
+against <b>1.761 Wb</b> at the axis the solve reports (R=1.688 m,
+Z=&minus;0.346 m). The interior saddle at R=1.540 m, Z=&minus;0.040 m (Hessian
+determinant &minus;6.65, eigenvalues &minus;1.0 and +6.5, winding index
+&minus;1) separates those two maxima, so trip 1 is already a two-lobed field and
+the solver's axis selection picks the lower lobe. Frame 137 shows the same
+structure at trip 1 (maximum 2.003 Wb at R=1.531 m, Z=0.000 m against a reported
+axis flux of 1.883 Wb), so axis selection below the field maximum is not by
+itself the discriminator.
+
+What separates the frames is where the next trip goes. At trip 2 frame 146's
+reported axis (R=1.211 m, Z=+1.556 m) sits at <b>&minus;5.28 Wb</b>, while the
+field's maximum inside the limiter is 1.211 Wb at R=2.013 m, Z=&minus;0.400 m
+and the nearest polished extremum is a minimum at R=1.102 m, Z=+1.347 m
+(&minus;6.34 Wb). The step did not hand the plasma to the upper lobe; it moved
+the axis onto a low-flux extremum above the limiter. Frame 137's trip 2 keeps
+its axis at 1.973 Wb on a field whose maximum is 2.383 Wb.
+
+So <b>axis misidentification across a saddle is present at trip 1 on both
+frames, and the trip-2 step makes it terminal on frame 146</b>: the promotion
+moves the axis to a lower extremum rather than to the field's maximum, which
+leaves 0.046&times;Ip confined. Both findings belong to the same mechanism.
 </p>
 </section>
 

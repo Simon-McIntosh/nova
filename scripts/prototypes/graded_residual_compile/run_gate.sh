@@ -2,7 +2,7 @@
 #SBATCH --partition=sirius
 #SBATCH --time=12:00:00
 #SBATCH --mem=256G
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=36
 #SBATCH --job-name=graded-residual-suite
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T134005364650-graded-residual-compile-recovery/gate/suite-%j.log
 set -u
@@ -24,8 +24,8 @@ if [ ! -d "$BT/tests/biot" ]; then
 fi
 FILES="test_edge_term_tangents test_vertex_term_tangents test_vertex_edge_tangent_recurrences test_graded_layer_near_corner"
 for file in $FILES; do
-  srun --overlap --ntasks=1 --cpus-per-task=8 --cpu-bind=none "$ARM" base "$BT" "$BASE" "$file" &
-  srun --overlap --ntasks=1 --cpus-per-task=8 --cpu-bind=none "$ARM" head "$W" "$HEAD" "$file" &
+  srun --overlap --ntasks=1 --cpus-per-task=4 --cpu-bind=none "$ARM" base "$BT" "$BASE" "$file" &
+  srun --overlap --ntasks=1 --cpus-per-task=4 --cpu-bind=none "$ARM" head "$W" "$HEAD" "$file" &
 done
 wait
 git -C "$W" worktree remove --force "$BT" 2>/dev/null || rm -rf "$BT"

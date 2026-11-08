@@ -103,6 +103,12 @@ pair collapsed the wrong way, is O(1) there.
       the padded tile and the flat walk and not an artefact of a cancelling sum. The
       independent reference is what tells whether that residual lives in the coefficients or
       in the padding.</li>
+  <li>The CPU lane is not a fallback at a smaller size. A 32-row subset — about a minute of
+      compute at the measured per-pair cost — was left to 540 s and produced no summary line:
+      the parent pytest process was alive at 1.2% CPU nine minutes in with no spawned shard
+      beside it, so the multi-worker gate path blocks before it computes. That is the same
+      signature as the two full-mesh attempts, and it makes one free H200 card the only route
+      to this number.</li>
   <li>Naming test files on the command line clears pytest's inherited <code>-m 'not slow'</code>
       filter, so a suite arm written that way runs the 1500 s and 1200 s gates and reads as a
       hang rather than as work. Both arms here pass <code>-m 'not slow'</code> explicitly and

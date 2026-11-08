@@ -1,0 +1,137 @@
+<section id="diiid-residual-plateau">
+<h2>DIII-D plateau: warmup loses its finite trajectory before Newton can act</h2>
+<p><strong>The terminal support is stable because the solver returns its earlier finite best state; the trajectory used to start Newton is already nonfinite.</strong> On frame 179 limited, eight unconditional Picard warmup sweeps pass through a best residual of 0.0272617608330 and then a finite state whose map contains NaNs. Warmup propagates those NaNs into the trajectory. Newton's finite-residual guard correctly refuses to attempt a step. A second trip repeats this sequence and returns the identical best state with 345 connected cells. Frame 137 diverted follows the same stopping sequence on its fifth trip, after 72 attempted and 62 accepted Newton promotions on earlier trips; its final support has 234 cells and residual 0.0623688287771. MAST 21978/35 keeps finite warmup operands, accepts seven promotions and converges to 3.31454484353e-16.</p>
+<p>No product source is changed. The prototype wraps the public request's actual assembly, inner solver, residual and backtracking functions and persists runtime callback operands. It does not replace a solver expression. The successful batch ran as one explicitly sized H200 job, 1308449, with one fresh process per case; its scheduler receipt is COMPLETED, exit 0:0, and its launcher ends NOVA_LANE_EXIT_STATUS=0. The initial in-place attempt remains one counted product-run failure: its child received SIGKILL during compilation. The signal alone does not establish an out-of-memory cause.</p>
+<h3>Reproduction and route</h3>
+<p>The live plan was read at version 65. Product source is pinned to the assigned base; the relevant equilibrium source and DIII-D preparation were byte-identical to main at ec901e1af when checked before measurement. Concurrent material-mask and axis changes are not included. The archived frame-179 plateau was first revalued through the live, frozen-shadow and re-read-shadow product maps: all three gave 0.027261760833028243, with support 345, shadow count 67, zero changed shadow entries and zero image difference. The fresh solve reproduces that plateau to roundoff. The support is read from connected.sum(); mask_history is a count of changed shadow entries.</p>
+<p>The registered request executes <code>newton_krylov</code>, with 24 Newton promotions per trip, 24 Krylov iterations, eight warmup sweeps, 16 trip slots, kernel tolerance 1e-8 and outer qualification tolerance 1e-5. The route default is <code>nova/equilibrium/solve_request.py:313</code>; <code>nova/equilibrium/forward.py:2652</code> adds an inactive vertical-position pair and <code>forward.py:2232</code> executes the augmented system. The earlier reduced-kernel premise was incorrect for this request: its reduced factory really executes zero times. The instrument is now attached to the path that does run, with positive inner, warmup and linearisation counts in all three cases and positive ladder counts in frame 137 and MAST. Frame 179's absent ladder is corroborated by its actual inner result reporting zero attempted promotions.</p>
+
+<table>
+<caption>Fresh public-seam terminal receipts. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>case</th><th>relative sup</th><th>converged</th><th>support cells</th><th>attempted / accepted</th><th>terminal reason</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>frame-179-limited</td><td>0.0272617608330305</td><td>false</td><td>345</td><td>0 / 0</td><td>11</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>0.0623688287771099</td><td>false</td><td>234</td><td>72 / 62</td><td>11</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>3.31454484352629e-16</td><td>true</td><td>243</td><td>7 / 7</td><td>1</td></tr>
+</tbody>
+</table>
+
+<table>
+<caption>Executed runtime callbacks, rather than trace-time visits. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>case</th><th>inner</th><th>warmup</th><th>linearisation</th><th>ladder</th><th>reduced factory</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>frame-179-limited</td><td>2</td><td>16</td><td>2</td><td>0</td><td>0</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>5</td><td>40</td><td>65</td><td>63</td><td>0</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>4</td><td>32</td><td>8</td><td>7</td><td>0</td></tr>
+</tbody>
+</table>
+
+<h3>Where the terminal norm lives</h3>
+<p>For physical flux rows the residual is mapped minus state in Wb. Its relative sup norm is max |residual| / max |mapped|, the product definition at <code>fixed_point.py:1128</code>. The grid regions are disjoint: support interior excludes a one-cell four-neighbour boundary band (dilation minus erosion), the band includes its inside and outside neighbours, and outside plasma excludes both support and band. The remaining physical rows evaluate wall flux. They are not coil-current equations: coil currents are prescribed inputs, so this system has zero coil-current rows. Direct pre-clip sample rows are also absent.</p>
+<p>Frame 179's sup is outside plasma at (R, Z) = (2.433750, 0) m, residual -127.295174 mWb. Its squared physical L2 norm is distributed across interior/band/exterior/wall as 52.94/14.27/28.03/4.76%. Frame 137's sup is also outside, at (1.318125, -1.600000) m on the lower grid edge, residual +224.729700 mWb. Its exterior carries 51.19% of squared physical L2, against 27.94% interior, 17.87% band and 3.00% wall. Neither plateau is a residual confined to the support boundary or to an augmented constraint.</p>
+
+<table>
+<caption>frame-179-limited: physical block and region decomposition; all 1221 physical entries are covered exactly once. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>block / region</th><th>entries</th><th>sup [mWb]</th><th>relative sup</th><th>L2 [mWb]</th><th>squared physical L2 [%]</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>support_interior</td><td>281</td><td>126.605362</td><td>0.0271140295494</td><td>1206.725495</td><td>52.941297</td></tr>
+<tr><td>619156e5b</td><td>boundary_band</td><td>133</td><td>126.918781</td><td>0.0271811518798</td><td>626.573979</td><td>14.273232</td></tr>
+<tr><td>619156e5b</td><td>outside_plasma</td><td>675</td><td>127.295174</td><td>0.027261760833</td><td>878.018228</td><td>28.027520</td></tr>
+<tr><td>619156e5b</td><td>wall_flux</td><td>132</td><td>104.222994</td><td>0.0223205818996</td><td>361.760572</td><td>4.757952</td></tr>
+<tr><td>619156e5b</td><td>direct_sample_flux</td><td>0</td><td>0.000000</td><td>0</td><td>0.000000</td><td>0.000000</td></tr>
+<tr><td>619156e5b</td><td>coil-current equations</td><td>0</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+
+<table>
+<caption>frame-137-diverted: physical block and region decomposition; all 1221 physical entries are covered exactly once. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>block / region</th><th>entries</th><th>sup [mWb]</th><th>relative sup</th><th>L2 [mWb]</th><th>squared physical L2 [%]</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>support_interior</td><td>185</td><td>204.329709</td><td>0.0567072560079</td><td>1678.249174</td><td>27.938718</td></tr>
+<tr><td>619156e5b</td><td>boundary_band</td><td>102</td><td>208.856782</td><td>0.0579636463378</td><td>1342.325306</td><td>17.873481</td></tr>
+<tr><td>619156e5b</td><td>outside_plasma</td><td>802</td><td>224.729700</td><td>0.0623688287771</td><td>2271.563428</td><td>51.185072</td></tr>
+<tr><td>619156e5b</td><td>wall_flux</td><td>132</td><td>78.420194</td><td>0.0217638151644</td><td>550.188218</td><td>3.002729</td></tr>
+<tr><td>619156e5b</td><td>direct_sample_flux</td><td>0</td><td>0.000000</td><td>0</td><td>0.000000</td><td>0.000000</td></tr>
+<tr><td>619156e5b</td><td>coil-current equations</td><td>0</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+
+<p>The augmented pair adds one dimensionless compensator row. Flux is divided by the seed flux scale at <code>constraint.py:2070</code>; the inactive row retains the unknown as its residual (<code>constraint.py:174</code>). Its map residual can therefore be nonzero after numerical promotions. It must be measured, not assumed identically zero. The frame-137 value below is small but present. Fractions for this table use the full normalized augmented residual, whereas the preceding tables use physical Wb rows only.</p>
+<table>
+<caption>Effective constraint block, independently reconciled against the last runtime inner operands. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>case</th><th>rows</th><th>map residual [dimensionless]</th><th>relative sup</th><th>squared augmented L2 [%]</th><th>seed flux scale [Wb]</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>frame-179-limited</td><td>1</td><td>0</td><td>0</td><td>0</td><td>4.56836206897</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>1</td><td>5.44356900523e-05</td><td>0.000302709336927</td><td>1.18013294341e-05</td><td>20.0371046956</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1.00249511273</td></tr>
+</tbody>
+</table>
+
+<h3>The stopping sequence in executed operands</h3>
+<p>The decisive product sequence is explicit. <code>fixed_point.py:3828</code> retains only a finite best residual, but <code>fixed_point.py:3837</code> unconditionally advances <code>candidate = state + relaxation * (mapped - state)</code>, and <code>fixed_point.py:3845</code> carries that candidate into the next sweep. There is no finite admission or rollback of this warmup trajectory. After eight sweeps, <code>fixed_point.py:3953</code> linearises the current trajectory; <code>fixed_point.py:3964</code> requires a finite residual to attempt Newton and reports NONFINITE_RESIDUAL (3) otherwise. <code>fixed_point.py:4436</code> returns <code>loop.best_state</code>, retaining the finite plateau separately from the failed trajectory.</p>
+<p>Outer reconciliation reads the best state and stable shadow again. The terminal no-attempt settlement is named stationary at <code>fixed_point.py:4851</code>; repeated identical finite residual and unchanged mask meet the stagnation condition at <code>fixed_point.py:4819</code>. The reason selector prioritises ACTIVE_SET_STATIONARY (11) at <code>fixed_point.py:399</code>. This is a stationary returned iteration state above tolerance, not evidence that the map has reached a root. The finite-residual Newton guard already works: the trace makes its guarded condition happen and shows zero attempted promotions. No replacement guard is proposed.</p>
+
+<table>
+<caption>Per-trip inner returns. Warmup indices are zero-based within each case; a listed index has a finite input and nonfinite image. Inner reason 1=converged, 2=budget, 3=nonfinite, 6=sufficient decrease refused. Return residual is the retained best under that trip map, before outer reconciliation. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>case</th><th>trip</th><th>first invalid-image indices</th><th>best residual</th><th>attempted / accepted</th><th>inner reason</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>frame-179-limited</td><td>1</td><td>5</td><td>0.027261760833</td><td>0 / 0</td><td>3</td></tr>
+<tr><td>619156e5b</td><td>frame-179-limited</td><td>2</td><td>10</td><td>0.027261760833</td><td>0 / 0</td><td>3</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>1</td><td>none</td><td>0.038475839607</td><td>24 / 14</td><td>6</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>2</td><td>none</td><td>0.0649093791548</td><td>24 / 24</td><td>2</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>3</td><td>20</td><td>0.0670052295871</td><td>0 / 0</td><td>3</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>4</td><td>none</td><td>0.0579636463378</td><td>24 / 24</td><td>2</td></tr>
+<tr><td>619156e5b</td><td>frame-137-diverted</td><td>5</td><td>38</td><td>0.0623688287771</td><td>0 / 0</td><td>3</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>1</td><td>none</td><td>5.61602667678e-12</td><td>5 / 5</td><td>1</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>2</td><td>none</td><td>2.52043514143e-16</td><td>1 / 1</td><td>1</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>3</td><td>none</td><td>3.14191229959e-16</td><td>1 / 1</td><td>1</td></tr>
+<tr><td>619156e5b</td><td>mast-21978-35</td><td>4</td><td>none</td><td>2.20969656235e-16</td><td>0 / 0</td><td>1</td></tr>
+</tbody>
+</table>
+
+<p>The direct reproduction for frame 179 is <code>warmup 3: residual 0.02726176083303048, finite_state=true, finite_image=true</code>, followed by <code>warmup 5: residual=NaN, finite_state=true, finite_image=false</code>, then <code>linearization 0: finite_state=false, finite_image=false</code> and <code>inner 0: attempted=0, accepted=0, reason=3</code>. The next trip repeats at warmup indices 10–15. For frame 137's terminal trip, warmup 32 begins at residual 0.06236882877710997, warmup 38 has a finite state and nonfinite image, warmup 39 has a nonfinite state, and linearisation 64 is nonfinite; inner 4 again returns attempted=0, accepted=0, reason=3. These are observed arrays, not NaN padding in unused history slots.</p>
+<p>The first invalid frame-179 images contain 1129 and 1154 nonfinite physical entries while the constraint image remains finite. Frame 137's first invalid images contain 1197 nonfinite physical entries, also with a finite constraint image. The capture does not identify the upstream physical-map operation that first generated those NaNs; it establishes the warmup propagation and Newton starvation that hold the returned plateau. In particular, this record does not infer a current-amplitude bound, an omitted Jacobian term or a material-mask cause from a NaN alone.</p>
+<h3>Last Newton direction and merit</h3>
+<p>The merit is the product's smooth eighth-norm ratio at <code>fixed_point.py:1135</code>, distinct from the relative sup stopping norm. Directions below are the actual bounded Newton proposals passed to <code>_backtracking_scores</code> at <code>fixed_point.py:1350</code>, in dimensionless augmented coordinates. Frame 179 has no Newton proposal: a direction norm and before/after step merit are inapplicable, rather than zero. Its retained terminal merit is 0.0291049047758860. Frame 137's final trip likewise creates no proposal; its retained terminal merit is 0.0626332502568996.</p>
+<p>Frame 137's last executed Newton ladder (callback 62, on trip 4) has direction L2 norm 3.36923241076 and sup norm 0.388166172813. Its incumbent merit is 0.0597013509605. Every actual ladder candidate is worse; even the smallest factor gives 0.0672157139569. The product selector at <code>fixed_point.py:1234</code> requires sufficient measured decrease and reports accepted=false, model_distrusted=true. The full-step model predicted 2.16142826252e-11 but the actual merit is 1.05158809920. This proves that the ladder refused a measured bad step. The stored selected=0 is the default argmax when no entry passes, not an accepted full step.</p>
+<p>This ladder refusal is not the terminal reason: trip 4 reports 24 accepted promotions, so fallback/rebuilt/descent machinery can accept moves after a Newton ladder is refused (<code>fixed_point.py:4216</code>). The callback records the six Newton trial merits, not which fallback supplies the accepted move. The final trip then has no attempt at all. MAST's last ladder (callback 6, trip 3) instead accepts factor 1: direction L2 3.03195887999e-5, sup 2.59939114338e-5, merit 1.92858937298e-5 → 2.78092842167e-16, predicted 8.23593879680e-17, model_distrusted=false.</p>
+
+<table>
+<caption>Actual merit after each candidate of the last recorded Newton ladder, beside its model prediction; incumbent merits are 0.0597013509605 for DIII-D 137 and 1.92858937298e-5 for MAST. No Newton step exists on DIII-D 179. Measurement revision <code>619156e5b75ef6bd855b5c63b53a13dcfcc7f911</code> in every row; product base <code>708079d2e5c785d2d2b6fe67be128632c9852043</code>.</caption>
+<thead><tr><th>revision</th><th>factor</th><th>DIII-D 137 actual</th><th>DIII-D 137 predicted</th><th>MAST actual</th><th>MAST predicted</th></tr></thead>
+<tbody>
+<tr><td>619156e5b</td><td>1.0</td><td>1.0515880992</td><td>2.16142826252e-11</td><td>2.78092842167e-16</td><td>8.2359387968e-17</td></tr>
+<tr><td>619156e5b</td><td>0.5</td><td>0.492500170696</td><td>0.0223898026565</td><td>9.64294686489e-06</td><td>9.64294686488e-06</td></tr>
+<tr><td>619156e5b</td><td>0.25</td><td>0.242223470264</td><td>0.0392369784828</td><td>1.44644202973e-05</td><td>1.44644202973e-05</td></tr>
+<tr><td>619156e5b</td><td>0.125</td><td>0.125137456268</td><td>0.0491227987196</td><td>1.68751570135e-05</td><td>1.68751570135e-05</td></tr>
+<tr><td>619156e5b</td><td>0.0625</td><td>0.0763377482446</td><td>0.0543554386786</td><td>1.80805253717e-05</td><td>1.80805253717e-05</td></tr>
+<tr><td>619156e5b</td><td>0.03125</td><td>0.0672157139569</td><td>0.0570203811093</td><td>1.86832095507e-05</td><td>1.86832095507e-05</td></tr>
+</tbody>
+</table>
+
+<h3>MAST comparison and corrective change</h3>
+<p>MAST 21978/35 executes the same public Newton-Krylov route and budgets, with all 32 warmup images finite. It reaches Newton on three trips and accepts 7/7 promotions; its fourth trip already has a finite residual at roundoff and needs no step. Thus an absent final Newton attempt is explained by convergence for MAST and by a nonfinite trajectory for DIII-D. The MAST builder uses the fitted-circuit, passive-inclusive reference case and starts from its EFIT state. DIII-D uses the cold limited/diverted branch seeds. This comparison separates the observed numerical paths; it is not a controlled claim that machine identity alone causes the difference.</p>
+<p><strong>The corrective product change, named but not written:</strong> globalise the Picard warmup, retain a finite trajectory and its matching shadow/partition, and stop or damp a warmup proposal whose resulting map is nonfinite. Begin Newton from the retained finite best state when warmup fails, instead of passing the NaN trajectory into the already-correct finite-residual guard. This addresses the observed starvation mechanism at <code>fixed_point.py:3837</code>. A repair must demonstrate an actual promotion from the 179 plateau and the final 137 state. Reaching 1e-5 is not established by this diagnostic record; the earlier frame-137 ladder mismatch and physical-map admissibility still need to be checked by that repair.</p>
+<h3>Native terminal panels</h3>
+<p>All fields are bound by declared radius-height storage (<code>nova/equilibrium/conservation.py:138</code>), never inferred from square shapes; only the plotting interface transposes. Each panel carries the physical limiter, solved and EFIT flux on one shared set of nine physical levels, both sets of null markers and the EFIT boundary. The solved axis is a filled triangle, its recorded unadmitted saddle a hollow cross; EFIT markers are hollow grey, polished on the EFIT field. Dotted outlines locate the selected residual region. All residual contours are solid: green (#2e8b57) denotes residual &gt; 0 and purple (#7954ad) denotes residual &lt; 0. Levels remain ±20%, ±50% and ±80% of each case's full grid maximum. Each figure states that maximum in Wb and the solved–EFIT axis separation in metres, so the MAST roundoff scale remains explicit. A thin neutral rectangle marks the computational domain; a contour reaching it ends at the grid edge. The legend separately keys solved flux, EFIT flux, EFIT boundary, limiter, region edge, grid boundary, solved axis, recorded saddle, EFIT axis and the grey EFIT X-point cross. All labels lie in the margin. The producer inspected each 1400-pixel preview, and the renderer reports zero text collisions and zero labels over data.</p>
+
+<figure>
+<img src="/nova/figures/diiid-residual-plateau/frame-179-limited.svg" alt="frame-179-limited native terminal flux and regional residual line contours">
+<figcaption>frame-179-limited: terminal residual 0.027261760833, converged false, support 345. Measurement revision 619156e5b75ef6bd855b5c63b53a13dcfcc7f911. Shared flux levels [Wb]: -4.14672, -3.64877, -3.15081, -2.65286, -2.15491, -1.65696, -1.159, -0.66105, -0.163097. Residual levels are ±{0.2, 0.5, 0.8} × max|r|, with max|r| = 0.12729517354 Wb. Solved–EFIT axis separation is 0.0748210285 m; both markers remain at their measured coordinates. The hollow EFIT axis uses a larger outline to keep it visible where the glyphs approach.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-residual-plateau/frame-137-diverted.svg" alt="frame-137-diverted native terminal flux and regional residual line contours">
+<figcaption>frame-137-diverted: terminal residual 0.0623688287771, converged false, support 234. Measurement revision 619156e5b75ef6bd855b5c63b53a13dcfcc7f911. Shared flux levels [Wb]: -3.31979, -2.67476, -2.02974, -1.38471, -0.739683, -0.0946569, 0.55037, 1.1954, 1.84042. Residual levels are ±{0.2, 0.5, 0.8} × max|r|, with max|r| = 0.224729699866 Wb. Solved–EFIT axis separation is 0.449295254 m; both markers remain at their measured coordinates. The hollow EFIT axis uses a larger outline to keep it visible where the glyphs approach.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-residual-plateau/mast-21978-35.svg" alt="mast-21978-35 native terminal flux and regional residual line contours">
+<figcaption>mast-21978-35: terminal residual 3.31454484353e-16, converged true, support 243. Measurement revision 619156e5b75ef6bd855b5c63b53a13dcfcc7f911. Shared flux levels [Wb]: -0.875195, -0.743019, -0.610842, -0.478666, -0.346489, -0.214312, -0.0821357, 0.0500409, 0.182217. MAST residual contours show floating-point roundoff, with maxima labelled in aWb; they do not indicate a physical residual structure. Residual levels are ±{0.2, 0.5, 0.8} × max|r|, with max|r| = 3.33066907388e-16 Wb. Solved–EFIT axis separation is 0.0267367396 m; both markers remain at their measured coordinates. The hollow EFIT axis uses a larger outline to keep it visible where the glyphs approach.</figcaption>
+</figure>
+
+<p>The sign palette is checked in the prototype style module using full-severity Machado colour-vision simulation and CIE76 distance in D65 Lab. Across the positive/negative pair and each sign against both flux greys, the minimum ΔE is 45.266 for normal vision, 26.657 for protanopia, 18.470 for deuteranopia and 12.591 for tritanopia, all above the declared floor of 8. The first teal proposal was refused at ΔE 4.081 against a grey under deuteranopia. The method uses the <a href="https://github.com/njsmith/colorspacious/blob/master/colorspacious/cvd.py">published Machado simulation matrices</a>; the standalone dataviz validator is not installed in this environment. The prototype validates a known black/white distance and repeated-colour identity before checking the selected palette.</p>
+<h3>Capture checks and durable receipts</h3>
+<p>The analyzer reads every saved warmup and linearisation operand, every inner return and all ladder rows: 110/20/44 runtime array files and 63/0/7 ladder rows for DIII-D 137/179 and MAST respectively. It checks finite flags and residuals against arrays, reconciles aggregate attempts/acceptances, reconstructs the flux scale from actual normalized operands, and reconciles the constraint residual. The focused capture gate additionally binds each named region to the saved operands and independently recomputes its entry count, sup, relative sup, L2 norm and squared norm fraction. It also checks the region cover, positive executed-seam counts, both DIII-D nonfinite terminal refusals and the finite converged MAST control. Swapping support-interior and exterior row identities passed the aggregate-only gate (region-swap-before.log, EXIT=0) but the strengthened check refuses it (region-swap-red.log, EXIT=1). Its negative control deliberately zeroes a known-present inner-call count and must be refused. The final-head gate receipt, refusal log and lint result are named in the manifest; a paired capture check now records the expected absent script at the archived product base and the passing final-head arm, using the identical plain script invocation in both. The base archive contains the known-present product fixed-point module; only the newly added capture script is absent. Its scratch tree is removed after that arm.</p>
+<p>All large/raw data remain in the run directory <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/</code>. Inputs and results are <code>trace-sized/*/{receipt,stages,inner,ladder}.json</code>, the corresponding per-call NPZ arrays and <code>terminal.npz</code>, <code>measure-sized-lane.log</code>, <code>operand-summary.json</code>, <code>operand-analysis.log</code>, <code>render-sized.log</code>, and <code>previews-sized/</code>. There is no ladder file for frame 179 because none ran; its positive inner callback and attempted=0 receipt establish that absence. The independent archived reproduction is retained under <code>archived-179/</code>. The run's <code>landing-record.html</code> and <code>manifest.md</code> carry the final local commits, exact gate command and audit result.</p>
+</section>

@@ -100,6 +100,13 @@
     },
     "coverage": "Observed completed summaries only; 6 identical failure ids including H200 forward solve. Reduced-constraints aborted on both arms before its summary, so zero is the observed delta, not proof of complete regression coverage."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "receipt-mask-history-rename",
+      "recorded_at": "2026-11-08T17:36:44.201233+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/equilibrium/forward.py",

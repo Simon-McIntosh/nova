@@ -1,0 +1,193 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T05:29:32.962Z",
+  "dispatched_at": "2026-11-08T05:20:48Z",
+  "findings": [
+    {
+      "anchor": "iron-core-magnetisation.html#decisions:410",
+      "id": "wiring-1",
+      "reason": "a reader and the plan surface will look for the production-formulation decision under the field-source section, and \u00a75 can close without its decision ever showing against it.",
+      "text": "the `formulation` decision carries `data-sections=\"s6\"`, but \u00a75 is the section that measures the three candidate formulations and whose text says \"Record the choice in the formulation decision below\"; \u00a76 consumes the answer, it does not decide it",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html#s5:331",
+      "id": "done_when-1",
+      "reason": "a comparison that cannot be made to fail reports whatever the code produces; each of these nodes needs the mutation or wrong-configuration arm \u00a72/\u00a73/\u00a74 already carry (for \u00a75 a deliberately mis-graded mesh that must miss 0.5 %, for \u00a77 a frozen-magnetisation arm that must shift the axis, and so on) before its measure means anything.",
+      "text": "neither \u00a75, \u00a76, \u00a77, \u00a78 nor \u00a79 declares a negative control: \u00a75 compares candidate formulations only against each other, \u00a76's imas-efit shell is a cross-code comparison rather than a case the check must fail, \u00a77's clauses are convergence/shift/finite-difference checks, \u00a78's are report-and-agreement, \u00a79's are residual reports",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html#s4:283",
+      "id": "done_when-2",
+      "reason": "a node can pass all three clauses having added a third script reader, which is exactly the duplication \u00a74 says it is preventing; the migration needs its own clause or its own node.",
+      "text": "\u00a74's first paragraph declares work with no clause measuring it: extending `nova/imas/machine.py` and moving `scripts/prototypes/iron_magnetisation/west.py` and `scripts/west_stray_field/solve.py` onto that reader \"rather than joined by a third\", while done-when (1)\u2013(3) test only the sphere, the shell, WEST convergence and the receipt",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html#s7:367",
+      "id": "done_when-3",
+      "reason": "without a number, \"converges\" is satisfied by whatever the run stops at, so the node's headline claim is unfalsifiable.",
+      "text": "done-when clause (1) reads \"a WEST forward state with iron converges through the seam on the H200\" with no residual, tolerance or iteration bound, against \u00a74's \"at most ten Newton iterations\"; the clause therefore cannot fail determinately",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html#s6:340",
+      "id": "single_goal-1",
+      "reason": "the seam can be correct while the imas-efit control is unresolved, and the single done-when closes neither on one verdict; splitting them lets the seam land and the control be answered or escalated on its own.",
+      "text": "\u00a76 carries two deliverables under one done-when: the CoilSet passive-frame seam that puts the solved magnetisation into every grid and point solve (clause 1), and the imas-efit closed-shell control that is a cross-code investigation into the imas-efit owners (clause 2), with clause 3 a tabulation against imas-efit",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html#s7:369",
+      "id": "reasoning-1",
+      "reason": "a node following \u00a77 as written lands a per-iteration magnetisation update with nothing carrying the cross-derivative, and then cannot satisfy its own gate; the mechanism must say whether M is differentiated implicitly (at the inner-solve fixed point) or the block is built from the frozen incremental permeability.",
+      "text": "done-when clause (3) requires \"the iron Jacobian block \u2026 checked against finite differences\", but \u00a77's mechanism only says the magnetisation \"updates \u2026 inside the Grad\u2013Shafranov Newton step rather than once before it\" and names no path by which dM/d\u03c8 (or dM/dI_coil) enters the GS Jacobian \u2014 an inner Newton solve re-run per outer iteration yields a converged M but no differentiated block",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-core-magnetisation.html#s1:161",
+      "id": "reasoning-2",
+      "reason": "the plan already hedges it with the closed-shell control (\u00a76) and the measurement search (\u00a79), which are the tests that would settle the attribution, so the sentence is a hypothesis under test rather than the premise any downstream node runs on.",
+      "text": "\u00a71 says \"The difference sits in the iron representation: imas-efit carries B-spline boundary currents with the permeability sampled at its observation points\", then records short-range work already performed (`magnetics-residuals.json`) that does not discriminate \u2014 the claimed cause rests on no measurement the plan cites, and both models are stated to be unchecked",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "d63f218f1e20724417e52e0fd739c672887bc73b",
+  "plan_fingerprint": "de06948e0453efc5b1a22d720681010e6cb2d56e1a52458dc7c3e8dc8377acd0",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 22,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "Kept on s6 deliberately: a decision's data-sections hold readiness for those sections, and scoping it to s5, the section that measures and records it, deadlocks s5 behind its own output (measured earlier on this plan with the sheet-route decision, scoped from s2,s3 to s3 for that reason). s6 is the first section that consumes the formulation, so the hold belongs there.",
+      "when": "2026-11-08T05:52:26.241571+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Accepted and scheduled, not refused: the negative controls for s5 to s9 (a mis-graded mesh that must miss 0.5 % for s5, a frozen-magnetisation arm that must shift the axis for s7, axisymmetric-only iron that must fail s8's behind-versus-between difference, and so on) are written into those sections in the edit that follows s3's dispatch, so their review overlaps s3's build instead of delaying it.",
+      "when": "2026-11-08T05:52:31.896746+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "Accepted and scheduled with done_when-1: s4 gains a clause that the iron read extends nova/imas/machine.py and the two script readers are moved onto it with no third reader, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:36.857977+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-3",
+      "reason": "Accepted and scheduled with done_when-1: s7 clause (1) gains the residual tolerance and iteration bound of the forward solve's own convergence test, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:43.593950+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "Accepted and scheduled: s6 splits into the CoilSet passive-frame seam and the imas-efit closed-shell control as two sections, with the waits rewired, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:49.533125+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Accepted and scheduled: s7's mechanism will state that dM/dpsi enters the Grad-Shafranov Jacobian by implicit differentiation at the inner material solve's fixed point, which is what its finite-difference clause then checks, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:54.886159+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "The sentence is a hypothesis already under test (the s6 closed-shell control and the s9 measurement search); it is reworded as a hypothesis in the same edit after s3's dispatch, and no node runs on it.",
+      "when": "2026-11-08T05:52:59.204571+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted and scheduled, not refused: the negative controls for s5 to s9 (a mis-graded mesh that must miss 0.5 % for s5, a frozen-magnetisation arm that must shift the axis for s7, axisymmetric-only iron that must fail s8's behind-versus-between difference, and so on) are written into those sections in the edit that follows s3's dispatch, so their review overlaps s3's build instead of delaying it.",
+      "when": "2026-11-08T05:52:31.896746+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted and scheduled with done_when-1: s4 gains a clause that the iron read extends nova/imas/machine.py and the two script readers are moved onto it with no third reader, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:36.857977+00:00"
+    },
+    "done_when-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted and scheduled with done_when-1: s7 clause (1) gains the residual tolerance and iteration bound of the forward solve's own convergence test, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:43.593950+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted and scheduled: s7's mechanism will state that dM/dpsi enters the Grad-Shafranov Jacobian by implicit differentiation at the inner material solve's fixed point, which is what its finite-difference clause then checks, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:54.886159+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The sentence is a hypothesis already under test (the s6 closed-shell control and the s9 measurement search); it is reworded as a hypothesis in the same edit after s3's dispatch, and no node runs on it.",
+      "when": "2026-11-08T05:52:59.204571+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Accepted and scheduled: s6 splits into the CoilSet passive-frame seam and the imas-efit closed-shell control as two sections, with the waits rewired, in the edit after s3's dispatch.",
+      "when": "2026-11-08T05:52:49.533125+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Kept on s6 deliberately: a decision's data-sections hold readiness for those sections, and scoping it to s5, the section that measures and records it, deadlocks s5 behind its own output (measured earlier on this plan with the sheet-route decision, scoped from s2,s3 to s3 for that reason). s6 is the first section that consumes the formulation, so the hold belongs there.",
+      "when": "2026-11-08T05:52:26.241571+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-core-magnetisation.v22.json",
+  "review_run_id": "r-20261108T051747014310-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "c80679e2bc829cb2e7be7d97d03bdeaddc6a9de4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module, symbol, figure, plan and crew report resolves on this tree (with extensionless hrefs read as `<path>.html`).",
+    "done_when": "a finding \u2014 five of the seven implementable nodes (\u00a75, \u00a76, \u00a77, \u00a78, \u00a79) declare no negative control, \u00a74 declares work no clause measures, and \u00a77's convergence clause names no tolerance.",
+    "evidence_paths": "pass \u2014 \u00a71's receipts sit on the GPFS evidence root, \u00a73 and \u00a76 write into tracked docs, and the decision evidence resolves; \u00a75's unqualified \"the plan's evidence record\" is the only soft path and the plan's evidence-fragment convention resolves it.",
+    "naming": "pass \u2014 the sections are named by the mechanism they build and the new symbols the plan introduces (`sheet_flux`, `sheet_field`, `antiderivative_closed`, `nova/biot/magnetisation.py`) carry no stage, ticket or version labels.",
+    "reasoning": "a finding \u2014 \u00a77 requires an iron Jacobian block its stated mechanism never produces, and \u00a71's attribution of the imas-efit disagreement to the boundary-current representation is argued past evidence the plan itself says does not exist.",
+    "single_goal": "a finding \u2014 \u00a76 carries two independent deliverables, four definition decisions apart by their evidence, under one done-when.",
+    "wiring": "a finding \u2014 the `formulation` decision is scoped to `s6` although \u00a75 is the section that owns and records it."
+  },
+  "section_digests": {
+    "_document": "bbea0326e147706ddc33a678c12e2f42156ec2b5535a739fba9f309d03c5dcf9",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "8a9bb054eb92d91f1362764d30f5012de50c1a204862d6f892ab7d3d46e21af5",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0e968df67c572dad4921d3c80db60349fef2aeaf97a4e88ea0544111dc4254cb",
+    "s4": "431cf6b3bf7390adf73c53d44d400892cf8ab2fc4602682c29ad8bbf7336b026",
+    "s5": "1ddaa033d32473090aa93beaa9ea6f52771c030c3d57236675e2e14690edb2a0",
+    "s6": "2ab66931d7751a99523cd11abdace1d2538b7d308a01c15cecee74f08909e896",
+    "s7": "82e4aca632d08ce980cd9edd75021304444c2f9a151ecd8aadd02279b61fc9f8",
+    "s8": "e895d9cede3e0bda8ff5d8b562280502b513fd79c93b22e01253fef172135b2e",
+    "s9": "0627d5897107a2c45716c427c0bb2bd82a178065fbf0eed4eed599ab0e1ddf14"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T05:52:23.356578+00:00",
+  "total": null
+}

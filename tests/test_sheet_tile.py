@@ -18,6 +18,7 @@ import importlib.util
 import multiprocessing
 import os
 import pickle
+import sys
 
 import numpy as np
 import pytest
@@ -92,6 +93,9 @@ def prototype():
     )
     spec = importlib.util.spec_from_file_location("iron_magnetisation_prototype", path)
     module = importlib.util.module_from_spec(spec)
+    # register before executing: the module defines dataclasses, and dataclass
+    # resolves a class's annotations through sys.modules[cls.__module__]
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 

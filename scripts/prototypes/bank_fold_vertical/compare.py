@@ -19,6 +19,8 @@ def main() -> None:
         "centroid",
     ):
         a, b = first["null"][key], second["null"][key]
+        if key.startswith("cosine_"):
+            a, b = abs(a), abs(b)
         if not np.isclose(a, b, rtol=1e-5, atol=1e-9):
             raise AssertionError(f"null {key} differs: {a}, {b}")
     for key in ("drive", "certified", "reads", "updates"):

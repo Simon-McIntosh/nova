@@ -13,8 +13,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.collections import PolyCollection
 from matplotlib.lines import Line2D
+from matplotlib.patches import PathPatch
+from matplotlib.path import Path as PlotPath
 
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.forward import _lattice_cells
@@ -41,6 +42,7 @@ def render(archive, output, previews):
         ("material ∩ closed", material & closed),
         ("axis component", arrays["connected"]),
     )
+    plt.rcParams["svg.fonttype"] = "none"
     figure, axes = plt.subplots(1, 4, figsize=(14, 7.2), dpi=100)
     figure.subplots_adjust(left=0.02, right=0.98, bottom=0.15, top=0.80, wspace=0.08)
     style = DEFAULT_INK
@@ -51,15 +53,16 @@ def render(archive, output, previews):
         poloidal_axes(ax)
         ax.set_xlim(radius[0], radius[-1])
         ax.set_ylim(height[0], height[-1])
-        ax.add_collection(
-            PolyCollection(
-                cells[mask],
-                facecolors="none",
-                edgecolors=style.plasma_edgecolor,
-                linewidths=0.45,
-                zorder=1,
+        if np.any(mask):
+            ax.add_patch(
+                PathPatch(
+                    PlotPath.make_compound_path_from_polys(cells[mask]),
+                    facecolor="none",
+                    edgecolor=style.plasma_edgecolor,
+                    linewidth=0.45,
+                    zorder=1,
+                )
             )
-        )
         ax.contour(
             radius,
             height,
@@ -175,6 +178,15 @@ def render(archive, output, previews):
     text = re.sub(
         r'width="[^"]+" height="[^"]+"', 'width="31.111cm" height="16cm"', text, count=1
     )
+
+    def compact(match):
+        coordinates = re.sub(
+            r"-?\d+\.\d+", lambda value: f"{float(value[0]):.2f}", match[1]
+        )
+        return 'd="' + re.sub(r"\s+", " ", coordinates).strip() + '"'
+
+    text = re.sub(r'(?<!\w)d="([^"]+)"', compact, text)
+    text = re.sub(r">\s+<", "><", text)
     output.write_text(text)
     previews.mkdir(parents=True, exist_ok=True)
     figure.savefig(previews / output.with_suffix(".png").name)

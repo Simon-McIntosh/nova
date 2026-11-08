@@ -225,7 +225,16 @@ def pinned_step(machine, state, seed, drive, field, target):
     return tuple(pieces), field_update, support.valid
 
 
-def pinned_measure(machine, initial, seeds, targets):
+def pinned_measure(
+    machine,
+    initial,
+    seeds,
+    targets,
+    *,
+    target_drive=1.01,
+    terminal_tolerance=1e-10,
+    return_state=False,
+):
     pin = VerticalPositionPin(
         targets, source_scale=1e-3, row_scale=1e-3, tolerance=1e-6, active=True
     )
@@ -269,13 +278,14 @@ def pinned_measure(machine, initial, seeds, targets):
     drive = 1.0
     sub_step = 1e-3
     rows = []
+    accepted_states = []
     reads = updates = 0
     for _ in range(256):
-        if drive >= 1.01:
+        if drive >= target_drive:
             break
-        change = min(sub_step, 1.01 - drive)
+        change = min(sub_step, target_drive - drive)
         requested = drive + change
-        tolerance = 1e-10 if requested >= 1.01 else 1e-6
+        tolerance = terminal_tolerance if requested >= target_drive else 1e-6
         trial_state, trial_field = state, field
         for iteration in range(6):
             norms, heights, valid = evaluate(trial_state, trial_field, requested)
@@ -326,6 +336,8 @@ def pinned_measure(machine, initial, seeds, targets):
         emit("PINNED_STEP", **rows[-1])
         if accepted:
             state, field, drive = trial_state, trial_field, requested
+            if return_state:
+                accepted_states.append((drive, state, field))
             sub_step = min(sub_step * 2, 1.0)
         else:
             sub_step *= 0.5
@@ -333,7 +345,7 @@ def pinned_measure(machine, initial, seeds, targets):
                 break
     outcome = dict(
         drive=drive,
-        certified=drive >= 1.01,
+        certified=drive >= target_drive,
         reads=reads,
         updates=updates,
         steps=rows,
@@ -347,6 +359,8 @@ def pinned_measure(machine, initial, seeds, targets):
         updates=updates,
         substeps=len(rows),
     )
+    if return_state:
+        return outcome, state, field, accepted_states
     return outcome
 
 

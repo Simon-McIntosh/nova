@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>icm-sheet-tile — sheet tile and the cell interaction matrix</title>
+<title>icm-sheet-tile — the sheet tile and the cell interaction matrix</title>
 </head>
 <body>
 <article data-reckon="evidence" data-plan="iron-core-magnetisation" data-node="icm-sheet-tile">
@@ -10,51 +10,96 @@
 <h1 id="icm-sheet-tile-title">The edge-sheet tile and G</h1>
 
 <p id="icm-sheet-tile-outcome">
-The sheet tile is built and the mechanism works; the node's numeric gate is not
-met. <code>nova/biot/tiledassembly.py</code> now carries a sheet tile beside the
-polygon, moment and arc tiles — <code>packed_sheet_field</code>,
-<code>_fill_sheet_tile</code>, <code>_warm_sheet_evaluator</code>,
-<code>sheet_edge_field</code>, <code>cell_edges</code> and
-<code>cell_interaction</code> — so <em>G</em> is built through the tile plan,
-padded to the plan's one (block, nodes) shape and scanned over blocks.
+The sheet tile is built and G is assembled through it, but the node's 1e-13
+agreement gate is <strong>not met</strong>, and the measurement found a defect
+upstream of the tile. Two of the three questions are settled: the tile's
+padding and batching reproduce the closed form exactly wherever the closed form
+returns a number, and the flat and sloped branches are now both traced and
+dispatched by edge slope. What blocks the gate is that the host closed form in
+<code>nova/biot/sheet.py</code> itself returns <code>NaN</code> for roughly
+three entries in ten on the prototype mesh, and the entries that remain are
+cancellation-dominated, so the gate's denominator is a small fraction of the
+terms being summed.
 </p>
 
 <h2 id="icm-sheet-tile-measure">What was measured</h2>
 <table id="icm-sheet-tile-table">
-  <thead><tr><th>check</th><th>result</th><th>gate</th></tr></thead>
+  <thead><tr><th>check</th><th>result</th></tr></thead>
   <tbody>
-    <tr><td>packed kernel versus host closed form, one pair at a time</td>
-        <td>1.6e-13 relative to |B|</td><td>agree</td></tr>
-    <tr><td>whole G, rotated cell mesh, entry by entry against the absolute
-        sum of each entry's edge-sheet contributions</td>
-        <td>4.06e-13 worst entry</td><td><strong>1e-13 — not met</strong></td></tr>
+    <tr><td>packed kernel versus the host closed form, one pair at a time</td>
+        <td>~1e-15 relative to |B|, flat and sloped edges both</td></tr>
+    <tr><td>G on the prototype mesh, first 24 of 1696 cell targets, entry by
+        entry against the same traced form evaluated unbatched</td>
+        <td>median 0, 99th 7.1e-11, worst finite 1.22e-8</td></tr>
+    <tr><td>entries above the 1e-13 gate, over the finite entries</td>
+        <td>8805 of 115328</td></tr>
+    <tr><td>per-edge-column worst entry</td>
+        <td>median 1.58e-13, max 1.22e-8</td></tr>
+    <tr><td>non-finite entries in the same block</td>
+        <td><strong>47488 of 162816</strong> — both sides <code>NaN</code></td></tr>
     <tr><td>negative control: one cell's edge normals reversed</td>
-        <td>worst entry 2.00 (a full sign reversal), EXIT=1</td>
-        <td>must fail — does</td></tr>
+        <td>worst entry 2.00, a full sign reversal</td></tr>
   </tbody>
 </table>
 
-<p id="icm-sheet-tile-shortfall">
-The 4.06e-13 is roughly two orders of magnitude above pure round-off and is not
-absorbed by widening the tolerance. The batched path takes the elliptic block's
-derivative through a <code>vmap</code> of <code>value_and_grad</code> where the
-host route calls its jitted scalar form once per end, so the two order the
-<code>R</code> block differently; <code>B_Z</code> then carries
-<code>value + r dS/dr</code>, a difference of two order-<code>r</code>
-quantities, which is where the cancellation is amplified. Settling it needs the
-per-entry error map over the axes and a fixed order on both sides.
+<h2 id="icm-sheet-tile-worst">Where the worst entries sit</h2>
+
+<p id="icm-sheet-tile-worst-text">
+The worst finite entries are (20, 1025), (19, 1025), (20, 1026), (4–11, 425–432)
+and (18, 1033). Every one of them carries an entry value near
+<code>-1.2e-14</code> against a contribution scale of <code>3.3e-13</code>: the
+entry is the small remainder of a sum whose terms are an order of magnitude
+larger, so the fraction the gate asks for is being taken of a cancelling sum
+rather than of a well-conditioned one. The tile and the reference print the
+same value to seven significant digits at every one of them; what differs is
+the last bits of the accumulated edge-field sum, and no float64 evaluation of
+this expression can do better on entries whose own value is a hundred-fold
+smaller than the terms it is made of. That is a statement about the gate's
+denominator, not a licence to widen it: the gate is reported unmet.
+</p>
+
+<h2 id="icm-sheet-tile-nan">The upstream defect the gate exposed</h2>
+
+<p id="icm-sheet-tile-nan-text">
+<code>sheet.py</code> computes <code>2 sqrt(r (r1 + r b1 b1))</code> for the
+lower antiderivative limit, and for a target far from a sloped edge on the side
+beyond the edge's start, <code>r1 + r b1 b1</code> is negative — the square
+root is undefined and the whole <code>B_Z</code> comes back <code>NaN</code>.
+Measured on target 4 of the prototype mesh: edges 753, 792, 794, 831, 833 and
+866 return a finite <code>B_R</code> and a <code>NaN</code> <code>B_Z</code>,
+while the host route raises the same warning and returns the same
+<code>NaN</code>. The traced kernel reproduces the host exactly here, so this
+is not a tile defect — it is a domain the closed form does not cover, and it
+takes out 29 per cent of the interaction matrix. Nothing downstream can be
+gated until that branch is written.
+</p>
+
+<h2 id="icm-sheet-tile-flat">The flat branch</h2>
+
+<p id="icm-sheet-tile-flat-text">
+Horizontal edges have no slope, so the sloped antiderivative does not apply.
+The Snow pancake route <code>sheet.py</code> uses — its third-kind blocks
+expressed as complete elliptic integrals with the characteristic reduced
+through <code>zeta</code> — is now traced inside the padded tile and selected
+by edge slope, so no edge is refused. Its agreement with the host route is
+~1e-15 on mixed flat and sloped pairs.
 </p>
 
 <h2 id="icm-sheet-tile-open">What remains</h2>
 <ul id="icm-sheet-tile-remaining">
-  <li>The 1696-cell prototype WEST mesh is not built here: the prototype reads
-      the WEST <code>iron_core</code> IDS at import, so the gate ran on a rotated
-      square cell mesh instead and the 1696-cell measurement is outstanding.</li>
-  <li>Horizontal cell edges have no slope in this parameterisation and are
-      refused; the flat-sheet (Snow pancake) branch of the closed form is not
-      transcribed into the traced kernel.</li>
-  <li>The 1e-13 agreement above is the remaining defect, then the H200 compile
-      measurement of the next node.</li>
+  <li>The <code>NaN</code> domain in <code>sheet.py</code>: the lower-limit
+      square root needs its complementary branch for a target on the far side
+      of a sloped edge's start. This is a change to
+      <code>nova/biot/sheet.py</code>, which is outside this node's write path,
+      and it is the reason 29 per cent of G is undefined.</li>
+  <li>The 1e-13 gate as specified, once that branch exists: the remaining 1e-8
+      is concentrated on cancellation-dominated entries, so the gate's form
+      needs a decision — an absolute floor tied to the term magnitudes, or a
+      comparison of the two sides at the level of each edge field rather than
+      each sum.</li>
+  <li>The full 1696-target build to a complete error map. The host has 8 cores
+      and the sharded run did not finish inside this node's fence; the slice
+      above is one shard's worth, contiguous in target index.</li>
 </ul>
 
 </article>

@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_measured": false,
+  "added_failures_note": "Not applicable: source node suite_pair is unarmed; source manifest baseline_suite and after_suite are empty and no baseline/head suite logs exist. Zero is the required neutral schema field, not an observed green suite delta.",
+  "assertion_review": {
+    "check_contract.py:17": "Fails when the post-sixth-update fresh evaluation is removed: the extracted actual loop never sees the root attained on update six; inherited helper substitutes its own acceptance predicate.",
+    "check_contract.py:18": "Fails when either arm removes enough accepted_read call sites; this is an AST call-count check, not a behavioral acceptance-predicate test.",
+    "check_contract.py:22": "Fails when the vertical flux gradient is not 2*pi*R for a unit Bz; does not assert flux value or radial Hessian.",
+    "check_contract.py:23": "Fails on nonzero height derivative or mixed/height Hessian for uniform Bz.",
+    "check_contract.py:71": "Fails if the valid read or the assembled live row/column presence reports false in the connected synthetic update.",
+    "check_contract.py:72": "Fails when the synthetic constrained update does not restore physical radius 2 m; the target is a specified invariant checked on the changed state, not an automatic input echo.",
+    "check_contract.py:73": "Fails if the centroid omits centre*current: independently known physical radius is 2.1 m, observed in local-moment-negative.log EXIT=1.",
+    "check_contract.py:74": "Fails if the bordered source correction has the wrong sign or unit scaling in this synthetic problem (expected 0.1 T).",
+    "check_contract.py:75": "Fails if the radial update leaks into the vertical moment; independent expected unchanged value is 0.3.",
+    "check_contract.py:81": "Fails if payload=False still reports an active assembled constraint; does not assert finite updates for an intentionally disconnected singular system.",
+    "compare.py:12-27": "Refuses unequal arm reach/flags/counts, missing or unequal-length spectra, invalid reads and disagreeing drive/singular values; receipt-controls.log records actual count-mismatch and missing-spectrum refusals.",
+    "measure.py:299-304": "Raises when a real assembled scratch row or field column is absent; recorded H200 PIN_ACTIVE=true derives from live g and field_column.",
+    "measure.py:404-405": "Refuses invalid selected reads or nonfinite selected smallest singular values.",
+    "measure.py:412": "Fails when configure_dtypes has not enabled x64.",
+    "measure.py:49-60": "Refuses unexpected constraint row counts; zero is checked against state dimension but this added radial check_contract does not invoke the predecessor positive row-count probe.",
+    "tautological_assertions": "No assertion found whose expected value merely echoes the value supplied to the code; identified limitations are zero current-direction coverage and an injected acceptance predicate, not input echo."
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "commit_review": [
+    "91cad6661742a0d6e42d4f08c6516f90e4759d6e: initial harness read with later physical correction identified",
+    "6a57ed4753d1937cdfcd148a41e4c55b44669db4: centre contribution, derivative and synthetic correction read",
+    "a91268e7340e02fdb5e9d3dc3bcba364488a2ad6: plot and explicit-head SVG inspected",
+    "aba22ce5c74410894f730d19cd57b1cba36fb5f2: bounded outcome table and provisional provenance read",
+    "714f29cfa2895b064144c70d16a13365d68ec389: completed paired provenance read"
+  ],
+  "completed_at": "2026-11-08T11:05:17Z",
+  "dispatched_at": "2026-11-08T10:56:53Z",
+  "figure_review": "Rendered explicit reviewed-head SVG with convert and visually inspected reviewed-figure.png; legible labels, separate logarithmic scales, no clipping or overlaps, only measured markers; no product call sites found by git grep at explicit head, with positive matches in the executable prototype launcher.",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "for this frozen scratch experiment because the brief explicitly requests a scratch copy of the corrected harness; this does not warrant re-running the expensive measurement.",
+      "file": "scripts/prototypes/bank_fold_radial/measure.py",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "non-blocking: accepted_read, bank_pin_status, run_unpinned, the pinned continuation loop, condition.py:17 and compare.py:10 fork capabilities already owned by scripts/prototypes/bank_fold_vertical/measure.py, condition.py and compare.py; these additions duplicate rather than wrap or extend the owners, so subsequent acceptance or comparator repairs can diverge. Exempted for this frozen scratch experiment because the brief explicitly requests a scratch copy of the corrected harness; this does not warrant re-running the expensive measurement."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "for this experimental evidence node because the independently repeated measured accepted states satisfy the physical radius constraint, but this is missing regression coverage for reuse in a general solver.",
+      "file": "scripts/prototypes/bank_fold_radial/check_contract.py",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "non-blocking: The identity Jacobian and residual confined to the radial-moment slot make both current-block directions zero, so reinstating the erroneous -radius/total derivative in measure.py:209 leaves every numerical assertion green; the direct centroid-value assertion at :73 does not protect the derivative correction. Exempted for this experimental evidence node because the independently repeated measured accepted states satisfy the physical radius constraint, but this is missing regression coverage for reuse in a general solver."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all five commits in order, including the physical-centroid correction in 6a57ed4753d1937cdfcd148a41e4c55b44669db4 and final provenance in 714f29cfa2895b064144c70d16a13365d68ec389; scripts/prototypes/bank_fold_radial/check_contract.py:73 independently catches the original centroid-value error, with coverage and reuse limitations below.",
+    "done_when": "The three clauses in the source brief are supported by h200-job.log:4,279,554,556 (two fresh GPU processes, agreement, EXIT=0), the outcome table at docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:29, and the inspected marker-only SVG produced by scripts/prototypes/bank_fold_radial/plot.py:35.",
+    "goal": "The goal in the reviewed run's live node is to measure weak radius control at a 1e-2 drive change; scripts/prototypes/bank_fold_radial/measure.py:230 and docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:3 deliver that bounded experiment and explicitly leave mathematical fold removal unresolved after the attempt ceiling.",
+    "manifest": "The source manifest.md names five actual commits and the H200 receipt, whose counts and spectra agree with first.json and second.json; its baseline_suite and after_suite are empty because this prototype node has no armed suite pair.",
+    "write_paths": "The live source node declares scripts/prototypes/bank_fold_radial and the radial evidence/figure paths; all eight added files in bf94e9d2b30ebdde5c6f135d19383856ab080a65..714f29cfa2895b064144c70d16a13365d68ec389 lie inside those paths and no product source changes."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_fold_radial/check_contract.py:73 fails on the recorded centroid-value mutation and :17 exercises a sixth-update root, but :38-46 fixes the current direction to zero and therefore cannot catch the wrong current-block centroid derivative.",
+    "evidence": "h200-job.log:4,279,554,556 records two x64 GPU processes and successful comparison, while first.json and second.json independently reconcile the outcome and singular-value tables in docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:29.",
+    "fit": "scripts/prototypes/bank_fold_radial/measure.py:8 configures precision before arrays, uses existing bank operators and continuation, and plot.py:16 reuses checked_save; names describe mechanisms and the SVG is legible without label collisions.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:3 reports the tested failure to certify drive 1.01 and correctly distinguishes the attempt ceiling from a mathematical fold, leaving the unrestricted fold question open.",
+    "reuse": "scripts/prototypes/bank_fold_radial/measure.py:37,45,113,218 and compare.py:10 duplicate acceptance, row counting, continuation and receipt comparison owned by scripts/prototypes/bank_fold_vertical/measure.py:38,46,81,256 and compare.py:10 rather than extending those owners, although plotting checks and acceptance-loop probes are reused.",
+    "scope_discipline": "The eight files added between the recorded base and head stay within the live node's three declared paths, with scripts/prototypes/bank_fold_radial/measure.py:99 applying the field only in scratch operands."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal in the reviewed run's live node is to measure weak radius control at a 1e-2 drive change; scripts/prototypes/bank_fold_radial/measure.py:230 and docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:3 deliver that bounded experiment and explicitly leave mathematical fold removal unresolved after the attempt ceiling.\nVERDICT done_when: The three clauses in the source brief are supported by h200-job.log:4,279,554,556 (two fresh GPU processes, agreement, EXIT=0), the outcome table at docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:29, and the inspected marker-only SVG produced by scripts/prototypes/bank_fold_radial/plot.py:35.\nVERDICT write_paths: The live source node declares scripts/prototypes/bank_fold_radial and the radial evidence/figure paths; all eight added files in bf94e9d2b30ebdde5c6f135d19383856ab080a65..714f29cfa2895b064144c70d16a13365d68ec389 lie inside those paths and no product source changes.\nVERDICT manifest: The source manifest.md names five actual commits and the H200 receipt, whose counts and spectra agree with first.json and second.json; its baseline_suite and after_suite are empty because this prototype node has no armed suite pair.\nVERDICT diff: Read all five commits in order, including the physical-centroid correction in 6a57ed4753d1937cdfcd148a41e4c55b44669db4 and final provenance in 714f29cfa2895b064144c70d16a13365d68ec389; scripts/prototypes/bank_fold_radial/check_contract.py:73 independently catches the original centroid-value error, with coverage and reuse limitations below.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:3 reports the tested failure to certify drive 1.01 and correctly distinguishes the attempt ceiling from a mathematical fold, leaving the unrestricted fold question open.\nSCORE evidence: 19\nJUSTIFICATION evidence: h200-job.log:4,279,554,556 records two x64 GPU processes and successful comparison, while first.json and second.json independently reconcile the outcome and singular-value tables in docs/evidence/fragments/sub-millisecond-forward-path/bank-fold-radial.html:29.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eight files added between the recorded base and head stay within the live node's three declared paths, with scripts/prototypes/bank_fold_radial/measure.py:99 applying the field only in scratch operands.\nSCORE durability: 14\nJUSTIFICATION durability: scripts/prototypes/bank_fold_radial/check_contract.py:73 fails on the recorded centroid-value mutation and :17 exercises a sixth-update root, but :38-46 fixes the current direction to zero and therefore cannot catch the wrong current-block centroid derivative.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/bank_fold_radial/measure.py:8 configures precision before arrays, uses existing bank operators and continuation, and plot.py:16 reuses checked_save; names describe mechanisms and the SVG is legible without label collisions.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_fold_radial/measure.py:37,45,113,218 and compare.py:10 duplicate acceptance, row counting, continuation and receipt comparison owned by scripts/prototypes/bank_fold_vertical/measure.py:38,46,81,256 and compare.py:10 rather than extending those owners, although plotting checks and acceptance-loop probes are reused.\nFINDING scripts/prototypes/bank_fold_radial/measure.py:37 non-blocking: accepted_read, bank_pin_status, run_unpinned, the pinned continuation loop, condition.py:17 and compare.py:10 fork capabilities already owned by scripts/prototypes/bank_fold_vertical/measure.py, condition.py and compare.py; these additions duplicate rather than wrap or extend the owners, so subsequent acceptance or comparator repairs can diverge. Exempted for this frozen scratch experiment because the brief explicitly requests a scratch copy of the corrected harness; this does not warrant re-running the expensive measurement.\nFINDING scripts/prototypes/bank_fold_radial/check_contract.py:38 non-blocking: The identity Jacobian and residual confined to the radial-moment slot make both current-block directions zero, so reinstating the erroneous -radius/total derivative in measure.py:209 leaves every numerical assertion green; the direct centroid-value assertion at :73 does not protect the derivative correction. Exempted for this experimental evidence node because the independently repeated measured accepted states satisfy the physical radius constraint, but this is missing regression coverage for reuse in a general solver.\n",
+  "reuse_search": {
+    "owners_opened": [
+      "scripts/prototypes/bank_fold_vertical/measure.py",
+      "scripts/prototypes/bank_fold_vertical/condition.py",
+      "scripts/prototypes/bank_fold_vertical/compare.py",
+      "scripts/prototypes/bank_fold_vertical/check_contract.py",
+      "scripts/prototypes/bank_fold_vertical/plot.py",
+      "nova/equilibrium/constraint.py:460-537"
+    ],
+    "results": "No existing uniform vertical-field jet beside the radial-field owner; radius formula and physical derivative are the novel scratch capability. Common harness capabilities duplicate vertical owners. emit/flat are local serialization/array adapters; main functions are executable composition. Radial pin metadata mirrors the requested vertical concept without introducing product API. Existing checked_save and terminal-loop probes are imported.",
+    "searched_capabilities": [
+      "current-centroid radius and pin assembly",
+      "uniform vertical or axial field jet and uniform Bz",
+      "acceptance and post-update continuation",
+      "bordered spectrum",
+      "paired-process receipt comparison",
+      "checked figure save"
+    ]
+  },
+  "review_run_id": "r-20261108T105205781845-review-of-bank-fold-radial-714f29cfa289",
+  "reviewed_base_sha": "bf94e9d2b30ebdde5c6f135d19383856ab080a65",
+  "reviewed_head_sha": "714f29cfa2895b064144c70d16a13365d68ec389",
+  "reviewed_run_id": "r-20261108T092804002487-bank-fold-radial",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:11:56.787349+00:00",
+  "total": 95
+}

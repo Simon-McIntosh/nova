@@ -1,0 +1,51 @@
+<section data-reckon="evidence" id="icm-sheet-domain">
+<h2>Closed form beyond a sloped edge's ends</h2>
+<p>
+  <code>nova/biot/sheet.py</code> returned NaN for any target beyond a sloped
+  segment or on the far side of its supporting line. The pole-reduced
+  antiderivative's phi = 0 panel took <code>2 sqrt(r (r_1 + r b_1^2))</code>,
+  whose argument is negative once <code>r_1 &lt; -r b_1^2</code>: on a 30 &times; 61
+  box at slope pi/8, 120 of 1830 targets returned NaN in <strong>both</strong>
+  the flux and the field, and the Phi3 sheet-tile prototype measured 47488 of
+  162816 interaction entries (29 %) NaN on the 1696-cell WEST mesh. The
+  phi = pi panel's offset <code>r_1 + r</code> was passed unsigned too, so the
+  logarithmic model there was built from a negative offset.
+</p>
+<p>
+  Both quantities enter the log model as magnitudes &mdash; the model is the
+  square root of a squared term &mdash; so they are now taken unsigned, the
+  same form the phi = pi curvature already used.
+</p>
+<p>
+  A second defect surfaced in the field while the new box grid was checked.
+  The arsinh gradient in <code>_arsinh_gradient</code> graded its azimuthal rule
+  at phi = 0 only, which resolves the logarithmic layer where
+  <code>r_1 = r</code> but not where <code>r_1 = -r</code>, a confluence a
+  far-side target crosses. There the analytic field disagreed with its own
+  flux's derivative by 16 % (target r = 3 m, z = -1.875 m, slope pi/8) and with
+  the ring reference by the same amount. The rule is now placed at whichever
+  end is nearer the confluence, which brings the box grid to 8.7e-12 worst
+  relative error.
+</p>
+<h3>Measurement</h3>
+<p>
+  <code>tests/test_edge_sheet.py</code> adds beyond-the-end and far-side
+  targets at the section's four standoffs for slopes pi/8, pi/4 and 3 pi/8 in
+  both segment orientations, and a box grid over r = 0.05 to 3 m and
+  z = &minus;1 to 1 m (7 &times; 9 targets per slope), each compared with
+  <code>scripts/edge_sheet/reference.py</code>. Gate: 654 passed. Restoring the
+  unguarded square root fails two of them by NaN
+  (<code>EXIT=1</code>, <code>gate-negative-control.log</code>). The field is
+  held to 1e-10 of the reference's own vector scale, since a component that is
+  a cancellation residue (the radial one where it is a thousandth of the
+  vertical) cannot carry a per-component relative floor.
+</p>
+<h3>Recorded limitation</h3>
+<p>
+  At the half-cell standoff (0.01 m) on the far side of the line, the
+  pole-reduced flux meets only 1.1e-10 to 2.2e-10 against the reference while
+  the graded cross-check meets 1e-14: the two ends' antiderivatives cancel five
+  digits there. That is the reduction's own conditioning, unchanged by this
+  node, and the near-field test asserts 1e-9 with the reason stated.
+</p>
+</section>

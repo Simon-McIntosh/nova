@@ -276,16 +276,21 @@ class SheetFlux:
         """
         a1sq = 1.0 + b1 * b1
         spread = r1 - r
-        # the denominator's curvature at each graded end, read off the exact
-        # squares (r_1 + r)^2 - 4 r (r_1 - r b_1^2) b^2 on the phi = pi panel and
-        # (r_1 - r)^2 + 4 r (r_1 + r b_1^2) b^2 on the phi = 0 one
+        # The denominator's end value and curvature at each graded end, read off
+        # the exact squares (r_1 + r)^2 - 4 r (r_1 - r b_1^2) b^2 on the phi = pi
+        # panel and (r_1 - r)^2 + 4 r (r_1 + r b_1^2) b^2 on the phi = 0 one.  A
+        # target beyond the segment's ends or on the far side of its line puts
+        # r_1 below -r, where the phi = 0 curvature is negative and r_1 + r is
+        # negative; both enter the log model as magnitudes, the model being the
+        # square root of a squared term, so they are taken unsigned rather than
+        # left to an imaginary square root.
         upper = 2.0 * np.sqrt(r * np.abs(r1 - r * b1 * b1))
-        lower = 2.0 * np.sqrt(r * (r1 + r * b1 * b1))
+        lower = 2.0 * np.sqrt(r * np.abs(r1 + r * b1 * b1))
         far = a1sq * gamma + b1 * (r1 + r)
         near = a1sq * gamma + b1 * spread
         one = np.ones(1)
         panels = (
-            (one * (r1 + r), one * far, one * upper, 0.0, QUARTER),
+            (one * abs(r1 + r), one * far, one * upper, 0.0, QUARTER),
             (one * abs(spread), one * near, one * lower, 0.0, QUARTER),
         )
 
@@ -506,7 +511,15 @@ class SheetFlux:
         a1 = np.sqrt(a1sq)
         width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
         width = width if width > 0.0 else 1.0
+        # The arsinh argument's denominator vanishes at the azimuth where the
+        # source ring passes through the target, which is phi = 0 when
+        # r_1 = r and phi = pi when r_1 = -r.  The rule grades only one end, so
+        # it is placed at whichever end is nearer that confluence: a target on
+        # the far side of the line puts r_1 below -r, and the end carrying the
+        # logarithmic layer is then the far one.
         phi, rule = self._azimuth_rule(width)
+        if np.abs(r1 + r) < np.abs(r1 - r):
+            phi = np.pi - phi
         cosine = np.cos(phi)
         sine_sq = np.sin(phi) ** 2
         dense = np.sqrt(

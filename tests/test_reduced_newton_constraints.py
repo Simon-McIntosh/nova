@@ -1070,6 +1070,10 @@ def test_the_request_path_reports_the_reduced_active_set_history(steered):
         np.asarray(history.active_set_residuals),
     )
     np.testing.assert_array_equal(
-        np.asarray(receipt.mask_history),
+        np.asarray(receipt.changed_mask_entries),
         np.asarray(history.active_set_mask_differences),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(receipt.support_cell_count),
+        np.asarray(history.active_set_support_cells),
     )

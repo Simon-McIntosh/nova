@@ -495,6 +495,7 @@ def scanned_active_set_newton_krylov(
         mask_differences=jnp.full(active_set_steps, -1, dtype=jnp.int32)
         .at[0]
         .set(first_difference),
+        support_cells=jnp.full(active_set_steps, -1, dtype=jnp.int32),
         cycle_damping_activations=jnp.full(active_set_steps, -1, dtype=jnp.int32)
         .at[0]
         .set(first_damping.astype(jnp.int32)),
@@ -584,6 +585,7 @@ def scanned_active_set_newton_krylov(
                 live_residual=live_residual,
                 residuals=carry.residuals.at[index].set(live_residual),
                 mask_differences=carry.mask_differences.at[index].set(mask_difference),
+                support_cells=carry.support_cells.at[index].set(-1),
                 cycle_damping_activations=(
                     carry.cycle_damping_activations.at[index].set(
                         damping_activated.astype(jnp.int32)

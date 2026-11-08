@@ -416,9 +416,12 @@ def equilibrium_frame_receipt(
     residual_history = getattr(history, "active_set_residuals", None)
     if residual_history is None:
         residual_history = history.trace
-    mask_history = getattr(history, "active_set_mask_differences", None)
-    if mask_history is None:
-        mask_history = history.shadow_mask_changes
+    changed_mask_entries = getattr(history, "active_set_mask_differences", None)
+    if changed_mask_entries is None:
+        changed_mask_entries = history.shadow_mask_changes
+    support_cell_count = getattr(history, "active_set_support_cells", None)
+    if support_cell_count is None:
+        support_cell_count = np.empty((0,), dtype=np.int32)
     normalisation = getattr(equilibrium, "normalisation", None)
     amplitude = getattr(normalisation, "amplitude", None)
     policy = ForwardSolvePolicy()
@@ -429,7 +432,8 @@ def equilibrium_frame_receipt(
         qualified=bool(getattr(getattr(equilibrium, "finite", None), "passed", True)),
         termination_reason=history.termination_reason,
         residual_history=residual_history,
-        mask_history=mask_history,
+        changed_mask_entries=changed_mask_entries,
+        support_cell_count=support_cell_count,
         globalisation_decisions=(
             history.inner_iteration_decisions,
             history.inner_iteration_applied_factors,

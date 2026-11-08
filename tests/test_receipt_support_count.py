@@ -11,6 +11,7 @@ count never stands in for an empty support.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any, NamedTuple
 
 import numpy as np
@@ -21,7 +22,13 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium.domain import PlasmaDomain
+    from nova.equilibrium.forward import receipt_history_fields
     from nova.equilibrium.fixed_point import newton_krylov
+    from nova.equilibrium.solve_request import (
+        ForwardSolvePolicy,
+        ForwardSolveReceipt,
+        ResolvedForwardSolveDefaults,
+    )
     from nova.jax.config import configure_dtypes
 
 
@@ -138,3 +145,52 @@ def test_a_settled_empty_support_is_reported_as_zero_not_as_the_change_count():
     np.testing.assert_array_equal(support, np.zeros_like(support))
     assert changes[0] > 0
     assert changes[-1] == 0
+
+
+def _published_receipt(history, route):
+    """Build the receipt through the selection its publication calls."""
+    residual_history, changed_mask_entries, support_cell_count = receipt_history_fields(
+        history, route
+    )
+    return ForwardSolveReceipt(
+        terminal_state=SimpleNamespace(constraints=()),
+        qualified=False,
+        termination_reason=0,
+        residual_history=residual_history,
+        changed_mask_entries=changed_mask_entries,
+        support_cell_count=support_cell_count,
+        globalisation_decisions=(jnp.zeros(0, dtype=jnp.int32), jnp.zeros(0)),
+        amplitude_history=jnp.zeros(0),
+        topology_read=None,
+        polish_receipt=None,
+        compilation_cache_hit=False,
+        wall_seconds=0.0,
+        resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
+            ForwardSolvePolicy()
+        ),
+    )
+
+
+def test_the_published_receipt_keeps_its_support_count_apart_from_its_changes():
+    configure_dtypes()
+    history = SimpleNamespace(
+        active_set_residuals=jnp.asarray((1.0e-2, 1.0e-3)),
+        active_set_mask_differences=jnp.asarray((9, 0)),
+        active_set_support_cells=jnp.asarray((345, 345)),
+    )
+
+    receipt = _published_receipt(history, "newton_krylov")
+
+    assert int(receipt.support_cell_count[-1]) == 345
+    assert int(receipt.changed_mask_entries[-1]) == 0
+    assert int(receipt.support_cell_count[-1]) != int(receipt.changed_mask_entries[-1])
+
+
+def test_a_route_without_active_set_trips_publishes_no_support_history():
+    configure_dtypes()
+    history = SimpleNamespace(trace=jnp.asarray((1.0,)), shadow_mask_changes=7)
+
+    receipt = _published_receipt(history, "picard")
+
+    assert int(receipt.changed_mask_entries) == 7
+    assert np.asarray(receipt.support_cell_count).size == 0

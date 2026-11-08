@@ -351,7 +351,10 @@ def _forward_receipt(
         qualified=qualified,
         termination_reason=history.termination_reason,
         residual_history=residuals,
-        mask_history=differences,
+        changed_mask_entries=differences,
+        # A reduced result reports the change history but no per-trip support
+        # population, so this receipt publishes none rather than a proxy.
+        support_cell_count=jnp.empty((0,), dtype=jnp.int32),
         globalisation_decisions=(
             jnp.asarray(history.inner_iteration_decisions),
             jnp.asarray(history.inner_iteration_applied_factors),

@@ -475,7 +475,8 @@ def solved(cases, machine):
                 np.max(np.abs(np.asarray(eq.flux) - np.asarray(seed)))
             ),
             residual_history=np.asarray(receipt.residual_history).tolist(),
-            mask_history=np.asarray(receipt.mask_history).tolist(),
+            changed_mask_entries=np.asarray(receipt.changed_mask_entries).tolist(),
+            support_cell_count=np.asarray(receipt.support_cell_count).tolist(),
             defaults=receipt.resolved_defaults.to_dict(),
         )
         metrics["solver_finding"] = (

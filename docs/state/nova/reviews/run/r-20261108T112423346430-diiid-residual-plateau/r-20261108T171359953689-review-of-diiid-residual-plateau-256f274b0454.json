@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "Prototype-only addition; git grep at exact head over nova, benchmarks and apps found no production importer. Production solver expressions inspected at fixed_point.py:3828-3845,3953-3976,4436,4819-4868 and called by diagnostic wrappers, not modified by them.",
+  "completed_at": "2026-11-08T17:23:24Z",
+  "dispatched_at": "2026-11-08T17:14:34Z",
+  "failure_delta_evidence": {
+    "after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/gate-final.log",
+    "after_summary": {
+      "completed": true,
+      "failure_count": 0,
+      "failure_ids": []
+    },
+    "baseline_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112423346430-diiid-residual-plateau/suite-base.log",
+    "baseline_summary": {
+      "completed": true,
+      "expected_empty_baseline": true,
+      "failure_count": 1,
+      "failure_ids": [
+        "capture_script_absent"
+      ]
+    },
+    "derivation": "after failure_ids minus baseline failure_ids from each complete SUITE SUMMARY; head EXIT=0, baseline expected absent new script EXIT=2"
+  },
+  "figure_review": {
+    "inspected": [
+      "frame-137-diverted.png",
+      "frame-179-limited.png",
+      "mast-21978-35.png"
+    ],
+    "render_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T171359953689-review-of-diiid-residual-plateau-256f274b0454/figure-render.log",
+    "verdict": "All three exact-head SVGs rendered and visually inspected; margin labels readable, sign keys distinct, no clipped or colliding text."
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_residual_plateau/style.py",
+      "line": "68",
+      "severity": "non-blocking",
+      "text": "non-blocking: np.array_equal(lab(POSITIVE, VISION[\"normal\"]), lab(POSITIVE, VISION[\"normal\"])) compares the same call with itself and passes for any deterministic finite wrong conversion; it does not validate colour-transform correctness, so exclude it from claimed guard coverage and exempt this redundant assertion for landing because the independent black/white check, distance thresholds and rejected-palette receipt carry the actual palette evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all six commits' changes against the stated base and their final definitions; ten files add diagnostic capture, analysis, evidence and three figures with no product-source modification.",
+    "done_when": "The source brief's three clauses are supported by measure.py:49-122 runtime hooks, check_capture.py:20-126 decomposition/refusal assertions, the three inspected SVGs, and the recorded final gate and negative controls.",
+    "goal": "The root-cause deliverable in the source brief is met by docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:3, which identifies the observed warmup-to-NaN stopping sequence without changing product code.",
+    "manifest": "The reviewed run's manifest.md names all six commits, final-head gate-final.log EXIT=0, suite-base.log's expected absent-script EXIT=2, refusal logs and raw operands, which I read rather than inferring success from the manifest alone.",
+    "write_paths": "The source brief allows the prototype directory, one evidence fragment and one figure directory; all ten paths in the 708079d2e5c785d2d2b6fe67be128632c9852043..256f274b0454e180956f0ba2deaf6ab39bd11720 diff are inside those grants."
+  },
+  "justifications": {
+    "durability": "check_capture.py:20-53 independently binds regional identities to saved operands and the region-swap/missing-callback logs demonstrate refusals, while style.py:68's identical-call assertion contributes no durability and the focused gate validates retained receipts rather than rerunning capture.",
+    "evidence": "scripts/prototypes/diiid_residual_plateau/measure.py:49-122 observes executed production expressions and gate-final.log records all three cases at the reviewed head, although suite-base.log is an absent-new-script control rather than a product regression-suite baseline.",
+    "fit": "scripts/prototypes/diiid_residual_plateau/render.py:20-30 reuses repository poloidal drawing and collision checking, its three rasterized SVGs have readable margin labels, and style.py:68 adds one redundant self-comparison.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:29-115 supplies both decompositions, observed stopping mechanism, last direction/merits, MAST control and a named unimplemented remedy with explicit limits.",
+    "reuse": "Capability searches across nova, scripts/prototypes and benchmarks found no existing executed warmup-operand capture or CIE76 validator; measure.py:241 wraps the MAST builders, measure.py:283 uses the DIII-D builder, and render.py:35 wraps the existing render_panels.py:435 checker.",
+    "scope_discipline": "The ten paths in the six-commit diff all match the source brief's three grants, and measure.py:49 wraps the production functions without editing nova/equilibrium source."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The root-cause deliverable in the source brief is met by docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:3, which identifies the observed warmup-to-NaN stopping sequence without changing product code.\nVERDICT done_when: The source brief's three clauses are supported by measure.py:49-122 runtime hooks, check_capture.py:20-126 decomposition/refusal assertions, the three inspected SVGs, and the recorded final gate and negative controls.\nVERDICT write_paths: The source brief allows the prototype directory, one evidence fragment and one figure directory; all ten paths in the 708079d2e5c785d2d2b6fe67be128632c9852043..256f274b0454e180956f0ba2deaf6ab39bd11720 diff are inside those grants.\nVERDICT manifest: The reviewed run's manifest.md names all six commits, final-head gate-final.log EXIT=0, suite-base.log's expected absent-script EXIT=2, refusal logs and raw operands, which I read rather than inferring success from the manifest alone.\nVERDICT diff: Read all six commits' changes against the stated base and their final definitions; ten files add diagnostic capture, analysis, evidence and three figures with no product-source modification.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-residual-plateau.html:29-115 supplies both decompositions, observed stopping mechanism, last direction/merits, MAST control and a named unimplemented remedy with explicit limits.\nSCORE evidence: 19\nJUSTIFICATION evidence: scripts/prototypes/diiid_residual_plateau/measure.py:49-122 observes executed production expressions and gate-final.log records all three cases at the reviewed head, although suite-base.log is an absent-new-script control rather than a product regression-suite baseline.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The ten paths in the six-commit diff all match the source brief's three grants, and measure.py:49 wraps the production functions without editing nova/equilibrium source.\nSCORE durability: 18\nJUSTIFICATION durability: check_capture.py:20-53 independently binds regional identities to saved operands and the region-swap/missing-callback logs demonstrate refusals, while style.py:68's identical-call assertion contributes no durability and the focused gate validates retained receipts rather than rerunning capture.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/diiid_residual_plateau/render.py:20-30 reuses repository poloidal drawing and collision checking, its three rasterized SVGs have readable margin labels, and style.py:68 adds one redundant self-comparison.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches across nova, scripts/prototypes and benchmarks found no existing executed warmup-operand capture or CIE76 validator; measure.py:241 wraps the MAST builders, measure.py:283 uses the DIII-D builder, and render.py:35 wraps the existing render_panels.py:435 checker.\nFINDING scripts/prototypes/diiid_residual_plateau/style.py:68 non-blocking: np.array_equal(lab(POSITIVE, VISION[\"normal\"]), lab(POSITIVE, VISION[\"normal\"])) compares the same call with itself and passes for any deterministic finite wrong conversion; it does not validate colour-transform correctness, so exclude it from claimed guard coverage and exempt this redundant assertion for landing because the independent black/white check, distance thresholds and rejected-palette receipt carry the actual palette evidence.\n",
+  "recommended_dispositions": [
+    {
+      "disposition": "exempted",
+      "file": "scripts/prototypes/diiid_residual_plateau/style.py",
+      "line": 68,
+      "reason": "Redundant self-identity assertion is excluded from durability credit; independent black/white distance, palette-distance floors and rejected-palette receipt preserve the landing evidence."
+    }
+  ],
+  "review_run_id": "r-20261108T171359953689-review-of-diiid-residual-plateau-256f274b0454",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_head_sha": "256f274b0454e180956f0ba2deaf6ab39bd11720",
+  "reviewed_run_id": "r-20261108T112423346430-diiid-residual-plateau",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T17:28:54.800392+00:00",
+  "total": 116
+}

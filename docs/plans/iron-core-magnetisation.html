@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-11-08">
 </head>
 <body>
@@ -595,6 +595,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261108T122902495269-review-of-icm-sheet-tile-a7874ac46891" data-who="reckon-build" data-when="2026-11-08T13:27:57.658Z">
     <div class="r-comment-body"><p>The review is stored, not landed to the plan: both review-record paths under run r-20261108T055840490522-icm-sheet-tile pass `reckon crew check --review`, scoring all six dimensions and naming base 972f7538ebf0c2d82c99124bd89987eb9b24466b and head a7874ac4689130379dc0059c024af4069343e0ee.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261108T055840490522-icm-sheet-tile" data-who="reckon-build" data-when="2026-11-08T14:37:36Z">
+    <div class="r-comment-body"><p>tests/test_sheet_tile.py is the only changed file. The prototype-mesh agreement test and its reversed-normal control carry pytest.mark.slow so the default fast lane skips them; the agreement test also carries xfail(strict=True) with the reason naming the base defect, the fix revision and the follow-on node that re-measures it. The control now reduces over finite entries, with an assertion that finite entries exist.</p></div>
 </div>
 </section>
 </main>

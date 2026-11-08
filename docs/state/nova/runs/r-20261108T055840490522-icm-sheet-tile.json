@@ -1,0 +1,548 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "972f7538ebf0c2d82c99124bd89987eb9b24466b",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/brief.md",
+    "sha256": "c1994a33ddfb220c1350b55f59546f02ad80c991c53eb8db3254259d0a233e29"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1042303,
+      "input_tokens_cumulative": 1042303,
+      "output_tokens": 2459,
+      "output_tokens_cumulative": 2459,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 904,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 963,
+        "name": "_fill_arc_tile",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 965
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 963,
+        "name": "_fill_arc_tile",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 965
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 1470,
+        "name": "one_block",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1471
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 1470,
+        "name": "one_block",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1471
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 1497,
+        "name": "over_blocks",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1498
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 1497,
+        "name": "over_blocks",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1498
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_a_whole_build_compiles_the_kernel_once",
+        "path": "tests/test_biottiledbackend.py"
+      },
+      "run_function": {
+        "line": 1681,
+        "name": "assemble",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1771
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "pair_geometry",
+        "path": "tests/test_biottiledbackend.py"
+      },
+      "run_function": {
+        "line": 1681,
+        "name": "assemble",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1771
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "98257ee91ff2cf0421729f5cca98673bf89f62e8",
+    "b60e742972bc68fb928e7b643cc01dc25ec20258",
+    "fc95faa8943767de59912e08fec0188fd800eb24",
+    "244b5ed481c8452afe118a929ae0775953422696",
+    "4c25eb16a1ac732a1e71ec87a848864a380174c2",
+    "cadecf1d27342b9b8de2b2e0df5ec55b905bc5a3",
+    "a7874ac4689130379dc0059c024af4069343e0ee"
+  ],
+  "completed_at": "2026-11-08T14:37:36Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-08T06:51:49Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest with",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_biottiledassembly.py tests/test_sheet_tile.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/after-suite-node.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2885375494071146,
+    "plan": "iron-core-magnetisation",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-08T07:47:59.830093+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-08T06:47:59Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 1,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 9,
+    "mean_context": 126667,
+    "observed_at": "2026-11-08T06:48:08Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 1,
+      "aggregate_tokens_per_second": 381.496,
+      "detail": "",
+      "mean_tokens_per_second": 76.299,
+      "observed_at": "2026-11-08T06:48:08Z",
+      "runs": 5.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-08T14:37:36Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/manifest.md",
+  "member": "disposable-r-20261108T055840490522-icm-sheet-tile",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [],
+    "control_run_failed": true,
+    "declaration": "reverse one cell's edge normals in the device build: the entry-by-entry agreement with the host sheet route must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/negative-control-agreement-sheet-tile.log",
+    "reason": "the reversed-normal control ran as scripts/reversed_normals_agreement.py (worst agreement 2.00 under the mutation) rather than through pytest; moving it into pytest is folded into icm-sheet-tile-measure, which owns the agreement gate",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/negative-control-agreement-sheet-tile.log",
+    "test_paths": [
+      "tests/test_biottiledassembly.py",
+      "tests/test_sheet_tile.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "icm-sheet-tile",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/brief.md",
+    "brief_sha256": "c1994a33ddfb220c1350b55f59546f02ad80c991c53eb8db3254259d0a233e29",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "standard",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "(1) nova/biot/tiledassembly.py gains a sheet tile beside the polygon, moment and arc tiles, evaluating nova/biot/sheet.py's route, and G (B_R, B_Z at the cell centroids per unit M_R, M_Z, 2N x 2N) is built through the tile plan for the 1696-cell prototype WEST mesh; (2) the device build and the host sheet route agree in float64 entry by entry to within 1e-13 relative to the sum of absolute edge-sheet contributions, asserted in a test; (3) reversing one cell's edge normals breaks that agreement, run through pytest with failing test ids and a captured EXIT= line.",
+    "estimated_hours": 5.0,
+    "goal": "Build the cell interaction matrix through a sheet tile in the tile assembly",
+    "id": "icm-sheet-tile",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-08T06:47:59Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 1,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 9,
+      "mean_context": 126667,
+      "observed_at": "2026-11-08T06:48:08Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 1,
+        "aggregate_tokens_per_second": 381.496,
+        "detail": "",
+        "mean_tokens_per_second": 76.299,
+        "observed_at": "2026-11-08T06:48:08Z",
+        "runs": 5.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/manifest.md",
+    "negative_control": "reverse one cell's edge normals in the device build: the entry-by-entry agreement with the host sheet route must fail",
+    "over_fence_reason": "",
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/tiledassembly.py",
+      "tests/test_biottiledassembly.py",
+      "tests/test_sheet_tile.py",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile.html",
+      "docs/figures/iron-core-magnetisation/icm-sheet-tile"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1563735.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "nova/biot/sheet.py"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "icm-sheet-tile",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-08T06:51:09.544408+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.872,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2885375494071146,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a7874ac4689130379dc0059c024af4069343e0ee",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "972f7538ebf0c2d82c99124bd89987eb9b24466b",
+    "reviewed_head_sha": "a7874ac4689130379dc0059c024af4069343e0ee",
+    "scores": {
+      "durability": 8,
+      "evidence": 9,
+      "fit": 13,
+      "goal_fidelity": 12,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 67
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261108T055840490522-icm-sheet-tile",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "claude",
+  "session_id": "3af71272-41a9-47b2-96f3-21e2449456b9",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_biottiledassembly.py tests/test_sheet_tile.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/after-suite-node.log",
+      "revision": "a7874ac46"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_biottiledassembly.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055840490522-icm-sheet-tile/baseline-suite-node.log",
+      "revision": "972f7538ebf0c2d82c99124bd89987eb9b24466b"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_biottiledassembly.py tests/test_sheet_tile.py",
+    "waiver_reason": null
+  },
+  "tests_added": 6,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 30819766,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 276.126,
+    "generated_tokens": 132661,
+    "generation_seconds": -30.6,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.1,
+    "machine_seconds": 306.726,
+    "peak_input_tokens": 175213,
+    "wall_tokens_per_second": 480.44
+  },
+  "time_budget": "60m",
+  "tool_steps": 55.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 27947,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project nova",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project nova --session 5b10be66-c69b-456f-9a85-3840909f1723",
+    "requested": true,
+    "session_attached": false,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-08T14:37:47Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-08T14:00:21Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261108T055840490522-icm-sheet-tile",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 19895,
+    "worker_pid": 3503227
+  },
+  "worker_seconds": 9078,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

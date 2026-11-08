@@ -386,6 +386,41 @@ def test_the_label_check_measures_a_broken_figure():
     assert counts["clipped_labels"] >= 1
 
 
+def test_a_re_render_replaces_its_render_block_and_keeps_one_superseded(
+    tmp_path: Path,
+):
+    """A second render keeps the provenance and displaces one render block.
+
+    The receipt carries what a render cannot rediscover -- the state archive and
+    its digest -- so merging must not replace the file.  The ``render`` block
+    describes one run, so it is replaced rather than merged: merging it would
+    nest each predecessor inside the last and leave no way to tell which run
+    produced the figure.
+    """
+    import benchmarks.coil_edit_latency as renderer
+
+    path = tmp_path / "panel-receipt.json"
+    path.write_text(
+        json.dumps(
+            {
+                "state_archive": "panel-states.npz",
+                "state_archive_md5": "da0da1ec0d5515befa0bbd9e614e7fb0",
+                "render": {
+                    "job_id": "1308065",
+                    "superseded": {"job_id": "1308034", "superseded": {"job_id": "1"}},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    merged = renderer._merge_receipt(path, {"render": {"job_id": "1308093"}})
+    assert merged["state_archive"] == "panel-states.npz"
+    assert merged["state_archive_md5"] == "da0da1ec0d5515befa0bbd9e614e7fb0"
+    assert merged["render"]["job_id"] == "1308093"
+    assert merged["render"]["superseded"]["job_id"] == "1308065"
+    assert "superseded" not in merged["render"]["superseded"]
+
+
 def test_the_panel_map_reproduces_the_operator_raster_image():
     """A state's panel map equals the operator's own raster at the nodes."""
     profile, lattice = _profile()
@@ -496,4 +531,214 @@ def test_committed_converged_panel_uses_its_terminal_currents():
             - reported["max_solved_node_mismatch_wb"]
         )
         <= 1.0e-12
+    )
+
+
+PANEL_ARCHIVE = Path(
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
+)
+
+#: The colours the panel paints its two null sets in.
+REFERENCE_NULL_COLOR = "#3366cc"
+SOLVED_NULL_COLOR = "#cc7722"
+
+
+def _render_capturing(
+    tmp_path: Path, monkeypatch: Any, **kwargs: Any
+) -> tuple[Any, Any]:
+    """Render the panel and keep the figure the save-time check measured.
+
+    ``_render_panel`` closes its figure after saving, so the artists are only
+    reachable from inside the label check. Wrapping that check captures the
+    drawn figure without changing what is measured.
+    """
+    import benchmarks.coil_edit_latency as renderer
+
+    captured: dict[str, Any] = {}
+    measured = renderer._label_defects
+
+    def capture(figure: Any) -> dict[str, int]:
+        counts = measured(figure)
+        captured["figure"] = figure
+        captured["counts"] = counts
+        # ``_render_panel`` closes the figure after saving, which drops the Agg
+        # canvas the extents were measured through, so the renderer is kept
+        # here while it is still the one the saved PNG was drawn by.
+        captured["renderer"] = figure.canvas.get_renderer()
+        # Measured here, while the check has just drawn the figure and the Agg
+        # canvas is still attached: ``_render_panel`` closes it afterwards.
+        captured["independent"] = _measure_labels(figure)
+        return counts
+
+    monkeypatch.setattr(renderer, "_label_defects", capture)
+    panel = _render_panel(PANEL_ARCHIVE, tmp_path / "panel.png", **kwargs)
+    return panel, captured
+
+
+def _null_markers(figure: Any, color: str) -> list[Any]:
+    """Return the drawn marker artists of one null set."""
+    from matplotlib.colors import to_hex
+
+    found = []
+    for axis in figure.axes:
+        for artist in axis.get_children():
+            if not hasattr(artist, "get_marker"):
+                continue
+            if artist.get_marker() not in ("^", "X"):
+                continue
+            if to_hex(artist.get_color()).lower() != color.lower():
+                continue
+            found.append(artist)
+    return found
+
+
+def _measure_labels(figure: Any) -> dict[str, int]:
+    """Count clipped and overlapping text artists on a drawn figure.
+
+    This is a second implementation of the renderer's save-time check, written
+    from the figure rather than from anything the renderer returns. The check
+    the receipt publishes is that function's own return value, so a test that
+    compared the receipt with it would compare a value with itself and hold
+    whatever the renderer did.
+    """
+    import matplotlib.text
+
+    renderer = figure.canvas.get_renderer()
+    canvas = figure.get_window_extent(renderer)
+    # A poloidal panel is drawn with its axis off; its tick and axis labels
+    # remain visible artists carrying no ink, so they are excluded by identity.
+    furniture: set[int] = set()
+    for axis in figure.axes:
+        if axis.axison:
+            continue
+        for label in (
+            *axis.get_xticklabels(),
+            *axis.get_yticklabels(),
+            axis.xaxis.label,
+            axis.yaxis.label,
+        ):
+            furniture.add(id(label))
+    boxes = []
+    for text in figure.findobj(matplotlib.text.Text):
+        if not text.get_visible() or not text.get_text().strip():
+            continue
+        if id(text) in furniture:
+            continue
+        boxes.append(text.get_window_extent(renderer))
+    clipped = sum(
+        1
+        for box in boxes
+        if box.x0 < canvas.x0
+        or box.y0 < canvas.y0
+        or box.x1 > canvas.x1
+        or box.y1 > canvas.y1
+    )
+    overlapping = sum(
+        1
+        for index, box in enumerate(boxes)
+        for other in boxes[index + 1 :]
+        if box.overlaps(other)
+    )
+    return {"clipped_labels": clipped, "overlapping_labels": overlapping}
+
+
+def test_a_rendered_panel_measures_no_clipped_or_overlapping_labels(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The published label counts are a measurement of the drawn panel."""
+    panel, captured = _render_capturing(tmp_path, monkeypatch)
+    assert panel["visual_inspection"] == {
+        "clipped_labels": 0,
+        "overlapping_labels": 0,
+    }
+    assert captured["independent"] == {
+        "clipped_labels": panel["visual_inspection"]["clipped_labels"],
+        "overlapping_labels": panel["visual_inspection"]["overlapping_labels"],
+    }
+
+
+def test_a_coincident_reference_null_stays_visible_under_the_solved_one(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The reference marker is larger and drawn beneath the solved one.
+
+    At the magnetic axis the two sets sit within a few centimetres, so two
+    markers of one size at one point read as whichever was painted last. An
+    oversized lower marker keeps the reference set visible as a margin around
+    the solved one, without the panel reaching into the painter's vocabulary.
+    """
+    _, captured = _render_capturing(tmp_path, monkeypatch)
+    figure = captured["figure"]
+    reference = _null_markers(figure, REFERENCE_NULL_COLOR)
+    solved = _null_markers(figure, SOLVED_NULL_COLOR)
+    assert reference and solved, "both null sets must be drawn"
+
+    assert max(a.get_markersize() for a in reference) > max(
+        a.get_markersize() for a in solved
+    )
+    reference_axes = [a for a in reference if a.get_marker() == "^"]
+    solved_axes = [a for a in solved if a.get_marker() == "^"]
+    assert reference_axes and solved_axes, "neither set drew its magnetic axis"
+    assert reference_axes[0].get_zorder() < solved_axes[0].get_zorder()
+
+
+def test_the_panel_title_defines_its_percentage_and_its_trips(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """A bare percentage and a bare trip count leave both quantities undefined."""
+    import inspect
+
+    import benchmarks.coil_edit_latency as renderer
+
+    # The test feeds the context in, so it would stay green if the renderer
+    # stopped carrying the edit's identity out of the prepared case. Assert the
+    # population itself, in the block that builds it.
+    source = inspect.getsource(renderer._prepare_case)
+    block = source.split('"circuit_context": {', 1)[1].split("}", 1)[0]
+    assert '"family"' in block, "the prepared case must carry the circuit family"
+    assert '"circuit"' in block, "the prepared case must carry the circuit index"
+
+    _, captured = _render_capturing(
+        tmp_path,
+        monkeypatch,
+        circuit_context={"family": "p4_upper", "circuit": 8, "group": "g", "row": {}},
+    )
+    titles = [axis.get_title() for axis in captured["figure"].axes]
+    assert titles
+    for title in titles:
+        assert "P4-UPPER circuit 8 current" in title
+        assert "of the seed" in title
+        assert "active-set iterations" in title
+
+
+def test_the_panel_subcommand_persists_its_caption(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The receipt the panel path writes carries the caption it measured."""
+    import sys
+
+    import benchmarks.coil_edit_latency as renderer
+
+    receipt = tmp_path / "panel-receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "coil_edit_latency.py",
+            "panel",
+            "--panel-data",
+            str(PANEL_ARCHIVE),
+            "--panel-figure",
+            str(tmp_path / "panel.png"),
+            "--receipt",
+            str(receipt),
+        ],
+    )
+    renderer.main()
+    written = json.loads(receipt.read_text())
+    assert written["caption"].strip()
+    assert written["visual_inspection"]["clipped_labels"] == 0
+    assert written["visual_inspection"]["overlapping_labels"] == 0
+    assert written["visual_inspection"]["inspected_render"] == str(
+        tmp_path / "panel.png"
     )

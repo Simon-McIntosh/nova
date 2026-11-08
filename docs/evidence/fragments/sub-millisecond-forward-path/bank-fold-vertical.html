@@ -1,0 +1,56 @@
+<section id="bank-fold-vertical-record">
+  <h3>Drive fold and centroid constraint</h3>
+  <p><strong>Product pin status: absent in the bank solve.</strong>
+  <code>nova/equilibrium/support_read.py:1587-1607</code> declares only the three
+  moment state blocks and takes no vertical-position or centroid row;
+  <code>nova/equilibrium/drive_continuation.py:100-146</code> passes a solve
+  callable or defaults to that bank solve without adding a row. The separate
+  forward-request route in <code>nova/equilibrium/forward.py:2645-2654</code>
+  returns <code>VerticalPositionPin(0.0, active=False)</code> for a default
+  Newton–Krylov request, and returns no pin for other default routes.
+  <code>VerticalPositionPin</code> in
+  <code>nova/equilibrium/constraint.py:479-533</code> defines a centroid-height
+  row and a uniform radial-field unknown when active. The H200 log prints
+  <code>PIN_ACTIVE=absent</code> for the bank route; the scratch probe prints
+  <code>SCRATCH_PIN_ACTIVE=true</code>. The lead's requested active product pin
+  is therefore not present.</p>
+
+  <figure id="bank-fold-vertical-null-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/null-flux-contours.svg"
+         alt="Line contours of the soft Jacobian mode within the machine wall">
+    <figcaption>The last accepted unpinned state's smallest balanced-Jacobian
+    right-singular vector, contracted through the bank into a flux image. Blue
+    contours are signed equal-spaced levels; black is the vessel wall. This is
+    a mode image, not the equilibrium flux itself.</figcaption>
+  </figure>
+
+  <p>The unpinned replay from the saved sixteen-lane warm start stops at drive
+  <strong>1.0089341297149657</strong>, after 52 attempted sub-steps,
+  277 updates and 1253 fresh reads. The final balanced smallest singular
+  value is <strong>1.124237e-6</strong>. Centroid height drifts downward by
+  about <strong>22.147 µm</strong> in every lane from the seed. Among the
+  sixteen accepted continuation states, the drift starts at −2.321 µm at
+  drive 1.001, reaches −22.203 µm, and ends at −22.147 µm.
+  At the last state, the soft-mode flux image has a signed cosine of
+  <strong>−0.103</strong> with a vertical translation flux tangent and
+  <strong>−0.890</strong> with a radial translation flux tangent. The sign of
+  a singular vector is arbitrary, so the absolute cosines carry the physical
+  comparison. Simple within-cell moment shift tangents have absolute cosines
+  0.000104 vertical and 0.002046 radial. Neither projection by itself proves
+  the full transported-current displacement mode. The flux image and small
+  centroid drift do not support calling this a vertical-displacement fold.</p>
+
+  <p>The scratch pinned arm holds each lane's seed centroid height with a
+  uniform radial-field unknown and a declared row scale of 1e-3; its log
+  prints <code>SCRATCH_PIN_ACTIVE=true</code>. It reaches only
+  <strong>1.001552137374879</strong>, using 158 attempted sub-steps, 833
+  updates and 7566 fresh reads. The last accepted intermediate residual is
+  8.993e-7 with a maximum radial field of 8.157 µT; the next 1.907e-9 drive
+  increment is rejected at 1.164e-6 after six updates. The maximum centroid
+  height error at that rejection is 2.372e-20 m. It does not certify drive
+  1.01 at the required
+  1e-10 fresh-read tolerance. The unpinned arm reaches about 0.00738 more
+  drive than this scratch pinned arm. The scratch implementation uses its own
+  bordered Newton solve and line search; this negative result does not prove
+  that a production pin using a different globalization would fail.</p>
+</section>

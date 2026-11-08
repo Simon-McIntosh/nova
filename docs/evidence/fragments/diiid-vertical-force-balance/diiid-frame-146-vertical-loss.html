@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DIII-D frame 146: why the forward solve loses the plasma vertically</title>
+</head>
+<body>
+<main>
+
+<section id="summary">
+<h2>Summary</h2>
+<p>
+Frame 146's diverted branch terminates at trip 3 with its axis at R=1.2196 m,
+Z=+1.5631 m &mdash; 0.20 m above the DIII-D limiter top at Z=+1.363 m &mdash;
+0.0412&times;Ip confined and a terminal residual of 5.61e-2. The loss itself
+happens at trip 2. Frames 137, 144, 179 and 44 keep their
+plasma.
+</p>
+<p>
+The mechanism is the <em>second</em> active-set promotion. At trip 1 the two
+frames are indistinguishable: frame 146 holds 0.912&times;Ip at Z=&minus;0.346 m
+and frame 137 holds 0.920&times;Ip at Z=&minus;0.362 m, both inside the limiter,
+within 1% of each other on both measures. At trip 2 their promotion steps differ by 13.5&times;
+&mdash; 83.21 Wb against 6.156 Wb &mdash; and frame 146 changes 39 mask entries
+where frame 137 changes 20. That one step throws the axis to Z=+1.556 m, outside the limiter, and
+leaves 0.046&times;Ip confined.
+</p>
+<p>
+<b>Correction to the earlier reading of this fragment.</b> A previous version
+named a 25.28 Wb first-promotion step as the discriminator against frame 137's
+1.40 Wb. Those numbers came from a defect in the tabulation: every re-solve
+reported <code>amplitude_history[0]</code>, the first promotion of the run,
+whatever trip the row described. Measured per trip, the first promotion is
+<em>not</em> where the frames differ, and 25 Wb is not a quantity this
+trajectory reproduces. The discriminator is the trip-2 step.
+</p>
+</section>
+
+<section id="trajectory">
+<h2>1. Per-trip trajectory, measured</h2>
+<p>
+Each row is its own solve: <code>active_set_steps=k</code> stops the solve after
+exactly k promotions, so the state at trip k is a real solve state rather than a
+read of a terminal. Axis containment is judged with
+<code>inside_wall_units</code> against the governed 84-point DIII-D limiter,
+which spans Z &minus;1.359 to +1.363 m; the step norm is the norm of the
+difference between consecutive trip flux states; trip 1 has no previous state, so its step norm is null by construction rather than missing.
+</p>
+<table>
+<caption>
+Frame 146 against the frame 137 control, diverted branch, one row per
+active-set trip. Ratio is confined current over the 1.624 MA target. Step norm
+is the flux change from the previous trip, so trip 1 has none.
+</caption>
+<thead>
+<tr><th>frame</th><th>trip</th><th>axis R [m]</th><th>axis Z [m]</th>
+<th>inside limiter</th><th>Iconf/Ip</th><th>changed mask entries</th>
+<th>step norm [Wb]</th><th>residual</th></tr>
+</thead>
+<tbody>
+<tr><td>146</td><td>1</td><td>1.688</td><td>&minus;0.346</td><td>yes</td>
+<td>0.912</td><td>27</td><td>null</td><td>0.128</td></tr>
+<tr><td>146</td><td>2</td><td>1.211</td><td><b>+1.556</b></td><td><b>no</b></td>
+<td>0.046</td><td><b>39</b></td><td><b>83.21</b></td><td>0.221</td></tr>
+<tr><td>146</td><td>3</td><td>1.220</td><td>+1.563</td><td>no</td>
+<td>0.041</td><td>0</td><td>3.37</td><td>0.056</td></tr>
+<tr><td>137</td><td>1</td><td>1.611</td><td>&minus;0.362</td><td>yes</td>
+<td>0.920</td><td>24</td><td>null</td><td>0.130</td></tr>
+<tr><td>137</td><td>2</td><td>1.667</td><td>&minus;0.361</td><td>yes</td>
+<td>0.737</td><td><b>20</b></td><td><b>6.156</b></td><td>0.111</td></tr>
+<tr><td>137</td><td>3</td><td>1.700</td><td>&minus;0.239</td><td>yes</td>
+<td>0.706</td><td>9</td><td>1.68</td><td>0.067</td></tr>
+<tr><td>137</td><td>4</td><td>1.655</td><td>&minus;0.443</td><td>yes</td>
+<td>0.709</td><td>9</td><td>1.69</td><td>0.062</td></tr>
+<tr><td>137</td><td>5</td><td>1.655</td><td>&minus;0.443</td><td>yes</td>
+<td>0.709</td><td>0</td><td>5.5&times;10<sup>&minus;13</sup></td><td>0.062</td></tr>
+</tbody>
+</table>
+<p>
+The <b>changed mask entries</b> column is the length of that trip's
+<code>active_set_mask_differences</code> entry &mdash; the number of mask entries
+that changed on that trip, not a count of boundary cells in the set. The field is
+populated at <code>nova/equilibrium/forward.py:2738</code>, where
+<code>mask_history</code> takes <code>history.active_set_mask_differences</code>.
+</p>
+
+<h3>Each trip's own field</h3>
+<p>
+Each panel below is drawn from that trip's own solved flux grid, saved by the
+trajectory job as <code>frame-&lt;n&gt;-trip-&lt;k&gt;.npz</code>. Blue contours are
+the trip's solved field, grey contours the EFIT label at the same physical
+levels; the thick red curve is the bounding surface read on that trip's grid,
+the black outline the governed limiter, the dashed grey curve the EFIT label
+boundary, and the markers the solved and label nulls. The strip under each
+panel carries the residual at every trip the frame reached, sized to the trips
+present.
+</p>
+<figure>
+<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg"
+     alt="Frame 146 at trip 1: a closed solved field centred inside the limiter">
+<figcaption>
+Frame 146, trip 1. The reported axis (triangle) sits at Z=&minus;0.346 m with
+0.912&times;Ip confined, and the polish moves it 0.328 m to the field's true
+maximum at Z=&minus;0.034 m. Mask entries changed on this trip: 27.
+</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+     alt="Frame 146 at trip 2: the axis lifted above the limiter top">
+<figcaption>
+Frame 146, trip 2, after the 83.21 Wb promotion. The axis triangle is
+now at Z=+1.556 m, above the limiter top at +1.363 m, and the closed field
+around it has collapsed: 0.046&times;Ip confined. Mask entries changed on this
+trip: 39.
+</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg"
+     alt="Frame 137 at trip 2: a closed field still centred inside the limiter">
+<figcaption>
+Frame 137 at the same trip, after a 6.156 Wb promotion. Its axis stays at
+Z=&minus;0.361 m inside the limiter with 0.737&times;Ip confined. Mask entries
+changed on this trip: 20.
+</figcaption>
+</figure>
+<p>
+The bounding surface and the nulls come from the repository owners, not from
+reconstructions here. The surface is <code>host_boundary_read</code> on this
+trip's flux grid and the governed limiter units &mdash; the same call the
+root-cause node makes &mdash; and only the ring that encloses the measured axis
+is drawn, so a lobe bounding no plasma cannot be read as a boundary. The axis
+and X-point markers are polished by <code>polish_stationary_points</code> on the
+field's own tensor spline, so each drawn marker is a true stationary point
+rather than a grid cell; the grid-scale search supplies seeds only. The EFIT
+nulls are polished on the label's spline and drawn hollow, so the two sets are
+distinguishable where they coincide. Each drawn stationary point carries a
+winding index of magnitude 1 on a loop around it; the interior trip-1 saddle is
+a genuine stationary point that sits above the axis flux and so outside the
+closed surfaces.
+</p>
+
+<h3>Where the two branches part at trip 2</h3>
+<p>
+Frame 137's promotion changes fewer mask entries each trip: 24, then 20, then 9,
+then 9, then 0, and each step moves a few Wb of flux. Frame 146 changes more on
+its second trip than on its first &mdash; 27, then 39, then 0 &mdash; and lands
+83 Wb of column height on a seed 151 Wb from the label. The axis does not drift
+upward over several trips; it is carried out of the vessel and left there in one
+step. After trip 3 the set is empty, the step falls to 3.37 Wb, and the residual
+plateaus at 5.6e-2 with nothing left to correct.
+</p>
+<p>
+The plateau itself is not a symptom: frame 137 plateaus at 6.2e-2 and keeps its
+plasma. It is the vertical position and the confined fraction that separate them.
+</p>
+</section>
+
+<section id="mechanism">
+<h2>2. Mechanism: which hypothesis holds</h2>
+<table>
+<thead><tr><th>hypothesis</th><th>verdict</th><th>measurement</th></tr></thead>
+<tbody>
+<tr><td>The profile or current normalisation pushes the axis up</td><td>refuted</td>
+<td>Frame 146 limited branch and frame 146 trip 1 both hold a centred plasma at
+0.912&ndash;1.134&times;Ip. Trip 1 of both frames differs by 1% on this frame's own
+extraction.</td></tr>
+<tr><td>The coil currents give no vertical equilibrium for the extracted profiles</td><td>refuted</td>
+<td>Trip 1 of frame 146 is a held diverted plasma at 0.912&times;Ip, Z=&minus;0.346 m,
+inside the limiter, from the same coils, profiles and target.</td></tr>
+<tr><td>The seed drives an n=0 displacement the fixed point does not restore</td><td>sustained, located at trip 2</td>
+<td>The seed distances are 151.05 Wb and 150.27 Wb for frames 146 and 137. Trip 1
+is healthy on both, so neither the seed nor the first promotion carries the
+displacement. Trip 2 does: 83.21 Wb against 6.156 Wb, changing more mask
+growing before it collapses.</td></tr>
+</tbody>
+</table>
+<p>
+<b>The mechanism.</b> The promotion executed on the second active-set trip of
+frame 146 is unbounded relative to the state it is applied to. It changes 39 mask entries
+where the control at the same trip changes 20, and it
+moves the flux by 83 Wb &mdash; more than half the seed's own 151 Wb distance
+from the label. The resulting state has its axis above the limiter and almost no
+confined current. Every later trip inherits that state with no mask changes left
+and cannot bring it back.
+</p>
+<p>
+<b>The trip-1 field carries a true second maximum inside the limiter, and the
+axis the solve reports is not a stationary point.</b> Every candidate below was
+seeded and then moved by <code>polish_stationary_points</code> on the field's own
+spline; the index is the winding index of the gradient on a loop around the
+polished point, so only the indices are read here.
+</p>
+<table>
+<caption>
+Frame 146 trip 1, polished points (receipt
+<code>trip-trajectory/polish-axis-check.json</code>). Shift is the distance from
+the seed to where the polish converged.
+</caption>
+<thead><tr><th>seed</th><th>polished R [m]</th><th>polished Z [m]</th>
+<th>flux [Wb]</th><th>index</th><th>converged</th></tr></thead>
+<tbody>
+<tr><td>grid argmax inside limiter</td><td>1.585</td><td>&minus;0.034</td>
+<td>1.959</td><td><b>+1</b></td><td>yes</td></tr>
+<tr><td>solver's reported axis (1.688, &minus;0.346)</td><td>1.585</td>
+<td>&minus;0.034</td><td>1.9588</td><td>+1</td><td>yes, 0.328 m away</td></tr>
+<tr><td>interior saddle</td><td>1.544</td><td>&minus;0.038</td>
+<td>1.957</td><td><b>&minus;1</b></td><td>yes</td></tr>
+</tbody>
+</table>
+<p>
+Three facts follow, each from the index rather than from a grid sample. There
+<em>is</em> a second +1 maximum inside the limiter, at R=1.585 m, Z=&minus;0.034 m,
+0.04 m from the &minus;1 saddle: the trip-1 field is genuinely two-lobed, and the
+grid argmax at Z=0.000 was pointing at it. The solver's reported axis is
+<em>not</em> a stationary point: polishing from (1.688, &minus;0.346) travels
+0.328 m and converges onto that same +1 maximum, so the reported axis is 0.33 m
+below the field's own maximum at the same flux level. And a &minus;1 saddle with
+flux above the reported axis is therefore fully explained &mdash; the reported
+axis is simply not the field's maximum.
+</p>
+<p>
+At trip 2 the reported axis (R=1.211 m, Z=+1.556 m) does not converge to any
+stationary point either (shift 0.073 m, converged false), while the field's
+maximum inside the limiter is 1.211 Wb at R=2.3275 m, Z=&minus;0.400 m and the
+nearest polished extremum is a minimum at R=1.102 m, Z=+1.347 m
+(&minus;6.34 Wb). The step did not hand the plasma to the upper lobe; it left the
+axis on a non-stationary point above the limiter.
+</p>
+<p>
+Frame 137's trip-1 argmax is R=1.531 m, not R=0.531 m: the census mask is the
+limiter interior, and R=1.531 m is inboard of the DIII-D limiter's outer wall but
+well outside its inner wall near R=1.0, so the mask is correct. Frame 137's trip
+2 does carry a true +1 maximum at R=1.498 m, Z=&minus;0.043 m (2.393 Wb), and its
+reported axis holds 1.973 Wb.
+</p>
+<p>
+<b>So the mechanism is axis identification, and it is what the trip-2 step
+makes terminal.</b> On frame 146 the axis moving 0.33 m onto a non-stationary
+point at trip 1 precedes the promotion that leaves the reported axis above the
+limiter and 0.046&times;Ip confined. Frame 137 keeps a genuine extremum near its
+reported axis. Both findings belong to the same mechanism.
+</p>
+</section>
+
+<section id="fix">
+<h2>3. Recommended fix</h2>
+<p>
+<b>Module and place.</b> <code>nova/equilibrium/fixed_point.py</code>, in the
+active-set promotion that builds the next boundary set from the current
+promotion &mdash; the same routine that admits or withdraws boundary cells. A
+step-size or trust-region bound belongs there, applied to the promotion flux
+update before the cells are admitted: bound the step by the reliable
+flux-surface set and by the flux distance between the current state and the
+seed, and refuse a promotion that admits more cells than the set it replaces
+unless that trip reduced the residual.
+</p>
+<p>
+<b>The test that would have caught it.</b> A forward-solve test that runs frame
+146's diverted branch to the second trip and asserts two things: that the
+promotion step norm does not exceed the state's distance from the seed, and
+that a terminal whose mask has stopped changing cannot carry an axis outside
+the limiter. With an 83 Wb step on a 151 Wb seed, the first assertion fails at 55%
+of the budget, which is the signature of a first-order method that has lost its
+trust region.
+</p>
+<p>
+<b>Relation to the stopping-rule fix</b> (run
+<code>r-20261107T141006905473</code>, which now requires an attempted promotion
+before the settle exit). That fix makes the settle exit honest: a branch cannot report convergence
+without having attempted a promotion. This finding is the complementary half. The stopping rule governs
+<em>when the loop ends</em>; the trip-2 defect governs <em>what a single step may
+do</em> while it is still running. Frame 146 does attempt promotions, so it
+satisfies the new stopping rule and still loses its plasma: the step bound is
+what the trajectory shows is missing, and the stopping rule would not have
+caught it.
+</p>
+</section>
+
+<section id="evidence">
+<h2>Evidence</h2>
+<ul>
+<li>Driver: <code>scripts/prototypes/diiid_vertical_loss/trip_trajectory.py</code>,
+run as SLURM job 1307948 (COMPLETED, 00:54:16) through
+<code>scripts/nova_lane/run.sh --rungs h200,titan,cpu --mem 96G --time 01:30:00</code>.</li>
+<li>Per-trip flux grids: run directory
+<code>trip-trajectory/frame-&lt;n&gt;-trip-&lt;k&gt;.npz</code>, carrying the flux
+grid, the governed limiter and the wall.</li>
+<li>Steps are measured, not inferred: <code>_arm_summary</code> supplies the
+presence read and the mask history; the step norm is
+<code>|| flux_k &minus; flux_{k&minus;1} ||</code> over the lattice.</li>
+</ul>
+</section>
+
+</main>
+</body>
+</html>

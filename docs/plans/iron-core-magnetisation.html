@@ -376,11 +376,16 @@
       iron_core IDS, with its B-H curve (<code>src/ironCoreBuilder.cpp</code>), and falls back to an
       XML <code>ironBoundaries</code> element only when the IDS carries no iron core
       (<code>src/tokamakData.cpp</code>); WEST's <code>configuration/machines/WEST/iron.xml</code> holds only
-      a constant <code>relativePermeability</code> and no boundary. So the shell geometry is authored as two
-      new iron-boundary elements, since imas-efit's <code>IronBoundary</code> is a single closed iron-air
-      interface (<code>src/ironBoundary.h</code>): the outer surface anticlockwise and the inner surface
-      clockwise, as its orientation rule requires for a body with a cavity (one contour alone would
-      be a solid iron sphere). Their required fields (<code>geometry/category</code>, the
+      a constant <code>relativePermeability</code> and no boundary. So the shell geometry is authored as one
+      new iron-boundary element: imas-efit's <code>IronBoundary</code> is a single closed iron-air path in
+      (R, Z) with R &ge; 0 (<code>src/ironBoundary.h</code>), and a spherical shell's poloidal section is a
+      half-annulus with no hole, closed along the axis, so its contour runs the outer arc, the axis
+      segment, the inner arc reversed and the other axis segment, as the §1 prototype builds it
+      (<code>scripts/prototypes/iron_magnetisation/shell.py</code>); a contour along the outer arc alone would
+      be a solid iron sphere. The permeability the boundary selects must be 1000: with the IDS withheld,
+      imas-efit reads <code>magneticPermeabilities</code> from the same XML document, and WEST's
+      <code>iron.xml</code> defines only id 1 at 215, so the configuration adds an entry at 1000 and points the
+      boundary's material at it. The element's required fields (<code>geometry/category</code>, the
       <code>knotSet</code> and the <code>observationPoints</code> blocks) are those
       <code>checkData</code> in imas-efit <code>src/ironBoundary.cpp</code> enforces, since no instance exists
       under <code>configuration/</code> to copy; the iron_core IDS is withheld, and the permeability is
@@ -393,7 +398,7 @@
       result rather than by the setting: lowering <code>relativeError</code> a hundredfold, with the iteration
       cap raised until the solve reports converged, must move S by under 0.5&nbsp;%, and so must one
       further refinement of the boundary resolution (the <code>knotSet</code> and
-      <code>observationPoints</code> counts of both elements), so a miss cannot be under-resolution. The control falsifies in one direction: if imas-efit misses S, its
+      <code>observationPoints</code> counts of the element), so a miss cannot be under-resolution. The control falsifies in one direction: if imas-efit misses S, its
       representation is implicated in the §1 WEST disagreement; if it reproduces S, its
       representation is sound on that body and the disagreement stays unexplained, which §9 then
       carries. It is a cross-code comparison with its own owners, so it lands separately from the §6

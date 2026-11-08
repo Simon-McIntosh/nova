@@ -177,7 +177,7 @@ def _counters_self_check() -> int:
     return 0
 
 
-def _prepare_frame(frame: int, expansion: float):
+def _prepare_frame(frame: int, expansion: float | None = None):
     """Return the frame's row, profile, seed portfolio and conductor current."""
 
     paths = sorted(bench.DEFAULT_DATA.glob("*.parquet"))
@@ -558,7 +558,7 @@ def _branch_record(
 
 def run_frame(
     frame: int,
-    expansion: float,
+    expansion: float | None,
     artifact_dir: Path,
     receipt: dict[str, Any],
     output: Path,
@@ -672,9 +672,11 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--expansion",
+        "--pseudo-wall-expansion",
+        dest="expansion",
         type=float,
-        default=float(bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION),
+        default=None,
+        help="explicit pseudo-wall control; omit to use the governed limiter",
     )
     arguments = parser.parse_args()
     if arguments.self_check:

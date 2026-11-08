@@ -59,9 +59,17 @@ from typing import Iterator
 import numpy as np
 import zarr
 
+from nova.biot.completeelliptic import (
+    complete_kind,
+    complete_kind_traced,
+    complete_pole,
+)
+from nova.biot.gradedresidual import QUARTER, graded_residual
+from nova.biot.greens import MU0
 from nova.biot.polygon import _BLOCK, _held_edge, _phi_rule, pad_batch
 from nova.biot.polygonanalytic import packed_analytic_greens, packed_analytic_moments
 from nova.biot.polygonarc import packed_arc_greens
+from nova.biot.zeta import traced_zeta
 from nova.jax.config import Precision, resolve_precision
 
 COMPONENTS = ("Psi", "Br", "Bz")
@@ -77,6 +85,7 @@ MOMENT_COMPONENTS = (
     "BzZ",
 )
 ARC_COMPONENTS = ("Ar", "Aphi", "Br", "Bphi", "Bz")
+SHEET_COMPONENTS = ("Br", "Bz")
 
 # What a tile can be evaluated WITH: the fixed-node phi rule the operator is
 # validated against, or the closed-form reduction.  Only the traced backend carries
@@ -378,6 +387,524 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     )
 
 
+_SHEET_ARSINH_NODES = 128
+_SHEET_FIELD_PANELS = 140
+_SHEET_FIELD_RATIO = 1.25
+_SHEET_FIELD_NODES = 24
+
+
+@functools.lru_cache(maxsize=None)
+def _sheet_graded_rule() -> tuple:
+    """Return the graded arsinh rule's nodes and its azimuthal rule's nodes."""
+    return np.polynomial.legendre.leggauss(64), np.polynomial.legendre.leggauss(
+        _SHEET_FIELD_NODES
+    )
+
+
+def _sheet_root(gamma, radius, source):
+    """``R``: the closed form's complete first- and second-kind ``D`` block.
+
+    The same expression :func:`nova.biot.sheet` carries, written against the
+    traced elliptic descent so one call evaluates a whole block of pairs.
+    """
+    span = gamma * gamma + (radius + source) ** 2
+    k2 = 4.0 * radius * source / span
+    complement = (gamma * gamma + (radius - source) ** 2) / span
+    first, second = complete_kind_traced(complement)
+    return 2.0 * span**0.5 * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second) / (3.0 * k2)
+
+
+def _sheet_root_gradient(gamma, radius, source):
+    """Return ``(R, dR/dgamma, dR/dradius)`` per pair.
+
+    Each pair's ``R`` depends only on its own geometry, so the elementwise
+    derivative is a ``vmap`` of JAX's own ``value_and_grad`` over the traced
+    elliptic descent rather than a full Jacobian.
+    """
+    import jax
+
+    value, gradient = jax.vmap(
+        jax.value_and_grad(_sheet_root, argnums=(0, 1)), in_axes=(0, 0, 0)
+    )(gamma, radius, source)
+    return value, gradient
+
+
+def _sheet_azimuth_rule(xp, width):
+    """Return the field kernels' azimuth nodes and weights, shape ``(pairs, nodes)``.
+
+    The rule is graded geometrically toward the singular azimuth and its width
+    follows the target's own standoff, so it is a function of the traced geometry
+    rather than a constant. The node count is fixed, which is what keeps the
+    program one shape.
+    """
+    _, (node, weight) = _sheet_graded_rule()
+    node = xp.asarray(node)
+    weight = xp.asarray(weight)
+    span = xp.arcsinh(np.pi / width)
+    index = np.arange(_SHEET_FIELD_PANELS + 1)
+    edges = (
+        span[:, None]
+        * (_SHEET_FIELD_RATIO**index - 1.0)
+        / (_SHEET_FIELD_RATIO**_SHEET_FIELD_PANELS - 1.0)
+    )
+    half = 0.5 * (edges[:, 1:] - edges[:, :-1])
+    centre = 0.5 * (edges[:, 1:] + edges[:, :-1])
+    stretch = (centre[:, :, None] + half[:, :, None] * node[None, None, :]).reshape(
+        width.shape[0], -1
+    )
+    rule = (half[:, :, None] * weight[None, None, :]).reshape(width.shape[0], -1)
+    rule = rule * width[:, None] * xp.cosh(stretch)
+    return width[:, None] * xp.sinh(stretch), rule
+
+
+def _sheet_arsinh_rule(xp, gamma, radius, r1, b1):
+    """Return the two graded panels and the integrand closure of the arsinh term."""
+    a1sq = 1.0 + b1 * b1
+    spread = r1 - radius
+    upper = 2.0 * xp.sqrt(radius * xp.abs(r1 - radius * b1 * b1))
+    lower = 2.0 * xp.sqrt(radius * (r1 + radius * b1 * b1))
+    far = a1sq * gamma + b1 * (r1 + radius)
+    near = a1sq * gamma + b1 * spread
+    zero = xp.zeros_like(radius)
+    panels = (
+        (r1 + radius, far, upper, zero, QUARTER),
+        (xp.abs(spread), near, lower, zero, QUARTER),
+    )
+
+    def pieces(x, y):
+        return (
+            near[:, None] + 2.0 * b1[:, None] * radius[:, None] * y,
+            xp.sqrt(
+                spread[:, None] ** 2
+                + 4.0 * radius[:, None] * r1[:, None] * y
+                + 4.0 * radius[:, None] ** 2 * b1[:, None] ** 2 * x * y
+            ),
+        )
+
+    return panels, pieces
+
+
+def _sheet_arsinh_term(xp, gamma, radius, r1, b1):
+    """``int cos(phi) (r_1 + b_1^2 r cos phi) arsinh d phi``, log removed."""
+    panels, pieces = _sheet_arsinh_rule(xp, gamma, radius, r1, b1)
+    weight = (
+        [-8.0 * b1 * b1 * radius],
+        xp.asarray(2.0 * (r1 + b1 * b1 * radius)),
+        xp.asarray(2.0 * (b1 * b1 * radius - r1)),
+    )
+    return graded_residual(panels, pieces, _SHEET_ARSINH_NODES, xp, weight=weight)
+
+
+def _sheet_arsinh_gradient(xp, gamma, radius, source, b1):
+    """Return ``(A, dA/dgamma, dA/dradius)`` of the arsinh remainder per pair."""
+    a1sq = 1.0 + b1 * b1
+    a1 = xp.asarray(1.0 + b1 * b1) ** 0.5
+    r1 = source - b1 * gamma
+    width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
+    width = xp.where(width > 0.0, width, 1.0)
+    phi, rule = _sheet_azimuth_rule(xp, width)
+    cosine = xp.cos(phi)
+    sine_sq = xp.sin(phi) ** 2
+    dense = xp.sqrt(
+        (radius - source)[:, None] ** 2
+        + gamma[:, None] ** 2
+        + 4.0 * radius[:, None] * source[:, None] * xp.sin(0.5 * phi) ** 2
+    )
+    half_sine = xp.sin(0.5 * phi) ** 2
+    gap = r1 - radius
+    gap = xp.where(xp.abs(gap) <= 1e-12 * radius, 0.0, gap)
+    W = gap[:, None] + 2.0 * radius[:, None] * half_sine
+    denominator = W * W + a1sq[:, None] * radius[:, None] ** 2 * sine_sq
+    gamma_bracket = a1sq[:, None] * gamma[:, None] + b1[:, None] * W
+    arsinh = xp.arcsinh(gamma_bracket / xp.sqrt(denominator))
+    smear = r1[:, None] + b1[:, None] ** 2 * radius[:, None] * cosine
+    gamma_pole = (
+        a1sq[:, None]
+        * (W * (source[:, None] - radius[:, None] * cosine) + radius[:, None] ** 2 * sine_sq)
+        / denominator
+    )
+    radial_pole = (
+        -b1[:, None] * cosine * denominator
+        - gamma_bracket
+        * (
+            -gap[:, None]
+            + 2.0 * r1[:, None] * half_sine
+            + radius[:, None] * b1[:, None] ** 2 * sine_sq
+        )
+    ) / denominator
+    arsinh_plain = xp.sum(rule * cosine * arsinh, axis=1)
+    gamma_value = -b1 * arsinh_plain + xp.sum(
+        rule * cosine * smear * gamma_pole / (a1[:, None] * dense), axis=1
+    )
+    radial_value = b1 * b1 * xp.sum(rule * cosine * cosine * arsinh, axis=1) + xp.sum(
+        rule * cosine * smear * radial_pole / (a1[:, None] * dense), axis=1
+    )
+    return _sheet_arsinh_term(xp, gamma, radius, r1, b1), gamma_value, radial_value
+
+
+def _sheet_closed_gradient(xp, gamma, radius, source, b1):
+    """Return ``(S, dS/dgamma, dS/dradius)`` of the closed-form antiderivative."""
+    a1 = xp.sqrt(1.0 + b1 * b1)
+    root, gradient = _sheet_root_gradient(gamma, radius, source)
+    value, gamma_value, radial_value = _sheet_arsinh_gradient(
+        xp, gamma, radius, source, b1
+    )
+    return (
+        a1 * b1 * root + value,
+        a1 * b1 * gradient[0] + gamma_value,
+        a1 * b1 * gradient[1] + radial_value,
+    )
+
+
+def _sheet_pancake_terms(xp, gamma, radius, source):
+    """``(A_phi, H_r, H_z)`` of Snow's eqs (26) and (27) at one flat-sheet end.
+
+    The flat sheet's remainder is the paper's ``g_0^(2)(pi/2)``, taken through
+    :func:`nova.biot.zeta.traced_zeta` so the same rule serves a block of pairs.
+    A target level with the sheet's plane is the one place the printed blocks
+    need their limit taken rather than their arithmetic, and it is selected
+    arithmetically rather than by a branch.
+    """
+    span = gamma**2 + (radius + source) ** 2
+    a = xp.sqrt(span)
+    complement = (gamma**2 + (radius - source) ** 2) / span
+    first, second = complete_kind(complement, xp=xp)
+    c = xp.sqrt(gamma**2 + radius**2)
+    remainder = traced_zeta(xp, source, radius, gamma, np.pi / 2)
+    potential = (
+        -source / (2.0 * a * radius)
+    ) * ((radius**2 - source**2 - 3.0 * gamma**2) * first + span * second)
+    potential = potential + radius * remainder
+    height = 2.0 * remainder - 2.0 * source / a * first
+    level = xp.abs(gamma) <= 1e-12 * radius
+    # a target level with the plane puts the first pole on the range end; the
+    # block cancels to zero there, so the characteristic is held off the pole
+    # and the term is zeroed rather than divided by zero
+    held = xp.where(level, radius + radius, c)
+    third = 0.0
+    radial = 0.0
+    for order in (1, 2):
+        if order == 1:
+            ratio = (source + c) / (radius - held)
+            characteristic = 2.0 * radius / (radius - held)
+        else:
+            ratio = (source - c) / (radius + c)
+            characteristic = 2.0 * radius / (radius + held)
+        pole = complete_pole(
+            xp.asarray(1.0 - characteristic), xp.asarray(complement), xp=xp
+        )
+        third = third + (-1) ** order * ratio * pole
+        radial = radial + (-1) ** order * c * ratio * pole
+    potential = potential - xp.where(
+        level, 0.0, c * gamma**2 / (2.0 * a * radius) * third
+    )
+    radial = xp.where(level, 0.0, gamma / (a * radius) * (2.0 * source * first - radial))
+    return potential, radial, height
+
+
+def _sheet_pancake_field(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """``(B_R, B_Z)`` [T per A/m] of a flat edge, eq (27) over the segment."""
+    gamma = xp.asarray(start_z) - target_z
+    lower = xp.minimum(xp.asarray(start_r), xp.asarray(end_r))
+    upper = xp.maximum(xp.asarray(start_r), xp.asarray(end_r))
+    radial = 0.0
+    height = 0.0
+    for source, sign in ((upper, 1.0), (lower, -1.0)):
+        _, end_radial, end_height = _sheet_pancake_terms(xp, gamma, target_r, source)
+        radial = radial + sign * end_radial
+        height = height + sign * end_height
+    return MU0 / (2.0 * np.pi) * radial, MU0 / (2.0 * np.pi) * height
+
+
+def packed_sheet_field(
+    xp, target_r, target_z, start_r, start_z, end_r, end_z
+):
+    """Return ``(B_R, B_Z)`` [T per A/m] per pair from the edge-sheet closed form.
+
+    The packed transcription of :meth:`nova.biot.sheet.SheetFlux._sloped_field_closed`
+    and, for a horizontal edge, of :meth:`_pancake_field`: one call evaluates a
+    whole block of (target, edge) pairs, each pair against its own segment, with
+    no branch on a value. An edge's own slope selects its route arithmetically, so
+    a tile mixing sloped and horizontal edges is one program.
+    """
+    target_r = xp.asarray(target_r)
+    target_z = xp.asarray(target_z)
+    start_r = xp.asarray(start_r)
+    start_z = xp.asarray(start_z)
+    end_r = xp.asarray(end_r)
+    end_z = xp.asarray(end_z)
+    # The sheet current is an azimuthal density, so the field depends on the
+    # segment and the sign of K alone. Ordering the endpoints by height makes
+    # that independence arithmetic rather than a convention on the caller.
+    swap = start_z > end_z
+    lower_r = xp.where(swap, end_r, start_r)
+    lower_z = xp.where(swap, end_z, start_z)
+    upper_r = xp.where(swap, start_r, end_r)
+    upper_z = xp.where(swap, start_z, end_z)
+    drop_r = upper_r - lower_r
+    drop_z = upper_z - lower_z
+    flat = drop_z == 0.0
+    held_z = xp.where(flat, xp.ones_like(drop_z), drop_z)
+    b1 = drop_r / held_z
+    a1sq = 1.0 + b1 * b1
+    radial = height = 0.0
+    for start, sign in ((1.0, 1.0), (0.0, -1.0)):
+        gamma = (upper_z if start else lower_z) - target_z
+        source = (upper_r if start else lower_r) + xp.zeros_like(target_z)
+        value, gamma_value, radial_value = _sheet_closed_gradient(
+            xp, gamma, target_r, source, b1
+        )
+        radial = radial + sign * gamma_value
+        height = height + sign * (value + target_r * radial_value)
+    sloped = (
+        MU0 / (2.0 * np.pi * a1sq) * radial,
+        MU0 / (2.0 * np.pi * target_r * a1sq) * height,
+    )
+    pancake = _sheet_pancake_field(
+        xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
+    return (
+        xp.where(flat, pancake[0], sloped[0]),
+        xp.where(flat, pancake[1], sloped[1]),
+    )
+
+
+def _fill_sheet_tile(plan: TilePlan, target_r, target_z, start_r, start_z, end_r, end_z):
+    """Return one edge-sheet tile grown to the fixed target/source shape."""
+    n_target, n_source = np.size(target_r), np.size(start_r)
+    if n_target > plan.target_tile or n_source > plan.source_tile:
+        raise ValueError(
+            f"tile ({n_target}, {n_source}) exceeds the configured shape "
+            f"({plan.target_tile}, {plan.source_tile})"
+        )
+    rows = np.zeros(plan.target_tile, dtype=np.intp)
+    rows[:n_target] = np.arange(n_target)
+    columns = np.zeros(plan.source_tile, dtype=np.intp)
+    columns[:n_source] = np.arange(n_source)
+    return tuple(
+        np.ascontiguousarray(value, dtype=np.float64)[index]
+        for value, index in (
+            (target_r, rows),
+            (target_z, rows),
+            (start_r, columns),
+            (start_z, columns),
+            (end_r, columns),
+            (end_z, columns),
+        )
+    )
+
+
+@functools.lru_cache(maxsize=_WARM_EVALUATORS)
+def _warm_sheet_evaluator(
+    plan: TilePlan,
+    batched: bool,
+    devices: int,
+    precision: Precision,
+    compilation: CompilationCacheConfiguration,
+) -> TileEvaluator:
+    """Trace and compile the edge-sheet closed form for one tile shape."""
+    import jax
+    import jax.numpy as jnp
+
+    if devices != 1:
+        raise ValueError("the sheet tile evaluates on one device")
+    rows, columns = _device_blocks(plan, devices)
+    index = (jnp.asarray(rows), jnp.asarray(columns))
+
+    def one_block(target_r, target_z, start_r, start_z, end_r, end_z, rows, columns):
+        """Return the two edge-sheet field components of one padded pair block."""
+        radial, height = packed_sheet_field(
+            jnp,
+            jnp.take(target_r, rows),
+            jnp.take(target_z, rows),
+            jnp.take(start_r, columns),
+            jnp.take(start_z, columns),
+            jnp.take(end_r, columns),
+            jnp.take(end_z, columns),
+        )
+        return jnp.stack([radial, height])
+
+    def over_blocks(*arguments):
+        geometry = arguments[:-2]
+        rows, columns = arguments[-2:]
+        if batched:
+            return jax.vmap(one_block, in_axes=(None,) * len(geometry) + (0, 0))(
+                *geometry, rows, columns
+            )
+
+        def step(carry, block):
+            return carry, one_block(*geometry, *block)
+
+        return jax.lax.scan(step, None, (rows, columns))[1]
+
+    compiled = jax.jit(lambda *geometry: over_blocks(*geometry, *index))
+    return TileEvaluator(
+        compiled,
+        plan,
+        batched=batched,
+        name="sheet",
+        geometry="sheet",
+        components=SHEET_COMPONENTS,
+        precision=precision,
+        compilation=compilation,
+    )
+
+
+def sheet_edge_field(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    start_r: np.ndarray,
+    start_z: np.ndarray,
+    end_r: np.ndarray,
+    end_z: np.ndarray,
+    *,
+    plan: TilePlan,
+    batched: bool = False,
+    precision: Precision | str = Precision.DOUBLE,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return ``(B_R, B_Z)`` per unit sheet current over every (target, edge).
+
+    The arrays are ``(target, edge)`` [T per A/m]. The build walks
+    :meth:`TilePlan.tiles` through one compiled kernel, so the compile is a cost of
+    the tile shape rather than of the edge count.
+    """
+    target_r = np.ascontiguousarray(target_r, dtype=np.float64).reshape(-1)
+    target_z = np.ascontiguousarray(target_z, dtype=np.float64).reshape(-1)
+    geometry = tuple(
+        np.ascontiguousarray(value, dtype=np.float64).reshape(-1)
+        for value in (start_r, start_z, end_r, end_z)
+    )
+    shape = (target_r.size, geometry[0].size)
+    evaluator = _warm_sheet_evaluator(
+        plan,
+        batched,
+        1,
+        resolve_precision(precision, Precision.DOUBLE),
+        configure_production_compilation_cache(),
+    )
+    radial = np.empty(shape)
+    height = np.empty(shape)
+    for rows, columns in plan.tiles(*shape):
+        tile = evaluator(
+            target_r[rows],
+            target_z[rows],
+            *(value[columns] for value in geometry),
+        )
+        radial[rows, columns] = tile[0]
+        height[rows, columns] = tile[1]
+    return radial, height
+
+
+@dataclass(frozen=True)
+class CellEdges:
+    """A cell mesh's unique undirected edges and each cell's signed incidence.
+
+    ``coefficient_r`` and ``coefficient_z`` are ``(cells, edges)``: the sheet
+    current an edge carries per unit ``M_R`` and per unit ``M_Z`` of the cell it
+    bounds, ``K_phi = M_Z n_R - M_R n_Z`` with ``n`` the cell's outward normal. A
+    shared edge is one column, so two neighbours appear on it with opposite signs
+    and the net sheet is the magnetisation difference.
+    """
+
+    start_r: np.ndarray
+    start_z: np.ndarray
+    end_r: np.ndarray
+    end_z: np.ndarray
+    coefficient_r: np.ndarray
+    coefficient_z: np.ndarray
+
+
+def cell_edges(polygons) -> CellEdges:
+    """Return the unique edges of ``polygons`` and each cell's signed incidence."""
+    index: dict[tuple, int] = {}
+    start, end = [], []
+    cells, edges, values_r, values_z = [], [], [], []
+    for cell, polygon in enumerate(polygons):
+        vertices = np.asarray(polygon, dtype=np.float64)
+        if np.sum(
+            vertices[:, 0] * np.roll(vertices[:, 1], -1)
+            - np.roll(vertices[:, 0], -1) * vertices[:, 1]
+        ) < 0.0:
+            vertices = vertices[::-1]
+        ring = np.concatenate([vertices, vertices[:1]])
+        for a, b in zip(ring[:-1], ring[1:]):
+            step = b - a
+            length = float(np.hypot(*step))
+            if length == 0.0:
+                continue
+            outward = np.array([step[1], -step[0]]) / length
+            first, second = tuple(np.round(a, 9)), tuple(np.round(b, 9))
+            key = (first, second) if first <= second else (second, first)
+            if key not in index:
+                index[key] = len(start)
+                start.append(key[0])
+                end.append(key[1])
+            cells.append(cell)
+            edges.append(index[key])
+            values_r.append(-outward[1])
+            values_z.append(outward[0])
+    count = len(polygons)
+    coefficient_r = np.zeros((count, len(start)))
+    coefficient_z = np.zeros((count, len(start)))
+    coefficient_r[cells, edges] = values_r
+    coefficient_z[cells, edges] = values_z
+    return CellEdges(
+        np.array(start, dtype=np.float64)[:, 0],
+        np.array(start, dtype=np.float64)[:, 1],
+        np.array(end, dtype=np.float64)[:, 0],
+        np.array(end, dtype=np.float64)[:, 1],
+        coefficient_r,
+        coefficient_z,
+    )
+
+
+def cell_interaction(
+    polygons,
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    *,
+    plan: TilePlan,
+    batched: bool = False,
+    precision: Precision | str = Precision.DOUBLE,
+    reverse_normals: int | None = None,
+) -> np.ndarray:
+    """Return the cell interaction matrix ``G``, shape ``(2T, 2N)`` [T per A/m].
+
+    Rows are ``[B_R(targets), B_Z(targets)]`` and columns ``[M_R(cells),
+    M_Z(cells)]``. Each cell's columns are the signed sum of its edge sheets over
+    the one edge set, so a shared edge contributes once with its net sheet.
+    ``reverse_normals`` flips one cell's edge normals, which is the mutation the
+    agreement check is required to fail against.
+    """
+    edges = cell_edges(polygons)
+    target_r = np.ascontiguousarray(target_r, dtype=np.float64).reshape(-1)
+    target_z = np.ascontiguousarray(target_z, dtype=np.float64).reshape(-1)
+    radial, height = sheet_edge_field(
+        target_r,
+        target_z,
+        edges.start_r,
+        edges.start_z,
+        edges.end_r,
+        edges.end_z,
+        plan=plan,
+        batched=batched,
+        precision=precision,
+    )
+    coefficient_r, coefficient_z = edges.coefficient_r, edges.coefficient_z
+    if reverse_normals is not None:
+        coefficient_r = coefficient_r.copy()
+        coefficient_z = coefficient_z.copy()
+        coefficient_r[reverse_normals] *= -1.0
+        coefficient_z[reverse_normals] *= -1.0
+    count = len(polygons)
+    interaction = np.empty((2 * target_r.size, 2 * count))
+    interaction[: target_r.size, :count] = radial @ coefficient_r.T
+    interaction[target_r.size :, :count] = height @ coefficient_r.T
+    interaction[: target_r.size, count:] = radial @ coefficient_z.T
+    interaction[target_r.size :, count:] = height @ coefficient_z.T
+    return interaction
+
+
 def _fill_tile(plan: TilePlan, target_r, target_z, edge, weight, norm):
     """Return the tile's geometry grown to the configured full tile shape.
 
@@ -533,6 +1060,10 @@ class TileEvaluator:
                 if self.kernel == "moments"
                 else _fill_tile(plan, *geometry)
             )
+        elif self.geometry == "sheet":
+            n_source = np.size(geometry[2])
+            edge_count = None
+            filled = _fill_sheet_tile(plan, *geometry)
         else:
             n_source = np.size(geometry[5])
             edge_count = np.shape(geometry[3])[0]
@@ -771,6 +1302,7 @@ def forget_evaluators() -> None:
     """
     _warm_evaluator.cache_clear()
     _warm_arc_evaluator.cache_clear()
+    _warm_sheet_evaluator.cache_clear()
 
 
 @functools.lru_cache(maxsize=_WARM_EVALUATORS)
@@ -1372,14 +1904,20 @@ __all__ = [
     "MOMENT_COMPONENTS",
     "TileEvaluator",
     "TilePlan",
+    "CellEdges",
+    "SHEET_COMPONENTS",
     "assemble",
     "assemble_arcs",
     "budget_from_environment",
+    "cell_edges",
+    "cell_interaction",
     "compilation_cache",
     "configure_production_compilation_cache",
     "forget_evaluators",
+    "packed_sheet_field",
     "plan_tiles",
     "production_compilation_cache_configuration",
+    "sheet_edge_field",
     "tile_coupling",
     "tile_evaluator",
 ]

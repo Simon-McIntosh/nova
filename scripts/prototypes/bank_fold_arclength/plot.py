@@ -6,7 +6,6 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 import argparse
 import json
-import re
 from pathlib import Path
 
 import jax
@@ -16,55 +15,43 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.font_manager import FontProperties
 from matplotlib.lines import Line2D
 from matplotlib.ticker import NullLocator
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from nova.equilibrium import fixed_points, support_read
 from nova.equilibrium.wall_mask import WallUnit
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 from scripts.prototypes.bank_newton_step.measure import machine
+from scripts.prototypes.bank_solve_profile.plot import save_checked
 
 BRANCH = "#2e6fa8"
 REFERENCE = "#303030"
 
 
 def checked_save(fig, path, preview):
-    """Refuse canvas clipping and text collisions before saving either artifact."""
-    fig.canvas.draw()
-    renderer = fig.canvas.get_renderer()
-    texts = [
-        artist
-        for artist in fig.findobj(matplotlib.text.Text)
-        if artist.get_visible() and artist.get_text()
-    ]
-    boxes = [(text.get_text(), text.get_window_extent(renderer)) for text in texts]
-    for name, box in boxes:
-        if not fig.bbox.contains(*box.get_points()[0]) or not fig.bbox.contains(
-            *box.get_points()[1]
-        ):
-            raise ValueError(f"clipped text: {name}")
-    for i, (name, box) in enumerate(boxes):
-        for other_name, other_box in boxes[i + 1 :]:
-            if box.overlaps(other_box):
-                raise ValueError(f"text collision: {name} / {other_name}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, format="svg")
-    source = re.sub(
-        r'width="[^"]+" height="[^"]+"',
-        'width="31.1cm" height="16cm"',
-        path.read_text(),
-        count=1,
-    )
-    path.write_text(source)
+    """Use the shared canvas policy, then write this probe's raster preview."""
+    save_checked(fig, path)
+    path.write_text(" ".join(path.read_text().splitlines()) + "\n")
     fig.savefig(preview, dpi=100)
-    print(
-        "FIGURE",
-        path.name,
-        "text_bounds=pass text_collisions=pass direct_labels=none",
-        flush=True,
-    )
     plt.close(fig)
+
+
+def axis_levels(data):
+    """One absolute level union resolves both disjoint local flux ranges."""
+    fractions = np.asarray((0.15, 0.30, 0.45, 0.60))
+    levels = np.unique(
+        np.concatenate(
+            [
+                np.nanmax(data[key]) - fractions * np.ptp(data[key])
+                for key in ("axis_solved", "axis_reference")
+            ]
+        )
+    )
+    print("AXIS_LEVELS_WB " + json.dumps(levels.tolist()), flush=True)
+    return levels
 
 
 def branch_figure(receipt, output, preview):
@@ -273,6 +260,7 @@ def poloidal_figure(scene, output, preview):
             ),
         ),
     ]
+    local_levels = axis_levels(data)
     for panel, ax in enumerate(axes):
         poloidal_axes(ax)
         for key, (color, style) in zip(("reference", "solved"), styles[::-1]):
@@ -282,7 +270,7 @@ def poloidal_figure(scene, output, preview):
                 data[prefix + "r"],
                 data[prefix + "z"],
                 data[prefix + key],
-                data["levels"],
+                local_levels if panel == 1 else data["levels"],
                 wall=units,
                 color=color,
                 linewidth=2.0,
@@ -319,6 +307,21 @@ def poloidal_figure(scene, output, preview):
         min(data["saddle"][1], data["roots"][1, 1]) - 0.018,
         max(data["saddle"][1], data["roots"][1, 1]) + 0.018,
     )
+    axes[1].add_artist(
+        AnchoredSizeBar(
+            axes[1].transData,
+            0.01,
+            "10 mm",
+            "upper center",
+            bbox_to_anchor=(0.5, -0.02),
+            bbox_transform=axes[1].transAxes,
+            borderpad=0,
+            pad=0.3,
+            color="#555555",
+            frameon=False,
+            fontproperties=FontProperties(size=14),
+        )
+    )
     fig.legend(
         handles=[
             Line2D([], [], color=BRANCH, lw=2, label="continued state"),
@@ -336,6 +339,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("run", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--only", choices=("all", "branch", "poloidal"), default="all")
     args = parser.parse_args()
     plt.style.use("data-ink")
     plt.rcParams["svg.fonttype"] = "none"
@@ -347,9 +351,11 @@ def main():
             refined = "saddle_solved" in archive
         if not refined:
             scene_data(args.run / "first.npz", scene)
-    receipt = json.loads((args.run / "first.json").read_text())
-    branch_figure(receipt, args.output / "branch.svg", args.run / "branch.png")
-    poloidal_figure(scene, args.output / "poloidal.svg", args.run / "poloidal.png")
+    if args.only in ("all", "branch"):
+        receipt = json.loads((args.run / "first.json").read_text())
+        branch_figure(receipt, args.output / "branch.svg", args.run / "branch.png")
+    if args.only in ("all", "poloidal"):
+        poloidal_figure(scene, args.output / "poloidal.svg", args.run / "poloidal.png")
 
 
 if __name__ == "__main__":

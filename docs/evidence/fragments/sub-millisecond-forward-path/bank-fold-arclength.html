@@ -92,9 +92,14 @@ alt="Continued post-turn equilibrium and analytic seed flux contours with both s
 1e-10 acceptance rule (the figure producer independently re-reads it on CPU at
 2.37463e-11). Solid blue is its bank Bell flux field; dashed near-black
 is the analytic seed field at drive 1.0, which supplies an orienting reference,
-rather than an exact solution at the continued drive. Both use the same twelve
+rather than an exact solution at the continued drive. The full view and saddle close-up use the same twelve
 physical flux levels between the continued axis and boundary fluxes, excluding
-the axis endpoint. Grey is the unit-faithful vessel wall. Solid triangles mark
+the axis endpoint. The axis close-up uses one shared union of eight local
+absolute flux levels: four levels within each field's local range, handed
+unchanged to both fields. Their local ranges are disjoint (continued
+35.281–35.435 mWb; analytic seed 35.729–35.874 mWb), so a union resolves both
+near-axis contour families without shifting or independently normalising either
+field. The 10 mm scale bar gives the local spatial scale. Grey is the unit-faithful vessel wall. Solid triangles mark
 both magnetic axes and filled crosses mark both admitted saddles in their own
 series colours. The right-hand panels enlarge the axes above and saddles below;
 the close views sample the same field afresh on finer local grids, and
@@ -126,4 +131,16 @@ run <code>r-20261107T111056270825-bank-warm-start</code>. Table values use
 Only the two SVGs are committed; the larger NPZ state and field receipts stay
 outside git. Both SVGs pass text clipping and collision checks and their
 1400 × 720 PNG renderings were visually inspected.</p>
+<p id="bank-fold-arclength-render-check">The axis-flux rendering check counts
+actual nonempty contour paths from each field and blue field pixels in the
+axis panel; two null markers alone fail it. The delivered global-level drawing
+reproduces zero contour paths for each field and only 60 blue pixels. The
+repair requires at least four contours from each field and at least 1000 blue
+pixels, as well as identical physical level arrays for the pair. The save
+wrapper calls <code>scripts.prototypes.bank_solve_profile.plot.save_checked</code>,
+the existing shared owner of canvas bounds, text collisions and slide sizing;
+it adds only vector compaction and a PNG preview. A runtime check verifies that
+owner is called and that it refuses deliberately clipped text. Parent-source
+revert controls fail both checks; the repaired source passes them. The updated
+SVG was rasterised and visually inspected, including its axis close-up.</p>
 </section>

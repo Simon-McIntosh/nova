@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>icm-sheet-tile-measure — the per-end denominator, the packed-kernel port and the measured gate</title>
+</head>
+<body>
+<article data-reckon="evidence" data-plan="iron-core-magnetisation" data-node="icm-sheet-tile-measure">
+
+<h1 id="icm-sheet-tile-measure-title">The per-end denominator, the packed-kernel port, and a gate that now closes</h1>
+
+<p id="icm-sheet-tile-measure-outcome">
+Each entry of the tiled interaction matrix is now divided by the absolute sum of its own
+per-end antiderivative terms, which is the denominator the section specifies. The packed
+closed form no longer returns <code>NaN</code> beyond a sloped edge's end. With both changes in
+place the whole-mesh comparison <strong>closes</strong>: over 11,505,664 entries the worst
+disagreement between the padded tile and its flat walk is <strong>2.083&times;10<sup>-15</sup></strong>
+relative to the per-end terms, nothing exceeds <code>1e-13</code>, and every entry is finite. The
+strict <code>xfail</code> that recorded the gate as unmet is removed, and the reversed-normal
+control now fails with its own test id and a nonzero exit status.
+</p>
+
+<h2 id="icm-sheet-tile-measure-result">The gate</h2>
+<table id="icm-sheet-tile-measure-result-table">
+  <thead><tr><th>quantity</th><th>measured</th></tr></thead>
+  <tbody>
+    <tr><td>targets &times; cells</td><td>1696 &times; 1696 (3392 &times; 1696 matrix rows)</td></tr>
+    <tr><td>entries compared</td><td>11,505,664</td></tr>
+    <tr><td>entries above <code>1e-13</code></td><td>0</td></tr>
+    <tr><td>worst entry</td><td>2.083&times;10<sup>-15</sup> at (3391, 3201)</td></tr>
+    <tr><td>distribution p50 / p90 / p99 / p99.9 / p100</td><td>0 / 0 / 0 / 0 / 2.083&times;10<sup>-15</sup></td></tr>
+    <tr><td>undefined entries, either side</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<p id="icm-sheet-tile-measure-result-text">
+The median and every upper percentile are exactly zero: at the measured scale the
+two evaluations agree bit for bit in all but a handful of entries, and the worst entry sits
+48&times; inside the bound. This is the comparison the earlier attempt could not make, and it
+settles what that attempt left open: the residual near <code>1e-8</code> it saw was an artefact
+of the per-edge denominator and the <code>NaN</code> port, not a disagreement between the padded
+tile and the flat walk.
+</p>
+
+<h2 id="icm-sheet-tile-measure-cost">Cost, and the lane the gate actually ran on</h2>
+<table id="icm-sheet-tile-measure-cost-table">
+  <thead><tr><th>run</th><th>measured</th></tr></thead>
+  <tbody>
+    <tr><td>warm <code>packed_sheet_field</code>, CPU node</td><td>1.17 ms/pair</td></tr>
+    <tr><td>whole mesh, 8 CPU workers (projected)</td><td>about 46 min</td></tr>
+    <tr><td>whole-mesh gate, titan P100, cold compile included</td><td>126 s (test body 115 s)</td></tr>
+    <tr><td>reversed-normal control, titan P100</td><td>29 s (test body 20 s)</td></tr>
+    <tr><td>default lane, base revision</td><td>12 passed, 3 deselected, EXIT=0</td></tr>
+    <tr><td>default lane, at head</td><td>12 passed, 4 deselected, EXIT=0</td></tr>
+  </tbody>
+</table>
+
+<p id="icm-sheet-tile-measure-lane">
+The gate was routed to <code>betelgeuse</code> first, as the section names, and that job stayed
+<code>PENDING</code> on resources for twenty minutes with all eight cards allocated to serving
+jobs. The same payload then ran on <code>titan</code>, where it started immediately. These are
+titan walls and titan is a P100: the 126 s includes a cold compile against a 16 GB device, and
+none of it is a headline for the H200. The arithmetic is unaffected — the comparison runs in
+float64 on either device, and the test module asserts that flag rather than trusting the
+environment, because the bare probe process in the job header reads <code>x64 False</code> by
+construction (it never reaches <code>configure_dtypes</code>) while the test process is double
+throughout.
+</p>
+
+<p id="icm-sheet-tile-measure-cpu">
+The CPU lane is not a fallback at a smaller size. A 32-row subset — about a minute of compute at
+the measured per-pair cost — was left to 540 s and produced no summary line: the parent pytest
+process was alive at 1.2&#37; CPU nine minutes in with no spawned shard beside it, so the
+multi-worker path blocks before it computes. That is the same signature as the two full-mesh
+attempts, and it made one accelerator the only route to this number.
+</p>
+
+<h2 id="icm-sheet-tile-measure-nan">The finiteness clause was failing in this node's own scope</h2>
+
+<p id="icm-sheet-tile-measure-nan-text">
+<code>nova/biot/sheet.py</code> was fixed to take the <code>phi = 0</code> curvature argument
+and the <code>r<sub>1</sub> + r</code> panel centre as magnitudes, because a target beyond a
+sloped segment's ends or on the far side of its line puts <code>r<sub>1</sub> + r b<sub>1</sub><sup>2</sup></code>
+below zero and the square root returns an imaginary. The tile does not call that code: it
+evaluates a packed transcription of the same closed form in
+<code>nova/biot/tiledassembly.py</code>, which still carried the pre-fix signed forms. So the
+tile and its own reference both returned <code>NaN</code> for a whole field component on
+targets beyond an edge end — the two sides agreeing perfectly on an undefined value while the
+gate failed on finiteness rather than on agreement. Both terms are magnitudes now, and
+<code>_sheet_arsinh_gradient</code> grades the end nearer the azimuth where its arsinh
+denominator vanishes, mirroring the host route. The packed form evaluates a block at once, so
+that end selection is broadcast over the rule's node axis rather than applied to a scalar.
+</p>
+
+<h2 id="icm-sheet-tile-measure-denominator">The denominator</h2>
+
+<p id="icm-sheet-tile-measure-denominator-text">
+<code>packed_sheet_end_scale</code> returns, per pair and per component, the sum of the
+absolute values of the two segment-end terms that <code>packed_sheet_field</code> subtracts.
+It mirrors the field's branch structure — the sloped route's two end gradients, the flat
+route's two pancake ends — so a block mixing flat and sloped edges remains one program, and
+it reuses the same <code>_sheet_closed_gradient</code> and <code>_sheet_pancake_terms</code>
+rather than re-deriving the closed form. The tests contract it against the cell incidence
+exactly as they contract the field, so the gate and its negative control share one
+denominator.
+</p>
+
+<h2 id="icm-sheet-tile-measure-independent">The reference that is independent of the code under test</h2>
+
+<p id="icm-sheet-tile-measure-independent-text">
+Comparing the tile with an unbatched evaluation of the same traced closed form measures the
+tile's batching and padding and nothing else: both sides read their edge directions, normals
+and shared-edge signs from the same <code>cell_edges</code> coefficients, so a sign or
+deduplication defect there is invisible to it by construction. A second test therefore builds
+the same interaction matrix from the prototype's own edge-ring quadrature and exact ring
+Green's function (<code>scripts/prototypes/iron_magnetisation/magnetisation.py</code>), which
+derives its own edge directions, outward normals and shared-edge sum from the polygons.
+</p>
+
+<table id="icm-sheet-tile-measure-convergence-table">
+  <thead><tr><th>quadrature order</th><th>worst disagreement</th></tr></thead>
+  <tbody>
+    <tr><td>32</td><td>3.0518099689&times;10<sup>-8</sup></td></tr>
+    <tr><td>64</td><td>3.0518099493&times;10<sup>-8</sup></td></tr>
+    <tr><td>128</td><td>3.0518099360&times;10<sup>-8</sup></td></tr>
+  </tbody>
+</table>
+
+<p id="icm-sheet-tile-measure-independent-bound">
+The disagreement moves only in the eighth digit between orders 32 and 128, so the quadrature has
+converged and what remains is the gap between a ring sum of the ring Green's function and a
+closed-form edge integral. It is not the tile's error — the tile reproduces its own flat walk to
+2&times;10<sup>-15</sup> on the same mesh. The bound is therefore set at
+<code>1e-6</code>, about thirty times the measured floor, which leaves it a defect detector
+rather than a precision gate: a sign error in <code>K<sub>phi</sub></code>, or a shared-edge
+pair collapsed the wrong way, moves an O(1) fraction of an entry, as the control below shows.
+</p>
+
+<h2 id="icm-sheet-tile-measure-control">The negative control</h2>
+
+<p id="icm-sheet-tile-measure-control-text">
+Reversing one cell's edge normals in the device build and running the same gate test produces a
+<strong>failed</strong> test — <code>tests/test_sheet_tile.py::test_tile_agrees_with_the_unbatched_closed_form</code>,
+exit status 1 — with a worst entry of <strong>2.000</strong> and 62 of 108,544 entries above the
+gate. That is the O(1) response the denominator is supposed to expose, and it is now visible as a
+red test rather than as an expected failure: under the strict <code>xfail</code> the same run
+reported <code>1 xfailed</code> and exit status 0, which is why the marker had to go before the
+control could mean anything.
+</p>
+
+<h2 id="icm-sheet-tile-measure-open">What remains</h2>
+<ul id="icm-sheet-tile-measure-remaining">
+  <li>Nothing in this section's done-when. The gate closes with every entry finite and the worst
+      entry inside <code>1e-13</code>, the heavy tests carry the <code>slow</code> marker so the
+      default lane skips them, and the control is red through pytest with a test id and an
+      <code>EXIT=</code> line.</li>
+  <li>For the next reader: the <code>3.05&times;10<sup>-8</sup></code> formulation gap is
+      documented and bounded, not explained pair by pair. If a later node needs the ring
+      reference as a precision instrument rather than a defect detector, that gap is where it
+      starts.</li>
+  <li>Naming test files on the command line clears pytest's inherited <code>-m 'not slow'</code>
+      filter, so a suite arm written that way runs the 1500 s and 1200 s gates and reads as a
+      hang rather than as work. Both arms here pass <code>-m 'not slow'</code> explicitly and
+      report their deselected count beside their result.</li>
+</ul>
+
+</article>
+</body>
+</html>

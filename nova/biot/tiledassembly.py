@@ -462,12 +462,17 @@ def _sheet_arsinh_rule(xp, gamma, radius, r1, b1):
     a1sq = 1.0 + b1 * b1
     spread = r1 - radius
     upper = 2.0 * xp.sqrt(radius * xp.abs(r1 - radius * b1 * b1))
-    lower = 2.0 * xp.sqrt(radius * (r1 + radius * b1 * b1))
+    # a target beyond the segment's ends or on the far side of its line puts
+    # r_1 below -r, where the phi = 0 curvature is negative and r_1 + r is
+    # negative; both enter the log model as magnitudes, the model being the
+    # square root of a squared term, so they are taken unsigned rather than
+    # left to an imaginary square root
+    lower = 2.0 * xp.sqrt(radius * xp.abs(r1 + radius * b1 * b1))
     far = a1sq * gamma + b1 * (r1 + radius)
     near = a1sq * gamma + b1 * spread
     zero = xp.zeros_like(radius)
     panels = (
-        (r1 + radius, far, upper, zero, QUARTER),
+        (xp.abs(r1 + radius), far, upper, zero, QUARTER),
         (xp.abs(spread), near, lower, zero, QUARTER),
     )
 
@@ -502,7 +507,16 @@ def _sheet_arsinh_gradient(xp, gamma, radius, source, b1):
     r1 = source - b1 * gamma
     width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
     width = xp.where(width > 0.0, width, 1.0)
+    # The arsinh argument's denominator vanishes at the azimuth where the source
+    # ring passes through the target, which is phi = 0 when r_1 = r and
+    # phi = pi when r_1 = -r. The rule grades only one end, so it is placed at
+    # whichever end is nearer that confluence: a target on the far side of the
+    # line puts r_1 below -r, and the end carrying the logarithmic layer is
+    # then the far one.
     phi, rule = _sheet_azimuth_rule(xp, width)
+    phi = xp.where(
+        (xp.abs(r1 + radius) < xp.abs(r1 - radius))[:, None], np.pi - phi, phi
+    )
     cosine = xp.cos(phi)
     sine_sq = xp.sin(phi) ** 2
     dense = xp.sqrt(
@@ -662,6 +676,65 @@ def packed_sheet_field(
     )
     pancake = _sheet_pancake_field(
         xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
+    return (
+        xp.where(flat, pancake[0], sloped[0]),
+        xp.where(flat, pancake[1], sloped[1]),
+    )
+
+
+def packed_sheet_end_scale(xp, target_r, target_z, start_r, start_z, end_r, end_z):
+    """Return the absolute per-end antiderivative scale of each field component.
+
+    A component of :func:`packed_sheet_field` is a signed difference of its two
+    segment-end terms, and each of those is an antiderivative evaluated at one
+    end. Two correctly rounded evaluations of that difference can disagree by
+    the last bits of the magnitudes being summed, so the largest disagreement
+    either can carry is bounded by the sum of those magnitudes rather than by
+    the net value, which cancellation can leave orders of magnitude smaller.
+    This returns that sum, per pair and per component, in the units of the field
+    it scales, mirroring the branch structure of :func:`packed_sheet_field` so a
+    mixed flat and sloped block is one program.
+    """
+    target_r = xp.asarray(target_r)
+    target_z = xp.asarray(target_z)
+    start_r = xp.asarray(start_r)
+    start_z = xp.asarray(start_z)
+    end_r = xp.asarray(end_r)
+    end_z = xp.asarray(end_z)
+    swap = start_z > end_z
+    lower_r = xp.where(swap, end_r, start_r)
+    lower_z = xp.where(swap, end_z, start_z)
+    upper_r = xp.where(swap, start_r, end_r)
+    upper_z = xp.where(swap, start_z, end_z)
+    drop_r = upper_r - lower_r
+    drop_z = upper_z - lower_z
+    flat = drop_z == 0.0
+    held_z = xp.where(flat, xp.ones_like(drop_z), drop_z)
+    b1 = drop_r / held_z
+    a1sq = 1.0 + b1 * b1
+    radial_end = height_end = 0.0
+    for start in (1.0, 0.0):
+        gamma = (upper_z if start else lower_z) - target_z
+        source = (upper_r if start else lower_r) + xp.zeros_like(target_z)
+        value, _, radial_value = _sheet_closed_gradient(
+            xp, gamma, target_r, source, b1
+        )
+        radial_end = radial_end + xp.abs(radial_value)
+        height_end = height_end + xp.abs(value + target_r * radial_value)
+    sloped = (
+        MU0 / (2.0 * np.pi * a1sq) * radial_end,
+        MU0 / (2.0 * np.pi * target_r * a1sq) * height_end
+    )
+    gamma = start_z - target_z
+    pancake_radial = pancake_height = 0.0
+    for source, _ in ((xp.maximum(start_r, end_r), 1.0), (xp.minimum(start_r, end_r), -1.0)):
+        _, end_radial, end_height = _sheet_pancake_terms(xp, gamma, target_r, source)
+        pancake_radial = pancake_radial + xp.abs(end_radial)
+        pancake_height = pancake_height + xp.abs(end_height)
+    pancake = (
+        MU0 / (2.0 * np.pi) * pancake_radial,
+        MU0 / (2.0 * np.pi) * pancake_height,
     )
     return (
         xp.where(flat, pancake[0], sloped[0]),
@@ -1914,6 +1987,7 @@ __all__ = [
     "compilation_cache",
     "configure_production_compilation_cache",
     "forget_evaluators",
+    "packed_sheet_end_scale",
     "packed_sheet_field",
     "plan_tiles",
     "production_compilation_cache_configuration",

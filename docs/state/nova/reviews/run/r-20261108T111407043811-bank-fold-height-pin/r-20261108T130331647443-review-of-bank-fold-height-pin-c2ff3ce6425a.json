@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_measured": false,
+  "added_failures_note": "Neutral required integer for an unarmed suite pair, not a measured zero: source manifest baseline_suite and after_suite are both empty and the dispatch declares no suite pair; no baseline/head suite logs exist to subtract.",
+  "after_suite": null,
+  "assertion_review": [
+    {
+      "assertion": "before equals centres.mean()",
+      "fails_when": "Removing the cell-centre contribution gives zero rather than the independently computed mean 0.1.",
+      "independence": "Uniform current and zero relative moments give a geometric reference independent of centroid().",
+      "location": "scripts/prototypes/bank_fold_vertical/check_contract.py:35"
+    },
+    {
+      "assertion": "after minus before equals 0.037 m",
+      "fails_when": "Reinstating the cell-relative sum gives zero change under a rigid translation; the recorded negative control prints observed_dz=0 expected_dz=0.037 passed=False and EXIT=1.",
+      "independence": "The imposed geometric displacement is compared to measured output movement; it is not the output echoed back as its own reference.",
+      "location": "scripts/prototypes/bank_fold_vertical/check_contract.py:35-37"
+    },
+    {
+      "assertion": "valid, row_present, corrected relative moment zero, field_update 0.1",
+      "fails_when": "Removing the row or column makes row_present false or the Schur solve nonfinite; restoring the old cell-relative residual with the nonzero 0.25 m target produces the wrong moment and field update.",
+      "independence": "Expected zero moment and 0.1 field correction are fixed consequences of the synthetic identity matrix and residual, not values returned by the function.",
+      "location": "scripts/prototypes/bank_fold_vertical/check_contract.py:158-165"
+    },
+    {
+      "assertion": "analytic centroid_gradient agrees with central differences",
+      "fails_when": "Restoring the old gradient omits centres/total from current derivatives at heights -0.2 and 0.4, disagreeing with numerical derivatives of the corrected centroid.",
+      "independence": "Central differences independently check the analytic derivative, but both could agree on an incorrect centroid formula; the separate geometric translation test establishes the physical quantity.",
+      "location": "scripts/prototypes/bank_fold_vertical/check_contract.py:190-194"
+    }
+  ],
+  "baseline_suite": null,
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/bank_fold_vertical/measure.py:run_unpinned",
+    "scripts/prototypes/bank_fold_vertical/measure.py:inspect_null",
+    "scripts/prototypes/bank_fold_vertical/measure.py:pinned_step",
+    "scripts/prototypes/bank_fold_vertical/measure.py:pinned_measure.evaluate",
+    "scripts/prototypes/bank_fold_vertical/measure.py:main",
+    "scripts/prototypes/bank_fold_vertical/condition.py:condition"
+  ],
+  "completed_at": "2026-11-08T13:15:03Z",
+  "dispatched_at": "2026-11-08T13:07:29Z",
+  "evidence_caveats": [
+    "final-gate.log prints an ImageMagick temporary-file read-only warning despite EXIT=0; the resulting exact committed SVG was independently rendered and visually inspected during this review.",
+    "contract-physical.log carries the precommit base label even though it measured modified source; final-gate.log and both H200 process headers establish the committed implementation revision.",
+    "No product package caller reaches this scratch prototype; the named call sites are executable measurement code, not contract tests."
+  ],
+  "figure_inspection": {
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T130331647443-review-of-bank-fold-height-pin-c2ff3ce6425a/reviewed-singular.png",
+    "result": "Exact committed SVG independently extracted and rendered at 1400 px; both series identified; labels readable without clipping or collisions; blue pinned samples agree with receipt table; retained null SVG unchanged.",
+    "source_revision": "c2ff3ce6425abc6fc7ccee753f5aa2075a10f22e"
+  },
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "Reviewed commits 4805711f8986171d061c0b8572fc321c73eab473 and c2ff3ce6425abc6fc7ccee753f5aa2075a10f22e against their actual parent 04d969738a47a2d5bc31544c03980d1e4afcd94c; the six-file delta corrects the height, shares its derivative, adds controls and replaces evidence and one SVG.",
+    "done_when": "The three clauses in the source brief.txt are supported by h200-job.log:1-176 (two GPU/x64 processes and EXIT=0), centroid-relative-red.log:2-4 (observed_dz=0 and EXIT=1), the corrected fragment, and the rendered reviewed-singular.png.",
+    "goal": "The source live run node.goal requires physical current-centroid height; scripts/prototypes/bank_fold_vertical/measure.py:34-46 implements that height and derivative throughout both arms.",
+    "manifest": "The source manifest.md names both commits, all six paths and readable red/green/device receipts; baseline_suite and after_suite are empty because this prototype node has no armed suite pair.",
+    "write_paths": "The source live run node.write_paths and manifest.md declare prototype, fragment and figure scopes, and all six changed paths lie within them without product-source edits."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/bank_fold_vertical/check_contract.py:16-43 fails when the cell-centre contribution is removed, :168-194 rejects a restored cell-relative derivative, and :108-165 checks the actual bordered update, although these focused controls execute extracted functions through NumPy rather than their complete JAX callers.",
+    "evidence": "h200-job.log:3,89,175-176 records two fresh GPU/x64 processes at the implementation revision and agreement with EXIT=0, while final-gate.log records nine passing controls and the independently inspected committed SVG resolves the renderer's temporary-file warning.",
+    "fit": "scripts/prototypes/bank_fold_vertical/measure.py:39 and condition.py:44 factor the existing centroid row by capability, preserve the surrounding prototype idiom and introduce no forbidden source names or provenance comments.",
+    "goal_fidelity": "scripts/prototypes/bank_fold_vertical/measure.py:34-46 includes cell-centre current contributions and condition.py:44 consumes the same physical-height derivative used by the Newton row.",
+    "reuse": "Capability searches over nova/equilibrium and scripts/prototypes, including opening constraint.py:1072-1128 and the radial analogue at commit 714f29cfa, found no owner of a bank cell-relative height derivative, so measure.py:39 extends the existing vertical owner and condition.py:44 reuses it rather than duplicating its row.",
+    "scope_discipline": "The six-file diff is confined to scripts/prototypes/bank_fold_vertical, the two explicitly granted evidence fragments and the granted singular-value SVG, as source manifest.md lists."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source live run node.goal requires physical current-centroid height; scripts/prototypes/bank_fold_vertical/measure.py:34-46 implements that height and derivative throughout both arms.\nVERDICT done_when: The three clauses in the source brief.txt are supported by h200-job.log:1-176 (two GPU/x64 processes and EXIT=0), centroid-relative-red.log:2-4 (observed_dz=0 and EXIT=1), the corrected fragment, and the rendered reviewed-singular.png.\nVERDICT write_paths: The source live run node.write_paths and manifest.md declare prototype, fragment and figure scopes, and all six changed paths lie within them without product-source edits.\nVERDICT manifest: The source manifest.md names both commits, all six paths and readable red/green/device receipts; baseline_suite and after_suite are empty because this prototype node has no armed suite pair.\nVERDICT diff: Reviewed commits 4805711f8986171d061c0b8572fc321c73eab473 and c2ff3ce6425abc6fc7ccee753f5aa2075a10f22e against their actual parent 04d969738a47a2d5bc31544c03980d1e4afcd94c; the six-file delta corrects the height, shares its derivative, adds controls and replaces evidence and one SVG.\nCALL_SITES: scripts/prototypes/bank_fold_vertical/measure.py:run_unpinned, scripts/prototypes/bank_fold_vertical/measure.py:inspect_null, scripts/prototypes/bank_fold_vertical/measure.py:pinned_step, scripts/prototypes/bank_fold_vertical/measure.py:pinned_measure.evaluate, scripts/prototypes/bank_fold_vertical/measure.py:main, scripts/prototypes/bank_fold_vertical/condition.py:condition\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_fold_vertical/measure.py:34-46 includes cell-centre current contributions and condition.py:44 consumes the same physical-height derivative used by the Newton row.\nSCORE evidence: 19\nJUSTIFICATION evidence: h200-job.log:3,89,175-176 records two fresh GPU/x64 processes at the implementation revision and agreement with EXIT=0, while final-gate.log records nine passing controls and the independently inspected committed SVG resolves the renderer's temporary-file warning.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The six-file diff is confined to scripts/prototypes/bank_fold_vertical, the two explicitly granted evidence fragments and the granted singular-value SVG, as source manifest.md lists.\nSCORE durability: 19\nJUSTIFICATION durability: scripts/prototypes/bank_fold_vertical/check_contract.py:16-43 fails when the cell-centre contribution is removed, :168-194 rejects a restored cell-relative derivative, and :108-165 checks the actual bordered update, although these focused controls execute extracted functions through NumPy rather than their complete JAX callers.\nSCORE fit: 20\nJUSTIFICATION fit: scripts/prototypes/bank_fold_vertical/measure.py:39 and condition.py:44 factor the existing centroid row by capability, preserve the surrounding prototype idiom and introduce no forbidden source names or provenance comments.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches over nova/equilibrium and scripts/prototypes, including opening constraint.py:1072-1128 and the radial analogue at commit 714f29cfa, found no owner of a bank cell-relative height derivative, so measure.py:39 extends the existing vertical owner and condition.py:44 reuses it rather than duplicating its row.\n",
+  "reuse_search": {
+    "capabilities": [
+      "physical centroid from current and relative moments",
+      "centroid row derivative",
+      "rigid translation and finite difference contract controls"
+    ],
+    "owners_opened": [
+      "nova/equilibrium/constraint.py:1072-1128",
+      "scripts/prototypes/bank_fold_radial/measure.py at 714f29cfa",
+      "scripts/prototypes/bank_fold_vertical/check_contract.py"
+    ],
+    "result": "The existing vertical centroid owner is corrected and extended; the new gradient replaces duplicated inline rows in measure and condition. The production constraint uses a different booked/flux representation; the radial analogue measures a different component. No existing rigid-translation or finite-difference control for this bank height was found."
+  },
+  "review_run_id": "r-20261108T130331647443-review-of-bank-fold-height-pin-c2ff3ce6425a",
+  "reviewed_base_sha": "04d969738a47a2d5bc31544c03980d1e4afcd94c",
+  "reviewed_commits": [
+    "4805711f8986171d061c0b8572fc321c73eab473",
+    "c2ff3ce6425abc6fc7ccee753f5aa2075a10f22e"
+  ],
+  "reviewed_head_sha": "c2ff3ce6425abc6fc7ccee753f5aa2075a10f22e",
+  "reviewed_run_id": "r-20261108T111407043811-bank-fold-height-pin",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T13:21:36.830932+00:00",
+  "total": 118
+}

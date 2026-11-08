@@ -1,0 +1,54 @@
+{
+  "added_failure_basis": "the reviewed run's manifest (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T134744819124-diiid-frame-146-vertical-loss/manifest.md) records no baseline_suite or after_suite arm, so no gate log carries a failing id to attribute.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-11-08T00:53:26.092Z",
+  "dispatched_at": "2026-11-08T00:44:00Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py",
+      "line": 88,
+      "severity": "non-blocking",
+      "text": "RegularGridInterpolator((radius, height), flux.T) is algebraically identical to the previous ((height, radius), flux), because flux.T[i, j] == flux[j, i], so the change is a no-op that cannot have altered any measured value; the receipt's Hessian determinant moving from -34.71 to -6.65 is therefore unexplained by this delta, and the fragment at docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:185 cites the new number as a fresh measurement."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py",
+      "line": 104,
+      "severity": "non-blocking",
+      "text": "inside_grid is computed from the radius and height axis extents alone, so a point inside the bounding box but outside the flux array's valid support still receives a winding index and a Hessian, and no assertion or receipt check records what the out-of-grid branch produces."
+    }
+  ],
+  "justifications": {
+    "durability": "core_stationary_probe.py adds no assertion and the node's write scope holds no test file, so the new inside_grid flag at :104 and the closure at :66 have no test that reddens if either regresses.",
+    "evidence": "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:88 reorders the interpolator axes to (radius, height) with flux.T, which is algebraically identical to the prior (height, radius) with flux, so the receipt's move from Hessian determinant -34.71 to -6.65 is not explained by this diff.",
+    "fit": "core_stationary_probe.py:76 wraps the spline call to the line limit in the surrounding style and the closure at :66 uses the same numpy idiom as the rest of the module.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:183 adds the saddle paragraph the goal's mechanism clause asks the record to state, and the delta changes no panel or fix recommendation.",
+    "reuse": "core_stationary_probe.py:28 _seeds and :40 _hessian still re-derive a grid seed scan and a finite-difference Hessian that nova/equilibrium/topology.py:1598 stationary_read and the returned hessian_type carry; this delta neither extends nor removes the duplication.",
+    "scope_discipline": "git diff --stat cfc176dcd da28baf2d lists only the fragment and scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py, both inside the declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261108T004153332922-review-of-diiid-frame-146-vertical-loss-da28baf2d7f9",
+  "reviewed_base_sha": "cfc176dcdfca872630453c896faef94a4116e244",
+  "reviewed_head_sha": "da28baf2d7f9a73618dd34fb40596a10bfd7f5b1",
+  "reviewed_run_id": "r-20261107T134744819124-diiid-frame-146-vertical-loss",
+  "scores": {
+    "durability": 3,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:11:33.537863+00:00",
+  "total": 79,
+  "verdicts": {
+    "diff": "Read both commits against base cfc176dcd: c9660b3bd changes the winding closure at core_stationary_probe.py:66, reorders the interpolator axes at :88, adds the inside_grid flag at :104 and rewrites the fragment paragraph, and da28baf2d only rewraps the spline call at :76, two files and 32 insertions against 6 deletions.",
+    "done_when": "The done_when's third clause asks for per-trip line-contour panels with the limiter, both null sets and the bounding surface; the delta touches none of the panels and adds no command, and the source manifest's checkpoint states the per-trip figure items remain undone, so nothing in this delta asserts the measure.",
+    "goal": "The source goal is to explain frame 146's vertical loss and end the fragment with a recommended fix; this delta adds the paragraph at docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:183 that records the trip-1 interior saddle as a genuine stationary point above the axis flux, so the fragment states the null-set finding the panels draw.",
+    "manifest": "Read the source manifest; it records status in-progress with a checkpoint naming the closed winding loop, the re-checked trip-1 saddle at Hessian determinant -6.65 and winding index -1, the inside_grid flag, and the remaining figure items, and it records no baseline_suite or after_suite arm.",
+    "write_paths": "The source write paths are scripts/prototypes/diiid_vertical_loss/, the fragment and docs/figures/diiid-frame-146-vertical-loss/; git diff --stat cfc176dcd da28baf2d lists exactly the fragment and scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py, both inside them, and no product source is touched."
+  }
+}

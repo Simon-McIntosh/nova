@@ -25,6 +25,13 @@
     "a226220f3aab8c87793cb8bd44929f25f5f51aa8"
   ],
   "completed_at": "2026-11-08T08:47:15Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "the lead accepted the falsification as this node's deliverable on 2026-11-08 and chose to run the record correction and the support-mask investigation as two follow-up nodes",
+      "recorded_at": "2026-11-08T09:03:30.964334+00:00"
+    }
+  },
   "dispatched_at": "2026-11-08T08:38:15Z",
   "finding_dispositions": {
     "0": {

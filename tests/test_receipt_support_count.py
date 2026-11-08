@@ -21,18 +21,27 @@ from nova.utilities.importmanager import skip_import
 with skip_import("jax"):
     import jax.numpy as jnp
 
+    from nova.biot.null import Null1D, Null2D
+    from nova.biot.target import FluxTarget
+    from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain
-    from nova.equilibrium.forward import receipt_history_fields
+    from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.fixed_point import newton_krylov
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.solve_request import (
-        ForwardSolvePolicy,
-        ForwardSolveReceipt,
-        ResolvedForwardSolveDefaults,
+        ExplicitSolveSeed,
+        ForwardSolveRequest,
     )
+    from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
 
 
 SUPPORT_CELLS = 5
+
+
+def _zero(value):
+    return jnp.zeros_like(value)
 
 
 def _support_labels():
@@ -147,33 +156,88 @@ def test_a_settled_empty_support_is_reported_as_zero_not_as_the_change_count():
     assert changes[-1] == 0
 
 
-def _published_receipt(history, route):
-    """Build the receipt through the selection its publication calls."""
-    residual_history, changed_mask_entries, support_cell_count = receipt_history_fields(
-        history, route
-    )
-    return ForwardSolveReceipt(
-        terminal_state=SimpleNamespace(constraints=()),
-        qualified=False,
-        termination_reason=0,
-        residual_history=residual_history,
-        changed_mask_entries=changed_mask_entries,
-        support_cell_count=support_cell_count,
-        globalisation_decisions=(jnp.zeros(0, dtype=jnp.int32), jnp.zeros(0)),
-        amplitude_history=jnp.zeros(0),
-        topology_read=None,
-        polish_receipt=None,
-        compilation_cache_hit=False,
-        wall_seconds=0.0,
-        resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
-            ForwardSolvePolicy()
+def _raster_operator():
+    """A small structured operator, cheap to build and never solved."""
+    configure_dtypes()
+    lattice = FluxLattice(np.linspace(0.6, 1.4, 9), np.linspace(-0.4, 0.4, 9))
+    wall_angle = np.linspace(0.0, 2.0 * np.pi, 64, endpoint=False)
+    wall_coordinate = np.c_[
+        1.0 + 1.5 * np.cos(wall_angle),
+        1.5 * np.sin(wall_angle),
+    ]
+    node_count = lattice.node_count
+    wall_count = len(wall_coordinate)
+    operator = ForwardFluxOperator(
+        grid=FluxTarget(
+            source_target=jnp.zeros((node_count, 1)),
+            plasma_target=jnp.eye(node_count),
+            null=Null2D.from_coordinates(
+                lattice.coordinate, hex_stencil(lattice.shape), maxsize=5
+            ),
         ),
+        wall=FluxTarget(
+            source_target=jnp.zeros((wall_count, 1)),
+            plasma_target=jnp.zeros((wall_count, node_count)),
+            null=Null1D(jnp.asarray(wall_coordinate, dtype=jnp.float64)),
+        ),
+        source=ForwardSource(core=DomainProfile(p_prime=_zero, ff_prime=_zero)),
+        external_current=jnp.zeros(1),
+        area=jnp.asarray(lattice.cell_area),
+        use_linear_moments=False,
     )
+    return operator, lattice
+
+
+class _RecordedHistoryProfile(ForwardProfile):
+    """A profile whose equilibrium map returns one recorded fixed-point history.
+
+    Only the map is replaced: the request seam below it, the publication that
+    builds the receipt, and the receipt itself are the production ones, so a
+    keyword swapped at the publication site reaches the assertions.
+    """
+
+    recorded = None
+
+    def solve(self, initial_flux, **kwargs):
+        if isinstance(initial_flux, ForwardSolveRequest):
+            return super().solve(initial_flux, **kwargs)
+        return self.recorded
+
+
+def _recorded_history(**overrides):
+    history = {
+        "residual": jnp.asarray(1.0e-9),
+        "termination_reason": 0,
+        "attempted_newton_promotions": 0,
+        "accepted_newton_promotions": 0,
+        "inner_iteration_decisions": jnp.zeros(0, dtype=jnp.int32),
+        "inner_iteration_applied_factors": jnp.zeros(0),
+    }
+    history.update(overrides)
+    return SimpleNamespace(**history)
+
+
+def _published_receipt(history, route):
+    """Solve one request through the production publication, with a fixed history."""
+    operator, lattice = _raster_operator()
+    profile = _RecordedHistoryProfile(operator=operator, lattice=lattice)
+    profile.recorded = SimpleNamespace(
+        fixed_point=history,
+        finite=SimpleNamespace(passed=jnp.asarray(True)),
+        topology=None,
+        normalisation=None,
+    )
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="receipt-support-publication",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.zeros(lattice.node_count)),
+        policy_overrides={"route": route},
+    )
+    return profile.solve(request)
 
 
 def test_the_published_receipt_keeps_its_support_count_apart_from_its_changes():
-    configure_dtypes()
-    history = SimpleNamespace(
+    history = _recorded_history(
         active_set_residuals=jnp.asarray((1.0e-2, 1.0e-3)),
         active_set_mask_differences=jnp.asarray((9, 0)),
         active_set_support_cells=jnp.asarray((345, 345)),
@@ -187,8 +251,7 @@ def test_the_published_receipt_keeps_its_support_count_apart_from_its_changes():
 
 
 def test_a_route_without_active_set_trips_publishes_no_support_history():
-    configure_dtypes()
-    history = SimpleNamespace(trace=jnp.asarray((1.0,)), shadow_mask_changes=7)
+    history = _recorded_history(trace=jnp.asarray((1.0,)), shadow_mask_changes=7)
 
     receipt = _published_receipt(history, "picard")
 

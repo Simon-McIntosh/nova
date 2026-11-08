@@ -4,6 +4,13 @@
   "call_sites": [],
   "completed_at": "2026-11-08T01:12:59.647Z",
   "dispatched_at": "2026-11-08T00:59:34Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-vertical-loss",
+      "recorded_at": "2026-11-08T01:39:58.185647+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "The census receipt trip-trajectory/maxima-census.json gives global_maximum_inside_limiter.position_rz = [2.3275, -0.4000] for frame 146 trip 2, and the source manifest's own checkpoint also reads R=2.327 m. The fragment's paragraph cites R=2.013 m for that same point, so a reader checking the cited evidence finds a different field maximum than the prose states; at R=2.013 m the census reports no extremum at all.",

@@ -156,7 +156,10 @@ def run(frame: int, out_dir: Path, artifacts: Path) -> dict[str, Any]:
         print(json.dumps(state, sort_keys=True, default=float), flush=True)
         (out_dir / "trajectory.json").write_text(json.dumps(record, indent=2) + "\n")
         previous = flux
-        if state["changed_mask_entries"] in (0, -1) and arm["active_set_iterations"] <= k:
+        if (
+            state["changed_mask_entries"] in (0, -1)
+            and arm["active_set_iterations"] <= k
+        ):
             break
     return record
 

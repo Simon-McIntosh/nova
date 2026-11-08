@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms. baseline_suite log gate_base.log records one failing id (tests/test_reduced_newton_termination.py::test_last_permitted_trip_reports_the_arrived_iterate) and tests/test_forward_solve_request.py as five passed at :50-51. after_suite log gate_head2.log is taken at a5e0f8151, before the repair, and adds tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table at :73-74; commit 5f675d25e, inside the reviewed range, restores the pinned tuple and at the reviewed head nova/equilibrium/solve_request.py:742-743 carries both new fields in the exact order tests/test_forward_solve_request.py:66-67 pins, so that id does not carry to head and the reviewed range adds no failure. Independently confirmed: tests/test_forward_solve_request.py was run at the reviewed head (git archive of a3cd2debc, PYTHONPATH on that tree, JAX_PLATFORMS=cpu) and reported 5 passed in 44.60s, EXIT=0, log at /tmp/reckon-crew-scratch/r-20261108T022654804314-review-of-diiid-stopping-rule-fix-a3cd2debc571/head_forward_solve_request.log.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T02:56:29.003Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "diiid-stopping-rule-fix",
+      "recorded_at": "2026-11-08T05:09:32.876998+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-08T02:30:48Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "line": "126",
+      "severity": "blocking",
+      "text": "the axis annotation is placed 12,-14 points from the axis inside the contour field, so on all four committed panels the red label text lies across the solved flux contours and the axis marker, which the repository's figure rule refuses to deliver."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+      "line": "131",
+      "severity": "blocking",
+      "text": "the record states the magnetic axis sits at Z between -0.14 and +0.04 m on all four panels, while its own frame-137-diverted-terminal.png labels that axis at Z = -0.44 m, so a reader takes a measured range that omits 0.30 m of the value the figure shows."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+      "line": "117",
+      "severity": "non-blocking",
+      "text": "the sentence says levels of the opposite sign are dashed, but render_terminal_panels.py:109 passes linestyles=solid and every contour in all four committed PNGs is solid, which is what commit a3cd2debc exists to establish."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "_wall_gap duplicates boundary_competition.py:66 _wall_distance, the same roll-clip-project construction over one ring, in a file the node already imports from the same prototype package, so the wall-distance capability now has a second owner."
+    },
+    {
+      "file": "scripts/prototypes/diiid_stopping_rule/run_geometry_dump.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "the committed orchestration script produced none of the geometry the panels consume, since both recorded runs end EXIT_179_LIMITED=1 (geometry_dump.log, AttributeError at record_machine_geometry.py:43; geometry_dump2.log, RuntimeError at :57) and the geometry-limiter-*.npz files the renderer reads were written by a hand command carrying surface=np.zeros((0,2)) and axis=np.zeros(2), so the panels are not reproducible from the tree."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the three new modules are prototype entry points under scripts/prototypes and nothing under nova/, tests/ or benchmarks/ imports them; the only landed test change is a pinned tuple in tests/test_forward_solve_request.py, which is a test file and not a production call site.",
+    "diff": "read all three commits against da9c18d8f; they add the two pinned receipt fields, rewrite the four terminal panels onto the governed limiter, add record_machine_geometry.py and run_geometry_dump.py, and repair one malformed table row.",
+    "done_when": "the figure clause asks for a line-contour panel carrying the real limiter, both null sets, the bounding surface from host_boundary_read and the EFIT boundary; render_terminal_panels.py:102-125 draws the limiter, the nulls and the EFIT boundary and omits the bounding surface, and the record's axis-range sentence is contradicted by its 137 diverted panel.",
+    "goal": "the source node goal is a stopping rule that ends the solve on convergence rather than on a settled mask; these three commits do not touch that rule and instead repair the evidence record and its terminal panels, which the done-when also requires, and they leave the required bounding surface undrawn (docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:136-142).",
+    "manifest": "read; it records commits 5f675d25e, 442d5453e and a3cd2debc answering four carried findings and claims tests/test_forward_solve_request.py is five passed at head without naming a log for that run.",
+    "write_paths": "eight of the nine changed paths sit inside the manifest's declared write paths; tests/test_forward_solve_request.py:66-67 does not."
+  },
+  "justifications": {
+    "durability": "tests/test_forward_solve_request.py:139 compares a literal tuple against dataclasses.fields and so reddens if either new field is dropped, but nothing in tests/ exercises the limiter refusal at scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:89-94 or the new recorders.",
+    "evidence": "the wall-relation numbers are the probe's own wall_contact reads, but docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:131 contradicts the 137 diverted panel eight lines below it and :117 describes a dash style scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:109 removed.",
+    "fit": "names carry no plan or ticket label and the module follows its neighbours, but ruff format would reformat all three committed scripts and run_geometry_dump.py:24-25 exceed the 88-column limit.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:113-133 now states where each terminal sat relative to the machine, but the bounding surface the node's done-when names is omitted and the stated axis range is wrong.",
+    "reuse": "scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:42 re-implements the point-to-ring-segment distance that scripts/prototypes/diiid_forward_convergence/boundary_competition.py:66 already owns, in a package the same node's record_machine_geometry.py already imports.",
+    "scope_discipline": "eight changed paths are inside the manifest's declared write paths, and tests/test_forward_solve_request.py:66-67 is outside the fence with no scope change recorded."
+  },
+  "node": "review-of-diiid-stopping-rule-fix-a3cd2debc571",
+  "node:reviewed": "diiid-stopping-rule-fix",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is a stopping rule that ends the solve on convergence rather than on a settled mask; these three commits do not touch that rule and instead repair the evidence record and its terminal panels, which the node's done-when also requires, and they leave the required bounding surface undrawn (docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:136-142).\nVERDICT done_when: the done-when's figure clause asks for a line-contour panel carrying the real limiter, both null sets, the bounding surface from host_boundary_read and the EFIT boundary; scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:102-125 now draws the limiter, the nulls and the EFIT boundary, and explicitly omits the bounding surface, and the record's own axis-range sentence is contradicted by its 137 diverted panel.\nVERDICT write_paths: the manifest's declared paths are nova/equilibrium/*, tests/test_fixed_point_stationary_mask.py, scripts/prototypes/diiid_stopping_rule, the evidence fragment and docs/figures/diiid-stopping-rule-fix; eight of the nine changed paths sit inside them and tests/test_forward_solve_request.py:66-67 does not.\nVERDICT manifest: read; it records commits 5f675d25e, 442d5453e and a3cd2debc answering four carried findings, states the four test arms and the h200 heavy-file arms, and claims tests/test_forward_solve_request.py is five passed at head without naming a log for that run.\nVERDICT diff: read all three commits against da9c18d8f; they add the two pinned receipt fields, rewrite the four terminal panels onto the governed limiter, add record_machine_geometry.py and run_geometry_dump.py, and repair one malformed table row.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:113-133 now states where each terminal sat relative to the machine, but the bounding surface the node's done-when names is omitted and the stated axis range is wrong.\nSCORE evidence: 11\nJUSTIFICATION evidence: the wall-relation numbers are the probe's own wall_contact reads, but docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:131 contradicts the 137 diverted panel eight lines below it and :117 describes a dash style scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:109 removed.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: eight changed paths are inside the manifest's declared write paths, and tests/test_forward_solve_request.py:66-67 is outside the fence with no scope change recorded.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_forward_solve_request.py:139 compares a literal tuple against dataclasses.fields and so reddens if either new field is dropped, but nothing in tests/ exercises the limiter refusal at scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:89-94 or the new recorders.\nSCORE fit: 12\nJUSTIFICATION fit: names carry no plan or ticket label and the module follows its neighbours, but ruff format would reformat all three committed scripts and run_geometry_dump.py:24-25 exceed the 88-column limit.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:42 re-implements the point-to-ring-segment distance that scripts/prototypes/diiid_forward_convergence/boundary_competition.py:66 already owns, in a package the same node's record_machine_geometry.py already imports.\nFINDING scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:126 blocking: the axis annotation is placed 12,-14 points from the axis inside the contour field, so on all four committed panels the red label text lies across the solved flux contours and the axis marker, which the repository's figure rule refuses to deliver.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:131 blocking: the record states the magnetic axis sits at Z between -0.14 and +0.04 m on all four panels, while its own frame-137-diverted-terminal.png labels that axis at Z = -0.44 m, so a reader takes a measured range that omits 0.30 m of the value the figure shows.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html:117 non-blocking: the sentence says levels of the opposite sign are dashed, but render_terminal_panels.py:109 passes linestyles=solid and every contour in all four committed PNGs is solid, which is what commit a3cd2debc exists to establish.\nFINDING scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py:42 non-blocking: _wall_gap duplicates boundary_competition.py:66 _wall_distance, the same roll-clip-project construction over one ring, in a file the node already imports from the same prototype package, so the wall-distance capability now has a second owner.\nFINDING scripts/prototypes/diiid_stopping_rule/run_geometry_dump.py:24 non-blocking: the committed orchestration script produced none of the geometry the panels consume, since both recorded runs end EXIT_179_LIMITED=1 (geometry_dump.log, AttributeError at record_machine_geometry.py:43; geometry_dump2.log, RuntimeError at :57) and the geometry-limiter-*.npz files the renderer reads were written by a hand command carrying surface=np.zeros((0,2)) and axis=np.zeros(2), so the panels are not reproducible from the tree.\n",
+  "review_run_id": "r-20261108T022654804314-review-of-diiid-stopping-rule-fix-a3cd2debc571",
+  "reviewed_base_sha": "da9c18d8f93c39042708c4e986c2757231b4857d",
+  "reviewed_head_sha": "a3cd2debc571b4c96f724a07502f55788d39a85d",
+  "reviewed_run_id": "r-20261107T141006905473-diiid-stopping-rule-fix",
+  "scores": {
+    "durability": 11,
+    "evidence": 11,
+    "fit": 12,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T03:55:00+00:00",
+  "total": 65
+}

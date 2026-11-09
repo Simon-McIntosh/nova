@@ -12,6 +12,8 @@ import sys
 import tempfile
 from types import SimpleNamespace
 
+from timing import CompilationTiming
+
 PYTHON = "/home/ITER/mcintos/Code/nova/.venv/bin/python"
 CASES = (
     (179, "limited"),
@@ -53,6 +55,11 @@ def row(args):
 
     configure_dtypes()
     assert jax.config.jax_enable_x64
+    if os.environ.get("NOVA_LANE_RUNG") in ("titan", "h200"):
+        assert jax.default_backend() == "gpu", "GPU rung did not serve a GPU"
+    timing = CompilationTiming()
+    timing.control()
+    timing.install_solve()
     tree = args.tree.resolve()
     assert Path(fixed_point.__file__).resolve().is_relative_to(tree)
     print(
@@ -154,6 +161,8 @@ def row(args):
             warmup_refused_proposals=sum(r["refused"] for r in history),
             module=fixed_point.__file__,
             cwd=str(Path.cwd().resolve()),
+            timing=timing.solves,
+            backend_compile_programs=timing.rows,
         )
     instance = instances[0]
     assert instance.counts["warmup"] > 0 and instance.counts["inner"] > 0
@@ -178,10 +187,12 @@ def batch(args):
     ) as temporary:
         base = Path(temporary) / "base"
         extract(base, args.base, repository)
+        head_tree = Path(temporary) / "head"
+        extract(head_tree, head, repository)
         records = []
         for arm, tree, revision in (
             ("base", base, args.base),
-            ("head", repository, head),
+            ("head", head_tree, head),
         ):
             for frame, branch in CASES:
                 name = (
@@ -236,6 +247,24 @@ def batch(args):
                 (args.output / "comparison.json").write_text(
                     json.dumps(records, indent=2) + "\n"
                 )
+        if args.forward_regressions:
+            from regression import gate
+
+            arms = {}
+            for arm, tree, revision in (
+                ("base", base, args.base),
+                ("head", head_tree, head),
+            ):
+                arms[arm] = gate(
+                    tree,
+                    revision,
+                    "tests/test_equilibrium_forward_solve.py",
+                    args.output / f"forward-{arm}.log",
+                    platforms=os.environ["JAX_PLATFORMS"],
+                )
+                (args.output / "forward-regressions.json").write_text(
+                    json.dumps(arms, indent=2) + "\n"
+                )
 
 
 def main():
@@ -247,6 +276,7 @@ def main():
     parser.add_argument("--revision")
     parser.add_argument("--frame", type=int)
     parser.add_argument("--branch")
+    parser.add_argument("--forward-regressions", action="store_true")
     args = parser.parse_args()
     row(args) if args.row else batch(args)
 

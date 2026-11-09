@@ -1,0 +1,146 @@
+<section id="bank-fold-arclength-record">
+<h3>Pseudo-arclength continuation through the drive stall</h3>
+<p><strong>The connected equilibrium branch turns near drive 1.008934 and
+continues toward decreasing drive.</strong> Its highest sampled accepted drive
+is 1.0089335951191345, at dimensionless arclength 0.064033864870. The incoming
+secant's drive component there is +0.0300134; at the next accepted point it is
+−0.0221433. Six accepted points follow the reversal, ending at drive
+1.008727505660832 with drive component −0.0675187. This is a local turning point
+of the discretised bank equation under the tested read and branch policy.
+The connected branch does not reach drive 1.01; this measurement does not
+exclude a separate equilibrium branch.</p>
+<p>The balanced unaugmented Jacobian reaches its sampled minimum singular value
+of 2.9320043e-5 at the sampled drive maximum, down from 6.2521104e-4 at the first
+retained state. It recovers to 2.7091465e-4 on the decreasing-drive branch.
+The augmented matrix remains nonsingular over the retained points: its smallest
+singular value is at least 2.0437274e-4, and is 2.3927749e-4 at the sampled
+maximum. Those two spectra use different matrix sizes and an explicitly scaled
+arclength border; their absolute magnitudes are not a physical improvement
+factor. The sign reversal together with the unaugmented minimum and bounded
+augmented spectrum supports the turning-point verdict.</p>
+<p>The stated drive is a <em>sampled maximum</em>, not a solve of the exact
+zero-drive-tangent condition. The adjacent retained arclengths are
+0.063607996666 and 0.064335570365; the table supplies their drives and tangents.
+No sub-sampling error bar is claimed. The earlier natural-parameter stall at
+1.0089341297149657 used a 1e-6 intermediate tolerance and is not a strict
+1e-10 equilibrium beyond this sampled maximum.</p>
+<figure id="bank-fold-arclength-branch-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/bank-fold-arclength/branch.svg"
+alt="Accepted drive branch, a close view of its reversal, and separate smallest-singular-value panels">
+<figcaption>Lane 0 of sixteen lanes. Blue markers are the 22 accepted states;
+segments join consecutive accepted states and do not assert intermediate
+certification. Top left shows the full retained drive trajectory; bottom left
+resolves its reversal. The dotted grey line locates the highest sampled drive.
+Right panels show the balanced bank and arclength-augmented smallest singular
+values on separate logarithmic scales. Their scales and numerical definitions
+are independent. The secant has unit length in the fixed metric described below.</figcaption>
+</figure>
+<p>The corrector solves the existing assembled bank Jacobian with the drive as
+one additional unknown and a secant-normal arclength row. The drive column is
+an exact automatic derivative of the existing residual with respect to the
+profile amplitude, with state and freshly read support fixed. The support
+itself has no explicit drive input. No product source changes. The state metric
+scales each moment block by its seed maximum times the square root of the cell
+count, giving dimensionless RMS block weights; the three scales are
+4212.434280374, 33.4562018190 and 23.5965512093 in their moment units, and the
+drive scale is one. These scales remain fixed along the branch, while the
+Newton matrix uses the existing dynamic row and column balancing. The bottom
+row in balanced coordinates is the fixed-metric secant multiplied by the
+current column scales. The drive border is divided by the current row scales.</p>
+<p>The saved seed is refined at drive 1.0, a second state is corrected at
+1.0002, and their normalized secant starts continuation. Each corrector permits
+16 updates, tries divisors 1 through 128 in its line search, and reads afresh
+before acceptance, including after its last update. Every lane must have a
+valid read, maximum absolute moment residual at most 1e-10, and arclength-row
+error at most 1e-12. Seven attempted steps are rejected and reduced; none is
+included in the accepted-state table. The largest accepted residual in either
+process is 3.21734e-11. The largest within-point drive spread across sixteen
+lanes is 5.10703e-15. Physical centroids use
+<code>sum(cell_centre * cell_current + cell_relative_moment) / sum(cell_current)</code>
+for both radius and height.</p>
+<table id="bank-fold-arclength-points">
+<thead><tr><th>Arclength</th><th>Drive</th><th>Secant drive component</th><th>Bank σmin</th><th>Augmented σmin</th><th>Centroid R [m]</th><th>Centroid Z [mm]</th><th>Fresh residual, max over lanes</th></tr></thead>
+<tbody>
+<tr><td>0.001490238922</td><td>1.000200000000000</td><td>+0.13420667</td><td>6.25211035e-04</td><td>6.87779878e-04</td><td>1.712826839910</td><td>34.291025757</td><td>3.21165317e-12</td></tr>
+<tr><td>0.002980721742</td><td>1.000400257335338</td><td>+0.13435736</td><td>6.27101293e-04</td><td>6.91020854e-04</td><td>1.712717788295</td><td>34.203826986</td><td>5.76960701e-12</td></tr>
+<tr><td>0.004918471127</td><td>1.000660860484416</td><td>+0.13448754</td><td>6.28126450e-04</td><td>6.93230315e-04</td><td>1.712576744023</td><td>34.089914042</td><td>4.20641300e-12</td></tr>
+<tr><td>0.007437994240</td><td>1.000999936871944</td><td>+0.13457959</td><td>6.27252848e-04</td><td>6.93147909e-04</td><td>1.712394733510</td><td>33.940913256</td><td>5.68434189e-12</td></tr>
+<tr><td>0.010714336075</td><td>1.001441025315766</td><td>+0.13462833</td><td>6.29140569e-04</td><td>6.99973318e-04</td><td>1.712160539570</td><td>33.745677538</td><td>6.33804120e-12</td></tr>
+<tr><td>0.014976021978</td><td>1.002014334408939</td><td>+0.13452636</td><td>6.26959438e-04</td><td>7.03593427e-04</td><td>1.711860755947</td><td>33.489222652</td><td>5.86197757e-12</td></tr>
+<tr><td>0.020516224482</td><td>1.002760771962006</td><td>+0.13473110</td><td>6.18842904e-04</td><td>6.95141727e-04</td><td>1.711476598620</td><td>33.152552333</td><td>6.89226454e-12</td></tr>
+<tr><td>0.027720215809</td><td>1.003744586708176</td><td>+0.13656523</td><td>5.99831698e-04</td><td>6.68310196e-04</td><td>1.710972949910</td><td>32.713874575</td><td>4.36983782e-12</td></tr>
+<tr><td>0.037100612431</td><td>1.005054684056335</td><td>+0.13966332</td><td>5.61996141e-04</td><td>6.19697047e-04</td><td>1.710309628484</td><td>32.135396269</td><td>5.16564569e-12</td></tr>
+<tr><td>0.047530427809</td><td>1.006570433476477</td><td>+0.14532850</td><td>5.18482896e-04</td><td>5.66460747e-04</td><td>1.709563566498</td><td>31.460182170</td><td>2.43005616e-12</td></tr>
+<tr><td>0.057673053356</td><td>1.008039776279351</td><td>+0.14486809</td><td>4.67874252e-04</td><td>5.07277943e-04</td><td>1.708862668332</td><td>30.789161855</td><td>5.46407364e-12</td></tr>
+<tr><td>0.062695200265</td><td>1.008768359117272</td><td>+0.14507398</td><td>4.19370952e-04</td><td>4.55929713e-04</td><td>1.708523415422</td><td>30.450239913</td><td>1.31166189e-11</td></tr>
+<tr><td>0.063103919933</td><td>1.008832233905886</td><td>+0.15628019</td><td>3.94822277e-04</td><td>4.51807169e-04</td><td>1.708498148031</td><td>30.420110966</td><td>3.15623083e-11</td></tr>
+<tr><td>0.063376379395</td><td>1.008880527609067</td><td>+0.17725097</td><td>3.49765966e-04</td><td>4.01175314e-04</td><td>1.708485615371</td><td>30.396845988</td><td>5.54223334e-12</td></tr>
+<tr><td>0.063607996666</td><td>1.008920813367281</td><td>+0.17393244</td><td>1.88154878e-04</td><td>2.04372738e-04</td><td>1.708488603832</td><td>30.376457022</td><td>5.02353714e-12</td></tr>
+<tr><td>0.064033864870</td><td>1.008933595119134</td><td>+0.03001340</td><td>2.93200429e-05</td><td>2.39277491e-04</td><td>1.708521524708</td><td>30.367653797</td><td>9.53548351e-12</td></tr>
+<tr><td>0.064335570365</td><td>1.008926914350700</td><td>-0.02214334</td><td>9.44269294e-05</td><td>2.71715132e-04</td><td>1.708546654000</td><td>30.369158883</td><td>5.65592018e-12</td></tr>
+<tr><td>0.064714075607</td><td>1.008912488405998</td><td>-0.03811293</td><td>1.43494934e-04</td><td>2.91415789e-04</td><td>1.708578405071</td><td>30.374049347</td><td>4.83879603e-12</td></tr>
+<tr><td>0.065205158677</td><td>1.008888497339096</td><td>-0.04885338</td><td>1.83259543e-04</td><td>3.08458772e-04</td><td>1.708619637555</td><td>30.383015825</td><td>4.90274488e-12</td></tr>
+<tr><td>0.065843080227</td><td>1.008852302109160</td><td>-0.05673931</td><td>2.16509913e-04</td><td>3.24004401e-04</td><td>1.708673133978</td><td>30.397155906</td><td>4.64694949e-12</td></tr>
+<tr><td>0.066672077006</td><td>1.008800257642402</td><td>-0.06278006</td><td>2.45232591e-04</td><td>3.38897349e-04</td><td>1.708742524369</td><td>30.417993963</td><td>3.95772304e-12</td></tr>
+<tr><td>0.067749586171</td><td>1.008727505660832</td><td>-0.06751867</td><td>2.70914652e-04</td><td>3.53946454e-04</td><td>1.708832573091</td><td>30.447596143</td><td>4.34141612e-12</td></tr>
+</tbody></table>
+<figure id="bank-fold-arclength-poloidal-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/bank-fold-arclength/poloidal.svg"
+alt="Continued post-turn equilibrium and analytic seed flux contours with both sets of nulls, wall and null close-ups">
+<figcaption>The final accepted state is past the turning point, at drive
+1.008727505660832, fresh residual 4.34142e-12 and converged true under the
+1e-10 acceptance rule (the figure producer independently re-reads it on CPU at
+2.37463e-11). Solid blue is its bank Bell flux field; dashed near-black
+is the analytic seed field at drive 1.0, which supplies an orienting reference,
+rather than an exact solution at the continued drive. The full view and saddle close-up use the same twelve
+physical flux levels between the continued axis and boundary fluxes, excluding
+the axis endpoint. The axis close-up uses one shared union of eight local
+absolute flux levels: four levels within each field's local range, handed
+unchanged to both fields. Their local ranges are disjoint (continued
+35.281–35.435 mWb; analytic seed 35.729–35.874 mWb), so a union resolves both
+near-axis contour families without shifting or independently normalising either
+field. The 10 mm scale bar gives the local spatial scale. Grey is the unit-faithful vessel wall. Solid triangles mark
+both magnetic axes and filled crosses mark both admitted saddles in their own
+series colours. The right-hand panels enlarge the axes above and saddles below;
+the close views sample the same field afresh on finer local grids, and
+all panels use equal spatial aspect, no axes and no grid. The continued state's
+centroid is R = 1.708832573091 m and Z = 30.447596143 mm.</figcaption>
+</figure>
+<p id="bank-fold-arclength-provenance">H200 job 1308438 completed in 18 min
+53 s on 98dci4-gpu-0003 under the required betelgeuse reservation with one
+H200 GPU, four CPUs, 64 GB and
+a one-hour limit. Two fresh processes at revision
+<code>1be09d68a4a6bab99ea2727c57b1a8ba57bb35f9</code> each reproduce the prior
+natural-parameter stall exactly:
+<code>REPLAY {"certified": false, "drive": 1.0089341297149657, "reads": 1253, "updates": 277}</code>.
+They then each retain 22 arclength points from 28 attempted continuation steps
+plus the bootstrap. Their maximum drive difference is 3.33067e-15; their
+largest relative singular-value difference is 1.25044e-10. The scheduler receipt identifies that node, whose recorded inventory is
+<code>Gres=gpu:h200:8</code>. The comparator
+prints <code>AGREE branch=1 fresh_residual=1 spectra=1 centroids=1</code> and
+<code>FOLD_VERDICT turning-point at 1.008933595119134</code>; the job log ends
+<code>EXIT=0</code>. A deliberately modified receipt with a residual of
+1.01e-10 is refused with <code>EXIT=1</code>, proving the receipt guard fires.</p>
+<p>Reproduction source is
+<code>scripts/prototypes/bank_fold_arclength/</code>. Receipts, saved states,
+H200 log, refusal control, sampled figure fields and rendered PNG inspections
+are retained in run <code>r-20261108T111744407818-bank-fold-arclength</code>
+under the crew run root. The input is <code>warm-start-streams.npz</code> from
+run <code>r-20261107T111056270825-bank-warm-start</code>. Table values use
+<code>first.json</code>; the independent process is <code>second.json</code>.
+Only the two SVGs are committed; the larger NPZ state and field receipts stay
+outside git. Both SVGs pass text clipping and collision checks and their
+1400 × 720 PNG renderings were visually inspected.</p>
+<p id="bank-fold-arclength-render-check">The axis-flux rendering check counts
+actual nonempty contour paths from each field and blue field pixels in the
+axis panel; two null markers alone fail it. The delivered global-level drawing
+reproduces zero contour paths for each field and only 60 blue pixels. The
+repair requires at least four contours from each field and at least 1000 blue
+pixels, as well as identical physical level arrays for the pair. The save
+wrapper calls <code>scripts.prototypes.bank_solve_profile.plot.save_checked</code>,
+the existing shared owner of canvas bounds, text collisions and slide sizing;
+it adds only vector compaction and a PNG preview. A runtime check verifies that
+owner is called and that it refuses deliberately clipped text. Parent-source
+revert controls fail both checks; the repaired source passes them. The updated
+SVG was rasterised and visually inspected, including its axis close-up.</p>
+</section>

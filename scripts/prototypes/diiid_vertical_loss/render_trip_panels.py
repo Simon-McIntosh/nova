@@ -113,51 +113,94 @@ def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> None:
         )
 
 
+SOLVED_FLUX_WIDTH = 3.0
+"""Line width [pt] of the solved field, the subject the panel exists to show."""
+
+REFERENCE_FLUX = "#9a9a9a"
+REFERENCE_FLUX_WIDTH = 2.4
+"""Colour and width of the EFIT reference field, drawn beneath the solved one."""
+
 LABEL_CLEARANCE = 1.5
-"""Distance [px] a text box keeps from any drawn vertex it is checked against."""
+"""Distance [px] a text box keeps from any drawn segment it is checked against."""
 
 
-def _drawn_vertices(axes) -> np.ndarray:
-    """Return every drawn data vertex in display coordinates.
+def _drawn_segments(axes) -> list[np.ndarray]:
+    """Return every drawn polyline in display coordinates.
 
     The geometry a label must keep clear of is what the panel actually draws:
     the lines (contours, the bounding surface, the limiter ring, leader lines)
     and the collection paths (any contour set kept as a collection), plus the
-    markers, which carry their position as a one-point line.
+    markers, which carry their position as a one-point line.  Each artist's own
+    transform places its points, so a collection drawn in axes coordinates is
+    compared where it is actually drawn.
     """
 
-    transform = axes.transData.transform
-    blocks = []
+    polylines = []
     for line in axes.lines:
         if not line.get_visible():
             continue
         points = np.asarray(line.get_xydata(), dtype=float)
         if len(points):
-            blocks.append(points)
+            polylines.append(line.get_transform().transform(points))
     for artist in axes.get_children():
         if not isinstance(artist, Collection) or not artist.get_visible():
             continue
+        transform = artist.get_transform().transform
         for path in artist.get_paths():
             vertices = np.asarray(path.vertices, dtype=float)
             if len(vertices):
-                blocks.append(vertices)
-    if not blocks:
-        return np.empty((0, 2))
-    return transform(np.vstack(blocks))
+                polylines.append(transform(vertices))
+    return polylines
+
+
+def _segment_hits_box(start, end, bounds) -> bool:
+    """Return whether the segment crosses the axis-aligned box.
+
+    Liang-Barsky clipping: the parametric interval the segment spends inside
+    the box is intersected with the box's four half-planes, and a segment whose
+    endpoints both lie outside still hits the box whenever that interval is
+    non-empty.
+    """
+
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    low, high = 0.0, 1.0
+    for rate, offset in (
+        (-dx, start[0] - bounds.x0),
+        (dx, bounds.x1 - start[0]),
+        (-dy, start[1] - bounds.y0),
+        (dy, bounds.y1 - start[1]),
+    ):
+        if rate == 0.0:
+            if offset < 0.0:
+                return False
+            continue
+        crossing = offset / rate
+        if rate < 0.0:
+            if crossing > high:
+                return False
+            low = max(low, crossing)
+        else:
+            if crossing < low:
+                return False
+            high = min(high, crossing)
+    return low <= high
 
 
 def _labels_over_data(figure, axes) -> list[str]:
-    """Name every text artist whose box covers a drawn vertex.
+    """Name every text artist whose box a drawn segment passes through.
 
     A panel carries no axes, so a coordinate written over the contours cannot
     be read off a scale: a label belongs in clear space beside the field, never
-    on the data it describes.
+    on the data it describes.  Whole segments are tested rather than their
+    endpoints, so a contour that crosses a label between two vertices lying
+    outside it is caught as well.
     """
 
     figure.canvas.draw()
     renderer = figure.canvas.get_renderer()
-    vertices = _drawn_vertices(axes)
-    if not len(vertices):
+    polylines = _drawn_segments(axes)
+    if not polylines:
         return []
     field = axes.get_window_extent(renderer)
     problems = []
@@ -167,16 +210,21 @@ def _labels_over_data(figure, axes) -> list[str]:
         box = artist.get_window_extent(renderer)
         if not box.overlaps(field):
             continue
-        covered = (
-            (vertices[:, 0] > box.x0 - LABEL_CLEARANCE)
-            & (vertices[:, 0] < box.x1 + LABEL_CLEARANCE)
-            & (vertices[:, 1] > box.y0 - LABEL_CLEARANCE)
-            & (vertices[:, 1] < box.y1 + LABEL_CLEARANCE)
-        )
-        if covered.any():
+        padded = box.padded(LABEL_CLEARANCE)
+        crossed = 0
+        for points in polylines:
+            steps = (
+                list(zip(points[:-1], points[1:], strict=False))
+                if len(points) > 1
+                else [(points[0], points[0])]
+            )
+            for start, end in steps:
+                if _segment_hits_box(start, end, padded):
+                    crossed += 1
+        if crossed:
             problems.append(
-                f"over data: {artist.get_text()[:40]!r} covers "
-                f"{int(covered.sum())} drawn vertices"
+                f"over data: {artist.get_text()[:40]!r} crosses "
+                f"{crossed} drawn segments"
             )
     return problems
 
@@ -361,10 +409,26 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     poloidal_axes(axes)
 
     draw_flux_contours(
-        axes, radius, height, flux, levels, color=DEFAULT_INK.flux_color, wall=wall
+        axes,
+        radius,
+        height,
+        label,
+        levels,
+        color=REFERENCE_FLUX,
+        linewidth=REFERENCE_FLUX_WIDTH,
+        wall=None,
+        zorder=DEFAULT_INK.zorder_flux,
     )
     draw_flux_contours(
-        axes, radius, height, label, levels, color="#9a9a9a", linewidth=1.0, wall=None
+        axes,
+        radius,
+        height,
+        flux,
+        levels,
+        color=DEFAULT_INK.flux_color,
+        linewidth=SOLVED_FLUX_WIDTH,
+        wall=wall,
+        zorder=DEFAULT_INK.zorder_flux + 1,
     )
     _connected_surface(
         axes,
@@ -430,24 +494,44 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
 
     handles = [
         plt.Line2D(
-            [], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"
+            [],
+            [],
+            color=DEFAULT_INK.flux_color,
+            linewidth=SOLVED_FLUX_WIDTH,
+            label="solved flux",
         ),
-        plt.Line2D([], [], color="#9a9a9a", linewidth=2.0, label="EFIT flux"),
+        plt.Line2D(
+            [],
+            [],
+            color=REFERENCE_FLUX,
+            linewidth=REFERENCE_FLUX_WIDTH,
+            label="EFIT flux",
+        ),
         *(
             [
                 plt.Line2D(
-                    [], [], color="#6a4c93", linewidth=2.6, label="bounding surface"
+                    [],
+                    [],
+                    color="#6a4c93",
+                    linewidth=DEFAULT_INK.separatrix_linewidth,
+                    label="bounding surface",
                 )
             ]
             if np.isfinite(bounding)
             else []
         ),
-        plt.Line2D([], [], color="black", linewidth=2.0, label="limiter"),
+        plt.Line2D(
+            [],
+            [],
+            color="black",
+            linewidth=DEFAULT_INK.wall_linewidth,
+            label="limiter",
+        ),
         plt.Line2D(
             [],
             [],
             color="#606060",
-            linewidth=1.6,
+            linewidth=1.0,
             linestyle="--",
             label="EFIT boundary",
         ),

@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-11-09">
 </head>
 <body>
@@ -610,6 +610,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261109T071913971640-icm-sheet-full-mesh-cpu" data-who="reckon-build" data-when="2026-11-09T10:01:57Z">
     <div class="r-comment-body"><p>landed the all-target WEST sheet-tile CPU measurement: clause (1) is not met at the head, 3077 of 11,505,664 entries above 1e-13 with a worst entry of 2.282e-12 at (1692, 2116), every entry finite, in 747.31 s under job 1308778; gate and control are scripts/sheet_tile_cpu_gate/</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261109T111506770922-review-of-icm-sheet-tail-entries-f3993dfc53a0" data-who="reckon-build" data-when="2026-11-09T11:34:33.328Z">
+    <div class="r-comment-body"><p>Independent review of r-20261109T102646983081-icm-sheet-tail-entries at head f3993dfc53a0: scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 20, reuse 18; added_failure_count 0; one non-blocking finding on duplicated batch-test scaffolding in tests/test_sheet_tile.py:418.</p></div>
 </div>
 </section>
 </main>

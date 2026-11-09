@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-09T11:34:33.328Z",
+  "dispatched_at": "2026-11-09T11:19:15Z",
+  "findings": [
+    {
+      "file": "tests/test_sheet_tile.py",
+      "line": 418,
+      "severity": "non-blocking",
+      "text": "the new exterior-cylinder batch test repeats the kernel construction, pair tuple and batch loop of test_flat_cpu_pair_is_independent_of_batch_size (tests/test_sheet_tile.py:392-414) rather than parametrizing that test over (edge, component); the two bodies now have to be edited together whenever the kernel call changes."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to remove the residual cancellation behind the 3077 failing WEST sheet-tile entries, and nova/biot/sheet.py:314 adds the exterior-cylinder series reached from nova/biot/sheet.py:356, with the head arm reporting 0 of 11,505,664 entries above 1e-13 against the base arm's 3077.\nVERDICT done_when: the three clauses are each measured \u2014 docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tail-entries.html records all 3077 failures persisted and classified (cylinder route 3077, BZ per MZ 3077) with witness (target 844, edge 907); tests/test_sheet_tile.py:418 makes that pair batch-independent; after_suite.log records job 1308946 at 702 passed with all entries finite and none above 1e-13, and negative-control.log records the same job's restored pre-fix form failing witness IDs 906 and 907.\nVERDICT write_paths: the node was fenced to nova/biot/sheet.py, tests/test_edge_sheet.py, tests/test_sheet_tile.py, scripts/sheet_tile_cpu_gate, the evidence fragment and a figure directory; the diff against base e914d02e6 changes 7 files and every one is inside that set, the three new scripts/sheet_tile_cpu_gate files sitting under the granted directory.\nVERDICT manifest: read; it declares status complete, the literal gate command, baseline_suite at e914d02e6 with 1 failure of 694 collected, after_suite at bcb3143f with 0 failures of 702, negative-control.log with EXIT=1, the source blob check, and its own scaffolding attributions for two retried ids.\nVERDICT diff: read commit by commit from e914d02e6 to f3993dfc5 \u2014 facd4eb36 persists the residual attribution, 00c126993 derives the endpoint series, 37f20a446 serialises the collector's flags, bcb3143f0 factors the exterior cylinder height endpoints in nova/biot/sheet.py, 664223d4b and f3993dfc5 write the evidence record; 519 insertions and 8 deletions, the production change confined to nova/biot/sheet.py:314-357 and the two selectors at nova/biot/sheet.py:827 and nova/biot/sheet.py:1368.\nCALL_SITES: nova/biot/sheet.py:827 (SheetFlux height-branch selector, reached through sheet_flux/sheet_field at nova/biot/sheet.py:1023 and :1030), nova/biot/sheet.py:1368 (_sheet_end_terms cylinder selector), nova/biot/tiledassembly.py:432 (packed_sheet_field, the tiled production route)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:314 supplies the factored exterior endpoint that nova/biot/sheet.py:356 selects, and the head arm of the same 1696x1696 comparison reports 0 entries above 1e-13 where the base arm reported 3077, the goal's stated defect.\nSCORE evidence: 19\nJUSTIFICATION evidence: after_suite.log carries the revision, tree, literal command and module headers plus 'entries above 1e-13: 0 of 11505664' and EXIT=0, though the after arm runs at bcb3143f0 rather than the reviewed head f3993dfc5, whose two later commits the diff shows touch only docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tail-entries.html.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all 7 changed paths (nova/biot/sheet.py, tests/test_edge_sheet.py, tests/test_sheet_tile.py, three files under scripts/sheet_tile_cpu_gate, and the evidence fragment) lie inside the six fenced paths the dispatch declared.\nSCORE durability: 19\nJUSTIFICATION durability: restoring the pre-fix selectors via scripts/sheet_tile_cpu_gate/restore_cylinder_projection.py reddens tests/test_sheet_tile.py:438 with IDs [906] and [907] in negative-control.log EXIT=1 while that assertion at the head arm passes, and the new high-precision cases at tests/test_edge_sheet.py:828-833 guard the ineligible exterior fallback, though the batch assertion establishes invariance and finiteness rather than the value itself.\nSCORE fit: 20\nJUSTIFICATION fit: nova/biot/sheet.py:349-357 follows the compute-then-xp.where idiom already used at nova/biot/sheet.py:297-302 and the existing _sheet_series_loop helper at nova/biot/sheet.py:209, and no added symbol, comment or path carries a plan, stage or version label.\nSCORE reuse: 18\nJUSTIFICATION reuse: nova/biot/sheet.py:314 extends the capability owner _sheet_cylinder_height at nova/biot/sheet.py:342 and reuses _sheet_series_loop and the complete_kind/complete_pole primitives, but tests/test_sheet_tile.py:418 duplicates the batch scaffolding of tests/test_sheet_tile.py:392 instead of extending it.\nFINDING tests/test_sheet_tile.py:418 non-blocking: the new exterior-cylinder batch test repeats the kernel construction, pair tuple and batch loop of test_flat_cpu_pair_is_independent_of_batch_size at tests/test_sheet_tile.py:392-414 rather than parametrizing that test over (edge, component); the two bodies now have to be edited together whenever the kernel call changes.\n",
+  "review_run_id": "r-20261109T111506770922-review-of-icm-sheet-tail-entries-f3993dfc53a0",
+  "reviewed_base_sha": "e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe",
+  "reviewed_head_sha": "f3993dfc53a0dcc13b4b098d48676ba91a1120c3",
+  "reviewed_run_id": "r-20261109T102646983081-icm-sheet-tail-entries",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T11:42:23.480431+00:00",
+  "total": 116
+}

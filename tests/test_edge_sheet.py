@@ -141,11 +141,10 @@ def test_flat_pancake_form_matches_reference(station, distance):
 @pytest.mark.parametrize("distance", DISTANCES)
 @pytest.mark.parametrize("station", STATIONS)
 def test_flat_pancake_quadrature_matches_reference(station, distance):
-    """The kept surface-current integral against the reference, as it landed.
+    """The independent panelised radial rule against the ring reference.
 
-    ``route="quadrature"`` selects the panelised radial rule that the section
-    shipped before the closed form existed, so the cross-check is held to the
-    reference in its own right as well as through its agreement with eq (26).
+    The radial cross-check is held to the reference in its own right as well
+    as through its agreement with eq (26).
     """
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)

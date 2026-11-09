@@ -39,6 +39,13 @@
     "result": "Viewed the head-rasterised trip-2 panel and the reverted-drawing control side by side: at the base the nine blue levels fuse into a solid block above the limiter and along the bottom edge, carrying no level information; at the head every level is separable in both regions, the legend sits above with no undrawn entry, no label collides or leaves the canvas, and the plasma sits inside the limiter.",
     "revision": "296afe3b03b0e231e05eb2ec24a69697b56f3b15"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-09T07:00:12.302268+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-frame-146-vertical-loss/per-trip-panels.json",

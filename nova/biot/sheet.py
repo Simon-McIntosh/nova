@@ -235,13 +235,14 @@ def _pancake_end_series(xp, gamma, radius, source, regular, regular_height):
 
     The source multipoles converge in source/distance or its inverse; the
     intermediate source range uses the combined pole integrand's near-axis
-    series. All three carry the radial and cubic source scales explicitly.
+    series. The small-source branches factor out source cubed; the outer
+    branch uses a rationalised infinite-radius limit.
     """
     gamma, radius, source = map(xp.asarray, (gamma, radius, source))
     distance = xp.hypot(gamma, radius)
     t2 = (gamma / distance) ** 2
-    inner = source <= 0.5 * distance
-    outer = distance <= 0.5 * source
+    inner = source <= 0.8 * distance
+    outer = distance <= 0.8 * source
     vin = xp.where(inner, source / distance, 0.0)
     vout = xp.where(outer, distance / xp.where(source > 0.0, source, 1.0), 0.0)
     zero = xp.zeros_like(distance)
@@ -270,7 +271,7 @@ def _pancake_end_series(xp, gamma, radius, source, regular, regular_height):
         )
 
     *_, inside, outside, inside_height = _sheet_series_loop(
-        xp, 32, step, (one, 3.0 * one, one, one, vout**2, zero, zero, zero)
+        xp, 96, step, (one, 3.0 * one, one, one, vout**2, zero, zero, zero)
     )
     common = np.pi * (radius / distance) * (gamma / distance)
     inside = -common * vin**3 * inside

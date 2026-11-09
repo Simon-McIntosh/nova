@@ -34,11 +34,11 @@ integral, rather than subtracting their evaluated complete integrals, gives</p>
 Since Pₙ¹(x)=−√(1−x²) Cₙ₋₁³ᐟ²(x), differentiating the source-radius integral
 of the ring potential analytically gives the following two convergent endpoint
 series. Neither series evaluates the cancelling pole sum.</p>
-<pre>For v=s/c ≤ 1/2, t=g/c:
+<pre>For v=s/c ≤ 4/5, t=g/c:
 H = −π (r g/c²) v³ Σₖ≥₀ v²ᵏ C₂ₖ³ᐟ²(0)
                          [C₂ₖ₊₁³ᐟ²(t)/t] / [(2k+2)(2k+3)].
 
-For v=c/s ≤ 1/2:
+For v=c/s ≤ 4/5:
 H = −π sign(g) r/(c+|g|)
     −π (r g/c²) Σₖ≥₁ v²ᵏ C₂ₖ³ᐟ²(0)
                          [C₂ₖ₋₁³ᐟ²(t)/t] / [(2k)(2k+1)].</pre>
@@ -59,7 +59,7 @@ Iₖ(h) = Σⱼ≥₀ hʲ π (2j+2k+2 choose j+k+1)/4ʲ⁺ᵏ⁺¹.</pre>
 lost by subtracting the complete pole integrals. The near-axis series is used
 at h≤1/4. Outside these three regions the geometric ratios are bounded away
 from the cancellation limits and the direct complete-integral identity is
-retained. Each pancake series uses 32 terms per index.</p>
+retained. The source series use 96 terms; the near-axis double series uses 32 terms per index.</p>
 </section>
 <section id="icm-sheet-cancellation-free-sloped">
 <h2>Sloped gamma derivative identity</h2>
@@ -98,7 +98,7 @@ aggregate norm.</p>
 subtracting <code>2 zeta − 2s K/a</code>. The radial Legendre identity is</p>
 <pre>(1/r) ∂r [r c⁻ⁿ⁻¹ Pₙ¹(g/c)] = −n(n+1)c⁻ⁿ⁻² Pₙ₊₁(g/c),
 H_Z = π (s/c)³ Σₖ≥₀ (s/c)²ᵏ C₂ₖ³ᐟ²(0) P₂ₖ₊₂(g/c)/(2k+3).</pre>
-<p>This is evaluated in the same loop as the radial source series at s/c≤1/2.
+<p>This is evaluated in the same loop as the radial source series at s/c≤4/5.
 Writing Eₖ=C₂ₖ³ᐟ²(t) and Oₖ=C₂ₖ₊₁³ᐟ²(t)/t gives
 P₂ₖ₊₂(t)=(t²Oₖ−Eₖ)/(2k+2). The source-cubed factor is explicit here too.</p>
 <p>For an interior cylinder target the height endpoint has a simpler exact
@@ -133,6 +133,14 @@ angular integral minus the complete first kind</td><td>Worst relative error
 elliptic integrals</td><td>Worst relative error 3.067432792451254e−16</td></tr>
 </tbody>
 </table>
+<p>The production source-series range is widened to 4/5, with 96 terms, after
+checking the whole-mesh geometry envelope near the pancake plane. Eight
+additional 70-digit checks at the inner and outer series boundaries have a
+worst relative error of 1.421649639769686e−15. Four of those independent
+values are retained as regression fixtures. A lost process-pool child now
+raises <code>BrokenProcessPool</code> rather than silently losing its work;
+<code>pool-loss-control.log</code> records an intentionally exited child being
+refused.</p>
 <p>The first double-precision angular check was ill-conditioned near the plane;
 a 70-digit elliptic check replaced it as the numerical authority. A direct
 angular power-series reduction of the sloped rational integrand retained a

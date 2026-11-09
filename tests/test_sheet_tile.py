@@ -13,6 +13,7 @@ somewhere to show.
 
 from __future__ import annotations
 
+from concurrent.futures import ProcessPoolExecutor
 from functools import lru_cache
 import importlib.util
 import multiprocessing
@@ -240,8 +241,8 @@ def interaction():
         # inherited mutexes it can never acquire: every worker wedges in
         # futex_wait. Each shard is a fresh interpreter instead.
         context = multiprocessing.get_context("spawn")
-        with context.Pool(WORKERS) as pool:
-            built = pool.map(build_slice, bounds)
+        with ProcessPoolExecutor(max_workers=WORKERS, mp_context=context) as pool:
+            built = list(pool.map(build_slice, bounds))
     tiled = np.concatenate([item[2] for item in built], axis=0)
     reference = np.concatenate([item[3] for item in built], axis=0)
     scale = np.concatenate([item[4] for item in built], axis=0)
@@ -310,7 +311,8 @@ def test_tile_agrees_with_the_unbatched_closed_form(interaction, capsys):
     )
     with capsys.disabled():
         print(
-            f"\nsheet tile: {tiled.shape[0]} targets x {tiled.shape[1] // 2} cells, "
+            f"\nsheet tile: {tiled.shape[0] // 2} targets x "
+            f"{tiled.shape[1] // 2} cells, "
             f"worst entry {worst:.3e} at ({row}, {column}); "
             f"entries above {GATE:.0e}: {counts} of {error.size}; {distribution}"
         )

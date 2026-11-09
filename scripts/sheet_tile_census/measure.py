@@ -39,7 +39,7 @@ def main():
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     device = jax.devices()[0]
-    assert "H200" in device.device_kind, device
+    assert device.platform == "gpu" and "P100" in device.device_kind, device
     root = Path(os.environ["NOVA_COMPILATION_CACHE_ROOT"]).resolve()
     assert str(root) != "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm"
     configuration = tile.configure_production_compilation_cache()
@@ -50,6 +50,8 @@ def main():
         size_m=args.size,
         host=socket.gethostname(),
         device=device.device_kind,
+        platform=device.platform,
+        partition=os.environ["SLURM_JOB_PARTITION"],
         job=os.environ["SLURM_JOB_ID"],
         cache_root=str(root),
         cache_directory=str(directory),
@@ -86,7 +88,7 @@ def main():
             polygons.extend(mesh(region.buffer(0), args.size).polygons)
         cells = Cells(tuple(polygons))
         count = len(polygons)
-        assert count == 1696 if args.size == 0.08 else count > 1696
+        assert count == {0.08: 1696, 0.04: 6493}[args.size], count
         targets = cells.centroids
         edges = tile.cell_edges(polygons)
         plan = tile.TilePlan(128, 128, 256, 16, 48)

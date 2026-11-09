@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --partition=betelgeuse
-#SBATCH --reservation=gpu_0003_grpA
+#SBATCH --partition=titan
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G

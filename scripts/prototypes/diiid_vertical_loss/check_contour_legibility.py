@@ -16,10 +16,17 @@ import argparse
 import json
 from pathlib import Path
 
+import matplotlib.colors
 import matplotlib.image as mpimg
 import numpy as np
 
-SOLVED_FLUX = np.array([0x33, 0x66, 0xCC], dtype=float)
+from nova.media.ink import DEFAULT_INK
+
+SOLVED_FLUX = (
+    np.array(matplotlib.colors.to_rgb(DEFAULT_INK.flux_color), dtype=float) * 255.0
+)
+"""The solved-flux colour, taken from the style every panel is drawn with."""
+
 TOLERANCE = 0.18
 """Fractional RGB distance from the solved-flux colour that still counts as it."""
 
@@ -84,6 +91,13 @@ def main() -> None:
         print(json.dumps(record))
     if arguments.json is not None:
         arguments.json.write_text(json.dumps({"panels": records}, indent=2) + "\n")
+    unmeasured = [record for record in records if record["solved_pixels"] == 0]
+    if unmeasured:
+        names = ", ".join(Path(record["png"]).name for record in unmeasured)
+        raise SystemExit(
+            f"NO SOLVED CONTOUR FOUND: {names} - the check measured nothing, "
+            "so its verdict would describe no line at all"
+        )
     fused = [record for record in records if record["fused_pixels"] > BLOCK_PIXELS]
     if fused:
         names = ", ".join(Path(record["png"]).name for record in fused)

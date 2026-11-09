@@ -13,6 +13,10 @@ import json
 from pathlib import Path
 
 
+PUBLISHED_ROOT = Path("docs/figures")
+"""The only place a receipt may point at: figures published in the repository."""
+
+
 def repository_root(start: Path) -> Path:
     for parent in start.resolve().parents:
         if (parent / ".git").exists():
@@ -33,6 +37,8 @@ def check(receipt: Path) -> list[str]:
         path = Path(pointer)
         if path.is_absolute():
             faults.append(f"{name} names an absolute path: {pointer}")
+        elif PUBLISHED_ROOT not in path.parents:
+            faults.append(f"{name} names a path outside {PUBLISHED_ROOT}: {pointer}")
         elif not (root / path).exists():
             faults.append(f"{name} names a file that does not resolve: {pointer}")
         elif root not in (root / path).resolve().parents:

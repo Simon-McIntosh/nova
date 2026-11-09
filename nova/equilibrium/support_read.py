@@ -165,8 +165,8 @@ class Stencil(NamedTuple):
 
     This is the part of a read that cannot be shared between lanes: it refines
     the state's own stationary points and resolves the cell each occupies.
-    Everything after it is the connected-domain decision, which a caller in the
-    steady state carries from the previous step's :class:`TrackingState`.
+    A caller carries the connected-domain decision from :class:`TrackingState`
+    while refreshing its continuous geometry from these stationary points.
     """
 
     solved: fixed_points.FixedPointResult
@@ -262,9 +262,9 @@ def read(
     cell-local Bell fit of whichever cells they occupy, warm-started from
     ``previous``. The connected-domain decision is rebuilt only when a tracked
     point changes cell or the limited/diverted ownership changes; otherwise the
-    previous decision is carried forward, so the own-node fit over every node
-    (``sampled_coefficient``) and the whole-mesh Bell rebuild
-    (``field_from_jets``) are paid by a rebuild step only.
+    previous discrete decision is carried forward. The own-node coefficients,
+    stationary fluxes, fragment areas, edge intervals and saddle normal form
+    are refreshed from the current state on both branches.
     """
     stencil = stationary_stencil(
         operands,
@@ -303,19 +303,31 @@ def read(
             # becomes a select and evaluates the whole-mesh rebuild for every
             # lane whether or not a lane needs it; :func:`read_batch` avoids
             # that by taking one branch for the whole batch.
-            reading = tracking.reading
+            reading = _rebuilt_reading(
+                operands, stencil, moments, convention, policy, jets, tracking.reading
+            )
         else:
             reading = jax.lax.cond(
                 rebuilt,
                 rebuild,
-                lambda _: tracking.reading,
+                lambda _: _rebuilt_reading(
+                    operands,
+                    stencil,
+                    moments,
+                    convention,
+                    policy,
+                    jets,
+                    tracking.reading,
+                ),
                 None,
             )
         rebuilds = tracking.rebuilds + rebuilt.astype(jnp.int32)
     return _verdict(stencil, reading, rebuilt, rebuilds)
 
 
-def _rebuilt_reading(operands, stencil, moments, convention, policy, jets):
+def _rebuilt_reading(
+    operands, stencil, moments, convention, policy, jets, decision=None
+):
     """The connected-domain decision of one stencil, fitted over the whole mesh."""
     field_jets = nodal_jets(operands, moments) if jets is None else jets
     field = fixed_points.field_from_jets(
@@ -326,8 +338,12 @@ def _rebuilt_reading(operands, stencil, moments, convention, policy, jets):
         bank_moments=jnp.stack(tuple(moments), axis=-1),
         bank_exterior=operands.exterior,
     )
-    return topology.read_at_stationary_points(
-        field, operands.geometry, convention, policy, stencil.solved
+    if decision is None:
+        return topology.read_at_stationary_points(
+            field, operands.geometry, convention, policy, stencil.solved
+        )
+    return topology.refresh_at_stationary_points(
+        field, operands.geometry, convention, policy, stencil.solved, decision
     )
 
 
@@ -344,6 +360,7 @@ def read_batch(
     iterations: int = 12,
     jets=None,
     tracking: TrackingState | None = None,
+    certificate=None,
 ) -> SupportRead:
     """One read over a batch of slices, taking one decision branch for all.
 
@@ -355,6 +372,10 @@ def read_batch(
     A steady batch therefore executes the carry branch alone, where a ``vmap``
     of :func:`read`'s own conditional compiles to a select that evaluates the
     whole-mesh rebuild in every lane.
+
+    Continuous fragment geometry is refreshed even on a carry. ``certificate``
+    optionally tests that result and requests a full fresh read for the batch;
+    only the full read can then supply a terminal solve certificate.
 
     ``rebuilt`` and the ``rebuilds`` counter are batch-uniform: when one lane
     needs the decision rebuilt the batch rebuilds all of them, so every lane
@@ -410,7 +431,31 @@ def read_batch(
         )
 
     def carry(_):
-        return jax.vmap(verdict)(stack, tracking.reading, tracking)
+        if jets is None:
+            reading = jax.vmap(
+                lambda stencil, state, decision: _rebuilt_reading(
+                    operands, stencil, state, convention, policy, None, decision
+                )
+            )(stack, moments, tracking.reading)
+        else:
+            reading = jax.vmap(
+                lambda stencil, state, jet, decision: _rebuilt_reading(
+                    operands, stencil, state, convention, policy, jet, decision
+                )
+            )(stack, moments, jets, tracking.reading)
+        carried = jax.vmap(verdict)(stack, reading, tracking)
+        if certificate is None:
+            return carried
+        return jax.lax.cond(
+            jnp.any(certificate(carried)),
+            lambda _: jax.vmap(
+                lambda stencil, reading, tracked: _verdict(
+                    stencil, reading, jnp.asarray(True), tracked.rebuilds + 1
+                )
+            )(stack, whole_mesh(), tracking),
+            lambda _: carried,
+            None,
+        )
 
     def rebuild(_):
         return jax.vmap(verdict)(stack, whole_mesh(), tracking)
@@ -1607,7 +1652,10 @@ def solve_batch(
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
-    A fresh read certifies every accepted state. Once close to the root, the
+    Intermediate reads carry the discrete connected decision while tracked
+    cells and saddle liveness hold, refreshing all continuous geometry. A trial
+    that appears converged is re-read in full before acceptance; the last
+    allowed update also takes a full read. Once close to the root, the
     booking keeps the cut-cell, normal-form and fragment decisions of the first
     close read while every continuous reading remains current. A changed fresh
     decision or failed contraction releases that lock. Candidate updates halve
@@ -1802,6 +1850,11 @@ def solve_batch(
                 policy,
                 axis_sign,
                 iterations=iterations,
+                tracking=tracking_of(fresh),
+                certificate=lambda reading: (
+                    (magnitude(trial, reading) <= tolerance)
+                    | (jnp.max(steps) + 1 >= max_steps)
+                ),
             )
             return magnitude(trial, trial_read), trial_read.valid, trial_read
 
@@ -1865,14 +1918,38 @@ def solve_batch(
         )
 
     final = jax.lax.while_loop(keep_going, advance, initial)
+    # A search with no valid trial can retain a carried incumbent at the cap.
+    # Return its full fresh read too, even though the lane did not converge.
+    terminal_needed = jnp.any(~final[3] & ~final[1].rebuilt)
+
+    def terminal_read(_):
+        reading = read_batch(
+            operands,
+            cache,
+            final[0],
+            seeds,
+            previous,
+            convention,
+            policy,
+            axis_sign,
+            iterations=iterations,
+        )
+        return reading, magnitude(final[0], reading)
+
+    terminal, terminal_norm = jax.lax.cond(
+        terminal_needed, terminal_read, lambda _: (final[1], final[2]), None
+    )
     return SolveResult(
         final[0],
-        final[1],
-        final[2],
-        final[3],
+        terminal,
+        terminal_norm,
+        final[3]
+        & terminal.valid
+        & jnp.isfinite(terminal_norm)
+        & (terminal_norm <= tolerance),
         final[11],
         final[12],
-        final[13],
+        final[13] + terminal_needed.astype(jnp.int32),
         final[14],
         final[15],
         final[16],

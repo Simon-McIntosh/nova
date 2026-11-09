@@ -482,8 +482,8 @@ class FixedPointResult(NamedTuple):
     solve may continue that local trajectory while still returning the best
     live iterate it has observed.
     ``warmup_refused_proposals`` and ``warmup_first_nonfinite_index`` record
-    each warm-up's refused images and first zero-based refusal index (-1 when
-    none). Active-set solves retain one entry per trip, preceded by the
+    each warm-up's refused proposals and first zero-based nonfinite-image
+    index (-1 when none). Active-set solves retain one entry per trip, preceded by the
     topology-freezing warm-up when that separate pass is required.
     """
 
@@ -3847,9 +3847,10 @@ def _newton_krylov_inner(
             proposed_shadow = promoted_shadow(proposal, previous_shadow)
             proposed_image = mapped_with_shadow(proposal, proposed_shadow)
             proposed_residual = _relative_residual(proposed_image, proposal)
+            finite_image = jnp.all(jnp.isfinite(proposed_image))
             finite_proposal = (
                 jnp.all(jnp.isfinite(proposal))
-                & jnp.all(jnp.isfinite(proposed_image))
+                & finite_image
                 & jnp.isfinite(proposed_residual)
             )
             candidate = jnp.where(finite_proposal, proposal, state)
@@ -3861,7 +3862,7 @@ def _newton_krylov_inner(
                 amplification, state, candidate, finite_proposal
             )
             first_nonfinite_index = jnp.where(
-                ~finite_proposal & (first_nonfinite_index < 0),
+                ~finite_image & (first_nonfinite_index < 0),
                 index,
                 first_nonfinite_index,
             )

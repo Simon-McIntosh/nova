@@ -103,11 +103,7 @@ def row(args):
                     self.last_warmup :
                 ]
                 self.last_warmup += len(stages)
-                bad = [
-                    i
-                    for i, r in enumerate(stages)
-                    if not r["finite_image"] or not np.isfinite(r["residual"])
-                ]
+                bad = [i for i, r in enumerate(stages) if not r["finite_image"]]
                 history.append(
                     dict(
                         refused=0,

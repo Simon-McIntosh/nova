@@ -102,7 +102,7 @@ def test_finite_image_with_nonfinite_residual_is_refused():
 
     np.testing.assert_array_equal(result.trajectory_state, [5e307])
     np.testing.assert_array_equal(result.warmup_refused_proposals, [1])
-    np.testing.assert_array_equal(result.warmup_first_nonfinite_index, [0])
+    np.testing.assert_array_equal(result.warmup_first_nonfinite_index, [-1])
 
 
 def test_active_set_history_keeps_each_warmup_refusal():

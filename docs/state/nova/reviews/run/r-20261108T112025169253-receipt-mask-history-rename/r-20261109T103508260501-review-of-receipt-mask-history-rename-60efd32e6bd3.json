@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request",
+    "nova/equilibrium/forward.py:receipt_history_fields",
+    "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+    "nova/equilibrium/reduced_newton.py:solve_reduced_newton",
+    "nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton",
+    "apps/playable/session.py:equilibrium_frame_receipt",
+    "scripts/labeller_batch/shard.py:_forward_receipt"
+  ],
+  "completed_at": "2026-11-09T10:47:11.313Z",
+  "dispatched_at": "2026-11-09T10:36:32Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/reduced_newton.py",
+      "line": "336",
+      "severity": "blocking",
+      "text": "blocking: ReducedNewtonResult.active_set_support_cells is added at the reviewed head, but this file appears in neither the brief's write paths, the run's orientation_write_paths, nor the manifest's changed_paths, so the delivered record under-reports a file the diff changes and a coordinator auditing the fence from the manifest will not see it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "non-blocking: the after_suite arm for the twelve covering modules is recorded at revision 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 rather than the reviewed head 60efd32e6bd3970cfa830657894724dfbdc313cd, so \"0 added failures at head\" is measured against a superseded revision for every file except tests/test_reduced_newton_constraints.py."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite and after_suite carry `<node id>` and `<n>` placeholders in their `command` values, so neither arm is re-runnable from the record and a promotion gate reading that line cannot rebuild the receipt."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: failure_attribution calls transport_coupled_window's \"two timeout errors ... identical ids\", but base-arm.log.test_transport_coupled_window records three ERROR ids and head-arm.log.test_transport_coupled_window records two, so the parity claim is imprecise even though the zero-added-failure conclusion holds."
+    },
+    {
+      "file": "scripts/labeller_batch/shard.py",
+      "line": "357",
+      "severity": "non-blocking",
+      "text": "non-blocking: the receipt publishes an empty support history under the comment \"A reduced result reports the change history but no per-trip support population\", which 60efd32e6 made false: reduced_newton.py:336 now carries that history and shard.py builds its FixedPointResult at line 320-334 from the very result that holds it, so the data is discarded one line before it is needed."
+    },
+    {
+      "file": "tests/test_receipt_support_count.py",
+      "line": "248",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert int(receipt.support_cell_count[-1]) == 345` and line 249 compare the publication's output against the (345, 345) and (9, 0) values the test itself passed in at lines 242-243, so the pair fails only on a swap or a dropped field and not on a wrong count; durability does not rest on it, because lines 119 and 140 measure the population against labels the test authored."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read 3294d101740f2939900ad7c3b4f168258bdf49ae, 0b810e963b856f9e74b43386cee2990b7247249c, 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 and 60efd32e6bd3970cfa830657894724dfbdc313cd against 708079d2e5c785d2d2b6fe67be128632c9852043; they rename the receipt field, thread a per-trip axis-connected population through the fixed-point carry and both reduced construction sites, migrate eight constructors/readers plus the RECEIPT_FIELDS pin, add five tests, and append a dated correction to the stopping-rule fragment with the original text intact.",
+    "done_when": "the done_when names every reader, a positive-support-zero-change test with a logged red control, an appended correction, and 0 added failures; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log records `10 passed in 27.04s` with `EXIT=0` at 60efd32e6, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/negative-control.log records `3 failed in 27.84s` with `EXIT=1` under the declared swap, and the per-id arms (/home/ITER/mcintos/.cache/nova-receipt-mask-arm/collated-base.txt and collated-head.txt) carry the same 20 (id, exit) pairs with the same 2 failing ids.",
+    "goal": "the source goal is \"publish the receipt mask history as changed_mask_entries beside a separate support_cell_count\"; nova/equilibrium/solve_request.py:733-734 renames the field with no alias and adds the population, and nova/equilibrium/forward.py:2765 fills both through receipt_history_fields, leaving only the two DIII-D prototype scripts (scripts/prototypes/diiid_forward_convergence/measure_branches.py:351, scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102) still reading receipt.mask_history, both declared under outside_scope.",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md records both arms, the negative control, the outside_scope handoff and rubric lines for every dimension, but its baseline_suite/after_suite `command` values still carry `<node id>` and `<n>` placeholders, its changed_paths omits nova/equilibrium/reduced_newton.py, and its failure_attribution calls transport_coupled_window's errors \"identical ids\" where the base log records three ids and the head two.",
+    "write_paths": "the brief's six paths plus the widen recorded in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/resume-1-advice.txt authorise fifteen files, and fifteen of the sixteen changed files lie inside them; nova/equilibrium/reduced_newton.py:336 is changed at 60efd32e6 and appears in neither the brief, the run's orientation_write_paths, nor the manifest's changed_paths."
+  },
+  "justifications": {
+    "durability": "tests/test_receipt_support_count.py:119 fixes the expected population at the five CORE labels the test itself authors and line 140 asserts [1,1] against one CORE beside three non-core labels, both of which redden under the declared swap (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/negative-control.log); line 248 instead compares the publication back to the 345 the test supplied, which only catches a swap.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log ends `EXIT=0` after `10 passed in 27.04s` at revision 60efd32e6 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/negative-control.log ends `EXIT=1` after `3 failed`, but the twelve-module head arm is recorded at 4e400eba8 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:21-22 keeps `<node id>` in the arm command.",
+    "fit": "nova/equilibrium/forward.py:207 and nova/equilibrium/fixed_point.py:4652 follow the surrounding module idiom and introduce no forbidden name, although scripts/labeller_batch/shard.py:355 still states that a reduced result reports no per-trip support population after 60efd32e6 gave the reduced result one.",
+    "goal_fidelity": "nova/equilibrium/solve_request.py:733-734 renames the field with no alias and adds support_cell_count, and nova/equilibrium/forward.py:2778-2779 publishes both, but scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102 still read receipt.mask_history and raise AttributeError at the head.",
+    "reuse": "nova/equilibrium/forward.py:207 creates the route-selection owner but apps/playable/session.py:419-426, edited in the same diff, keeps a getattr-based duplicate of that selection, and nova/equilibrium/fixed_point.py:4652 re-derives the predicate nova/equilibrium/domain.py:88 already owns as DomainMasks.core.",
+    "scope_discipline": "fifteen of the sixteen files in the diff are inside the authorised set, while nova/equilibrium/reduced_newton.py:336 was added at 60efd32e6 with no entry in the brief's write paths, the run's orientation_write_paths, or the manifest's changed_paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:12."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is \"publish the receipt mask history as changed_mask_entries beside a separate support_cell_count\"; nova/equilibrium/solve_request.py:733-734 renames the field with no alias and adds the population, and nova/equilibrium/forward.py:2765 fills both through receipt_history_fields, leaving only the two DIII-D prototype scripts (scripts/prototypes/diiid_forward_convergence/measure_branches.py:351, scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102) still reading receipt.mask_history, both declared under outside_scope.\nVERDICT done_when: the done_when names every reader, a positive-support-zero-change test with a logged red control, an appended correction, and 0 added failures; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log records `10 passed in 27.04s` with `EXIT=0` at 60efd32e6, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/negative-control.log records `3 failed in 27.84s` with `EXIT=1` under the declared swap, and the per-id arms (/home/ITER/mcintos/.cache/nova-receipt-mask-arm/collated-base.txt and collated-head.txt) carry the same 20 (id, exit) pairs with the same 2 failing ids.\nVERDICT write_paths: the brief's six paths plus the widen recorded in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/resume-1-advice.txt authorise fifteen files, and fifteen of the sixteen changed files lie inside them; nova/equilibrium/reduced_newton.py:336 is changed at 60efd32e6 and appears in neither the brief, the run's orientation_write_paths, nor the manifest's changed_paths.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md records both arms, the negative control, the outside_scope handoff and rubric lines for every dimension, but its baseline_suite/after_suite `command` values still carry `<node id>` and `<n>` placeholders, its changed_paths omits nova/equilibrium/reduced_newton.py, and its failure_attribution calls transport_coupled_window's errors \"identical ids\" where the base log records three ids and the head two.\nVERDICT diff: read 3294d101740f2939900ad7c3b4f168258bdf49ae, 0b810e963b856f9e74b43386cee2990b7247249c, 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 and 60efd32e6bd3970cfa830657894724dfbdc313cd against 708079d2e5c785d2d2b6fe67be128632c9852043; they rename the receipt field, thread a per-trip axis-connected population through the fixed-point carry and both reduced construction sites, migrate eight constructors/readers plus the RECEIPT_FIELDS pin, add five tests, and append a dated correction to the stopping-rule fragment with the original text intact.\n\nCALL_SITES: nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request, nova/equilibrium/forward.py:receipt_history_fields, nova/equilibrium/fixed_point.py:_active_set_newton_krylov, nova/equilibrium/reduced_newton.py:solve_reduced_newton, nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton, apps/playable/session.py:equilibrium_frame_receipt, scripts/labeller_batch/shard.py:_forward_receipt\n\nSCORE goal_fidelity: 17\nSCORE evidence: 15\nSCORE scope_discipline: 14\nSCORE durability: 18\nSCORE fit: 17\nSCORE reuse: 15\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve_request.py:733-734 renames the field with no alias and adds support_cell_count, and nova/equilibrium/forward.py:2778-2779 publishes both, but scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102 still read receipt.mask_history and raise AttributeError at the head.\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log ends `EXIT=0` after `10 passed in 27.04s` at revision 60efd32e6 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/negative-control.log ends `EXIT=1` after `3 failed`, but the twelve-module head arm is recorded at 4e400eba8 and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:21-22 keeps `<node id>` in the arm command.\nJUSTIFICATION scope_discipline: fifteen of the sixteen files in the diff are inside the authorised set, while nova/equilibrium/reduced_newton.py:336 was added at 60efd32e6 with no entry in the brief's write paths, the run's orientation_write_paths, or the manifest's changed_paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:12.\nJUSTIFICATION durability: tests/test_receipt_support_count.py:119 fixes the expected population at the five CORE labels the test itself authors and line 140 asserts [1,1] against one CORE beside three non-core labels, both of which redden under the declared swap (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/negative-control.log); line 248 instead compares the publication back to the 345 the test supplied, which only catches a swap.\nJUSTIFICATION fit: nova/equilibrium/forward.py:207 and nova/equilibrium/fixed_point.py:4652 follow the surrounding module idiom and introduce no forbidden name, although scripts/labeller_batch/shard.py:355 still states that a reduced result reports no per-trip support population after 60efd32e6 gave the reduced result one.\nJUSTIFICATION reuse: nova/equilibrium/forward.py:207 creates the route-selection owner but apps/playable/session.py:419-426, edited in the same diff, keeps a getattr-based duplicate of that selection, and nova/equilibrium/fixed_point.py:4652 re-derives the predicate nova/equilibrium/domain.py:88 already owns as DomainMasks.core.\n\nFINDING nova/equilibrium/reduced_newton.py:336 blocking: ReducedNewtonResult.active_set_support_cells is added at the reviewed head, but this file appears in neither the brief's write paths, the run's orientation_write_paths, nor the manifest's changed_paths, so the delivered record under-reports a file the diff changes and a coordinator auditing the fence from the manifest will not see it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:22 non-blocking: the after_suite arm for the twelve covering modules is recorded at revision 4e400eba8cc0bc6fdb19e94cd239191c2bf071c6 rather than the reviewed head 60efd32e6bd3970cfa830657894724dfbdc313cd, so \"0 added failures at head\" is measured against a superseded revision for every file except tests/test_reduced_newton_constraints.py.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:21 non-blocking: baseline_suite and after_suite carry `<node id>` and `<n>` placeholders in their `command` values, so neither arm is re-runnable from the record and a promotion gate reading that line cannot rebuild the receipt.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:23 non-blocking: failure_attribution calls transport_coupled_window's \"two timeout errors ... identical ids\", but base-arm.log.test_transport_coupled_window records three ERROR ids and head-arm.log.test_transport_coupled_window records two, so the parity claim is imprecise even though the zero-added-failure conclusion holds.\nFINDING scripts/labeller_batch/shard.py:357 non-blocking: the receipt publishes an empty support history under the comment \"A reduced result reports the change history but no per-trip support population\", which 60efd32e6 made false: reduced_newton.py:336 now carries that history and shard.py builds its FixedPointResult at line 320-334 from the very result that holds it, so the data is discarded one line before it is needed.\nFINDING tests/test_receipt_support_count.py:248 non-blocking: `assert int(receipt.support_cell_count[-1]) == 345` and line 249 compare the publication's output against the (345, 345) and (9, 0) values the test itself passed in at lines 242-243, so the pair fails only on a swap or a dropped field and not on a wrong count; durability does not rest on it, because lines 119 and 140 measure the population against labels the test authored.\n",
+  "review_run_id": "r-20261109T103508260501-review-of-receipt-mask-history-rename-60efd32e6bd3",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_commits": [
+    "3294d101740f2939900ad7c3b4f168258bdf49ae",
+    "0b810e963b856f9e74b43386cee2990b7247249c",
+    "4e400eba8cc0bc6fdb19e94cd239191c2bf071c6",
+    "60efd32e6bd3970cfa830657894724dfbdc313cd"
+  ],
+  "reviewed_head_sha": "60efd32e6bd3970cfa830657894724dfbdc313cd",
+  "reviewed_run_id": "r-20261108T112025169253-receipt-mask-history-rename",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T10:55:24.955621+00:00",
+  "total": 96
+}

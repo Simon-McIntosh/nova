@@ -18,24 +18,19 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
 import jax.numpy as jnp
 import numpy as np
 
+from nova.database.content_store import sha256_bytes
 from scripts.prototypes.bank_route_rows.measure import limited_contact
 
 BOUNDARY_BUDGET = 1e-4
 HERE = Path(__file__).resolve().parent
 ARCHIVED = HERE / "archived"
 CHECKED_RATIO_TOLERANCE = 1e-9
-
-
-def digest(path):
-    """Return the archive's sha256, so a figure's inputs are identified."""
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def report(state_path):
@@ -61,7 +56,7 @@ def report(state_path):
     boundary_error = abs(route_flux - contact_flux)
     return {
         "state": Path(state_path).name,
-        "state_sha256": digest(state_path),
+        "state_sha256": sha256_bytes(Path(state_path).read_bytes()),
         "wall_points": int(len(wall)),
         "contact_rz_m": contact.tolist(),
         "contact_flux": contact_flux,
@@ -79,7 +74,7 @@ def report(state_path):
     }
 
 
-def check():
+def check(output=None):
     """Re-derive both rows from the committed archives and assert the record."""
     record = ARCHIVED / "boundary-clause.json"
     if not record.exists():
@@ -111,6 +106,11 @@ def check():
             failures.append(f"{want['state']}: outside the {BOUNDARY_BUDGET} budget")
     for row in derived:
         print("BOUNDARY " + json.dumps(row, default=float))
+    if output is not None:
+        # A caller that asked for the derived rows gets them, so a gate can
+        # compare the record it just asserted against the file it writes.
+        Path(output).parent.mkdir(parents=True, exist_ok=True)
+        Path(output).write_text(json.dumps(derived, indent=2) + "\n")
     for failure in failures:
         print("CHECK_FAIL " + failure)
     print("CHECK=" + ("PASS" if not failures else "FAIL"))
@@ -124,7 +124,7 @@ def main():
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     if args.check:
-        raise SystemExit(check())
+        raise SystemExit(check(args.output))
     if not args.state:
         parser.error("--state is required unless --check is given")
     rows = [report(path) for path in args.state]
@@ -132,7 +132,11 @@ def main():
         args.output.write_text(json.dumps(rows, indent=2) + "\n")
     for row in rows:
         print("BOUNDARY " + json.dumps(row, default=float))
-    print("ALL_PASS=" + str(all(row["passes"] for row in rows)))
+    passed = all(row["passes"] for row in rows)
+    print("ALL_PASS=" + str(passed))
+    # A row outside its budget has to fail the gate it is run as, not only say
+    # so in a line of output.
+    raise SystemExit(0 if passed else 1)
 
 
 if __name__ == "__main__":

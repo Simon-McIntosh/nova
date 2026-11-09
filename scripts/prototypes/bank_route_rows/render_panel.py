@@ -136,8 +136,10 @@ def render(state_path, row_path, output_path, preview_path, title, cells=None):
     )
     reference.set_linestyle((0, (4, 2.6)))
     # A white casing keeps the dashes legible where they run along the route.
+    # It stays inside the route line's own width so the route still reads as an
+    # unbroken line beneath the oracle rather than being cut by the casing.
     reference.set_path_effects(
-        [patheffects.withStroke(linewidth=3.4, foreground="white")]
+        [patheffects.withStroke(linewidth=2.6, foreground="white")]
     )
     draw_wall(axes, wall[:, 0], wall[:, 1])
     oracle = row["oracle"]
@@ -146,6 +148,11 @@ def render(state_path, row_path, output_path, preview_path, title, cells=None):
     # contact, which must not be drawn with the saddle marker.
     boundary_marker = "X" if saddle is not None else "s"
     boundary_label = "X-point" if saddle is not None else "boundary"
+    # The route's limiter contact needs a marker of its own: a limited row's
+    # boundary point lies on the wall, where the null filter drops it as
+    # neither interior nor a strike point, so it is drawn explicitly below and
+    # must be told apart from the oracle's hollow square where the two coincide.
+    route_marker = boundary_marker if saddle is not None else "D"
     oracle_style = DEFAULT_INK.variant(
         axis_color=NEUTRAL,
         xpoint_color=NEUTRAL,
@@ -171,6 +178,20 @@ def render(state_path, row_path, output_path, preview_path, title, cells=None):
     draw_nulls(
         axes, solved_roots[0], solved_roots[1:], style=solved_style, contain=wall
     )
+    if saddle is None and len(solved_roots) > 1:
+        # Drawn last and filled, so it stays visible on top of the oracle's
+        # hollow square even where the two contacts are the same point.
+        axes.plot(
+            solved_roots[1][0],
+            solved_roots[1][1],
+            marker=route_marker,
+            markersize=13,
+            markerfacecolor=feature,
+            markeredgecolor="white",
+            markeredgewidth=1.6,
+            linestyle="none",
+            zorder=10,
+        )
     axes.set_aspect("equal")
     lower, upper = np.min(wall, axis=0), np.max(wall, axis=0)
     margin = 0.04 * (upper - lower)
@@ -198,8 +219,9 @@ def render(state_path, row_path, output_path, preview_path, title, cells=None):
             [],
             [],
             color=feature,
-            marker=boundary_marker,
+            marker=route_marker,
             markersize=10,
+            markerfacecolor=feature,
             linestyle="none",
             label=f"fast {boundary_label}",
         ),

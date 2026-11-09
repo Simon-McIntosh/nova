@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/bank_route_rows/run.sh:11"
+  ],
+  "completed_at": "2026-11-09T05:57:48.470Z",
+  "dispatched_at": "2026-11-09T05:31:47Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_route_rows/boundary_gap.py",
+      "line": 135,
+      "severity": "non-blocking",
+      "summary": "the recompute path still prints ALL_PASS and returns 0, so the --state invocation the run's manifest records first presents a failing row as a green gate; only the new --check path carries the verdict into an exit status"
+    },
+    {
+      "file": "scripts/prototypes/bank_route_rows/boundary_gap.py",
+      "line": 126,
+      "severity": "non-blocking",
+      "summary": "--output is accepted and silently ignored under --check, so the recorded gate command names results/boundary-check.json and no such file was written"
+    },
+    {
+      "file": "scripts/prototypes/bank_route_rows/boundary_gap.py",
+      "line": 36,
+      "severity": "non-blocking",
+      "summary": "digest() re-implements the file-hash capability nova already owns at nova/database/content_store.py:45 sha256_bytes, which sibling prototypes (scripts/prototypes/read_route/jets.py:23) import rather than copy"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/manifest.md",
+      "line": 12,
+      "severity": "non-blocking",
+      "summary": "the tests line carries two commands and the second is a template with unsubstituted <worktree> and <run> placeholders, which the promotion gate refuses; promotion therefore reads the fail-open --state command as this node's gate"
+    }
+  ],
+  "plan": "nova:sub-millisecond-forward-path",
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is the fast route's convergence and analytic-oracle precision on the limited and diverted certificate rows at 550 and 2000 cells, one poloidal panel per 550-cell row, and a fragment carrying the table; the three commits read here (8a6ba070a, 7c718db4e, bb59f06a7) serve that goal by making the limited rows' boundary clause re-derivable from the repository: scripts/prototypes/bank_route_rows/archived/ holds both converged states with their sha256 digests, archived/boundary-clause.json holds the clause, and boundary_gap.py:87 check() re-derives and asserts it.\nVERDICT done_when: the brief's done_when asks convergence, updates, residual, axis/X-point/boundary ratios against the locked budget, the present route's status, the lattice X-point gap, the unpromoted flux gap, the asymptote difference and one panel per 550-cell row; the manifest declares the budget 1e-4 of span which matches decision precision-budget (read-1mm-flux-1e-4), the committed record scores 5.372719e-6 and 4.567102e-11 against it, and the gate log results/boundary-check.log ends CHECK=PASS and EXIT=0 at REVISION=7c718db4e, so the measure the increment claims is asserted rather than reported.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_route_rows, docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html and docs/figures/sub-millisecond-forward-path/bank-route-rows; `git diff --name-only 47be40341c62 bb59f06a74af` lists exactly five paths, every one inside those roots, with no product code, no test file and no figure touched.\nVERDICT manifest: read; it records the boundary-clause and boundary-check gate commands and names results/boundary-check.log, whose header carries REVISION=7c718db4e, TREE and MODULE resolving nova/equilibrium/support_read.py in the node's own worktree, and whose last line is EXIT=0 below CHECK=PASS; its tests line nevertheless holds two commands with unsubstituted <worktree>/<run> placeholders, which promotion refuses.\nVERDICT diff: read commit by commit from 47be40341c62 to bb59f06a74af \u2014 8a6ba070a is the code change (boundary_gap.py only: +69/-10, adding check(), digest(), state_sha256 and state recorded as a bare name, and --check/optional --output), 7c718db4e commits the two npz archives and the recorded clause, and bb59f06a7 is docs-only, adding the reproducibility paragraph to the fragment; total +149/-10 across five files, and 8a6ba070a's body claims the archives are committed while the commit that commits them is 7c718db4e.\nCALL_SITES: run.sh:11 is the only invoker of the module (BANK_ROUTE_MODULE=scripts.prototypes.bank_route_rows.boundary_gap), and the fragment documents the --check command; no product runtime code under nova/ reaches boundary_gap.py.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_route_rows/boundary_gap.py:87 check() turns the limited boundary clause from a run-directory artifact into a repository-reproducible assertion, which is what the node's evidence paragraph in docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:112-133 now claims.\nSCORE evidence: 18\nJUSTIFICATION evidence: results/boundary-check.log:1 names REVISION=7c718db4e, the module path and the command, and its final two lines read CHECK=PASS and EXIT=0; I corroborated the fragment's figures independently from the committed archives \u2014 limited-550-oracle.npz residual_sup 9.640644e-11 and limited-2000-oracle.npz 6.639311e-11 against the 9.64e-11 and 6.64e-11 the fragment states, and analytic_roots[0] at (6.2, 0) giving the 49.941 Wb span.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five paths in `git diff --name-only 47be40341c62 bb59f06a74af` (scripts/prototypes/bank_route_rows/boundary_gap.py, archived/boundary-clause.json, the two archived npz states, and docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html) sit inside the manifest's three declared write roots.\nSCORE durability: 16\nJUSTIFICATION durability: check() at scripts/prototypes/bank_route_rows/boundary_gap.py:87 compares re-derived contact_rz_m, flux_span, boundary_error and boundary_ratio against literals read from archived/boundary-clause.json, so reinstating the vertex-argmax reference moves limited_contact and reddens the check with exit 1 \u2014 but nothing runs it automatically, and re-running the recompute with --output archived/boundary-clause.json silently re-baselines the guard.\nSCORE fit: 18\nJUSTIFICATION fit: boundary_gap.py:16-33 keeps the sibling prototype layout (configure_dtypes first under `# ruff: noqa: E402`, module-level path constants, argparse plus a JSON writer) and names by mechanism (ARCHIVED, CHECKED_RATIO_TOLERANCE, check); a scan of the added lines for plan, ticket and version labels returned nothing.\nSCORE reuse: 5\nJUSTIFICATION reuse: digest() at scripts/prototypes/bank_route_rows/boundary_gap.py:36 is `hashlib.sha256(Path(path).read_bytes()).hexdigest()`, duplicating the repository's owner nova/database/content_store.py:45 sha256_bytes, which scripts/prototypes/read_route/jets.py:23 and scripts/prototypes/support/certificate_fixtures.py:51 import instead of copying; the change otherwise extends owners correctly (limited_contact from measure.py, fixture._analytic_inputs from tests/equilibrium/test_topology_read.py).\nFINDING scripts/prototypes/bank_route_rows/boundary_gap.py:135 non-blocking: main() prints ALL_PASS and returns without an exit status on the --state path, so a row that fails the budget still reads EXIT=0 through run.sh; the new --check path is the only one that carries the verdict into the exit code.\nFINDING scripts/prototypes/bank_route_rows/boundary_gap.py:126 non-blocking: --check returns before --output is used, so the gate command recorded in the manifest names results/boundary-check.json and that file does not exist in results/; a reader looking for the named receipt finds only the log.\nFINDING scripts/prototypes/bank_route_rows/boundary_gap.py:36 non-blocking: digest() duplicates sha256_bytes from nova/database/content_store.py:45 rather than importing it as the sibling prototypes do.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/manifest.md:12 non-blocking: the tests line holds two commands, the second a template with <worktree> and <run> placeholders; promotion refuses a placeholder command and falls back to the first, which is the fail-open --state invocation.\n",
+  "review_run_id": "r-20261109T052818401950-review-of-bank-route-rows-bb59f06a74af",
+  "reviewed_base_sha": "47be40341c62059f957c4a640c9d7e81cfc27528",
+  "reviewed_head_sha": "bb59f06a74af8e0731c7f1ac0e5f4f43fac9c1da",
+  "reviewed_run_id": "r-20261107T111216113482-bank-route-rows",
+  "reviewed_run_node": "bank-route-rows",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "section": "3",
+  "status": "parsed",
+  "suite_arms_note": "the reviewed run carries no baseline_suite/after_suite arms: its brief declares it a measurement node that changes no product code and no tests, and `git diff --name-only 47be40341c62 bb59f06a74af` lists only scripts/prototypes/bank_route_rows/{boundary_gap.py,archived/boundary-clause.json,archived/limited-550-oracle.npz,archived/limited-2000-oracle.npz} and docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html, so no suite scope exists to pair; added_failure_count is a zero over that empty scope, not an unreported pair",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T06:21:15.885656+00:00",
+  "total": 95
+}

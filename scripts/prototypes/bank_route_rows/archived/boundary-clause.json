@@ -1,0 +1,56 @@
+[
+  {
+    "state": "limited-550-oracle.npz",
+    "state_sha256": "74ee9e08d05b1b50c476565134dfdf40f1196f34643f2b95307ea7628ce2fe98",
+    "wall_points": 121,
+    "contact_rz_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "contact_flux": 2.2322358387255243e-14,
+    "axis_rz_m": [
+      6.2,
+      0.0
+    ],
+    "axis_flux": 49.94072179477446,
+    "flux_span": 49.94072179477444,
+    "route_boundary_rz_m": [
+      7.801395789307387,
+      -0.008344485542996827
+    ],
+    "route_boundary_flux": -0.00026831746767926035,
+    "route_boundary_flux_basis": "analytic flux at the route's own boundary point",
+    "separation_m": 0.008344485542996827,
+    "boundary_error": 0.0002683174677015827,
+    "boundary_ratio": 5.372719056889125e-06,
+    "budget": 0.0001,
+    "passes": true
+  },
+  {
+    "state": "limited-2000-oracle.npz",
+    "state_sha256": "42a849be880e0f048ad9a5ea9d2b51335f9c8ca0131ce106b96023e65c89bcc4",
+    "wall_points": 121,
+    "contact_rz_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "contact_flux": 2.2322358387255243e-14,
+    "axis_rz_m": [
+      6.2,
+      0.0
+    ],
+    "axis_flux": 49.94072179477446,
+    "flux_span": 49.94072179477444,
+    "route_boundary_rz_m": [
+      7.801395789307387,
+      2.4328921917643465e-05
+    ],
+    "route_boundary_flux": -2.2808214681506993e-09,
+    "route_boundary_flux_basis": "analytic flux at the route's own boundary point",
+    "separation_m": 2.4328921917643465e-05,
+    "boundary_error": 2.2808437905090865e-09,
+    "boundary_ratio": 4.567102173416611e-11,
+    "budget": 0.0001,
+    "passes": true
+  }
+]

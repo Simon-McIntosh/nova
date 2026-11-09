@@ -141,11 +141,10 @@ def test_flat_pancake_form_matches_reference(station, distance):
 @pytest.mark.parametrize("distance", DISTANCES)
 @pytest.mark.parametrize("station", STATIONS)
 def test_flat_pancake_quadrature_matches_reference(station, distance):
-    """The kept surface-current integral against the reference, as it landed.
+    """The independent panelised radial rule against the ring reference.
 
-    ``route="quadrature"`` selects the panelised radial rule that the section
-    shipped before the closed form existed, so the cross-check is held to the
-    reference in its own right as well as through its agreement with eq (26).
+    The radial cross-check is held to the reference in its own right as well
+    as through its agreement with eq (26).
     """
     start, end, targets = frame(0.0)
     target = next(t for t in targets if t.distance == distance and t.station == station)
@@ -717,3 +716,120 @@ def test_grid_matches_reference(angle, r, z):
     assert np.isfinite(flux)
     assert abs(flux - converged.psi) <= TOLERANCE * abs(converged.psi)
     assert_field_matches(field, (converged.br, converged.bz))
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "expected"),
+    (
+        (4.4364, 0.09, 0.53, -5.313724027690613e-05),
+        (1.0, 1.0, 0.1, -0.0002774170152049587),
+        (0.001, 1.0, 0.1, -1.5886497294809025e-06),
+        (1.0, 1.0, 4.0, -1.1576070212467167),
+        (0.001, 1.0, 4.0, -3.1382961822532587),
+        (1.0, 0.09, 1.0, -0.04961699534410705),
+        (4.4, 0.09, 2.0, -0.002274859438413864),
+        (4.4, 0.09, 5.0, -0.013589152235584235),
+        (0.9999499987499375, 0.01, 0.799999999999, -0.0038294326793218585),
+        (0.9999499987499375, 0.01, 1.25000000001, -0.007479483847414431),
+        (
+            0.0010000000000143778,
+            0.999999499999875,
+            0.799999999999,
+            -0.002480158050361592,
+        ),
+        (0.0010000000000143778, 0.999999499999875, 1.25000000001, -3.134503422810057),
+    ),
+)
+def test_pancake_endpoint_series_matches_high_precision(
+    gamma, radius, source, expected
+):
+    """Endpoint fields against 70-digit elliptic values, including near the plane.
+
+    The NaN fallback makes this assert that an analytic series actually ran.
+    The constants were evaluated from the two complete poles and first kind
+    at high precision, independently of the source and near-axis series.
+    """
+    got, _ = sheet_module._pancake_end_series(np, gamma, radius, source, np.nan, np.nan)
+    assert np.isfinite(got)
+    assert abs(got - expected) <= 5e-15 * abs(expected)
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "slope", "expected"),
+    (
+        (4.4, 0.09, 0.1, 2.4, -2.7835585637336792e-06),
+        (4.4, 0.09, 0.53, 21.72, -0.02612550735129679),
+        (-4.4, 0.09, 0.53, 21.72, 0.025837480921348403),
+        (4.4, 0.09, 0.53, -21.72, 0.025837480921348403),
+        (1.0, 0.09, 0.1, 0.4, -0.0005666167421711974),
+        (-1.0, 0.09, 0.1, -0.4, -0.0005666167421711974),
+        (0.1, 0.001, 0.01, 2.4, -0.0001182281393935999),
+        (1.0, 0.09, 0.1, -2.4, 0.0009603169702279289),
+    ),
+)
+def test_sloped_endpoint_series_matches_high_precision(
+    gamma, radius, source, slope, expected
+):
+    """The combined derivative against a 60-digit angular-integral reference."""
+    got = sheet_module._sheet_gamma_series(np, gamma, radius, source, slope, np.nan)
+    assert np.isfinite(got)
+    assert abs(got - expected) <= 5e-15 * abs(expected)
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "slope"),
+    ((0.01, 0.09, 0.001, 2.4), (1.0, 0.09, 1.0, 2.4), (1.0, 0.09, 0.1, 0.0)),
+)
+def test_sloped_endpoint_series_refuses_an_unqualified_branch(
+    gamma, radius, source, slope
+):
+    """Interior, unconverged-series and cylindrical cases retain their regular form."""
+    regular = 3.25
+    assert (
+        sheet_module._sheet_gamma_series(np, gamma, radius, source, slope, regular)
+        == regular
+    )
+
+
+def test_packed_pancake_retains_the_surface_limit():
+    """The endpoint's prescribed surface limit also masks its analytic series."""
+    _, radial, _ = sheet_module._sheet_pancake_terms(
+        np, np.asarray([5e-13]), np.asarray([1.0]), np.asarray([3.0])
+    )
+    assert radial[0] == 0.0
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "expected"),
+    (
+        (4.4364, 0.09, 0.53, 0.0017607374722479433),
+        (1.0, 1.0, 0.1, 9.323579255191544e-05),
+        (0.001, 1.0, 0.1, -0.0005271571736625841),
+        (1.0, 0.09, 0.13, 0.0022131621116677413),
+        (0.5, 0.5, 0.1, 0.0007619931080212963),
+    ),
+)
+def test_pancake_height_series_matches_high_precision(gamma, radius, source, expected):
+    """The zeta-minus-first-kind endpoint against its 70-digit angular integral."""
+    _, height = sheet_module._pancake_end_series(
+        np, gamma, radius, source, np.nan, np.nan
+    )
+    assert abs(height - expected) <= 5e-15 * abs(expected)
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "expected"),
+    (
+        (0.0337, 0.09, 4.9565, 0.021364957290125615),
+        (-0.0463, 0.09, 4.984, -0.029190417369569316),
+        (0.001, 1.0, 2.0, 0.0019566157278257212),
+        (1.0, 1.0, 2.0, 1.5904821201104593),
+        (4.4, 0.09, 0.53, 3.1190603443383114),
+    ),
+)
+def test_cylinder_height_endpoint_matches_high_precision(
+    gamma, radius, source, expected
+):
+    """The interior cylinder endpoint against 60-digit complete elliptic values."""
+    height = sheet_module._sheet_cylinder_height(np, gamma, radius, source)
+    assert abs(height - expected) <= 5e-15 * abs(expected)

@@ -13,6 +13,7 @@ somewhere to show.
 
 from __future__ import annotations
 
+from concurrent.futures import ProcessPoolExecutor
 from functools import lru_cache
 import importlib.util
 import multiprocessing
@@ -48,10 +49,11 @@ WEST_MESH = os.environ.get(
 #: Pairs evaluated per kernel launch. The unbatched reference is chunked at the
 #: same count as the tile's block, so both sides launch the same number of
 #: programs and the difference is the tile's padding and pair ordering alone.
-PAIR_BLOCK = 4096
+#: Bounded blocks keep four CPU workers within the shared allocation's memory.
+PAIR_BLOCK = 256
 
 #: Processes the build is sharded over; the allocation is one compute node.
-WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "8"))
+WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "4"))
 
 #: Targets measured, counted from the first cell; 0 measures the whole mesh.
 #: A subset is how the gate is exercised on a fence too short for all 1696
@@ -231,9 +233,7 @@ def interaction():
     _, centroids = west_mesh()
     count = TARGETS or centroids.shape[0]
     step = (count + WORKERS - 1) // WORKERS
-    bounds = [
-        (start, min(start + step, count)) for start in range(0, count, step)
-    ]
+    bounds = [(start, min(start + step, count)) for start in range(0, count, step)]
     if WORKERS == 1:
         built = [build_slice(bound) for bound in bounds]
     else:
@@ -241,8 +241,8 @@ def interaction():
         # inherited mutexes it can never acquire: every worker wedges in
         # futex_wait. Each shard is a fresh interpreter instead.
         context = multiprocessing.get_context("spawn")
-        with context.Pool(WORKERS) as pool:
-            built = pool.map(build_slice, bounds)
+        with ProcessPoolExecutor(max_workers=WORKERS, mp_context=context) as pool:
+            built = list(pool.map(build_slice, bounds))
     tiled = np.concatenate([item[2] for item in built], axis=0)
     reference = np.concatenate([item[3] for item in built], axis=0)
     scale = np.concatenate([item[4] for item in built], axis=0)
@@ -295,8 +295,8 @@ def test_tile_agrees_with_the_independent_ring_reference():
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(1500)
-def test_tile_agrees_with_the_unbatched_closed_form(interaction):
+@pytest.mark.timeout(3600)
+def test_tile_agrees_with_the_unbatched_closed_form(interaction, capsys):
     """Every entry of the tiled build matches the unbatched host evaluation."""
     tiled, reference, scale = interaction
     assert np.all(np.isfinite(tiled)), "the tiled build left an entry undefined"
@@ -309,11 +309,13 @@ def test_tile_agrees_with_the_unbatched_closed_form(interaction):
         f"p{level}={np.percentile(error, level):.3e}"
         for level in (50, 90, 99, 99.9, 100)
     )
-    print(
-        f"\nsheet tile: {tiled.shape[0]} targets x {tiled.shape[1] // 2} cells, "
-        f"worst entry {worst:.3e} at ({row}, {column}); "
-        f"entries above {GATE:.0e}: {counts} of {error.size}; {distribution}"
-    )
+    with capsys.disabled():
+        print(
+            f"\nsheet tile: {tiled.shape[0] // 2} targets x "
+            f"{tiled.shape[1] // 2} cells, "
+            f"worst entry {worst:.3e} at ({row}, {column}); "
+            f"entries above {GATE:.0e}: {counts} of {error.size}; {distribution}"
+        )
     assert worst <= GATE, (
         f"worst entry error {worst:.3e} relative to the absolute per-end "
         f"antiderivative terms, at ({row}, {column}); {counts} entries above "
@@ -385,3 +387,28 @@ def test_reversed_edge_normals_break_the_agreement():
     assert finite.any(), "the block holds no finite entry to compare"
     worst = float(np.max(error[finite]))
     assert worst > GATE, f"the reversed cell still agrees to {worst:.3e}"
+
+
+def test_flat_cpu_pair_is_independent_of_batch_size():
+    """The far horizontal edge retains its radial field in every flat launch."""
+    polygons, centroids = west_mesh()
+    edges = cell_edges(polygons)
+    target, edge = 0, 1129
+    kernel = jax.jit(lambda *values: packed_sheet_field(jnp, *values))
+    pair = (
+        centroids[target, 0],
+        centroids[target, 1],
+        edges.start_r[edge],
+        edges.start_z[edge],
+        edges.end_r[edge],
+        edges.end_z[edge],
+    )
+    values = []
+    for count in (1, 2, 8):
+        radial, height = kernel(*(jnp.full((count,), value) for value in pair))
+        assert np.all(np.isfinite(radial))
+        assert np.all(np.isfinite(height))
+        values.append(float(radial[0]))
+    assert values == [values[0]] * len(values), (
+        f"batch-dependent radial field: {values!r}"
+    )

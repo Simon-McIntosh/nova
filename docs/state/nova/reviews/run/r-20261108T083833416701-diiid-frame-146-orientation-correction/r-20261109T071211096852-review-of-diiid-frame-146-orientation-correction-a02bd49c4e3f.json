@@ -46,6 +46,13 @@
     "result": "All three committed SVGs are content-identical to 296afe3b0 once matplotlib's regenerated dc:date and p-/m- artist identifiers are normalised (70436, 71902 and 67163 bytes each side; diff empty), so the commit eebac055c carries a metadata-only re-render and no drawing change reaches the reader. Reading frame-146-trip-2-flux-contours.svg:2057 shows the 'solved flux' legend handle still drawn at stroke-width 3 while the nine solved levels on that panel are 0.7-1.21 pt, which is the legend-width defect the previous review round raised and the manifest's rubric.figures claims repaired.",
     "revision": "a02bd49c4e3f0807e92c11b1ba3c84b769bbdac5"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-09T07:37:37.689539+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",

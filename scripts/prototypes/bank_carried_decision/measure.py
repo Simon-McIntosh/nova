@@ -206,6 +206,7 @@ def main():
         module=support_read.__file__,
         cwd=str(Path.cwd().resolve()),
         devices=[str(device) for device in jax.devices()],
+        device_kinds=[device.device_kind for device in jax.devices()],
         x64=jax.config.jax_enable_x64,
         cache=os.environ.get("JAX_COMPILATION_CACHE_DIR"),
     )

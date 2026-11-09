@@ -63,13 +63,25 @@ fragment selections changed; relative membership error was 0.747911826. The
 implementation now refuses to carry across represented-cell or fragment-incidence
 changes. Stable shifts of 1e-6, 1e-3 and 0.01 pitch are covered separately from
 the in-cell rebuild case.</p>
+<p>Control-header caveat: the first controls launcher stamped the pinned base
+revision on its head and mutated-arm headers. Their imported paths identify
+the head worktree and the scratch overlay respectively; the overlay carries
+product source <code>3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e</code>.
+The final paired suite logs carry the correct revision, and subsequent controls
+use the corrected header. The raw records are retained unchanged.</p>
 <h2 id="bank-carried-decision-pending">Remaining measurements</h2>
 <p>Sirius job <code>1308738</code> runs the final guard head against base over all
 five named files, one fresh process per file. The earlier job
 <code>1308719</code> and repaired tracked-read job <code>1308723</code> retain
 the preceding revisions' evidence; the repaired file reports nine passing tests.
-Controls job <code>1308729</code> checks the extended guard and repeats the
-declared stale-edge mutation. The reserved H200
+The final tracked-read head arm reports <code>13 passed in 298.62s</code>;
+controls job <code>1308729</code> independently reports
+<code>13 passed in 317.01s</code> and logs
+<code>REFUSAL invalid fresh certificate: no lane accepted</code>. The declared
+stale-edge mutation at that guard head fails all three equality cases, with
+relative edge-interval errors <code>7.391647964927195e-6</code>,
+<code>0.007403997178451971</code> and
+<code>0.07517782408822127</code>; its log ends <code>EXIT=1</code>. The reserved H200
 job <code>1308720</code> requests four CPUs, one GPU and 96 GB; its recorded
 state is <code>PENDING (Resources)</code>. It remains queued.</p>
 <p>The timing runner builds cold and preceding warm-stream inputs once at base,

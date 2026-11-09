@@ -208,10 +208,24 @@ def stationary_stencil(
     return Stencil(solved, cells, jnp.any(saddles))
 
 
-def rebuild_needed(stencil: Stencil, tracking: TrackingState) -> jax.Array:
-    """Whether a stencil's cells or ownership differ from the tracked ones."""
+def rebuild_needed(
+    stencil: Stencil, tracking: TrackingState, geometry=None
+) -> jax.Array:
+    """Whether tracked cells, ownership or represented saddle cells change."""
+    normal_changed = jnp.asarray(False)
+    if geometry is not None:
+        decision = tracking.reading
+        index = jnp.argmax(decision.x_point_valid)
+        represented = topology.represented_saddle_cells(
+            geometry,
+            stencil.solved.position[index],
+            decision.boundary_class == int(topology.TopologyClass.DIVERTED),
+            decision.normal_form_radius,
+        )
+        normal_changed = jnp.any(represented != decision.normal_form_cells)
     return (
-        jnp.any(stencil.cells != tracking.cells)
+        normal_changed
+        | jnp.any(stencil.cells != tracking.cells)
         | (stencil.saddle_live != tracking.saddle_live)
         | ~tracking.valid
     )
@@ -296,7 +310,7 @@ def read(
         reading = rebuild(None)
         rebuilds = jnp.asarray(1, jnp.int32)
     else:
-        rebuilt = rebuild_needed(stencil, tracking)
+        rebuilt = rebuild_needed(stencil, tracking, operands.geometry)
         if rebuild is False:
             # A caller that knows no slice of its batch can rebuild takes the
             # carried decision directly. Under ``vmap`` the conditional below
@@ -321,6 +335,12 @@ def read(
                 ),
                 None,
             )
+        changed = topology.carried_decision_changed(
+            reading, tracking.reading, operands.geometry, policy
+        )
+        extra = ~rebuilt & changed
+        reading = jax.lax.cond(extra, rebuild, lambda _: reading, None)
+        rebuilt = rebuilt | extra
         rebuilds = tracking.rebuilds + rebuilt.astype(jnp.int32)
     return _verdict(stencil, reading, rebuilt, rebuilds)
 
@@ -417,7 +437,9 @@ def read_batch(
             )
         )(stack, whole_mesh())
 
-    flags = jax.vmap(rebuild_needed)(stack, tracking)
+    flags = jax.vmap(
+        lambda stencil, tracked: rebuild_needed(stencil, tracked, operands.geometry)
+    )(stack, tracking)
     # The decision is one scalar for the batch: the branch, the reported flag
     # and the counter all read it, so no lane can carry a per-lane verdict.
     needed = jnp.any(flags)
@@ -429,6 +451,13 @@ def read_batch(
             needed,
             tracked.rebuilds + needed.astype(tracked.rebuilds.dtype),
         )
+
+    def full_verdict():
+        return jax.vmap(
+            lambda stencil, reading, tracked: _verdict(
+                stencil, reading, jnp.asarray(True), tracked.rebuilds + 1
+            )
+        )(stack, whole_mesh(), tracking)
 
     def carry(_):
         if jets is None:
@@ -444,17 +473,15 @@ def read_batch(
                 )
             )(stack, moments, jets, tracking.reading)
         carried = jax.vmap(verdict)(stack, reading, tracking)
-        if certificate is None:
-            return carried
+        changed = jax.vmap(
+            lambda reading, decision: topology.carried_decision_changed(
+                reading, decision, operands.geometry, policy
+            )
+        )(reading, tracking.reading)
+        if certificate is not None:
+            changed = changed | certificate(carried)
         return jax.lax.cond(
-            jnp.any(certificate(carried)),
-            lambda _: jax.vmap(
-                lambda stencil, reading, tracked: _verdict(
-                    stencil, reading, jnp.asarray(True), tracked.rebuilds + 1
-                )
-            )(stack, whole_mesh(), tracking),
-            lambda _: carried,
-            None,
+            jnp.any(changed), lambda _: full_verdict(), lambda _: carried, None
         )
 
     def rebuild(_):

@@ -2955,8 +2955,8 @@ def _wall_events(field, geometry, policy, sigma):
     return points.reshape(-1, 2), values.reshape(-1)
 
 
-def _connected_fragment_labels(area, intervals, geometry, tolerance):
-    cells, capacity = area.shape
+def _fragment_connections(intervals, geometry, tolerance):
+    """Local fragment incidence, without propagating connected labels."""
     edge_interval = jnp.transpose(intervals, (0, 2, 1, 3, 4))
     peer = jnp.maximum(geometry.neighbour, 0)
     peer_interval = edge_interval[peer, geometry.neighbour_edge]
@@ -2972,6 +2972,18 @@ def _connected_fragment_labels(area, intervals, geometry, tolerance):
         jnp.any(overlap > tolerance, axis=(-2, -1))
         & (geometry.neighbour >= 0)[..., None, None]
     )
+    wall = jnp.any(
+        (geometry.neighbour < 0)[:, :, None, None]
+        & (edge_interval[..., 1] - edge_interval[..., 0] > tolerance),
+        axis=(1, 3),
+    )
+    return links, wall
+
+
+def _connected_fragment_labels(area, intervals, geometry, tolerance):
+    cells, capacity = area.shape
+    links, wall = _fragment_connections(intervals, geometry, tolerance)
+    peer = jnp.maximum(geometry.neighbour, 0)
     sentinel = cells * capacity
     initial = jnp.where(
         area > 0.0, jnp.arange(sentinel).reshape(cells, capacity), sentinel
@@ -2992,11 +3004,6 @@ def _connected_fragment_labels(area, intervals, geometry, tolerance):
 
     _, labels, _ = jax.lax.while_loop(
         condition, propagate, (jnp.asarray(0), initial, jnp.asarray(True))
-    )
-    wall = jnp.any(
-        (geometry.neighbour < 0)[:, :, None, None]
-        & (edge_interval[..., 1] - edge_interval[..., 0] > tolerance),
-        axis=(1, 3),
     )
     return labels, wall
 
@@ -3060,16 +3067,20 @@ def _fragments_at_level(geometry, coefficient, sigma, level, form, represented, 
     return area, intervals, valid, required, fragments, signed, local_vertices
 
 
+def represented_saddle_cells(geometry, point, live, radius):
+    """Cells whose support uses the saddle normal form."""
+    return live & (
+        _inside_cells(geometry, point)
+        | (jnp.linalg.norm(geometry.centre - point, axis=1) < radius)
+    )
+
+
 def _support_at_level(
     geometry, coefficient, sigma, level, axis, form, saddle_live, policy
 ):
     owner = _inside_cells(geometry, form.position) & saddle_live
-    represented = saddle_live & (
-        owner
-        | (
-            jnp.linalg.norm(geometry.centre - form.position, axis=1)
-            < policy.normal_form_radius
-        )
+    represented = represented_saddle_cells(
+        geometry, form.position, saddle_live, policy.normal_form_radius
     )
     area, intervals, valid, required, fragments, signed, local_vertices = (
         _fragments_at_level(
@@ -3506,13 +3517,8 @@ def _read_at_nulls(
         jnp.all(jnp.where(live, nulls.tangent_valid, True)),
         required,
         fragment_count,
-        diverted
-        & (
-            _inside_cells(geometry, saddle_point)
-            | (
-                jnp.linalg.norm(geometry.centre - saddle_point, axis=1)
-                < policy.normal_form_radius
-            )
+        represented_saddle_cells(
+            geometry, saddle_point, diverted, policy.normal_form_radius
         ),
         jnp.where(diverted, policy.normal_form_radius, 0.0),
         tree,
@@ -3545,10 +3551,18 @@ def refresh_at_stationary_points(field, geometry, convention, policy, solved, de
     def wall_contact(_):
         points, flux = _wall_events(field, geometry, policy, sigma)
         index = jnp.argmin(jnp.linalg.norm(points - decision.boundary, axis=-1))
-        return points[index], flux[index]
+        cells = jax.vmap(lambda point: jnp.argmax(_inside_cells(geometry, point)))(
+            points
+        )
+        on_core = jnp.any(decision.fragment_selected[cells], axis=1)
+        winner = jnp.argmax(jnp.where(on_core, sigma * flux, -jnp.inf))
+        return points[index], flux[index], winner == index
 
-    boundary, level = jax.lax.cond(
-        diverted, lambda _: (point, solved.jet.value[saddle_index]), wall_contact, None
+    boundary, level, wall_stable = jax.lax.cond(
+        diverted,
+        lambda _: (point, solved.jet.value[saddle_index], jnp.asarray(True)),
+        wall_contact,
+        None,
     )
     coefficient = field.sampled_coefficient(geometry)
     area, intervals, fragment_valid, required, *_ = _fragments_at_level(
@@ -3561,6 +3575,7 @@ def refresh_at_stationary_points(field, geometry, convention, policy, solved, de
     bound = _membership_roundoff_bound(area, geometry, policy.edge_tolerance)
     valid = (
         decision.valid
+        & wall_stable
         & fragment_valid
         & jnp.all(jnp.isfinite(coefficient))
         & jnp.all(jnp.isfinite(membership))
@@ -3590,4 +3605,30 @@ def refresh_at_stationary_points(field, geometry, convention, policy, solved, de
         valid=valid,
         qualified=decision.qualified & valid,
         required_fragments=required,
+    )
+
+
+def carried_decision_changed(reading, decision, geometry, policy):
+    """Detect support incidence changes before reusing connected labels.
+
+    Equal live fragments and neighbour links have the same propagated labels.
+    A changed cut-cell class or wall incidence also requires the full read.
+    This checks local connectivity without repeating its global flood.
+    """
+    links, wall = _fragment_connections(
+        reading.edge_interval, geometry, policy.edge_tolerance
+    )
+    prior_links, prior_wall = _fragment_connections(
+        decision.edge_interval, geometry, policy.edge_tolerance
+    )
+
+    def cut(membership):
+        return (membership > 0) & (membership < 1 - 1e-14)
+
+    return (
+        jnp.any(links != prior_links)
+        | jnp.any(wall != prior_wall)
+        | jnp.any((reading.fragment_area > 0) != (decision.fragment_area > 0))
+        | jnp.any(cut(reading.membership) != cut(decision.membership))
+        | ~reading.valid
     )

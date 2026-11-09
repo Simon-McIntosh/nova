@@ -31,6 +31,7 @@ import numpy as np
 from matplotlib.collections import Collection
 from matplotlib.text import Text
 from scipy.interpolate import RegularGridInterpolator
+from scipy.spatial import cKDTree
 
 import jax.numpy as jnp
 
@@ -119,6 +120,12 @@ SOLVED_FLUX_WIDTH = 3.0
 REFERENCE_FLUX = "#9a9a9a"
 REFERENCE_FLUX_WIDTH = 2.4
 """Colour and width of the EFIT reference field, drawn beneath the solved one."""
+
+MIN_FLUX_WIDTH = 0.7
+"""Narrowest stroke a crowded solved level is drawn at [pt]."""
+
+CROWD_FRACTION = 0.55
+"""Fraction of the gap to its neighbour a solved level may spend on its stroke."""
 
 LABEL_CLEARANCE = 1.5
 """Distance [px] a text box keeps from any drawn segment it is checked against."""
@@ -299,6 +306,65 @@ def _gradient_magnitude(radius, height, flux):
     return np.abs(dr) + np.abs(dz)
 
 
+def _level_spacing(figure, axes, radius, height, flux, levels) -> list[float]:
+    """Return the gap [pt] between each level and its nearest neighbour.
+
+    The gap is the short percentile of the distance from the level's own points
+    to the neighbouring level's points, so a set that crowds in one region is
+    measured where it crowds rather than on average.
+    """
+
+    transform = axes.transData.transform
+    paths = []
+    for level in levels:
+        contour = axes.contour(radius, height, flux, levels=[level], colors="none")
+        segments = [
+            np.asarray(segment, dtype=float)
+            for segment in contour.allsegs[0]
+            if len(segment) > 1
+        ]
+        contour.remove()
+        paths.append(transform(np.vstack(segments)) if segments else np.empty((0, 2)))
+    spacing = []
+    for index, points in enumerate(paths):
+        neighbours = [
+            paths[other]
+            for other in (index - 1, index + 1)
+            if 0 <= other < len(paths) and len(paths[other])
+        ]
+        if len(points) < 2 or not neighbours:
+            spacing.append(np.inf)
+            continue
+        sample = points[:: max(1, len(points) // 200)]
+        closest = []
+        for other in neighbours:
+            distances, _ = cKDTree(other).query(sample)
+            closest.append(float(np.percentile(distances, 5)))
+        spacing.append(min(closest) * 72.0 / figure.dpi)
+    return spacing
+
+
+def solved_level_widths(figure, axes, radius, height, flux, levels) -> list[float]:
+    """Return the stroke each solved level is drawn at.
+
+    The solved field is the panel's subject and is normally drawn at the
+    headline weight. Where neighbouring levels fall closer together than that
+    stroke, drawing them all at the headline width fills the space between them
+    and the reader sees one block of colour instead of nine levels, so each
+    level thins to a fraction of the gap it actually has.
+    """
+
+    widths = []
+    for gap in _level_spacing(figure, axes, radius, height, flux, levels):
+        if not np.isfinite(gap):
+            widths.append(SOLVED_FLUX_WIDTH)
+        else:
+            widths.append(
+                float(np.clip(CROWD_FRACTION * gap, MIN_FLUX_WIDTH, SOLVED_FLUX_WIDTH))
+            )
+    return widths
+
+
 def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
     """Draw only the level ring that encloses the axis.
 
@@ -407,6 +473,11 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     strip = figure.add_subplot(layout[1])
     figure.subplots_adjust(left=0.09, right=0.97, top=0.86, bottom=0.11)
     poloidal_axes(axes)
+    axes.set_aspect("equal")
+    axes.set_xlim(float(np.nanmin(radius)), float(np.nanmax(radius)))
+    axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
+
+    solved_widths = solved_level_widths(figure, axes, radius, height, flux, levels)
 
     draw_flux_contours(
         axes,
@@ -419,17 +490,18 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
         wall=None,
         zorder=DEFAULT_INK.zorder_flux,
     )
-    draw_flux_contours(
-        axes,
-        radius,
-        height,
-        flux,
-        levels,
-        color=DEFAULT_INK.flux_color,
-        linewidth=SOLVED_FLUX_WIDTH,
-        wall=wall,
-        zorder=DEFAULT_INK.zorder_flux + 1,
-    )
+    for level, width in zip(levels, solved_widths, strict=True):
+        draw_flux_contours(
+            axes,
+            radius,
+            height,
+            flux,
+            [level],
+            color=DEFAULT_INK.flux_color,
+            linewidth=width,
+            wall=wall,
+            zorder=DEFAULT_INK.zorder_flux + 1,
+        )
     _connected_surface(
         axes,
         radius,

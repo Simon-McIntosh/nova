@@ -494,6 +494,16 @@ below them. A panel whose axis lies outside the limiter draws no bounding
 surface and carries no such legend entry, and a solved X-point that would crowd
 the axis is drawn as a smaller callout joined by a leader to a hollow dot at
 the position the solve returned, so the axis and the saddle both read.</li>
+<li>Contour stroke is set per level from the gap to its neighbour, so a set
+that crowds where the field is nearly flat stays separable: above the limiter
+in frame 146 trip 2 the nine levels are closer together than one 3.0 pt stroke,
+and drawing them all at that weight filled the space between them with a block
+of colour that carried no level information. The stroke is
+<code>0.55 &times; gap</code>, clamped to [0.7, 3.0] pt, so a panel that is not
+crowded still draws its solved field at the headline weight.
+<code>check_contour_legibility.py</code> rasterises a panel and counts pixels
+whose horizontal and vertical runs are both wider than one line, which is what
+a fused band looks like and what a contour does not.</li>
 </ul>
 
 </section>

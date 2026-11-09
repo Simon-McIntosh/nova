@@ -31,8 +31,19 @@ def emit(label, **values):
     print(label + " " + json.dumps(values, sort_keys=True), flush=True)
 
 
-def centroid(state):
-    return jnp.sum(state[2], axis=-1) / jnp.sum(state[0], axis=-1)
+def centroid(state, centres):
+    """Physical height from cell current and cell-relative vertical moments."""
+    return jnp.sum(state[0] * centres + state[2], axis=-1) / jnp.sum(state[0], axis=-1)
+
+
+def centroid_gradient(state, centres):
+    """Derivative of physical height in current, radial and vertical moments."""
+    total = jnp.sum(state[0])
+    height = centroid(state, centres)
+    cells = state[0].size
+    return jnp.concatenate(
+        ((centres - height) / total, jnp.zeros(cells), jnp.full(cells, 1 / total))
+    )
 
 
 def accepted_read(valid, residual, tolerance, *, height=None):
@@ -103,7 +114,13 @@ def run_unpinned(machine, moments, seeds):
             drive, state, seed, warm, max_steps=max_steps, tolerance=tolerance
         )
         if accepted_read(attempt.converged, attempt.residual, tolerance):
-            accepted.append((float(drive), attempt.moments, centroid(attempt.moments)))
+            accepted.append(
+                (
+                    float(drive),
+                    attempt.moments,
+                    centroid(attempt.moments, machine.operands.geometry.centre[:, 1]),
+                )
+            )
         return attempt
 
     result = drive_continuation.advance_drive(
@@ -185,7 +202,7 @@ def inspect_null(machine, state, seeds, drive):
             np.asarray(null_state),
             np.concatenate((np.zeros(cells), np.asarray(one[0]), np.zeros(cells))),
         ),
-        centroid=float(centroid(one)),
+        centroid=float(centroid(one, op.geometry.centre[:, 1])),
     )
     emit("NULL", **payload)
     wall = np.asarray(op.geometry.wall_points)
@@ -240,12 +257,10 @@ def pinned_step(machine, state, seed, drive, field, target, payload):
         balanced, jnp.stack((rhs, field_column), axis=-1) / row[:, None]
     )
     u, v = column * both[:, 0], column * both[:, 1]
-    total = jnp.sum(state[0])
-    zc = jnp.sum(state[2]) / total
+    centres = op.geometry.centre[:, 1]
+    zc = centroid(state, centres)
     n = state[0].size
-    g = jnp.concatenate(
-        (jnp.full(n, -zc / total), jnp.zeros(n), jnp.full(n, 1 / total))
-    ) * jnp.asarray(payload)
+    g = centroid_gradient(state, centres) * jnp.asarray(payload)
     field_update = (-jnp.dot(g, u) - (zc - target)) / -jnp.dot(g, v)
     updates = u - v * field_update
     pieces = jnp.split(updates, (n, 2 * n), axis=-1)
@@ -294,7 +309,11 @@ def pinned_measure(
                 op, one_state, one_state, support, profile, machine.quadrature
             )
             norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
-            return norm, centroid(one_state) - target, support.valid
+            return (
+                norm,
+                centroid(one_state, op.geometry.centre[:, 1]) - target,
+                support.valid,
+            )
 
         return jax.vmap(one)(state, seeds, field, targets)
 
@@ -388,6 +407,7 @@ def pinned_measure(
         certified=drive >= target_drive,
         reads=reads,
         updates=updates,
+        substeps=len(rows),
         steps=rows,
         final_field=np.asarray(field).tolist(),
     )
@@ -456,7 +476,7 @@ def main():
             jnp.asarray(archive[name][: args.lanes]) for name in ("m0", "m1", "m2")
         )
         seeds = jnp.asarray(archive["stationary"][: args.lanes])
-    target = centroid(moments)
+    target = centroid(moments, machine.operands.geometry.centre[:, 1])
     bank_pin_status(machine, moments, seeds)
     unpinned, accepted = run_unpinned(machine, moments, seeds)
     emit(
@@ -476,6 +496,7 @@ def main():
             certified=unpinned.certified,
             reads=unpinned.reads,
             updates=unpinned.updates,
+            substeps=len(unpinned.substeps),
             centroid_start=np.asarray(target).tolist(),
             centroid_accepted=[
                 dict(drive=d, height=np.asarray(h).tolist()) for d, _, h in accepted

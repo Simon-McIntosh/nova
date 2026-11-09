@@ -3,7 +3,7 @@
 import jax.numpy as jnp
 
 from nova.equilibrium import support_read
-from scripts.prototypes.bank_fold_vertical.measure import centroid, shifted
+from scripts.prototypes.bank_fold_vertical.measure import centroid_gradient, shifted
 from scripts.prototypes.bank_solve_profile import fixture as profile_fixture
 from scripts.prototypes.bank_warm_start import streams
 
@@ -41,16 +41,7 @@ def condition(machine, state, seed, field, drive):
         return jnp.concatenate(value)
 
     field_column = (flat(residual_plus.residual) - flat(residual.residual)) / 1e-6
-    cells = state[0].size
-    total = jnp.sum(state[0])
-    height = centroid(state)
-    height_row = jnp.concatenate(
-        (
-            jnp.full(cells, -height / total),
-            jnp.zeros(cells),
-            jnp.full(cells, 1 / total),
-        )
-    )
+    height_row = centroid_gradient(state, op.geometry.centre[:, 1])
     bordered = jnp.block(
         [
             [balanced, (field_column * 1e-3 / row)[:, None]],

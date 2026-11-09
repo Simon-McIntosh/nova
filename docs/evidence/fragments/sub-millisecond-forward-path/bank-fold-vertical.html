@@ -1,122 +1,140 @@
-<section id="bank-fold-vertical-record">
-  <h3>Drive fold and centroid constraint</h3>
-  <p id="bank-fold-vertical-repair-note">Both arms now use the same
-  fresh-read acceptance predicate in
-  <code>scripts/prototypes/bank_fold_vertical/measure.py:38-43</code>. The
-  scratch arm reads again after its sixth update before deciding acceptance or
-  reporting a residual (<code>measure.py:316-370</code>). The conditioning
-  series is measured inside each process of the one-job H200 run.</p>
-  <p id="bank-fold-vertical-regression-controls">The executable
-  contract checks the actual continuation loop with a synthetic state that
-  reaches zero residual on its sixth update, and checks the bordered step on
-  a one-cell state whose centroid requires a nonzero radial-field correction.
-  A receipt pair with no conditioning rows is refused. The pre-repair source
-  fails the first and third checks; a scratch mutation that removes the
-  centroid correction fails the second. A known extra bank row changes the
-  product pin-status probe from <code>absent</code> to <code>true</code>, while
-  a hardcoded-absent mutant fails it. These controls make the assertions
-  independent of two processes agreeing on the same result.</p>
-  <p><strong>Product pin status: absent in the bank solve.</strong>
-  <code>nova/equilibrium/support_read.py:1587-1607</code> declares only the three
-  moment state blocks and takes no vertical-position or centroid row;
-  <code>nova/equilibrium/drive_continuation.py:100-146</code> passes a solve
-  callable or defaults to that bank solve without adding a row. The separate
-  forward-request route in <code>nova/equilibrium/forward.py:2645-2654</code>
-  returns <code>VerticalPositionPin(0.0, active=False)</code> for a default
-  Newton–Krylov request, and returns no pin for other default routes.
-  <code>VerticalPositionPin</code> in
-  <code>nova/equilibrium/constraint.py:479-533</code> defines a centroid-height
-  row and a uniform radial-field unknown when active. The H200 run assembles
-  the bank residual at the supplied state and counts zero rows beyond the
-  three moment blocks (<code>measure.py:46-64</code>), printing
-  <code>PIN_ACTIVE=absent</code>. The scratch probe tests the centroid row and
-  radial-field column actually used by its bordered update
-  (<code>measure.py:235-253</code>) and prints
-  <code>SCRATCH_PIN_ACTIVE=true</code>. The requested active product pin is
-  absent.</p>
+<section id="bank-fold-height-pin-measurement">
+  <h3>Drive fold with the physical current-centroid height pinned</h3>
+  <p id="bank-fold-height-pin-correction"><strong>The cell-relative centroid
+  results are replaced.</strong> The vertical moment in each cell integrates
+  current times height relative to that cell's moment centre. Summing those
+  moments alone omits the cell-centre contribution. The physical height is
+  <code>sum(cell_height * cell_current + vertical_moment) / sum(cell_current)</code>,
+  with heights from <code>machine.operands.geometry.centre[:, 1]</code>, the
+  same centres used by the current quadrature. The prototype now uses this
+  height for its target, fresh-read acceptance, unpinned drift and diagnostic,
+  and uses its derivative for both the Newton row and the bordered spectrum.
+  No product source changes.</p>
+  <p>The earlier pinned reach <strong>1.0015521373748786</strong>, its
+  138 sub-steps / 6789 reads / 739 updates, 8.157 µT field and the bordered
+  singular values 4.033e-8–7.269e-8 describe a cell-relative moment pin.
+  They do not establish a physical-height pin and are superseded below.
+  The earlier unpinned drift <strong>−22.147 µm</strong> (including its
+  −2.321 µm initial and −22.203 µm extremal drift) is also superseded.
+  <code>smallest-singular-vs-drive.svg</code> is regenerated from the physical
+  receipt. <code>null-flux-contours.svg</code> and the separate null-vector
+  projection cosines are retained.</p>
 
-  <figure id="bank-fold-vertical-null-figure">
+  <p id="bank-fold-height-pin-controls">The defect reproduces before repair:
+  a uniform-current state translated rigidly by 37 mm gives
+  <code>observed_dz=0 expected_dz=0.037 passed=False</code>, with
+  <code>physical_centroid=false</code> and <code>EXIT=1</code> in
+  <code>centroid-relative-red.log</code>. The physical formula gives
+  <code>before=0.1 after=0.137 observed_dz=0.037</code>. The contract also
+  checks its row against central differences with unequal cell currents at
+  distinct heights, exercises an actual bordered update requiring nonzero
+  radial field, checks the sixth update's terminal fresh read, and refuses a
+  receipt pair missing conditioning rows. A known extra assembled bank row
+  changes the product-status probe from absent to true. All nine controls,
+  including the durable-receipt check, pass in <code>final-gate.log</code>.</p>
+
+  <p id="bank-fold-height-pin-status"><strong>Assembled bank
+  <code>PIN_ACTIVE=absent</code>; scratch bordered
+  <code>SCRATCH_PIN_ACTIVE=true</code>.</strong> Each H200 process counts
+  zero bank residual rows beyond the three moment blocks. The separate
+  scratch update measures a nonzero physical-height row and a nonzero
+  radial-field column. The scratch pin does not activate a product pin.
+  Both arms retain the same valid fresh-read residual acceptance: 1e-6 for
+  intermediate drive steps and 1e-10 at the requested drive 1.01; the pinned
+  arm additionally requires physical height error at most 1 µm. The requested
+  drive change is 1e-2, with the existing adaptive sub-steps unchanged.</p>
+
+  <table id="bank-fold-height-pin-arms">
+    <thead><tr><th>Arm, sixteen lanes</th><th>Last accepted drive</th>
+      <th>Attempted sub-steps</th><th>Reported reads</th><th>Newton updates</th>
+      <th>Certifies 1.01</th></tr></thead>
+    <tbody>
+      <tr><td>Unpinned</td><td>1.0089341297149657</td><td>52</td>
+        <td>1253</td><td>277</td><td>No</td></tr>
+      <tr><td>Physical-height pin</td><td>1.0049403209686272</td><td>66</td>
+        <td>3243</td><td>353</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <p>Read counts retain the existing harness convention. The pinned counter
+  counts fresh residual evaluations; its Newton assembly also makes two
+  support reads per update to construct the field column. The table is not
+  a whole-solve read-cost or timing measurement.</p>
+  <p>The unpinned arm reaches <strong>0.0039938087463384786</strong> more
+  drive. Its physical centroid starts at 34.377834 mm and ends at
+  30.367971 mm: <strong>−4.009863 mm</strong> drift in every lane. Over the
+  sixteen accepted states, the drift starts at −0.436948 mm at drive 1.001
+  and progresses to −4.009863 mm. The two processes' complete physical-drift
+  arrays differ by at most 8.764e-15 m.</p>
+  <p>The physical-height pin's final uniform radial-field unknown is
+  <strong>+5.997292 µT</strong> in every lane; the paired final fields differ
+  by at most 1.236e-17 T. At the last accepted step the maximum fresh residual
+  is 9.720104e-7 and the height error is at most 1.388e-17 m across the two
+  processes. The next 1.907349e-9 drive increment is rejected after six updates
+  at a post-update residual of about 1.025742e-6, while height error remains
+  at most 1.388e-17 m. Holding height therefore does not remove this tested
+  continuation barrier. This scratch Newton solve and line search do not
+  establish how a different product globalization would behave.</p>
+
+  <figure id="bank-fold-height-pin-singular-figure">
+    <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg"
+         alt="Smallest balanced singular values versus drive for unpinned and physical-height-pinned continuation">
+    <figcaption>Grey: original balanced matrix at four retained unpinned
+    states. Blue: physical-height-bordered matrix at six retained pinned
+    states. Both series sample lane 0 of the same sixteen-lane H200 process.
+    The bordered spectrum uses a physical-height row scaled by 1e-3 and a
+    radial-field column scaled by 1e-3 T. The matrices differ in size and
+    scaling, and the branches stop at different drives; the vertical gap is
+    not a measure of physical improvement. This figure replaces the
+    cell-relative-pin singular-value figure.</figcaption>
+  </figure>
+  <table id="bank-fold-height-pin-spectra">
+    <thead><tr><th>Pinned drive</th><th>Physical-height bordered smallest
+      singular value</th><th>Original matrix at the same pinned state</th>
+      <th>Fresh read</th></tr></thead>
+    <tbody>
+      <tr><td>1.0</td><td>5.091436e-5</td><td>6.223127e-4</td><td>Valid</td></tr>
+      <tr><td>1.001</td><td>5.063297e-5</td><td>6.111897e-4</td><td>Valid</td></tr>
+      <tr><td>1.004875</td><td>5.539217e-5</td><td>3.999676e-4</td><td>Valid</td></tr>
+      <tr><td>1.004939453125</td><td>6.519687e-6</td><td>9.544133e-5</td><td>Valid</td></tr>
+      <tr><td>1.0049403190612785</td><td>3.447146e-7</td><td>4.259100e-5</td><td>Valid</td></tr>
+      <tr><td>1.0049403209686272</td><td>2.333206e-7</td><td>4.153787e-5</td><td>Valid</td></tr>
+    </tbody>
+  </table>
+  <p>The unpinned smallest singular value falls from 6.272526e-4 at drive
+  1.001 to 1.124237e-6 at its last accepted drive. All four unpinned and six
+  pinned conditioning reads in each process are valid. The physical pin's
+  bordered singular value declines near its own stopping drive; neither this
+  spectrum nor the measured reach shows a continuation rescue.</p>
+
+  <figure id="bank-fold-height-pin-null-figure">
     <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/null-flux-contours.svg"
          alt="Line contours of the soft Jacobian mode within the machine wall">
-    <figcaption>The last accepted unpinned state's smallest balanced-Jacobian
-    right-singular vector, contracted through the bank into a flux image. Blue
-    contours are signed equal-spaced levels; black is the vessel wall. This is
-    a mode image, not the equilibrium flux itself.</figcaption>
+    <figcaption>The retained null-vector panel: the last accepted unpinned
+    state's smallest balanced-Jacobian right-singular vector contracted
+    through the bank into a flux image. Blue contours are signed equal-spaced
+    levels; black is the vessel wall. This is a mode image, not equilibrium
+    flux. The SVG is unchanged by the height correction.</figcaption>
   </figure>
+  <p>The null-vector flux-image cosines remain <strong>−0.102685</strong>
+  with the vertical translation tangent and <strong>−0.889546</strong> with
+  the radial translation tangent. A singular vector's sign is arbitrary;
+  their absolute values carry the comparison. Within-cell moment-shift
+  tangents have absolute cosines 0.000104 vertical and 0.002046 radial.
+  These separate projections survive the correction, but neither alone
+  establishes the full transported-current displacement mode or identifies
+  the barrier as a vertical-displacement fold.</p>
 
-  <p>The unpinned replay from the saved sixteen-lane warm start stops at drive
-  <strong>1.0089341297149657</strong>, after 52 attempted sub-steps,
-  277 updates and 1253 fresh reads. The final balanced smallest singular
-  value is <strong>1.124237e-6</strong>. Centroid height drifts downward by
-  about <strong>22.147 µm</strong> in every lane from the seed. Among the
-  sixteen accepted continuation states, the drift starts at −2.321 µm at
-  drive 1.001, reaches −22.203 µm, and ends at −22.147 µm.
-  At the last state, the soft-mode flux image has a signed cosine of
-  <strong>−0.103</strong> with a vertical translation flux tangent and
-  <strong>−0.890</strong> with a radial translation flux tangent. The sign of
-  a singular vector is arbitrary, so the absolute cosines carry the physical
-  comparison. Simple within-cell moment shift tangents have absolute cosines
-  0.000104 vertical and 0.002046 radial. Neither projection by itself proves
-  the full transported-current displacement mode. The flux image and small
-  centroid drift do not support calling this a vertical-displacement fold.</p>
-
-  <p>The scratch pinned arm holds each lane's seed centroid height with a
-  uniform radial-field unknown and a declared row scale of 1e-3; its log
-  prints <code>SCRATCH_PIN_ACTIVE=true</code>. The row scale cancels from its
-  exact Schur-complement Newton update, while it remains explicit in the
-  bordered spectrum below. With the corrected post-update read, it reaches
-  <strong>1.0015521373748786</strong>, using 138 attempted sub-steps, 739
-  updates and 6789 fresh reads. The last accepted intermediate residual is
-  8.993137e-7 with a maximum radial field of 8.157 µT; the next 1.907e-9
-  drive increment is rejected at a <em>post-update</em> residual of
-  1.164290e-6 after six updates. The maximum centroid height error at that
-  rejection is 3.896e-20 m. It does not certify drive
-  1.01 at the required
-  1e-10 fresh-read tolerance. The unpinned arm reaches
-  <strong>0.00738199234</strong> more drive than this scratch pinned arm. The
-  scratch implementation uses its own
-  bordered Newton solve and line search; this negative result does not prove
-  that a production pin using a different globalization would fail.</p>
-
-  <figure id="bank-fold-vertical-singular-figure">
-    <img src="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg"
-         alt="Smallest balanced singular value against drive for the pinned and unpinned branches">
-    <figcaption>Smallest singular value versus drive for lane 0. Grey is the
-    unpinned branch at four retained states; blue is the centroid-bordered
-    matrix at six retained pinned states. Both series come from the same
-    sixteen-lane H200 process, which samples lane 0 for conditioning.
-    The bordered matrix includes a centroid row scaled by 1e-3 and a radial
-    field column scaled by 1e-3 T, so the two matrices have different
-    sizes and balancing conventions; their vertical gap is not a measure of physical
-    improvement. The arms stop at different drives, as the plot shows.</figcaption>
-  </figure>
-
-  <p>The corrected pinned diagnostic reaches drive 1.00155 under the
-  intermediate 1e-6 fresh-residual tolerance. Its bordered smallest singular
-  value is 4.033e-8 at drive 1.0, 3.299e-8 at 1.000125,
-  4.266e-8 at 1.000515625, 4.487e-8 at 1.000984375, and
-  7.269e-8 at the last two retained states near 1.001552137. All six
-  fresh reads are valid. The unpinned branch
-  falls from 6.273e-4 at drive 1.001 to 1.124e-6 at 1.0089341297149657.
-  These spectra show no singular-value rescue by the tested weak row; the
-  direct continuation outcome is the stronger negative evidence.</p>
-
-  <p>Provenance: H200 job 1308355 on 98dci4-gpu-0003 uses one card, four
-  CPUs, 64 GB and sixteen lanes. Its two fresh processes write
-  <code>repair-first.json</code> and <code>repair-second.json</code> in the
-  worker run directory; <code>compare.py</code> checks their null projection,
-  branch reach, reads, updates and both singular-value series. The plotted
-  SVGs were rendered to PNG and visually inspected before committing only
-  the SVGs. The job's <code>h200-repair-final-job.log</code> records the
-  assembled product and scratch pin status and the per-step fresh residuals.
-  Both processes reach the same unpinned and pinned drives with identical
-  read and update counts; all four unpinned and six pinned conditioning reads
-  in each process are valid. The log ends
-  <code>AGREE null=1 unpinned=1 pinned=1 condition=1</code> and
-  <code>EXIT=0</code>. Their header revisions differ only by a commit to the
-  contract-check script; <code>measure.py</code>, <code>condition.py</code>,
-  <code>compare.py</code> and the job runner are identical at both revisions,
-  as <code>process-source-identity.log</code> verifies. The separate
-  <code>contract-final.log</code> checks both receipts and ends
-  <code>EXIT=0</code>.</p>
+  <p id="bank-fold-height-pin-provenance">H200 job <strong>1308437</strong>
+  completed on 98dci4-gpu-0003 with scheduler exit 0:0 in 35 min 20 s, using
+  one card, four CPUs, 64 GB and sixteen lanes. Both fresh process headers
+  record revision <code>4805711f8986171d061c0b8572fc321c73eab473</code>,
+  the assigned tree's imported modules, GPU backend and x64 enabled.
+  <code>repair-first.json</code>, <code>repair-second.json</code> and
+  <code>h200-job.log</code> are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111407043811-bank-fold-height-pin</code>.
+  The log ends <code>AGREE null=1 unpinned=1 pinned=1 condition=1</code> and
+  <code>EXIT=0</code>. The supplemental receipt check verifies matching
+  sub-step counts, physical drift and final fields; its log is
+  <code>final-gate.log</code>. Only the singular-value SVG is regenerated;
+  its PNG inspection copy stays in that run directory.</p>
 </section>

@@ -1,0 +1,33 @@
+<section id="bank-fold-height-pin-landing">
+  <h3>Physical-height continuation correction</h3>
+  <p>The prototype now pins physical current-centroid height, including each
+  cell centre times its current, and uses the corresponding derivative in
+  the Newton row and bordered spectrum. A rigid 37 mm translation fails with
+  the cell-relative formula (observed movement zero, contract exit 1) and
+  passes with the physical formula (observed movement 37 mm, contract exit 0).
+  The finite-difference row check and seven other contract checks also pass.</p>
+  <p>One H200 job, <strong>1308437</strong>, completes with two agreeing fresh
+  sixteen-lane processes and <code>EXIT=0</code>. The physical-height pin
+  reaches <strong>1.0049403209686272</strong> in 66 attempted sub-steps,
+  3243 reads and 353 updates, with a final radial field of
+  <strong>+5.997292 µT</strong>. The unpinned arm reaches
+  <strong>1.0089341297149657</strong> in 52 attempted sub-steps, 1253 reads
+  and 277 updates; its physical centroid drifts <strong>−4.009863 mm</strong>.
+  Neither certifies drive 1.01. The bank's assembled
+  <code>PIN_ACTIVE=absent</code> and the scratch update's assembled
+  <code>SCRATCH_PIN_ACTIVE=true</code> are independently probed.</p>
+  <p>The corrected pinned smallest bordered singular value declines from
+  5.091436e-5 at drive 1.0 to 2.333206e-7 at its last accepted drive.
+  <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-fold-vertical.html#bank-fold-height-pin-measurement">The corrected measurement record</a>
+  replaces the invalid pinned reach 1.0015521373748786, its bordered spectra
+  and the −22.147 µm cell-relative drift. Its
+  <a href="/nova/figures/sub-millisecond-forward-path/bank-fold-vertical/smallest-singular-vs-drive.svg">regenerated singular-value figure</a>
+  was rendered to PNG and inspected; only the SVG is committed. The separate
+  null-vector panel and absolute radial/vertical cosines 0.889546/0.102685
+  remain unchanged. Product source and plan state are unchanged.</p>
+  <p>Prototype commit: <code>4805711f8986171d061c0b8572fc321c73eab473</code>.
+  Receipts, logs and the PNG inspection copy are in
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111407043811-bank-fold-height-pin</code>;
+  <code>h200-job.log</code> and <code>final-gate.log</code> end with
+  <code>EXIT=0</code>.</p>
+</section>

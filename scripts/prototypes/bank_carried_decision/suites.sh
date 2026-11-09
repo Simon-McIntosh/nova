@@ -32,13 +32,19 @@ run_file() {
         "$python" -m pytest -p no:cacheprovider -q "$file" "${extra[@]}"
         code=$?
         printf 'EXIT=%s\n' "$code"
+        exit "$code"
     ) > "$log" 2>&1
 }
 # One fresh process per file; arms share this one scheduler job.
 files=${4:-"tests/test_tracked_read.py tests/test_support_read.py tests/test_bank_solve_driver.py tests/test_bank_solve_cycle.py tests/test_candidate_inspection_batched.py"}
+result=0
 for file in $files; do
     run_file base "$scratch/base" "$file" &
+    base_pid=$!
     run_file HEAD "$root" "$file" &
-    wait
+    head_pid=$!
+    wait "$base_pid" || result=1
+    wait "$head_pid" || result=1
 done
-printf 'EXIT=0\n'
+printf 'EXIT=%s\n' "$result"
+exit "$result"

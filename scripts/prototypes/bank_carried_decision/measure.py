@@ -7,6 +7,7 @@ configure_dtypes()
 
 import argparse
 import json
+import hashlib
 import os
 from pathlib import Path
 from time import perf_counter
@@ -218,7 +219,11 @@ def main():
     program = solve_program(parts)
     certify = certificate_program(parts)
     rows = []
-    payload = {"revision": os.environ["MEASURE_REVISION"], "rows": rows}
+    payload = {
+        "revision": os.environ["MEASURE_REVISION"],
+        "rows": rows,
+        "inputs_sha256": hashlib.sha256(args.inputs.read_bytes()).hexdigest(),
+    }
     _, _, wall, _, _ = _analytic_inputs("diverted")
     diagnostic, observed, original, counter = (None, [], None, None)
     if args.census:
@@ -280,6 +285,9 @@ def main():
                 )
                 full = sum(observed)
                 carried = len(observed) - full
+                # Every solve takes a known full read before any carry branch.
+                assert full >= lanes, "read census missed the initial full read"
+                assert len(observed) >= lanes * int(jnp.max(counted.reads))
                 assert full % lanes == 0 and carried % lanes == 0
                 row["full_reads"] = full // lanes
                 row["carried_reads"] = carried // lanes

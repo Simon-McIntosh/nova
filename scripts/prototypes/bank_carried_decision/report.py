@@ -27,6 +27,10 @@ def main():
         }
         for process in (1, 2)
     }
+    hashes = {
+        receipt["inputs_sha256"] for pair in pairs.values() for receipt in pair.values()
+    }
+    assert len(hashes) == 1, "paired arms did not load the same seed archive"
     precision = []
     problems = []
     table = []
@@ -61,11 +65,12 @@ def main():
                 per_read = float(np.median(row["walls_ms"])) / max(row["reads"])
                 memory = row["peak_memory"] or {}
                 peak = memory.get("peak_bytes_in_use", memory.get("bytes_in_use"))
+                peak_gb = None if peak is None else peak / 1e9
                 table.append(
                     f"<tr><td>{process}</td><td>{arm}</td><td>{row['lanes']}</td>"
                     f"<td>{escape(row['key'])}</td><td>{row.get('full_reads')}</td>"
                     f"<td>{row.get('carried_reads')}</td><td>{row['wall_per_slice_ms']:.5f}</td>"
-                    f"<td>{per_read:.5f}</td><td>{peak}</td>"
+                    f"<td>{per_read:.5f}</td><td>{peak_gb}</td>"
                     f"<td><details><summary>Lane order</summary>reads {row['reads']}; "
                     f"updates {row['updates']}; "
                     f"diagnostic reads {row.get('diagnostic_reads')}; "

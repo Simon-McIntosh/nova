@@ -21,14 +21,18 @@ and GPU measurement remain open. No performance result or inspected figure has
 been produced yet. The reserved H200 allocation is queued on resources.</p>
 <h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
 <p><code>support_read.read_batch</code> still forms the stationary stencil and
-one batch-level <code>rebuild_needed</code> decision. When no lane requires a
+one batch-level <code>rebuild_needed</code> decision, including represented
+saddle cells. When no lane requires a
 rebuild, <code>topology.refresh_at_stationary_points</code> carries fragment
 selection, connected component and wall labels, admitted saddle slots, and the
 normal-form cell set. It recomputes nodal jets, own-cell coefficients, stationary
 positions and fluxes, saddle normal form, fragment areas, edge intervals and
 fractional membership from the new state. The full and carried routes share
 <code>topology._fragments_at_level</code>; connectivity and candidate inspection
-are skipped on a carry.</p>
+are skipped on a carry. Before labels can be carried, the refreshed fragments
+must preserve live slots, cut-cell classes, neighbour links and wall incidence.
+These local checks share the full read's connection calculation without repeating
+its global label propagation.</p>
 <p>Limited boundaries recompute wall events and follow the contact nearest the
 carried boundary. A tentative converged residual triggers a full fresh read
 before <code>solve_batch</code> can accept it. The last allowed update also
@@ -53,12 +57,19 @@ certificate even when the discrete decision stays unchanged. The added
 invalid-certificate arm initially over-constrained later backtracking requests;
 its assertion is corrected to permit a non-converged half-trial to skip
 certification while retaining the refusal and fresh-return checks. A paired
-rerun of that test file is pending. A displacement sweep also checks whether the
-existing tracked-cell predicate is sufficient over larger in-cell changes.</p>
+rerun of that test file is pending. The displacement sweep reproduced an additional defect: at a 0.2-pitch shift,
+tracked null cells stayed unchanged while eight normal-form cells and thirteen
+fragment selections changed; relative membership error was 0.747911826. The
+implementation now refuses to carry across represented-cell or fragment-incidence
+changes. Stable shifts of 1e-6, 1e-3 and 0.01 pitch are covered separately from
+the in-cell rebuild case.</p>
 <h2 id="bank-carried-decision-pending">Remaining measurements</h2>
-<p>Sirius job <code>1308719</code> runs the five named files as paired base and
-head arms with one fresh process per file. Job <code>1308723</code> repeats the
-changed tracked-read file after the refusal-test correction. The reserved H200
+<p>Sirius job <code>1308738</code> runs the final guard head against base over all
+five named files, one fresh process per file. The earlier job
+<code>1308719</code> and repaired tracked-read job <code>1308723</code> retain
+the preceding revisions' evidence; the repaired file reports nine passing tests.
+Controls job <code>1308729</code> checks the extended guard and repeats the
+declared stale-edge mutation. The reserved H200
 job <code>1308720</code> requests four CPUs, one GPU and 96 GB; its recorded
 state is <code>PENDING (Resources)</code>. It remains queued.</p>
 <p>The timing runner builds cold and preceding warm-stream inputs once at base,

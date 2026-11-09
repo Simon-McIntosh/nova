@@ -36,7 +36,8 @@ run_arm() {
     (
         cd "$tree" || exit 2
         export PYTHONPATH="$tree"
-        printf '# revision: %s tree: %s command: PYTHONPATH=. JAX_PLATFORMS=cpu %s -m pytest -p no:cacheprovider -q tests/test_tracked_read.py %s\n' "$base" "$tree" "$python" "$selection"
+        if [ "$label" = reproduction ]; then revision=$base; else revision=$(git -C "$root" rev-parse HEAD); fi
+        printf '# revision: %s tree: %s command: PYTHONPATH=. JAX_PLATFORMS=cpu %s -m pytest -p no:cacheprovider -q tests/test_tracked_read.py %s\n' "$revision" "$tree" "$python" "$selection"
         "$python" -c 'import os,nova; from nova.equilibrium import support_read; print("nova",nova.__file__,"module",support_read.__file__,"cwd",os.getcwd(),flush=True)'
         "$python" -m pytest -p no:cacheprovider -q tests/test_tracked_read.py $selection -s --basetemp="$scratch/$label-tests"
         printf 'EXIT=%s\n' "$?"

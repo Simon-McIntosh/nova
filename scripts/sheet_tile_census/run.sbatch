@@ -19,6 +19,9 @@ finish() {
   printf 'EXIT=%s\n' "$code"
 }
 trap finish EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+trap 'exit 129' HUP
 export TMPDIR="$scratch"
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 status=0
@@ -30,7 +33,9 @@ for size in 0.08 0.04; do
   export XDG_CACHE_HOME="$NOVA_COMPILATION_CACHE_ROOT"
   printf 'EMPTY_CACHE_ROOT=%s entries=%s\n' "$NOVA_COMPILATION_CACHE_ROOT" "$(ls -A "$NOVA_COMPILATION_CACHE_ROOT" | wc -l)"
   for state in miss hit; do
-    "$python" -u "$repo/scripts/sheet_tile_census/measure.py" --size "$size" --expect "$state" --output "$out/$size-$state.json" > "$out/$size-$state.log" 2>&1
+    options=()
+    [[ "$state" != hit ]] || options+=(--tile-only)
+    "$python" -u "$repo/scripts/sheet_tile_census/measure.py" --size "$size" --expect "$state" "${options[@]}" --output "$out/$size-$state.json" > "$out/$size-$state.log" 2>&1
     code=$?
     printf 'EXIT=%s\n' "$code" >> "$out/$size-$state.log"
     [[ $code == 0 ]] || status=1
@@ -45,4 +50,5 @@ printf 'EXIT=%s\n' "$code" >> "$out/control.log"
 [[ $code != 0 ]] || status=1
 "$python" -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r.get("tile_cache_result")=="miss" and r.get("error", "").startswith("AssertionError:")' "$out/control.json" || status=1
 printf 'CONTROL_EXIT=%s\n' "$code"
+"$python" "$repo/scripts/sheet_tile_census/verify.py" --directory "$out" --output "$out/verification.json" || status=1
 exit "$status"

@@ -825,11 +825,17 @@ def test_pancake_height_series_matches_high_precision(gamma, radius, source, exp
         (0.001, 1.0, 2.0, 0.0019566157278257212),
         (1.0, 1.0, 2.0, 1.5904821201104593),
         (4.4, 0.09, 0.53, 3.1190603443383114),
+        (1e-8, 1.0, 0.79, -2.88509515615868511446967726e-8),
+        (-1e-8, 1.0, 0.79, 2.88509515615868511446967726e-8),
+        (0.001, 1.0, 0.01, -1.57097070286330553469883048e-7),
+        (0.03, 0.1, 0.079, -0.487153254288254873083469693),
+        (0.01, 1.0, 0.801, -0.0311944426093918782142417924),
+        (0.1, 1.0, 1.2, 0.637341574282294800577587285),
     ),
 )
 def test_cylinder_height_endpoint_matches_high_precision(
     gamma, radius, source, expected
 ):
-    """The interior cylinder endpoint against 60-digit complete elliptic values."""
+    """Cylinder endpoints against complete elliptic values at 60 to 70 digits."""
     height = sheet_module._sheet_cylinder_height(np, gamma, radius, source)
     assert abs(height - expected) <= 5e-15 * abs(expected)

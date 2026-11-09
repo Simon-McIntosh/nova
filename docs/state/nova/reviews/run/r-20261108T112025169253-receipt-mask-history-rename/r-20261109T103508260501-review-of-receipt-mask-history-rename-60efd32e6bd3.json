@@ -40,6 +40,11 @@
       "kind": "folded",
       "node": "receipt-mask-history-rename",
       "recorded_at": "2026-11-09T10:57:03.731614+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "a pairing check kept beside the count checks at lines 119 and 140, which measure the population against labels the test authored",
+      "recorded_at": "2026-11-09T10:57:16.887687+00:00"
     }
   },
   "findings": [

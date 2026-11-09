@@ -18,9 +18,9 @@
 <h1>Carried support decision with fresh geometry</h1>
 <p>The implementation, focused controls and five-file paired suites are complete.
 The paired suites have zero added failures. Titan P100 job <code>1309317</code>
-failed during the base builder; a paired retry with stronger compiler memory fitting
-is being prepared. Every timing reported by this run will
-be a titan P100 wall; the H200 headline is pending a free card.</p>
+and retry <code>1309319</code> both failed during the sixteen-lane base builder.
+No titan P100 wall or device precision result is available, and no timing figure
+can be drawn. The H200 headline remains pending a free card.</p>
 <h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
 <p><code>support_read.read_batch</code> still forms the stationary stencil and
 one batch-level <code>rebuild_needed</code> decision, including represented
@@ -94,7 +94,7 @@ including source hashes and each per-file receipt, is retained as
 <code>paired-suite-audit.json</code> beside <code>paired-suite-audit.log</code>,
 which ends <code>EXIT=0</code>. The committed reproducer is
 <code>scripts/prototypes/bank_carried_decision/audit_suites.py</code>.</p>
-<h2 id="bank-carried-decision-pending">Remaining measurement</h2>
+<h2 id="bank-carried-decision-pending">Device measurement blocked by allocation failure</h2>
 <p>The final paired suite above closes the CPU gate. The earlier job
 <code>1308719</code> and repaired tracked-read job <code>1308723</code> retain
 the preceding revisions' evidence; the repaired file reports nine passing tests.
@@ -114,8 +114,20 @@ and a two-hour limit. It failed before producing common inputs or any timing:
 <code>RESOURCE_EXHAUSTED: Out of memory while trying to allocate 14.08GiB</code>
 (15,120,349,440 bytes). The compiler reported 16,672,843,845 temporary bytes
 (15.53 GiB), above its 11,840,517,815-byte fitting target. Builder and parent
-logs both end <code>EXIT=1</code>. A single paired retry uses JAX memory-fitting
-level O3 and effort 1.0 for both revisions, retaining <code>XLA_FLAGS=unset</code>. The H200 headline remains pending a free card.</p>
+logs both end <code>EXIT=1</code>. The paired retry, titan job
+<code>1309319</code>, used JAX memory-fitting level O3 and effort 1.0 for both
+revisions, retaining <code>XLA_FLAGS=unset</code>. Its base builder failed with
+the same 15,120,349,440-byte allocation request and ended <code>EXIT=1</code>;
+accounting reports <code>FAILED</code> after 3 min 23 s, beside 3 min 34 s for
+the first attempt. Its header confirms <code>Tesla P100-PCIE-16GB</code>,
+64-bit arithmetic and an allocator limit of 12,801,015,808 bytes. The failure
+therefore exceeds the configured allocator budget; it does not establish that
+the whole solve would fit the card if that budget were raised. Both attempts
+stopped before producing the common-input archive, so there are no base/head
+process-zero, one or two receipts, hashes, census matches or independent terminal
+precision results to admit. Width 128 was not attempted because width 16 could
+not run. The two failures exhaust the node retry rule; no product code was
+changed to accommodate the smaller device. The H200 headline remains pending a free card.</p>
 <p>The timing runner builds cold and preceding warm-stream inputs once at base,
 uses separate revision caches, warms each once, and measures two fresh processes
 per arm at 16 lanes. Width 128 is attempted only if compiled temporary and
@@ -129,6 +141,11 @@ only after receipts exist.</p>
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision</code>.
 The reproducible launchers and reporter are under
 <code>scripts/prototypes/bank_carried_decision</code>.
-The figure and its visual inspection remain required before delivery.</p>
+The failed P100 logs are in <code>titan/builder.log</code> and
+<code>titan-memory-fit/builder.log</code>, with their parent logs in the same
+directories. The missing measurement and inspected figure remain required for
+a complete verdict. A further P100 attempt requires a reviewed allocator-budget
+probe against physical free memory, or the same paired job can run on a larger
+card. The H200 headline remains pending a free card.</p>
 </section>
 </main></body></html>

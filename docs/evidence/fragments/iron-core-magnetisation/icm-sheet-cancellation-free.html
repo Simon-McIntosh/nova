@@ -151,16 +151,55 @@ run directory; none is a second production owner.</p>
 </section>
 <section id="icm-sheet-cancellation-free-gates">
 <h2>Implementation gates</h2>
-<p>The first implementation checkpoint passes 675 focused tests; the height
-identities bring the focused gate to 686 passes. The fixed WEST pair has
-bit-identical B<sub>R</sub> at batch sizes 1, 2 and 8:
-−5.465098407088696e−12 T. The exact baseline suite completed with 658 passes
-and one fixture timeout after five pool children were killed at the shared
-allocation memory ceiling. The test pair block is reduced from 4096 to 256, with four worker processes,
-with every target and cell retained and the 1e−13 floor unchanged; the bounded
-whole-mesh test timeout is 3600 s. The repeated eight-target preflight passes with a worst of 2.824e−14 and
-zero entries above the floor out of 54,272. Pending: the full head suite and
-declared subtractive-bracket negative control.</p>
+<p>The final CPU pair receipt has bit-identical B<sub>R</sub> at batch sizes
+1, 2 and 8: −5.465098407088696e−12 T. Both components are finite. The source
+and tests are committed at <code>56d461d4852ae8c4a9a135906f935d1f02c04ac6</code>;
+subsequent commits change this evidence record only. The 1e−10 ring-reference
+floor and the graded cross-check are unchanged and pass in the head suite.</p>
+<table>
+<thead><tr><th>Measurement</th><th>Recorded result</th><th>Limit</th></tr></thead>
+<tbody>
+<tr><td>Exact baseline suite</td><td>658 passed, 1 error in 1727.11 s;
+EXIT=1</td><td>The whole-mesh fixture timed out after five pool children
+were killed at the shared allocation memory ceiling.</td></tr>
+<tr><td>Height-corrected preflight, eight targets against all 1696 cells</td>
+<td>Worst per-end relative error 2.824e−14; 0 of 54,272 entries above
+1e−13; 3 passed in 160.13 s</td><td>This receipt precedes the widened
+source-series boundary. It measures those eight targets.</td></tr>
+<tr><td>Final focused gate</td><td>690 passed in 44.51 s</td><td>Includes the
+widened series-boundary fixtures and exact batch-size identity.</td></tr>
+<tr><td>Exact final suite, all 1696 targets selected</td><td>693 passed,
+1 error in 3766.61 s; EXIT=1</td><td>The whole-mesh fixture exceeded its
+3600 s bound before the comparison emitted a numerical receipt. No additional
+worker kills occurred. All-target finiteness and the 1e−13 floor remain
+unverified.</td></tr>
+<tr><td>Subtractive-bracket mutation on the height-corrected checkpoint</td>
+<td>Both the batch-size test and eight-target whole-cell agreement test fail;
+worst 6.258e−9, 2047 of 54,272 entries above 1e−13</td><td>Restores only
+the packed pancake radial subtraction. This is a counterexample on eight
+targets against every cell, before the final series-boundary widening.</td></tr>
+</tbody>
+</table>
+<p>The fixture now uses 256-pair blocks and four worker processes, retaining
+every target, every cell and the 1e−13 floor. A broken process pool raises
+explicitly. The head run records no new OOM kills, but the all-target computation
+still outlasts the 3600 s test bound. The repeated exact-command failure ends
+this worker's repair attempts under its dispatch contract. The planned final-head
+mutation run is not started after that refusal; the earlier mutation receipt
+above is retained with its revision limit.</p>
+<p>This node is blocked on the full numerical receipt, rather than on a measured
+all-target disagreement. The coordinator must choose a follow-on measurement
+with sufficient compute time or a separate implementation change that reduces
+the gate's cost, then run the final-head mutation. The implementation is not
+asserted to satisfy the whole-mesh measure, and the plan section remains open.</p>
+<p>Durable logs and numerical checks are in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044433957253-icm-sheet-cancellation-free</code>:
+<code>baseline_suite.log</code>, <code>after_suite.log</code>,
+<code>flat-pair-head.log</code>, <code>flat-pair-receipt.json</code>,
+<code>negative-control.log</code> and <code>after-suite-memory.jsonl</code>.
+The two suite arms use exactly
+<code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</code>,
+in fresh processes. No subset or tile environment variable prefixes either arm.</p>
 </section>
 </article>
 </body>

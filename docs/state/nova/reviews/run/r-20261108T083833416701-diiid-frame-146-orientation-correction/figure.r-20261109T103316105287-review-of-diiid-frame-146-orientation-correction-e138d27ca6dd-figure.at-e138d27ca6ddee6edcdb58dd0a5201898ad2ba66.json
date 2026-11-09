@@ -58,6 +58,11 @@
       "kind": "exempted",
       "reason": "the thin solved field on trip 2 is the collapse the record reports, and its caption says so",
       "recorded_at": "2026-11-09T11:00:13.889768+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "ticks are legible and consistent across the set; one size step below the axis labels",
+      "recorded_at": "2026-11-09T11:00:25.180029+00:00"
     }
   },
   "findings": [

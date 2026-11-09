@@ -48,6 +48,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-09T07:44:56.579734+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: a figures-layout follow-up placing the residual strip beside the poloidal panel so the contours use the canvas height instead of the margins",

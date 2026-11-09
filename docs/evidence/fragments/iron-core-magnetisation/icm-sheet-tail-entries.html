@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="icm-sheet-tail-entries">
+<meta name="plan-evidence-for" content="iron-core-magnetisation">
+<meta name="plan-verifies" content="iron-core-magnetisation#s3">
+<title>Exterior-cylinder sheet endpoint cancellation</title>
+</head>
+<body>
+<article>
+<h1 id="icm-sheet-tail-entries-title">Exterior-cylinder sheet endpoint cancellation</h1>
+<section id="icm-sheet-tail-entries-reproduction">
+<h2>Reproduction</h2>
+<p>The recorded matrix maximum maps to target 844, cell 420, height field per
+height magnetisation. Matrix components are stored in blocks, with radial rows
+before height rows within each worker shard, rather than alternating components.
+Target 844 is (4.957, 2.574971493902439) m. Cell 420's vertical edges are 906
+at radius 0.05 m and 907 at radius 0.13 m, each spanning z=2.5624 to 2.6424 m.</p>
+<p>The unchanged endpoint projection reproduces batch dependence for pair
+(844,906): B<sub>Z</sub> is −5.15787198874764e−13 T at batch size 1 and
+−5.157871988714087e−13 T at sizes 2 and 8. At size 256 it is
+−5.157871988736484e−13 T. The retained <code>pair-reproduction.log</code>
+records both edges. Full route attribution and the final head gate are pending.</p>
+</section>
+<section id="icm-sheet-tail-entries-derivation">
+<h2>Source-radius expansion of the exterior cylinder height endpoint</h2>
+<p>Write g=z′−z, target radius r, source radius s, d=√(r²+g²),
+t=g/d and v=s/d. The dimensionless height endpoint carried before μ₀/(2π) is</p>
+<pre>H_Z = g ∫₀^π s(s−r cos φ) / (L² D) dφ,
+L² = r²+s²−2rs cos φ,  D² = g²+L².</pre>
+<p>Its complete-elliptic identity is
+H<sub>Z</sub>=(g/a)[K(m)+(s−r)/(s+r)Π(n|m)], with
+a²=g²+(r+s)², m=4rs/a² and n=4rs/(r+s)².
+For an exterior target the two terms cancel as s/r tends to zero. The angular
+projection of the flux primitive carries the same small remainder.</p>
+<p>Introduce the disk potential V=∫<sub>disk(s)</sub>1/D dA. The planar divergence
+of g(ρ−r)/(L²D) is −g/D³ plus its 2π sign(g) point contribution at ρ=r.
+The divergence theorem therefore gives
+2H<sub>Z</sub>=∂<sub>g</sub>V+2π sign(g)1<sub>r&lt;s</sub>.
+For r&gt;s the point contribution vanishes. The angular addition theorem and
+the analytic source-radius integration give</p>
+<pre>V = 2π Σₖ≥₀ P₂ₖ(0) P₂ₖ(t) s²ᵏ⁺² / [(2k+2)d²ᵏ⁺¹],
+∂g[d⁻ⁿ⁻¹ Pₙ(t)] = −(n+1)d⁻ⁿ⁻² Pₙ₊₁(t),
+H_Z = −π t v² Σₖ≥₀ [(2k+1)/(2k+2)] P₂ₖ(0)
+                         [P₂ₖ₊₁(t)/t] v²ᵏ.</pre>
+<p>The factor tv² is formed before summation. Carrying the odd Legendre
+polynomial divided by t keeps g=0 regular and avoids losing relative accuracy
+near the edge's plane. With E=P₂ₖ(t), O=P₂ₖ₊₁(t)/t and p=P₂ₖ(0), the recurrence is</p>
+<pre>E_next = [(4k+3)t² O − (2k+1)E]/(2k+2),
+O_next = [(4k+5)E_next − (2k+2)O]/(2k+3),
+p_next = −p(2k+1)/(2k+2),   E₀=O₀=p₀=1.</pre>
+<p>The qualified region is r&gt;s and v≤4/5. Ninety-six terms leave a geometric
+tail below double-precision rounding. Elsewhere the complete-elliptic identity
+has no large opposing terms: r≤s gives the same sign, while the remaining
+exterior region bounds (r−s)/(r+s). No source or angular quadrature is added.</p>
+</section>
+<section id="icm-sheet-tail-entries-independent">
+<h2>Independent checks before implementation</h2>
+<p>A 65-digit evaluation of the complete-elliptic identity over 350 exterior
+geometries checks source/target radius ratios 0.001 to 0.79 and height/radius
+ratios zero to 100, including 1e−8 near the plane. The worst relative difference
+from the derived series is 1.0584553134129076e−15. A separate compiled series
+probe gives exactly −5.157871988723156e−13 T for pair (844,906) and
+−3.4890208935350897e−12 T for pair (844,907) at all four batch sizes.</p>
+<p>Logs and numerical receipts are retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries</code>:
+<code>cylinder-derivation.log</code>, <code>series-batch.log</code>, and
+<code>pair-reproduction.log</code>. These checks establish the identity; they do
+not yet establish the whole-mesh gate at the implementation head.</p>
+</section>
+</article>
+</body>
+</html>

@@ -47,7 +47,9 @@ def row(args):
     import numpy as np
 
     from nova.equilibrium import fixed_point
+    from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
     from nova.jax.config import configure_dtypes
+    from nova.linalg.tensor_spline import fit_tensor_spline
 
     configure_dtypes()
     assert jax.config.jax_enable_x64
@@ -134,12 +136,23 @@ def row(args):
     with np.load(args.output / "terminal.npz") as saved:
         assert record["storage_order"] == "radius_height"
         assert saved["flux"].shape == (saved["radius"].size, saved["height"].size)
+        import jax.numpy as jnp
+
+        field = fit_tensor_spline(
+            jnp.asarray(saved["radius"]),
+            jnp.asarray(saved["height"]),
+            jnp.asarray(saved["label"].T),
+        )
+        starts = np.vstack((saved["reference_axis"], saved["reference_saddle"]))
+        roots = polish_stationary_points(field, jnp.asarray(starts), jnp.ones(2, bool))
+        assert np.asarray(roots["converged"]).all(), "EFIT null polishing refused"
+        reference_saddle = np.asarray(roots["position_rz"])[1]
         record.update(
             axis_rz_m=saved["axis"][:2].tolist(),
             x_point_rz_m=saved["saddle"][:2].tolist(),
-            efit_x_point_rz_m=saved["reference_saddle"].tolist(),
+            efit_x_point_rz_m=reference_saddle.tolist(),
             x_point_distance_m=float(
-                np.linalg.norm(saved["saddle"][:2] - saved["reference_saddle"])
+                np.linalg.norm(saved["saddle"][:2] - reference_saddle)
             ),
             warmup=history,
             warmup_refused_proposals=sum(r["refused"] for r in history),

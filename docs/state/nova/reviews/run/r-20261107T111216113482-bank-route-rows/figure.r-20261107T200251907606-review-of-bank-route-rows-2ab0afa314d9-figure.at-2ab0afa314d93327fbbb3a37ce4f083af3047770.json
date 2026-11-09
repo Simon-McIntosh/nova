@@ -6,6 +6,13 @@
   "figures_reviewed": [
     "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-route-rows",
+      "recorded_at": "2026-11-09T04:42:46.176095+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg",

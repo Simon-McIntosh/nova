@@ -38,6 +38,13 @@
     "result": "Inspected the three rendered previews at the reviewed head. Frame 146 trip 1: nested solved contours around the reported axis inside the limiter, violet bounding surface closing in the midplane, both null sets drawn, the displaced X-point callout legible with its hollow true-position dot, residual column beside the panel with a fixed 0.05 step and two decimals. Frame 146 trip 2: the axis triangle sits above the limiter as the corrected record states, the crowded solved set is drawn thin, and no bounding-surface legend entry appears because none is drawn. Frame 137 trip 2: the axis is inside the core with contours nesting around it. No clipped or overlapping label observed; a legend entry is present for every mark drawn.",
     "revision": "e138d27ca6ddee6edcdb58dd0a5201898ad2ba66"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the four trip readers are prototype scripts on a correction record; each now calls the one declared-order helper, and its gate's transposed control moves the axis 0.328 m",
+      "recorded_at": "2026-11-09T10:59:15.830035+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_vertical_loss/check_orientation.py",

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="iron-core-magnetisation">
+<meta name="plan-verifies" content="iron-core-magnetisation#s3">
+<title>Cancellation-free sheet endpoint fields</title>
+</head>
+<body>
+<article>
+<h1 id="icm-sheet-cancellation-free-title">Cancellation-free sheet endpoint fields</h1>
+<section id="icm-sheet-cancellation-free-reproduction">
+<h2>Reproduction before implementation</h2>
+<p>The unchanged CPU kernel reproduces the recorded batch dependence for WEST
+pair (0,1129): B<sub>R</sub> is −5.4650984030847755e−12 T at n=1 and n=8,
+and −5.465098408938728e−12 T at n=2. The probe is the preceding precision
+node's <code>minimal.py</code>, executed with Python's safe-path option because
+that run directory also contains a <code>bisect.py</code> that shadows the
+standard library. The retained log is <code>reproduction-safe.log</code> in
+this node's run directory.</p>
+</section>
+<section id="icm-sheet-cancellation-free-pancake">
+<h2>Pancake radial identity</h2>
+<p>Write the target radius as r, source radius as s, source minus target height
+as g, c²=r²+g², and d²=c²+s². Let H denote the endpoint radial field before
+multiplication by μ₀/(2π). Combining the two pole fractions under the defining
+integral, rather than subtracting their evaluated complete integrals, gives</p>
+<pre>H = g ∫₀^π cos φ (c² − sr cos φ)
+          / [(c² − r² cos² φ) √(d² − 2rs cos φ)] dφ.</pre>
+<p>The angular addition theorem for Legendre polynomials yields
+∫₀^π cos φ Pₙ(sin θ cos φ) dφ = π Pₙ¹(0)Pₙ¹(cos θ)/(n(n+1)).
+Since Pₙ¹(x)=−√(1−x²) Cₙ₋₁³ᐟ²(x), differentiating the source-radius integral
+of the ring potential analytically gives the following two convergent endpoint
+series. Neither series evaluates the cancelling pole sum.</p>
+<pre>For v=s/c ≤ 1/2, t=g/c:
+H = −π (r g/c²) v³ Σₖ≥₀ v²ᵏ C₂ₖ³ᐟ²(0)
+                         [C₂ₖ₊₁³ᐟ²(t)/t] / [(2k+2)(2k+3)].
+
+For v=c/s ≤ 1/2:
+H = −π sign(g) r/(c+|g|)
+    −π (r g/c²) Σₖ≥₁ v²ᵏ C₂ₖ³ᐟ²(0)
+                         [C₂ₖ₋₁³ᐟ²(t)/t] / [(2k)(2k+1)].</pre>
+<p>The outer series integrates the remaining rings from s to infinity. Its
+constant is the exact infinite-radius endpoint, rationalised as
+−π sign(g)r/(c+|g|). The odd Gegenbauer polynomial is carried divided by its
+argument through an even/odd recurrence, so g=0 never introduces 0/0.</p>
+<p>For the intermediate source range, the near-axis cancellation is handled by
+expanding the already-combined pole integrand in q=2rs/d² and h=r²/c². Set
+cₙ=(2n choose n)/4ⁿ and
+Iₖ(h)=∫₀^π cos²ᵏ⁺²φ/(1−h cos²φ)dφ. Pairing the odd and even binomial
+coefficients before summation gives</p>
+<pre>H = (g r s³)/(c² d³) [−I₀(h)
+    + Σₖ≥₁ c₂ₖ q²ᵏ⁻² (4r²/d⁴)
+      ((2k/(2k+1))c² − s²) Iₖ(h)],
+Iₖ(h) = Σⱼ≥₀ hʲ π (2j+2k+2 choose j+k+1)/4ʲ⁺ᵏ⁺¹.</pre>
+<p>The first coefficient is −s² before s³ is factored out. This is the term
+lost by subtracting the complete pole integrals. The near-axis series is used
+at h≤1/4. Outside these three regions the geometric ratios are bounded away
+from the cancellation limits and the direct complete-integral identity is
+retained. Each pancake series uses 32 terms per index.</p>
+</section>
+<section id="icm-sheet-cancellation-free-sloped">
+<h2>Sloped gamma derivative identity</h2>
+<p>Let b=dr′/dz′, a=√(1+b²), and S=a b R+A, the bracket whose flux is
+μ₀r S/a². Along the source line the antiderivative satisfies
+(∂g+b∂s)S=a³s∫₀^π cos φ/D dφ. Differentiating this identity with respect
+to g commutes with its source-line derivative. Set g₀=g−s/b,
+c₀=√(r²+g₀²), t=−g₀/c₀, u=sign(b)/a, and v=sa/(|b|c₀).
+On the exterior branch |b g₀|&gt;r the zero-source gamma derivative is zero.
+Integrating the differentiated addition theorem in source radius then gives</p>
+<pre>∂g S = π (a³/b) (r/c₀) (s/c₀)³
+       Σₙ≥₁ vⁿ⁻¹ Cₙ³ᐟ²(t) Cₙ₋₁³ᐟ²(u) / [(n+1)(n+2)].</pre>
+<p>This is the derivative of the same closed antiderivative, with its cancelling
+root and arsinh contributions combined analytically. The factor s³ is explicit.
+The source integral is performed symbolically on each power; no numerical
+source or angular quadrature is added. The series is used at v≤1/2 on that
+exterior branch, and the regular complete-integral composition remains elsewhere.
+Eighty terms bound the geometric tail below double-precision rounding. The
+recurrence is (n+1)Cₙ₊₁³ᐟ²(x)=(2n+3)xCₙ³ᐟ²(x)−(n+2)Cₙ₋₁³ᐟ²(x).</p>
+<p>The exterior qualification is essential. The printed primitive has an
+additional branch contribution when |b g₀|&lt;r; applying the zero-source identity
+there changes the answer. Independent high-precision checks caught this in the
+standalone derivation, before implementation.</p>
+</section>
+<section id="icm-sheet-cancellation-free-independent-checks">
+<h2>Checks of the identities before wiring</h2>
+<table>
+<thead><tr><th>Identity</th><th>Independent reference</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Three pancake series, 45 geometries</td><td>70-digit complete elliptic
+integrals, including the pole terms</td><td>Worst relative error
+1.128903469874604e−15</td></tr>
+<tr><td>Sloped source multipole, 335 qualified geometries</td><td>60-digit
+angular integral of the original root-plus-arsinh gamma derivative</td><td>Worst
+relative error 2.017559941485094e−15; maximum term-sum condition 14.2922</td></tr>
+</tbody>
+</table>
+<p>The first double-precision angular check was ill-conditioned near the plane;
+a 70-digit elliptic check replaced it as the numerical authority. A direct
+angular power-series reduction of the sloped rational integrand retained a
+condition above 1e5 and was rejected. The source multipole above removes that
+remaining cancellation. All exploratory scripts and logs live in the node's
+run directory; none is a second production owner.</p>
+</section>
+<section id="icm-sheet-cancellation-free-gates">
+<h2>Implementation gates</h2>
+<p>Pending: production wiring, CPU batch-size probe, ring-reference floor,
+whole-mesh agreement, and the declared subtractive-bracket negative control.
+The baseline suite is running at the recorded base revision.</p>
+</section>
+</article>
+</body>
+</html>

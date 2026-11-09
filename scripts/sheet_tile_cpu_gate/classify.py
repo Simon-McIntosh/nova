@@ -19,22 +19,28 @@ def build(bounds):
     """Capture the production edge fields and the host reference for one shard."""
     held = {}
     original = assembly.sheet_edge_field
+    original_reference = gate.unbatched_edge_field
 
     def capture(*args, **kwargs):
         values = original(*args, **kwargs)
         held["fields"] = values
         return values
 
+    def capture_reference(*args, **kwargs):
+        values = original_reference(*args, **kwargs)
+        held["reference"] = values
+        return values
+
     assembly.sheet_edge_field = capture
+    gate.unbatched_edge_field = capture_reference
     try:
         lower, upper, tiled, reference, scale = gate.build_slice(bounds)
     finally:
         assembly.sheet_edge_field = original
+        gate.unbatched_edge_field = original_reference
     polygons, centres = gate.west_mesh()
     edges = assembly.cell_edges(polygons)
-    radial, height = gate.unbatched_edge_field(
-        centres[lower:upper, 0], centres[lower:upper, 1], edges
-    )
+    radial, height = held["reference"]
     differences = (held["fields"][0] - radial, held["fields"][1] - height)
     error = np.abs(tiled - reference) / scale
     rows, columns = np.where(error > gate.GATE)
@@ -87,7 +93,7 @@ def build(bounds):
                     "edge": int(edge),
                     "route": route,
                     "contribution": float(contribution),
-                    "dominant": edge == dominant,
+                    "dominant": bool(edge == dominant),
                     "distance_over_length": float(distance / length),
                     "line_distance_over_length": float(line_distance / length),
                     "plane_distance_over_length": float(abs(displacement[1]) / length),

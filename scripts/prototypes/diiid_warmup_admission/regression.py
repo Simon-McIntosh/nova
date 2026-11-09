@@ -99,6 +99,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--scope-only", action="store_true")
     args = parser.parse_args()
     repository = Path(__file__).resolve().parents[3]
     args.output.mkdir(parents=True, exist_ok=True)
@@ -115,15 +116,37 @@ def main():
         else:
             assert (tree / "nova/equilibrium/fixed_point.py").is_file()
             log = args.output / "suite.log"
-            log.write_text(
-                f"# revision: {args.revision}; tree: {tree}; "
-                "command: empty scoped baseline\n"
-                f"BASE_SCOPE_EMPTY={NODE_TEST}\n"
-                "KNOWN_PRESENT=nova/equilibrium/fixed_point.py\nEXIT=0\n"
+            code = (
+                "from pathlib import Path; "
+                "from nova.equilibrium import fixed_point; "
+                "import os; "
+                "print('IMPORTED_MODULE=' + fixed_point.__file__); "
+                "print('RESOLVED_CWD=' + os.getcwd()); "
+                "assert Path('nova/equilibrium/fixed_point.py').is_file(); "
+                f"assert not Path({NODE_TEST!r}).exists(); "
+                f"print('BASE_SCOPE_EMPTY={NODE_TEST}'); "
+                "print('KNOWN_PRESENT=nova/equilibrium/fixed_point.py')"
             )
+            command = [PYTHON, "-c", code]
+            literal = "PYTHONPATH=. JAX_PLATFORMS=cpu " + shlex.join(command)
+            with log.open("w") as stream:
+                stream.write(
+                    f"# revision: {args.revision}; tree: {tree}; command: {literal}\n"
+                )
+                stream.flush()
+                result = subprocess.run(
+                    command,
+                    cwd=tree,
+                    env=dict(os.environ, PYTHONPATH=".", JAX_PLATFORMS="cpu"),
+                    stdout=stream,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                )
+                stream.write(f"EXIT={result.returncode}\n")
+            assert result.returncode == 0
             records["suite"] = dict(
                 revision=args.revision,
-                command="",
+                command=literal,
                 exit_status=0,
                 log_path=str(log),
                 completed=True,
@@ -132,6 +155,8 @@ def main():
                 note="Empty scoped suite: the node creates its only test file.",
             )
         (args.output / "results.json").write_text(json.dumps(records, indent=2) + "\n")
+        if args.scope_only:
+            return
         for path in FILES:
             records[path] = gate(
                 tree, args.revision, path, args.output / (Path(path).stem + ".log")

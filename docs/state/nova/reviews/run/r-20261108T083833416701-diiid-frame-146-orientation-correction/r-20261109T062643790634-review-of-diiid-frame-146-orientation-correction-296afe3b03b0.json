@@ -1,0 +1,103 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured as an armed suite pair: the reviewed run's manifest carries no baseline_suite and no after_suite, and its gate-final.log is the legibility check rather than a pytest run, so 0 records the absence of an armed suite rather than a measured zero added failures.",
+  "assertion_audit": [
+    {
+      "fails_when": "Restoring the single 3.0 pt solved stroke draws the nine levels into a band; measure() counts 7254 fused pixels and main() raises CONTOURS FUSED at EXIT=1, as legibility-negative-control.log records.",
+      "independent": true,
+      "path": "scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:66"
+    },
+    {
+      "fails_when": "If solved_level_widths returned SOLVED_FLUX_WIDTH for every level the SVG would carry nine 3.0 pt strokes; nothing in the repository asserts the emitted widths, so only the run-directory gate catches this regression.",
+      "independent": true,
+      "limit": "No test collects the check; the guard lives as a script in the run directory and its red run is a log, not a suite entry.",
+      "path": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:347"
+    },
+    {
+      "fails_when": "It cannot fail on its own subject: the mask compares against a hard-coded SOLVED_FLUX, and changing nova/media/ink.py:45 flux_color would zero solved_pixels and fused_pixels and print CONTOURS LEGIBLE.",
+      "independent": false,
+      "path": "scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:62"
+    }
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:solved_level_widths",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:main",
+    "scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:main",
+    "nova/media/poloidal.py:draw_flux_contours",
+    "nova/media/ink.py:poloidal_axes"
+  ],
+  "completed_at": "2026-11-09T06:43:53.053Z",
+  "dispatched_at": "2026-11-09T06:28:52Z",
+  "figure_review": {
+    "inspected": [
+      "frame-146-trip-2-flux-contours.check.png at head",
+      "frame-146-trip-2-flux-contours.check.png at 69ced0e8b, reverted drawing"
+    ],
+    "result": "Viewed the head-rasterised trip-2 panel and the reverted-drawing control side by side: at the base the nine blue levels fuse into a solid block above the limiter and along the bottom edge, carrying no level information; at the head every level is separable in both regions, the legend sits above with no undrawn entry, no label collides or leaves the canvas, and the plasma sits inside the limiter.",
+    "revision": "296afe3b03b0e231e05eb2ec24a69697b56f3b15"
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/per-trip-panels.json",
+      "line": "44",
+      "severity": "blocking",
+      "text": "the three svg pointers were rewritten from repository-relative docs/figures paths to absolute run-directory paths under .config/reckon/crew/runs/.../rendered/adaptive, which resolve for no other reader and will die with the run directory; render_trip_panels.py:720 records str(out), so rendering into run scratch bakes a transient path into a committed artefact."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py",
+      "line": "91",
+      "severity": "non-blocking",
+      "text": "the check prints CONTOURS LEGIBLE whenever no fused pixels are counted and never asserts solved_pixels > 0, while its mask at line 62 matches a hard-coded SOLVED_FLUX rather than nova/media/ink.py:45 flux_color, so a change to the flux colour empties the mask and the guard reports legibility it has not measured."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": "572",
+      "severity": "non-blocking",
+      "text": "the legend's solved-flux handle is drawn at SOLVED_FLUX_WIDTH 3.0 pt while the levels it names are 0.7-1.21 pt on frame 146 trip 2, so the sample overstates the stroke by up to four times, against the rule that a legend entry be as thick as the line it names."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": "476",
+      "severity": "non-blocking",
+      "text": "axes.set_aspect(\"equal\") repeats what poloidal_axes already did at nova/media/ink.py:164 on the preceding line; the set_xlim/set_ylim that follow it are load-bearing for the display-space spacing measured at line 480, but the aspect line itself is redundant."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the single commit 296afe3b0 against 69ced0e8b; seven files, check_contour_legibility.py added, render_trip_panels.py gaining _level_spacing and solved_level_widths plus per-level drawing, three SVGs re-rendered, per-trip-panels.json rewritten with run-directory absolute svg paths, and the fragment gaining one correction bullet.",
+    "done_when": "The source done-when's binding and regeneration measures still hold at this head (check_orientation.py native shift 3.4e-9 m against 0.3284652 m transposed), and the increment's own measure is asserted by check_contour_legibility.py in gate-final.log, whose header names revision 296afe3b0 and whose last line is EXIT=0 with 19, 12 and 4 fused pixels.",
+    "goal": "The source goal is to correct the frame-146 record after the flux grid was read with R and Z swapped; this increment (296afe3b0) closes the legibility defect the previous review left against it, and the committed SVG for frame 146 trip 2 carries solved strokes of 0.7 pt and 1.19-1.21 pt where the base carried nine at 3.0 pt.",
+    "manifest": "Read source manifest.md; it records the repair, the 7254-to-4 measurement and the reverted-drawing control, but its rubric.figures claim about legend sample widths no longer holds at render_trip_panels.py:572.",
+    "write_paths": "Read the source brief's three grants; all seven paths in the diff lie inside scripts/prototypes/diiid_vertical_loss/, docs/figures/diiid-frame-146-vertical-loss/, or the frame-146 fragment."
+  },
+  "justifications": {
+    "durability": "check_contour_legibility.py:66 refuses a fused band and its red run is logged, but it lives only as a script gate and its mask at check_contour_legibility.py:62 hard-codes the flux colour, so no repository test reddens if the per-level drawing is reverted and a colour change would make the guard pass on an empty mask.",
+    "evidence": "gate-final.log names revision 296afe3b0 and ends EXIT=0 with fused counts 19/12/4, and legibility-negative-control.log records the reverted drawing refusing at 7254 fused pixels; I re-ran the same check at head into review-gate.log and reproduced 19/12/4 EXIT=0.",
+    "fit": "the new names (_level_spacing, solved_level_widths, FUSED_RUN, BLOCK_PIXELS) describe their mechanisms and follow the module's style at render_trip_panels.py:309, but line 476 repeats the equal aspect nova/media/ink.py:164 already set one line earlier.",
+    "goal_fidelity": "render_trip_panels.py:493 redraws each solved level at the width solved_level_widths returns, and the committed SVG for frame 146 trip 2 carries five 0.7 pt and four 1.19-1.21 pt solved strokes where the committed base carried nine at 3.0 pt, exactly the defect the commit claims to fix.",
+    "reuse": "no owner for raster contour-legibility measurement exists in nova/ or scripts/, so check_contour_legibility.py is the first, but its SOLVED_FLUX constant at check_contour_legibility.py:22 re-states the value nova/media/ink.py:45 owns rather than importing DEFAULT_INK.flux_color.",
+    "scope_discipline": "every path in 69ced0e8b..296afe3b0 is inside the source brief's three write paths, and no product source under nova/ changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal is to correct the frame-146 record after the flux grid was read with R and Z swapped; this increment (296afe3b0) closes the legibility defect the previous review left against it, and docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg now carries solved strokes of 0.7 pt and 1.19-1.21 pt where 69ced0e8b carried nine at 3.0 pt.\nVERDICT done_when: The source done-when's binding and regeneration measures still hold at this head (check_orientation.py native shift 3.4e-9 m against 0.3284652 m transposed, receipts re-run over the four archives), and the increment's own measure is asserted by scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py in gate-final.log, whose header names revision 296afe3b0 and whose last line is EXIT=0 with 19, 12 and 4 fused pixels on the three panels.\nVERDICT write_paths: Read the source brief's three grants; all seven paths in the diff lie inside scripts/prototypes/diiid_vertical_loss/, docs/figures/diiid-frame-146-vertical-loss/, or docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html.\nVERDICT manifest: Read source manifest.md; it records the repair, the 7254-to-4 fused-pixel measurement and the reverted-drawing control, but its rubric.figures claim that every legend sample carries the width of the line it names no longer holds at this head (scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:572 draws the solved-flux handle at SOLVED_FLUX_WIDTH 3.0 pt while trip 2's levels are 0.7-1.21 pt).\nVERDICT diff: Read the single commit 296afe3b0 against 69ced0e8b: check_contour_legibility.py added (95 lines), render_trip_panels.py gains _level_spacing (line 309) and solved_level_widths (line 347) plus per-level drawing at line 493, the three SVGs are re-rendered with per-level strokes verified in the committed SVG text, and per-trip-panels.json's three svg pointers were rewritten to run-directory absolute paths.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:solved_level_widths, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:main, scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:main, nova/media/poloidal.py:draw_flux_contours, nova/media/ink.py:poloidal_axes\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: render_trip_panels.py:493 redraws each solved level at the width solved_level_widths returns, and the committed SVG for frame 146 trip 2 carries five 0.7 pt and four 1.19-1.21 pt solved strokes where the base carried nine at 3.0 pt, exactly the defect the commit claims to fix.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-final.log names revision 296afe3b0 and ends EXIT=0 with fused counts 19/12/4, and legibility-negative-control.log records the reverted drawing refusing at 7254 fused pixels; I re-ran the same check at head into review-gate.log and reproduced 19/12/4 EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 69ced0e8b..296afe3b0 is inside the source brief's three write paths, and no product source under nova/ changed.\nSCORE durability: 15\nJUSTIFICATION durability: check_contour_legibility.py:66 refuses a fused band and its red run is logged, but it lives only as a script gate and its mask at check_contour_legibility.py:62 hard-codes the flux colour, so no repository test reddens if the per-level drawing is reverted and a colour change would make the guard pass on an empty mask.\nSCORE fit: 15\nJUSTIFICATION fit: the new names (_level_spacing, solved_level_widths, FUSED_RUN, BLOCK_PIXELS) describe their mechanisms and follow the module's style at render_trip_panels.py:309, but line 476 repeats the equal aspect nova/media/ink.py:164 already set one line earlier.\nSCORE reuse: 16\nJUSTIFICATION reuse: no owner for raster contour-legibility measurement exists in nova/ or scripts/, so check_contour_legibility.py is the first, but its SOLVED_FLUX constant at check_contour_legibility.py:22 re-states the value nova/media/ink.py:45 owns rather than importing DEFAULT_INK.flux_color.\nFINDING docs/figures/diiid-frame-146-vertical-loss/per-trip-panels.json:44 blocking: the three svg pointers were rewritten from repository-relative docs/figures paths to absolute run-directory paths under .config/reckon/crew/runs/.../rendered/adaptive, which resolve for no other reader and will die with the run directory; render_trip_panels.py:720 records str(out), so rendering into run scratch bakes a transient path into a committed artefact.\nFINDING scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:91 non-blocking: the check prints CONTOURS LEGIBLE whenever no fused pixels are counted and never asserts solved_pixels > 0, while its mask at line 62 matches a hard-coded SOLVED_FLUX rather than nova/media/ink.py:45 flux_color, so a change to the flux colour empties the mask and the guard reports legibility it has not measured.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:572 non-blocking: the legend's solved-flux handle is drawn at SOLVED_FLUX_WIDTH 3.0 pt while the levels it names are 0.7-1.21 pt on frame 146 trip 2, so the sample overstates the stroke by up to four times, against the rule that a legend entry be as thick as the line it names.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:476 non-blocking: axes.set_aspect(\"equal\") repeats what poloidal_axes already did at nova/media/ink.py:164 on the preceding line, so the new line is redundant; the set_xlim/set_ylim that follow it are load-bearing for the display-space spacing measured at line 480.\n",
+  "review_run_id": "r-20261109T062643790634-review-of-diiid-frame-146-orientation-correction-296afe3b03b0",
+  "review_text": "VERDICT goal: The source goal is to correct the frame-146 record after the flux grid was read with R and Z swapped; this increment (296afe3b0) closes the legibility defect the previous review left against it, and docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg now carries solved strokes of 0.7 pt and 1.19-1.21 pt where 69ced0e8b carried nine at 3.0 pt.\nVERDICT done_when: The source done-when's binding and regeneration measures still hold at this head (check_orientation.py native shift 3.4e-9 m against 0.3284652 m transposed, receipts re-run over the four archives), and the increment's own measure is asserted by scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py in gate-final.log, whose header names revision 296afe3b0 and whose last line is EXIT=0 with 19, 12 and 4 fused pixels on the three panels.\nVERDICT write_paths: Read the source brief's three grants; all seven paths in the diff lie inside scripts/prototypes/diiid_vertical_loss/, docs/figures/diiid-frame-146-vertical-loss/, or docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html.\nVERDICT manifest: Read source manifest.md; it records the repair, the 7254-to-4 fused-pixel measurement and the reverted-drawing control, but its rubric.figures claim that every legend sample carries the width of the line it names no longer holds at this head (scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:572 draws the solved-flux handle at SOLVED_FLUX_WIDTH 3.0 pt while trip 2's levels are 0.7-1.21 pt).\nVERDICT diff: Read the single commit 296afe3b0 against 69ced0e8b: check_contour_legibility.py added (95 lines), render_trip_panels.py gains _level_spacing (line 309) and solved_level_widths (line 347) plus per-level drawing at line 493, the three SVGs are re-rendered with per-level strokes verified in the committed SVG text, and per-trip-panels.json's three svg pointers were rewritten to run-directory absolute paths.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:solved_level_widths, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:main, scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:main, nova/media/poloidal.py:draw_flux_contours, nova/media/ink.py:poloidal_axes\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: render_trip_panels.py:493 redraws each solved level at the width solved_level_widths returns, and the committed SVG for frame 146 trip 2 carries five 0.7 pt and four 1.19-1.21 pt solved strokes where the base carried nine at 3.0 pt, exactly the defect the commit claims to fix.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-final.log names revision 296afe3b0 and ends EXIT=0 with fused counts 19/12/4, and legibility-negative-control.log records the reverted drawing refusing at 7254 fused pixels; I re-ran the same check at head into review-gate.log and reproduced 19/12/4 EXIT=0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 69ced0e8b..296afe3b0 is inside the source brief's three write paths, and no product source under nova/ changed.\nSCORE durability: 15\nJUSTIFICATION durability: check_contour_legibility.py:66 refuses a fused band and its red run is logged, but it lives only as a script gate and its mask at check_contour_legibility.py:62 hard-codes the flux colour, so no repository test reddens if the per-level drawing is reverted and a colour change would make the guard pass on an empty mask.\nSCORE fit: 15\nJUSTIFICATION fit: the new names (_level_spacing, solved_level_widths, FUSED_RUN, BLOCK_PIXELS) describe their mechanisms and follow the module's style at render_trip_panels.py:309, but line 476 repeats the equal aspect nova/media/ink.py:164 already set one line earlier.\nSCORE reuse: 16\nJUSTIFICATION reuse: no owner for raster contour-legibility measurement exists in nova/ or scripts/, so check_contour_legibility.py is the first, but its SOLVED_FLUX constant at check_contour_legibility.py:22 re-states the value nova/media/ink.py:45 owns rather than importing DEFAULT_INK.flux_color.\nFINDING docs/figures/diiid-frame-146-vertical-loss/per-trip-panels.json:44 blocking: the three svg pointers were rewritten from repository-relative docs/figures paths to absolute run-directory paths under .config/reckon/crew/runs/.../rendered/adaptive, which resolve for no other reader and will die with the run directory; render_trip_panels.py:720 records str(out), so rendering into run scratch bakes a transient path into a committed artefact.\nFINDING scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:91 non-blocking: the check prints CONTOURS LEGIBLE whenever no fused pixels are counted and never asserts solved_pixels > 0, while its mask at line 62 matches a hard-coded SOLVED_FLUX rather than nova/media/ink.py:45 flux_color, so a change to the flux colour empties the mask and the guard reports legibility it has not measured.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:572 non-blocking: the legend's solved-flux handle is drawn at SOLVED_FLUX_WIDTH 3.0 pt while the levels it names are 0.7-1.21 pt on frame 146 trip 2, so the sample overstates the stroke by up to four times, against the rule that a legend entry be as thick as the line it names.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:476 non-blocking: axes.set_aspect(\"equal\") repeats what poloidal_axes already did at nova/media/ink.py:164 on the preceding line, so the new line is redundant; the set_xlim/set_ylim that follow it are load-bearing for the display-space spacing measured at line 480.\n",
+  "reviewed_base_sha": "69ced0e8bc8a747d22ae6d83fc3b8011479a5d88",
+  "reviewed_head_sha": "296afe3b03b0e231e05eb2ec24a69697b56f3b15",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "revision_note": "Review worktree HEAD is 63da95ed94129ced97cc025d165af4931f695068, which does not contain the node's commits; every file state was read from the reviewed git objects 69ced0e8b and 296afe3b0 through git show, not from the checkout.",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T06:54:32.188694+00:00",
+  "total": 100
+}

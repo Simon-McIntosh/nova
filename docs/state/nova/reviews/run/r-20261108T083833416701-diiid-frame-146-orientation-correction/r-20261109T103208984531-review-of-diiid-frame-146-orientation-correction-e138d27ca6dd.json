@@ -43,6 +43,11 @@
       "kind": "exempted",
       "reason": "the four trip readers are prototype scripts on a correction record; each now calls the one declared-order helper, and its gate's transposed control moves the axis 0.328 m",
       "recorded_at": "2026-11-09T10:59:15.830035+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "every archived grid this record reads is square; a non-square reader order is a hypothetical future writer, not a defect in the corrected record",
+      "recorded_at": "2026-11-09T10:59:27.115662+00:00"
     }
   },
   "findings": [

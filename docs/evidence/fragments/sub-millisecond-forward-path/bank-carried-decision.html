@@ -16,8 +16,8 @@
 <body><main class="plan-doc">
 <section id="bank-carried-decision-result">
 <h1>Carried support decision with fresh geometry</h1>
-<p>The implementation and focused controls are committed; the full paired suites
-and GPU measurement remain open. No performance result or inspected figure has
+<p>The implementation, focused controls and five-file paired suites are complete.
+The paired suites have zero added failures; the GPU measurement remains open. No performance result or inspected figure has
 been produced yet. The reserved H200 allocation is queued on resources.</p>
 <h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
 <p><code>support_read.read_batch</code> still forms the stationary stencil and
@@ -56,8 +56,7 @@ difference for every checked continuous quantity.</td></tr>
 certificate even when the discrete decision stays unchanged. The added
 invalid-certificate arm initially over-constrained later backtracking requests;
 its assertion is corrected to permit a non-converged half-trial to skip
-certification while retaining the refusal and fresh-return checks. A paired
-rerun of that test file is pending. The displacement sweep reproduced an additional defect: at a 0.2-pitch shift,
+certification while retaining the refusal and fresh-return checks. The paired rerun and the final guard suite both pass. The displacement sweep reproduced an additional defect: at a 0.2-pitch shift,
 tracked null cells stayed unchanged while eight normal-form cells and thirteen
 fragment selections changed; relative membership error was 0.747911826. The
 implementation now refuses to carry across represented-cell or fragment-incidence
@@ -69,9 +68,32 @@ the head worktree and the scratch overlay respectively; the overlay carries
 product source <code>3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e</code>.
 The final paired suite logs carry the correct revision, and subsequent controls
 use the corrected header. The raw records are retained unchanged.</p>
-<h2 id="bank-carried-decision-pending">Remaining measurements</h2>
-<p>Sirius job <code>1308738</code> runs the final guard head against base over all
-five named files, one fresh process per file. The earlier job
+<h2 id="bank-carried-decision-suites">Completed paired suites</h2>
+<p>Sirius job <code>1308738</code> completed in 20 min 1 s. Each arm ran each
+file in a fresh process with its own basetemp, and every per-file log ends
+<code>EXIT=0</code>. Base is <code>8ce11904123bfebd516bc418416a6ec5eeb10117</code>.
+The head logs identify either <code>3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e</code>
+or <code>76d2cd50e345494417c380a99559783ddd5e6890</code>; SHA-256 comparisons of
+both product modules and the tracked-read test confirm identical contents at
+those head revisions.</p>
+<table><thead><tr><th>File</th><th>Base</th><th>Head</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_tracked_read.py</td><td>4 passed</td><td>13 passed</td><td>0</td></tr>
+<tr><td>test_support_read.py</td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td><td>0</td></tr>
+<tr><td>test_bank_solve_driver.py</td><td>10 passed</td><td>10 passed</td><td>0</td></tr>
+<tr><td>test_bank_solve_cycle.py</td><td>3 passed</td><td>3 passed</td><td>0</td></tr>
+<tr><td>test_candidate_inspection_batched.py, light</td><td>5 passed, 4 deselected</td><td>5 passed, 4 deselected</td><td>0</td></tr>
+</tbody></table>
+<p>Totals are 35 base passes and 44 head passes, with two skips and four
+deselections in each arm. The audit reads the pytest summaries, failure IDs and
+terminal exit lines rather than relying on the scheduler result. Its parser
+first finds all three known failures in the stale-edge negative-control log,
+so a zero failure count has a positive instrument control. The complete audit,
+including source hashes and each per-file receipt, is retained as
+<code>paired-suite-audit.json</code> beside <code>paired-suite-audit.log</code>,
+which ends <code>EXIT=0</code>. The committed reproducer is
+<code>scripts/prototypes/bank_carried_decision/audit_suites.py</code>.</p>
+<h2 id="bank-carried-decision-pending">Remaining measurement</h2>
+<p>The final paired suite above closes the CPU gate. The earlier job
 <code>1308719</code> and repaired tracked-read job <code>1308723</code> retain
 the preceding revisions' evidence; the repaired file reports nine passing tests.
 The final tracked-read head arm reports <code>13 passed in 298.62s</code>;

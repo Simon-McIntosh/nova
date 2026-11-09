@@ -1,0 +1,55 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/bank_route_rows/limited_oracle.py:90",
+    "scripts/prototypes/bank_route_rows/render_panel.py:render",
+    "scripts/prototypes/bank_route_rows/measure.py:main"
+  ],
+  "completed_at": "2026-11-09T04:56:07.347Z",
+  "dispatched_at": "2026-11-09T04:46:16Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_route_rows/boundary_gap.py",
+      "line": 76,
+      "severity": "non-blocking",
+      "summary": "main() prints ALL_PASS and returns without setting an exit status, so the run's declared gate (run.sh, which propagates the module's exit code into its EXIT= line) reports EXIT=0 on a row that fails: reinstating the vertex-argmax reference would print ALL_PASS=False and still read as a green gate at promotion."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 172,
+      "severity": "non-blocking",
+      "summary": "the re-rendered diverted 550-cell caption states a terminal fresh residual of 1.59e-12 while the table's own row for that case (line 29) states 1.21e-12; the two come from different processes (gate-diverted-550.json 1.5916e-12 versus diverted-550.log FINAL 1.2079e-12) and nothing in the record says they are separate runs, so the fragment carries two residuals for one row with no stated provenance."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html",
+      "line": 37,
+      "severity": "non-blocking",
+      "summary": "the single 'Boundary / span' column now carries two different constructions: the diverted rows scale the route's reported boundary-flux residual (2.591e-5), while the limited rows scale the analytic flux at the route's own displaced boundary point (5.373e-6), so a reader comparing 2.591e-5 with 5.373e-6 across the table compares quantities that are not the same; the body paragraph below explains the limited construction, but the header does not."
+    }
+  ],
+  "plan": "nova:sub-millisecond-forward-path",
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a table of the fast route's convergence and oracle precision on the limited and diverted certificate rows at 550 and 2000 cells, with one poloidal panel per 550-cell row, and `git diff 2ab0afa3 47be40341c62` lands exactly that repair: scripts/prototypes/bank_route_rows/measure.py:292-300 replaces the limited boundary reference with the oracle fixtures' designed_contact, boundary_gap.py recomputes the clause from archived state, and docs/figures/sub-millisecond-forward-path/bank-route-rows/limited-550.svg supplies the panel the prior review found missing.\nVERDICT done_when: the brief's done_when asks convergence, updates, residual, axis/X-point/boundary ratios against the budget, the present status, the lattice gap, the unpromoted flux gap, the asymptote difference and one panel per 550-cell row; the delta supplies the corrected limited boundary clause (5.373e-6 and 4.567e-11 of span) and the second panel, and every clause that cannot be measured (present route non-convergent, 5000 cells) is stated with its reason rather than dropped, so I found no unmet clause.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_route_rows, docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html and docs/figures/sub-millisecond-forward-path/bank-route-rows; `git diff --name-only 2ab0afa3 47be40341c62` lists seven paths, all inside those three roots, with no product code and no test file touched.\nVERDICT manifest: read; it records the gate as the BANK_ROUTE_MODULE=scripts.prototypes.bank_route_rows.boundary_gap run.sh invocation over the two archived limited states and names results/boundary-clause.log, whose header carries REVISION=15facb3ac, whose MODULE line resolves nova/equilibrium/support_read.py in the node's own worktree, and whose last line is EXIT=0 with ALL_PASS=True above it.\nVERDICT diff: read commit by commit from 2ab0afa3 to 47be40341 \u2014 four commits, +8419/-2354 \u2014 adding boundary_gap.py, routing row_oracle through limited_contact, restyling render_panel's contour order and marker vocabulary, making run.sh's JAX platform overridable, and rewriting the fragment's boundary and residual-floor paragraphs; the two SVG changes are the re-render of diverted-550 and the new limited-550.\nCALL_SITES: scripts/prototypes/bank_route_rows/limited_oracle.py:90, scripts/prototypes/bank_route_rows/render_panel.py:render, scripts/prototypes/bank_route_rows/measure.py:main\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_route_rows/measure.py:319 now takes the limited reference from limited_contact, so both limited rows are judged against the designed midplane contact rather than the wall vertex argmax, and limited-550.svg gives the second 550-cell row its panel.\nSCORE evidence: 16\nJUSTIFICATION evidence: results/boundary-clause.log reproduces every number in the table and I corroborated them from the archived states independently \u2014 vertex 0 is at (7.801396, 0.112943) absolute, and the reported fluxes -2.683e-4 Wb at 8.344e-3 m and -2.281e-9 Wb at 2.433e-5 m scale quadratically with the displacement as the wall's flux must, so the corrected reference is self-consistent; the gate nevertheless cannot express a failure in its exit status.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --name-only 2ab0afa3 47be40341c62` lists only the fragment, the two SVGs and four files under scripts/prototypes/bank_route_rows, all inside the manifest's declared write paths.\nSCORE durability: 6\nJUSTIFICATION durability: the delta adds assertions at scripts/prototypes/bank_route_rows/boundary_gap.py:36 (the archived wall against the fixture wall) and render_panel.py:86-88 (a unique row per cells value), but neither reddens when the boundary reference regresses, and boundary_gap.py:76 prints ALL_PASS without setting an exit status, so no test or gate fails if limited_contact is reverted to the vertex argmax.\nSCORE fit: 18\nJUSTIFICATION fit: boundary_gap.py:1-20 follows the prototype layout of its siblings (dtype configuration first, `# ruff: noqa: E402`, argparse plus a JSON writer), and its names \u2014 limited_contact, BOUNDARY_BUDGET, boundary_ratio \u2014 state the mechanism; a scan of the added lines for plan, ticket and version labels returned nothing.\nSCORE reuse: 20\nJUSTIFICATION reuse: measure.py:298 delegates to scripts/analytic_oracle_fixtures/measure.py:272 designed_contact, the single owner of that construction (shared with benchmarks/limiter_read_resolution_audit.py:1453 and tests/test_topology_limiter_contact.py:119), and the search for another boundary-clause owner over scripts/ found none, so the addition extends the owner rather than forking it.\nFINDING scripts/prototypes/bank_route_rows/boundary_gap.py:76 non-blocking: main() prints ALL_PASS and never sets an exit status, so run.sh's propagated EXIT= line reads 0 on a failing row \u2014 reinstating the vertex-argmax reference would print ALL_PASS=False and still present a green gate.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:172 non-blocking: the diverted 550-cell caption now states 1.59e-12 while the table row for the same case states 1.21e-12, from gate-diverted-550.json versus diverted-550.log, with no statement that they are separate processes.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html:37 non-blocking: the boundary column applies two different constructions across rows \u2014 a route-versus-oracle flux residual for diverted and a position-derived flux at the route's own point for limited \u2014 and the table header does not distinguish them.\n",
+  "review_run_id": "r-20261109T044341699687-review-of-bank-route-rows-47be40341c62",
+  "reviewed_base_sha": "2ab0afa314d93327fbbb3a37ce4f083af3047770",
+  "reviewed_head_sha": "47be40341c62059f957c4a640c9d7e81cfc27528",
+  "reviewed_run_id": "r-20261107T111216113482-bank-route-rows",
+  "reviewed_run_node": "bank-route-rows",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "3",
+  "status": "parsed",
+  "suite_arms_note": "the reviewed run carries no baseline_suite/after_suite arms because its brief declares it a measurement node that changes no product code and no tests, and `git diff --name-only 2ab0afa3 47be40341c62 | grep -c tests/` returns 0; added_failure_count is therefore a zero over an empty suite scope, not an unreported pair",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T05:20:59.442795+00:00",
+  "total": 98
+}

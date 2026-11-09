@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "artifacts": "none",
+  "completed_at": "",
+  "dispatched_at": "2026-11-09T04:57:29Z",
+  "evidence_inputs": {
+    "basis": "judged only from the two rendered PNGs attached to the attached review run, magnified regions of those same PNGs, and the panel-drawing script at the reviewed head; no SVG and no other image was opened",
+    "marker_evidence": "a blue-pixel blob scan of the limited PNG finds the axis triangle, the two legend swatches and no filled square in the plot area; the same scan finds the diverted X-point marker inside the wall",
+    "prior_defect": "the blocking finding recorded at base 2ab0afa314d9 (oracle contours hidden beneath the route contours) no longer reproduces: the oracle is drawn at zorder 6 above the route at zorder 4 and the grey dashes are visible along every contour in both panels",
+    "provenance": "the two attached PNGs are 1400x720 and are not byte-identical to results/limited-550-panel.png and results/diverted-550-panel.png in the reviewed run directory, so identity with the run's own preview files is not established by hash; the captions and rendered values match the reviewed run's manifest artifacts row for row (limited residual 9.64e-11, axis 1.16e-05, boundary 5.37e-06; diverted residual 1.59e-12, axis 1.05e-05, X-point 9.25e-06, boundary 2.59e-05)",
+    "writing": "this review changed no file it reviewed"
+  },
+  "figures_reviewed": [
+    "docs/figures/sub-millisecond-forward-path/bank-route-rows/limited-550.svg",
+    "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-route-rows/limited-550.svg",
+      "id": "f38236c5e2d",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The fast-route boundary marker is not rendered. The only boundary mark in the panel is the hollow white-faced oracle square at the limiter midplane, and no blue filled square appears anywhere in the image, so the legend's 'fast boundary' swatch has no counterpart and a reader cannot see where the fast route places the limiter contact or agree it with the oracle's. That point is one of the two nulls the panel exists to compare, and it is the clause the caption reports as 5.37e-06 of span. The analytic root is outlined directly at render_panel.py:160-162, while the solved roots go through draw_nulls(..., contain=wall) at render_panel.py:171-173. The diverted panel, whose solved X-point lies inside the wall, does draw its blue marker, which isolates the difference to the limited row."
+    },
+    {
+      "file": "scripts/prototypes/bank_route_rows/render_panel.py",
+      "id": "f93bc3adb41",
+      "line": 140,
+      "severity": "non-blocking",
+      "summary": "The oracle contour's white casing is wider than the fast-route contour, so wherever the two fields coincide the casing erases the route line and it renders as short blue dashes alternating with the grey dashes. The legend draws 'fast-route flux' as a continuous solid line, so the key describes a line the panel never shows; in both panels no blue contour is continuous. The agreement the figure conveys survives, which is why this does not hold the node, but the legend and the rendering disagree."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg",
+      "id": "f6b75b9ddb3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Several oracle dashes and route dashes terminate abruptly in open space inside the wall low on the right of the panel, at roughly three-fifths width and seven-tenths height."
+    }
+  ],
+  "plan": "nova:sub-millisecond-forward-path",
+  "plan_slug": "sub-millisecond-forward-path",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: [limited-550.svg] The wall, eight nested flux contours and the axis marker read at a glance, but the boundary comparison is not readable: the only boundary mark rendered is a hollow white square at the limiter midplane and no blue fast-route boundary square appears anywhere in the panel, so the reader cannot see where the fast route puts the limiter contact. Defect.\nRUBRIC data_ink: [limited-550.svg] The contours, wall, null markers and legend carry all the ink; there is no shading, fill or hachure. Pass.\nRUBRIC decoration: [limited-550.svg] No gradient, background fill, grid, frame or stylised theme appears; the axes are off. Pass.\nRUBRIC contrast: [limited-550.svg] Mid-grey legend and caption text on white is about 5.6:1 and the blue feature colour is about 4.9:1; both clear body-text contrast. Pass.\nRUBRIC table_form: [limited-550.svg] A poloidal contour panel is a spatial comparison of two fields and their nulls, which a table cannot carry; the numeric clauses it states also appear in the fragment's table. Pass.\nRUBRIC label_collision: [limited-550.svg] The four-column legend and the two-line caption both sit inside the canvas, no text overlaps another text artist or the data, and the caption clears the wall apex. Pass.\nRUBRIC legibility: [diverted-550.svg] Both null sets and both contour sets are visible and the two X-point markers read as coincident; the flux surfaces and wall read at a glance. Several contours stop in open space low on the right, which reads as a surface ending rather than a level leaving the sampled range. Minor defect.\nRUBRIC data_ink: [diverted-550.svg] The contours, wall, null markers and legend carry all the ink; there is no shading, fill or hachure. Pass.\nRUBRIC decoration: [diverted-550.svg] No gradient, background fill, grid, frame or stylised theme appears; the axes are off. Pass.\nRUBRIC contrast: [diverted-550.svg] Mid-grey legend and caption text on white is about 5.6:1 and the blue feature colour is about 4.9:1; both clear body-text contrast. Pass.\nRUBRIC table_form: [diverted-550.svg] A poloidal contour panel is a spatial comparison of two fields and their nulls, which a table cannot carry; the numeric clauses it states also appear in the fragment's table. Pass.\nRUBRIC label_collision: [diverted-550.svg] The legend and the two-line caption sit inside the canvas and no text overlaps another text artist or the data; the second legend row clears the wall apex by only a few pixels but does not touch it. Pass.",
+  "review_run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+  "reviewed_base_sha": "acff793928732503a84525c3fe29ca260dbf9035",
+  "reviewed_head_sha": "47be40341c62059f957c4a640c9d7e81cfc27528",
+  "reviewed_run_id": "r-20261107T111216113482-bank-route-rows",
+  "reviewed_run_node": "bank-route-rows",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: [limited-550.svg] The wall, eight nested flux contours and the axis marker read at a glance, but the boundary comparison is not readable: the only boundary mark rendered is a hollow white square at the limiter midplane and no blue fast-route boundary square appears anywhere in the panel, so the reader cannot see where the fast route puts the limiter contact. Defect.",
+    "RUBRIC data_ink: [limited-550.svg] The contours, wall, null markers and legend carry all the ink; there is no shading, fill or hachure. Pass.",
+    "RUBRIC decoration: [limited-550.svg] No gradient, background fill, grid, frame or stylised theme appears; the axes are off. Pass.",
+    "RUBRIC contrast: [limited-550.svg] Mid-grey legend and caption text on white is about 5.6:1 and the blue feature colour is about 4.9:1; both clear body-text contrast. Pass.",
+    "RUBRIC table_form: [limited-550.svg] A poloidal contour panel is a spatial comparison of two fields and their nulls, which a table cannot carry; the numeric clauses it states also appear in the fragment's table. Pass.",
+    "RUBRIC label_collision: [limited-550.svg] The four-column legend and the two-line caption both sit inside the canvas, no text overlaps another text artist or the data, and the caption clears the wall apex. Pass.",
+    "RUBRIC legibility: [diverted-550.svg] Both null sets and both contour sets are visible and the two X-point markers read as coincident; the flux surfaces and wall read at a glance. Several contours stop in open space low on the right, which reads as a surface ending rather than a level leaving the sampled range. Minor defect.",
+    "RUBRIC data_ink: [diverted-550.svg] The contours, wall, null markers and legend carry all the ink; there is no shading, fill or hachure. Pass.",
+    "RUBRIC decoration: [diverted-550.svg] No gradient, background fill, grid, frame or stylised theme appears; the axes are off. Pass.",
+    "RUBRIC contrast: [diverted-550.svg] Mid-grey legend and caption text on white is about 5.6:1 and the blue feature colour is about 4.9:1; both clear body-text contrast. Pass.",
+    "RUBRIC table_form: [diverted-550.svg] A poloidal contour panel is a spatial comparison of two fields and their nulls, which a table cannot carry; the numeric clauses it states also appear in the fragment's table. Pass.",
+    "RUBRIC label_collision: [diverted-550.svg] The legend and the two-line caption sit inside the canvas and no text overlaps another text artist or the data; the second legend row clears the wall apex by only a few pixels but does not touch it. Pass."
+  ],
+  "rubric_verdicts": {
+    "docs/figures/sub-millisecond-forward-path/bank-route-rows/diverted-550.svg": {
+      "contrast": "Mid-grey legend and caption text on white is about 5.6:1 and the blue feature colour is about 4.9:1; both clear body-text contrast. Pass.",
+      "data_ink": "The contours, wall, null markers and legend carry all the ink; there is no shading, fill or hachure. Pass.",
+      "decoration": "No gradient, background fill, grid, frame or stylised theme appears; the axes are off. Pass.",
+      "label_collision": "The legend and the two-line caption sit inside the canvas and no text overlaps another text artist or the data; the second legend row clears the wall apex by only a few pixels but does not touch it. Pass.",
+      "legibility": "Both null sets and both contour sets are visible and the two X-point markers read as coincident; the flux surfaces and wall read at a glance. Several contours stop in open space low on the right, which reads as a surface ending rather than a level leaving the sampled range. Minor defect.",
+      "table_form": "A poloidal contour panel is a spatial comparison of two fields and their nulls, which a table cannot carry; the numeric clauses it states also appear in the fragment's table. Pass."
+    },
+    "docs/figures/sub-millisecond-forward-path/bank-route-rows/limited-550.svg": {
+      "contrast": "Mid-grey legend and caption text on white is about 5.6:1 and the blue feature colour is about 4.9:1; both clear body-text contrast. Pass.",
+      "data_ink": "The contours, wall, null markers and legend carry all the ink; there is no shading, fill or hachure. Pass.",
+      "decoration": "No gradient, background fill, grid, frame or stylised theme appears; the axes are off. Pass.",
+      "label_collision": "The four-column legend and the two-line caption both sit inside the canvas, no text overlaps another text artist or the data, and the caption clears the wall apex. Pass.",
+      "legibility": "The wall, eight nested flux contours and the axis marker read at a glance, but the boundary comparison is not readable: the only boundary mark rendered is a hollow white square at the limiter midplane and no blue fast-route boundary square appears anywhere in the panel, so the reader cannot see where the fast route puts the limiter contact. Defect.",
+      "table_form": "A poloidal contour panel is a spatial comparison of two fields and their nulls, which a table cannot carry; the numeric clauses it states also appear in the fragment's table. Pass."
+    }
+  },
+  "section": "3",
+  "status": "parsed",
+  "tests": "none",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T05:13:30.181154+00:00",
+  "total": null
+}

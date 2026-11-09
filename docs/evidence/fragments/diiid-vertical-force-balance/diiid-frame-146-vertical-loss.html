@@ -518,6 +518,19 @@ repository. <code>check_panel_receipts.py</code> refuses a receipt whose
 pointers do not resolve, and <code>check_path_mapping_reuse.py</code> refuses a
 module under this directory that walks the parent tree for a <code>.git</code>
 marker instead of calling that mapping.</li>
+<li>The residual column stands beside the poloidal panel rather than under it.
+An equal-aspect panel is height-limited, so a full-width strip below it spent
+two thirds of the canvas on nothing; the column is placed against the panel's
+own drawn box, and the panel now takes the full height of the 14 in canvas. Its
+ticks are one fixed step of 0.05 with two decimals on every panel, so the same
+quantity reads at the same positions whether a frame converged or not.</li>
+<li>The solved-flux legend entry is drawn at the median width its levels are
+actually drawn at, not at the headline weight: on frame 146 trip 2, where the
+crowded levels thin to 0.7&ndash;1.5 pt, the legend sample is 0.80 pt and
+matches the lines it names, while the two separated panels keep a 3.0 pt
+sample. The hollow dot a displaced X-point callout leaves at the solved
+position is now in the legend as "X-point true position", on the panel that
+carries such a callout.</li>
 </ul>
 
 </section>

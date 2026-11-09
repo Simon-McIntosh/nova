@@ -4,8 +4,9 @@ The trip's own solved field (saved by the per-trip driver as
 ``frame-<n>-trip-<k>.npz``) is drawn as line contours against the EFIT label at
 the same physical levels, with both null sets, the governed limiter ring, the
 axis-connected bounding surface the connectivity owner reads, and the measured
-axis position.  A residual strip below the panel carries the relative residual
-at every trip the frame reached.
+axis position.  A narrow residual column beside the panel carries the relative
+residual at every trip the frame reached, so the equal-aspect poloidal geometry
+takes the full canvas height instead of sitting above a full-width strip.
 
 The geometry is not derived here.  The bounding surface comes from
 ``nova.equilibrium.connectivity_boundary.host_boundary_read`` on the trip's flux
@@ -30,6 +31,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import Collection
 from matplotlib.text import Text
+from matplotlib.ticker import FixedLocator, FormatStrFormatter
 from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial import cKDTree
 
@@ -47,6 +49,7 @@ from nova.media.poloidal import (
     inside_wall_units,
 )
 
+from check_panel_receipts import PUBLISHED_ROOT
 from flux_orientation import analysis_field
 
 SIBLING = Path(__file__).resolve().parent.parent / "diiid_forward_convergence"
@@ -60,16 +63,20 @@ NULL_CLEARANCE = 0.14
 """Separation [m] a solved X-point keeps from the solved axis when they touch."""
 
 
-def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> None:
+def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> bool:
     """Draw each solved X-point, stepping clear of the axis with a leader.
 
     A saddle can sit within a marker width of the axis, and two filled markers
     then read as one blob.  A marker that would crowd the axis is drawn smaller
     at a callout position clear of it, joined by a thin leader to a hollow dot
     at the position the solve actually returned.
+
+    Returns whether any callout was drawn, so the legend names the hollow dot
+    only on a panel that carries one.
     """
     points = np.asarray(x_points, dtype=float).reshape(-1, 2)
     anchor = None if axis is None else np.asarray(axis, dtype=float)
+    callouts = False
     for point in points:
         if not np.all(np.isfinite(point)):
             continue
@@ -84,6 +91,7 @@ def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> None:
                 )
                 drawn = point + direction * (NULL_CLEARANCE - distance)
                 callout = True
+                callouts = True
                 axes.plot(
                     [point[0], drawn[0]],
                     [point[1], drawn[1]],
@@ -113,6 +121,7 @@ def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> None:
             linestyle="none",
             zorder=style.zorder_markers,
         )
+    return callouts
 
 
 SOLVED_FLUX_WIDTH = 3.0
@@ -124,6 +133,9 @@ REFERENCE_FLUX_WIDTH = 2.4
 
 MIN_FLUX_WIDTH = 0.7
 """Narrowest stroke a crowded solved level is drawn at [pt]."""
+
+RESIDUAL_STEP = 0.05
+"""Residual tick step [dimensionless], shared by every panel so the axes compare."""
 
 CROWD_FRACTION = 0.55
 """Fraction of the gap to its neighbour a solved level may spend on its stroke."""
@@ -397,25 +409,6 @@ def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
     return kept
 
 
-def recorded_path(figure_path: Path) -> str:
-    """Name a figure by its path inside the repository.
-
-    The receipt is a committed artefact, so it may not name the directory the
-    render happened to write into: a run scratch directory, a worktree or a
-    temporary tree resolves for no other reader and disappears with the render.
-    The name comes from the repository's own mapping; a path it cannot place
-    comes back absolute, and that is refused rather than recorded.
-    """
-
-    pointer = repository_relative(figure_path)
-    if Path(pointer).is_absolute():
-        raise SystemExit(
-            f"refusing to record {figure_path}: it is outside the repository, "
-            "so its name would resolve for no other reader"
-        )
-    return pointer
-
-
 def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
@@ -488,10 +481,10 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
         )[1:-1]
 
     figure = plt.figure(figsize=(14.0, 7.2))
-    layout = figure.add_gridspec(2, 1, height_ratios=[6.4, 0.9], hspace=0.10)
+    layout = figure.add_gridspec(1, 2, width_ratios=[6.4, 0.9], wspace=0.06)
     axes = figure.add_subplot(layout[0])
     strip = figure.add_subplot(layout[1])
-    figure.subplots_adjust(left=0.09, right=0.97, top=0.86, bottom=0.11)
+    figure.subplots_adjust(left=0.06, right=0.97, top=0.86, bottom=0.10)
     poloidal_axes(axes)
     axes.set_aspect("equal")
     axes.set_xlim(float(np.nanmin(radius)), float(np.nanmax(radius)))
@@ -542,8 +535,7 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
         xpoint_marker="o",
     )
     draw_nulls(axes, magnetic_axis=axis)
-    if len(saddles):
-        _draw_x_points(axes, axis, saddles)
+    callout_drawn = bool(len(saddles)) and _draw_x_points(axes, axis, saddles)
     if len(label_axis_points):
         draw_nulls(
             axes,
@@ -589,7 +581,7 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
             [],
             [],
             color=DEFAULT_INK.flux_color,
-            linewidth=SOLVED_FLUX_WIDTH,
+            linewidth=float(np.median(solved_widths)),
             label="solved flux",
         ),
         plt.Line2D(
@@ -644,6 +636,23 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
             color=DEFAULT_INK.xpoint_color,
             markersize=7,
             label="solved X-point",
+        ),
+        *(
+            [
+                plt.Line2D(
+                    [],
+                    [],
+                    marker="o",
+                    linestyle="none",
+                    markerfacecolor="none",
+                    markeredgecolor=DEFAULT_INK.xpoint_color,
+                    markeredgewidth=0.8,
+                    markersize=4,
+                    label="X-point true position",
+                )
+            ]
+            if callout_drawn
+            else []
         ),
         plt.Line2D(
             [],
@@ -711,12 +720,25 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     strip.spines[["top", "right"]].set_visible(False)
     finite = [v for v in residuals if v is not None and np.isfinite(v)]
     strip.set_ylim(0, max(finite + [0.1]) * 1.2)
+    axes.apply_aspect()
+    box = axes.get_position()
+    strip.set_position([box.x1 + 0.07, box.y0, 0.08, box.height])
+    strip.yaxis.set_major_locator(
+        FixedLocator(np.arange(0.0, strip.get_ylim()[1], RESIDUAL_STEP))
+    )
+    strip.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
 
     axes.set_aspect("equal")
     axes.set_xlim(float(np.nanmin(radius)), float(np.nanmax(radius)))
     axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
 
     out.parent.mkdir(parents=True, exist_ok=True)
+    pointer = repository_relative(out)
+    if Path(pointer).is_absolute() or PUBLISHED_ROOT not in Path(pointer).parents:
+        raise SystemExit(
+            f"refusing to record {out}: a receipt may only name a figure under "
+            f"{PUBLISHED_ROOT}, and this path resolves to {pointer}"
+        )
     check_panel(figure, axes, out)
     figure.savefig(out, format="svg")
     figure.savefig(out.with_suffix(".check.png"), dpi=110)
@@ -737,7 +759,7 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
         "saddles_rz_m": saddles.tolist(),
         "saddle_flux": saddle_values.tolist(),
         "residual": row.get("residual"),
-        "svg": recorded_path(out),
+        "svg": pointer,
     }
 
 

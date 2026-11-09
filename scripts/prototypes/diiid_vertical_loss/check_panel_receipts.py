@@ -24,20 +24,11 @@ PUBLISHED_ROOT = Path("docs/figures")
 """The only place a receipt may point at: figures published in the repository."""
 
 
-def repository_root(path: Path) -> Path:
-    """Return the root a path relative to this repository is measured from."""
-
-    relative = repository_relative(path)
-    if Path(relative).is_absolute():
-        raise SystemExit(f"{path} is not inside a repository")
-    root = path.resolve()
-    for _ in Path(relative).parts:
-        root = root.parent
-    return root
-
-
 def check(receipt: Path) -> list[str]:
-    root = repository_root(receipt)
+    relative = repository_relative(receipt)
+    if Path(relative).is_absolute():
+        raise SystemExit(f"{receipt} is not inside a repository")
+    root = Path(receipt).resolve().parents[len(Path(relative).parts) - 1]
     records = json.loads(receipt.read_text())["panels"]
     faults = []
     for record in records:
@@ -47,12 +38,11 @@ def check(receipt: Path) -> list[str]:
             faults.append(f"{name} carries no svg pointer")
             continue
         candidate = root / pointer
-        recorded = repository_relative(candidate)
-        if Path(pointer).is_absolute() or recorded != pointer:
+        if Path(pointer).is_absolute() or repository_relative(candidate) != pointer:
             faults.append(f"{name} is not a repository path: {pointer}")
         elif PUBLISHED_ROOT not in Path(pointer).parents:
             faults.append(f"{name} names a path outside {PUBLISHED_ROOT}: {pointer}")
-        elif not (root / pointer).exists():
+        elif not candidate.exists():
             faults.append(f"{name} names a file that does not resolve: {pointer}")
     return faults
 

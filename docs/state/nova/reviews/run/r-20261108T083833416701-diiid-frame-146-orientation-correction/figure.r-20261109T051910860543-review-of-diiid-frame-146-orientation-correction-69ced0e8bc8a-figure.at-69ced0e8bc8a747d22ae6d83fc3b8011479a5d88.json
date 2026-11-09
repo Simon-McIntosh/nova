@@ -48,6 +48,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-09T07:01:57.804754+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",

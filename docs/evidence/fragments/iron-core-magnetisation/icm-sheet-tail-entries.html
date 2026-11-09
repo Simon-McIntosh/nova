@@ -23,7 +23,65 @@ at radius 0.05 m and 907 at radius 0.13 m, each spanning z=2.5624 to 2.6424 m.</
 (844,906): B<sub>Z</sub> is −5.15787198874764e−13 T at batch size 1 and
 −5.157871988714087e−13 T at sizes 2 and 8. At size 256 it is
 −5.157871988736484e−13 T. The retained <code>pair-reproduction.log</code>
-records both edges. Full route attribution and the final head gate are pending.</p>
+records both edges. The exact base suite reproduces 3,077 of 11,505,664 entries above 1e−13, with a worst error of 2.2815967011827007e−12; its result is 693 passed and one failed in 765.63 s. The failure is the all-target agreement test, after both finiteness assertions passed.</p>
+</section>
+<section id="icm-sheet-tail-entries-classification">
+<h2>All 3,077 persisted failures</h2>
+<p>Job 1308931 compared every target and saved all 16 shard files
+<code>classification/entries-*.npz</code>. Each entry retains its local row,
+column, physical target, field component, cell, magnetisation component, error,
+absolute per-end scale, tiled value, reference value and dominant residual edge.
+The dominant edge is the largest absolute signed edge contribution to the
+matrix residual, computed from the production tile's captured edge fields and
+the unbatched reference. Every saved error reconciles with
+|tiled−reference|/scale.</p>
+<table>
+<thead><tr><th>Classification</th><th>Count</th></tr></thead>
+<tbody>
+<tr><td>Cylinder route</td><td>3,077</td></tr>
+<tr><td>Pancake route</td><td>0</td></tr>
+<tr><td>Sloped route</td><td>0</td></tr>
+<tr><td>B<sub>Z</sub> per M<sub>Z</sub></td><td>3,077</td></tr>
+<tr><td>B<sub>R</sub>, or per M<sub>R</sub></td><td>0</td></tr>
+<tr><td>On or near the edge line, distance ≤0.1 edge lengths</td><td>0</td></tr>
+<tr><td>Within 0.1 edge lengths of the nearer endpoint plane</td><td>19</td></tr>
+<tr><td>Near axis, target radius ≤edge length</td><td>0</td></tr>
+<tr><td>Source cylinder radius ≤edge length</td><td>31</td></tr>
+</tbody>
+</table>
+<p>All ranges below are over the dominant edge of each failing entry; L denotes
+that edge's length. The plane distance is |z_target−z_start|/L, so it states the
+end plane used rather than assigning a unique plane to an entire cylinder.</p>
+<table>
+<thead><tr><th>Geometry</th><th>Minimum</th><th>Median</th><th>Maximum</th></tr></thead>
+<tbody>
+<tr><td>Target-to-segment distance / L</td><td>12.5000</td><td>53.5031</td><td>87.5728</td></tr>
+<tr><td>Target-to-supporting-line distance / L</td><td>0.481928</td><td>42.5000</td><td>71.1801</td></tr>
+<tr><td>Target-to-start-plane distance / L</td><td>0.080525</td><td>0.516830</td><td>88.5600</td></tr>
+<tr><td>Target-to-nearer-endpoint-plane distance / L</td><td>0.080525</td><td>0.500000</td><td>87.5600</td></tr>
+<tr><td>Source radius / L</td><td>0.625000</td><td>2.62500</td><td>19.6250</td></tr>
+<tr><td>Target radius / L</td><td>2.04819</td><td>48.1250</td><td>73.0919</td></tr>
+<tr><td>Source radius / target radius</td><td>0.0101698</td><td>0.142665</td><td>0.840000</td></tr>
+<tr><td>Slope dr′/dz′</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The single worst witness is <strong>(target 844, edge 907)</strong>, belonging
+to cell 420. That entry's tiled value is −2.9732336946628784e−12 T per A/m,
+its reference is −2.9732336946720157e−12, and its unchanged per-end scale is
+4.004808092410357e−12. Edge 907 runs from (0.13,2.5624) to (0.13,2.6424) m;
+the target is 60.3375 L away. The same cell's edge 906 is the companion test.
+For edge 907 the unchanged height field is −3.4890208935320508e−12 T at batch
+size 1 and −3.4890208935365255e−12 at sizes 2, 8 and 256. Both new tests fail
+on that source, as recorded in <code>witness-before.log</code>.</p>
+<p>The collector's auxiliary JSON serialization failed on a NumPy boolean after
+all 16 entry files had been written. This is a failed collector process, not a
+passing gate. The complete entry records already carry the dominant identities:
+<code>recover_geometry.py</code> validates and reconstructs their geometry from
+the same mesh into <code>classification/dominant-edges.json</code> without
+repeating the field comparison. <code>geometry-classification.log</code> records
+the validation and counts. The serializer is corrected and its native-boolean
+round trip checked. A redundant second collector, job 1308944, was cancelled
+after 1 min 42 s once the complete raw receipts were verified.</p>
 </section>
 <section id="icm-sheet-tail-entries-derivation">
 <h2>Source-radius expansion of the exterior cylinder height endpoint</h2>
@@ -59,7 +117,7 @@ exterior region bounds (r−s)/(r+s). No source or angular quadrature is added.<
 </section>
 <section id="icm-sheet-tail-entries-independent">
 <h2>Independent checks before implementation</h2>
-<p>A 65-digit evaluation of the complete-elliptic identity over 350 exterior
+<p>A 65-digit evaluation of the complete-elliptic identity over 140 exterior
 geometries checks source/target radius ratios 0.001 to 0.79 and height/radius
 ratios zero to 100, including 1e−8 near the plane. The worst relative difference
 from the derived series is 1.0584553134129076e−15. A separate compiled series
@@ -68,8 +126,17 @@ probe gives exactly −5.157871988723156e−13 T for pair (844,906) and
 <p>Logs and numerical receipts are retained under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries</code>:
 <code>cylinder-derivation.log</code>, <code>series-batch.log</code>, and
-<code>pair-reproduction.log</code>. These checks establish the identity; they do
-not yet establish the whole-mesh gate at the implementation head.</p>
+<code>pair-reproduction.log</code>. The exploratory log initially printed “350” from a hard-coded label: the actual loop has 4×5×7=140 cases, and its appended correction preserves that error. The committed 96-term implementation is separately checked over the same 140 cases in <code>implemented-series-validation.log</code>, whose counter is measured and whose worst relative error is 1.2701463760954892e−15. Its imported module carries the introduced <code>_cylinder_height_series</code> marker. These checks establish the identity; the whole-mesh head gate is recorded separately below.</p>
+</section>
+<section id="icm-sheet-tail-entries-gate">
+<h2>Head acceptance gate</h2>
+<p>The source and regression tests are committed at
+<code>bcb3143f0d0b18c704d7da113e415b885f3ea101</code>. Job 1308946 on
+<code>sirius</code> runs the exact after suite over the full mesh, followed in
+the same job by a scratch extraction restoring both exterior-cylinder selectors
+to their angular projection. The job verifies the imported mutant module and
+checks the tracked source blob against HEAD. Its numerical result is pending;
+this record does not yet claim the whole-mesh head measure.</p>
 </section>
 </article>
 </body>

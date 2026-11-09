@@ -30,6 +30,13 @@
     "nova/media/ink.py:poloidal_axes"
   ],
   "completed_at": "2026-11-09T06:43:53.053Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-frame-146-orientation-correction",
+      "recorded_at": "2026-11-09T07:01:11.812602+00:00"
+    }
+  },
   "dispatched_at": "2026-11-09T06:28:52Z",
   "figure_review": {
     "inspected": [

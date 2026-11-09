@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the source manifest carries no baseline_suite or after_suite and prompt.txt declares the suite pair unarmed; gate-final.log's suite arm collects no tests (SUITE_EXIT=5), so 0 records the absence of an armed suite rather than a measured zero added failures.",
+  "assertion_audit": [
+    {
+      "fails_when": "Restoring a vertex-only coverage test lets a diagonal line cross a centred label with both endpoints outside the box; check_panel would write the figure instead of refusing it, and the control prints 'EXPECTED a refusal and got none' and CONTROLS-MISMATCHED.",
+      "independent": true,
+      "limit": "Lives in the run directory, uncommitted, so no repository test reddens on regression.",
+      "path": "guard_controls.py:74 (run directory, not committed)"
+    },
+    {
+      "fails_when": "Restoring the shape-based orientation guess leaves the square archive untransposed and polishes 0.328465 m, above the 0.053125 m threshold, reddening TRANSPOSED_EXIT=1 and NATIVE_EXIT=0.",
+      "independent": true,
+      "limit": "Unchanged by this increment; cited because it is the node's only committed assertion.",
+      "path": "scripts/prototypes/diiid_vertical_loss/check_orientation.py:85"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:check_panel",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:main",
+    "nova/media/poloidal.py:draw_flux_contours"
+  ],
+  "completed_at": "2026-11-09T05:29:37.033Z",
+  "dispatched_at": "2026-11-09T05:18:37Z",
+  "figure_review": {
+    "geometry": "path 'd' attributes are identical as a multiset base-to-head for all three files (33/30/32 paths), so the re-render changed draw order and stroke widths only.",
+    "inspected": [
+      "frame-146-trip-1-flux-contours.svg",
+      "frame-146-trip-2-flux-contours.svg",
+      "frame-137-trip-2-flux-contours.svg"
+    ],
+    "result": "The three git-object SVGs at 69ced0e8b were rasterized at 1400 px and inspected; legend sits above with no entry that is not drawn, the solved field reads over the grey reference, no label collides or leaves the canvas, the plasma sits inside the limiter on both 146-trip-1 and 137-trip-2, and 146-trip-2's axis is drawn above the limiter with its solved contours only at the boundary.",
+    "revision": "69ced0e8bc8a747d22ae6d83fc3b8011479a5d88"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "line": "156",
+      "severity": "non-blocking",
+      "text": "_segment_hits_box re-implements segment/box clipping that matplotlib exposes as Path.intersects_bbox and that scripts/prototypes/bank_drive_barrier/plot.py:44 already uses, so 33 lines of uncommitted-test helper duplicate a library routine the repository already employs."
+    },
+    {
+      "file": "manifest.md",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "the head re-render is recorded in regenerated/render-weights.log with no revision header and the manifest cites regenerated/render.log at 9ac1b1124 instead, so the figure-regeneration evidence for the reviewed head rests on the committed SVGs' dc:date rather than on a revision-stamped log."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read the single commit 69ced0e8b against 48fcbac8f; it replaces the vertex-coverage label check with per-artist-transformed polyline segments and Liang-Barsky clipping, adds a fifth control, sets solved flux to 3.0 pt over a 2.4 pt grey reference with explicit zorder, and re-renders the three panels whose path geometry is identical as a multiset while their document order flips.",
+    "done_when": "gate-final.log names revision 69ced0e8b and records the native check at shift 3.398096975e-09 m against a 0.053125 m spacing (NATIVE_EXIT=0) and the transposed control at 0.328465227 m (TRANSPOSED_EXIT=1), and panel-guard-controls.log at the same revision records five controls ending CONTROLS-MATCHED.",
+    "goal": "the source goal is declared-order binding plus an appended record correction, and this increment (commit 69ced0e8b) closes the only blocking review finding left against it by testing drawn segments in render_trip_panels.py:156-188 and re-rendering the three trip panels it draws.",
+    "manifest": "read source manifest.md; it records the head 69ced0e8b gate and the five logged controls, but its test_logs line cites regenerated/render.log, whose header names 9ac1b1124, and omits the head re-render log regenerated/render-weights.log, which carries no revision header of its own.",
+    "write_paths": "the incremental diff 48fcbac8f..69ced0e8b touches only render_trip_panels.py under scripts/prototypes/diiid_vertical_loss and three SVGs under docs/figures/diiid-frame-146-vertical-loss, all inside the source brief's three grants."
+  },
+  "justifications": {
+    "durability": "guard_controls.py:74 builds the crossing geometry independently and would redden if the vertex test were restored, but it lives in the run directory and is uncommitted, so nothing in the repository fails when _segment_hits_box regresses.",
+    "evidence": "gate-final.log and panel-guard-controls.log both name revision 69ced0e8b and end EXIT=0, but the head figure re-render is logged in regenerated/render-weights.log with no revision header and is not cited by manifest.md:17.",
+    "fit": "render_trip_panels.py:116-120 names its constants by mechanism, follows the module's existing style, and check_panel:238 still delegates bounds and text overlap to the shared render_panels.py:435 checker.",
+    "goal_fidelity": "render_trip_panels.py:156 adds the segment test the prior blocking finding named, and the committed SVGs at 69ced0e8b carry stroke-width 3 for the solved field over 2.4 for the grey reference with the blue paths later in document order.",
+    "reuse": "_segment_hits_box at render_trip_panels.py:156 hand-rolls segment-versus-box clipping that matplotlib's Path.intersects_bbox already provides and that scripts/prototypes/bank_drive_barrier/plot.py:44 already uses for the same check.",
+    "scope_discipline": "the four paths in 48fcbac8f..69ced0e8b are exactly the four the source brief grants, and no other file in the tree changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is declared-order binding plus an appended record correction, and this increment (commit 69ced0e8b) closes the only blocking review finding left against it by testing drawn segments in render_trip_panels.py:156-188 and re-rendering the three trip panels it draws.\nVERDICT done_when: gate-final.log names revision 69ced0e8b and records the native check at shift 3.398096975e-09 m against a 0.053125 m spacing (NATIVE_EXIT=0) and the transposed control at 0.328465227 m (TRANSPOSED_EXIT=1), and panel-guard-controls.log at the same revision records five controls ending CONTROLS-MATCHED.\nVERDICT write_paths: the incremental diff 48fcbac8f..69ced0e8b touches only render_trip_panels.py under scripts/prototypes/diiid_vertical_loss and three SVGs under docs/figures/diiid-frame-146-vertical-loss, all inside the source brief's three grants.\nVERDICT manifest: read source manifest.md; it records the head 69ced0e8b gate and the five logged controls, but its test_logs line cites regenerated/render.log, whose header names 9ac1b1124, and omits the head re-render log regenerated/render-weights.log, which carries no revision header of its own.\nVERDICT diff: read the single commit 69ced0e8b against 48fcbac8f; it replaces the vertex-coverage label check with per-artist-transformed polyline segments and Liang-Barsky clipping, adds a fifth control, sets solved flux to 3.0 pt over a 2.4 pt grey reference with explicit zorder, and re-renders the three panels whose path geometry is identical as a multiset while their document order flips.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:check_panel, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:main, nova/media/poloidal.py:draw_flux_contours\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: render_trip_panels.py:156 adds the segment test the prior blocking finding named, and the committed SVGs at 69ced0e8b carry stroke-width 3 for the solved field over 2.4 for the grey reference with the blue paths later in document order.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-final.log and panel-guard-controls.log both name revision 69ced0e8b and end EXIT=0, but the head figure re-render is logged in regenerated/render-weights.log with no revision header and is not cited by manifest.md:17.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the four paths in 48fcbac8f..69ced0e8b are exactly the four the source brief grants, and no other file in the tree changed.\nSCORE durability: 14\nJUSTIFICATION durability: guard_controls.py:74 builds the crossing geometry independently and would redden if the vertex test were restored, but it lives in the run directory and is uncommitted, so nothing in the repository fails when _segment_hits_box regresses.\nSCORE fit: 18\nJUSTIFICATION fit: render_trip_panels.py:116-120 names its constants by mechanism, follows the module's existing style, and check_panel:238 still delegates bounds and text overlap to the shared render_panels.py:435 checker.\nSCORE reuse: 14\nJUSTIFICATION reuse: _segment_hits_box at render_trip_panels.py:156 hand-rolls segment-versus-box clipping that matplotlib's Path.intersects_bbox already provides and that scripts/prototypes/bank_drive_barrier/plot.py:44 already uses for the same check.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:156 non-blocking: _segment_hits_box re-implements segment/box clipping that matplotlib exposes as Path.intersects_bbox and that scripts/prototypes/bank_drive_barrier/plot.py:44 already uses, so 33 lines of uncommitted-test helper duplicate a library routine the repository already employs.\nFINDING manifest.md:17 non-blocking: the head re-render is recorded in regenerated/render-weights.log with no revision header and the manifest cites regenerated/render.log at 9ac1b1124 instead, so the figure-regeneration evidence for the reviewed head rests on the committed SVGs' dc:date rather than on a revision-stamped log.",
+  "review_run_id": "r-20261109T051749408139-review-of-diiid-frame-146-orientation-correction-69ced0e8bc8a",
+  "review_text": "VERDICT goal: the source goal is declared-order binding plus an appended record correction, and this increment (commit 69ced0e8b) closes the only blocking review finding left against it by testing drawn segments in render_trip_panels.py:156-188 and re-rendering the three trip panels it draws.\nVERDICT done_when: gate-final.log names revision 69ced0e8b and records the native check at shift 3.398096975e-09 m against a 0.053125 m spacing (NATIVE_EXIT=0) and the transposed control at 0.328465227 m (TRANSPOSED_EXIT=1), and panel-guard-controls.log at the same revision records five controls ending CONTROLS-MATCHED.\nVERDICT write_paths: the incremental diff 48fcbac8f..69ced0e8b touches only render_trip_panels.py under scripts/prototypes/diiid_vertical_loss and three SVGs under docs/figures/diiid-frame-146-vertical-loss, all inside the source brief's three grants.\nVERDICT manifest: read source manifest.md; it records the head 69ced0e8b gate and the five logged controls, but its test_logs line cites regenerated/render.log, whose header names 9ac1b1124, and omits the head re-render log regenerated/render-weights.log, which carries no revision header of its own.\nVERDICT diff: read the single commit 69ced0e8b against 48fcbac8f; it replaces the vertex-coverage label check with per-artist-transformed polyline segments and Liang-Barsky clipping, adds a fifth control, sets solved flux to 3.0 pt over a 2.4 pt grey reference with explicit zorder, and re-renders the three panels whose path geometry is identical as a multiset while their document order flips.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:check_panel, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:main, nova/media/poloidal.py:draw_flux_contours\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: render_trip_panels.py:156 adds the segment test the prior blocking finding named, and the committed SVGs at 69ced0e8b carry stroke-width 3 for the solved field over 2.4 for the grey reference with the blue paths later in document order.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-final.log and panel-guard-controls.log both name revision 69ced0e8b and end EXIT=0, but the head figure re-render is logged in regenerated/render-weights.log with no revision header and is not cited by manifest.md:17.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the four paths in 48fcbac8f..69ced0e8b are exactly the four the source brief grants, and no other file in the tree changed.\nSCORE durability: 14\nJUSTIFICATION durability: guard_controls.py:74 builds the crossing geometry independently and would redden if the vertex test were restored, but it lives in the run directory and is uncommitted, so nothing in the repository fails when _segment_hits_box regresses.\nSCORE fit: 18\nJUSTIFICATION fit: render_trip_panels.py:116-120 names its constants by mechanism, follows the module's existing style, and check_panel:238 still delegates bounds and text overlap to the shared render_panels.py:435 checker.\nSCORE reuse: 14\nJUSTIFICATION reuse: _segment_hits_box at render_trip_panels.py:156 hand-rolls segment-versus-box clipping that matplotlib's Path.intersects_bbox already provides and that scripts/prototypes/bank_drive_barrier/plot.py:44 already uses for the same check.\nFINDING scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:156 non-blocking: _segment_hits_box re-implements segment/box clipping that matplotlib exposes as Path.intersects_bbox and that scripts/prototypes/bank_drive_barrier/plot.py:44 already uses, so 33 lines of uncommitted-test helper duplicate a library routine the repository already employs.\nFINDING manifest.md:17 non-blocking: the head re-render is recorded in regenerated/render-weights.log with no revision header and the manifest cites regenerated/render.log at 9ac1b1124 instead, so the figure-regeneration evidence for the reviewed head rests on the committed SVGs' dc:date rather than on a revision-stamped log.",
+  "reviewed_base_sha": "48fcbac8fa7e255b584daf2135b1156114df70f9",
+  "reviewed_head_sha": "69ced0e8bc8a747d22ae6d83fc3b8011479a5d88",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "revision_note": "Review worktree HEAD is 1da49b86e86a44d6b5ce6a436f96e9c5446fe55f; the increment was read from the explicitly reviewed git objects 48fcbac8f and 69ced0e8b, not from that checkout.",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T05:38:21.005623+00:00",
+  "total": 102
+}

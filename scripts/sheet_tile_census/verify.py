@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 
-def verify(directory):
+def verify(directory, recovery_directory=None):
     failures, summaries = [], []
 
     def require(condition, message):
@@ -15,14 +15,25 @@ def verify(directory):
 
     for size, count in (("0.08", 1696), ("0.04", 6493)):
         pair = []
-        for outcome in ("miss", "hit"):
+        cache_directory = (
+            recovery_directory if size == "0.04" and recovery_directory else directory
+        )
+        arms = [(directory, "miss", True)]
+        if cache_directory != directory:
+            arms.append((cache_directory, "miss", False))
+        arms.append((cache_directory, "hit", False))
+        measured = None
+        for source, outcome, full_build in arms:
             name = f"{size}-{outcome}"
-            path = directory / f"{name}.json"
+            path = source / f"{name}.json"
             if not path.is_file():
                 failures.append(f"{name}: receipt absent")
                 continue
             row = json.loads(path.read_text())
-            pair.append(row)
+            if full_build:
+                measured = row
+            if source == cache_directory:
+                pair.append(row)
             require(row.get("phase") == "complete", f"{name}: receipt incomplete")
             require(row.get("partition") == "titan", f"{name}: wrong partition")
             require("P100" in row.get("device", ""), f"{name}: wrong device")
@@ -47,12 +58,15 @@ def verify(directory):
                     and entries[0].get("hits") == int(outcome == "hit"),
                     f"{name}: wrong cache event counts",
                 )
-            log = directory / f"{name}.log"
+            require(
+                row.get("warm_tile_seconds", 0) > 0, f"{name}: tile execution absent"
+            )
+            log = source / f"{name}.log"
             require(
                 log.is_file() and log.read_text().rstrip().endswith("EXIT=0"),
                 f"{name}: successful process exit absent",
             )
-            if outcome == "miss":
+            if full_build:
                 require(
                     row.get("matrix_finite") is True
                     and row.get("matrix_max_abs", 0) > 0,
@@ -93,7 +107,22 @@ def verify(directory):
             for key in ("tile_cache_key", "cache_root", "revision", "host", "job"):
                 require(cold.get(key) == warm.get(key), f"{size}: {key} differs")
             require(cold.get("pid") != warm.get("pid"), f"{size}: process not fresh")
-    path = directory / "control.json"
+            if measured is not None:
+                for key in (
+                    "tile_cache_key",
+                    "stablehlo_instructions",
+                    "stablehlo_bytes",
+                    "cells",
+                    "platform",
+                    "device",
+                    "host",
+                ):
+                    require(
+                        cold.get(key) == measured.get(key),
+                        f"{size}: recovery {key} differs from full build",
+                    )
+    control_directory = recovery_directory or directory
+    path = control_directory / "control.json"
     if not path.is_file():
         failures.append("control: receipt absent")
     else:
@@ -104,7 +133,16 @@ def verify(directory):
             and row.get("error", "").startswith("AssertionError:"),
             "control: cache-hit refusal absent",
         )
-        log = directory / "control.log"
+        require(
+            row.get("partition") == "titan"
+            and row.get("platform") == "gpu"
+            and "P100" in row.get("device", "")
+            and row.get("host", "").split(".")[0] == "98dci4-gpu-0002",
+            "control: wrong platform or host",
+        )
+        if recovery_directory:
+            require(row.get("cells") == 6493, "control: wrong recovery cell count")
+        log = control_directory / "control.log"
         ending = log.read_text().rstrip().splitlines()[-1] if log.is_file() else ""
         require(
             ending.startswith("EXIT=") and ending != "EXIT=0",
@@ -113,7 +151,8 @@ def verify(directory):
         require(
             all(
                 row.get("cache_root") != json.loads(p.read_text()).get("cache_root")
-                for p in directory.glob("*-miss.json")
+                for source in {directory, control_directory}
+                for p in source.glob("*-miss.json")
             ),
             "control: root not distinct",
         )
@@ -123,9 +162,10 @@ def verify(directory):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", type=Path, required=True)
+    parser.add_argument("--recovery-directory", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = verify(args.directory)
+    result = verify(args.directory, args.recovery_directory)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print("SUMMARY " + json.dumps(result), flush=True)
     return 0 if result["complete"] else 1

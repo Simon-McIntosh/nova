@@ -521,7 +521,7 @@ class FixedPointResult(NamedTuple):
     active_set_iterations: jax.Array | int = 0
     active_set_residuals: jax.Array | float = float("nan")
     active_set_mask_differences: jax.Array | int = -1
-    active_set_support_cells: jax.Array | int = -1
+    active_set_support_cells: jax.Array = jnp.zeros((0,), dtype=jnp.int32)
     active_set_cycle_damping_activations: jax.Array | int = -1
     frozen_partition_reads: jax.Array | int = 0
     frozen_partition_refreezes: jax.Array | int = 0

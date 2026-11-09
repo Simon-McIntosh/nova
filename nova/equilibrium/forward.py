@@ -2424,6 +2424,9 @@ class ForwardProfile:
             active_set_mask_differences=jnp.asarray(
                 result.active_set_mask_differences, dtype=jnp.int32
             ),
+            active_set_support_cells=jnp.asarray(
+                result.active_set_support_cells, dtype=jnp.int32
+            ),
             shadow_mask_changes=jnp.asarray(
                 result.active_set_mask_differences, dtype=jnp.int32
             ),

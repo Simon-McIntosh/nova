@@ -48,6 +48,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the key states the drawn median stroke, as the previous round asked; the thin key on trip 2 is truthful about that panel",
+      "recorded_at": "2026-11-09T11:00:03.012296+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded: a figure-family follow-up drawing the solved-flux legend key at SOLVED_FLUX_WIDTH so the key weight matches the field the figure exists to show, in every panel of the set",

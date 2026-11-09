@@ -6,6 +6,13 @@
     "scripts/prototypes/bank_route_rows/run.sh:11"
   ],
   "completed_at": "2026-11-09T05:57:48.470Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-bank-route-rows-bb59f06a74af",
+      "recorded_at": "2026-11-09T06:41:54.763888+00:00"
+    }
+  },
   "dispatched_at": "2026-11-09T05:31:47Z",
   "findings": [
     {
